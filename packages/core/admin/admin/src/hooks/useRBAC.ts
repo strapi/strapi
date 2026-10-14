@@ -91,17 +91,20 @@ const useRBAC = (
     true
   );
   const adminUserId = useAuth('useRBAC', (state) => state.user?.id ?? state.user?.email);
+  const userPermissions = useAuth('useRBAC', (state) => state.permissions);
 
   const permssionsChecked = usePrev(actualPermissionsToCheck);
   const contextChecked = usePrev(rawQueryContext);
   const previousAdminUserId = usePrev(adminUserId);
+  const previousUserPermissions = usePrev(userPermissions);
 
   React.useEffect(() => {
     if (
       !isEqual(permssionsChecked, actualPermissionsToCheck) ||
       // TODO: also run this when the query context changes
       contextChecked !== rawQueryContext ||
-      previousAdminUserId !== adminUserId
+      previousAdminUserId !== adminUserId ||
+      !isEqual(previousUserPermissions, userPermissions)
     ) {
       setIsLoading(true);
       setData(undefined);
@@ -143,7 +146,9 @@ const useRBAC = (
     permssionsChecked,
     contextChecked,
     previousAdminUserId,
+    previousUserPermissions,
     rawQueryContext,
+    userPermissions,
   ]);
 
   /**

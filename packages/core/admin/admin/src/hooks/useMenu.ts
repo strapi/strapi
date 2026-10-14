@@ -38,6 +38,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
   const adminUserId = useAuth('useMenu', (state) => state.user?.id ?? state.user?.email);
   const rawMenu = useStrapiApp('useMenu', (state) => state.menu);
   const menu = React.useMemo(() => normalizeMenuLinks(rawMenu), [rawMenu]);
+  const isLoadingAuth = useAuth('useMenu', (state) => state.isLoading);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
@@ -100,8 +101,13 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
   });
   const generalSectionLinksRef = React.useRef(menuWithUserPermissions.generalSectionLinks);
   const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
+  const resolvedPermissionsRef = React.useRef(permissions);
 
   React.useEffect(() => {
+    if (isLoadingAuth) {
+      return undefined;
+    }
+
     let cancelled = false;
 
     async function applyMenuPermissions() {
@@ -118,6 +124,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
 
       if (!cancelled) {
         resolvedAdminUserIdRef.current = adminUserId;
+        resolvedPermissionsRef.current = permissions;
         setMenuWithUserPermissions((state) => ({
           ...state,
           generalSectionLinks: authorizedGeneralSectionLinks,
@@ -144,9 +151,14 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     checkUserHasPermissions,
     currentEnvironment,
     adminUserId,
+    isLoadingAuth,
   ]);
 
-  if (resolvedAdminUserIdRef.current !== adminUserId) {
+  if (
+    isLoadingAuth ||
+    resolvedAdminUserIdRef.current !== adminUserId ||
+    resolvedPermissionsRef.current !== permissions
+  ) {
     return {
       ...menuWithUserPermissions,
       generalSectionLinks: [],

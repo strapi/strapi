@@ -255,8 +255,17 @@ const AuthProvider = ({
 
   const handleSessionDead = React.useCallback(
     (expiredToken?: string | null) => {
+      // Requests send the shared token, which can be ahead of this tab's Redux
+      // copy after another tab refreshes. A rejected credential is still current
+      // when it matches either one; ignoring it records the token as already
+      // handled and later 401s never log the tab out.
       const currentToken = store.getState().admin_app.token ?? null;
-      if (expiredToken !== undefined && expiredToken !== currentToken) {
+      const storedToken = getStoredToken();
+      if (
+        expiredToken !== undefined &&
+        expiredToken !== currentToken &&
+        expiredToken !== storedToken
+      ) {
         return;
       }
 
@@ -428,6 +437,8 @@ const AuthProvider = ({
    * clear data cached for the previous admin before rendering that session.
    * Logout is handled by the `isLoggedIn` storage listener above.
    */
+  const lastResetTokenRef = React.useRef<string | null>(null);
+
   React.useEffect(() => {
     let disposed = false;
 
@@ -446,12 +457,19 @@ const AuthProvider = ({
         return;
       }
 
+      // Broadcast and storage notices for one change arrive as separate tasks.
+      // Resetting again for the token just adopted only repeats identity fetches.
+      if (lastResetTokenRef.current === nextToken && currentToken === nextToken) {
+        return;
+      }
+
       discardPendingLogout();
       resetSessionExpiredNotification();
       if (currentToken !== nextToken) {
         dispatch(setToken(nextToken));
       }
       resetAdminApiState(dispatch);
+      lastResetTokenRef.current = nextToken;
     };
 
     const unsubscribe = subscribeToAdminSessionChanges(() => reconcileSharedSession(true));

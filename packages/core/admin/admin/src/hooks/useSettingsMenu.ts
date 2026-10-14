@@ -66,6 +66,7 @@ const useSettingsMenu = (): {
     isLoading: true,
     menu: [],
   });
+  const isLoadingAuth = useAuth('useSettingsMenu', (state) => state.isLoading);
   const checkUserHasPermission = useAuth(
     'useSettingsMenu',
     (state) => state.checkUserHasPermissions
@@ -76,6 +77,7 @@ const useSettingsMenu = (): {
   const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
   const permissions = useSelector(selectAdminPermissions);
   const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
+  const resolvedPermissionsRef = React.useRef(permissions);
 
   /**
    * memoize the return value of this function to avoid re-computing it on every render
@@ -115,6 +117,10 @@ const useSettingsMenu = (): {
   );
 
   React.useEffect(() => {
+    if (isLoadingAuth) {
+      return undefined;
+    }
+
     let cancelled = false;
 
     const getData = async () => {
@@ -141,6 +147,7 @@ const useSettingsMenu = (): {
 
       if (!cancelled) {
         resolvedAdminUserIdRef.current = adminUserId;
+        resolvedPermissionsRef.current = permissions;
         setData((prev) => {
           return {
             ...prev,
@@ -196,9 +203,15 @@ const useSettingsMenu = (): {
     addPermissions,
     checkUserHasPermission,
     adminUserId,
+    isLoadingAuth,
+    permissions,
   ]);
 
-  if (resolvedAdminUserIdRef.current !== adminUserId) {
+  if (
+    isLoadingAuth ||
+    resolvedAdminUserIdRef.current !== adminUserId ||
+    resolvedPermissionsRef.current !== permissions
+  ) {
     return {
       isLoading: true,
       menu: [],

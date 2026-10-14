@@ -498,6 +498,91 @@ describe('AuthProvider session identity', () => {
     expect(screen.getByTestId('rbac-result')).toHaveTextContent('false');
   });
 
+  it('keeps menus loading until the new admin permissions arrive', async () => {
+    let releasePermissions = () => {};
+    const permissionsGate = new Promise<void>((resolve) => {
+      releasePermissions = resolve;
+    });
+
+    server.use(
+      http.get('/admin/users/me/permissions', async ({ request }) => {
+        const authorization = request.headers.get('Authorization');
+        if (authorization === bearer(TOKEN_B)) {
+          await permissionsGate;
+        }
+
+        const who = identityForAuthorization(authorization);
+
+        return HttpResponse.json({
+          data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B],
+        });
+      })
+    );
+
+    renderIdentity(
+      <>
+        <IdentityProbe />
+        <QueryStringMenuProbe />
+      </>
+    );
+
+    await waitForUserA();
+    await waitFor(() => expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('false'));
+
+    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+    act(() => {
+      emitExternalSessionBroadcast();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_B.email)
+    );
+    expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('true');
+    expect(screen.getByTestId('settings-menu-loading')).toHaveTextContent('true');
+
+    await act(async () => {
+      releasePermissions();
+    });
+
+    await waitFor(() => expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('false'));
+    await waitFor(() =>
+      expect(screen.getByTestId('settings-menu-loading')).toHaveTextContent('false')
+    );
+  });
+
+  it('refetches identity once when a session notice arrives twice', async () => {
+    let meRequests = 0;
+    server.use(
+      http.get('/admin/users/me', ({ request }) => {
+        meRequests += 1;
+        const who = identityForAuthorization(request.headers.get('Authorization'));
+
+        return HttpResponse.json({
+          data: who === 'a' ? USER_A : USER_B,
+        });
+      })
+    );
+
+    renderIdentity();
+    await waitForUserA();
+    const requestsAfterLoad = meRequests;
+
+    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+    act(() => {
+      emitExternalSessionBroadcast();
+      emitExternalStorageSignal();
+    });
+
+    await waitForUserB();
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 20);
+      });
+    });
+
+    expect(meRequests - requestsAfterLoad).toBe(1);
+  });
+
   it('refetches identity under the new persisted token when another tab changes the session', async () => {
     renderIdentity();
 
@@ -731,6 +816,22 @@ describe('AuthProvider', () => {
 
       expect(dialog).toHaveTextContent(/session has ended and can't be resumed/i);
       expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+    });
+
+    it('logs out when the stored token dies while Redux still has the previous one', async () => {
+      render(<AuthProbe />);
+
+      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent(TOKEN));
+
+      const refreshedToken = 'refreshed-access-token';
+      window.localStorage.setItem('jwtToken', JSON.stringify(refreshedToken));
+      expect(screen.getByTestId('token')).toHaveTextContent(TOKEN);
+
+      act(() => {
+        getKeepaliveOptions().onSessionDead?.(refreshedToken);
+      });
+
+      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent('logged-out'));
     });
 
     it('logs out without prompting when there is nothing unsaved', async () => {

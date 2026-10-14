@@ -114,8 +114,9 @@ const isForeignSessionChange = (data: unknown): boolean => {
 
 /**
  * Run `onChange` after a session-change notice from another document.
- * Coalesces a broadcast and a storage event delivered in the same turn so the
- * refresh reads storage once, after both signals have been observed.
+ * A broadcast and a storage event are separate tasks, so this only collapses
+ * notices that land in the same turn. Callers still skip a second reset for a
+ * token they have already adopted.
  */
 const subscribeToAdminSessionChanges = (onChange: () => void): (() => void) => {
   if (!canUseDom()) {
