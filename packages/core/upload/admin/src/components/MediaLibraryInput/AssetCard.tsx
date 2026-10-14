@@ -6,6 +6,7 @@ import { styled } from 'styled-components';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetPreview, UploadPreview } from './AssetPreview';
+import { FieldMenuItem, GhostIconButton } from './FieldControls';
 import { UploadProgressBar } from './UploadProgressBar';
 
 import type { FieldUpload } from './useFieldUploads';
@@ -120,21 +121,25 @@ export const AssetCard = ({
             )}
           />
           <Menu.Content popoverPlacement="bottom-end">
-            <Menu.Item startIcon={<Link />} onSelect={() => onCopyLink(asset)}>
+            <FieldMenuItem startIcon={<Link />} onSelect={() => onCopyLink(asset)}>
               {formatMessage({
                 id: getTranslationKey('asset-details.copy-link.trigger'),
                 defaultMessage: 'Copy link',
               })}
-            </Menu.Item>
+            </FieldMenuItem>
             {onEdit && (
-              <Menu.Item startIcon={<Pencil />} disabled={disabled} onSelect={() => onEdit(asset)}>
+              <FieldMenuItem
+                startIcon={<Pencil />}
+                disabled={disabled}
+                onSelect={() => onEdit(asset)}
+              >
                 {formatMessage({
                   id: getTranslationKey('control-card.edit'),
                   defaultMessage: 'Edit',
                 })}
-              </Menu.Item>
+              </FieldMenuItem>
             )}
-            <Menu.Item
+            <FieldMenuItem
               variant="danger"
               startIcon={<Trash />}
               disabled={disabled}
@@ -144,7 +149,7 @@ export const AssetCard = ({
                 id: getTranslationKey('content-manager.input.actions.remove-failed'),
                 defaultMessage: 'Remove',
               })}
-            </Menu.Item>
+            </FieldMenuItem>
           </Menu.Content>
         </Menu.Root>
       }
@@ -184,8 +189,7 @@ export const UploadCard = ({
         actions={
           <>
             {canRetry && (
-              <IconButton
-                variant="ghost"
+              <GhostIconButton
                 disabled={disabled}
                 onClick={() => onRetry(upload)}
                 label={formatMessage(
@@ -197,7 +201,7 @@ export const UploadCard = ({
                 )}
               >
                 <ArrowClockwise />
-              </IconButton>
+              </GhostIconButton>
             )}
             <DangerIconButton
               disabled={disabled}
@@ -241,8 +245,7 @@ export const UploadCard = ({
       }
       name={<Name textColor="neutral800">{upload.name}</Name>}
       actions={
-        <IconButton
-          variant="ghost"
+        <GhostIconButton
           onClick={() => onCancel(upload)}
           label={formatMessage(
             {
@@ -253,7 +256,7 @@ export const UploadCard = ({
           )}
         >
           <Cross />
-        </IconButton>
+        </GhostIconButton>
       }
     />
   );

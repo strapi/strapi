@@ -1,4 +1,4 @@
-import { Box, Button, Flex, IconButton, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { ArrowClockwise, Cross, Link, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -6,6 +6,7 @@ import { styled } from 'styled-components';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetPreview, UploadPreview } from './AssetPreview';
+import { GhostIconButton } from './FieldControls';
 import { UploadProgressBar } from './UploadProgressBar';
 
 import type { FieldUpload } from './useFieldUploads';
@@ -71,8 +72,7 @@ export const AssetRow = ({
         {asset.name}
       </Name>
       <Flex gap={2} shrink={0}>
-        <IconButton
-          variant="ghost"
+        <GhostIconButton
           onClick={() => onCopyLink(asset)}
           label={formatMessage(
             {
@@ -83,10 +83,9 @@ export const AssetRow = ({
           )}
         >
           <Link />
-        </IconButton>
+        </GhostIconButton>
         {onEdit && (
-          <IconButton
-            variant="ghost"
+          <GhostIconButton
             disabled={disabled}
             onClick={() => onEdit(asset)}
             label={formatMessage(
@@ -98,10 +97,9 @@ export const AssetRow = ({
             )}
           >
             <Pencil />
-          </IconButton>
+          </GhostIconButton>
         )}
-        <IconButton
-          variant="ghost"
+        <GhostIconButton
           disabled={disabled}
           onClick={() => onRemove(asset)}
           label={formatMessage(
@@ -113,7 +111,7 @@ export const AssetRow = ({
           )}
         >
           <Trash />
-        </IconButton>
+        </GhostIconButton>
       </Flex>
     </RowFrame>
   );
@@ -197,8 +195,7 @@ export const UploadRow = ({
         <UploadProgressBar progress={upload.progress} label={uploadingLabel} />
       </Flex>
       <Box shrink={0}>
-        <IconButton
-          variant="ghost"
+        <GhostIconButton
           onClick={() => onCancel(upload)}
           label={formatMessage(
             {
@@ -209,7 +206,7 @@ export const UploadRow = ({
           )}
         >
           <Cross />
-        </IconButton>
+        </GhostIconButton>
       </Box>
     </RowFrame>
   );
