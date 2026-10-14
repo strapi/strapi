@@ -13,7 +13,15 @@ import { getTranslationKey } from '../../utils/translations';
  */
 export type ZoneVariant = 'bar' | 'tile' | 'stacked';
 
-const Zone = styled.div<{ $isDragging: boolean; $variant: ZoneVariant }>`
+type DragState = 'idle' | 'accept' | 'reject';
+
+const DRAG_FRAME_COLORS = {
+  accept: { border: 'primary600', background: 'primary100' },
+  reject: { border: 'neutral300', background: 'neutral150' },
+} as const;
+
+const Zone = styled.div<{ $dragState: DragState; $variant: ZoneVariant }>`
+  position: relative;
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spaces[4]};
@@ -39,12 +47,24 @@ const Zone = styled.div<{ $isDragging: boolean; $variant: ZoneVariant }>`
     background: ${theme.colors.neutral100};
   `}
 
-  // Only while a file is dragged over the zone: it marks where the file will land.
-  ${({ $isDragging, theme }) =>
-    $isDragging &&
+  // Only while a file is dragged over the zone: a solid frame inset from the
+  // zone's own border marks where the file will land, greyed out when it can't.
+  ${({ $dragState, theme }) =>
+    $dragState !== 'idle' &&
     `
-    border: 1px dashed ${theme.colors.primary600};
-    background: ${theme.colors.primary100};
+    &::after {
+      content: '';
+      position: absolute;
+      inset: ${theme.spaces[2]};
+      border: 1px solid ${theme.colors[DRAG_FRAME_COLORS[$dragState].border]};
+      border-radius: ${theme.borderRadius};
+      background: ${theme.colors[DRAG_FRAME_COLORS[$dragState].background]};
+      pointer-events: none;
+    }
+
+    & > * {
+      z-index: 1;
+    }
   `}
 
   &[data-disabled='true'] {
@@ -87,17 +107,14 @@ export const AssetDropZone = ({
   // pointer crosses the icon or the label. Counting enter/leave pairs doesn't.
   const dragDepth = useRef(0);
 
-  const handleDragEnter = useCallback(
-    (event: DragEvent<HTMLElement>) => {
-      event.preventDefault();
-      if (disabled || !event.dataTransfer.types.includes('Files')) {
-        return;
-      }
-      dragDepth.current += 1;
-      setIsDragging(true);
-    },
-    [disabled]
-  );
+  const handleDragEnter = useCallback((event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    if (!event.dataTransfer.types.includes('Files')) {
+      return;
+    }
+    dragDepth.current += 1;
+    setIsDragging(true);
+  }, []);
 
   const handleDragLeave = useCallback((event: DragEvent<HTMLElement>) => {
     event.preventDefault();
@@ -108,10 +125,14 @@ export const AssetDropZone = ({
     }
   }, []);
 
-  const handleDragOver = useCallback((event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'copy';
-  }, []);
+  const handleDragOver = useCallback(
+    (event: DragEvent<HTMLElement>) => {
+      event.preventDefault();
+      // `none` shows the no-drop cursor, and the browser then fires no `drop`.
+      event.dataTransfer.dropEffect = disabled ? 'none' : 'copy';
+    },
+    [disabled]
+  );
 
   const handleDrop = useCallback(
     (event: DragEvent<HTMLElement>) => {
@@ -133,7 +154,7 @@ export const AssetDropZone = ({
 
   return (
     <Zone
-      $isDragging={isDragging}
+      $dragState={isDragging ? (disabled ? 'reject' : 'accept') : 'idle'}
       $variant={variant}
       data-disabled={disabled}
       onDragEnter={handleDragEnter}
