@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * Regression coverage for CMS-1428 — single (and multiple) media must honour
+ * Regression coverage for single (and multiple) media connect/disconnect deltas
+ * (https://github.com/strapi/strapi/pull/27116). Media must honour
  * `{ connect | disconnect }` delta payloads instead of treating them as a full replace.
  *
  * Three pre-existing defects are fixed and exercised here (all in the media morph path of
@@ -55,7 +56,7 @@ const multipleMediaCT = {
 };
 
 // A plain oneToOne relation used to prove the media morph path behaves identically to a
-// real relation for the same delta/replace payload shapes (the central CMS-1428 claim).
+// real relation for the same delta/replace payload shapes (media matches relation semantics).
 const relationTargetCT = {
   displayName: 'delta-target',
   singularName: 'delta-target',
@@ -73,6 +74,40 @@ const relationHolderCT = {
   draftAndPublish: false,
   attributes: {
     pick: { type: 'relation', relation: 'oneToOne', target: 'api::delta-target.delta-target' },
+    tags: { type: 'relation', relation: 'manyToMany', target: 'api::delta-target.delta-target' },
+  },
+};
+
+// Single media nested in a component. `singleRow` is copied onto the component
+// model, so a connect here must still leave one physical join row.
+const coverComponent = {
+  displayName: 'delta-cover',
+  attributes: {
+    media: { type: 'media', multiple: false, required: false },
+  },
+};
+
+const componentHolderCT = {
+  displayName: 'delta-component-holder',
+  singularName: 'delta-component-holder',
+  pluralName: 'delta-component-holders',
+  draftAndPublish: false,
+  attributes: {
+    block: {
+      type: 'component',
+      component: 'default.delta-cover',
+      repeatable: false,
+    },
+  },
+};
+
+const dpSingleCT = {
+  displayName: 'delta-dp-single',
+  singularName: 'delta-dp-single',
+  pluralName: 'delta-dp-singles',
+  draftAndPublish: true,
+  attributes: {
+    cover: { type: 'media', multiple: false, required: false },
   },
 };
 
@@ -115,6 +150,9 @@ const TARGET_UID = 'api::delta-target.delta-target';
 const HOLDER_UID = 'api::delta-holder.delta-holder';
 const MORPH_TARGET_UID = 'api::delta-morph-target.delta-morph-target';
 const MORPH_HOLDER_UID = 'api::delta-morph-holder.delta-morph-holder';
+const COMP_UID = 'api::delta-component-holder.delta-component-holder';
+const DP_UID = 'api::delta-dp-single.delta-dp-single';
+const COVER_COMPONENT_UID = 'default.delta-cover';
 const FILE_UID = 'plugin::upload.file';
 
 const createEntry = (uid, body = {}, qs = {}) =>
@@ -149,11 +187,11 @@ const morphJoinInfo = () => {
 
 // Count physical join rows attaching files to a given entry id / field. This is the ground
 // truth that exposes phantom rows a populated read would hide.
-const countJoinRows = async (entryId, field) => {
+const countJoinRows = async (entryId, field, typeUid = SINGLE_UID) => {
   const { tableName, idColumn, typeColumn } = morphJoinInfo();
   const rows = await strapi.db
     .getConnection(tableName)
-    .where({ [idColumn]: entryId, [typeColumn]: SINGLE_UID, field });
+    .where({ [idColumn]: entryId, [typeColumn]: typeUid, field });
   return rows.length;
 };
 
@@ -165,7 +203,7 @@ const countGalleryRows = async (entryId) => {
   return rows.length;
 };
 
-describe('CMS-1428 — media connect/disconnect delta payloads', () => {
+describe('media connect/disconnect delta payloads', () => {
   const builder = createTestBuilder();
   let fileA;
   let fileB;
@@ -177,12 +215,15 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
 
   beforeAll(async () => {
     await builder
+      .addComponent(coverComponent)
       .addContentType(singleMediaCT)
       .addContentType(multipleMediaCT)
       .addContentType(relationTargetCT)
       .addContentType(relationHolderCT)
       .addContentType(morphTargetCT)
       .addContentType(morphHolderCT)
+      .addContentType(componentHolderCT)
+      .addContentType(dpSingleCT)
       .build();
 
     strapi = await createStrapiInstance();
@@ -582,7 +623,7 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
 
   // Parity: the same payload shapes on a real oneToOne relation must behave identically to
   // single media. This exercises an actual relation (`pick`) — it is the executable form of
-  // the central CMS-1428 claim that media now matches relation semantics. The CM write
+  // media now matches relation semantics for the same payload shapes. The CM write
   // endpoints return a xToOne relation as a `{ count }` object, so the attached value is read
   // back through the dedicated relations endpoint instead of the create/update response.
   describe('oneToOne relation parity', () => {
@@ -712,6 +753,32 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
       // Both rows must survive: last-wins truncation is media-only.
       expect(await countMorphRows(holder.id)).toBe(2);
     });
+
+    // The set-on-update case above only reaches the truncation check on the replace path.
+    // Create and connect compute `isSingle` on their own branches.
+    test('create with two target rows keeps both', async () => {
+      const t1 = await strapi.db.query(MORPH_TARGET_UID).create({ data: { label: 'one' } });
+      const t2 = await strapi.db.query(MORPH_TARGET_UID).create({ data: { label: 'two' } });
+
+      const holder = await strapi.db.query(MORPH_HOLDER_UID).create({
+        data: { tagged: [t1.id, t2.id] },
+      });
+
+      expect(await countMorphRows(holder.id)).toBe(2);
+    });
+
+    test('connect of two target rows keeps both', async () => {
+      const holder = await strapi.db.query(MORPH_HOLDER_UID).create({ data: {} });
+      const t1 = await strapi.db.query(MORPH_TARGET_UID).create({ data: { label: 'one' } });
+      const t2 = await strapi.db.query(MORPH_TARGET_UID).create({ data: { label: 'two' } });
+
+      await strapi.db.query(MORPH_HOLDER_UID).update({
+        where: { id: holder.id },
+        data: { tagged: { connect: [t1.id, t2.id] } },
+      });
+
+      expect(await countMorphRows(holder.id)).toBe(2);
+    });
   });
 
   describe('Connect dedup — heterogeneous representations of one file', () => {
@@ -812,6 +879,154 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
       });
 
       expect(await countGalleryRows(created.id)).toBe(1);
+    });
+  });
+
+  describe('{ set: null } clears regular relations', () => {
+    const readRelationDocumentIds = async (field, documentId) => {
+      const res = await rq.get(
+        `/content-manager/relations/${HOLDER_UID}/${documentId}/${field}`
+      );
+      expect(res.statusCode).toBe(200);
+      return (res.body.results ?? []).map((row) => row.documentId);
+    };
+
+    const countLinks = async (attributeName, entryId) => {
+      const attribute = strapi.db.metadata.get(HOLDER_UID).attributes[attributeName];
+      const { joinTable } = attribute;
+      const rows = await strapi.db.getConnection(joinTable.name).where({
+        [joinTable.joinColumn.name]: entryId,
+      });
+      return rows.length;
+    };
+
+    test('{ set: null } clears a oneToOne and leaves no link rows', async () => {
+      const res = await createEntry(HOLDER_UID, {
+        pick: { connect: [{ documentId: targetA }] },
+      });
+      expect(res.statusCode).toBe(201);
+      const { id, documentId } = res.body.data;
+      expect(await countLinks('pick', id)).toBe(1);
+
+      const update = await updateEntry(HOLDER_UID, documentId, { pick: { set: null } });
+      expect(update.statusCode).toBe(200);
+      expect(await readRelationDocumentIds('pick', documentId)).toEqual([]);
+      expect(await countLinks('pick', id)).toBe(0);
+    });
+
+    test('{ set: null } clears a manyToMany and leaves no link rows', async () => {
+      const res = await createEntry(HOLDER_UID, {
+        tags: { connect: [{ documentId: targetA }, { documentId: targetB }] },
+      });
+      expect(res.statusCode).toBe(201);
+      const { id, documentId } = res.body.data;
+      expect(await countLinks('tags', id)).toBe(2);
+
+      const update = await updateEntry(HOLDER_UID, documentId, { tags: { set: null } });
+      expect(update.statusCode).toBe(200);
+      expect(await readRelationDocumentIds('tags', documentId)).toEqual([]);
+      expect(await countLinks('tags', id)).toBe(0);
+    });
+  });
+
+  describe('single media outside a top-level field', () => {
+    test('connect inside a component leaves one join row', async () => {
+      const created = await createEntry(
+        COMP_UID,
+        { block: { media: fileA } },
+        { populate: ['block.media'] }
+      );
+      expect(created.statusCode).toBe(201);
+      const componentId = created.body.data.block.id;
+      expect(await countJoinRows(componentId, 'media', COVER_COMPONENT_UID)).toBe(1);
+
+      const update = await updateEntry(
+        COMP_UID,
+        created.body.data.documentId,
+        { block: { id: componentId, media: { connect: [fileB] } } },
+        { populate: ['block.media'] }
+      );
+      expect(update.statusCode).toBe(200);
+      expect(update.body.data.block.media.id).toBe(fileB);
+      expect(
+        await countJoinRows(update.body.data.block.id, 'media', COVER_COMPONENT_UID)
+      ).toBe(1);
+    });
+
+    test('connect on a draft-and-publish entry leaves one join row', async () => {
+      const created = await createEntry(DP_UID, { cover: fileA }, { populate: ['cover'] });
+      expect(created.statusCode).toBe(201);
+      const { id, documentId } = created.body.data;
+      expect(await countJoinRows(id, 'cover', DP_UID)).toBe(1);
+
+      const update = await updateEntry(
+        DP_UID,
+        documentId,
+        { cover: { connect: [fileB] } },
+        { populate: ['cover'] }
+      );
+      expect(update.statusCode).toBe(200);
+      expect(update.body.data.cover.id).toBe(fileB);
+      expect(await countJoinRows(update.body.data.id, 'cover', DP_UID)).toBe(1);
+    });
+  });
+
+  describe('pre-existing duplicate single-media rows', () => {
+    // Databases that ran the old connect path can already hold a hidden extra row.
+    // connect and set collapse those to one. disconnect is not covered here: removing
+    // the visible file still leaves the hidden row, and whether this PR should clean
+    // that up is a separate decision.
+    const seedDuplicateCover = async () => {
+      const entry = await createWithCover();
+      const { tableName, joinColumn, idColumn, typeColumn } = morphJoinInfo();
+      const [current] = await strapi.db
+        .getConnection(tableName)
+        .where({ [idColumn]: entry.id, [typeColumn]: SINGLE_UID, field: 'cover' });
+
+      const duplicate = { ...current };
+      delete duplicate.id;
+      duplicate[joinColumn] = fileC;
+      duplicate.order = Number(current.order) + 1;
+      await strapi.db.getConnection(tableName).insert(duplicate);
+
+      expect(await countJoinRows(entry.id, 'cover')).toBe(2);
+      expect((await readCover(entry.documentId)).id).toBe(fileA);
+      return entry;
+    };
+
+    test('empty connect keeps both rows; connect and set collapse to one', async () => {
+      const untouched = await seedDuplicateCover();
+      const noop = await updateEntry(
+        SINGLE_UID,
+        untouched.documentId,
+        { cover: { connect: [] } },
+        { populate: ['cover'] }
+      );
+      expect(noop.statusCode).toBe(200);
+      expect(noop.body.data.cover.id).toBe(fileA);
+      expect(await countJoinRows(untouched.id, 'cover')).toBe(2);
+
+      const connected = await seedDuplicateCover();
+      const connect = await updateEntry(
+        SINGLE_UID,
+        connected.documentId,
+        { cover: { connect: [fileB] } },
+        { populate: ['cover'] }
+      );
+      expect(connect.statusCode).toBe(200);
+      expect(connect.body.data.cover.id).toBe(fileB);
+      expect(await countJoinRows(connected.id, 'cover')).toBe(1);
+
+      const replaced = await seedDuplicateCover();
+      const set = await updateEntry(
+        SINGLE_UID,
+        replaced.documentId,
+        { cover: { set: [fileB] } },
+        { populate: ['cover'] }
+      );
+      expect(set.statusCode).toBe(200);
+      expect(set.body.data.cover.id).toBe(fileB);
+      expect(await countJoinRows(replaced.id, 'cover')).toBe(1);
     });
   });
 });

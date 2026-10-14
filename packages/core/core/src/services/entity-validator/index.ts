@@ -252,6 +252,13 @@ const hasRelationValue = (value: unknown): boolean => {
     const connect = (value as { connect?: unknown }).connect;
     const set = (value as { set?: unknown }).set;
 
+    // `{ set: null }` with no `connect` is an explicit clear, same as `{ set: [] }`.
+    // `isNil` skips a null `set`, and the leftover object would then count as a value,
+    // so a required field would accept a payload the entity manager deletes.
+    if (has(value, 'set') && isNil(set) && isNil(connect)) {
+      return false;
+    }
+
     if (!isNil(connect)) {
       return Array.isArray(connect) ? connect.length > 0 : true;
     }
@@ -308,7 +315,8 @@ const isDisconnectOnly = (value: unknown): boolean => {
  * - update (`notNull` analogue): an absent key keeps the existing value, so it passes.
  *   Only reject when the request is present AND leaves the field empty. A bare
  *   `{ connect: [] }` (no `set`) neither adds nor removes anything → treated as a no-op
- *   that passes; `{ set: [] }` / `null` / `[]` explicitly empty the field → rejected.
+ *   that passes; `{ set: [] }` / `{ set: null }` / `null` / `[]` explicitly empty the
+ *   field → rejected.
  *
  * `isToOne` marks a to-one relation / single media, which can hold at most one entry.
  * For those, a disconnect-only update (`{ disconnect: [...] }` with no `connect`/`set`)

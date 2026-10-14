@@ -23,7 +23,8 @@
  * The same write-time-vs-publish-time split applies to required MEDIA, exercised below
  * with a real uploaded file so the disconnect/connect shapes go through the upload plugin.
  *
- * Media now mirrors relations for connect/disconnect deltas (CMS-1428): a no-op
+ * Media now mirrors relations for connect/disconnect deltas
+ * (https://github.com/strapi/strapi/pull/27116): a no-op
  * `{ connect: [] }` / `{ disconnect: [] }` preserves an already-attached single media
  * instead of emptying it, so publish stays 200 — exactly like the oneToOne relation
  * no-op case above. See `media-delta-payloads.test.api.js` for the full delta matrix.
@@ -307,10 +308,10 @@ describe('strictRelations — publish-time enforcement of connect/disconnect edg
         expect(publish.statusCode).toBe(400);
       });
 
-      // Media now mirrors relations (CMS-1428): a no-op `{ connect: [] }` on an already-
-      // populated single media preserves the attached file instead of emptying it — just
-      // like the oneToOne relation no-op case above. The required cover stays populated, so
-      // publish succeeds.
+      // Media now mirrors relations (strapi/strapi#27116): a no-op `{ connect: [] }` on
+      // an already-populated single media preserves the attached file instead of emptying
+      // it — just like the oneToOne relation no-op case above. The required cover stays
+      // populated, so publish succeeds.
       test('no-op { connect: [] } on a populated required media then publishing → 200', async () => {
         const upload = await uploadImg();
         expect(upload.statusCode).toBe(201);
@@ -474,6 +475,51 @@ describe('strictRelations — publish-time enforcement of connect/disconnect edg
           .query(NODP_OTO_UID)
           .findOne({ where: { documentId }, populate: ['author'] });
         expect(row.author).not.toBe(null);
+      });
+
+      // `{ set: null }` deletes every link. On a required field that must be a 400,
+      // and the existing link must still be there after the rejected write.
+      test('{ set: null } on a required to-one → update 400 and the link stays', async () => {
+        const author = await createEntry(AUTHOR_UID, { name: 'SetNull' });
+
+        const creation = await createEntry(
+          NODP_OTO_UID,
+          { author: author.body.data.id },
+          { populate: ['author'] }
+        );
+        expect(creation.statusCode).toBe(201);
+        const { documentId } = creation.body.data;
+
+        const update = await updateEntry(NODP_OTO_UID, documentId, { author: { set: null } });
+        expect(update.statusCode).toBe(400);
+
+        const row = await strapi.db
+          .query(NODP_OTO_UID)
+          .findOne({ where: { documentId }, populate: ['author'] });
+        expect(row.author).not.toBe(null);
+      });
+
+      test('required single media { set: null } → update 400, file stays', async () => {
+        const upload = await uploadImg();
+        expect(upload.statusCode).toBe(201);
+        const fileId = upload.body[0].id;
+
+        const creation = await createEntry(
+          NODP_MEDIA_UID,
+          { cover: fileId },
+          { populate: ['cover'] }
+        );
+        expect(creation.statusCode).toBe(201);
+        const { documentId } = creation.body.data;
+
+        const update = await updateEntry(NODP_MEDIA_UID, documentId, { cover: { set: null } });
+        expect(update.statusCode).toBe(400);
+
+        const row = await strapi.db
+          .query(NODP_MEDIA_UID)
+          .findOne({ where: { documentId }, populate: ['cover'] });
+        expect(row.cover).not.toBe(null);
+        expect(row.cover.id).toBe(fileId);
       });
     });
   });
