@@ -5,10 +5,14 @@ import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';
 
+// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
+// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
+// factory would break them (see __tests__/plugin-shape.test.ts).
+
 const { setCreatorFields } = utils;
 const { ApplicationError } = utils.errors;
 
-const sanitizeLocale = (locale: any) => {
+const sanitizeLocale = ({ strapi }: { strapi: Core.Strapi }, locale: any) => {
   const model = strapi.getModel('plugin::i18n.locale');
 
   return strapi.contentAPI.sanitize.output(locale, model);
@@ -16,10 +20,10 @@ const sanitizeLocale = (locale: any) => {
 
 const controller: Core.Controller = {
   async listLocales(ctx) {
-    const localesService = getService('locales');
+    const localesService = getService('locales', { strapi });
 
     const locales = await localesService.find();
-    const sanitizedLocales = await sanitizeLocale(locales);
+    const sanitizedLocales = await sanitizeLocale({ strapi }, locales);
 
     ctx.body = await localesService.setIsDefault(sanitizedLocales);
   },
@@ -31,7 +35,7 @@ const controller: Core.Controller = {
 
     await validateCreateLocaleInput(body);
 
-    const localesService = getService('locales');
+    const localesService = getService('locales', { strapi });
 
     const existingLocale = await localesService.findByCode(body.code);
     if (existingLocale) {
@@ -46,7 +50,7 @@ const controller: Core.Controller = {
       await localesService.setDefaultLocale(locale);
     }
 
-    const sanitizedLocale = await sanitizeLocale(locale);
+    const sanitizedLocale = await sanitizeLocale({ strapi }, locale);
 
     ctx.body = await localesService.setIsDefault(sanitizedLocale);
   },
@@ -59,7 +63,7 @@ const controller: Core.Controller = {
 
     await validateUpdateLocaleInput(body);
 
-    const localesService = getService('locales');
+    const localesService = getService('locales', { strapi });
 
     const existingLocale = await localesService.findById(id);
     if (!existingLocale) {
@@ -75,7 +79,7 @@ const controller: Core.Controller = {
       await localesService.setDefaultLocale(updatedLocale);
     }
 
-    const sanitizedLocale = await sanitizeLocale(updatedLocale);
+    const sanitizedLocale = await sanitizeLocale({ strapi }, updatedLocale);
 
     ctx.body = await localesService.setIsDefault(sanitizedLocale);
   },
@@ -83,7 +87,7 @@ const controller: Core.Controller = {
   async deleteLocale(ctx) {
     const { id } = ctx.params;
 
-    const localesService = getService('locales');
+    const localesService = getService('locales', { strapi });
 
     const existingLocale = await localesService.findById(id);
     if (!existingLocale) {
@@ -97,7 +101,7 @@ const controller: Core.Controller = {
 
     await localesService.delete({ id });
 
-    const sanitizedLocale = await sanitizeLocale(existingLocale);
+    const sanitizedLocale = await sanitizeLocale({ strapi }, existingLocale);
 
     ctx.body = await localesService.setIsDefault(sanitizedLocale);
   },

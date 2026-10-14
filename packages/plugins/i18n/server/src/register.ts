@@ -30,9 +30,11 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
  * @param {Strapi} strapi
  */
 const addContentManagerLocaleMiddleware = (strapi: Core.Strapi) => {
+  const validateLocale = validateLocaleCreation({ strapi });
+
   strapi.server.router.use('/content-manager/collection-types/:model', (ctx, next) => {
     if (ctx.method === 'POST' || ctx.method === 'PUT') {
-      return validateLocaleCreation(ctx, next);
+      return validateLocale(ctx, next);
     }
 
     return next();
@@ -40,7 +42,7 @@ const addContentManagerLocaleMiddleware = (strapi: Core.Strapi) => {
 
   strapi.server.router.use('/content-manager/single-types/:model', (ctx, next) => {
     if (ctx.method === 'POST' || ctx.method === 'PUT') {
-      return validateLocaleCreation(ctx, next);
+      return validateLocale(ctx, next);
     }
 
     return next();

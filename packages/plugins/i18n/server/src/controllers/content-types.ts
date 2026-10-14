@@ -8,6 +8,10 @@ import {
   validateFillFromLocaleInput,
 } from '../validation/content-types';
 
+// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
+// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
+// factory would break them (see __tests__/plugin-shape.test.ts).
+
 const { ApplicationError } = errors;
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
@@ -24,7 +28,7 @@ const controller = {
     const body = ctx.request.body as any;
     const { model, id, locale } = body;
 
-    await validateGetNonLocalizedAttributesInput({ model, id, locale });
+    await validateGetNonLocalizedAttributesInput({ strapi }, { model, id, locale });
 
     const permissionChecker = strapi
       .plugin('content-manager')
@@ -39,7 +43,7 @@ const controller = {
       copyNonLocalizedAttributes,
       isLocalizedContentType,
       getNestedPopulateOfNonLocalizedAttributes,
-    } = getService('content-types');
+    } = getService('content-types', { strapi });
 
     const {
       default: { READ_ACTION, CREATE_ACTION },
@@ -130,7 +134,7 @@ const controller = {
       return ctx.forbidden();
     }
 
-    const fillFromLocaleService = getService('fill-from-locale');
+    const fillFromLocaleService = getService('fill-from-locale', { strapi });
 
     const rawDocument = await fillFromLocaleService.fetchRawDocument(
       model as UID.ContentType,

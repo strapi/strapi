@@ -1,22 +1,25 @@
+import type { Core } from '@strapi/types';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-const validateGetNonLocalizedAttributesSchema = yup
-  .object()
-  .shape({
-    model: yup.string().required(),
-    id: yup.mixed().when('model', {
-      is: (model: any) => strapi.contentType(model)?.kind === 'singleType',
-      then: yup.strapiID().nullable(),
-      otherwise: yup.strapiID().required(),
-    }),
-    locale: yup.string().required(),
-  })
-  .noUnknown()
-  .required();
+const getNonLocalizedAttributesSchema = ({ strapi }: { strapi: Core.Strapi }) =>
+  yup
+    .object()
+    .shape({
+      model: yup.string().required(),
+      id: yup.mixed().when('model', {
+        is: (model: any) => strapi.contentType(model)?.kind === 'singleType',
+        then: yup.strapiID().nullable(),
+        otherwise: yup.strapiID().required(),
+      }),
+      locale: yup.string().required(),
+    })
+    .noUnknown()
+    .required();
 
-const validateGetNonLocalizedAttributesInput = validateYupSchema(
-  validateGetNonLocalizedAttributesSchema
-);
+const validateGetNonLocalizedAttributesInput = (
+  { strapi }: { strapi: Core.Strapi },
+  body: unknown
+) => validateYupSchema(getNonLocalizedAttributesSchema({ strapi }))(body);
 
 const validateFillFromLocaleInputSchema = yup
   .object()
