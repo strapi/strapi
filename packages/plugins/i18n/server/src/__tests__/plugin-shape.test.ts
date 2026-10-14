@@ -495,39 +495,35 @@ describe('i18n plugin entry, as consumed by core', () => {
     expect(resolveRouters(plugin, strapi)['content-api'].routes).toBe(legacyRoutes);
   });
 
+  /**
+   * The response schema only feeds the OpenAPI document (`@strapi/openapi`); core does not validate
+   * responses with it. It rejects locale codes longer than 2 characters and non-UUID document ids,
+   * which real locales (`en-US`) and document ids (cuid2) have. Pinned as is.
+   */
+  it('describes the content-api locales response with the develop schema', async () => {
+    const { plugin, strapi } = await loadPluginLikeCore();
+    const [route] = resolveRouters(plugin, strapi)['content-api'].routes;
+    const schema = route.response as { safeParse: (value: unknown) => { success: boolean } };
+    const locale = {
+      id: 1,
+      documentId: 'f1f1f1f1-1111-4111-8111-111111111111',
+      name: 'English (en)',
+      code: 'en',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      publishedAt: null,
+      isDefault: true,
+    };
+
+    expect(schema.safeParse([locale]).success).toBe(true);
+    expect(schema.safeParse([{ ...locale, isDefault: undefined }]).success).toBe(false);
+    expect(schema.safeParse([{ ...locale, code: 'en-US' }]).success).toBe(false);
+    expect(schema.safeParse([{ ...locale, documentId: 'jx3k9s0f2b7m1q8w4e6r5t' }]).success).toBe(
+      false
+    );
+  });
+
   describe('user extension (src/extensions/i18n/strapi-server.js)', () => {
-    it.each([
-      'locales.listLocales',
-      'iso-locales.listIsoLocales',
-      'content-types.getNonLocalizedAttributes',
-      'settings.getSettings',
-    ])('serves %s patched on the plugin object', async (handler) => {
-      const [controllerName, actionName] = handler.split('.');
-      const patched = jest.fn();
-      const { plugin, strapi } = await loadPluginLikeCore((p) => {
-        (p.controllers[controllerName] as UnknownRecord)[actionName] = patched;
-        return p;
-      });
-
-      expect(servedAction(plugin, handler, strapi)).toBe(patched);
-    });
-
-    it('serves a service method patched by wrapping the service factory', async () => {
-      const patched = jest.fn();
-      const { plugin, strapi } = await loadPluginLikeCore((p) => {
-        const original = p.services.locales;
-        p.services.locales = (params: { strapi: unknown }) => ({
-          ...(resolveValue(original, params.strapi) as UnknownRecord),
-          find: patched,
-        });
-        return p;
-      });
-
-      const service = resolveMap(plugin.services, strapi).locales;
-      expect(service.find).toBe(patched);
-      expect(typeof service.setIsDefault).toBe('function');
-    });
-
     it('registers admin routes edited on the plugin object', async () => {
       const { plugin, strapi } = await loadPluginLikeCore((p) => {
         const router = (p.routes as Record<string, Router>).admin;
@@ -541,6 +537,22 @@ describe('i18n plugin entry, as consumed by core', () => {
 
       expect(handlers).not.toContain('DELETE /locales/:id');
       expect(handlers).toContain('GET /custom');
+    });
+
+    it('keeps route config edited on the plugin object', async () => {
+      const { plugin, strapi } = await loadPluginLikeCore((p) => {
+        const routers = p.routes as Record<string, Router>;
+        const [adminRoute] = routers.admin.routes;
+        const [contentApiRoute] = routers['content-api'].routes;
+        adminRoute.config = { ...adminRoute.config, policies: ['global::custom'] };
+        contentApiRoute.config = { middlewares: ['global::custom'] };
+        return p;
+      });
+
+      const routers = resolveRouters(plugin, strapi);
+
+      expect(routers.admin.routes[0].config?.policies).toEqual(['global::custom']);
+      expect(routers['content-api'].routes[0].config?.middlewares).toEqual(['global::custom']);
     });
 
     it('registers content-api routes edited on the plugin object', async () => {
@@ -568,6 +580,117 @@ describe('i18n plugin entry, as consumed by core', () => {
       const routes = resolveRouters(plugin, strapi)['content-api'].routes;
 
       expect(routes.map((route) => `${route.method} ${route.path}`)).toEqual(['GET /replaced']);
+    });
+  });
+  /**
+   * User extensions receive the raw plugin object, before the core registries resolve factories.
+   * A value that is a plain object on develop can be patched in place
+   * (`plugin.controllers.x.fn = ...`);
+   * a factory can only be wrapped. Turning a plain object into a factory, or the reverse, silently
+   * breaks existing extensions, so each entry pins the develop shape through the extension path.
+   */
+  describe('user extension patching keeps the develop shape', () => {
+    type Entry = [name: string, member: string];
+
+    // Every service is a factory on develop: none can be patched in place.
+    const factoryServices: Entry[] = [
+      ['ai-localization-jobs', 'getJobByDocument'],
+      ['ai-localizations', 'isEnabled'],
+      ['ai-translations', 'hasProvider'],
+      ['content-types', 'isLocalizedContentType'],
+      ['fill-from-locale', 'transformDocument'],
+      ['iso-locales', 'getIsoLocales'],
+      ['locales', 'find'],
+      ['localizations', 'syncNonLocalizedAttributes'],
+      ['metrics', 'sendDidInitializeEvent'],
+      ['permissions', 'actions'],
+      ['sanitize', 'sanitizeLocalizationFields'],
+      ['settings', 'getSettings'],
+    ];
+    const plainControllers: Entry[] = [
+      ['content-types', 'getNonLocalizedAttributes'],
+      ['content-types', 'getFillFromLocaleData'],
+      ['iso-locales', 'listIsoLocales'],
+      ['locales', 'listLocales'],
+      ['locales', 'createLocale'],
+      ['locales', 'updateLocale'],
+      ['locales', 'deleteLocale'],
+      ['settings', 'getSettings'],
+      ['settings', 'updateSettings'],
+    ];
+    const factoryControllers: Entry[] = [
+      ['ai-localization-jobs', 'getJobForCollectionType'],
+      ['ai-localization-jobs', 'getJobForSingleType'],
+    ];
+
+    const names = (entries: Entry[]) => [...new Set(entries.map(([name]) => name))].sort();
+
+    const patchInPlace = (key: 'services' | 'controllers', name: string, member: string) => {
+      const patched = jest.fn();
+      const extension: UserExtension = (p) => {
+        (p[key][name] as UnknownRecord)[member] = patched;
+        return p;
+      };
+
+      return { patched, extension };
+    };
+
+    const wrapFactory = (key: 'services' | 'controllers', name: string, member: string) => {
+      const patched = jest.fn();
+      const extension: UserExtension = (p) => {
+        const factory = p[key][name] as Factory;
+        p[key][name] = (params: { strapi: unknown }) => ({
+          ...(factory(params) as UnknownRecord),
+          [member]: patched,
+        });
+        return p;
+      };
+
+      return { patched, extension };
+    };
+
+    it('lists every service and controller exposed on the plugin object', async () => {
+      const { plugin } = await loadPluginLikeCore();
+
+      expect(Object.keys(plugin.services).sort()).toEqual(names(factoryServices));
+      expect(Object.keys(plugin.controllers).sort()).toEqual(
+        names([...plainControllers, ...factoryControllers])
+      );
+      expect(plugin.policies).toBe(undefined);
+      expect(plugin.middlewares).toBe(undefined);
+    });
+
+    it('keeps the admin router a plain object and the content-api router a factory', async () => {
+      const { plugin } = await loadPluginLikeCore();
+      const routes = plugin.routes as UnknownRecord;
+
+      expect(Object.keys(routes).sort()).toEqual(['admin', 'content-api']);
+      expect(typeof routes.admin).toBe('object');
+      expect(typeof routes['content-api']).toBe('function');
+    });
+
+    it.each(factoryServices)('serves %s.%s from a wrapped service factory', async (n, m) => {
+      const { patched, extension } = wrapFactory('services', n, m);
+      const { plugin, strapi } = await loadPluginLikeCore(extension);
+
+      expect((resolveValue(plugin.services[n], strapi) as UnknownRecord)[m]).toBe(patched);
+      expect(typeof plugin.services[n]).toBe('function');
+    });
+
+    it.each(plainControllers)('serves %s.%s patched on the plain controller', async (n, m) => {
+      const { patched, extension } = patchInPlace('controllers', n, m);
+      const { plugin, strapi } = await loadPluginLikeCore(extension);
+
+      expect(servedAction(plugin, `${n}.${m}`, strapi)).toBe(patched);
+      expect(typeof plugin.controllers[n]).toBe('object');
+    });
+
+    it.each(factoryControllers)('serves %s.%s from a wrapped controller factory', async (n, m) => {
+      const { patched, extension } = wrapFactory('controllers', n, m);
+      const { plugin, strapi } = await loadPluginLikeCore(extension);
+
+      expect(servedAction(plugin, `${n}.${m}`, strapi)).toBe(patched);
+      expect(typeof plugin.controllers[n]).toBe('function');
     });
   });
 });
