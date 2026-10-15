@@ -16040,6 +16040,8 @@ __metadata:
     sort-package-json: "npm:2.10.0"
     tar: "npm:7.5.22"
     tsconfig: "npm:5.57.0"
+    vitest: "catalog:"
+    vitest-config: "npm:5.57.0"
   bin:
     create-strapi-app: ./bin/index.js
   languageName: unknown
