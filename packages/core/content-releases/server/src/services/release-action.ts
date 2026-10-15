@@ -16,7 +16,13 @@ import type {
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import type { Entity } from '../../../shared/types';
-import { getService, getDraftEntryValidStatus, getEntry, getEntryStatus } from '../utils';
+import {
+  getService,
+  getDraftEntryValidity,
+  getEntry,
+  getEntryStatus,
+  UNPUBLISH_VALIDITY,
+} from '../utils';
 
 const getGroupName = (queryValue: string) => {
   switch (queryValue) {
@@ -114,27 +120,26 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.ValidationError('Release already published');
       }
 
-      // If the action is a publish, check if the entry is valid
-      // If the action is an unpublish, skip the validation
-      const actionStatus =
+      const validity =
         action.type === 'publish'
-          ? await getDraftEntryValidStatus(
+          ? await getDraftEntryValidity(
               {
                 contentType: action.contentType,
                 documentId: action.entryDocumentId,
                 locale: action.locale,
               },
-              {
-                strapi,
-              }
+              { strapi }
             )
-          : true;
+          : UNPUBLISH_VALIDITY;
 
       const releaseAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).create({
         data: {
-          ...action,
+          type: action.type,
+          contentType: action.contentType,
+          entryDocumentId: action.entryDocumentId,
+          locale: action.locale,
           release: release.id,
-          isEntryValid: actionStatus,
+          ...validity,
         },
         populate: { release: { select: ['id'] } },
       });
@@ -279,6 +284,22 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       return contentTypeModelsMap;
     },
 
+    async countNotReadyByRelease(releaseIds: Data.ID[]): Promise<Map<Data.ID, number>> {
+      if (releaseIds.length === 0) {
+        return new Map();
+      }
+
+      const releases: { id: Data.ID; actions: { count: number } }[] = await strapi.db
+        .query(RELEASE_MODEL_UID)
+        .findMany({
+          where: { id: { $in: releaseIds }, releasedAt: null },
+          select: ['id'],
+          populate: { actions: { count: true, where: { type: 'publish', isEntryValid: false } } },
+        });
+
+      return new Map(releases.map((release) => [release.id, release.actions.count]));
+    },
+
     async countActions(
       query: Modules.EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
     ) {
@@ -311,19 +332,17 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         );
       }
 
-      const actionStatus =
+      const validity =
         update.type === 'publish'
-          ? await getDraftEntryValidStatus(
+          ? await getDraftEntryValidity(
               {
                 contentType: action.contentType,
                 documentId: action.entryDocumentId,
                 locale: action.locale,
               },
-              {
-                strapi,
-              }
+              { strapi }
             )
-          : true;
+          : UNPUBLISH_VALIDITY;
 
       const updatedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
         where: {
@@ -338,13 +357,13 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         // Only the field the PUT contract allows. Changing the entry is remove + add.
         data: {
           type: update.type,
-          isEntryValid: actionStatus,
+          ...validity,
         },
       });
 
       getService('release', { strapi }).updateReleaseStatus(releaseId);
 
-      // isEntryValid is recalculated, not edited: only the type change is audited
+      // Validity and reason are recalculated, not edited: only the type change is audited
       if (updatedAction && action.type !== updatedAction.type) {
         await emitAuditOnCommit({ strapi }, AUDITED_EVENTS.RELEASE_ENTRY_UPDATE, {
           releaseId: action.release?.id ?? Number(releaseId),
@@ -409,6 +428,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
           },
           // We only want to validate actions that are going to be published
           type: 'publish',
+          outcome: null,
           release: {
             releasedAt: {
               $null: true,
@@ -421,7 +441,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       const releasesUpdated: Data.ID[] = [];
 
       await async.map(actions, async (action: ReleaseAction) => {
-        const isValid = await getDraftEntryValidStatus(
+        const validity = await getDraftEntryValidity(
           {
             contentType: action.contentType,
             documentId: action.entryDocumentId,
@@ -430,23 +450,16 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
           { strapi }
         );
 
-        await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-          where: {
-            id: action.id,
-          },
-          data: {
-            isEntryValid: isValid,
-          },
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+          where: { id: action.id, outcome: null },
+          data: validity,
         });
 
         if (!releasesUpdated.includes(action.release.id)) {
           releasesUpdated.push(action.release.id);
         }
 
-        return {
-          id: action.id,
-          isEntryValid: isValid,
-        };
+        return { id: action.id, ...validity };
       });
 
       if (releasesUpdated.length > 0) {

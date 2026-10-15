@@ -1,11 +1,11 @@
-import { isEntryValid } from '../index';
+import { getEntryPublishability } from '../index';
 
 /**
- * `isEntryValid` powers the "valid" badge shown in the release UI. It must read
+ * `getEntryPublishability` powers the "valid" badge shown in the release UI. It must read
  * `api.documents.strictRelations` and forward it to `validateEntityCreation`, otherwise
  * the UI can mark an entry valid that publish later rejects (issue #24927 / PR #27028).
  */
-describe('content-releases utils - isEntryValid', () => {
+describe('content-releases utils - getEntryPublishability: strict relations', () => {
   const contentTypeUid = 'api::article.article';
   const model = { uid: contentTypeUid };
 
@@ -29,7 +29,7 @@ describe('content-releases utils - isEntryValid', () => {
     const strapi = buildStrapi({ strictRelations: true, validate });
     const entry = { id: 1, documentId: 'article-1', locale: 'en' };
 
-    await isEntryValid(contentTypeUid, entry, { strapi });
+    await getEntryPublishability(contentTypeUid, entry, { strapi });
 
     const [, , options] = validate.mock.calls[0];
     expect(options).toEqual({ isDraft: false, locale: 'en', strictRelations: true });
@@ -40,7 +40,7 @@ describe('content-releases utils - isEntryValid', () => {
     const strapi = buildStrapi({ strictRelations: false, validate });
     const entry = { id: 1, documentId: 'article-1' };
 
-    await isEntryValid(contentTypeUid, entry, { strapi });
+    await getEntryPublishability(contentTypeUid, entry, { strapi });
 
     const [, , options] = validate.mock.calls[0];
     expect(options).toEqual({ isDraft: false, locale: undefined, strictRelations: false });
@@ -50,25 +50,25 @@ describe('content-releases utils - isEntryValid', () => {
     const validate = jest.fn().mockRejectedValue(new Error('author must be defined.'));
     const strapi = buildStrapi({ strictRelations: true, validate });
 
-    const result = await isEntryValid(
+    const { publishable } = await getEntryPublishability(
       contentTypeUid,
       { id: 1, documentId: 'article-1' },
       { strapi }
     );
 
-    expect(result).toBe(false);
+    expect(publishable).toBe(false);
   });
 
   test('returns true when validation passes and no workflow gate applies (flag off)', async () => {
     const validate = jest.fn().mockResolvedValue({});
     const strapi = buildStrapi({ strictRelations: false, validate });
 
-    const result = await isEntryValid(
+    const { publishable } = await getEntryPublishability(
       contentTypeUid,
       { id: 1, documentId: 'article-1' },
       { strapi }
     );
 
-    expect(result).toBe(true);
+    expect(publishable).toBe(true);
   });
 });

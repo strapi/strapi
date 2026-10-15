@@ -210,7 +210,11 @@ packages/core/content-releases/server/src/services/scheduling.ts
 
 ### Release status update triggers:
 
-Each release has a `releaseCondition`: `all_or_nothing` (the default, and the value given to releases created before the field existed) or `allow_partial`. A publish entry is publishable when its draft passes publish validation and, if its content type's review workflow has a stage required to publish, the entry is at that stage. Without review workflows, only validation applies. Unpublish entries are always publishable. Each release action stores whether its entry was publishable when last checked (`isEntryValid`), and the status is derived from the values of the publish actions. Editing an entry also rewrites `isEntryValid` on its unpublish actions, which the status ignores. Only actions of releases that haven't run are rewritten: a release that ran keeps what its run saw.
+Each release has a `releaseCondition`: `all_or_nothing` (the default, and the value given to releases created before the field existed) or `allow_partial`. A publish entry is publishable when its draft passes publish validation and, if its content type's review workflow has a stage required to publish, the entry is at that stage. Without review workflows, only validation applies. Unpublish entries are always publishable. Each release action stores whether its entry was publishable when last checked (`isEntryValid`) and, when it isn't, why (`reason`, the same shape a run records: field paths and messages without the submitted values, and the entry's and required stages). The status is derived from the values of the publish actions. Unpublish actions are always publishable: they keep `isEntryValid: true` and no `reason`. The check reads the deep-populated draft, as a run does, so the stored reason matches what the run will decide. Only actions of releases that haven't run are rewritten: a release that ran keeps what its run saw.
+
+The validity and reason are written when an entry is added to a release or its action changes type, when the entry is edited (only if it's in a planned release), when a manual publish is rejected by the check, when a review workflow is created, updated or deleted (stages, required stage, content types), and when a content type's attributes change at startup.
+
+The releases list and the single release response return `actions.meta.notReadyCount` for planned releases: the publish entries that aren't publishable now. With `actions.meta.count` and the release condition, it gives the status the other condition would have, so no per-condition status is stored.
 
 - **Empty**: the release has no entries.
 - **Blocked**: publishing now would release nothing. With `all_or_nothing`, at least one entry is not publishable. With `allow_partial`, no entry is publishable.
@@ -289,7 +293,7 @@ The audit counts are the release's totals, `failed` being `totalSkippedEntries`:
 
 #### Listening to events on entries:
 
-When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity. Only releases that haven't run are affected: an update rewrites `isEntryValid` and a deletion removes the entry's actions only there. A release that ran keeps the actions of deleted entries, with what the run recorded; `GET /content-releases/:releaseId/actions` returns them with an empty `entry` and a `null` `status`.
+When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity. Only releases that haven't run are affected: an update rewrites `isEntryValid` and `reason` and a deletion removes the entry's actions only there. A release that ran keeps the actions of deleted entries, with what the run recorded; `GET /content-releases/:releaseId/actions` returns them with an empty `entry` and a `null` `status`.
 
 ## Migrations
 

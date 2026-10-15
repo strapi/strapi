@@ -1,7 +1,7 @@
 import type { Modules, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
-import { getService, isEntryValid } from '../utils';
+import { getService, getDraftEntryValidity, UNPUBLISH_VALIDITY } from '../utils';
 
 type Middleware = Modules.Documents.Middleware.Middleware;
 
@@ -15,30 +15,42 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
   contentType: UID.ContentType,
   entry: Modules.Documents.AnyDocument
 ) => {
+  const plannedActionsWhere = {
+    contentType,
+    entryDocumentId: entry.documentId,
+    locale: entry.locale,
+    outcome: null,
+    release: { releasedAt: { $null: true } },
+  };
+
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
       releasedAt: null,
-      actions: {
-        contentType,
-        entryDocumentId: entry.documentId,
-        locale: entry.locale,
-      },
+      actions: { contentType, entryDocumentId: entry.documentId, locale: entry.locale },
     },
   });
 
-  const entryStatus = await isEntryValid(contentType, entry, { strapi });
+  if (releases.length === 0) {
+    return;
+  }
 
-  // Only planned releases: a release that ran keeps what its run recorded
+  const publishActionsWhere = { ...plannedActionsWhere, type: 'publish' };
+
+  if ((await strapi.db.query(RELEASE_ACTION_MODEL_UID).count({ where: publishActionsWhere })) > 0) {
+    const validity = await getDraftEntryValidity(
+      { contentType, documentId: entry.documentId, locale: entry.locale },
+      { strapi }
+    );
+
+    await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+      where: publishActionsWhere,
+      data: validity,
+    });
+  }
+
   await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-    where: {
-      contentType,
-      entryDocumentId: entry.documentId,
-      locale: entry.locale,
-      release: { releasedAt: { $null: true } },
-    },
-    data: {
-      isEntryValid: entryStatus,
-    },
+    where: { ...plannedActionsWhere, type: 'unpublish', isEntryValid: false },
+    data: UNPUBLISH_VALIDITY,
   });
 
   for (const release of releases) {
@@ -114,13 +126,11 @@ const updateActionsOnUpdate: Middleware = async (ctx, next) => {
     return result;
   }
 
-  try {
-    updateActionsStatusAndUpdateReleaseStatus(contentType, result);
-  } catch (error) {
+  updateActionsStatusAndUpdateReleaseStatus(contentType, result).catch((error: unknown) => {
     strapi.log.error('Error while updating release actions after update', {
       error,
     });
-  }
+  });
 
   return result;
 };

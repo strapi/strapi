@@ -29,7 +29,12 @@ export type Pagination = {
 };
 
 export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
-  actions: { meta: { count: number } };
+  actions: {
+    meta: {
+      count: number;
+      notReadyCount?: number;
+    };
+  };
   createdBy: SanitizedAdminUser;
 }
 

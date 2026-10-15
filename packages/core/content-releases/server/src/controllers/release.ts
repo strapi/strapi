@@ -63,7 +63,7 @@ const releaseController = {
         },
         populate: {
           actions: {
-            fields: ['type'],
+            fields: ['type', 'isEntryValid', 'reason'],
             filters: {
               contentType,
               entryDocumentId: entryDocumentId ?? null,
@@ -118,14 +118,22 @@ const releaseController = {
     const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
     const { results, pagination } = await releaseService.findPage(query);
 
+    const notReadyCounts = await getService('release-action', { strapi }).countNotReadyByRelease(
+      results
+        .filter((release: ReleaseWithPopulatedActions) => !release.releasedAt)
+        .map((release: ReleaseWithPopulatedActions) => release.id)
+    );
+
     const data = results.map((release: ReleaseWithPopulatedActions) => {
       const { actions, ...releaseData } = release;
+      const notReadyCount = notReadyCounts.get(release.id);
 
       return {
         ...releaseData,
         actions: {
           meta: {
             count: actions.count,
+            ...(notReadyCount !== undefined && { notReadyCount }),
           },
         },
       };
@@ -155,6 +163,11 @@ const releaseController = {
         release: id,
       },
     });
+    const notReadyCount = release.releasedAt
+      ? undefined
+      : await releaseActionService.countActions({
+          filters: { release: id, type: 'publish', isEntryValid: false },
+        });
     const sanitizedRelease = {
       ...release,
       createdBy: release.createdBy
@@ -168,6 +181,7 @@ const releaseController = {
       actions: {
         meta: {
           count,
+          ...(notReadyCount !== undefined && { notReadyCount }),
         },
       },
     };

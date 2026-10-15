@@ -8,7 +8,7 @@ import {
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
 } from '../constants';
-import { getDraftEntryValidStatus, getService } from '../utils';
+import { getDraftEntryValidity, getDraftEntryValidStatus, getService } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
 import { ReleaseAction } from '../../../shared/contracts/release-actions';
 
@@ -147,47 +147,48 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
         const oldContentType = oldContentTypes[contentTypeUID];
         const contentType = contentTypes[contentTypeUID];
 
-        // If attributes have changed, we need to revalidate actions because maybe validations rules are different
-        if (!isEqual(oldContentType?.attributes, contentType?.attributes)) {
+        // If attributes have changed, we need to revalidate actions because maybe validations rules are different.
+        // A deleted content type's actions are removed by deleteActionsOnDeleteContentType
+        if (contentType && !isEqual(oldContentType?.attributes, contentType?.attributes)) {
           const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
             where: {
               contentType: contentTypeUID,
+              type: 'publish',
+              outcome: null,
+              release: { releasedAt: { $null: true } },
             },
-            populate: {
-              entry: true,
-              release: true,
-            },
+            populate: { release: { select: ['id'] } },
           });
 
           await async.map(actions, async (action: ReleaseAction) => {
-            if (action.entry && action.release && action.type === 'publish') {
-              const isEntryValid = await getDraftEntryValidStatus(
-                {
-                  contentType: contentTypeUID,
-                  documentId: action.entryDocumentId,
-                  locale: action.locale,
-                },
-                { strapi }
-              );
+            const validity = await getDraftEntryValidity(
+              {
+                contentType: contentTypeUID,
+                documentId: action.entryDocumentId,
+                locale: action.locale,
+              },
+              { strapi }
+            );
 
-              releasesAffected.add(action.release.id);
+            releasesAffected.add(action.release.id);
 
-              await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-                where: {
-                  id: action.id,
-                },
-                data: {
-                  isEntryValid,
-                },
-              });
-            }
+            await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+              where: { id: action.id, outcome: null },
+              data: validity,
+            });
           });
         }
       })
       .then(() => {
         // We need to update the status of the releases affected
-        async.map(releasesAffected, async (releaseId: Release['id']) => {
+        return async.map(releasesAffected, async (releaseId: Release['id']) => {
           return getService('release', { strapi }).updateReleaseStatus(releaseId);
+        });
+      })
+      // Not awaited by startup: a failure must not become an unhandled rejection
+      .catch((error: unknown) => {
+        strapi.log.error('Error while revalidating release actions after a content type change', {
+          error,
         });
       });
   }
