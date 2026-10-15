@@ -285,21 +285,16 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
 
     // The service audits the run itself, whoever the caller is
-    const { release, counts, countsError } = await releaseService.publish(id, {
-      trigger: 'manual',
-    });
-
-    // The publish is committed and audited; the response still needs the counts
-    if (!counts) {
-      throw countsError ?? new Error('Failed to count the release entries');
-    }
+    const release = await releaseService.publish(id, { trigger: 'manual' });
+    const { totalPublishedEntries, totalUnpublishedEntries, totalSkippedEntries } = release;
 
     ctx.body = {
       data: release,
       meta: {
-        totalEntries: counts.published + counts.unpublished,
-        totalPublishedEntries: counts.published,
-        totalUnpublishedEntries: counts.unpublished,
+        totalEntries: totalPublishedEntries + totalUnpublishedEntries + totalSkippedEntries,
+        totalPublishedEntries,
+        totalUnpublishedEntries,
+        totalSkippedEntries,
       },
     };
   },

@@ -316,7 +316,7 @@ describe('Release service', () => {
 
       expect(update).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: { status: 'done', releasedAt: expect.any(Date) },
+        data: expect.objectContaining({ status: 'done', releasedAt: expect.any(Date) }),
       });
     });
 
@@ -680,18 +680,11 @@ describe('Release service', () => {
   });
 
   describe('publish audit', () => {
-    it('records what the run released, while the response counts every entry of the release', async () => {
+    it('audits what the run released', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
-        plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({
-            countActions: jest.fn(({ filters }: { filters: { type: string } }) =>
-              Promise.resolve(filters.type === 'publish' ? 2 : 1)
-            ),
-          }),
-        }),
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
@@ -700,7 +693,7 @@ describe('Release service', () => {
               { id: 2, contentType: 'collectionType', type: 'publish', entryDocumentId: 'b' },
               { id: 3, contentType: 'collectionType', type: 'unpublish', entryDocumentId: 'c' },
             ]),
-            update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'done' }),
+            update: jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data })),
             updateMany: jest.fn(),
           }),
         },
@@ -710,10 +703,8 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      const { counts, countsError } = await releaseService.publish(1, { trigger: 'manual' });
+      await releaseService.publish(1, { trigger: 'manual' });
 
-      expect(counts).toEqual({ published: 2, unpublished: 1 });
-      expect(countsError).toBeNull();
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith('release.trigger', {
         releaseId: 1,
         name: 'March',
@@ -756,9 +747,6 @@ describe('Release service', () => {
         eventHub: { emit: jest.fn() },
         log: { info: jest.fn(), warn: jest.fn() },
         documents: jest.fn().mockReturnValue({ publish, unpublish: jest.fn() }),
-        plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({ countActions: jest.fn().mockResolvedValue(3) }),
-        }),
         db: {
           ...baseStrapiMock.db,
           savepoint: jest.fn((cb: () => unknown) => cb()),
@@ -771,7 +759,7 @@ describe('Release service', () => {
                 entryDocumentId,
               }))
             ),
-            update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'partial' }),
+            update: jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data })),
             updateMany: jest.fn(),
           }),
         },
@@ -834,52 +822,9 @@ describe('Release service', () => {
       expect(releaseUpdate).toHaveBeenCalledTimes(1);
       expect(releaseUpdate).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: { status: 'done', releasedAt: expect.any(Date) },
+        data: expect.objectContaining({ status: 'done', releasedAt: expect.any(Date) }),
       });
       expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
-    });
-
-    it('keeps the success entry when the counts fail', async () => {
-      // The publish committed: an audit-only read failure must not lose its entry
-      mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });
-      const strapiMock = {
-        ...baseStrapiMock,
-        eventHub: { emit: jest.fn() },
-        log: { info: jest.fn(), error: jest.fn() },
-        plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({
-            countActions: jest.fn().mockRejectedValue(new Error('db down')),
-          }),
-        }),
-        db: {
-          ...baseStrapiMock.db,
-          query: jest.fn().mockReturnValue({
-            findMany: jest
-              .fn()
-              .mockReturnValue([
-                { contentType: 'collectionType', type: 'publish', entry: { id: 1 } },
-              ]),
-            update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'done' }),
-            updateMany: jest.fn(),
-          }),
-        },
-        contentTypes: { collectionType: { kind: 'collectionType' } },
-      };
-
-      // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
-
-      // The committed publish must not fail because of an audit-only read: the
-      // error travels in the return for the caller to decide
-      const { counts, countsError } = await releaseService.publish(1, { trigger: 'manual' });
-
-      expect(counts).toBeNull();
-      expect(countsError).toBeInstanceOf(Error);
-      expect(strapiMock.log.error).toHaveBeenCalled();
-      expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
-        'release.trigger',
-        expect.objectContaining({ outcome: 'success', releaseId: 1 })
-      );
     });
 
     it('records a failed all_or_nothing run as failed everywhere, with only the error name', async () => {
@@ -888,7 +833,7 @@ describe('Release service', () => {
         .fn()
         .mockResolvedValueOnce(undefined)
         .mockRejectedValueOnce(new errors.ValidationError('Publish failed'));
-      const releaseUpdate = jest.fn();
+      const releaseUpdate = jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data }));
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
@@ -918,7 +863,7 @@ describe('Release service', () => {
       expect(strapiMock.db.savepoint).toHaveBeenCalledTimes(1);
       expect(releaseUpdate).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: { status: 'failed', releasedAt: expect.any(Date) },
+        data: expect.objectContaining({ status: 'failed', releasedAt: expect.any(Date) }),
       });
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
         'releases.publish',
@@ -945,9 +890,6 @@ describe('Release service', () => {
           ),
         },
         log: { info: jest.fn(), error: jest.fn() },
-        plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({ countActions: jest.fn().mockResolvedValue(1) }),
-        }),
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
@@ -956,7 +898,7 @@ describe('Release service', () => {
               .mockReturnValue([
                 { contentType: 'collectionType', type: 'publish', entry: { id: 1 } },
               ]),
-            update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'done' }),
+            update: jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data })),
             updateMany: jest.fn(),
           }),
         },
@@ -966,9 +908,9 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      const { counts } = await releaseService.publish(1, { trigger: 'manual' });
+      const release = await releaseService.publish(1, { trigger: 'manual' });
 
-      expect(counts).toEqual({ published: 1, unpublished: 1 });
+      expect(release.status).toBe('done');
       expect(strapiMock.log.error).toHaveBeenCalled();
     });
 
