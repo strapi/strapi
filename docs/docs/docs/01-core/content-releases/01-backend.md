@@ -24,6 +24,8 @@ The `Release` content type stores all the information about a release and its as
 packages/core/content-releases/server/src/content-types/release/schema.ts
 ```
 
+`releasedAt` is when the release ran, whatever the outcome: a release with `releasedAt` set is frozen (it can't be edited, deleted or published again, and it no longer counts as pending). On a "Failed" release, nothing went live.
+
 ### Release Action
 
 Th `Release Action` content type is associated with any entry from any content-type that has draft and publish enabled. It is responsible for storing the action to perform for an associated entry. It is saved in the database as `strapi_release_actions`. In v4, we used built-in polymorphic relations, but for v5, we stored `contentType`, `locale`, and `entryDocumentId` in the Release Action schema to create a "manual" relationship between actions and entries. This approach allows us to link a release action to a document ID instead of a specific entry ID, as the entry ID may change over time and is not reliable.
@@ -214,7 +216,7 @@ Each release has a `releaseCondition`: `all_or_nothing` (the default, and the va
 - **Blocked**: publishing now would release nothing. With `all_or_nothing`, at least one entry is not publishable. With `allow_partial`, no entry is publishable.
 - **Ready**: otherwise. An `allow_partial` release with some entries that aren't publishable is ready: they are skipped when it runs.
 
-After it runs, a release has one of these statuses:
+A release is planned (Empty, Ready, Blocked) until it runs. After it runs, it is frozen with one of these statuses, which nothing changes afterwards:
 
 - **Done**: every entry was published or unpublished. A release with no entries ends done.
 - **Partial**: some entries were released and some were not.
@@ -229,6 +231,8 @@ When creating a release, its status is automatically set to "Empty" as there are
 #### Adding an entry to a release:
 
 Upon adding an entry to a release, its status is recalculated to either "Ready" or "Blocked" from the validity of its entries and its release condition.
+
+All the recalculations below only apply to a planned release: once `releasedAt` is set, `updateReleaseStatus` leaves the status as the run wrote it.
 
 #### Removing an entry from a release:
 
@@ -248,15 +252,15 @@ A publish is either manual (the publish button or the API) or scheduled (the sch
 When the check finds that a run would release nothing (`all_or_nothing`: any entry not publishable; `allow_partial`: no entry publishable; never for a release with no entries):
 
 - A manual publish is rejected with the first such entry's validation error, in run order. Nothing is published, the check's result is stored on the release actions (`isEntryValid`), and the status is recalculated, so the release stays planned and reads "Blocked" even if the stored values had gone out of date. No webhook or audit event is sent.
-- A scheduled run fails: the status becomes "Failed", with the first entry's error for `all_or_nothing` and `No entries were published` for `allow_partial`.
+- A scheduled run fails: the release is frozen as "Failed", with the first entry's error for `all_or_nothing` and `No entries were published` for `allow_partial`.
 
 How a run ends:
 
 - Every entry released, or no entries at all: "Done", with `releasedAt` set.
 - Some entries released and some not (an `allow_partial` run that skipped entries): "Partial", with `releasedAt` set.
-- No entry released (an `allow_partial` run whose entries all failed, or an `all_or_nothing` run stopped by an error): "Failed", and the request fails. A failed release keeps `releasedAt` empty for now, so it stays pending.
+- No entry released (an `allow_partial` run whose entries all failed, or an `all_or_nothing` run stopped by an error): "Failed", with `releasedAt` set, and the request fails. The release leaves Pending and can't be published again: its entries go out in a new release.
 
-An error after the entries were released (writing the release's own status, for example) leaves the run "Partial": the entries stay released, and the request fails with the error.
+A run either records its outcome or doesn't happen. Only the failures the run decides are recorded as "Failed" (a scheduled run stopped by the check, an `all_or_nothing` run stopped by an entry error, an `allow_partial` run where every entry failed). Any other error (reading the entries, writing the result, the writes of a rejected manual publish) rolls the whole transaction back, the entries it released included: the request fails, the release stays as it was, and no webhook or audit event is sent. A scheduled release whose run rolled back keeps its past date in Pending until the overdue sweep freezes it (planned, EE-243); a manual one can be published again.
 
 Each entry of the run records what happened to it on its release action, returned by `GET /content-releases/:releaseId/actions`:
 
@@ -269,17 +273,17 @@ Each entry of the run records what happened to it on its release action, returne
 | `skipped_error`        | publishing or unpublishing the entry threw an error other than a validation error                                                                                                  | `error.name`, never its message                                                                                                    |
 | `skipped_held`         | the entry was publishable, but an `all_or_nothing` run released nothing (at the check or after an error)                                                                           | `null`                                                                                                                             |
 
-An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status. When a `failed` release goes back to planned (any change that recalculates its status), its outcomes and reasons are cleared, so a later run starts from none. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
+An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status. A release runs once: its outcomes are never rewritten afterwards, a `failed` release included. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
 
 The status written, the `releases.publish` webhook and the `release.trigger` audit event always agree:
 
-| Status  | Webhook `isPublished` | Audit `outcome` | Audit `details`                                                                |
-| ------- | --------------------- | --------------- | ------------------------------------------------------------------------------ |
-| Done    | `true`                | `success`       | `published`, `unpublished`, `failed: 0`                                        |
-| Partial | `true`                | `partial`       | `published`, `unpublished`, `failed`, and `reason` if an error stopped the run |
-| Failed  | `false`               | `failure`       | `reason`: the error's name                                                     |
+| Status  | Webhook `isPublished` | Audit `outcome` | Audit `details`                         |
+| ------- | --------------------- | --------------- | --------------------------------------- |
+| Done    | `true`                | `success`       | `published`, `unpublished`, `failed: 0` |
+| Partial | `true`                | `partial`       | `published`, `unpublished`, `failed`    |
+| Failed  | `false`               | `failure`       | `reason`: the error's name              |
 
-The counts are what the run released, and `failed` the entries it left out: not publishable, or their publish or unpublish threw. A failed run sends the webhook once its status is written. Entry errors are rolled back with their savepoint, so on Postgres they don't abort the transaction; an error outside a savepoint that does (writing the status after a database error) rolls back the whole run and the status write with it: the webhook then has `isPublished: false`, and the release keeps its previous status.
+The counts are what the run released, and `failed` the entries it left out: not publishable, or their publish or unpublish threw. The webhook and the audit event are sent once the outcome is committed. Entry errors are rolled back with their savepoint, so on Postgres they don't abort the transaction; any other error rolls back the whole run, as above.
 
 #### Listening to events on entries:
 
