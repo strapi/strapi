@@ -9517,6 +9517,8 @@ __metadata:
     use-context-selector: "npm:1.4.4"
     vite: "npm:6.4.3"
     vite-plugin-dts: "npm:^4.3.0"
+    vitest: "catalog:"
+    vitest-config: "npm:5.58.0"
     yup: "npm:0.32.9"
     zod: "npm:4.4.3"
   peerDependencies:
