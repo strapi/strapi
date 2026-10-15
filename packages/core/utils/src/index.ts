@@ -28,6 +28,7 @@ export * as file from './file';
 export * as async from './async';
 export * as policy from './policy';
 export * as yup from './yup';
+export { EMAIL_REGEX } from './email-regex';
 export * as errors from './errors';
 export * as contentTypes from './content-types';
 export * as relations from './relations';
