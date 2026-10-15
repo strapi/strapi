@@ -28,6 +28,56 @@ export interface Store {
 
 const storage = new AsyncLocalStorage<Store>();
 
+const isDeadlockError = (error: unknown) => {
+  const seen = new Set<unknown>();
+
+  const matches = (candidate: unknown): boolean => {
+    if (!candidate || typeof candidate !== 'object' || seen.has(candidate)) {
+      return false;
+    }
+
+    seen.add(candidate);
+    const current = candidate as {
+      code?: string;
+      errno?: number;
+      message?: string;
+      original?: unknown;
+      cause?: unknown;
+    };
+
+    if (
+      current.code === '40P01' ||
+      current.code === 'ER_LOCK_DEADLOCK' ||
+      current.errno === 1213 ||
+      current.message?.includes('deadlock detected') ||
+      current.message?.includes('Deadlock found')
+    ) {
+      return true;
+    }
+
+    return matches(current.original) || matches(current.cause);
+  };
+
+  return matches(error);
+};
+
+/**
+ * Commit hooks do database work after the transaction finishes (document
+ * events, history, audit logs). Waiting for them keeps that work on the
+ * caller's timeline so a later destroy does not abort it mid-query.
+ * Callbacks may register more hooks; drain until none remain.
+ */
+const runCallbacks = async (callbacks: Callback[] | undefined) => {
+  if (!callbacks) {
+    return;
+  }
+
+  while (callbacks.length > 0) {
+    const batch = callbacks.splice(0, callbacks.length);
+    await Promise.all(batch.map((cb) => Promise.resolve(cb())));
+  }
+};
+
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const store = storage.getStore();
@@ -64,13 +114,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    if (!store?.commitCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.commitCallbacks.forEach((cb) => cb());
-    store.commitCallbacks = [];
+    await runCallbacks(store?.commitCallbacks);
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -90,13 +134,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    if (!store?.rollbackCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.rollbackCallbacks.forEach((cb) => cb());
-    store.rollbackCallbacks = [];
+    await runCallbacks(store?.rollbackCallbacks);
   },
 
   onCommit(cb: Callback) {
@@ -114,4 +152,4 @@ const transactionCtx = {
   },
 };
 
-export { transactionCtx };
+export { isDeadlockError, transactionCtx };

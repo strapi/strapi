@@ -38,6 +38,7 @@ describe('SessionManager JWT Configuration', () => {
       delete: jest.fn(),
       deleteMany: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     };
 
     mockDb = {

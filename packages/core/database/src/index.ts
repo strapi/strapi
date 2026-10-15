@@ -10,7 +10,12 @@ import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
-import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import {
+  Callback,
+  isDeadlockError,
+  transactionCtx,
+  TransactionObject,
+} from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
@@ -189,6 +194,30 @@ class Database {
   async transaction<TCallback extends Callback>(
     cb?: TCallback
   ): Promise<ReturnType<TCallback> | TransactionObject> {
+    // Postgres and MySQL abort one transaction when two of them deadlock.
+    // The database requires the caller to retry. Nested work retries with the
+    // outermost transaction so a savepoint is not reused after it aborted.
+    const nested = !!transactionCtx.get();
+    const attempts = nested ? 1 : 3;
+
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        return await this.runTransaction(cb);
+      } catch (error) {
+        lastError = error;
+        if (nested || attempt === attempts || !isDeadlockError(error)) {
+          throw error;
+        }
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async runTransaction<TCallback extends Callback>(
+    cb?: TCallback
+  ): Promise<ReturnType<TCallback> | TransactionObject> {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
       ? await this.connection.transaction()
@@ -223,7 +252,12 @@ class Database {
         await commit();
         return res;
       } catch (error) {
-        await rollback();
+        try {
+          await rollback();
+        } catch {
+          // A deadlock already aborted the transaction. Keep the original error
+          // so the outermost transaction can retry it.
+        }
         throw error;
       }
     });
@@ -238,7 +272,21 @@ class Database {
   getConnection(tableName?: string): Knex | Knex.QueryBuilder {
     const schema = this.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
-    return schema ? connection.withSchema(schema) : connection;
+
+    if (!schema) {
+      return connection;
+    }
+
+    // knex.withSchema() returns a query builder. The no-arg connection is also
+    // used as a schema inspector (`db.getConnection().schema.hasTable`).
+    const query = connection.withSchema(schema);
+    if (!tableName) {
+      Object.defineProperty(query, 'schema', {
+        value: this.connection.schema.withSchema(schema),
+      });
+    }
+
+    return query;
   }
 
   // Returns basic info about the database connection
