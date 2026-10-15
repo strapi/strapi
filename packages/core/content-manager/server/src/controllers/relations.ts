@@ -1,4 +1,4 @@
-import { property, uniqBy, concat, flow, isEmpty } from 'lodash';
+import { property, uniqBy, concat, flow, isEmpty, castArray } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -503,15 +503,21 @@ export default {
      * Load the relations with the main field, the sanitized permission query
      * will exclude the relations the user does not have access to.
      *
-     * Pagination is not necessary as the permissionQuery contains the ids to load.
+     * Not paginated: the permissionQuery's `$in` filter already bounds this query to the ids
+     * of the requested page. Going through `loadPages` here would apply its default pageSize
+     * of 10 and drop the main field of every relation past the 10th.
      */
-    const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
-      ...strapi.get('query-params').transform(targetUid, permissionQuery),
-      ordering: 'desc',
-    });
+    const sanitizedResults = isEmpty(loadedIds)
+      ? []
+      : await dbQuery
+          .load({ id: entryId }, targetField, {
+            ...strapi.get('query-params').transform(targetUid, permissionQuery),
+            ordering: 'desc',
+          })
+          .then((result) => (result ? castArray(result) : []));
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy(concat(sanitizedRes.results, res.results), 'id');
+    const relationsUnion = uniqBy(concat(sanitizedResults, res.results), 'id');
 
     ctx.body = {
       pagination: res.pagination || {
