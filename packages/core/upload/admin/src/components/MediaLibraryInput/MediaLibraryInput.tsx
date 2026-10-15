@@ -25,6 +25,7 @@ import { typeFromMime } from '../../utils/typeFromMime';
 
 import { AssetDropZone } from './AssetDropZone';
 import { AssetRow } from './AssetRow';
+import { NoLibraryAccessDialog } from './NoLibraryAccessDialog';
 
 import type { File } from '../../../../shared/contracts/files';
 
@@ -42,7 +43,7 @@ const CONTENT_MANAGER_LOCATION = 'content-manager';
  */
 const UPLOAD_FOLDER_ID = null;
 
-type Step = 'browse' | 'create-folder';
+type Step = 'browse' | 'create-folder' | 'no-access';
 
 export interface MediaLibraryInputProps {
   name: string;
@@ -267,12 +268,13 @@ export const MediaLibraryInput = ({
     }
   };
 
-  // Without read access the library browser has nothing to show.
   const handleZoneClick = () => {
     if (canRead) {
       setStep('browse');
     } else if (canCreate) {
       fileInputRef.current?.click();
+    } else {
+      setStep('no-access');
     }
   };
 
@@ -362,6 +364,8 @@ export const MediaLibraryInput = ({
       {step === 'create-folder' && (
         <EditFolderDialog open onClose={() => setStep('browse')} parentFolderId={folderId} />
       )}
+
+      {step === 'no-access' && <NoLibraryAccessDialog onClose={() => setStep(undefined)} />}
     </Field.Root>
   );
 };

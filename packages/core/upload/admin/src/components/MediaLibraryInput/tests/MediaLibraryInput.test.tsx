@@ -367,7 +367,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       click.mockRestore();
     });
 
-    it('does nothing on click without upload access either', async () => {
+    it('explains the missing access on click without upload access either', async () => {
       mockPermissions.canCreate = false;
       const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
       const { user } = renderInput();
@@ -379,7 +379,13 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       );
 
       expect(click).not.toHaveBeenCalled();
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(await screen.findByRole('dialog')).toHaveTextContent(
+        "You don't have the permissions to access that content"
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
       click.mockRestore();
     });
   });
