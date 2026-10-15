@@ -1,6 +1,7 @@
 {
   "name": "@strapi/admin-test-utils",
   "version": "5.59.0",
+  "type": "commonjs",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",

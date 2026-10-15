@@ -1,6 +1,7 @@
 {
   "name": "@strapi/core",
   "version": "5.59.0",
+  "type": "commonjs",
   "description": "Core of Strapi",
   "homepage": "https://strapi.io",
   "bugs": {

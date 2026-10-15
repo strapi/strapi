@@ -1,6 +1,7 @@
 {
   "name": "@strapi/permissions",
   "version": "5.59.0",
+  "type": "commonjs",
   "description": "Strapi's permission layer.",
   "homepage": "https://strapi.io",
   "bugs": {

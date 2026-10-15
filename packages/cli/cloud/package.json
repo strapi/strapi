@@ -1,6 +1,7 @@
 {
   "name": "@strapi/cloud-cli",
   "version": "5.59.0",
+  "type": "commonjs",
   "description": "Commands to interact with the Strapi Cloud",
   "keywords": [
     "strapi",

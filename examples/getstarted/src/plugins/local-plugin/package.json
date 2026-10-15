@@ -1,6 +1,7 @@
 {
   "name": "strapi-plugin-local-plugin",
   "version": "0.0.0",
+  "type": "commonjs",
   "private": true,
   "description": "This is the description of my plugin.",
   "strapi": {

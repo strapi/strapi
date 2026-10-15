@@ -1,6 +1,7 @@
 {
   "name": "eslint-config-custom",
   "version": "5.59.0",
+  "type": "commonjs",
   "private": true,
   "main": "index.js"
 }
