@@ -14,6 +14,10 @@ export interface Release extends Entity {
   // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
   timezone: string | null;
   releaseCondition: ReleaseCondition;
+  // What the run did with the release's entries; null until it runs
+  totalPublishedEntries: number | null;
+  totalUnpublishedEntries: number | null;
+  totalSkippedEntries: number | null;
   actions: ReleaseAction[];
 }
 
@@ -200,6 +204,7 @@ export declare namespace PublishRelease {
       totalEntries: number;
       totalPublishedEntries: number;
       totalUnpublishedEntries: number;
+      totalSkippedEntries: number;
     };
     error?: errors.ApplicationError | errors.ValidationError;
   }

@@ -48,6 +48,17 @@ export default {
       default: DEFAULT_RELEASE_CONDITION,
       required: true,
     },
+    // What the run did with the release's entries, written when it runs. Null until then.
+    totalPublishedEntries: {
+      type: 'integer',
+    },
+    totalUnpublishedEntries: {
+      type: 'integer',
+    },
+    // Every entry the run didn't release, whatever the reason
+    totalSkippedEntries: {
+      type: 'integer',
+    },
     actions: {
       type: 'relation',
       relation: 'oneToMany',
