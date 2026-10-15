@@ -132,11 +132,14 @@ describe('useDocument', () => {
       documentId: '12345',
     };
 
+    jest.mocked(createYupSchema).mockClear();
+
     const { result } = renderHook(() => [useDocument(args), useDocument(args)] as const);
 
     await waitFor(() => expect(result.current[0].isLoading).toBe(false));
 
-    jest.mocked(createYupSchema).mockClear();
+    // Mounting the hooks doesn't build anything
+    expect(createYupSchema).not.toHaveBeenCalled();
 
     const [first, second] = result.current;
     const document = { documentId: '12345', id: 1, postal_code: 12 };
