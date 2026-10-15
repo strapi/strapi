@@ -29,21 +29,18 @@ export const isMediaTypeAllowed = (
     return true;
   }
 
-  const singularTypes = allowedTypes.map((type) => SINGULAR[type]).filter(Boolean);
+  const singularTypes = new Set(allowedTypes.map((type) => SINGULAR[type]).filter(Boolean));
   const kind = mime?.split('/')[0];
 
   if (!kind) {
-    return singularTypes.includes('file');
+    return singularTypes.has('file');
   }
 
-  if (
-    singularTypes.includes('file') &&
-    !MEDIA_KINDS.includes(kind as (typeof MEDIA_KINDS)[number])
-  ) {
+  if (singularTypes.has('file') && !MEDIA_KINDS.includes(kind as (typeof MEDIA_KINDS)[number])) {
     return true;
   }
 
-  return singularTypes.includes(kind);
+  return singularTypes.has(kind);
 };
 
 /** The subset of `files` this field accepts, in the order they were given. */

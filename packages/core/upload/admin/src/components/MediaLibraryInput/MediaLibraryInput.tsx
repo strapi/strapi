@@ -64,6 +64,8 @@ export interface MediaLibraryInputProps {
   };
 }
 
+const NO_ATTRIBUTE: NonNullable<MediaLibraryInputProps['attribute']> = {};
+
 /**
  * The Content Manager's `media` field, on the current Media Library stack.
  *
@@ -82,7 +84,7 @@ export const MediaLibraryInput = ({
   hint,
   required = false,
   disabled = false,
-  attribute: { allowedTypes = null, multiple = false } = {},
+  attribute: { allowedTypes = null, multiple = false } = NO_ATTRIBUTE,
 }: MediaLibraryInputProps) => {
   const { formatMessage } = useIntl();
   const { onChange, value, error } = useField<File | File[] | null>(name);
