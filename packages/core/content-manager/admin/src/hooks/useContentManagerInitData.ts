@@ -13,7 +13,7 @@ import { useIntl } from 'react-intl';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
 import { HOOKS } from '../constants/hooks';
-import { AppState, setInitialData } from '../modules/app';
+import { AppState, initialState, setInitialData } from '../modules/app';
 import { useTypedDispatch, useTypedSelector } from '../modules/hooks';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
@@ -73,6 +73,11 @@ const useContentManagerInitData = (): AppState => {
     'useContentManagerInitData',
     (state) => state.checkUserHasPermissions
   );
+  const { isLoading: isLoadingAuth, user } = useAuth('useContentManagerInitData', (state) => ({
+    isLoading: state.isLoading,
+    user: state.user,
+  }));
+  const adminUserId = user?.id ?? user?.email;
 
   const state = useTypedSelector((state) => state['content-manager'].app);
 
@@ -168,21 +173,22 @@ const useContentManagerInitData = (): AppState => {
         models: contentTypes,
       });
 
-      dispatch(
-        setInitialData({
-          authorizedCollectionTypeLinks: ctLinks,
-          authorizedSingleTypeLinks: stLinks,
-          components,
-          contentStructure,
-          contentTypeSchemas: contentTypes,
-          fieldSizes,
-        })
-      );
+      return {
+        adminUserId,
+        authorizedCollectionTypeLinks: ctLinks,
+        authorizedSingleTypeLinks: stLinks,
+        components,
+        contentStructure,
+        contentTypeSchemas: contentTypes,
+        fieldSizes,
+      };
     },
-    [checkUserHasPermissions, dispatch, runHookWaterfall]
+    [adminUserId, checkUserHasPermissions, runHookWaterfall]
   );
 
   useEffect(() => {
+    let cancelled = false;
+
     if (initialDataQuery.data && contentTypeSettingsQuery.data) {
       formatData(
         initialDataQuery.data.components,
@@ -190,20 +196,37 @@ const useContentManagerInitData = (): AppState => {
         initialDataQuery.data.fieldSizes,
         contentTypeSettingsQuery.data,
         initialDataQuery.data.contentStructure
-      ).catch((error) => {
-        toggleNotification({
-          type: 'danger',
-          message: formatAPIError(error),
+      )
+        .then((data) => {
+          if (!cancelled) {
+            dispatch(setInitialData(data));
+          }
+        })
+        .catch((error) => {
+          if (!cancelled) {
+            toggleNotification({
+              type: 'danger',
+              message: formatAPIError(error),
+            });
+          }
         });
-      });
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [
+    dispatch,
     formatAPIError,
     formatData,
     initialDataQuery.data,
     contentTypeSettingsQuery.data,
     toggleNotification,
   ]);
+
+  if (isLoadingAuth || state.adminUserId !== adminUserId) {
+    return { ...initialState };
+  }
 
   return { ...state };
 };

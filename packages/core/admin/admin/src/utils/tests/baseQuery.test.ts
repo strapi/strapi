@@ -148,8 +148,10 @@ describe('baseQuery', () => {
   describe('401 handling', () => {
     it('triggers session expiry on a non-auth path without clearing auth state directly', async () => {
       const post = jest.fn().mockResolvedValue({});
+      const unauthorizedError = buildUnauthorizedError();
+      unauthorizedError.sessionToken = 'expired-token';
       (getFetchClient as jest.Mock).mockReturnValue({
-        get: jest.fn().mockRejectedValue(buildUnauthorizedError()),
+        get: jest.fn().mockRejectedValue(unauthorizedError),
         post,
         del: jest.fn(),
         put: jest.fn(),
@@ -163,6 +165,7 @@ describe('baseQuery', () => {
       expect(logout).not.toHaveBeenCalled();
       expect(dispatch).not.toHaveBeenCalledWith({ type: 'LOGOUT', payload: undefined });
       expect(triggerSessionExpired).toHaveBeenCalledTimes(1);
+      expect(triggerSessionExpired).toHaveBeenCalledWith('expired-token');
     });
 
     it('does not log out on auth paths', async () => {

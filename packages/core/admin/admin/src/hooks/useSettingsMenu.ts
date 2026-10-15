@@ -66,14 +66,18 @@ const useSettingsMenu = (): {
     isLoading: true,
     menu: [],
   });
+  const isLoadingAuth = useAuth('useSettingsMenu', (state) => state.isLoading);
   const checkUserHasPermission = useAuth(
     'useSettingsMenu',
     (state) => state.checkUserHasPermissions
   );
+  const adminUserId = useAuth('useSettingsMenu', (state) => state.user?.id ?? state.user?.email);
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
   const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
   const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
   const permissions = useSelector(selectAdminPermissions);
+  const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
+  const resolvedPermissionsRef = React.useRef(permissions);
 
   /**
    * memoize the return value of this function to avoid re-computing it on every render
@@ -113,6 +117,12 @@ const useSettingsMenu = (): {
   );
 
   React.useEffect(() => {
+    if (isLoadingAuth) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
     const getData = async () => {
       interface MenuLinkPermission {
         hasPermission: boolean;
@@ -135,26 +145,30 @@ const useSettingsMenu = (): {
 
       const menuPermissions = await buildMenuPermissions(sections);
 
-      setData((prev) => {
-        return {
-          ...prev,
-          isLoading: false,
-          menu: sections.map((section, sectionIndex) => ({
-            ...section,
-            links: section.links.map((link, linkIndex) => {
-              const permission = menuPermissions.find(
-                (permission) =>
-                  permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
-              );
+      if (!cancelled) {
+        resolvedAdminUserIdRef.current = adminUserId;
+        resolvedPermissionsRef.current = permissions;
+        setData((prev) => {
+          return {
+            ...prev,
+            isLoading: false,
+            menu: sections.map((section, sectionIndex) => ({
+              ...section,
+              links: section.links.map((link, linkIndex) => {
+                const permission = menuPermissions.find(
+                  (permission) =>
+                    permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
+                );
 
-              return {
-                ...link,
-                isDisplayed: Boolean(permission?.hasPermission),
-              };
-            }),
-          })),
-        };
-      });
+                return {
+                  ...link,
+                  isDisplayed: Boolean(permission?.hasPermission),
+                };
+              }),
+            })),
+          };
+        });
+      }
     };
 
     const { global, ...otherSections } = settings;
@@ -176,7 +190,11 @@ const useSettingsMenu = (): {
       ...Object.values(otherSections),
     ]);
 
-    getData();
+    void getData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     adminLinks,
     globalLinks,
@@ -184,7 +202,21 @@ const useSettingsMenu = (): {
     shouldUpdateStrapi,
     addPermissions,
     checkUserHasPermission,
+    adminUserId,
+    isLoadingAuth,
+    permissions,
   ]);
+
+  if (
+    isLoadingAuth ||
+    resolvedAdminUserIdRef.current !== adminUserId ||
+    resolvedPermissionsRef.current !== permissions
+  ) {
+    return {
+      isLoading: true,
+      menu: [],
+    };
+  }
 
   return {
     isLoading,

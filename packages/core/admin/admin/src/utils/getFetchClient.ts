@@ -41,7 +41,7 @@ let onTokenUpdate: ((token: string) => void) | null = null;
  * session expired). The React layer registers a handler that clears local
  * auth state and navigates to /auth/login.
  */
-let onSessionExpired: (() => void) | null = null;
+let onSessionExpired: ((expiredToken?: string | null) => void) | null = null;
 
 /**
  * A 401 after a failed refresh is delivered twice in the common RTK path
@@ -50,6 +50,7 @@ let onSessionExpired: (() => void) | null = null;
  * token is stored (refresh or login).
  */
 let sessionExpiredNotified = false;
+let sessionExpiredToken: string | null | undefined;
 
 /**
  * Set the callback that will be called when the token is refreshed.
@@ -75,7 +76,7 @@ const setOnTokenUpdate = (callback: ((token: string) => void) | null): void => {
  *
  * @param callback - Function to call when the session ends, or null to clear
  */
-const setOnSessionExpired = (callback: (() => void) | null): void => {
+const setOnSessionExpired = (callback: ((expiredToken?: string | null) => void) | null): void => {
   onSessionExpired = callback;
   if (callback === null) {
     resetSessionExpiredNotification();
@@ -88,6 +89,7 @@ const setOnSessionExpired = (callback: (() => void) | null): void => {
  */
 const resetSessionExpiredNotification = (): void => {
   sessionExpiredNotified = false;
+  sessionExpiredToken = undefined;
 };
 
 /**
@@ -97,17 +99,20 @@ const resetSessionExpiredNotification = (): void => {
  * instead of leaving the user on a dead page. Subsequent calls during the same
  * dead session return `true` without invoking the handler again.
  */
-const triggerSessionExpired = (): boolean => {
+const triggerSessionExpired = (expiredToken?: string | null): boolean => {
   if (!onSessionExpired) {
     return false;
   }
 
   if (sessionExpiredNotified) {
-    return true;
+    if (expiredToken === undefined || expiredToken === sessionExpiredToken) {
+      return true;
+    }
   }
 
   sessionExpiredNotified = true;
-  onSessionExpired();
+  sessionExpiredToken = expiredToken;
+  onSessionExpired(expiredToken);
   return true;
 };
 
@@ -341,6 +346,7 @@ class FetchError extends Error {
   public response?: ErrorResponse;
   public code?: number;
   public status?: number;
+  public sessionToken?: string | null;
 
   constructor(message: string, response?: ErrorResponse) {
     super(message);
@@ -533,13 +539,25 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     } catch (error) {
       // Only attempt refresh for 401 errors on non-auth paths
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
+        const tokenUsedByFailedRequest = getRequestToken();
+
         try {
-          await attemptTokenRefresh(getRequestToken());
-          // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
-          return await executeRequest();
+          await attemptTokenRefresh(tokenUsedByFailedRequest);
         } catch {
           // If refresh fails, throw the original error
+          error.sessionToken = tokenUsedByFailedRequest;
           throw error;
+        }
+
+        // Retry outside the refresh catch so a second 401 is attributed to the
+        // refreshed token instead of the token used by the original request.
+        try {
+          return await executeRequest();
+        } catch (retryError) {
+          if (isFetchError(retryError) && retryError.status === 401) {
+            retryError.sessionToken = getRequestToken();
+          }
+          throw retryError;
         }
       }
       throw error;

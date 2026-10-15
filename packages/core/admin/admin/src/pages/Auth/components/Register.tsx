@@ -21,7 +21,6 @@ import { useNotification } from '../../../features/Notifications';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
-import { login } from '../../../reducer';
 import {
   useGetRegistrationInfoQuery,
   useRegisterAdminMutation,
@@ -29,6 +28,7 @@ import {
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
 import { getOrCreateDeviceId } from '../../../utils/deviceId';
+import { establishAdminSession } from '../../../utils/establishAdminSession';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
@@ -303,12 +303,19 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const { setNpsSurveySettings } = useNpsSurveySettings();
 
   const registrationToken = query.get('registrationToken');
+  const registrationSucceededRef = React.useRef(false);
 
   const { data: userInfo, error } = useGetRegistrationInfoQuery(registrationToken as string, {
     skip: !registrationToken,
   });
 
   React.useEffect(() => {
+    // Establishing the session resets the API cache while this page is still
+    // mounted, which refetches registration-info with an already-used token.
+    if (registrationSucceededRef.current) {
+      return;
+    }
+
     if (error) {
       const message: string = isBaseQueryError(error)
         ? formatAPIError(error)
@@ -334,7 +341,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     const res = await registerAdmin({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
-      dispatch(login({ token: res.data.token }));
+      registrationSucceededRef.current = true;
+      establishAdminSession(dispatch, { token: res.data.token });
 
       if (news) {
         // Only enable EE survey if user accepted the newsletter
@@ -368,7 +376,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     const res = await registerUser({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
-      dispatch(login({ token: res.data.token }));
+      registrationSucceededRef.current = true;
+      establishAdminSession(dispatch, { token: res.data.token });
 
       if (news) {
         // Only enable EE survey if user accepted the newsletter

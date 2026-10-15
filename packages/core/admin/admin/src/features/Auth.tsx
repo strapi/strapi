@@ -7,17 +7,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Login } from '../../../shared/contracts/authentication';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { createContext } from '../components/Context';
-import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
+import { useTypedDispatch, useTypedSelector, useTypedStore } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { useSessionKeepalive } from '../hooks/useSessionKeepalive';
-import {
-  getStoredToken,
-  login as loginAction,
-  logout as logoutAction,
-  setLocale,
-  setToken,
-} from '../reducer';
+import { getStoredToken, logout as logoutAction, setLocale, setToken } from '../reducer';
+import { resetAdminApiState } from '../services/admin';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -27,7 +22,9 @@ import {
   useLogoutMutation,
 } from '../services/auth';
 import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
+import { subscribeToAdminSessionChanges } from '../utils/adminSessionSync';
 import { getOrCreateDeviceId } from '../utils/deviceId';
+import { establishAdminSession } from '../utils/establishAdminSession';
 import {
   attemptTokenRefresh,
   getFetchClient,
@@ -158,6 +155,7 @@ const AuthProvider = ({
 }: AuthProviderProps) => {
   const { formatMessage } = useIntl();
   const dispatch = useTypedDispatch();
+  const store = useTypedStore();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
   const [{ rawQuery }] = useQueryParams();
@@ -171,7 +169,11 @@ const AuthProvider = ({
 
   const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
-  const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
+  const {
+    data: user,
+    isLoading: isLoadingUser,
+    isError: isUserError,
+  } = useGetMeQuery(undefined, {
     /**
      * If there's no token, we don't try to fetch
      * the user data because it will fail.
@@ -251,6 +253,27 @@ const AuthProvider = ({
     runLogoutWithGuard(performGlobalLogout, 'session-dead');
   }, [performGlobalLogout, runLogoutWithGuard]);
 
+  const handleSessionDead = React.useCallback(
+    (expiredToken?: string | null) => {
+      // Requests send the shared token, which can be ahead of this tab's Redux
+      // copy after another tab refreshes. A rejected credential is still current
+      // when it matches either one; ignoring it records the token as already
+      // handled and later 401s never log the tab out.
+      const currentToken = store.getState().admin_app.token ?? null;
+      const storedToken = getStoredToken();
+      if (
+        expiredToken !== undefined &&
+        expiredToken !== currentToken &&
+        expiredToken !== storedToken
+      ) {
+        return;
+      }
+
+      clearStateAndLogout();
+    },
+    [clearStateAndLogout, store]
+  );
+
   const handleConfirmSessionLogout = React.useCallback(() => {
     logoutGuardOpenRef.current = false;
     logoutGuardReasonRef.current = 'voluntary';
@@ -283,6 +306,14 @@ const AuthProvider = ({
     },
     [handleCancelSessionLogout]
   );
+
+  const discardPendingLogout = React.useCallback(() => {
+    logoutGuardOpenRef.current = false;
+    logoutGuardReasonRef.current = 'voluntary';
+    pendingLogoutRef.current = null;
+    setIsSessionLogoutDialogOpen(false);
+    setSessionLogoutReason('voluntary');
+  }, []);
 
   const resyncToken = React.useCallback(
     (newToken: string) => {
@@ -358,14 +389,12 @@ const AuthProvider = ({
    * a stale page until they click something.
    */
   React.useEffect(() => {
-    setOnSessionExpired(() => {
-      clearStateAndLogout();
-    });
+    setOnSessionExpired(handleSessionDead);
 
     return () => {
       setOnSessionExpired(null);
     };
-  }, [clearStateAndLogout]);
+  }, [handleSessionDead]);
 
   /**
    * Session keepalive around access-token expiry. The timer fires per-tab; the
@@ -378,7 +407,7 @@ const AuthProvider = ({
    */
   useSessionKeepalive({
     token,
-    onSessionDead: clearStateAndLogout,
+    onSessionDead: handleSessionDead,
     getStoredToken,
     onResync: resyncToken,
     getLastActivityAt,
@@ -403,6 +432,55 @@ const AuthProvider = ({
     };
   });
 
+  /**
+   * Another tab can replace the shared credential. Adopt the new token and
+   * clear data cached for the previous admin before rendering that session.
+   * Logout is handled by the `isLoggedIn` storage listener above.
+   */
+  const lastResetTokenRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    let disposed = false;
+
+    const reconcileSharedSession = (forceReset: boolean = false) => {
+      if (disposed) {
+        return;
+      }
+
+      const nextToken = getStoredToken();
+      if (!nextToken) {
+        return;
+      }
+
+      const currentToken = store.getState().admin_app.token ?? null;
+      if (currentToken === nextToken && !forceReset) {
+        return;
+      }
+
+      // Broadcast and storage notices for one change arrive as separate tasks.
+      // Resetting again for the token just adopted only repeats identity fetches.
+      if (lastResetTokenRef.current === nextToken && currentToken === nextToken) {
+        return;
+      }
+
+      discardPendingLogout();
+      resetSessionExpiredNotification();
+      if (currentToken !== nextToken) {
+        dispatch(setToken(nextToken));
+      }
+      resetAdminApiState(dispatch);
+      lastResetTokenRef.current = nextToken;
+    };
+
+    const unsubscribe = subscribeToAdminSessionChanges(() => reconcileSharedSession(true));
+    queueMicrotask(reconcileSharedSession);
+
+    return () => {
+      disposed = true;
+      unsubscribe();
+    };
+  }, [discardPendingLogout, dispatch, store]);
+
   const login = React.useCallback<AuthContextValue['login']>(
     async ({ rememberMe, ...body }) => {
       const res = await loginMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
@@ -415,12 +493,10 @@ const AuthProvider = ({
         const { token } = res.data;
 
         resetSessionExpiredNotification();
-        dispatch(
-          loginAction({
-            token,
-            persist: rememberMe,
-          })
-        );
+        establishAdminSession(dispatch, {
+          token,
+          persist: rememberMe,
+        });
       }
 
       return res;
@@ -527,7 +603,8 @@ const AuthProvider = ({
     [checkPermissions, rawQuery, runRbacMiddleware, user, userPermissions]
   );
 
-  const isLoading = isLoadingUser || isLoadingPermissions;
+  const isLoading =
+    isLoadingUser || isLoadingPermissions || (Boolean(token) && !user && !isUserError);
 
   return (
     <>

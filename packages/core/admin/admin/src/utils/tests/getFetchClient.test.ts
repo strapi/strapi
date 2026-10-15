@@ -1,6 +1,7 @@
 import {
   ADMIN_REFRESH_LOCK,
   attemptTokenRefresh,
+  FetchError,
   getFetchClient,
   refreshAccessToken,
   resetSessionExpiredNotification,
@@ -385,6 +386,48 @@ describe('getFetchClient', () => {
       );
     });
 
+    it('attributes a failed retry to the refreshed token instead of the original token', async () => {
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Original token expired', status: 401 },
+              }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: 'new-token' } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Refreshed token rejected', status: 401 },
+              }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the retried request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Refreshed token rejected' });
+        expect((error as FetchError).sessionToken).toBe('new-token');
+      }
+    });
+
     it('should not refresh token for auth paths', async () => {
       // Call to login endpoint returns 401
       (window.fetch as jest.Mock).mockImplementationOnce(() =>
@@ -409,6 +452,8 @@ describe('getFetchClient', () => {
     });
 
     it('should throw original error if token refresh fails', async () => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('token-a'));
+
       // First call returns 401
       (window.fetch as jest.Mock)
         .mockImplementationOnce(() =>
@@ -435,7 +480,10 @@ describe('getFetchClient', () => {
 
       const fetchClient = getFetchClient();
 
-      await expect(fetchClient.get('/api/test')).rejects.toThrow('Token expired');
+      await expect(fetchClient.get('/api/test')).rejects.toMatchObject({
+        message: 'Token expired',
+        sessionToken: 'token-a',
+      });
 
       // Original request plus one access-token attempt
       expect(window.fetch).toHaveBeenCalledTimes(2);
@@ -896,6 +944,20 @@ describe('getFetchClient', () => {
       resetSessionExpiredNotification();
       triggerSessionExpired();
 
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('deduplicates one expired token without suppressing a newer session expiry', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      triggerSessionExpired('token-a');
+      triggerSessionExpired();
+      triggerSessionExpired('token-a');
+      triggerSessionExpired('token-b');
+
+      expect(callback).toHaveBeenNthCalledWith(1, 'token-a');
+      expect(callback).toHaveBeenNthCalledWith(2, 'token-b');
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
