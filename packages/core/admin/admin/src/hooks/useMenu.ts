@@ -6,6 +6,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { useTypedSelector } from '../core/store/hooks';
 import { useAuth, AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
+import { StrapiUpdateSeverity } from '../utils/strapiUpdate';
 import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
 /* -------------------------------------------------------------------------------------------------
@@ -14,6 +15,10 @@ import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
 export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'> & {
   navigationLink?: string;
+  /**
+   * Color of the notifications badge, defaults to `primary`.
+   */
+  notificationsVariant?: 'primary' | 'warning';
 };
 export type MobileMenuItem = {
   to: string;
@@ -29,7 +34,7 @@ export interface Menu {
   isLoading: boolean;
 }
 
-const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
+const useMenu = (strapiUpdateSeverity: StrapiUpdateSeverity, currentEnvironment?: string) => {
   const checkUserHasPermissions = useAuth(
     'useMenu',
     (state) => state.checkUserHasPermissions,
@@ -108,7 +113,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
 
       const authorizedGeneralSectionLinks = await getGeneralLinks(
         generalSectionLinksRef.current,
-        shouldUpdateStrapi,
+        strapiUpdateSeverity,
         checkUserHasPermissions
       );
 
@@ -129,7 +134,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     generalSectionLinksRef,
     menu,
     permissions,
-    shouldUpdateStrapi,
+    strapiUpdateSeverity,
     checkUserHasPermissions,
     currentEnvironment,
   ]);
@@ -143,7 +148,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
 
 const getGeneralLinks = async (
   generalSectionRawLinks: MenuItem[],
-  shouldUpdateStrapi: boolean = false,
+  strapiUpdateSeverity: StrapiUpdateSeverity = 'none',
   checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
   const generalSectionLinks = normalizeMenuLinks(generalSectionRawLinks);
@@ -165,7 +170,10 @@ const getGeneralLinks = async (
 
   const authorizedGeneralLinksClone = cloneDeep(authorizedGeneralSectionLinks);
 
-  authorizedGeneralLinksClone[settingsLinkIndex].notificationsCount = shouldUpdateStrapi ? 1 : 0;
+  authorizedGeneralLinksClone[settingsLinkIndex].notificationsCount =
+    strapiUpdateSeverity !== 'none' ? 1 : 0;
+  authorizedGeneralLinksClone[settingsLinkIndex].notificationsVariant =
+    strapiUpdateSeverity === 'urgent' ? 'warning' : 'primary';
 
   return authorizedGeneralLinksClone;
 };
@@ -234,4 +242,4 @@ const normalizeMenuLinks = (links: unknown): MenuItem[] => {
   }, []);
 };
 
-export { useMenu, normalizeMenuLinks };
+export { useMenu, getGeneralLinks, normalizeMenuLinks };
