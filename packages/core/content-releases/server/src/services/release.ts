@@ -1,13 +1,7 @@
-import { setCreatorFields, errors, emitAudit } from '@strapi/utils';
-
-import type { Core, Struct, UID, Data } from '@strapi/types';
-
-import {
-  ALLOWED_WEBHOOK_EVENTS,
-  AUDITED_EVENTS,
-  RELEASE_ACTION_MODEL_UID,
-  RELEASE_MODEL_UID,
-} from '../constants';
+import type { Core, Data, Modules, Struct, UID } from '@strapi/types';
+import { emitAudit, errors, setCreatorFields } from '@strapi/utils';
+import type { ParameterizedContext } from 'koa';
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type {
   GetReleases,
   CreateRelease,
@@ -17,10 +11,15 @@ import type {
   Release,
   DeleteRelease,
 } from '../../../shared/contracts/releases';
-import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
-import { getService, getPublishOrderForContentTypes } from '../utils';
 import { getReleaseChanges } from '../audit-logs';
+import {
+  ALLOWED_WEBHOOK_EVENTS,
+  AUDITED_EVENTS,
+  RELEASE_ACTION_MODEL_UID,
+  RELEASE_MODEL_UID,
+} from '../constants';
+import { getPublishOrderForContentTypes, getService } from '../utils';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -341,6 +340,38 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             { strapi }
           );
 
+          const deduplicateReleaseWebhooks =
+            strapi.config.get<boolean>('server.webhooks.deduplicateReleaseWebhooks', false) ===
+            true;
+          const runReleaseAction = async (
+            releaseAction: Modules.WebhookRunner.ReleaseAction,
+            work: () => Promise<void>
+          ) => {
+            if (!deduplicateReleaseWebhooks) {
+              return work();
+            }
+
+            const locale =
+              releaseAction.locale ||
+              (strapi.localization.isLocalizedContentType(strapi.contentTypes[releaseAction.uid])
+                ? await strapi.localization.getDefaultLocale()
+                : undefined);
+            const context = strapi.requestContext.get();
+
+            return strapi.requestContext.run(
+              {
+                ...context,
+                request: context?.request ?? { url: '' },
+                state: {
+                  ...context?.state,
+                  releaseId,
+                  releaseAction: { ...releaseAction, locale: locale ?? undefined },
+                },
+              } as ParameterizedContext,
+              work
+            );
+          };
+
           await strapi.db.transaction(async () => {
             for (const contentTypeUid of contentTypeUids) {
               const contentType = contentTypeUid as UID.ContentType;
@@ -351,11 +382,21 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               // leave inconsistent FK rows when one branch deletes a row another branch is
               // about to reference.
               for (const params of publish) {
-                await strapi.documents(contentType).publish(params);
+                await runReleaseAction(
+                  { uid: contentType, ...params, event: 'entry.publish' },
+                  async () => {
+                    await strapi.documents(contentType).publish(params);
+                  }
+                );
               }
 
               for (const params of unpublish) {
-                await strapi.documents(contentType).unpublish(params);
+                await runReleaseAction(
+                  { uid: contentType, ...params, event: 'entry.unpublish' },
+                  async () => {
+                    await strapi.documents(contentType).unpublish(params);
+                  }
+                );
               }
             }
           });

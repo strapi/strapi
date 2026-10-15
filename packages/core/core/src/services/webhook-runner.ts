@@ -12,21 +12,19 @@ import type { EventHub } from './event-hub';
 import type { Fetch } from '../utils/fetch';
 
 type Webhook = Modules.WebhookStore.Webhook;
+type Event = Modules.WebhookRunner.Event;
 
 interface Config {
   defaultHeaders: Record<string, string>;
+  deduplicateReleaseWebhooks: boolean;
 }
 
 interface ConstructorParameters {
   eventHub: EventHub;
+  requestContext: Modules.RequestContext.RequestContext;
   logger: Logger;
   configuration?: Record<string, unknown>;
   fetch: Fetch;
-}
-
-interface Event {
-  event: string;
-  info: Record<string, unknown>;
 }
 
 type Listener = (info: Record<string, unknown>) => Promise<void>;
@@ -35,10 +33,13 @@ const debug = createdDebugger('strapi:webhook');
 
 const defaultConfiguration: Config = {
   defaultHeaders: {},
+  deduplicateReleaseWebhooks: false,
 };
 
 class WebhookRunner {
   private eventHub: EventHub;
+
+  private requestContext: Modules.RequestContext.RequestContext;
 
   private logger: Logger;
 
@@ -52,9 +53,16 @@ class WebhookRunner {
 
   private fetch: Fetch;
 
-  constructor({ eventHub, logger, configuration = {}, fetch }: ConstructorParameters) {
+  constructor({
+    eventHub,
+    requestContext,
+    logger,
+    configuration = {},
+    fetch,
+  }: ConstructorParameters) {
     debug('Initialized webhook runner');
     this.eventHub = eventHub;
+    this.requestContext = requestContext;
     this.logger = logger;
     this.fetch = fetch;
 
@@ -64,7 +72,7 @@ class WebhookRunner {
       );
     }
 
-    this.config = _.merge(defaultConfiguration, configuration);
+    this.config = _.merge({}, defaultConfiguration, configuration);
 
     this.queue = new WorkerQueue({ logger, concurrency: 5 });
 
@@ -91,17 +99,42 @@ class WebhookRunner {
     }
 
     const listen = async (info: Event['info']) => {
-      this.queue.enqueue({ event, info });
+      if (this.config.deduplicateReleaseWebhooks !== true) {
+        this.queue.enqueue({ event, info });
+        return;
+      }
+
+      const context = this.requestContext.get();
+      const releaseAction: Modules.WebhookRunner.ReleaseAction | undefined =
+        context?.state?.releaseAction;
+      const isReleaseAction =
+        releaseAction !== undefined &&
+        releaseAction.event === event &&
+        releaseAction.uid === info.uid &&
+        releaseAction.documentId === _.get(info, 'entry.documentId') &&
+        (releaseAction.locale ?? null) === (_.get(info, 'entry.locale') ?? null);
+      const releaseId: Event['releaseId'] = isReleaseAction ? context?.state?.releaseId : undefined;
+
+      this.queue.enqueue({ event, info, releaseId });
     };
 
     this.listeners.set(event, listen);
     this.eventHub.on(event, listen);
   }
 
-  async executeListener({ event, info }: Event) {
+  async executeListener({ event, info, releaseId }: Event) {
     debug(`Executing webhook for event '${event}'`);
     const webhooks = this.webhooksMap.get(event) || [];
-    const activeWebhooks = webhooks.filter((webhook) => webhook.isEnabled === true);
+    const activeWebhooks = webhooks.filter(
+      (webhook) =>
+        webhook.isEnabled === true &&
+        !(
+          this.config.deduplicateReleaseWebhooks === true &&
+          releaseId !== undefined &&
+          ['entry.publish', 'entry.unpublish'].includes(event) &&
+          webhook.events.includes('releases.publish')
+        )
+    );
 
     for (const webhook of activeWebhooks) {
       await this.run(webhook, event, info).catch((error: unknown) => {
