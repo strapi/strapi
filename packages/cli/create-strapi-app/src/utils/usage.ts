@@ -14,6 +14,10 @@ function addPackageJsonStrapiMetadata(metadata: Record<string, unknown>, scope: 
 
 const boolToString = (value: boolean | undefined) => (value === true).toString();
 
+const isTruthy = (val: unknown) => {
+  return [1, true].includes(val as never) || ['true', '1'].includes(_.toLower(val as string));
+};
+
 const getProperties = (scope: Scope, error?: TrackError) => {
   const eventProperties = {
     error: typeof error === 'string' ? error : error && error.message,
@@ -53,7 +57,7 @@ const getProperties = (scope: Scope, error?: TrackError) => {
 };
 
 function trackEvent(event: string, payload: Record<string, unknown>) {
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test' || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED)) {
     return;
   }
 
