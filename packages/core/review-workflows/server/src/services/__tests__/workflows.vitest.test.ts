@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import workflowsFactory from '../workflows';
+import { WORKFLOW_POPULATE } from '../../constants/workflows';
 
 const {
   validateWorkflowCount,
@@ -281,6 +282,39 @@ describe('review-workflows workflows service', () => {
         workflowId: 1,
         name: 'Default',
       });
+    });
+  });
+
+  describe('populate', () => {
+    const callerPopulate = { stages: false };
+
+    it('create ignores a populate passed by the caller', async () => {
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      createMany.mockResolvedValue([{ id: 10 }]);
+      const service = workflowsFactory({ strapi: strapi as any });
+
+      await service.create({
+        data: { name: 'New', stages: [{ name: 'Todo' }] },
+        populate: callerPopulate,
+      } as Parameters<typeof service.create>[0]);
+
+      expect(strapi.db.query().create).toHaveBeenCalledWith(
+        expect.objectContaining({ populate: WORKFLOW_POPULATE })
+      );
+    });
+
+    it('update ignores a populate passed by the caller', async () => {
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      const service = workflowsFactory({ strapi: strapi as any });
+
+      await service.update(workflow, {
+        data: {},
+        populate: callerPopulate,
+      } as Parameters<typeof service.update>[1]);
+
+      expect(strapi.db.query().update).toHaveBeenCalledWith(
+        expect.objectContaining({ populate: WORKFLOW_POPULATE })
+      );
     });
   });
 });
