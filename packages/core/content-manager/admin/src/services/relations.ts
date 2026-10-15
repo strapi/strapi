@@ -33,9 +33,11 @@ type GetRelationsResponse =
     };
 
 /**
- * The maximum page size the relations API accepts.
+ * The relations API loads the main field of the relations with a second query that isn't
+ * paginated, so it's capped at the default page size of the database layer: 10 rows. Past that
+ * number in a page, relations come back without their label.
  */
-const ALL_RELATIONS_PAGE_SIZE = 100;
+const ALL_RELATIONS_PAGE_SIZE = 10;
 
 const relationsApi = contentManagerApi.injectEndpoints({
   endpoints: (build) => ({

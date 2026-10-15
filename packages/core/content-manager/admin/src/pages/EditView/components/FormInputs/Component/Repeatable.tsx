@@ -164,16 +164,20 @@ const RepeatableComponent = ({
   };
 
   const handleCopyComponent = (componentData: Record<string, unknown>) => {
-    if (value.length < max) {
-      addFieldRow(name, componentData);
-    } else {
+    if (value.length >= max) {
       toggleNotification({
         type: 'info',
         message: formatMessage({
           id: getTranslation('components.notification.info.maximum-requirement'),
         }),
       });
+
+      return false;
     }
+
+    addFieldRow(name, componentData);
+
+    return true;
   };
 
   const handleMoveComponentField = React.useCallback(
@@ -280,7 +284,6 @@ const RepeatableComponent = ({
             mode="component"
             onClose={() => setIsCopyModalOpen(false)}
             onInsert={handleCopyComponent}
-            open={isCopyModalOpen}
             sourceFieldName={name}
           />
         )}
@@ -362,7 +365,6 @@ const RepeatableComponent = ({
           mode="component"
           onClose={() => setIsCopyModalOpen(false)}
           onInsert={handleCopyComponent}
-          open={isCopyModalOpen}
           sourceFieldName={name}
         />
       )}

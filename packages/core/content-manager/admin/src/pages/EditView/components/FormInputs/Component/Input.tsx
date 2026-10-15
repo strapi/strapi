@@ -62,6 +62,8 @@ const ComponentInput = ({
 
   const handleCopyComponent = (componentData: Record<string, unknown>) => {
     field.onChange(name, componentData);
+
+    return true;
   };
 
   return (
@@ -107,7 +109,6 @@ const ComponentInput = ({
           mode="component"
           onClose={() => setIsCopyModalOpen(false)}
           onInsert={handleCopyComponent}
-          open={isCopyModalOpen}
           sourceFieldName={name}
         />
       )}

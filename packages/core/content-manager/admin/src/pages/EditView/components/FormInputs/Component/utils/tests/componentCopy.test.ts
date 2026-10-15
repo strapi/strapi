@@ -261,6 +261,14 @@ describe('componentCopy', () => {
       expect(getRelationsToCopy(sourceDocument.links[1], 'shared.link', components)).toEqual([]);
     });
 
+    it('should leave out the relation fields that are not part of the source', () => {
+      // A role without read permission on a field does not get it back with the entry.
+      const link = { id: 10, label: 'First link' };
+
+      expect(getRelationsToCopy(link, 'shared.link', components)).toEqual([]);
+      expect(getRelationsToCopy({ ...link, pages: null }, 'shared.link', components)).toEqual([]);
+    });
+
     it('should leave out the relations of a component that was never saved', () => {
       expect(
         getRelationsToCopy({ label: 'New link', pages: { count: 1 } }, 'shared.link', components)

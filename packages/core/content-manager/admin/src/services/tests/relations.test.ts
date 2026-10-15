@@ -59,9 +59,9 @@ describe('relations', () => {
   describe('getAllRelations', () => {
     it('should load every page and return the relations in the order they are displayed', async () => {
       // The API returns the latest relations first.
-      const allRelations = Array.from({ length: 250 }, (_, index) => ({
-        id: 250 - index,
-        documentId: `document-${250 - index}`,
+      const allRelations = Array.from({ length: 25 }, (_, index) => ({
+        id: 25 - index,
+        documentId: `document-${25 - index}`,
       }));
       const requestedPages: string[] = [];
 
@@ -92,9 +92,9 @@ describe('relations', () => {
         getAllRelations({ model: 'shared.link', id: 1, targetField: 'pages' }).unwrap()
       );
 
-      expect(requestedPages).toEqual(['1/100', '2/100', '3/100']);
+      expect(requestedPages).toEqual(['1/10', '2/10', '3/10']);
       expect(relations.map((relation) => relation.id)).toEqual(
-        Array.from({ length: 250 }, (_, index) => index + 1)
+        Array.from({ length: 25 }, (_, index) => index + 1)
       );
     });
 

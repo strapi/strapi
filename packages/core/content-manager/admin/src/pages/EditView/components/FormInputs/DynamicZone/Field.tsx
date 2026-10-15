@@ -173,17 +173,21 @@ const DynamicZone = ({
 
   const handleCopyComponent = React.useCallback(
     (componentData: Record<string, unknown>) => {
-      if (dynamicDisplayedComponentsLength < max) {
-        setAddComponentIsOpen(false);
-        addFieldRow(name, componentData);
-      } else {
+      if (dynamicDisplayedComponentsLength >= max) {
         toggleNotification({
           type: 'info',
           message: formatMessage({
             id: getTranslation('components.notification.info.maximum-requirement'),
           }),
         });
+
+        return false;
       }
+
+      setAddComponentIsOpen(false);
+      addFieldRow(name, componentData);
+
+      return true;
     },
     [addFieldRow, dynamicDisplayedComponentsLength, formatMessage, max, name, toggleNotification]
   );
@@ -400,7 +404,6 @@ const DynamicZone = ({
             mode="dynamiczone"
             onClose={() => setComponentUidToCopy(null)}
             onInsert={handleCopyComponent}
-            open={componentUidToCopy !== null}
             sourceFieldName={name}
           />
         )}

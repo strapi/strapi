@@ -300,7 +300,8 @@ const getCopyScope = (fieldName: string, targetValues: unknown) => {
 /**
  * @description Lists the relations of a component of the source entry, including the ones of the
  * components nested in it. An entry only holds the count of its relations, they have to be
- * loaded to be copied.
+ * loaded to be copied. Relation fields the user isn't allowed to read aren't part of the entry
+ * and are left out.
  */
 const getRelationsToCopy = (
   source: unknown,
@@ -320,10 +321,12 @@ const getRelationsToCopy = (
     const value = source[name];
 
     if (attribute.type === 'relation') {
-      const isEmpty = isObject(value) && value.count === 0;
+      // Only what came back with the source can be copied: a relation field the user isn't
+      // allowed to read is left out of the entry. A component that was never saved has no
+      // relations to load either.
+      const hasRelations = isObject(value) && value.count !== 0;
 
-      // A component that was never saved has no relations to load.
-      if ((typeof id !== 'number' && typeof id !== 'string') || isEmpty) {
+      if ((typeof id !== 'number' && typeof id !== 'string') || !hasRelations) {
         return [];
       }
 
