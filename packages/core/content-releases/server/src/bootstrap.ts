@@ -3,7 +3,7 @@ import type { Core, UID, Modules } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { registerAuditEvents } from './audit-logs';
-import { getService } from './utils';
+import { getService, updateAffectedReleaseStatuses } from './utils';
 import { deleteActionsOnDelete, updateActionsOnUpdate } from './middlewares/documents';
 
 interface DeleteManyParams {
@@ -27,9 +27,7 @@ const deleteReleasesActionsAndUpdateReleaseStatus = async (
   });
 
   // We update the status of each release after delete the actions
-  for (const release of releases) {
-    await getService('release', { strapi }).updateReleaseStatus(release.id);
-  }
+  await updateAffectedReleaseStatuses(releases, { strapi });
 };
 
 export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {

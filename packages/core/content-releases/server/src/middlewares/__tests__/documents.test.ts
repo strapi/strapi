@@ -231,5 +231,27 @@ describe('content-releases cleanup failures', () => {
       expect(updateStatus.mock.calls).toEqual([[1], [2]]);
       expect(logError).not.toHaveBeenCalled();
     });
+
+    it('updates later releases when one status refresh fails', async () => {
+      findMany.mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      const rejected = Promise.reject(error);
+      rejected.catch(() => {});
+      updateStatus.mockReset();
+      updateStatus
+        .mockResolvedValueOnce({})
+        .mockReturnValueOnce(rejected)
+        .mockResolvedValueOnce({});
+
+      await invoke();
+
+      expect(updateStatus.mock.calls).toEqual([[1], [2], [3]]);
+      const message = {
+        update: 'Error while updating release actions after update',
+        delete: 'Error while deleting release actions after delete',
+        afterDeleteMany: 'Error while deleting release actions after entry deleteMany',
+      }[action];
+      expect(logError).toHaveBeenCalledTimes(1);
+      expect(logError).toHaveBeenCalledWith(message, { error });
+    });
   });
 });
