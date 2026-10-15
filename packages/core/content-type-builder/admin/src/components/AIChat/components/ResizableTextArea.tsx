@@ -58,7 +58,8 @@ export const ResizableTextArea = ({ value, onChange, onSubmit, placeholder }: Te
       return;
     }
 
-    if (e.key === 'Enter' && !e.shiftKey && onSubmit) {
+    // Do not submit when Enter confirms an IME composition.
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing && !e.shiftKey && onSubmit) {
       e.preventDefault();
       onSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
       // Ensure focus is maintained after submission using a small delay
