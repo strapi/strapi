@@ -1,0 +1,93 @@
+views {
+  view editorial_publishing {
+    title '02 Journeys / Governed publishing and localization'
+    description '''
+      **Audience:** product and technical readers. **Type:** editorial responsibility map, not an ordered approval sequence.
+      **Question:** how can locales, review stages and releases affect publication?
+      Draft & Publish applies only where enabled. Review workflows and scheduled releases are separate Enterprise features;
+      localization is bundled but configured per content type. These concerns may participate independently and are not one required approval path.
+      Direct editor publication and release execution are alternative entry points. A configured required review stage can block publication;
+      localization selects the affected content variant. Open the publication arrow for the basic draft-to-published journey.
+    '''
+    include
+      strapi.admin_web_app.content_manager_ui with { navigateTo content_workspace },
+      strapi.server_runtime.cm_document_manager,
+      strapi.server_runtime.document_service with { navigateTo content_model },
+      strapi.server_runtime.review_workflow_gate,
+      strapi.server_runtime.release_service,
+      strapi.server_runtime.localization_support
+    exclude * -> *
+    include
+      strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.cm_document_manager with { title 'Requests publication via Admin API' },
+      strapi.server_runtime.cm_document_manager -> strapi.server_runtime.document_service with { title 'Publishes a document' navigateTo content_publishing_flow },
+      strapi.server_runtime.document_service -> strapi.server_runtime.review_workflow_gate with { title 'Checks required stage, when configured' },
+      strapi.server_runtime.release_service -> strapi.server_runtime.document_service with { title 'Executes release actions' },
+      strapi.server_runtime.document_service -> strapi.server_runtime.localization_support with { title 'Selects locale' }
+    autoLayout LeftRight 70 40
+  }
+
+  dynamic view media_upload_flow {
+    title '02 Journeys / Media upload to a remote provider'
+    description '''
+      **Audience:** product and technical readers. **Scenario:** an editor uploads a media file through a Content Manager media field while a remote upload provider is configured.
+      **Question:** where do the file bytes and their metadata go?
+      The upload service sends file bytes to the provider and separately persists file metadata in the application database.
+      With the local provider, bytes are retained on local disk instead of external media storage.
+      **Outcome:** a media record is returned to the Admin. Saving the content entry that references it is a separate operation.
+      File validation and image preparation are summarized inside the upload service; provider failures are outside this successful-upload scenario.
+    '''
+    strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.upload_service 'Uploads via Admin API'
+    strapi.server_runtime.upload_service -> strapi.server_runtime.upload_provider 'Stores bytes and image formats'
+    strapi.server_runtime.upload_provider -> media_storage 'Writes files'
+    strapi.server_runtime.upload_service <- strapi.server_runtime.upload_provider 'File storage details'
+    strapi.server_runtime.upload_service -> strapi.database 'Saves media metadata'
+    strapi.admin_web_app.content_manager_ui <- strapi.server_runtime.upload_service 'Uploaded media record'
+    include
+      strapi.database with { navigateTo application_state },
+      strapi.admin_web_app.content_manager_ui with { navigateTo content_workspace },
+      strapi.server_runtime.upload_provider with { navigateTo strapi_providers }
+    autoLayout LeftRight 70 40
+  }
+
+  dynamic view content_preview_flow {
+    title '02 Journeys / Configured content preview'
+    description '''
+      **Audience:** product and technical readers. **Scenario:** preview is enabled and its configured handler returns a URL.
+      **Question:** how does Strapi open the application-defined preview?
+      The Content Manager requests that URL, receives it, then loads the external frontend in its preview iframe. This does not promise a particular
+      external authentication, draft-data fetching, or rendering protocol; those are defined by the application\'s handler and frontend.
+      **Outcome:** the configured frontend loads in the iframe. Opening preview does not publish the document.
+    '''
+    content_editor -> strapi.admin_web_app.content_manager_ui 'Requests a preview'
+    strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.content_manager_server.preview_url_resolver 'Requests a preview URL'
+    strapi.admin_web_app.content_manager_ui <- strapi.server_runtime.content_manager_server.preview_url_resolver 'Returns the configured preview URL'
+    strapi.admin_web_app.content_manager_ui -> preview_frontend 'Loads the configured URL in the preview iframe'
+    include strapi.admin_web_app.content_manager_ui with { navigateTo content_workspace }
+    autoLayout LeftRight 70 40
+  }
+
+  view content_history {
+    title '02 Journeys / Content history'
+    description '''
+      **Audience:** product and technical readers. **Type:** history and restoration responsibility map, not a call sequence.
+      **Question:** where are earlier versions stored, and how can they be restored?
+      It records and retrieves versions only when the Enterprise cms-content-history feature is enabled. The model remains registered
+      when disabled so existing records are not discarded.
+      An authorized restore reconciles the saved version with the current schema and available relations/media, then updates the document through Document Service.
+      With Draft & Publish enabled this updates the draft; publishing it is a separate action. History is not a full database or media backup.
+    '''
+    include
+      content_editor,
+      strapi.admin_web_app.content_manager_ui with { navigateTo content_workspace },
+      strapi.server_runtime.content_manager_server.history_version_service,
+      strapi.server_runtime.document_service with { navigateTo content_publishing_flow },
+      strapi.database
+    exclude * -> *
+    include
+      content_editor -> strapi.admin_web_app.content_manager_ui,
+      strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.content_manager_server.history_version_service,
+      strapi.server_runtime.content_manager_server.history_version_service -> strapi.database,
+      strapi.server_runtime.content_manager_server.history_version_service -> strapi.server_runtime.document_service
+    autoLayout LeftRight 80 100
+  }
+}

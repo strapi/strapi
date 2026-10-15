@@ -1746,7 +1746,7 @@ const makeLocaleRestrictedPermissionChecker = (permittedLocales: string[]) => {
 };
 
 /**
- * Builds a mock strapi instance that reports the given uid as localized (i18n).
+ * Builds a mock strapi instance whose localization provider reports the given uid as localized.
  */
 const makeLocalizedStrapi = (uid: string): Core.Strapi =>
   ({
@@ -1756,10 +1756,16 @@ const makeLocalizedStrapi = (uid: string): Core.Strapi =>
         pluginOptions: { i18n: { localized: true } },
       },
     },
+    localization: {
+      isLocalizedContentType: jest.fn(
+        (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+          model.pluginOptions?.i18n?.localized === true
+      ),
+    },
   }) as unknown as Core.Strapi;
 
 /**
- * Builds a mock strapi instance that reports the given uid as NOT localized.
+ * Builds a mock strapi instance whose localization provider reports the given uid as NOT localized.
  */
 const makeNonLocalizedStrapi = (uid: string): Core.Strapi =>
   ({
@@ -1768,6 +1774,12 @@ const makeNonLocalizedStrapi = (uid: string): Core.Strapi =>
       [uid]: {
         pluginOptions: {},
       },
+    },
+    localization: {
+      isLocalizedContentType: jest.fn(
+        (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+          model.pluginOptions?.i18n?.localized === true
+      ),
     },
   }) as unknown as Core.Strapi;
 

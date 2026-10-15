@@ -1,4 +1,5 @@
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
+
 import createConditionProvider from '../provider';
 import domain from '..';
 
@@ -40,7 +41,7 @@ describe('Condition Provider', () => {
           plugin: 'foo',
           handler: { foo: 'bar' },
         };
-        const expected = omit('name', attributes);
+        const expected = omit(attributes, 'name');
         const id = domain.computeConditionId(attributes);
 
         const conditionProvider = createConditionProvider();

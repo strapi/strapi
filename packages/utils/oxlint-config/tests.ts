@@ -7,6 +7,6 @@ import type { OxlintOverride } from 'oxlint';
  * Phase 1 (see base.ts) until an ESLint-side test-quality policy exists.
  */
 export const tests = {
-  files: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}', '**/__tests__/**', 'tests/**'],
+  files: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}', '**/__tests__/**'],
   env: { jest: true },
 } satisfies OxlintOverride;

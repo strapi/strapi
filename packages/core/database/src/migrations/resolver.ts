@@ -30,7 +30,10 @@ export const migrationResolver: MigrationResolver = ({ name, path: migrationPath
 
   // NOTE: we can add some ts register if we want to handle ts migration files at some point
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const migration = require(migrationPath);
+  const required = require(migrationPath);
+  // Compiled TypeScript migrations (`export default { up, down }`) expose the
+  // migration object on `default`; plain CommonJS files export it directly.
+  const migration = required?.default?.up ? required.default : required;
   return {
     name,
     path: migrationPath,

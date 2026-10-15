@@ -1,6 +1,6 @@
 import { yup } from '@strapi/utils';
-import _ from 'lodash';
-import { snakeCase } from 'lodash/fp';
+import _, { snakeCase } from 'lodash';
+
 import { modelTypes, typeKinds } from '../../services/constants';
 import { getService } from '../../utils';
 import { isValidKey, isValidCollectionName } from './common';

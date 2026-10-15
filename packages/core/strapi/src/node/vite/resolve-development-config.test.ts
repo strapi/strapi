@@ -1,5 +1,6 @@
 import http from 'node:http';
 
+import type { AliasOptions } from 'vite';
 import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
 import { resolveDevelopmentConfig, resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
@@ -9,65 +10,78 @@ jest.mock('browserslist-to-esbuild', () => ({
   default: jest.fn(() => ['chrome100']),
 }));
 
+jest.mock('@tailwindcss/vite', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ name: 'tailwindcss' })),
+}));
+
+/**
+ * Vite's `AliasOptions` is an array or a record. This config always builds the record form, so a
+ * custom `src/admin/vite.config` can spread `config.resolve.alias` into a new object
+ */
+const asAliasRecord = (alias: AliasOptions | undefined): Record<string, string> => {
+  if (typeof alias !== 'object' || alias === null || Array.isArray(alias)) {
+    throw new Error('expected a plain alias object');
+  }
+
+  return alias as Record<string, string>;
+};
+
+const buildContext = (overrides: Record<string, unknown> = {}): BuildContext =>
+  ({
+    cwd: process.cwd(),
+    target: ['last 3 major versions'],
+    basePath: '/admin',
+    adminPath: '/admin',
+    distDir: 'dist/build',
+    appDir: process.cwd(),
+    entry: '.strapi/client/app.js',
+    distPath: `${process.cwd()}/dist/build`,
+    env: {},
+    runtimeDir: `${process.cwd()}/.strapi/client`,
+    logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
+    bundler: 'vite' as const,
+    options: { minify: true, sourcemap: false },
+    plugins: [],
+    nextDesignSystem: false,
+    scanRoots: [],
+    tsconfig: undefined,
+    customisations: undefined,
+    features: undefined,
+    ...overrides,
+  }) as unknown as BuildContext;
+
+/** `react()` contributes an array, so the plugin list is one level deeper than it looks */
+const pluginNames = (config: { plugins?: unknown }): string[] =>
+  ((config.plugins ?? []) as { name?: string }[])
+    .flat(2)
+    .map((plugin) => plugin?.name)
+    .filter((name): name is string => typeof name === 'string');
+
 describe('Vite admin configuration', () => {
   it('does not copy public files into the admin build output', async () => {
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-      strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
-      bundler: 'vite' as const,
-      options: {
-        minify: true,
-        sourcemap: false,
-      },
-      plugins: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
-
+    const ctx = buildContext();
     const config = await resolveProductionConfig(ctx);
 
     expect(config.publicDir).toBe(false);
+    expect(config.build?.rollupOptions?.input).toEqual({ strapi: ctx.entry });
+  });
+
+  it('builds from the html entry when the next design system is on', async () => {
+    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: true }));
+
+    expect(config.build?.rollupOptions?.input).toEqual({
+      strapi: expect.stringMatching(/index\.html$/),
+    });
   });
 
   it.each([true, false])(
     'passes options.sourcemap through to the production build config (%s)',
     async (sourcemap) => {
-      const ctx = {
-        cwd: process.cwd(),
-        target: ['last 3 major versions'],
-        basePath: '/admin',
-        adminPath: '/admin',
-        distDir: 'dist/build',
-        appDir: process.cwd(),
-        entry: '.strapi/client/app.js',
-        distPath: `${process.cwd()}/dist/build`,
-        env: {},
-        runtimeDir: `${process.cwd()}/.strapi/client`,
-        logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-        strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
-        bundler: 'vite' as const,
-        // The CLI flag is `--sourcemap`, so commander stores the value on `options.sourcemap`.
-        // Reading `options.sourcemaps` here silently produced `undefined` and no .map files (#22632).
-        options: {
-          minify: true,
-          sourcemap,
-        },
-        plugins: [],
-        tsconfig: undefined,
-        customisations: undefined,
-        features: undefined,
-      } as unknown as BuildContext;
+      // The CLI flag is `--sourcemap`, so commander stores the value on `options.sourcemap`.
+      // Reading `options.sourcemaps` here silently produced `undefined` and no .map files (#22632).
+      const ctx = buildContext({ options: { minify: true, sourcemap } });
 
       const config = await resolveProductionConfig(ctx);
 
@@ -77,31 +91,13 @@ describe('Vite admin configuration', () => {
 
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {
     const mockHttpServer = http.createServer();
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-      // HMR must bind to Strapi's own http.Server so websockets reuse the app port behind a proxy.
-      // Mock that real source instead of injecting the server via options, so the test guards the
-      // strapi.server.httpServer -> config wiring that actually fixes #23491.
+    // HMR must bind to Strapi's own http.Server so websockets reuse the app port behind a proxy.
+    // Mock that real source instead of injecting the server via options, so the test guards the
+    // strapi.server.httpServer -> config wiring that actually fixes #23491.
+    const ctx = buildContext({
       strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
-      bundler: 'vite' as const,
-      options: {
-        open: false,
-      },
-      plugins: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
+      options: { open: false },
+    });
 
     const config = await resolveDevelopmentConfig(ctx);
 
@@ -117,11 +113,11 @@ describe('Vite admin configuration', () => {
       expect.arrayContaining(['invariant', 'lodash', 'prismjs'])
     );
 
-    // Same modules need explicit aliases so pnpm can resolve optimizeDeps.include (#27014).
-    const alias = config.resolve?.alias as Record<string, string> | undefined;
-    expect(alias?.invariant).toEqual(expect.any(String));
-    expect(alias?.prismjs).toEqual(expect.any(String));
-    expect(alias?.lodash).toEqual(expect.any(String));
+    // Same modules need explicit aliases so pnpm can resolve optimizeDeps.include (#27014)
+    const alias = asAliasRecord(config.resolve?.alias);
+    expect(alias.invariant).toEqual(expect.any(String));
+    expect(alias.prismjs).toEqual(expect.any(String));
+    expect(alias.lodash).toEqual(expect.any(String));
 
     // CodeMirror must be pre-bundled and aliased for every admin build so the JSON custom
     // field keeps a single instance (JSONInput instanceof checks)
@@ -129,8 +125,40 @@ describe('Vite admin configuration', () => {
       expect.arrayContaining([...ADMIN_VITE_SINGLETON_MODULES])
     );
     for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
-      expect(alias?.[mod]).toEqual(expect.any(String));
+      expect(alias[mod]).toEqual(expect.any(String));
     }
+
+    await new Promise<void>((resolve) => {
+      mockHttpServer.close(() => resolve());
+    });
+  });
+
+  it('keeps resolve.alias a plain object in both the production and the development config', async () => {
+    const mockHttpServer = http.createServer();
+    const ctx = buildContext({
+      strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
+      options: { open: false },
+    });
+
+    const production = asAliasRecord((await resolveProductionConfig(ctx)).resolve?.alias);
+    const development = asAliasRecord((await resolveDevelopmentConfig(ctx)).resolve?.alias);
+
+    for (const alias of [production, development]) {
+      for (const replacement of Object.values(alias)) {
+        expect(replacement).toEqual(expect.any(String));
+      }
+
+      // A custom config spreads the object, and a spread keeps insertion order, so the exact
+      // subpath keys stay ahead of the prefix key that would otherwise match them first
+      const keys = Object.keys(alias);
+      expect(keys.indexOf('@strapi/design-system/next/source.css')).toBeLessThan(
+        keys.indexOf('@strapi/design-system')
+      );
+      expect(alias['@strapi/design-system']).toEqual(expect.any(String));
+    }
+
+    // The monorepo aliases survive the spread
+    expect(development['@strapi/admin/strapi-admin']).toEqual(expect.any(String));
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
@@ -139,28 +167,10 @@ describe('Vite admin configuration', () => {
 
   it('pre-bundles prismjs core but not language components (#26964 / blank-admin)', async () => {
     const mockHttpServer = http.createServer();
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+    const ctx = buildContext({
       strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
-      bundler: 'vite' as const,
-      options: {
-        open: false,
-      },
-      plugins: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
+      options: { open: false },
+    });
 
     const config = await resolveDevelopmentConfig(ctx);
     const include = config.optimizeDeps?.include ?? [];
@@ -173,5 +183,17 @@ describe('Vite admin configuration', () => {
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
     });
+  });
+
+  it('adds the Tailwind plugin when the next design system is on', async () => {
+    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: true }));
+
+    expect(pluginNames(config)).toContain('tailwindcss');
+  });
+
+  it('adds no Tailwind plugin when the next design system is off', async () => {
+    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: false }));
+
+    expect(pluginNames(config)).not.toContain('tailwindcss');
   });
 });

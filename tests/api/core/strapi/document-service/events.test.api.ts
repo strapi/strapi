@@ -1,4 +1,4 @@
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import type { Core } from '@strapi/types';
 
@@ -161,7 +161,7 @@ describe('Document Service Events', () => {
         // TODO: Populate relations on delete webhook
         expect(payload).toMatchObject({
           ...eventPayload,
-          entry: omit(['categories'], eventPayload.entry),
+          entry: omit(eventPayload.entry, ['categories']),
         });
       });
 
@@ -201,7 +201,7 @@ describe('Document Service Events', () => {
         // TODO: Populate relations on unpublish webhook
         expect(payload).toMatchObject({
           ...eventPayload,
-          entry: omit(['categories'], eventPayload.entry),
+          entry: omit(eventPayload.entry, ['categories']),
         });
       });
 

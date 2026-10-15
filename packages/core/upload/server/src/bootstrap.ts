@@ -53,6 +53,15 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
   await getService('weeklyMetrics').registerCron();
 
+  // AI metadata
+  if (strapi.ai.admin.isAvailable()) {
+    const aiMetadataProvider = getService('aiMetadataProvider');
+
+    if (!aiMetadataProvider.hasProvider() && strapi.ai.admin.isStrapiManagedAiEnabled()) {
+      aiMetadataProvider.registerStrapiManagedProvider();
+    }
+  }
+
   getService('metrics').sendUploadPluginMetrics();
 
   getService('extensions').signFileUrlsOnDocumentService();

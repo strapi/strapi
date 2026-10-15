@@ -110,8 +110,10 @@ const ContentTypeCollapses = ({
  * Collapse
  * -----------------------------------------------------------------------------------------------*/
 
-interface CollapseProps
-  extends Pick<RowLabelWithCheckboxProps, 'isActive' | 'isFormDisabled' | 'label'> {
+interface CollapseProps extends Pick<
+  RowLabelWithCheckboxProps,
+  'isActive' | 'isFormDisabled' | 'label'
+> {
   availableActions?: Array<Action & { isDisplayed: boolean }>;
   isGrey?: boolean;
   onClickToggle: RowLabelWithCheckboxProps['onClick'];
