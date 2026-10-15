@@ -1,5 +1,6 @@
 {
   "name": "strapi",
+  "type": "commonjs",
   "private": true,
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"

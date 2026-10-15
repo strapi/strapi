@@ -1,6 +1,7 @@
 {
   "name": "@strapi/provider-upload-cloudinary",
   "version": "5.58.0",
+  "type": "commonjs",
   "description": "Cloudinary provider for strapi upload",
   "keywords": [
     "upload",

@@ -1,6 +1,7 @@
 {
   "name": "community-pr-triage",
   "version": "5.43.0",
+  "type": "commonjs",
   "private": true,
   "main": "dist/index.cjs",
   "scripts": {
