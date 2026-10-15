@@ -6,6 +6,7 @@ import { MediaLibraryInput } from '../MediaLibraryInput';
 import type { File as AssetFile } from '../../../../../shared/contracts/files';
 
 const mockUploadFiles = jest.fn();
+const mockUploadFromUrls = jest.fn();
 
 jest.mock('../../../services/api', () => {
   const actual = jest.requireActual('../../../services/api');
@@ -13,6 +14,7 @@ jest.mock('../../../services/api', () => {
   return {
     ...actual,
     useUploadFilesMutation: () => [mockUploadFiles],
+    useUploadFromUrlsMutation: () => [mockUploadFromUrls],
   };
 });
 
@@ -85,7 +87,8 @@ const dropFiles = (files: globalThis.File[]) => {
 describe('<MediaLibraryInput /> (Content Manager)', () => {
   beforeEach(() => {
     mockUploadFiles.mockReset();
-    Object.assign(mockPermissions, { canRead: true, canCreate: true });
+    mockUploadFromUrls.mockReset();
+    Object.assign(mockPermissions, { isLoading: false, canRead: true, canCreate: true });
   });
 
   it('renders the drop zone and one row per asset already on the field', () => {
@@ -420,6 +423,170 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
 
     await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
     expect(await screen.findByText('picked.png')).toBeInTheDocument();
+  });
+
+  describe('Add asset menu', () => {
+    const openMenu = async (user: ReturnType<typeof renderInput>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'Add asset' }));
+    };
+
+    it('offers browse and both upload paths when the user can create', async () => {
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+
+      expect(await screen.findByRole('menuitem', { name: 'Browse library' })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: 'Upload from device' })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: 'Upload from URL' })).toBeInTheDocument();
+    });
+
+    it('offers browse only when the user cannot create', async () => {
+      mockPermissions.canCreate = false;
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+
+      expect(await screen.findByRole('menuitem', { name: 'Browse library' })).toBeInTheDocument();
+      expect(
+        screen.queryByRole('menuitem', { name: 'Upload from device' })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('menuitem', { name: 'Upload from URL' })).not.toBeInTheDocument();
+    });
+
+    it('offers upload only when the user cannot read the Media Library', async () => {
+      mockPermissions.canRead = false;
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+
+      expect(
+        await screen.findByRole('menuitem', { name: 'Upload from device' })
+      ).toBeInTheDocument();
+      expect(screen.queryByRole('menuitem', { name: 'Browse library' })).not.toBeInTheDocument();
+    });
+
+    it('hides the trigger when the user can neither read nor create', () => {
+      mockPermissions.canRead = false;
+      mockPermissions.canCreate = false;
+      renderInput({ attribute: { multiple: true } });
+
+      expect(screen.queryByRole('button', { name: 'Add asset' })).not.toBeInTheDocument();
+    });
+
+    it('shows every entry disabled while permissions are still loading', async () => {
+      // `useRBAC` starts at isLoading with every flag false.
+      mockPermissions.isLoading = true;
+      mockPermissions.canRead = false;
+      mockPermissions.canCreate = false;
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+
+      for (const name of ['Browse library', 'Upload from device', 'Upload from URL']) {
+        // eslint-disable-next-line no-await-in-loop
+        expect(await screen.findByRole('menuitem', { name })).toHaveAttribute(
+          'aria-disabled',
+          'true'
+        );
+      }
+    });
+
+    it('opens the device file picker from "Upload from device"', async () => {
+      const clickSpy = jest.spyOn(HTMLInputElement.prototype, 'click');
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+      await user.click(await screen.findByRole('menuitem', { name: 'Upload from device' }));
+
+      expect(clickSpy).toHaveBeenCalled();
+      clickSpy.mockRestore();
+    });
+
+    it('opens the URL dialog from "Upload from URL", and uploads to the root', async () => {
+      mockUploadFromUrls.mockReturnValue({
+        unwrap: () => Promise.resolve({ data: [asset(9, 'from-url.png')], errors: [] }),
+      });
+
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+      await user.click(await screen.findByRole('menuitem', { name: 'Upload from URL' }));
+
+      const urlField = await screen.findByRole('textbox');
+      // `fireEvent.change` rather than `user.type`: the textarea is controlled,
+      // and one change event is what the component actually reads.
+      fireEvent.change(urlField, { target: { value: 'https://example.com/from-url.png' } });
+      expect(urlField).toHaveValue('https://example.com/from-url.png');
+
+      const form = screen.getByRole('button', { name: 'Upload' }).closest('form')!;
+      // jsdom does not perform implicit form submission from a submit button, so
+      // the event the dialog listens for has to be raised directly.
+      fireEvent.submit(form);
+
+      await waitFor(() => expect(mockUploadFromUrls).toHaveBeenCalledTimes(1));
+      expect(mockUploadFromUrls.mock.calls[0][0]).toMatchObject({
+        urls: ['https://example.com/from-url.png'],
+        folderId: null,
+      });
+
+      expect(await screen.findByText('from-url.png')).toBeInTheDocument();
+    });
+
+    it('renders the label unbolded and the chevron in the label colour', () => {
+      renderInput({ attribute: { multiple: true } });
+
+      const trigger = screen.getByRole('button', { name: 'Add asset' });
+
+      // The design system paints button icons with its own per-variant
+      // "svg path { fill }", so the chevron needs the fill set explicitly or it
+      // stays the default grey while the label turns primary.
+      const chevron = trigger.querySelector('svg path');
+      expect(chevron).not.toBeNull();
+      // primary600
+      expect(window.getComputedStyle(chevron!).fill).toBe('#4945ff');
+
+      const label = trigger.querySelector('span');
+      expect(window.getComputedStyle(label!).fontWeight).toBe('400');
+    });
+
+    it('disables the trigger on a disabled field', () => {
+      renderInput({ disabled: true, attribute: { multiple: true } });
+
+      const trigger = screen.getByRole('button', { name: 'Add asset' });
+      expect(trigger).toHaveAttribute('aria-disabled', 'true');
+
+      // Still a greyed-out link, not the design system's grey button.
+      const style = window.getComputedStyle(trigger);
+      expect(style.backgroundColor).toBe('transparent');
+      expect(style.borderColor).toBe('transparent');
+    });
+
+    it('says a URL file the field does not accept was added to the library', async () => {
+      mockUploadFromUrls.mockReturnValue({
+        unwrap: () =>
+          Promise.resolve({
+            data: [asset(9, 'photo.png'), { ...asset(10, 'notes.pdf'), mime: 'application/pdf' }],
+            errors: [],
+          }),
+      });
+
+      const { user } = renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
+
+      await openMenu(user);
+      await user.click(await screen.findByRole('menuitem', { name: 'Upload from URL' }));
+      fireEvent.change(await screen.findByRole('textbox'), {
+        target: { value: 'https://example.com/photo.png\nhttps://example.com/notes.pdf' },
+      });
+      fireEvent.submit(screen.getByRole('button', { name: 'Upload' }).closest('form')!);
+
+      expect(
+        await screen.findByText(
+          'notes.pdf was added to the Media Library, but this field only accepts images.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByText('photo.png')).toBeInTheDocument();
+      expect(screen.queryByText(/You can't upload this type of file/)).not.toBeInTheDocument();
+    });
   });
 
   it('does not upload when the field is disabled', () => {
