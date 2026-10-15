@@ -1,6 +1,8 @@
-// @ts-check
+/** @import { Linter } from 'eslint' */
 
-/** @type {import('eslint').Linter.Config} */
+const { lodashImportPatterns, lodashSelectors } = require('lint-policy/lodash');
+
+/** @type {Linter.Config} */
 const config = {
   root: true,
   extends: ['@strapi/eslint-config/front/typescript'],
@@ -42,8 +44,10 @@ const config = {
             message: 'Please use import [method] from lodash/[method]',
           },
         ],
+        patterns: [...lodashImportPatterns],
       },
     ],
+    'no-restricted-syntax': ['error', ...lodashSelectors],
     'no-restricted-globals': [
       'error',
       {

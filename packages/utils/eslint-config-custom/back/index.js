@@ -1,6 +1,8 @@
-// @ts-check
+/** @import { Linter } from 'eslint' */
 
-/** @type {import('eslint').Linter.Config} */
+const { lodashImportPatterns, lodashSelectors } = require('lint-policy/lodash');
+
+/** @type {Linter.Config} */
 const config = {
   extends: '@strapi/eslint-config/back/javascript',
   parserOptions: {
@@ -43,6 +45,8 @@ const config = {
         props: false,
       },
     ],
+    'no-restricted-imports': ['error', { patterns: [...lodashImportPatterns] }],
+    'no-restricted-syntax': ['error', ...lodashSelectors],
   },
 };
 

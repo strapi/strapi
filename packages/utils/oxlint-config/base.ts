@@ -1,5 +1,7 @@
 import type { OxlintConfig } from 'oxlint';
 
+import { lodashImportPatterns, lodashSelectors } from 'lint-policy/lodash';
+
 /**
  * Shared baseline applied to every file in the monorepo.
  *
@@ -19,7 +21,11 @@ import type { OxlintConfig } from 'oxlint';
  */
 export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
-  jsPlugins: ['./no-lodash-fp.js'],
+  jsPlugins: [
+    './no-lodash-fp.js',
+    // ESLint's own rule implementations, for rules OxLint has no native equivalent of.
+    { name: 'eslint-js', specifier: 'oxlint-plugin-eslint' },
+  ],
   categories: {
     // Blocking bar: correctness plus extra-policy `perf`.
     // Later categories (suspicious/pedantic/style) are not extra policy yet.
@@ -38,6 +44,8 @@ export const base = {
             group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
             message: 'Use regular lodash methods or a focused helper instead.',
           },
+          // Lodash policy shared verbatim with ESLint — see lint-policy/lodash.js.
+          ...lodashImportPatterns,
         ],
       },
     ],
@@ -53,6 +61,10 @@ export const base = {
     // A category enable would expand that ban onto the backend (~495 of the
     // Aug 20 +685 perf delta). Frontend JS stays covered by ESLint.
     'eslint/no-await-in-loop': 'off',
+    // Lodash policy shared verbatim with ESLint — see lint-policy/lodash.js.
+    // `no-restricted-syntax` is not native to OxLint; it comes from the `eslint-js`
+    // JS plugin declared above, which is why this key carries the plugin prefix.
+    'eslint-js/no-restricted-syntax': ['error', ...lodashSelectors],
   },
   ignorePatterns: [
     '**/dist/**',
