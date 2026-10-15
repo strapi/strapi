@@ -1,6 +1,7 @@
 import { async, errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
+
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -78,7 +79,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
             ...version,
             data: await permissionChecker.sanitizeOutput(version.data),
             createdBy: version.createdBy
-              ? pick(['id', 'firstname', 'lastname', 'username', 'email'], version.createdBy)
+              ? pick(version.createdBy, ['id', 'firstname', 'lastname', 'username', 'email'])
               : undefined,
           };
         }

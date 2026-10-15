@@ -1,6 +1,6 @@
 import type { UID, Modules } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
-import { assoc, omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import * as components from './components';
 
@@ -47,7 +47,7 @@ const createEntriesService = (
       throw new Error('Create requires data attribute');
     }
 
-    const data = isParamEmpty(inputData.documentId) ? omit('documentId', inputData) : inputData;
+    const data = isParamEmpty(inputData.documentId) ? omit(inputData, 'documentId') : inputData;
 
     // Check for uniqueness based on documentId and locale (if localized)
     if (data.documentId) {
@@ -125,7 +125,7 @@ const createEntriesService = (
     const { data: inputData, ...restParams } = await transformParamsDocumentId(uid, params);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
-    const data = inputData ? omit('documentId', inputData) : inputData;
+    const data = inputData ? omit(inputData, 'documentId') : inputData;
 
     const validData = await entityValidator.validateEntityUpdate(
       contentType,
@@ -154,10 +154,11 @@ const createEntriesService = (
 
   async function publishEntry(entry: any, params = {} as any) {
     clearTransformDataRequestCache();
+    const publishedAt = new Date();
 
     return async.pipe(
-      omit('id'),
-      assoc('publishedAt', new Date()),
+      (value) => omit(value, 'id'),
+      (value) => ({ ...value, publishedAt }),
       (draft) => {
         const opts = {
           uid,
@@ -177,8 +178,8 @@ const createEntriesService = (
     clearTransformDataRequestCache();
 
     return async.pipe(
-      omit('id'),
-      assoc('publishedAt', null),
+      (value) => omit(value, 'id'),
+      (value) => ({ ...value, publishedAt: null }),
       (entry) => {
         const opts = {
           uid,

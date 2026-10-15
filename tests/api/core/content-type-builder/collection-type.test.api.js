@@ -8,7 +8,7 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const modelsUtils = require('api-tests/models');
 const { createTestBuilder } = require('api-tests/builder');
-const { kebabCase } = require('lodash/fp');
+const { kebabCase } = require('lodash');
 
 let strapi;
 let rq;
