@@ -1,27 +1,76 @@
 import type { Core } from '@strapi/types';
-import weeklyMetrics from '../weekly-metrics';
 
-const find = jest.fn();
+import weeklyMetricsFactory from '../weekly-metrics';
+
+const findWorkflows = jest.fn();
 
 jest.mock('../../../utils', () => ({
-  getService: (name: string) => (name === 'workflows' ? { find } : {}),
+  getService: jest.fn((name: string) => {
+    if (name === 'workflow-metrics') {
+      return jest.requireActual('../index').default;
+    }
+    if (name === 'workflows') {
+      return { find: findWorkflows };
+    }
+    return {};
+  }),
 }));
 
-describe('weekly review workflow metrics', () => {
-  it('counts stages and content types per workflow, including empty collections', async () => {
-    find.mockResolvedValue([
-      { stages: [{ id: 1 }, { id: 2 }], contentTypes: ['api::article.article'] },
-      { stages: [{ id: 3 }], contentTypes: ['api::page.page', 'api::author.author'] },
-      { stages: [], contentTypes: [] },
-    ]);
-    const metrics = weeklyMetrics({ strapi: {} as Core.Strapi });
+const send = jest.fn();
+const setStore = jest.fn();
 
-    await expect(metrics.computeMetrics()).resolves.toEqual({
-      numberOfActiveWorkflows: 3,
-      avgStagesCount: 1,
-      maxStagesCount: 2,
-      activatedContentTypes: 3,
+const strapiMock = {
+  telemetry: { send },
+  store: { get: jest.fn(async () => ({})), set: setStore },
+} as unknown as Core.Strapi;
+
+global.strapi = strapiMock;
+
+describe('Review workflows weekly metrics', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('sendMetrics sends each computed metric as its own group property', async () => {
+    findWorkflows.mockResolvedValue([
+      { stages: [{}, {}], contentTypes: ['api::a.a'] },
+      { stages: [{}, {}, {}, {}], contentTypes: ['api::b.b', 'api::c.c'] },
+    ]);
+
+    await weeklyMetricsFactory({ strapi: strapiMock }).sendMetrics();
+
+    expect(send).toHaveBeenCalledWith('didSendReviewWorkflowPropertiesOnceAWeek', {
+      groupProperties: {
+        numberOfActiveWorkflows: 2,
+        avgStagesCount: 3,
+        maxStagesCount: 4,
+        activatedContentTypes: 3,
+      },
     });
-    expect(find).toHaveBeenCalledWith({ populate: 'stages' });
+    expect(setStore).toHaveBeenCalledWith(
+      expect.objectContaining({ value: { lastWeeklyUpdate: expect.any(Number) } })
+    );
+  });
+
+  test('sendMetrics stores lastWeeklyUpdate only after the telemetry send settles', async () => {
+    findWorkflows.mockResolvedValue([{ stages: [{}], contentTypes: [] }]);
+
+    let resolveSend: (value: boolean) => void = () => {};
+    send.mockReturnValueOnce(
+      new Promise<boolean>((resolve) => {
+        resolveSend = resolve;
+      })
+    );
+
+    const sending = weeklyMetricsFactory({ strapi: strapiMock }).sendMetrics();
+
+    await new Promise(setImmediate);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(setStore).not.toHaveBeenCalled();
+
+    resolveSend(true);
+    await sending;
+
+    expect(setStore).toHaveBeenCalledTimes(1);
   });
 });

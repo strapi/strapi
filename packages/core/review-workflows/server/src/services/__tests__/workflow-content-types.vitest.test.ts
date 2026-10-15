@@ -1,28 +1,31 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import workflowContentTypesFactory from '../workflow-content-types';
 
-const getAssignedWorkflows = jest.fn();
+const { getAssignedWorkflows } = vi.hoisted(() => ({
+  getAssignedWorkflows: vi.fn(),
+}));
 
-jest.mock('../../utils', () => ({
-  getService: jest.fn((name: string) =>
+vi.mock('../../utils', () => ({
+  getService: vi.fn((name: string) =>
     name === 'workflows'
       ? { _getAssignedWorkflows: getAssignedWorkflows }
-      : { updateEntitiesStage: jest.fn(), deleteAllEntitiesStage: jest.fn() }
+      : { updateEntitiesStage: vi.fn(), deleteAllEntitiesStage: vi.fn() }
   ),
 }));
 
 const createStrapiMock = () => {
-  const update = jest.fn(async ({ where, data }: any) => ({
+  const update = vi.fn(async ({ where, data }: any) => ({
     id: where.id,
     name: 'Other',
     ...data,
   }));
 
   return {
-    db: { query: jest.fn(() => ({ update })) },
-    plugin: jest.fn(() => ({
-      service: jest.fn(() => ({
-        findConfiguration: jest.fn().mockResolvedValue({ options: {} }),
-        updateConfiguration: jest.fn(),
+    db: { query: vi.fn(() => ({ update })) },
+    plugin: vi.fn(() => ({
+      service: vi.fn(() => ({
+        findConfiguration: vi.fn().mockResolvedValue({ options: {} }),
+        updateConfiguration: vi.fn(),
       })),
     })),
   };
@@ -30,7 +33,7 @@ const createStrapiMock = () => {
 
 describe('review-workflows workflow content types service', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('migrate returns one transfer per workflow that lost content types', async () => {
