@@ -1,4 +1,4 @@
-import { join, relative } from 'node:path';
+import { isAbsolute, join, relative, sep } from 'node:path';
 
 import chalk from 'chalk';
 import execa from 'execa';
@@ -261,7 +261,7 @@ async function createApp(scope: Scope) {
   }
 
   // show the folder relative to where the command ran, not the absolute path
-  const projectFolder = relative(process.cwd(), rootPath) || '.';
+  const projectFolder = getDisplayFolder(relative(process.cwd(), rootPath));
 
   if (installDependencies) {
     logger.log([
@@ -307,6 +307,23 @@ async function createApp(scope: Scope) {
       logger.fatal('Failed to start your Strapi application');
     }
   }
+}
+
+// prefix child folders with ./ so names like -site or ~site are not read as an option or a home path
+function getDisplayFolder(relativeFolder: string) {
+  if (!relativeFolder) {
+    return '.';
+  }
+
+  if (
+    isAbsolute(relativeFolder) ||
+    relativeFolder === '..' ||
+    relativeFolder.startsWith(`..${sep}`)
+  ) {
+    return relativeFolder;
+  }
+
+  return `.${sep}${relativeFolder}`;
 }
 
 async function runInstall({ rootPath, packageManager }: Scope) {
