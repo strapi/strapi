@@ -95,6 +95,11 @@ const missingAssetWarningMessage = (file: IFile, filepath: string, format?: stri
   return `[Data transfer] Media item ${file.id} (hash: ${file.hash}) exists in database but no corresponding file was found to transfer${formatPart}. Path: ${filepath}`;
 };
 
+const getLocalFilepath = (publicDir: string, url: string) => {
+  const [pathname] = url.split(/[?#]/, 1);
+  return join(publicDir, pathname);
+};
+
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
@@ -121,7 +126,9 @@ export const createAssetsStream = (
       if (!isLocalProvider) {
         await signUploadFileForTransfer(strapi, file);
       }
-      const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
+      const filepath = isLocalProvider
+        ? getLocalFilepath(strapi.dirs.static.public, file.url)
+        : file.url;
       let stats: { size: number };
       try {
         stats = await getFileStatsForTransfer(filepath, strapi, isLocalProvider);
@@ -150,7 +157,7 @@ export const createAssetsStream = (
         for (const format of Object.keys(file.formats)) {
           const fileFormat = file.formats[format];
           const fileFormatFilepath = isLocalProvider
-            ? join(strapi.dirs.static.public, fileFormat.url)
+            ? getLocalFilepath(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
           let fileFormatStats: { size: number };
           try {

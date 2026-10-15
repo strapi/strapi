@@ -174,4 +174,54 @@ describe('Local source assets stream warnings', () => {
       expect(items[0]).toMatchObject({ filename: 'media-hash' });
     }
   );
+
+  test('ignores query strings when resolving a local media file', async () => {
+    const localFilepath = join(publicDir, 'uploads', 'media-hash.jpg');
+    await writeFile(localFilepath, Buffer.from('media'));
+
+    const uploadFile = {
+      id: 1,
+      hash: 'media-hash',
+      ext: '.jpg',
+      url: '/uploads/media-hash.jpg?name=original%20file.jpg',
+      provider: 'local',
+      formats: undefined,
+    };
+
+    const warn = jest.fn();
+    const strapi = {
+      db: {
+        queryBuilder: jest.fn(() => ({
+          select: jest.fn().mockReturnThis(),
+          stream: jest.fn(() => Readable.from([uploadFile])),
+        })),
+      },
+      dirs: {
+        static: { public: publicDir },
+      },
+      log: { warn },
+      plugins: {
+        upload: {
+          provider: {
+            isPrivate: jest.fn().mockResolvedValue(false),
+          },
+        },
+      },
+      config: {
+        get: jest.fn(() => ({ provider: 'local' })),
+      },
+    } as any;
+
+    const items = [];
+    for await (const item of createAssetsStream(strapi)) {
+      items.push(item);
+    }
+
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      filepath: localFilepath,
+      filename: 'media-hash.jpg',
+    });
+    expect(warn).not.toHaveBeenCalled();
+  });
 });
