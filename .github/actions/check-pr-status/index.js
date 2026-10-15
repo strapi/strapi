@@ -23,8 +23,8 @@ async function main() {
       return;
     }
 
-    const labelNames = labels.map((label) => label.name);
-    const hasQaResolution = QA_COMPLETION_LABELS.some((label) => labelNames.includes(label));
+    const labelNames = new Set(labels.map((label) => label.name));
+    const hasQaResolution = QA_COMPLETION_LABELS.some((label) => labelNames.has(label));
 
     if (hasQaResolution === false) {
       core.setFailed(

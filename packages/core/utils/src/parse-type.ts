@@ -93,8 +93,8 @@ export interface ParseTypeOptions<T extends keyof TypeMap> {
  * made those two throwaway allocations one of the largest single sources of GC pressure
  * in a read: 4.3% of on-CPU time in a profiled LaunchPad run.
  */
-const TRUTHY_INPUTS: ReadonlyArray<string | number> = ['true', 't', '1', 1];
-const FALSY_INPUTS: ReadonlyArray<string | number> = ['false', 'f', '0', 0];
+const TRUTHY_INPUTS = new Set<string | number>(['true', 't', '1', 1]);
+const FALSY_INPUTS = new Set<string | number>(['false', 'f', '0', 0]);
 
 /**
  * Whether `parseBoolean` would accept this value without `forceCast`.
@@ -113,7 +113,7 @@ const isBooleanLike = (value: unknown): boolean => {
   }
 
   if (typeof value === 'string' || typeof value === 'number') {
-    return TRUTHY_INPUTS.includes(value) || FALSY_INPUTS.includes(value);
+    return TRUTHY_INPUTS.has(value) || FALSY_INPUTS.has(value);
   }
 
   return false;
@@ -127,11 +127,11 @@ const parseBoolean = (value: unknown, options: { forceCast?: boolean }): boolean
   }
 
   if (typeof value === 'string' || typeof value === 'number') {
-    if (TRUTHY_INPUTS.includes(value)) {
+    if (TRUTHY_INPUTS.has(value)) {
       return true;
     }
 
-    if (FALSY_INPUTS.includes(value)) {
+    if (FALSY_INPUTS.has(value)) {
       return false;
     }
   }
