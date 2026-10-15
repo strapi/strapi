@@ -88,6 +88,7 @@ describe('Relation filters with group operators', () => {
     expect(labels).toEqual(['t1']);
   });
 
+  // Different keys never collided; kept as a regression guard for the merge helper.
   test('a relation $or next to a relation $and both apply', async () => {
     const labels = await labelsFor({
       writer: { $or: [{ name: 'A' }, { name: 'B' }] },
@@ -97,13 +98,23 @@ describe('Relation filters with group operators', () => {
     expect(labels).toEqual(['t1']);
   });
 
-  test('a root $and alongside relation group operators keeps every constraint', async () => {
+  test('a root $and alongside two relation $or keeps every constraint', async () => {
     const labels = await labelsFor({
       $and: [{ label: { $ne: 'nope' } }],
       writer: { $or: [{ name: 'A' }, { name: 'B' }] },
       cat: { $or: [{ title: 'P' }, { title: 'Q' }] },
     });
 
+    expect(labels).toEqual(['t1']);
+  });
+
+  test('a root $and and a relation $and (same key) both apply', async () => {
+    const labels = await labelsFor({
+      $and: [{ label: { $ne: 't2' } }],
+      writer: { $and: [{ name: { $ne: 'B' } }, { name: { $ne: 'C' } }] },
+    });
+
+    // writer A keeps t1 and t2; the root $and must still remove t2.
     expect(labels).toEqual(['t1']);
   });
 
