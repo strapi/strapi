@@ -134,7 +134,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         metrics.sendDidCreateWorkflow(createdWorkflow.id, !!opts.data.stageRequiredToPublishName);
 
-        if (opts.data.stageRequiredToPublishName) {
+        if (opts.data.contentTypes?.length) {
           await strapi
             .plugin('content-releases')
             .service('release-action')
@@ -166,7 +166,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async update(workflow: any, opts: any) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
-      let updatedStages: any = [];
+      let updatedStages: any;
       let updatedStageIds: any;
 
       await workflowValidator.validateWorkflowCount();

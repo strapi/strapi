@@ -65,11 +65,6 @@ export const getDraftEntryValidity = async (
   }
 };
 
-export const getDraftEntryValidStatus = async (
-  action: Action,
-  { strapi }: { strapi: Core.Strapi }
-) => (await getDraftEntryValidity(action, { strapi })).isEntryValid;
-
 type StageRef = { id: Data.ID; name: string };
 
 type WorkflowWithRequiredStage = { stageRequiredToPublish?: StageRef | null } | null | undefined;

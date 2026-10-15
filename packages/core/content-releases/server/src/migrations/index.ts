@@ -8,7 +8,7 @@ import {
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
 } from '../constants';
-import { getDraftEntryValidity, getDraftEntryValidStatus, getService } from '../utils';
+import { getDraftEntryValidity, getService, UNPUBLISH_VALIDITY } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
 import { ReleaseAction } from '../../../shared/contracts/release-actions';
 
@@ -66,64 +66,90 @@ export async function migrateIsValidAndStatusReleases() {
       status: null,
       releasedAt: null,
     },
-    populate: {
-      actions: {
-        populate: {
-          entry: true,
-        },
-      },
-    },
+    populate: { actions: true },
   })) as Release[];
 
-  async.map(releasesWithoutStatus, async (release: Release) => {
-    const actions = release.actions;
+  const migrate = async () => {
+    for (const release of releasesWithoutStatus) {
+      const notValidatedActions = release.actions.filter((action) => action.isEntryValid === null);
 
-    const notValidatedActions = actions.filter((action) => action.isEntryValid === null);
-
-    for (const action of notValidatedActions) {
-      // We need to check the Action is related to a valid entry because we can't assume this is gonna be always the case
-      // example: users could make changes directly to their database, or data could be lost
-      if (action.entry) {
-        const isEntryValid = getDraftEntryValidStatus(
-          {
-            contentType: action.contentType,
-            documentId: action.entryDocumentId,
-            locale: action.locale,
-          },
-          { strapi }
-        );
+      for (const action of notValidatedActions) {
+        const validity =
+          action.type === 'publish'
+            ? await getDraftEntryValidity(
+                {
+                  contentType: action.contentType,
+                  documentId: action.entryDocumentId,
+                  locale: action.locale,
+                },
+                { strapi }
+              )
+            : UNPUBLISH_VALIDITY;
 
         await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-          where: {
-            id: action.id,
-          },
-          data: {
-            isEntryValid,
-          },
+          where: { id: action.id },
+          data: validity,
         });
       }
+
+      await getService('release', { strapi }).updateReleaseStatus(release.id);
     }
 
-    return getService('release', { strapi }).updateReleaseStatus(release.id);
-  });
+    await strapi.db.query(RELEASE_MODEL_UID).updateMany({
+      where: { status: null, releasedAt: { $notNull: true } },
+      data: { status: 'done' },
+    });
+  };
 
-  const publishedReleases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+  migrate().catch((error: unknown) => {
+    strapi.log.error('Error while migrating the status of releases created before v5', { error });
+  });
+}
+
+export async function addReasonsToInvalidActions() {
+  const actions: ReleaseAction[] = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
     where: {
-      status: null,
-      releasedAt: {
-        $notNull: true,
-      },
+      type: 'publish',
+      isEntryValid: false,
+      reason: { $null: true },
+      outcome: null,
+      release: { releasedAt: { $null: true } },
     },
+    populate: { release: { select: ['id'] } },
   });
 
-  async.map(publishedReleases, async (release: Release) => {
-    return strapi.db.query(RELEASE_MODEL_UID).update({
-      where: {
-        id: release.id,
-      },
-      data: {
-        status: 'done',
-      },
+  if (actions.length === 0) {
+    return;
+  }
+
+  const revalidate = async () => {
+    const releaseIds = new Set<Release['id']>();
+
+    for (const action of actions) {
+      const validity = await getDraftEntryValidity(
+        {
+          contentType: action.contentType,
+          documentId: action.entryDocumentId,
+          locale: action.locale,
+        },
+        { strapi }
+      );
+
+      await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+        where: { id: action.id, outcome: null },
+        data: validity,
+      });
+      releaseIds.add(action.release.id);
+    }
+
+    for (const releaseId of releaseIds) {
+      await getService('release', { strapi }).updateReleaseStatus(releaseId);
+    }
+  };
+
+  revalidate().catch((error: unknown) => {
+    strapi.log.error('Error while adding reasons to release actions that are not publishable', {
+      error,
     });
   });
 }
