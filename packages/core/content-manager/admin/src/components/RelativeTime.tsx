@@ -37,7 +37,7 @@ const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
     // Invalid Date: intervalToDuration throws RangeError (see #27382).
     if (!isValid(timestamp)) {
       return (
-        <time ref={forwardedRef} role="time" {...restProps}>
+        <time ref={forwardedRef} {...restProps} aria-hidden>
           -
         </time>
       );
@@ -57,7 +57,8 @@ const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
         return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
       }) ?? 'seconds';
 
-    const relativeTime = isPast(timestamp) ? -interval[unit] : interval[unit];
+    const value = interval[unit] ?? 0;
+    const relativeTime = isPast(timestamp) ? -value : value;
 
     // Display custom text if interval is less than the threshold
     const customInterval = customIntervals.find(

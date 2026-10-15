@@ -37,7 +37,7 @@ const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
     // Invalid Date: intervalToDuration throws RangeError (see #27382).
     if (!isValid(timestamp)) {
       return (
-        <time ref={forwardedRef} role="time" {...restProps}>
+        <time ref={forwardedRef} {...restProps} aria-hidden>
           -
         </time>
       );
