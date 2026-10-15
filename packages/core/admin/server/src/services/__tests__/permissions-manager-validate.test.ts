@@ -1,5 +1,6 @@
 import { AbilityBuilder, Ability } from '@casl/ability';
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
+
 import sift from 'sift';
 
 import createValidateHelpers from '../permission/permissions-manager/validate';
@@ -19,7 +20,7 @@ const allowedOperations = [
   '$elemMatch',
 ];
 
-const operations = pick(allowedOperations, sift);
+const operations = pick(sift, allowedOperations);
 
 const conditionsMatcher = (conditions: any) => {
   // @ts-expect-error sift operation map is intentionally narrowed for tests
