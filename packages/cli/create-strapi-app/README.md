@@ -33,3 +33,25 @@ Using npm
 npm install -g create-strapi-app
 create-strapi-app my-app
 ```
+
+### Non-interactive
+
+`--non-interactive` skips every prompt. It requires a project directory.
+
+With that flag, and no overriding flags, the defaults are:
+
+- TypeScript
+- no example app
+- install dependencies
+- initialize a git repository
+- SQLite
+
+Cloud login runs only when neither `--skip-cloud` nor `--non-interactive` is set. `--non-interactive` already skips it; `--skip-cloud` skips it on its own.
+
+```
+yarn create strapi-app my-project --non-interactive --skip-cloud
+```
+
+```
+npx create-strapi-app my-project --non-interactive --skip-cloud
+```
