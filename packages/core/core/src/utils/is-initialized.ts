@@ -1,4 +1,4 @@
-import { isEmpty, isNil } from 'lodash/fp';
+import { isEmpty } from 'lodash';
 
 import type { Core } from '@strapi/types';
 
@@ -14,7 +14,7 @@ export const isInitialized = async (strapi: Core.Strapi): Promise<boolean> => {
     // test if there is at least one admin
     const anyAdministrator = await strapi.db.query('admin::user').findOne({ select: ['id'] });
 
-    return !isNil(anyAdministrator);
+    return anyAdministrator != null;
   } catch (err) {
     strapi.stopWithError(err);
   }

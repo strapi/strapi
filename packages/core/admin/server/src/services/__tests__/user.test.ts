@@ -1,8 +1,13 @@
 import _ from 'lodash';
-import { errors, queryParams } from '@strapi/utils';
+import { errors, queryParams, emitAudit } from '@strapi/utils';
 import constants from '../constants';
 import userService from '../user';
 import userContentType from '../../content-types/User';
+
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  emitAudit: jest.fn(),
+}));
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -189,6 +194,73 @@ describe('User', () => {
     });
   });
 
+  describe('createFirstAdmin', () => {
+    test('Records the first super admin in the audit log with its role', async () => {
+      const superAdminRole = { id: 1, code: 'strapi-super-admin' };
+      const createdUser = {
+        id: 1,
+        email: 'first@strapi.io',
+        firstname: 'First',
+        lastname: 'Admin',
+        isActive: true,
+        roles: [superAdminRole],
+        password: 'hash',
+      };
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: jest.fn() },
+        db: {
+          transaction: jest.fn((fn) => fn({ trx: {} })),
+          queryBuilder: () => ({
+            select: () => ({
+              where: () => ({
+                first: () => ({
+                  transacting: () => ({
+                    forUpdate: () => ({ execute: jest.fn(() => Promise.resolve(superAdminRole)) }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+          query: () => ({
+            count: jest.fn(() => Promise.resolve(0)),
+            create: jest.fn(() => Promise.resolve(createdUser)),
+          }),
+        },
+        admin: {
+          services: {
+            token: { createToken: jest.fn(() => 'token') },
+            auth: { hashPassword: jest.fn(() => Promise.resolve('hash')) },
+            metrics: { sendDidInviteUser: jest.fn() },
+          },
+        },
+      } as any;
+      jest.mocked(emitAudit).mockClear();
+
+      await userService.createFirstAdmin({
+        email: 'first@strapi.io',
+        firstname: 'First',
+        lastname: 'Admin',
+        password: 'Password123',
+      });
+
+      expect(global.strapi.eventHub.emit).toHaveBeenCalledWith(
+        'user.create',
+        expect.objectContaining({ user: expect.objectContaining({ id: 1 }) })
+      );
+      expect(emitAudit).toHaveBeenCalledWith({ strapi: global.strapi }, 'admin-user.create', {
+        userId: 1,
+        email: 'first@strapi.io',
+        firstname: 'First',
+        lastname: 'Admin',
+        roles: [1],
+        isActive: true,
+      });
+      expect(JSON.stringify(jest.mocked(emitAudit).mock.calls)).not.toMatch(/Password123|hash/);
+    });
+  });
+
   describe('Count users', () => {
     test('Count users without params', async () => {
       const dbCount = jest.fn(() => Promise.resolve(2));
@@ -337,6 +409,84 @@ describe('User', () => {
         populate: ['roles'],
       });
       expect(hashPassword).toHaveBeenCalledWith(password);
+    });
+  });
+
+  describe('update audit events', () => {
+    const previous = {
+      id: 1,
+      email: 'test@strapi.io',
+      firstname: 'Kai',
+      isActive: true,
+      roles: [{ id: 1 }],
+    };
+
+    const setup = (updated: Record<string, unknown>) => {
+      const findOne = jest.fn(() => Promise.resolve(previous));
+      const update = jest.fn(() => Promise.resolve(updated));
+      const hashPassword = jest.fn(() => Promise.resolve('hash'));
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: jest.fn() },
+        db: { query: () => ({ update, findOne }) },
+        admin: {
+          services: {
+            auth: { hashPassword },
+            role: { getSuperAdminWithUsersCount: jest.fn(() => ({ id: 9, usersCount: 2 })) },
+          },
+        },
+      } as any;
+      jest.mocked(emitAudit).mockClear();
+
+      return { findOne, update };
+    };
+
+    test('Reads the previous row and records the changed fields', async () => {
+      const { findOne } = setup({ ...previous, isActive: false });
+
+      await updateById(1, { isActive: false });
+
+      expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'] });
+      expect(emitAudit).toHaveBeenCalledWith({ strapi: global.strapi }, 'admin-user.update', {
+        userId: 1,
+        email: 'test@strapi.io',
+        changes: { isActive: { before: true, after: false } },
+      });
+    });
+
+    test('Still emits the legacy user.update on the event hub', async () => {
+      setup({ ...previous, isActive: false });
+
+      await updateById(1, { isActive: false });
+
+      expect(global.strapi.eventHub.emit).toHaveBeenCalledWith(
+        'user.update',
+        expect.objectContaining({ user: expect.objectContaining({ id: 1 }) })
+      );
+    });
+
+    test('Records nothing when the update changed no tracked field', async () => {
+      setup(previous);
+
+      await updateById(1, { firstname: 'Kai' });
+
+      expect(emitAudit).not.toHaveBeenCalled();
+    });
+
+    test('Records a password change without reading the previous row', async () => {
+      const { findOne } = setup({ ...previous, password: 'hash' });
+
+      await updateById(1, { password: 'Secret1234' });
+
+      expect(findOne).not.toHaveBeenCalled();
+      expect(emitAudit).toHaveBeenCalledTimes(1);
+      expect(emitAudit).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'admin-user.password.update',
+        { userId: 1, email: 'test@strapi.io' }
+      );
+      expect(JSON.stringify(jest.mocked(emitAudit).mock.calls)).not.toMatch(/Secret1234|hash/);
     });
   });
 
@@ -795,6 +945,32 @@ describe('User', () => {
         1,
         expect.objectContaining({ firstname: 'test', lastname: 'Strapi', password: 'Test1234' })
       );
+    });
+
+    test('Records the accepted invitation in the audit log, without the password', async () => {
+      const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
+      const updateById = jest.fn(() =>
+        Promise.resolve({ id: 1, email: 'test@strapi.io', password: 'hash' })
+      );
+
+      global.strapi = {
+        ...global.strapi,
+        db: { query: () => ({ findOne }) },
+        admin: { services: { user: { updateById } } },
+      } as any;
+      jest.mocked(emitAudit).mockClear();
+
+      await register({
+        registrationToken: '123',
+        userInfo: { firstname: 'test', lastname: 'Strapi', password: 'Test1234' },
+      });
+
+      expect(emitAudit).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'admin-user.invite.accept',
+        { userId: 1, email: 'test@strapi.io' }
+      );
+      expect(JSON.stringify(jest.mocked(emitAudit).mock.calls)).not.toMatch(/Test1234|hash|123/);
     });
 
     test('Set user to active', async () => {

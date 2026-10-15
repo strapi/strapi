@@ -210,9 +210,19 @@ export function buildPayload(input: {
   };
 }
 
-/** Wraps the payload in the markers later automation reads. */
+/** Wraps the marked payload in a collapsed section for humans and later automation. */
 export function renderJsonBlock(payload: ReleasePayload): string {
-  return [BLOCK_START, '```json', JSON.stringify(payload, null, 2), '```', BLOCK_END].join('\n');
+  return [
+    '<details>',
+    '<summary>Machine-readable release candidate data</summary>',
+    '',
+    BLOCK_START,
+    '```json',
+    JSON.stringify(payload, null, 2),
+    '```',
+    BLOCK_END,
+    '</details>',
+  ].join('\n');
 }
 
 /**

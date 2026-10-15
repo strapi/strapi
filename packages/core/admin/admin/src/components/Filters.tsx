@@ -33,7 +33,7 @@ import type { Schema } from '@strapi/types';
 interface FilterFormData {
   name: string;
   filter: string;
-  value?: string;
+  value?: string | boolean | null;
 }
 
 /**
@@ -83,8 +83,7 @@ const getFilterDetails = (
 };
 
 interface RootProps
-  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>,
-    Popover.Props {
+  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>, Popover.Props {
   children: React.ReactNode;
 }
 
@@ -187,20 +186,27 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   }
 
   const handleSubmit = (data: FilterFormData) => {
-    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : (data.value ?? '');
+    /**
+     * There will ALWAYS be an option because we use the options to create the form data.
+     */
+    const fieldOptions = options.find((filter) => filter.name === data.name)!;
+    const type = fieldOptions.mainField?.type ?? fieldOptions.type;
+
+    /**
+     * An untouched boolean toggle is `undefined` but renders as `false`, and `false` itself is falsy,
+     * so it has to be stringified before the emptiness check below.
+     * A cleared toggle (`null`) stays empty.
+     */
+    const rawValue = data.value === undefined && type === 'boolean' ? false : (data.value ?? '');
+    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : String(rawValue);
 
     if (!value) {
       return;
     }
 
     if (onChange) {
-      onChange(data);
+      onChange({ ...data, value: rawValue });
     }
-
-    /**
-     * There will ALWAYS be an option because we use the options to create the form data.
-     */
-    const fieldOptions = options.find((filter) => filter.name === data.name)!;
 
     /**
      * If the filter is a relation, we need to nest the filter object,
@@ -277,7 +283,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                       label: filter.label,
                       value: filter.name,
                     })),
-                    placholder: formatMessage({
+                    placeholder: formatMessage({
                       id: 'app.utils.select-field',
                       defaultMessage: 'Select field',
                     }),
@@ -473,12 +479,23 @@ const AttributeTag = ({
   const setOpen = useFilters('AttributeTag', ({ setOpen }) => setOpen);
   const setEditingFilter = useFilters('AttributeTag', ({ setEditingFilter }) => setEditingFilter);
 
+  const type = mainField?.type ? mainField.type : filter.type;
+
+  const getEditValue = () => {
+    if (FILTERS_WITH_NO_VALUE.includes(operator)) {
+      return undefined;
+    }
+
+    // the query holds `'true'`/`'false'`, the toggle needs a real boolean
+    return type === 'boolean' ? value === 'true' : value;
+  };
+
   const handleEdit = () => {
     setEditingFilter({
       name,
       filter: operator,
       index,
-      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : value,
+      value: getEditValue(),
     });
     setOpen(true);
   };
@@ -486,8 +503,6 @@ const AttributeTag = ({
   const handleRemove = () => {
     onRemove(index);
   };
-
-  const type = mainField?.type ? mainField.type : filter.type;
 
   let formattedValue: string = value;
 
