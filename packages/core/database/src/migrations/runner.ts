@@ -68,25 +68,32 @@ export const createMigrationRunner = (opts: MigrationRunnerOptions) => {
 
     async up(): Promise<MigrationMeta[]> {
       const toBeApplied = await getPendingMigrations();
+      const applied: MigrationMeta[] = [];
 
       for (const migration of toBeApplied) {
         const start = Date.now();
 
         logEvent(opts.logger, 'migrating', migration.name);
 
+        const claimed = await opts.storage.tryClaimMigration({ name: migration.name });
+        if (!claimed) {
+          logEvent(opts.logger, 'skipped', migration.name, { reason: 'already_claimed' });
+          continue;
+        }
+
         try {
           await migration.up();
         } catch (error) {
+          await opts.storage.unlogMigration({ name: migration.name });
           throw wrapMigrationError(migration.name, 'up', error);
         }
 
-        await opts.storage.logMigration({ name: migration.name });
-
         const durationSeconds = (Date.now() - start) / 1000;
         logEvent(opts.logger, 'migrated', migration.name, { durationSeconds });
+        applied.push({ name: migration.name, path: migration.path });
       }
 
-      return toBeApplied.map(({ name, path }) => ({ name, path }));
+      return applied;
     },
 
     async down(): Promise<MigrationMeta[]> {
