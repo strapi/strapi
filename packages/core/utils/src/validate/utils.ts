@@ -1,11 +1,19 @@
-// lodash/fp curry does not handle async functions properly, and creates very "ugly" types,
-// so we will use our own version to ensure curried functions are typed correctly
+// Keep asynchronous return values in the types of partially applied functions.
 // TODO: Export this from root @strapi/utils so we don't have copies of it between packages
 
 import { ValidationError } from '../errors';
 
-export const throwInvalidKey = ({ key, path }: { key: string; path?: string | null }): never => {
-  const msg = path && path !== key ? `Invalid key ${key} at ${path}` : `Invalid key ${key}`;
+export const throwInvalidKey = ({
+  key,
+  path,
+  reason,
+}: {
+  key: string;
+  path?: string | null;
+  reason?: string;
+}): never => {
+  const location = path && path !== key ? `Invalid key ${key} at ${path}` : `Invalid key ${key}`;
+  const msg = reason ? `${location}: ${reason}` : location;
 
   throw new ValidationError(msg, {
     key,

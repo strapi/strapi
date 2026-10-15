@@ -55,8 +55,10 @@ interface TableHeader<TData = object, THeader = object> {
   sortable?: boolean;
 }
 
-interface TableContextValue<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
-  extends Pick<TableProps, 'footer'> {
+interface TableContextValue<
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+> extends Pick<TableProps, 'footer'> {
   colCount: number;
   hasHeaderCheckbox: boolean;
   headers: THeader[];
@@ -80,13 +82,15 @@ const GenericTableProvider = TableProvider as <
   props: TableContextValue<TRow, THeader> & { children?: React.ReactNode }
 ) => React.ReactElement;
 
-interface RootProps<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
-  extends Partial<
-    Pick<
-      TableContextValue<TRow, THeader>,
-      'footer' | 'headers' | 'isLoading' | 'rows' | 'selectedRows'
-    >
-  > {
+interface RootProps<
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+> extends Partial<
+  Pick<
+    TableContextValue<TRow, THeader>,
+    'footer' | 'headers' | 'isLoading' | 'rows' | 'selectedRows'
+  >
+> {
   children?: React.ReactNode;
   defaultSelectedRows?: TRow[];
   onSelectedRowsChange?: (selectedRows: TRow[]) => void;

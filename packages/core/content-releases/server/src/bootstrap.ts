@@ -70,8 +70,8 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     // We register middleware to handle ReleaseActions when changes on documents are made
-    strapi.documents.use(deleteActionsOnDelete(strapi));
-    strapi.documents.use(updateActionsOnUpdate(strapi));
+    strapi.documents.use(deleteActionsOnDelete);
+    strapi.documents.use(updateActionsOnUpdate);
 
     getService('scheduling', { strapi })
       .syncFromDatabase()
