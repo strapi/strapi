@@ -30,14 +30,14 @@ const getSharpOptions = (): SharpOptions | undefined => {
   return { limitInputPixels };
 };
 
-const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
-const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
-const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
+const FORMATS_TO_RESIZE = new Set(['jpeg', 'png', 'webp', 'tiff', 'gif']);
+const FORMATS_TO_PROCESS = new Set(['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif']);
+const FORMATS_TO_OPTIMIZE = new Set(['jpeg', 'png', 'webp', 'tiff', 'avif']);
 
 const isOptimizableFormat = (
   format: string | undefined
 ): format is 'jpeg' | 'png' | 'webp' | 'tiff' | 'avif' =>
-  format !== undefined && FORMATS_TO_OPTIMIZE.includes(format);
+  format !== undefined && FORMATS_TO_OPTIMIZE.has(format);
 
 const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
   new Promise<void>((resolve, reject) => {
@@ -294,7 +294,7 @@ const isOptimizableImage = async (file: UploadableFile) => {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_OPTIMIZE.includes(format);
+  return format && FORMATS_TO_OPTIMIZE.has(format);
 };
 
 const isResizableImage = async (file: UploadableFile) => {
@@ -306,7 +306,7 @@ const isResizableImage = async (file: UploadableFile) => {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_RESIZE.includes(format);
+  return format && FORMATS_TO_RESIZE.has(format);
 };
 
 const isImage = async (file: UploadableFile) => {
@@ -318,7 +318,7 @@ const isImage = async (file: UploadableFile) => {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_PROCESS.includes(format);
+  return format && FORMATS_TO_PROCESS.has(format);
 };
 
 const generateFileName = (name: string) => {

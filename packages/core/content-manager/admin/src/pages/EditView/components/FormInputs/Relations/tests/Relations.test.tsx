@@ -504,9 +504,11 @@ describe('Relations', () => {
         http.get('/content-manager/relations/:model/:fieldName', ({ request }) => {
           const params = new URL(request.url).searchParams;
           const search = params.get('_q') ?? '';
-          const idsToOmit = [...params.entries()]
-            .filter(([key]) => key.startsWith('idsToOmit'))
-            .map(([, value]) => value);
+          const idsToOmit = new Set(
+            [...params.entries()]
+              .filter(([key]) => key.startsWith('idsToOmit'))
+              .map(([, value]) => value)
+          );
 
           searchQueries.push(search);
 
@@ -519,7 +521,7 @@ describe('Relations', () => {
               name: `Category ${id}`,
             }))
             .filter((relation) => relation.name.includes(search))
-            .filter((relation) => !idsToOmit.includes(relation.id.toString()));
+            .filter((relation) => !idsToOmit.has(relation.id.toString()));
 
           return HttpResponse.json({
             results,
