@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import _ from 'lodash';
-import { defaults } from 'lodash/fp';
+import _, { defaults } from 'lodash';
+
 import { arrays, errors, emitAudit } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
@@ -352,7 +352,7 @@ const findOneByEmail = async (email: string, populate = []) => {
 const findPage = async (params = {}): Promise<unknown> => {
   const query = strapi
     .get('query-params')
-    .transform('admin::user', defaults({ populate: ['roles'] }, params));
+    .transform('admin::user', defaults({}, params, { populate: ['roles'] }));
 
   return strapi.db.query('admin::user').findPage(query);
 };

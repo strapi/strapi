@@ -1,6 +1,6 @@
 'use strict';
 
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import { async } from '@strapi/utils';
 
 import { createStrapiInstance } from 'api-tests/strapi';
@@ -623,14 +623,14 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           expect(workflowRes.body.data).toBeInstanceOf(Object);
           expect(workflowRes.body.data.stages).toBeInstanceOf(Array);
           expect(workflowRes.body.data.stages[0]).toMatchObject(
-            omit(['updatedAt'], stagesUpdateData[0])
+            omit(stagesUpdateData[0], ['updatedAt'])
           );
           expect(workflowRes.body.data.stages[1]).toMatchObject(
-            omit(['updatedAt'], stagesUpdateData[1])
+            omit(stagesUpdateData[1], ['updatedAt'])
           );
           expect(workflowRes.body.data.stages[2]).toMatchObject({
             id: expect.any(Number),
-            ...omit(['updatedAt'], stagesUpdateData[2]),
+            ...omit(stagesUpdateData[2], ['updatedAt']),
           });
         } else {
           expect(workflowRes.status).toBe(404);

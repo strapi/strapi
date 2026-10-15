@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import { keyBy, omit } from 'lodash/fp';
+import { keyBy, omit } from 'lodash';
 
 import type { Data, UID, Schema } from '@strapi/types';
 
@@ -148,7 +148,7 @@ const load = async (
 
                 return !matchingOldVersion;
               })
-              .map(omit(strapi.db.metadata.identifiers.ID_COLUMN));
+              .map((value) => omit(value, strapi.db.metadata.identifiers.ID_COLUMN));
 
             updates.push({ joinTable, relations: discardToAdd });
           }
@@ -181,7 +181,7 @@ const sync = async (
    *
    * Will be used to update the relation target ids
    */
-  const newEntryByLocale = keyBy('locale', newEntries);
+  const newEntryByLocale = keyBy(newEntries, 'locale');
   const oldEntriesMap = oldEntries.reduce(
     (acc, entry) => {
       const newEntry = newEntryByLocale[entry.locale];
