@@ -199,7 +199,7 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] =>
  */
 export const registerUploadMcpTools = ({ strapi }: { strapi: Core.Strapi }): void => {
   // No `isEnabled()` gate: registerTool() only stores the definition, and the MCP server never
-  // exposes it when disabled, so registering unconditionally is a no-op there. The three
+  // exposes it when disabled, so registering unconditionally is a no-op there. The
   // definitions are static, so there is no derivation cost worth guarding either.
   for (const tool of buildUploadMcpToolDefinitions()) {
     strapi.ai?.mcp?.registerTool(tool);
