@@ -56,7 +56,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version `>= v22 and <= v26` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version `>= v22 and <= v26` and [Yarn](https://yarnpkg.com/en/) 4 installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -137,7 +137,7 @@ Both commands must be running at same time; now you will be able to see the admi
 ### 6. Available commands
 
 - `yarn watch` starts yarn watch in all packages.
-- `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn build` builds all packages (code and types).
 - `yarn commit` runs an interactive commit CLI to help you write a good commit message inline with our git conventions.
 - `yarn setup` installs dependencies.
 - `yarn lint` lints the codebase.
@@ -147,8 +147,6 @@ Both commands must be running at same time; now you will be able to see the admi
 - `yarn test:unit` runs the back-end unit tests.
 - `yarn test:api` runs the api integration tests.
 - `yarn test:generate-app` generates a test application.
-- `yarn test:run-app` runs a test application.
-- `yarn test:start-app` starts the test application.
 
 ---
 
