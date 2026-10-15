@@ -140,23 +140,12 @@ describe('transformers', () => {
       details: { reason: 'ValidationError' },
     });
 
-    // A custom error class can put arbitrary text in its name, on a failed or a partial run
+    // A custom error class can put arbitrary text in its name
     expect(
       transformers['release.trigger']({
         releaseId: 1,
         name: 'March',
         outcome: 'failure',
-        reason: 'X'.repeat(500),
-      }).details.reason
-    ).toHaveLength(100);
-    expect(
-      transformers['release.trigger']({
-        releaseId: 1,
-        name: 'March',
-        outcome: 'partial',
-        published: 1,
-        unpublished: 0,
-        failed: 0,
         reason: 'X'.repeat(500),
       }).details.reason
     ).toHaveLength(100);

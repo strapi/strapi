@@ -89,8 +89,6 @@ export interface TriggerDetails {
   unpublished: number;
   /** Entries the run left out: not publishable, or their publish or unpublish threw */
   failed: number;
-  /** Only on a partial run that an error stopped after it released entries: the error's name */
-  reason?: string;
 }
 
 /** A run that released nothing: its writes were rolled back */
@@ -237,7 +235,6 @@ export const registerAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
           published: event.published,
           unpublished: event.unpublished,
           failed: event.failed,
-          ...(event.reason && { reason: event.reason.slice(0, MAX_REASON_LENGTH) }),
         },
       };
     }
