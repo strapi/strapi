@@ -173,6 +173,14 @@ const LazyFormRow = ({ fields, mountImmediately = false, children }: LazyFormRow
     fields.some(({ name }) => name in state.errors)
   );
 
+  // Once mounted for an error, the row stays mounted when the errors are cleared (every
+  // validation starts by clearing them), so its state (e.g. open blocks) is preserved.
+  React.useEffect(() => {
+    if (hasError) {
+      setIsVisible(true);
+    }
+  }, [hasError]);
+
   const shouldMount = isVisible || hasError;
 
   React.useEffect(() => {
