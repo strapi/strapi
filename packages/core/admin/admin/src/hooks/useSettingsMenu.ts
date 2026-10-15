@@ -30,11 +30,13 @@ const formatLinks = (menu: SettingsMenuSection[]): SettingsMenuSectionWithDispla
 interface SettingsMenuLinkWithPermissions extends SettingsMenuLink {
   permissions: IStrapiAppSettingLink['permissions'];
   hasNotification?: boolean;
+  notificationVariant?: 'primary' | 'warning';
 }
 
 interface StrapiAppSettingsLink extends IStrapiAppSettingLink {
   licenseOnly?: never;
   hasNotification?: never;
+  notificationVariant?: never;
 }
 
 interface SettingsMenuSection extends Omit<StrapiAppSetting, 'links'> {
@@ -71,6 +73,7 @@ const useSettingsMenu = (): {
     (state) => state.checkUserHasPermissions
   );
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
+  const strapiUpdateSeverity = useAppInfo('useSettingsMenu', (state) => state.strapiUpdateSeverity);
   const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
   const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
   const permissions = useSelector(selectAdminPermissions);
@@ -165,6 +168,7 @@ const useSettingsMenu = (): {
           (link) => ({
             ...link,
             hasNotification: link.id === '000-application-infos' && shouldUpdateStrapi,
+            notificationVariant: strapiUpdateSeverity === 'urgent' ? 'warning' : 'primary',
           })
         ),
       },
@@ -182,6 +186,7 @@ const useSettingsMenu = (): {
     globalLinks,
     settings,
     shouldUpdateStrapi,
+    strapiUpdateSeverity,
     addPermissions,
     checkUserHasPermission,
   ]);

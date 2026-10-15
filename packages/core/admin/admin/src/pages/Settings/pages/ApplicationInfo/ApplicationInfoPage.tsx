@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, Link, Typography } from '@strapi/design-system';
-import { Check, ExternalLink } from '@strapi/icons';
+import { Badge, Box, Button, Flex, Grid, Typography } from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
@@ -16,6 +16,7 @@ import { selectAdminPermissions } from '../../../../selectors';
 import { LogoInput, LogoInputProps } from './components/LogoInput';
 import { PlanCard } from './components/PlanCard';
 import { SupportCard } from './components/SupportCard';
+import { UpgradeBanner } from './components/UpgradeBanner';
 import { DIMENSION, SIZE } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
@@ -29,12 +30,19 @@ const ApplicationInfoPage = () => {
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 
-  const latestStrapiReleaseTag = useAppInfo(
-    'ApplicationInfoPage',
-    (state) => state.latestStrapiReleaseTag
-  );
   const nodeVersion = useAppInfo('ApplicationInfoPage', (state) => state.nodeVersion);
-  const shouldUpdateStrapi = useAppInfo('ApplicationInfoPage', (state) => state.shouldUpdateStrapi);
+  const strapiUpdateSeverity = useAppInfo(
+    'ApplicationInfoPage',
+    (state) => state.strapiUpdateSeverity
+  );
+  const strapiReleasesBehind = useAppInfo(
+    'ApplicationInfoPage',
+    (state) => state.strapiReleasesBehind
+  );
+  const isStrapiMajorBehind = useAppInfo(
+    'ApplicationInfoPage',
+    (state) => state.isStrapiMajorBehind
+  );
   const strapiVersion = useAppInfo('ApplicationInfoPage', (state) => state.strapiVersion);
 
   const {
@@ -115,6 +123,7 @@ const ApplicationInfoPage = () => {
           />
           <Layouts.Content>
             <Flex direction="column" alignItems="stretch" gap={6}>
+              <UpgradeBanner />
               <Flex
                 direction="column"
                 alignItems="stretch"
@@ -142,20 +151,32 @@ const ApplicationInfoPage = () => {
                         defaultMessage: 'strapi version',
                       })}
                     </Typography>
-                    <Flex gap={3} direction="column" alignItems="start" tag="dd">
+                    <Flex gap={2} alignItems="center" wrap="wrap" tag="dd">
                       <Typography>v{strapiVersion}</Typography>
-                      {shouldUpdateStrapi && (
-                        <Link
-                          href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
-                          endIcon={<ExternalLink />}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
+                      {strapiUpdateSeverity === 'default' && (
+                        <Badge variant="primary">
                           {formatMessage({
-                            id: 'Settings.application.link-upgrade',
-                            defaultMessage: 'Upgrade your admin panel',
+                            id: 'Settings.application.update-badge.available',
+                            defaultMessage: 'Update available',
                           })}
-                        </Link>
+                        </Badge>
+                      )}
+                      {strapiUpdateSeverity === 'urgent' && (
+                        <Badge variant="warning">
+                          {isStrapiMajorBehind
+                            ? formatMessage({
+                                id: 'Settings.application.update-badge.major-behind',
+                                defaultMessage: 'Major update available',
+                              })
+                            : formatMessage(
+                                {
+                                  id: 'Settings.application.update-badge.releases-behind',
+                                  defaultMessage:
+                                    '{count, plural, one {# release} other {# releases}} behind',
+                                },
+                                { count: strapiReleasesBehind }
+                              )}
+                        </Badge>
                       )}
                     </Flex>
                   </Grid.Item>

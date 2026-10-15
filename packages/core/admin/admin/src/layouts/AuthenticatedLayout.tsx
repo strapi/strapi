@@ -5,8 +5,6 @@ import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import lt from 'semver/functions/lt';
-import valid from 'semver/functions/valid';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
@@ -20,6 +18,7 @@ import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { useMenu } from '../hooks/useMenu';
 import { useInformationQuery } from '../services/admin';
+import { getStrapiUpdateInfo } from '../utils/strapiUpdate';
 import { hashAdminUserEmail } from '../utils/users';
 
 import { useAuthenticatedAccessTracking } from './useAuthenticatedAccessTracking';
@@ -67,13 +66,15 @@ const AdminLayout = () => {
     });
   }, [userInfo]);
 
+  const strapiUpdate = getStrapiUpdateInfo(strapiVersion, tagName);
+
   const {
     isLoading: isLoadingMenu,
     generalSectionLinks,
     pluginsSectionLinks,
     topMobileNavigation,
     burgerMobileNavigation,
-  } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName), appInfo?.currentEnvironment);
+  } = useMenu(strapiUpdate.severity, appInfo?.currentEnvironment);
 
   const projectId = appInfo?.projectId;
   useAuthenticatedAccessTracking(projectId);
@@ -89,7 +90,10 @@ const AdminLayout = () => {
       {...appInfo}
       userId={userId}
       latestStrapiReleaseTag={tagName}
-      shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
+      shouldUpdateStrapi={strapiUpdate.severity !== 'none'}
+      strapiUpdateSeverity={strapiUpdate.severity}
+      strapiReleasesBehind={strapiUpdate.releasesBehind}
+      isStrapiMajorBehind={strapiUpdate.isMajorBehind}
     >
       <NpsSurvey />
       <PluginsInitializer>
@@ -145,17 +149,6 @@ const PrivateAdminLayout = () => {
       <AdminLayout />
     </PrivateRoute>
   );
-};
-
-const checkLatestStrapiVersion = (
-  currentPackageVersion: string,
-  latestPublishedVersion: string = ''
-): boolean => {
-  if (!valid(currentPackageVersion) || !valid(latestPublishedVersion)) {
-    return false;
-  }
-
-  return lt(currentPackageVersion, latestPublishedVersion);
 };
 
 export { AdminLayout, PrivateAdminLayout };
