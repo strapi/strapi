@@ -68,6 +68,7 @@ export interface Config {
   sharp?: {
     cache?: boolean;
     concurrency?: number;
+    limitInputPixels?: number | boolean;
   };
   /** Server-side ceiling: files processed in parallel within a single request. */
   concurrentUploadSize?: number;
