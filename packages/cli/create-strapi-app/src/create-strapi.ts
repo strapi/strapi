@@ -277,9 +277,10 @@ async function createApp(scope: Scope) {
       `${chalk.cyan('cd')} ${projectFolder}`,
       `${chalk.cyan(packageManager)} install`,
       !shouldRunSeed && useExample ? `${cmd} seed:example && ${cmd} develop` : `${cmd} develop`,
+      '',
     ]);
   }
-  logger.log(['Documentation:', '', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
+  logger.log(['Documentation:', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
 
   if (runApp && installDependencies) {
     logger.title('Run', 'Running your Strapi application');
