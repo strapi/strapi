@@ -5,9 +5,10 @@ import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
-import permissionDomain from '../domain/permission';
+import permissionDomain, { type CreatePermissionPayload } from '../domain/permission';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
 import type { Action } from '../domain/action';
+import type { CeilingPermission } from '../domain/permission/ceiling';
 
 import { validatePermissionsExist } from '../validation/permission';
 import roleConstants from './constants';
@@ -16,7 +17,7 @@ import { getService } from '../utils';
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION, ROLE_TEXT_MAX_LENGTH } = roleConstants;
 
 const { createAsyncSeriesWaterfallHook } = hooksUtils;
-const { ApplicationError } = errors;
+const { ApplicationError, ForbiddenError } = errors;
 
 const hooks = {
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
@@ -393,6 +394,72 @@ const assignPermissions = async (
   return permissionsToReturn;
 };
 
+/**
+ * Who updates the role, which decides the permissions they can grant: an admin user grants up
+ * to their own permissions (all of them for a super admin), an admin token up to the token's
+ * permissions, whoever owns it.
+ */
+export type CeilingRequester = { user: AdminUser } | { tokenPermissions: CeilingPermission[] };
+
+const findRequesterPermissions = async (
+  requester: CeilingRequester
+): Promise<CeilingPermission[] | null> => {
+  if ('tokenPermissions' in requester) {
+    return requester.tokenPermissions;
+  }
+
+  if (hasSuperAdminRole(requester.user)) {
+    return null;
+  }
+
+  return getService('permission').findUserPermissions(requester.user);
+};
+
+/**
+ * Make sure a requester cannot grant a role permissions they do not hold themselves.
+ * Only permissions that are new to the role are checked: permissions the role already
+ * carries are preserved as they are, and removing them is always allowed.
+ * @param requester - the admin user or admin token performing the update
+ * @param roleId - the role being updated
+ * @param permissions - the permissions requested for the role
+ */
+const checkPermissionsCeiling = async (
+  requester: CeilingRequester,
+  roleId: Data.ID,
+  permissions: CreatePermissionPayload[] = []
+): Promise<void> => {
+  const heldPermissions = await findRequesterPermissions(requester);
+
+  // Super admins hold every permission
+  if (heldPermissions === null) {
+    return;
+  }
+
+  const permissionService = getService('permission');
+
+  const existingPermissions = await permissionService.findMany({
+    where: { role: { id: roleId } },
+  });
+
+  const newPermissions = differenceWith(
+    permissions.map((permission) => permissionDomain.create(permission)),
+    existingPermissions,
+    arePermissionsEqual
+  );
+
+  const rejectedPermissions = newPermissions.filter(
+    (permission) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, heldPermissions)
+  );
+
+  if (rejectedPermissions.length > 0) {
+    throw new ForbiddenError('You cannot grant permissions you do not hold yourself', {
+      permissions: rejectedPermissions.map((permission) =>
+        pick(permission, ['action', 'subject', 'properties', 'conditions'])
+      ),
+    });
+  }
+};
+
 const addPermissions = async (roleId: Data.ID, permissions: any) => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
@@ -487,6 +554,7 @@ export default {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   hasSuperAdminRole,
+  checkPermissionsCeiling,
   assignPermissions,
   resetSuperAdminPermissions,
   checkRolesIdForDeletion,

@@ -148,3 +148,20 @@ The permissions are modified in the admin panel (on the [edit page](http://local
 | **conditions**       | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
 
 A permission contains all needed information for the backend and the frontend to prevent users to perform non-permitted action.
+
+### Permission ceiling
+
+A user's permissions can act as a ceiling: the set of permissions they are allowed to hand on to someone else. The rules live in `server/src/domain/permission/ceiling.ts`.
+
+The permission engine registers every stored permission as its own rule, with its fields, locales and conditions applying together. Holding `title` on `en` through one permission and `body` on `fr` through another does not give `title` on `fr`. The ceiling follows the same rule. A requested permission is split into atoms, one per combination of a value of every restricted property (`fields`, `locales`, ...) and a condition, and it is within the ceiling when:
+
+- the user holds a permission with the same `action` and `subject` (a held permission with `fields: []` grants nothing and does not count; requesting `fields: []` is always allowed for the same reason);
+- an empty list on a property other than `fields` (`locales: []`) grants no value of that property, so it adds no dimension and needs nothing to cover it, but the other properties and the conditions are still checked;
+- every atom is covered by a single held permission. A held permission covers a property value when it does not restrict the property (unset or `null`) or lists the value (a nested field is covered by its parent, `seo.title` by `seo`), and covers a condition when it is unconditional or lists it. A request that is unrestricted on a property or carries no condition only matches a held permission unrestricted on the same dimension, so omitting a restricted property, sending `null`, or dropping the conditions is rejected.
+
+Different atoms may be covered by different held permissions, so unions on one dimension stay valid: `title` and `body` held separately allow `[title, body]`, `title@en` plus `title@fr` allow `title@[en, fr]`, and `title` under `is-creator` plus `title` under `has-same-role-as-creator` allow both conditions, because the engine ORs the two rules to the same effect. Mixing dimensions is not: `title@en` plus `body@fr` do not allow `title@fr`, and `title` unconditional plus `body` under `is-creator` do not allow `body` unconditional.
+
+Where it applies:
+
+- **Roles**: for every user except super admins. `PUT /admin/roles/:id/permissions` rejects permissions outside the requester's ceiling with a 403 listing them in `error.details.permissions`. A request made with an admin token is checked against the token's own permissions (`adminPermissions`), not its owner's, with no super-admin bypass. Permissions the role already carries are not checked, so a requester can keep or remove them but not change them. The role editor mirrors the rule in `admin/src/pages/Settings/pages/Roles/utils/createPermissionChecker.ts`: for each action it disables the values and conditions that cannot be added to what is already ticked, and a bulk tick picks one held combination rather than mixing several.
+- **Admin tokens**: a token cannot carry more than its owner holds. This check lives in `server/src/services/api-token.ts` (`enforceAdminPermissionsCeiling`) with its own rules: only `fields` are compared, fields and conditions are unioned across the owner's matching permissions (so it does not prevent the recombination described above yet), conditions are inherited from the owner instead of chosen, out-of-ceiling permissions are rejected with a 400, and token permissions are re-clamped when the owner's roles change (`reconcileTokenPermissionsToUserCeiling`). It does not use `ceiling.ts` yet.
