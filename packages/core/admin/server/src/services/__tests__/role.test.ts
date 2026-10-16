@@ -1071,7 +1071,9 @@ describe('Role', () => {
       const { findUserPermissions, findMany } = setupStrapi();
 
       await expect(
-        checkPermissionsCeiling(superAdminUser, ROLE_ID, [{ action: READ, subject: ARTICLE }])
+        checkPermissionsCeiling({ user: superAdminUser }, ROLE_ID, [
+          { action: READ, subject: ARTICLE },
+        ])
       ).resolves.toBeUndefined();
 
       expect(findUserPermissions).not.toHaveBeenCalled();
@@ -1083,7 +1085,7 @@ describe('Role', () => {
         userPermissions: [{ action: READ, subject: ARTICLE }],
       });
 
-      await checkPermissionsCeiling(user, ROLE_ID, [{ action: READ, subject: ARTICLE }]);
+      await checkPermissionsCeiling({ user }, ROLE_ID, [{ action: READ, subject: ARTICLE }]);
 
       expect(findUserPermissions).toHaveBeenCalledWith(user);
       expect(findMany).toHaveBeenCalledWith({ where: { role: { id: ROLE_ID } } });
@@ -1093,7 +1095,7 @@ describe('Role', () => {
       setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
 
       await expectForbidden(
-        checkPermissionsCeiling(user, ROLE_ID, [
+        checkPermissionsCeiling({ user }, ROLE_ID, [
           { action: READ, subject: ARTICLE },
           { action: READ, subject: AUTHOR },
           { action: CREATE, subject: ARTICLE },
@@ -1109,8 +1111,76 @@ describe('Role', () => {
       setupStrapi({ userPermissions: [{ action: 'admin::roles.read', subject: null }] });
 
       await expect(
-        checkPermissionsCeiling(user, ROLE_ID, [{ action: 'admin::roles.read' }])
+        checkPermissionsCeiling({ user }, ROLE_ID, [{ action: 'admin::roles.read' }])
       ).resolves.toBeUndefined();
+    });
+
+    test('Checks the other properties when a property lists no value', async () => {
+      setupStrapi({
+        userPermissions: [
+          { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['en'] } },
+        ],
+      });
+
+      await expectForbidden(
+        checkPermissionsCeiling({ user }, ROLE_ID, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['body'], locales: [] } },
+        ]),
+        [
+          {
+            action: READ,
+            subject: ARTICLE,
+            properties: { fields: ['body'], locales: [] },
+            conditions: [],
+          },
+        ]
+      );
+    });
+
+    describe('admin token requesters', () => {
+      // Everything a super admin would hold on articles, but not on authors
+      const superAdminLikeTokenPermissions = toPermission([
+        { action: READ, subject: ARTICLE },
+        { action: CREATE, subject: ARTICLE },
+        { action: 'admin::roles.update' },
+      ]);
+
+      test('Checks the token permissions with no super-admin bypass', async () => {
+        const { findUserPermissions, findMany } = setupStrapi();
+
+        await expectForbidden(
+          checkPermissionsCeiling({ tokenPermissions: superAdminLikeTokenPermissions }, ROLE_ID, [
+            { action: READ, subject: ARTICLE },
+            { action: READ, subject: AUTHOR },
+          ]),
+          [{ action: READ, subject: AUTHOR, properties: {}, conditions: [] }]
+        );
+
+        expect(findUserPermissions).not.toHaveBeenCalled();
+        expect(findMany).toHaveBeenCalledWith({ where: { role: { id: ROLE_ID } } });
+      });
+
+      test('Allows permissions the token holds', async () => {
+        setupStrapi();
+
+        await expect(
+          checkPermissionsCeiling({ tokenPermissions: superAdminLikeTokenPermissions }, ROLE_ID, [
+            { action: READ, subject: ARTICLE },
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Rejects everything when the token holds no permission', async () => {
+        setupStrapi();
+
+        await expectForbidden(
+          checkPermissionsCeiling({ tokenPermissions: [] }, ROLE_ID, [
+            { action: READ, subject: ARTICLE },
+          ]),
+          [{ action: READ, subject: ARTICLE, properties: {}, conditions: [] }]
+        );
+      });
     });
 
     describe('permissions the role already holds', () => {
@@ -1129,14 +1199,14 @@ describe('Role', () => {
         });
 
         await expect(
-          checkPermissionsCeiling(user, ROLE_ID, [
+          checkPermissionsCeiling({ user }, ROLE_ID, [
             { action: READ, subject: ARTICLE },
             { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
           ])
         ).resolves.toBeUndefined();
 
         await expectForbidden(
-          checkPermissionsCeiling(user, ROLE_ID, [
+          checkPermissionsCeiling({ user }, ROLE_ID, [
             { action: READ, subject: ARTICLE },
             { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
             { action: CREATE, subject: AUTHOR },
@@ -1160,7 +1230,7 @@ describe('Role', () => {
         });
 
         await expectForbidden(
-          checkPermissionsCeiling(user, ROLE_ID, [
+          checkPermissionsCeiling({ user }, ROLE_ID, [
             { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'body'] } },
           ]),
           [
@@ -1180,7 +1250,7 @@ describe('Role', () => {
           rolePermissions: [{ id: 1, role: ROLE_ID, action: CREATE, subject: ARTICLE }],
         });
 
-        await expect(checkPermissionsCeiling(user, ROLE_ID, [])).resolves.toBeUndefined();
+        await expect(checkPermissionsCeiling({ user }, ROLE_ID, [])).resolves.toBeUndefined();
       });
     });
   });

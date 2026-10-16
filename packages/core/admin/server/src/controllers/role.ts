@@ -20,9 +20,36 @@ import type {
   BatchDelete,
 } from '../../../shared/contracts/roles';
 import { AdminRole } from '../../../shared/contracts/shared';
+import type { AdminApiToken } from '../../../shared/contracts/admin-token';
+import type { CeilingRequester } from '../services/role';
+import adminTokenStrategy from '../strategies/admin-token';
 
 const { ApplicationError, ForbiddenError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
+
+/**
+ * The part of `ctx.state.auth` (set by the auth service) used to tell an admin token request
+ * from an admin user one.
+ */
+interface RequestAuth {
+  strategy?: { name?: string };
+  credentials?: Partial<Pick<AdminApiToken, 'adminPermissions'>> | null;
+}
+
+/**
+ * A request made with an admin token can only grant the token's own permissions. Its owner is
+ * in `ctx.state.user`, but the token may hold fewer permissions, and a super-admin owner must
+ * not lift the check.
+ */
+const getCeilingRequester = (ctx: Context): CeilingRequester => {
+  const auth: RequestAuth | undefined = ctx.state.auth;
+
+  if (auth?.strategy?.name === adminTokenStrategy.name) {
+    return { tokenPermissions: auth.credentials?.adminPermissions ?? [] };
+  }
+
+  return { user: ctx.state.user };
+};
 
 export default {
   /**
@@ -167,7 +194,11 @@ export default {
     )) as typeof input.permissions;
 
     try {
-      await roleService.checkPermissionsCeiling(ctx.state.user, role.id, normalizedPermissions);
+      await roleService.checkPermissionsCeiling(
+        getCeilingRequester(ctx),
+        role.id,
+        normalizedPermissions
+      );
     } catch (error) {
       // A ForbiddenError thrown from a controller is turned into a bare 403 by the auth
       // middleware, so respond here to keep the message and the rejected permissions.

@@ -11,6 +11,10 @@
  * a single held permission. Different atoms may be covered by different held permissions, so
  * same-dimension unions (`title` plus `body`, `en` plus `fr`) stay valid.
  *
+ * An empty list on a property other than `fields` (`locales: []`) grants no value of that
+ * property, so it is not a dimension: it needs nothing to cover it, but the other properties and
+ * the conditions are still checked. An empty `fields` list grants nothing at all.
+ *
  * Admin tokens enforce a similar ceiling against the token owner in `services/api-token.ts`
  * (`enforceAdminPermissionsCeiling`), with its own rules for now: fields only, and conditions
  * inherited from the owner instead of chosen.
@@ -142,17 +146,22 @@ interface PropertyDimension {
 
 /**
  * The requested values of a property as a dimension: `[null]` when the request is not
- * restricted on it, the listed values otherwise. An empty list gives no atoms at all, so a
- * request that lists no value on a property grants nothing and is vacuously within the ceiling.
+ * restricted on it, the listed values otherwise. An empty list grants no value of the property
+ * (i18n enforces `locales: []` as `locale $in []`, and ignores it on non-localized subjects), so
+ * it is not a dimension (`null`). The other properties and the conditions are still checked.
  */
 const getPropertyDimension = (
   requested: CeilingPermission,
   property: string
-): PropertyDimension => {
+): PropertyDimension | null => {
   const requestedValues = requested.properties?.[property];
 
   if (!Array.isArray(requestedValues)) {
     return { property, values: [null] };
+  }
+
+  if (requestedValues.length === 0) {
+    return null;
   }
 
   return { property, values: uniq(requestedValues as string[]) };
@@ -197,9 +206,9 @@ export const isPermissionWithinCeiling = (
     return false;
   }
 
-  const dimensions = getRestrictedProperties(requested, matching).map((property) =>
-    getPropertyDimension(requested, property)
-  );
+  const dimensions = getRestrictedProperties(requested, matching)
+    .map((property) => getPropertyDimension(requested, property))
+    .filter((dimension): dimension is PropertyDimension => dimension !== null);
 
   const requestedConditions = requested.conditions ?? [];
   const conditions: (string | null)[] =

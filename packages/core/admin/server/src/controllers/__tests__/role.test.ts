@@ -304,7 +304,7 @@ describe('Role controller', () => {
         },
       ];
 
-      const setup = (checkPermissionsCeiling: jest.Mock) => {
+      const setup = (checkPermissionsCeiling: jest.Mock, state: Record<string, unknown> = {}) => {
         const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
 
         const ctx = createContext(
@@ -314,7 +314,7 @@ describe('Role controller', () => {
               permissions: inputPermissions,
             },
           },
-          { state: { user } }
+          { state: { user, ...state } }
         ) as any;
 
         global.strapi = {
@@ -363,10 +363,60 @@ describe('Role controller', () => {
 
         await roleController.updatePermissions(ctx);
 
-        expect(checkPermissionsCeiling).toHaveBeenCalledWith(user, roleID, normalizedPermissions);
+        expect(checkPermissionsCeiling).toHaveBeenCalledWith(
+          { user },
+          roleID,
+          normalizedPermissions
+        );
         expect(assignPermissions).toHaveBeenCalledWith(roleID, normalizedPermissions);
         expect(checkPermissionsCeiling.mock.invocationCallOrder[0]).toBeLessThan(
           assignPermissions.mock.invocationCallOrder[0]
+        );
+      });
+
+      test('Checks an admin user session against the user', async () => {
+        const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
+        const { ctx } = setup(checkPermissionsCeiling, {
+          auth: { strategy: { name: 'admin' }, credentials: user },
+        });
+
+        await roleController.updatePermissions(ctx);
+
+        expect(checkPermissionsCeiling).toHaveBeenCalledWith(
+          { user },
+          roleID,
+          normalizedPermissions
+        );
+      });
+
+      test("Checks an admin token request against the token's permissions, not its owner", async () => {
+        const adminPermissions = [{ action: 'admin::roles.update', subject: null }];
+        const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
+        const { ctx } = setup(checkPermissionsCeiling, {
+          auth: { strategy: { name: 'admin-token' }, credentials: { adminPermissions } },
+        });
+
+        await roleController.updatePermissions(ctx);
+
+        expect(checkPermissionsCeiling).toHaveBeenCalledWith(
+          { tokenPermissions: adminPermissions },
+          roleID,
+          normalizedPermissions
+        );
+      });
+
+      test('Checks an admin token request with no loaded permissions against nothing', async () => {
+        const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
+        const { ctx } = setup(checkPermissionsCeiling, {
+          auth: { strategy: { name: 'admin-token' }, credentials: {} },
+        });
+
+        await roleController.updatePermissions(ctx);
+
+        expect(checkPermissionsCeiling).toHaveBeenCalledWith(
+          { tokenPermissions: [] },
+          roleID,
+          normalizedPermissions
         );
       });
 

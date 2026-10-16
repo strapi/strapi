@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
+const { createAuthRequest, createRequest } = require('api-tests/request');
 const { createUtils } = require('api-tests/utils');
 
 const data = {
@@ -908,6 +908,58 @@ describe('Role CRUD End to End', () => {
       expect(sameDimensionRes.statusCode).toBe(200);
     });
 
+    test('Still checks fields and conditions when a property lists no value', async () => {
+      // `locales: []` is accepted on any content-type action because i18n adds `locales` to all
+      // of them, and stays as is on a non-localized subject like this one
+      const rolePermissionsBefore = await getTargetRolePermissions();
+
+      const unheldField = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['password'], locales: [] },
+        conditions: [],
+      };
+      const omittedFields = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { locales: [] },
+        conditions: [],
+      };
+      // Only held under `admin::is-creator`
+      const droppedConditions = {
+        action: CREATE_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'], locales: [] },
+        conditions: [],
+      };
+
+      for (const permission of [unheldField, omittedFields, droppedConditions]) {
+        const res = await updateTargetRolePermissions(rqRequester, [permission]);
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error.details.permissions).toEqual([permission]);
+        expect(await getTargetRolePermissions()).toEqual(rolePermissionsBefore);
+      }
+
+      const heldFieldRes = await updateTargetRolePermissions(rqRequester, [
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'], locales: [] },
+          conditions: [],
+        },
+      ]);
+      expect(heldFieldRes.statusCode).toBe(200);
+
+      const rolePermissions = await getTargetRolePermissions();
+      expect(rolePermissions).toHaveLength(1);
+      expect(rolePermissions[0]).toMatchObject({
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'], locales: [] },
+      });
+    });
+
     test('Preserves permissions the role already holds, even if the requester does not hold them', async () => {
       const outOfScopePermission = {
         action: OUT_OF_SCOPE_ACTION,
@@ -954,6 +1006,68 @@ describe('Role CRUD End to End', () => {
       const rolePermissions = await getTargetRolePermissions();
       expect(rolePermissions).toHaveLength(1);
       expect(rolePermissions[0]).toMatchObject(inScopePermission);
+    });
+
+    /**
+     * A request made with an admin token is checked against the token's own permissions, even
+     * when its owner (here the super admin) holds more.
+     */
+    describe('with an admin token', () => {
+      const ROLE_PERMISSIONS = [
+        { action: 'admin::roles.read', subject: null, conditions: [], properties: {} },
+        { action: 'admin::roles.update', subject: null, conditions: [], properties: {} },
+      ];
+      const readPermission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: {},
+        conditions: [],
+      };
+
+      const tokenIds = [];
+
+      const createAdminToken = async (name, adminPermissions) => {
+        const res = await rq({
+          url: '/admin/admin-tokens',
+          method: 'POST',
+          body: { name, adminPermissions },
+        });
+
+        expect(res.statusCode).toBe(201);
+        tokenIds.push(res.body.data.id);
+
+        return createRequest({ strapi }).setToken(res.body.data.accessKey);
+      };
+
+      afterAll(async () => {
+        await strapi.db.query('admin::api-token').deleteMany({ where: { id: { $in: tokenIds } } });
+      });
+
+      test('Cannot grant a permission the token does not hold, even if its owner does', async () => {
+        const rolePermissionsBefore = await getTargetRolePermissions();
+        const rqToken = await createAdminToken('ceiling-roles-only-token', ROLE_PERMISSIONS);
+
+        const res = await updateTargetRolePermissions(rqToken, [readPermission]);
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error.details.permissions).toEqual([readPermission]);
+        expect(await getTargetRolePermissions()).toEqual(rolePermissionsBefore);
+      });
+
+      test('Can grant a permission the token holds', async () => {
+        const rqToken = await createAdminToken('ceiling-roles-and-read-token', [
+          ...ROLE_PERMISSIONS,
+          readPermission,
+        ]);
+
+        const res = await updateTargetRolePermissions(rqToken, [readPermission]);
+
+        expect(res.statusCode).toBe(200);
+
+        const rolePermissions = await getTargetRolePermissions();
+        expect(rolePermissions).toHaveLength(1);
+        expect(rolePermissions[0]).toMatchObject({ action: READ_ACTION, subject: SUBJECT });
+      });
     });
   });
 });

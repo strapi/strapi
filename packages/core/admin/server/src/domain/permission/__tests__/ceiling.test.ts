@@ -522,10 +522,36 @@ describe('Permission ceiling', () => {
         ).toBe(false);
       });
 
-      test('Treats a property listing no value as granting nothing', () => {
+      test('Does not need a property listing no value to be covered', () => {
         expect(
           isPermissionWithinCeiling(request({ fields: ['title'], locales: [] }), [titleEn])
         ).toBe(true);
+      });
+
+      test('Still checks the other properties when a property lists no value', () => {
+        expect(
+          isPermissionWithinCeiling(request({ fields: ['body'], locales: [] }), [titleEn])
+        ).toBe(false);
+        expect(isPermissionWithinCeiling(request({ locales: [] }), [titleEn])).toBe(false);
+      });
+
+      test('Still checks the conditions when a property lists no value', () => {
+        const titleEnIfCreator = { ...titleEn, conditions: [IS_CREATOR] };
+
+        expect(
+          isPermissionWithinCeiling(request({ fields: ['title'], locales: [] }), [titleEnIfCreator])
+        ).toBe(false);
+        expect(
+          isPermissionWithinCeiling(request({ fields: ['title'], locales: [] }, [IS_CREATOR]), [
+            titleEnIfCreator,
+          ])
+        ).toBe(true);
+      });
+
+      test('Still allows requesting no fields alongside a property listing no value', () => {
+        expect(isPermissionWithinCeiling(request({ fields: [], locales: [] }), [titleEn])).toBe(
+          true
+        );
       });
     });
   });
