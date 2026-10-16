@@ -309,11 +309,11 @@ describe('mfa service', () => {
       expect(trustedDevicesCalls).toBe(1);
     });
 
-    it('DELETEs /admin/mfa/passkeys/:id with no body, and returns 204 with no body', async () => {
+    it('POSTs the credentials to /admin/mfa/passkeys/:id/remove, and returns 204 with no body', async () => {
       let method: string | undefined;
       let bodyText: string | undefined;
       server.use(
-        http.delete('/admin/mfa/passkeys/1', async ({ request }) => {
+        http.post('/admin/mfa/passkeys/1/remove', async ({ request }) => {
           method = request.method;
           bodyText = await request.text();
           return new HttpResponse(null, { status: 204 });
@@ -323,7 +323,7 @@ describe('mfa service', () => {
       const { result } = renderHook(() => useDeletePasskeyMutation());
 
       await act(async () => {
-        const res = await result.current[0]({ id: '1' });
+        const res = await result.current[0]({ id: '1', password: 'pw', code: '123456' });
         expect('error' in res).toBe(false);
         // A real 204 has no body: the fetch client's own 204 special-case answers `{}` without
         // attempting to parse one, so this pins "no body" rather than tolerating whatever shape a
@@ -331,8 +331,9 @@ describe('mfa service', () => {
         expect('data' in res && res.data).toEqual({});
       });
 
-      expect(method).toBe('DELETE');
-      expect(bodyText).toBe('');
+      expect(method).toBe('POST');
+      // The credentials travel in the body, and the id stays in the path.
+      expect(JSON.parse(bodyText ?? '')).toEqual({ password: 'pw', code: '123456' });
     });
 
     it('deleting a passkey invalidates the passkeys list and the notices list', async () => {
@@ -347,7 +348,7 @@ describe('mfa service', () => {
           noticesCalls += 1;
           return HttpResponse.json({ data: noticesCalls === 1 ? [] : [{ id: 1 }] });
         }),
-        http.delete('/admin/mfa/passkeys/1', () => new HttpResponse(null, { status: 204 }))
+        http.post('/admin/mfa/passkeys/1/remove', () => new HttpResponse(null, { status: 204 }))
       );
 
       const { result } = renderHook(() => {
@@ -361,7 +362,7 @@ describe('mfa service', () => {
       await waitFor(() => expect(result.current.notices.isSuccess).toBe(true));
 
       await act(async () => {
-        await result.current.del({ id: '1' });
+        await result.current.del({ id: '1', password: 'pw', code: '123456' });
       });
 
       await waitFor(() => expect(result.current.passkeys.data).toHaveLength(0));

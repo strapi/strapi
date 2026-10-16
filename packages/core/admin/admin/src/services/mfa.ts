@@ -174,8 +174,13 @@ const mfaService = adminApi
         },
         invalidatesTags: ['Passkeys', 'MfaNotices'],
       }),
-      deletePasskey: builder.mutation<void, DeletePasskey.Params>({
-        query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/passkeys/${id}` }),
+      /** Costs the password and a live code, exactly as registering one does. */
+      deletePasskey: builder.mutation<void, DeletePasskey.Params & DeletePasskey.Request['body']>({
+        query: ({ id, ...body }) => ({
+          method: 'POST',
+          url: `/admin/mfa/passkeys/${id}/remove`,
+          data: body,
+        }),
         invalidatesTags: ['Passkeys', 'MfaNotices'],
       }),
       /** A count only, never an inventory of somebody's hardware. */

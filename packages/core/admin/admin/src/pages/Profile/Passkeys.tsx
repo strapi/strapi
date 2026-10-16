@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import {
   Button,
-  Dialog,
   Flex,
   IconButton,
   Table,
@@ -17,14 +16,13 @@ import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { MAX_PASSKEYS_PER_USER, type Passkey } from '../../../../shared/contracts/mfa';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ErrorMessage } from '../../components/ErrorMessage';
-import { useNotification } from '../../features/Notifications';
 import { useToMessage } from '../../hooks/useToMessage';
-import { useDeletePasskeyMutation, useGetPasskeysQuery } from '../../services/mfa';
+import { useGetPasskeysQuery } from '../../services/mfa';
 import { passkeyAvailability } from '../../utils/webauthn';
 
 import { AddPasskeyDialog } from './AddPasskeyDialog';
+import { RemovePasskeyDialog } from './RemovePasskeyDialog';
 
 /**
  * The WebAuthn credentials this user can sign in with instead of typing a code, inside
@@ -32,8 +30,10 @@ import { AddPasskeyDialog } from './AddPasskeyDialog';
  * while the organisation allows passkeys, so nothing here re-checks either.
  *
  * Only four fields ever reach the client (`shared/contracts/mfa.ts` `Passkey`), and there is no
- * rename: the name is captured once in `AddPasskeyDialog`. Removing a passkey costs nothing --
- * the authenticator app always survives it, so there is no lockout path and no re-authentication.
+ * rename: the name is captured once in `AddPasskeyDialog`. Removing one costs the same password
+ * and live code that adding one does: it is not a lockout path, since the authenticator app
+ * always survives it, but a session alone must not be able to strip a factor the holder may be
+ * relying on.
  *
  * `passkeyAvailability()` gates the Add button only. Existing rows stay listed and removable
  * where a ceremony cannot run: a user who registered a passkey elsewhere must still be able to
@@ -48,11 +48,10 @@ import { AddPasskeyDialog } from './AddPasskeyDialog';
  */
 const Passkeys = () => {
   const { formatMessage, formatDate } = useIntl();
-  const { toggleNotification } = useNotification();
   const toMessage = useToMessage();
   const { data: passkeys = [], isLoading, error } = useGetPasskeysQuery();
-  const [deletePasskey] = useDeletePasskeyMutation();
   const [addOpen, setAddOpen] = React.useState(false);
+  const [pendingRemoval, setPendingRemoval] = React.useState<Passkey | undefined>();
 
   // Keeps the error, empty and table states mutually exclusive: a stale, previously-successful
   // array must not render the table underneath an error. `TrustedDevices.tsx` derives the same way.
@@ -63,21 +62,6 @@ const Passkeys = () => {
 
   const dateTime = (value: string) =>
     formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
-
-  const handleDelete = async (passkey: Passkey) => {
-    const res = await deletePasskey({ id: passkey.id });
-    if ('error' in res) {
-      toggleNotification({ type: 'danger', message: toMessage(res.error) });
-      return;
-    }
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: 'Settings.profile.form.section.mfa.passkeys.delete.success',
-        defaultMessage: 'Passkey removed',
-      }),
-    });
-  };
 
   if (isLoading) {
     return null;
@@ -195,32 +179,16 @@ const Passkeys = () => {
                 </Td>
                 <Td>
                   <Flex justifyContent="end">
-                    <Dialog.Root>
-                      <Dialog.Trigger>
-                        <IconButton
-                          label={formatMessage({
-                            id: 'Settings.profile.form.section.mfa.passkeys.delete',
-                            defaultMessage: 'Remove passkey',
-                          })}
-                          variant="ghost"
-                        >
-                          <Trash />
-                        </IconButton>
-                      </Dialog.Trigger>
-                      <ConfirmDialog
-                        title={formatMessage({
-                          id: 'Settings.profile.form.section.mfa.passkeys.delete.title',
-                          defaultMessage: 'Remove this passkey?',
-                        })}
-                        onConfirm={() => handleDelete(passkey)}
-                      >
-                        {formatMessage({
-                          id: 'Settings.profile.form.section.mfa.passkeys.delete.body',
-                          defaultMessage:
-                            'That device will no longer sign you in. You can still use a code from your authenticator app.',
-                        })}
-                      </ConfirmDialog>
-                    </Dialog.Root>
+                    <IconButton
+                      label={formatMessage({
+                        id: 'Settings.profile.form.section.mfa.passkeys.delete',
+                        defaultMessage: 'Remove passkey',
+                      })}
+                      variant="ghost"
+                      onClick={() => setPendingRemoval(passkey)}
+                    >
+                      <Trash />
+                    </IconButton>
                   </Flex>
                 </Td>
               </Tr>
@@ -229,6 +197,7 @@ const Passkeys = () => {
         </Table>
       ) : null}
       <AddPasskeyDialog open={addOpen} onClose={() => setAddOpen(false)} />
+      <RemovePasskeyDialog passkey={pendingRemoval} onClose={() => setPendingRemoval(undefined)} />
     </Flex>
   );
 };

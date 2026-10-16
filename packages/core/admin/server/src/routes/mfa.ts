@@ -75,7 +75,9 @@ export default [
   credentialGuarded('POST', '/mfa/passkeys/options', 'mfa.passkeyRegistrationOptions'),
   authenticated('POST', '/mfa/passkeys', 'mfa.registerPasskey'),
   authenticated('GET', '/mfa/passkeys', 'mfa.listPasskeys'),
-  authenticated('DELETE', '/mfa/passkeys/:id', 'mfa.deletePasskey'),
+  // POST, not DELETE: it carries a password and a code, and the admin fetch client sends no body
+  // on a DELETE.
+  credentialGuarded('POST', '/mfa/passkeys/:id/remove', 'mfa.deletePasskey'),
   withPermission('GET', '/mfa/users/:id/passkeys', 'mfa.listUserPasskeys', 'admin::users.read'),
   withPermission(
     'DELETE',

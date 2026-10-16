@@ -163,11 +163,22 @@ describe('Passkeys', () => {
     expect(screen.queryByText(/reached the limit of 10 passkeys/)).not.toBeInTheDocument();
   });
 
-  it('removes one passkey after confirmation, toasts, and the list refreshes', async () => {
+  /** Fills the removal dialog's two credential fields and submits it. */
+  const confirmRemoval = async (user: ReturnType<typeof render>['user']) => {
+    await user.click(screen.getAllByRole('button', { name: 'Remove passkey' })[0]);
+    await screen.findByRole('dialog', { name: 'Remove this passkey?' });
+    await user.type(screen.getByLabelText('Current password*'), 'pw');
+    await user.type(screen.getByLabelText('Authentication code*'), '123456');
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+  };
+
+  it('removes one passkey after re-authentication, toasts, and the list refreshes', async () => {
     let passkeys = PASSKEYS;
+    let body: Record<string, unknown> | undefined;
     server.use(
       http.get('/admin/mfa/passkeys', () => HttpResponse.json({ data: passkeys })),
-      http.delete('/admin/mfa/passkeys/3', () => {
+      http.post('/admin/mfa/passkeys/3/remove', async ({ request }) => {
+        body = (await request.json()) as Record<string, unknown>;
         passkeys = passkeys.filter((passkey) => passkey.id !== '3');
         return new HttpResponse(null, { status: 204 });
       })
@@ -175,45 +186,62 @@ describe('Passkeys', () => {
     const { user } = render(<Passkeys />);
     await screen.findByText('MacBook Touch ID');
 
-    await user.click(screen.getAllByRole('button', { name: 'Remove passkey' })[0]);
-    expect(screen.getByRole('alertdialog', { name: 'Remove this passkey?' })).toHaveTextContent(
-      /That device will no longer sign you in/
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await confirmRemoval(user);
 
     expect(await screen.findByText('Passkey removed')).toBeInTheDocument();
+    // Removing a credential costs what adding one does, so the credentials must actually reach
+    // the server rather than the dialog merely collecting them.
+    expect(body).toEqual({ password: 'pw', code: '123456' });
     await waitFor(() => expect(screen.queryByText('MacBook Touch ID')).not.toBeInTheDocument());
     expect(screen.getByText('YubiKey 5C')).toBeInTheDocument();
   });
 
-  it('toasts the server message when a removal is refused', async () => {
+  it('will not submit a removal until both credentials are entered', async () => {
+    let called = false;
     server.use(
       list(PASSKEYS),
-      http.delete('/admin/mfa/passkeys/3', () =>
+      http.post('/admin/mfa/passkeys/3/remove', () => {
+        called = true;
+        return new HttpResponse(null, { status: 204 });
+      })
+    );
+    const { user } = render(<Passkeys />);
+    await screen.findByText('MacBook Touch ID');
+
+    await user.click(screen.getAllByRole('button', { name: 'Remove passkey' })[0]);
+    await screen.findByRole('dialog', { name: 'Remove this passkey?' });
+    await user.type(screen.getByLabelText('Current password*'), 'pw');
+
+    expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled();
+    expect(called).toBe(false);
+  });
+
+  it('shows the server message in the dialog when a removal is refused', async () => {
+    server.use(
+      list(PASSKEYS),
+      http.post('/admin/mfa/passkeys/3/remove', () =>
         HttpResponse.json(
           {
             error: {
-              status: 404,
-              name: 'NotFoundError',
-              message: 'Passkey not found',
+              status: 400,
+              name: 'ValidationError',
+              message: 'Invalid credentials',
               details: {},
             },
           },
-          { status: 404 }
+          { status: 400 }
         )
       )
     );
     const { user } = render(<Passkeys />);
     await screen.findByText('MacBook Touch ID');
 
-    await user.click(screen.getAllByRole('button', { name: 'Remove passkey' })[0]);
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await confirmRemoval(user);
 
-    expect(await screen.findByText('Passkey not found')).toBeInTheDocument();
-    // The row must survive: `deletePasskey` performs no optimistic update, so a refused removal
-    // leaves the list exactly as it was. Without this assertion the test proves only that a
-    // message appeared, not that the table is still truthful.
+    expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
+    // The row must survive, and so must the dialog: a wrong password is a retry, not a dead end.
     expect(screen.getByText('MacBook Touch ID')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Remove this passkey?' })).toBeInTheDocument();
   });
 
   it('shows the read error instead of the table or the empty state', async () => {

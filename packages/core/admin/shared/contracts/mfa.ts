@@ -203,11 +203,24 @@ export declare namespace RegisterPasskey {
   }
 }
 
-/** DELETE /mfa/passkeys/:id - 204, or 404 when the row is not theirs. Costs nothing and works
- * while the policy is off: removing a credential is never the dangerous direction. */
+/**
+ * POST /mfa/passkeys/:id/remove - 204, or 404 when the row is not theirs.
+ *
+ * Costs the same password and live code that registering one does. Removal never drops the
+ * account below its base factor -- TOTP survives -- but a session-only attacker could otherwise
+ * destroy every hardware key the holder owns, one request at a time, and that is a denial of the
+ * factor they may be relying on when their phone is elsewhere. A POST rather than a DELETE
+ * because of that body: the admin fetch client sends none on a DELETE.
+ */
 export declare namespace DeletePasskey {
   export interface Params {
     id: string;
+  }
+  export interface Request {
+    body: {
+      password: string;
+      code: string;
+    };
   }
 }
 

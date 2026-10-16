@@ -401,7 +401,16 @@ export default {
       return ctx.notFound('Passkey not found');
     }
 
-    const deleted = await mfa.deletePasskey(String(ctx.state.user.id), id);
+    await validateMfaPasswordAndCodeInput(ctx.request.body ?? {});
+    const { password, code } = ctx.request.body as DeletePasskey.Request['body'];
+    const userId = String(ctx.state.user.id);
+
+    // Registering a credential costs a password and a live code; removing one costs the same.
+    // Otherwise a stolen session can strip the holder's hardware keys without presenting either,
+    // which is a denial of a factor they may need when their phone is not to hand.
+    await mfa.assertPasswordAndFactor(userId, password, code.trim());
+
+    const deleted = await mfa.deletePasskey(userId, id);
     if (!deleted) {
       return ctx.notFound('Passkey not found');
     }

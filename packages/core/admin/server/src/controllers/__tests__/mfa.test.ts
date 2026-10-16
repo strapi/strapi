@@ -1126,6 +1126,9 @@ describe('mfa controller', () => {
       expect(ctx.body).toEqual({ data: [] });
     });
 
+    /** Removing a credential costs what registering one does. */
+    const CREDENTIALS = { password: 'pw', code: '123456' };
+
     test('delete: a non-numeric id is a 404 without touching the service', async () => {
       const doubles = buildStrapiWithPasskeys();
       const { ctx, notFound } = buildCtx({}, {}, {}, { params: { id: 'abc' } });
@@ -1140,26 +1143,58 @@ describe('mfa controller', () => {
       const missing = buildStrapiWithPasskeys({
         deletePasskey: jest.fn(() => Promise.resolve(false)),
       });
-      const first = buildCtx({}, {}, {}, { params: { id: '9' } });
+      const first = buildCtx({ password: 'pw', code: '123456' }, {}, {}, { params: { id: '9' } });
       await mfaController.deletePasskey(first.ctx);
       expect(first.notFound).toHaveBeenCalled();
       expect(missing.deletePasskey).toHaveBeenCalledWith('7', '9');
 
-      // An empty body proves nothing about ownership -- a body (or param) that tries to
-      // supply its own owner must be ignored, and the handler must use only the session's user.
+      // A body that tries to supply its own owner is refused outright by the credential schema,
+      // which allows no unspecified keys -- and the handler would ignore it anyway, since it
+      // reads the owner from the session. Either way the row is never touched.
       const spoofed = buildStrapiWithPasskeys({
         deletePasskey: jest.fn(() => Promise.resolve(false)),
       });
-      const injected = buildCtx({ userId: '8' }, {}, {}, { params: { id: '9', userId: '8' } });
-      await mfaController.deletePasskey(injected.ctx);
-      expect(injected.notFound).toHaveBeenCalled();
-      expect(spoofed.deletePasskey).toHaveBeenCalledWith('7', '9');
+      const injected = buildCtx(
+        { ...CREDENTIALS, userId: '8' },
+        {},
+        {},
+        { params: { id: '9', userId: '8' } }
+      );
+      await expect(mfaController.deletePasskey(injected.ctx)).rejects.toThrow(/userId/);
+      expect(spoofed.deletePasskey).not.toHaveBeenCalled();
 
-      buildStrapiWithPasskeys();
-      const second = buildCtx({}, {}, {}, { params: { id: '9' } });
+      const allowed = buildStrapiWithPasskeys();
+      const second = buildCtx({ password: 'pw', code: '123456' }, {}, {}, { params: { id: '9' } });
       await mfaController.deletePasskey(second.ctx);
       expect(second.ctx.status).toBe(204);
       expect(second.ctx.body).toBeUndefined();
+      expect(allowed.assertPasswordAndFactor).toHaveBeenCalledWith('7', 'pw', '123456');
+    });
+
+    /**
+     * Registering a credential costs a password and a live code. Removing one has to cost the
+     * same, or a session alone can strip the holder's hardware keys one request at a time --
+     * never a lockout, since TOTP survives, but a denial of the factor they may be relying on.
+     */
+    test('delete: a wrong credential is refused before the row is touched', async () => {
+      const refused = buildStrapiWithPasskeys({
+        assertPasswordAndFactor: jest.fn(() => Promise.reject(new Error('Invalid credentials'))),
+      });
+      const { ctx } = buildCtx(CREDENTIALS, {}, {}, { params: { id: '9' } });
+
+      await expect(mfaController.deletePasskey(ctx)).rejects.toThrow(/invalid credentials/i);
+
+      expect(refused.deletePasskey).not.toHaveBeenCalled();
+    });
+
+    test('delete: a body with no credentials never reaches the service', async () => {
+      const doubles = buildStrapiWithPasskeys();
+      const { ctx } = buildCtx({}, {}, {}, { params: { id: '9' } });
+
+      await expect(mfaController.deletePasskey(ctx)).rejects.toThrow();
+
+      expect(doubles.assertPasswordAndFactor).not.toHaveBeenCalled();
+      expect(doubles.deletePasskey).not.toHaveBeenCalled();
     });
 
     test('the administrator count: 404 for an unknown user, a bare number for a known one', async () => {
