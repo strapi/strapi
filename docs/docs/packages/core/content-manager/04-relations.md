@@ -221,3 +221,16 @@ for a relational field. Search results are only fetched after `searchFor()` has 
 #### `searchFor(string)`
 
 `searchFor` is a method which can be used to search for entities which haven't been connected with the source entity yet. The method accepts a search-term: `searchFor("term")`.
+
+## Loading existing relations (backend)
+
+`GET /content-manager/relations/:model/:id/:targetField` returns the relations that are already connected to an entry. It is handled by `findExisting` in the [relations controller](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/controllers/relations.ts). The request accepts `page` and `pageSize` (1 to 100), validated in [`validation/relations.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/controllers/validation/relations.ts).
+
+A user can be allowed to read a relation field while some of the connected entries are hidden from them, for example by a custom condition on the target content type. Those entries must still appear in the list, but without their main field. To do that, `findExisting` runs two queries and returns their union:
+
+1. **Page query.** Loads the requested page of relations, selecting only `id`, `documentId`, `locale`, `publishedAt` and `updatedAt`. Any-to-many relations go through `loadPages`, which owns the pagination of the response.
+2. **Main field query.** Loads the same relations again with the main field, using the user's sanitized read query plus an `id: { $in: <ids of the page> }` filter. Entries the user cannot read are excluded by the permission query.
+
+The results of the second query come first in the union (`uniqBy` on `id`), so every readable entry keeps its main field and every unreadable entry falls back to the id-only row of the first query.
+
+The second query uses `load`, not `loadPages`. The `$in` filter already bounds it to the requested page, and `loadPages` applies a default `pageSize` of 10 when none is passed. Paginating it again would drop the main field of every relation past the 10th as soon as `pageSize` is greater than 10 ([#28072](https://github.com/strapi/strapi/issues/28072)).
