@@ -314,8 +314,12 @@ Admin panel:
 | E2E            | `tests/e2e/tests/admin/mfa{,-enforcement,-trusted-devices,-passkeys}.spec.ts`                                                                             |
 | Shared helpers | `tests/utils/mfa.ts` (TOTP generation), `tests/api/core/admin/utils/mfa-state.ts` (state reset)                                                           |
 
-The app template enables the future flag and sets a WebAuthn relying party, in
-`tests/app-template/config/`. Both the API and the e2e apps are generated from it, so every suite
-runs with the flag on except `admin-mfa-flag-off.test.api.ts`, which boots its own instance with
-`UNSTABLE_ADMIN_MFA=false`. Running the e2e suites without that config leaves passkeys hidden; see
+The e2e app is generated from `tests/app-template/`, whose config enables the future flag and sets
+a WebAuthn relying party. Running the e2e suites without that config leaves passkeys hidden; see
 [Passkeys](./15-admin-passkeys.md).
+
+The API test app is not generated from that template, so the flag is off there. Every
+`admin-mfa-*` API suite turns it on for its own instance in a `bootstrap` hook, except
+`admin-mfa-flag-off.test.api.ts`, which boots with `UNSTABLE_ADMIN_MFA=false`. Suites that do not
+touch MFA (such as `admin-permission`) therefore see the feature off, including the absence of the
+security-settings permissions.
