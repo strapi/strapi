@@ -175,10 +175,10 @@ const mfaService = adminApi
         invalidatesTags: ['Passkeys', 'MfaNotices'],
       }),
       /** Costs the password and a live code, exactly as registering one does. */
-      deletePasskey: builder.mutation<void, DeletePasskey.Params & DeletePasskey.Request['body']>({
-        query: ({ id, ...body }) => ({
+      deletePasskey: builder.mutation<void, DeletePasskey.Request['body']>({
+        query: (body) => ({
           method: 'POST',
-          url: `/admin/mfa/passkeys/${id}/remove`,
+          url: '/admin/mfa/passkeys/remove',
           data: body,
         }),
         invalidatesTags: ['Passkeys', 'MfaNotices'],

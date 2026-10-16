@@ -1126,16 +1126,19 @@ describe('mfa controller', () => {
       expect(ctx.body).toEqual({ data: [] });
     });
 
-    /** Removing a credential costs what registering one does. */
+    /** Removing a credential costs what registering one does, and names its id in the body. */
     const CREDENTIALS = { password: 'pw', code: '123456' };
+    const removalBody = (id: string) => ({ id, ...CREDENTIALS });
 
-    test('delete: a non-numeric id is a 404 without touching the service', async () => {
+    test('delete: a non-numeric id is refused without touching the service', async () => {
       const doubles = buildStrapiWithPasskeys();
-      const { ctx, notFound } = buildCtx({}, {}, {}, { params: { id: 'abc' } });
+      const { ctx } = buildCtx(removalBody('abc'));
 
-      await mfaController.deletePasskey(ctx);
+      // The schema carries the digits-only guard now that the id arrives in the body, so this is
+      // a validation refusal rather than the handler's own 404. Either way: nothing is touched.
+      await expect(mfaController.deletePasskey(ctx)).rejects.toThrow();
 
-      expect(notFound).toHaveBeenCalled();
+      expect(doubles.assertPasswordAndFactor).not.toHaveBeenCalled();
       expect(doubles.deletePasskey).not.toHaveBeenCalled();
     });
 
@@ -1143,7 +1146,7 @@ describe('mfa controller', () => {
       const missing = buildStrapiWithPasskeys({
         deletePasskey: jest.fn(() => Promise.resolve(false)),
       });
-      const first = buildCtx({ password: 'pw', code: '123456' }, {}, {}, { params: { id: '9' } });
+      const first = buildCtx(removalBody('9'));
       await mfaController.deletePasskey(first.ctx);
       expect(first.notFound).toHaveBeenCalled();
       expect(missing.deletePasskey).toHaveBeenCalledWith('7', '9');
@@ -1154,17 +1157,12 @@ describe('mfa controller', () => {
       const spoofed = buildStrapiWithPasskeys({
         deletePasskey: jest.fn(() => Promise.resolve(false)),
       });
-      const injected = buildCtx(
-        { ...CREDENTIALS, userId: '8' },
-        {},
-        {},
-        { params: { id: '9', userId: '8' } }
-      );
+      const injected = buildCtx({ ...removalBody('9'), userId: '8' });
       await expect(mfaController.deletePasskey(injected.ctx)).rejects.toThrow(/userId/);
       expect(spoofed.deletePasskey).not.toHaveBeenCalled();
 
       const allowed = buildStrapiWithPasskeys();
-      const second = buildCtx({ password: 'pw', code: '123456' }, {}, {}, { params: { id: '9' } });
+      const second = buildCtx(removalBody('9'));
       await mfaController.deletePasskey(second.ctx);
       expect(second.ctx.status).toBe(204);
       expect(second.ctx.body).toBeUndefined();
@@ -1180,7 +1178,7 @@ describe('mfa controller', () => {
       const refused = buildStrapiWithPasskeys({
         assertPasswordAndFactor: jest.fn(() => Promise.reject(new Error('Invalid credentials'))),
       });
-      const { ctx } = buildCtx(CREDENTIALS, {}, {}, { params: { id: '9' } });
+      const { ctx } = buildCtx(removalBody('9'));
 
       await expect(mfaController.deletePasskey(ctx)).rejects.toThrow(/invalid credentials/i);
 
@@ -1189,7 +1187,7 @@ describe('mfa controller', () => {
 
     test('delete: a body with no credentials never reaches the service', async () => {
       const doubles = buildStrapiWithPasskeys();
-      const { ctx } = buildCtx({}, {}, {}, { params: { id: '9' } });
+      const { ctx } = buildCtx({ id: '9' });
 
       await expect(mfaController.deletePasskey(ctx)).rejects.toThrow();
 

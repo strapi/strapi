@@ -177,7 +177,7 @@ describe('Passkeys', () => {
     let body: Record<string, unknown> | undefined;
     server.use(
       http.get('/admin/mfa/passkeys', () => HttpResponse.json({ data: passkeys })),
-      http.post('/admin/mfa/passkeys/3/remove', async ({ request }) => {
+      http.post('/admin/mfa/passkeys/remove', async ({ request }) => {
         body = (await request.json()) as Record<string, unknown>;
         passkeys = passkeys.filter((passkey) => passkey.id !== '3');
         return new HttpResponse(null, { status: 204 });
@@ -191,7 +191,7 @@ describe('Passkeys', () => {
     expect(await screen.findByText('Passkey removed')).toBeInTheDocument();
     // Removing a credential costs what adding one does, so the credentials must actually reach
     // the server rather than the dialog merely collecting them.
-    expect(body).toEqual({ password: 'pw', code: '123456' });
+    expect(body).toEqual({ id: '3', password: 'pw', code: '123456' });
     await waitFor(() => expect(screen.queryByText('MacBook Touch ID')).not.toBeInTheDocument());
     expect(screen.getByText('YubiKey 5C')).toBeInTheDocument();
   });
@@ -200,7 +200,7 @@ describe('Passkeys', () => {
     let called = false;
     server.use(
       list(PASSKEYS),
-      http.post('/admin/mfa/passkeys/3/remove', () => {
+      http.post('/admin/mfa/passkeys/remove', () => {
         called = true;
         return new HttpResponse(null, { status: 204 });
       })
@@ -219,7 +219,7 @@ describe('Passkeys', () => {
   it('shows the server message in the dialog when a removal is refused', async () => {
     server.use(
       list(PASSKEYS),
-      http.post('/admin/mfa/passkeys/3/remove', () =>
+      http.post('/admin/mfa/passkeys/remove', () =>
         HttpResponse.json(
           {
             error: {

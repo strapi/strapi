@@ -8,6 +8,7 @@ import {
   validateMfaNoticesSeenInput,
   validatePasskeyOptionsInput,
   validateRegisterPasskeyInput,
+  validateRemovePasskeyInput,
 } from '../validation/authentication/mfa';
 import {
   getSessionManager,
@@ -395,14 +396,11 @@ export default {
   async deletePasskey(ctx: Context) {
     const mfa = mfaService();
 
-    // Same guard as `revokeTrustedDevice`: a non-integer id is a 500 on Postgres, not a miss.
-    const { id } = ctx.params as DeletePasskey.Params;
-    if (!/^\d+$/.test(id)) {
-      return ctx.notFound('Passkey not found');
-    }
-
-    await validateMfaPasswordAndCodeInput(ctx.request.body ?? {});
-    const { password, code } = ctx.request.body as DeletePasskey.Request['body'];
+    // The id is in the body, not the path: see the route comment. The schema carries the same
+    // digits-only guard `revokeTrustedDevice` applies inline -- a non-integer id is a 500 on
+    // Postgres, not a miss.
+    await validateRemovePasskeyInput(ctx.request.body ?? {});
+    const { id, password, code } = ctx.request.body as DeletePasskey.Request['body'];
     const userId = String(ctx.state.user.id);
 
     // Registering a credential costs a password and a live code; removing one costs the same.

@@ -88,6 +88,21 @@ const registerPasskeySchema = yup
   .required()
   .noUnknown();
 
+/**
+ * Passkey removal. The id travels in the body rather than the path so that `admin::rateLimit`,
+ * which keys partly on `ctx.request.path`, cannot be handed a fresh bucket per id: the password
+ * is verified before ownership is known, so a per-id bucket would be no bound at all.
+ */
+const removePasskeySchema = yup
+  .object()
+  .shape({
+    id: yup.string().matches(/^\d+$/).required(),
+    password: yup.string().required(),
+    code: yup.string().min(6).max(32).required(),
+  })
+  .required()
+  .noUnknown();
+
 const noticesSeenSchema = yup
   .object()
   .shape({ ids: yup.array().of(yup.number().integer().required()).optional() })
@@ -100,4 +115,5 @@ export const validateMfaPasswordAndCodeInput = validateYupSchema(passwordAndCode
 export const validateMfaNoticesSeenInput = validateYupSchema(noticesSeenSchema);
 // Its own export, so the passkey route can diverge from the two TOTP ones.
 export const validatePasskeyOptionsInput = validateYupSchema(passwordAndCodeSchema);
+export const validateRemovePasskeyInput = validateYupSchema(removePasskeySchema);
 export const validateRegisterPasskeyInput = validateYupSchema(registerPasskeySchema);

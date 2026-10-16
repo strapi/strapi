@@ -18,7 +18,7 @@ describe('mfa routes (passkeys)', () => {
     ['POST', '/mfa/passkeys/options'],
     ['POST', '/mfa/passkeys'],
     ['GET', '/mfa/passkeys'],
-    ['POST', '/mfa/passkeys/:id/remove'],
+    ['POST', '/mfa/passkeys/remove'],
   ])('%s %s is gated by the feature flag and authentication only', (method, path) => {
     expect(route(method, path).config.policies).toEqual([
       'admin::isMfaEnabled',
@@ -90,7 +90,7 @@ describe('mfa routes (rate limiting)', () => {
     ['POST', '/mfa/recovery-codes'],
     ['POST', '/mfa/disable'],
     ['POST', '/mfa/passkeys/options'],
-    ['POST', '/mfa/passkeys/:id/remove'],
+    ['POST', '/mfa/passkeys/remove'],
   ] as const;
 
   test.each(CREDENTIAL_ROUTES)('%s %s is rate limited', (method, path) => {

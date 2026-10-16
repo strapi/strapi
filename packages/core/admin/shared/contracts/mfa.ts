@@ -204,20 +204,22 @@ export declare namespace RegisterPasskey {
 }
 
 /**
- * POST /mfa/passkeys/:id/remove - 204, or 404 when the row is not theirs.
+ * POST /mfa/passkeys/remove - 204, or 404 when the row is not theirs.
  *
  * Costs the same password and live code that registering one does. Removal never drops the
  * account below its base factor -- TOTP survives -- but a session-only attacker could otherwise
  * destroy every hardware key the holder owns, one request at a time, and that is a denial of the
  * factor they may be relying on when their phone is elsewhere. A POST rather than a DELETE
  * because of that body: the admin fetch client sends none on a DELETE.
+ *
+ * The id is in the body too. `admin::rateLimit` keys partly on `ctx.request.path`, so an `:id`
+ * segment would give the caller a fresh bucket per id -- and the password is verified before
+ * ownership is known, which would leave the password half with no bound at all.
  */
 export declare namespace DeletePasskey {
-  export interface Params {
-    id: string;
-  }
   export interface Request {
     body: {
+      id: string;
       password: string;
       code: string;
     };

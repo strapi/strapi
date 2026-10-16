@@ -76,8 +76,10 @@ export default [
   authenticated('POST', '/mfa/passkeys', 'mfa.registerPasskey'),
   authenticated('GET', '/mfa/passkeys', 'mfa.listPasskeys'),
   // POST, not DELETE: it carries a password and a code, and the admin fetch client sends no body
-  // on a DELETE.
-  credentialGuarded('POST', '/mfa/passkeys/:id/remove', 'mfa.deletePasskey'),
+  // on a DELETE. The id is in that body and not in the path, because `admin::rateLimit` keys on
+  // `ctx.request.path` -- a `:id` segment would hand the caller a fresh bucket per id, and since
+  // the password is checked before ownership is known, that is no bound at all.
+  credentialGuarded('POST', '/mfa/passkeys/remove', 'mfa.deletePasskey'),
   withPermission('GET', '/mfa/users/:id/passkeys', 'mfa.listUserPasskeys', 'admin::users.read'),
   withPermission(
     'DELETE',

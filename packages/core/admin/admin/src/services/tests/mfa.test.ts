@@ -309,11 +309,11 @@ describe('mfa service', () => {
       expect(trustedDevicesCalls).toBe(1);
     });
 
-    it('POSTs the credentials to /admin/mfa/passkeys/:id/remove, and returns 204 with no body', async () => {
+    it('POSTs the id and credentials to /admin/mfa/passkeys/remove, and returns 204 with no body', async () => {
       let method: string | undefined;
       let bodyText: string | undefined;
       server.use(
-        http.post('/admin/mfa/passkeys/1/remove', async ({ request }) => {
+        http.post('/admin/mfa/passkeys/remove', async ({ request }) => {
           method = request.method;
           bodyText = await request.text();
           return new HttpResponse(null, { status: 204 });
@@ -333,7 +333,7 @@ describe('mfa service', () => {
 
       expect(method).toBe('POST');
       // The credentials travel in the body, and the id stays in the path.
-      expect(JSON.parse(bodyText ?? '')).toEqual({ password: 'pw', code: '123456' });
+      expect(JSON.parse(bodyText ?? '')).toEqual({ id: '1', password: 'pw', code: '123456' });
     });
 
     it('deleting a passkey invalidates the passkeys list and the notices list', async () => {
@@ -348,7 +348,7 @@ describe('mfa service', () => {
           noticesCalls += 1;
           return HttpResponse.json({ data: noticesCalls === 1 ? [] : [{ id: 1 }] });
         }),
-        http.post('/admin/mfa/passkeys/1/remove', () => new HttpResponse(null, { status: 204 }))
+        http.post('/admin/mfa/passkeys/remove', () => new HttpResponse(null, { status: 204 }))
       );
 
       const { result } = renderHook(() => {
