@@ -73,10 +73,9 @@ describe('every mfa route is gated by the feature flag', () => {
 });
 
 /**
- * A read behind the login-grade limiter is a bug, not a hardening: the default is five requests
- * per five minutes and the key collapses to `unknownEmail:<path>:<ip>`, so one profile visit can
- * spend the whole allowance for every administrator on that address and the section renders its
- * "unavailable" error. Only the routes that check a password or a code carry it.
+ * A read behind the login-grade limiter is a bug, not a hardening: five requests per five minutes
+ * is spent by one profile visit, and the section renders its "unavailable" error. Only the routes
+ * that check a password or a code carry it.
  */
 describe('mfa routes (rate limiting)', () => {
   /**
@@ -93,10 +92,10 @@ describe('mfa routes (rate limiting)', () => {
     ['POST', '/mfa/passkeys/remove'],
   ] as const;
 
-  test.each(CREDENTIAL_ROUTES)('%s %s is rate limited', (method, path) => {
-    expect(route(method, path).config.middlewares).toEqual([
-      { name: 'admin::rateLimit', config: { max: 20 } },
-    ]);
+  test.each(CREDENTIAL_ROUTES)('%s %s is rate limited at the default ceiling', (method, path) => {
+    // Per account and route pattern, so the `/login` default is the right bound -- see
+    // `rateLimitKey`.
+    expect(route(method, path).config.middlewares).toEqual(['admin::rateLimit']);
   });
 
   const isCredentialRoute = (method: string, path: string) =>

@@ -1,10 +1,3 @@
-/** Ten times the middleware default is what `/login/mfa` needs; these routes are rarer, but share
- * the same collapsed bucket, so they get the `/reset-password` allowance rather than the default.
- * An authenticated body carries no email, so `admin::rateLimit` keys on `unknownEmail:<path>:<ip>`
- * -- one bucket for every administrator behind a shared address, not one per account. At the
- * default of five, two colleagues enrolling from one office lock each other out. */
-const CREDENTIAL_RATE_LIMIT = 20;
-
 const authenticated = (method: string, path: string, handler: string) => ({
   method,
   path,
@@ -18,7 +11,12 @@ const authenticated = (method: string, path: string, handler: string) => ({
  * For the handful of routes that verify a password or a TOTP code. Nothing else here is worth a
  * limiter: the rest are already behind a session and a permission, and none of them takes a secret
  * an attacker could guess. Reads in particular must stay off it -- the profile page alone spends
- * several `/mfa/me` calls, so a default-limited read turns an ordinary visit into a 429.
+ * several `/mfa/me` calls, so a limited read turns an ordinary visit into a 429.
+ *
+ * The middleware default, five per five minutes, the same as `/login`. With a session the limiter
+ * keys on the account and the route pattern (`rateLimitKey`), so colleagues behind one address no
+ * longer share a bucket and a parameter in the path no longer buys a fresh one; the higher ceiling
+ * these routes once had existed only to paper over the first of those.
  */
 const credentialGuarded = (method: string, path: string, handler: string) => ({
   method,
@@ -26,7 +24,7 @@ const credentialGuarded = (method: string, path: string, handler: string) => ({
   handler,
   config: {
     policies: ['admin::isMfaEnabled', 'admin::isAuthenticatedAdmin'],
-    middlewares: [{ name: 'admin::rateLimit', config: { max: CREDENTIAL_RATE_LIMIT } }],
+    middlewares: ['admin::rateLimit'],
   },
 });
 
