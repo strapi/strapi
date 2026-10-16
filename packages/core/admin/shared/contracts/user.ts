@@ -53,14 +53,15 @@ export declare namespace FindAll {
 
   export interface Response {
     data: {
-      results: SanitizedAdminUser[];
+      results: Array<SanitizedAdminUser & AdminUserMfaState>;
       pagination: Pagination;
     };
     error?: errors.ApplicationError;
   }
 }
 /**
- * Enforcement state appended to `GET /admin/users/:id` for callers holding `admin::users.update`.
+ * Enforcement state appended to `GET /admin/users` and `GET /admin/users/:id` for callers holding
+ * `admin::users.update` while the feature is on.
  */
 export interface AdminUserMfaState {
   mfaEnabledAt?: string | Date | null;

@@ -294,6 +294,7 @@ describe('User Controller', () => {
         admin: {
           services: {
             user: { findPage, sanitizeUser },
+            mfa: { isEnabled: () => false },
             permission: {
               createPermissionsManager,
             },
@@ -337,6 +338,7 @@ describe('User Controller', () => {
         admin: {
           services: {
             user: { findPage, sanitizeUser },
+            mfa: { isEnabled: () => false },
             permission: {
               createPermissionsManager,
             },
@@ -349,6 +351,95 @@ describe('User Controller', () => {
       expect(findPage).toHaveBeenCalled();
       expect(sanitizeUser).toHaveBeenCalledTimes(2);
       expect(ctx.body).toStrictEqual({ data: { results: users, pagination } });
+    });
+  });
+
+  /**
+   * The list carries the same enforcement state `findOne` does, under the same gate, so an
+   * administrator watching grace periods run out sees every account on one page.
+   */
+  describe('Find users: two-factor state', () => {
+    const rows = [
+      {
+        id: 1,
+        email: 'a@b.c',
+        mfaEnabledAt: '2026-09-01T10:00:00.000Z',
+        mfaGraceUntil: null,
+        mfaLockedAt: null,
+        mfaSecret: 'enc:x',
+      },
+      {
+        id: 2,
+        email: 'd@e.f',
+        mfaEnabledAt: null,
+        mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+        mfaLockedAt: null,
+        mfaPendingSecret: 'enc:y',
+      },
+    ];
+
+    const run = async ({ enabled, canUpdate }: { enabled: boolean; canUpdate: boolean }) => {
+      const pagination = { page: 1, pageSize: 10, pageCount: 1, total: 2 };
+      const state = {
+        userAbility: { can: jest.fn(() => canUpdate), cannot: jest.fn(() => false) },
+      };
+      const ctx = createContext({}) as any;
+      ctx.state = state;
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: {
+              findPage: jest.fn(() => ({ results: rows, pagination })),
+              sanitizeUser: jest.fn(({ id, email }) => ({ id, email })),
+            },
+            mfa: { isEnabled: () => enabled },
+            permission: {
+              createPermissionsManager: jest.fn(() => ({
+                ability: state.userAbility,
+                sanitizeQuery: (query: any) => query,
+                validateQuery() {},
+              })),
+            },
+          },
+        },
+      } as any;
+
+      await userController.find(ctx);
+      return ctx.body.data.results;
+    };
+
+    test("appends each row's state, never a secret, for a caller who may update users", async () => {
+      expect(await run({ enabled: true, canUpdate: true })).toEqual([
+        {
+          id: 1,
+          email: 'a@b.c',
+          mfaEnabledAt: '2026-09-01T10:00:00.000Z',
+          mfaGraceUntil: null,
+          mfaLockedAt: null,
+        },
+        {
+          id: 2,
+          email: 'd@e.f',
+          mfaEnabledAt: null,
+          mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+          mfaLockedAt: null,
+        },
+      ]);
+    });
+
+    test('appends nothing for a read-only caller', async () => {
+      expect(await run({ enabled: true, canUpdate: false })).toEqual([
+        { id: 1, email: 'a@b.c' },
+        { id: 2, email: 'd@e.f' },
+      ]);
+    });
+
+    test('flag off: appends nothing even for a caller who may update users', async () => {
+      expect(await run({ enabled: false, canUpdate: true })).toEqual([
+        { id: 1, email: 'a@b.c' },
+        { id: 2, email: 'd@e.f' },
+      ]);
     });
   });
 
