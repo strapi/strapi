@@ -60,7 +60,6 @@
     "formik": "2.4.9",
     "immer": "9.0.21",
     "jsonwebtoken": "9.0.3",
-    "koa": "2.16.4",
     "koa2-ratelimit": "^1.1.3",
     "lodash": "4.18.1",
     "prop-types": "^15.8.1",

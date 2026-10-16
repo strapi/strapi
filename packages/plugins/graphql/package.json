@@ -70,10 +70,8 @@
     "@strapi/utils": "5.58.0",
     "graphql": "^16.8.1",
     "graphql-depth-limit": "^1.1.0",
-    "graphql-playground-middleware-koa": "^1.6.21",
     "graphql-scalars": "1.22.2",
     "koa-bodyparser": "4.4.1",
-    "koa-compose": "^4.1.0",
     "lodash": "4.18.1",
     "nexus": "1.3.0",
     "pluralize": "8.0.0"
@@ -83,6 +81,7 @@
     "@strapi/strapi": "5.58.0",
     "@strapi/types": "5.58.0",
     "@types/graphql-depth-limit": "1.1.5",
+    "@types/koa": "2.15.2",
     "@types/koa-bodyparser": "4.3.12",
     "@types/koa__cors": "5.0.0",
     "@types/node": "20.19.41",
@@ -101,10 +100,16 @@
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
     "@strapi/strapi": "^5.0.0",
+    "@types/koa": "^2.15.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

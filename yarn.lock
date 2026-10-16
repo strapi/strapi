@@ -9452,7 +9452,10 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/jsonwebtoken": "npm:9.0.3"
+    "@types/koa": "npm:2.15.2"
+    "@types/koa-compose": "npm:3.2.5"
     "@types/koa-passport": "npm:6.0.1"
+    "@types/koa-static": "npm:4.0.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/markdown-it": "npm:13.0.7"
     "@types/markdown-it-container": "npm:2.0.9"
@@ -9521,10 +9524,14 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@strapi/data-transfer": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -9596,6 +9603,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
     "@types/prismjs": "npm:1.26.5"
@@ -9607,7 +9615,6 @@ __metadata:
     immer: "npm:9.0.21"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
-    koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
     markdown-it: "npm:14.3.0"
     markdown-it-abbr: "npm:^1.0.4"
@@ -9640,10 +9647,14 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@strapi/admin": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -9687,10 +9698,14 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -9717,6 +9732,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
     "@types/micromatch": "npm:^4.0.9"
     "@types/node": "npm:20.19.41"
     "@types/pluralize": "npm:0.0.32"
@@ -9749,10 +9765,14 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@strapi/admin": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -9786,9 +9806,11 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
+    "@types/koa-compose": "npm:3.2.5"
     "@types/koa-compress": "npm:4.0.3"
     "@types/koa-favicon": "npm:2.1.5"
     "@types/koa-static": "npm:4.0.2"
+    "@types/koa__cors": "npm:5.0.0"
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
@@ -9845,6 +9867,11 @@ __metadata:
     vitest-config: "npm:5.58.0"
     yup: "npm:0.32.9"
     zod: "npm:4.4.3"
+  peerDependencies:
+    "@types/koa": ^2.15.2
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -9889,6 +9916,11 @@ __metadata:
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
     ws: "npm:8.21.2"
+  peerDependencies:
+    "@types/koa": ^2.15.2
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10000,11 +10032,15 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@strapi/admin": ^5.0.0
+    "@types/koa": ^2.15.2
     koa: ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10083,6 +10119,7 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
     "@types/node": "npm:20.19.41"
     jest: "npm:29.6.0"
     koa: "npm:2.16.4"
@@ -10101,10 +10138,14 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10241,6 +10282,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.15.2"
+    "@types/koa-static": "npm:4.0.2"
     "@types/node": "npm:20.19.41"
     "@types/swagger-ui-dist": "npm:3.30.4"
     bcryptjs: "npm:2.4.3"
@@ -10267,10 +10309,14 @@ __metadata:
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10290,6 +10336,7 @@ __metadata:
     "@strapi/types": "npm:5.58.0"
     "@strapi/utils": "npm:5.58.0"
     "@types/graphql-depth-limit": "npm:1.1.5"
+    "@types/koa": "npm:2.15.2"
     "@types/koa-bodyparser": "npm:4.3.12"
     "@types/koa__cors": "npm:5.0.0"
     "@types/node": "npm:20.19.41"
@@ -10297,11 +10344,9 @@ __metadata:
     eslint-config-custom: "npm:5.58.0"
     graphql: "npm:^16.8.1"
     graphql-depth-limit: "npm:^1.1.0"
-    graphql-playground-middleware-koa: "npm:^1.6.21"
     graphql-scalars: "npm:1.22.2"
     koa: "npm:2.16.4"
     koa-bodyparser: "npm:4.4.1"
-    koa-compose: "npm:^4.1.0"
     lodash: "npm:4.18.1"
     nexus: "npm:1.3.0"
     pluralize: "npm:8.0.0"
@@ -10316,10 +10361,14 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10368,7 +10417,6 @@ __metadata:
     immer: "npm:9.0.21"
     jest: "npm:29.6.0"
     jsonwebtoken: "npm:9.0.3"
-    koa: "npm:2.16.4"
     koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.18.1"
     msw: "npm:2.13.4"
@@ -10523,6 +10571,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@types/jest": "npm:29.5.2"
+    "@types/koa": "npm:2.15.2"
     "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
     fractional-indexing: "npm:3.2.0"
@@ -10548,10 +10597,14 @@ __metadata:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
     "@strapi/types": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10647,7 +10700,6 @@ __metadata:
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:
     "@casl/ability": "npm:6.7.5"
-    "@koa/cors": "npm:5.0.0"
     "@koa/router": "npm:12.0.2"
     "@strapi/database": "npm:5.58.0"
     "@strapi/logger": "npm:5.58.0"
@@ -10672,6 +10724,11 @@ __metadata:
     typescript: "npm:5.9.3"
     undici: "npm:8.12.1"
     zod: "npm:4.4.3"
+  peerDependencies:
+    "@types/koa": ^2.15.2
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10819,10 +10876,14 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@strapi/admin": ^5.0.0
+    "@types/koa": ^2.15.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
+  peerDependenciesMeta:
+    "@types/koa":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10833,14 +10894,12 @@ __metadata:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
     "@types/jest": "npm:29.5.2"
-    "@types/koa": "npm:2.15.2"
     "@types/node": "npm:20.19.41"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.58.0"
     execa: "npm:5.1.1"
     http-errors: "npm:2.0.0"
     jest: "npm:29.6.0"
-    koa: "npm:2.16.4"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
     node-machine-id: "npm:1.1.12"
@@ -12060,7 +12119,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/koa-compose@npm:*":
+"@types/koa-compose@npm:*, @types/koa-compose@npm:3.2.5":
   version: 3.2.5
   resolution: "@types/koa-compose@npm:3.2.5"
   dependencies:
@@ -15644,7 +15703,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^2.20.0, commander@npm:^2.20.3":
+"commander@npm:^2.20.0":
   version: 2.20.3
   resolution: "commander@npm:2.20.3"
   checksum: 10c0/74c781a5248c2402a0a3e966a0a2bba3c054aad144f5c023364be83265e796b20565aa9feff624132ff629aa64e16999fa40a743c10c12f7c61e96a794b99288
@@ -16237,13 +16296,6 @@ __metadata:
   bin:
     cssesc: bin/cssesc
   checksum: 10c0/6bcfd898662671be15ae7827120472c5667afb3d7429f1f917737f3bf84c4176003228131b643ae74543f17a394446247df090c597bb9a728cce298606ed0aa7
-  languageName: node
-  linkType: hard
-
-"cssfilter@npm:0.0.10":
-  version: 0.0.10
-  resolution: "cssfilter@npm:0.0.10"
-  checksum: 10c0/478a227a616fb6e9bb338eb95f690df141b86231ec737cbea574484f31a09a51db894b4921afc4987459dae08d584355fd689ff2a7a7c7a74de4bb4c072ce553
   languageName: node
   linkType: hard
 
@@ -19675,26 +19727,6 @@ __metadata:
   peerDependencies:
     graphql: "*"
   checksum: 10c0/8f50268ab3e2553cfe64fad532a3bd60068865217f113ac7388bfea1484d36a7e711a1c26f6a03e67969923967f2a84b62618c07732ca2ca603c295f8a19dbf9
-  languageName: node
-  linkType: hard
-
-"graphql-playground-html@npm:^1.6.30":
-  version: 1.6.30
-  resolution: "graphql-playground-html@npm:1.6.30"
-  dependencies:
-    xss: "npm:^1.0.6"
-  checksum: 10c0/32c87615b221610e57db41b68788bccf1e548ae66f38489521d4cfd2abf35666c76acf8250ce178f86b2bd825c2a9b083d496684abede1085847ca2dc7e71fb6
-  languageName: node
-  linkType: hard
-
-"graphql-playground-middleware-koa@npm:^1.6.21":
-  version: 1.6.22
-  resolution: "graphql-playground-middleware-koa@npm:1.6.22"
-  dependencies:
-    graphql-playground-html: "npm:^1.6.30"
-  peerDependencies:
-    koa: ^2
-  checksum: 10c0/79461d0d624df4189fb85e8c06c26aa2894486cd91179bbda04febfd2808c4c59eb6dac7d75712b8f95416a388ba4adc21e709523ccab5e0a247bd18f90fd5cc
   languageName: node
   linkType: hard
 
@@ -31484,18 +31516,6 @@ __metadata:
   version: 2.2.0
   resolution: "xmlchars@npm:2.2.0"
   checksum: 10c0/b64b535861a6f310c5d9bfa10834cf49127c71922c297da9d4d1b45eeaae40bf9b4363275876088fbe2667e5db028d2cd4f8ee72eed9bede840a67d57dab7593
-  languageName: node
-  linkType: hard
-
-"xss@npm:^1.0.6":
-  version: 1.0.13
-  resolution: "xss@npm:1.0.13"
-  dependencies:
-    commander: "npm:^2.20.3"
-    cssfilter: "npm:0.0.10"
-  bin:
-    xss: bin/xss
-  checksum: 10c0/ba1ebf985e43676d5ae7488e85f608b2ee3be2c1a304f10c54a2110f71d90ffe1cd5e65aa81d837bc9768eaba6686c585034836cb5a90e5a213386b859520c44
   languageName: node
   linkType: hard
 

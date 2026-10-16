@@ -157,7 +157,10 @@
     "@types/jest": "29.5.2",
     "@types/json-logic-js": "2.0.8",
     "@types/jsonwebtoken": "9.0.3",
+    "@types/koa": "2.15.2",
+    "@types/koa-compose": "3.2.5",
     "@types/koa-passport": "6.0.1",
+    "@types/koa-static": "4.0.2",
     "@types/lodash": "^4.14.191",
     "@types/markdown-it": "13.0.7",
     "@types/markdown-it-container": "2.0.9",
@@ -179,10 +182,16 @@
   },
   "peerDependencies": {
     "@strapi/data-transfer": "^5.0.0",
+    "@types/koa": "^2.15.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
