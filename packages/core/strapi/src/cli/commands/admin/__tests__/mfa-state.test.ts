@@ -79,9 +79,7 @@ describe('admin:mfa-state command', () => {
     });
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    await mfaStateCommand({ email }).catch((err) => {
-      expect(err).toEqual(new Error('exit'));
-    });
+    await expect(mfaStateCommand({ email })).rejects.toEqual(new Error('exit'));
 
     expect(consoleError).toHaveBeenCalledWith(`No admin user found for ${email}`);
     expect(mockExit).toHaveBeenCalledWith(1);

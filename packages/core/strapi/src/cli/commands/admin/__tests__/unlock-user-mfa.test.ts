@@ -81,9 +81,7 @@ describe('admin:unlock-user-mfa command', () => {
     });
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    await unlockUserMfaCommand({ email }).catch((err) => {
-      expect(err).toEqual(new Error('exit'));
-    });
+    await expect(unlockUserMfaCommand({ email })).rejects.toEqual(new Error('exit'));
 
     expect(unlock).toHaveBeenCalledWith('1', { via: 'cli' });
     expect(consoleError).toHaveBeenCalledWith(
@@ -104,9 +102,7 @@ describe('admin:unlock-user-mfa command', () => {
     });
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    await unlockUserMfaCommand({ email }).catch((err) => {
-      expect(err).toEqual(new Error('exit'));
-    });
+    await expect(unlockUserMfaCommand({ email })).rejects.toEqual(new Error('exit'));
 
     expect(consoleError).toHaveBeenCalledWith(`No admin user found for ${email}`);
     expect(mockExit).toHaveBeenCalledWith(1);

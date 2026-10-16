@@ -22,13 +22,18 @@ describe('admin::isMfaEnabled', () => {
     expect(() => run(false)).toThrow(expect.objectContaining({ name: 'NotFoundError' }));
   });
 
-  test('reads the flag per request rather than caching it', () => {
+  test('asks the mfa service on every request rather than deciding once at route build', () => {
     const strapi = { service: jest.fn(() => ({ isEnabled: () => false })) };
 
-    expect(() => handler({}, {}, { strapi })).toThrow();
-    expect(() => handler({}, {}, { strapi })).toThrow();
+    expect(() => handler({}, {}, { strapi })).toThrow(
+      expect.objectContaining({ name: 'NotFoundError' })
+    );
+    expect(() => handler({}, {}, { strapi })).toThrow(
+      expect.objectContaining({ name: 'NotFoundError' })
+    );
 
-    // Re-read per request, so toggling the config takes effect without a route rebuild.
+    // The policy does not memoise the answer. What `isEnabled()` itself caches -- the
+    // `admin.auth.mfa` config, read once per process -- is pinned in the mfa service's own tests.
     expect(strapi.service).toHaveBeenCalledTimes(2);
   });
 });

@@ -39,34 +39,42 @@ const hubName = (type: string) => `admin.mfa.${type.replace(/_/g, '.')}`;
  * list must contain from the row types, without coupling to how it is written.
  */
 describe('every second-factor notice reaches the audit log', () => {
-  const ROW_TYPES: MfaEventType[] = [
-    'enabled',
-    'disabled',
-    'reset',
-    'challenge_failed',
-    'recovery_code_used',
-    'recovery_codes_issued',
-    'grace_started',
-    'locked',
-    'unlocked',
-    'authenticator_replaced',
-    'device_trusted',
-    'device_trust_revoked',
-    'passkey_registered',
-    'passkey_removed',
-  ];
+  /**
+   * A `Record` over the union, not a hand-copied list: adding a member to `MfaEventType` without
+   * deciding whether it is audited is a type error here, rather than a silent gap nobody finds
+   * until an auditor asks for a trail that does not exist.
+   *
+   * The `false`s are deliberate: the recovery-code types say nothing `disabled`/`reset` does not,
+   * and `grace_started` follows from a policy change that is itself audited.
+   */
+  const AUDITED: Record<MfaEventType, boolean> = {
+    enabled: true,
+    disabled: true,
+    reset: true,
+    challenge_failed: true,
+    recovery_code_used: false,
+    recovery_codes_issued: false,
+    grace_started: false,
+    locked: true,
+    unlocked: true,
+    authenticator_replaced: true,
+    device_trusted: true,
+    device_trust_revoked: true,
+    passkey_registered: true,
+    passkey_removed: true,
+  };
+  const types = Object.keys(AUDITED) as MfaEventType[];
 
-  /** Deliberately unaudited: the recovery-code types say nothing `disabled`/`reset` does not, and
-   * `grace_started` follows from a policy change that is itself audited. */
-  const NOT_AUDITED: MfaEventType[] = [
-    'recovery_code_used',
-    'recovery_codes_issued',
-    'grace_started',
-  ];
-
-  test.each(ROW_TYPES.filter((type) => !NOT_AUDITED.includes(type)))('%s is registered', (type) => {
+  test.each(types.filter((type) => AUDITED[type]))('%s is registered', (type) => {
     expect(MFA_NOTICE_EVENTS).toContain(hubName(type));
   });
+
+  test.each(types.filter((type) => !AUDITED[type]))(
+    '%s is deliberately absent, not forgotten',
+    (type) => {
+      expect(MFA_NOTICE_EVENTS).not.toContain(hubName(type));
+    }
+  );
 
   // Emitted on the hub but never persisted, so a check derived from row types alone misses them.
   test.each<MfaAuditOnlyNotice>(['trusted_device_used', 'passkey_used'])(
@@ -75,12 +83,6 @@ describe('every second-factor notice reaches the audit log', () => {
       expect(MFA_NOTICE_EVENTS).toContain(hubName(type));
     }
   );
-
-  test('the deliberately unaudited types are genuinely absent, not forgotten', () => {
-    for (const type of NOT_AUDITED) {
-      expect(MFA_NOTICE_EVENTS).not.toContain(hubName(type));
-    }
-  });
 
   test('every listed notice, and the two other events, is actually registered', () => {
     const { transformers } = register();

@@ -88,11 +88,16 @@ describe('authentication routes', () => {
       config: { middlewares?: Array<string | { name: string; config?: unknown }> };
     }>;
 
-    for (const route of otherRateLimited) {
-      const entry = (route.config.middlewares ?? []).find((m) => limiterName(m) !== undefined);
-      if (entry !== undefined) {
-        expect(entry).toBe('admin::rateLimit');
-      }
+    const entries = otherRateLimited.flatMap((route) =>
+      (route.config.middlewares ?? []).filter((m) => limiterName(m) !== undefined)
+    );
+
+    // Non-empty first: with the assertion inside a loop over limiter entries, zero entries meant
+    // zero assertions, and the test passed having checked nothing. `/login` and `/register-admin`
+    // carry the default on develop and must still be found here.
+    expect(entries.length).toBeGreaterThanOrEqual(2);
+    for (const entry of entries) {
+      expect(entry).toBe('admin::rateLimit');
     }
   });
 

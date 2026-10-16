@@ -115,7 +115,7 @@ describe('security-settings controller', () => {
     });
     const { ctx } = buildCtx(body);
 
-    await expect(controller.update(ctx)).rejects.toThrow();
+    await expect(controller.update(ctx)).rejects.toMatchObject({ name: 'ValidationError' });
     expect(updateSettings).not.toHaveBeenCalled();
   });
 });

@@ -144,9 +144,7 @@ describe('admin:reset-user-mfa command', () => {
     });
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    await resetUserMfaCommand({ email }).catch((err) => {
-      expect(err).toEqual(new Error('exit'));
-    });
+    await expect(resetUserMfaCommand({ email })).rejects.toEqual(new Error('exit'));
 
     expect(consoleError).toHaveBeenCalledWith(`No admin user found for ${email}`);
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -171,9 +169,7 @@ describe('admin:reset-user-mfa command', () => {
       throw new Error('exit');
     });
 
-    await resetUserMfaCommand().catch((err) => {
-      expect(err).toEqual(new Error('exit'));
-    });
+    await expect(resetUserMfaCommand()).rejects.toEqual(new Error('exit'));
 
     expect(mockInquiry).toHaveBeenLastCalledWith([
       expect.objectContaining({

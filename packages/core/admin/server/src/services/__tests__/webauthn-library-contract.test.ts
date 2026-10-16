@@ -2,6 +2,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import minVersion from 'semver/ranges/min-version';
+import lte from 'semver/functions/lte';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { isoBase64URL, isoUint8Array } from '@simplewebauthn/server/helpers';
 
@@ -30,6 +32,11 @@ const findPackageRoot = (from: string): string => {
 };
 
 const PACKAGE_ROOT = findPackageRoot(require.resolve('@simplewebauthn/server'));
+
+/** `@strapi/admin`'s own manifest: the declared dependency and the Node range Strapi supports. */
+const ADMIN_MANIFEST = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../../../../package.json'), 'utf8')
+) as { dependencies: Record<string, string>; engines: { node: string } };
 const MANIFEST = JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, 'package.json'), 'utf8')) as {
   version: string;
   license?: string;
@@ -50,8 +57,10 @@ const declarationText = (): string => {
 };
 
 describe('@simplewebauthn/server call contract', () => {
-  test('the pinned version is what is installed, under a permissive licence', () => {
-    expect(MANIFEST.version).toBe('14.0.1');
+  test('the version declared in @strapi/admin is what is installed, under a permissive licence', () => {
+    // Compared with the declaration rather than a literal, so a deliberate bump updates one place
+    // and this still catches a lockfile that resolved something else.
+    expect(MANIFEST.version).toBe(ADMIN_MANIFEST.dependencies['@simplewebauthn/server']);
     expect(MANIFEST.license).toBe('MIT');
   });
 
@@ -69,11 +78,17 @@ describe('@simplewebauthn/server call contract', () => {
     expect(typeof isoBase64URL.toBuffer).toBe('function');
   });
 
-  test("the engines range is inside Strapi's own", () => {
-    // If the manifest phrases this differently, assert the real string rather than delete the check:
-    // a floor above 22 puts the library outside the Node range Strapi supports.
-    expect(MANIFEST).toHaveProperty('engines');
-    expect((MANIFEST as { engines?: { node?: string } }).engines?.node).toMatch(/20/);
+  test("the library's Node floor is not above Strapi's own", () => {
+    // A floor above Strapi's puts the library outside the Node range Strapi supports. Compared as
+    // ranges: matching the digits "20" in the string checked nothing of the sort.
+    const libraryFloor = minVersion(
+      (MANIFEST as { engines?: { node?: string } }).engines?.node ?? ''
+    );
+    const strapiFloor = minVersion(ADMIN_MANIFEST.engines.node);
+
+    expect(libraryFloor).not.toBeNull();
+    expect(strapiFloor).not.toBeNull();
+    expect(lte(libraryFloor!, strapiFloor!)).toBe(true);
   });
 
   test('shape 1: userID must be a Uint8Array -- a string throws', async () => {

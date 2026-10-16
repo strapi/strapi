@@ -3,6 +3,18 @@ import { http, HttpResponse } from 'msw';
 
 import { ProfilePage } from '../ProfilePage';
 
+const MFA_STATUS = {
+  enabled: false,
+  enabledAt: null,
+  recoveryCodesRemaining: 0,
+  codesAcknowledged: false,
+  required: false,
+  graceUntil: null,
+  trustedDevicesEnabled: false,
+  passkeysEnabled: false,
+  hasLocalPassword: true,
+};
+
 describe('Profile page', () => {
   const originalIsEnabled = window.strapi.features.isEnabled;
   const originalIsEE = window.strapi.isEE;
@@ -77,20 +89,7 @@ describe('Profile page', () => {
   });
 
   it('should display the two-factor authentication section when the status endpoint is available', async () => {
-    server.use(
-      http.get('/admin/mfa/me', () =>
-        HttpResponse.json({
-          data: {
-            enabled: false,
-            enabledAt: null,
-            recoveryCodesRemaining: 0,
-            codesAcknowledged: false,
-            required: false,
-            graceUntil: null,
-          },
-        })
-      )
-    );
+    server.use(http.get('/admin/mfa/me', () => HttpResponse.json({ data: MFA_STATUS })));
 
     const { findByText, findByRole } = render(<ProfilePage />);
 
@@ -100,6 +99,10 @@ describe('Profile page', () => {
   });
 
   it('should not display the two-factor authentication section if the user role is Locked', async () => {
+    // The status endpoint answers, so the section *would* render. Without this the default handler
+    // 404s, the section is absent for that reason alone, and the test passed with the Locked check
+    // deleted.
+    let statusRequested = false;
     server.use(
       http.get('/admin/providers/isSSOLocked', () => {
         return HttpResponse.json({
@@ -107,6 +110,10 @@ describe('Profile page', () => {
             isSSOLocked: true,
           },
         });
+      }),
+      http.get('/admin/mfa/me', () => {
+        statusRequested = true;
+        return HttpResponse.json({ data: MFA_STATUS });
       })
     );
 
@@ -115,5 +122,6 @@ describe('Profile page', () => {
     await findByText('Interface language');
 
     expect(queryByRole('heading', { name: 'Two-factor authentication' })).not.toBeInTheDocument();
+    expect(statusRequested).toBe(false);
   });
 });

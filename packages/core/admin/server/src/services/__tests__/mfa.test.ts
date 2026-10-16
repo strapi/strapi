@@ -1765,6 +1765,35 @@ describe('mfa service: isEnabled', () => {
 
     expect(service.isEnabled()).toBe(true);
   });
+
+  /**
+   * Pins what the architecture page documents: the future flag is read on every call, while
+   * `admin.auth.mfa` is read once and cached for the process. A test that builds a fresh service
+   * and reads once cannot tell those apart; this one changes both between two calls.
+   */
+  test('re-reads the future flag on every call but reads the config once', () => {
+    let flag = true;
+    let enabled = true;
+    const get = jest.fn((path: string, defaultValue?: unknown) =>
+      path === 'admin.auth.mfa' ? { enabled } : defaultValue
+    );
+    const { strapi } = buildStrapi({
+      features: { future: { isEnabled: jest.fn(() => flag) } },
+      config: { get },
+    });
+    const service = createMfaService(defaultDeps(strapi));
+
+    expect(service.isEnabled()).toBe(true);
+
+    flag = false;
+    expect(service.isEnabled()).toBe(false);
+
+    flag = true;
+    enabled = false;
+    // Still on: the config was cached at the first read, so changing it needs a restart.
+    expect(service.isEnabled()).toBe(true);
+    expect(get.mock.calls.filter(([path]) => path === 'admin.auth.mfa')).toHaveLength(1);
+  });
 });
 
 describe('mfa service: recovery codes', () => {

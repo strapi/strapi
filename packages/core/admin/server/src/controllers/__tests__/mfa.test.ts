@@ -1136,7 +1136,9 @@ describe('mfa controller', () => {
 
       // The schema carries the digits-only guard now that the id arrives in the body, so this is
       // a validation refusal rather than the handler's own 404. Either way: nothing is touched.
-      await expect(mfaController.deletePasskey(ctx)).rejects.toThrow();
+      await expect(mfaController.deletePasskey(ctx)).rejects.toMatchObject({
+        name: 'ValidationError',
+      });
 
       expect(doubles.assertPasswordAndFactor).not.toHaveBeenCalled();
       expect(doubles.deletePasskey).not.toHaveBeenCalled();
@@ -1189,7 +1191,9 @@ describe('mfa controller', () => {
       const doubles = buildStrapiWithPasskeys();
       const { ctx } = buildCtx({ id: '9' });
 
-      await expect(mfaController.deletePasskey(ctx)).rejects.toThrow();
+      await expect(mfaController.deletePasskey(ctx)).rejects.toMatchObject({
+        name: 'ValidationError',
+      });
 
       expect(doubles.assertPasswordAndFactor).not.toHaveBeenCalled();
       expect(doubles.deletePasskey).not.toHaveBeenCalled();

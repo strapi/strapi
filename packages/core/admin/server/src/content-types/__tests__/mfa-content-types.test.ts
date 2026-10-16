@@ -9,6 +9,16 @@ import roleContentType from '../Role';
 
 const schemas = { challenge, recoveryCode, event, trustedDevice, passkey };
 
+/**
+ * The properties that matter for a column holding second-factor state: never in an API response,
+ * never searchable, never editable through the content-type builder. A subset match, not a literal
+ * of the whole attribute -- that only proved the schema equalled itself, and broke on any harmless
+ * addition.
+ */
+const expectHiddenColumn = (attribute: unknown, type: string) => {
+  expect(attribute).toMatchObject({ type, private: true, searchable: false, configurable: false });
+};
+
 describe('mfa content types', () => {
   test('are registered under the expected keys', () => {
     expect(contentTypes['mfa-challenge'].schema).toBe(challenge);
@@ -73,28 +83,14 @@ describe('mfa content types', () => {
   describe('enforcement columns', () => {
     test('admin::user declares the three enforcement columns as private datetimes/strings', () => {
       const { attributes } = User;
-      expect(attributes.mfaPendingSecret).toEqual({
-        type: 'string',
-        configurable: false,
-        private: true,
-        searchable: false,
-      });
-      expect(attributes.mfaGraceUntil).toEqual({
-        type: 'datetime',
-        configurable: false,
-        private: true,
-        searchable: false,
-      });
-      expect(attributes.mfaLockedAt).toEqual({
-        type: 'datetime',
-        configurable: false,
-        private: true,
-        searchable: false,
-      });
+      expectHiddenColumn(attributes.mfaPendingSecret, 'string');
+      expectHiddenColumn(attributes.mfaGraceUntil, 'datetime');
+      expectHiddenColumn(attributes.mfaLockedAt, 'datetime');
     });
 
     test('admin::role declares mfaRequired as a non-configurable boolean defaulting to false', () => {
-      expect(roleContentType.attributes.mfaRequired).toEqual({
+      // `default: false` is what keeps every existing role unrequired on upgrade.
+      expect(roleContentType.attributes.mfaRequired).toMatchObject({
         type: 'boolean',
         default: false,
         configurable: false,
@@ -170,27 +166,12 @@ describe('mfa content types', () => {
 
     test('admin::user carries the pending registration ceremony, private like mfaPendingSecret', () => {
       const { attributes } = User;
-      expect(attributes.mfaPasskeyChallenge).toEqual({
-        type: 'string',
-        configurable: false,
-        private: true,
-        searchable: false,
-      });
-      expect(attributes.mfaPasskeyChallengeExpiresAt).toEqual({
-        type: 'datetime',
-        configurable: false,
-        private: true,
-        searchable: false,
-      });
+      expectHiddenColumn(attributes.mfaPasskeyChallenge, 'string');
+      expectHiddenColumn(attributes.mfaPasskeyChallengeExpiresAt, 'datetime');
     });
 
     test('admin::mfa-challenge carries the login ceremony challenge, nullable', () => {
-      expect(challenge.attributes.webauthnChallenge).toEqual({
-        type: 'string',
-        configurable: false,
-        private: true,
-        searchable: false,
-      });
+      expectHiddenColumn(challenge.attributes.webauthnChallenge, 'string');
       // Nullable, so every existing row and every TOTP-only challenge is untouched.
       expect(challenge.attributes.webauthnChallenge).not.toHaveProperty('required');
     });

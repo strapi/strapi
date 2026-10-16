@@ -761,7 +761,9 @@ describe('authentication controller', () => {
           trustDevice: 'yes',
         });
 
-        await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toThrow();
+        await expect(authenticationController.loginMfa(ctx, jest.fn())).rejects.toMatchObject({
+          name: 'ValidationError',
+        });
         expect(verifyChallenge).not.toHaveBeenCalled();
       });
 
@@ -1000,7 +1002,9 @@ describe('authentication controller', () => {
           const doubles = buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
           const { ctx } = buildCtx({ challengeToken: 'c'.repeat(64) });
 
-          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          await expect(
+            authenticationController.loginMfaWebauthn(ctx, jest.fn())
+          ).rejects.toMatchObject({ name: 'ValidationError' });
           expect(verifyAssertion).not.toHaveBeenCalled();
           expect(doubles.generateRefreshToken).not.toHaveBeenCalled();
         });
@@ -1010,7 +1014,9 @@ describe('authentication controller', () => {
           buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
           const { ctx } = buildCtx(body({ assertion: null }));
 
-          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          await expect(
+            authenticationController.loginMfaWebauthn(ctx, jest.fn())
+          ).rejects.toMatchObject({ name: 'ValidationError' });
           expect(verifyAssertion).not.toHaveBeenCalled();
         });
 
@@ -1019,7 +1025,9 @@ describe('authentication controller', () => {
           buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
           const { ctx } = buildCtx(body({ challengeToken: 'c'.repeat(65) }));
 
-          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          await expect(
+            authenticationController.loginMfaWebauthn(ctx, jest.fn())
+          ).rejects.toMatchObject({ name: 'ValidationError' });
           expect(verifyAssertion).not.toHaveBeenCalled();
         });
 
@@ -1028,7 +1036,9 @@ describe('authentication controller', () => {
           buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
           const { ctx } = buildCtx(body({ userId: 99 }));
 
-          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          await expect(
+            authenticationController.loginMfaWebauthn(ctx, jest.fn())
+          ).rejects.toMatchObject({ name: 'ValidationError' });
           expect(verifyAssertion).not.toHaveBeenCalled();
         });
 
@@ -1039,7 +1049,9 @@ describe('authentication controller', () => {
           buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
           const { ctx } = buildCtx(body({ trustDevice: true, deviceId: 'not-a-uuid' }));
 
-          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          await expect(
+            authenticationController.loginMfaWebauthn(ctx, jest.fn())
+          ).rejects.toMatchObject({ name: 'ValidationError' });
           expect(verifyAssertion).not.toHaveBeenCalled();
         });
 
@@ -1048,7 +1060,9 @@ describe('authentication controller', () => {
           buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
           const { ctx } = buildCtx(body({ rememberMe: 'yes' }));
 
-          await expect(authenticationController.loginMfaWebauthn(ctx, jest.fn())).rejects.toThrow();
+          await expect(
+            authenticationController.loginMfaWebauthn(ctx, jest.fn())
+          ).rejects.toMatchObject({ name: 'ValidationError' });
           expect(verifyAssertion).not.toHaveBeenCalled();
         });
 
@@ -1059,7 +1073,7 @@ describe('authentication controller', () => {
 
           await expect(
             authenticationController.loginMfaWebauthnOptions(ctx, jest.fn())
-          ).rejects.toThrow();
+          ).rejects.toMatchObject({ name: 'ValidationError' });
           expect(authenticationOptions).not.toHaveBeenCalled();
         });
 
@@ -1074,7 +1088,7 @@ describe('authentication controller', () => {
 
           await expect(
             authenticationController.loginMfaWebauthnOptions(ctx, jest.fn())
-          ).rejects.toThrow();
+          ).rejects.toMatchObject({ name: 'ValidationError' });
           expect(authenticationOptions).not.toHaveBeenCalled();
         });
       });
