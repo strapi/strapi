@@ -977,4 +977,24 @@ describe('security-settings: service', () => {
     ).rejects.toThrow(/no local password/);
     expect(widened.storeSet).not.toHaveBeenCalled();
   });
+
+  test('a concurrent raise turns the password-less passkeys save into one it never proved', async () => {
+    // The in-transaction re-check is the whole point of reading the settings again. The
+    // passkeys-only branch lets this caller through having presented nothing, so if a raise lands
+    // between the read and the write, the save they are about to make is a downgrade they were
+    // never checked for -- the document is written whole, so `mode` would go back to `off`.
+    const concurrent = setup({
+      stored: { mfa: { mode: 'off', graceDays: 7 }, passkeys: { enabled: true } },
+      actor: { password: null },
+      exempt: true,
+      onTransaction(setStored) {
+        setStored({ mfa: { mode: 'required', graceDays: 7 }, passkeys: { enabled: true } });
+      },
+    });
+
+    await expect(
+      concurrent.service.updateSettings({ passkeys: { enabled: false } }, actor)
+    ).rejects.toThrow(/changed while this save was in flight/i);
+    expect(concurrent.storeSet).not.toHaveBeenCalled();
+  });
 });

@@ -345,15 +345,29 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       }
     }
 
-    // A save that demanded nothing is only safe if it still demands nothing at write time.
-    const credentialsVerified = lowersEnforcement || widensTrust || disablesPasskeys;
+    // What the caller actually proved. A password-less actor reaching here presented nothing --
+    // the `disablesPasskeys`-only branch above lets them through on session authority -- so their
+    // save is still unverified however it is re-evaluated below.
+    const credentialsVerified =
+      Boolean(actorRow.password) && (lowersEnforcement || widensTrust || disablesPasskeys);
 
     await strapi.db.transaction(async () => {
       // A concurrent save since the read at the top can turn what looked like a raise into a
       // relaxation. The credential check is not repeated -- bcrypt would hold the transaction open --
       // so a save whose requirement appeared only now is refused and the caller retries.
+      //
+      // The test is the same one the pre-check applied, against the settings as they are now: a
+      // password holder was asked for credentials if anything relaxed, while a password-less
+      // actor is allowed `disablesPasskeys` and nothing else. Asking only whether *something*
+      // relaxes would refuse the uncontested SSO-only passkey toggle the branch above exists to
+      // permit.
       const current = await getSettings();
-      if (relaxingChanges(current, nextValues).any && !credentialsVerified) {
+      const now = relaxingChanges(current, nextValues);
+      const needsCredentials = actorRow.password
+        ? now.any
+        : now.lowersEnforcement || now.widensTrust;
+
+      if (needsCredentials && !credentialsVerified) {
         throw new ValidationError(
           'Two-factor settings changed while this save was in flight. Review the current settings and try again.'
         );
