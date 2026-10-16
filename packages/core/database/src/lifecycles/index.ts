@@ -19,6 +19,7 @@ export interface LifecycleProvider {
   subscribe(subscriber: Subscriber): () => void;
   clear(): void;
   run(action: Action, uid: string, properties: Properties, states?: States): Promise<States>;
+  hasSubscribers(action: Action, uid: string): boolean;
   createEvent(action: Action, uid: string, properties: Properties, state: State): Event;
   disable(): void;
   enable(): void;
@@ -54,6 +55,30 @@ export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
 
     enable() {
       isLifecycleHooksDisabled = false;
+    },
+
+    /**
+     * Whether running `action` on `uid` would reach anyone: a lifecycle declared on the model, a
+     * subscriber registered for that model or for every model, or a subscriber function.
+     */
+    hasSubscribers(action, uid) {
+      if (isLifecycleHooksDisabled) {
+        return false;
+      }
+
+      return subscribers.some((subscriber) => {
+        if (subscriber === subscriberUtils.modelsLifecyclesSubscriber) {
+          const model = db.metadata.get(uid);
+
+          return Boolean(model.lifecycles && action in model.lifecycles);
+        }
+
+        if (typeof subscriber === 'function') {
+          return true;
+        }
+
+        return action in subscriber && (!subscriber.models || subscriber.models.includes(uid));
+      });
     },
 
     createEvent(action, uid, properties, state): Event {
