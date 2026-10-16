@@ -79,8 +79,8 @@
     "test:ts": "run -T tsc -p tsconfig.json",
     "test:ts:back": "run -T tsc -p server/tsconfig.json && run -T tsc -p ee/server/tsconfig.json",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json && run -T tsc -p ee/admin/tsconfig.json",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
@@ -175,7 +175,9 @@
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1",
     "vite": "6.4.3",
-    "vite-plugin-dts": "^4.3.0"
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "catalog:",
+    "vitest-config": "5.58.0"
   },
   "peerDependencies": {
     "@strapi/data-transfer": "^5.0.0",
