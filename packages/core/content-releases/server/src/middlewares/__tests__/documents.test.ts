@@ -2,11 +2,12 @@ import { setImmediate } from 'node:timers/promises';
 
 import type { Core, Modules } from '@strapi/types';
 
-import { createDeleteActionsOnDelete, createUpdateActionsOnUpdate } from '../documents';
+import { createDeleteActionsOnDelete, createRevalidateActionsOnDraftChange } from '../documents';
 
 type Context = Parameters<Modules.Documents.Middleware.Middleware>[0];
 
 const UID = 'api::article.article';
+const DRAFT = { documentId: 'doc-1', locale: 'en' };
 
 const deleteEntryActions = jest.fn();
 const revalidateEntryActions = jest.fn();
@@ -21,14 +22,15 @@ const strapi = {
 } as unknown as Core.Strapi;
 
 // The middleware's work on releases runs after it returns: let it settle before asserting
-const runMiddleware = async (middleware: Modules.Documents.Middleware.Middleware, ctx: unknown) => {
-  const result = await middleware(
-    ctx as Context,
-    jest.fn().mockResolvedValue({ documentId: 'doc-1', locale: 'en' })
-  );
+const runMiddleware = async (
+  middleware: Modules.Documents.Middleware.Middleware,
+  ctx: unknown,
+  result: unknown = DRAFT
+) => {
+  const returned = await middleware(ctx as Context, jest.fn().mockResolvedValue(result));
   await setImmediate();
 
-  return result;
+  return returned;
 };
 
 beforeEach(() => {
@@ -37,33 +39,56 @@ beforeEach(() => {
   revalidateEntryActions.mockResolvedValue(undefined);
 });
 
-describe('createUpdateActionsOnUpdate', () => {
-  const updateEntry = () =>
-    runMiddleware(createUpdateActionsOnUpdate({ strapi }), {
-      action: 'update',
-      contentType: { uid: UID, options: { draftAndPublish: true } },
-      params: { documentId: 'doc-1' },
-    });
+describe('createRevalidateActionsOnDraftChange', () => {
+  const changeDraft = (action: 'update' | 'discardDraft', result?: unknown) =>
+    runMiddleware(
+      createRevalidateActionsOnDraftChange({ strapi }),
+      {
+        action,
+        contentType: { uid: UID, options: { draftAndPublish: true } },
+        params: { documentId: 'doc-1' },
+      },
+      result
+    );
 
   it("revalidates the updated entry's release actions", async () => {
-    await updateEntry();
+    await changeDraft('update');
+
+    expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, DRAFT]]);
+  });
+
+  it('revalidates the release actions of each locale whose draft was discarded', async () => {
+    const frDraft = { documentId: 'doc-1', locale: 'fr' };
+
+    await changeDraft('discardDraft', { documentId: 'doc-1', entries: [DRAFT, frDraft] });
 
     expect(revalidateEntryActions.mock.calls).toStrictEqual([
-      [UID, { documentId: 'doc-1', locale: 'en' }],
+      [UID, DRAFT],
+      [UID, frDraft],
     ]);
   });
 
-  it('logs a failure to revalidate and still returns the updated entry', async () => {
-    revalidateEntryActions.mockRejectedValue(new Error('revalidation failed'));
+  it('revalidates an updated entry that has its own `entries` field as one entry', async () => {
+    const draft = { ...DRAFT, entries: [] };
 
-    const result = await updateEntry();
+    await changeDraft('update', draft);
 
-    expect(result).toEqual({ documentId: 'doc-1', locale: 'en' });
-    expect(logError).toHaveBeenCalledWith(
-      'Error while updating release actions after update',
-      expect.objectContaining({ error: expect.any(Error) })
-    );
+    expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, draft]]);
   });
+
+  it.each(['update', 'discardDraft'] as const)(
+    'logs a failure to revalidate after %s and still returns the result',
+    async (action) => {
+      revalidateEntryActions.mockRejectedValue(new Error('revalidation failed'));
+      const result = action === 'update' ? DRAFT : { documentId: 'doc-1', entries: [DRAFT] };
+
+      expect(await changeDraft(action, result)).toEqual(result);
+      expect(logError).toHaveBeenCalledWith(
+        `Error while updating release actions after ${action}`,
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    }
+  );
 });
 
 describe('createDeleteActionsOnDelete', () => {
@@ -95,7 +120,7 @@ describe('createDeleteActionsOnDelete', () => {
 
     const result = await deleteEntry();
 
-    expect(result).toEqual({ documentId: 'doc-1', locale: 'en' });
+    expect(result).toEqual(DRAFT);
     expect(logError).toHaveBeenCalledWith(
       'Error while deleting release actions after delete',
       expect.objectContaining({ error: expect.any(Error) })

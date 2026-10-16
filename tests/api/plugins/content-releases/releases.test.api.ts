@@ -2716,6 +2716,61 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect((await getRelease(release.id)).actions.meta).toEqual({ count: 1, notReadyCount: 0 });
     });
 
+    describe('when a draft is discarded', () => {
+      // A published product, in a planned all_or_nothing release
+      const createPublishedProductInRelease = async () => {
+        const documentId = await createProduct({ valid: true });
+        await strapi.documents(productUID).publish({ documentId });
+        const release = await createReleaseWithActions('all_or_nothing', [{ documentId }]);
+
+        return { documentId, release };
+      };
+
+      test('an invalid draft replaced by its valid published version makes the action valid', async () => {
+        const { documentId, release } = await createPublishedProductInRelease();
+        await strapi.documents(productUID).update({ documentId, data: { description: null } });
+        expect(await waitFor(async () => (await getRelease(release.id)).status === 'blocked')).toBe(
+          true
+        );
+
+        await strapi.documents(productUID).discardDraft({ documentId });
+
+        expect(
+          await waitFor(async () => (await getAction(release.id, documentId)).isEntryValid === true)
+        ).toBe(true);
+        expect((await getAction(release.id, documentId)).reason).toBeNull();
+        expect(await waitFor(async () => (await getRelease(release.id)).status === 'ready')).toBe(
+          true
+        );
+      });
+
+      test('a valid draft replaced by an invalid published version stores the reason', async () => {
+        const { documentId, release } = await createPublishedProductInRelease();
+        // Publishing validates, so make the published version invalid behind its back
+        await strapi.db.query(productUID).updateMany({
+          where: { documentId, publishedAt: { $notNull: true } },
+          data: { description: null },
+        });
+        expect((await getRelease(release.id)).status).toBe('ready');
+
+        await strapi.documents(productUID).discardDraft({ documentId });
+
+        expect(
+          await waitFor(
+            async () => (await getAction(release.id, documentId)).isEntryValid === false
+          )
+        ).toBe(true);
+        expect((await getAction(release.id, documentId)).reason).toEqual({
+          validation: {
+            errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+          },
+        });
+        expect(await waitFor(async () => (await getRelease(release.id)).status === 'blocked')).toBe(
+          true
+        );
+      });
+    });
+
     test('an unpublish action has no reason and never counts as not ready', async () => {
       const invalidId = await createProduct({ valid: false });
       const unpublishRelease = await createReleaseWithActions('all_or_nothing', [

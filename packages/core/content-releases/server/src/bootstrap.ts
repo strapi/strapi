@@ -4,7 +4,10 @@ import type { Core, UID } from '@strapi/types';
 import { ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { registerAuditEvents } from './audit-logs';
 import { getService } from './utils';
-import { createDeleteActionsOnDelete, createUpdateActionsOnUpdate } from './middlewares/documents';
+import {
+  createDeleteActionsOnDelete,
+  createRevalidateActionsOnDraftChange,
+} from './middlewares/documents';
 
 export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
@@ -45,7 +48,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
     // We register middleware to handle ReleaseActions when changes on documents are made
     strapi.documents.use(createDeleteActionsOnDelete({ strapi }));
-    strapi.documents.use(createUpdateActionsOnUpdate({ strapi }));
+    strapi.documents.use(createRevalidateActionsOnDraftChange({ strapi }));
 
     getService('scheduling', { strapi })
       .syncFromDatabase()

@@ -39,10 +39,11 @@ const createDeleteActionsOnDelete =
     return result;
   };
 
-const createUpdateActionsOnUpdate =
+// An update or a discarded draft changes the draft a planned release would publish
+const createRevalidateActionsOnDraftChange =
   ({ strapi }: { strapi: Core.Strapi }): Middleware =>
   async (ctx, next) => {
-    if (ctx.action !== 'update') {
+    if (ctx.action !== 'update' && ctx.action !== 'discardDraft') {
       return next();
     }
 
@@ -51,22 +52,32 @@ const createUpdateActionsOnUpdate =
     }
 
     const contentType = ctx.contentType.uid;
+    const { action } = ctx;
 
-    const result = (await next()) as Modules.Documents.AnyDocument;
+    const result = await next();
 
-    if (!result) {
+    // Neither action returns a count or a list; nothing to revalidate without a result
+    if (!result || typeof result !== 'object' || Array.isArray(result)) {
       return result;
     }
 
-    getService('release-action', { strapi })
-      .revalidateEntryActions(contentType, result)
-      .catch((error: unknown) => {
-        strapi.log.error('Error while updating release actions after update', {
-          error,
-        });
+    // `update` returns the updated draft (which may have its own `entries` field); `discardDraft`
+    // `{ entries }`, the new draft of each locale it discarded
+    const drafts = action === 'discardDraft' && 'entries' in result ? result.entries : [result];
+
+    const revalidate = async () => {
+      for (const draft of drafts) {
+        await getService('release-action', { strapi }).revalidateEntryActions(contentType, draft);
+      }
+    };
+
+    revalidate().catch((error: unknown) => {
+      strapi.log.error(`Error while updating release actions after ${action}`, {
+        error,
       });
+    });
 
     return result;
   };
 
-export { createDeleteActionsOnDelete, createUpdateActionsOnUpdate };
+export { createDeleteActionsOnDelete, createRevalidateActionsOnDraftChange };
