@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { shallowEqual } from 'react-redux';
 
@@ -9,8 +9,6 @@ import {
 } from '../../services/api';
 import { useTypedDispatch, useTypedSelector } from '../../store/hooks';
 import { cancelFile, type FileProgress } from '../../store/uploadProgress';
-
-import type { File } from '../../../../shared/contracts/files';
 
 export interface FieldUpload {
   key: string;
@@ -52,10 +50,10 @@ const toProgress = ({ status, size, uploadedBytes }: FileProgress) => {
  * until the user retries or removes it, whatever happened to the dialog. A row
  * that vanished while still in flight was cancelled along with its batch.
  *
- * Completed rows are handed to `onComplete` once each, then leave the list —
- * from there on they are ordinary assets of the field.
+ * Completed rows leave the list. Attaching them to the field is the upload's
+ * `onFileUploaded`, which outlives the input.
  */
-export const useFieldUploads = (owner: string, onComplete: (assets: File[]) => void) => {
+export const useFieldUploads = (owner: string) => {
   const dispatch = useTypedDispatch();
   const [retryUploadFile] = useRetryUploadFileMutation();
 
@@ -68,11 +66,7 @@ export const useFieldUploads = (owner: string, onComplete: (assets: File[]) => v
   );
 
   const trackedRef = useRef(new Map<string, TrackedRow>());
-  const attachedRef = useRef(new Set<string>());
   const [dismissed, setDismissed] = useState<ReadonlySet<string>>(() => new Set());
-
-  const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
 
   const tracked = trackedRef.current;
   const liveKeys = new Set<string>();
@@ -90,23 +84,6 @@ export const useFieldUploads = (owner: string, onComplete: (assets: File[]) => v
       tracked.set(key, { ...entry, row: { ...entry.row, status: 'cancelled' } });
     }
   });
-
-  useEffect(() => {
-    const completed: File[] = [];
-
-    ownedRows.forEach((row) => {
-      const key = getKey(currentUploadId, row.index);
-
-      if (row.status === 'complete' && row.file && !attachedRef.current.has(key)) {
-        attachedRef.current.add(key);
-        completed.push(row.file);
-      }
-    });
-
-    if (completed.length > 0) {
-      onCompleteRef.current(completed);
-    }
-  }, [ownedRows, currentUploadId]);
 
   const uploads: FieldUpload[] = [];
 

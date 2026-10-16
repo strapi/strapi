@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { adminApi, Form } from '@strapi/admin/strapi-admin';
 import { render, screen, waitFor, fireEvent, act } from '@tests/utils';
 
@@ -459,6 +461,55 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(
         screen.getByRole('button', { name: 'More actions for second.png' })
       ).toBeInTheDocument();
+    });
+
+    it('attaches an upload that completes after the input remounts', async () => {
+      // A repeatable component collapsed mid-upload unmounts its fields.
+      const CollapsibleInput = () => {
+        const [isOpen, setIsOpen] = useState(true);
+
+        return (
+          <>
+            <button type="button" onClick={() => setIsOpen((open) => !open)}>
+              Toggle
+            </button>
+            {isOpen && <MediaLibraryInput name="cover" label="Cover" {...multiple} />}
+          </>
+        );
+      };
+
+      const { user } = render(<CollapsibleInput />, {
+        providerOptions: { storeConfig },
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Form onSubmit={jest.fn()} method="POST" initialValues={{}}>
+              {children}
+            </Form>
+          ),
+        },
+      });
+
+      dropFiles([image('first.png'), image('second.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+
+      await user.click(screen.getByRole('button', { name: 'Toggle' }));
+      await settle('first.png');
+      await waitFor(() => expect(requests).toHaveLength(2));
+      await user.click(screen.getByRole('button', { name: 'Toggle' }));
+
+      expect(
+        screen.getByRole('button', { name: 'More actions for first.png' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Cancel upload of second.png' })
+      ).toBeInTheDocument();
+
+      await settle('second.png');
+
+      expect(
+        screen.getByRole('button', { name: 'More actions for second.png' })
+      ).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: /^More actions for/ })).toHaveLength(2);
     });
 
     it('cancels one upload without stopping the others', async () => {
