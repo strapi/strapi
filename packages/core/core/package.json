@@ -129,9 +129,11 @@
     "@types/jest": "29.5.2",
     "@types/json-logic-js": "2.0.8",
     "@types/koa": "2.15.2",
+    "@types/koa-compose": "3.2.5",
     "@types/koa-compress": "4.0.3",
     "@types/koa-favicon": "2.1.5",
     "@types/koa-static": "4.0.2",
+    "@types/koa__cors": "5.0.0",
     "@types/koa__router": "12.0.0",
     "@types/lodash": "^4.14.191",
     "@types/mime-types": "2.1.1",
@@ -148,5 +150,37 @@
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
+  },
+  "peerDependencies": {
+    "@types/koa": "^2.15.2",
+    "@types/koa-compose": "^3.2.5",
+    "@types/koa-compress": "^4.0.3",
+    "@types/koa-favicon": "^2.1.5",
+    "@types/koa-static": "^4.0.2",
+    "@types/koa__cors": "^5.0.0",
+    "@types/koa__router": "^12.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/koa-compose": {
+      "optional": true
+    },
+    "@types/koa-compress": {
+      "optional": true
+    },
+    "@types/koa-favicon": {
+      "optional": true
+    },
+    "@types/koa-static": {
+      "optional": true
+    },
+    "@types/koa__cors": {
+      "optional": true
+    },
+    "@types/koa__router": {
+      "optional": true
+    }
   }
 }

@@ -97,5 +97,13 @@
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
+  },
+  "peerDependencies": {
+    "@types/koa": "^2.15.2"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    }
   }
 }

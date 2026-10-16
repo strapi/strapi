@@ -61,7 +61,6 @@
   },
   "dependencies": {
     "@casl/ability": "6.7.5",
-    "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
     "@strapi/database": "5.58.0",
     "@strapi/logger": "5.58.0",
@@ -92,5 +91,17 @@
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
+  },
+  "peerDependencies": {
+    "@types/koa": "^2.15.2",
+    "@types/koa__router": "^12.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/koa__router": {
+      "optional": true
+    }
   }
 }

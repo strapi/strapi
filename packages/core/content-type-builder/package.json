@@ -102,6 +102,7 @@
     "@testing-library/user-event": "14.6.1",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
+    "@types/koa": "2.15.2",
     "@types/micromatch": "^4.0.9",
     "@types/node": "20.19.41",
     "@types/pluralize": "0.0.32",
@@ -120,10 +121,16 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
+    "@types/koa": "^2.15.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
