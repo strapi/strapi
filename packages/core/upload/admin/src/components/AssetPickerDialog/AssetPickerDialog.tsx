@@ -321,7 +321,7 @@ const PickerContent = ({ title, initialSelection, onClose, onConfirm }: PickerCo
         >
           {formatMessage({
             id: getTranslationKey('asset-picker.confirm'),
-            defaultMessage: 'Add',
+            defaultMessage: 'Confirm',
           })}
         </Button>
       </Footer>

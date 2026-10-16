@@ -4,7 +4,7 @@
   "assets.uploaded": "{number, plural, one {# asset} other {# assets}} uploaded successfully",
   "asset-picker.breadcrumbs.label": "Folder navigation",
   "asset-picker.breadcrumbs.more": "Show more folders",
-  "asset-picker.confirm": "Add",
+  "asset-picker.confirm": "Confirm",
   "asset-picker.selected.empty": "No asset selected yet.",
   "asset-picker.tabs.browse": "Browse assets",
   "asset-picker.tabs.label": "Asset picker tabs",

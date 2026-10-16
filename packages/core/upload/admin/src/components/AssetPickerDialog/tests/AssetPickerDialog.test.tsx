@@ -93,7 +93,7 @@ describe('AssetPickerDialog', () => {
     );
   });
 
-  it('shows the title, both tabs and a disabled Add button', async () => {
+  it('shows the title, both tabs and a disabled Confirm button', async () => {
     renderDialog();
 
     const dialog = await screen.findByRole('dialog');
@@ -102,7 +102,7 @@ describe('AssetPickerDialog', () => {
     // The tabs appear once the read permission is confirmed.
     expect(await within(dialog).findByRole('tab', { name: 'Browse assets' })).toBeInTheDocument();
     expect(within(dialog).getByRole('tab', { name: /Selected assets/ })).toBeInTheDocument();
-    expect(within(dialog).getByRole('button', { name: 'Add' })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: 'Confirm' })).toBeDisabled();
   });
 
   it('lists the library root', async () => {
@@ -346,7 +346,7 @@ describe('AssetPickerDialog', () => {
     });
 
     const selectedTab = () => screen.getByRole('tab', { name: /Selected assets/ });
-    const addButton = () => screen.getByRole('button', { name: 'Add' });
+    const confirmButton = () => screen.getByRole('button', { name: 'Confirm' });
     const checkboxFor = (name: string) => screen.getByRole('checkbox', { name: `Select ${name}` });
 
     it('picks an asset on click, counts it and confirms it', async () => {
@@ -358,7 +358,7 @@ describe('AssetPickerDialog', () => {
       expect(within(selectedTab()).getByText('1')).toBeInTheDocument();
       expect(checkboxFor('hero.png')).toBeChecked();
 
-      fireEvent.click(addButton());
+      fireEvent.click(confirmButton());
 
       expect(onConfirm).toHaveBeenCalledWith([hero]);
     });
@@ -370,7 +370,7 @@ describe('AssetPickerDialog', () => {
       // Radix tabs switch on mouse down, not click.
       fireEvent.mouseDown(await screen.findByRole('tab', { name: 'Browse assets' }));
       fireEvent.click(await screen.findByText('hero.png'));
-      fireEvent.click(addButton());
+      fireEvent.click(confirmButton());
 
       expect(onConfirm).toHaveBeenCalledWith([banner, hero]);
     });
@@ -385,7 +385,7 @@ describe('AssetPickerDialog', () => {
       expect(checkboxFor('hero.png')).not.toBeChecked();
       expect(within(selectedTab()).getByText('1')).toBeInTheDocument();
 
-      fireEvent.click(addButton());
+      fireEvent.click(confirmButton());
 
       expect(onConfirm).toHaveBeenCalledWith([banner]);
     });
@@ -445,7 +445,7 @@ describe('AssetPickerDialog', () => {
         fireEvent.click(await screen.findByRole('checkbox', { name: 'Select all' }));
 
         // The PDF is outside allowedTypes; the asset from elsewhere stays first.
-        fireEvent.click(addButton());
+        fireEvent.click(confirmButton());
 
         expect(onConfirm).toHaveBeenCalledWith([elsewhere, hero, banner]);
       });
@@ -469,7 +469,7 @@ describe('AssetPickerDialog', () => {
         fireEvent.click(selectAll);
 
         // Back to the field's value: the asset from another folder survived.
-        expect(addButton()).toBeDisabled();
+        expect(confirmButton()).toBeDisabled();
         expect(within(selectedTab()).getByText('1')).toBeInTheDocument();
       });
 
@@ -489,10 +489,10 @@ describe('AssetPickerDialog', () => {
     });
 
     describe('with assets already in the field', () => {
-      it('keeps Add disabled until the selection changes', async () => {
+      it('keeps Confirm disabled until the selection changes', async () => {
         renderDialog({ multiple: true, initialSelection: [hero] });
 
-        expect(await screen.findByRole('button', { name: 'Add' })).toBeDisabled();
+        expect(await screen.findByRole('button', { name: 'Confirm' })).toBeDisabled();
       });
 
       it('confirms what is left after unchecking, which removes it from the field', async () => {
@@ -504,7 +504,7 @@ describe('AssetPickerDialog', () => {
 
         expect(screen.queryByText('hero.png')).not.toBeInTheDocument();
 
-        fireEvent.click(addButton());
+        fireEvent.click(confirmButton());
 
         expect(onConfirm).toHaveBeenCalledWith([banner]);
       });
@@ -596,7 +596,7 @@ describe('AssetPickerDialog', () => {
       renderDialog({ onConfirm }, without('plugin::upload.assets.update'));
 
       fireEvent.click(await screen.findByRole('checkbox', { name: 'Select hero.png' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
       expect(onConfirm).toHaveBeenCalledWith([expect.objectContaining({ id: 1 })]);
     });
