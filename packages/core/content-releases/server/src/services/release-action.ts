@@ -4,7 +4,12 @@ import type { Core, Internal, Modules, UID, Data } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
-import { AUDITED_EVENTS, RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
+import {
+  AUDITED_EVENTS,
+  PLANNED_ACTION_WHERE,
+  RELEASE_ACTION_MODEL_UID,
+  RELEASE_MODEL_UID,
+} from '../constants';
 import { emitAuditOnCommit } from '../audit-logs';
 import { AlreadyOnReleaseError } from './validation';
 
@@ -21,9 +26,11 @@ import type { Release } from '../../../shared/contracts/releases';
 import type { Entity } from '../../../shared/types';
 import {
   getService,
-  getDraftEntryValidity,
+  getActionValidity,
   getEntry,
   getEntryStatus,
+  getValidityForActions,
+  lockRelease,
   UNPUBLISH_VALIDITY,
 } from '../utils';
 import type { EntryValidity } from '../utils';
@@ -52,15 +59,19 @@ type LocaleDictionary = {
 
 // The actions of an entry: `locale: null` matches a content type that isn't localized, an
 // omitted locale every locale
-export type EntryActionsWhere = Pick<ReleaseAction, 'contentType'> &
+type EntryActionsWhere = Pick<ReleaseAction, 'contentType'> &
   Partial<Pick<ReleaseAction, 'entryDocumentId'>> & { locale?: ReleaseAction['locale'] | null };
+
+// A filter on release actions, in the filter syntax the query engine's `where` takes
+type ReleaseActionWhere = Modules.Documents.Params.Filters.Any<typeof RELEASE_ACTION_MODEL_UID>;
 
 // An action checked against its release, ready to be written
 interface PreparedAction {
-  release: Pick<Release, 'id' | 'name'>;
   action: CreateReleaseAction.Request['body'];
   validity: EntryValidity;
 }
+
+type LockedRelease = Pick<Release, 'id' | 'name' | 'releasedAt'>;
 
 const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getLocalesDataForActions = async () => {
@@ -97,17 +108,139 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     return contentTypesData;
   };
 
-  // An action change and the release status it changes commit together: a failed status update
-  // undoes the change, and the audit event the change emits waits for the commit
-  const commitWithReleaseStatus = <T>(releaseId: Data.ID, change: () => Promise<T>) =>
+  // A request's change to a release's actions: written with the status it changes in one
+  // transaction, under the release lock, so a failed status update undoes the change, the audit
+  // event waits for the commit, and a release that ran never gains, loses or changes an action
+  const commitWithReleaseStatus = <T>(
+    releaseId: Data.ID,
+    change: (release: LockedRelease) => Promise<T>
+  ) =>
     strapi.db.transaction(async () => {
-      const result = await change();
+      const release: LockedRelease | undefined = await lockRelease({ strapi }, releaseId, [
+        'id',
+        'name',
+        'releasedAt',
+      ]);
+
+      if (!release) {
+        throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+      }
+
+      if (release.releasedAt) {
+        throw new errors.ValidationError('Release already published');
+      }
+
+      const result = await change(release);
       await getService('release', { strapi }).updateReleaseStatus(releaseId);
 
       return result;
     });
 
-  // Checks an action can join its release and reads its entry's validity; writes nothing
+  // A background change to planned actions of several releases (after an entry or a workflow
+  // changed): one release at a time, each under its lock with its status. A release that ran or
+  // was deleted in between is left alone. A release whose change fails is rolled back and logged
+  // without stopping the others; the savepoint keeps a caller's transaction (a review workflow
+  // change) usable after such a failure. Returns the releases whose change failed.
+  const changePlannedActionsByRelease = async <TAction extends { release: { id: Data.ID } }>(
+    actions: TAction[],
+    change: (releaseActions: TAction[]) => Promise<void>
+  ) => {
+    const actionsByRelease = new Map<Data.ID, TAction[]>();
+    for (const action of actions) {
+      const releaseActions = actionsByRelease.get(action.release.id);
+      if (releaseActions) {
+        releaseActions.push(action);
+      } else {
+        actionsByRelease.set(action.release.id, [action]);
+      }
+    }
+
+    const failedReleaseIds: Data.ID[] = [];
+    for (const [releaseId, releaseActions] of actionsByRelease) {
+      try {
+        await strapi.db.transaction(() =>
+          strapi.db.savepoint(async () => {
+            const release = await lockRelease({ strapi }, releaseId, ['releasedAt']);
+
+            if (!release || release.releasedAt) {
+              return;
+            }
+
+            await change(releaseActions);
+            await getService('release', { strapi }).updateReleaseStatus(releaseId);
+          })
+        );
+      } catch (error: unknown) {
+        failedReleaseIds.push(releaseId);
+        strapi.log.error(`Error while changing the actions of release ${releaseId}`, { error });
+      }
+    }
+
+    return failedReleaseIds;
+  };
+
+  /**
+   * Stores the current validity and reason of the planned actions matching `where`: a publish
+   * action gets its draft's (a draft that can't be read is stored as not publishable, so it
+   * doesn't stop the others), an unpublish action stored as invalid by an earlier version becomes
+   * valid. Then recalculates their releases' status.
+   */
+  const revalidatePlannedActions = async (where: ReleaseActionWhere) => {
+    const actions: (ReleaseAction & { release: { id: Data.ID } })[] = await strapi.db
+      .query(RELEASE_ACTION_MODEL_UID)
+      .findMany({
+        where: { ...where, ...PLANNED_ACTION_WHERE },
+        populate: { release: { select: ['id'] } },
+      });
+
+    // The drafts are read before taking any lock
+    const publishValidities = new Map(
+      (
+        await getValidityForActions(
+          actions.filter((action) => action.type === 'publish'),
+          { strapi }
+        )
+      ).map(({ action, validity }) => [action.id, validity])
+    );
+
+    await changePlannedActionsByRelease(actions, async (releaseActions) => {
+      for (const action of releaseActions) {
+        const validity = publishValidities.get(action.id);
+
+        // By type too: a type change committed since the read keeps its own validity
+        if (validity) {
+          await strapi.db
+            .query(RELEASE_ACTION_MODEL_UID)
+            .update({ where: { id: action.id, type: 'publish' }, data: validity });
+        } else if (!action.isEntryValid) {
+          await strapi.db
+            .query(RELEASE_ACTION_MODEL_UID)
+            .update({ where: { id: action.id, type: 'unpublish' }, data: UNPUBLISH_VALIDITY });
+        }
+      }
+    });
+  };
+
+  // Deletes the planned actions matching `where`, then recalculates their releases' status.
+  // Returns the releases whose change failed.
+  const deletePlannedActions = async (where: ReleaseActionWhere) => {
+    const actions: { id: Data.ID; release: { id: Data.ID } }[] = await strapi.db
+      .query(RELEASE_ACTION_MODEL_UID)
+      .findMany({
+        where: { ...where, ...PLANNED_ACTION_WHERE },
+        select: ['id'],
+        populate: { release: { select: ['id'] } },
+      });
+
+    return changePlannedActionsByRelease(actions, async (releaseActions) => {
+      await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+        where: { id: { $in: releaseActions.map((action) => action.id) } },
+      });
+    });
+  };
+
+  // Checks an action can join a release and reads its entry's validity; writes nothing. Whether
+  // the release still takes changes is decided under its lock.
   const prepareAction = async (
     releaseId: CreateReleaseAction.Request['params']['releaseId'],
     action: CreateReleaseAction.Request['body']
@@ -135,33 +268,14 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
     const preparedAction = { ...action, entryDocumentId };
 
-    const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({ where: { id: releaseId } });
-
-    if (!release) {
-      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
-    }
-
-    if (release.releasedAt) {
-      throw new errors.ValidationError('Release already published');
-    }
-
-    const validity =
-      preparedAction.type === 'publish'
-        ? await getDraftEntryValidity(
-            {
-              contentType: preparedAction.contentType,
-              documentId: preparedAction.entryDocumentId,
-              locale: preparedAction.locale,
-            },
-            { strapi }
-          )
-        : UNPUBLISH_VALIDITY;
-
-    return { release, action: preparedAction, validity };
+    return {
+      action: preparedAction,
+      validity: await getActionValidity(preparedAction, { strapi }),
+    };
   };
 
-  // Writes a prepared action; its audit event waits for the commit
-  const writeAction = async ({ release, action, validity }: PreparedAction) => {
+  // Writes a prepared action into a locked release; its audit event waits for the commit
+  const writeAction = async (release: LockedRelease, { action, validity }: PreparedAction) => {
     const releaseAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).create({
       data: {
         type: action.type,
@@ -192,35 +306,36 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       releaseId: CreateReleaseAction.Request['params']['releaseId'],
       action: CreateReleaseAction.Request['body']
     ) {
+      // Prepared before the lock: reading the draft doesn't hold up a run
       const prepared = await prepareAction(releaseId, action);
 
-      return commitWithReleaseStatus(prepared.release.id, () => writeAction(prepared));
+      return commitWithReleaseStatus(releaseId, (release) => writeAction(release, prepared));
     },
 
-    // Entries already in the release are skipped and counted. The new actions and the release
-    // status they change commit together, as for a single action
+    // Entries already in the release are skipped and counted. As for a single action, the
+    // actions are prepared before the lock, then written with the status they change
     async createMany(
       releaseId: CreateManyReleaseActions.Request['params']['releaseId'],
       actions: CreateManyReleaseActions.Request['body']
     ) {
-      return commitWithReleaseStatus(releaseId, async () => {
-        let alreadyInRelease = 0;
-        const createdOrSkipped = await Promise.all(
-          actions.map(async (action) => {
-            try {
-              return await writeAction(await prepareAction(releaseId, action));
-            } catch (error) {
-              if (error instanceof AlreadyOnReleaseError) {
-                alreadyInRelease += 1;
-                return null;
-              }
-              throw error;
+      const preparedOrSkipped = await Promise.all(
+        actions.map(async (action) => {
+          try {
+            return await prepareAction(releaseId, action);
+          } catch (error) {
+            if (error instanceof AlreadyOnReleaseError) {
+              return null;
             }
-          })
-        );
+            throw error;
+          }
+        })
+      );
+      const prepared = preparedOrSkipped.filter((action) => action !== null);
 
-        return { created: createdOrSkipped.filter((action) => action !== null), alreadyInRelease };
-      });
+      return commitWithReleaseStatus(releaseId, async (release) => ({
+        created: await Promise.all(prepared.map((action) => writeAction(release, action))),
+        alreadyInRelease: actions.length - prepared.length,
+      }));
     },
 
     async findPage(
@@ -375,48 +490,23 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       releaseId: UpdateReleaseAction.Request['params']['releaseId'],
       update: UpdateReleaseAction.Request['body']
     ) {
+      // A release that ran is refused under the lock, as for any change
       const action = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findOne({
-        where: {
-          id: actionId,
-          release: {
-            id: releaseId,
-            releasedAt: {
-              $null: true,
-            },
-          },
-        },
+        where: { id: actionId, release: { id: releaseId } },
         populate: { release: { select: ['id', 'name'] } },
       });
 
       if (!action) {
         throw new errors.NotFoundError(
-          `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
+          `Action with id ${actionId} not found in release with id ${releaseId}`
         );
       }
 
-      const validity =
-        update.type === 'publish'
-          ? await getDraftEntryValidity(
-              {
-                contentType: action.contentType,
-                documentId: action.entryDocumentId,
-                locale: action.locale,
-              },
-              { strapi }
-            )
-          : UNPUBLISH_VALIDITY;
+      const validity = await getActionValidity({ ...action, type: update.type }, { strapi });
 
       return commitWithReleaseStatus(releaseId, async () => {
         const updatedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-          where: {
-            id: actionId,
-            release: {
-              id: releaseId,
-              releasedAt: {
-                $null: true,
-              },
-            },
-          },
+          where: { id: actionId, release: { id: releaseId } },
           // Only the field the PUT contract allows. Changing the entry is remove + add.
           data: {
             type: update.type,
@@ -424,8 +514,15 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
           },
         });
 
+        // Removed since the read above
+        if (!updatedAction) {
+          throw new errors.NotFoundError(
+            `Action with id ${actionId} not found in release with id ${releaseId}`
+          );
+        }
+
         // Validity and reason are recalculated, not edited: only the type change is audited
-        if (updatedAction && action.type !== updatedAction.type) {
+        if (action.type !== updatedAction.type) {
           await emitAuditOnCommit({ strapi }, AUDITED_EVENTS.RELEASE_ENTRY_UPDATE, {
             releaseId: action.release?.id ?? Number(releaseId),
             name: action.release?.name,
@@ -448,21 +545,13 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       return commitWithReleaseStatus(releaseId, async () => {
         const deletedRow = await strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
-          where: {
-            id: actionId,
-            release: {
-              id: releaseId,
-              releasedAt: {
-                $null: true,
-              },
-            },
-          },
+          where: { id: actionId, release: { id: releaseId } },
           populate: { release: { select: ['id', 'name'] } },
         });
 
         if (!deletedRow) {
           throw new errors.NotFoundError(
-            `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
+            `Action with id ${actionId} not found in release with id ${releaseId}`
           );
         }
 
@@ -485,120 +574,45 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     // After an entry is deleted. Only planned releases: a release that ran keeps the entry's
     // action and what its run recorded
     async deleteEntryActions(where: EntryActionsWhere) {
-      const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-        where: {
-          releasedAt: { $null: true },
-          actions: where,
-        },
-      });
+      await deletePlannedActions(where);
+    },
 
-      await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-        where: { ...where, release: { releasedAt: { $null: true } } },
-      });
+    // After a content type is deleted or loses Draft and Publish: its entries can no longer be
+    // read or released, so its actions leave every release, including releases that ran (they
+    // keep their status and totals). The planned releases' statuses are recalculated.
+    async deleteContentTypeActions(contentTypeUids: UID.ContentType[]) {
+      const where = { contentType: { $in: contentTypeUids } };
 
-      for (const release of releases) {
-        await getService('release', { strapi }).updateReleaseStatus(release.id);
+      const failedReleaseIds = await deletePlannedActions(where);
+      await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({ where });
+
+      // A planned release whose locked removal failed lost its actions with the rest
+      for (const releaseId of failedReleaseIds) {
+        await getService('release', { strapi })
+          .updateReleaseStatus(releaseId)
+          .catch((error: unknown) => {
+            strapi.log.error(`Error while updating the status of release ${releaseId}`, { error });
+          });
       }
     },
 
-    // After an entry is updated: its actions in planned releases that no run recorded get its
-    // draft's validity, then those releases' status is recalculated
+    revalidatePlannedActions,
+
+    // After an entry's draft changes (updated, or discarded for the published version)
     async revalidateEntryActions(
       contentType: UID.ContentType,
       entry: Modules.Documents.AnyDocument
     ) {
-      const entryActionsWhere: EntryActionsWhere = {
+      await revalidatePlannedActions({
         contentType,
         entryDocumentId: entry.documentId,
         locale: entry.locale,
-      };
-      const plannedActionsWhere = {
-        ...entryActionsWhere,
-        outcome: null,
-        release: { releasedAt: { $null: true } },
-      };
-
-      const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-        where: { releasedAt: { $null: true }, actions: entryActionsWhere },
       });
-
-      if (releases.length === 0) {
-        return;
-      }
-
-      const publishActionsWhere = { ...plannedActionsWhere, type: 'publish' };
-
-      if (
-        (await strapi.db.query(RELEASE_ACTION_MODEL_UID).count({ where: publishActionsWhere })) > 0
-      ) {
-        const validity = await getDraftEntryValidity(
-          { contentType, documentId: entry.documentId, locale: entry.locale },
-          { strapi }
-        );
-
-        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-          where: publishActionsWhere,
-          data: validity,
-        });
-      }
-
-      await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-        where: { ...plannedActionsWhere, type: 'unpublish', isEntryValid: false },
-        data: UNPUBLISH_VALIDITY,
-      });
-
-      for (const release of releases) {
-        await getService('release', { strapi }).updateReleaseStatus(release.id);
-      }
     },
 
+    // After a review workflow change: what "at the required stage" means may have changed
     async validateActionsByContentTypes(contentTypeUids: UID.ContentType[]) {
-      const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
-        where: {
-          contentType: {
-            $in: contentTypeUids,
-          },
-          // We only want to validate actions that are going to be published
-          type: 'publish',
-          outcome: null,
-          release: {
-            releasedAt: {
-              $null: true,
-            },
-          },
-        },
-        populate: { release: true },
-      });
-
-      const releasesUpdated: Data.ID[] = [];
-
-      await async.map(actions, async (action: ReleaseAction) => {
-        const validity = await getDraftEntryValidity(
-          {
-            contentType: action.contentType,
-            documentId: action.entryDocumentId,
-            locale: action.locale,
-          },
-          { strapi }
-        );
-
-        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-          where: { id: action.id, outcome: null },
-          data: validity,
-        });
-
-        if (!releasesUpdated.includes(action.release.id)) {
-          releasesUpdated.push(action.release.id);
-        }
-
-        return { id: action.id, ...validity };
-      });
-
-      if (releasesUpdated.length > 0) {
-        await async.map(releasesUpdated, async (releaseId: number) => {
-          await getService('release', { strapi }).updateReleaseStatus(releaseId);
-        });
-      }
+      await revalidatePlannedActions({ contentType: { $in: contentTypeUids } });
     },
   };
 };

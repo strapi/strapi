@@ -14,7 +14,8 @@ export interface Release extends Entity {
   // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
   timezone: string | null;
   releaseCondition: ReleaseCondition;
-  // What the run did with the release's entries; null until it runs
+  // What the run did with the release's entries. Null until a run records them: a planned
+  // release, and a release that ran before the totals existed.
   totalPublishedEntries: number | null;
   totalUnpublishedEntries: number | null;
   totalSkippedEntries: number | null;
@@ -32,6 +33,7 @@ export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
   actions: {
     meta: {
       count: number;
+      // Planned releases only: the publish entries that aren't publishable now
       notReadyCount?: number;
     };
   };

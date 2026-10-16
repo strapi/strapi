@@ -13,15 +13,29 @@ const deleteEntryActions = jest.fn();
 const revalidateEntryActions = jest.fn();
 const logError = jest.fn();
 
+// The caller's transaction: the work registered on its commit waits for `commit()`
+let commitCallbacks: (() => unknown)[] = [];
+const commit = () => {
+  commitCallbacks.forEach((callback) => callback());
+  commitCallbacks = [];
+};
+
 const strapi = {
   plugin: () => ({
     service: (name: string) =>
       name === 'release-action' ? { deleteEntryActions, revalidateEntryActions } : undefined,
   }),
+  db: {
+    // The middleware runs inside the caller's transaction unless a test says otherwise
+    inTransaction: jest.fn(() => true),
+    transaction: async (work: (params: { onCommit: (cb: () => unknown) => void }) => unknown) =>
+      work({ onCommit: (cb) => commitCallbacks.push(cb) }),
+  },
   log: { error: logError },
 } as unknown as Core.Strapi;
 
-// The middleware's work on releases runs after it returns: let it settle before asserting
+// The middleware's work on releases runs after the caller's commit, without being awaited: commit
+// and let it settle before asserting
 const runMiddleware = async (
   middleware: Modules.Documents.Middleware.Middleware,
   ctx: unknown,
@@ -29,12 +43,15 @@ const runMiddleware = async (
 ) => {
   const returned = await middleware(ctx as Context, jest.fn().mockResolvedValue(result));
   await setImmediate();
+  commit();
+  await setImmediate();
 
   return returned;
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
+  commitCallbacks = [];
   deleteEntryActions.mockResolvedValue(undefined);
   revalidateEntryActions.mockResolvedValue(undefined);
 });
@@ -53,6 +70,26 @@ describe('createRevalidateActionsOnDraftChange', () => {
 
   it("revalidates the updated entry's release actions", async () => {
     await changeDraft('update');
+
+    expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, DRAFT]]);
+  });
+
+  it("waits for the caller's transaction to commit", async () => {
+    await createRevalidateActionsOnDraftChange({ strapi })(
+      {
+        action: 'update',
+        contentType: { uid: UID, options: { draftAndPublish: true } },
+        params: { documentId: 'doc-1' },
+      } as unknown as Context,
+      jest.fn().mockResolvedValue(DRAFT)
+    );
+    await setImmediate();
+
+    // The entry's change could still roll back, and its draft isn't committed yet
+    expect(revalidateEntryActions).not.toHaveBeenCalled();
+
+    commit();
+    await setImmediate();
 
     expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, DRAFT]]);
   });
@@ -89,6 +126,28 @@ describe('createRevalidateActionsOnDraftChange', () => {
       );
     }
   );
+
+  it('starts right away when the change was made outside a transaction', async () => {
+    jest.mocked(strapi.db.inTransaction).mockReturnValueOnce(false);
+    revalidateEntryActions.mockRejectedValueOnce(new Error('revalidation failed'));
+
+    await createRevalidateActionsOnDraftChange({ strapi })(
+      {
+        action: 'update',
+        contentType: { uid: UID, options: { draftAndPublish: true } },
+        params: { documentId: 'doc-1' },
+      } as unknown as Context,
+      jest.fn().mockResolvedValue(DRAFT)
+    );
+    await setImmediate();
+
+    // Nothing to wait for: no commit() call
+    expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, DRAFT]]);
+    expect(logError).toHaveBeenCalledWith(
+      'Error while updating release actions after update',
+      expect.objectContaining({ error: expect.any(Error) })
+    );
+  });
 });
 
 describe('createDeleteActionsOnDelete', () => {

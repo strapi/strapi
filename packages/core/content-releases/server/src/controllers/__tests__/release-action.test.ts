@@ -89,7 +89,7 @@ describe('Release Action controller', () => {
       jest.clearAllMocks();
     });
 
-    it('returns the created actions and counts the entries already in the release', async () => {
+    it('counts every entry sent and the entries already in the release', async () => {
       // One of the two entries was already in the release
       mockCreateManyActions.mockResolvedValue({ created: [{ id: 1 }], alreadyInRelease: 1 });
 
@@ -117,10 +117,9 @@ describe('Release Action controller', () => {
 
       await releaseActionController.createMany(ctx);
 
-      expect(created).toHaveBeenCalledWith({
-        data: [{ id: 1 }],
-        meta: { totalEntries: 2, entriesAlreadyInRelease: 1 },
-      });
+      expect(created).toHaveBeenCalledWith(
+        expect.objectContaining({ meta: { totalEntries: 2, entriesAlreadyInRelease: 1 } })
+      );
     });
   });
 

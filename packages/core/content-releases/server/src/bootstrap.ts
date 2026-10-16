@@ -3,7 +3,7 @@ import type { Core, UID } from '@strapi/types';
 
 import { ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { registerAuditEvents } from './audit-logs';
-import { getService } from './utils';
+import { getService, runAfterCommit } from './utils';
 import {
   createDeleteActionsOnDelete,
   createRevalidateActionsOnDraftChange,
@@ -21,28 +21,26 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       /**
        * deleteMany is still used outside documents service, for example when deleting a locale
        */
-      async afterDeleteMany(event) {
-        const deleteActionsOfDeletedEntries = async () => {
-          const model = strapi.getModel(event.model.uid as UID.Schema);
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-            const { where } = event.params;
-
-            await getService('release-action', { strapi }).deleteEntryActions({
-              contentType: model.uid,
-              locale: where?.locale ?? null,
-              ...(where?.documentId && { entryDocumentId: where.documentId }),
-            });
-          }
-        };
-
+      afterDeleteMany(event) {
         // Not awaited: the delete entry flow doesn't wait for its releases, and isn't blocked by
         // their failure, which is logged
-        deleteActionsOfDeletedEntries().catch((error: unknown) => {
-          strapi.log.error('Error while deleting release actions after entry deleteMany', {
-            error,
-          });
-        });
+        runAfterCommit(
+          { strapi },
+          async () => {
+            const model = strapi.getModel(event.model.uid as UID.Schema);
+            // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+            if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+              const { where } = event.params;
+
+              await getService('release-action', { strapi }).deleteEntryActions({
+                contentType: model.uid,
+                locale: where?.locale ?? null,
+                ...(where?.documentId && { entryDocumentId: where.documentId }),
+              });
+            }
+          },
+          'Error while deleting release actions after entry deleteMany'
+        );
       },
     });
 
@@ -52,11 +50,12 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
     getService('scheduling', { strapi })
       .syncFromDatabase()
-      .catch((error: unknown) => {
+      .catch((err: Error) => {
         strapi.log.error(
-          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.',
-          { error }
+          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
         );
+
+        throw err;
       });
 
     Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {

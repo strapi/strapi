@@ -1,6 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
-import { getService } from '../utils';
+import { getService, runAfterCommit } from '../utils';
 
 type Middleware = Modules.Documents.Middleware.Middleware;
 
@@ -24,17 +24,16 @@ const createDeleteActionsOnDelete =
       return result;
     }
 
-    getService('release-action', { strapi })
-      .deleteEntryActions({
-        contentType,
-        entryDocumentId: documentId,
-        ...(locale !== '*' && { locale }),
-      })
-      .catch((error: unknown) => {
-        strapi.log.error('Error while deleting release actions after delete', {
-          error,
-        });
-      });
+    runAfterCommit(
+      { strapi },
+      () =>
+        getService('release-action', { strapi }).deleteEntryActions({
+          contentType,
+          entryDocumentId: documentId,
+          ...(locale !== '*' && { locale }),
+        }),
+      'Error while deleting release actions after delete'
+    );
 
     return result;
   };
@@ -65,17 +64,15 @@ const createRevalidateActionsOnDraftChange =
     // `{ entries }`, the new draft of each locale it discarded
     const drafts = action === 'discardDraft' && 'entries' in result ? result.entries : [result];
 
-    const revalidate = async () => {
-      for (const draft of drafts) {
-        await getService('release-action', { strapi }).revalidateEntryActions(contentType, draft);
-      }
-    };
-
-    revalidate().catch((error: unknown) => {
-      strapi.log.error(`Error while updating release actions after ${action}`, {
-        error,
-      });
-    });
+    runAfterCommit(
+      { strapi },
+      async () => {
+        for (const draft of drafts) {
+          await getService('release-action', { strapi }).revalidateEntryActions(contentType, draft);
+        }
+      },
+      `Error while updating release actions after ${action}`
+    );
 
     return result;
   };

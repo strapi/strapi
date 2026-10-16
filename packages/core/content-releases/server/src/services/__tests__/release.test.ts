@@ -69,10 +69,8 @@ const baseStrapiMock = {
       select: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       first: jest.fn().mockReturnThis(),
-      transacting: jest.fn().mockReturnThis(),
       forUpdate: jest.fn().mockReturnThis(),
       execute: mockExecute,
-      update: jest.fn().mockReturnThis(),
     }),
   },
   eventHub: {
@@ -148,6 +146,7 @@ describe('Release service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
+          ...baseStrapiMock.db,
           query: () => ({
             findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
             update: jest.fn().mockReturnValue({ id: 1, name: 'Release name' }),
@@ -220,6 +219,7 @@ describe('Release service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
+          ...baseStrapiMock.db,
           query: () => ({
             findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
             update: jest
@@ -248,6 +248,7 @@ describe('Release service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
+          ...baseStrapiMock.db,
           query: () => ({
             findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
             update: jest.fn().mockReturnValue({ id: 1, name: 'Release name', scheduledAt: null }),
@@ -954,12 +955,16 @@ describe('Release service', () => {
     });
 
     it('records nothing for a manual publish rejected because it would release nothing', async () => {
-      mockExecute.mockReturnValueOnce({
-        id: 1,
-        name: 'March',
-        releasedAt: null,
-        releaseCondition: 'all_or_nothing',
-      });
+      mockExecute
+        // The run's lock
+        .mockReturnValueOnce({
+          id: 1,
+          name: 'March',
+          releasedAt: null,
+          releaseCondition: 'all_or_nothing',
+        })
+        // The status recalculation's lock
+        .mockReturnValueOnce({ releasedAt: null, releaseCondition: 'all_or_nothing' });
       const notPublishableError = new errors.ValidationError('Invalid entry');
       mockGetPublishabilityForActions.mockImplementationOnce(async (actions) =>
         actions.map((action) =>
@@ -1023,15 +1028,15 @@ describe('Release service', () => {
         where: { id: { $in: [1] } },
         data: { isEntryValid: true, reason: null },
       });
-      expect(releaseQuery.update).toHaveBeenCalledWith({
-        where: { id: 2 },
-        data: { isEntryValid: false, reason: { validation: { errors: [] } } },
-      });
-      expect(releaseQuery.update).toHaveBeenCalledTimes(1);
-      expect(releaseQuery.updateMany).toHaveBeenCalledWith({
-        where: { id: 1, releasedAt: null },
-        data: { status: 'blocked' },
-      });
+      expect(releaseQuery.update.mock.calls).toStrictEqual([
+        [
+          {
+            where: { id: 2 },
+            data: { isEntryValid: false, reason: { validation: { errors: [] } } },
+          },
+        ],
+        [{ where: { id: 1 }, data: { status: 'blocked' } }],
+      ]);
       // Not a run: no releases.publish webhook and no release.trigger audit event
       expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
     });
@@ -1039,28 +1044,36 @@ describe('Release service', () => {
 
   describe('updateReleaseStatus', () => {
     const createStrapiMock = (release: unknown, counts: { total: number; invalid: number }) => {
-      const updateMany = jest.fn();
+      const update = jest.fn();
       const countActions = jest.fn(({ filters }) =>
         filters.isEntryValid === false ? counts.invalid : counts.total
       );
+      // The release row, read under its lock
+      const lockedRead = {
+        where: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        first: jest.fn().mockReturnThis(),
+        forUpdate: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue(release ?? undefined),
+      };
 
       const strapiMock = {
         ...baseStrapiMock,
         plugin: jest.fn().mockReturnValue({ service: jest.fn().mockReturnValue({ countActions }) }),
         db: {
-          query: jest
-            .fn()
-            .mockReturnValue({ findOne: jest.fn().mockResolvedValue(release), updateMany }),
+          transaction: jest.fn((fn) => fn({ trx: {} })),
+          queryBuilder: jest.fn().mockReturnValue(lockedRead),
+          query: jest.fn().mockReturnValue({ update }),
         },
       };
 
-      return { strapiMock, updateMany, countActions };
+      return { strapiMock, update };
     };
 
     it.each(['done', 'partial', 'failed'])(
       'leaves a frozen %s release untouched, whatever happens to its entries',
       async (status) => {
-        const { strapiMock, updateMany } = createStrapiMock(
+        const { strapiMock, update } = createStrapiMock(
           { releaseCondition: 'all_or_nothing', releasedAt: new Date(), status },
           { total: 0, invalid: 0 }
         );
@@ -1069,50 +1082,33 @@ describe('Release service', () => {
         const releaseService = createReleaseService({ strapi: strapiMock });
         await releaseService.updateReleaseStatus(1);
 
-        expect(updateMany).not.toHaveBeenCalled();
+        expect(update).not.toHaveBeenCalled();
       }
     );
 
-    // `null`: a release from before statuses existed still gets one
-    it.each([null, 'ready'])(
-      'recalculates the status of a planned release whose status is %s',
-      async (status) => {
-        const { strapiMock, updateMany } = createStrapiMock(
-          { releaseCondition: 'all_or_nothing', releasedAt: null, status },
-          { total: 3, invalid: 1 }
-        );
-
-        // @ts-expect-error Ignore missing properties
-        const releaseService = createReleaseService({ strapi: strapiMock });
-        await releaseService.updateReleaseStatus(1);
-
-        expect(updateMany.mock.calls).toStrictEqual([
-          [{ where: { id: 1, releasedAt: null }, data: { status: 'blocked' } }],
-        ]);
-      }
-    );
-
-    it('keeps the status of a planned release that failed before runs froze releases', async () => {
-      const { strapiMock, updateMany } = createStrapiMock(
-        { releaseCondition: 'all_or_nothing', releasedAt: null, status: 'failed' },
-        { total: 3, invalid: 0 }
+    it('recalculates the status of a planned release', async () => {
+      const { strapiMock, update } = createStrapiMock(
+        { releaseCondition: 'all_or_nothing', releasedAt: null },
+        { total: 3, invalid: 1 }
       );
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
       await releaseService.updateReleaseStatus(1);
 
-      expect(updateMany).not.toHaveBeenCalled();
+      expect(update.mock.calls).toStrictEqual([
+        [{ where: { id: 1 }, data: { status: 'blocked' } }],
+      ]);
     });
 
     it('does nothing for a release that no longer exists', async () => {
-      const { strapiMock, updateMany } = createStrapiMock(null, { total: 3, invalid: 1 });
+      const { strapiMock, update } = createStrapiMock(null, { total: 3, invalid: 1 });
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
       await releaseService.updateReleaseStatus(1);
 
-      expect(updateMany).not.toHaveBeenCalled();
+      expect(update).not.toHaveBeenCalled();
     });
   });
 

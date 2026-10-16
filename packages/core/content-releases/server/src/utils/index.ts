@@ -6,6 +6,8 @@ import type {
   ReleaseActionOutcome,
   ReleaseActionReason,
 } from '../../../shared/contracts/release-actions';
+import type { Release } from '../../../shared/contracts/releases';
+import { RELEASE_MODEL_UID } from '../constants';
 import type { ReleaseCondition } from '../constants';
 
 import type { SettingsService } from '../services/settings';
@@ -34,6 +36,46 @@ export const getService = <TName extends keyof Services>(
   return strapi.plugin('content-releases').service(name);
 };
 
+// Reads a release under its row lock (FOR UPDATE), in the current transaction. Runs, action
+// changes and status recalculations all take it, so each waits for the one in progress. Reads
+// `undefined` for a release that doesn't exist.
+export const lockRelease = <TColumn extends keyof Release>(
+  { strapi }: { strapi: Core.Strapi },
+  releaseId: Data.ID,
+  columns: TColumn[]
+): Promise<Pick<Release, TColumn> | undefined> =>
+  strapi.db
+    .queryBuilder(RELEASE_MODEL_UID)
+    .where({ id: releaseId })
+    .select(columns)
+    .first()
+    .forUpdate()
+    .execute();
+
+// Starts the releases' work after a change to entries, without waiting for it, and outside the
+// caller's transaction: once that commits, or right away without one. So it reads the committed
+// entries, nothing it does can undo the caller's writes, and it never runs for a change that was
+// rolled back. Each release it changes gets its own transaction (`changePlannedActionsByRelease`).
+// A failure is logged, never an unhandled rejection.
+export const runAfterCommit = (
+  { strapi }: { strapi: Core.Strapi },
+  task: () => Promise<void>,
+  errorMessage: string
+) => {
+  const logError = (error: unknown) => strapi.log.error(errorMessage, { error });
+
+  if (!strapi.db.inTransaction()) {
+    task().catch(logError);
+    return;
+  }
+
+  strapi.db
+    .transaction(({ onCommit }) => {
+      onCommit(() => task().catch(logError));
+    })
+    .catch(logError);
+};
+
 export interface EntryValidity {
   isEntryValid: boolean;
   reason: ReleaseActionReason | null;
@@ -41,17 +83,14 @@ export interface EntryValidity {
 
 export const UNPUBLISH_VALIDITY: EntryValidity = { isEntryValid: true, reason: null };
 
-export const getDraftEntryValidity = async (
-  { contentType, documentId, locale }: Action,
-  { strapi }: { strapi: Core.Strapi }
+// The validity a publish action stores from its draft's publishability: whether it's publishable
+// and, when it isn't, why. A draft that can't be read is stored as not publishable, with only the
+// error's name.
+const toStoredValidity = async (
+  readPublishability: () => Promise<EntryPublishability>
 ): Promise<EntryValidity> => {
   try {
-    const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
-    // @ts-expect-error - populateBuilderService should be a function but is returning service
-    const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
-
-    const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
-    const publishability = await getEntryPublishability(contentType, entry, { strapi });
+    const publishability = await readPublishability();
 
     return publishability.publishable
       ? { isEntryValid: true, reason: null }
@@ -63,6 +102,16 @@ export const getDraftEntryValidity = async (
     };
   }
 };
+
+// What an action stores when it's added or changes type: an unpublish action is always valid, a
+// publish action gets its draft's validity
+export const getActionValidity = async (
+  action: DraftRef & Pick<ReleaseAction, 'type'>,
+  { strapi }: { strapi: Core.Strapi }
+): Promise<EntryValidity> =>
+  action.type === 'publish'
+    ? toStoredValidity(() => createDraftPublishabilityCheck({ strapi })(action))
+    : UNPUBLISH_VALIDITY;
 
 type StageRef = { id: Data.ID; name: string };
 
@@ -225,51 +274,90 @@ export const getEntryPublishability = async (
 
 type PublishActionRef = Pick<ReleaseAction, 'id' | 'contentType' | 'entryDocumentId' | 'locale'>;
 
-/**
- * Publishability of each publish action from its current draft, in the order given. The deep
- * populate and the workflow are looked up once per content type.
- */
-export const getPublishabilityForActions = async <TAction extends PublishActionRef>(
-  actions: readonly TAction[],
-  { strapi }: { strapi: Core.Strapi }
-): Promise<{ action: TAction; publishability: EntryPublishability }[]> => {
+// The draft a publish action points at
+type DraftRef = Pick<ReleaseAction, 'contentType'> & {
+  entryDocumentId?: ReleaseAction['entryDocumentId'];
+  locale?: ReleaseAction['locale'];
+};
+
+// Checks publish actions' current drafts. The deep populate and the workflow are looked up once
+// per content type, and each draft is read once, for every action the returned check is called
+// with (an entry in several planned releases has one action in each).
+const createDraftPublishabilityCheck = ({ strapi }: { strapi: Core.Strapi }) => {
   const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
   const lookupsByContentType = new Map<
     UID.ContentType,
     { populate: unknown; workflow: WorkflowWithRequiredStage }
   >();
-  const results: { action: TAction; publishability: EntryPublishability }[] = [];
+  const publishabilityByDraft = new Map<string, Promise<EntryPublishability>>();
 
-  for (const action of actions) {
-    let lookups = lookupsByContentType.get(action.contentType);
+  const readDraft = async (draft: DraftRef): Promise<EntryPublishability> => {
+    let lookups = lookupsByContentType.get(draft.contentType);
     if (!lookups) {
       lookups = {
         // @ts-expect-error - populateBuilderService should be a function but is returning service
-        populate: await populateBuilderService(action.contentType).populateDeep(Infinity).build(),
-        workflow: await getAssignedWorkflow(action.contentType, { strapi }),
+        populate: await populateBuilderService(draft.contentType).populateDeep(Infinity).build(),
+        workflow: await getAssignedWorkflow(draft.contentType, { strapi }),
       };
-      lookupsByContentType.set(action.contentType, lookups);
+      lookupsByContentType.set(draft.contentType, lookups);
     }
 
     const entry = await getEntry(
       {
-        contentType: action.contentType,
-        documentId: action.entryDocumentId,
-        locale: action.locale,
+        contentType: draft.contentType,
+        documentId: draft.entryDocumentId,
+        locale: draft.locale,
         populate: lookups.populate,
       },
       { strapi }
     );
 
-    results.push({
-      action,
-      publishability: await computeEntryPublishability(
-        action.contentType,
-        entry,
-        lookups.workflow,
-        { strapi }
-      ),
-    });
+    return computeEntryPublishability(draft.contentType, entry, lookups.workflow, { strapi });
+  };
+
+  return (draft: DraftRef): Promise<EntryPublishability> => {
+    const key = JSON.stringify([draft.contentType, draft.entryDocumentId, draft.locale ?? null]);
+    let publishability = publishabilityByDraft.get(key);
+    if (!publishability) {
+      publishability = readDraft(draft);
+      publishabilityByDraft.set(key, publishability);
+    }
+
+    return publishability;
+  };
+};
+
+/**
+ * Publishability of each publish action from its current draft, in the order given. A draft that
+ * can't be read throws: a run must not decide on an entry it couldn't check.
+ */
+export const getPublishabilityForActions = async <TAction extends PublishActionRef>(
+  actions: readonly TAction[],
+  { strapi }: { strapi: Core.Strapi }
+): Promise<{ action: TAction; publishability: EntryPublishability }[]> => {
+  const check = createDraftPublishabilityCheck({ strapi });
+  const results: { action: TAction; publishability: EntryPublishability }[] = [];
+
+  for (const action of actions) {
+    results.push({ action, publishability: await check(action) });
+  }
+
+  return results;
+};
+
+/**
+ * The validity to store on each publish action, from its current draft, in the order given. A
+ * draft that can't be read is stored as not publishable and doesn't stop the others.
+ */
+export const getValidityForActions = async <TAction extends PublishActionRef>(
+  actions: readonly TAction[],
+  { strapi }: { strapi: Core.Strapi }
+): Promise<{ action: TAction; validity: EntryValidity }[]> => {
+  const check = createDraftPublishabilityCheck({ strapi });
+  const results: { action: TAction; validity: EntryValidity }[] = [];
+
+  for (const action of actions) {
+    results.push({ action, validity: await toStoredValidity(() => check(action)) });
   }
 
   return results;

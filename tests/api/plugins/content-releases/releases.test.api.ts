@@ -789,7 +789,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(res.statusCode).toBe(404);
       expect(res.body.error.message).toBe(
-        `Action with id 1 not found in release with id ${release.id} or it is already published`
+        `Action with id 1 not found in release with id ${release.id}`
       );
     });
   });
@@ -976,62 +976,6 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(legacyRes.body.data.releaseCondition).toBe('all_or_nothing');
       expect(allowPartialRes.body.data.releaseCondition).toBe('allow_partial');
-    });
-
-    test('a release left failed and pending by an earlier version keeps its failed status', async () => {
-      const editedId = await createProduct({ valid: true });
-      const release = await createReleaseWithActions('all_or_nothing', [{ documentId: editedId }]);
-
-      // Before runs froze releases, a failed run left the release pending
-      await strapi.db.query('plugin::content-releases.release').update({
-        where: { id: release.id },
-        data: { status: 'failed' },
-      });
-
-      // Changes that used to recalculate the status. They are still allowed until the planned
-      // overdue sweep freezes these releases; the point here is that the status survives them.
-      const renameRes = await rq({
-        method: 'PUT',
-        url: `/content-releases/${release.id}`,
-        body: { name: 'Renamed failed release' },
-      });
-      expect(renameRes.statusCode).toBe(200);
-      const addRes = await createReleaseAction(release.id, {
-        contentType: productUID,
-        entryDocumentId: await createProduct({ valid: true }),
-        type: 'publish',
-      });
-      expect(addRes.statusCode).toBe(201);
-      const removeRes = await rq({
-        method: 'DELETE',
-        url: `/content-releases/${release.id}/actions/${addRes.body.data.id}`,
-      });
-      expect(removeRes.statusCode).toBe(200);
-      // An edit that makes the entry invalid: a recalculation would read "Blocked". The edit
-      // revalidates in the background: wait until its status update has run
-      const statusUpdates = jest.spyOn(
-        strapi.plugin('content-releases').service('release'),
-        'updateReleaseStatus'
-      );
-      try {
-        await strapi.documents(productUID).update({
-          documentId: editedId,
-          data: { description: null },
-        });
-        expect(
-          await waitFor(async () => statusUpdates.mock.calls.some(([id]) => id === release.id))
-        ).toBe(true);
-        await Promise.all(statusUpdates.mock.results.map(({ value }) => value));
-      } finally {
-        statusUpdates.mockRestore();
-      }
-      expect((await getActionsByEntry(release.id))[editedId].isEntryValid).toBe(false);
-
-      expect(await getRelease(release.id)).toMatchObject({ status: 'failed', releasedAt: null });
-
-      const publishRes = await publishManually(release.id);
-      expect(publishRes.statusCode).toBe(400);
-      expect(publishRes.body.error.message).toBe('Release failed to publish');
     });
   });
 
@@ -1951,11 +1895,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         });
         expect(fixRes.statusCode).toBe(200);
 
-        let plannedValid = false;
-        for (let attempt = 0; attempt < 20 && !plannedValid; attempt += 1) {
-          plannedValid = (await getActionsByEntry(plannedRelease.id))[invalidId].isEntryValid;
-        }
-        expect(plannedValid).toBe(true);
+        expect(
+          await waitFor(
+            async () => (await getActionsByEntry(plannedRelease.id))[invalidId].isEntryValid
+          )
+        ).toBe(true);
 
         await strapi.plugin('content-releases').service('release').updateReleaseStatus(release.id);
 
@@ -1985,6 +1929,44 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         const deleteRes = await rq({ method: 'DELETE', url: `/content-releases/${release.id}` });
         expect(deleteRes.statusCode).toBe(400);
         expect(deleteRes.body.error.message).toBe('Release already published');
+      });
+
+      test('cannot gain, lose or change entries', async () => {
+        const { release, invalidId } = await createFailedRelease();
+        const { id: actionId } = (await getActionsByEntry(release.id))[invalidId];
+        const newEntry = {
+          contentType: productUID,
+          entryDocumentId: await createProduct({ valid: true }),
+          type: 'publish',
+        };
+
+        const responses = [
+          await createReleaseAction(release.id, newEntry),
+          await rq({
+            method: 'POST',
+            url: `/content-releases/${release.id}/actions/bulk`,
+            body: [newEntry],
+          }),
+          await rq({
+            method: 'PUT',
+            url: `/content-releases/${release.id}/actions/${actionId}`,
+            body: { type: 'unpublish' },
+          }),
+          await rq({
+            method: 'DELETE',
+            url: `/content-releases/${release.id}/actions/${actionId}`,
+          }),
+        ];
+
+        for (const res of responses) {
+          expect(res.statusCode).toBe(400);
+          expect(res.body.error.message).toBe('Release already published');
+        }
+        expect(Object.keys(await getActionsByEntry(release.id))).toHaveLength(2);
+        expect((await getActionsByEntry(release.id))[invalidId]).toMatchObject({
+          type: 'publish',
+          outcome: 'skipped_invalid',
+        });
       });
     });
 
@@ -2513,11 +2495,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(fixRes.statusCode).toBe(200);
 
       // The update revalidates release actions without awaiting it
-      let plannedAction;
-      for (let attempt = 0; attempt < 20 && !plannedAction?.isEntryValid; attempt += 1) {
-        plannedAction = (await getActionsByEntry(plannedRelease.id))[skippedId];
-      }
-      expect(plannedAction.isEntryValid).toBe(true);
+      expect(
+        await waitFor(
+          async () => (await getActionsByEntry(plannedRelease.id))[skippedId].isEntryValid
+        )
+      ).toBe(true);
 
       const after = (await getActionsByEntry(ranRelease.id))[skippedId];
       expect({
@@ -2548,11 +2530,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       await strapi.documents(productUID).delete({ documentId: deletedId, locale: '*' });
 
       // The deletion removes release actions without awaiting it
-      let plannedActions = await getActionsByEntry(plannedRelease.id);
-      for (let attempt = 0; attempt < 20 && plannedActions[deletedId]; attempt += 1) {
-        plannedActions = await getActionsByEntry(plannedRelease.id);
-      }
-      expect(plannedActions[deletedId]).toBeUndefined();
+      expect(
+        await waitFor(
+          async () => (await getActionsByEntry(plannedRelease.id))[deletedId] === undefined
+        )
+      ).toBe(true);
 
       const kept = (await getActionsByEntry(ranRelease.id))[deletedId];
       expect(kept).toMatchObject({
@@ -2768,6 +2750,32 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(await waitFor(async () => (await getRelease(release.id)).status === 'blocked')).toBe(
           true
         );
+      });
+
+      test('an unpublish action stays publishable, whatever the published version', async () => {
+        const documentId = await createProduct({ valid: true });
+        await strapi.documents(productUID).publish({ documentId });
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId, type: 'unpublish' },
+        ]);
+        // As stored by an earlier version, which validated unpublish actions too
+        await strapi.db.query('plugin::content-releases.release-action').updateMany({
+          where: { release: release.id },
+          data: { isEntryValid: false },
+        });
+        // An invalid published version replaces the draft
+        await strapi.db.query(productUID).updateMany({
+          where: { documentId, publishedAt: { $notNull: true } },
+          data: { description: null },
+        });
+
+        await strapi.documents(productUID).discardDraft({ documentId });
+
+        expect(
+          await waitFor(async () => (await getAction(release.id, documentId)).isEntryValid === true)
+        ).toBe(true);
+        expect((await getAction(release.id, documentId)).reason).toBeNull();
+        expect((await getRelease(release.id)).status).toBe('ready');
       });
     });
 
