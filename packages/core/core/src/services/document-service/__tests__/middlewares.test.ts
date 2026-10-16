@@ -40,4 +40,45 @@ describe('middlewares', () => {
       expect(middlewareFn).toHaveBeenCalled();
     });
   });
+
+  describe('use', () => {
+    const createRecorder = () => {
+      const calls: string[] = [];
+      const record = (name: string) => async (_ctx: any, next: () => Promise<void>) => {
+        calls.push(name);
+        return next();
+      };
+
+      return { calls, record };
+    };
+
+    it('removes only its own middleware', async () => {
+      const manager = createMiddlewareManager();
+      const { calls, record } = createRecorder();
+
+      manager.use(record('first'));
+      const removeSecond = manager.use(record('second'));
+      manager.use(record('third'));
+
+      removeSecond();
+      await manager.run({}, () => {});
+
+      expect(calls).toEqual(['first', 'third']);
+    });
+
+    it('does nothing when the remover is called again', async () => {
+      const manager = createMiddlewareManager();
+      const { calls, record } = createRecorder();
+
+      const removeFirst = manager.use(record('first'));
+      manager.use(record('second'));
+      manager.use(record('third'));
+
+      removeFirst();
+      removeFirst();
+      await manager.run({}, () => {});
+
+      expect(calls).toEqual(['second', 'third']);
+    });
+  });
 });
