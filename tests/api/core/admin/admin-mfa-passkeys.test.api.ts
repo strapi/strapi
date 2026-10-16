@@ -144,7 +144,7 @@ describe('Admin MFA passkeys', () => {
         ['POST', '/admin/mfa/passkeys/options', { nonsense: true }],
         ['POST', '/admin/mfa/passkeys', {}],
         ['GET', '/admin/mfa/passkeys', undefined],
-        ['DELETE', '/admin/mfa/passkeys/1', undefined],
+        ['POST', '/admin/mfa/passkeys/remove', { id: '1' }],
       ] as const;
 
       for (const [method, url, body] of authenticated) {
@@ -334,18 +334,33 @@ describe('Admin MFA passkeys', () => {
     expect(res.body.data).toMatchObject({ mfaRequired: true, passkeyAvailable: true });
   });
 
-  test("deleting a passkey: a non-numeric id, a foreign row and the caller's own", async () => {
-    const malformed = await editorRq('/mfa/passkeys/not-a-number', 'DELETE');
-    expect(malformed.statusCode).toBe(404);
+  /** Removing a credential costs the password and a live code, exactly as registering one does. */
+  test("removing a passkey: credentials, a non-numeric id, a foreign row and the caller's own", async () => {
+    const remove = (id: string, extra: Record<string, unknown> = {}) =>
+      editorRq('/mfa/passkeys/remove', 'POST', {
+        id,
+        password: editorPassword,
+        code: nextRecoveryCode(),
+        ...extra,
+      });
+
+    const mine = (await passkeyRows(editor.id))[0];
+
+    // A session alone is not enough.
+    const noCredentials = await editorRq('/mfa/passkeys/remove', 'POST', { id: String(mine.id) });
+    expect(noCredentials.statusCode).toBe(400);
+    expect(await passkeyRows(editor.id)).toHaveLength(10);
+
+    const malformed = await remove('not-a-number');
+    expect(malformed.statusCode).toBe(400);
 
     const foreignRow = await seedPasskey(superAdminId, 99);
-    const foreign = await editorRq(`/mfa/passkeys/${foreignRow.id}`, 'DELETE');
+    const foreign = await remove(String(foreignRow.id));
     // Ownership, not just existence: the row is real, it is simply not the caller's.
     expect(foreign.statusCode).toBe(404);
     expect(await passkeyRows(superAdminId)).toHaveLength(1);
 
-    const mine = (await passkeyRows(editor.id))[0];
-    const deleted = await editorRq(`/mfa/passkeys/${mine.id}`, 'DELETE');
+    const deleted = await remove(String(mine.id));
     expect(deleted.statusCode).toBe(204);
     expect(deleted.body).toEqual({});
     expect(await passkeyRows(editor.id)).toHaveLength(9);
@@ -471,8 +486,8 @@ describe('Admin MFA passkeys', () => {
     expect(registering.statusCode).toBe(400);
     expect(JSON.stringify(registering.body)).toContain('Passkeys are disabled');
 
-    // Removing a credential is never the dangerous direction (the service's own reasoning for
-    // `deletePasskey`/`clearPasskeys`), so both delete routes must keep working while the policy
+    // Removing a credential is never the dangerous direction for the account (the service's own
+    // reasoning for `deletePasskey`/`clearPasskeys`), so both delete routes must keep working while the policy
     // is off. A row can only exist here through a direct seed -- registration is refused above --
     // and while it exists the caller's list and the administrator count still agree with each
     // other (both stay empty/zero), never disagreeing about what is really in the table.
@@ -482,7 +497,13 @@ describe('Admin MFA passkeys', () => {
       (await rq({ url: `/admin/mfa/users/${editor.id}/passkeys`, method: 'GET' })).body.data
     ).toEqual({ count: 0 });
 
-    const selfDeleteWhileOff = await editorRq(`/mfa/passkeys/${offRowForSelfDelete.id}`, 'DELETE');
+    // Still costs credentials while the policy is off: the factor check is about who is asking,
+    // not about whether new passkeys are allowed.
+    const selfDeleteWhileOff = await editorRq('/mfa/passkeys/remove', 'POST', {
+      id: String(offRowForSelfDelete.id),
+      password: editorPassword,
+      code: nextRecoveryCode(),
+    });
     expect(selfDeleteWhileOff.statusCode).toBe(204);
     expect(selfDeleteWhileOff.body).toEqual({});
     expect(await passkeyRows(editor.id)).toHaveLength(0);

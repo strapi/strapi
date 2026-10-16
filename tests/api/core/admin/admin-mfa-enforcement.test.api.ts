@@ -80,6 +80,8 @@ describe('Admin MFA enforcement', () => {
       body: { name: 'mfa_enforcement_editor', description: 'x', mfaRequired: true },
     });
     expect(res.statusCode).toBe(400);
+    // The role schema refuses the key itself: it is set only through the security settings.
+    expect(res.body.error.message).toMatch(/mfaRequired/);
   });
 
   test('an unenrolled super admin cannot switch to required', async () => {
@@ -101,6 +103,7 @@ describe('Admin MFA enforcement', () => {
       body: { mfa: { mode: 'optional', graceDays: 31, requiredRoles: [] } },
     });
     expect(res.statusCode).toBe(400);
+    expect(res.body.error.message).toMatch(/graceDays/);
   });
 
   describe('once the super admin is enrolled', () => {
@@ -182,6 +185,7 @@ describe('Admin MFA enforcement', () => {
 
       const again = await rq({ url: `/admin/mfa/users/${editor.id}/unlock`, method: 'POST' });
       expect(again.statusCode).toBe(400);
+      expect(again.body.error.message).toBe('This account is not locked');
 
       const res = await login(editor.email, editorPassword);
       expect(res.statusCode).toBe(200);
@@ -218,6 +222,10 @@ describe('Admin MFA enforcement', () => {
         body: { mfa: { mode: 'optional', graceDays: 2, requiredRoles: [] } },
       });
       expect(noAuth.statusCode).toBe(400);
+      // Not validation and not the self-lockout guard: specifically the downgrade gate.
+      expect(noAuth.body.error.message).toBe(
+        'Your password is required to change two-factor settings'
+      );
 
       // A fresh TOTP step: the beforeAll enrolment verify already consumed the current one, and
       // the account-wide replay guard means the same step's code can't be accepted twice.
@@ -244,6 +252,10 @@ describe('Admin MFA enforcement', () => {
         body: { mfa: { mode: 'optional', graceDays: 5, requiredRoles: [] } },
       });
       expect(noAuth.statusCode).toBe(400);
+      // Not validation and not the self-lockout guard: specifically the downgrade gate.
+      expect(noAuth.body.error.message).toBe(
+        'Your password is required to change two-factor settings'
+      );
 
       await new Promise((resolve) =>
         setTimeout(resolve, (31 - (Math.floor(Date.now() / 1000) % 30)) * 1000)

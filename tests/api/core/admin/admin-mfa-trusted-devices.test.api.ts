@@ -298,13 +298,19 @@ describe('Admin MFA trusted devices', () => {
       expect(res.body.data.trustedDeviceDays).toBe(30);
       editorPassword = 'NewPassword456';
 
-      // Trust survives a password reset by design; the new password is still required.
+      // A reset is what you do when you believe the password is compromised, so it revokes every
+      // trusted browser: one the attacker had already trusted must not keep skipping the second
+      // factor with the new password.
       const again = await loginEditor({ Cookie: trustCookie });
-      expect(again.body.data.mfaRequired).toBeUndefined();
-      expect(typeof again.body.data.token).toBe('string');
+      expect(again.body.data.mfaRequired).toBe(true);
+      expect(await trustedRows()).toHaveLength(0);
     });
 
     test('revoking the current device clears the cookie and the next login is challenged again', async () => {
+      // The reset above revoked the old trust, so this test grants its own.
+      trustCookie = await grantTrust();
+      rowId = String((await trustedRows())[0].id);
+
       const headers = await editorBearer();
       const revoke = await createRequest({ strapi }).delete(`/admin/mfa/trusted-devices/${rowId}`, {
         headers: { ...headers, Cookie: trustCookie },
