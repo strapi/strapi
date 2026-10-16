@@ -60,3 +60,17 @@ const updateSecuritySettingsSchema = yup
   );
 
 export const validateUpdateSecuritySettings = validateYupSchema(updateSecuritySettingsSchema);
+
+const mfaImpactSchema = yup
+  .object()
+  .shape({
+    mode: yup
+      .string()
+      .oneOf([...MFA_ENFORCEMENT_MODES])
+      .required(),
+    requiredRoles: yup.array().of(yup.string().matches(/^\d+$/).required()).optional(),
+  })
+  .required()
+  .noUnknown();
+
+export const validateMfaImpactQuery = validateYupSchema(mfaImpactSchema);

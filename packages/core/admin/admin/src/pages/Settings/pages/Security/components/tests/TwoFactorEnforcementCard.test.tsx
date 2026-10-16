@@ -1,3 +1,4 @@
+import { within } from '@testing-library/react';
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -38,6 +39,18 @@ const captureSave = () => {
   return bodies;
 };
 
+/** The blast radius the raise confirmation reads before saving. */
+const impact = (affected: number, enrolled: number) => {
+  const queries: URLSearchParams[] = [];
+  server.use(
+    http.get('/admin/security-settings/mfa-impact', ({ request }) => {
+      queries.push(new URL(request.url).searchParams);
+      return HttpResponse.json({ data: { affected, enrolled } });
+    })
+  );
+  return queries;
+};
+
 describe('TwoFactorEnforcementCard', () => {
   it('renders the stored mode, grace days and required roles with user counts', () => {
     renderCard();
@@ -70,20 +83,74 @@ describe('TwoFactorEnforcementCard', () => {
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
   });
 
-  it('saves a protection increase directly, without asking for credentials', async () => {
+  /**
+   * Raising enforcement can put every password user on a lockout clock. It used to commit on one
+   * click with a "Saved" toast; it now shows how many people and how long they have, and only
+   * saves once confirmed. No credentials: that gate is for the opposite direction.
+   */
+  it('confirms a protection increase with its blast radius, then saves without credentials', async () => {
     const bodies = captureSave();
+    const queries = impact(12, 5);
     const { user } = renderCard();
 
     await user.click(screen.getByRole('radio', { name: /^Required/ }));
     await user.click(screen.getByRole('checkbox', { name: 'Author (0 users)' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
+    const dialog = await screen.findByRole('alertdialog', {
+      name: 'Require two-factor authentication?',
+    });
+    expect(dialog).toHaveTextContent(
+      '12 users will be asked to set up two-factor authentication, and 5 of them already have it.'
+    );
+    expect(dialog).toHaveTextContent('Each has 7 days from their next sign-in');
+    expect(queries[0].get('mode')).toBe('required');
+    expect(bodies).toHaveLength(0);
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
+
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0]).toEqual({
       mfa: { mode: 'required', graceDays: 7, requiredRoles: ['2', '3'] },
     });
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(await screen.findByText('Saved')).toBeInTheDocument();
+  });
+
+  it('saves nothing when the raise is cancelled', async () => {
+    const bodies = captureSave();
+    impact(3, 0);
+    const { user } = renderCard();
+
+    await user.click(screen.getByRole('radio', { name: /^Required/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    const dialog = await screen.findByRole('alertdialog', {
+      name: 'Require two-factor authentication?',
+    });
+    expect(dialog).toHaveTextContent(
+      '3 users will be asked to set up two-factor authentication, and none of them has it.'
+    );
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+    expect(bodies).toHaveLength(0);
+    // The draft survives, so the user can reconsider without redoing their choices.
+    expect(screen.getByRole('radio', { name: /^Required/ })).toBeChecked();
+  });
+
+  it('shortening the grace period is not a raise, so it saves without the confirmation', async () => {
+    const bodies = captureSave();
+    const queries = impact(1, 1);
+    const { user } = renderCard();
+
+    const grace = screen.getByRole('spinbutton', { name: 'Grace period (days)' });
+    await user.clear(grace);
+    await user.type(grace, '3');
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(queries).toHaveLength(0);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
   it('asks for the password alone on a downgrade when the caller is not enrolled, then saves with it', async () => {
@@ -173,10 +240,16 @@ describe('TwoFactorEnforcementCard', () => {
         )
       )
     );
+    impact(4, 0);
     const { user } = renderCard();
 
     await user.click(screen.getByRole('radio', { name: /^Required/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(
+      within(
+        await screen.findByRole('alertdialog', { name: 'Require two-factor authentication?' })
+      ).getByRole('button', { name: 'Confirm' })
+    );
 
     // same live-region caveat as above -- assert on text rather than a bare role query
     expect(

@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Dialog,
   Field,
   Flex,
   Radio,
@@ -13,10 +14,13 @@ import {
 import isEqual from 'lodash/isEqual';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 
+import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
 import { ErrorMessage } from '../../../../../components/ErrorMessage';
 import { Panel } from '../../../../../components/Panel';
+import { useToMessage } from '../../../../../hooks/useToMessage';
+import { useLazyGetMfaImpactQuery } from '../../../../../services/securitySettings';
 import { useSecuritySettingsSave } from '../hooks/useSecuritySettingsSave';
-import { isSecurityDowngrade } from '../utils/isSecurityDowngrade';
+import { isEnforcementRaise, isSecurityDowngrade } from '../utils/isSecurityDowngrade';
 
 import { ConfirmDowngradeDialog } from './ConfirmDowngradeDialog';
 
@@ -149,6 +153,37 @@ const TwoFactorEnforcementCard = ({
         return true;
       },
     });
+
+  /**
+   * Raising enforcement is the change with a blast radius -- it can put every password user in the
+   * organisation on a lockout clock -- so it confirms first, showing how many people and how long
+   * they have. The credential gate is for the opposite direction and stays as it is.
+   */
+  const toMessage = useToMessage();
+  const [fetchImpact, { isFetching: isFetchingImpact }] = useLazyGetMfaImpactQuery();
+  const [impact, setImpact] = React.useState<{ affected: number; enrolled: number } | null>(null);
+  const [impactError, setImpactError] = React.useState<string>();
+
+  const handleSave = async () => {
+    if (!isEnforcementRaise(settings, next)) {
+      await save();
+      return;
+    }
+    setImpactError(undefined);
+    const res = await fetchImpact({ mode: next.mode, requiredRoles: next.requiredRoles });
+    if (res.error) {
+      setImpactError(toMessage(res.error));
+      return;
+    }
+    if (res.data) {
+      setImpact(res.data);
+    }
+  };
+
+  const confirmRaise = async () => {
+    setImpact(null);
+    await save();
+  };
 
   const toggleRole = (id: string, checked: boolean) => {
     setDraft((prev) => ({
@@ -316,15 +351,48 @@ const TwoFactorEnforcementCard = ({
           </Flex>
         </Flex>
 
+        <ErrorMessage error={impactError} />
         <Flex justifyContent="flex-end">
           <Button
-            onClick={save}
-            loading={isSaving}
+            onClick={handleSave}
+            loading={isSaving || isFetchingImpact}
             disabled={!canUpdate || !modified || isRefreshing}
           >
             {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
           </Button>
         </Flex>
+
+        <Dialog.Root open={impact !== null} onOpenChange={(open) => !open && setImpact(null)}>
+          {impact !== null ? (
+            <ConfirmDialog
+              title={formatMessage({
+                id: 'Settings.security.mfa.enforce.title',
+                defaultMessage: 'Require two-factor authentication?',
+              })}
+              variant="default"
+              onConfirm={confirmRaise}
+            >
+              {impact.affected === 0
+                ? formatMessage({
+                    id: 'Settings.security.mfa.enforce.none',
+                    defaultMessage:
+                      'No active user signs in with a password under this setting, so nobody will be asked to set it up yet.',
+                  })
+                : formatMessage(
+                    {
+                      id: 'Settings.security.mfa.enforce.body',
+                      defaultMessage:
+                        '{affected, plural, one {# user} other {# users}} will be asked to set up two-factor authentication, and {enrolled, plural, =0 {none of them has} one {# of them already has} other {# of them already have}} it. Each has {graceDays, plural, one {# day} other {# days}} from their next sign-in to set it up. After that, password sign-in is locked until an administrator unlocks the account.',
+                    },
+                    {
+                      affected: impact.affected,
+                      enrolled: impact.enrolled,
+                      graceDays: next.graceDays,
+                    }
+                  )}
+            </ConfirmDialog>
+          ) : null}
+        </Dialog.Root>
 
         <ConfirmDowngradeDialog
           open={downgradeOpen}

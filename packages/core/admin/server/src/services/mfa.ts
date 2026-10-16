@@ -23,7 +23,10 @@ import {
   readPasskeySettings,
   readTrustedDeviceSettings,
 } from './security-settings';
-import type { MfaEnforcement } from '../../../shared/contracts/security-settings';
+import type {
+  MfaEnforcement,
+  MfaEnforcementMode,
+} from '../../../shared/contracts/security-settings';
 import { createTrustedDevices } from './mfa-trusted-devices';
 import { createPasskeys, PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from './mfa-passkeys';
 
@@ -193,6 +196,55 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   const isEnrolledRow = (user: AdminUserRow): boolean =>
     Boolean(user.mfaEnabledAt && user.mfaSecret);
+
+  /**
+   * How many active accounts a proposed enforcement would put on the clock, and how many of those
+   * are already enrolled. Read before raising enforcement, so the administrator sees the blast
+   * radius before the click rather than after it.
+   *
+   * Decided per user with the same rules `isMfaRequiredFor` applies -- an account with no local
+   * password is exempt, and so is one holding an SSO-locked role -- but against the *proposed*
+   * roles rather than the stored flags. Iterated in memory: admin user tables are small, and
+   * exact parity with the enforcement path matters more than a clever query that could drift
+   * from it. Inactive accounts cannot sign in at all, so they are nobody's problem here.
+   */
+  const enforcementImpact = async (proposal: {
+    mode: MfaEnforcementMode;
+    requiredRoles: string[];
+  }): Promise<{ affected: number; enrolled: number }> => {
+    if (proposal.mode === 'off') {
+      return { affected: 0, enrolled: 0 };
+    }
+
+    const users = (await userQuery().findMany({
+      where: { isActive: true },
+      select: ['id', 'password', 'mfaEnabledAt', 'mfaSecret'],
+      populate: { roles: { select: ['id'] } },
+    })) as AdminUserRow[];
+
+    const required = new Set(proposal.requiredRoles.map(String));
+    let affected = 0;
+    let enrolled = 0;
+
+    for (const user of users) {
+      // eslint-disable-next-line no-await-in-loop -- the SSO lookup is store-cached per call
+      if (await isExemptFromMfa(user)) {
+        continue;
+      }
+      const roles = Array.isArray(user.roles) ? user.roles : [];
+      const subject =
+        proposal.mode === 'required' || roles.some((role) => required.has(String(role.id)));
+      if (!subject) {
+        continue;
+      }
+      affected += 1;
+      if (isEnrolledRow(user)) {
+        enrolled += 1;
+      }
+    }
+
+    return { affected, enrolled };
+  };
 
   /** One conditional UPDATE each; read-then-write would let a refresh-path lock race an
    * administrator's unlock and silently win. */
@@ -1186,6 +1238,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     areCodesAcknowledged,
     acknowledgeCodes,
     isAccountThrottled,
+    enforcementImpact,
     createChallenge,
     verifyChallenge,
     assertFactor,

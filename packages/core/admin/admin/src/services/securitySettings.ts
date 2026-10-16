@@ -1,6 +1,7 @@
 import { adminApi } from './api';
 
 import type {
+  GetMfaImpact,
   GetSecuritySettings,
   UpdateSecuritySettings,
 } from '../../../shared/contracts/security-settings';
@@ -27,6 +28,18 @@ const securitySettingsService = adminApi
         },
         providesTags: ['SecuritySettings'],
       }),
+      /** Read on demand, before a raise is saved, so never cached against stale settings. */
+      getMfaImpact: builder.query<GetMfaImpact.Response['data'], GetMfaImpact.Request['query']>({
+        query: (params) => ({
+          method: 'GET',
+          url: '/admin/security-settings/mfa-impact',
+          config: { params },
+        }),
+        transformResponse(res: GetMfaImpact.Response) {
+          return res.data;
+        },
+        keepUnusedDataFor: 0,
+      }),
       updateSecuritySettings: builder.mutation<
         UpdateSecuritySettings.Response['data'],
         UpdateSecuritySettings.Request['body']
@@ -50,6 +63,7 @@ const securitySettingsService = adminApi
     overrideExisting: false,
   });
 
-const { useGetSecuritySettingsQuery, useUpdateSecuritySettingsMutation } = securitySettingsService;
+const { useGetSecuritySettingsQuery, useLazyGetMfaImpactQuery, useUpdateSecuritySettingsMutation } =
+  securitySettingsService;
 
-export { useGetSecuritySettingsQuery, useUpdateSecuritySettingsMutation };
+export { useGetSecuritySettingsQuery, useLazyGetMfaImpactQuery, useUpdateSecuritySettingsMutation };

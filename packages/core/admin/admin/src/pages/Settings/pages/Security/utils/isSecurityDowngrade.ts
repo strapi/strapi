@@ -25,6 +25,28 @@ export const isSecurityDowngrade = (
   return next.graceDays > previous.graceDays;
 };
 
+/**
+ * Whether a save could put someone *new* on the enforcement clock: the mode rises out of `off`
+ * or up to `required`, or `optional` gains a role. That is the change with a blast radius, so it
+ * gets a consequence confirmation -- not a credential gate, which is for the opposite direction.
+ * A shorter grace period or a dropped role puts nobody new on the clock.
+ */
+export const isEnforcementRaise = (
+  previous: MfaEnforcementSettings,
+  next: MfaEnforcementSettings
+): boolean => {
+  if (next.mode === 'off') {
+    return false;
+  }
+  if (MODE_RANK[next.mode] > MODE_RANK[previous.mode]) {
+    return true;
+  }
+  return (
+    next.mode === 'optional' &&
+    next.requiredRoles.some((id) => !previous.requiredRoles.includes(id))
+  );
+};
+
 /** Offering trust, or lengthening it, lets a browser skip the second factor for longer. */
 export const isTrustedDevicesDowngrade = (
   previous: TrustedDeviceSettings,

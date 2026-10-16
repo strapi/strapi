@@ -1,4 +1,5 @@
 import {
+  isEnforcementRaise,
   isPasskeysDisable,
   isSecurityDowngrade,
   isTrustedDevicesDowngrade,
@@ -108,5 +109,31 @@ describe('requiresPasskeysCredentials', () => {
   it('is false when nothing actually changed', () => {
     expect(requiresPasskeysCredentials(false, false)).toBe(false);
     expect(requiresPasskeysCredentials(true, false)).toBe(false);
+  });
+});
+
+describe('isEnforcementRaise', () => {
+  const optional = { mode: 'optional' as const, graceDays: 7, requiredRoles: ['1'] };
+
+  it.each([
+    ['off to optional', { ...optional, mode: 'off' as const }, optional],
+    ['optional to required', optional, { ...optional, mode: 'required' as const }],
+    ['a role added under optional', optional, { ...optional, requiredRoles: ['1', '2'] }],
+  ])('%s puts someone new on the clock', (_label, previous, next) => {
+    expect(isEnforcementRaise(previous, next)).toBe(true);
+  });
+
+  it.each([
+    ['nothing changed', optional, optional],
+    ['a shorter grace period', optional, { ...optional, graceDays: 3 }],
+    ['a role dropped', optional, { ...optional, requiredRoles: [] }],
+    ['a move to off', optional, { ...optional, mode: 'off' as const }],
+    [
+      'a role added while already required',
+      { ...optional, mode: 'required' as const },
+      { ...optional, mode: 'required' as const, requiredRoles: ['1', '2'] },
+    ],
+  ])('%s does not', (_label, previous, next) => {
+    expect(isEnforcementRaise(previous, next)).toBe(false);
   });
 });

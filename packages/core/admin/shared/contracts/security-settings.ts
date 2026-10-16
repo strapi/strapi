@@ -57,3 +57,23 @@ export declare namespace UpdateSecuritySettings {
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
+
+/**
+ * GET /security-settings/mfa-impact - how many active accounts a proposed enforcement would put on
+ * the clock, and how many of them are already enrolled. Read before a raise is saved, so the
+ * administrator sees the blast radius before committing to it.
+ */
+export declare namespace GetMfaImpact {
+  export interface Request {
+    query: {
+      mode: MfaEnforcementMode;
+      requiredRoles?: string[];
+    };
+  }
+  export interface Response {
+    data: {
+      affected: number;
+      enrolled: number;
+    };
+  }
+}
