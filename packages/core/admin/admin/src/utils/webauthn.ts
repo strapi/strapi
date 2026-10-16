@@ -27,24 +27,24 @@ const codeOf = (value: unknown): string | undefined => {
  * `name`, `cause.name` and `code` all have to be consulted -- and the tests mock the module
  * wholesale, so there is no class for `instanceof`. */
 export const ceremonyErrorKind = (error: unknown): CeremonyErrorKind => {
-  const names = [nameOf(error), nameOf(causeOf(error))];
+  const names = new Set([nameOf(error), nameOf(causeOf(error))]);
   const code = codeOf(error);
 
   if (
-    names.includes('NotAllowedError') ||
-    names.includes('AbortError') ||
+    names.has('NotAllowedError') ||
+    names.has('AbortError') ||
     code === 'ERROR_CEREMONY_ABORTED'
   ) {
     return 'dismissed';
   }
 
-  if (names.includes('InvalidStateError') || code === 'ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED') {
+  if (names.has('InvalidStateError') || code === 'ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED') {
     return 'already-registered';
   }
 
   if (
-    names.includes('SecurityError') ||
-    names.includes('NotSupportedError') ||
+    names.has('SecurityError') ||
+    names.has('NotSupportedError') ||
     code === 'ERROR_INVALID_DOMAIN' ||
     code === 'ERROR_AUTHENTICATOR_NO_SUPPORTED_PUBKEY_ALGORITHMS'
   ) {

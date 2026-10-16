@@ -20,13 +20,13 @@ const route = (method: string, path: string): RouteEntry | undefined =>
  * Two names, one job. `admin::mfa-rate-limit` is `admin::rateLimit` applied only while the MFA
  * feature is on, for routes that exist without it and must stay unthrottled when it is off.
  */
-const RATE_LIMIT_NAMES = ['admin::rateLimit', 'admin::mfa-rate-limit'];
+const RATE_LIMIT_NAMES = new Set(['admin::rateLimit', 'admin::mfa-rate-limit']);
 
 const limiterName = (m: string | { name: string; config?: unknown }): string | undefined => {
   if (typeof m === 'string') {
-    return RATE_LIMIT_NAMES.includes(m) ? m : undefined;
+    return RATE_LIMIT_NAMES.has(m) ? m : undefined;
   }
-  return m !== null && RATE_LIMIT_NAMES.includes(m.name) ? m.name : undefined;
+  return m !== null && RATE_LIMIT_NAMES.has(m.name) ? m.name : undefined;
 };
 
 const hasRateLimitEntry = (
@@ -75,14 +75,14 @@ describe('authentication routes', () => {
     // So this only ever asserts the deliberate widenings above, not a blanket change. The predicate
     // must match the object form as well as the bare string, or the assertion below is a tautology
     // that skips exactly the routes this exists to catch.
-    const widened = [
+    const widened = new Set([
       '/reset-password',
       '/login/mfa',
       '/login/mfa/webauthn/options',
       '/login/mfa/webauthn',
-    ];
+    ]);
     const otherRateLimited = routes.filter(
-      (r) => !widened.includes(r.path) && r.method === 'POST'
+      (r) => !widened.has(r.path) && r.method === 'POST'
     ) as unknown as Array<{
       path: string;
       config: { middlewares?: Array<string | { name: string; config?: unknown }> };

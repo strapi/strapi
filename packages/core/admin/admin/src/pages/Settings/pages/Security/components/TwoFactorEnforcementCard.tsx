@@ -95,13 +95,16 @@ const byRoleId = (a: string, b: string) => {
   return a < b ? -1 : 1;
 };
 
+/** Stable, so the default does not change identity on every render. */
+const NO_ROLE_IDS: string[] = [];
+
 const TwoFactorEnforcementCard = ({
   settings,
   roles,
   canUpdate,
   callerEnrolled,
   callerHasLocalPassword = true,
-  callerRoleIds = [],
+  callerRoleIds = NO_ROLE_IDS,
   isRefreshing = false,
 }: TwoFactorEnforcementCardProps) => {
   const { formatMessage } = useIntl();
