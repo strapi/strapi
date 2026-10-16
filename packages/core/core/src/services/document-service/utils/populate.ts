@@ -5,6 +5,11 @@ interface Options {
    * Fields to select when populating relations
    */
   relationalFields?: string[];
+  /**
+   * Whether relations are populated at all. Components, dynamic zones and media
+   * are populated either way. Defaults to true.
+   */
+  relations?: boolean;
 }
 
 const deepPopulateCache = new Map<string, any>();
@@ -25,6 +30,10 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}): Record<str
       case 'relation': {
         if ('unstable_virtual' in attribute && attribute.unstable_virtual) {
           // skip relations not managed by the DB layer
+          break;
+        }
+
+        if (opts.relations === false) {
           break;
         }
 

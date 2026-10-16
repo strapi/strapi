@@ -118,3 +118,48 @@ describe('Event Hub', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('Event Hub hasListeners', () => {
+  it('is false when nothing can receive the event', () => {
+    const { hasListeners } = createEventHub();
+
+    expect(hasListeners('my-event')).toBe(false);
+  });
+
+  it('is true while a listener is registered for the event', () => {
+    const { on, off, hasListeners } = createEventHub();
+    const listener = jest.fn();
+
+    const removeListener = on('my-event', listener);
+    expect(hasListeners('my-event')).toBe(true);
+    expect(hasListeners('my-other-event')).toBe(false);
+
+    removeListener();
+    expect(hasListeners('my-event')).toBe(false);
+
+    on('my-event', listener);
+    off('my-event', listener);
+    expect(hasListeners('my-event')).toBe(false);
+  });
+
+  it('is true for every event while a subscriber is registered', () => {
+    const { subscribe, hasListeners } = createEventHub();
+
+    const unsubscribe = subscribe(jest.fn());
+    expect(hasListeners('my-event')).toBe(true);
+    expect(hasListeners('my-other-event')).toBe(true);
+
+    unsubscribe();
+    expect(hasListeners('my-event')).toBe(false);
+  });
+
+  it('is false after destroy()', () => {
+    const eventHub = createEventHub();
+    eventHub.on('my-event', jest.fn());
+    eventHub.subscribe(jest.fn());
+
+    eventHub.destroy();
+
+    expect(eventHub.hasListeners('my-event')).toBe(false);
+  });
+});
