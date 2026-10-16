@@ -58,7 +58,7 @@ describe('addReasonsToInvalidActions', () => {
         isEntryValid: false,
         reason: { $null: true },
         outcome: null,
-        release: { releasedAt: { $null: true } },
+        release: { id: { $notNull: true }, releasedAt: { $null: true } },
       },
       populate: { release: { select: ['id'] } },
     });
@@ -82,18 +82,24 @@ describe('addReasonsToInvalidActions', () => {
     expect(updateReleaseStatus.mock.calls).toStrictEqual([[10]]);
   });
 
-  it('logs a failure instead of leaving an unhandled rejection', async () => {
+  it('logs an action that fails and still stores the reason of the others', async () => {
     actionFindMany.mockResolvedValue([
       { id: 1, contentType: 'api::a.a', entryDocumentId: 'a', locale: 'en', release: { id: 10 } },
+      { id: 2, contentType: 'api::a.a', entryDocumentId: 'b', locale: 'en', release: { id: 20 } },
     ]);
-    actionUpdateMany.mockRejectedValue(new Error('write failed'));
+    actionUpdateMany.mockRejectedValueOnce(new Error('write failed'));
 
     await addReasonsToInvalidActions();
     await flush();
 
     expect(logError).toHaveBeenCalledWith(
-      'Error while adding reasons to release actions that are not publishable',
+      'Error while adding the reason of release action 1',
       expect.objectContaining({ error: expect.any(Error) })
     );
+    expect(actionUpdateMany).toHaveBeenLastCalledWith({
+      where: { id: 2, outcome: null },
+      data: INVALID,
+    });
+    expect(updateReleaseStatus.mock.calls).toStrictEqual([[20]]);
   });
 });

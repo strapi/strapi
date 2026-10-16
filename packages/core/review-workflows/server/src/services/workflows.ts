@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { set, isString, map, get } from 'lodash/fp';
 import { errors, emitAudit } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
@@ -166,8 +166,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async update(workflow: any, opts: any) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
-      let updatedStages: any;
-      let updatedStageIds: any;
+      let updatedStages: { id: Data.ID; name: string }[] | undefined;
+      let updatedStageIds: Data.ID[] | undefined;
 
       await workflowValidator.validateWorkflowCount();
 
@@ -181,12 +181,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
 
-          updatedStages = await stageService.replaceStages(
+          const replacedStages: { id: Data.ID; name: string }[] = await stageService.replaceStages(
             workflow.stages,
             opts.data.stages,
             workflow.contentTypes
           );
-          updatedStageIds = updatedStages.map((stage: any) => stage.id);
+          updatedStages = replacedStages;
+          updatedStageIds = replacedStages.map((stage) => stage.id);
 
           updateOpts = set('data.stages', updatedStageIds, updateOpts);
         }

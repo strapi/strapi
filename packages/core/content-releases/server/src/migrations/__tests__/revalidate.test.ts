@@ -68,7 +68,7 @@ describe('revalidateChangedContentTypes', () => {
         contentType: UID,
         type: 'publish',
         outcome: null,
-        release: { releasedAt: { $null: true } },
+        release: { id: { $notNull: true }, releasedAt: { $null: true } },
       },
       populate: { release: { select: ['id'] } },
     });

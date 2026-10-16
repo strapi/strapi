@@ -45,13 +45,12 @@ export const getDraftEntryValidity = async (
   { contentType, documentId, locale }: Action,
   { strapi }: { strapi: Core.Strapi }
 ): Promise<EntryValidity> => {
-  const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
-  // @ts-expect-error - populateBuilderService should be a function but is returning service
-  const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
-
-  const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
-
   try {
+    const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+    // @ts-expect-error - populateBuilderService should be a function but is returning service
+    const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
+
+    const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
     const publishability = await getEntryPublishability(contentType, entry, { strapi });
 
     return publishability.publishable

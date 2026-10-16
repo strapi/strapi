@@ -54,7 +54,7 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
   });
 
   for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
+    await getService('release', { strapi }).updateReleaseStatus(release.id);
   }
 };
 

@@ -70,6 +70,9 @@ describe('updateActionsOnUpdate', () => {
     releaseFindMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
     actionCount.mockResolvedValue(1);
     mockGetDraftEntryValidity.mockResolvedValue(INVALID);
+    // clearAllMocks keeps implementations: undo a failure set by an earlier test
+    actionUpdateMany.mockResolvedValue(undefined);
+    updateReleaseStatus.mockResolvedValue(undefined);
   });
 
   it('skips the draft read when the entry is in no planned release', async () => {
@@ -120,6 +123,10 @@ describe('updateActionsOnUpdate', () => {
   it.each([
     ['the draft read', () => mockGetDraftEntryValidity.mockRejectedValue(new Error('read failed'))],
     ['a write', () => actionUpdateMany.mockRejectedValue(new Error('write failed'))],
+    [
+      'a release status update',
+      () => updateReleaseStatus.mockRejectedValue(new Error('status failed')),
+    ],
   ])('logs a failure of %s and still returns the updated entry', async (_, fail) => {
     fail();
 

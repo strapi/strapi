@@ -1,5 +1,7 @@
 'use strict';
 
+import { setTimeout as sleep } from 'node:timers/promises';
+
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
 import { describeOnCondition } from 'api-tests/utils';
@@ -2479,11 +2481,14 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
   });
   describe('Planned entries: why an entry is not publishable', () => {
+    // An entry edit revalidates its actions in the background: poll until it lands
     const waitFor = async (check: () => Promise<boolean>) => {
       for (let attempt = 0; attempt < 30; attempt += 1) {
         if (await check()) {
           return true;
         }
+
+        await sleep(100);
       }
 
       return false;
@@ -2542,16 +2547,23 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         reason: null,
       });
 
-      const editRes = await rq({
-        method: 'PUT',
-        url: `/content-manager/collection-types/${productUID}/${invalidId}`,
-        body: { name: 'Still invalid' },
-      });
-      expect(editRes.statusCode).toBe(200);
+      // Each edit revalidates in the background: wait for one before the next, so they don't race
       expect(await fixProduct(invalidId)).toMatchObject({ statusCode: 200 });
       expect(
         await waitFor(
           async () => (await getAction(publishRelease.id, invalidId)).isEntryValid === true
+        )
+      ).toBe(true);
+
+      const breakRes = await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${productUID}/${invalidId}`,
+        body: { name: 'Invalid again', description: null },
+      });
+      expect(breakRes.statusCode).toBe(200);
+      expect(
+        await waitFor(
+          async () => (await getAction(publishRelease.id, invalidId)).isEntryValid === false
         )
       ).toBe(true);
 
@@ -2563,6 +2575,44 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         count: 1,
         notReadyCount: 0,
       });
+    });
+
+    test('switching an action to unpublish clears its reason, and back to publish restores it', async () => {
+      const invalidId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('all_or_nothing', [{ documentId: invalidId }]);
+      const { id: actionId } = await getAction(release.id, invalidId);
+
+      const changeType = (type: 'publish' | 'unpublish') =>
+        rq({
+          method: 'PUT',
+          url: `/content-releases/${release.id}/actions/${actionId}`,
+          body: { type },
+        });
+
+      expect((await changeType('unpublish')).statusCode).toBe(200);
+      expect(await getAction(release.id, invalidId)).toMatchObject({
+        isEntryValid: true,
+        reason: null,
+      });
+      expect((await getRelease(release.id)).actions.meta).toEqual({ count: 1, notReadyCount: 0 });
+      // The status is recalculated after the response
+      expect(await waitFor(async () => (await getRelease(release.id)).status === 'ready')).toBe(
+        true
+      );
+
+      expect((await changeType('publish')).statusCode).toBe(200);
+      expect(await getAction(release.id, invalidId)).toMatchObject({
+        isEntryValid: false,
+        reason: {
+          validation: {
+            errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+          },
+        },
+      });
+      expect((await getRelease(release.id)).actions.meta).toEqual({ count: 1, notReadyCount: 1 });
+      expect(await waitFor(async () => (await getRelease(release.id)).status === 'blocked')).toBe(
+        true
+      );
     });
 
     test('the releases list returns the not-ready count of planned releases', async () => {

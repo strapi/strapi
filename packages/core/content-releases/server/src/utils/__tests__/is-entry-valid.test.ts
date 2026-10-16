@@ -1,4 +1,6 @@
-import { getEntryPublishability } from '../index';
+import type { Core } from '@strapi/types';
+
+import { getDraftEntryValidity, getEntryPublishability } from '../index';
 
 /**
  * `getEntryPublishability` powers the "valid" badge shown in the release UI. It must read
@@ -70,5 +72,28 @@ describe('content-releases utils - getEntryPublishability: strict relations', ()
     );
 
     expect(publishable).toBe(true);
+  });
+});
+
+describe('content-releases utils - getDraftEntryValidity', () => {
+  test('stores a failing draft read as not valid, with only the error name', async () => {
+    const strapi = {
+      plugin: () => ({
+        service: () => () => ({ populateDeep: () => ({ build: async () => ({}) }) }),
+      }),
+      documents: () => ({
+        findOne: jest.fn().mockRejectedValue(new TypeError('connection lost: secret-value')),
+      }),
+    } as unknown as Core.Strapi; // only what the draft read touches
+
+    const validity = await getDraftEntryValidity(
+      { contentType: 'api::article.article', documentId: 'article-1', locale: 'en' },
+      { strapi }
+    );
+
+    expect(validity).toStrictEqual({
+      isEntryValid: false,
+      reason: { error: { name: 'TypeError' } },
+    });
   });
 });

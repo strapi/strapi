@@ -70,29 +70,36 @@ export async function migrateIsValidAndStatusReleases() {
   })) as Release[];
 
   const migrate = async () => {
+    // One release failing must not leave the others without a status
     for (const release of releasesWithoutStatus) {
-      const notValidatedActions = release.actions.filter((action) => action.isEntryValid === null);
+      try {
+        const notValidatedActions = release.actions.filter(
+          (action) => action.isEntryValid === null
+        );
 
-      for (const action of notValidatedActions) {
-        const validity =
-          action.type === 'publish'
-            ? await getDraftEntryValidity(
-                {
-                  contentType: action.contentType,
-                  documentId: action.entryDocumentId,
-                  locale: action.locale,
-                },
-                { strapi }
-              )
-            : UNPUBLISH_VALIDITY;
+        for (const action of notValidatedActions) {
+          const validity =
+            action.type === 'publish'
+              ? await getDraftEntryValidity(
+                  {
+                    contentType: action.contentType,
+                    documentId: action.entryDocumentId,
+                    locale: action.locale,
+                  },
+                  { strapi }
+                )
+              : UNPUBLISH_VALIDITY;
 
-        await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-          where: { id: action.id },
-          data: validity,
-        });
+          await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+            where: { id: action.id, outcome: null },
+            data: validity,
+          });
+        }
+
+        await getService('release', { strapi }).updateReleaseStatus(release.id);
+      } catch (error: unknown) {
+        strapi.log.error(`Error while migrating the status of release ${release.id}`, { error });
       }
-
-      await getService('release', { strapi }).updateReleaseStatus(release.id);
     }
 
     await strapi.db.query(RELEASE_MODEL_UID).updateMany({
@@ -113,7 +120,9 @@ export async function addReasonsToInvalidActions() {
       isEntryValid: false,
       reason: { $null: true },
       outcome: null,
-      release: { releasedAt: { $null: true } },
+      // The relation filter is a left join: without the id check, an action whose release is
+      // gone would match `releasedAt IS NULL`
+      release: { id: { $notNull: true }, releasedAt: { $null: true } },
     },
     populate: { release: { select: ['id'] } },
   });
@@ -125,21 +134,28 @@ export async function addReasonsToInvalidActions() {
   const revalidate = async () => {
     const releaseIds = new Set<Release['id']>();
 
+    // One action failing must not stop the others: it would stop at the same action on every start
     for (const action of actions) {
-      const validity = await getDraftEntryValidity(
-        {
-          contentType: action.contentType,
-          documentId: action.entryDocumentId,
-          locale: action.locale,
-        },
-        { strapi }
-      );
+      try {
+        const validity = await getDraftEntryValidity(
+          {
+            contentType: action.contentType,
+            documentId: action.entryDocumentId,
+            locale: action.locale,
+          },
+          { strapi }
+        );
 
-      await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-        where: { id: action.id, outcome: null },
-        data: validity,
-      });
-      releaseIds.add(action.release.id);
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+          where: { id: action.id, outcome: null },
+          data: validity,
+        });
+        releaseIds.add(action.release.id);
+      } catch (error: unknown) {
+        strapi.log.error(`Error while adding the reason of release action ${action.id}`, {
+          error,
+        });
+      }
     }
 
     for (const releaseId of releaseIds) {
@@ -181,7 +197,7 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
               contentType: contentTypeUID,
               type: 'publish',
               outcome: null,
-              release: { releasedAt: { $null: true } },
+              release: { id: { $notNull: true }, releasedAt: { $null: true } },
             },
             populate: { release: { select: ['id'] } },
           });
