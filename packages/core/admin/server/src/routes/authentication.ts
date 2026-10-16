@@ -92,9 +92,12 @@ export default [
     handler: 'authentication.resetPassword',
     config: {
       auth: false,
-      // Same collapse: a reset body carries a token, not an email, so every reset in the deployment
-      // shares one `unknownEmail:<path>:<ip>` bucket -- five between a whole org behind NAT.
-      middlewares: [{ name: 'admin::rateLimit', config: { max: 20 } }],
+      // Only while the feature is on: the limiter is here because a reset can now answer with a
+      // second-factor challenge, and with the flag off this route must be what it was before.
+      // Same collapse as the mfa routes: a reset body carries a token, not an email, so every
+      // reset in the deployment shares one `unknownEmail:<path>:<ip>` bucket -- five between a
+      // whole org behind NAT.
+      middlewares: [{ name: 'admin::mfa-rate-limit', config: { max: 20 } }],
     },
   },
   {

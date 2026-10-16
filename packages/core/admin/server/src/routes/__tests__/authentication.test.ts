@@ -16,14 +16,22 @@ type RouteEntry = {
 const route = (method: string, path: string): RouteEntry | undefined =>
   (routes as unknown as RouteEntry[]).find((r) => r.method === method && r.path === path);
 
+/**
+ * Two names, one job. `admin::mfa-rate-limit` is `admin::rateLimit` applied only while the MFA
+ * feature is on, for routes that exist without it and must stay unthrottled when it is off.
+ */
+const RATE_LIMIT_NAMES = ['admin::rateLimit', 'admin::mfa-rate-limit'];
+
+const limiterName = (m: string | { name: string; config?: unknown }): string | undefined => {
+  if (typeof m === 'string') {
+    return RATE_LIMIT_NAMES.includes(m) ? m : undefined;
+  }
+  return m !== null && RATE_LIMIT_NAMES.includes(m.name) ? m.name : undefined;
+};
+
 const hasRateLimitEntry = (
   middlewares: Array<string | { name: string; config?: unknown }> = []
-): boolean =>
-  middlewares.some(
-    (m) =>
-      (typeof m === 'string' && m === 'admin::rateLimit') ||
-      (typeof m === 'object' && m !== null && m.name === 'admin::rateLimit')
-  );
+): boolean => middlewares.some((m) => limiterName(m) !== undefined);
 
 describe('authentication routes', () => {
   // Every route whose bucket collapses onto the source IP, because its body carries a token rather
@@ -40,12 +48,27 @@ describe('authentication routes', () => {
 
       const rateLimit = (entry!.config.middlewares ?? []).find(
         (m): m is { name: string; config?: { max?: number } } =>
-          typeof m === 'object' && m !== null && m.name === 'admin::rateLimit'
+          typeof m === 'object' && m !== null && limiterName(m) !== undefined
       );
 
       expect(rateLimit).toBeDefined();
       expect(rateLimit!.config?.max).toBeGreaterThanOrEqual(expected);
     });
+  });
+
+  /**
+   * `/reset-password` exists with the feature off and behaved differently before this branch, so
+   * its limiter has to disappear with the flag. The `/login/mfa*` routes are new and 404 behind
+   * `admin::isMfaEnabled`, so the plain limiter is right for them.
+   */
+  test('only /reset-password uses the flag-gated limiter', () => {
+    const gated = (routes as unknown as RouteEntry[])
+      .filter((r) =>
+        (r.config.middlewares ?? []).some((m) => limiterName(m) === 'admin::mfa-rate-limit')
+      )
+      .map((r) => r.path);
+
+    expect(gated).toEqual(['/reset-password']);
   });
 
   test('every other admin::rateLimit route entry is left at the shared default', () => {
@@ -66,11 +89,7 @@ describe('authentication routes', () => {
     }>;
 
     for (const route of otherRateLimited) {
-      const entry = (route.config.middlewares ?? []).find(
-        (m) =>
-          (typeof m === 'string' && m === 'admin::rateLimit') ||
-          (typeof m === 'object' && m !== null && m.name === 'admin::rateLimit')
-      );
+      const entry = (route.config.middlewares ?? []).find((m) => limiterName(m) !== undefined);
       if (entry !== undefined) {
         expect(entry).toBe('admin::rateLimit');
       }
