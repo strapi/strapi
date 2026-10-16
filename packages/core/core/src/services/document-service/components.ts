@@ -1,4 +1,4 @@
-import _, { assign, curry, has, omit } from 'lodash';
+import _, { assign, curry, has, isEmpty, isEqual, isNil, isPlainObject, omit } from 'lodash';
 import type { Utils, UID, Schema, Data, Modules } from '@strapi/types';
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
 import {
@@ -173,7 +173,24 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
       const { component: componentUID, repeatable = false } = attribute;
 
       const componentValue = data[attributeName as keyof TData] as ComponentValue;
-      await deleteOldComponents(uid, componentUID, entityToUpdate, attributeName, componentValue);
+      const previousValue = await deleteOldComponents(
+        uid,
+        componentUID,
+        entityToUpdate,
+        attributeName,
+        componentValue
+      );
+
+      const previousComponents = _.castArray(previousValue ?? []).filter(
+        (component) => !isNil(component)
+      ) as Record<string, unknown>[];
+      const previousById = new Map(
+        previousComponents.map((component) => [pickStringifiedId(component as any), component])
+      );
+      const getPrevious = (value: any) =>
+        value && has(value, 'id') && !isNil(value.id)
+          ? previousById.get(pickStringifiedId(value))
+          : undefined;
 
       if (repeatable === true) {
         if (!Array.isArray(componentValue)) {
@@ -181,11 +198,24 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
         }
 
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components: RepeatableComponentValue = await async.map(componentValue, (value: any) =>
-          updateOrCreateComponent(componentUID, value)
+        const results: Array<ComponentWriteResult | null> = await async.map(
+          componentValue,
+          (value: any) => updateOrCreateComponent(componentUID, value, getPrevious(value))
+        );
+        const components = results.filter(
+          (result): result is ComponentWriteResult => !isNil(result)
         );
 
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
+        // The join rows are already right when no component changed and the list kept its order
+        const sameList = isEqual(
+          components.map(pickStringifiedId),
+          previousComponents.map((component) => pickStringifiedId(component as any))
+        );
+        if (sameList && components.every((component) => !component.changed)) {
+          continue;
+        }
+
+        componentBody[attributeName] = components.map(({ id }) => {
           return {
             id,
             __pivot: {
@@ -195,31 +225,78 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
           };
         });
       } else {
-        const component = await updateOrCreateComponent(componentUID, componentValue);
-        componentBody[attributeName] = component && {
-          id: component.id,
-          __pivot: {
-            field: attributeName,
-            component_type: componentUID,
-          },
-        };
+        const component = await updateOrCreateComponent(
+          componentUID,
+          componentValue,
+          getPrevious(componentValue)
+        );
+
+        const previousId = previousComponents[0]
+          ? pickStringifiedId(previousComponents[0] as any)
+          : null;
+        const currentId = component ? pickStringifiedId(component) : null;
+        if (previousId === currentId && (!component || !component.changed)) {
+          continue;
+        }
+
+        componentBody[attributeName] = (
+          component
+            ? {
+                id: component.id,
+                __pivot: {
+                  field: attributeName,
+                  component_type: componentUID,
+                },
+              }
+            : null
+        ) as ComponentValue;
       }
     } else if (attribute.type === 'dynamiczone') {
       const dynamiczoneValues = data[attributeName as keyof TData] as DynamicZoneValue;
 
-      await deleteOldDZComponents(uid, entityToUpdate, attributeName, dynamiczoneValues);
+      const previousValue = await deleteOldDZComponents(
+        uid,
+        entityToUpdate,
+        attributeName,
+        dynamiczoneValues,
+        attribute.components
+      );
 
       if (!Array.isArray(dynamiczoneValues)) {
         throw new Error('Expected an array to create repeatable component');
       }
 
-      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-      componentBody[attributeName] = await async.map(dynamiczoneValues, async (value: any) => {
-        const { id } = await updateOrCreateComponent(value.__component, value);
+      const toKey = (value: {
+        id: Modules.EntityService.Params.Attribute.ID;
+        __component: string;
+      }) => `${value.__component}:${pickStringifiedId(value)}`;
+      const previousComponents = _.castArray(previousValue ?? []).filter(
+        (component) => !isNil(component)
+      );
+      const previousByKey = new Map(
+        previousComponents.map((component) => [toKey(component), component])
+      );
 
+      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+      const components: Array<ComponentWriteResult & { __component: UID.Component }> =
+        await async.map(dynamiczoneValues, async (value: any) => {
+          const previous =
+            has(value, 'id') && !isNil(value.id) ? previousByKey.get(toKey(value)) : undefined;
+          const result = await updateOrCreateComponent(value.__component, value, previous);
+
+          return { ...result, __component: value.__component };
+        });
+
+      // The join rows are already right when no component changed and the zone kept its order
+      const sameList = isEqual(components.map(toKey), previousComponents.map(toKey));
+      if (sameList && components.every((component) => !component.changed)) {
+        continue;
+      }
+
+      componentBody[attributeName] = components.map(({ id, __component }) => {
         return {
           id,
-          __component: value.__component,
+          __component,
           __pivot: {
             field: attributeName,
           },
@@ -243,6 +320,286 @@ const pickStringifiedId = ({
   return `${id}`;
 };
 
+/**
+ * Result of writing one component: its id, and whether anything was written for it.
+ */
+type ComponentWriteResult = {
+  id: Modules.EntityService.Params.Attribute.ID;
+  changed: boolean;
+};
+
+/**
+ * Populate of the media attributes of a component, ids only, so that a loaded component can be
+ * compared with the data sent for it (see isComponentUnchanged).
+ */
+const getMediaPopulate = (componentUID: UID.Component) => {
+  const { attributes = {} } = strapi.getModel(componentUID);
+
+  const populate = Object.entries(attributes).reduce(
+    (acc, [attributeName, attribute]) => {
+      if (attribute.type === 'media') {
+        acc[attributeName] = { select: ['id'] };
+      }
+
+      return acc;
+    },
+    {} as Record<string, { select: string[] }>
+  );
+
+  return isEmpty(populate) ? undefined : populate;
+};
+
+const getComponentLoadParams = (componentUID: UID.Component) => {
+  const populate = getMediaPopulate(componentUID);
+
+  return populate ? { populate } : undefined;
+};
+
+const getDynamicZoneLoadParams = (componentUIDs: UID.Component[]) => {
+  // Every component of the zone has to be listed: the DB layer only returns the listed types
+  const on = componentUIDs.reduce(
+    (acc, componentUID) => {
+      const populate = getMediaPopulate(componentUID);
+      acc[componentUID] = populate ? { populate } : {};
+
+      return acc;
+    },
+    {} as Record<string, Record<string, unknown>>
+  );
+
+  return Object.values(on).some((fragment) => !isEmpty(fragment)) ? { on } : undefined;
+};
+
+/**
+ * A relation or media sent as `{ connect: [], disconnect: [] }` leaves the stored value as it is.
+ */
+const isRelationInputNoop = (value: unknown): boolean => {
+  if (!isPlainObject(value) || has(value, 'set')) {
+    return false;
+  }
+
+  const { connect, disconnect, ...rest } = value as Record<string, unknown>;
+
+  return (
+    isEmpty(connect) && isEmpty(disconnect) && Object.keys(rest).every((key) => key === 'options')
+  );
+};
+
+/**
+ * Ids of a media value, as loaded (`{ id }`, `[{ id }]`) or as sent (ids, `{ id }` objects, a `set`).
+ * Returns null when they cannot be told.
+ */
+const toMediaIds = (value: unknown): string[] | null => {
+  if (isNil(value)) {
+    return [];
+  }
+
+  if (typeof value === 'number' || typeof value === 'string') {
+    return [String(value)];
+  }
+
+  if (Array.isArray(value)) {
+    const ids = value.map((item) => (isPlainObject(item) ? (item as { id?: unknown }).id : item));
+
+    return ids.every((id) => typeof id === 'number' || typeof id === 'string')
+      ? ids.map(String)
+      : null;
+  }
+
+  if (isPlainObject(value)) {
+    if (has(value, 'set')) {
+      return toMediaIds((value as { set: unknown }).set);
+    }
+
+    if (has(value, 'id') && !has(value, 'connect') && !has(value, 'disconnect')) {
+      return toMediaIds([value]);
+    }
+  }
+
+  return null;
+};
+
+const toComparableNumber = (value: unknown): number | null => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+};
+
+const toComparableBigInt = (value: unknown): string | null => {
+  try {
+    if (typeof value === 'bigint') {
+      return value.toString();
+    }
+
+    if (typeof value === 'number' && Number.isInteger(value)) {
+      return BigInt(value).toString();
+    }
+
+    if (typeof value === 'string' && value.trim() !== '') {
+      return BigInt(value.trim()).toString();
+    }
+  } catch {
+    // not a big integer
+  }
+
+  return null;
+};
+
+const toComparableDateTime = (value: unknown): number | null => {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value.getTime();
+  }
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    // timestamps are loaded as epoch strings
+    const time = /^\d+$/.test(value) ? Number(value) : new Date(value).getTime();
+    return Number.isNaN(time) ? null : time;
+  }
+
+  return null;
+};
+
+const toComparableDate = (value: unknown): string | null => {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+    return value.slice(0, 10);
+  }
+
+  return null;
+};
+
+const toComparableTime = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const match = value.match(/^(\d{2}:\d{2})(?::(\d{2}))?(?:\.(\d{1,3}))?$/);
+  if (!match) {
+    return null;
+  }
+
+  const [, hoursMinutes, seconds = '00', milliseconds = '000'] = match;
+
+  return `${hoursMinutes}:${seconds}.${milliseconds.padEnd(3, '0')}`;
+};
+
+const toComparableJson = (value: unknown): unknown => {
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+
+  return value;
+};
+
+const isScalarUnchanged = (
+  attribute: Schema.Attribute.AnyAttribute,
+  stored: unknown,
+  incoming: unknown
+): boolean => {
+  if (isNil(stored) || isNil(incoming)) {
+    return isNil(stored) && isNil(incoming);
+  }
+
+  switch (attribute.type) {
+    case 'string':
+    case 'text':
+    case 'richtext':
+    case 'email':
+    case 'enumeration':
+    case 'uid':
+      return typeof incoming === 'string' && String(stored) === incoming;
+    case 'boolean':
+      return typeof incoming === 'boolean' && stored === incoming;
+    case 'integer':
+    case 'float':
+    case 'decimal': {
+      const a = toComparableNumber(stored);
+      return a !== null && a === toComparableNumber(incoming);
+    }
+    case 'biginteger': {
+      const a = toComparableBigInt(stored);
+      return a !== null && a === toComparableBigInt(incoming);
+    }
+    case 'date': {
+      const a = toComparableDate(stored);
+      return a !== null && a === toComparableDate(incoming);
+    }
+    case 'time': {
+      const a = toComparableTime(stored);
+      return a !== null && a === toComparableTime(incoming);
+    }
+    case 'datetime':
+    case 'timestamp': {
+      const a = toComparableDateTime(stored);
+      return a !== null && a === toComparableDateTime(incoming);
+    }
+    case 'json':
+    case 'blocks':
+      return isEqual(toComparableJson(stored), toComparableJson(incoming));
+    default:
+      // passwords and unknown types: assume a change
+      return false;
+  }
+};
+
+/**
+ * Whether the data sent for a component leaves it as it is stored. Nested components and dynamic
+ * zones are not compared here: updateComponents only reports the ones that changed, and the caller
+ * checks that it reported none. Anything that cannot be compared with certainty counts as a change.
+ */
+const isComponentUnchanged = (
+  schema: Schema.Schema,
+  stored: Record<string, unknown>,
+  data: Record<string, unknown>
+): boolean => {
+  return Object.entries(schema.attributes).every(([attributeName, attribute]) => {
+    if (!has(data, attributeName) || contentTypesUtils.isComponentAttribute(attribute)) {
+      return true;
+    }
+
+    const incoming = data[attributeName];
+
+    if (attribute.type === 'relation') {
+      return isRelationInputNoop(incoming);
+    }
+
+    if (!has(stored, attributeName)) {
+      return false;
+    }
+
+    if (attribute.type === 'media') {
+      if (isRelationInputNoop(incoming)) {
+        return true;
+      }
+
+      const storedIds = toMediaIds(stored[attributeName]);
+      const incomingIds = toMediaIds(incoming);
+
+      return storedIds !== null && incomingIds !== null && isEqual(storedIds, incomingIds);
+    }
+
+    return isScalarUnchanged(attribute, stored[attributeName], incoming);
+  });
+};
+
 const deleteOldComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   componentUID: UID.Component,
@@ -252,7 +609,7 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
 ) => {
   const previousValue = (await strapi.db
     .query(uid)
-    .load(entityToUpdate, attributeName)) as ComponentValue;
+    .load(entityToUpdate, attributeName, getComponentLoadParams(componentUID))) as ComponentValue;
   const idsToKeep = _.castArray(componentValue)
     .filter((value) => has(value, 'id'))
     .map(pickStringifiedId);
@@ -275,17 +632,24 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
       await deleteComponent(componentUID, { id: idToDelete });
     }
   }
+
+  return previousValue;
 };
 
 const deleteOldDZComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   attributeName: string,
-  dynamiczoneValues: DynamicZoneValue
+  dynamiczoneValues: DynamicZoneValue,
+  componentUIDs: UID.Component[]
 ) => {
   const previousValue = (await strapi.db
     .query(uid)
-    .load(entityToUpdate, attributeName)) as DynamicZoneValue;
+    .load(
+      entityToUpdate,
+      attributeName,
+      getDynamicZoneLoadParams(componentUIDs)
+    )) as DynamicZoneValue;
 
   const idsToKeep = _.castArray(dynamiczoneValues)
     .filter((value) => has(value, 'id'))
@@ -328,6 +692,8 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
       await deleteComponent(componentUID, { id });
     }
   }
+
+  return previousValue;
 };
 
 const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.Entity<TUID>>(
@@ -394,24 +760,38 @@ const createComponent = async <TUID extends UID.Component>(
 const updateComponent = async <TUID extends UID.Component>(
   uid: TUID,
   componentToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
-  data: Input<TUID>
-) => {
+  data: Input<TUID>,
+  previous?: Record<string, unknown>
+): Promise<ComponentWriteResult | null> => {
   const schema = strapi.getModel(uid);
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
-  return strapi.db.query(uid).update({
+  // Nothing to write when the component is stored as sent. updateComponents only reports the
+  // nested attributes that changed, so an empty componentData means none of them did.
+  if (
+    previous &&
+    isEmpty(componentData) &&
+    isComponentUnchanged(schema, previous, data as Record<string, unknown>)
+  ) {
+    return { id: componentToUpdate.id, changed: false };
+  }
+
+  const component = await strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
     data: assignComponentData(schema, componentData, data),
   });
+
+  return component ? { id: component.id, changed: true } : null;
 };
 
-const updateOrCreateComponent = <TUID extends UID.Component>(
+const updateOrCreateComponent = async <TUID extends UID.Component>(
   componentUID: TUID,
-  value: Input<TUID>
-) => {
+  value: Input<TUID>,
+  previous?: Record<string, unknown>
+): Promise<ComponentWriteResult | null> => {
   if (value === null) {
     return null;
   }
@@ -419,11 +799,13 @@ const updateOrCreateComponent = <TUID extends UID.Component>(
   // update
   if ('id' in value && typeof value.id !== 'undefined') {
     // TODO: verify the compo is associated with the entity
-    return updateComponent(componentUID, { id: value.id }, value);
+    return updateComponent(componentUID, { id: value.id }, value, previous);
   }
 
   // create
-  return createComponent(componentUID, value);
+  const component = await createComponent(componentUID, value);
+
+  return { id: component.id, changed: true };
 };
 
 const deleteComponent = async <TUID extends UID.Component>(
@@ -611,6 +993,7 @@ const createComponentRelationFilter = () => {
 export {
   omitComponentData,
   assignComponentData,
+  isComponentUnchanged,
   getComponents,
   createComponents,
   updateComponents,

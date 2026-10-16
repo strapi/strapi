@@ -95,6 +95,8 @@ Read methods use the same idea. `statusToLookup` and `localeToLookup` write cond
 - If the row does not exist, but the document exists in another locale, the repository creates a row for the new locale. It copies the non-localized fields from an existing row. It schedules `entry.create`, not `entry.update`.
 - If the document does not exist, `update` returns `null`.
 
+For each component or dynamic zone attribute present in the data, the entries service loads the stored components (with the ids of their media), deletes the ones that are no longer sent, creates the ones sent without an id, and compares the others with the data sent for them. A component is not written again when its scalars and media are stored exactly as sent, its relations arrive with empty `connect` and `disconnect` lists, and none of its nested components changed. When a whole list is unchanged and kept its order, its join rows are left alone too. A value that cannot be compared with certainty, such as a password, counts as a change. Database lifecycles of a component run only when it is written. The entry row itself is always updated, so `updatedAt` moves on every save.
+
 If the caller passed `status: 'published'` and a row was written, `update` then calls the inner `publish` function.
 
 **`publish`** exists only on D&P content types. For the requested locales, it:

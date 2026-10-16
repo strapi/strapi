@@ -1,0 +1,441 @@
+import { updateComponents, isComponentUnchanged } from '../components';
+
+const PAGE_UID = 'api::page.page';
+const LINK_UID = 'monster.links';
+const SECTION_UID = 'monster.section';
+
+const models: Record<string, any> = {
+  [PAGE_UID]: {
+    uid: PAGE_UID,
+    modelType: 'contentType',
+    attributes: {
+      title: { type: 'string' },
+      links: { type: 'component', component: LINK_UID, repeatable: true },
+      hero: { type: 'component', component: LINK_UID, repeatable: false },
+      sections: { type: 'component', component: SECTION_UID, repeatable: true },
+      zone: { type: 'dynamiczone', components: [LINK_UID, SECTION_UID] },
+    },
+  },
+  [LINK_UID]: {
+    uid: LINK_UID,
+    modelType: 'component',
+    attributes: {
+      title: { type: 'string' },
+      tags: { type: 'relation', relation: 'oneToMany', target: 'api::tag.tag' },
+      image: { type: 'media', multiple: false },
+    },
+  },
+  [SECTION_UID]: {
+    uid: SECTION_UID,
+    modelType: 'component',
+    attributes: {
+      title: { type: 'string' },
+      links: { type: 'component', component: LINK_UID, repeatable: true },
+    },
+  },
+};
+
+const NOOP_RELATION = { connect: [], disconnect: [] };
+const MEDIA_POPULATE = { populate: { image: { select: ['id'] } } };
+
+type Stored = Record<string, Record<string, unknown>>;
+
+/**
+ * `stored[uid][entityId][attribute]` is what `strapi.db.query(uid).load(entity, attribute)` returns.
+ */
+const setup = (stored: Record<string, Stored>) => {
+  let nextId = 100;
+  const queries = Object.fromEntries(
+    Object.keys(models).map((uid) => [
+      uid,
+      {
+        load: jest.fn(async (entity: { id: number }, attribute: string) => {
+          const value = stored[uid]?.[entity.id]?.[attribute];
+          return value === undefined ? null : value;
+        }),
+        update: jest.fn(async ({ where }: { where: { id: number } }) => ({ id: where.id })),
+        create: jest.fn(async () => {
+          nextId += 1;
+          return { id: nextId - 1 };
+        }),
+        delete: jest.fn(async () => ({})),
+      },
+    ])
+  );
+
+  global.strapi = {
+    getModel: jest.fn((uid: string) => models[uid]),
+    db: { query: jest.fn((uid: string) => queries[uid]) },
+  } as any;
+
+  return queries;
+};
+
+const link = (id: number, title: string, image: unknown = null) => ({ id, title, image });
+const linkInput = (id: number | undefined, title: string, image: unknown = null) => ({
+  ...(id === undefined ? {} : { id }),
+  title,
+  tags: NOOP_RELATION,
+  image,
+});
+
+const pivot = (field: string, component_type: string) => ({ field, component_type });
+
+describe('updateComponents', () => {
+  const page = { id: 10 };
+
+  describe('repeatable component', () => {
+    const storedLinks = [link(1, 'a', { id: 7 }), link(2, 'b')];
+
+    it('writes nothing when the components are sent as they are stored', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      const result = await updateComponents(PAGE_UID, page, {
+        links: [linkInput(1, 'a', [{ id: 7 }]), linkInput(2, 'b')],
+      } as any);
+
+      expect(result).toEqual({});
+      expect(queries[PAGE_UID].load).toHaveBeenCalledWith(page, 'links', MEDIA_POPULATE);
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+      expect(queries[LINK_UID].create).not.toHaveBeenCalled();
+      expect(queries[LINK_UID].delete).not.toHaveBeenCalled();
+    });
+
+    it('updates only the component whose data changed and reports the list', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      const result = await updateComponents(PAGE_UID, page, {
+        links: [linkInput(1, 'a', [{ id: 7 }]), linkInput(2, 'b updated')],
+      } as any);
+
+      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
+      expect(queries[LINK_UID].update).toHaveBeenCalledWith({
+        where: { id: 2 },
+        data: expect.objectContaining({ title: 'b updated' }),
+      });
+      expect(result).toEqual({
+        links: [
+          { id: 1, __pivot: pivot('links', LINK_UID) },
+          { id: 2, __pivot: pivot('links', LINK_UID) },
+        ],
+      });
+    });
+
+    it('reports the list when its order changed, without updating the components', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      const result = await updateComponents(PAGE_UID, page, {
+        links: [linkInput(2, 'b'), linkInput(1, 'a', [{ id: 7 }])],
+      } as any);
+
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+      expect(result.links).toEqual([
+        { id: 2, __pivot: pivot('links', LINK_UID) },
+        { id: 1, __pivot: pivot('links', LINK_UID) },
+      ]);
+    });
+
+    it('creates the components sent without an id', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      const result = await updateComponents(PAGE_UID, page, {
+        links: [linkInput(1, 'a', [{ id: 7 }]), linkInput(2, 'b'), linkInput(undefined, 'c')],
+      } as any);
+
+      expect(queries[LINK_UID].create).toHaveBeenCalledTimes(1);
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+      expect(result.links.map((item: any) => item.id)).toEqual([1, 2, 100]);
+    });
+
+    it('deletes the components that are no longer sent', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      const result = await updateComponents(PAGE_UID, page, {
+        links: [linkInput(1, 'a', [{ id: 7 }])],
+      } as any);
+
+      // ids of removed components are compared and passed as strings
+      expect(queries[LINK_UID].delete).toHaveBeenCalledWith({ where: { id: '2' } });
+      expect(result.links.map((item: any) => item.id)).toEqual([1]);
+    });
+
+    it('treats a relation with connections as a change', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      await updateComponents(PAGE_UID, page, {
+        links: [
+          { ...linkInput(1, 'a', [{ id: 7 }]), tags: { connect: [{ id: 5 }], disconnect: [] } },
+          linkInput(2, 'b'),
+        ],
+      } as any);
+
+      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
+      expect(queries[LINK_UID].update).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 1 } })
+      );
+    });
+
+    it('treats a different media as a change', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      await updateComponents(PAGE_UID, page, {
+        links: [linkInput(1, 'a', [{ id: 8 }]), linkInput(2, 'b')],
+      } as any);
+
+      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
+      expect(queries[LINK_UID].update).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 1 } })
+      );
+    });
+
+    it('treats a removed media as a change', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      await updateComponents(PAGE_UID, page, {
+        links: [linkInput(1, 'a', null), linkInput(2, 'b')],
+      } as any);
+
+      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('single component', () => {
+    it('writes nothing when the component is sent as it is stored', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { hero: link(3, 'hero') } } });
+
+      const result = await updateComponents(PAGE_UID, page, { hero: linkInput(3, 'hero') } as any);
+
+      expect(result).toEqual({});
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+    });
+
+    it('reports the removal of the component', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { hero: link(3, 'hero') } } });
+
+      const result = await updateComponents(PAGE_UID, page, { hero: null } as any);
+
+      expect(queries[LINK_UID].delete).toHaveBeenCalledWith({ where: { id: '3' } });
+      expect(result).toEqual({ hero: null });
+    });
+
+    it('writes nothing when the component stays empty', async () => {
+      setup({ [PAGE_UID]: { 10: { hero: null } } });
+
+      const result = await updateComponents(PAGE_UID, page, { hero: null } as any);
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('nested components', () => {
+    const stored = {
+      [PAGE_UID]: { 10: { sections: [{ id: 20, title: 's' }] } },
+      [SECTION_UID]: { 20: { links: [link(1, 'a'), link(2, 'b')] } },
+    };
+
+    it('writes nothing when the whole tree is sent as it is stored', async () => {
+      const queries = setup(stored);
+
+      const result = await updateComponents(PAGE_UID, page, {
+        sections: [{ id: 20, title: 's', links: [linkInput(1, 'a'), linkInput(2, 'b')] }],
+      } as any);
+
+      expect(result).toEqual({});
+      expect(queries[SECTION_UID].load).toHaveBeenCalledWith({ id: 20 }, 'links', MEDIA_POPULATE);
+      expect(queries[SECTION_UID].update).not.toHaveBeenCalled();
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+    });
+
+    it('updates the parent when a nested component changed', async () => {
+      const queries = setup(stored);
+
+      const result = await updateComponents(PAGE_UID, page, {
+        sections: [{ id: 20, title: 's', links: [linkInput(1, 'a'), linkInput(2, 'b updated')] }],
+      } as any);
+
+      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
+      expect(queries[SECTION_UID].update).toHaveBeenCalledTimes(1);
+      expect(queries[SECTION_UID].update).toHaveBeenCalledWith({
+        where: { id: 20 },
+        data: expect.objectContaining({
+          title: 's',
+          links: [
+            { id: 1, __pivot: pivot('links', LINK_UID) },
+            { id: 2, __pivot: pivot('links', LINK_UID) },
+          ],
+        }),
+      });
+      expect(result.sections).toEqual([{ id: 20, __pivot: pivot('sections', SECTION_UID) }]);
+    });
+
+    it('updates the parent when a nested component is added', async () => {
+      const queries = setup(stored);
+
+      await updateComponents(PAGE_UID, page, {
+        sections: [
+          {
+            id: 20,
+            title: 's',
+            links: [linkInput(1, 'a'), linkInput(2, 'b'), linkInput(undefined, 'c')],
+          },
+        ],
+      } as any);
+
+      expect(queries[LINK_UID].create).toHaveBeenCalledTimes(1);
+      expect(queries[SECTION_UID].update).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('dynamic zone', () => {
+    const storedZone = [
+      { id: 1, __component: LINK_UID, title: 'a', image: null },
+      { id: 20, __component: SECTION_UID, title: 's' },
+    ];
+    const stored = {
+      [PAGE_UID]: { 10: { zone: storedZone } },
+      [SECTION_UID]: { 20: { links: [] } },
+    };
+
+    it('writes nothing when the zone is sent as it is stored', async () => {
+      const queries = setup(stored);
+
+      const result = await updateComponents(PAGE_UID, page, {
+        zone: [
+          { __component: LINK_UID, ...linkInput(1, 'a') },
+          { __component: SECTION_UID, id: 20, title: 's', links: [] },
+        ],
+      } as any);
+
+      expect(result).toEqual({});
+      expect(queries[PAGE_UID].load).toHaveBeenCalledWith(page, 'zone', {
+        on: { [LINK_UID]: MEDIA_POPULATE, [SECTION_UID]: {} },
+      });
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+      expect(queries[SECTION_UID].update).not.toHaveBeenCalled();
+    });
+
+    it('reports the zone when a block changed', async () => {
+      const queries = setup(stored);
+
+      const result = await updateComponents(PAGE_UID, page, {
+        zone: [
+          { __component: LINK_UID, ...linkInput(1, 'a updated') },
+          { __component: SECTION_UID, id: 20, title: 's', links: [] },
+        ],
+      } as any);
+
+      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
+      expect(result.zone).toEqual([
+        { id: 1, __component: LINK_UID, __pivot: { field: 'zone' } },
+        { id: 20, __component: SECTION_UID, __pivot: { field: 'zone' } },
+      ]);
+    });
+
+    it('reports the zone when the blocks were reordered', async () => {
+      const queries = setup(stored);
+
+      const result = await updateComponents(PAGE_UID, page, {
+        zone: [
+          { __component: SECTION_UID, id: 20, title: 's', links: [] },
+          { __component: LINK_UID, ...linkInput(1, 'a') },
+        ],
+      } as any);
+
+      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
+      expect(result.zone.map((block: any) => block.id)).toEqual([20, 1]);
+    });
+  });
+});
+
+describe('isComponentUnchanged', () => {
+  const schema = {
+    uid: 'test.all-types',
+    attributes: {
+      string: { type: 'string' },
+      bool: { type: 'boolean' },
+      int: { type: 'integer' },
+      dec: { type: 'decimal' },
+      big: { type: 'biginteger' },
+      day: { type: 'date' },
+      clock: { type: 'time' },
+      when: { type: 'datetime' },
+      stamp: { type: 'timestamp' },
+      json: { type: 'json' },
+      secret: { type: 'password' },
+      tags: { type: 'relation', relation: 'oneToMany', target: 'api::tag.tag' },
+      image: { type: 'media', multiple: true },
+    },
+  } as any;
+
+  const check = (stored: Record<string, unknown>, data: Record<string, unknown>) =>
+    isComponentUnchanged(schema, stored, data);
+
+  it('ignores attributes that are not sent', () => {
+    expect(check({ string: 'a', bool: true }, {})).toBe(true);
+  });
+
+  it('compares scalars after normalizing how they are loaded and sent', () => {
+    expect(check({ string: 'a' }, { string: 'a' })).toBe(true);
+    expect(check({ string: 'a' }, { string: 'b' })).toBe(false);
+    expect(check({ bool: false }, { bool: false })).toBe(true);
+    expect(check({ bool: false }, { bool: 'false' })).toBe(false);
+    expect(check({ int: 3 }, { int: '3' })).toBe(true);
+    expect(check({ dec: 12.5 }, { dec: '12.50' })).toBe(true);
+    expect(check({ big: '9007199254740993' }, { big: '9007199254740993' })).toBe(true);
+    expect(check({ big: '9007199254740993' }, { big: '9007199254740994' })).toBe(false);
+    expect(check({ day: '2026-10-16' }, { day: '2026-10-16' })).toBe(true);
+    expect(check({ day: '2026-10-16' }, { day: '2026-10-17' })).toBe(false);
+    expect(check({ clock: '10:30:00.000' }, { clock: '10:30' })).toBe(true);
+    expect(check({ clock: '10:30:00.000' }, { clock: '10:31' })).toBe(false);
+    expect(
+      check({ when: '2026-10-16T10:00:00.000Z' }, { when: '2026-10-16T12:00:00.000+02:00' })
+    ).toBe(true);
+    expect(check({ when: '2026-10-16T10:00:00.000Z' }, { when: '2026-10-16T10:00:01.000Z' })).toBe(
+      false
+    );
+    // timestamps are loaded as epoch strings
+    expect(
+      check({ stamp: String(Date.UTC(2026, 9, 16, 10)) }, { stamp: '2026-10-16T10:00:00.000Z' })
+    ).toBe(true);
+    expect(check({ json: { a: 1, b: [2] } }, { json: { b: [2], a: 1 } })).toBe(true);
+    expect(check({ json: { a: 1 } }, { json: '{"a":1}' })).toBe(true);
+    expect(check({ json: { a: 1 } }, { json: { a: 2 } })).toBe(false);
+  });
+
+  it('treats null and a value as a change, and null and null as no change', () => {
+    expect(check({ string: null }, { string: null })).toBe(true);
+    expect(check({ string: null }, { string: '' })).toBe(false);
+    expect(check({ int: 0 }, { int: null })).toBe(false);
+  });
+
+  it('assumes a change for passwords, unknown values and attributes that were not loaded', () => {
+    expect(check({ secret: 'hash' }, { secret: 'hash' })).toBe(false);
+    expect(check({}, { string: 'a' })).toBe(false);
+    expect(check({ int: 3 }, { int: 'three' })).toBe(false);
+  });
+
+  it('only accepts relations sent without connections or disconnections', () => {
+    expect(check({}, { tags: NOOP_RELATION })).toBe(true);
+    expect(check({}, { tags: { connect: [], disconnect: [], options: { strict: true } } })).toBe(
+      true
+    );
+    expect(check({}, { tags: { connect: [{ id: 1 }], disconnect: [] } })).toBe(false);
+    expect(check({}, { tags: { set: [] } })).toBe(false);
+    expect(check({}, { tags: [1, 2] })).toBe(false);
+    expect(check({}, { tags: null })).toBe(false);
+  });
+
+  it('compares media by id and order', () => {
+    const stored = { image: [{ id: 1 }, { id: 2 }] };
+    expect(check(stored, { image: [{ id: 1 }, { id: 2 }] })).toBe(true);
+    expect(check(stored, { image: [1, 2] })).toBe(true);
+    expect(check(stored, { image: { set: [{ id: 1 }, { id: 2 }] } })).toBe(true);
+    expect(check(stored, { image: NOOP_RELATION })).toBe(true);
+    expect(check(stored, { image: [{ id: 2 }, { id: 1 }] })).toBe(false);
+    expect(check(stored, { image: [{ id: 1 }] })).toBe(false);
+    expect(check(stored, { image: null })).toBe(false);
+    expect(check({ image: null }, { image: null })).toBe(true);
+    expect(check({ image: { id: 1 } }, { image: { id: 1 } })).toBe(true);
+    expect(check({ image: { id: 1 } }, { image: [{ documentId: 'x' }] })).toBe(false);
+  });
+});
