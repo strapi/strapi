@@ -127,7 +127,7 @@ const RemovePasskeyDialog = ({ passkey, onClose }: RemovePasskeyDialogProps) => 
             </Button>
             <Button variant="danger-light" type="submit" loading={submitting} disabled={!canSubmit}>
               {formatMessage({
-                id: 'Settings.profile.form.section.mfa.passkeys.delete',
+                id: 'Settings.profile.form.section.mfa.passkeys.delete.confirm',
                 defaultMessage: 'Remove',
               })}
             </Button>

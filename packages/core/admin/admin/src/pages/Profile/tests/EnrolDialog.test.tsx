@@ -460,4 +460,52 @@ describe('EnrolDialog', () => {
     // Still open, codes still visible.
     expect(screen.getByText(CODES[0])).toBeInTheDocument();
   });
+
+  /**
+   * `TwoFactorSection` mounts one instance for enrol *and* replace, for the whole page visit. A
+   * warning earned by an Escape in the first run used to still be on screen the moment the second
+   * run's codes appeared, scolding the user for a dismissal they had not attempted.
+   */
+  it('does not carry a dismissal warning into the next run of the same dialog', async () => {
+    const onClose = jest.fn();
+    server.use(
+      http.post('/admin/mfa/enrol/verify', () =>
+        HttpResponse.json({ data: { recoveryCodes: CODES } })
+      )
+    );
+
+    const reachCodes = async (user: ReturnType<typeof renderDialog>['user']) => {
+      await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+      await user.click(screen.getByRole('button', { name: 'Continue' }));
+      await user.type(await screen.findByLabelText('Authentication code*'), '123456');
+      await user.click(screen.getByRole('button', { name: 'Verify' }));
+      await screen.findByRole('checkbox');
+    };
+
+    const { user, rerender } = renderDialog({ open: true, onClose });
+    await reachCodes(user);
+    await user.keyboard('{Escape}');
+    expect(await screen.findByText('Save your recovery codes first')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
+    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+
+    // The parent closes it and later opens the same instance again.
+    rerender(
+      <>
+        <MfaStoreProbe />
+        <EnrolDialog open={false} onClose={onClose} />
+      </>
+    );
+    rerender(
+      <>
+        <MfaStoreProbe />
+        <EnrolDialog open onClose={onClose} />
+      </>
+    );
+    await reachCodes(user);
+
+    expect(screen.queryByText('Save your recovery codes first')).not.toBeInTheDocument();
+  });
 });

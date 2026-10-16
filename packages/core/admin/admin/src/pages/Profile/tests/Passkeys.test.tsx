@@ -369,7 +369,7 @@ describe('Passkeys', () => {
     expect(jest.mocked(startRegistration)).not.toHaveBeenCalled();
   });
 
-  it('says nothing and re-enables the submit when the user dismisses the prompt', async () => {
+  it('asks for a fresh code when the user dismisses the prompt, because the first is spent', async () => {
     server.use(
       list([]),
       http.post('/admin/mfa/passkeys/options', () => HttpResponse.json({ data: OPTIONS }))
@@ -386,10 +386,17 @@ describe('Passkeys', () => {
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
     fireEvent.click(screen.getByRole('button', { name: 'Add passkey' }));
 
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Add passkey' })).toBeEnabled());
+    // The options request succeeded, so the server has consumed that code. Leaving it in the field
+    // would make the retry a credentials refusal that reads as a wrong password.
+    expect(
+      await screen.findByText(
+        'Your device did not finish. Enter a new code from your authenticator app and try again.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Authentication code*')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Add passkey' })).toBeDisabled();
     expect(screen.getByRole('dialog', { name: 'Add a passkey' })).toBeInTheDocument();
     expect(screen.queryByText(/could not create a passkey/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/already has a passkey/)).not.toBeInTheDocument();
   });
 
   it('says so when the authenticator is already registered, and generically otherwise', async () => {
@@ -420,6 +427,9 @@ describe('Passkeys', () => {
     jest
       .mocked(startRegistration)
       .mockRejectedValue(Object.assign(new Error('boom'), { name: 'UnknownError' }));
+    // The failed ceremony spent the first code and cleared the field, so a retry takes a new one.
+    expect(screen.getByLabelText('Authentication code*')).toHaveValue('');
+    await user.type(screen.getByLabelText('Authentication code*'), '654321');
     fireEvent.click(screen.getByRole('button', { name: 'Add passkey' }));
 
     expect(

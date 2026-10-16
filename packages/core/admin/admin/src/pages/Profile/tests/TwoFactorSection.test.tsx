@@ -91,6 +91,23 @@ describe('TwoFactorSection', () => {
     await waitFor(() => expect(root).toBeEmptyDOMElement());
   });
 
+  it('does not ask for notices on an instance where the feature is off', async () => {
+    // `MfaNotices` already skips this; the profile section fired it anyway, so every profile view
+    // on a flag-off instance left a 404 in the network tab for whoever was debugging something else.
+    let noticesRequested = false;
+    server.use(
+      http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })),
+      http.get('/admin/mfa/notices', () => {
+        noticesRequested = true;
+        return new HttpResponse(null, { status: 404 });
+      })
+    );
+    const { root } = renderSection();
+
+    await waitFor(() => expect(root).toBeEmptyDOMElement());
+    expect(noticesRequested).toBe(false);
+  });
+
   it('shows the disabled state when not enrolled', async () => {
     server.use(status());
     renderSection();
@@ -265,6 +282,31 @@ describe('TwoFactorSection', () => {
 
     await user.click(screen.getByRole('button', { name: 'Mark all as seen' }));
     await waitFor(() => expect(seenBody).toEqual({}));
+  });
+
+  it('says so when marking the events as seen fails, instead of looking broken', async () => {
+    const notice: MfaEventNotice = {
+      id: 1,
+      type: 'challenge_failed',
+      metadata: {},
+      createdAt: '2026-09-01T10:00:00.000Z',
+      seenAt: null,
+    };
+    server.use(
+      status({ enabled: true, enabledAt: '2026-09-01T10:14:00.000Z', codesAcknowledged: true }),
+      http.get('/admin/mfa/notices', () => HttpResponse.json({ data: [notice] })),
+      http.post('/admin/mfa/notices/seen', () =>
+        HttpResponse.json(
+          { error: { status: 500, name: 'InternalServerError', message: 'boom', details: {} } },
+          { status: 500 }
+        )
+      )
+    );
+    const { user } = renderSection();
+
+    await user.click(await screen.findByRole('button', { name: 'Mark all as seen' }));
+
+    expect(await screen.findByText('boom')).toBeInTheDocument();
   });
 
   /**

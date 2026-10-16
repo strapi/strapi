@@ -101,16 +101,26 @@ const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
         registration = await startRegistration({ optionsJSON: optionsRes.data });
       } catch (ceremonyError) {
         const kind = ceremonyErrorKind(ceremonyError);
-        // A dismissed or timed-out prompt is a no-op with the button re-enabled: the user closed
-        // their own dialog and knows it. The other two kinds each say something actionable.
-        if (kind === 'already-registered') {
+        // The options request already succeeded, so the code is spent: the server's replay guard is
+        // single-use across the account. Leaving it in the field turns the user's retry into a
+        // credentials refusal that reads as a wrong password.
+        setCode('');
+        if (kind === 'dismissed') {
+          setError(
+            formatMessage({
+              id: 'Settings.profile.form.section.mfa.passkeys.add.dismissed',
+              defaultMessage:
+                'Your device did not finish. Enter a new code from your authenticator app and try again.',
+            })
+          );
+        } else if (kind === 'already-registered') {
           setError(
             formatMessage({
               id: 'Settings.profile.form.section.mfa.passkeys.add.alreadyRegistered',
               defaultMessage: 'That device already has a passkey for this account.',
             })
           );
-        } else if (kind !== 'dismissed') {
+        } else {
           setError(
             formatMessage({
               id: 'Settings.profile.form.section.mfa.passkeys.add.failed',

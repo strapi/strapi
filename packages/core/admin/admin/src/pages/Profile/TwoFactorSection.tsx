@@ -5,6 +5,8 @@ import { useIntl } from 'react-intl';
 
 import { Panel } from '../../components/Panel';
 import { formatMfaNotice } from '../../features/MfaNotices';
+import { useNotification } from '../../features/Notifications';
+import { useToMessage } from '../../hooks/useToMessage';
 import {
   useGetMfaNoticesQuery,
   useGetMfaStatusQuery,
@@ -131,8 +133,22 @@ const RecentSecurityEvents = ({
 const TwoFactorSection = () => {
   const { formatMessage } = useIntl();
   const { data: status, error, isLoading } = useGetMfaStatusQuery();
-  const { data: notices } = useGetMfaNoticesQuery();
+  const { toggleNotification } = useNotification();
+  const toMessage = useToMessage();
+  // Skipped until the status says the feature exists, as `MfaNotices` does: otherwise every profile
+  // view on a flag-off instance fires one request that can only 404.
+  const { data: notices } = useGetMfaNoticesQuery(undefined, {
+    skip: isLoading || isNotFoundError(error),
+  });
   const [markNoticesSeen] = useMarkMfaNoticesSeenMutation();
+
+  const handleMarkAllSeen = async () => {
+    const res = await markNoticesSeen({});
+    // Without this a failure leaves the list unchanged and the button looking broken.
+    if ('error' in res) {
+      toggleNotification({ type: 'danger', message: toMessage(res.error) });
+    }
+  };
   /**
    * Dismissing a warning only hides it for the lifetime of this component instance -- nothing is
    * persisted, so the warning comes back the next time the profile page is visited.
@@ -307,7 +323,7 @@ const TwoFactorSection = () => {
        */}
       {status.enabled && status.passkeysEnabled ? <Passkeys /> : null}
       {notices && notices.length > 0 ? (
-        <RecentSecurityEvents notices={notices} onMarkAllSeen={() => markNoticesSeen({})} />
+        <RecentSecurityEvents notices={notices} onMarkAllSeen={handleMarkAllSeen} />
       ) : null}
       {/*
        * All dialogs are mounted unconditionally (only `open` toggles), same as `EnrolDialog`

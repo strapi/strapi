@@ -121,6 +121,9 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
     resetEnrol();
     resetVerify();
     resetAck();
+    // The one instance serves enrol and replace for the whole page visit, so a warning earned in
+    // one run must not be on screen before the next run's codes appear.
+    setDismissBlocked(false);
   };
 
   const close = () => {
@@ -195,16 +198,23 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
       <Modal.Content>
         <Modal.Header>
           <Modal.Title>
+            {/* The last step gets its own title: the codes are the one thing on this dialog the user
+                cannot get back, and a title that never changes gives no sign the step has moved. */}
             {formatMessage(
-              isReplace
+              step.name === 'codes'
                 ? {
-                    id: 'Settings.profile.form.section.mfa.replace.title',
-                    defaultMessage: 'Replace authenticator',
+                    id: 'Settings.profile.form.section.mfa.codes.title',
+                    defaultMessage: 'Save your recovery codes',
                   }
-                : {
-                    id: 'Settings.profile.form.section.mfa.enrol.title',
-                    defaultMessage: 'Enable two-factor authentication',
-                  }
+                : isReplace
+                  ? {
+                      id: 'Settings.profile.form.section.mfa.replace.title',
+                      defaultMessage: 'Replace authenticator',
+                    }
+                  : {
+                      id: 'Settings.profile.form.section.mfa.enrol.title',
+                      defaultMessage: 'Enable two-factor authentication',
+                    }
             )}
           </Modal.Title>
         </Modal.Header>
