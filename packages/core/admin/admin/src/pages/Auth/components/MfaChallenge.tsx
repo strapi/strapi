@@ -1,10 +1,6 @@
 import * as React from 'react';
 
-import {
-  browserSupportsWebAuthn,
-  startAuthentication,
-  type AuthenticationResponseJSON,
-} from '@simplewebauthn/browser';
+import { startAuthentication, type AuthenticationResponseJSON } from '@simplewebauthn/browser';
 import { Box, Button, Checkbox, Flex, Main, Typography, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -22,7 +18,7 @@ import {
 } from '../../../layouts/UnauthenticatedLayout';
 import { useLoginMfaWebauthnOptionsMutation } from '../../../services/auth';
 import { translatedErrors } from '../../../utils/translatedErrors';
-import { ceremonyErrorKind } from '../../../utils/webauthn';
+import { ceremonyErrorKind, passkeyAvailability } from '../../../utils/webauthn';
 import { getRedirectTo } from '../utils';
 
 /** `createBrowserRouter` persists router state in `window.history.state.usr` and restores it on a
@@ -122,6 +118,20 @@ const MfaChallenge = () => {
     );
   }, [challenge, location.pathname, location.search, navigate]);
 
+  /**
+   * The server refuses a lapsed challenge with the same message as a wrong code, which sends the
+   * user hunting for a typo when the only way forward is to sign in again. `expiresIn` is in
+   * seconds, from when the challenge was issued -- close enough to mount for this purpose.
+   */
+  const [expired, setExpired] = React.useState(false);
+  React.useEffect(() => {
+    if (!challenge) {
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setExpired(true), challenge.expiresIn * 1000);
+    return () => window.clearTimeout(timer);
+  }, [challenge]);
+
   if (!challenge) {
     return <Navigate to={{ pathname: '/auth/login', search: location.search }} replace />;
   }
@@ -159,7 +169,8 @@ const MfaChallenge = () => {
 
   /** Called per render rather than hoisted: module scope would freeze the answer for the life of
    * the bundle, and defeat the per-test mock. */
-  const showPasskey = challenge.passkeyAvailable === true && browserSupportsWebAuthn();
+  const availability = challenge.passkeyAvailable === true ? passkeyAvailability() : null;
+  const showPasskey = availability === 'available';
 
   /** Three steps that must stay in this order: options (which stores the ceremony's challenge on
    * the challenge row), the browser ceremony, then the assertion. */
@@ -244,7 +255,15 @@ const MfaChallenge = () => {
                 })}
               </Typography>
             </Box>
-            {apiError ? (
+            {expired ? (
+              <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                {formatMessage({
+                  id: 'Auth.form.mfa.expired',
+                  defaultMessage:
+                    'This sign-in attempt has expired. Go back to login and sign in again.',
+                })}
+              </Typography>
+            ) : apiError ? (
               <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
                 {apiError}
               </Typography>
@@ -284,7 +303,7 @@ const MfaChallenge = () => {
                   )}
                 </Checkbox>
               ) : null}
-              <Button fullWidth type="submit" loading={codeBusy} disabled={passkeyBusy}>
+              <Button fullWidth type="submit" loading={codeBusy} disabled={passkeyBusy || expired}>
                 {formatMessage({ id: 'Auth.form.mfa.button.verify', defaultMessage: 'Verify' })}
               </Button>
               {showPasskey ? (
@@ -294,13 +313,23 @@ const MfaChallenge = () => {
                   variant="tertiary"
                   onClick={handlePasskey}
                   loading={passkeyBusy}
-                  disabled={codeBusy}
+                  disabled={codeBusy || expired}
                 >
                   {formatMessage({
                     id: 'Auth.form.mfa.passkey.button',
                     defaultMessage: 'Use a passkey',
                   })}
                 </Button>
+              ) : availability === 'insecure-context' ? (
+                // The far likelier cause on a self-hosted panel than an incapable browser. Saying
+                // nothing made the passkey button simply vanish at login with no explanation.
+                <Typography variant="pi" textColor="neutral600" textAlign="center">
+                  {formatMessage({
+                    id: 'Settings.profile.form.section.mfa.passkeys.insecure',
+                    defaultMessage:
+                      'Passkeys need the admin panel to be served over HTTPS. This page is not, so your browser will not offer them.',
+                  })}
+                </Typography>
               ) : null}
             </Flex>
           </Form>

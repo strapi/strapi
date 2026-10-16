@@ -1,5 +1,5 @@
 import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser';
-import { render, server, screen, fireEvent, waitFor } from '@tests/utils';
+import { act, render, server, screen, fireEvent, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
@@ -553,5 +553,55 @@ describe('MfaChallenge', () => {
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument()
     );
+  });
+
+  /**
+   * The server refuses a lapsed challenge with the same message as a wrong code, which sends the
+   * user hunting for a typo. When `expiresIn` runs out the screen says the attempt is over and
+   * stops offering a submit that can only fail.
+   */
+  it('says the attempt has expired once the challenge lapses, and stops offering a submit', async () => {
+    jest.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      renderChallenge({ ...STATE, expiresIn: 2, passkeyAvailable: true });
+
+      expect(screen.getByRole('button', { name: 'Verify' })).toBeEnabled();
+
+      act(() => {
+        jest.advanceTimersByTime(2_000);
+      });
+
+      expect(
+        await screen.findByText(
+          'This sign-in attempt has expired. Go back to login and sign in again.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Verify' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Use a passkey' })).toBeDisabled();
+      expect(screen.getByRole('link', { name: 'Back to login' })).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  /**
+   * `browserSupportsWebAuthn()` is false on a plain-http panel in a perfectly capable browser, and
+   * that is the likelier cause self-hosted. The button used to vanish with no explanation.
+   */
+  it('explains a missing passkey button on a panel not served over HTTPS', () => {
+    jest.mocked(browserSupportsWebAuthn).mockReturnValue(false);
+    const original = window.isSecureContext;
+    Object.defineProperty(window, 'isSecureContext', { value: false, configurable: true });
+
+    try {
+      renderChallenge({ ...STATE, passkeyAvailable: true });
+
+      expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
+      expect(
+        screen.getByText(/Passkeys need the admin panel to be served over HTTPS/)
+      ).toBeInTheDocument();
+    } finally {
+      Object.defineProperty(window, 'isSecureContext', { value: original, configurable: true });
+    }
   });
 });

@@ -210,4 +210,41 @@ describe('TwoFactorEnforcementCard', () => {
       screen.getByText(/Under Required, every user with a password must enrol/)
     ).toBeInTheDocument();
   });
+
+  /**
+   * A refetch used to adopt server data unconditionally, throwing away whatever the user was in
+   * the middle of choosing -- with no sign anything was lost. It now adopts only when there is
+   * nothing unsaved; otherwise the edit survives and the server's version waits for the next load.
+   */
+  it('keeps an unsaved edit when the settings are refetched underneath it', async () => {
+    const { user, rerender } = renderCard();
+    await user.click(screen.getByRole('radio', { name: /^Required/ }));
+
+    rerender(
+      <TwoFactorEnforcementCard
+        settings={{ ...SETTINGS, graceDays: 14 }}
+        roles={ROLES}
+        canUpdate
+        callerEnrolled={false}
+      />
+    );
+
+    expect(screen.getByRole('radio', { name: /^Required/ })).toBeChecked();
+  });
+
+  it('adopts refetched settings when nothing is unsaved', () => {
+    const { rerender } = renderCard();
+
+    rerender(
+      <TwoFactorEnforcementCard
+        settings={{ ...SETTINGS, mode: 'required', graceDays: 14 }}
+        roles={ROLES}
+        canUpdate
+        callerEnrolled={false}
+      />
+    );
+
+    expect(screen.getByRole('radio', { name: /^Required/ })).toBeChecked();
+    expect(screen.getByRole('spinbutton', { name: 'Grace period (days)' })).toHaveValue(14);
+  });
 });

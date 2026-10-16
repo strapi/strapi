@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
 import { Panel } from '../../../../../components/Panel';
 import { useNotification } from '../../../../../features/Notifications';
-import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
+import { useToMessage } from '../../../../../hooks/useToMessage';
 import {
   useDeleteUserPasskeysMutation,
   useGetUserPasskeysQuery,
@@ -15,7 +15,6 @@ import {
   useRevokeUserTrustedDevicesMutation,
   useUnlockUserMfaMutation,
 } from '../../../../../services/mfa';
-import { isBaseQueryError } from '../../../../../utils/baseQuery';
 
 import type { AdminUserListItem } from '../../../../../services/users';
 
@@ -45,7 +44,7 @@ interface TwoFactorPanelProps {
 const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const toMessage = useToMessage();
   const [unlock, { isLoading }] = useUnlockUserMfaMutation();
   const [resetMfa, { isLoading: isResetting }] = useResetUserMfaMutation();
   const [resetOpen, setResetOpen] = React.useState(false);
@@ -83,9 +82,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
     if ('error' in res) {
       toggleNotification({
         type: 'danger',
-        message: isBaseQueryError(res.error)
-          ? formatAPIError(res.error)
-          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        message: toMessage(res.error),
       });
       return;
     }
@@ -104,9 +101,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
     if ('error' in res) {
       toggleNotification({
         type: 'danger',
-        message: isBaseQueryError(res.error)
-          ? formatAPIError(res.error)
-          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        message: toMessage(res.error),
       });
       return;
     }
@@ -125,9 +120,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
     if ('error' in res) {
       toggleNotification({
         type: 'danger',
-        message: isBaseQueryError(res.error)
-          ? formatAPIError(res.error)
-          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        message: toMessage(res.error),
       });
       return;
     }
@@ -146,9 +139,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
     if ('error' in res) {
       toggleNotification({
         type: 'danger',
-        message: isBaseQueryError(res.error)
-          ? formatAPIError(res.error)
-          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        message: toMessage(res.error),
       });
       return;
     }

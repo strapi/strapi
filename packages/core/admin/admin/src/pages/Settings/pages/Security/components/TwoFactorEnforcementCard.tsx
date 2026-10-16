@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import isEqual from 'lodash/isEqual';
-import { useIntl } from 'react-intl';
+import { type MessageDescriptor, useIntl } from 'react-intl';
 
 import { ErrorMessage } from '../../../../../components/ErrorMessage';
 import { Panel } from '../../../../../components/Panel';
@@ -44,19 +44,22 @@ interface TwoFactorEnforcementCardProps {
 const GRACE_MIN = 1;
 const GRACE_MAX = 30;
 
-const MODE_COPY: Record<MfaEnforcementMode, { label: string; description: string }> = {
+/** Spelled out rather than built from a template id, so each string is greppable and extractable,
+ * and the fallback is the same whole sentence a translator sees. */
+const MODE_MESSAGES: Record<MfaEnforcementMode, MessageDescriptor> = {
   off: {
-    label: 'Off',
-    description:
-      'Nobody is required to use two-factor authentication. Users who enrolled still get a code prompt at login.',
+    id: 'Settings.security.mfa.mode.off',
+    defaultMessage:
+      'Off. Nobody is required to use two-factor authentication. Users who enrolled still get a code prompt at login.',
   },
   optional: {
-    label: 'Optional',
-    description: 'Only users with one of the roles selected below are required to enrol.',
+    id: 'Settings.security.mfa.mode.optional',
+    defaultMessage:
+      'Optional. Only users with one of the roles selected below are required to enrol.',
   },
   required: {
-    label: 'Required',
-    description: 'Every user who logs in with a password is required to enrol.',
+    id: 'Settings.security.mfa.mode.required',
+    defaultMessage: 'Required. Every user who logs in with a password is required to enrol.',
   },
 };
 
@@ -97,9 +100,16 @@ const TwoFactorEnforcementCard = ({
   const [graceDays, setGraceDays] = React.useState<number | null>(settings.graceDays);
   const [graceError, setGraceError] = React.useState<string>();
 
+  // The baseline the draft was last taken from. A refetch adopts fresh server data only while the
+  // draft still matches it: an edit in progress is kept rather than silently thrown away, which is
+  // what happened when another administrator saved enforcement while this one was typing.
+  const baselineRef = React.useRef(settings);
   React.useEffect(() => {
-    setDraft(settings);
-    setGraceDays(settings.graceDays);
+    const baseline = baselineRef.current;
+    baselineRef.current = settings;
+
+    setDraft((current) => (isEqual(current, baseline) ? settings : current));
+    setGraceDays((current) => (current === baseline.graceDays ? settings.graceDays : current));
   }, [settings]);
 
   // An empty grace field reads as the stored value, so `isSecurityDowngrade` never sees the
@@ -125,10 +135,13 @@ const TwoFactorEnforcementCard = ({
       validate: () => {
         if (!isValidGraceDays(graceDays)) {
           setGraceError(
-            formatMessage({
-              id: 'Settings.security.mfa.graceDays.error',
-              defaultMessage: 'Enter a whole number of days between 1 and 30',
-            })
+            formatMessage(
+              {
+                id: 'Settings.security.mfa.graceDays.error',
+                defaultMessage: 'Enter a whole number of days between {min} and {max}',
+              },
+              { min: GRACE_MIN, max: GRACE_MAX }
+            )
           );
           return false;
         }
@@ -191,12 +204,9 @@ const TwoFactorEnforcementCard = ({
             }
           >
             <Flex direction="column" alignItems="stretch" gap={2}>
-              {(Object.keys(MODE_COPY) as MfaEnforcementMode[]).map((mode) => (
+              {(Object.keys(MODE_MESSAGES) as MfaEnforcementMode[]).map((mode) => (
                 <Radio.Item key={mode} value={mode}>
-                  {formatMessage({
-                    id: `Settings.security.mfa.mode.${mode}`,
-                    defaultMessage: `${MODE_COPY[mode].label}. ${MODE_COPY[mode].description}`,
-                  })}
+                  {formatMessage(MODE_MESSAGES[mode])}
                 </Radio.Item>
               ))}
             </Flex>

@@ -117,12 +117,8 @@ const authService = adminApi
           data: body,
         }),
         transformResponse(res: Login.Response | MfaChallengeResponse) {
-          // The MFA-challenge shape carries no token/user to transform; return it as-is and let
-          // the caller narrow on `mfaRequired` before treating the result as a session.
-          if ('mfaRequired' in res.data) {
-            return res.data;
-          }
-
+          // Both shapes pass through untouched: the MFA challenge carries no token or user to
+          // transform, and the caller narrows on `mfaRequired` before treating it as a session.
           return res.data;
         },
         invalidatesTags: ['Me'],
@@ -195,12 +191,8 @@ const authService = adminApi
           data: body,
         }),
         transformResponse(res: ResetPassword.Response | MfaChallengeResponse) {
-          // The MFA-challenge shape carries no token/user to transform; return it as-is and let
-          // the caller narrow on `mfaRequired` before treating the result as a session.
-          if ('mfaRequired' in res.data) {
-            return res.data;
-          }
-
+          // Both shapes pass through untouched: the MFA challenge carries no token or user to
+          // transform, and the caller narrows on `mfaRequired` before treating it as a session.
           return res.data;
         },
       }),
