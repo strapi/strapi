@@ -79,11 +79,17 @@ describe('every mfa route is gated by the feature flag', () => {
  * "unavailable" error. Only the routes that check a password or a code carry it.
  */
 describe('mfa routes (rate limiting)', () => {
+  /**
+   * Hand-maintained, and the "carries no rate limiter" case below derives its list from this one:
+   * a handler that starts verifying a password or a code without being added here gets asserted
+   * *unlimited* rather than caught. `/mfa/passkeys/options` was exactly that for one release.
+   */
   const CREDENTIAL_ROUTES = [
     ['POST', '/mfa/enrol'],
     ['POST', '/mfa/enrol/verify'],
     ['POST', '/mfa/recovery-codes'],
     ['POST', '/mfa/disable'],
+    ['POST', '/mfa/passkeys/options'],
   ] as const;
 
   test.each(CREDENTIAL_ROUTES)('%s %s is rate limited', (method, path) => {

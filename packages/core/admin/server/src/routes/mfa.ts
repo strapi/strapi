@@ -71,7 +71,8 @@ export default [
     'admin::users.update'
   ),
   // The caller's own passkeys.
-  authenticated('POST', '/mfa/passkeys/options', 'mfa.passkeyRegistrationOptions'),
+  // Verifies a password and a live code, so it belongs on the limiter with the other four.
+  credentialGuarded('POST', '/mfa/passkeys/options', 'mfa.passkeyRegistrationOptions'),
   authenticated('POST', '/mfa/passkeys', 'mfa.registerPasskey'),
   authenticated('GET', '/mfa/passkeys', 'mfa.listPasskeys'),
   authenticated('DELETE', '/mfa/passkeys/:id', 'mfa.deletePasskey'),
