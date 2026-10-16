@@ -1018,16 +1018,16 @@ describe('Release service', () => {
       // Nothing written to the entries, and the release isn't marked as a run
       expect(strapiMock.db.savepoint).not.toHaveBeenCalled();
       expect(publish).not.toHaveBeenCalled();
-      expect(releaseQuery.update).not.toHaveBeenCalled();
-      // The check's result is stored, so the status reads blocked
+      // The check's result is stored, each entry with its reason, so the status reads blocked
       expect(releaseQuery.updateMany).toHaveBeenCalledWith({
         where: { id: { $in: [1] } },
-        data: { isEntryValid: true },
+        data: { isEntryValid: true, reason: null },
       });
-      expect(releaseQuery.updateMany).toHaveBeenCalledWith({
-        where: { id: { $in: [2] } },
-        data: { isEntryValid: false },
+      expect(releaseQuery.update).toHaveBeenCalledWith({
+        where: { id: 2 },
+        data: { isEntryValid: false, reason: { validation: { errors: [] } } },
       });
+      expect(releaseQuery.update).toHaveBeenCalledTimes(1);
       expect(releaseQuery.updateMany).toHaveBeenCalledWith({
         where: { id: 1, releasedAt: null },
         data: { status: 'blocked' },

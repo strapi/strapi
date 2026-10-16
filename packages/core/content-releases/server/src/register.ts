@@ -6,6 +6,7 @@ import {
   deleteActionsOnDeleteContentType,
   deleteActionsOnDisableDraftAndPublish,
   migrateIsValidAndStatusReleases,
+  addReasonsToInvalidActions,
   migrateReleaseConditionReleases,
   revalidateChangedContentTypes,
   disableContentTypeLocalized,
@@ -30,6 +31,7 @@ export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
       .register(enableContentTypeLocalized)
       .register(revalidateChangedContentTypes)
       .register(migrateIsValidAndStatusReleases)
+      .register(addReasonsToInvalidActions)
       .register(migrateReleaseConditionReleases);
   }
 
