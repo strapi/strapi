@@ -703,7 +703,7 @@ export const AssetsTable = ({
     if (allSelected) {
       // Only what this header covers: the picker's selection also holds assets
       // from other folders and the ones already in the field.
-      selectableKeys.forEach(deselect);
+      selectableKeys.forEach((key) => deselect(key));
     } else {
       trackUsage('didSelectAllMediaLibraryElements');
       selectAll(selectableKeys);

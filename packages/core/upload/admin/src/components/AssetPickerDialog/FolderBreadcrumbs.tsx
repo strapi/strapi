@@ -43,14 +43,14 @@ export const FolderBreadcrumbs = ({ currentFolderId, onSelectFolder }: FolderBre
   const { data: folderStructure = [] } = useGetFolderStructureQuery();
 
   const path = findFolderPath(folderStructure, currentFolderId);
+  const current = path?.at(-1);
 
   // The tree has not loaded yet, or no longer holds the folder (deleted
   // elsewhere — `useAssetsList` sends the list back to the root on its own).
-  if (!path) {
+  if (!path || !current) {
     return null;
   }
 
-  const current = path[path.length - 1];
   const ancestors = path.slice(0, -1);
   const isCollapsed = path.length > MAX_VISIBLE_FOLDERS;
   const leading = isCollapsed ? ancestors.slice(0, 1) : ancestors;

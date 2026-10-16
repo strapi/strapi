@@ -122,7 +122,7 @@ export const PickerSelectionProvider = ({
       }
 
       const files = orderedKeys
-        .map(resolveSelectableFile)
+        .map((key) => resolveSelectableFile(key))
         .filter((file): file is File => file !== null);
 
       setSelection((prev) => addFiles(prev, files));

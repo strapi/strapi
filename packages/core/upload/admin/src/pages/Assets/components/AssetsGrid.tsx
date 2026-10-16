@@ -645,7 +645,7 @@ const GridSelectAll = ({ assets }: { assets: File[] }) => {
   const handleChange = () => {
     if (allSelected) {
       // Only these: a picker's selection also holds assets from elsewhere.
-      selectableKeys.forEach(deselect);
+      selectableKeys.forEach((key) => deselect(key));
     } else {
       trackUsage('didSelectAllMediaLibraryElements');
       selectAll(selectableKeys);
