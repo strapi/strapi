@@ -149,7 +149,7 @@ This behavior ensures that compromised refresh tokens cannot be used after a pas
 Admin login can require a second factor behind the `unstableAdminMfa` future flag. Four pages cover
 it:
 
-- [Admin two-factor authentication](./12-admin-two-factor.md) — TOTP enrolment, login, recovery codes
-- [Admin 2FA enforcement](./13-admin-mfa-enforcement.md) — enforcement modes, grace periods, locks
-- [Admin trusted devices](./14-admin-trusted-devices.md) — skipping the code on a known browser
-- [Admin passkeys](./15-admin-passkeys.md) — WebAuthn credentials as an additional second factor
+- [Admin two-factor authentication](./12-admin-two-factor.md): TOTP enrolment, login, recovery codes
+- [Admin 2FA enforcement](./13-admin-mfa-enforcement.md): enforcement modes, grace periods, locks
+- [Admin trusted devices](./14-admin-trusted-devices.md): skipping the code on a known browser
+- [Admin passkeys](./15-admin-passkeys.md): WebAuthn credentials as an additional second factor

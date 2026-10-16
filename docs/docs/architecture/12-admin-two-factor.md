@@ -1,14 +1,17 @@
 ---
 title: Admin two-factor authentication
 description: 'How TOTP second-factor authentication works for the admin panel: enrolment, login, recovery codes, throttling, and the data it stores.'
+status: needs-review
+review_notes:
+  - Corrected on 2026-10-16 against a code review of the branch, which found fifteen statements that no longer matched the code. The corrections are checked; the rest of the page has not been re-verified claim by claim, and needs a maintainer pass before the status is removed.
 ---
 
 Two-factor authentication (2FA) for the admin panel, built on TOTP (RFC 6238). This page covers the
 base factor. Three related pages cover the rest:
 
-- [Enforcement](./13-admin-mfa-enforcement.md) — requiring 2FA, grace periods, locks
-- [Trusted devices](./14-admin-trusted-devices.md) — skipping the code on a known browser
-- [Passkeys](./15-admin-passkeys.md) — WebAuthn credentials as an alternative second factor
+- [Enforcement](./13-admin-mfa-enforcement.md): requiring 2FA, grace periods, locks
+- [Trusted devices](./14-admin-trusted-devices.md): skipping the code on a known browser
+- [Passkeys](./15-admin-passkeys.md): WebAuthn credentials as an additional second factor
 
 It is intentionally concise for contributors working in the monorepo.
 
@@ -67,9 +70,13 @@ reflects it.
 
 `POST /admin/login` returns one of two shapes for a correct password:
 
-- **Not enrolled:** the normal `Login.Response` with a session (see
-  [Sessions and JWT](./08-authentication.md))
+- **Not enrolled,** or enrolled and presenting a valid trust cookie: the normal `Login.Response`
+  with a session (see [Sessions and JWT](./08-authentication.md) and
+  [Trusted devices](./14-admin-trusted-devices.md))
 - **Enrolled:** `MfaChallengeResponse` instead, with **no cookie and no access token**
+
+`POST /admin/reset-password` answers an enrolled account the same way. It never honours a trust
+cookie: a reset is the classic second-factor bypass.
 
 ```jsonc
 {
@@ -97,6 +104,21 @@ credential on the follow-up call, and it is single-use.
 `deviceId` and `rememberMe` matter on the follow-up call, not just on `/login`: `issueSession`
 reads both from that request body, so omitting them loses the user's "remember me" choice.
 
+## Disabling
+
+`POST /admin/mfa/disable` takes `{ password, code }`, the same gate as regenerating recovery codes:
+the session may be the thing an attacker holds. In order:
+
+- It is refused with 403 `MfaRequiredError` while the policy requires the account, before any
+  attempt is spent.
+- It needs the session manager, and answers 500 without it.
+- On success it removes the secret, the recovery codes, every trusted device and every passkey,
+  evicts the user's sessions on other devices while keeping the caller's, and answers 204.
+
+An administrator resets somebody else's factor through `POST /admin/mfa/users/:id/reset`. That
+route refuses the caller's own id: on yourself it would be a cheaper `/mfa/disable`, with no
+password, no code and no `MfaRequiredError` check.
+
 ## Recovery codes
 
 One row per code (`admin::mfa-recovery-code`), so consuming one is a row update rather than a
@@ -121,7 +143,15 @@ after a few guesses, which is why the account tier exists (NIST SP 800-63B).
 
 The account tier counts `challenge_failed` rows in `admin::mfa-event`, so it is durable across
 process restarts. A wrong **password** never records one: `assertPasswordAndFactor` throws before
-`assertFactor` runs, so a password guess cannot burn a victim's factor attempts.
+`assertFactor` runs, so a password guess cannot burn a victim's factor attempts. Enrolment
+verification (`/mfa/enrol/verify`) checks and records against the same account tier.
+
+The routes that verify a password or a code also carry `admin::rateLimit`. With a session, the
+limiter keys on the account and the route pattern (`rateLimitKey` in
+`server/src/middlewares/rateLimit.ts`), so administrators behind one address do not share a bucket
+and a parameter in the path does not buy a fresh one. Without a session it keys on the email in the
+body, the path and the address, as on `/login`. `/reset-password` uses `admin::mfa-rate-limit`,
+the same limiter applied only while the feature is on, because that route exists without it.
 
 ## Configuration
 
@@ -187,21 +217,30 @@ it is one statement per replica against the same two tables at the same moment.
 
 ## Notices and events
 
-`recordEvent` writes an `admin::mfa-event` row and emits `admin.mfa.<type>` on the event hub, with
-`_` replaced by `.` (so `challenge_failed` becomes `admin.mfa.challenge.failed`).
+Two functions in `server/src/services/mfa.ts` record what happens:
+
+- `recordEvent` writes an `admin::mfa-event` row, and prunes the user's oldest rows past a soft cap
+  when no transaction is open.
+- `notify` emits `admin.mfa.<type>` on the event hub, with `_` replaced by `.` (so
+  `challenge_failed` becomes `admin.mfa.challenge.failed`). It emails the account holder only for
+  `enabled`, `disabled`, `reset` and `authenticator_replaced`. `trusted_device_used` and
+  `passkey_used` are emitted with no row.
 
 `GET /admin/mfa/notices` returns the caller's unseen rows; `POST /admin/mfa/notices/seen` marks
 them (an absent `ids` marks all of the caller's, and it is always scoped to rows the caller owns).
 Notice `metadata` is limited to neutral context and never carries a code, a secret or an otpauth
 URI.
 
-Thirteen of these names are on the EE audit-log allow-list
-(`packages/core/admin/ee/server/src/audit-logs/services/lifecycles.ts`): `admin.mfa.enabled`,
-`.disabled`, `.reset`, `.challenge.failed`, `.authenticator.replaced`, `.locked`, `.unlocked`,
-`.device.trusted`, `.device.trust.revoked`, `.trusted.device.used`, `.passkey.registered`,
-`.passkey.removed`, `.passkey.used`. Because these events can be raised by a request that has no
-session (a failed login), the audit row is attributed to the `userId` in the payload for
-`admin.mfa.*` names specifically.
+The EE audit log records thirteen of these, plus `admin.auth.mfa_required` and
+`admin.security-settings.update`, on the standard shape. They are registered through
+`registerEvent` in `server/src/audit-logs/mfa.ts`. The actor is the session user when there is one
+and `unknown` when there is not, as on `/login/mfa`, and the account the event concerns is the
+`resource`. Attributing a sessionless row to the account holder would put a failed guess by an
+attacker on the victim's name. A settings save records only the fields that changed, as
+`{ before, after }`.
+
+The errors a user can hit carry a stable `details.code` (`shared/utils/mfa-error-codes.ts`), which
+the admin panel maps to a translated message. The English server message is the fallback.
 
 ## CLI
 
@@ -267,14 +306,16 @@ Admin panel:
 
 ## Tests
 
-| Kind           | Location                                                                                             |
-| -------------- | ---------------------------------------------------------------------------------------------------- |
-| Unit (server)  | `packages/core/admin/server/src/services/__tests__/mfa.test.ts`, `controllers/__tests__/mfa.test.ts` |
-| Unit (admin)   | `packages/core/admin/admin/src/**/tests/` beside each component                                      |
-| API            | `tests/api/core/admin/admin-mfa-{enforcement,trusted-devices,passkeys}.test.api.ts`                  |
-| E2E            | `tests/e2e/tests/admin/mfa{,-enforcement,-trusted-devices,-passkeys}.spec.ts`                        |
-| Shared helpers | `tests/utils/mfa.ts` (TOTP generation), `tests/api/core/admin/utils/mfa-state.ts` (state reset)      |
+| Kind           | Location                                                                                                                                                  |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit (server)  | `packages/core/admin/server/src/services/__tests__/mfa.test.ts`, `controllers/__tests__/mfa.test.ts`                                                      |
+| Unit (admin)   | `packages/core/admin/admin/src/**/tests/` beside each component                                                                                           |
+| API            | `tests/api/core/admin/admin-mfa-*.test.api.ts`: TOTP, enforcement, trusted devices, passkeys (incl. real cryptography), throttling, concurrency, flag off |
+| E2E            | `tests/e2e/tests/admin/mfa{,-enforcement,-trusted-devices,-passkeys}.spec.ts`                                                                             |
+| Shared helpers | `tests/utils/mfa.ts` (TOTP generation), `tests/api/core/admin/utils/mfa-state.ts` (state reset)                                                           |
 
-The e2e app template enables the future flag and sets a WebAuthn relying party, in
-`tests/app-template/config/`. Running the e2e suites without that config leaves passkeys hidden;
-see [Passkeys](./15-admin-passkeys.md).
+The app template enables the future flag and sets a WebAuthn relying party, in
+`tests/app-template/config/`. Both the API and the e2e apps are generated from it, so every suite
+runs with the flag on except `admin-mfa-flag-off.test.api.ts`, which boots its own instance with
+`UNSTABLE_ADMIN_MFA=false`. Running the e2e suites without that config leaves passkeys hidden; see
+[Passkeys](./15-admin-passkeys.md).

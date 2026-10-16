@@ -1,6 +1,9 @@
 ---
 title: Admin trusted devices
 description: 'How a browser earns the right to skip the admin second factor for a bounded period, and how that trust is bounded, listed and revoked.'
+status: needs-review
+review_notes:
+  - Corrected on 2026-10-16 after a code review (sweep schedule, cascades). The rest of the page has not been re-verified claim by claim.
 ---
 
 A trusted device is a browser allowed to skip the second factor until an absolute expiry. It
@@ -76,6 +79,9 @@ later raise of `days` from reviving a trust an earlier cut had killed.
 
 ## Consuming trust at login
 
+Only `POST /admin/login` consumes trust. `POST /admin/reset-password` never does: a reset is the
+classic second-factor bypass, so it always asks for the code.
+
 `POST /admin/login` reads the cookie **after** the password check and after enforcement (a locked
 account is refused before anything else). Trust is consumed only for a live row **owned by the
 user who just proved the password**. A row owned by someone else is left alone and simply refused,
@@ -115,10 +121,15 @@ than a miss.
 Trust is destroyed, not merely expired, when:
 
 - The user disables 2FA, or their factor is reset
+- The user moves to a new authenticator app: the trusts were granted against the old one
+- The user's password is reset (`/reset-password`), since a reset usually means the password was
+  lost or leaked
+- The account is deleted (`purgeUser`, called from the user service's delete paths)
 - An administrator revokes their devices
 - The organisation turns the setting off (every row is cleared)
 
-Expired rows are also swept at bootstrap, best-effort, for table hygiene only. Nothing about the
+Expired rows (and expired challenges) are also swept at bootstrap and then daily at 03:30 server
+time through `strapi.cron`, best-effort, for table hygiene only. Nothing about the
 security of the flow depends on the sweep having run.
 
 ## Key files

@@ -1,6 +1,9 @@
 ---
 title: Admin passkeys (WebAuthn)
 description: 'WebAuthn credentials as an admin second factor: relying-party resolution, the registration and login ceremonies, and the configuration a deployment needs.'
+status: needs-review
+review_notes:
+  - Corrected on 2026-10-16 after a code review (refusal messages, public-suffix check, counter, removal route). The rest of the page has not been re-verified claim by claim.
 ---
 
 A passkey is a WebAuthn credential registered as a second factor. The private key never leaves the
@@ -81,20 +84,21 @@ meant to serve.
 
 ### What `resolveWebauthnRp` refuses
 
-Every refusal names the config key that fixes it, and all of them surface to the caller as the same
-message. On the two unauthenticated login routes the caller holds only a challenge token, so
-deployment details are not theirs to learn.
+Each refusal has two messages. The server log gets the specific cause and the config key that
+fixes it, once per cause. The caller gets one generic message (`PASSKEY_RP_NOT_CONFIGURED`),
+whatever the cause: on the two unauthenticated login routes the caller holds only a challenge
+token, so deployment details are not theirs to learn.
 
-| Refused                                                               | Why                                                                                                                                                        |
-| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No usable `rpId` from either source                                   | Nothing to derive from                                                                                                                                     |
-| An `rpId` starting with `.`                                           | Not a valid host                                                                                                                                           |
-| An IP literal                                                         | No browser accepts one as a relying-party id; only `localhost` works without a domain                                                                      |
-| A public suffix, or a bare label                                      | Browsers reject these. `localhost` is the exception                                                                                                        |
-| `origins` that is not an array                                        | A string would iterate per character                                                                                                                       |
-| An origin that is not a URL                                           |                                                                                                                                                            |
-| An origin that is not a secure context                                | Must be `https:`, or `http://localhost[:port]`                                                                                                             |
-| An origin that is neither the relying party nor a **subdomain** of it | Checked as `host === rpId \|\| host.endsWith('.' + rpId)`. The leading dot is load-bearing: a bare `endsWith` accepts `evil-example.com` for `example.com` |
+| Refused                                                               | Why                                                                                                                                                                                                                                   |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No usable `rpId` from either source                                   | Nothing to derive from                                                                                                                                                                                                                |
+| An `rpId` starting with `.`                                           | Not a valid host                                                                                                                                                                                                                      |
+| An IP literal                                                         | No browser accepts one as a relying-party id; only `localhost` works without a domain                                                                                                                                                 |
+| A known public suffix, or a bare label                                | Browsers reject these. `localhost` is the exception. The check is a short built-in list, not the full public suffix list: a suffix it misses is still caught by the browser, while refusing a real domain would lock a deployment out |
+| `origins` that is not an array                                        | A string would iterate per character                                                                                                                                                                                                  |
+| An origin that is not a URL                                           |                                                                                                                                                                                                                                       |
+| An origin that is not a secure context                                | Must be `https:`, or `http://localhost[:port]`                                                                                                                                                                                        |
+| An origin that is neither the relying party nor a **subdomain** of it | Checked as `host === rpId \|\| host.endsWith('.' + rpId)`. The leading dot is load-bearing: a bare `endsWith` accepts `evil-example.com` for `example.com`                                                                            |
 
 `rpId` is lowercased and has every trailing DNS root dot stripped before use, and the normalised
 value is what gets used, not merely what gets checked. The subdomain check runs for every origin
@@ -107,8 +111,8 @@ two.
 `passkeysConfigured()` wraps that resolution in a boolean that cannot throw, so no caller can be
 made to 500 by asking. Two fields compose it with the organisation policy:
 
-- `passkeysEnabled` on `GET /admin/mfa/me` — the setting is on **and** the relying party resolves
-- `passkeyAvailable` on the login challenge response — both of the above **and** this account holds
+- `passkeysEnabled` on `GET /admin/mfa/me`: the setting is on **and** the relying party resolves
+- `passkeyAvailable` on the login challenge response: both of the above **and** this account holds
   at least one passkey
 
 Neither ever advertises a button a misconfigured deployment cannot honour.
@@ -190,7 +194,9 @@ trusted-device row's `deviceId` null. `trustDevice` works exactly as it does for
 factor passed.
 
 The signature counter is stored and updated on every successful assertion. The library raises on a
-counter regression, which is the clone signal.
+counter that does not advance, which is the clone signal. It skips the check when both the stored
+and the presented counter are 0, which most platform passkeys report forever, so for those the
+clone signal does not exist.
 
 A stored `credentialId` that is not valid base64url is **skipped and logged at error level**, never
 returned as a 400 and never deleted. Without that filter, one corrupt row would make the library
@@ -201,13 +207,17 @@ back and bricks passkey login for that account.
 
 The caller's own:
 
-| Endpoint                         | Effect                                                                                                                     |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `GET /admin/mfa/passkeys`        | Newest first. An **empty list** when the organisation has passkeys off, so this and the administrator count never disagree |
-| `DELETE /admin/mfa/passkeys/:id` | 204, or 404 when the row is not theirs                                                                                     |
+| Endpoint                          | Effect                                                                                                                     |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `GET /admin/mfa/passkeys`         | Newest first. An **empty list** when the organisation has passkeys off, so this and the administrator count never disagree |
+| `POST /admin/mfa/passkeys/remove` | Body `{ id, password, code }`. 204, or 404 when the row is not theirs                                                      |
 
-Deletion costs nothing and works even while the policy is off. TOTP always survives a passkey
-deletion, so there is no lockout path, and removing a credential is never the dangerous direction.
+Removal asks for the password and a code, like every other change to the account's factors: the
+session may be the thing an attacker holds, and a removed passkey takes the owner's strongest
+factor with it. It works even while the policy is off. It is a `POST` with the id in the body,
+not a `DELETE` with the id in the path, so the rate limiter's key (account and route pattern)
+gives one bucket per account rather than one per id. TOTP always survives a passkey removal, so
+there is no lockout path.
 
 An administrator's view of another user:
 
