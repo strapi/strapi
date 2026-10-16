@@ -576,10 +576,15 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       </StyledCardHeader>
       <CardBody>
         <CardFooter alignItems="center" gap={2}>
-          {dragHandle && <ReorderHandle name={asset.name} handle={dragHandle} />}
-          <FileTypeIcon>
-            <TypeIcon width={20} height={20} />
-          </FileTypeIcon>
+          {/* The grip takes the type icon's place: the preview above already
+              shows what the asset is. */}
+          {dragHandle ? (
+            <ReorderHandle name={asset.name} handle={dragHandle} />
+          ) : (
+            <FileTypeIcon>
+              <TypeIcon width={20} height={20} />
+            </FileTypeIcon>
+          )}
           <NameButton type="button" onClick={handleNameClick}>
             <FileName textColor="primary800">{asset.name}</FileName>
           </NameButton>
