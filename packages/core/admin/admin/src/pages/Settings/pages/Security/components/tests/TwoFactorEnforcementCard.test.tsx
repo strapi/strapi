@@ -91,7 +91,7 @@ describe('TwoFactorEnforcementCard', () => {
   it('confirms a protection increase with its blast radius, then saves without credentials', async () => {
     const bodies = captureSave();
     const queries = impact(12, 5);
-    const { user } = renderCard();
+    const { user } = renderCard({ callerEnrolled: true });
 
     await user.click(screen.getByRole('radio', { name: /^Required/ }));
     await user.click(screen.getByRole('checkbox', { name: 'Author (0 users)' }));
@@ -119,7 +119,7 @@ describe('TwoFactorEnforcementCard', () => {
   it('saves nothing when the raise is cancelled', async () => {
     const bodies = captureSave();
     impact(3, 0);
-    const { user } = renderCard();
+    const { user } = renderCard({ callerEnrolled: true });
 
     await user.click(screen.getByRole('radio', { name: /^Required/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
@@ -225,7 +225,44 @@ describe('TwoFactorEnforcementCard', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
-  it('shows the guard refusal inline under the mode options', async () => {
+  /**
+   * Requiring two-factor authentication of a caller who has none is the most obvious self-lockout,
+   * and the server refuses it. The card used to find out only after Save; it now says so first,
+   * with the way forward, and does not offer the click.
+   */
+  it('says to enrol first, and offers no Save, before an unenrolled caller can require it', async () => {
+    const bodies = captureSave();
+    const { user } = renderCard({ callerEnrolled: false });
+
+    await user.click(screen.getByRole('radio', { name: /^Required/ }));
+
+    expect(
+      screen.getByText(/Set up two-factor authentication on your own account before requiring it/)
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Go to your profile' })).toHaveAttribute('href', '/me');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(bodies).toHaveLength(0);
+  });
+
+  it('does not apply the guard to a caller with no local password, who is exempt', async () => {
+    const { user } = renderCard({ callerEnrolled: false, callerHasLocalPassword: false });
+
+    await user.click(screen.getByRole('radio', { name: /^Required/ }));
+
+    expect(screen.queryByText(/before requiring it for others/)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+  });
+
+  it('applies the guard when optional gains a role the caller holds, and not otherwise', async () => {
+    const { user } = renderCard({ callerEnrolled: false, callerRoleIds: ['3'] });
+
+    await user.click(screen.getByRole('checkbox', { name: 'Author (0 users)' }));
+
+    expect(screen.getByText(/before requiring it for others/)).toBeInTheDocument();
+  });
+
+  /** The server stays the authority, and its refusal reaches the user in their own language. */
+  it('shows a server refusal by its code, translated, and keeps the draft', async () => {
     server.use(
       http.put('/admin/security-settings', () =>
         HttpResponse.json(
@@ -234,6 +271,7 @@ describe('TwoFactorEnforcementCard', () => {
               status: 400,
               name: 'ValidationError',
               message: 'Enrol in two-factor authentication before requiring it for others',
+              details: { code: 'MFA_ENROL_FIRST' },
             },
           },
           { status: 400 }
@@ -241,7 +279,7 @@ describe('TwoFactorEnforcementCard', () => {
       )
     );
     impact(4, 0);
-    const { user } = renderCard();
+    const { user } = renderCard({ callerEnrolled: true });
 
     await user.click(screen.getByRole('radio', { name: /^Required/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
@@ -251,11 +289,11 @@ describe('TwoFactorEnforcementCard', () => {
       ).getByRole('button', { name: 'Confirm' })
     );
 
-    // same live-region caveat as above -- assert on text rather than a bare role query
     expect(
-      await screen.findByText('Enrol in two-factor authentication before requiring it for others')
+      await screen.findByText(
+        'Set up two-factor authentication on your own account before requiring it for others.'
+      )
     ).toBeInTheDocument();
-    // the draft is kept so the user can change their mind without redoing every click
     expect(screen.getByRole('radio', { name: /^Required/ })).toBeChecked();
   });
 

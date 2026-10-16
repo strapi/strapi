@@ -334,12 +334,19 @@ const MfaChallenge = () => {
             </Flex>
           </Form>
         </LayoutContent>
-        <Flex justifyContent="center">
-          <Box paddingTop={4}>
-            <Link isExternal={false} tag={NavLink} to="/auth/login">
-              {formatMessage({ id: 'Auth.form.mfa.link.back', defaultMessage: 'Back to login' })}
-            </Link>
-          </Box>
+        <Flex direction="column" alignItems="center" gap={3} paddingTop={4}>
+          <Link isExternal={false} tag={NavLink} to="/auth/login">
+            {formatMessage({ id: 'Auth.form.mfa.link.back', defaultMessage: 'Back to login' })}
+          </Link>
+          {/* The defining failure of two-factor authentication, on the screen where it happens. There
+              is no self-service way out, and saying so plainly beats implying one. */}
+          <Typography variant="pi" textColor="neutral600" textAlign="center">
+            {formatMessage({
+              id: 'Auth.form.mfa.lost',
+              defaultMessage:
+                'Lost your authenticator and your recovery codes? An administrator can reset two-factor authentication for your account.',
+            })}
+          </Typography>
         </Flex>
       </Main>
     </UnauthenticatedLayout>

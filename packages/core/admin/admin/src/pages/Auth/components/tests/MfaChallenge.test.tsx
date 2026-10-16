@@ -74,12 +74,21 @@ describe('MfaChallenge', () => {
     const input = screen.getByLabelText('Authentication code*');
     expect(input).toHaveAttribute('autocomplete', 'one-time-code');
     expect(input).toHaveAttribute('maxlength', '32');
-    expect(screen.getByText(/recovery code/i)).toBeInTheDocument();
+    expect(
+      screen.getByText('Enter the code from your authenticator app, or one of your recovery codes.')
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Verify' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Back to login' })).toHaveAttribute(
       'href',
       '/auth/login'
     );
+    // Someone with neither factor is told who can get them back in, on the screen where they are
+    // stuck, instead of being left with a link back to the screen that sent them here.
+    expect(
+      screen.getByText(
+        'Lost your authenticator and your recovery codes? An administrator can reset two-factor authentication for your account.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('returns to login when opened without a challenge in router state', () => {

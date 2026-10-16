@@ -84,6 +84,9 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   /** The codes are shown exactly once and are the only way back into a locked-out account, so a
    * dismissal must not silently destroy them. Refused with an explanation instead. */
   const [dismissBlocked, setDismissBlocked] = React.useState(false);
+  // The checkbox is the user's assertion that they saved the codes; the acknowledge request is
+  // bookkeeping. Once ticked, a failed request must cost them a profile warning, not their way out.
+  const [codesSaved, setCodesSaved] = React.useState(false);
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string>();
@@ -124,6 +127,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
     // The one instance serves enrol and replace for the whole page visit, so a warning earned in
     // one run must not be on screen before the next run's codes appear.
     setDismissBlocked(false);
+    setCodesSaved(false);
   };
 
   const close = () => {
@@ -188,7 +192,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
         if (isOpen) {
           return;
         }
-        if (step.name === 'codes') {
+        if (step.name === 'codes' && !codesSaved) {
           setDismissBlocked(true);
           return;
         }
@@ -358,11 +362,15 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
                   {formatMessage({
                     id: 'Settings.profile.form.section.mfa.codes.dismiss.body',
                     defaultMessage:
-                      'These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then tick the box below.',
+                      'These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then tick the box below. If you close this without saving them, generate a new set from your profile.',
                   })}
                 </Alert>
               ) : null}
-              <RecoveryCodes codes={step.recoveryCodes} onAcknowledged={handleAcknowledged} />
+              <RecoveryCodes
+                codes={step.recoveryCodes}
+                onAcknowledged={handleAcknowledged}
+                onSavedChange={setCodesSaved}
+              />
             </Flex>
           </Modal.Body>
         ) : null}

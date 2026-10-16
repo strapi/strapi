@@ -7,12 +7,14 @@ import {
   Dialog,
   Field,
   Flex,
+  Link,
   Radio,
   TextInput,
   Typography,
 } from '@strapi/design-system';
 import isEqual from 'lodash/isEqual';
 import { type MessageDescriptor, useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
 import { ErrorMessage } from '../../../../../components/ErrorMessage';
@@ -36,6 +38,13 @@ interface TwoFactorEnforcementCardProps {
   canUpdate: boolean;
   /** `/admin/mfa/me` `enabled` for the caller: decides whether a downgrade also needs a code. */
   callerEnrolled: boolean;
+  /**
+   * `/admin/mfa/me` `hasLocalPassword`. An account with no password is exempt from enforcement, so
+   * the enrol-first guard never applies to it. Defaults to true, the conservative reading.
+   */
+  callerHasLocalPassword?: boolean;
+  /** The caller's own role ids, to tell whether a role being required includes one they hold. */
+  callerRoleIds?: string[];
   /**
    * `isFetching` of the `SecuritySettings` query, while it refetches after this card's own save.
    * Keeps Save disabled through the gap between the mutation fulfilling and the refetched
@@ -91,6 +100,8 @@ const TwoFactorEnforcementCard = ({
   roles,
   canUpdate,
   callerEnrolled,
+  callerHasLocalPassword = true,
+  callerRoleIds = [],
   isRefreshing = false,
 }: TwoFactorEnforcementCardProps) => {
   const { formatMessage } = useIntl();
@@ -153,6 +164,20 @@ const TwoFactorEnforcementCard = ({
         return true;
       },
     });
+
+  /**
+   * The server refuses to require two-factor authentication of a caller who has none: the most
+   * obvious self-lockout. It used to say so only after Save. The same rule is evaluated here so the
+   * refusal arrives as a next step, before the click -- the server stays the authority.
+   */
+  const addsHeldRole = next.requiredRoles.some(
+    (id) => !settings.requiredRoles.includes(id) && callerRoleIds.includes(id)
+  );
+  const mustEnrolFirst =
+    !callerEnrolled &&
+    callerHasLocalPassword &&
+    ((next.mode === 'required' && settings.mode !== 'required') ||
+      (next.mode === 'optional' && addsHeldRole));
 
   /**
    * Raising enforcement is the change with a blast radius -- it can put every password user in the
@@ -352,11 +377,29 @@ const TwoFactorEnforcementCard = ({
         </Flex>
 
         <ErrorMessage error={impactError} />
+        {mustEnrolFirst ? (
+          <Typography variant="pi" textColor="neutral600">
+            {formatMessage(
+              {
+                id: 'Settings.security.mfa.enrolFirst.hint',
+                defaultMessage:
+                  'Set up two-factor authentication on your own account before requiring it for others. <link>Go to your profile</link>.',
+              },
+              {
+                link: (chunks: React.ReactNode) => (
+                  <Link tag={NavLink} to="/me" isExternal={false}>
+                    {chunks}
+                  </Link>
+                ),
+              }
+            )}
+          </Typography>
+        ) : null}
         <Flex justifyContent="flex-end">
           <Button
             onClick={handleSave}
             loading={isSaving || isFetchingImpact}
-            disabled={!canUpdate || !modified || isRefreshing}
+            disabled={!canUpdate || !modified || isRefreshing || mustEnrolFirst}
           >
             {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
           </Button>

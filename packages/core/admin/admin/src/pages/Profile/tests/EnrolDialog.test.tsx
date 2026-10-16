@@ -508,4 +508,41 @@ describe('EnrolDialog', () => {
 
     expect(screen.queryByText('Save your recovery codes first')).not.toBeInTheDocument();
   });
+
+  /**
+   * Every exit is blocked on the codes step, and the only way out was a successful acknowledge. If
+   * that request failed, the user was trapped in a modal holding codes they must not lose, with 2FA
+   * already on, until they reloaded the browser. Ticking the box is their assertion that the codes
+   * are saved; the request is bookkeeping.
+   */
+  it('lets the user leave once they have ticked the box, even when acknowledging failed', async () => {
+    const onClose = jest.fn();
+    server.use(
+      http.post('/admin/mfa/recovery-codes/ack', () =>
+        HttpResponse.json(
+          { error: { status: 500, name: 'InternalError', message: 'boom', details: {} } },
+          { status: 500 }
+        )
+      )
+    );
+
+    const { user } = renderDialog({ open: true, onClose });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(await screen.findByLabelText('Authentication code*'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    // Before the box is ticked, a dismissal is still refused, and says why.
+    await screen.findByRole('checkbox');
+    await user.keyboard('{Escape}');
+    expect(await screen.findByText('Save your recovery codes first')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
+    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    expect(await screen.findByText('boom')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
 });

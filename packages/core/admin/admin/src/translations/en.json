@@ -407,7 +407,7 @@
   "Settings.profile.form.section.mfa.codes.intro": "Each recovery code can be used once instead of an authenticator code if you lose your device. Store them somewhere safe. They will not be shown again.",
   "Settings.profile.form.section.mfa.codes.saved": "I have saved these codes somewhere safe",
   "Settings.profile.form.section.mfa.codes.title": "Save your recovery codes",
-  "Settings.profile.form.section.mfa.codes.dismiss.body": "These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then tick the box below.",
+  "Settings.profile.form.section.mfa.codes.dismiss.body": "These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then tick the box below. If you close this without saving them, generate a new set from your profile.",
   "Settings.profile.form.section.mfa.codes.dismiss.title": "Save your recovery codes first",
   "Settings.profile.form.section.mfa.description": "Protect your account with a code from an authenticator app each time you log in.",
   "Settings.profile.form.section.mfa.disable.intro": "Your account will only be protected by your password. Every other device signed in to this account will be logged out. Confirm your password and a code from your authenticator app or an unused recovery code.",
@@ -1197,5 +1197,16 @@
   "HomePage.widget.drag": "Drag to move",
   "HomePage.widget.deploy-now.title": "Ready to go live?",
   "HomePage.widget.deploy-now.description": "Deploy with Strapi Cloud",
-  "HomePage.widget.deploy-now.button": "Deploy Now"
+  "HomePage.widget.deploy-now.button": "Deploy Now",
+  "Auth.form.mfa.error.invalidCode": "That code was not accepted. Codes change every 30 seconds. Wait for the next one and try again, or use a recovery code.",
+  "Auth.form.mfa.error.secretUnreadable": "Your two-factor secret could not be read. Use a recovery code to sign in, or ask an administrator to reset two-factor authentication for your account.",
+  "Settings.profile.form.section.mfa.error.noEnrolment": "This setup session expired. Close this and start again.",
+  "Settings.profile.form.section.mfa.error.noPassword": "You sign in through single sign-on, so two-factor authentication is managed by your identity provider.",
+  "Settings.security.mfa.error.noPasswordDowngrade": "Your account has no password, so it cannot lower two-factor requirements. Ask an administrator who signs in with a password.",
+  "Settings.security.mfa.enrolFirst": "Set up two-factor authentication on your own account before requiring it for others.",
+  "Settings.security.mfa.error.unknownRole": "One of the selected roles no longer exists. Reload the page and try again.",
+  "Settings.security.mfa.error.conflict": "Two-factor settings changed while this save was in flight. Review the current settings and try again.",
+  "Settings.security.mfa.enrolFirst.hint": "Set up two-factor authentication on your own account before requiring it for others. <link>Go to your profile</link>.",
+  "Auth.form.mfa.lost": "Lost your authenticator and your recovery codes? An administrator can reset two-factor authentication for your account.",
+  "Settings.profile.form.section.mfa.noPassword": "You sign in through single sign-on, so there is no password to protect with a second factor. Two-factor authentication is managed by your identity provider."
 }

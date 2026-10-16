@@ -9,6 +9,8 @@ import { useNotification } from '../../features/Notifications';
 interface RecoveryCodesProps {
   codes: string[];
   onAcknowledged: () => Promise<void> | void;
+  /** The user's own assertion that the codes are saved, so a host dialog can let them leave. */
+  onSavedChange?: (saved: boolean) => void;
 }
 
 const CodeTypography = styled(Typography)`
@@ -20,7 +22,7 @@ const CodeTypography = styled(Typography)`
  * so acknowledging is mandatory: the confirming button stays disabled until the checkbox is
  * ticked. Copy and download are conveniences; nothing here is stored by the app.
  */
-const RecoveryCodes = ({ codes, onAcknowledged }: RecoveryCodesProps) => {
+const RecoveryCodes = ({ codes, onAcknowledged, onSavedChange }: RecoveryCodesProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const [saved, setSaved] = React.useState(false);
@@ -127,7 +129,13 @@ const RecoveryCodes = ({ codes, onAcknowledged }: RecoveryCodesProps) => {
           })}
         </Button>
       </Flex>
-      <Checkbox checked={saved} onCheckedChange={(value) => setSaved(value === true)}>
+      <Checkbox
+        checked={saved}
+        onCheckedChange={(value) => {
+          setSaved(value === true);
+          onSavedChange?.(value === true);
+        }}
+      >
         {formatMessage({
           id: 'Settings.profile.form.section.mfa.codes.saved',
           defaultMessage: 'I have saved these codes somewhere safe',

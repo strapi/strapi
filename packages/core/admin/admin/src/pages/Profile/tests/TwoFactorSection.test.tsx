@@ -29,6 +29,8 @@ const status = (overrides = {}) =>
         graceUntil: null,
         trustedDevicesEnabled: false,
         passkeysEnabled: false,
+        // Always on the wire from `/mfa/me`; the fixture omitted it.
+        hasLocalPassword: true,
         ...overrides,
       },
     })
@@ -510,5 +512,18 @@ describe('TwoFactorSection', () => {
 
     expect(await screen.findByText(/^Enabled/)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Passkeys' })).not.toBeInTheDocument();
+  });
+
+  /** The enrol dialog's first and only field is the current password, which this account lacks. */
+  it('explains instead of offering enrolment to an account that signs in only through SSO', async () => {
+    server.use(status({ hasLocalPassword: false }));
+    renderSection();
+
+    expect(
+      await screen.findByText(/You sign in through single sign-on, so there is no password/)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Enable two-factor authentication' })
+    ).not.toBeInTheDocument();
   });
 });

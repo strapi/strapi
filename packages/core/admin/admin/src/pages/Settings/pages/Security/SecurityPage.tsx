@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
@@ -53,6 +54,9 @@ const SecurityPage = () => {
   // The caller's own enrolment decides whether a downgrade needs a code; a 404 here is the same
   // feature-off signal and simply reads as "not enrolled".
   const { data: mfaStatus } = useGetMfaStatusQuery();
+  const callerRoleIds = useAuth('SecurityPage', (state) =>
+    (state.user?.roles ?? []).map((role) => String(role.id))
+  );
 
   const isFeatureOff = isNotFoundError(error);
   // While `canReadRoles` is true, the roles query starts out uninitialized (its `isLoading` is
@@ -101,6 +105,8 @@ const SecurityPage = () => {
               roles={roles}
               canUpdate={canUpdate}
               callerEnrolled={Boolean(mfaStatus?.enabled)}
+              callerHasLocalPassword={mfaStatus ? mfaStatus.hasLocalPassword : true}
+              callerRoleIds={callerRoleIds}
               isRefreshing={isFetchingSettings}
             />
             <TrustedDevicesCard

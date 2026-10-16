@@ -263,7 +263,17 @@ const TwoFactorSection = () => {
       ) : null}
       <Flex justifyContent="space-between" alignItems="center" gap={4} wrap="wrap">
         <TwoFactorStatus status={status} />
-        {!status.enabled ? (
+        {!status.enabled && !status.hasLocalPassword ? (
+          // The dialog's first and only field is the current password, which this account does not
+          // have: the button was a dead end. `hasLocalPassword` was already on the wire.
+          <Typography variant="pi" textColor="neutral600">
+            {formatMessage({
+              id: 'Settings.profile.form.section.mfa.noPassword',
+              defaultMessage:
+                'You sign in through single sign-on, so there is no password to protect with a second factor. Two-factor authentication is managed by your identity provider.',
+            })}
+          </Typography>
+        ) : !status.enabled ? (
           <Flex gap={2}>
             <Button onClick={() => setEnrolOpen(true)}>
               {formatMessage({
