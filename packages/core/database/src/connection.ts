@@ -42,5 +42,19 @@ export const createConnection = (userConfig: Knex.Config, strapiConfig?: Partial
     };
   }
 
-  return knex(knexConfig);
+  const instance = knex(knexConfig);
+
+  // knex up to 3.2.6 made `password` non-enumerable on the connection object it was given, which
+  // is the live config object, so it stayed out of JSON.stringify and Object.keys. 3.2.7 clones the
+  // config instead and hides it on the clone only, so do it here. The value is unchanged.
+  const connection = userConfig.connection;
+  if (
+    typeof connection === 'object' &&
+    connection !== null &&
+    Object.prototype.hasOwnProperty.call(connection, 'password')
+  ) {
+    Object.defineProperty(connection, 'password', { enumerable: false });
+  }
+
+  return instance;
 };
