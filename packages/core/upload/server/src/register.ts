@@ -114,6 +114,20 @@ const createProvider = (config: Config) => {
   }
 
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
+    if (methodName === 'replace' || methodName === 'replaceStream') {
+      // replace takes (newFile, oldFile, customConfig). The generic wrapper below
+      // would pass oldFile as the options argument, so the upload action options
+      // (e.g. the cloudinary folder) never reach the provider on replace.
+      const uploadMethodName = methodName === 'replaceStream' ? 'uploadStream' : 'upload';
+
+      return async (newFile: File, oldFile: File, customConfig: Record<string, unknown> = {}) =>
+        providerInstance[methodName](newFile, oldFile, {
+          ...(actionOptions[uploadMethodName] as Record<string, unknown> | undefined),
+          ...(actionOptions[methodName] as Record<string, unknown> | undefined),
+          ...customConfig,
+        });
+    }
+
     return async (file: File, options = actionOptions[methodName]) =>
       providerInstance[methodName](file, options);
   });
