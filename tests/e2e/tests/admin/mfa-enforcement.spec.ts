@@ -19,6 +19,11 @@ const requireTwoFactorForEveryone = async (page: Page) => {
   await page.goto('/admin/settings/security');
   await page.getByRole('radio', { name: /^Required/ }).check();
   await twoFactorCard(page).getByRole('button', { name: 'Save' }).click();
+  // Raising enforcement is confirmed first, against the count of accounts it would affect.
+  await page
+    .getByRole('alertdialog', { name: 'Require two-factor authentication?' })
+    .getByRole('button', { name: 'Confirm' })
+    .click();
   await expect(page.getByText('Saved')).toBeVisible();
 };
 
@@ -38,12 +43,15 @@ test.describe('Two-factor enforcement', () => {
     await expect(page.getByRole('heading', { name: 'Security' })).toBeVisible();
     await expect(page.getByRole('radio', { name: /^Optional/ })).toBeChecked();
 
+    // Refused up front rather than after Save: the hint appears and Save stays disabled.
     await page.getByRole('radio', { name: /^Required/ }).check();
-    await twoFactorCard(page).getByRole('button', { name: 'Save' }).click();
-
     await expect(
-      page.getByText('Enrol in two-factor authentication before requiring it for others')
+      twoFactorCard(page).getByText(/Set up two-factor authentication on your own account/)
     ).toBeVisible();
+    await expect(twoFactorCard(page).getByRole('button', { name: 'Save' })).toBeDisabled();
+    await expect(
+      twoFactorCard(page).getByRole('link', { name: 'Go to your profile' })
+    ).toHaveAttribute('href', /\/me$/);
   });
 
   test('required mode: grace banner, lock, unlock from the user page, enrol, replace authenticator', async ({
@@ -118,12 +126,13 @@ test.describe('Two-factor enforcement', () => {
     await waitForNextTotpStep();
     await dialog.getByLabel('Authentication code*').fill(totpFor(newSecret));
     await dialog.getByRole('button', { name: 'Verify' }).click();
-    const codes = dialog.getByTestId('mfa-recovery-code');
+    const codesDialog = page.getByRole('dialog', { name: 'Save your recovery codes' });
+    const codes = codesDialog.getByTestId('mfa-recovery-code');
     await codes.first().waitFor();
     expect(await codes.count()).toBe(10);
-    await dialog.getByRole('checkbox', { name: /saved these codes/i }).check();
-    await dialog.getByRole('button', { name: 'I have saved my recovery codes' }).click();
-    await dialog.waitFor({ state: 'hidden' });
+    await codesDialog.getByRole('checkbox', { name: /saved these codes/i }).check();
+    await codesDialog.getByRole('button', { name: 'I have saved my recovery codes' }).click();
+    await codesDialog.waitFor({ state: 'hidden' });
     await expect(page.getByText(/Your authenticator app was replaced/)).toBeVisible();
   });
 });

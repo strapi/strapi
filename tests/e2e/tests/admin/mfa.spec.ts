@@ -41,7 +41,7 @@ test.describe('Two-factor authentication', () => {
     // the same role for screen-reader announcements, so that query hits Playwright's strict-mode
     // guard (two matches). `getByText` sidesteps it, matching the pattern `login.spec.ts` already
     // uses for `Invalid credentials`.
-    await expect(page.getByText('Invalid code')).toBeVisible();
+    await expect(page.getByText(/That code was not accepted/)).toBeVisible();
 
     // the step used at enrolment is consumed account-wide; wait for the next one
     await waitForNextTotpStep();

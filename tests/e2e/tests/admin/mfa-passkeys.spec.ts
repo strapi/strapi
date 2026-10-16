@@ -97,11 +97,12 @@ test.describe('Passkeys', () => {
     await expect(page.getByText(/A passkey was added to your account/)).toBeVisible();
 
     // 5. Removing it puts the account back on codes only.
+    //    Removal asks for the password and a code; a recovery code avoids waiting out a TOTP step.
     await page.getByRole('button', { name: 'Remove passkey' }).click();
-    await page
-      .getByRole('alertdialog', { name: 'Remove this passkey?' })
-      .getByRole('button', { name: 'Confirm' })
-      .click();
+    const removeDialog = page.getByRole('dialog', { name: 'Remove this passkey?' });
+    await removeDialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
+    await removeDialog.getByLabel('Authentication code*').fill(admin.recoveryCodes[0]);
+    await removeDialog.getByRole('button', { name: 'Remove' }).click();
     await expect(page.getByText('Passkey removed')).toBeVisible();
     await expect(page.getByText(/^No passkeys\./)).toBeVisible();
 

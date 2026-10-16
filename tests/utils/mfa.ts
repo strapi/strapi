@@ -29,14 +29,17 @@ export const enrolViaUi = async (page: Page, password: string) => {
   await dialog.getByLabel('Authentication code*').fill(totpFor(secret));
   await dialog.getByRole('button', { name: 'Verify' }).click();
 
+  // The codes step retitles the dialog, so its accessible name changes with it.
+  const codesDialog = page.getByRole('dialog', { name: 'Save your recovery codes' });
+
   // `allTextContents()` snapshots immediately and does not auto-wait, so without this it reads back
   // an empty array while the codes step is still committing to the DOM.
-  const codesLocator = dialog.getByTestId('mfa-recovery-code');
+  const codesLocator = codesDialog.getByTestId('mfa-recovery-code');
   await codesLocator.first().waitFor();
   const recoveryCodes = await codesLocator.allTextContents();
-  await dialog.getByRole('checkbox', { name: /saved these codes/i }).check();
-  await dialog.getByRole('button', { name: 'I have saved my recovery codes' }).click();
-  await dialog.waitFor({ state: 'hidden' });
+  await codesDialog.getByRole('checkbox', { name: /saved these codes/i }).check();
+  await codesDialog.getByRole('button', { name: 'I have saved my recovery codes' }).click();
+  await codesDialog.waitFor({ state: 'hidden' });
 
   return { secret, recoveryCodes: recoveryCodes.map((c) => c.trim()) };
 };
