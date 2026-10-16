@@ -561,7 +561,7 @@ describe('MfaChallenge', () => {
    * stops offering a submit that can only fail.
    */
   it('says the attempt has expired once the challenge lapses, and stops offering a submit', async () => {
-    jest.useFakeTimers({ shouldAdvanceTime: true });
+    jest.useFakeTimers({ advanceTimers: true });
     try {
       renderChallenge({ ...STATE, expiresIn: 2, passkeyAvailable: true });
 
