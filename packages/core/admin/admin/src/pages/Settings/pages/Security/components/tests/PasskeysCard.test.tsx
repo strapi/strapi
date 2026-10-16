@@ -119,6 +119,7 @@ describe('PasskeysCard', () => {
     save();
 
     expect(await screen.findByText('Nope')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
   });
 
   it('re-enables Save only while the draft differs from the stored policy', async () => {

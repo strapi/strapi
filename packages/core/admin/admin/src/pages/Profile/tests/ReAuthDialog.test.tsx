@@ -84,7 +84,7 @@ describe('ReAuthDialog', () => {
     // the freshly issued recovery codes must not outlive the dialog in the Redux store (RTK
     // Query keeps a mutation's `data` around for as long as the hook stays subscribed, and this
     // dialog stays mounted for the whole profile-page session -- see ReAuthDialog.tsx).
-    expect(hasLeakedMfaSecrets(...CODES)).toBe(false);
+    expect(hasLeakedMfaSecrets('Testing123!', ...CODES)).toBe(false);
   });
 
   it('disables, shows the success toast, and closes', async () => {
@@ -108,6 +108,27 @@ describe('ReAuthDialog', () => {
 
     expect(await screen.findByText('Invalid code')).toBeInTheDocument();
     expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Disable two-factor authentication' })).toBeEnabled();
+  });
+
+  it('shows the server error and keeps the form when regenerating recovery codes fails', async () => {
+    server.use(
+      http.post('/admin/mfa/recovery-codes', () =>
+        HttpResponse.json(
+          { error: { status: 400, name: 'ValidationError', message: 'Invalid code', details: {} } },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderDialog({ open: true, onClose: jest.fn(), intent: 'regenerate' });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.type(screen.getByLabelText('Authentication code*'), '000000');
+    await user.click(screen.getByRole('button', { name: 'Generate new recovery codes' }));
+
+    expect(await screen.findByText('Invalid code')).toBeInTheDocument();
+    expect(screen.queryByTestId('mfa-recovery-code')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Generate new recovery codes' })).toBeEnabled();
   });
 
   it('trims surrounding whitespace off the code before sending it to regenerate recovery codes', async () => {
@@ -206,7 +227,7 @@ describe('ReAuthDialog', () => {
 
     unmount();
 
-    expect(hasLeakedMfaSecrets(...CODES)).toBe(false);
+    expect(hasLeakedMfaSecrets('Testing123!', ...CODES)).toBe(false);
   });
 
   it('submits once when Enter is pressed in the code field', async () => {

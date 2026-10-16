@@ -22,7 +22,9 @@ const renderDialog = (props: Parameters<typeof EnrolDialog>[0]) =>
   );
 
 /** True if any cached mutation result still carries the secret, the otpauth URI, or a code. */
-const hasLeakedMfaSecrets = () => hasLeakedSecrets(SECRET, URI, ...CODES);
+/** The password too: it is what `originalArgs` carries for `/mfa/enrol`, and the probe stringifies
+ * whole mutation entries precisely so `originalArgs` is covered. */
+const hasLeakedMfaSecrets = () => hasLeakedSecrets(SECRET, URI, 'Testing123!', ...CODES);
 
 describe('EnrolDialog', () => {
   beforeEach(() => {
@@ -151,6 +153,8 @@ describe('EnrolDialog', () => {
 
     expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
     expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
+    // The in-flight guard must clear on the error path too, or the dialog is dead from here on.
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
   });
 
   it('shows the generic error on a wrong code and stays on the scan step with the same secret', async () => {
@@ -163,6 +167,7 @@ describe('EnrolDialog', () => {
 
     expect(await screen.findByText('Invalid code')).toBeInTheDocument();
     expect(screen.getByText(SECRET)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Verify' })).toBeEnabled();
   });
 
   it('trims surrounding whitespace off the code before sending it to verify', async () => {
@@ -328,6 +333,7 @@ describe('EnrolDialog', () => {
 
     expect(await screen.findByText('Something went wrong')).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'I have saved my recovery codes' })).toBeEnabled();
     CODES.forEach((code) => expect(screen.getByText(code)).toBeInTheDocument());
 
     shouldFail = false;

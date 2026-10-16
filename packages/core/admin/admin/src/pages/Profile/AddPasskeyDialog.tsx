@@ -133,6 +133,8 @@ const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
 
       const res = await registerPasskey({ name: trimmedName, registration });
       if ('error' in res) {
+        // Spent by the options request, exactly as after a failed ceremony.
+        setCode('');
         setError(toMessage(res.error));
         return;
       }

@@ -369,6 +369,45 @@ describe('Passkeys', () => {
     expect(jest.mocked(startRegistration)).not.toHaveBeenCalled();
   });
 
+  /**
+   * The worst place to get wrong: the authenticator now holds a credential the server refused.
+   * `MfaChallenge` has this test for the login side; the registration side had none.
+   */
+  it('shows the refusal when the server rejects a registration the device completed', async () => {
+    server.use(
+      list([]),
+      http.post('/admin/mfa/passkeys/options', () => HttpResponse.json({ data: OPTIONS })),
+      http.post('/admin/mfa/passkeys', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'The passkey could not be verified',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    jest.mocked(startRegistration).mockResolvedValue(REGISTRATION as never);
+
+    const { user } = render(<Passkeys />);
+    await screen.findByText(/^No passkeys\./);
+    await user.click(screen.getByRole('button', { name: 'Add a passkey' }));
+    await user.type(screen.getByLabelText('Passkey name*'), 'Phone');
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.type(screen.getByLabelText('Authentication code*'), '123456');
+    fireEvent.click(screen.getByRole('button', { name: 'Add passkey' }));
+
+    expect(await screen.findByText('The passkey could not be verified')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Add a passkey' })).toBeInTheDocument();
+    expect(screen.queryByText('Passkey added')).not.toBeInTheDocument();
+    // The options request spent the code, so it is cleared for a fresh one.
+    expect(screen.getByLabelText('Authentication code*')).toHaveValue('');
+  });
+
   it('asks for a fresh code when the user dismisses the prompt, because the first is spent', async () => {
     server.use(
       list([]),

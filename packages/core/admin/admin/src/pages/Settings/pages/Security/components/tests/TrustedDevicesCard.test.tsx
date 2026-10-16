@@ -173,5 +173,6 @@ describe('TrustedDevicesCard', () => {
     save();
 
     expect(await screen.findByText('Nope')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
   });
 });

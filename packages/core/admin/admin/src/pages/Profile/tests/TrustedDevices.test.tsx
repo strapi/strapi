@@ -146,5 +146,46 @@ describe('TrustedDevices', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(await screen.findByText('Trusted device not found')).toBeInTheDocument();
+    // Nothing optimistic: a refused revoke leaves the list truthful.
+    expect(screen.getByText('Chrome on macOS')).toBeInTheDocument();
+  });
+
+  it('toasts the server message when revoking every device is refused, and keeps the list', async () => {
+    server.use(
+      list(DEVICES),
+      http.delete('/admin/mfa/trusted-devices', () =>
+        HttpResponse.json(
+          { error: { status: 500, name: 'InternalServerError', message: 'boom', details: {} } },
+          { status: 500 }
+        )
+      )
+    );
+    const { user } = render(<TrustedDevices />);
+    await screen.findByText('Chrome on macOS');
+
+    await user.click(screen.getByRole('button', { name: 'Revoke all' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    expect(await screen.findByText('boom')).toBeInTheDocument();
+    expect(screen.queryByText('No device is trusted any more')).not.toBeInTheDocument();
+    expect(screen.getByText('Chrome on macOS')).toBeInTheDocument();
+  });
+
+  /** The `!error &&` guard exists so a stale table never renders underneath an error. */
+  it('shows the read error instead of the table or the empty state', async () => {
+    server.use(
+      http.get('/admin/mfa/trusted-devices', () =>
+        HttpResponse.json(
+          { error: { status: 500, name: 'InternalServerError', message: 'boom', details: {} } },
+          { status: 500 }
+        )
+      )
+    );
+    render(<TrustedDevices />);
+
+    expect(await screen.findByText('boom')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^No trusted devices\./)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Revoke all' })).not.toBeInTheDocument();
   });
 });
