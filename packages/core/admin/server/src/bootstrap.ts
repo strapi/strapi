@@ -26,8 +26,21 @@ const defaultAdminAuthSettings = {
   },
 };
 
+/**
+ * Actions that exist only while the two-factor feature does. Registered unconditionally, the role
+ * editor offered a Security permission for a page that is not there, on every install, flag or
+ * no flag. Gated the way EE actions are gated on their licence: switching the feature off and
+ * restarting drops these grants from custom roles, as `cleanPermissionsInDatabase` does for any
+ * action that is no longer registered; the super admin gets them back when it is switched on.
+ */
+const MFA_ACTION_UIDS = new Set(['security-settings.read', 'security-settings.update']);
+
 const registerPermissionActions = async () => {
-  await getService('permission').actionProvider.registerMany(adminActions.actions);
+  const mfaEnabled = getService('mfa').isEnabled();
+  const actions = adminActions.actions.filter(
+    (action) => mfaEnabled || !MFA_ACTION_UIDS.has(action.uid)
+  );
+  await getService('permission').actionProvider.registerMany(actions);
 };
 
 const registerAdminConditions = async () => {
