@@ -30,7 +30,7 @@ describe('Scheduling service', () => {
 
       // @ts-expect-error Ignore missing properties
       const schedulingService = createSchedulingService({ strapi: strapiMock });
-      expect(() => schedulingService.set('1', new Date())).rejects.toThrow(
+      await expect(schedulingService.set('1', new Date())).rejects.toThrow(
         'No release found for id 1'
       );
     });
@@ -207,6 +207,33 @@ describe('Scheduling service', () => {
       const scheduledJobs = await schedulingService.syncFromDatabase();
       expect(scheduledJobs.size).toBe(1);
       expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs a release that fails to be scheduled and still schedules the others', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        log: { error: jest.fn() },
+        db: {
+          query: jest.fn(() => ({
+            findMany: jest.fn().mockResolvedValue([
+              { id: 1, scheduledAt: new Date() },
+              { id: 2, scheduledAt: new Date() },
+            ]),
+            // Release 1 was released or deleted since the list was read
+            findOne: jest.fn(({ where }) => Promise.resolve(where.id === 1 ? null : { id: 2 })),
+          })),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const schedulingService = createSchedulingService({ strapi: strapiMock });
+      const scheduledJobs = await schedulingService.syncFromDatabase();
+
+      expect([...scheduledJobs.keys()]).toEqual(['2']);
+      expect(strapiMock.log.error).toHaveBeenCalledWith(
+        'Error while scheduling release 1',
+        expect.objectContaining({ error: expect.any(Error) })
+      );
     });
   });
 });

@@ -78,8 +78,13 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
         },
       });
 
+      // One release that can't be scheduled must not leave the others unscheduled
       for (const release of releases) {
-        this.set(release.id, release.scheduledAt);
+        try {
+          await this.set(release.id, release.scheduledAt);
+        } catch (error: unknown) {
+          strapi.log.error(`Error while scheduling release ${release.id}`, { error });
+        }
       }
 
       return scheduledJobs;

@@ -1,15 +1,17 @@
-import { AlreadyOnReleaseError } from '../../services/validation';
+import type Koa from 'koa';
+
 import releaseActionController from '../release-action';
 
 const mockSanitizedQueryRead = jest.fn().mockResolvedValue({});
 const mockFindActions = jest.fn().mockResolvedValue({ results: [], pagination: {} });
 const mockSanitizeOutput = jest.fn((entry: { id: number; name: string }) => ({ id: entry.id }));
 const mockCreateAction = jest.fn();
-const mockUpdateReleaseStatus = jest.fn();
+const mockCreateManyActions = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
     create: mockCreateAction,
+    createMany: mockCreateManyActions,
     findActions: mockFindActions,
     getContentTypesDataForActions: jest.fn(() => ({
       'api::contentTypeA.contentTypeA': {
@@ -21,7 +23,6 @@ jest.mock('../../utils', () => ({
         displayName: 'contentTypeB',
       },
     })),
-    updateReleaseStatus: mockUpdateReleaseStatus,
   })),
   getPermissionsChecker: jest.fn(() => ({
     sanitizedQuery: {
@@ -83,26 +84,21 @@ describe('Release Action controller', () => {
 
   describe('createMany', () => {
     beforeEach(() => {
-      global.strapi = {
-        db: {
-          transaction: jest.fn((cb) => cb()),
-        },
-        eventHub: {
-          emit: jest.fn(),
-        },
-      } as unknown as typeof global.strapi;
+      global.strapi = {} as unknown as typeof global.strapi;
 
       jest.clearAllMocks();
     });
 
-    it('creates multiple release actions', async () => {
-      mockCreateAction.mockResolvedValue({ id: 1 });
+    it('returns the created actions and counts the entries already in the release', async () => {
+      // One of the two entries was already in the release
+      mockCreateManyActions.mockResolvedValue({ created: [{ id: 1 }], alreadyInRelease: 1 });
 
-      const ctx: any = {
+      const created = jest.fn();
+      const ctx = {
         params: {
           releaseId: 1,
         },
-        created: jest.fn(),
+        created,
         request: {
           body: [
             {
@@ -117,139 +113,14 @@ describe('Release Action controller', () => {
             },
           ],
         },
-      };
+      } as unknown as Koa.Context;
 
       await releaseActionController.createMany(ctx);
 
-      expect(mockCreateAction).toHaveBeenCalledTimes(2);
-
-      expect(ctx.created).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.any(Array), // Ensure data is an array
-          meta: expect.objectContaining({
-            totalEntries: 2,
-            entriesAlreadyInRelease: 0,
-          }),
-        })
-      );
-      const firstCallArgument = ctx.created.mock.calls[0][0];
-      expect(firstCallArgument.data.length).toBe(2);
-    });
-
-    it('should count already added entries and dont throw an error', async () => {
-      mockCreateAction.mockRejectedValue(
-        new AlreadyOnReleaseError(
-          'Entry with id 1 and contentType api::contentTypeA.contentTypeA already exists in release with id 1'
-        )
-      );
-
-      const ctx: any = {
-        params: {
-          releaseId: 1,
-        },
-        created: jest.fn(),
-        request: {
-          body: [
-            {
-              entryDocumentId: 'abcd',
-              contentType: 'api::contentTypeA.contentTypeA',
-              type: 'publish',
-            },
-          ],
-        },
-      };
-
-      await releaseActionController.createMany(ctx);
-
-      expect(mockCreateAction).toHaveBeenCalledTimes(1);
-      expect(ctx.created).toHaveBeenCalledWith({
-        data: [],
-        meta: { totalEntries: 1, entriesAlreadyInRelease: 1 },
+      expect(created).toHaveBeenCalledWith({
+        data: [{ id: 1 }],
+        meta: { totalEntries: 2, entriesAlreadyInRelease: 1 },
       });
-    });
-
-    it('should call updateReleaseStatus only once', async () => {
-      mockCreateAction.mockResolvedValue({ id: 1 });
-      mockUpdateReleaseStatus.mockResolvedValue({ id: 1 });
-
-      const ctx: any = {
-        params: {
-          releaseId: 1,
-        },
-        created: jest.fn(),
-        request: {
-          body: [
-            {
-              entryDocumentId: 'abcd1',
-              contentType: 'api::contentTypeA.contentTypeA',
-              type: 'publish',
-            },
-            {
-              entryDocumentId: 'abcd2',
-              contentType: 'api::contentTypeA.contentTypeA',
-              type: 'publish',
-            },
-          ],
-        },
-      };
-
-      await releaseActionController.createMany(ctx);
-
-      expect(mockUpdateReleaseStatus).toHaveBeenCalledTimes(1);
-    });
-
-    it('leaves audit events to the service', async () => {
-      mockCreateAction
-        .mockResolvedValueOnce({ id: 1, type: 'publish' })
-        .mockResolvedValueOnce({ id: 2, type: 'publish' });
-
-      const ctx: any = {
-        params: { releaseId: 1 },
-        created: jest.fn(),
-        request: {
-          body: [
-            {
-              entryDocumentId: 'abcd1',
-              contentType: 'api::contentTypeA.contentTypeA',
-              type: 'publish',
-            },
-            {
-              entryDocumentId: 'abcd2',
-              contentType: 'api::contentTypeA.contentTypeA',
-              type: 'publish',
-            },
-          ],
-        },
-      };
-
-      await releaseActionController.createMany(ctx);
-
-      // The service emits release.entry.add per created action, on commit — the
-      // controller emits nothing itself
-      expect(global.strapi.eventHub.emit).not.toHaveBeenCalled();
-      expect(ctx.created).toHaveBeenCalled();
-    });
-
-    it('emits nothing when every entry was already in the release', async () => {
-      mockCreateAction.mockRejectedValue(new AlreadyOnReleaseError('already in release'));
-
-      const ctx: any = {
-        params: { releaseId: 1 },
-        created: jest.fn(),
-        request: {
-          body: [
-            {
-              entryDocumentId: 'abcd',
-              contentType: 'api::contentTypeA.contentTypeA',
-              type: 'publish',
-            },
-          ],
-        },
-      };
-
-      await releaseActionController.createMany(ctx);
-
-      expect(global.strapi.eventHub.emit).not.toHaveBeenCalled();
     });
   });
 

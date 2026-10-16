@@ -1,6 +1,20 @@
 import { queryParams } from '@strapi/utils';
 
+import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../../constants';
 import createReleaseActionService from '../release-action';
+import { AlreadyOnReleaseError } from '../validation';
+import type * as utils from '../../utils';
+
+const actualGetDraftEntryValidity =
+  jest.requireActual<typeof utils>('../../utils').getDraftEntryValidity;
+// The real draft check by default; tests of the entry revalidation stub its result
+const mockGetDraftEntryValidity = jest.fn(actualGetDraftEntryValidity);
+
+jest.mock('../../utils', () => ({
+  ...jest.requireActual<typeof utils>('../../utils'),
+  getDraftEntryValidity: (...args: Parameters<typeof utils.getDraftEntryValidity>) =>
+    mockGetDraftEntryValidity(...args),
+}));
 
 const serviceMock = {
   'release-validation': {
@@ -32,8 +46,8 @@ const baseStrapiMock = {
     },
   },
   db: {
-    // Standalone by default: the emit goes out directly
-    inTransaction: jest.fn().mockReturnValue(false),
+    // Action writes run in a transaction; the mock commits right away, so the audit emit goes out
+    inTransaction: jest.fn().mockReturnValue(true),
     query: jest.fn().mockReturnValue({
       update: jest.fn(),
     }),
@@ -117,8 +131,14 @@ const baseStrapiMock = {
 };
 
 describe('Release Action service', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Also drops results a test queued but didn't consume
+    mockGetDraftEntryValidity.mockReset().mockImplementation(actualGetDraftEntryValidity);
+  });
+
   describe('findPage', () => {
-    it('throws an error if the release does not exist', () => {
+    it('throws an error if the release does not exist', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -131,7 +151,7 @@ describe('Release Action service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });
 
-      expect(() => releaseActionService.findPage(1, {})).rejects.toThrow(
+      await expect(releaseActionService.findPage(1, {})).rejects.toThrow(
         'No release found for id 1'
       );
     });
@@ -170,12 +190,10 @@ describe('Release Action service', () => {
         type: 'publish',
         entry: { id: 1, contentType: 'api::contentTypeA.contentTypeA' },
       });
-      // Standalone: emitted directly, no transaction opened for it
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
         'release.entry.add',
         expect.objectContaining({ type: 'publish' })
       );
-      expect(strapiMock.db.transaction).not.toHaveBeenCalled();
     });
 
     it('defers the audit event to the commit inside a transaction', async () => {
@@ -185,9 +203,11 @@ describe('Release Action service', () => {
         eventHub: { emit: jest.fn() },
         db: {
           ...baseStrapiMock.db,
-          // A bulk request runs the creates inside a transaction
+          // The emit waits for the commit of the write's transaction
           inTransaction: jest.fn().mockReturnValue(true),
-          transaction: jest.fn((fn: any) => fn({ trx: jest.fn(), onCommit })),
+          transaction: jest.fn((fn: (params: { trx: unknown; onCommit: jest.Mock }) => unknown) =>
+            fn({ trx: jest.fn(), onCommit })
+          ),
           query: jest.fn().mockReturnValue({
             create: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
             findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
@@ -218,7 +238,34 @@ describe('Release Action service', () => {
       );
     });
 
-    it('throws an error if the release does not exist', () => {
+    it("points a single type's action at its document, without changing the request", async () => {
+      const actionCreate = jest.fn(({ data }) => ({ id: 1, ...data }));
+      const strapiMock = {
+        ...baseStrapiMock,
+        contentType: jest.fn(() => ({ uid: 'api::homepage.homepage', kind: 'singleType' })),
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            create: actionCreate,
+            // The single type's document, then the release
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', documentId: 'homepage-doc' }),
+          }),
+        },
+      };
+      const request = {
+        type: 'unpublish' as const,
+        contentType: 'api::homepage.homepage' as const,
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      const action = await releaseActionService.create(1, request);
+
+      expect(action).toMatchObject({ entryDocumentId: 'homepage-doc' });
+      expect(request).toEqual({ type: 'unpublish', contentType: 'api::homepage.homepage' });
+    });
+
+    it('throws an error if the release does not exist', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -236,12 +283,12 @@ describe('Release Action service', () => {
         contentType: 'api::contentTypeA.contentTypeA' as const,
       };
 
-      expect(() => releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
+      await expect(releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
         'No release found for id 1'
       );
     });
 
-    it('throws an error if the release is already published', () => {
+    it('throws an error if the release is already published', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -260,7 +307,7 @@ describe('Release Action service', () => {
         contentType: 'api::contentTypeA.contentTypeA' as const,
       };
 
-      expect(() => releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
+      await expect(releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
         'Release already published'
       );
     });
@@ -454,13 +501,13 @@ describe('Release Action service', () => {
       expect(release).toEqual({ id: 1, type: 'publish' });
     });
 
-    it('throws an error if the release does not exist', () => {
+    it('throws an error if the release does not exist', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
+          ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
             delete: jest.fn().mockReturnValue(null),
-            updated: jest.fn().mockReturnValue(null),
           }),
         },
       };
@@ -468,9 +515,207 @@ describe('Release Action service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });
 
-      expect(() => releaseActionService.delete(1, 1)).rejects.toThrow(
+      await expect(releaseActionService.delete(1, 1)).rejects.toThrow(
         'Action with id 1 not found in release with id 1 or it is already published'
       );
+    });
+  });
+
+  describe('createMany', () => {
+    it('skips entries already in the release and recalculates the status once', async () => {
+      const actionCreate = jest.fn(({ data }) => ({ id: 1, ...data }));
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            create: actionCreate,
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          }),
+        },
+      };
+      const { validateUniqueEntry } = serviceMock['release-validation'];
+      validateUniqueEntry
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new AlreadyOnReleaseError('already in the release'));
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      const result = await releaseActionService.createMany(1, [
+        {
+          type: 'unpublish',
+          entryDocumentId: 'new',
+          contentType: 'api::contentTypeA.contentTypeA',
+        },
+        {
+          type: 'unpublish',
+          entryDocumentId: 'dup',
+          contentType: 'api::contentTypeA.contentTypeA',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [expect.objectContaining({ entryDocumentId: 'new' })],
+        alreadyInRelease: 1,
+      });
+      expect(actionCreate).toHaveBeenCalledTimes(1);
+      expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[1]]);
+    });
+
+    it('fails the whole batch on any other error', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({ create: jest.fn(), findOne: jest.fn() }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+
+      await expect(
+        releaseActionService.createMany(1, [
+          {
+            type: 'unpublish',
+            entryDocumentId: 'a',
+            contentType: 'api::contentTypeA.contentTypeA',
+          },
+        ])
+      ).rejects.toThrow('No release found for id 1');
+      expect(serviceMock.release.updateReleaseStatus).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteEntryActions', () => {
+    it("deletes the entry's actions from planned releases only and recalculates their status", async () => {
+      const releaseFindMany = jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]);
+      const actionDeleteMany = jest.fn();
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn((uid: string) =>
+            uid === RELEASE_MODEL_UID
+              ? { findMany: releaseFindMany }
+              : { deleteMany: actionDeleteMany }
+          ),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      const entry = {
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+        entryDocumentId: 'doc-1',
+        locale: 'en',
+      };
+
+      await releaseActionService.deleteEntryActions(entry);
+
+      expect(releaseFindMany).toHaveBeenCalledWith({
+        where: { releasedAt: { $null: true }, actions: entry },
+      });
+      expect(actionDeleteMany.mock.calls).toStrictEqual([
+        [{ where: { ...entry, release: { releasedAt: { $null: true } } } }],
+      ]);
+      expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[1], [2]]);
+    });
+  });
+
+  describe('revalidateEntryActions', () => {
+    const UID = 'api::contentTypeA.contentTypeA' as const;
+    const INVALID = {
+      isEntryValid: false,
+      reason: { validation: { errors: [{ path: ['title'], message: 'title is required' }] } },
+    };
+    // The entry's actions in planned releases that no run recorded
+    const PLANNED = {
+      contentType: UID,
+      entryDocumentId: 'doc-1',
+      locale: 'en',
+      outcome: null,
+      release: { releasedAt: { $null: true } },
+    };
+
+    const revalidate = async ({
+      plannedReleases,
+      publishActions,
+    }: {
+      plannedReleases: { id: number }[];
+      publishActions: number;
+    }) => {
+      const actionUpdateMany = jest.fn();
+      const actionCount = jest.fn().mockResolvedValue(publishActions);
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn((uid: string) =>
+            uid === RELEASE_ACTION_MODEL_UID
+              ? { count: actionCount, updateMany: actionUpdateMany }
+              : { findMany: jest.fn().mockResolvedValue(plannedReleases) }
+          ),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      await releaseActionService.revalidateEntryActions(UID, {
+        id: 1,
+        documentId: 'doc-1',
+        locale: 'en',
+      });
+
+      return { actionCount, actionUpdateMany };
+    };
+
+    it('skips the draft read when the entry is in no planned release', async () => {
+      const { actionUpdateMany } = await revalidate({ plannedReleases: [], publishActions: 1 });
+
+      expect(mockGetDraftEntryValidity).not.toHaveBeenCalled();
+      expect(actionUpdateMany).not.toHaveBeenCalled();
+    });
+
+    it('skips the draft read when the entry only has unpublish actions', async () => {
+      const { actionUpdateMany } = await revalidate({
+        plannedReleases: [{ id: 1 }],
+        publishActions: 0,
+      });
+
+      expect(mockGetDraftEntryValidity).not.toHaveBeenCalled();
+      expect(actionUpdateMany.mock.calls).toStrictEqual([
+        [
+          {
+            where: { ...PLANNED, type: 'unpublish', isEntryValid: false },
+            data: { isEntryValid: true, reason: null },
+          },
+        ],
+      ]);
+    });
+
+    it("stores the draft's validity and reason on publish actions a run hasn't recorded", async () => {
+      mockGetDraftEntryValidity.mockResolvedValueOnce(INVALID);
+      const { actionCount, actionUpdateMany } = await revalidate({
+        plannedReleases: [{ id: 1 }, { id: 2 }],
+        publishActions: 1,
+      });
+
+      expect(actionCount).toHaveBeenCalledWith({ where: { ...PLANNED, type: 'publish' } });
+      expect(mockGetDraftEntryValidity).toHaveBeenCalledWith(
+        { contentType: UID, documentId: 'doc-1', locale: 'en' },
+        expect.anything()
+      );
+      expect(actionUpdateMany.mock.calls).toStrictEqual([
+        [{ where: { ...PLANNED, type: 'publish' }, data: INVALID }],
+        [
+          {
+            where: { ...PLANNED, type: 'unpublish', isEntryValid: false },
+            data: { isEntryValid: true, reason: null },
+          },
+        ],
+      ]);
+      expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[1], [2]]);
     });
   });
 
@@ -479,6 +724,7 @@ describe('Release Action service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
+          ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
             findOne: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
             update: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
@@ -518,7 +764,7 @@ describe('Release Action service', () => {
       expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
     });
 
-    it('throws an error if the release does not exist or was already published', () => {
+    it('throws an error if the release does not exist or was already published', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -532,7 +778,7 @@ describe('Release Action service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });
 
-      expect(() => releaseActionService.update(1, 1, { type: 'publish' })).rejects.toThrow(
+      await expect(releaseActionService.update(1, 1, { type: 'publish' })).rejects.toThrow(
         'Action with id 1 not found in release with id 1 or it is already published'
       );
     });

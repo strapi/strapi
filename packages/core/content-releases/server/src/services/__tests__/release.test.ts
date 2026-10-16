@@ -169,7 +169,7 @@ describe('Release service', () => {
       expect(release).toEqual({ id: 1, name: 'Release name' });
     });
 
-    it('throws an error if the release does not exist', () => {
+    it('throws an error if the release does not exist', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -187,12 +187,12 @@ describe('Release service', () => {
         name: 'Release name',
       };
 
-      expect(() => releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
+      await expect(releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
         'No release found for id 1'
       );
     });
 
-    it('throws an error if the release is already published', () => {
+    it('throws an error if the release is already published', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -209,7 +209,7 @@ describe('Release service', () => {
         name: 'Release name',
       };
 
-      expect(() => releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
+      await expect(releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
         'Release already published'
       );
     });
@@ -272,24 +272,24 @@ describe('Release service', () => {
   });
 
   describe('publish', () => {
-    it('throws an error if the release does not exist', () => {
+    it('throws an error if the release does not exist', async () => {
       mockExecute.mockReturnValueOnce(null);
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: baseStrapiMock });
 
-      expect(() => releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
+      await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
         'No release found for id 1'
       );
     });
 
-    it('throws an error if the release is already published', () => {
+    it('throws an error if the release is already published', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, releasedAt: new Date() });
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: baseStrapiMock });
 
-      expect(() => releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
+      await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
         'Release already published'
       );
     });
@@ -1073,19 +1073,36 @@ describe('Release service', () => {
       }
     );
 
-    it('recalculates the status of a planned release', async () => {
+    // `null`: a release from before statuses existed still gets one
+    it.each([null, 'ready'])(
+      'recalculates the status of a planned release whose status is %s',
+      async (status) => {
+        const { strapiMock, updateMany } = createStrapiMock(
+          { releaseCondition: 'all_or_nothing', releasedAt: null, status },
+          { total: 3, invalid: 1 }
+        );
+
+        // @ts-expect-error Ignore missing properties
+        const releaseService = createReleaseService({ strapi: strapiMock });
+        await releaseService.updateReleaseStatus(1);
+
+        expect(updateMany.mock.calls).toStrictEqual([
+          [{ where: { id: 1, releasedAt: null }, data: { status: 'blocked' } }],
+        ]);
+      }
+    );
+
+    it('keeps the status of a planned release that failed before runs froze releases', async () => {
       const { strapiMock, updateMany } = createStrapiMock(
-        { releaseCondition: 'all_or_nothing', releasedAt: null },
-        { total: 3, invalid: 1 }
+        { releaseCondition: 'all_or_nothing', releasedAt: null, status: 'failed' },
+        { total: 3, invalid: 0 }
       );
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
       await releaseService.updateReleaseStatus(1);
 
-      expect(updateMany.mock.calls).toStrictEqual([
-        [{ where: { id: 1, releasedAt: null }, data: { status: 'blocked' } }],
-      ]);
+      expect(updateMany).not.toHaveBeenCalled();
     });
 
     it('does nothing for a release that no longer exists', async () => {
@@ -1126,7 +1143,7 @@ describe('Release service', () => {
       expect(release).toEqual({ id: 1, name: 'test' });
     });
 
-    it('throws an error if the release does not exist or was already published', () => {
+    it('throws an error if the release does not exist or was already published', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -1141,10 +1158,10 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      expect(() => releaseService.delete(1)).rejects.toThrow('No release found for id 1');
+      await expect(releaseService.delete(1)).rejects.toThrow('No release found for id 1');
     });
 
-    it('throws an error if the release is already published', () => {
+    it('throws an error if the release is already published', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -1157,7 +1174,7 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      expect(() => releaseService.delete(1)).rejects.toThrow('Release already published');
+      await expect(releaseService.delete(1)).rejects.toThrow('Release already published');
     });
 
     it('removes the scheduling if the release is scheduled', async () => {

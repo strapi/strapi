@@ -70,7 +70,7 @@ type WorkflowWithRequiredStage = { stageRequiredToPublish?: StageRef | null } | 
 
 type DraftEntry = Modules.Documents.AnyDocument & { strapi_stage?: StageRef | null };
 
-type PublishabilityOutcome = Extract<
+export type PublishabilityOutcome = Extract<
   ReleaseActionOutcome,
   'skipped_invalid' | 'skipped_not_approved'
 >;

@@ -30,6 +30,7 @@ import {
   getValidationErrors,
   isReleaseBlocked,
 } from '../utils';
+import type { PublishabilityOutcome } from '../utils';
 import { getReleaseChanges } from '../audit-logs';
 
 type PublishTrigger = 'manual' | 'scheduled';
@@ -59,6 +60,19 @@ const getErrorOutcome = (error: unknown): RecordedOutcome =>
   error instanceof errors.ValidationError
     ? { outcome: 'skipped_invalid', reason: { validation: { errors: getValidationErrors(error) } } }
     : { outcome: 'skipped_error', reason: { error: { name: getErrorName(error) } } };
+
+// The run writes the validity it found, so a frozen action never contradicts its outcome: false
+// exactly for the outcomes of an entry that isn't publishable. An entry that threw while being
+// released (`skipped_error`) had passed the check.
+const IS_ENTRY_VALID_BY_OUTCOME: Record<PublishabilityOutcome, false> &
+  Record<Exclude<ReleaseActionOutcome, PublishabilityOutcome>, true> = {
+  published: true,
+  unpublished: true,
+  skipped_held: true,
+  skipped_error: true,
+  skipped_invalid: false,
+  skipped_not_approved: false,
+};
 
 // Every entry the run didn't release counts as skipped, also one it recorded no outcome for
 const getRunTotals = (
@@ -152,7 +166,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (reason) {
         await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
           where: { id },
-          data: { outcome, reason },
+          data: { outcome, reason, isEntryValid: IS_ENTRY_VALID_BY_OUTCOME[outcome] },
         });
       } else {
         const ids = idsByOutcome.get(outcome) ?? [];
@@ -165,7 +179,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Clears any reason stored before the run: the run's record replaces it
       await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
         where: { id: { $in: ids } },
-        data: { outcome, reason: null },
+        data: { outcome, reason: null, isEntryValid: IS_ENTRY_VALID_BY_OUTCOME[outcome] },
       });
     }
   };
@@ -642,10 +656,13 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 
-      const releaseRead: Promise<Pick<Release, 'releaseCondition' | 'releasedAt'> | null> =
-        strapi.db
-          .query(RELEASE_MODEL_UID)
-          .findOne({ where: { id: releaseId }, select: ['releaseCondition', 'releasedAt'] });
+      const releaseRead: Promise<Pick<
+        Release,
+        'releaseCondition' | 'releasedAt' | 'status'
+      > | null> = strapi.db.query(RELEASE_MODEL_UID).findOne({
+        where: { id: releaseId },
+        select: ['releaseCondition', 'releasedAt', 'status'],
+      });
 
       const [release, totalActions, invalidActions] = await Promise.all([
         releaseRead,
@@ -664,7 +681,9 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         }),
       ]);
 
-      if (!release || release.releasedAt) {
+      // A `failed` release without `releasedAt` failed before runs froze releases: its status is
+      // the only record of that failure, kept until the overdue sweep freezes it
+      if (!release || release.releasedAt || release.status === 'failed') {
         return;
       }
 
