@@ -21,11 +21,13 @@ export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
   jsPlugins: ['./no-lodash-fp.js'],
   categories: {
-    // Phase 1: correctness only (definitely-wrong code, lowest noise).
-    // TODO @Nico Phase 2 — port the ESLint/Airbnb policy surface here
-    // (suspicious/style/restriction) once the rule matrix is agreed. Goal is
-    // to reproduce what ESLint covers today, preferring over- to under-coverage.
+    // Blocking bar: correctness plus extra-policy `perf`.
+    // Later categories (suspicious/pedantic/style) are not extra policy yet.
+    // The category enable also accepts any new `perf` rule that a future oxlint
+    // release adds. oxlint is pinned exactly, so such a rule breaks the blocking
+    // gate on the version bump PR and not on a code merge.
     correctness: 'error',
+    perf: 'error',
   },
   rules: {
     'no-restricted-imports': [
@@ -46,6 +48,11 @@ export const base = {
     'unicorn/no-thenable': 'off',
     // Behavioral / intentional deps; revisit when enabling broader react-hooks.
     'react/exhaustive-deps': 'off',
+    // Backend ESLint turns this off on purpose (sequential await is allowed).
+    // ESLint only errors it on a 62-file frontend JS surface (2 projects).
+    // A category enable would expand that ban onto the backend (~495 of the
+    // Aug 20 +685 perf delta). Frontend JS stays covered by ESLint.
+    'eslint/no-await-in-loop': 'off',
   },
   ignorePatterns: [
     '**/dist/**',

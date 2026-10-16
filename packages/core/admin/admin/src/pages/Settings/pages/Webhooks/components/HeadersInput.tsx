@@ -38,12 +38,29 @@ const HeadersInput = () => {
   const removeFieldRow = useForm('HeadersInput', (state) => state.removeFieldRow);
   const setFieldValue = useForm('HeadersInput', (state) => state.onChange);
   const { value = [] } = useField<Header[]>('headers');
+  const rowKeyPrefix = React.useId();
+  const nextRowKey = React.useRef(0);
+  const rowKeys = React.useRef<string[]>([]);
+
+  while (rowKeys.current.length < value.length) {
+    rowKeys.current.push(`${rowKeyPrefix}-${nextRowKey.current}`);
+    nextRowKey.current += 1;
+  }
+  rowKeys.current.length = value.length;
+
+  const rows = value.map((_, index) => ({
+    index,
+    key: rowKeys.current[index],
+  }));
 
   const removeRow = (index: number) => {
-    // if we are removing the last row, simply clear it
+    // Removing the only row clears it in place instead of deleting it, so the list length
+    // stays 1 and its key stays valid. Splicing rowKeys here would drop a key that the render
+    // body regenerates on the next pass, which would remount the row and tear down its inputs.
     if (value.length === 1) {
       setFieldValue('headers', [{ key: '', value: '' }]);
     } else {
+      rowKeys.current.splice(index, 1);
       removeFieldRow('headers', index);
     }
   };
@@ -57,9 +74,9 @@ const HeadersInput = () => {
         })}
       </DSField.Label>
       <Box padding={8} background="neutral100" hasRadius>
-        {value.map((val, index) => {
+        {rows.map(({ index, key }) => {
           return (
-            <Grid.Root key={`${index}-${JSON.stringify(val.key)}`} gap={4} padding={2}>
+            <Grid.Root key={key} gap={4} padding={2}>
               <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                 <HeaderCombobox
                   name={`headers.${index}.key`}
