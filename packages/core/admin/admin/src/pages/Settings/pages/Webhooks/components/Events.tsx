@@ -258,11 +258,16 @@ interface EventsContentTypesProps {
   selectedEvents?: string[];
 }
 
+const EMPTY_SELECTED_EVENTS: NonNullable<EventsContentTypesProps['selectedEvents']> = [];
+
 /**
  * Lists the content types below the entry events, to select events for a single content type.
  * The events selected for every content type are displayed as selected and can't be changed.
  */
-const EventsContentTypes = ({ events, selectedEvents = [] }: EventsContentTypesProps) => {
+const EventsContentTypes = ({
+  events,
+  selectedEvents = EMPTY_SELECTED_EVENTS,
+}: EventsContentTypesProps) => {
   const { locale } = useIntl();
   const { isLoading, collectionTypes, singleTypes } = useContentTypes();
   const { value = {}, onChange } = useField<Record<string, string[]>>('contentTypeEvents');
