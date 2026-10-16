@@ -5360,13 +5360,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mux/mux-player-react@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@mux/mux-player-react@npm:3.1.0"
+"@mux/mux-data-google-ima@npm:^0.3.17":
+  version: 0.3.18
+  resolution: "@mux/mux-data-google-ima@npm:0.3.18"
   dependencies:
-    "@mux/mux-player": "npm:3.1.0"
-    "@mux/playback-core": "npm:0.27.0"
-    prop-types: "npm:^15.7.2"
+    mux-embed: "npm:5.18.2"
+  checksum: 10c0/d760eb338580d73cac5f7ea5400718b4099c99643919a9907d304f832c04ca4204b5fe5e74249c33197a07bedbb1834a174fc8144d803b2c20806ae84481cf2b
+  languageName: node
+  linkType: hard
+
+"@mux/mux-player-react@npm:3.14.0":
+  version: 3.14.0
+  resolution: "@mux/mux-player-react@npm:3.14.0"
+  dependencies:
+    "@mux/mux-player": "npm:3.14.0"
+    "@mux/playback-core": "npm:0.36.0"
+    prop-types: "npm:^15.8.1"
   peerDependencies:
     "@types/react": ^17.0.0 || ^17.0.0-0 || ^18 || ^18.0.0-0 || ^19 || ^19.0.0-0
     react: ^17.0.2 || ^17.0.0-0 || ^18 || ^18.0.0-0 || ^19 || ^19.0.0-0
@@ -5376,41 +5385,43 @@ __metadata:
       optional: true
     "@types/react-dom":
       optional: true
-  checksum: 10c0/14b7a1de1a5d6712fc69aea675a87ac5771e79840f8cee378cce7e187728567b328a32669d6159b69617c859dba48b91024d8cd2de7b66f980b03b1f5209a6b7
+  checksum: 10c0/846567204336a5b52f82ea9d6e07df9ce250b67903aae028798cc8f2dad12a95a737e49b39bb71964c56d4f6abb32940085f1dc0cf2a73b04d85246858981646
   languageName: node
   linkType: hard
 
-"@mux/mux-player@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@mux/mux-player@npm:3.1.0"
+"@mux/mux-player@npm:3.14.0":
+  version: 3.14.0
+  resolution: "@mux/mux-player@npm:3.14.0"
   dependencies:
-    "@mux/mux-video": "npm:0.22.0"
-    "@mux/playback-core": "npm:0.27.0"
-    media-chrome: "npm:~4.2.1"
-    player.style: "npm:^0.0.8"
-  checksum: 10c0/0c2cad39060a587c035d1fe2c33bfd035471208262f953190ddb61565adc8620210b587ca599821c0208b5a4251a59fbc47da33d21b17bc57e3b4e07036384eb
+    "@mux/mux-video": "npm:0.31.5"
+    "@mux/playback-core": "npm:0.36.0"
+    media-chrome: "npm:~4.19.3"
+    player.style: "npm:^0.3.0"
+  checksum: 10c0/7e1caebf9b46684a58b407ea25147121d602ce8f8930ff41e969d3911787baf89fac22a89d2a2996d750b26051167868800b51dcb381317a0f833f274d20d95f
   languageName: node
   linkType: hard
 
-"@mux/mux-video@npm:0.22.0":
-  version: 0.22.0
-  resolution: "@mux/mux-video@npm:0.22.0"
+"@mux/mux-video@npm:0.31.5":
+  version: 0.31.5
+  resolution: "@mux/mux-video@npm:0.31.5"
   dependencies:
-    "@mux/playback-core": "npm:0.27.0"
-    castable-video: "npm:~1.1.0"
-    custom-media-element: "npm:~1.3.1"
-    media-tracks: "npm:~0.3.2"
-  checksum: 10c0/bd9ed43090afaa0683675ee76adcda658c299d030085ee4bd03be2f1c562af745285d213829cd1c88747c84f606bdbfb3b22ec0564d532c3d6aed45df3f4dd5b
+    "@mux/mux-data-google-ima": "npm:^0.3.17"
+    "@mux/playback-core": "npm:0.36.0"
+    "@types/google_interactive_media_ads_types": "npm:^3.697.0"
+    castable-video: "npm:~1.1.16"
+    custom-media-element: "npm:~1.4.6"
+    media-tracks: "npm:~0.3.5"
+  checksum: 10c0/ca353b3201288899109cd175150e7df9eec89c14f9c5c84fe1d53fac44f6651f0b50cfb6eed1aa79adeff91a968f2397511fab2fd8019b50ecd2653ed0946ce0
   languageName: node
   linkType: hard
 
-"@mux/playback-core@npm:0.27.0":
-  version: 0.27.0
-  resolution: "@mux/playback-core@npm:0.27.0"
+"@mux/playback-core@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@mux/playback-core@npm:0.36.0"
   dependencies:
-    hls.js: "npm:~1.5.11"
-    mux-embed: "npm:^5.3.1"
-  checksum: 10c0/af2056f110415557b4d19c7139e104a178f287e1c892d6818645d5953c3b61da0b5e6f1063ea6aa943af0becc54d7a9f5e7005ff2b2254a3f3a40f89b92f126a
+    hls.js: "npm:~1.7.0"
+    mux-embed: "npm:^5.18.1"
+  checksum: 10c0/327d4ce44832325f329192f53acf75ffc0841bc5c2a9b38ce9edcf333499e3e3fb4b4f696c0105dd7ab39ffa374589d070620ae9a3e64eedc62fd617415ccbf0
   languageName: node
   linkType: hard
 
@@ -10765,7 +10776,7 @@ __metadata:
   dependencies:
     "@dnd-kit/core": "npm:6.3.1"
     "@dnd-kit/modifiers": "npm:9.0.0"
-    "@mux/mux-player-react": "npm:3.1.0"
+    "@mux/mux-player-react": "npm:3.14.0"
     "@radix-ui/react-dialog": "npm:1.0.5"
     "@radix-ui/react-toggle-group": "npm:1.1.11"
     "@reduxjs/toolkit": "npm:1.9.7"
@@ -11848,6 +11859,13 @@ __metadata:
   version: 3.0.0
   resolution: "@types/global-agent@npm:3.0.0"
   checksum: 10c0/b2fdcb13b8b7079e1ae9fbab52ca1fe7551d7fbff6be40a30a2f3c9d2b2d1841829e62249464ecf5e7240bfece8bce143a3331449af714f8c97a08b581bbc18a
+  languageName: node
+  linkType: hard
+
+"@types/google_interactive_media_ads_types@npm:^3.697.0":
+  version: 3.697.1
+  resolution: "@types/google_interactive_media_ads_types@npm:3.697.1"
+  checksum: 10c0/273e4119fdb6471e55abd4efeb6f333d6901cc4f4a6b1b2b14ad2ac17c3c3eeb10e1c781426914489e7dce3cc44028d4d5ce728df1cb2382b326698a04bc2e3a
   languageName: node
   linkType: hard
 
@@ -15048,12 +15066,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"castable-video@npm:~1.1.0":
-  version: 1.1.0
-  resolution: "castable-video@npm:1.1.0"
+"castable-video@npm:~1.1.16":
+  version: 1.1.16
+  resolution: "castable-video@npm:1.1.16"
   dependencies:
-    custom-media-element: "npm:~1.3.2"
-  checksum: 10c0/2b9ef1037651c8f9475ad5d9af3b0462f2f65d994f507fcb5acb204e1fea1c3015639aa1d1fd5bf9591835416acc5cf68b7a831bd24b8fed685253b9a32e6259
+    custom-media-element: "npm:~1.4.6"
+  checksum: 10c0/e9e8947697f3479f9911200968592d970a664880deff2bd34fd02e241203e97cb625ff37f29d01525fece1cbf2bebb8b3100b79843f67c93358796b7164ba30c
   languageName: node
   linkType: hard
 
@@ -15061,6 +15079,15 @@ __metadata:
   version: 2.0.1
   resolution: "ccount@npm:2.0.1"
   checksum: 10c0/3939b1664390174484322bc3f45b798462e6c07ee6384cb3d645e0aa2f318502d174845198c1561930e1d431087f74cf1fe291ae9a4722821a9f4ba67e574350
+  languageName: node
+  linkType: hard
+
+"ce-la-react@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "ce-la-react@npm:0.3.2"
+  peerDependencies:
+    react: ">=17.0.0"
+  checksum: 10c0/cbee7602c1e4efc1278e5c0847b8201fa291ad3a5bde4137da139a7b6a2b7b8de029530fb2c474e62fcc544e62669003e4a34fd1abafac8110d89ffade588c37
   languageName: node
   linkType: hard
 
@@ -16277,10 +16304,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"custom-media-element@npm:~1.3.1, custom-media-element@npm:~1.3.2":
-  version: 1.3.2
-  resolution: "custom-media-element@npm:1.3.2"
-  checksum: 10c0/49b1efa65ecb3dbf2c49f66132496c50bc44fd73dcdb5529bdc601e9642eba1d02400ad18c28d640c1fe0d671cee3613ae26f50575a1c7702a14f656a69e9d10
+"custom-media-element@npm:~1.4.6":
+  version: 1.4.6
+  resolution: "custom-media-element@npm:1.4.6"
+  checksum: 10c0/e47644f9f8f4f1ffdc0186d67d42b5472b9538f72d55a74283f820a5c411095849d029804263909b49b6bd79c7cc36399da827b45a733ed1f01b6ac5812cc045
   languageName: node
   linkType: hard
 
@@ -19879,10 +19906,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hls.js@npm:~1.5.11":
-  version: 1.5.15
-  resolution: "hls.js@npm:1.5.15"
-  checksum: 10c0/e04d7b7e5e318cf10914bb7ab0e6607fcc3f0e8d5cd89c25c699736b3206a4791a85fd55b62fe4120897fc6bcb848760b4797df288deede8dbc050810503fe89
+"hls.js@npm:~1.7.0":
+  version: 1.7.3
+  resolution: "hls.js@npm:1.7.3"
+  checksum: 10c0/c44c0098b9f4b53cb0c2cc2301d4cad907a77c60f470fa344b8cfc5077da4ccab9590d47e5cf81100a958d4aa43d7dc7bcb6566197fd9ae170ec10cea8af3e8c
   languageName: node
   linkType: hard
 
@@ -23382,17 +23409,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"media-chrome@npm:^4.1.0, media-chrome@npm:~4.2.1":
-  version: 4.2.3
-  resolution: "media-chrome@npm:4.2.3"
-  checksum: 10c0/88cd534dad0f67db90b5187de74ceff1affa3baf521850562aa55dc585547221538903b2c61f61bcd8347c47d5625cdb7560ba201aac2bc0fcfa648a73fbc1bb
+"media-chrome@npm:~4.19.0, media-chrome@npm:~4.19.3":
+  version: 4.19.3
+  resolution: "media-chrome@npm:4.19.3"
+  dependencies:
+    ce-la-react: "npm:^0.3.2"
+  checksum: 10c0/c3f53d13339cf66f0ca5104ef86625848ae70c5505e3efeffdc5092dfe0041e75dfe16f10767d4c2da4cec9eea6693ec9886ac6150e3ac63f1f22fbadb5d6c7b
   languageName: node
   linkType: hard
 
-"media-tracks@npm:~0.3.2":
-  version: 0.3.3
-  resolution: "media-tracks@npm:0.3.3"
-  checksum: 10c0/ecd57e628222b6e0611f21813a291a47b30c96aa1c9d7e13546932b59e8bb206651961a36360cc5584bf76bf890ce01be3bb0c045facf76ab8b1cfacecf9808b
+"media-tracks@npm:~0.3.5":
+  version: 0.3.5
+  resolution: "media-tracks@npm:0.3.5"
+  checksum: 10c0/a34402cb63dbf1c7d839595d0daf53b8df2a357f5fc71a365fe8427fd9013c09a3a957a6ad29a2bec177667f507ed7955eed71f7d12ced56e1f9edc8e178e93b
   languageName: node
   linkType: hard
 
@@ -24186,10 +24215,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mux-embed@npm:^5.3.1":
-  version: 5.4.1
-  resolution: "mux-embed@npm:5.4.1"
-  checksum: 10c0/443631ef225280a1c6aa6e4eb08ffd888c32453a26e0d21901cc86817920c1e683422a88ea71bad832f756bbbf6c6ee74f5e0354fef4c37444b4f17bead1c2af
+"mux-embed@npm:5.18.2, mux-embed@npm:^5.18.1":
+  version: 5.18.2
+  resolution: "mux-embed@npm:5.18.2"
+  checksum: 10c0/c9e31b3e5d4512641218e206420d31123ac0c2d3dd19d5f5e97fec6a2cdd021693c9305cafb5f1966dd5869b4dbbe6a556ca8aca065723b4817e280679388b17
   languageName: node
   linkType: hard
 
@@ -25899,12 +25928,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"player.style@npm:^0.0.8":
-  version: 0.0.8
-  resolution: "player.style@npm:0.0.8"
+"player.style@npm:^0.3.0":
+  version: 0.3.5
+  resolution: "player.style@npm:0.3.5"
   dependencies:
-    media-chrome: "npm:^4.1.0"
-  checksum: 10c0/a0e45a2a5d44ad423e2c0feb3b41c0219481ff95eab100e1c905e7f49a550c86ee362e09a8ac87279301a182795aed058245aec277bf039ba2e63161f8dca44f
+    media-chrome: "npm:~4.19.0"
+  checksum: 10c0/2b30e96629191dcf8faf2b95f4fde6717807abcdbfc5cf04f0e496e90089126f9884b4ff944fc405393356f369ce6f6479e687bf9b66b205af44b21602b5c664
   languageName: node
   linkType: hard
 
