@@ -117,6 +117,8 @@ When `create` or `update` calls the inner `publish` function, the call does not 
 
 The other D&P methods follow the same model. `unpublish` deletes the published rows. `discardDraft` replaces the draft rows with copies of the published rows. `delete` removes all rows of the requested locales and throws if the caller passes `status: 'draft'`.
 
+When a row goes away, through `delete`, `unpublish`, `discardDraft` or the replacement of a published row, its components go with it. The entries service collects the whole component tree level by level, with one query per component type, then removes it with one statement per component type and per relation attribute (`entityManager.deleteManyRelations` and `deleteMany`, which fire the `beforeDeleteMany` and `afterDeleteMany` lifecycles). When a database lifecycle subscriber listens to `beforeDelete` or `afterDelete` of one of those component types (`strapi.db.lifecycles.hasSubscribers`), the components are deleted one by one instead, so that each of them fires its events.
+
 ## Validation
 
 The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. For drafts, it skips `required`, `min`, `minLength` and `regex` checks. When `api.documents.strictRelations` is `true`, it also enforces required relations and media on non-draft writes.

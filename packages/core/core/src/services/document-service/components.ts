@@ -696,7 +696,132 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
   return previousValue;
 };
 
-const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.Entity<TUID>>(
+type ComponentIdsByUid = Map<UID.Component, Modules.EntityService.Params.Attribute.ID[]>;
+
+const addComponentIds = (
+  groups: ComponentIdsByUid,
+  componentUID: UID.Component,
+  ids: Modules.EntityService.Params.Attribute.ID[]
+) => {
+  if (ids.length > 0) {
+    groups.set(componentUID, [...(groups.get(componentUID) ?? []), ...ids]);
+  }
+};
+
+/**
+ * Ids of the components held by the component and dynamic zone attributes of `values`, by component uid.
+ */
+const groupComponentsByUid = (
+  schema: Schema.Schema,
+  values: Record<string, unknown>
+): ComponentIdsByUid => {
+  const groups: ComponentIdsByUid = new Map();
+
+  for (const [attributeName, attribute] of Object.entries(schema.attributes)) {
+    const value = values[attributeName];
+
+    if (isNil(value)) {
+      continue;
+    }
+
+    const components = _.castArray(value).filter(
+      (
+        component
+      ): component is {
+        id: Modules.EntityService.Params.Attribute.ID;
+        __component?: UID.Component;
+      } => isPlainObject(component) && !isNil((component as { id?: unknown }).id)
+    );
+
+    if (attribute.type === 'component') {
+      addComponentIds(
+        groups,
+        attribute.component,
+        components.map((component) => component.id)
+      );
+    } else if (attribute.type === 'dynamiczone') {
+      for (const component of components) {
+        if (component.__component) {
+          addComponentIds(groups, component.__component, [component.id]);
+        }
+      }
+    }
+  }
+
+  return groups;
+};
+
+/**
+ * Ids of every component under an entry or a component, by component uid, down to the deepest
+ * level. Each level costs one query per component uid, whatever the number of components.
+ */
+const collectComponentTree = async <TUID extends UID.Schema>(
+  uid: TUID,
+  entity: Record<string, unknown>,
+  { loadComponents = true } = {}
+): Promise<ComponentIdsByUid> => {
+  const tree: ComponentIdsByUid = new Map();
+  const schema = strapi.getModel(uid);
+  const componentAttributes = contentTypesUtils.getComponentAttributes(schema);
+
+  if (componentAttributes.length === 0) {
+    return tree;
+  }
+
+  const values = loadComponents
+    ? await strapi.db.query(uid).load(entity as any, componentAttributes)
+    : entity;
+
+  let level = groupComponentsByUid(schema, values ?? {});
+
+  while (level.size > 0) {
+    const nextLevel: ComponentIdsByUid = new Map();
+
+    for (const [componentUID, ids] of level) {
+      addComponentIds(tree, componentUID, ids);
+
+      const componentSchema = strapi.getModel(componentUID);
+      const nestedAttributes = contentTypesUtils.getComponentAttributes(componentSchema);
+
+      if (nestedAttributes.length === 0) {
+        continue;
+      }
+
+      const rows: Record<string, unknown>[] = await strapi.db.query(componentUID).findMany({
+        where: { id: { $in: ids } },
+        select: ['id'],
+        populate: Object.fromEntries(
+          nestedAttributes.map((attributeName) => [
+            attributeName,
+            // dynamic zone items need their __component, keep every column for them
+            componentSchema.attributes[attributeName].type === 'dynamiczone'
+              ? true
+              : { select: ['id'] },
+          ])
+        ),
+      });
+
+      for (const row of rows) {
+        for (const [nestedUID, nestedIds] of groupComponentsByUid(componentSchema, row)) {
+          addComponentIds(nextLevel, nestedUID, nestedIds);
+        }
+      }
+    }
+
+    level = nextLevel;
+  }
+
+  return tree;
+};
+
+const hasDeleteLifecycleSubscribers = (componentUID: UID.Component) =>
+  strapi.db.lifecycles.hasSubscribers('beforeDelete', componentUID) ||
+  strapi.db.lifecycles.hasSubscribers('afterDelete', componentUID);
+
+/**
+ * Deletes the components one by one, each with its own delete lifecycles.
+ */
+const deleteComponentsOneByOne = async <TUID extends UID.Schema, TEntity extends Data.Entity<TUID>>(
   uid: TUID,
   entityToDelete: TEntity,
   { loadComponents = true } = {}
@@ -735,6 +860,45 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
       continue;
     }
   }
+};
+
+// Keeps every statement under the parameter limits of the databases
+const DELETE_BATCH_SIZE = 500;
+
+/**
+ * Deletes every component under an entry or a component. The whole tree is removed level by level
+ * with one statement per component uid and per relation attribute. When a database lifecycle
+ * subscriber listens to the deletion of one of those component uids, the components are deleted
+ * one by one instead, so that each of them fires its events.
+ */
+const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.Entity<TUID>>(
+  uid: TUID,
+  entityToDelete: TEntity,
+  { loadComponents = true } = {}
+) => {
+  const tree = await collectComponentTree(uid, entityToDelete as Record<string, unknown>, {
+    loadComponents,
+  });
+
+  if (tree.size === 0) {
+    return;
+  }
+
+  if ([...tree.keys()].some(hasDeleteLifecycleSubscribers)) {
+    await deleteComponentsOneByOne(uid, entityToDelete, { loadComponents });
+    return;
+  }
+
+  await strapi.db.transaction(async ({ trx }) => {
+    for (const [componentUID, ids] of tree) {
+      for (const batch of _.chunk(ids, DELETE_BATCH_SIZE)) {
+        await strapi.db.entityManager.deleteManyRelations(componentUID, batch, {
+          transaction: trx,
+        });
+        await strapi.db.query(componentUID).deleteMany({ where: { id: { $in: batch } } });
+      }
+    }
+  });
 };
 
 /** *************************
