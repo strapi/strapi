@@ -34,7 +34,7 @@ Use `documentId` for stable references. Do not store a row `id` of a D&P content
 | 3     | Repository      | `document-service/repository.ts`     | Each public method runs in `strapi.db.transaction()`. It turns the params into an internal query and calls the entries service. It schedules events.          |
 | 4     | Entries service | `document-service/entries.ts`        | Resolves relation `documentId` values to row `id` values, checks uniqueness, runs the entity validator, writes components, then calls `strapi.db.query(uid)`. |
 | 5     | Entity manager  | `@strapi/database` `entity-manager/` | Runs the database lifecycles, applies attribute defaults, inserts or updates the row, attaches relations and reads the row back.                              |
-| 6     | Event manager   | `document-service/events.ts`         | After the commit, reads the row with a deep populate, sanitizes it and emits the event on the event hub.                                                      |
+| 6     | Event manager   | `document-service/events.ts`         | After the commit, when something listens to the event, reads the row with a deep populate, sanitizes it and emits the event on the event hub.                 |
 | 7     | Webhook runner  | `services/webhook-runner.ts`         | Queues the event and sends an HTTP `POST` to each enabled webhook for that event.                                                                             |
 
 The built-in middleware converts invalid date, time, datetime and relation errors from the database layer into `ValidationError`.
@@ -95,6 +95,8 @@ Read methods use the same idea. `statusToLookup` and `localeToLookup` write cond
 - If the row does not exist, but the document exists in another locale, the repository creates a row for the new locale. It copies the non-localized fields from an existing row. It schedules `entry.create`, not `entry.update`.
 - If the document does not exist, `update` returns `null`.
 
+For each component or dynamic zone attribute present in the data, the entries service loads the stored components (with the ids of their media), deletes the ones that are no longer sent, creates the ones sent without an id, and compares the others with the data sent for them. A component is not written again when its scalars and media are stored exactly as sent, its relations arrive with empty `connect` and `disconnect` lists, and none of its nested components changed. When a whole list is unchanged and kept its order, its join rows are left alone too. A value that cannot be compared with certainty, such as a password, counts as a change. Database lifecycles of a component run only when it is written. The entry row itself is always updated, so `updatedAt` moves on every save.
+
 If the caller passed `status: 'published'` and a row was written, `update` then calls the inner `publish` function.
 
 **`publish`** exists only on D&P content types. For the requested locales, it:
@@ -135,9 +137,10 @@ The transaction context starts the commit callbacks but does not await them. The
 
 When the callback runs, the event manager:
 
-1. reads the row again with a deep populate, except for `entry.delete` and `entry.unpublish`, where the row is gone;
-2. sanitizes it with `defaultSanitizeOutput`, which removes private fields;
-3. calls `strapi.eventHub.emit(eventName, { model, uid, entry })`.
+1. checks `strapi.eventHub.hasListeners(eventName)`. When no listener or subscriber would receive the event, it stops here: the deep populate below is the expensive part of an event, and nothing would read its result;
+2. reads the row again with a deep populate, except for `entry.delete` and `entry.unpublish`, where the row is gone. With `server.webhooks.populateRelations: false`, relations are left out of that populate; components, dynamic zones and media stay;
+3. sanitizes it with `defaultSanitizeOutput`, which removes private fields;
+4. calls `strapi.eventHub.emit(eventName, { model, uid, entry })`.
 
 | Method         | Events                                                                                            |
 | -------------- | ------------------------------------------------------------------------------------------------- |

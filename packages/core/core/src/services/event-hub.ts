@@ -13,6 +13,7 @@ export interface EventHub {
   removeAllListeners(): EventHub;
   removeAllSubscribers(): EventHub;
   addListener(eventName: string, listener: Listener): () => void;
+  hasListeners(eventName: string): boolean;
 }
 
 /**
@@ -80,6 +81,18 @@ export default function createEventHub(): EventHub {
         eventHub.off(eventName, listener);
         return listener(...args);
       });
+    },
+
+    hasListeners(eventName) {
+      // Subscribers other than the default one receive every event
+      const hasCustomSubscriber = subscribers.some(
+        (subscriber) => subscriber !== defaultSubscriber
+      );
+      // Listeners are only reached through the default subscriber
+      const hasEventListener =
+        subscribers.includes(defaultSubscriber) && (listeners.get(eventName)?.length ?? 0) > 0;
+
+      return hasCustomSubscriber || hasEventListener;
     },
 
     destroy() {

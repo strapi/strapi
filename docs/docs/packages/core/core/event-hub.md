@@ -135,6 +135,19 @@ const removeListener = strapi.eventHub.once('some.event', () => {
 removeListener();
 ```
 
+#### `hasListeners`
+
+Tells whether emitting an event would reach anyone: a listener registered for that event with `on` or `once`, or a subscriber, which receives every event. Use it to skip work that only exists to build an event payload, such as the deep populate the Document Service runs before emitting `entry.*` events.
+
+```ts
+// Types
+type HasListeners = (eventName: string) => boolean;
+
+if (strapi.eventHub.hasListeners('entry.update')) {
+  // Build the payload, then emit
+}
+```
+
 ## Tradeoffs
 
 - Potential breaking changes: a change to an event's name or payload may affect other features or plugins listening to the same event. Backwards compatibility is a concern when managing these events.

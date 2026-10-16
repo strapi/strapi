@@ -759,6 +759,12 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
+
+      // Relations sent with empty connect and disconnect lists leave nothing to look up
+      if (uniqueValues.length === 0) {
+        return;
+      }
+
       const count = await strapi.db.query(key as UID.Schema).count({
         where: {
           id: {
