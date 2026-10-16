@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 import type { Database } from '..';
 
@@ -136,36 +136,33 @@ const createQueryBuilder = (
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
 
-  const state: State = _.defaults(
-    {
-      type: 'select',
-      select: [],
-      count: null,
-      max: null,
-      min: null,
-      first: false,
-      data: null,
-      where: [],
-      joins: [],
-      populate: null,
-      limit: null,
-      offset: null,
-      transaction: null,
-      forUpdate: false,
-      onConflict: null,
-      merge: null,
-      ignore: false,
-      orderBy: [],
-      groupBy: [],
-      increments: [],
-      decrements: [],
-      aliasCounter: 0,
-      filters: null,
-      search: null,
-      processed: false,
-    },
-    initialState
-  );
+  const state: State = _.defaults({}, initialState, {
+    type: 'select',
+    select: [],
+    count: null,
+    max: null,
+    min: null,
+    first: false,
+    data: null,
+    where: [],
+    joins: [],
+    populate: null,
+    limit: null,
+    offset: null,
+    transaction: null,
+    forUpdate: false,
+    onConflict: null,
+    merge: null,
+    ignore: false,
+    orderBy: [],
+    groupBy: [],
+    increments: [],
+    decrements: [],
+    aliasCounter: 0,
+    filters: null,
+    search: null,
+    processed: false,
+  });
 
   const getAlias = () => {
     const alias = `t${state.aliasCounter}`;
@@ -186,13 +183,13 @@ const createQueryBuilder = (
 
     select(args) {
       state.type = 'select';
-      state.select = _.uniq(_.castArray(args));
+      state.select = [...new Set(_.castArray(args))];
 
       return this;
     },
 
     addSelect(args) {
-      state.select = _.uniq([...state.select, ..._.castArray(args)]);
+      state.select = [...new Set([...state.select, ..._.castArray(args)])];
 
       return this;
     },
@@ -337,41 +334,41 @@ const createQueryBuilder = (
         populate,
       } = params;
 
-      if (!_.isNil(where)) {
+      if (where != null) {
         this.where(where);
       }
 
-      if (!_.isNil(searchQuery)) {
+      if (searchQuery != null) {
         this.search(searchQuery);
       }
 
-      if (!_.isNil(select)) {
+      if (select != null) {
         this.select(select);
       } else {
         this.select('*');
       }
 
-      if (!_.isNil(limit)) {
+      if (limit != null) {
         this.limit(limit);
       }
 
-      if (!_.isNil(offset)) {
+      if (offset != null) {
         this.offset(offset);
       }
 
-      if (!_.isNil(orderBy)) {
+      if (orderBy != null) {
         this.orderBy(orderBy);
       }
 
-      if (!_.isNil(groupBy)) {
+      if (groupBy != null) {
         this.groupBy(groupBy);
       }
 
-      if (!_.isNil(populate)) {
+      if (populate != null) {
         this.populate(populate);
       }
 
-      if (!_.isNil(filters)) {
+      if (filters != null) {
         this.filters(filters);
       }
 
@@ -422,7 +419,7 @@ const createQueryBuilder = (
         return key;
       }
 
-      if (!_.isNil(alias)) {
+      if (alias != null) {
         return `${alias}.${key}`;
       }
 
@@ -463,11 +460,11 @@ const createQueryBuilder = (
 
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
 
-      if (!_.isNil(state.filters)) {
-        if (_.isFunction(state.filters)) {
+      if (state.filters != null) {
+        if (typeof state.filters === 'function') {
           const filters = state.filters({ qb: this, uid, meta, db });
 
-          if (!_.isNil(filters)) {
+          if (filters != null) {
             state.where.push(filters);
           }
         } else {
@@ -575,14 +572,14 @@ const createQueryBuilder = (
 
       if (this.shouldUseDistinct()) {
         const joinsOrderByColumns = state.joins.flatMap((join) => {
-          return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
+          return Object.keys(join.orderBy ?? {}).map((key) => this.aliasColumn(key, join.alias));
         });
         // Only include column-based orderBy entries here (raw expressions are handled below)
         const orderByColumns = state.orderBy
           .filter((ob: any) => 'column' in ob)
           .map((ob: any) => ob.column);
 
-        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+        state.select = [...new Set([...joinsOrderByColumns, ...orderByColumns, ...state.select])];
 
         // PostgreSQL requires every ORDER BY expression to appear in the SELECT list when
         // SELECT DISTINCT is used. Raw expressions (e.g. the `status` CASE ranking) are not
@@ -649,7 +646,7 @@ const createQueryBuilder = (
         case 'insert': {
           qb.insert(state.data);
 
-          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
+          if (db.dialect.useReturning() && _.has(meta.attributes, 'id')) {
             qb.returning('id');
           }
 
@@ -764,7 +761,7 @@ const createQueryBuilder = (
 
         const rows = await qb;
 
-        if (state.populate && !_.isNil(rows)) {
+        if (state.populate && rows != null) {
           await helpers.applyPopulate(_.castArray(rows), state.populate, {
             qb: this,
             uid,
