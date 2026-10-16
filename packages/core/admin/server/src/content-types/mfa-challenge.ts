@@ -74,9 +74,16 @@ export default {
   // declares its own.
   indexes: [
     {
-      // The expiry sweep and every per-user challenge lookup scan on this.
+      // Every per-user challenge lookup scans on this.
       name: 'strapi_admin_mfa_challenges_user_id_index',
       columns: ['user_id'],
+      type: null,
+    },
+    {
+      // The expiry sweep filters on nothing else. The expired set is small by construction, but
+      // without this the sweep still reads the whole table to find it, at boot and again daily.
+      name: 'strapi_admin_mfa_challenges_expires_at_index',
+      columns: ['expires_at'],
       type: null,
     },
   ],

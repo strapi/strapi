@@ -98,8 +98,9 @@ export const generateTotp = ({
   timestamp?: number;
 }): string => totpForStep(secret, Math.floor(timestamp / step), digits);
 
-/** Length-safe constant time string comparison. */
-export const constantTimeEquals = (a: string, b: string): boolean => {
+/** Length-safe constant time string comparison. Module-private: exported from `@strapi/utils` it
+ * would become public API by accident, and removing it later would be a breaking change. */
+const constantTimeEquals = (a: string, b: string): boolean => {
   const bufA = Buffer.from(a, 'utf8');
   const bufB = Buffer.from(b, 'utf8');
   if (bufA.length !== bufB.length) {

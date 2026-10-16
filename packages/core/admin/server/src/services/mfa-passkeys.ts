@@ -36,7 +36,7 @@ const PASSKEY_CEREMONY_TTL_SECONDS = 300;
 
 /** varchar(255), so the unique index stays portable across dialects. WebAuthn permits up to 1023
  * bytes, but no authenticator in practice produces one longer than this. */
-export const MAX_CREDENTIAL_ID_LENGTH = 255;
+const MAX_CREDENTIAL_ID_LENGTH = 255;
 
 const RP_NAME = 'Strapi';
 

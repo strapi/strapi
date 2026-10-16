@@ -33,8 +33,10 @@ deployment does not advertise the endpoints or leak validation messages. That is
 policy, `admin::isMfaEnabled` (`server/src/policies/isMfaEnabled.ts`), carried by every MFA route
 including the three `/login/mfa*` ones and the security-settings pair. Being a policy is what puts
 it ahead of body validation: validating first would answer 400 for a malformed body and 404 for a
-well-formed one, and that difference is itself a feature-presence tell. It reads `isEnabled()` in
-`server/src/services/mfa.ts` per request, so toggling the config needs no restart.
+well-formed one, and that difference is itself a feature-presence tell. It calls `isEnabled()` in
+`server/src/services/mfa.ts` on every request. The future flag is read each time, but
+`admin.auth.mfa` is read once and cached for the life of the process, so changing it needs a
+restart, like any other file-based configuration.
 
 Turning `admin.auth.mfa.enabled` off does **not** delete enrolment data. Nobody is challenged and
 nobody is locked out, and re-enabling restores the previous state. That is what makes it usable as
@@ -173,10 +175,15 @@ On `admin::user`:
 | `mfaGraceUntil`, `mfaLockedAt`                        | Enforcement stamps, see [Enforcement](./13-admin-mfa-enforcement.md) |
 | `mfaPasskeyChallenge`, `mfaPasskeyChallengeExpiresAt` | The one pending passkey registration ceremony                        |
 
-Expired challenge and trusted-device rows are swept at bootstrap
-(`server/src/bootstrap.ts`), wrapped in a `try`/`catch` so cleanup can never stop the admin
-booting. Nothing about the security of the flow depends on the sweep having run: expired rows are
-rejected, and deleted, on read.
+Expired challenge and trusted-device rows are swept at bootstrap and again daily at 03:30
+(`server/src/bootstrap.ts`, through `strapi.cron.add`). The sweep is wrapped in a `try`/`catch` so
+cleanup can never stop the admin booting. Nothing about the security of the flow depends on the
+sweep having run: expired rows are rejected, and deleted, on read. Both tables index `expires_at`,
+so the sweep does not read the whole table to find the expired set.
+
+Every instance runs the sweep. In a deployment with several replicas they all issue the same
+`DELETE` at boot and at 03:30. The delete is idempotent, so this is not a correctness problem, but
+it is one statement per replica against the same two tables at the same moment.
 
 ## Notices and events
 

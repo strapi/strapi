@@ -68,7 +68,9 @@ export default {
     ctx.body = {
       data: {
         enabled: enrolled,
-        enabledAt: enrolled ? user.mfaEnabledAt : null,
+        // Normalised like `graceUntil` below: the raw column is whatever the driver returned for a
+        // datetime, so two adjacent timestamps could otherwise reach the client in two shapes.
+        enabledAt: enrolled && user.mfaEnabledAt ? new Date(user.mfaEnabledAt).toISOString() : null,
         recoveryCodesRemaining: enrolled ? await mfa.countUnusedRecoveryCodes(userId) : 0,
         codesAcknowledged: enrolled ? await mfa.areCodesAcknowledged(userId) : false,
         required: await mfa.isMfaRequiredFor(user),

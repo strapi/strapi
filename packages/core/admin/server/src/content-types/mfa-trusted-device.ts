@@ -75,5 +75,11 @@ export default {
       columns: ['user_id'],
       type: null,
     },
+    {
+      // The expiry sweep filters on nothing else, so without this it reads the whole table.
+      name: 'strapi_admin_mfa_trusted_devices_expires_at_index',
+      columns: ['expires_at'],
+      type: null,
+    },
   ],
 };

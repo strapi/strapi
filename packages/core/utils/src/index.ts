@@ -53,7 +53,6 @@ export {
   currentTotpStep,
   generateTotp,
   verifyTotp,
-  constantTimeEquals,
   buildOtpauthUri,
   generateRecoveryCode,
   generateRecoveryCodes,
