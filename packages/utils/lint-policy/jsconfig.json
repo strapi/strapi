@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "node20",
+    "lib": ["es2023"],
+    "types": ["node"],
+    "checkJs": true,
+    "noEmit": true,
+    "maxNodeModuleJsDepth": 0,
+    "strict": true
+  },
+  "exclude": ["node_modules", "dist"]
+}

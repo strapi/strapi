@@ -14,8 +14,12 @@
     "./front": "./front.ts",
     "./tests": "./tests.ts"
   },
+  "dependencies": {
+    "lint-policy": "5.58.0"
+  },
   "devDependencies": {
     "oxlint": "1.72.0",
+    "oxlint-plugin-eslint": "1.72.0",
     "tsconfig": "5.58.0",
     "vitest": "catalog:",
     "vitest-config": "5.58.0"

@@ -1,0 +1,11 @@
+{
+  "name": "lint-policy",
+  "version": "5.58.0",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "commonjs",
+  "exports": {
+    "./lodash": "./lodash.js",
+    "./package.json": "./package.json"
+  }
+}

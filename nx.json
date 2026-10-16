@@ -1,6 +1,10 @@
 {
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
+    "lintPolicy": [
+      "{workspaceRoot}/packages/utils/eslint-config-custom/**/*",
+      "{workspaceRoot}/packages/utils/lint-policy/**/*"
+    ],
     "production": [
       "{workspaceRoot}/rollup.utils.mjs",
       "!{projectRoot}/**/*.test.ts",
@@ -50,7 +54,7 @@
         "{projectRoot}/**/*.ts",
         "{projectRoot}/**/.eslintrc.cjs",
         "{projectRoot}/**/tsconfig.eslint.json",
-        "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
+        "lintPolicy"
       ],
       "cache": true
     }

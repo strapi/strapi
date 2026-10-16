@@ -21,8 +21,14 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 const CONFIG_DIR = 'packages/utils/oxlint-config';
 const packageDir = path.resolve(import.meta.dirname, '..');
-const oxlintDir = path.dirname(createRequire(import.meta.url).resolve('oxlint/package.json'));
+const resolvePackageDir = (name: string) =>
+  path.dirname(createRequire(import.meta.url).resolve(`${name}/package.json`));
+const oxlintDir = resolvePackageDir('oxlint');
 const oxlintBin = path.join(oxlintDir, 'bin/oxlint');
+
+// Modules the config loads: `defineConfig`, the shared lint policy, and the
+// `eslint-js` JS plugin (resolved from the config file's directory).
+const CONFIG_DEPENDENCIES = ['oxlint', 'lint-policy', 'oxlint-plugin-eslint'];
 
 // Always reported: proves `no-undef` runs on the probe file.
 const CONTROL = 'cs026UndefinedControl';
@@ -41,9 +47,10 @@ beforeAll(() => {
     .filter((file) => file.endsWith('.ts') || file.endsWith('.js') || file === 'package.json')
     .forEach((file) => fs.copyFileSync(path.join(packageDir, file), path.join(configDir, file)));
 
-  // The config imports `defineConfig` from `oxlint`.
   fs.mkdirSync(path.join(root, 'node_modules'));
-  fs.symlinkSync(oxlintDir, path.join(root, 'node_modules/oxlint'), 'dir');
+  CONFIG_DEPENDENCIES.forEach((name) =>
+    fs.symlinkSync(resolvePackageDir(name), path.join(root, 'node_modules', name), 'dir')
+  );
 });
 
 afterAll(() => {
