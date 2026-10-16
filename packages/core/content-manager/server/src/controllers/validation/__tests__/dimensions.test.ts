@@ -91,4 +91,16 @@ describe('getDocumentDimensions', () => {
       status: 'published',
     });
   });
+
+  test('status is a regular attribute when the model does not have draft and publish', async () => {
+    await expect(
+      getDocumentLocaleAndStatus({ locale: 'en', status: 'active' }, modelWithoutDraftAndPublishUID)
+    ).resolves.toMatchObject({ locale: 'en', status: 'published' });
+  });
+
+  test('status enum is still validated when the model has draft and publish', async () => {
+    await expect(
+      getDocumentLocaleAndStatus({ status: 'active' }, modelWithDraftAndPublishUID)
+    ).rejects.toThrow();
+  });
 });

@@ -14,7 +14,8 @@ const statusSchema = z.enum(['draft', 'published'], { error: 'Invalid status' })
 
 /**
  * From a request or query object, validates and returns the locale and status of the document.
- * If the status is not provided and Draft & Publish is disabled, it defaults to 'published'.
+ * If Draft & Publish is disabled, the returned status is always 'published' and a `status` in the
+ * request is not validated against draft|published, as it may be a regular attribute of the model.
  */
 export const getDocumentLocaleAndStatus = async (
   request: any,
@@ -22,19 +23,17 @@ export const getDocumentLocaleAndStatus = async (
   opts: Options = { allowMultipleLocales: false }
 ) => {
   const { allowMultipleLocales } = opts;
-  const { locale, status: providedStatus, ...rest } = request || {};
+  const { locale, ...rest } = request || {};
 
-  const defaultStatus = contentTypes.hasDraftAndPublish(strapi.getModel(model))
-    ? undefined
-    : 'published';
-  const status = providedStatus !== undefined ? providedStatus : defaultStatus;
+  const localeSchema = allowMultipleLocales ? multipleLocaleSchema : singleLocaleSchema;
 
-  const schema = z.object({
-    locale: allowMultipleLocales ? multipleLocaleSchema : singleLocaleSchema,
-    status: statusSchema,
-  });
+  if (!contentTypes.hasDraftAndPublish(strapi.getModel(model))) {
+    await validateZodAsync(z.object({ locale: localeSchema }))(request);
 
-  await validateZodAsync(schema)(request);
+    return { ...rest, locale, status: 'published' as const };
+  }
 
-  return { locale, status, ...rest };
+  await validateZodAsync(z.object({ locale: localeSchema, status: statusSchema }))(request);
+
+  return { locale, ...rest };
 };

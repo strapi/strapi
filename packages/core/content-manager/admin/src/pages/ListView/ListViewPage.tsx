@@ -464,7 +464,7 @@ const ListViewPage = () => {
    */
   const linkCandidates = tableHeaders.filter(
     ({ name, attribute, cellFormatter }) =>
-      name !== 'status' &&
+      !(name === 'status' && attribute?.type === 'custom') &&
       typeof cellFormatter !== 'function' &&
       attribute &&
       !NON_LINKABLE_TYPES.has(attribute.type)
@@ -611,7 +611,8 @@ const ListViewPage = () => {
                         >
                           <Table.CheckboxCell id={row.id} />
                           {tableHeaders.map(({ cellFormatter, ...header }) => {
-                            if (header.name === 'status') {
+                            // Only the synthetic Draft & Publish column; a model's own `status` attribute renders as a regular cell
+                            if (header.name === 'status' && header.attribute?.type === 'custom') {
                               const { status } = row;
 
                               return (
