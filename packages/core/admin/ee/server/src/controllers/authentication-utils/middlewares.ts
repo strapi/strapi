@@ -12,7 +12,7 @@ import {
   getAccessCookieDomain,
   getSessionManager,
   generateDeviceId,
-} from '../../../../../shared/utils/session-auth';
+} from '../../../../../server/src/utils/session-auth';
 
 const defaultConnectionError = () => new Error('Invalid connection payload');
 

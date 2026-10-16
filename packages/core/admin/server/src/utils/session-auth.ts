@@ -3,9 +3,9 @@ import type { Context } from 'koa';
 import type { Modules } from '@strapi/types';
 import { buildSessionMetadata } from '@strapi/utils';
 
-import { resolveAuthCookieName } from './auth-cookie-name';
-import { resolveAuthCookiePath } from './auth-cookie-path';
-import { resolveAuthCookieDomain } from './auth-cookie-domain';
+import { resolveAuthCookieName } from '../../../shared/utils/auth-cookie-name';
+import { resolveAuthCookiePath } from '../../../shared/utils/auth-cookie-path';
+import { resolveAuthCookieDomain } from '../../../shared/utils/auth-cookie-domain';
 
 const ADMIN_ORIGIN = 'admin';
 const SESSION_CONTENT_TYPE = 'admin::session';

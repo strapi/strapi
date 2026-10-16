@@ -5,6 +5,7 @@ import { formatApplicationError, formatHttpError, formatInternalError } from '..
 
 declare module 'koa' {
   interface BaseResponse {
+    // https://github.com/koajs/koa/blob/v2.16.4/lib/response.js#L89
     _explicitStatus: boolean;
   }
 }

@@ -7,6 +7,7 @@ status: draft
 review_notes:
   - Written from the package source on develop; needs a maintainer review.
   - The namespace summaries in Key concepts come from a read of the folder names and entry files, not from every type. Check `Struct` versus `Schema` and the `Modules` list.
+  - The package lists in "Server types in admin programs" come from `tsc --explainFiles` on a program that contains only `packages/core/types/src/index.ts`, with `"types": []`. Check them again after dependency changes.
 ---
 
 ## Purpose
@@ -44,9 +45,28 @@ A UID is a string literal type that identifies a resource, for example `api::art
 
 A public registry is an interface with an index signature, for example `ContentTypeSchemas`, `ComponentSchemas`, `Services`, `Controllers`, `Policies` and `Middlewares` in `src/public/registries.ts`. An application adds its own entries with module augmentation, and Strapi types then resolve to the application schemas. The `strapi ts:generate-types` command writes these augmentations. When a registry is empty, the types fall back to their generic form. See [Public registries](./type-system/02-concepts/03-public-registry.mdx).
 
-### Global declaration
+### Ambient declarations
 
-`src/index.ts` also declares a global `strapi` variable of type `Strapi`. This matches the `global.strapi` assignment in `createStrapi()`. New code must receive `strapi` as a parameter.
+Some types are not exported but declared globally or merged into another module. Each one has a single source, so a workspace opts in explicitly instead of through a side-effect import.
+
+- `globals-server` (subpath export, `src/globals-server.ts`): declares the deprecated `global.strapi` as `Core.Strapi`. This matches the `global.strapi` assignment in `createStrapi()`. Server tsconfigs list it in `compilerOptions.types`, and the entry point of `@strapi/strapi` references it so that applications keep the global. New code must receive `strapi` as a parameter.
+- `globals-admin` (subpath export, `src/globals-admin.ts`): declares `window.strapi` for the admin panel. Admin tsconfigs list it in `compilerOptions.types`. A program must not load both subpaths, because the two `strapi` declarations conflict.
+- `koa-body`: `src/index.ts` starts with `/// <reference types="koa-body" preserve="true" />`. The reference carries the `koa` augmentation (`ctx.request.body`, `ctx.request.files`) to every consumer of `@strapi/types`. It is a type reference, not an `import`, so the JavaScript output never requires `koa-body`.
+
+Code under `<workspace>/shared/` (for example `packages/core/admin/shared/` or `packages/core/content-manager/shared/`) compiles into both the admin and the server programs of that workspace. It must not depend on `global.strapi` or `window.strapi`. Code that needs one of them belongs in the slice of that host.
+
+### Server types in admin programs
+
+The entry point of `@strapi/types` is not browser-safe. An admin program that imports any name from it loads the whole module graph, including server-only typings:
+
+- `koa-body`, `@types/formidable` and `@types/co-body`, through the `koa-body` reference.
+- `@types/koa` and its dependencies (including `@types/cookies`, which loads `@types/express`), through the `Core` namespace.
+- `@types/koa__router`, `undici` and `croner`, through the `Modules` namespace.
+- `knex` and `winston`, through `@strapi/database` and `@strapi/logger`, which `Core.Strapi` imports.
+- `execa`, `yup` and `zod`, through `@strapi/utils`, which several namespaces import.
+- `@types/node`, through most of the packages above.
+
+TypeScript loads every file that the entry point reaches, whatever names the program imports. Moving the `koa-body` reference to an opt-in subpath would therefore not remove `koa` from admin programs. The fix is a host-agnostic subpath export (for example `Data`, `Schema`, `Struct`, `UID` and `Utils`) for admin and shared code to import. `@strapi/utils` has the same problem for admin code that imports it directly.
 
 ### Working with the types
 

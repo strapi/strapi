@@ -1,7 +1,7 @@
 import passport from 'koa-passport';
 import { authenticate, redirectWithAuth } from '../middlewares';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../../../../../../shared/utils/auth-cookie-name';
-import { REFRESH_COOKIE_NAME } from '../../../../../../shared/utils/session-auth';
+import { REFRESH_COOKIE_NAME } from '../../../../../../server/src/utils/session-auth';
 
 jest.mock('../utils', () => ({
   __esModule: true,
@@ -16,8 +16,8 @@ jest.mock('../utils', () => ({
 
 jest.mock('koa-passport', () => ({ __esModule: true, default: { authenticate: jest.fn() } }));
 
-jest.mock('../../../../../../shared/utils/session-auth', () => {
-  const actual = jest.requireActual('../../../../../../shared/utils/session-auth');
+jest.mock('../../../../../../server/src/utils/session-auth', () => {
+  const actual = jest.requireActual('../../../../../../server/src/utils/session-auth');
   return {
     ...actual,
     getSessionManager: jest.fn(),
@@ -33,7 +33,7 @@ jest.mock('../../../../../../shared/utils/session-auth', () => {
 });
 
 const { getSessionManager, buildCookieOptionsWithExpiry } = jest.requireMock(
-  '../../../../../../shared/utils/session-auth'
+  '../../../../../../server/src/utils/session-auth'
 ) as {
   getSessionManager: jest.Mock;
   buildCookieOptionsWithExpiry: jest.Mock;

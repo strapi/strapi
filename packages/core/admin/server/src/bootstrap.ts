@@ -16,7 +16,7 @@ import {
   DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
   DEFAULT_MAX_SESSION_LIFESPAN,
   DEFAULT_IDLE_SESSION_LIFESPAN,
-} from '../../shared/utils/session-auth';
+} from './utils/session-auth';
 
 const defaultAdminAuthSettings = {
   providers: {

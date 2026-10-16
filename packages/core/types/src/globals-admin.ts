@@ -44,7 +44,7 @@ interface BrowserStrapi {
 
 /**
  * Opt in from an admin tsconfig via `compilerOptions.types`. Server programs must
- * not: the package root already declares a `strapi` global as `Core.Strapi`.
+ * not: they opt into `globals-server` instead, which declares `strapi` as `Core.Strapi`.
  */
 declare global {
   interface Window {
