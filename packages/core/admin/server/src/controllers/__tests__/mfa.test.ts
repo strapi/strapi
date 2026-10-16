@@ -743,9 +743,9 @@ describe('mfa controller', () => {
   });
 
   describe('resetUser', () => {
-    const build = (userExists = true) => {
+    const build = (userExists = true, targetId = '3') => {
       const resetUser = jest.fn(() => Promise.resolve());
-      const findOne = jest.fn(() => Promise.resolve(userExists ? { id: 3 } : null));
+      const findOne = jest.fn(() => Promise.resolve(userExists ? { id: Number(targetId) } : null));
       setStrapi({
         admin: { services: { mfa: { isEnabled: () => true, resetUser }, user: { findOne } } },
       });
@@ -754,7 +754,7 @@ describe('mfa controller', () => {
         {},
         {
           state: { user: { id: 7 } },
-          params: { id: '3' },
+          params: { id: targetId },
           notFound,
           request: { query: {}, body: {} },
         }
@@ -782,6 +782,20 @@ describe('mfa controller', () => {
       const { ctx, resetUser, notFound } = build(false);
       await mfaController.resetUser(ctx);
       expect(notFound).toHaveBeenCalledWith('User does not exist');
+      expect(resetUser).not.toHaveBeenCalled();
+      expect(ctx.status).not.toBe(204);
+    });
+
+    /**
+     * Administrator recovery is for other people. Turned on yourself this route is a cheaper
+     * `/mfa/disable`: no password, no code, and none of that route's `isMfaRequiredFor` refusal.
+     * Under `mode: 'required'` it is an escape hatch that renews itself -- `disable()` leaves
+     * `mfaGraceUntil` null, so the next login stamps a fresh grace.
+     */
+    test("refuses to reset the caller's own factor and points at /mfa/disable", async () => {
+      const { ctx, resetUser } = build(true, '7');
+
+      await expect(mfaController.resetUser(ctx)).rejects.toThrow(/two-factor settings/i);
       expect(resetUser).not.toHaveBeenCalled();
       expect(ctx.status).not.toBe(204);
     });

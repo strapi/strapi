@@ -239,6 +239,19 @@ export default {
       return ctx.notFound('User does not exist');
     }
 
+    // Administrator recovery, for *another* account. Turned on yourself it is a cheaper
+    // `/mfa/disable`: no password, no code, and no `isMfaRequiredFor` refusal. Under
+    // `mode: 'required'` that is an escape hatch -- `disable()` leaves `mfaGraceUntil` null, so the
+    // next login stamps a fresh grace and the holder has the full window of password-only access
+    // again, repeatable. It also lets a stolen session strip the factor that session should have
+    // needed. Anyone entitled to drop their own factor can do it through `/mfa/disable`, which
+    // charges both.
+    if (String(target.id) === String(ctx.state.user.id)) {
+      throw new ValidationError(
+        'Use the two-factor settings in your profile to remove your own authenticator.'
+      );
+    }
+
     await mfa.resetUser(String(target.id), { byUserId: String(ctx.state.user.id) });
 
     ctx.status = 204;
