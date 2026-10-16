@@ -159,6 +159,11 @@ const deleteById = async (id: unknown) => {
     }
   }
 
+  // This function shadows the CE one (`server/src/index.ts` merges EE over CE), so the purge has
+  // to be repeated here or it never runs on an EE build. Same contract as CE: unconditional,
+  // after the guard above, right before the row delete. See `server/src/services/user.ts`.
+  await getService('mfa').purgeUser(String(id));
+
   const deletedUser = await strapi.db
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
@@ -197,6 +202,9 @@ const deleteByIds = async (ids: any) => {
 
   const deletedUsers = [];
   for (const id of ids) {
+    // See deleteById: repeated here because EE shadows CE. Before this id's row is deleted.
+    await getService('mfa').purgeUser(String(id));
+
     const deletedUser = await strapi.db.query('admin::user').delete({
       where: { id },
       populate: ['roles'],

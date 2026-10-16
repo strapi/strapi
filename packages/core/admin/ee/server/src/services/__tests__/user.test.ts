@@ -38,6 +38,8 @@ describe('EE user service audit events', () => {
           role: {
             getSuperAdminWithUsersCount: jest.fn(() => Promise.resolve({ id: 9, usersCount: 2 })),
           },
+          // The delete paths purge the account's MFA material before removing the row.
+          mfa: { purgeUser: jest.fn(() => Promise.resolve()) },
           'seat-enforcement': { getDisabledUserList: jest.fn(() => Promise.resolve(null)) },
         },
       },
@@ -157,6 +159,7 @@ describe('EE user service', () => {
       admin: {
         services: {
           role: { getSuperAdminWithUsersCount: jest.fn() },
+          mfa: { purgeUser: jest.fn(() => Promise.resolve()) },
           // `removeFromEEDisabledUsersList` resolves this via `strapi.service('admin::seat-enforcement')`
           // (see `tests/setup/unit.setup.js`, which routes `strapi.service` through
           // `strapi.admin.services`). Returning a falsy list short-circuits it before it ever
@@ -184,5 +187,85 @@ describe('EE user service', () => {
       expect(payload).not.toHaveProperty(column);
     }
     expect(payload.roles).toEqual([{ id: 2, code: 'strapi-editor', name: 'Editor' }]);
+  });
+
+  /**
+   * These functions shadow their CE namesakes (`server/src/index.ts` merges EE over CE), so the
+   * CE suite's ordering assertions prove nothing about an EE build -- the only kind the paying
+   * base runs. Without the purge, deleting an admin strands recovery-code hashes, trusted-device
+   * tokens, passkey keys and the whole notice history against an id that no longer resolves.
+   */
+  describe('mfa purge on delete', () => {
+    const editor = { id: 3, email: 'kai@doe.com', roles: [{ id: 2, code: 'strapi-editor' }] };
+
+    const buildStrapi = ({
+      user = editor,
+      superAdminUsersCount = 2,
+      superAdminsToDelete = 0,
+    }: {
+      user?: Record<string, unknown>;
+      superAdminUsersCount?: number;
+      superAdminsToDelete?: number;
+    } = {}) => {
+      const purgeUser = jest.fn(() => Promise.resolve());
+      const del = jest.fn(() => Promise.resolve(user));
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const count = jest.fn(() => Promise.resolve(superAdminsToDelete));
+      const getSuperAdminWithUsersCount = jest.fn(() =>
+        Promise.resolve({ id: 9, usersCount: superAdminUsersCount })
+      );
+
+      setStrapi({
+        eventHub: { emit: jest.fn() },
+        db: { query: jest.fn(() => ({ findOne, delete: del, count })) },
+        store: jest.fn(() => ({ get: jest.fn(), set: jest.fn() })),
+        sessionManager: Object.assign(jest.fn(), { hasOrigin: jest.fn(() => false) }),
+        admin: {
+          services: {
+            role: { getSuperAdminWithUsersCount },
+            mfa: { purgeUser },
+            'seat-enforcement': { getDisabledUserList: jest.fn(() => Promise.resolve(null)) },
+          },
+        },
+      });
+
+      return { purgeUser, del, getSuperAdminWithUsersCount };
+    };
+
+    test('deleteById purges after the super-admin guard and before the row delete', async () => {
+      const { purgeUser, del, getSuperAdminWithUsersCount } = buildStrapi();
+
+      await userService.deleteById(3);
+
+      expect(purgeUser).toHaveBeenCalledWith('3');
+      expect(getSuperAdminWithUsersCount.mock.invocationCallOrder[0] ?? -1).toBeLessThan(
+        purgeUser.mock.invocationCallOrder[0]
+      );
+      expect(purgeUser.mock.invocationCallOrder[0]).toBeLessThan(del.mock.invocationCallOrder[0]);
+    });
+
+    test("a refused deletion leaves the live user's second factor alone", async () => {
+      const { purgeUser, del } = buildStrapi({
+        user: { id: 3, email: 'kai@doe.com', roles: [{ id: 1, code: 'strapi-super-admin' }] },
+        superAdminUsersCount: 1,
+      });
+
+      await expect(userService.deleteById(3)).rejects.toThrow(
+        'You must have at least one user with super admin role.'
+      );
+
+      expect(purgeUser).not.toHaveBeenCalled();
+      expect(del).not.toHaveBeenCalled();
+    });
+
+    test('deleteByIds purges each account before that account is deleted', async () => {
+      const { purgeUser, del } = buildStrapi();
+
+      await userService.deleteByIds([3, 4]);
+
+      expect(purgeUser.mock.calls).toEqual([['3'], ['4']]);
+      expect(purgeUser.mock.invocationCallOrder[0]).toBeLessThan(del.mock.invocationCallOrder[0]);
+      expect(purgeUser.mock.invocationCallOrder[1]).toBeLessThan(del.mock.invocationCallOrder[1]);
+    });
   });
 });
