@@ -157,6 +157,7 @@ export const createMockedQueryBuilder = <T extends string = ContentType>(data: {
         state.fields = fields;
         return this;
       },
+      orderBy: jest.fn().mockReturnThis(),
       populate(populate: unknown) {
         state.populate = populate;
         return this;
