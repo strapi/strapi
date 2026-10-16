@@ -124,6 +124,33 @@ describe('sanitizeQuery', () => {
     });
   });
 
+  describe('filters', () => {
+    it('keeps an empty $in array so it matches nothing (#27836)', async () => {
+      const query = { filters: { id: { $in: [] } } };
+
+      const result = await sanitizers.query(query, schema);
+
+      expect(result).toMatchObject({ filters: { id: { $in: [] } } });
+    });
+
+    it('keeps an empty $notIn array so it matches everything', async () => {
+      const query = { filters: { id: { $notIn: [] } } };
+
+      const result = await sanitizers.query(query, schema);
+
+      expect(result).toMatchObject({ filters: { id: { $notIn: [] } } });
+    });
+
+    it('still removes other empty filter objects and arrays', async () => {
+      const query = { filters: { title: {}, id: { $in: [1, 2] } } };
+
+      const result = await sanitizers.query(query, schema);
+
+      expect((result as any).filters).not.toHaveProperty('title');
+      expect(result).toMatchObject({ filters: { id: { $in: [1, 2] } } });
+    });
+  });
+
   describe('publicationFilter (core query param)', () => {
     it('throws ValidationError with details when publicationFilter is invalid', async () => {
       const query = { filters: { id: 1 }, publicationFilter: 'invalid-mode' };
