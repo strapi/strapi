@@ -270,6 +270,7 @@ describe('security-settings: service', () => {
           const inList = (list: unknown[]) => list.map(String).includes(String(role.id));
           if (where?.id?.$in && !inList(where.id.$in)) continue;
           if (where?.id?.$notIn && inList(where.id.$notIn)) continue;
+          if (where?.mfaRequired !== undefined && role.mfaRequired !== where.mfaRequired) continue;
           Object.assign(role, data);
           count += 1;
         }
@@ -978,11 +979,13 @@ describe('security-settings: service', () => {
     expect(widened.storeSet).not.toHaveBeenCalled();
   });
 
-  test('a concurrent raise turns the password-less passkeys save into one it never proved', async () => {
-    // The in-transaction re-check is the whole point of reading the settings again. The
-    // passkeys-only branch lets this caller through having presented nothing, so if a raise lands
-    // between the read and the write, the save they are about to make is a downgrade they were
-    // never checked for -- the document is written whole, so `mode` would go back to `off`.
+  /**
+   * An absent object is left as stored at write time. Rewritten from the read at the top instead,
+   * a passkeys-only save would put back whatever `mode` a concurrent save had just set -- and since
+   * the password-less caller is allowed to make this save on session authority alone, that revert
+   * would be a downgrade made by someone who proved nothing.
+   */
+  test('a passkeys-only save leaves a concurrent raise in place rather than reverting it', async () => {
     const concurrent = setup({
       stored: { mfa: { mode: 'off', graceDays: 7 }, passkeys: { enabled: true } },
       actor: { password: null },
@@ -992,9 +995,57 @@ describe('security-settings: service', () => {
       },
     });
 
+    await concurrent.service.updateSettings({ passkeys: { enabled: false } }, actor);
+
+    expect(concurrent.storeSet).toHaveBeenCalledWith({
+      key: 'security-settings',
+      value: expect.objectContaining({
+        mfa: { mode: 'required', graceDays: 7 },
+        passkeys: { enabled: false },
+      }),
+    });
+  });
+
+  test('a trust-only save is not refused for a role change it is not making', async () => {
+    // Before, the stale role list read at the top was compared with the fresh one, so a colleague
+    // adding a required role mid-save read as this save removing it -- a "relaxation" -- and the
+    // save that touched no role row at all was refused.
+    const { service, storeSet } = setup({
+      stored: {
+        mfa: { mode: 'optional', graceDays: 7 },
+        trustedDevices: { enabled: true, days: 30 },
+      },
+      onTransaction(setStored) {
+        setStored({
+          mfa: { mode: 'optional', graceDays: 7 },
+          trustedDevices: { enabled: true, days: 30 },
+        });
+      },
+    });
+
     await expect(
-      concurrent.service.updateSettings({ passkeys: { enabled: false } }, actor)
-    ).rejects.toThrow(/changed while this save was in flight/i);
-    expect(concurrent.storeSet).not.toHaveBeenCalled();
+      service.updateSettings({ trustedDevices: { enabled: true, days: 14 } }, actor)
+    ).resolves.toMatchObject({ trustedDevices: { enabled: true, days: 14 } });
+    expect(storeSet).toHaveBeenCalled();
+  });
+
+  test('clearing the required roles writes only the rows that were flagged', async () => {
+    const { service, roles } = setup({ enrolled: true });
+    const before = roles.map((role) => ({ ...role }));
+
+    // Dropping a required role is a relaxation, so it costs credentials like any other.
+    await service.updateSettings(
+      {
+        mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
+        password: 'pw',
+        code: '123456',
+      },
+      actor
+    );
+
+    // Role 3 was already `false` and role 1 was `null`: neither is a row this save should touch.
+    expect(roles.find((r) => r.id === 3)).toEqual(before.find((r) => r.id === 3));
+    expect(roles.find((r) => r.id === 1)).toEqual(before.find((r) => r.id === 1));
+    expect(roles.find((r) => r.id === 2)!.mfaRequired).toBe(false);
   });
 });

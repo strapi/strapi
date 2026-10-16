@@ -362,7 +362,19 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       // relaxes would refuse the uncontested SSO-only passkey toggle the branch above exists to
       // permit.
       const current = await getSettings();
-      const now = relaxingChanges(current, nextValues);
+
+      // An absent object is "left as stored" -- as stored *now*, not as read at the top. Written
+      // from the earlier read, a save that only touched trusted devices would silently put back
+      // whatever mode a concurrent save had just set, and would compare stale roles it never
+      // writes against fresh ones, refusing itself for a change it was not making.
+      const write = {
+        mfa: input.mfa ? nextMfa : current.mfa,
+        requiredRoles: input.mfa ? requiredRoles : current.mfa.requiredRoles,
+        trustedDevices: input.trustedDevices ? nextTrusted : current.trustedDevices,
+        passkeys: input.passkeys ? nextPasskeys : current.passkeys,
+      };
+
+      const now = relaxingChanges(current, write);
       const needsCredentials = actorRow.password
         ? now.any
         : now.lowersEnforcement || now.widensTrust;
@@ -373,25 +385,28 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
         );
       }
 
-      // The document is always written whole, from the resolved next values, so an absent object
-      // in the body is re-written unchanged rather than dropped.
+      // The document is always written whole, so an absent object is re-written as it now stands
+      // rather than dropped.
       await adminStore(strapi).set({
         key: SECURITY_SETTINGS_KEY,
         value: {
-          mfa: { mode: nextMfa.mode, graceDays: nextMfa.graceDays },
-          trustedDevices: { enabled: nextTrusted.enabled, days: nextTrusted.days },
-          passkeys: { enabled: nextPasskeys.enabled },
+          mfa: { mode: write.mfa.mode, graceDays: write.mfa.graceDays },
+          trustedDevices: {
+            enabled: write.trustedDevices.enabled,
+            days: write.trustedDevices.days,
+          },
+          passkeys: { enabled: write.passkeys.enabled },
         },
       });
 
       // Left in place, these rows would let a later re-enable silently revive trusts granted under the
       // old policy. Deleted in the same transaction as the setting that forbids them.
-      if (previous.trustedDevices.enabled && !nextTrusted.enabled) {
+      if (current.trustedDevices.enabled && !write.trustedDevices.enabled) {
         await mfa().clearAllTrustedDevices();
       }
 
       // The same cascade, for the same reason -- and why this `PUT` carries credentials.
-      if (previous.passkeys.enabled && !nextPasskeys.enabled) {
+      if (current.passkeys.enabled && !write.passkeys.enabled) {
         await mfa().clearAllPasskeys();
       }
 
@@ -402,15 +417,20 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
             data: { mfaRequired: true },
           });
         }
-        // `where: {}` is every role in the table, not a no-op: an empty `requiredRoles` clears them all.
+        // `where: {}` would be every role in the table: an empty `requiredRoles` clears them all.
+        // Only rows actually flagged are written, so a save does not bump `updatedAt` on every role
+        // whose flag was already off.
         await roleQuery().updateMany({
-          where: requiredRoles.length > 0 ? { id: { $notIn: requiredRoles } } : {},
+          where:
+            requiredRoles.length > 0
+              ? { id: { $notIn: requiredRoles }, mfaRequired: true }
+              : { mfaRequired: true },
           data: { mfaRequired: false },
         });
 
         // Grace clocks kept running while enforcement was paused, so without this, resuming after more
         // than `graceDays` locks every previously graced user at their next session with no banner.
-        if (previous.mfa.mode === 'off' && nextMfa.mode !== 'off') {
+        if (current.mfa.mode === 'off' && write.mfa.mode !== 'off') {
           await userQuery().updateMany({
             where: { mfaLockedAt: null, mfaGraceUntil: { $notNull: true } },
             data: { mfaGraceUntil: null },
