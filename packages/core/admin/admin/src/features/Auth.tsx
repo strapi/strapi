@@ -459,6 +459,9 @@ const AuthProvider = ({
       const res = await loginMfaMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
 
       if ('data' in res) {
+        // As in `login`: this is where an enrolled account's session actually starts, so the
+        // `sessionExpired` latch has to be re-armed here or the next expiry passes in silence.
+        resetSessionExpiredNotification();
         dispatch(loginAction({ token: res.data.token, persist: rememberMe }));
       }
 
@@ -476,6 +479,8 @@ const AuthProvider = ({
       });
 
       if ('data' in res) {
+        // See `loginMfa`.
+        resetSessionExpiredNotification();
         dispatch(loginAction({ token: res.data.token, persist: rememberMe }));
       }
 
