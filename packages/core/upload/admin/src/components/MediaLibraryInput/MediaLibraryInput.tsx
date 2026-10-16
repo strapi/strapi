@@ -1,7 +1,8 @@
-import { useId, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import { useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 
-import { useClipboard, useField, useNotification } from '@strapi/admin/strapi-admin';
+import { useClipboard, useField, useForm, useNotification } from '@strapi/admin/strapi-admin';
 import { Field, Flex, VisuallyHidden } from '@strapi/design-system';
+import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
@@ -32,6 +33,16 @@ import { AssetRow, UploadRow } from './AssetRow';
 import { useFieldUploads, type FieldUpload } from './useFieldUploads';
 
 import type { File } from '../../../../shared/contracts/files';
+
+/**
+ * What a field wrote that its form has not rendered yet, per form and field.
+ * `getValues()` only catches up on render, and two uploads can complete before
+ * the next one. Kept outside the input so it survives a remount.
+ */
+const unrenderedWrites = new WeakMap<object, Map<string, { seen: unknown; written: File[] }>>();
+
+const toAssets = (value: unknown): File[] =>
+  Array.isArray(value) ? value : value ? [value as File] : [];
 
 /**
  * `location` for every event this field fires. The standalone Media Library
@@ -93,7 +104,7 @@ export const MediaLibraryInput = ({
   const { toggleNotification } = useNotification();
   const { trackUsage } = useTracking();
   const { copy } = useClipboard();
-  const owner = useId();
+  const getValues = useForm('MediaLibraryInput', (state) => state.getValues);
 
   const [step, setStep] = useState<Step | undefined>(undefined);
   const [editedAsset, setEditedAsset] = useState<File | null>(null);
@@ -134,15 +145,22 @@ export const MediaLibraryInput = ({
     setAssets(assets.filter((current) => current.id !== asset.id));
   };
 
-  // Uploads land on the field as each file completes, whichever way it got
-  // there: dropped, retried from the field, or retried from the progress dialog.
-  const { uploads, cancel, retry, dismiss } = useFieldUploads(owner, (uploadedFiles) => {
-    setAssets(
-      multiple
-        ? [...assetsRef.current, ...uploadedFiles]
-        : [uploadedFiles[uploadedFiles.length - 1]]
-    );
-  });
+  // Bound to the form, not to this input: a component collapsed mid-upload
+  // unmounts the field, and the file must still land on the entry.
+  const attachUploadedFile = (file: File) => {
+    const writes = unrenderedWrites.get(getValues) ?? new Map();
+    unrenderedWrites.set(getValues, writes);
+
+    const value = get(getValues(), name);
+    const pending = writes.get(name);
+    const current = pending && pending.seen === value ? pending.written : toAssets(value);
+    const next = multiple ? [...current, file] : [file];
+
+    writes.set(name, { seen: value, written: next });
+    setAssets(next);
+  };
+
+  const { uploads, cancel, retry, dismiss } = useFieldUploads(name);
 
   const handleCopyLink = async (asset: File) => {
     const url = prefixFileUrlWithBackendUrl(asset.url);
@@ -273,7 +291,7 @@ export const MediaLibraryInput = ({
 
   /**
    * Hands the files to the shared upload pool. The field picks the results up
-   * from the progress store (see `useFieldUploads`), not from this call.
+   * from `onFileUploaded`, which also runs for retries of the same rows.
    */
   const startUpload = (allowedFiles: globalThis.File[]) => {
     const formData = new FormData();
@@ -295,7 +313,8 @@ export const MediaLibraryInput = ({
       totalFiles: allowedFiles.length,
       concurrency,
       generateAiMetadata: Boolean(isAiMetadataEnabled),
-      owner,
+      onFileUploaded: attachUploadedFile,
+      owner: name,
     });
   };
 
