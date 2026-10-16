@@ -27,9 +27,14 @@ export default {
     // Unique across the whole table, not per user, so "this credential already belongs to somebody"
     // is a database constraint rather than a lookup somebody might forget to write. varchar(255) so
     // the index stays portable; a longer id is refused before the insert.
+    //
+    // `column.unique` is what creates the constraint. The attribute-level `unique` is only checked
+    // by the document service's validator, which `db.query()` never runs, so on its own it let the
+    // same authenticator be registered twice.
     credentialId: {
       type: 'string',
       unique: true,
+      column: { unique: true },
       required: true,
       configurable: false,
       private: true,
