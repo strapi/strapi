@@ -210,21 +210,15 @@ export default () => {
         parent,
       };
 
-      // Deliberately awaited unconditionally, even though most visitors are synchronous
-      // and `await` on a non-thenable still costs a promise and a microtask hop.
+      // Awaited unconditionally. Most visitors are synchronous, and awaiting a
+      // non-thenable still schedules a microtask, but skipping that await changes
+      // the order of branches that recurse concurrently via Promise.all.
       //
-      // Skipping the await when the visitor returns nothing thenable is measurably faster
-      // but changes the order in which concurrently recursing branches run. The filters
-      // traversal recurses over array members with `Promise.all`, and at least one visitor
-      // depends on the resulting order: content-manager's `getQueryPopulate` accumulates
-      // into a shared object with `populateQuery = set(path, {}, populateQuery)`, where a
-      // shallow write such as `relation` replaces the whole subtree written by a deeper
-      // sibling like `relation.populate.component`. Dropping the await reordered those two
-      // writes and silently lost the deeper populate.
-      //
-      // That ordering dependency is a latent bug in the visitor rather than a contract this
-      // traversal should be guaranteeing, but it is not this change's job to fix it. Keep
-      // the await until such visitors are made order-independent.
+      // That reordering used to drop nested populate in content-manager's
+      // getQueryPopulate: a shallow `relation` write replaced the subtree a deeper
+      // sibling had written at `relation.populate.component`. #27236 fixed that
+      // visitor by merging paths. Re-measuring the skip afterward showed no
+      // throughput gain, so the await stays.
       await visitor(visitorOptions, visitorUtils);
 
       const value = utils.get(key, out);
