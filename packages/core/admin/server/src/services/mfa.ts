@@ -29,6 +29,7 @@ import type {
 } from '../../../shared/contracts/security-settings';
 import { createTrustedDevices } from './mfa-trusted-devices';
 import { createPasskeys, PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from './mfa-passkeys';
+import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
@@ -441,8 +442,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     }
 
     if (!secret) {
+      // The operator gets the diagnosis; the user gets what they can do about it. A Cloud customer
+      // has no shell to run a CLI command in, and backticks render literally in the panel.
+      strapi.log.error(
+        'An admin two-factor secret could not be decrypted. This usually means the admin encryption key changed. Recover the account with `strapi admin:reset-user-mfa`, or have the user sign in with a recovery code.'
+      );
       throw new ApplicationError(
-        'The stored two-factor secret could not be read. This usually means the admin encryption key changed. Use a recovery code, or reset this user with `strapi admin:reset-user-mfa`.'
+        'Your two-factor secret could not be read. Use a recovery code to sign in, or ask an administrator to reset two-factor authentication for your account.',
+        { code: MFA_ERROR_CODES.SECRET_UNREADABLE }
       );
     }
 
@@ -457,7 +464,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   ): Promise<void> => {
     if (!user.password) {
       throw new ValidationError(
-        'Your account has no local password, so it cannot manage two-factor authentication. Ask an administrator who signs in with a password.'
+        'Your account has no local password, so it cannot manage two-factor authentication. Ask an administrator who signs in with a password.',
+        { code: MFA_ERROR_CODES.NO_LOCAL_PASSWORD }
       );
     }
     if (!(await auth.validatePassword(password, user.password))) {
@@ -527,9 +535,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     const lastUsedStepColumn: string | undefined = metadata.attributes.mfaLastUsedStep?.columnName;
 
     if (!lastUsedStepColumn) {
-      throw new ApplicationError(
-        'Could not resolve the physical column name for admin::user.mfaLastUsedStep'
-      );
+      throw new Error('Could not resolve the physical column name for admin::user.mfaLastUsedStep');
     }
 
     // A single watermark, not a set of spent steps: with `window.back` set, a legitimate code for
@@ -555,7 +561,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     const user = await loadUser(userId);
     if (!user.mfaPendingSecret) {
-      throw new ValidationError('No enrolment in progress');
+      throw new ValidationError('No enrolment in progress', { code: MFA_ERROR_CODES.NO_ENROLMENT });
     }
 
     const pending = readSecret(user.mfaPendingSecret);
@@ -570,7 +576,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     if (!result.valid) {
       await recordEvent(userId, 'challenge_failed');
       notify(userId, 'challenge_failed');
-      throw new ValidationError('Invalid code');
+      throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
     }
 
     // Steps are wall-clock indices shared by both secrets, so one guard covers both. A
@@ -579,7 +585,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     if (!consumed) {
       await recordEvent(userId, 'challenge_failed');
       notify(userId, 'challenge_failed');
-      throw new ValidationError('Invalid code');
+      throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
     }
 
     const replaced = Boolean(user.mfaEnabledAt && user.mfaSecret);
@@ -604,7 +610,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       });
 
       if (count !== 1) {
-        throw new ValidationError('No enrolment in progress');
+        throw new ValidationError('No enrolment in progress', {
+          code: MFA_ERROR_CODES.NO_ENROLMENT,
+        });
       }
 
       // The trusts on file were granted against the authenticator just retired.
@@ -672,7 +680,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     const usedAtColumn: string | undefined = metadata.attributes.usedAt?.columnName;
 
     if (!usedAtColumn) {
-      throw new ApplicationError(
+      throw new Error(
         'Could not resolve the physical column name for admin::mfa-recovery-code.usedAt'
       );
     }
@@ -722,7 +730,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
 
     if (!attemptsColumn) {
-      throw new ApplicationError(
+      throw new Error(
         'Could not resolve the physical column name for admin::mfa-challenge.attempts'
       );
     }
@@ -1152,7 +1160,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     await recordEvent(userId, 'challenge_failed');
     notify(userId, 'challenge_failed');
-    throw new ValidationError('Invalid code');
+    throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
   };
 
   /**

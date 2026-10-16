@@ -8,6 +8,7 @@ import type {
   TrustedDeviceSettings,
   UpdateSecuritySettings,
 } from '../../../shared/contracts/security-settings';
+import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 
 const { ValidationError } = errors;
 
@@ -282,7 +283,9 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
         select: ['id'],
       });
       if (existing.length !== requiredRoles.length) {
-        throw new ValidationError('requiredRoles contains an unknown role id');
+        throw new ValidationError('requiredRoles contains an unknown role id', {
+          code: MFA_ERROR_CODES.UNKNOWN_ROLE,
+        });
       }
     }
 
@@ -302,7 +305,7 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     const raisesToRequired = nextMfa.mode === 'required' && previous.mfa.mode !== 'required';
     const addsHeldRole = addedRoles.some((id) => actorRoleIds.has(id));
     if (!actorExempt && !actorEnrolled && (raisesToRequired || addsHeldRole)) {
-      throw new ValidationError(GUARD_MESSAGE);
+      throw new ValidationError(GUARD_MESSAGE, { code: MFA_ERROR_CODES.ENROL_FIRST });
     }
 
     // Security downgrades need re-authentication, exactly like `/mfa/disable`: session authority
@@ -325,7 +328,8 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       // session authority; combined with either other term it is refused.
       if (!actorRow.password && (lowersEnforcement || widensTrust)) {
         throw new ValidationError(
-          'Your account has no local password, so it cannot lower two-factor authentication requirements. Ask an administrator who signs in with a password.'
+          'Your account has no local password, so it cannot lower two-factor authentication requirements. Ask an administrator who signs in with a password.',
+          { code: MFA_ERROR_CODES.NO_LOCAL_PASSWORD_DOWNGRADE }
         );
       }
       if (actorRow.password) {
@@ -381,7 +385,8 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
 
       if (needsCredentials && !credentialsVerified) {
         throw new ValidationError(
-          'Two-factor settings changed while this save was in flight. Review the current settings and try again.'
+          'Two-factor settings changed while this save was in flight. Review the current settings and try again.',
+          { code: MFA_ERROR_CODES.SETTINGS_CONFLICT }
         );
       }
 

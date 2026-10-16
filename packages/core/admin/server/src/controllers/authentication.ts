@@ -48,6 +48,7 @@ import type {
 } from '../../../shared/contracts/authentication';
 import type { MfaWebauthnLogin, MfaWebauthnOptions } from '../../../shared/contracts/mfa';
 import { AdminUser } from '../../../shared/contracts/shared';
+import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
@@ -237,7 +238,7 @@ export default {
         }
 
         // One generic message, so a caller cannot tell an expired challenge from a wrong code.
-        throw new ValidationError('Invalid code');
+        throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
       }
 
       const user = await getService('user').findOne(result.userId);
@@ -246,7 +247,7 @@ export default {
       // `verifyChallenge` has no equivalent of `checkCredentials`' gate. Mirrors it exactly -- it does
       // not consult `blocked` -- and reuses its generic message rather than open an enumeration channel.
       if (!user || user.isActive !== true) {
-        throw new ValidationError('Invalid code');
+        throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
       }
 
       // The service returns null when the organisation does not offer trust, and a stale checkbox is

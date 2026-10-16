@@ -1520,8 +1520,12 @@ describe('mfa service: enrolment', () => {
         const { service, users, events } = await beginFresh();
 
         await expect(service.completeEnrolment('1', '000000')).rejects.toThrow(/invalid code/i);
+        // The panel translates by this code; the English message is only the fallback.
+        await expect(service.completeEnrolment('1', '000000')).rejects.toMatchObject({
+          details: { code: 'MFA_INVALID_CODE' },
+        });
 
-        expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+        expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(2);
         // Still mid-enrolment: a wrong code costs an attempt, not the pending secret.
         expect(users.get('1')!.mfaPendingSecret).not.toBeNull();
         expect(users.get('1')!.mfaEnabledAt).toBeNull();

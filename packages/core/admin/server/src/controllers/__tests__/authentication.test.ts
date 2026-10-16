@@ -377,12 +377,15 @@ describe('authentication controller', () => {
           // Strict assertions, not `rejects.toMatchObject`: `toMatchObject` does a subset match
           // on nested objects, so `details: {}` there would still pass even if `details` were
           // `{ reason: 'unusable' }` -- exactly the enumeration leak this test exists to catch.
-          // `toEqual({})` fails on any extra key.
+          // `toEqual` fails on any extra key. The code is the same for every reason, so it is
+          // translatable without telling the caller which one it was.
           expect(error).toBeInstanceOf(errors.ValidationError);
           expect((error as InstanceType<typeof errors.ValidationError>).message).toBe(
             'Invalid code'
           );
-          expect((error as InstanceType<typeof errors.ValidationError>).details).toEqual({});
+          expect((error as InstanceType<typeof errors.ValidationError>).details).toEqual({
+            code: 'MFA_INVALID_CODE',
+          });
         }
       );
 

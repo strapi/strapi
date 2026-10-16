@@ -21,7 +21,7 @@ import type { MfaConfig } from '../config/mfa';
 import type { MfaEventMetadata, MfaEventType } from './mfa';
 import { warnOnce } from './security-settings';
 
-const { ApplicationError, RateLimitError, ValidationError } = errors;
+const { RateLimitError, ValidationError } = errors;
 
 const USER_UID = 'admin::user';
 const CHALLENGE_UID = 'admin::mfa-challenge';
@@ -449,12 +449,12 @@ export const createPasskeys = ({
     const challengeExpiresAtColumn: string | undefined = expiresAttr?.columnName;
 
     if (!challengeColumn) {
-      throw new ApplicationError(
+      throw new Error(
         'Could not resolve the physical column name for admin::user.mfaPasskeyChallenge'
       );
     }
     if (!challengeExpiresAtColumn) {
-      throw new ApplicationError(
+      throw new Error(
         'Could not resolve the physical column name for admin::user.mfaPasskeyChallengeExpiresAt'
       );
     }
@@ -479,12 +479,12 @@ export const createPasskeys = ({
     const webauthnColumn: string | undefined = metadata.attributes.webauthnChallenge?.columnName;
 
     if (!attemptsColumn) {
-      throw new ApplicationError(
+      throw new Error(
         'Could not resolve the physical column name for admin::mfa-challenge.attempts'
       );
     }
     if (!webauthnColumn) {
-      throw new ApplicationError(
+      throw new Error(
         'Could not resolve the physical column name for admin::mfa-challenge.webauthnChallenge'
       );
     }
