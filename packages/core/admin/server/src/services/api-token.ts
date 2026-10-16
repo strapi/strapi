@@ -303,9 +303,9 @@ const enforceAdminPermissionsCeiling = async (
     const requestedFields = requested.properties?.fields;
 
     if (!anyUserPermHasAllFields) {
-      const effectiveUserFields = [
-        ...new Set(matchingUserPerms.flatMap((p) => p.properties?.fields || [])),
-      ];
+      const effectiveUserFields = new Set(
+        matchingUserPerms.flatMap((p) => p.properties?.fields || [])
+      );
 
       // When the owner is field-restricted, omitting fields would widen access to all fields.
       // Force explicit field selection so token scope can't exceed the owner's ceiling.
@@ -315,7 +315,7 @@ const enforceAdminPermissionsCeiling = async (
       }
 
       if (requestedFields.length > 0) {
-        const exceedingFields = requestedFields.filter((f) => !effectiveUserFields.includes(f));
+        const exceedingFields = requestedFields.filter((f) => !effectiveUserFields.has(f));
 
         if (exceedingFields.length > 0) {
           exceeding.push(`${label} (fields: ${exceedingFields.join(', ')})`);
@@ -491,10 +491,10 @@ const reconcileTokenPermissionsToUserCeiling = (
       tokenFields !== null &&
       tokenFields.length > 0 &&
       (() => {
-        const effectiveUserFields = [
-          ...new Set(matchingUserPerms.flatMap((p) => p.properties?.fields || [])),
-        ];
-        return tokenFields.some((f) => !effectiveUserFields.includes(f));
+        const effectiveUserFields = new Set(
+          matchingUserPerms.flatMap((p) => p.properties?.fields || [])
+        );
+        return tokenFields.some((f) => !effectiveUserFields.has(f));
       })();
 
     if (fieldCeilingExceeded) {

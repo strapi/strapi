@@ -10,7 +10,6 @@ import {
   readFilePermissions,
 } from './test-helpers';
 
-const NOW = new Date('2026-09-28T12:00:00.000Z');
 const LICENSE = createTestLicense();
 const PASTED_LICENSE = createTestLicense({ type: 'gold', subscriptionId: 'pasted' });
 
@@ -87,37 +86,17 @@ describe('validateLicense', () => {
   it.each([['not-a-license'], [Buffer.from('one line only').toString('base64')]])(
     'rejects %s, which is not in the Strapi license format',
     (license) => {
-      expect(() => validateLicense(license, NOW)).toThrow('This Strapi license is not valid.');
+      expect(() => validateLicense(license)).toThrow('This Strapi license is not valid.');
     }
   );
 
   it('leaves the signature to the registry, which verifies every license it receives', () => {
-    expect(() => validateLicense(createTestLicense({ type: 'gold' }), NOW)).not.toThrow();
+    expect(() => validateLicense(createTestLicense({ type: 'gold' }))).not.toThrow();
   });
 
-  it('rejects an expired license', () => {
-    const license = createTestLicense({ expireAt: '2026-09-01T00:00:00.000Z' });
-
-    expect(() => validateLicense(license, NOW)).toThrow(
-      'This Strapi license expired on 2026-09-01.'
-    );
-  });
-
-  it('rejects an expired license whose expiry date is in milliseconds, as real licenses store it', () => {
-    const license = createTestLicense({ expireAt: Date.parse('2026-09-01T00:00:00.000Z') });
-
-    expect(() => validateLicense(license, NOW)).toThrow(
-      'This Strapi license expired on 2026-09-01.'
-    );
-  });
-
-  it('accepts a license without an expiry date or not expired yet', () => {
-    expect(() => validateLicense(LICENSE, NOW)).not.toThrow();
+  it('accepts a license whose expiry date has passed, since a renewed license keeps an old one', () => {
     expect(() =>
-      validateLicense(createTestLicense({ expireAt: '2027-03-01T00:00:00.000Z' }), NOW)
-    ).not.toThrow();
-    expect(() =>
-      validateLicense(createTestLicense({ expireAt: Date.parse('2027-03-01T00:00:00.000Z') }), NOW)
+      validateLicense(createTestLicense({ expireAt: Date.parse('2026-09-01T00:00:00.000Z') }))
     ).not.toThrow();
   });
 });
@@ -133,7 +112,6 @@ describe('resolveLicense', () => {
         isInteractive: true,
         logger,
         env: { STRAPI_LICENSE: LICENSE },
-        now: NOW,
         prompt,
       })
     ).resolves.toEqual({ license: LICENSE, source: 'environment' });
@@ -152,7 +130,6 @@ describe('resolveLicense', () => {
         isInteractive: false,
         logger: createTestLogger(),
         env: {},
-        now: NOW,
         prompt,
       })
     ).rejects.toThrow(
@@ -171,7 +148,6 @@ describe('resolveLicense', () => {
       isInteractive: true,
       logger: createTestLogger(),
       env: {},
-      now: NOW,
       prompt: async () => PASTED_LICENSE,
     });
 
@@ -191,7 +167,6 @@ describe('resolveLicense', () => {
         isInteractive: true,
         logger,
         env: {},
-        now: NOW,
         prompt: async () => PASTED_LICENSE,
       })
     ).resolves.toEqual({ license: PASTED_LICENSE, source: 'prompt' });
@@ -215,7 +190,6 @@ describe('resolveLicense', () => {
       isInteractive: true,
       logger: createTestLogger(),
       env: {},
-      now: NOW,
       prompt: async () => PASTED_LICENSE,
     });
 
@@ -231,7 +205,6 @@ describe('resolveLicense', () => {
         isInteractive: true,
         logger: createTestLogger(),
         env: {},
-        now: NOW,
         prompt: async () => 'bad-license',
       })
     ).rejects.toThrow('This Strapi license is not valid.');

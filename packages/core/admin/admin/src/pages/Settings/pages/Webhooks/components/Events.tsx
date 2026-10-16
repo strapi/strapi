@@ -24,6 +24,10 @@ import { useContentTypes } from '../../../../../hooks/useContentTypes';
 
 import type { ContentType } from '../../../../../../../shared/contracts/content-types';
 
+const EMPTY_DISABLED_EVENTS: NonNullable<EventsRowProps['disabledEvents']> = [];
+const EMPTY_EVENTS: NonNullable<EventsRowProps['events']> = [];
+const EMPTY_INPUT_VALUE: NonNullable<EventsRowProps['inputValue']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * EventsRoot
  * -----------------------------------------------------------------------------------------------*/
@@ -354,11 +358,11 @@ interface EventsRowProps {
 }
 
 const EventsRow = ({
-  disabledEvents = [],
+  disabledEvents = EMPTY_DISABLED_EVENTS,
   name,
   label,
-  events = [],
-  inputValue = [],
+  events = EMPTY_EVENTS,
+  inputValue = EMPTY_INPUT_VALUE,
   handleSelect,
   handleSelectAll,
 }: EventsRowProps) => {
