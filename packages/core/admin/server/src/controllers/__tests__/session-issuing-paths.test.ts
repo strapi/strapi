@@ -105,6 +105,8 @@ const buildResetStrapi = ({
           trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
           countPasskeys: jest.fn(() => Promise.resolve(1)),
           passkeysConfigured: jest.fn(() => true),
+          // A reset revokes every trusted browser alongside the sessions.
+          revokeAllTrustedDevices: jest.fn(() => Promise.resolve(0)),
         },
         user: { sanitizeUser },
       },
@@ -187,6 +189,7 @@ const buildPath = (
           ),
           enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
           countPasskeys: jest.fn(() => Promise.resolve(0)),
+          revokeAllTrustedDevices: jest.fn(() => Promise.resolve(0)),
           ...mfaOverrides,
         },
       },

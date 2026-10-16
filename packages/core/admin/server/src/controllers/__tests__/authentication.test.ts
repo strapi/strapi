@@ -105,6 +105,7 @@ describe('authentication controller', () => {
               consumeTrustedDevice,
               trustDevice,
               countPasskeys: jest.fn(() => Promise.resolve(0)),
+              revokeAllTrustedDevices: jest.fn(() => Promise.resolve(0)),
               ...mfaOverrides,
             },
             user: { sanitizeUser, findOne, ...userOverrides },
@@ -788,6 +789,29 @@ describe('authentication controller', () => {
             passkeyAvailable: false,
           },
         });
+      });
+
+      /**
+       * A reset is what you do when you believe the password is compromised. A browser the
+       * attacker had already trusted must not keep skipping the second factor on its next login
+       * with the new password -- `completeEnrolment` clears trusts when the authenticator is
+       * replaced for exactly this reason, and this is the same category of event.
+       */
+      test('/reset-password revokes every trusted browser, not just the sessions', async () => {
+        const revokeAllTrustedDevices = jest.fn(() => Promise.resolve(2));
+        const { invalidateRefreshToken } = buildIssuingStrapi({
+          isEnabled: jest.fn(() => false),
+          revokeAllTrustedDevices,
+        });
+        const { ctx } = buildCtx({
+          resetPasswordToken: 'reset-token',
+          password: 'NewPassword123',
+        });
+
+        await authenticationController.resetPassword(ctx);
+
+        expect(invalidateRefreshToken).toHaveBeenCalledWith(String(user.id));
+        expect(revokeAllTrustedDevices).toHaveBeenCalledWith(String(user.id));
       });
     });
 

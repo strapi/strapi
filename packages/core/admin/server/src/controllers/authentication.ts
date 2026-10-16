@@ -394,17 +394,24 @@ export default {
       return ctx.internalServerError();
     }
 
+    const mfa = getService('mfa');
+
     try {
       // Invalidate all existing sessions before creating a new one.
       await sessionManager('admin').invalidateRefreshToken(String(user.id));
+
+      // And every trusted browser. A reset is the event you perform when you believe the password
+      // is compromised, so a browser the attacker already trusted must not keep skipping the
+      // second factor on its next login with the new password. `completeEnrolment` clears trusts
+      // when the authenticator is replaced for the same reason; this is the same category of
+      // event. Revoked rather than cleared, so the account holder gets the notice.
+      await mfa.revokeAllTrustedDevices(String(user.id));
     } catch (err) {
       strapi.log.error('Failed to create admin refresh session during reset-password', err as any);
       return ctx.internalServerError();
     }
 
     const sessionOptions = await enforceMfaOrThrow(user);
-
-    const mfa = getService('mfa');
 
     if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
       // Before `createChallenge` mints its row, for the reason `login` gives.
