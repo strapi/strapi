@@ -494,6 +494,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   const completeEnrolment = async (userId: string, code: string) => {
+    // The one credential-verifying path that used to have no account tier. The route limiter keys
+    // on `unknownEmail:<path>:<ip>`, so it is one bucket for everyone behind an address, not a
+    // bound on guesses against *this* account's in-progress enrolment.
+    if (await isAccountThrottled(userId)) {
+      throw new RateLimitError();
+    }
+
     const user = await loadUser(userId);
     if (!user.mfaPendingSecret) {
       throw new ValidationError('No enrolment in progress');
@@ -509,6 +516,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       window,
     });
     if (!result.valid) {
+      await recordEvent(userId, 'challenge_failed');
+      notify(userId, 'challenge_failed');
       throw new ValidationError('Invalid code');
     }
 
@@ -516,6 +525,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // replacement must not reset `mfaLastUsedStep`, or a code accepted here replays at login.
     const consumed = await consumeTotpStep(userId, result.step);
     if (!consumed) {
+      await recordEvent(userId, 'challenge_failed');
+      notify(userId, 'challenge_failed');
       throw new ValidationError('Invalid code');
     }
 
@@ -675,9 +686,20 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   ): Promise<void> => {
     await eventQuery().create({ data: { userId: String(userId), type, metadata, seenAt: null } });
 
-    // `recordEvent` runs inside `issueRecoveryCodes`' transaction, so an uncaught prune failure would
-    // roll back the codes just written. Awaited, not detached: a floating promise inside an ambient
-    // transaction either escapes it or dangles past it.
+    // The prune is housekeeping against a soft cap, and it must never cost the caller its write.
+    // Inside an ambient transaction it cannot be made safe by catching: on Postgres and MySQL a
+    // failed statement aborts the whole transaction, so the catch below would return normally
+    // while every later statement -- and the commit -- fails. `recordEvent` runs inside three
+    // transactions (`issueRecoveryCodes`, `trustDevice`, `registerPasskey`), and the first is
+    // itself nested in `completeEnrolment`'s, so the blast radius is an entire enrolment.
+    //
+    // So: skip it there and let the next untransacted event for this user do it. Rows past the cap
+    // live a little longer; nothing reads them by position. SQLite would survive the catch, but
+    // one behaviour on every dialect is worth more than pruning a few events sooner on one.
+    if (strapi.db.inTransaction()) {
+      return;
+    }
+
     try {
       await pruneEvents(userId);
     } catch (error) {
@@ -722,14 +744,23 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    *
    * The hub event fires for every notice type and is how EE audit logging observes them. Email goes
    * only to `EmailedNotice` -- mailing every wrong code would let anyone who knows the password
-   * flood the account holder's inbox. The returned promise never rejects; only the CLI awaits it.
+   * flood the account holder's inbox.
+   *
+   * The returned promise never rejects; only the CLI awaits it. The hub emit is detached rather
+   * than part of it: `eventHub.emit` awaits every subscriber, and with EE audit logging on that
+   * means a `findOne` and an insert, either of which can throw. Most of the ~15 callers do not
+   * await this at all -- `verifyChallenge` on the unauthenticated `/login/mfa` route among them --
+   * so an unhandled rejection is the alternative. Its failures are logged, not propagated.
    */
   const notify = (
     userId: string,
     type: MfaChangeNotice,
     extra: { byUserId?: string; count?: number } = {}
   ): Promise<void> => {
-    strapi.eventHub.emit(`admin.mfa.${type.replace(/_/g, '.')}`, { userId, ...extra });
+    const event = `admin.mfa.${type.replace(/_/g, '.')}`;
+    strapi.eventHub.emit(event, { userId, ...extra }).catch((error) => {
+      strapi.log.error(`An event listener failed while handling ${event}`, { error });
+    });
 
     if (!isEmailedNotice(type)) {
       return Promise.resolve();

@@ -950,6 +950,9 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     challengeWebauthnColumn
   );
 
+  // Depth, not a boolean: `issueRecoveryCodes`' transaction nests inside `completeEnrolment`'s.
+  let transactionDepth = 0;
+
   const strapiBase = {
     config: {
       get: jest.fn((path: string, defaultValue?: unknown) => {
@@ -963,7 +966,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     // `challenge_failed` fallthrough (the whole challenge-lifecycle suite included) now goes
     // through it, so a real jest mock has to be here unconditionally, not only in the tests that
     // are actually about `notify`.
-    eventHub: { emit: jest.fn() },
+    // `emit` returns a promise in the real hub, and `notify` attaches a `.catch` to it.
+    eventHub: { emit: jest.fn(async () => {}) },
     // Same reasoning for the fire-and-forget email half of `notify`: a resolving default means
     // every incidental notify (e.g. a challenge_failed-adjacent enrolment test) settles quietly
     // instead of logging a caught error nobody asked about. Tests about `notify` itself override
@@ -1004,7 +1008,14 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       // suite touches before running the callback, and restore them all wholesale if it rejects.
       // On success nothing extra happens:
       // the stores already hold whatever the callback wrote, exactly like a committed transaction.
+      // `recordEvent` skips its prune while a transaction is open, because on Postgres and MySQL a
+      // failed statement there poisons the whole transaction. Tracked for real rather than stubbed
+      // `false`, so the skip is exercised by every suite that writes inside one.
+      inTransaction() {
+        return transactionDepth > 0;
+      },
       transaction: jest.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) => {
+        transactionDepth += 1;
         const usersSnapshot = new Map(Array.from(users.entries(), ([id, row]) => [id, { ...row }]));
         const recoverySnapshot = recoveryRows.map((row) => ({ ...row }));
         const challengesSnapshot = challenges.map((row) => ({ ...row }));
@@ -1023,6 +1034,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
           trustedRows.splice(0, trustedRows.length, ...trustedSnapshot);
           passkeyRows.splice(0, passkeyRows.length, ...passkeySnapshot);
           throw error;
+        } finally {
+          transactionDepth -= 1;
         }
       }),
     },
@@ -1485,6 +1498,58 @@ describe('mfa service: enrolment', () => {
 
       expect(users.get('1')!.mfaPendingSecret).toBeNull();
       expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+    });
+
+    /**
+     * `verify` is a credential check like any other: the pending secret is guessable in six
+     * digits, and the only other bound is the route limiter, whose key collapses to
+     * `unknownEmail:<path>:<ip>` and so bounds an address rather than an account. Without these
+     * two, a session-only attacker can grind a victim's in-progress enrolment inside the window
+     * between the QR code appearing and the victim typing their own code, and nothing about it
+     * reaches the account's notices, its audit trail or its throttle.
+     */
+    describe('verify is throttled and recorded like every other code check', () => {
+      const beginFresh = async () => {
+        const { strapi, users, events } = buildStrapi();
+        const service = createMfaService(defaultDeps(strapi));
+        await service.beginEnrolment('1', 'pw');
+        return { service, users, events };
+      };
+
+      test('a wrong code is recorded against the account, not just rejected', async () => {
+        const { service, users, events } = await beginFresh();
+
+        await expect(service.completeEnrolment('1', '000000')).rejects.toThrow(/invalid code/i);
+
+        expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
+        // Still mid-enrolment: a wrong code costs an attempt, not the pending secret.
+        expect(users.get('1')!.mfaPendingSecret).not.toBeNull();
+        expect(users.get('1')!.mfaEnabledAt).toBeNull();
+      });
+
+      test('an account already over its window cannot keep guessing', async () => {
+        const { service, events } = await beginFresh();
+
+        for (let i = 0; i < MFA_DEFAULTS.maxUserAttempts; i += 1) {
+          events.push({
+            id: 9000 + i,
+            userId: '1',
+            type: 'challenge_failed',
+            metadata: {},
+            seenAt: null,
+            createdAt: new Date(),
+          } as (typeof events)[number]);
+        }
+
+        await expect(service.completeEnrolment('1', '000000')).rejects.toBeInstanceOf(
+          errors.RateLimitError
+        );
+
+        // Refused before anything was spent, so a throttled request cannot itself deepen the hole.
+        expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(
+          MFA_DEFAULTS.maxUserAttempts
+        );
+      });
     });
 
     test('a valid TOTP code starts a replacement while the active secret keeps working', async () => {
