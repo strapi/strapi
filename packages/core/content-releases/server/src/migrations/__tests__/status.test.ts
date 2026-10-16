@@ -9,12 +9,20 @@ const INVALID = {
   reason: { validation: { errors: [{ path: ['title'], message: 'title is required' }] } },
 };
 
-const mockGetDraftEntryValidity = jest.fn();
+const actualUtils = jest.requireActual<typeof utils>('../../utils');
+
+// Publish drafts read as invalid; unpublish actions keep the real rule
+const mockGetActionValidity = jest.fn<
+  ReturnType<typeof utils.getActionValidity>,
+  Parameters<typeof utils.getActionValidity>
+>(async (action, options) =>
+  action.type === 'publish' ? INVALID : actualUtils.getActionValidity(action, options)
+);
 
 jest.mock('../../utils', () => ({
   ...jest.requireActual<typeof utils>('../../utils'),
-  getDraftEntryValidity: (...args: Parameters<typeof utils.getDraftEntryValidity>) =>
-    mockGetDraftEntryValidity(...args),
+  getActionValidity: (...args: Parameters<typeof utils.getActionValidity>) =>
+    mockGetActionValidity(...args),
 }));
 
 const releaseFindMany = jest.fn();
@@ -42,7 +50,6 @@ const action = (id: number, type: 'publish' | 'unpublish') => ({
 describe('migrateIsValidAndStatusReleases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetDraftEntryValidity.mockResolvedValue(INVALID);
     global.strapi = {
       db: {
         query: jest.fn((uid: string) =>
@@ -56,7 +63,7 @@ describe('migrateIsValidAndStatusReleases', () => {
     } as unknown as typeof global.strapi;
   });
 
-  it('validates publish actions only, without overwriting what a run recorded', async () => {
+  it('stores each action validity, without overwriting what a run recorded', async () => {
     releaseFindMany.mockResolvedValue([
       { id: 10, actions: [action(1, 'publish'), action(2, 'unpublish')] },
     ]);
@@ -64,7 +71,6 @@ describe('migrateIsValidAndStatusReleases', () => {
     await migrateIsValidAndStatusReleases();
     await flush();
 
-    expect(mockGetDraftEntryValidity).toHaveBeenCalledTimes(1);
     expect(actionUpdateMany.mock.calls).toStrictEqual([
       [{ where: { id: 1, outcome: null }, data: INVALID }],
       [{ where: { id: 2, outcome: null }, data: { isEntryValid: true, reason: null } }],

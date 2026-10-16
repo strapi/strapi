@@ -63,7 +63,7 @@ describe('Release Validation service', () => {
   });
 
   describe('validateUniqueEntry', () => {
-    it('throws an error if the release does not exist', () => {
+    it('throws an error if the release does not exist', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         contentType: jest.fn().mockReturnValue({
@@ -88,12 +88,12 @@ describe('Release Validation service', () => {
         type: 'publish',
       };
 
-      expect(() =>
+      await expect(
         releaseValidationService.validateUniqueEntry(1, mockReleaseAction)
       ).rejects.toThrow('No release found for id 1');
     });
 
-    it('throws an error if a contentType entry already exists in the release', () => {
+    it('throws an error if a contentType entry already exists in the release', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         contentType: jest.fn().mockReturnValue({
@@ -125,7 +125,7 @@ describe('Release Validation service', () => {
         type: 'publish',
       };
 
-      expect(() =>
+      await expect(
         releaseValidationService.validateUniqueEntry(1, mockReleaseAction)
       ).rejects.toThrow(
         'Entry with documentId 1 and contentType api::category.category already exists in release with id 1'
@@ -134,7 +134,7 @@ describe('Release Validation service', () => {
   });
 
   describe('validatePendingReleasesLimit', () => {
-    it('should throw an error if the default pending release limit has been reached', () => {
+    it('should throw an error if the default pending release limit has been reached', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -147,7 +147,7 @@ describe('Release Validation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      expect(() => releaseValidationService.validatePendingReleasesLimit()).rejects.toThrow(
+      await expect(releaseValidationService.validatePendingReleasesLimit()).rejects.toThrow(
         'You have reached the maximum number of pending releases'
       );
     });
@@ -168,7 +168,7 @@ describe('Release Validation service', () => {
       await expect(releaseValidationService.validatePendingReleasesLimit()).resolves.not.toThrow();
     });
 
-    it('should throw an error if the license pending release limit has been reached', () => {
+    it('should throw an error if the license pending release limit has been reached', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         ee: {
@@ -189,7 +189,7 @@ describe('Release Validation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      expect(() => releaseValidationService.validatePendingReleasesLimit()).rejects.toThrow(
+      await expect(releaseValidationService.validatePendingReleasesLimit()).rejects.toThrow(
         'You have reached the maximum number of pending releases'
       );
     });
@@ -273,22 +273,22 @@ describe('Release Validation service', () => {
       jest.useRealTimers();
     });
 
-    it('should throw an error if the scheduledAt date is in the past', () => {
+    it('should throw an error if the scheduledAt date is in the past', async () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
 
-      expect(() =>
+      await expect(
         releaseValidationService.validateScheduledAtIsLaterThanNow(new Date('2020-01-01'))
       ).rejects.toThrow('Scheduled at must be later than now');
     });
 
-    it('should pass if the scheduledAt date is in the future', () => {
+    it('should pass if the scheduledAt date is in the future', async () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
 
-      expect(() =>
+      await expect(
         releaseValidationService.validateScheduledAtIsLaterThanNow(new Date('2022-01-01'))
-      ).not.toThrow();
+      ).resolves.toBeUndefined();
     });
   });
 });

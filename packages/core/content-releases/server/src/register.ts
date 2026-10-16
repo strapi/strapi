@@ -12,6 +12,7 @@ import {
   disableContentTypeLocalized,
   enableContentTypeLocalized,
 } from './migrations';
+import type { ContentTypesSyncInput } from './migrations';
 import { addEntryDocumentToReleaseActions } from './migrations/database/5.0.0-document-id-in-actions';
 
 export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
@@ -20,18 +21,21 @@ export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
 
     strapi.db.migrations.providers.internal.register(addEntryDocumentToReleaseActions);
 
-    strapi
-      .hook('strapi::content-types.beforeSync')
-      .register(disableContentTypeLocalized)
-      .register(deleteActionsOnDisableDraftAndPublish);
+    strapi.hook('strapi::content-types.beforeSync').register(disableContentTypeLocalized);
 
+    // After the sync: the removals recalculate statuses, which reads the current schema
     strapi
       .hook('strapi::content-types.afterSync')
-      .register(deleteActionsOnDeleteContentType)
+      .register((input: ContentTypesSyncInput) =>
+        deleteActionsOnDeleteContentType(input, { strapi })
+      )
+      .register((input: ContentTypesSyncInput) =>
+        deleteActionsOnDisableDraftAndPublish(input, { strapi })
+      )
       .register(enableContentTypeLocalized)
-      .register(revalidateChangedContentTypes)
+      .register((input: ContentTypesSyncInput) => revalidateChangedContentTypes(input, { strapi }))
       .register(migrateIsValidAndStatusReleases)
-      .register(addReasonsToInvalidActions)
+      .register(() => addReasonsToInvalidActions({ strapi }))
       .register(migrateReleaseConditionReleases);
   }
 

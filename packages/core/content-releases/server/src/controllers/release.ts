@@ -163,11 +163,10 @@ const releaseController = {
         release: id,
       },
     });
-    const notReadyCount = release.releasedAt
-      ? undefined
-      : await releaseActionService.countActions({
-          filters: { release: id, type: 'publish', isEntryValid: false },
-        });
+    // Counted as for the releases list, so both say the same; absent for a release that ran
+    const notReadyCount = (await releaseActionService.countNotReadyByRelease([release.id])).get(
+      release.id
+    );
     const sanitizedRelease = {
       ...release,
       createdBy: release.createdBy

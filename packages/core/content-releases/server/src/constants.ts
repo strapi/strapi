@@ -9,6 +9,13 @@ export const DEFAULT_RELEASE_CONDITION = 'all_or_nothing' satisfies ReleaseCondi
 export const RELEASE_STATUSES = ['ready', 'blocked', 'failed', 'done', 'partial', 'empty'] as const;
 export type ReleaseStatus = (typeof RELEASE_STATUSES)[number];
 
+// A release action no run has recorded, in a release that hasn't run. The relation filter is a
+// left join: the id check keeps out actions whose release no longer exists.
+export const PLANNED_ACTION_WHERE = {
+  outcome: null,
+  release: { id: { $notNull: true }, releasedAt: { $null: true } },
+};
+
 export const ACTIONS = [
   {
     section: 'plugins',
