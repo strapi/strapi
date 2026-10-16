@@ -1,11 +1,20 @@
-import { Box, Card, CardBody, CardHeader, Checkbox, Flex } from '@strapi/design-system';
+import {
+  Box,
+  Card,
+  CardBody,
+  CardHeader,
+  Checkbox,
+  Divider,
+  Flex,
+  Typography,
+} from '@strapi/design-system';
 import { Folder as FolderIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { TruncatedText } from '../../../components/TruncatedText';
 import { ASSET_TYPES } from '../../../enums';
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../../hooks/useTracking';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
@@ -14,12 +23,15 @@ import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../consta
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { useListSettings } from '../hooks/useListSettings';
 import { buildRenderedKeys } from '../utils/renderedKeys';
-import { assetKey, folderKey, type ItemKey } from '../utils/selection';
+import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
 import { BusyOverlay } from './BusyOverlay';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
+import { isFromReorderHandle } from './Dnd/assetSortable';
+import { ReorderHandle } from './Dnd/ReorderHandle';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 import { FolderActionsMenu } from './FolderActionsMenu';
 import { useItemContextMenuTrigger } from './ItemContextMenu';
@@ -58,14 +70,19 @@ const StyledCard = styled(Card)<{
   $isMovePending?: boolean;
   $isBusy?: boolean;
   $isSelected?: boolean;
+  /** Shown but not choosable here (the picker's `allowedTypes`). */
+  $isUnselectable?: boolean;
 }>`
   border: 1px solid
     ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
   isolation: isolate;
-  cursor: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'wait' : 'pointer')};
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
+  cursor: ${({ $isMovePending, $isBusy, $isUnselectable }) => {
+    if ($isMovePending || $isBusy) return 'wait';
+    return $isUnselectable ? 'not-allowed' : 'pointer';
+  }};
+  opacity: ${({ $isDragging, $isUnselectable }) => ($isDragging || $isUnselectable ? 0.4 : 1)};
   /* No opacity change while busy — the overlay does the dimming, and stacking
      one on the other would wash the card out. */
   pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
@@ -91,13 +108,18 @@ const FoldersRow = styled(Box)`
   grid-column: 1 / -1;
 `;
 
-const MIN_TILE_WIDTH = '240px';
-
-const ItemsGrid = styled(Box)`
+const StyledItemsGrid = styled(Box)<{ $minTileWidth: string }>`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(${MIN_TILE_WIDTH}, 100%), 1fr));
+  grid-template-columns: ${({ $minTileWidth }) =>
+    `repeat(auto-fill, minmax(min(${$minTileWidth}, 100%), 1fr))`};
   gap: ${({ theme }) => theme.spaces[4]};
 `;
+
+const ItemsGrid = (props: React.ComponentProps<typeof Box>) => {
+  const { gridMinTileWidth } = useListSettings();
+
+  return <StyledItemsGrid $minTileWidth={gridMinTileWidth} {...props} />;
+};
 
 const StyledFolderCard = styled(Flex)<{
   $isDragging?: boolean;
@@ -163,8 +185,8 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
+  const { showItemActions } = useListSettings();
   const openContextMenu = useItemContextMenuTrigger();
   const {
     dragData,
@@ -175,6 +197,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   } = useFolderDraggableDroppable(folder);
 
   const key = folderKey(folder.id);
+  const selectability = getSelectability(key);
 
   const setNodeRef = (node: HTMLElement | null) => {
     setDragRef(node);
@@ -255,10 +278,11 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
         }
       }}
     >
-      {canUpdate && (
+      {selectability !== 'hidden' && (
         <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
           <Checkbox
             checked={isSelected(key)}
+            disabled={selectability === 'disabled'}
             onClick={handleCheckboxClick}
             aria-label={formatMessage(
               {
@@ -274,9 +298,11 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
       <FolderName textColor="neutral800">{folder.name}</FolderName>
-      <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
-        <FolderActionsMenu folder={folder} dragData={dragData} />
-      </Flex>
+      {showItemActions && (
+        <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
+          <FolderActionsMenu folder={folder} dragData={dragData} />
+        </Flex>
+      )}
     </StyledFolderCard>
   );
 };
@@ -426,14 +452,16 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
-  const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { attributes, listeners, setNodeRef, isDragging, dragData, dragStyle, dragHandle } =
+    useFileDraggable(asset);
+  const { isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
+  const { showItemActions } = useListSettings();
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
   const openContextMenu = useItemContextMenuTrigger();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
+  const selectability = getSelectability(key);
 
   // Plain click opens the asset details; pointer selection lives on the
   // checkbox only. Modifier clicks keep the selection semantics: shift selects
@@ -458,7 +486,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 
   // Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isEventFromWithin(e)) {
+    if (!isEventFromWithin(e) || isFromReorderHandle(e)) {
       return;
     }
 
@@ -497,6 +525,8 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       $isMovePending={isMovePending}
       $isBusy={busyMessage !== null}
       $isSelected={selected}
+      $isUnselectable={selectability === 'disabled'}
+      style={dragStyle}
       tabIndex={0}
       role="listitem"
       // Right-click opens this asset's own actions, or the selection's when it
@@ -518,13 +548,14 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       }}
     >
       <StyledCardHeader>
-        {canUpdate && (
+        {selectability !== 'hidden' && (
           <CheckboxOverlay
             {...ASSET_ITEM_CONTROL_PROPS}
             onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
           >
             <Checkbox
               checked={selected}
+              disabled={selectability === 'disabled'}
               onClick={handleCheckboxClick}
               aria-label={formatMessage(
                 {
@@ -545,20 +576,28 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       </StyledCardHeader>
       <CardBody>
         <CardFooter alignItems="center" gap={2}>
-          <FileTypeIcon>
-            <TypeIcon width={20} height={20} />
-          </FileTypeIcon>
+          {/* The grip takes the type icon's place: the preview above already
+              shows what the asset is. */}
+          {dragHandle ? (
+            <ReorderHandle name={asset.name} handle={dragHandle} />
+          ) : (
+            <FileTypeIcon>
+              <TypeIcon width={20} height={20} />
+            </FileTypeIcon>
+          )}
           <NameButton type="button" onClick={handleNameClick}>
             <FileName textColor="primary800">{asset.name}</FileName>
           </NameButton>
-          <Flex
-            {...ASSET_ITEM_CONTROL_PROPS}
-            onClick={stopCardEvent}
-            onKeyDown={stopCardEvent}
-            onPointerDown={stopCardEvent}
-          >
-            <AssetActionsMenu asset={asset} dragData={dragData} />
-          </Flex>
+          {showItemActions && (
+            <Flex
+              {...ASSET_ITEM_CONTROL_PROPS}
+              onClick={stopCardEvent}
+              onKeyDown={stopCardEvent}
+              onPointerDown={stopCardEvent}
+            >
+              <AssetActionsMenu asset={asset} dragData={dragData} />
+            </Flex>
+          )}
         </CardFooter>
       </CardBody>
     </StyledCard>
@@ -569,8 +608,68 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
 
+interface GridSectionProps {
+  title: string;
+  /** Sits at the end of the heading row. */
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+// Headings sit outside the `role="list"` grid: a list may only contain items.
+const GridSection = ({ title, action, children }: GridSectionProps) => (
+  <Flex tag="section" direction="column" alignItems="stretch" gap={4}>
+    <Flex justifyContent="space-between" alignItems="center" gap={4}>
+      <Typography variant="delta" tag="h3">
+        {title}
+      </Typography>
+      {action}
+    </Flex>
+    <ItemsGrid role="list">{children}</ItemsGrid>
+  </Flex>
+);
+
+/**
+ * The grid's counterpart of the table's header checkbox: selects the loaded
+ * assets that can be selected, or un-selects them when they all are.
+ */
+const GridSelectAll = ({ assets }: { assets: File[] }) => {
+  const { formatMessage } = useIntl();
+  const { selectedKeys, selectAll, deselect, getSelectability } = useAssetSelection();
+  const { trackUsage } = useTracking();
+
+  const selectableKeys = assets
+    .map((asset) => assetKey(asset.id))
+    .filter((key) => getSelectability(key) === 'enabled');
+  const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, selectableKeys);
+
+  const handleChange = () => {
+    if (allSelected) {
+      // Only these: a picker's selection also holds assets from elsewhere.
+      selectableKeys.forEach((key) => deselect(key));
+    } else {
+      trackUsage('didSelectAllMediaLibraryElements');
+      selectAll(selectableKeys);
+    }
+  };
+
+  return (
+    <Checkbox
+      checked={isIndeterminate ? 'indeterminate' : allSelected}
+      disabled={selectableKeys.length === 0}
+      onCheckedChange={handleChange}
+    >
+      {formatMessage({
+        id: getTranslationKey('list.table.header.select-all'),
+        defaultMessage: 'Select all',
+      })}
+    </Checkbox>
+  );
+};
+
 interface AssetsGridProps {
   assets: File[];
+  /** Shown in the "Assets (n)" heading; falls back to the loaded count. */
+  assetsTotal?: number;
   folders?: Folder[];
   /** Keys of the rendered items, in render order. Owned by the view. */
   renderedKeys?: ItemKey[];
@@ -579,10 +678,14 @@ interface AssetsGridProps {
 
 export const AssetsGrid = ({
   assets,
+  assetsTotal,
   folders = EMPTY_FOLDERS,
   renderedKeys,
   onAssetItemClick,
 }: AssetsGridProps) => {
+  const { formatMessage } = useIntl();
+  const { showSectionHeadings, showGridSelectAll } = useListSettings();
+  const { isEnabled, canSelectAll } = useAssetSelection();
   const totalItems = folders.length + assets.length;
 
   // Render order: folders always on top in the grid (mixing is table-only) —
@@ -595,30 +698,60 @@ export const AssetsGrid = ({
     return null;
   }
 
+  const folderCards = folders.map((folder) => (
+    <FolderCard folder={folder} orderedItemKeys={orderedItemKeys} key={`folder-${folder.id}`} />
+  ));
+  const assetCards = assets.map((asset) => (
+    <Flex key={asset.id} direction="column" alignItems="stretch">
+      <AssetCard
+        asset={asset}
+        orderedItemKeys={orderedItemKeys}
+        onAssetItemClick={onAssetItemClick}
+      />
+    </Flex>
+  ));
+
+  if (showSectionHeadings) {
+    return (
+      <Flex direction="column" alignItems="stretch" gap={6} data-testid="assets-grid">
+        {folders.length > 0 && (
+          <GridSection
+            title={formatMessage(
+              { id: getTranslationKey('list.folders.title'), defaultMessage: 'Folders ({count})' },
+              { count: folders.length }
+            )}
+          >
+            {folderCards}
+          </GridSection>
+        )}
+        {folders.length > 0 && assets.length > 0 && <Divider />}
+        {assets.length > 0 && (
+          <GridSection
+            title={formatMessage(
+              { id: getTranslationKey('list.assets.title'), defaultMessage: 'Assets ({count})' },
+              { count: assetsTotal ?? assets.length }
+            )}
+            action={
+              showGridSelectAll && isEnabled && canSelectAll ? (
+                <GridSelectAll assets={assets} />
+              ) : undefined
+            }
+          >
+            {assetCards}
+          </GridSection>
+        )}
+      </Flex>
+    );
+  }
+
   return (
     <ItemsGrid role="list" data-testid="assets-grid">
       {folders.length > 0 && (
         <FoldersRow>
-          <ItemsGrid>
-            {folders.map((folder) => (
-              <FolderCard
-                folder={folder}
-                orderedItemKeys={orderedItemKeys}
-                key={`folder-${folder.id}`}
-              />
-            ))}
-          </ItemsGrid>
+          <ItemsGrid>{folderCards}</ItemsGrid>
         </FoldersRow>
       )}
-      {assets.map((asset) => (
-        <Flex key={asset.id} direction="column" alignItems="stretch">
-          <AssetCard
-            asset={asset}
-            orderedItemKeys={orderedItemKeys}
-            onAssetItemClick={onAssetItemClick}
-          />
-        </Flex>
-      ))}
+      {assetCards}
     </ItemsGrid>
   );
 };

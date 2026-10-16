@@ -8,6 +8,7 @@ import { css, styled } from 'styled-components';
 
 import { TruncatedText } from '../../../../components/TruncatedText';
 import { useGetFolderStructureQuery } from '../../../../services/folders';
+import { findFolderPath } from '../../../../utils/findFolderPath';
 import { isEventFromWithin } from '../../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
@@ -111,28 +112,6 @@ const TreeRow = styled(Flex)<{
  * useExpandedFolders — local expand/collapse state
  * -----------------------------------------------------------------------------------------------*/
 
-const findAncestorIds = (
-  nodes: FolderNode[],
-  targetId: number,
-  trail: number[] = []
-): number[] | null => {
-  for (const node of nodes) {
-    if (node.id === targetId) {
-      return trail;
-    }
-
-    if (node.children?.length) {
-      const nextTrail = node.id != null ? [...trail, node.id] : trail;
-      const found = findAncestorIds(node.children, targetId, nextTrail);
-      if (found !== null) {
-        return found;
-      }
-    }
-  }
-
-  return null;
-};
-
 const useExpandedFolders = (folderStructure: FolderNode[], currentFolderId: number | null) => {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(() => new Set());
 
@@ -141,7 +120,11 @@ const useExpandedFolders = (folderStructure: FolderNode[], currentFolderId: numb
       return;
     }
 
-    const ancestors = findAncestorIds(folderStructure, currentFolderId);
+    // The path ends with the current folder itself, which needs no expanding.
+    const ancestors = findFolderPath(folderStructure, currentFolderId)
+      ?.slice(0, -1)
+      .map((folder) => folder.id)
+      .filter((id): id is number => id != null);
     if (!ancestors || ancestors.length === 0) {
       return;
     }
