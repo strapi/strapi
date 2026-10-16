@@ -1,6 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
 
-import { getDisplayName, type AdminUserLike } from '../utils';
+import { getDisplayName } from '../utils';
 
 export const DEFAULT_RETENTION_DAYS = 90;
 
@@ -11,7 +11,7 @@ export const DEFAULT_RETENTION_DAYS = 90;
  * records them as admin-user.* (server/src/audit-logs/admin-users.ts).
  * TODO: migrate the rest to the standard.
  */
-export const defaultEvents = [
+const defaultEvents = [
   'entry.create',
   'entry.update',
   'entry.delete',
@@ -24,21 +24,6 @@ export const defaultEvents = [
   'media-folder.update',
   'media-folder.delete',
   'admin.auth.success',
-  'admin.auth.mfa_required',
-  'admin.mfa.enabled',
-  'admin.mfa.disabled',
-  'admin.mfa.reset',
-  'admin.mfa.challenge.failed',
-  'admin.mfa.authenticator.replaced',
-  'admin.mfa.locked',
-  'admin.mfa.unlocked',
-  'admin.mfa.device.trusted',
-  'admin.mfa.device.trust.revoked',
-  'admin.mfa.trusted.device.used',
-  'admin.mfa.passkey.registered',
-  'admin.mfa.passkey.removed',
-  'admin.mfa.passkey.used',
-  'admin.security-settings.update',
   'admin.logout',
   'content-type.create',
   'content-type.update',
@@ -96,12 +81,9 @@ const getEventMap = (events: string[]) => {
   );
 };
 
-/** The user an audit row is attributed to: the session user, or the account an `admin.mfa.*` payload names. */
-type AttributableUser = AdminUserLike & { id: string | number };
-
 const getActor = (
   systemOrigin: Modules.AuditLogs.SystemOrigin | undefined,
-  user: AttributableUser | undefined
+  user: { id: string | number; email: string; firstname?: string; lastname?: string } | undefined
 ): Modules.AuditLogs.Actor => {
   if (systemOrigin) {
     return { type: 'system' };
@@ -191,6 +173,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     const options: RegisterEventOptions =
       registration.kind === 'standard' ? registration.options : {};
     const user = options.alwaysUnknownActor ? undefined : requestState?.user;
+
     const systemOrigin =
       auditSource && SYSTEM_ORIGINS.includes(auditSource)
         ? (auditSource as Modules.AuditLogs.SystemOrigin)
@@ -200,35 +183,10 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       return null;
     }
 
-    // `/login/mfa` challenges a second factor before `ctx.state.user` exists -- it is only
-    // populated on a successful login (`issueSession`, called after the challenge passes) -- and
-    // the refresh exchange locks an expired grace with no session user on the context either. Both
-    // are exactly the rows an audit log most wants. `admin::mfa`'s `notify` names the account in
-    // the event payload (`{ userId }`), so for `admin.mfa.*` names only, fall back to that id and
-    // load the user it names; every other event still requires `requestState.user` exactly as
-    // before. A payload id that matches no user cannot be attributed and is dropped. An event
-    // registered with `alwaysUnknownActor` opts out of attribution entirely, so it never falls
-    // back.
-    let attributedUser: AttributableUser | undefined = user;
-    if (
-      !attributedUser &&
-      !systemOrigin &&
-      !options.alwaysUnknownActor &&
-      name.startsWith('admin.mfa.')
-    ) {
-      const fallbackId = args[0]?.userId;
-      if (fallbackId !== undefined) {
-        attributedUser = await strapi.db.query('admin::user').findOne({
-          where: { id: fallbackId },
-          select: ['id', 'email', 'username', 'firstname', 'lastname'],
-        });
-      }
-    }
-
     const allowsUnknownActor =
       options.allowUnknownActor === true || options.alwaysUnknownActor === true;
 
-    if (!systemOrigin && !attributedUser && !allowsUnknownActor) {
+    if (!systemOrigin && !user && !allowsUnknownActor) {
       return null;
     }
 
@@ -241,7 +199,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     // Scheduled actions have no user, so a null user is expected. The earlier audit
     // entry that set the schedule records who did it. Events allowing an unknown actor
     // have no user either.
-    const userId = attributedUser ? attributedUser.id : null;
+    const userId = user ? user.id : null;
 
     if (registration.kind === 'legacy') {
       // TODO: What does this ignore in upload? Why would we want to ignore anything?
@@ -258,7 +216,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       };
     }
 
-    const actor = getActor(systemOrigin, attributedUser);
+    const actor = getActor(systemOrigin, user);
 
     let shape: Modules.AuditLogs.EventShape | null = null;
 
