@@ -6,9 +6,9 @@ import {
   getRefreshCookiePath,
   resolveLogoutDeviceId,
 } from '../session-auth';
-import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
-import { DEFAULT_AUTH_COOKIE_PATH } from '../auth-cookie-path';
-import { DEFAULT_AUTH_COOKIE_DOMAIN } from '../auth-cookie-domain';
+import { DEFAULT_AUTH_COOKIE_NAME } from '../../../../shared/utils/auth-cookie-name';
+import { DEFAULT_AUTH_COOKIE_PATH } from '../../../../shared/utils/auth-cookie-path';
+import { DEFAULT_AUTH_COOKIE_DOMAIN } from '../../../../shared/utils/auth-cookie-domain';
 
 // URL config as packages/core/core/src/configuration resolves it.
 const DEFAULT_URLS = {

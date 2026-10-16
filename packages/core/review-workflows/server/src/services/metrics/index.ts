@@ -1,5 +1,3 @@
-import '@strapi/types';
-
 export const sendDidCreateStage = async () => {
   strapi.telemetry.send('didCreateStage', {});
 };

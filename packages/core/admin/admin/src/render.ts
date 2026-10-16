@@ -26,7 +26,6 @@ const renderAdmin = async (
 
   const browserStrapi = await createBrowserStrapi(features);
 
-  // @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
   window.strapi = browserStrapi;
 
   const app = new StrapiApp({

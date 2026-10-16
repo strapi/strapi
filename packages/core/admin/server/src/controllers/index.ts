@@ -1,5 +1,3 @@
-import type {} from 'koa-body';
-
 import admin from './admin';
 import apiToken from './api-token';
 import adminToken from './admin-token';

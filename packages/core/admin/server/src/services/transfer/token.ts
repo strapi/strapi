@@ -3,7 +3,6 @@ import assert from 'assert';
 import { omit, difference, isEmpty, isNumber } from 'lodash';
 
 import { errors, emitAudit } from '@strapi/utils';
-import '@strapi/types';
 import constants from '../constants';
 import { getService } from '../../utils';
 import { AUDITED_EVENTS, getTokenChanges, toActionRefs } from '../../audit-logs/tokens';
