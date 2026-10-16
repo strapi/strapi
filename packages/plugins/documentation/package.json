@@ -109,7 +109,6 @@
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",
     "@types/koa": "^2.15.2",
-    "@types/koa-static": "^4.0.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
@@ -117,9 +116,6 @@
   },
   "peerDependenciesMeta": {
     "@types/koa": {
-      "optional": true
-    },
-    "@types/koa-static": {
       "optional": true
     }
   },

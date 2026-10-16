@@ -9525,21 +9525,12 @@ __metadata:
   peerDependencies:
     "@strapi/data-transfer": ^5.0.0
     "@types/koa": ^2.15.2
-    "@types/koa-compose": ^3.2.5
-    "@types/koa-passport": ^6.0.1
-    "@types/koa-static": ^4.0.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   peerDependenciesMeta:
     "@types/koa":
-      optional: true
-    "@types/koa-compose":
-      optional: true
-    "@types/koa-passport":
-      optional: true
-    "@types/koa-static":
       optional: true
   languageName: unknown
   linkType: soft
@@ -9878,26 +9869,8 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@types/koa": ^2.15.2
-    "@types/koa-compose": ^3.2.5
-    "@types/koa-compress": ^4.0.3
-    "@types/koa-favicon": ^2.1.5
-    "@types/koa-static": ^4.0.2
-    "@types/koa__cors": ^5.0.0
-    "@types/koa__router": ^12.0.0
   peerDependenciesMeta:
     "@types/koa":
-      optional: true
-    "@types/koa-compose":
-      optional: true
-    "@types/koa-compress":
-      optional: true
-    "@types/koa-favicon":
-      optional: true
-    "@types/koa-static":
-      optional: true
-    "@types/koa__cors":
-      optional: true
-    "@types/koa__router":
       optional: true
   languageName: unknown
   linkType: soft
@@ -10337,15 +10310,12 @@ __metadata:
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     "@types/koa": ^2.15.2
-    "@types/koa-static": ^4.0.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   peerDependenciesMeta:
     "@types/koa":
-      optional: true
-    "@types/koa-static":
       optional: true
   languageName: unknown
   linkType: soft
@@ -10392,18 +10362,12 @@ __metadata:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
     "@types/koa": ^2.15.2
-    "@types/koa-bodyparser": ^4.3.12
-    "@types/koa__cors": ^5.0.0
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   peerDependenciesMeta:
     "@types/koa":
-      optional: true
-    "@types/koa-bodyparser":
-      optional: true
-    "@types/koa__cors":
       optional: true
   languageName: unknown
   linkType: soft
@@ -10762,11 +10726,8 @@ __metadata:
     zod: "npm:4.4.3"
   peerDependencies:
     "@types/koa": ^2.15.2
-    "@types/koa__router": ^12.0.0
   peerDependenciesMeta:
     "@types/koa":
-      optional: true
-    "@types/koa__router":
       optional: true
   languageName: unknown
   linkType: soft
@@ -10916,18 +10877,12 @@ __metadata:
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@types/koa": ^2.15.2
-    "@types/koa-range": ^0.3.5
-    "@types/koa-static": ^4.0.2
     react: ^18.0.0
     react-dom: ^18.0.0
     react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   peerDependenciesMeta:
     "@types/koa":
-      optional: true
-    "@types/koa-range":
-      optional: true
-    "@types/koa-static":
       optional: true
   languageName: unknown
   linkType: soft
