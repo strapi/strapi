@@ -502,13 +502,18 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               if (publishableIds.length > 0) {
                 await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
                   where: { id: { $in: publishableIds } },
-                  data: { isEntryValid: true },
+                  data: { isEntryValid: true, reason: null },
                 });
               }
-              await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-                where: { id: { $in: [...notPublishableIds] } },
-                data: { isEntryValid: false },
-              });
+
+              for (const { action, publishability } of checks) {
+                if (!publishability.publishable) {
+                  await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+                    where: { id: action.id },
+                    data: { isEntryValid: false, reason: publishability.reason },
+                  });
+                }
+              }
               await this.updateReleaseStatus(releaseId);
 
               // Thrown after commit, so these writes are kept

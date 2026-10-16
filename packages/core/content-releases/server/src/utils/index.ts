@@ -34,17 +34,34 @@ export const getService = <TName extends keyof Services>(
   return strapi.plugin('content-releases').service(name);
 };
 
-export const getDraftEntryValidStatus = async (
+export interface EntryValidity {
+  isEntryValid: boolean;
+  reason: ReleaseActionReason | null;
+}
+
+export const UNPUBLISH_VALIDITY: EntryValidity = { isEntryValid: true, reason: null };
+
+export const getDraftEntryValidity = async (
   { contentType, documentId, locale }: Action,
   { strapi }: { strapi: Core.Strapi }
-) => {
-  const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
-  // @ts-expect-error - populateBuilderService should be a function but is returning service
-  const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
+): Promise<EntryValidity> => {
+  try {
+    const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+    // @ts-expect-error - populateBuilderService should be a function but is returning service
+    const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
 
-  const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
+    const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
+    const publishability = await getEntryPublishability(contentType, entry, { strapi });
 
-  return isEntryValid(contentType, entry, { strapi });
+    return publishability.publishable
+      ? { isEntryValid: true, reason: null }
+      : { isEntryValid: false, reason: publishability.reason };
+  } catch (error) {
+    return {
+      isEntryValid: false,
+      reason: { error: { name: error instanceof Error ? error.name : 'Error' } },
+    };
+  }
 };
 
 type StageRef = { id: Data.ID; name: string };
@@ -204,20 +221,6 @@ export const getEntryPublishability = async (
   const workflow = await getAssignedWorkflow(contentTypeUid, { strapi });
 
   return computeEntryPublishability(contentTypeUid, entry, workflow, { strapi });
-};
-
-export const isEntryValid = async (
-  contentTypeUid: UID.ContentType,
-  entry: DraftEntry | null,
-  { strapi }: { strapi: Core.Strapi }
-) => {
-  try {
-    const { publishable } = await getEntryPublishability(contentTypeUid, entry, { strapi });
-
-    return publishable;
-  } catch {
-    return false;
-  }
 };
 
 type PublishActionRef = Pick<ReleaseAction, 'id' | 'contentType' | 'entryDocumentId' | 'locale'>;

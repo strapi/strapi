@@ -4,6 +4,7 @@ const mockFindPage = jest.fn();
 const mockFindManyWithContentTypeEntryAttached = jest.fn();
 const mockFindManyWithoutContentTypeEntryAttached = jest.fn();
 const mockCountActions = jest.fn();
+const mockCountNotReadyByRelease = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
@@ -12,6 +13,7 @@ jest.mock('../../utils', () => ({
     findManyWithContentTypeEntryAttached: mockFindManyWithContentTypeEntryAttached,
     findManyWithoutContentTypeEntryAttached: mockFindManyWithoutContentTypeEntryAttached,
     countActions: mockCountActions,
+    countNotReadyByRelease: mockCountNotReadyByRelease,
     getContentTypesDataForActions: jest.fn(),
   })),
   getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
@@ -20,7 +22,14 @@ jest.mock('../../utils', () => ({
 describe('Release controller', () => {
   describe('findPage', () => {
     it('should call findPage', async () => {
-      mockFindPage.mockResolvedValue({ results: [], pagination: {} });
+      mockFindPage.mockResolvedValue({
+        results: [
+          { id: 1, releasedAt: null, actions: { count: 3 } },
+          { id: 2, releasedAt: '2026-10-01T00:00:00.000Z', actions: { count: 4 } },
+        ],
+        pagination: {},
+      });
+      mockCountNotReadyByRelease.mockResolvedValue(new Map([[1, 2]]));
       mockFindManyWithContentTypeEntryAttached.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
@@ -57,6 +66,12 @@ describe('Release controller', () => {
       await releaseController.findPage(ctx);
 
       expect(mockFindPage).toHaveBeenCalled();
+      expect(mockCountNotReadyByRelease).toHaveBeenCalledWith([1]);
+      // @ts-expect-error the context gets a body
+      expect(ctx.body.data.map(({ actions }) => actions.meta)).toEqual([
+        { count: 3, notReadyCount: 2 },
+        { count: 4 },
+      ]);
     });
   });
   describe('create', () => {
@@ -202,13 +217,17 @@ describe('Release controller', () => {
       };
       // We mock the count all actions
       mockCountActions.mockResolvedValueOnce(2);
-      // We mock the count hidden actions
+      // We mock the count of publish actions that aren't publishable
       mockCountActions.mockResolvedValueOnce(1);
 
       // @ts-expect-error partial context
       await releaseController.findOne(ctx);
       expect(ctx.body.data.actions.meta).toEqual({
         count: 2,
+        notReadyCount: 1,
+      });
+      expect(mockCountActions).toHaveBeenLastCalledWith({
+        filters: { release: 1, type: 'publish', isEntryValid: false },
       });
     });
 

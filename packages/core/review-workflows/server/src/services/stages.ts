@@ -233,13 +233,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await async.map(contentTypesToMigrate, (contentTypeUID: any) => {
+          // Returned, so the entries have moved before the stage is deleted and anything revalidates
+          await async.map(contentTypesToMigrate, (contentTypeUID: UID.ContentType) =>
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,
               toStageId: nearestStage.id,
               trx,
-            });
-          });
+            })
+          );
 
           return this.delete(stage);
         });

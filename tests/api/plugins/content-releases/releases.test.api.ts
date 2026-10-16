@@ -1,5 +1,7 @@
 'use strict';
 
+import { setTimeout as sleep } from 'node:timers/promises';
+
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
 import { describeOnCondition } from 'api-tests/utils';
@@ -1155,19 +1157,14 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         { documentId: toUnpublishId, type: 'unpublish' },
       ]);
 
-      // Editing an entry revalidates every action on it, unpublish ones included
       await strapi
         .documents(productUID)
         .update({ documentId: toUnpublishId, data: { description: null } });
-      const unpublishAction = { release: { id: release.id }, entryDocumentId: toUnpublishId };
-      let action;
-      for (let attempt = 0; attempt < 20 && action?.isEntryValid !== false; attempt += 1) {
-        action = await strapi.db
-          .query('plugin::content-releases.release-action')
-          .findOne({ where: unpublishAction });
-      }
-      expect(action.isEntryValid).toBe(false);
-      // The edit recalculates the status without awaiting it: recalculate it here, settled
+      // Edits no longer mark unpublish actions invalid; earlier versions did, so such rows exist
+      await strapi.db.query('plugin::content-releases.release-action').updateMany({
+        where: { release: { id: release.id }, entryDocumentId: toUnpublishId },
+        data: { isEntryValid: false },
+      });
       await strapi.plugin('content-releases').service('release').updateReleaseStatus(release.id);
 
       expect((await getRelease(release.id)).status).toBe('ready');
@@ -2291,7 +2288,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       const actions = await getActionsByEntry(release.id);
       expect(actions[validId]).toMatchObject({ outcome: null, reason: null });
-      expect(actions[invalidId]).toMatchObject({ outcome: null, reason: null });
+      expect(actions[invalidId]).toMatchObject({
+        outcome: null,
+        isEntryValid: false,
+        reason: { validation: expect.any(Object) },
+      });
     });
 
     test('fixing a skipped entry after the run leaves what the run recorded unchanged', async () => {
@@ -2477,6 +2478,363 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(res.statusCode).toBe(404);
       expect(res.body.error.message).toBe('No release found for id 999');
+    });
+  });
+  describe('Planned entries: why an entry is not publishable', () => {
+    // An entry edit revalidates its actions in the background: poll until it lands
+    const waitFor = async (check: () => Promise<boolean>) => {
+      for (let attempt = 0; attempt < 30; attempt += 1) {
+        if (await check()) {
+          return true;
+        }
+
+        await sleep(100);
+      }
+
+      return false;
+    };
+
+    const getAction = async (releaseId, documentId) =>
+      (await getActionsByEntry(releaseId))[documentId];
+
+    const fixProduct = (documentId) =>
+      rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${productUID}/${documentId}`,
+        body: { name: 'Fixed product', description: 'Description' },
+      });
+
+    test('an invalid entry stores its field errors, without the submitted value, until it is fixed', async () => {
+      const invalidId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('all_or_nothing', [{ documentId: invalidId }]);
+
+      expect(await getAction(release.id, invalidId)).toMatchObject({
+        isEntryValid: false,
+        reason: {
+          validation: {
+            errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+          },
+        },
+      });
+      const found = await getRelease(release.id);
+      expect(found.status).toBe('blocked');
+      expect(found.actions.meta).toEqual({ count: 1, notReadyCount: 1 });
+
+      expect((await fixProduct(invalidId)).statusCode).toBe(200);
+
+      expect(
+        await waitFor(async () => (await getAction(release.id, invalidId)).isEntryValid === true)
+      ).toBe(true);
+      expect((await getAction(release.id, invalidId)).reason).toBeNull();
+      expect(await waitFor(async () => (await getRelease(release.id)).status === 'ready')).toBe(
+        true
+      );
+      expect((await getRelease(release.id)).actions.meta).toEqual({ count: 1, notReadyCount: 0 });
+    });
+
+    test('an unpublish action has no reason and never counts as not ready', async () => {
+      const invalidId = await createProduct({ valid: false });
+      const unpublishRelease = await createReleaseWithActions('all_or_nothing', [
+        { documentId: invalidId, type: 'unpublish' },
+      ]);
+
+      const publishRelease = await createReleaseWithActions('all_or_nothing', [
+        { documentId: invalidId },
+      ]);
+
+      expect(await getAction(unpublishRelease.id, invalidId)).toMatchObject({
+        isEntryValid: true,
+        reason: null,
+      });
+
+      // Each edit revalidates in the background: wait for one before the next, so they don't race
+      expect(await fixProduct(invalidId)).toMatchObject({ statusCode: 200 });
+      expect(
+        await waitFor(
+          async () => (await getAction(publishRelease.id, invalidId)).isEntryValid === true
+        )
+      ).toBe(true);
+
+      const breakRes = await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${productUID}/${invalidId}`,
+        body: { name: 'Invalid again', description: null },
+      });
+      expect(breakRes.statusCode).toBe(200);
+      expect(
+        await waitFor(
+          async () => (await getAction(publishRelease.id, invalidId)).isEntryValid === false
+        )
+      ).toBe(true);
+
+      expect(await getAction(unpublishRelease.id, invalidId)).toMatchObject({
+        isEntryValid: true,
+        reason: null,
+      });
+      expect((await getRelease(unpublishRelease.id)).actions.meta).toEqual({
+        count: 1,
+        notReadyCount: 0,
+      });
+    });
+
+    test('switching an action to unpublish clears its reason, and back to publish restores it', async () => {
+      const invalidId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('all_or_nothing', [{ documentId: invalidId }]);
+      const { id: actionId } = await getAction(release.id, invalidId);
+
+      const changeType = (type: 'publish' | 'unpublish') =>
+        rq({
+          method: 'PUT',
+          url: `/content-releases/${release.id}/actions/${actionId}`,
+          body: { type },
+        });
+
+      expect((await changeType('unpublish')).statusCode).toBe(200);
+      expect(await getAction(release.id, invalidId)).toMatchObject({
+        isEntryValid: true,
+        reason: null,
+      });
+      expect((await getRelease(release.id)).actions.meta).toEqual({ count: 1, notReadyCount: 0 });
+      // The status is recalculated after the response
+      expect(await waitFor(async () => (await getRelease(release.id)).status === 'ready')).toBe(
+        true
+      );
+
+      expect((await changeType('publish')).statusCode).toBe(200);
+      expect(await getAction(release.id, invalidId)).toMatchObject({
+        isEntryValid: false,
+        reason: {
+          validation: {
+            errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+          },
+        },
+      });
+      expect((await getRelease(release.id)).actions.meta).toEqual({ count: 1, notReadyCount: 1 });
+      expect(await waitFor(async () => (await getRelease(release.id)).status === 'blocked')).toBe(
+        true
+      );
+    });
+
+    test('the releases list returns the not-ready count of planned releases', async () => {
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: true }) },
+        { documentId: await createProduct({ valid: false }) },
+      ]);
+
+      const res = await rq({
+        method: 'GET',
+        url: '/content-releases',
+        qs: { filters: { releasedAt: { $notNull: false } }, pageSize: 100 },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const listed = res.body.data.find(({ id }) => id === release.id);
+      expect(listed.actions.meta).toEqual({ count: 2, notReadyCount: 1 });
+    });
+
+    test('the releases of an entry return its validity and reason', async () => {
+      const invalidId = await createProduct({ valid: false });
+      await createReleaseWithActions('all_or_nothing', [{ documentId: invalidId }]);
+
+      const res = await rq({
+        method: 'GET',
+        url: '/content-releases/getByDocumentAttached',
+        qs: { contentType: productUID, entryDocumentId: invalidId, hasEntryAttached: true },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body.data[0].actions[0]).toMatchObject({
+        type: 'publish',
+        isEntryValid: false,
+        reason: {
+          validation: {
+            errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+          },
+        },
+      });
+    });
+
+    test('a client cannot set the validity, reason or outcome of an action it adds', async () => {
+      const invalidId = await createProduct({ valid: false });
+      const release = (await createRelease()).body.data;
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-releases/${release.id}/actions`,
+        body: {
+          contentType: productUID,
+          entryDocumentId: invalidId,
+          type: 'publish',
+          isEntryValid: true,
+          reason: { error: { name: 'Injected' } },
+          outcome: 'published',
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(await getAction(release.id, invalidId)).toMatchObject({
+        isEntryValid: false,
+        outcome: null,
+        reason: { validation: expect.any(Object) },
+      });
+    });
+
+    describe('with a required review stage', () => {
+      let workflow;
+
+      const getStageReason = async (releaseId, documentId) =>
+        (await getAction(releaseId, documentId)).reason?.stage;
+
+      beforeAll(async () => {
+        const res = await rq({
+          method: 'POST',
+          url: '/review-workflows/workflows?populate=*',
+          body: {
+            data: {
+              name: `planned-reason-${Math.random().toString(36)}`,
+              contentTypes: [reviewItemUID],
+              stages: [{ name: 'Review' }, { name: 'Done' }],
+              stageRequiredToPublishName: 'Done',
+            },
+          },
+        });
+        expect(res.statusCode).toBe(201);
+        workflow = res.body.data;
+      });
+
+      afterAll(async () => {
+        await rq({ method: 'DELETE', url: `/review-workflows/workflows/${workflow.id}` });
+      });
+
+      test('an entry not at the required stage stores both stages, until it reaches it', async () => {
+        const { data } = await createEntry(reviewItemUID, { name: 'Review item' });
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: data.documentId, contentType: reviewItemUID },
+        ]);
+
+        expect(await getStageReason(release.id, data.documentId)).toMatchObject({
+          entryStage: { name: 'Review' },
+          requiredStage: { name: 'Done' },
+        });
+
+        const stageRes = await rq({
+          method: 'PUT',
+          url: `/review-workflows/content-manager/collection-types/${reviewItemUID}/${data.documentId}/stage`,
+          body: { data: { id: workflow.stages[1].id } },
+        });
+        expect(stageRes.statusCode).toBe(200);
+
+        expect(
+          await waitFor(
+            async () => (await getAction(release.id, data.documentId)).isEntryValid === true
+          )
+        ).toBe(true);
+        expect((await getAction(release.id, data.documentId)).reason).toBeNull();
+      });
+
+      test('changing the required stage updates the stored reason and the release status', async () => {
+        const { data } = await createEntry(reviewItemUID, { name: 'Review item' });
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: data.documentId, contentType: reviewItemUID },
+        ]);
+        expect((await getRelease(release.id)).status).toBe('blocked');
+
+        const updateRes = await rq({
+          method: 'PUT',
+          url: `/review-workflows/workflows/${workflow.id}?populate=*`,
+          body: { data: { stageRequiredToPublishName: 'Review' } },
+        });
+        expect(updateRes.statusCode).toBe(200);
+
+        expect(await getAction(release.id, data.documentId)).toMatchObject({
+          isEntryValid: true,
+          reason: null,
+        });
+        expect((await getRelease(release.id)).status).toBe('ready');
+
+        await rq({
+          method: 'PUT',
+          url: `/review-workflows/workflows/${workflow.id}?populate=*`,
+          body: { data: { stageRequiredToPublishName: 'Done' } },
+        });
+      });
+    });
+  });
+  describe('Planned entries: review workflow changes', () => {
+    const createdWorkflowIds: number[] = [];
+
+    const createWorkflow = async (data) => {
+      const res = await rq({
+        method: 'POST',
+        url: '/review-workflows/workflows?populate=*',
+        body: { data: { name: `release-wf-${Math.random().toString(36)}`, ...data } },
+      });
+      expect(res.statusCode).toBe(201);
+      createdWorkflowIds.push(res.body.data.id);
+
+      return res.body.data;
+    };
+
+    const getPublishAction = async (releaseId, documentId) =>
+      (await getActionsByEntry(releaseId))[documentId];
+
+    const createBlockedRelease = async () => {
+      const { data } = await createEntry(reviewItemUID, { name: 'Review item' });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: data.documentId, contentType: reviewItemUID },
+      ]);
+      expect((await getRelease(release.id)).status).toBe('blocked');
+
+      return { release, documentId: data.documentId };
+    };
+
+    afterEach(async () => {
+      for (const id of createdWorkflowIds.splice(0)) {
+        await rq({ method: 'DELETE', url: `/review-workflows/workflows/${id}` });
+      }
+    });
+
+    test('deleting the stage an entry is at moves it, and updates its reason and the release status', async () => {
+      const workflow = await createWorkflow({
+        contentTypes: [reviewItemUID],
+        stages: [{ name: 'Review' }, { name: 'Done' }],
+        stageRequiredToPublishName: 'Done',
+      });
+      const { release, documentId } = await createBlockedRelease();
+
+      const done = workflow.stages.find(({ name }) => name === 'Done');
+      const res = await rq({
+        method: 'PUT',
+        url: `/review-workflows/workflows/${workflow.id}?populate=*`,
+        body: {
+          data: { stages: [{ id: done.id, name: 'Done' }], stageRequiredToPublishName: 'Done' },
+        },
+      });
+      expect(res.statusCode).toBe(200);
+
+      expect(await getPublishAction(release.id, documentId)).toMatchObject({
+        isEntryValid: true,
+        reason: null,
+      });
+      expect((await getRelease(release.id)).status).toBe('ready');
+    });
+
+    test('a new workflow without a required stage that takes the content type over unblocks its entries', async () => {
+      await createWorkflow({
+        contentTypes: [reviewItemUID],
+        stages: [{ name: 'Review' }, { name: 'Done' }],
+        stageRequiredToPublishName: 'Done',
+      });
+      const { release, documentId } = await createBlockedRelease();
+
+      await createWorkflow({ contentTypes: [reviewItemUID], stages: [{ name: 'Draft' }] });
+
+      expect(await getPublishAction(release.id, documentId)).toMatchObject({
+        isEntryValid: true,
+        reason: null,
+      });
+      expect((await getRelease(release.id)).status).toBe('ready');
     });
   });
 });
