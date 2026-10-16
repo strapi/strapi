@@ -36,6 +36,9 @@ import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 
+const EMPTY_HEADERS: [] = [];
+const EMPTY_ROWS: [] = [];
+
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
@@ -100,10 +103,10 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
   children,
   defaultSelectedRows,
   footer,
-  headers = [],
+  headers = EMPTY_HEADERS,
   isLoading = false,
   onSelectedRowsChange,
-  rows = [],
+  rows = EMPTY_ROWS,
   selectedRows: selectedRowsProps,
 }: RootProps<TRow, THeader>) => {
   const [selectedRows = [], setSelectedRows] = useControllableState({

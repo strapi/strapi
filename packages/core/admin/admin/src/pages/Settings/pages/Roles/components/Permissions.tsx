@@ -40,6 +40,8 @@ import { updateValues, updateValuesWithPermissions } from '../utils/updateValues
 import { ContentTypes } from './ContentTypes';
 import { PluginsAndSettingsPermissions } from './PluginsAndSettings';
 
+const EMPTY_PERMISSIONS: NonNullable<PermissionsProps['permissions']> = [];
+
 const TAB_LABELS = [
   {
     labelId: 'app.components.LeftMenuLinkContainer.collectionTypes',
@@ -100,7 +102,7 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
       layout,
       isFormDisabled,
       onLocaleValidationChange,
-      permissions = [],
+      permissions = EMPTY_PERMISSIONS,
       userPermissions,
       inheritConditions = false,
     },

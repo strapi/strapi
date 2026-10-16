@@ -15,13 +15,15 @@ import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData'
 
 import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
 
+const EMPTY_ACTIONS: NonNullable<GlobalActionsProps['actions']> = [];
+
 interface GlobalActionsProps {
   actions: Action[];
   isFormDisabled?: boolean;
   kind: Extract<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
 }
 
-const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProps) => {
+const GlobalActions = ({ actions = EMPTY_ACTIONS, isFormDisabled, kind }: GlobalActionsProps) => {
   const { formatMessage } = useIntl();
   const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox, checkUserHasPermission } =
     usePermissionsDataManager();

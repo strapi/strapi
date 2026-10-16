@@ -60,10 +60,10 @@ const fromDBObject = (row: DBOutput): Webhook => {
 };
 
 const webhookEventValidator = async (allowedEvents: Map<string, string>, events: string[]) => {
-  const allowedValues = Array.from(allowedEvents.values());
+  const allowedValues = new Set(Array.from(allowedEvents.values()));
 
   events.forEach((event) => {
-    if (allowedValues.includes(event)) {
+    if (allowedValues.has(event)) {
       return;
     }
 
