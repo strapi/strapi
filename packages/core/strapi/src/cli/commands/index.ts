@@ -13,6 +13,7 @@ import { command as listComponents } from './components/list';
 import { command as configurationDump } from './configuration/dump';
 import { command as configurationRestore } from './configuration/restore';
 import { command as listContentTypes } from './content-types/list';
+import { command as renameField } from './content-types/rename-field';
 import { command as listControllers } from './controllers/list';
 import { command as listHooks } from './hooks/list';
 import { command as listMiddlewares } from './middlewares/list';
@@ -31,6 +32,7 @@ import { command as reportCommand } from './report';
 import { command as startCommand } from './start';
 import { command as versionCommand } from './version';
 import { command as openAPICommand } from './openapi';
+import { command as enterpriseCommand } from './enterprise';
 import exportCommand from './export/command';
 import importCommand from './import/command';
 import transferCommand from './transfer/command';
@@ -52,6 +54,7 @@ export const commands: StrapiCommand[] = [
   configurationRestore,
   consoleCommand,
   listContentTypes,
+  renameField,
   listControllers,
   generateCommand,
   listHooks,
@@ -72,6 +75,7 @@ export const commands: StrapiCommand[] = [
   importCommand,
   transferCommand,
   openAPICommand,
+  enterpriseCommand,
   /**
    * Cloud
    */

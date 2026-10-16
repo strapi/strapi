@@ -41,6 +41,8 @@ import { adminApi } from '../src/services/api';
 import { server } from './server';
 import { initialState } from './store';
 
+const EMPTY_PERMISSIONS: NonNullable<ProvidersProps['permissions']> = [];
+
 setLogger({
   log: () => {},
   warn: () => {},
@@ -98,7 +100,12 @@ const DEFAULT_PERMISSIONS = [
   },
 ];
 
-const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: ProvidersProps) => {
+const Providers = ({
+  children,
+  initialEntries,
+  storeConfig,
+  permissions = EMPTY_PERMISSIONS,
+}: ProvidersProps) => {
   /**
    * Keep these instances stable for the lifetime of the render.
    * Recreating the data router on rerenders can crash React Router.
@@ -199,16 +206,16 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
               settings={{}}
             >
               <Provider store={storeRef.current!}>
-                <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
-                  <QueryClientProvider client={queryClientRef.current!}>
-                    <DndProvider backend={HTML5Backend}>
-                      <LanguageProvider messages={{}}>
-                        <Theme
-                          themes={{
-                            dark: darkTheme,
-                            light: lightTheme,
-                          }}
-                        >
+                <LanguageProvider messages={{}}>
+                  <Theme
+                    themes={{
+                      dark: darkTheme,
+                      light: lightTheme,
+                    }}
+                  >
+                    <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
+                      <QueryClientProvider client={queryClientRef.current!}>
+                        <DndProvider backend={HTML5Backend}>
                           <NotificationsProvider>
                             <GuidedTourContext enabled={false}>
                               <ConfigurationContextProvider
@@ -235,11 +242,11 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                               </ConfigurationContextProvider>
                             </GuidedTourContext>
                           </NotificationsProvider>
-                        </Theme>
-                      </LanguageProvider>
-                    </DndProvider>
-                  </QueryClientProvider>
-                </AuthProvider>
+                        </DndProvider>
+                      </QueryClientProvider>
+                    </AuthProvider>
+                  </Theme>
+                </LanguageProvider>
               </Provider>
             </StrapiAppProvider>
           ),

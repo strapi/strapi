@@ -94,9 +94,7 @@ export const resetSecuritySettingsWarnings = (): void => {
  */
 export const readMfaEnforcement = async (strapi: Core.Strapi): Promise<MfaEnforcement> => {
   const stored = (await adminStore(strapi).get({ key: SECURITY_SETTINGS_KEY })) as
-    | StoredSecuritySettings
-    | null
-    | undefined;
+    StoredSecuritySettings | null | undefined;
   const mfa = stored?.mfa ?? {};
 
   const mode = isMode(mfa.mode) ? mfa.mode : DEFAULT_MFA_ENFORCEMENT.mode;
@@ -126,9 +124,7 @@ export const readTrustedDeviceSettings = async (
   strapi: Core.Strapi
 ): Promise<TrustedDeviceSettings> => {
   const stored = (await adminStore(strapi).get({ key: SECURITY_SETTINGS_KEY })) as
-    | StoredSecuritySettings
-    | null
-    | undefined;
+    StoredSecuritySettings | null | undefined;
   const raw = stored?.trustedDevices ?? {};
 
   const enabled = typeof raw.enabled === 'boolean' ? raw.enabled : DEFAULT_TRUSTED_DEVICES.enabled;
@@ -159,9 +155,7 @@ export const readTrustedDeviceSettings = async (
  */
 export const readPasskeySettings = async (strapi: Core.Strapi): Promise<PasskeySettings> => {
   const stored = (await adminStore(strapi).get({ key: SECURITY_SETTINGS_KEY })) as
-    | StoredSecuritySettings
-    | null
-    | undefined;
+    StoredSecuritySettings | null | undefined;
   const raw = stored?.passkeys ?? {};
 
   const enabled = typeof raw.enabled === 'boolean' ? raw.enabled : DEFAULT_PASSKEYS.enabled;

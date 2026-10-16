@@ -49,10 +49,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .test(
       'lowercase',
       {
-        message: {
-          id: 'components.Input.error.contain.lowercase',
-          defaultMessage: 'Password must contain at least 1 lowercase letter',
-        },
+        id: 'components.Input.error.contain.lowercase',
+        defaultMessage: 'Password must contain at least 1 lowercase letter',
       },
       (value) => {
         if (!value) return true;
@@ -62,10 +60,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .test(
       'uppercase',
       {
-        message: {
-          id: 'components.Input.error.contain.uppercase',
-          defaultMessage: 'Password must contain at least 1 uppercase letter',
-        },
+        id: 'components.Input.error.contain.uppercase',
+        defaultMessage: 'Password must contain at least 1 uppercase letter',
       },
       (value) => {
         if (!value) return true;
@@ -75,10 +71,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .test(
       'number',
       {
-        message: {
-          id: 'components.Input.error.contain.number',
-          defaultMessage: 'Password must contain at least 1 number',
-        },
+        id: 'components.Input.error.contain.number',
+        defaultMessage: 'Password must contain at least 1 number',
       },
       (value) => {
         if (!value) return true;

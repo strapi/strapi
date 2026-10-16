@@ -1,249 +1,462 @@
-// TODO: find a better naming convention for the file that was an index file before
-import * as React from 'react';
+import { useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 
-import { useField, useNotification } from '@strapi/admin/strapi-admin';
+import { useClipboard, useField, useNotification } from '@strapi/admin/strapi-admin';
+import { Field, Flex, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { AllowedFiles, getAllowedFiles, getTrad } from '../../utils';
-import { AssetDialog } from '../AssetDialog/AssetDialog';
-import { EditFolderDialog } from '../EditFolderDialog/EditFolderDialog';
-import { Asset, UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
+import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../hooks/useTracking';
+// Temporary: the Content Manager's own asset picker is not built on this stack
+// yet, so browsing and editing the library still go through the legacy dialogs.
+// These imports go when that modal lands.
+import { AssetDialog } from '../../legacy/components/AssetDialog/AssetDialog';
+import {
+  EditAssetDialog,
+  type Asset as EditableAsset,
+} from '../../legacy/components/EditAssetDialog/EditAssetContent';
+import { EditFolderDialog } from '../../legacy/components/EditFolderDialog/EditFolderDialog';
+import { ImportFromUrlDialog } from '../../pages/Assets/components/ImportFromUrlDialog';
+import { useUploadFilesMutation, useUploadFromUrlsMutation } from '../../services/api';
+import { useGetUploadSettingsQuery } from '../../services/settings';
+import {
+  filterAllowedFiles,
+  isMediaTypeAllowed,
+  type AllowedMediaType,
+} from '../../utils/allowedMediaTypes';
+import { prefixFileUrlWithBackendUrl } from '../../utils/files';
+import { getTranslationKey } from '../../utils/translations';
+import { typeFromMime } from '../../utils/typeFromMime';
 
-import { CarouselAssets, CarouselAssetsProps, FileWithoutIdHash } from './Carousel/CarouselAssets';
+import { AddAssetMenu } from './AddAssetMenu';
+import { AssetDropZone } from './AssetDropZone';
+import { AssetRow } from './AssetRow';
+import { NoLibraryAccessDialog } from './NoLibraryAccessDialog';
 
 import type { File } from '../../../../shared/contracts/files';
 
-type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
+/**
+ * `location` for every event this field fires. The standalone Media Library
+ * tags its events `'upload'`; the picker inside an entry form has always been
+ * `'content-manager'`, and analytics still splits the two on that axis.
+ */
+const CONTENT_MANAGER_LOCATION = 'content-manager';
 
-const STEPS = {
-  AssetSelect: 'SelectAsset',
-  AssetUpload: 'UploadAsset',
-  FolderCreate: 'FolderCreate',
-};
+/**
+ * Uploads from here land at the root of the Media Library. An entry form has no
+ * current folder to inherit, and the field offers no destination picker — same
+ * place the legacy upload wizard put them when none was chosen.
+ */
+const UPLOAD_FOLDER_ID = null;
+
+type Step = 'browse' | 'create-folder' | 'no-access';
 
 export interface MediaLibraryInputProps {
-  required?: boolean;
   name: string;
-  labelAction?: React.ReactNode;
   label?: string;
+  labelAction?: ReactNode;
   hint?: string;
+  required?: boolean;
   disabled?: boolean;
   attribute?: {
-    allowedTypes?: AllowedTypes[];
+    allowedTypes?: AllowedMediaType[] | null;
     multiple?: boolean;
   };
 }
 
-export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibraryInputProps>(
-  (
-    {
-      attribute: { allowedTypes = null, multiple = false } = {},
-      label,
-      hint,
-      disabled = false,
-      labelAction = undefined,
-      name,
-      required = false,
-    },
-    forwardedRef
-  ) => {
-    const { formatMessage } = useIntl();
-    const { onChange, value, error } = useField<File | File[] | null>(name);
-    const [uploadedFiles, setUploadedFiles] = React.useState<Asset[] | File[]>([]);
-    const [step, setStep] = React.useState<string | undefined>(undefined);
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
-    const [droppedAssets, setDroppedAssets] = React.useState<AllowedFiles[]>();
-    const [folderId, setFolderId] = React.useState<number | null>(null);
-    const { toggleNotification } = useNotification();
+const EMPTY_ATTRIBUTE: NonNullable<MediaLibraryInputProps['attribute']> = {};
 
-    React.useEffect(() => {
-      // Clear the uploaded files on close
-      if (step === undefined) {
-        setUploadedFiles([]);
-      }
-    }, [step]);
+/**
+ * The Content Manager's `media` field, on the current Media Library stack.
+ *
+ * Files dropped here (or picked from the device) upload straight through
+ * `uploadFiles`, which is what drives the global upload progress dialog — so the
+ * entry form stays usable while they go, instead of being covered by the legacy
+ * wizard.
+ *
+ * The legacy input is still registered when `useLegacyMediaLibrary` is on, and
+ * is untouched by this.
+ */
+export const MediaLibraryInput = ({
+  name,
+  label,
+  labelAction,
+  hint,
+  required = false,
+  disabled = false,
+  attribute = EMPTY_ATTRIBUTE,
+}: MediaLibraryInputProps) => {
+  const { allowedTypes = null, multiple = false } = attribute;
+  const { formatMessage } = useIntl();
+  const { onChange, value, error } = useField<File | File[] | null>(name);
+  const { toggleNotification } = useNotification();
+  const { trackUsage } = useTracking();
+  const { copy } = useClipboard();
 
-    let selectedAssets: File[] = [];
+  const [step, setStep] = useState<Step | undefined>(undefined);
+  const [folderId, setFolderId] = useState<number | null>(null);
+  const [editedAsset, setEditedAsset] = useState<File | null>(null);
+  const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    if (Array.isArray(value)) {
-      selectedAssets = value;
-    } else if (value !== null && value !== undefined) {
-      selectedAssets = [value];
+  const [uploadFiles] = useUploadFilesMutation();
+  const [uploadFromUrls] = useUploadFromUrlsMutation();
+  // Echoes the app config; a missing payload (still loading) falls back to
+  // sequential rather than outpacing what the server asked for.
+  const { canRead, canCreate, canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
+  const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
+  const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
+  const isAiMetadataEnabled = useAIMetadataEnabled();
+
+  const assets: File[] = Array.isArray(value) ? value : value ? [value] : [];
+
+  // An upload resumes long after the render that started it, and the dialog is
+  // non-blocking precisely so a second batch can be dropped meanwhile. Reading
+  // the closed-over `assets` on resume would then append to whatever the field
+  // held when that drop began, dropping every asset that landed since.
+  const assetsRef = useRef(assets);
+  assetsRef.current = assets;
+
+  const setAssets = (nextAssets: File[]) => {
+    if (multiple) {
+      onChange(name, nextAssets.length > 0 ? nextAssets : null);
+      return;
+    }
+    onChange(name, nextAssets[0] ?? null);
+  };
+
+  const attachUploadedFile = (file: File) => {
+    const nextAssets = multiple ? [...assetsRef.current, file] : [file];
+    // Parallel uploads can finish before the next render refreshes the ref.
+    assetsRef.current = nextAssets;
+    setAssets(nextAssets);
+  };
+
+  const handleRemove = (asset: File) => {
+    setAssets(assets.filter((current) => current.id !== asset.id));
+  };
+
+  const handleCopyLink = async (asset: File) => {
+    const url = prefixFileUrlWithBackendUrl(asset.url);
+
+    if (!url) {
+      return;
     }
 
-    const handleValidation = (nextSelectedAssets: File[]) => {
-      const value = multiple ? nextSelectedAssets : nextSelectedAssets[0];
-      onChange(name, value);
-      setStep(undefined);
-    };
+    const didCopy = await copy(url);
 
-    const handleDeleteAssetFromMediaLibrary = () => {
-      let nextValue;
+    toggleNotification({
+      type: didCopy ? 'success' : 'danger',
+      message: formatMessage(
+        didCopy
+          ? {
+              id: getTranslationKey('asset-details.copy-link.success'),
+              defaultMessage: 'Link copied.',
+            }
+          : {
+              id: getTranslationKey('asset-details.copy-link.error'),
+              defaultMessage: 'Failed to copy the link.',
+            }
+      ),
+    });
+  };
 
-      if (multiple) {
-        const nextSelectedAssets = selectedAssets.filter(
-          (_, assetIndex) => assetIndex !== selectedIndex
-        );
-        nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
-      } else {
-        nextValue = null;
-      }
+  const handleEditClose = (result?: EditableAsset | null | boolean) => {
+    const asset = editedAsset;
+    setEditedAsset(null);
 
-      const value = nextValue;
-      onChange(name, value);
+    if (!asset) {
+      return;
+    }
 
-      setSelectedIndex(0);
-    };
+    // `null` means the asset was deleted from the library from inside the dialog.
+    if (result === null) {
+      setAssets(assetsRef.current.filter((current) => current.id !== asset.id));
+      return;
+    }
 
-    const handleDeleteAsset = (asset: File) => {
-      let nextValue;
-
-      if (multiple) {
-        const nextSelectedAssets = selectedAssets.filter((prevAsset) => prevAsset.id !== asset.id);
-
-        nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
-      } else {
-        nextValue = null;
-      }
-
-      onChange(name, nextValue);
-
-      setSelectedIndex(0);
-    };
-
-    const handleAssetEdit = (asset: File) => {
-      const nextSelectedAssets = selectedAssets.map((prevAsset) =>
-        prevAsset.id === asset.id ? asset : prevAsset
+    if (result && typeof result !== 'boolean') {
+      setAssets(
+        assetsRef.current.map((current) => (current.id === asset.id ? (result as File) : current))
       );
+    }
+  };
 
-      onChange(name, multiple ? nextSelectedAssets : nextSelectedAssets[0]);
-    };
+  const handleSelect = (selectedAssets: File[]) => {
+    setAssets(selectedAssets);
+    setStep(undefined);
+    setFolderId(null);
+  };
 
-    const validateAssetsTypes = (
-      assets: FileWithoutIdHash[] | Asset[],
-      callback: (assets?: AllowedFiles[], error?: string) => void
-    ) => {
-      const allowedAssets = getAllowedFiles(allowedTypes, assets as AllowedFiles[]);
+  const notifyUnsupported = () => {
+    toggleNotification({
+      type: 'danger',
+      timeout: 4000,
+      message: formatMessage(
+        {
+          // Legacy key: translated everywhere, and it names the accepted types,
+          // which the field already passes as `fileTypes`.
+          id: getTranslationKey('input.notification.not-supported'),
+          defaultMessage: `You can't upload this type of file, only the following types are accepted – {fileTypes}`,
+        },
+        { fileTypes: (allowedTypes ?? []).join(',') }
+      ),
+    });
+  };
 
-      if (allowedAssets.length > 0) {
-        callback(allowedAssets);
-      } else {
+  /**
+   * True when the batch is more than a single-value field can take. Counted on
+   * what was handed in rather than on what survives filtering: uploading one of
+   * several would leave the user guessing which one the field kept.
+   */
+  const rejectsBatch = (count: number) => {
+    if (multiple || count <= 1) {
+      return false;
+    }
+
+    toggleNotification({
+      type: 'danger',
+      timeout: 4000,
+      message: formatMessage({
+        id: getTranslationKey('content-manager.input.notification.single-file'),
+        defaultMessage: 'This field accepts only one file.',
+      }),
+    });
+
+    return true;
+  };
+
+  const handleUpload = async (files: globalThis.File[]) => {
+    if (disabled || files.length === 0) {
+      return;
+    }
+
+    // The device picker can't reach this — it carries `multiple` — so a drop is
+    // the only way in.
+    if (rejectsBatch(files.length)) {
+      return;
+    }
+
+    const allowedFiles = filterAllowedFiles(allowedTypes, files);
+
+    if (allowedFiles.length === 0) {
+      notifyUnsupported();
+      return;
+    }
+
+    // A mixed drop uploads what it can and says so, rather than silently
+    // dropping the rest.
+    if (allowedFiles.length < files.length) {
+      notifyUnsupported();
+    }
+
+    const assetsCountByType = allowedFiles.reduce<Record<string, number>>((acc, file) => {
+      const type = typeFromMime(file.type);
+      acc[type] = (acc[type] ?? 0) + 1;
+      return acc;
+    }, {});
+    trackUsage('didSelectFile', { source: 'computer', location: CONTENT_MANAGER_LOCATION });
+    trackUsage('willAddMediaLibraryAssets', {
+      location: CONTENT_MANAGER_LOCATION,
+      ...assetsCountByType,
+    });
+
+    const formData = new FormData();
+    allowedFiles.forEach((file) => formData.append('files', file));
+    formData.append(
+      'fileInfo',
+      JSON.stringify(
+        allowedFiles.map((file) => ({
+          name: file.name,
+          caption: null,
+          alternativeText: null,
+          folder: UPLOAD_FOLDER_ID,
+        }))
+      )
+    );
+
+    try {
+      // Attached per file rather than from the result: a Retry in the progress
+      // dialog uploads cancelled files after this call has already resolved.
+      await uploadFiles({
+        formData,
+        totalFiles: allowedFiles.length,
+        concurrency,
+        generateAiMetadata: Boolean(isAiMetadataEnabled),
+        onFileUploaded: attachUploadedFile,
+      }).unwrap();
+    } catch {
+      // Errors reach the user through the progress dialog, which the mutation
+      // populates itself.
+    }
+  };
+
+  const handleZoneClick = () => {
+    if (canRead) {
+      setStep('browse');
+    } else if (canCreate) {
+      fileInputRef.current?.click();
+    } else {
+      setStep('no-access');
+    }
+  };
+
+  /**
+   * The server fetches each URL and uploads what it finds, so the file's type
+   * is not known here — `allowedTypes` can only be enforced on what comes back.
+   * A URL whose file the field does not accept is uploaded to the library and
+   * left off the field, which is also what the Media Library page does with it.
+   */
+  const handleUrlUpload = async (urls: string[]) => {
+    if (disabled || urls.length === 0 || rejectsBatch(urls.length)) {
+      return;
+    }
+
+    trackUsage('didSelectFile', { source: 'url', location: CONTENT_MANAGER_LOCATION });
+    trackUsage('willAddMediaLibraryAssets', { location: CONTENT_MANAGER_LOCATION });
+
+    try {
+      const { data: uploadedFiles } = await uploadFromUrls({
+        urls,
+        folderId: UPLOAD_FOLDER_ID,
+        generateAiMetadata: Boolean(isAiMetadataEnabled),
+      }).unwrap();
+
+      const allowedFiles = uploadedFiles.filter((file) =>
+        isMediaTypeAllowed(allowedTypes, file.mime)
+      );
+      const notAttachedFiles = uploadedFiles.filter((file) => !allowedFiles.includes(file));
+
+      if (notAttachedFiles.length > 0) {
         toggleNotification({
-          type: 'danger',
+          type: 'warning',
           timeout: 4000,
           message: formatMessage(
             {
-              id: getTrad('input.notification.not-supported'),
-              defaultMessage: `You can't upload this type of file.`,
+              id: getTranslationKey('content-manager.input.notification.not-attached'),
+              defaultMessage:
+                '{fileNames} {count, plural, one {was} other {were}} added to the Media Library, but this field only accepts {fileTypes}.',
             },
             {
-              fileTypes: (allowedTypes ?? []).join(','),
+              fileNames: notAttachedFiles.map((file) => file.name).join(', '),
+              count: notAttachedFiles.length,
+              fileTypes: (allowedTypes ?? []).join(', '),
             }
           ),
         });
       }
-    };
 
-    const handleAssetDrop = (assets: FileWithoutIdHash[]) => {
-      validateAssetsTypes(assets, (allowedAssets?: AllowedFiles[]) => {
-        setDroppedAssets(allowedAssets);
-        setStep(STEPS.AssetUpload);
-      });
-    };
-
-    if (multiple && selectedAssets.length > 0) {
-      label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
+      if (allowedFiles.length > 0) {
+        setAssets(multiple ? [...assetsRef.current, ...allowedFiles] : [allowedFiles[0]]);
+      }
+    } catch {
+      // Errors reach the user through the progress dialog, which the mutation
+      // populates itself.
     }
+  };
 
-    const handleNext = () => {
-      setSelectedIndex((current) => (current < selectedAssets.length - 1 ? current + 1 : 0));
-    };
+  const handleFileInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    // Copied before the reset, not after: `event.target.files` is the input's
+    // live FileList, and clearing `value` empties it in place. Reading it
+    // afterwards yields nothing and the upload never starts.
+    const files = Array.from(event.target.files ?? []);
+    // Reset so picking the same file twice in a row still fires `change`.
+    event.target.value = '';
 
-    const handlePrevious = () => {
-      setSelectedIndex((current) => (current > 0 ? current - 1 : selectedAssets.length - 1));
-    };
-
-    const handleFilesUploadSucceeded = (uploadedFiles: Asset[] | File[]) => {
-      setUploadedFiles((prev) => [...prev, ...uploadedFiles]);
-    };
-
-    let initiallySelectedAssets = selectedAssets;
-
-    if (uploadedFiles.length > 0) {
-      const allowedUploadedFiles = getAllowedFiles(allowedTypes, uploadedFiles as AllowedFiles[]);
-
-      initiallySelectedAssets = multiple
-        ? [...allowedUploadedFiles, ...selectedAssets]
-        : [allowedUploadedFiles[0]];
+    if (files.length > 0) {
+      await handleUpload(files);
     }
+  };
 
-    const handleDoubleClickAsset = (asset: File) => {
-      if (disabled) return;
-      handleAssetEdit(asset);
-    };
-
-    return (
-      <>
-        <CarouselAssets
-          ref={forwardedRef}
-          assets={selectedAssets}
+  return (
+    <Field.Root name={name} error={error} hint={hint} required={required}>
+      <Flex justifyContent="space-between" alignItems="center" gap={2}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
+        <AddAssetMenu
           disabled={disabled}
-          label={label!}
-          labelAction={labelAction}
-          onDeleteAsset={handleDeleteAsset}
-          onDeleteAssetFromMediaLibrary={handleDeleteAssetFromMediaLibrary}
-          onAddAsset={() => setStep(STEPS.AssetSelect)}
-          onDropAsset={handleAssetDrop}
-          onEditAsset={handleAssetEdit}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          onDoubleClickAsset={handleDoubleClickAsset}
-          error={error}
-          hint={hint}
-          required={required}
-          selectedAssetIndex={selectedIndex}
-          trackedLocation="content-manager"
+          onBrowseLibrary={() => setStep('browse')}
+          onUploadFromDevice={() => fileInputRef.current?.click()}
+          onUploadFromUrl={() => setIsUrlDialogOpen(true)}
         />
+      </Flex>
 
-        {step === STEPS.AssetSelect && (
-          <AssetDialog
-            allowedTypes={allowedTypes as AllowedTypes[]}
-            initiallySelectedAssets={initiallySelectedAssets}
-            folderId={folderId}
-            onClose={() => {
-              setStep(undefined);
-              setFolderId(null);
-            }}
-            open={step === STEPS.AssetSelect}
-            onValidate={handleValidation}
-            multiple={multiple}
-            onAddAsset={() => setStep(STEPS.AssetUpload)}
-            onAddFolder={() => setStep(STEPS.FolderCreate)}
-            onChangeFolder={(folder) => setFolderId(folder)}
-            trackedLocation="content-manager"
+      <Flex direction="column" alignItems="stretch" gap={1}>
+        {assets.map((asset) => (
+          <AssetRow
+            key={asset.id}
+            asset={asset}
+            disabled={disabled}
+            onCopyLink={handleCopyLink}
+            // The details dialog needs the library's folder tree, which needs read access.
+            onEdit={canRead ? setEditedAsset : undefined}
+            onRemove={handleRemove}
           />
-        )}
+        ))}
 
-        {step === STEPS.AssetUpload && (
-          <UploadAssetDialog
-            open={step === STEPS.AssetUpload}
-            onClose={() => setStep(STEPS.AssetSelect)}
-            initialAssetsToAdd={droppedAssets as Asset[]}
-            addUploadedFiles={handleFilesUploadSucceeded}
-            trackedLocation="content-manager"
-            folderId={folderId}
-            validateAssetsTypes={validateAssetsTypes}
-          />
-        )}
+        <AssetDropZone disabled={disabled} onClick={handleZoneClick} onDropFiles={handleUpload} />
+      </Flex>
 
-        {step === STEPS.FolderCreate && (
-          <EditFolderDialog
-            open={step === STEPS.FolderCreate}
-            onClose={() => setStep(STEPS.AssetSelect)}
-            parentFolderId={folderId}
-          />
-        )}
-      </>
-    );
-  }
-);
+      <Field.Error />
+      <Field.Hint />
+
+      <VisuallyHidden>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple={multiple}
+          onChange={handleFileInputChange}
+          tabIndex={-1}
+          aria-hidden
+        />
+      </VisuallyHidden>
+
+      {step === 'browse' && (
+        <AssetDialog
+          open
+          multiple={multiple}
+          allowedTypes={allowedTypes ?? []}
+          initiallySelectedAssets={assets}
+          folderId={folderId}
+          trackedLocation={CONTENT_MANAGER_LOCATION}
+          onClose={() => {
+            setStep(undefined);
+            setFolderId(null);
+          }}
+          onValidate={handleSelect}
+          onAddFolder={() => setStep('create-folder')}
+          // The dialog's own upload button hands back to this field's upload
+          // path, so every route to an uploaded file opens the progress dialog.
+          onAddAsset={() => {
+            setStep(undefined);
+            fileInputRef.current?.click();
+          }}
+          onChangeFolder={(nextFolderId) => setFolderId(nextFolderId)}
+        />
+      )}
+
+      {editedAsset && (
+        <EditAssetDialog
+          open
+          asset={editedAsset as EditableAsset}
+          canUpdate={canUpdate && !disabled}
+          canCopyLink={canCopyLink}
+          canDownload={canDownload}
+          trackedLocation={CONTENT_MANAGER_LOCATION}
+          onClose={handleEditClose}
+        />
+      )}
+
+      {step === 'create-folder' && (
+        <EditFolderDialog open onClose={() => setStep('browse')} parentFolderId={folderId} />
+      )}
+
+      {step === 'no-access' && <NoLibraryAccessDialog onClose={() => setStep(undefined)} />}
+
+      <ImportFromUrlDialog
+        open={isUrlDialogOpen}
+        onClose={() => setIsUrlDialogOpen(false)}
+        onUpload={handleUrlUpload}
+      />
+    </Field.Root>
+  );
+};

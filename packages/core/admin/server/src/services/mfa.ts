@@ -63,9 +63,7 @@ export type VerifyChallengeResult =
   | { ok: false; reason: 'unusable' | 'exhausted' | 'invalid' | 'throttled' };
 
 export type EnforceOutcome =
-  | { outcome: 'none' }
-  | { outcome: 'grace'; graceUntil: Date }
-  | { outcome: 'refused' };
+  { outcome: 'none' } | { outcome: 'grace'; graceUntil: Date } | { outcome: 'refused' };
 
 /** Roles are optional: the login path does not populate them, so the resolver loads them rather
  * than read "not populated" as "no roles". */
@@ -157,9 +155,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     const adminStore = strapi.store({ type: 'core', name: 'admin' });
     const auth = (await adminStore.get({ key: 'auth' })) as
-      | { providers?: { ssoLockedRoles?: Array<string | number> } }
-      | null
-      | undefined;
+      { providers?: { ssoLockedRoles?: Array<string | number> } } | null | undefined;
     const lockedRoles = auth?.providers?.ssoLockedRoles ?? [];
     if (lockedRoles.length === 0) {
       return false;

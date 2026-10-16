@@ -2,12 +2,14 @@ import type { Core, Modules } from '@strapi/types';
 
 import { getDisplayName, type AdminUserLike } from '../utils';
 
-const DEFAULT_RETENTION_DAYS = 90;
+export const DEFAULT_RETENTION_DAYS = 90;
 
 /**
  * Events audited before the payload standard; their stored shape is frozen for
  * compatibility. Do not add events here: new events come through registerEvent().
- * TODO: migrate these to the standard.
+ * The event hub still emits user.create, user.update and user.delete; the audit log
+ * records them as admin-user.* (server/src/audit-logs/admin-users.ts).
+ * TODO: migrate the rest to the standard.
  */
 export const defaultEvents = [
   'entry.create',
@@ -21,9 +23,6 @@ export const defaultEvents = [
   'media-folder.create',
   'media-folder.update',
   'media-folder.delete',
-  'user.create',
-  'user.update',
-  'user.delete',
   'admin.auth.success',
   'admin.auth.mfa_required',
   'admin.mfa.enabled',
@@ -59,12 +58,33 @@ export const defaultEvents = [
  * Legacy events store the first emitted argument as-is; registered events store the
  * standard shape built by their transformer.
  */
-/** The user an audit row is attributed to: the session user, or the account an `admin.mfa.*` payload names. */
-type AttributableUser = AdminUserLike & { id: string | number };
-
 type EventRegistration =
   | { kind: 'legacy' }
-  | { kind: 'standard'; transform: Modules.AuditLogs.EventTransformer };
+  | {
+      kind: 'standard';
+      transform: Modules.AuditLogs.EventTransformer;
+      options: RegisterEventOptions;
+    };
+
+export interface RegisterEventOptions {
+  /**
+   * Records the event when the request has no authenticated user, with an
+   * `unknown` actor and no user column. For actions taken from public admin
+   * forms (password reset, invitation). Off by default: an event with no user
+   * is dropped.
+   */
+  allowUnknownActor?: boolean;
+  /**
+   * Records the event with an `unknown` actor and no user column even when the request
+   * has an authenticated user. For events about a login that did not complete.
+   */
+  alwaysUnknownActor?: boolean;
+  /**
+   * Receives the arguments passed to eventHub.emit(); returning false keeps the
+   * event out of the audit log. Listeners on the event hub still receive it.
+   */
+  shouldRecord?: (...args: any[]) => boolean;
+}
 
 const getEventMap = (events: string[]) => {
   return events.reduce(
@@ -76,24 +96,61 @@ const getEventMap = (events: string[]) => {
   );
 };
 
-const getRetentionDays = (strapi: Core.Strapi) => {
-  const featureConfig = strapi.ee.features.get('audit-logs');
-  const licenseRetentionDays =
-    typeof featureConfig === 'object' && featureConfig?.options?.retentionDays;
-  const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
+/** The user an audit row is attributed to: the session user, or the account an `admin.mfa.*` payload names. */
+type AttributableUser = AdminUserLike & { id: string | number };
 
+const getActor = (
+  systemOrigin: Modules.AuditLogs.SystemOrigin | undefined,
+  user: AttributableUser | undefined
+): Modules.AuditLogs.Actor => {
+  if (systemOrigin) {
+    return { type: 'system' };
+  }
+
+  if (!user) {
+    return { type: 'unknown' };
+  }
+
+  // We copy the user data into the row so the history stays unchanged if the user
+  // changes later
+  return {
+    type: 'admin-user',
+    user: { id: user.id, email: user.email, name: getDisplayName(user) },
+  };
+};
+
+/**
+ * The retention the daily delete job applies, from the license's value and the admin override.
+ * Shared with the Plan card's resolver (../entitlements.ts) so the card shows this same figure.
+ */
+export const computeRetentionDays = (
+  licenseRetentionDays: unknown,
+  userRetentionDays: number | null | undefined
+): number => {
   // For enterprise plans, use 90 days by default, but allow users to override it
   if (licenseRetentionDays == null) {
     return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
   }
 
+  // The registry can ship the value as a numeric string
+  const licenseDays = Number(licenseRetentionDays);
+
   // Allow users to override the license retention days, but not to increase it
-  if (userRetentionDays && userRetentionDays <= licenseRetentionDays) {
+  if (userRetentionDays && userRetentionDays <= licenseDays) {
     return userRetentionDays;
   }
 
   // User didn't provide a retention days value, use the license one
-  return licenseRetentionDays;
+  return licenseDays;
+};
+
+const getRetentionDays = (strapi: Core.Strapi) => {
+  const featureConfig = strapi.ee.features.get('audit-logs');
+
+  return computeRetentionDays(
+    typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
+    strapi.config.get('admin.auditLogs.retentionDays')
+  );
 };
 
 /**
@@ -131,7 +188,9 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     const isUsingAdminAuth = requestState?.route?.info?.type === 'admin';
     const auditSource = requestState?.auditSource;
     const isMcpAdminAction = auditSource === 'mcp';
-    const user = requestState?.user;
+    const options: RegisterEventOptions =
+      registration.kind === 'standard' ? registration.options : {};
+    const user = options.alwaysUnknownActor ? undefined : requestState?.user;
     const systemOrigin =
       auditSource && SYSTEM_ORIGINS.includes(auditSource)
         ? (auditSource as Modules.AuditLogs.SystemOrigin)
@@ -147,9 +206,16 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     // are exactly the rows an audit log most wants. `admin::mfa`'s `notify` names the account in
     // the event payload (`{ userId }`), so for `admin.mfa.*` names only, fall back to that id and
     // load the user it names; every other event still requires `requestState.user` exactly as
-    // before. A payload id that matches no user cannot be attributed and is dropped.
+    // before. A payload id that matches no user cannot be attributed and is dropped. An event
+    // registered with `alwaysUnknownActor` opts out of attribution entirely, so it never falls
+    // back.
     let attributedUser: AttributableUser | undefined = user;
-    if (!attributedUser && !systemOrigin && name.startsWith('admin.mfa.')) {
+    if (
+      !attributedUser &&
+      !systemOrigin &&
+      !options.alwaysUnknownActor &&
+      name.startsWith('admin.mfa.')
+    ) {
       const fallbackId = args[0]?.userId;
       if (fallbackId !== undefined) {
         attributedUser = await strapi.db.query('admin::user').findOne({
@@ -159,15 +225,23 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       }
     }
 
-    if (!systemOrigin && !attributedUser) {
+    const allowsUnknownActor =
+      options.allowUnknownActor === true || options.alwaysUnknownActor === true;
+
+    if (!systemOrigin && !attributedUser && !allowsUnknownActor) {
+      return null;
+    }
+
+    if (options.shouldRecord?.(...args) === false) {
       return null;
     }
 
     const origin: Modules.AuditLogs.AuditSource = systemOrigin ?? auditSource ?? 'admin-panel';
     const date = new Date().toISOString();
     // Scheduled actions have no user, so a null user is expected. The earlier audit
-    // entry that set the schedule records who did it.
-    const userId = systemOrigin ? null : attributedUser!.id;
+    // entry that set the schedule records who did it. Events allowing an unknown actor
+    // have no user either.
+    const userId = attributedUser ? attributedUser.id : null;
 
     if (registration.kind === 'legacy') {
       // TODO: What does this ignore in upload? Why would we want to ignore anything?
@@ -184,18 +258,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       };
     }
 
-    const actor: Modules.AuditLogs.Actor = systemOrigin
-      ? { type: 'system' }
-      : {
-          type: 'admin-user',
-          // We copy the user data into the row so the history stays unchanged if the
-          // user changes later
-          user: {
-            id: attributedUser!.id,
-            email: attributedUser!.email,
-            name: getDisplayName(attributedUser!),
-          },
-        };
+    const actor = getActor(systemOrigin, attributedUser);
 
     let shape: Modules.AuditLogs.EventShape | null = null;
 
@@ -245,7 +308,8 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
      */
     registerEvent<TDetails = unknown>(
       name: string,
-      transform: Modules.AuditLogs.EventTransformer<TDetails>
+      transform: Modules.AuditLogs.EventTransformer<TDetails>,
+      options: RegisterEventOptions = {}
     ) {
       if (eventMap[name]?.kind === 'legacy') {
         throw new Error(
@@ -260,6 +324,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       eventMap[name] = {
         kind: 'standard',
         transform: transform as Modules.AuditLogs.EventTransformer,
+        options,
       };
     },
 

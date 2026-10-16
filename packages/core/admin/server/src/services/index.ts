@@ -19,6 +19,7 @@ import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
 import createMfaService from './mfa';
 import { createSecuritySettingsService } from './security-settings';
+import debugDump from './debug-dump';
 
 const contentApiTokenService = createTokenService('content-api');
 const adminTokenService = createTokenService('admin');
@@ -59,4 +60,5 @@ export default {
   // Factory, same reasoning as `mfa` above: it takes `strapi` explicitly.
   'security-settings': ({ strapi }: { strapi: Core.Strapi }) =>
     createSecuritySettingsService({ strapi }),
+  'debug-dump': debugDump,
 };

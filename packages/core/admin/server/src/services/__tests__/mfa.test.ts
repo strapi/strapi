@@ -125,8 +125,7 @@ const buildConnection =
     const builder = {
       where(
         condition:
-          | Record<string, unknown>
-          | ((nested: ReturnType<typeof createNestedWhereBuilder>) => void)
+          Record<string, unknown> | ((nested: ReturnType<typeof createNestedWhereBuilder>) => void)
       ) {
         if (typeof condition === 'function') {
           const nested = createNestedWhereBuilder(resolveKey);

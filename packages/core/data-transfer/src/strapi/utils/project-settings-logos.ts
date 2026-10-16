@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { Readable } from 'stream';
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
 import { readFile } from 'fs-extra';
 import { lookup as lookupMimeType } from 'mime-types';
 import * as webStream from 'stream/web';
@@ -230,7 +230,7 @@ const uploadLogoFromTransferBuffer = async (strapi: Core.Strapi, logo: ProjectSe
 
   await strapi.plugin('upload').provider.uploadStream(file);
 
-  return pick(LOGO_PERSISTED_FIELDS, file);
+  return pick(file, LOGO_PERSISTED_FIELDS);
 };
 
 export const restoreProjectSettingsLogos = async (

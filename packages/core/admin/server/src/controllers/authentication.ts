@@ -2,10 +2,13 @@ import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
+import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { MfaLockedError } from '../services/mfa-errors';
 import { PASSKEY_VERIFY_FAILED } from '../services/mfa-passkeys';
+import { emitLoginFailure, type LoginFailureReason } from '../audit-logs/auth';
+import { USER_NOT_ACTIVE_MESSAGE } from '../services/auth';
 import {
   REFRESH_COOKIE_NAME,
   MFA_TRUST_COOKIE_NAME,
@@ -57,7 +60,17 @@ const enforceMfaOrThrow = async (
 
   if (result.outcome === 'refused') {
     const error = new MfaLockedError();
-    strapi.eventHub.emit('admin.auth.error', { error, provider: 'local' });
+    // `email` is optional on the shared `AdminUser` shape, but a row that reached password
+    // verification always has one; the guard only keeps the type honest.
+    emitLoginFailure(
+      { strapi },
+      {
+        error,
+        provider: 'local',
+        reason: 'mfa_locked',
+        ...(user.email ? { user: { id: user.id, email: user.email } } : {}),
+      }
+    );
     throw error;
   }
 
@@ -75,6 +88,37 @@ const offeredTrustDays = async (): Promise<number | null> => {
 const passkeyAvailableFor = async (userId: string): Promise<boolean> =>
   (await getService('mfa').countPasskeys(userId)) > 0 && getService('mfa').passkeysConfigured();
 
+/**
+ * Emits `admin.auth.error` without delaying the response. The account is looked up by
+ * the email of the request, as the local strategy does, because passport does not pass
+ * the user along with an error.
+ */
+const emitLocalLoginFailure = (ctx: Context, error: Error, reason: LoginFailureReason) => {
+  const { email } = (ctx.request.body ?? {}) as { email?: unknown };
+
+  const emit = (user?: { id: Data.ID; email: string } | null) =>
+    emitLoginFailure(
+      { strapi },
+      {
+        error,
+        reason,
+        provider: 'local',
+        ...(user ? { user: { id: user.id, email: user.email } } : {}),
+      }
+    );
+
+  // A failed lookup still emits, without the account
+  Promise.resolve()
+    .then(() =>
+      typeof email === 'string'
+        ? strapi.db
+            .query('admin::user')
+            .findOne({ select: ['id', 'email'], where: { email: email.toLowerCase() } })
+        : null
+    )
+    .then(emit, () => emit());
+};
+
 export default {
   login: compose([
     async (ctx: Context, next: Next) => {
@@ -84,7 +128,11 @@ export default {
     (ctx: Context, next: Next) => {
       return passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) {
-          strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
+          emitLocalLoginFailure(
+            ctx,
+            err,
+            err.details?.code === 'LOGIN_NOT_ALLOWED' ? 'login_not_allowed' : 'unexpected_error'
+          );
           // if this is a recognized error, allow it to bubble up to user
           if (err.details?.code === 'LOGIN_NOT_ALLOWED') {
             throw err;
@@ -95,10 +143,11 @@ export default {
         }
 
         if (!user) {
-          strapi.eventHub.emit('admin.auth.error', {
-            error: new Error(info.message),
-            provider: 'local',
-          });
+          emitLocalLoginFailure(
+            ctx,
+            new Error(info.message),
+            info.message === USER_NOT_ACTIVE_MESSAGE ? 'account_inactive' : 'invalid_credentials'
+          );
           throw new ApplicationError(info.message);
         }
 
@@ -323,7 +372,12 @@ export default {
 
     await validateForgotPasswordInput(input);
 
-    getService('auth').forgotPassword(input);
+    // Not awaited: the response must not reveal whether the email exists. The call runs
+    // synchronously so a broken service still surfaces as a 500; only a rejection of the
+    // returned promise is caught here, since nothing else would handle it.
+    Promise.resolve(getService('auth').forgotPassword(input)).catch((error: unknown) => {
+      strapi.log.error('Failed to process the forgot-password request', { error });
+    });
 
     ctx.status = 204;
   },

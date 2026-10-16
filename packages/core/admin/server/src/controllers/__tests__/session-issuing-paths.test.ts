@@ -414,6 +414,9 @@ describe('session issuing paths', () => {
     setStrapi({
       db: { query: jest.fn(() => ({ findOne })) },
       admin: { services: { user: { updateById } } },
+      // `register` records an audit event, which goes through the event hub and logs a failure.
+      eventHub: { emit: jest.fn() },
+      log: { error: jest.fn(), warn: jest.fn() },
     });
 
     await userService.register({
