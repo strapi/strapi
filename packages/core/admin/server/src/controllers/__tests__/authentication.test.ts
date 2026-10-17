@@ -1,124 +1,106 @@
-import passport from 'koa-passport';
-import { emitAudit, errors } from '@strapi/utils';
+/* eslint-env jest */
 
-import authentication from '../authentication';
+// @ts-expect-error - types are not generated for this file
+// eslint-disable-next-line import/no-relative-packages
+import createContext from '../../../../../../../tests/helpers/create-context';
+import { getService } from '../../utils';
+import authenticationController from '../authentication';
 
-jest.mock('@strapi/utils', () => ({
-  ...jest.requireActual('@strapi/utils'),
-  emitAudit: jest.fn(async () => {}),
+jest.mock('../../utils', () => ({
+  getService: jest.fn(),
 }));
 
-jest.mock('koa-passport', () => ({ __esModule: true, default: { authenticate: jest.fn() } }));
+jest.mock('../../validation/authentication', () => ({
+  validateRegistrationInput: jest.fn(),
+  validateAdminRegistrationInput: jest.fn(),
+  validateRegistrationInfoQuery: jest.fn(),
+  validateForgotPasswordInput: jest.fn(),
+  validateResetPasswordInput: jest.fn(),
+  validateLoginSessionInput: jest.fn(),
+}));
 
-const flush = () =>
+jest.mock('../../services/auth', () => ({
+  USER_NOT_ACTIVE_MESSAGE: 'User not active',
+}));
+
+jest.mock('../../audit-logs/auth', () => ({
+  emitLoginFailure: jest.fn(),
+}));
+
+const mockGetService = jest.mocked(getService);
+
+const setStrapi = (value: object) => {
+  (globalThis as any).strapi = value;
+};
+
+const flushPromises = () =>
   new Promise((resolve) => {
     setImmediate(resolve);
   });
 
-describe('Authentication controller, failed login', () => {
-  const findOne = jest.fn();
+describe('Authentication Controller', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    delete (globalThis as any).strapi;
+  });
 
-  const login = async (err: unknown, user: unknown, info?: { message: string }) => {
-    jest
-      .mocked(passport.authenticate)
-      .mockImplementation(
-        (_strategy: any, _options: any, callback: any) => () => callback(err, user, info)
+  describe('forgotPassword', () => {
+    test('Answers before the email is sent and does not log a successful request', async () => {
+      const log = { error: jest.fn() };
+      let resolveForgotPassword: () => void = () => {};
+      const forgotPassword = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveForgotPassword = resolve;
+          })
       );
 
-    const ctx = {
-      request: { body: { email: 'Ana@Acme.com', password: 'Password123' } },
-      state: {},
-      notImplemented: jest.fn(),
-    };
+      setStrapi({ log });
+      mockGetService.mockReturnValue({ forgotPassword } as any);
 
-    const result = authentication.login(ctx as any, jest.fn()).catch((error: unknown) => error);
-    const thrown = await result;
-    await flush();
+      const ctx = createContext({ body: { email: 'admin@example.com' } }) as any;
 
-    return { ctx, thrown };
-  };
+      await authenticationController.forgotPassword(ctx);
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    findOne.mockResolvedValue({ id: 7, email: 'ana@acme.com' });
+      expect(ctx.status).toBe(204);
+      expect(forgotPassword).toHaveBeenCalledWith({ email: 'admin@example.com' });
 
-    global.strapi = {
-      db: { query: jest.fn(() => ({ findOne })) },
-      eventHub: { emit: jest.fn() },
-      log: { error: jest.fn() },
-    } as any;
-  });
+      resolveForgotPassword();
+      await flushPromises();
 
-  test.each([
-    ['Invalid credentials', 'invalid_credentials'],
-    ['User not active', 'account_inactive'],
-  ])('emits %s with the account found by lowercased email', async (message, reason) => {
-    const { thrown } = await login(null, false, { message });
-
-    expect(thrown).toBeInstanceOf(errors.ApplicationError);
-    expect(findOne).toHaveBeenCalledWith({
-      select: ['id', 'email'],
-      where: { email: 'ana@acme.com' },
-    });
-    expect(emitAudit).toHaveBeenCalledWith({ strapi }, 'admin.auth.error', {
-      error: new Error(message),
-      provider: 'local',
-      reason,
-      user: { id: 7, email: 'ana@acme.com' },
-    });
-  });
-
-  test('emits login_not_allowed for an SSO-locked account and rethrows the error', async () => {
-    const lockedError = new errors.UnauthorizedError('Login not allowed', {
-      code: 'LOGIN_NOT_ALLOWED',
+      expect(log.error).not.toHaveBeenCalled();
     });
 
-    const { thrown } = await login(lockedError, false);
+    test('Logs a failure that happens after the Strapi instance has been destroyed', async () => {
+      const log = { error: jest.fn() };
+      let rejectForgotPassword: (error: Error) => void = () => {};
+      const forgotPassword = jest.fn(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectForgotPassword = reject;
+          })
+      );
 
-    expect(thrown).toBe(lockedError);
-    expect(emitAudit).toHaveBeenCalledWith({ strapi }, 'admin.auth.error', {
-      error: lockedError,
-      provider: 'local',
-      reason: 'login_not_allowed',
-      user: { id: 7, email: 'ana@acme.com' },
+      setStrapi({ log });
+      mockGetService.mockReturnValue({ forgotPassword } as any);
+
+      const ctx = createContext({ body: { email: 'admin@example.com' } }) as any;
+
+      await authenticationController.forgotPassword(ctx);
+
+      expect(ctx.status).toBe(204);
+
+      // The instance is destroyed (e.g. the server is shutting down) before the email
+      // provider gives up: the `strapi` global is gone when the rejection lands.
+      delete (globalThis as any).strapi;
+
+      const error = new Error('SMTP server unreachable');
+      rejectForgotPassword(error);
+      await flushPromises();
+
+      expect(log.error).toHaveBeenCalledWith('Failed to process the forgot-password request', {
+        error,
+      });
     });
-  });
-
-  test('emits unexpected_error for any other passport error and answers 501', async () => {
-    const error = new Error('db down');
-
-    const { ctx } = await login(error, false);
-
-    expect(ctx.notImplemented).toHaveBeenCalled();
-    expect(emitAudit).toHaveBeenCalledWith({ strapi }, 'admin.auth.error', {
-      error,
-      provider: 'local',
-      reason: 'unexpected_error',
-      user: { id: 7, email: 'ana@acme.com' },
-    });
-  });
-
-  test('emits without an account when no user has that email', async () => {
-    findOne.mockResolvedValue(null);
-
-    await login(null, false, { message: 'Invalid credentials' });
-
-    expect(emitAudit).toHaveBeenCalledWith({ strapi }, 'admin.auth.error', {
-      error: new Error('Invalid credentials'),
-      provider: 'local',
-      reason: 'invalid_credentials',
-    });
-  });
-
-  test('still emits, without an account, when the lookup fails', async () => {
-    findOne.mockRejectedValue(new Error('db down'));
-
-    await login(null, false, { message: 'Invalid credentials' });
-
-    expect(emitAudit).toHaveBeenCalledWith(
-      { strapi },
-      'admin.auth.error',
-      expect.not.objectContaining({ user: expect.anything() })
-    );
   });
 });
