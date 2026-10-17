@@ -421,7 +421,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       ...(actor.via ? { via: actor.via } : {}),
     });
 
-    return notify(userId, 'reset', actor.byUserId ? { byUserId: actor.byUserId } : {});
+    return sendNotice(userId, 'reset', actor.byUserId ? { byUserId: actor.byUserId } : {});
   };
 
   /** Both calls must sit inside the guard: `encryption.decrypt` and `base32Decode` throw rather than
@@ -806,18 +806,17 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * only to `EmailedNotice` -- mailing every wrong code would let anyone who knows the password
    * flood the account holder's inbox.
    *
-   * The returned promise never rejects; only the CLI awaits it. The hub emit is detached rather
-   * than part of it: `eventHub.emit` awaits every subscriber, and with EE audit logging on that
-   * means a `findOne` and an insert, either of which can throw. Most of the ~15 callers do not
-   * await this at all -- `verifyChallenge` on the unauthenticated `/login/mfa` route among them --
-   * so an unhandled rejection is the alternative. Its failures are logged, not propagated.
+   * The returned promise never rejects; only the CLI awaits it, through `resetUser`. The hub emit
+   * is detached rather than part of it: `eventHub.emit` awaits every subscriber, and with EE audit
+   * logging on that means a `findOne` and an insert, either of which can throw. Its failures are
+   * logged, not propagated. Request paths use `notify` instead, which does not return the promise.
    */
-  const notify = (
+  const sendNotice = (
     userId: string,
     type: MfaChangeNotice,
     extra: { byUserId?: string; count?: number } = {}
   ): Promise<void> => {
-    const event = `admin.mfa.${type.replace(/_/g, '.')}`;
+    const event = `admin.mfa.${type.replaceAll('_', '.')}`;
     strapi.eventHub.emit(event, { userId, ...extra }).catch((error) => {
       strapi.log.error(`An event listener failed while handling ${event}`, { error });
     });
@@ -856,6 +855,21 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
         strapi.log.error('Failed to send the two-factor change notification', error);
       }
     })();
+  };
+
+  /**
+   * `sendNotice` for request paths: an email send must not sit on the request's critical path, so
+   * nothing here is awaited. `sendNotice` already never rejects; the `.catch` keeps it that way
+   * should that ever change, rather than turning into an unhandled rejection.
+   */
+  const notify = (
+    userId: string,
+    type: MfaChangeNotice,
+    extra: { byUserId?: string; count?: number } = {}
+  ): void => {
+    sendNotice(userId, type, extra).catch((error) => {
+      strapi.log.error('Failed to send the two-factor change notification', error);
+    });
   };
 
   /**
@@ -1240,6 +1254,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     countUnusedRecoveryCodes,
     recordEvent,
     notify,
+    sendNotice,
     pruneEvents,
     unseenEvents,
     markEventsSeen,

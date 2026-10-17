@@ -212,5 +212,5 @@ export const normaliseRecoveryCode = (input: string): string =>
     .toUpperCase()
     .replace(/[\s-]/g, '')
     .replace(/[IL]/g, '1')
-    .replace(/O/g, '0')
-    .replace(/U/g, 'V');
+    .replaceAll('O', '0')
+    .replaceAll('U', 'V');

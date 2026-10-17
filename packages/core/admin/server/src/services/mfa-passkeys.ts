@@ -200,7 +200,15 @@ const stripBrackets = (host: string): string => host.replace(/^\[/, '').replace(
 
 /** The normalised value is what is RETURNED, not merely what is checked: a trailing root dot is
  * not a relying-party id any browser accepts. */
-const normalizeHost = (host: string): string => host.toLowerCase().replace(/\.+$/, '');
+const normalizeHost = (host: string): string => {
+  // A loop, not `/\.+$/`: that pattern backtracks quadratically on a long run of dots that is
+  // not at the end, and this runs on configuration, so on every passkey request.
+  let normalized = host.toLowerCase();
+  while (normalized.endsWith('.')) {
+    normalized = normalized.slice(0, -1);
+  }
+  return normalized;
+};
 
 const isPublicSuffix = (rpId: string): boolean => {
   if (rpId === 'localhost') {
@@ -373,7 +381,7 @@ export interface PasskeyDeps {
     // and that notice is how `isAccountThrottled` sees it.
     type: PasskeyNotice | 'challenge_failed',
     extra?: { byUserId?: string; count?: number }
-  ) => Promise<void>;
+  ) => void;
   isAccountThrottled: (userId: string) => Promise<boolean>;
 }
 

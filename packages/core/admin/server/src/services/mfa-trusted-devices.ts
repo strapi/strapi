@@ -53,13 +53,13 @@ export interface TrustedDeviceDeps {
   strapi: Core.Strapi;
   settings: () => Promise<TrustedDeviceSettings>;
   recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
-  /** Never awaited here and never inside a transaction: it cannot reject, and awaiting it would put
-   * an email send on the request's critical path. The floating promises are deliberate. */
+  /** Fire-and-forget, and never called inside a transaction: an email send must not sit on the
+   * request's critical path. */
   notify: (
     userId: string,
     type: TrustedDeviceNotice,
     extra?: { byUserId?: string; count?: number }
-  ) => Promise<void>;
+  ) => void;
 }
 
 const toIso = (value: Date | string): string => new Date(value).toISOString();

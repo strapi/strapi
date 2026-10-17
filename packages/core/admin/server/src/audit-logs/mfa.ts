@@ -83,7 +83,7 @@ export const diffSecuritySettings = (
     'mfa.mode': settings.mfa.mode,
     'mfa.graceDays': settings.mfa.graceDays,
     // Order is not meaning: the same roles in a new order is not a change.
-    'mfa.requiredRoles': [...settings.mfa.requiredRoles].sort(),
+    'mfa.requiredRoles': [...settings.mfa.requiredRoles].sort((a, b) => a.localeCompare(b)),
     'trustedDevices.enabled': settings.trustedDevices.enabled,
     'trustedDevices.days': settings.trustedDevices.days,
     'passkeys.enabled': settings.passkeys.enabled,

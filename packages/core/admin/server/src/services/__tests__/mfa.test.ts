@@ -2907,12 +2907,9 @@ describe('mfa notifications', () => {
     });
 
     // Non-throwing and never rejecting: the caller (e.g. `verifyChallenge`) must never see this
-    // failure. `notify` returns the email promise so a caller that needs to know the email
-    // settled can await it (the CLI reset, which must not `process.exit` before it does), but
-    // the internal try/catch guarantees that promise always resolves, never rejects, so the
-    // fire-and-forget call sites keep working unchanged.
-    expect(() => service.notify('1', 'enabled')).not.toThrow();
-    await expect(service.notify('1', 'enabled')).resolves.toBeUndefined();
+    // failure. `notify` returns nothing; `sendNotice`, which the CLI reset awaits, always resolves.
+    expect(service.notify('1', 'enabled')).toBeUndefined();
+    await expect(service.sendNotice('1', 'enabled')).resolves.toBeUndefined();
     await flushMicrotasks();
 
     expect(sendTemplatedEmail).toHaveBeenCalled();
@@ -2922,11 +2919,11 @@ describe('mfa notifications', () => {
     );
   });
 
-  // `notify` must return a promise that tracks the email, not send it from a detached async
-  // IIFE. The CLI reset command calls `notify` and then `process.exit(0)`, which tears the process
-  // down before an untracked promise resolves -- the reset email silently never sends. Awaiting
-  // what `notify` returns is what lets the CLI wait for it before exiting.
-  test("notify's returned promise resolves only after the email settles", async () => {
+  // `sendNotice` must return a promise that tracks the email, not send it from a detached async
+  // IIFE. The CLI reset command awaits it through `resetUser` and then calls `process.exit(0)`,
+  // which tears the process down before an untracked promise resolves -- the reset email silently
+  // never sends.
+  test("sendNotice's returned promise resolves only after the email settles", async () => {
     let releaseEmail: (() => void) | undefined;
     const sendTemplatedEmail = jest.fn(
       () =>
@@ -2939,7 +2936,7 @@ describe('mfa notifications', () => {
     });
 
     let settled = false;
-    const notifyPromise = service.notify('1', 'enabled').then(() => {
+    const notifyPromise = service.sendNotice('1', 'enabled').then(() => {
       settled = true;
     });
 
@@ -2951,19 +2948,19 @@ describe('mfa notifications', () => {
     expect(settled).toBe(true);
   });
 
-  test("notify's returned promise still resolves (never rejects) when the email provider rejects", async () => {
+  test("sendNotice's returned promise still resolves (never rejects) when the email provider rejects", async () => {
     const sendTemplatedEmail = jest.fn().mockRejectedValue(new Error('smtp down'));
     const { service } = setup({
       plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
     });
 
-    await expect(service.notify('1', 'enabled')).resolves.toBeUndefined();
+    await expect(service.sendNotice('1', 'enabled')).resolves.toBeUndefined();
   });
 
-  test("notify's returned promise resolves immediately for challenge_failed, which sends no email", async () => {
+  test("sendNotice's returned promise resolves immediately for challenge_failed, which sends no email", async () => {
     const { service } = setup();
 
-    await expect(service.notify('1', 'challenge_failed')).resolves.toBeUndefined();
+    await expect(service.sendNotice('1', 'challenge_failed')).resolves.toBeUndefined();
   });
 
   test('emits the eventHub event even when the email plugin is entirely missing', async () => {
