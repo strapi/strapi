@@ -1,6 +1,8 @@
-import { act, render, screen, waitFor } from '@tests/utils';
+import { act, render, screen, server, waitFor } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { useSessionKeepalive } from '../../hooks/useSessionKeepalive';
+import { triggerSessionExpired } from '../../utils/getFetchClient';
 import {
   clearUnsavedChangesChecks,
   registerUnsavedChangesCheck,
@@ -100,6 +102,59 @@ describe('AuthProvider', () => {
 
       await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
       expect(screen.getByTestId('token')).toHaveTextContent(TOKEN);
+    });
+  });
+
+  /**
+   * `triggerSessionExpired` latches on a module global so one dead session produces one prompt,
+   * and only a fresh login re-arms it. On an instance that enforces 2FA the second factor *is*
+   * the login, so a latch re-armed solely by `login` stays stuck after the first expiry: the
+   * next one is swallowed, leaving the user on a panel where every request 401s in silence.
+   */
+  describe('session-expired latch', () => {
+    const SESSION = {
+      token: 'mfa-session-token',
+      user: { id: 1, email: 'test@testing.com', firstname: 'T', lastname: 'U', roles: [] },
+    };
+
+    const LoginMfaProbe = () => {
+      const loginMfa = useAuth('LoginMfaProbe', (state) => state.loginMfa);
+      const token = useAuth('LoginMfaProbeToken', (state) => state.token);
+
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() =>
+              void loginMfa({ code: '123456', challengeToken: 'challenge', rememberMe: false })
+            }
+          >
+            Complete 2FA
+          </button>
+          <span data-testid="token">{token ?? 'logged-out'}</span>
+        </>
+      );
+    };
+
+    it('expires a session that a second-factor login started', async () => {
+      server.use(http.post('/admin/login/mfa', () => HttpResponse.json({ data: SESSION })));
+
+      const { user } = render(<LoginMfaProbe />);
+
+      act(() => {
+        triggerSessionExpired();
+      });
+      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent('logged-out'));
+
+      await user.click(screen.getByRole('button', { name: /complete 2fa/i }));
+      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent(SESSION.token));
+
+      // The second dead session must still log the user out. It does not if `loginMfa` left the
+      // latch set from the first one.
+      act(() => {
+        triggerSessionExpired();
+      });
+      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent('logged-out'));
     });
   });
 });

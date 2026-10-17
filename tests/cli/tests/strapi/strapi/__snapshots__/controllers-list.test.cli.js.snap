@@ -60,6 +60,7 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ admin::authenticated-user                            │
 │ admin::authenticated-session                         │
 │ admin::authentication                                │
+│ admin::mfa                                           │
 │ admin::permission                                    │
 │ admin::role                                          │
 │ admin::transfer                                      │
@@ -67,5 +68,6 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ admin::webhooks                                      │
 │ admin::content-api                                   │
 │ admin::homepage                                      │
+│ admin::security-settings                             │
 │ admin::ai                                            │"
 `;

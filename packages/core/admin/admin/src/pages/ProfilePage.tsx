@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, useNotifyAT, Grid, Typography, FlexProps } from '@strapi/design-system';
+import { Box, Button, Flex, useNotifyAT, Grid, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -11,6 +11,7 @@ import { InputRenderer } from '../components/FormInputs/Renderer';
 import { useGuidedTour } from '../components/GuidedTour/Context';
 import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
+import { Panel } from '../components/Panel';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
@@ -23,6 +24,7 @@ import { isBaseQueryError } from '../utils/baseQuery';
 import { translatedErrors } from '../utils/translatedErrors';
 import { getDisplayName } from '../utils/users';
 
+import { TwoFactorSection } from './Profile/TwoFactorSection';
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 
 import type { UpdateMe } from '../../../shared/contracts/users';
@@ -48,24 +50,6 @@ const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
 /* -------------------------------------------------------------------------------------------------
  * ProfilePage
  * -----------------------------------------------------------------------------------------------*/
-
-const Panel = ({ children, ...flexProps }: FlexProps) => {
-  return (
-    <Box
-      background="neutral0"
-      hasRadius
-      shadow="filterShadow"
-      paddingTop={6}
-      paddingBottom={6}
-      paddingLeft={7}
-      paddingRight={7}
-    >
-      <Flex direction="column" alignItems="stretch" gap={4} {...flexProps}>
-        {children}
-      </Flex>
-    </Box>
-  );
-};
 
 const ProfilePage = () => {
   const isDesktop = useIsDesktop();
@@ -224,6 +208,7 @@ const ProfilePage = () => {
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     <UserInfoSection />
                     {!hasLockedRole && <PasswordSection />}
+                    {!hasLockedRole && <TwoFactorSection />}
                     <PreferencesSection localeNames={localeNames} />
                   </Flex>
                 </Layouts.Content>

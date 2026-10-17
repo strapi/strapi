@@ -35,6 +35,9 @@ export const ALLOWED_CONTENT_TYPES = [
   'admin::permission',
   'admin::api-token',
   'admin::transfer-token',
+  'admin::mfa-challenge',
+  'admin::mfa-recovery-code',
+  'admin::mfa-event',
   ...APP_TEMPLATE_CONTENT_TYPES,
   'plugin::content-manager.history-version',
   /**

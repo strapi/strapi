@@ -143,3 +143,13 @@ This behavior ensures that compromised refresh tokens cannot be used after a pas
 - Admin refresh tokens are stored in an httpOnly cookie and are not exposed to JavaScript.
 - Device-bound sessions allow targeted logout by `deviceId`.
 - Session list responses expose `lastActiveAt` as the timestamp of the last refresh-token rotation for that session (not per-request activity tracking).
+
+## Second factor
+
+Admin login can require a second factor behind the `unstableAdminMfa` future flag. Four pages cover
+it:
+
+- [Admin two-factor authentication](./12-admin-two-factor.md): TOTP enrolment, login, recovery codes
+- [Admin 2FA enforcement](./13-admin-mfa-enforcement.md): enforcement modes, grace periods, locks
+- [Admin trusted devices](./14-admin-trusted-devices.md): skipping the code on a known browser
+- [Admin passkeys](./15-admin-passkeys.md): WebAuthn credentials as an additional second factor

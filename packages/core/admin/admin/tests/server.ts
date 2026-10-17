@@ -140,6 +140,14 @@ export const server: SetupServer = setupServer(
   http.delete('/admin/users/me/sessions', () => HttpResponse.json({ data: {} })),
   /**
    *
+   * ADMIN MFA
+   *
+   */
+  // Default: the future flag is off, matching the server's behaviour when unstableAdminMfa is
+  // disabled. Tests that exercise the enabled/enrolled states override this per-test.
+  http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })),
+  /**
+   *
    * ADMIN PROVIDERS
    *
    */

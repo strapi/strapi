@@ -16,10 +16,38 @@ import {
   FindAll,
   FindOne,
   Update,
+  type AdminUserMfaState,
 } from '../../../shared/contracts/user';
 import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError } = errors;
+
+/**
+ * Enforcement state is for the people who can act on it (unlock, reset). Gated on the feature
+ * being enabled too, not just the ability: with the flag off the user endpoints must read exactly
+ * as they did on develop, for every caller.
+ */
+const canSeeMfaState = (ctx: Context): boolean =>
+  getService('mfa').isEnabled() && Boolean(ctx.state.userAbility?.can('admin::users.update'));
+
+/**
+ * Appended after sanitising, as a fresh object rather than a mutation of the sanitizer's return,
+ * like `registrationToken` in `create`, so the shared sanitizer keeps these out of every other
+ * user-bearing response. Never the secrets: `mfaSecret` and `mfaPendingSecret` stay out.
+ */
+const withMfaState = <T extends object>(
+  sanitized: T,
+  user: AdminUser,
+  include: boolean
+): T & AdminUserMfaState =>
+  include
+    ? {
+        ...sanitized,
+        mfaEnabledAt: user.mfaEnabledAt ?? null,
+        mfaGraceUntil: user.mfaGraceUntil ?? null,
+        mfaLockedAt: user.mfaLockedAt ?? null,
+      }
+    : sanitized;
 
 export default {
   async create(ctx: Context) {
@@ -70,9 +98,15 @@ export default {
     // @ts-expect-error update the service type
     const { results, pagination } = await userService.findPage(sanitizedQuery);
 
+    const includeMfa = canSeeMfaState(ctx);
+
     ctx.body = {
       data: {
-        results: results.map((user: AdminUser) => userService.sanitizeUser(user)),
+        // Enforcement state per row, so an administrator watching grace periods run out can see
+        // every account on one page instead of opening each user in turn.
+        results: results.map((user: AdminUser) =>
+          withMfaState(userService.sanitizeUser(user), user, includeMfa)
+        ),
         pagination,
       },
     } satisfies FindAll.Response;
@@ -87,9 +121,14 @@ export default {
       return ctx.notFound('User does not exist');
     }
 
-    ctx.body = {
-      data: getService('user').sanitizeUser(user as AdminUser),
-    } as FindOne.Response;
+    const sanitized = getService('user').sanitizeUser(user as AdminUser);
+    const data: FindOne.Response['data'] = withMfaState(
+      sanitized,
+      user as AdminUser,
+      canSeeMfaState(ctx)
+    );
+
+    ctx.body = { data } satisfies FindOne.Response;
   },
 
   async update(ctx: Context) {

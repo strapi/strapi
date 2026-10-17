@@ -25,6 +25,9 @@ import { getDisplayName } from '../../../../utils/users';
 
 import { CreateActionCE } from './components/CreateActionCE';
 import { ModalForm } from './components/NewUserForm';
+import { TwoFactorStatus } from './components/TwoFactorStatus';
+
+import type { AdminUserMfaState } from '../../../../../../shared/contracts/user';
 
 /* -------------------------------------------------------------------------------------------------
  * ListPageCE
@@ -55,10 +58,15 @@ const ListPageCE = () => {
       ).CreateActionEE
   );
 
-  const headers = TABLE_HEADERS.map((header) => ({
-    ...header,
-    label: formatMessage(header.label),
-  }));
+  // Present only when the rows carry enforcement state: the server appends it while the feature is
+  // on, to callers who can act on it. Everyone else sees the table exactly as before.
+  const showTwoFactor = users.some((user) => 'mfaEnabledAt' in user);
+  const headers = [...TABLE_HEADERS, ...(showTwoFactor ? [TWO_FACTOR_HEADER] : [])].map(
+    (header) => ({
+      ...header,
+      label: formatMessage(header.label),
+    })
+  );
 
   const title = formatMessage({
     id: 'global.users',
@@ -297,6 +305,23 @@ const TABLE_HEADERS: Array<
     },
   },
 ];
+
+/**
+ * Enforcement state at a glance. Watching grace periods run out is the whole job of the
+ * administrator who turned enforcement on, and without this it meant opening each user in turn.
+ */
+const TWO_FACTOR_HEADER: (typeof TABLE_HEADERS)[number] = {
+  // Not a column on the row type; the cell reads the appended state directly.
+  name: 'mfaEnabledAt' as keyof SanitizedAdminUser,
+  label: {
+    id: 'Settings.permissions.users.mfa.column',
+    defaultMessage: 'Two-factor',
+  },
+  sortable: false,
+  cellFormatter(user) {
+    return <TwoFactorStatus user={user as AdminUserMfaState} />;
+  },
+};
 
 const FILTERS = [
   {
