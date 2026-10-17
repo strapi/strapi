@@ -10,4 +10,20 @@ describe('admin actions', () => {
       section: 'settings',
     });
   });
+
+  it('declares the password-policy read and update settings permissions', () => {
+    const actions = adminActions.actions.filter((a: any) => a.uid.startsWith('password-policy.'));
+
+    expect(actions.map((a: any) => a.uid)).toEqual([
+      'password-policy.read',
+      'password-policy.update',
+    ]);
+    actions.forEach((action: any) => {
+      expect(action).toMatchObject({
+        pluginName: 'admin',
+        section: 'settings',
+        category: 'password policy',
+      });
+    });
+  });
 });
