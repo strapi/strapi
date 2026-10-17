@@ -5,6 +5,7 @@ import { Field, Flex, IconButton } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
@@ -12,6 +13,7 @@ import { type AnyData, transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
 import { type InputRendererProps } from '../../InputRenderer';
 
+import { ComponentCopyModal } from './ComponentCopyModal';
 import { Initializer } from './Initializer';
 import { NonRepeatableComponent } from './NonRepeatable';
 import { RepeatableComponent } from './Repeatable';
@@ -40,13 +42,16 @@ const ComponentInput = ({
 }: ComponentInputProps) => {
   const { formatMessage } = useIntl();
   const field = useField<AnyData | AnyData[] | null>(name);
+  const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
 
   const showResetComponent =
     !attribute.repeatable && field.value !== undefined && field.value !== null && !disabled;
 
   const {
+    currentDocumentMeta,
     currentDocument: { components },
   } = useDocumentContext('ComponentInput');
+  const canCopyFromExisting = currentDocumentMeta.collectionType === COLLECTION_TYPES;
 
   const handleInitialisationClick = () => {
     const schema = components[attribute.component];
@@ -54,6 +59,12 @@ const ComponentInput = ({
     const data = transformDocument(schema, components)(form);
 
     field.onChange(name, data);
+  };
+
+  const handleCopyComponent = (componentData: Record<string, unknown>) => {
+    field.onChange(name, componentData);
+
+    return true;
   };
 
   return (
@@ -86,7 +97,21 @@ const ComponentInput = ({
        * TODO: should this just live in the `NonRepeatableComponent`?
        */}
       {!attribute.repeatable && !field.value && (
-        <Initializer disabled={disabled} name={name} onClick={handleInitialisationClick} />
+        <Initializer
+          disabled={disabled}
+          name={name}
+          onClick={handleInitialisationClick}
+          onCopyClick={canCopyFromExisting ? () => setIsCopyModalOpen(true) : undefined}
+        />
+      )}
+      {!attribute.repeatable && isCopyModalOpen && (
+        <ComponentCopyModal
+          componentUid={attribute.component}
+          mode="component"
+          onClose={() => setIsCopyModalOpen(false)}
+          onInsert={handleCopyComponent}
+          sourceFieldName={name}
+        />
       )}
       {!attribute.repeatable && field.value ? (
         <NonRepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>

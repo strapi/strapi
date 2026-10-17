@@ -11,12 +11,13 @@ import {
   useComposedRefs,
   BoxComponent,
 } from '@strapi/design-system';
-import { Plus, Drag, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
+import { Plus, Drag, Trash, ArrowUp, ArrowDown, Duplicate } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
@@ -28,6 +29,7 @@ import { createDefaultForm } from '../../../utils/forms';
 import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
+import { ComponentCopyModal } from './ComponentCopyModal';
 import { Initializer } from './Initializer';
 
 import type { ComponentInputProps } from './Input';
@@ -56,8 +58,9 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const { currentDocument } = useDocumentContext('RepeatableComponent');
+  const { currentDocument, currentDocumentMeta } = useDocumentContext('RepeatableComponent');
   const components = currentDocument.components;
+  const canCopyFromExisting = currentDocumentMeta.collectionType === COLLECTION_TYPES;
 
   const {
     value: rawValue,
@@ -72,6 +75,7 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
+  const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     const hasNestedErrors = rawError && Array.isArray(rawError) && rawError.length > 0;
@@ -164,6 +168,23 @@ const RepeatableComponent = ({
     }
   };
 
+  const handleCopyComponent = (componentData: Record<string, unknown>) => {
+    if (value.length >= max) {
+      toggleNotification({
+        type: 'info',
+        message: formatMessage({
+          id: getTranslation('components.notification.info.maximum-requirement'),
+        }),
+      });
+
+      return false;
+    }
+
+    addFieldRow(name, componentData);
+
+    return true;
+  };
+
   const handleMoveComponentField = React.useCallback(
     (newIndex: number, currentIndex: number) => {
       setLiveText(
@@ -254,7 +275,25 @@ const RepeatableComponent = ({
   const level = useComponent('RepeatableComponent', (state) => state.level);
 
   if (value.length === 0) {
-    return <Initializer disabled={disabled} name={name} onClick={handleClick} />;
+    return (
+      <>
+        <Initializer
+          disabled={disabled}
+          name={name}
+          onClick={handleClick}
+          onCopyClick={canCopyFromExisting ? () => setIsCopyModalOpen(true) : undefined}
+        />
+        {isCopyModalOpen && (
+          <ComponentCopyModal
+            componentUid={attribute.component}
+            mode="component"
+            onClose={() => setIsCopyModalOpen(false)}
+            onInsert={handleCopyComponent}
+            sourceFieldName={name}
+          />
+        )}
+      </>
+    );
   }
 
   return (
@@ -312,7 +351,28 @@ const RepeatableComponent = ({
             defaultMessage: 'Add an entry',
           })}
         </TextButtonCustom>
+        {canCopyFromExisting && (
+          <TextButtonCustom
+            disabled={disabled}
+            onClick={() => setIsCopyModalOpen(true)}
+            startIcon={<Duplicate />}
+          >
+            {formatMessage({
+              id: getTranslation('components.copy-from-existing'),
+              defaultMessage: 'Copy from existing',
+            })}
+          </TextButtonCustom>
+        )}
       </AccordionRoot>
+      {isCopyModalOpen && (
+        <ComponentCopyModal
+          componentUid={attribute.component}
+          mode="component"
+          onClose={() => setIsCopyModalOpen(false)}
+          onInsert={handleCopyComponent}
+          sourceFieldName={name}
+        />
+      )}
     </Box>
   );
 };

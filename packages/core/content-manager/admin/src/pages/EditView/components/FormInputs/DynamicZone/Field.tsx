@@ -11,12 +11,14 @@ import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
 import flow from 'lodash/flow';
 import { useIntl } from 'react-intl';
 
+import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
+import { ComponentCopyModal } from '../Component/ComponentCopyModal';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { AddComponentButton } from './AddComponentButton';
@@ -60,12 +62,15 @@ const DynamicZone = ({
   const { max = Infinity, min = -Infinity } = attribute ?? {};
 
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
+  const [componentUidToCopy, setComponentUidToCopy] = React.useState<string | null>(null);
   const [liveText, setLiveText] = React.useState('');
   const [openComponentKey, setOpenComponentKey] = React.useState<string | null>(null);
 
   const {
+    currentDocumentMeta,
     currentDocument: { components, isLoading },
   } = useDocumentContext('DynamicZone');
+  const canCopyFromExisting = currentDocumentMeta.collectionType === COLLECTION_TYPES;
 
   const disabled = disabledProp || isLoading;
   const addFieldRow = useForm('DynamicZone', (state) => state.addFieldRow);
@@ -165,6 +170,27 @@ const DynamicZone = ({
       addFieldRow(name, data, position);
     },
     [addFieldRow, components, name]
+  );
+
+  const handleCopyComponent = React.useCallback(
+    (componentData: Record<string, unknown>) => {
+      if (dynamicDisplayedComponentsLength >= max) {
+        toggleNotification({
+          type: 'info',
+          message: formatMessage({
+            id: getTranslation('components.notification.info.maximum-requirement'),
+          }),
+        });
+
+        return false;
+      }
+
+      setAddComponentIsOpen(false);
+      addFieldRow(name, componentData);
+
+      return true;
+    },
+    [addFieldRow, dynamicDisplayedComponentsLength, formatMessage, max, name, toggleNotification]
   );
 
   const handleClickOpenPicker = () => {
@@ -371,7 +397,17 @@ const DynamicZone = ({
           dynamicComponentsByCategory={dynamicComponentsByCategory}
           isOpen={addComponentIsOpen}
           onClickAddComponent={handleAddComponent}
+          onClickCopyComponent={canCopyFromExisting ? setComponentUidToCopy : undefined}
         />
+        {componentUidToCopy && (
+          <ComponentCopyModal
+            componentUid={componentUidToCopy}
+            mode="dynamiczone"
+            onClose={() => setComponentUidToCopy(null)}
+            onInsert={handleCopyComponent}
+            sourceFieldName={name}
+          />
+        )}
       </Flex>
     </DynamicZoneProvider>
   );
