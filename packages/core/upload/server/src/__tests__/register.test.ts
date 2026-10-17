@@ -287,26 +287,44 @@ describe('Upload plugin register', () => {
     test('keeps provider-specific methods and properties untouched', async () => {
       const providerConfig = { bucket: 'b' };
       const uploadIfMatch = jest.fn();
-      const getProviderConfig = () => providerConfig;
+      const getProviderConfig = jest.fn().mockReturnValue(providerConfig);
+      const instance = {
+        upload: jest.fn(),
+        delete: jest.fn(),
+        getProviderConfig,
+        uploadIfMatch,
+        version: 2,
+      };
 
-      const provider = await registerWithProvider(
-        {
-          upload: jest.fn(),
-          delete: jest.fn(),
-          getProviderConfig,
-          uploadIfMatch,
-          version: 2,
-        },
-        { uploadIfMatch: { shouldNotBeUsed: true } }
-      );
+      const provider = await registerWithProvider(instance, {
+        uploadIfMatch: { shouldNotBeUsed: true },
+      });
 
-      expect(provider.getProviderConfig).toBe(getProviderConfig);
       expect(provider.getProviderConfig()).toBe(providerConfig);
-      expect(provider.uploadIfMatch).toBe(uploadIfMatch);
+      expect(getProviderConfig.mock.contexts[0]).toBe(instance);
       expect(provider.version).toBe(2);
 
       await provider.uploadIfMatch(file, 'etag');
       expect(uploadIfMatch).toHaveBeenCalledWith(file, 'etag');
+      expect(uploadIfMatch.mock.contexts[0]).toBe(instance);
+    });
+
+    test('provider methods calling this.upload get the raw method, without actionOptions', async () => {
+      const upload = jest.fn();
+      const provider = await registerWithProvider(
+        {
+          upload,
+          delete: jest.fn(),
+          uploadTwice(this: { upload: (f: unknown) => unknown }, f: unknown) {
+            return this.upload(f);
+          },
+        },
+        { upload: { fromConfig: true } }
+      );
+
+      await provider.uploadTwice(file);
+
+      expect(upload).toHaveBeenCalledWith(file);
     });
 
     describe('base provider defaults', () => {

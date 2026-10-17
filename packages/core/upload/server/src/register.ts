@@ -115,14 +115,15 @@ const createProvider = (config: Config) => {
 
   return Object.assign(
     Object.create(baseProvider),
-    providerInstance,
     wrapWithActionOptions(providerInstance, actionOptions)
   );
 };
 
 // Contract methods whose last (options) argument defaults to `actionOptions[methodName]`,
 // grouped by arity: (file, options) and (newFile, oldFile, options).
-// Other properties of the provider (e.g. provider-specific helpers) are kept as-is.
+// Other methods of the provider (e.g. provider-specific helpers) keep their signature.
+// Every method runs with `this` bound to the provider instance, so a call like
+// `this.upload(file)` inside the provider does not receive `actionOptions`.
 const TWO_ARG_METHODS = ['upload', 'uploadStream', 'delete', 'checkFileSize', 'getSignedUrl'];
 const THREE_ARG_METHODS = ['replace', 'replaceStream'];
 
@@ -130,7 +131,9 @@ const wrapWithActionOptions = (
   providerInstance: Record<string, unknown>,
   actionOptions: Config['actionOptions']
 ) => {
-  const wrapped: Record<string, unknown> = {};
+  const wrapped: Record<string, unknown> = _.mapValues(providerInstance, (value) =>
+    typeof value === 'function' ? value.bind(providerInstance) : value
+  );
   const methodOf = (name: string) => {
     const method = providerInstance[name];
     return typeof method === 'function' ? (method as (...args: unknown[]) => unknown) : undefined;
