@@ -12,6 +12,7 @@ jest.mock('sharp', () => {
 
 /* eslint-disable import/first -- mock runs before `sharp` import */
 import sharp from 'sharp';
+import { errors } from '@strapi/utils';
 import { register } from '../register';
 /* eslint-enable import/first */
 
@@ -208,72 +209,139 @@ describe('Upload plugin register', () => {
       mockProviderInstance = undefined;
     });
 
-    test('passes actionOptions as the default options of (file, options) methods', async () => {
-      const upload = jest.fn();
-      const uploadStream = jest.fn();
-      const deleteFn = jest.fn();
+    test.each(['upload', 'uploadStream', 'delete', 'checkFileSize', 'getSignedUrl'])(
+      '%s(file, options) defaults options to its actionOptions',
+      async (name) => {
+        const method = jest.fn().mockReturnValue('result');
+        const instance = { upload: jest.fn(), delete: jest.fn(), [name]: method };
 
-      const provider = await registerWithProvider(
-        { upload, uploadStream, delete: deleteFn },
-        { upload: { ACL: null }, uploadStream: { ACL: 'x' }, delete: { d: 1 } }
-      );
+        const provider = await registerWithProvider(instance, {
+          [name]: { fromConfig: true },
+          other: { shouldNotBeUsed: true },
+        });
 
-      await provider.upload(file);
-      await provider.uploadStream(file);
-      await provider.delete(file);
-      await provider.upload(file, { custom: true });
+        const result = provider[name](file);
+        expect(result).toBeInstanceOf(Promise);
+        await expect(result).resolves.toBe('result');
+        expect(method).toHaveBeenLastCalledWith(file, { fromConfig: true });
+        expect(method.mock.contexts[0]).toBe(instance);
 
-      expect(upload).toHaveBeenNthCalledWith(1, file, { ACL: null });
-      expect(uploadStream).toHaveBeenCalledWith(file, { ACL: 'x' });
-      expect(deleteFn).toHaveBeenCalledWith(file, { d: 1 });
-      expect(upload).toHaveBeenNthCalledWith(2, file, { custom: true });
+        await provider[name](file, { custom: true });
+        expect(method).toHaveBeenLastCalledWith(file, { custom: true });
+      }
+    );
+
+    test.each(['replace', 'replaceStream'])(
+      '%s(newFile, oldFile, options) defaults options to its actionOptions',
+      async (name) => {
+        const method = jest.fn().mockReturnValue('result');
+        const instance = { upload: jest.fn(), delete: jest.fn(), [name]: method };
+
+        const provider = await registerWithProvider(instance, { [name]: { fromConfig: true } });
+
+        const result = provider[name](file, oldFile);
+        expect(result).toBeInstanceOf(Promise);
+        await expect(result).resolves.toBe('result');
+        expect(method).toHaveBeenLastCalledWith(file, oldFile, { fromConfig: true });
+        expect(method.mock.contexts[0]).toBe(instance);
+
+        await provider[name](file, oldFile, { custom: true });
+        expect(method).toHaveBeenLastCalledWith(file, oldFile, { custom: true });
+      }
+    );
+
+    test('isPrivate() is called without arguments and resolves its value', async () => {
+      const isPrivate = jest.fn().mockReturnValue(true);
+      const instance = { upload: jest.fn(), delete: jest.fn(), isPrivate };
+
+      const provider = await registerWithProvider(instance, { isPrivate: { ignored: true } });
+
+      const result = provider.isPrivate();
+      expect(result).toBeInstanceOf(Promise);
+      await expect(result).resolves.toBe(true);
+      expect(isPrivate).toHaveBeenCalledWith();
+      expect(isPrivate.mock.contexts[0]).toBe(instance);
     });
 
-    test('passes actionOptions as the third argument of replace and replaceStream', async () => {
-      const replace = jest.fn();
-      const replaceStream = jest.fn();
+    test('a sync throw from a wrapped method becomes a rejection', async () => {
+      const error = new Error('too large');
+      const provider = await registerWithProvider({
+        upload: jest.fn(),
+        delete: jest.fn(),
+        checkFileSize() {
+          throw error;
+        },
+      });
 
-      const provider = await registerWithProvider(
-        { upload: jest.fn(), delete: jest.fn(), replace, replaceStream },
-        { replace: { r: 1 }, replaceStream: { rs: 1 } }
-      );
+      await expect(provider.checkFileSize(file, { sizeLimit: 1 })).rejects.toBe(error);
+    });
 
-      await provider.replace(file, oldFile);
-      await provider.replaceStream(file, oldFile);
-      await provider.replace(file, oldFile, { custom: true });
+    test('optional contract methods the provider does not implement stay undefined', async () => {
+      const provider = await registerWithProvider({ uploadStream: jest.fn(), delete: jest.fn() });
 
-      expect(replace).toHaveBeenNthCalledWith(1, file, oldFile, { r: 1 });
-      expect(replaceStream).toHaveBeenCalledWith(file, oldFile, { rs: 1 });
-      expect(replace).toHaveBeenNthCalledWith(2, file, oldFile, { custom: true });
+      expect(provider.upload).toBeUndefined();
+      expect(provider.replace).toBeUndefined();
+      expect(provider.replaceStream).toBeUndefined();
     });
 
     test('keeps provider-specific methods and properties untouched', async () => {
       const providerConfig = { bucket: 'b' };
       const uploadIfMatch = jest.fn();
+      const getProviderConfig = () => providerConfig;
 
       const provider = await registerWithProvider(
         {
           upload: jest.fn(),
           delete: jest.fn(),
-          getProviderConfig: () => providerConfig,
+          getProviderConfig,
           uploadIfMatch,
           version: 2,
         },
         { uploadIfMatch: { shouldNotBeUsed: true } }
       );
 
+      expect(provider.getProviderConfig).toBe(getProviderConfig);
       expect(provider.getProviderConfig()).toBe(providerConfig);
+      expect(provider.uploadIfMatch).toBe(uploadIfMatch);
       expect(provider.version).toBe(2);
 
-      await provider.uploadIfMatch(file, 'etag', { p: 1 });
-      expect(uploadIfMatch).toHaveBeenCalledWith(file, 'etag', { p: 1 });
+      await provider.uploadIfMatch(file, 'etag');
+      expect(uploadIfMatch).toHaveBeenCalledWith(file, 'etag');
     });
 
-    test('falls back on the base provider defaults', async () => {
-      const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+    describe('base provider defaults', () => {
+      test('isPrivate returns false', async () => {
+        const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
 
-      expect(await provider.isPrivate()).toBe(false);
-      expect(await provider.getSignedUrl(file)).toBe(file);
+        expect(provider.isPrivate()).toBe(false);
+      });
+
+      test('getSignedUrl returns the file', async () => {
+        const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+
+        expect(provider.getSignedUrl(file)).toBe(file);
+      });
+
+      test('checkFileSize throws only when the file exceeds sizeLimit', async () => {
+        const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+        // file.size is in KB, sizeLimit in bytes
+        const bigFile = { name: 'big.png', size: 2 } as any;
+
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 1000 })).toThrow(
+          errors.PayloadTooLargeError
+        );
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 4000 })).not.toThrow();
+        expect(() => provider.checkFileSize(bigFile, { sizeLimit: 0 })).not.toThrow();
+      });
+
+      test('extend adds properties to the provider', async () => {
+        const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+        const extra = jest.fn();
+
+        provider.extend({ extra });
+
+        expect(provider.extra).toBe(extra);
+      });
     });
   });
 });
