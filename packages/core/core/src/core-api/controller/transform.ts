@@ -1,5 +1,5 @@
 import { isPlainObject } from 'lodash';
-import type { UID, Struct, Data } from '@strapi/types';
+import type { Core, UID, Struct, Data } from '@strapi/types';
 import { async } from '@strapi/utils';
 
 type TransformedEntry = {
@@ -37,6 +37,7 @@ interface TransformOptions {
 }
 
 const transformResponse = async (
+  strapi: Core.Strapi,
   resource: any,
   meta: unknown = {},
   opts: TransformOptions = {
@@ -54,7 +55,7 @@ const transformResponse = async (
 
   // Transform pipeline functions
   const applyJsonApiFormat = async (data: any) =>
-    opts.useJsonAPIFormat ? transformEntry(data, opts?.contentType) : data;
+    opts.useJsonAPIFormat ? transformEntry(strapi, data, opts?.contentType) : data;
 
   const applySourceMapEncoding = async (data: any) =>
     opts.encodeSourceMaps && opts.contentType
@@ -71,18 +72,20 @@ const transformResponse = async (
 };
 
 function transformComponent<T extends Entry | Entry[] | null>(
+  strapi: Core.Strapi,
   data: T,
   component: Struct.ComponentSchema
 ): T extends Entry[] ? TransformedComponent[] : T extends Entry ? TransformedComponent : null;
 function transformComponent(
+  strapi: Core.Strapi,
   data: Entry | Entry[] | null,
   component: Struct.ComponentSchema
 ): TransformedComponent | TransformedComponent[] | null {
   if (Array.isArray(data)) {
-    return data.map((datum) => transformComponent(datum, component));
+    return data.map((datum) => transformComponent(strapi, datum, component));
   }
 
-  const res = transformEntry(data, component);
+  const res = transformEntry(strapi, data, component);
 
   if (res == null) {
     return res;
@@ -93,10 +96,12 @@ function transformComponent(
 }
 
 function transformEntry<T extends Entry | Entry[] | null>(
+  strapi: Core.Strapi,
   entry: T,
   type?: Struct.Schema
 ): T extends Entry[] ? TransformedEntry[] : T extends Entry ? TransformedEntry : null;
 function transformEntry(
+  strapi: Core.Strapi,
   entry: Entry | Entry[] | null,
   type?: Struct.Schema
 ): TransformedEntry | TransformedEntry[] | null {
@@ -105,7 +110,7 @@ function transformEntry(
   }
 
   if (Array.isArray(entry)) {
-    return entry.map((singleEntry) => transformEntry(singleEntry, type));
+    return entry.map((singleEntry) => transformEntry(strapi, singleEntry, type));
   }
 
   if (!isPlainObject(entry)) {
@@ -121,21 +126,25 @@ function transformEntry(
     const attribute = type && type.attributes[key];
 
     if (attribute && attribute.type === 'relation' && isEntry(property) && 'target' in attribute) {
-      const data = transformEntry(property, strapi.contentType(attribute.target));
+      const data = transformEntry(strapi, property, strapi.contentType(attribute.target));
 
       attributeValues[key] = { data };
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
-      attributeValues[key] = transformComponent(property, strapi.components[attribute.component]);
+      attributeValues[key] = transformComponent(
+        strapi,
+        property,
+        strapi.components[attribute.component]
+      );
     } else if (attribute && attribute.type === 'dynamiczone' && isDZEntries(property)) {
       if (property == null) {
         attributeValues[key] = property;
       }
 
       attributeValues[key] = property.map((subProperty) => {
-        return transformComponent(subProperty, strapi.components[subProperty.__component]);
+        return transformComponent(strapi, subProperty, strapi.components[subProperty.__component]);
       });
     } else if (attribute && attribute.type === 'media' && isEntry(property)) {
-      const data = transformEntry(property, strapi.contentType('plugin::upload.file'));
+      const data = transformEntry(strapi, property, strapi.contentType('plugin::upload.file'));
 
       attributeValues[key] = { data };
     } else {

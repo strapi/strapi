@@ -1,6 +1,7 @@
 import { has, omit, toNumber } from 'lodash';
 
 import { errors, pagination } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 
 interface BasePaginationParams {
   withCount?: boolean | 't' | '1' | 'true' | 'f' | '0' | 'false' | 0 | 1;
@@ -31,7 +32,7 @@ type PaginationInfo =
 /**
  * Default limit values from config
  */
-const getLimitConfigDefaults = () => ({
+const getLimitConfigDefaults = (strapi: Core.Strapi) => ({
   defaultLimit: toNumber(strapi.config.get('api.rest.defaultLimit', 25)),
   maxLimit: toNumber(strapi.config.get('api.rest.maxLimit')) || null,
 });
@@ -42,7 +43,7 @@ const isOffsetPagination = (pagination?: PaginationParams): pagination is Offset
 const isPagedPagination = (pagination?: PaginationParams): pagination is PagedPagination =>
   has(pagination, 'page') || has(pagination, 'pageSize') || !isOffsetPagination(pagination);
 
-const shouldCount = (params: { pagination?: PaginationParams }) => {
+const shouldCount = (strapi: Core.Strapi, params: { pagination?: PaginationParams }) => {
   if (has(params, 'pagination.withCount')) {
     const withCount = params.pagination?.withCount;
 
@@ -70,8 +71,11 @@ const shouldCount = (params: { pagination?: PaginationParams }) => {
   return Boolean(strapi.config.get('api.rest.withCount', true));
 };
 
-const getPaginationInfo = (params: { pagination?: PaginationParams }): PaginationInfo => {
-  const { defaultLimit, maxLimit } = getLimitConfigDefaults();
+const getPaginationInfo = (
+  strapi: Core.Strapi,
+  params: { pagination?: PaginationParams }
+): PaginationInfo => {
+  const { defaultLimit, maxLimit } = getLimitConfigDefaults(strapi);
 
   const { start, limit } = pagination.withDefaultPagination(params.pagination || {}, {
     defaults: { offset: { limit: defaultLimit }, page: { pageSize: defaultLimit } },

@@ -1,6 +1,9 @@
 import type { Schema } from '@strapi/types';
 import * as transforms from '../transform';
 
+// Stub for the tests whose entries have no relation, media or component to resolve
+const emptyStrapi = {} as any;
+
 describe('Transforms', () => {
   test('v4 - using json api format', async () => {
     const contentType: Schema.ContentType = {
@@ -46,7 +49,7 @@ describe('Transforms', () => {
       },
     };
 
-    global.strapi = {
+    const strapi = {
       contentType() {
         return undefined;
       },
@@ -63,6 +66,7 @@ describe('Transforms', () => {
 
     expect(
       await transforms.transformResponse(
+        strapi,
         {
           id: 1,
           documentId: 'abcd',
@@ -134,25 +138,29 @@ describe('Transforms', () => {
   });
 
   test('Leaves nil values untouched', async () => {
-    expect(await transforms.transformResponse(undefined)).toBeUndefined();
-    expect(await transforms.transformResponse(null)).toBeNull();
+    expect(await transforms.transformResponse(emptyStrapi, undefined)).toBeUndefined();
+    expect(await transforms.transformResponse(emptyStrapi, null)).toBeNull();
   });
 
   test('Throws if entry is not and object or an array of object', async () => {
-    await expect(() => transforms.transformResponse(0)).rejects.toThrow();
-    await expect(() => transforms.transformResponse(new Date())).rejects.toThrow();
-    await expect(() => transforms.transformResponse('azaz')).rejects.toThrow();
+    await expect(() => transforms.transformResponse(emptyStrapi, 0)).rejects.toThrow();
+    await expect(() => transforms.transformResponse(emptyStrapi, new Date())).rejects.toThrow();
+    await expect(() => transforms.transformResponse(emptyStrapi, 'azaz')).rejects.toThrow();
   });
 
   test('Handles arrays of entries', async () => {
-    expect(await transforms.transformResponse([{ id: 1, title: 'Hello' }])).toStrictEqual({
+    expect(
+      await transforms.transformResponse(emptyStrapi, [{ id: 1, title: 'Hello' }])
+    ).toStrictEqual({
       data: [{ id: 1, title: 'Hello' }],
       meta: {},
     });
   });
 
   test('Handles single entry', async () => {
-    expect(await transforms.transformResponse({ id: 1, title: 'Hello' })).toStrictEqual({
+    expect(
+      await transforms.transformResponse(emptyStrapi, { id: 1, title: 'Hello' })
+    ).toStrictEqual({
       data: { id: 1, title: 'Hello' },
       meta: {},
     });
@@ -160,7 +168,9 @@ describe('Transforms', () => {
 
   test('Accepts any meta', async () => {
     const someMeta = { foo: 'bar' };
-    expect(await transforms.transformResponse({ id: 1, title: 'Hello' }, someMeta)).toStrictEqual({
+    expect(
+      await transforms.transformResponse(emptyStrapi, { id: 1, title: 'Hello' }, someMeta)
+    ).toStrictEqual({
       data: { id: 1, title: 'Hello' },
       meta: someMeta,
     });
@@ -187,7 +197,7 @@ describe('Transforms', () => {
       },
     };
 
-    global.strapi = {
+    const strapi = {
       contentType() {
         return undefined;
       },
@@ -195,6 +205,7 @@ describe('Transforms', () => {
 
     expect(
       await transforms.transformResponse(
+        strapi,
         { id: 1, title: 'Hello', relation: { id: 1, value: 'test' } },
         undefined,
         { contentType }
@@ -233,7 +244,7 @@ describe('Transforms', () => {
       },
     };
 
-    global.strapi = {
+    const strapi = {
       contentType() {
         return undefined;
       },
@@ -241,6 +252,7 @@ describe('Transforms', () => {
 
     expect(
       await transforms.transformResponse(
+        strapi,
         { id: 1, title: 'Hello', relation: [{ id: 1, value: 'test' }] },
         undefined,
         { contentType }
@@ -281,7 +293,7 @@ describe('Transforms', () => {
       },
     };
 
-    global.strapi = {
+    const strapi = {
       contentType() {
         return {
           attributes: {
@@ -296,6 +308,7 @@ describe('Transforms', () => {
 
     expect(
       await transforms.transformResponse(
+        strapi,
         {
           id: 1,
           title: 'Hello',
@@ -342,7 +355,7 @@ describe('Transforms', () => {
       },
     };
 
-    global.strapi = {
+    const strapi = {
       contentType() {
         return undefined;
       },
@@ -350,6 +363,7 @@ describe('Transforms', () => {
 
     expect(
       await transforms.transformResponse(
+        strapi,
         { id: 1, title: 'Hello', media: [{ id: 1, value: 'test' }] },
         undefined,
         { contentType }
@@ -393,7 +407,7 @@ describe('Transforms', () => {
       },
     };
 
-    global.strapi = {
+    const strapi = {
       contentType() {
         return undefined;
       },
@@ -410,6 +424,7 @@ describe('Transforms', () => {
 
     expect(
       await transforms.transformResponse(
+        strapi,
         {
           id: 1,
           title: 'Hello',
