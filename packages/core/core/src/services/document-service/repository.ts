@@ -65,7 +65,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   const filtersValidations = ['nonAttributesOperators', 'dynamicZones', 'morphRelations'];
   const populateValidations = {
     sort: sortValidations,
-    field: fieldValidations,
+    fields: fieldValidations,
     filters: filtersValidations,
     populate: ['nonAttributesOperators'],
   };
