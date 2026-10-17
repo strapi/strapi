@@ -213,7 +213,7 @@ export const mapAttributeToInputSchema = (
     case 'biginteger':
       return attributes.bigIntegerToInputSchema(attribute);
     case 'blocks':
-      return attributes.blocksToInputSchema();
+      return attributes.blocksToInputSchema(attribute);
     case 'boolean':
       return attributes.booleanToInputSchema(attribute);
     case 'component':

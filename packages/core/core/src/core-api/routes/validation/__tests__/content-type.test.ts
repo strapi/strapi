@@ -10,6 +10,7 @@ describe('CoreContentTypeRouteValidator query parameters', () => {
       attributes: {
         title: { type: 'string' },
         rating: { type: 'integer' },
+        content: { type: 'blocks', required: false },
       },
     })),
   } as unknown as Core.Strapi;
@@ -36,5 +37,30 @@ describe('CoreContentTypeRouteValidator query parameters', () => {
       title: { $eq: 'hello' },
     });
     expect(filters?.safeParse({ unknown: { $eq: 'hello' } }).success).toBe(false);
+  });
+
+  test('data accepts requests without optional blocks fields', () => {
+    const { data } = validator;
+
+    expect(data.safeParse({ title: 'Hello', rating: 5 }).success).toBe(true);
+  });
+
+  test('data requires blocks fields when configured as required', () => {
+    const requiredStrapi = {
+      getModel: jest.fn(() => ({
+        attributes: {
+          title: { type: 'string' },
+          content: { type: 'blocks', required: true },
+        },
+      })),
+    } as unknown as Core.Strapi;
+
+    const requiredValidator = new CoreContentTypeRouteValidator(
+      requiredStrapi,
+      'api::article.article'
+    );
+
+    expect(requiredValidator.data.safeParse({ title: 'Hello' }).success).toBe(false);
+    expect(requiredValidator.data.safeParse({ title: 'Hello', content: [] }).success).toBe(true);
   });
 });
