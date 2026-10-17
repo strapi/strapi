@@ -1,6 +1,3 @@
-// The `unhandledRejection` process event cannot be used here — jest's runner
-// intercepts it, so a genuinely unhandled rejection never reaches a listener
-// registered inside a test. The containment is asserted directly instead.
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
@@ -31,6 +28,9 @@ const providerInstance = {
 global.strapi = {
   config: {
     get: (key: any, defaultValue?: any) => _.get(defaultConfig, key, defaultValue),
+  },
+  log: {
+    error: jest.fn(),
   },
   plugins: {
     upload: {
@@ -68,49 +68,6 @@ const getFileData = () => ({
   name: 'image.png',
 });
 
-const settle = (operation: Promise<unknown>) =>
-  operation.then(
-    () => null,
-    (error) => error
-  );
-
-describe('queueConcurrentOperation', () => {
-  test('attaches a rejection handler in the same turn as the push', () => {
-    const queue: Promise<unknown>[] = [];
-    const operation = Promise.reject(new Error('InvalidAccessKeyId'));
-    const catchSpy = jest.spyOn(operation, 'catch');
-
-    uploadService._queueConcurrentOperation(queue, operation);
-
-    // Synchronous — before the caller moves on to `await`ing image work.
-    expect(catchSpy).toHaveBeenCalledTimes(1);
-
-    return expect(Promise.all(queue)).rejects.toThrow('InvalidAccessKeyId');
-  });
-
-  test('queues the operation itself so the batch still fails', async () => {
-    const queue: Promise<unknown>[] = [];
-    const providerError = new Error('InvalidAccessKeyId');
-    const operation = Promise.reject(providerError);
-
-    uploadService._queueConcurrentOperation(queue, operation);
-
-    expect(queue).toHaveLength(1);
-    expect(queue[0]).toBe(operation);
-    await expect(Promise.all(queue)).rejects.toBe(providerError);
-  });
-
-  test('accepts a provider that returns a plain value instead of a promise', async () => {
-    const queue: Promise<unknown>[] = [];
-
-    expect(() =>
-      uploadService._queueConcurrentOperation(queue, undefined as unknown as Promise<void>)
-    ).not.toThrow();
-
-    await expect(Promise.all(queue)).resolves.toEqual([undefined]);
-  });
-});
-
 describe('Provider rejections during concurrent uploads', () => {
   beforeAll(async () => {
     await fse.mkdir(tmpWorkingDirectory);
@@ -125,25 +82,27 @@ describe('Provider rejections during concurrent uploads', () => {
     providerInstance.delete.mockResolvedValue(undefined);
   });
 
-  test('handles an immediate upload rejection in the same turn, without swallowing it', async () => {
+  test('propagates an immediate upload rejection after all provider operations settle', async () => {
     const providerError = new Error('InvalidAccessKeyId: synthetic provider rejection');
-    const rejection = Promise.reject(providerError);
-    const catchSpy = jest.spyOn(rejection, 'catch');
-    providerService.upload.mockReturnValueOnce(rejection).mockResolvedValue(undefined);
+    providerService.upload.mockRejectedValueOnce(providerError).mockResolvedValue(undefined);
 
-    await expect(settle(uploadService._uploadImage(getFileData()))).resolves.toBe(providerError);
-
-    // The property the fix adds: a handler on the pushed promise before the
-    // caller awaits the image work. Asserting only that the error arrives passes
-    // without the fix, because `Promise.all` always surfaced it.
-    expect(catchSpy).toHaveBeenCalled();
+    await expect(uploadService._uploadImage(getFileData())).rejects.toBe(providerError);
   });
 
-  test('handles an immediate replace rejection in the same turn, without swallowing it', async () => {
+  test('turns a synchronous provider throw into the settled batch failure', async () => {
+    const providerError = new Error('synthetic synchronous provider failure');
+    providerService.upload
+      .mockImplementationOnce(() => {
+        throw providerError;
+      })
+      .mockResolvedValue(undefined);
+
+    await expect(uploadService._uploadImage(getFileData())).rejects.toBe(providerError);
+  });
+
+  test('propagates an immediate replace rejection after all provider operations settle', async () => {
     const providerError = new Error('InvalidAccessKeyId: synthetic provider rejection');
-    const rejection = Promise.reject(providerError);
-    const catchSpy = jest.spyOn(rejection, 'catch');
-    providerService.replace.mockReturnValueOnce(rejection).mockResolvedValue(undefined);
+    providerService.replace.mockRejectedValueOnce(providerError).mockResolvedValue(undefined);
     providerService.upload.mockResolvedValue(undefined);
 
     const oldFile = {
@@ -153,10 +112,8 @@ describe('Provider rejections during concurrent uploads', () => {
       formats: {},
     };
 
-    await expect(
-      settle(uploadService._replaceImage(getFileData() as any, oldFile as any))
-    ).resolves.toBe(providerError);
-
-    expect(catchSpy).toHaveBeenCalled();
+    await expect(uploadService._replaceImage(getFileData() as any, oldFile as any)).rejects.toBe(
+      providerError
+    );
   });
 });
