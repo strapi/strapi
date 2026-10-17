@@ -113,12 +113,51 @@ const createProvider = (config: Config) => {
     );
   }
 
-  const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
-    return async (file: File, options = actionOptions[methodName]) =>
-      providerInstance[methodName](file, options);
-  });
+  return Object.assign(
+    Object.create(baseProvider),
+    providerInstance,
+    wrapWithActionOptions(providerInstance, actionOptions)
+  );
+};
 
-  return Object.assign(Object.create(baseProvider), wrappedProvider);
+// Contract methods whose last (options) argument defaults to `actionOptions[methodName]`,
+// grouped by arity: (file, options) and (newFile, oldFile, options).
+// Other properties of the provider (e.g. provider-specific helpers) are kept as-is.
+const TWO_ARG_METHODS = ['upload', 'uploadStream', 'delete', 'checkFileSize', 'getSignedUrl'];
+const THREE_ARG_METHODS = ['replace', 'replaceStream'];
+
+const wrapWithActionOptions = (
+  providerInstance: Record<string, unknown>,
+  actionOptions: Config['actionOptions']
+) => {
+  const wrapped: Record<string, unknown> = {};
+  const methodOf = (name: string) => {
+    const method = providerInstance[name];
+    return typeof method === 'function' ? (method as (...args: unknown[]) => unknown) : undefined;
+  };
+
+  for (const name of TWO_ARG_METHODS) {
+    const method = methodOf(name);
+    if (method) {
+      wrapped[name] = async (file: File, options = actionOptions[name]) =>
+        method.call(providerInstance, file, options);
+    }
+  }
+
+  for (const name of THREE_ARG_METHODS) {
+    const method = methodOf(name);
+    if (method) {
+      wrapped[name] = async (newFile: File, oldFile: File, options = actionOptions[name]) =>
+        method.call(providerInstance, newFile, oldFile, options);
+    }
+  }
+
+  const isPrivate = methodOf('isPrivate');
+  if (isPrivate) {
+    wrapped.isPrivate = async () => isPrivate.call(providerInstance);
+  }
+
+  return wrapped;
 };
 
 const baseProvider = {

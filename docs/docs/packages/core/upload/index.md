@@ -23,7 +23,7 @@ The plugin declares two content types: `plugin::upload.file` and `plugin::upload
 
 ### Upload provider
 
-`register` in `server/src/register.ts` creates the provider and stores it in `strapi.plugin('upload').provider`. `createProvider` reads `provider`, `providerOptions` and `actionOptions` from the `plugin::upload` config. The default provider is `local`. It loads `@strapi/provider-upload-<name>`, or the module of that name, and calls its `init(providerOptions)`. The provider must implement `delete` and either `upload` or `uploadStream`. See [Providers](./01-backend/00-providers.md).
+`register` in `server/src/register.ts` creates the provider and stores it in `strapi.plugin('upload').provider`. `createProvider` reads `provider`, `providerOptions` and `actionOptions` from the `plugin::upload` config. The default provider is `local`. It loads `@strapi/provider-upload-<name>`, or the module of that name, and calls its `init(providerOptions)`. The provider must implement `delete` and either `upload` or `uploadStream`. `createProvider` wraps the contract methods so that `actionOptions[methodName]` is the default options argument: the second argument of `upload`, `uploadStream`, `delete`, `checkFileSize` and `getSignedUrl`, and the third argument of `replace` and `replaceStream`. These wrappers are async. Other properties of the provider, such as provider-specific helpers, are copied as they are. `isPrivate`, `getSignedUrl`, `checkFileSize` and `extend` fall back on defaults from a base prototype. See [Providers](./01-backend/00-providers.md).
 
 ### Upload flow
 

@@ -32,17 +32,35 @@ const exampleMiddlewaresConfig = [
   },
 ];
 
+let mockProviderInstance: Record<string, unknown> | undefined;
+
 jest.mock('@strapi/provider-upload-local', () => ({
   init() {
     global.strapi.config.set('middlewares', exampleMiddlewaresConfig);
 
-    return {
-      uploadStream: jest.fn(),
-      upload: jest.fn(),
-      delete: jest.fn(),
-    };
+    return (
+      mockProviderInstance ?? {
+        uploadStream: jest.fn(),
+        upload: jest.fn(),
+        delete: jest.fn(),
+      }
+    );
   },
 }));
+
+const mockStrapi = (uploadConfig: Record<string, unknown>, uploadPlugin: Record<string, unknown>) =>
+  ({
+    dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
+    plugins: { upload: uploadPlugin },
+    db: { migrations: { providers: { internal: { register: jest.fn() } } } },
+    server: { app: { on: jest.fn() }, routes: jest.fn() },
+    admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
+    config: {
+      get: jest.fn().mockReturnValue(uploadConfig),
+      set: jest.fn(),
+    },
+    get: jest.fn().mockReturnValue({ add: jest.fn() }),
+  }) as any;
 
 describe('Upload plugin register', () => {
   describe('routes and provider middlewares', () => {
@@ -166,6 +184,96 @@ describe('Upload plugin register', () => {
         expect(sharp.cache).toHaveBeenCalledWith(false);
         expect(sharp.concurrency).toHaveBeenCalledWith(1);
       }
+    });
+  });
+
+  describe('provider wrapper', () => {
+    const file = { name: 'a.png' } as any;
+    const oldFile = { name: 'old.png' } as any;
+
+    const registerWithProvider = async (
+      instance: Record<string, unknown>,
+      actionOptions: Record<string, unknown> = {}
+    ) => {
+      mockProviderInstance = instance;
+      const uploadPlugin: Record<string, any> = {};
+      global.strapi = mockStrapi({ provider: 'local', actionOptions }, uploadPlugin);
+
+      await register({ strapi });
+
+      return uploadPlugin.provider;
+    };
+
+    afterEach(() => {
+      mockProviderInstance = undefined;
+    });
+
+    test('passes actionOptions as the default options of (file, options) methods', async () => {
+      const upload = jest.fn();
+      const uploadStream = jest.fn();
+      const deleteFn = jest.fn();
+
+      const provider = await registerWithProvider(
+        { upload, uploadStream, delete: deleteFn },
+        { upload: { ACL: null }, uploadStream: { ACL: 'x' }, delete: { d: 1 } }
+      );
+
+      await provider.upload(file);
+      await provider.uploadStream(file);
+      await provider.delete(file);
+      await provider.upload(file, { custom: true });
+
+      expect(upload).toHaveBeenNthCalledWith(1, file, { ACL: null });
+      expect(uploadStream).toHaveBeenCalledWith(file, { ACL: 'x' });
+      expect(deleteFn).toHaveBeenCalledWith(file, { d: 1 });
+      expect(upload).toHaveBeenNthCalledWith(2, file, { custom: true });
+    });
+
+    test('passes actionOptions as the third argument of replace and replaceStream', async () => {
+      const replace = jest.fn();
+      const replaceStream = jest.fn();
+
+      const provider = await registerWithProvider(
+        { upload: jest.fn(), delete: jest.fn(), replace, replaceStream },
+        { replace: { r: 1 }, replaceStream: { rs: 1 } }
+      );
+
+      await provider.replace(file, oldFile);
+      await provider.replaceStream(file, oldFile);
+      await provider.replace(file, oldFile, { custom: true });
+
+      expect(replace).toHaveBeenNthCalledWith(1, file, oldFile, { r: 1 });
+      expect(replaceStream).toHaveBeenCalledWith(file, oldFile, { rs: 1 });
+      expect(replace).toHaveBeenNthCalledWith(2, file, oldFile, { custom: true });
+    });
+
+    test('keeps provider-specific methods and properties untouched', async () => {
+      const providerConfig = { bucket: 'b' };
+      const uploadIfMatch = jest.fn();
+
+      const provider = await registerWithProvider(
+        {
+          upload: jest.fn(),
+          delete: jest.fn(),
+          getProviderConfig: () => providerConfig,
+          uploadIfMatch,
+          version: 2,
+        },
+        { uploadIfMatch: { shouldNotBeUsed: true } }
+      );
+
+      expect(provider.getProviderConfig()).toBe(providerConfig);
+      expect(provider.version).toBe(2);
+
+      await provider.uploadIfMatch(file, 'etag', { p: 1 });
+      expect(uploadIfMatch).toHaveBeenCalledWith(file, 'etag', { p: 1 });
+    });
+
+    test('falls back on the base provider defaults', async () => {
+      const provider = await registerWithProvider({ upload: jest.fn(), delete: jest.fn() });
+
+      expect(await provider.isPrivate()).toBe(false);
+      expect(await provider.getSignedUrl(file)).toBe(file);
     });
   });
 });
