@@ -121,20 +121,17 @@ const createProvider = (config: Config) => {
     );
   }
 
-  // A key declared as `undefined` (e.g. `uploadStream: undefined`) must stay missing, so callers
-  // fall back on `upload` and the base provider defaults still apply.
-  const definedMembers = _.omitBy(providerInstance, _.isUndefined);
-
   return Object.assign(
     Object.create(baseProvider),
-    definedMembers,
     wrapWithActionOptions(providerInstance, actionOptions)
   );
 };
 
 // Contract methods whose last (options) argument defaults to `actionOptions[methodName]`,
 // grouped by arity: (file, options) and (newFile, oldFile, options).
-// Other properties of the provider (e.g. provider-specific helpers) are kept as-is.
+// Other methods of the provider (e.g. provider-specific helpers) keep their signature.
+// Every method runs with `this` bound to the provider instance, so a call like
+// `this.upload(file)` inside the provider does not receive `actionOptions`.
 const TWO_ARG_METHODS = ['upload', 'uploadStream', 'delete', 'checkFileSize', 'getSignedUrl'];
 const THREE_ARG_METHODS = ['replace', 'replaceStream'];
 
@@ -142,7 +139,12 @@ const wrapWithActionOptions = (
   providerInstance: Record<string, unknown>,
   actionOptions: Config['actionOptions']
 ) => {
-  const wrapped: Record<string, unknown> = {};
+  // A key declared as `undefined` (e.g. `uploadStream: undefined`) must stay missing, so callers
+  // fall back on `upload` and the base provider defaults still apply.
+  const definedMembers = _.omitBy(providerInstance, _.isUndefined);
+  const wrapped: Record<string, unknown> = _.mapValues(definedMembers, (value) =>
+    typeof value === 'function' ? value.bind(providerInstance) : value
+  );
   const methodOf = (name: string) => {
     const method = providerInstance[name];
     return typeof method === 'function' ? (method as (...args: unknown[]) => unknown) : undefined;
