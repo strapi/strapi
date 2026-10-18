@@ -1,0 +1,12 @@
+{
+  "extends": "tsconfig/base.json",
+  "include": ["."],
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "rootDir": ".",
+    "outDir": "../dist/shared",
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    "types": ["jest"]
+  }
+}

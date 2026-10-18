@@ -19,8 +19,8 @@ import { useQuery, useMutation } from 'react-query';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
-import { parseEmailAddress } from '../../../shared/email-address-parser';
 import { PERMISSIONS } from '../constants';
+import { parseEmailAddress } from '../utils/emailAddressParser';
 import { getYupInnerErrors } from '../utils/getYupInnerErrors';
 import { schema } from '../utils/schema';
 

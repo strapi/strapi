@@ -48,16 +48,16 @@
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
     "build:code": "run -T rollup -c",
-    "build:types": "run -T run-p build:types:server build:types:admin",
-    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
-    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
+    "build:types": "run -T tsc -b --force server/tsconfig.build.json admin/tsconfig.build.json",
+    "build:types:server": "run -T tsc -b --force server/tsconfig.build.json",
+    "build:types:admin": "run -T tsc -b --force admin/tsconfig.build.json",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --max-warnings=0",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch",
-    "test:ts:back": "run -T tsc -p server/tsconfig.json",
-    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:ts:back": "run -T tsc -b --force server/tsconfig.json",
+    "test:ts:front": "run -T tsc -b --force admin/tsconfig.json",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {

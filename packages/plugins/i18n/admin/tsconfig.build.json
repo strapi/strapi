@@ -1,10 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "../",
-    "outDir": "../dist",
+    "rootDir": "src",
+    "outDir": "../dist/admin/src",
+    "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo",
     "noEmit": false
   },
   "include": ["./src"],
-  "exclude": ["**/*.test.ts"]
+  "references": [{ "path": "../shared/tsconfig.build.json" }],
+  "exclude": ["./src/**/tests", "**/*.test.*"]
 }
