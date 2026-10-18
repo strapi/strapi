@@ -1,7 +1,7 @@
 import type { Modules, Schema, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
-import { getService, isEntryValid } from '../utils';
+import { isEntryValid, updateAffectedReleaseStatuses } from '../utils';
 
 type Middleware = Modules.Documents.Middleware.Middleware;
 
@@ -63,9 +63,7 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
     },
   });
 
-  for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
-  }
+  await updateAffectedReleaseStatuses(releases, { strapi });
 };
 
 const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams) => {
@@ -79,9 +77,7 @@ const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams)
     where: params,
   });
 
-  for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
-  }
+  await updateAffectedReleaseStatuses(releases, { strapi });
 };
 
 const deleteActionsOnDelete: Middleware = async (ctx, next) => {
@@ -103,7 +99,7 @@ const deleteActionsOnDelete: Middleware = async (ctx, next) => {
   }
 
   try {
-    deleteActionsAndUpdateReleaseStatus({
+    await deleteActionsAndUpdateReleaseStatus({
       contentType,
       entryDocumentId: documentId,
       ...(await getDeletedLocalesFilter(ctx.contentType, locale)),
@@ -135,7 +131,7 @@ const updateActionsOnUpdate: Middleware = async (ctx, next) => {
   }
 
   try {
-    updateActionsStatusAndUpdateReleaseStatus(contentType, result);
+    await updateActionsStatusAndUpdateReleaseStatus(contentType, result);
   } catch (error) {
     strapi.log.error('Error while updating release actions after update', {
       error,

@@ -34,8 +34,15 @@ const ALL_ATTRIBUTES = [
  * This list of attribute types impact the form either by hiding specific fields or having more that
  * should be tested separately.
  */
-const UNIQUE_ATTRIBUTES = ['richtext', 'blocks', 'dynamiczone', 'component', 'relation', 'json'];
-const BASIC_ATTRIBUTES = ALL_ATTRIBUTES.filter((type) => !UNIQUE_ATTRIBUTES.includes(type));
+const UNIQUE_ATTRIBUTES = new Set([
+  'richtext',
+  'blocks',
+  'dynamiczone',
+  'component',
+  'relation',
+  'json',
+]);
+const BASIC_ATTRIBUTES = ALL_ATTRIBUTES.filter((type) => !UNIQUE_ATTRIBUTES.has(type));
 
 describe('EditFieldForm', () => {
   type FieldData = ConfigurationFormData['layout'][number]['children'][number];

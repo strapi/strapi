@@ -38,6 +38,11 @@ interface UploadFilesArgs {
   concurrency?: number;
   /** Whether AI metadata generation is enabled (EE AI available + `settings.aiMetadata`). */
   generateAiMetadata: boolean;
+  /**
+   * Called for each file of this call as it finishes uploading, including files
+   * a later retry uploads after the call itself has resolved.
+   */
+  onFileUploaded?: (file: UploadedFile) => void;
 }
 
 interface UploadFromUrlsArgs {
@@ -70,6 +75,7 @@ interface RootState {
 interface UploadEntry {
   file: File;
   fileInfo: UploadFileInfo;
+  onUploaded?: (file: UploadedFile) => void;
 }
 
 /**
@@ -171,7 +177,12 @@ type AppDispatch = Dispatch &
   (<T>(thunk: T) => T extends (...args: never[]) => infer R ? R : never);
 
 type UploadPoolResult =
-  { data: UploadedFile[]; error?: undefined } | { error: UploadError; data?: undefined };
+  /**
+   * `own` is set only by a merged leg: `data` is the whole batch so far, for the
+   * next leg to chain from, while `own` is what this call uploaded.
+   */
+  | { data: UploadedFile[]; own?: UploadedFile[]; error?: undefined }
+  | { error: UploadError; data?: undefined; own?: undefined };
 
 /** Maps a server per-file outcome onto the row's terminal metadata status. */
 const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetadataResultStatus> = {
@@ -317,6 +328,7 @@ const runUploadPool = async ({
           completedAt: Date.now(),
         })
       );
+      entry.onUploaded?.(file);
 
       // Not awaited: overlaps with the next file's upload and can't fail the batch.
       maybeGenerateMetadata({
@@ -403,7 +415,7 @@ const runMergedUploadPool = async ({
       const earlier = previous?.data ?? [];
 
       if (abortController.signal.aborted) {
-        return { data: earlier };
+        return { data: earlier, own: [] };
       }
 
       registerAbortController(uploadId, abortController);
@@ -417,13 +429,21 @@ const runMergedUploadPool = async ({
         dispatch,
         concurrency,
         generateAiMetadata,
-      }).then((result) => (result.error ? result : { data: [...earlier, ...(result.data ?? [])] }));
+      }).then((result) =>
+        result.error
+          ? result
+          : { data: [...earlier, ...(result.data ?? [])], own: result.data ?? [] }
+      );
     }
   );
 
   trackPoolRun(uploadId, run);
 
-  return run;
+  // The chained value keeps every file in the batch, because the next merged leg
+  // reads it as its own `earlier`. The caller gets only what it handed in: a
+  // consumer that attaches the result — the Content Manager field — would
+  // otherwise re-attach the files the earlier drop already added.
+  return run.then((result) => (result.error ? result : { data: result.own ?? result.data }));
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -628,7 +648,7 @@ const uploadApi = adminApi
        */
       uploadFiles: builder.mutation<UploadedFile[], UploadFilesArgs>({
         queryFn: async (
-          { formData, totalFiles, concurrency = 1, generateAiMetadata },
+          { formData, totalFiles, concurrency = 1, generateAiMetadata, onFileUploaded },
           { dispatch, getState }
         ) => {
           const token = (getState() as RootState).admin_app?.token;
@@ -646,6 +666,7 @@ const uploadApi = adminApi
               alternativeText: null,
               folder: null,
             },
+            onUploaded: onFileUploaded,
           }));
 
           const fileNames = entries.map((entry) => entry.fileInfo.name ?? entry.file.name);

@@ -57,10 +57,15 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
           ? strapi.requestContext.get()
           : undefined;
       strapi.db.transaction(({ onCommit }) => {
+        // The transaction runner discards the callback result, so a failure here
+        // (e.g. the re-read of the entry) would be an unhandled rejection.
         onCommit(() =>
-          context
+          (context
             ? strapi.requestContext.run(context, () => emitEvent(eventName, entry))
             : emitEvent(eventName, entry)
+          ).catch((error) => {
+            strapi.log.error(`Could not emit ${eventName} for ${uid}: ${error?.message ?? error}`);
+          })
         );
       });
     },

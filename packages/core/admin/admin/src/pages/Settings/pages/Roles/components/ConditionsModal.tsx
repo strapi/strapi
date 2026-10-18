@@ -26,6 +26,9 @@ import {
 import type { HiddenCheckboxAction, VisibleCheckboxAction } from './ContentTypeCollapses';
 import type { ConditionForm } from '../utils/forms';
 
+const EMPTY_ACTIONS: NonNullable<ConditionsModalProps['actions']> = [];
+const EMPTY_HEADER_BREAD_CRUMBS: NonNullable<ConditionsModalProps['headerBreadCrumbs']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * ConditionsModal
  * -----------------------------------------------------------------------------------------------*/
@@ -46,8 +49,8 @@ interface ConditionsModalProps extends Pick<ActionRowProps, 'isFormDisabled'> {
 }
 
 const ConditionsModal = ({
-  actions = [],
-  headerBreadCrumbs = [],
+  actions = EMPTY_ACTIONS,
+  headerBreadCrumbs = EMPTY_HEADER_BREAD_CRUMBS,
   isFormDisabled,
   isReadOnly = false,
   onClose,
@@ -380,13 +383,11 @@ const ActionRow = ({
 };
 
 const getSelectedValues = (rawValue: Record<string, ConditionForm>): string[] =>
-  Object.values(rawValue)
-    .map((x) =>
-      Object.entries(x)
-        .filter(([, value]) => value)
-        .map(([key]) => key)
-    )
-    .flat();
+  Object.values(rawValue).flatMap((x) =>
+    Object.entries(x)
+      .filter(([, value]) => value)
+      .map(([key]) => key)
+  );
 
 const getNestedOptions = (options: ActionRowProps['arrayOfOptionsGroupedByCategory']) =>
   options.reduce<MultiSelectNestedProps['options']>((acc, [label, children]) => {
@@ -406,8 +407,7 @@ const getNewStateFromChangedValues = (
   changedValues: string[]
 ) =>
   options
-    .map(([, values]) => values)
-    .flat()
+    .flatMap(([, values]) => values)
     .reduce<Record<string, boolean>>(
       (acc, curr) => ({ [curr.id]: changedValues.includes(curr.id), ...acc }),
       {}
