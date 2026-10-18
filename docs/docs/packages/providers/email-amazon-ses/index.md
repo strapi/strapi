@@ -18,6 +18,7 @@ Connects Strapi to Amazon SES to send transactional emails. The email plugin loa
 - Reads `providerOptions` keys: `region` (optional, AWS region for credentials).
 - Uses AWS SDK v3 SES client; credentials resolve from standard AWS credential chain (environment variables, IAM roles, credentials file).
 - Supports the full `SendEmailCommand` interface for addressing, content, and headers via the `send` function.
+- The export checks itself against `Providers.Email.Factory` from `@strapi/types` with `satisfies`. `@strapi/types` is an optional peer dependency. The published typings import it, so a project that type-checks them needs `@strapi/types` installed; a Strapi app gets it through `@strapi/strapi`.
 - Source: [github.com/strapi/strapi/tree/develop/packages/providers/email-amazon-ses](https://github.com/strapi/strapi/tree/develop/packages/providers/email-amazon-ses)
 
 ## Related
