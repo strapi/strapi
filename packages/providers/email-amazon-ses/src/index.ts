@@ -1,5 +1,6 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
+import type { Providers } from '@strapi/types';
 import {
   buildSendEmailCommandInput,
   getClientConfig,
@@ -9,6 +10,7 @@ import {
 } from './utils';
 
 export default {
+  name: 'amazon-ses',
   init(providerOptions: ProviderOptions, settings: ProviderSettings) {
     const client = new SESClient(getClientConfig(providerOptions));
 
@@ -18,4 +20,4 @@ export default {
       },
     };
   },
-};
+} satisfies Providers.Email.Factory<ProviderOptions>;

@@ -18,6 +18,7 @@ Connects Strapi to a local sendmail or SMTP server to send transactional emails.
 - Reads `providerOptions` keys: `silent` (optional, default true), `dkim` (optional, boolean or object with privateKey/keySelector), `smtpPort` (optional, default 25), `smtpHost` (optional, extra SMTP host), `devPort`/`devHost` (optional, for development), `rejectUnauthorized`, `autoEHLO`, and `logger` (optional, custom logger functions).
 - Connects directly to SMTP or sendmail; resolves MX records unless dev mode is enabled. DKIM signing is optional.
 - Accepts email fields: from, to, cc, bcc, replyTo, subject, text, html, plus custom passthrough fields.
+- The export checks itself against `Providers.Email.Factory` from `@strapi/types` with `satisfies`. `@strapi/types` is an optional peer dependency. The published typings import it, so a project that type-checks them needs `@strapi/types` installed; a Strapi app gets it through `@strapi/strapi`.
 - Source: [github.com/strapi/strapi/tree/develop/packages/providers/email-sendmail](https://github.com/strapi/strapi/tree/develop/packages/providers/email-sendmail)
 
 ## Related

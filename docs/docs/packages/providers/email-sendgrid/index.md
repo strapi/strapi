@@ -18,6 +18,7 @@ Connects Strapi to Sendgrid to send transactional emails. The email plugin loads
 - Reads `providerOptions` keys: `apiKey` (required), `region` (optional, `'eu'` or `'global'` for data residency).
 - Supports Sendgrid Mail API v3; uses official `@sendgrid/mail` SDK and configures data residency when specified.
 - Accepts standard email fields: from, to, cc, bcc, replyTo, subject, text, html, and passthrough custom fields.
+- The export checks itself against `Providers.Email.Factory` from `@strapi/types` with `satisfies`. `@strapi/types` is an optional peer dependency. The published typings import it, so a project that type-checks them needs `@strapi/types` installed; a Strapi app gets it through `@strapi/strapi`.
 - Source: [github.com/strapi/strapi/tree/develop/packages/providers/email-sendgrid](https://github.com/strapi/strapi/tree/develop/packages/providers/email-sendgrid)
 
 ## Related

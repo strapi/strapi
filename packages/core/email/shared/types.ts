@@ -1,29 +1,13 @@
-export interface ProviderCapabilities {
-  transport?: {
-    host?: string;
-    port?: number;
-    secure?: boolean;
-    pool?: boolean;
-    maxConnections?: number;
-  };
-  auth?: {
-    type?: string;
-    user?: string;
-  };
-  features?: string[];
-}
+import type { Providers } from '@strapi/types';
 
 export interface EmailSettings {
   config: ConfigSettings;
   supportsVerify: boolean;
-  capabilities?: ProviderCapabilities;
+  capabilities?: Providers.Email.Capabilities;
   isIdle?: boolean;
 }
 
 export interface ConfigSettings {
   provider: string;
-  settings: {
-    defaultFrom: string;
-    defaultReplyTo: string;
-  };
+  settings: Providers.Email.Settings;
 }
