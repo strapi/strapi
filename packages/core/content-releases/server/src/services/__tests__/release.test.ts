@@ -648,6 +648,12 @@ describe('Release service', () => {
         locale: 'en',
       },
       { name: 'disabled localized', state: undefined, enabled: false, localized: true },
+      {
+        name: 'non-localized stored locale',
+        state: undefined,
+        enabled: true,
+        locale: 'en',
+      },
     ])('preserves $name release context', async ({ state, enabled, localized = false, locale }) => {
       mockExecute.mockReturnValueOnce({ id: 1, name: 'Release', releasedAt: null });
 
@@ -706,7 +712,7 @@ describe('Release service', () => {
                 releaseAction: {
                   uid: 'collectionType',
                   documentId: 'one',
-                  locale: locale ?? (localized ? 'fr' : undefined),
+                  locale: localized ? (locale ?? 'fr') : undefined,
                   event: 'entry.publish',
                 },
               }
@@ -722,7 +728,7 @@ describe('Release service', () => {
                 releaseAction: {
                   uid: 'collectionType',
                   documentId: 'two',
-                  locale: locale ?? (localized ? 'fr' : undefined),
+                  locale: localized ? (locale ?? 'fr') : undefined,
                   event: 'entry.unpublish',
                 },
               }

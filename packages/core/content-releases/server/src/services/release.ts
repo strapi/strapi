@@ -351,11 +351,11 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               return work();
             }
 
-            const locale =
-              releaseAction.locale ||
-              (strapi.localization.isLocalizedContentType(strapi.contentTypes[releaseAction.uid])
-                ? await strapi.localization.getDefaultLocale()
-                : undefined);
+            const locale = strapi.localization.isLocalizedContentType(
+              strapi.contentTypes[releaseAction.uid]
+            )
+              ? releaseAction.locale || (await strapi.localization.getDefaultLocale())
+              : undefined;
             const context = strapi.requestContext.get();
 
             return strapi.requestContext.run(
