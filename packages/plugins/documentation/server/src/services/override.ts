@@ -31,10 +31,16 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     registerOverride(
-      override: Partial<PluginConfig>,
+      override: Partial<PluginConfig> | string,
       opts?: { pluginOrigin: string; excludeFromGeneration?: string[] }
     ) {
       const { pluginOrigin, excludeFromGeneration = [] } = opts ?? {};
+
+      if (typeof override === 'string') {
+        strapi.log.warn(
+          `[documentation] Passing a YAML string to registerOverride${pluginOrigin ? ` (from "${pluginOrigin}")` : ''} is deprecated. In the next major version, registerOverride will only accept an object. Parse the YAML before passing it.`
+        );
+      }
 
       const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(
         strapi.config.get('plugin::documentation')
@@ -46,12 +52,17 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
         this.excludeFromGeneration(excludeFromGeneration);
       }
 
-      let overrideToRegister = override;
+      let overrideToRegister: Partial<PluginConfig>;
+
       // Parse yaml if we receive a string
       if (typeof override === 'string') {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        overrideToRegister = require('yaml').parse(overrideToRegister);
+        const yaml = require('yaml') as typeof import('yaml');
+        overrideToRegister = yaml.parse(override);
+      } else {
+        overrideToRegister = override;
       }
+
       // receive an object we can register it directly
       registeredOverrides.push(overrideToRegister);
     },
