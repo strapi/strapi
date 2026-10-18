@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
 import {
@@ -42,20 +42,27 @@ export const FeedbackProvider = ({ children }: { children: React.ReactNode }) =>
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [currentMessageId, setCurrentMessageId] = useState<string | null>(null);
 
-  const openFeedbackModal = (messageId: string) => {
+  const openFeedbackModal = useCallback((messageId: string) => {
     setCurrentMessageId(messageId);
     setIsFeedbackModalOpen(true);
-  };
+  }, []);
 
-  const closeFeedbackModal = () => {
+  const closeFeedbackModal = useCallback(() => {
     setIsFeedbackModalOpen(false);
     setCurrentMessageId(null);
-  };
+  }, []);
+  const contextValue = useMemo(
+    () => ({
+      isFeedbackModalOpen,
+      currentMessageId,
+      openFeedbackModal,
+      closeFeedbackModal,
+    }),
+    [isFeedbackModalOpen, currentMessageId, openFeedbackModal, closeFeedbackModal]
+  );
 
   return (
-    <FeedbackModalContext.Provider
-      value={{ isFeedbackModalOpen, currentMessageId, openFeedbackModal, closeFeedbackModal }}
-    >
+    <FeedbackModalContext.Provider value={contextValue}>
       {isFeedbackModalOpen && currentMessageId && <FeedbackModal />}
       {children}
     </FeedbackModalContext.Provider>

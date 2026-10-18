@@ -45,6 +45,9 @@ import type { File, Query, FilterCondition } from '../../../../../../shared/cont
 import type { Folder } from '../../../../../../shared/contracts/folders';
 import type { AllowedTypes } from '../../AssetCard/AssetCard';
 
+const EMPTY_ALLOWED_TYPES: NonNullable<BrowseStepProps['allowedTypes']> = [];
+const EMPTY_FOLDERS: NonNullable<BrowseStepProps['folders']> = [];
+
 const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
@@ -65,10 +68,7 @@ type StringFilter = {
 
 type MimeFilter = {
   [key: string]:
-    | string
-    | NumberKeyedObject
-    | Record<string, string | NumberKeyedObject>
-    | undefined;
+    string | NumberKeyedObject | Record<string, string | NumberKeyedObject> | undefined;
 };
 
 export type FilterStructure = {
@@ -79,9 +79,7 @@ export type Filter = {
   [key in 'mime' | 'createdAt' | 'updatedAt']?:
     | {
         [key in '$contains' | '$notContains' | '$eq' | '$not']?:
-          | string[]
-          | string
-          | { $contains: string[] };
+          string[] | string | { $contains: string[] };
       }
     | undefined;
 };
@@ -128,11 +126,11 @@ export interface BrowseStepProps {
 }
 
 export const BrowseStep = ({
-  allowedTypes = [],
+  allowedTypes = EMPTY_ALLOWED_TYPES,
   assets: rawAssets,
   canCreate,
   canRead,
-  folders = [],
+  folders = EMPTY_FOLDERS,
   multiple = false,
   onAddAsset,
   onChangeFilters,
@@ -325,8 +323,7 @@ export const BrowseStep = ({
           onSelectAll={onSelectAllAsset!}
           rows={
             [...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets] as
-              | FolderRow[]
-              | FileRow[]
+              FolderRow[] | FileRow[]
           }
           selected={selectedAssets}
           shouldDisableBulkSelect={!multiple}
