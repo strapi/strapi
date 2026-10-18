@@ -1,4 +1,4 @@
-import { setCreatorFields, errors } from '@strapi/utils';
+import { setCreatorFields, errors, emitAudit } from '@strapi/utils';
 
 import type { Core, Struct, UID, Data } from '@strapi/types';
 
@@ -20,7 +20,7 @@ import type {
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import { getService, getPublishOrderForContentTypes } from '../utils';
-import { emitAudit, getReleaseChanges } from '../audit-logs';
+import { getReleaseChanges } from '../audit-logs';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (

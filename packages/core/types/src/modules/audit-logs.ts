@@ -13,15 +13,21 @@ export type SystemOrigin = 'scheduler';
 /**
  * Who performed the action.
  * The subscriber builds this from the request context; emitters and transformers
- * don't provide it. Actions without a user are recorded as 'system'.
+ * don't provide it. Actions from a system origin are recorded as 'system'; actions
+ * from a request with no authenticated user (a public admin form) as 'unknown',
+ * for the events that allow it.
  */
 export type Actor =
   | { type: 'admin-user'; user: { id: string | number; email: string; name: string } }
-  | { type: 'system' };
+  | { type: 'system' }
+  | { type: 'unknown' };
 
 /**
  * The resource the action was performed on.
  * `type` is the audit-log name for the resource (e.g. 'release').
+ *
+ * A resource with its own stable identifier extends this in the package that owns it,
+ * rather than adding a field here that only one resource fills in.
  */
 export interface Resource {
   type: string;
@@ -32,11 +38,20 @@ export interface Resource {
 export type Outcome = 'success' | 'failure';
 
 /**
+ * A field's value on either side of a change, as recorded under `details.changes`.
+ */
+export interface FieldChange<T = string | number | boolean | null> {
+  before: T;
+  after: T;
+}
+
+/**
  * The shape returned by an event transformer.
  * The subscriber adds action, date, actor and origin.
  */
-export interface EventShape<TDetails = unknown> {
-  resource: Resource;
+export interface EventShape<TDetails = unknown, TResource extends Resource = Resource> {
+  // Absent when there is no known resource, e.g. a failed login for an unknown account.
+  resource?: TResource;
   details?: TDetails;
   // Only present when the action can fail (e.g. publish).
   outcome?: Outcome;
@@ -47,7 +62,10 @@ export interface EventShape<TDetails = unknown> {
  * action and date are also stored as table columns, but are repeated here so
  * the payload can be used on its own when exported or forwarded to another system.
  */
-export interface StoredPayload<TDetails = unknown> extends EventShape<TDetails> {
+export interface StoredPayload<
+  TDetails = unknown,
+  TResource extends Resource = Resource,
+> extends EventShape<TDetails, TResource> {
   action: string;
   date: string;
   actor: Actor;
@@ -61,6 +79,6 @@ export interface StoredPayload<TDetails = unknown> extends EventShape<TDetails> 
  * May be async when the resource needs to be fetched. Deleted rows and previous
  * values must be included in the emitted event instead.
  */
-export type EventTransformer<TDetails = unknown> = (
+export type EventTransformer<TDetails = unknown, TResource extends Resource = Resource> = (
   ...args: any[]
-) => EventShape<TDetails> | Promise<EventShape<TDetails>>;
+) => EventShape<TDetails, TResource> | Promise<EventShape<TDetails, TResource>>;

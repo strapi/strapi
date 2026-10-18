@@ -49,9 +49,9 @@ export interface Folder {
   name: string;
   pathId: number;
   /**
-   * parent id
+   * parent id, or null when the folder sits at the media library root
    */
-  parent?: number;
+  parent?: number | null;
   /**
    * children ids
    */
@@ -68,6 +68,7 @@ export interface Config {
   sharp?: {
     cache?: boolean;
     concurrency?: number;
+    limitInputPixels?: number | boolean;
   };
   /** Server-side ceiling: files processed in parallel within a single request. */
   concurrentUploadSize?: number;

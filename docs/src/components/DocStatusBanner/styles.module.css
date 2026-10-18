@@ -1,0 +1,26 @@
+.banner {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.body {
+  margin: 0.15rem 0 0;
+}
+
+.notes {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}

@@ -107,7 +107,8 @@ export declare namespace TokenCreate {
 }
 
 export interface TokenUpdatePayload
-  extends Pick<TokenCreatePayload, 'name' | 'description'>,
+  extends
+    Pick<TokenCreatePayload, 'name' | 'description'>,
     Partial<Omit<TokenCreatePayload, 'name' | 'description'>> {}
 
 /**

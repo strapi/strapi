@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/extensions
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
 import type { Core } from '@strapi/types';
 import {
   classifyMcpRequestFailure,
@@ -53,7 +52,7 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
         user: authResult.user,
       });
 
-      const transport = new StreamableHTTPServerTransport({
+      const transport = new NodeStreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
       });
 

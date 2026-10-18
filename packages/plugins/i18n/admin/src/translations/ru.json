@@ -10,7 +10,7 @@
   "Field.localized": "Это значение уникально для выбранного перевода",
   "Field.not-localized": "Это значение является общим для всех переводов",
   "Settings.list.actions.add": "Добавить новый перевод",
-  "Settings.list.actions.delete": "Удалить перевод",
+  "Settings.list.actions.delete": "Удалить перевод {name}",
   "Settings.list.actions.deleteAdditionalInfos": "Это приведет к удалению активных версий перевода <em>(из плагина интернационализации)</em>",
   "Settings.list.actions.edit": "Редактировать перевод",
   "Settings.list.actions.publishAdditionalInfos": "При этом будут опубликованы активные языковые версии <em>(из плагина Интернационализация)</em>",

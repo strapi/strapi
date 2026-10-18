@@ -169,6 +169,7 @@ const handlers: HttpHandler[] = [
         responsiveDimensions: true,
         autoOrientation: true,
         aiMetadata: true,
+        aiMetadataAvailable: true,
       },
     });
   }),

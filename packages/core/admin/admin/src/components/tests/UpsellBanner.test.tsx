@@ -127,6 +127,24 @@ describe('UpsellBanner', () => {
     expect(screen.getByRole('button', { name: 'Reopen banner' })).toBeInTheDocument();
   });
 
+  it('should render the reopen button in normal document flow so it cannot overlay page controls', async () => {
+    jest.setSystemTime(new Date(2025, 4, 10));
+
+    const { container, user } = render(<UpsellBanner />, {
+      userEventOptions: { advanceTimers: jest.advanceTimersByTime.bind(jest) },
+    });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    const reopenButton = screen.getByRole('button', { name: 'Reopen banner' });
+
+    // Walk from the button up to the render root: nothing on the way may be taken out of flow
+    let element: HTMLElement | null = reopenButton;
+    while (element && element !== container) {
+      expect(element).not.toHaveStyle({ position: 'fixed' });
+      element = element.parentElement;
+    }
+  });
+
   it('should restore the full banner when "Reopen banner" is clicked', async () => {
     jest.setSystemTime(new Date(2025, 4, 10));
 

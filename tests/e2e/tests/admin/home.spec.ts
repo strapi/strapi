@@ -4,7 +4,9 @@ import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
+import { startCreateContentType } from '../../../utils/content-types';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
+import { AssetsPage } from '../media-library/page-objects/AssetsPage';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -203,23 +205,26 @@ test.describe('Home as super admin — key statistics', () => {
       ]);
       await findAndClose(page, 'Saved document');
 
-      // Upload an asset
-      await navToHeader(page, ['Media Library'], 'Media Library');
-      await page.getByRole('button', { name: 'Add new assets' }).first().click();
-      await page
-        .getByLabel('Drag & Drop here or')
-        .setInputFiles('public/assets/administration_panel.png');
-      const uploadButton = page.getByRole('button', { name: 'Upload 1 asset to the library' });
-      try {
-        await uploadButton.waitFor({ state: 'visible', timeout: 5000 });
-        await uploadButton.click();
-      } catch {
-        await page.getByRole('button', { name: /^finish$/i }).click();
-      }
+      // Upload an asset, through the Media Library's page object rather than locators spelled
+      // out here — hardcoded panel copy is what broke this step when the new Media Library
+      // became the default.
+      //
+      // `navToHeader` cannot be used for the same reason: it asserts an exact heading, and the
+      // page is now titled after the folder you are in ("Home (3 items)" at the root). The menu
+      // link is unchanged, so only the readiness check moves — to `New`, which the upload opens
+      // anyway.
+      const assetsPage = new AssetsPage(page);
+      await clickAndWait(page, page.locator('role=link[name^="Media Library"]').last());
+      await expect(assetsPage.newButton).toBeVisible();
+
+      await assetsPage.uploadFilesWithFilePicker('public/assets/administration_panel.png');
+      await assetsPage.waitForUploadProgressSuccess();
+      // Dismissed before moving on: the dialog overlays the page the next steps navigate from.
+      await assetsPage.closeUploadProgressDialog();
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
-      await page.getByRole('button', { name: /create new collection type/i }).click();
+      await startCreateContentType(page, 'collection');
       await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
       await page.getByRole('textbox', { name: /display name/i }).fill('NewType');
       await expect(page.getByLabel('API ID (Singular)')).toHaveValue('new-type');
@@ -264,7 +269,10 @@ test.describe('Home as super admin — key statistics', () => {
       await page
         .getByRole('textbox', { name: /url/i })
         .fill('http://localhost:1337/api/webhooks/new');
-      await page.getByRole('button', { name: /save/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/admin\/settings\/webhooks\/(?!create)[^/]+/),
+        page.getByRole('button', { name: /save/i }).click(),
+      ]);
 
       // Create an API token
       await navToHeader(page, ['API Tokens'], 'API Tokens');
@@ -274,7 +282,10 @@ test.describe('Home as super admin — key statistics', () => {
       await page.getByRole('option', { name: '30 days' }).click();
       await page.getByRole('combobox', { name: 'Token type' }).click();
       await page.getByRole('option', { name: 'Full access' }).click();
-      await page.getByRole('button', { name: /save/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/admin\/settings\/api-tokens\/(?!create)[^/]+/),
+        page.getByRole('button', { name: /save/i }).click(),
+      ]);
 
       // Go back to the home page and wait for refreshed statistics.
       // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.

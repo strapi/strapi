@@ -1,4 +1,5 @@
 import type { Core, Modules } from '@strapi/types';
+import { emitAudit } from '@strapi/utils';
 
 import { AUDITED_EVENTS } from './constants';
 
@@ -28,11 +29,6 @@ export interface CreateDetails {
   timezone?: string | null;
 }
 
-export interface FieldChange {
-  before: string | boolean | null;
-  after: string | boolean | null;
-}
-
 export const RELEASE_EDITABLE_FIELDS = ['name', 'scheduledAt', 'timezone'] as const;
 
 /** Audit rows are never pruned by size, so the failure reason is capped */
@@ -41,7 +37,7 @@ const MAX_REASON_LENGTH = 100;
 type ReleaseChangedField = (typeof RELEASE_EDITABLE_FIELDS)[number] | 'isScheduled';
 
 export interface UpdateDetails {
-  changes: Partial<Record<ReleaseChangedField, FieldChange>>;
+  changes: Partial<Record<ReleaseChangedField, Modules.AuditLogs.FieldChange>>;
 }
 
 /**
@@ -52,7 +48,7 @@ export const getReleaseChanges = (
   previous: { name?: string; scheduledAt?: string | null; timezone?: string | null } | null,
   next: { name?: string; scheduledAt?: string | null; timezone?: string | null }
 ) => {
-  const changes: Partial<Record<ReleaseChangedField, FieldChange>> = {};
+  const changes: Partial<Record<ReleaseChangedField, Modules.AuditLogs.FieldChange>> = {};
 
   for (const field of RELEASE_EDITABLE_FIELDS) {
     const hasChanged = (previous?.[field] ?? null) !== (next[field] ?? null);
@@ -106,7 +102,7 @@ type TriggerEvent = ReleaseEvent &
   );
 
 export interface SettingsUpdateDetails {
-  changes: Partial<Record<'defaultTimezone', FieldChange>>;
+  changes: Partial<Record<'defaultTimezone', Modules.AuditLogs.FieldChange>>;
 }
 
 interface EntryRef {
@@ -128,23 +124,6 @@ export interface EntryUpdateDetails {
 export interface EntryRemoveDetails {
   entry: EntryRef;
 }
-
-/**
- * Emits an audit event and waits for it to be processed.
- * A failed audit write, or a failing listener, is logged here and doesn't affect the
- * operation that emitted the event.
- */
-export const emitAudit = async (
-  { strapi }: { strapi: Core.Strapi },
-  event: string,
-  payload: unknown
-): Promise<void> => {
-  try {
-    await strapi.eventHub.emit(event, payload);
-  } catch (error) {
-    strapi.log.error(`An event listener failed while handling ${event}`, { error });
-  }
-};
 
 /**
  * Emits an audit event for a write that may be part of a bulk transaction.

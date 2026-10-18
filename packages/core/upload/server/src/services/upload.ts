@@ -2,7 +2,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
-import _ from 'lodash';
+import _, { has, toNumber } from 'lodash';
 import { extension } from 'mime-types';
 import {
   async,
@@ -12,7 +12,6 @@ import {
   file as fileUtils,
   pagination as paginationUtils,
 } from '@strapi/utils';
-import { has, toNumber, isNil } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -473,7 +472,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function replace(
     id: ID,
-    { data, file }: { data: { fileInfo: FileInfo }; file: InputFile },
+    { data, file }: { data: { fileInfo: FileInfo } & Metas; file: InputFile },
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
@@ -493,8 +492,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     let fileData: UploadableFile;
 
     try {
-      const { fileInfo } = data;
-      fileData = await enhanceAndValidateFile(file, fileInfo);
+      // `refId` / `ref` / `field` are dropped rather than forwarded: `formatFileInfo` turns
+      // them into a one-element `related` array, and a bare array reaches the morph join as
+      // `set` — which deletes every row for this file, detaching it from every other entry
+      // that uses it. Attaching an existing file to an entry is the content API's job.
+      const { fileInfo, refId: _refId, ref: _ref, field: _field, ...metas } = data;
+      fileData = await enhanceAndValidateFile(file, fileInfo, metas);
 
       // Replacing a file writes new bytes just like creating one, so it has to
       // respect sizeLimit too. Checked before any provider write, and measured on
@@ -506,6 +509,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         hash: dbFile.hash,
         ext: dbFile.ext,
       });
+
+      // A plain replace sends no folder, so `formatFileInfo` resolved folderPath to
+      // '/' while the relation survived — and folder deletion selects by folderPath,
+      // which orphaned the file. An explicitly sent folder still moves it.
+      if (fileInfo?.folder === undefined) {
+        _.assign(fileData, { folderPath: dbFile.folderPath });
+      }
 
       // clear old formats — replaceImage / replace will set new ones
       _.set(fileData, 'formats', {});
@@ -627,7 +637,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * Defaults to the `api.rest.withCount` config (true) when not specified on the request.
    */
   function resolveWithCount(pagination: Record<string, unknown>): boolean {
-    if (has('withCount', pagination)) {
+    if (has(pagination, 'withCount')) {
       const withCount = pagination.withCount;
 
       if (typeof withCount === 'boolean') {
@@ -670,7 +680,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;
 
     // Whether the consumer used page-based pagination (default) vs offset-based.
-    const isOffset = has('start', pagination) || has('limit', pagination);
+    const isOffset = has(pagination, 'start') || has(pagination, 'limit');
     const isPaged = !isOffset;
 
     // Resolve start/limit applying defaults and the maxLimit cap.
@@ -703,7 +713,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return {
       results: signedResults,
       // Omit total & pageCount when counting is disabled (withCount=false).
-      pagination: isNil(total) ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
+      pagination: total == null ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
     };
   }
 

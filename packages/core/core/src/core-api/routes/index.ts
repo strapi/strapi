@@ -157,7 +157,7 @@ const getCollectionTypeRoutes = (
  * That is intentional: this drives the route contract/docs; the allowlist drives enforcement.
  */
 const getConditionalQueryParams = (schema: Schema.ContentType) => {
-  const isLocalized = strapi.plugin('i18n').service('content-types').isLocalizedContentType(schema);
+  const isLocalized = strapi.localization.isLocalizedContentType(schema);
   const hasDraftAndPublish = contentTypes.hasDraftAndPublish(schema);
 
   return [
