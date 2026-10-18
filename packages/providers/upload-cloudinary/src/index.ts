@@ -1,34 +1,13 @@
-import type { ReadStream } from 'node:fs';
 import { v2 as cloudinary, ConfigOptions, UploadApiOptions } from 'cloudinary';
 import intoStream from 'into-stream';
 import * as utils from '@strapi/utils';
-
-interface File {
-  name: string;
-  alternativeText?: string;
-  caption?: string;
-  width?: number;
-  height?: number;
-  formats?: Record<string, unknown>;
-  hash: string;
-  ext?: string;
-  mime: string;
-  size: number;
-  sizeInBytes: number;
-  url: string;
-  previewUrl?: string;
-  path?: string;
-  provider?: string;
-  provider_metadata?: Record<string, unknown>;
-  stream?: ReadStream;
-  buffer?: Buffer;
-}
+import type { Providers } from '@strapi/types';
 
 export default {
   init(options: ConfigOptions) {
     cloudinary.config(options);
 
-    const upload = (file: File, customConfig = {}): Promise<void> => {
+    const upload = (file: Providers.Upload.PendingFile, customConfig = {}): Promise<void> => {
       return new Promise((resolve, reject) => {
         const config: Partial<UploadApiOptions> = {
           resource_type: 'auto',
@@ -96,7 +75,11 @@ export default {
       });
     };
 
-    const replace = async (newFile: File, oldFile: File, customConfig = {}): Promise<void> => {
+    const replace = async (
+      newFile: Providers.Upload.PendingFile,
+      oldFile: Readonly<Providers.Upload.UploadedFile>,
+      customConfig = {}
+    ): Promise<void> => {
       const { public_id: oldPublicId, resource_type: oldResourceType } =
         oldFile.provider_metadata ?? {};
 
@@ -131,19 +114,27 @@ export default {
     };
 
     return {
-      uploadStream(file: File, customConfig = {}) {
+      uploadStream(file: Providers.Upload.PendingFile, customConfig = {}) {
         return upload(file, customConfig);
       },
-      upload(file: File, customConfig = {}) {
+      upload(file: Providers.Upload.PendingFile, customConfig = {}) {
         return upload(file, customConfig);
       },
-      replaceStream(newFile: File, oldFile: File, customConfig = {}) {
+      replaceStream(
+        newFile: Providers.Upload.PendingFile,
+        oldFile: Readonly<Providers.Upload.UploadedFile>,
+        customConfig = {}
+      ) {
         return replace(newFile, oldFile, customConfig);
       },
-      replace(newFile: File, oldFile: File, customConfig = {}) {
+      replace(
+        newFile: Providers.Upload.PendingFile,
+        oldFile: Readonly<Providers.Upload.UploadedFile>,
+        customConfig = {}
+      ) {
         return replace(newFile, oldFile, customConfig);
       },
-      async delete(file: File, customConfig = {}) {
+      async delete(file: Readonly<Providers.Upload.UploadedFile>, customConfig = {}) {
         try {
           const { resource_type: resourceType, public_id: publicId } = file.provider_metadata ?? {};
           const deleteConfig = {
@@ -167,4 +158,4 @@ export default {
       },
     };
   },
-};
+} satisfies Providers.Upload.Factory<ConfigOptions>;
