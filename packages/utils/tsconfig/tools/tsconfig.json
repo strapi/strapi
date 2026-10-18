@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "extends": "@tsconfig/node20",
+  "compilerOptions": {
+    "module": "node20",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "types": ["node"],
+    "noUncheckedSideEffectImports": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "erasableSyntaxOnly": true
+  }
+}
