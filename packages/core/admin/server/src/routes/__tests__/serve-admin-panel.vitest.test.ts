@@ -18,7 +18,6 @@ vi.mock('koa-static', async () => ({ default: vi.fn(() => vi.fn()) }));
 vi.mock('fs-extra', async () => {
   const actual = await vi.importActual<typeof import('fs-extra')>('fs-extra');
   const overrides = {
-    pathExistsSync: vi.fn(() => true),
     createReadStream: vi.fn(() => 'index-html-stream'),
   };
 
