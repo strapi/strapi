@@ -18,6 +18,35 @@ export interface Factory<Options = object> {
 }
 
 /**
+ * The provider keys of the `plugin::upload` config. `providerOptions` is checked
+ * against the options of the imported provider:
+ *
+ * ```ts
+ * import awsS3 from '@strapi/provider-upload-aws-s3';
+ *
+ * upload: {
+ *   config: {
+ *     provider: awsS3,
+ *     providerOptions: { s3Options: { region: env('AWS_REGION') } },
+ *   } satisfies Providers.Upload.Config<typeof awsS3>,
+ * },
+ * ```
+ *
+ * The other keys of the config belong to the upload plugin.
+ */
+export interface Config<F extends Factory<never> = Factory> {
+  provider: F;
+  /**
+   * Passed to `provider.init`.
+   */
+  providerOptions?: Parameters<F['init']>[0];
+  /**
+   * Passed as the last argument of each provider method, by method name.
+   */
+  actionOptions?: Record<string, ActionOptions>;
+}
+
+/**
  * The `actionOptions[<method>]` value of the `plugin::upload` config.
  * The upload plugin passes it as the last argument of each provider method.
  */

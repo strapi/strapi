@@ -14,6 +14,35 @@ export interface Factory<Options = object> {
   init: (options: Options, settings: Settings) => Provider;
 }
 
+/**
+ * The `plugin::email` config. `providerOptions` is checked against the options
+ * of the imported provider:
+ *
+ * ```ts
+ * import nodemailer from '@strapi/provider-email-nodemailer';
+ *
+ * email: {
+ *   config: {
+ *     provider: nodemailer,
+ *     providerOptions: { host: env('SMTP_HOST'), port: env.int('SMTP_PORT') },
+ *     settings: { defaultFrom: 'hello@example.com' },
+ *   } satisfies Providers.Email.Config<typeof nodemailer>,
+ * },
+ * ```
+ */
+export interface Config<F extends Factory<never> = Factory> {
+  provider: F;
+  /**
+   * Passed to `provider.init`.
+   */
+  providerOptions?: Parameters<F['init']>[0];
+  /**
+   * Passed to `provider.init`. The email plugin's default config sets
+   * `defaultFrom`.
+   */
+  settings?: Partial<Settings>;
+}
+
 export interface Provider {
   send: (options: SendOptions) => Promise<unknown>;
   verify?: () => Promise<boolean>;

@@ -30,7 +30,7 @@ The package README marks it as internal. Application developers import the same 
 - `Internal`: the low-level `Namespace`, `UID` and `Registry` types. They do not depend on an application.
 - `Public`: the public registries that applications augment.
 - `Plugin`: the `LoadedPlugin` shape, the `IsEnabled` helper and the `Config` types for the `strapi-server` and `strapi-admin` entry points.
-- `Providers`: the contracts that provider packages implement. `Providers.Email` holds the `Factory`, `Provider`, `SendOptions`, `Settings` and `Capabilities` types of email providers. `Providers.Upload` holds the `Factory`, `Provider`, `ActionOptions` and `CheckFileSizeOptions` types of upload providers, and the file types they receive: `PendingFile` (to store, no `url` yet), `UploadedFile` (stored, `url` set) and `SignableFile` (what `getSignedUrl` gets).
+- `Providers`: the contracts that provider packages implement. `Providers.Email` holds the `Factory`, `Config`, `Provider`, `SendOptions`, `Settings` and `Capabilities` types of email providers. `Providers.Upload` holds the `Factory`, `Config`, `Provider`, `ActionOptions` and `CheckFileSizeOptions` types of upload providers, and the file types they receive: `PendingFile` (to store, no `url` yet), `UploadedFile` (stored, `url` set) and `SignableFile` (what `getSignedUrl` gets).
 - `Utils`: type helpers, such as `Get`, `If` and the `Object`, `String` and `Guard` groups.
 
 ### Schema

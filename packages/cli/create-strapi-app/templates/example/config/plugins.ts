@@ -1,4 +1,6 @@
 import type { Core } from '@strapi/strapi';
+import sendmail from '@strapi/provider-email-sendmail';
+import local from '@strapi/provider-upload-local';
 
 const allowedMediaTypes = [
   'image/*',
@@ -32,8 +34,14 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
       },
     },
   },
+  email: {
+    config: {
+      provider: sendmail,
+    },
+  },
   upload: {
     config: {
+      provider: local,
       security: {
         allowedTypes: allowedMediaTypes,
         deniedTypes,

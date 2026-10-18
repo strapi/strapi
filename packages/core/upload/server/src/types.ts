@@ -138,6 +138,31 @@ export interface Config {
   };
 }
 
+/**
+ * A provider module imported in the `plugin::upload` config.
+ * `init` takes `never` so a module typed with its own options matches.
+ */
+export type ProviderModule = Providers.Upload.Factory<never>;
+
+/**
+ * A provider module as the upload plugin loads it. A module resolved by name can
+ * predate `name`, so it is checked at runtime.
+ */
+export type LoadedProviderModule = Omit<ProviderModule, 'name'> & { name?: unknown };
+
+/**
+ * The `plugin::upload` config as the user writes it. The upload plugin
+ * resolves `provider` at register and replaces it with the provider name, so
+ * the config read afterwards is a {@link Config}.
+ */
+export interface UserConfig extends Omit<Config, 'provider'> {
+  /**
+   * An imported provider module, or a provider name (deprecated, except for the
+   * default `local` provider).
+   */
+  provider: string | ProviderModule;
+}
+
 type Writable<T> = { -readonly [K in keyof T]: T[K] };
 
 /**
