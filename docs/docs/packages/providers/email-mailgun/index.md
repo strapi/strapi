@@ -18,6 +18,7 @@ Connects Strapi to Mailgun to send transactional emails. The email plugin loads 
 - Reads `providerOptions` keys: `key` (required, API key), `domain` (required, Mailgun domain for sending), and other `MailgunClientOptions` passed to the Mailgun client.
 - Uses the official Mailgun SDK with form-data multipart encoding; assertions check that both key and domain are supplied.
 - Accepts email fields: from, to, cc, bcc, replyTo, subject, text, html, plus custom passthrough fields (e.g. Mailgun templates).
+- The export checks itself against `Providers.Email.Factory` from `@strapi/types` with `satisfies`. `@strapi/types` is an optional peer dependency. The published typings import it, so a project that type-checks them needs `@strapi/types` installed; a Strapi app gets it through `@strapi/strapi`.
 - Source: [github.com/strapi/strapi/tree/develop/packages/providers/email-mailgun](https://github.com/strapi/strapi/tree/develop/packages/providers/email-mailgun)
 
 ## Related

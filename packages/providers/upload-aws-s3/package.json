@@ -56,11 +56,20 @@
     "lodash": "4.18.1"
   },
   "devDependencies": {
+    "@strapi/types": "5.58.0",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.58.0",
     "tsconfig": "5.58.0",
     "vitest": "catalog:",
     "vitest-config": "5.58.0"
+  },
+  "peerDependencies": {
+    "@strapi/types": "^5.58.0"
+  },
+  "peerDependenciesMeta": {
+    "@strapi/types": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

@@ -1,3 +1,5 @@
+import type { Providers } from '@strapi/types';
+
 /**
  * Options passed through from Strapi `plugin::email` config `providerOptions`,
  * historically compatible with `require('sendmail')` (guileen/node-sendmail).
@@ -27,7 +29,4 @@ export interface ProviderSendmailOptions {
   autoEHLO?: boolean;
 }
 
-export interface Settings {
-  defaultFrom: string;
-  defaultReplyTo?: string;
-}
+export type Settings = Providers.Email.Settings;

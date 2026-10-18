@@ -1,5 +1,6 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
+import type { Providers } from '@strapi/types';
 import {
   buildSendEmailCommandInput,
   getClientConfig,
@@ -18,4 +19,4 @@ export default {
       },
     };
   },
-};
+} satisfies Providers.Email.Factory<ProviderOptions>;

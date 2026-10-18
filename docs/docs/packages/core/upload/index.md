@@ -23,7 +23,7 @@ The plugin declares two content types: `plugin::upload.file` and `plugin::upload
 
 ### Upload provider
 
-`register` in `server/src/register.ts` creates the provider and stores it in `strapi.plugin('upload').provider`. `createProvider` reads `provider`, `providerOptions` and `actionOptions` from the `plugin::upload` config. The default provider is `local`. It loads `@strapi/provider-upload-<name>`, or the module of that name, and calls its `init(providerOptions)`. The provider must implement `delete` and either `upload` or `uploadStream`. See [Providers](./01-backend/00-providers.md).
+`register` in `server/src/register.ts` creates the provider and stores it in `strapi.plugin('upload').provider`. `createProvider` reads `provider`, `providerOptions` and `actionOptions` from the `plugin::upload` config. The default provider is `local`. It loads `@strapi/provider-upload-<name>`, or the module of that name, and calls its `init(providerOptions)`. The provider must implement `delete` and either `upload` or `uploadStream`. The contract is `Providers.Upload.Factory` and `Providers.Upload.Provider` in `@strapi/types`. The official providers check their export against it with `satisfies Providers.Upload.Factory<Options>`. See [`providers/upload.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/providers/upload.ts) and [Providers](./01-backend/00-providers.md).
 
 ### Upload flow
 

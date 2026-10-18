@@ -20,6 +20,7 @@ Stores uploaded files in Cloudinary for image and video management, transformati
 - Stores metadata: `provider_metadata` includes `public_id` and `resource_type`; replaces in-place if hash matches to invalidate CDN cache.
 - Generates preview URLs for videos (sample GIF with configurable resolution).
 - Throws `PayloadTooLargeError` when Cloudinary rejects oversized uploads.
+- The export checks itself against `Providers.Upload.Factory` from `@strapi/types` with `satisfies`. `@strapi/types` is an optional peer dependency. The published typings import it, so a project that type-checks them needs `@strapi/types` installed; a Strapi app gets it through `@strapi/strapi`.
 - Source: [github.com/strapi/strapi/tree/develop/packages/providers/upload-cloudinary](https://github.com/strapi/strapi/tree/develop/packages/providers/upload-cloudinary)
 
 ## Related
