@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { InputFile, File } from '../types';
+import type { AIMetadataImage, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
 import { fetchImagesAsBlobs } from '../utils/images';
@@ -268,16 +268,14 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         .map((file, index) => ({ file, originalIndex: index }))
         .filter(({ file }) => file.mime?.startsWith('image/'));
 
-      // Convert filtered image files to InputFile format (uses thumbnails when available)
-      const imageInputFiles = imageFiles.map(({ file }) => {
-        const thumbnail = (file.formats as any)?.thumbnail;
+      // Point at the image of each file (uses thumbnails when available)
+      const imageInputFiles = imageFiles.map(({ file }): AIMetadataImage => {
+        const thumbnail = file.formats?.thumbnail;
         return {
-          filepath: thumbnail?.url || file.url || '',
-          mimetype: file.mime,
-          originalFilename: file.name,
-          size: thumbnail?.size || file.size,
+          url: thumbnail?.url || file.url || '',
+          mime: file.mime,
           provider: file.provider,
-        } as InputFile;
+        };
       });
       const createEmptyMetadataResults = (): Array<{ altText: string; caption: string } | null> =>
         Array.from({ length: files.length }, () => null);

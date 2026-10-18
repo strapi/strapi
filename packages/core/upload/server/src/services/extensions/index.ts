@@ -1,8 +1,9 @@
 import { async } from '@strapi/utils';
+import type { UploadProvider } from '../../types';
 import { createSignCache, signEntityMedia, unsignEntityMedia } from './utils';
 
 const signFileUrlsOnDocumentService = async () => {
-  const { provider } = strapi.plugins.upload;
+  const provider: UploadProvider = strapi.plugins.upload.provider;
   const isPrivate = await provider.isPrivate();
 
   // We only need to sign the file urls if the provider is private

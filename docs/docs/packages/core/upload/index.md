@@ -23,11 +23,27 @@ The plugin declares two content types: `plugin::upload.file` and `plugin::upload
 
 ### Upload provider
 
-`register` in `server/src/register.ts` creates the provider and stores it in `strapi.plugin('upload').provider`. `createProvider` reads `provider`, `providerOptions` and `actionOptions` from the `plugin::upload` config. The default provider is `local`. It loads `@strapi/provider-upload-<name>`, or the module of that name, and calls its `init(providerOptions)`. The provider must implement `delete` and either `upload` or `uploadStream`. See [Providers](./01-backend/00-providers.md).
+`register` in `server/src/register.ts` creates the provider and stores it in `strapi.plugin('upload').provider`. `createProvider` reads `provider`, `providerOptions` and `actionOptions` from the `plugin::upload` config. The default provider is `local`. It loads `@strapi/provider-upload-<name>`, or the module of that name, and calls its `init(providerOptions)`. The provider must implement `delete` and either `upload` or `uploadStream`. The contract is `Providers.Upload.Factory` and `Providers.Upload.Provider` in `@strapi/types`. The official providers check their export against it with `satisfies Providers.Upload.Factory<Options>`. See [`providers/upload.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/providers/upload.ts) and [Providers](./01-backend/00-providers.md).
 
 ### Upload flow
 
 The controllers call `prepareUploadRequest` to validate the MIME types before any work starts. The `upload` service in `server/src/services/upload.ts` then builds the file info, optimizes images and checks the size limit. It sends the file to the provider service, which prefers `uploadStream` over `upload`. It saves the `plugin::upload.file` entry and emits a `media.create` event, or `media.update` and `media.delete` for the other actions. The option `concurrentUploadSize` sets how many files one request processes at the same time.
+
+### File types
+
+The file changes shape as it moves through the upload flow. Each phase has its own type in `server/src/types.ts`:
+
+- `InputFile`: a multipart part parsed by formidable, or a file fetched from a URL. Its content is in a temporary file at `filepath`, and `size` is in bytes.
+- `UploadableFile`: the file after `enhanceAndValidateFile`. It has a `name`, `hash`, `ext` and `mime`, its `size` is in kilobytes, and `getStream()` reads it. Thumbnails and responsive formats are uploadable files too.
+- `Providers.Upload.PendingFile` and `Providers.Upload.UploadedFile` (from `@strapi/types`): what the provider receives before and after it stores the file. An uploadable file is passed as a pending file.
+- `FileEntity`: a row of `plugin::upload.file`. `FileFormat` is one entry of its `formats`.
+- `SignableFile`: what `signFileUrls` accepts. Besides file entities, it signs files built from bare URLs found in rich text, which only have `url`, `hash`, `ext` and `provider`.
+
+`File` is a deprecated alias of `FileEntity`.
+
+`getProvider()` in `server/src/utils` returns `strapi.plugin('upload').provider` typed as `UploadProvider`: the provider instance with the defaults of `checkFileSize`, `getSignedUrl` and `isPrivate`.
+
+The MIME type validation in `server/src/utils/mime-validation.ts` still accepts any object, because it also reads legacy file shapes. The `File` type in `shared/contracts/files.ts` is the file as the admin API returns it, and is separate from `FileEntity`.
 
 ### MIME type validation
 

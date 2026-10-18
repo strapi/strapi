@@ -18,6 +18,7 @@ Connects Strapi to any SMTP relay using Nodemailer. The email plugin loads this 
 - Reads `providerOptions`: any valid Nodemailer transport configuration (host, port, secure, auth, pool, maxConnections, proxy, rateLimit, DKIM, etc.).
 - Supports comprehensive email options: standard fields (from, to, cc, bcc, replyTo, subject, text, html), plus attachments, alternatives, headers, priority, threading (inReplyTo/references), encoding, calendar events (icalEvent), mailing list support, DKIM signing, OAuth2 authentication per-message.
 - Blocks file and URL access to prevent local file inclusion or SSRF via attachment sources (disableFileAccess, disableUrlAccess always enforced).
+- The export checks itself against `Providers.Email.Factory` from `@strapi/types` with `satisfies`. `@strapi/types` is an optional peer dependency. The published typings import it, so a project that type-checks them needs `@strapi/types` installed; a Strapi app gets it through `@strapi/strapi`.
 - Source: [github.com/strapi/strapi/tree/develop/packages/providers/email-nodemailer](https://github.com/strapi/strapi/tree/develop/packages/providers/email-nodemailer)
 
 ## Related

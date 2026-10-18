@@ -1,18 +1,21 @@
 import { file as fileUtils } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Providers } from '@strapi/types';
 
-import { Config, File, UploadableFile } from '../types';
+import { getProvider } from '../utils';
+import type { Config, UploadableFile } from '../types';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async checkFileSize(file: UploadableFile) {
     const { sizeLimit } = strapi.config.get<Config>('plugin::upload');
-    await strapi.plugin('upload').provider.checkFileSize(file, { sizeLimit });
+    await getProvider(strapi).checkFileSize(file, { sizeLimit });
   },
 
   async upload(file: UploadableFile) {
-    if (typeof strapi.plugin('upload').provider.uploadStream === 'function') {
+    const provider = getProvider(strapi);
+
+    if (typeof provider.uploadStream === 'function') {
       file.stream = file.getStream();
-      await strapi.plugin('upload').provider.uploadStream(file);
+      await provider.uploadStream(file);
 
       delete file.stream;
 
@@ -21,7 +24,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       }
     } else {
       file.buffer = await fileUtils.streamToBuffer(file.getStream());
-      await strapi.plugin('upload').provider.upload(file);
+      // `createProvider` ensures the provider implements `upload` or `uploadStream`
+      await provider.upload!(file);
 
       delete file.buffer;
 
@@ -31,8 +35,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
   },
 
-  async replace(newFile: UploadableFile, oldFile: File) {
-    const provider = strapi.plugin('upload').provider;
+  async replace(newFile: UploadableFile, oldFile: Providers.Upload.UploadedFile) {
+    const provider = getProvider(strapi);
 
     if (typeof provider.replaceStream === 'function') {
       newFile.stream = newFile.getStream();
