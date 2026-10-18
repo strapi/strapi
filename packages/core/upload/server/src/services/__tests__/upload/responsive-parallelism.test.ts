@@ -83,6 +83,7 @@ const testFile: Parameters<typeof imageManipulation.generateResponsiveFormats>[0
   mime: 'image/jpeg',
   filepath: '/var/tmp/strapi-huge-mock.jpg',
   path: null,
+  size: 0,
   getStream() {
     throw new Error('unused (filepath set)');
   },

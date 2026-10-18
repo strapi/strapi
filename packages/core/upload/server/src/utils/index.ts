@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/types';
 
+import type { UploadProvider } from '../types';
+
 import type upload from '../services/upload';
 import type imageManipulation from '../services/image-manipulation';
 import type apiUploadFolder from '../services/api-upload-folder';
@@ -33,4 +35,8 @@ export const getService = <TName extends keyof Services>(
   strapiInstance: Core.Strapi = strapi
 ): Services[TName] => {
   return strapiInstance.plugin('upload').service<Services[TName]>(name);
+};
+
+export const getProvider = (strapiInstance: Core.Strapi = strapi): UploadProvider => {
+  return strapiInstance.plugin('upload').provider;
 };

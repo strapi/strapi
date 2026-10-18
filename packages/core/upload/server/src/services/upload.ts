@@ -16,7 +16,7 @@ import {
 import type { Core, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
-import { getService } from '../utils';
+import { getProvider, getService } from '../utils';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
@@ -201,7 +201,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   ): Promise<UploadableFile> {
     // Prefer detected MIME type from security validation. Treat application/octet-stream as
     // undeclared so we use detected type when the client sends no real Content-Type.
-    const detected = (file as any).detectedMimeType;
+    const detected = file.detectedMimeType;
     const declared = file.mimetype || '';
     const mimeType =
       detected ||
@@ -366,7 +366,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     const replaceFormat = async (key: string, newFormat: UploadableFile) => {
-      const oldFormat = oldFile.formats?.[key] as File | undefined;
+      const oldFormat = oldFile.formats?.[key];
       if (oldFormat) {
         await getService('provider').replace(newFormat, oldFormat);
       } else {
@@ -407,8 +407,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       for (const oldKey of Object.keys(oldFile.formats)) {
         if (!newFormatKeys.has(oldKey)) {
-          const oldFormat = oldFile.formats[oldKey] as File;
-          queueConcurrentOperation(promises, strapi.plugin('upload').provider.delete(oldFormat));
+          const oldFormat = oldFile.formats[oldKey];
+          queueConcurrentOperation(promises, getProvider(strapi).delete(oldFormat));
         }
       }
     }
@@ -531,7 +531,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           if (dbFile.formats) {
             await Promise.all(
               Object.keys(dbFile.formats).map((key) =>
-                strapi.plugin('upload').provider.delete(dbFile.formats![key] as File)
+                getProvider(strapi).delete(dbFile.formats![key])
               )
             );
           }
@@ -552,7 +552,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return update(id, fileData, { user });
   }
 
-  async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
+  async function update(id: ID, values: Partial<File> | UploadableFile, opts?: CommonOptions) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -571,7 +571,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  async function add(values: any, opts?: CommonOptions) {
+  async function add(values: UploadableFile, opts?: CommonOptions): Promise<File> {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -584,7 +584,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     await sendMediaMetrics(fileValues);
 
-    const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
+    const res: File = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
 
     await emitEvent(MEDIA_CREATE, res);
 
@@ -722,14 +722,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     // execute delete function of the provider
     if (file.provider === config.provider) {
-      await strapi.plugin('upload').provider.delete(file);
+      await getProvider(strapi).delete(file);
 
       if (file.formats) {
         const keys = Object.keys(file.formats);
 
         await Promise.all(
           keys.map((key) => {
-            return strapi.plugin('upload').provider.delete(file.formats![key]);
+            return getProvider(strapi).delete(file.formats![key]);
           })
         );
       }

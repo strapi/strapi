@@ -1,8 +1,8 @@
 import type { Core } from '@strapi/types';
-import { getService } from '../utils';
+import { getProvider, getService } from '../utils';
 
 const getProviderName = () => strapi.config.get('plugin::upload.provider', 'local');
-const isProviderPrivate = async () => strapi.plugin('upload').provider.isPrivate();
+const isProviderPrivate = async () => getProvider().isPrivate();
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async trackUsage(event: string, properties?: Record<string, any>) {

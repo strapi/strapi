@@ -7,7 +7,7 @@ import type { Core, Providers } from '@strapi/types';
 import registerUploadMiddleware from './middlewares/upload';
 import { unsignRichtextAndBlocksUrls } from './migrations/unsign-richtext-and-blocks-urls';
 import spec from '../../documentation/content-api.json';
-import type { Config, File, InputFile } from './types';
+import type { Config, UploadProvider } from './types';
 import { aiMetadataJob } from './models/ai-metadata-job';
 import { registerUploadMcpTools } from './mcp';
 
@@ -61,7 +61,7 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   }
 }
 
-const createProvider = (config: Config) => {
+const createProvider = (config: Config): UploadProvider => {
   const { providerOptions, actionOptions = {} } = config;
 
   const providerName = _.toLower(config.provider);
@@ -115,25 +115,33 @@ const createProvider = (config: Config) => {
 
   // Providers can return methods beyond the contract, and they are wrapped too
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
-    return async (file: File, options = actionOptions[methodName]) =>
+    return async (file: unknown, options = actionOptions[methodName]) =>
       (method as (...args: unknown[]) => unknown).call(providerInstance, file, options);
   });
 
-  return Object.assign(Object.create(baseProvider), wrappedProvider);
+  const uploadProvider: UploadProvider = Object.assign(
+    Object.create(baseProvider) as typeof baseProvider,
+    wrappedProvider
+  );
+
+  return uploadProvider;
 };
 
 const baseProvider = {
   extend(obj: unknown) {
     Object.assign(this, obj);
   },
-  checkFileSize(file: InputFile, { sizeLimit }: { sizeLimit: number }) {
+  checkFileSize(
+    file: Readonly<Providers.Upload.PendingFile>,
+    { sizeLimit }: Providers.Upload.CheckFileSizeOptions
+  ) {
     if (sizeLimit && kbytesToBytes(file.size) > sizeLimit) {
       throw new PayloadTooLargeError(
-        `${file.originalFilename} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+        `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
       );
     }
   },
-  getSignedUrl(file: File) {
+  getSignedUrl(file: Readonly<Providers.Upload.SignableFile>) {
     return file;
   },
   isPrivate() {

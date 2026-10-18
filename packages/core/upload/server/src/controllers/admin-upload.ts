@@ -10,7 +10,7 @@ import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
-import { Config, FileInfo } from '../types';
+import { Config, FileInfo, type File } from '../types';
 import { prepareUploadRequest, type FileUploadError } from '../utils/mime-validation';
 import type { UploadFileInfo } from '../../../shared/contracts/files';
 import type { UrlFetchProgress } from '../services/file';
@@ -44,7 +44,7 @@ export default {
           id
         );
 
-        const updated = await uploadService.updateFileInfo(id, fileInfo as any, { user });
+        const updated = await uploadService.updateFileInfo(id, fileInfo, { user });
 
         // Sign file urls for private providers
         const signedFile = await getService('file').signFileUrls(updated);
@@ -372,7 +372,7 @@ export default {
 
     const total = urls.length;
     const uploadErrors: FileUploadError[] = [];
-    const successfulFiles: any[] = [];
+    const successfulFiles: File[] = [];
 
     // Create temp directory for fetched files
     const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-url-upload-'));
