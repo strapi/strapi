@@ -19,6 +19,7 @@ Stores uploaded files in Amazon S3 or S3-compatible services (MinIO, Wasabi, Dig
 - Supports private buckets with signed URL generation; uses `isPrivate()` to check if ACL is private, then `getSignedUrl()` generates temporary access links.
 - S3-compatible providers: warns on AWS-specific features (storage class, KMS encryption) when using non-AWS endpoints; validates multipart configuration.
 - Credentials resolve from AWS SDK credential chain (environment, IAM roles, config file) or explicit options.
+- The export checks itself against `Providers.Upload.Factory` from `@strapi/types` with `satisfies`. `@strapi/types` is an optional peer dependency. The published typings import it, so a project that type-checks them needs `@strapi/types` installed; a Strapi app gets it through `@strapi/strapi`.
 - Source: [github.com/strapi/strapi/tree/develop/packages/providers/upload-aws-s3](https://github.com/strapi/strapi/tree/develop/packages/providers/upload-aws-s3)
 
 ## Related

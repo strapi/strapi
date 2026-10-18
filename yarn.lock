@@ -10500,12 +10500,18 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:3.1023.0"
     "@aws-sdk/s3-request-presigner": "npm:3.1023.0"
     "@aws-sdk/types": "npm:3.973.6"
+    "@strapi/types": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.58.0"
     lodash: "npm:4.18.1"
     tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10513,12 +10519,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
+    "@strapi/types": "npm:5.58.0"
     "@strapi/utils": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     cloudinary: "npm:^2.7.0"
     eslint-config-custom: "npm:5.58.0"
     into-stream: "npm:^5.1.0"
     tsconfig: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10535,6 +10547,11 @@ __metadata:
     tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 

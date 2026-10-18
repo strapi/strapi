@@ -2,7 +2,7 @@ import _ from 'lodash';
 import sharp from 'sharp';
 
 import { errors, file } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, Providers } from '@strapi/types';
 
 import registerUploadMiddleware from './middlewares/upload';
 import { unsignRichtextAndBlocksUrls } from './migrations/unsign-richtext-and-blocks-urls';
@@ -65,7 +65,7 @@ const createProvider = (config: Config) => {
   const { providerOptions, actionOptions = {} } = config;
 
   const providerName = _.toLower(config.provider);
-  let provider;
+  let provider: Providers.Upload.Factory<Config['providerOptions']>;
 
   let modulePath;
   try {
@@ -113,9 +113,10 @@ const createProvider = (config: Config) => {
     );
   }
 
+  // Providers can return methods beyond the contract, and they are wrapped too
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
     return async (file: File, options = actionOptions[methodName]) =>
-      providerInstance[methodName](file, options);
+      (method as (...args: unknown[]) => unknown).call(providerInstance, file, options);
   });
 
   return Object.assign(Object.create(baseProvider), wrappedProvider);
