@@ -530,6 +530,8 @@ export class AssetsPage {
   async openCropEditor() {
     await this.assetDetailsDrawer.getByRole('button', { name: 'Crop' }).click();
     await expect(this.page.getByRole('button', { name: 'Apply' })).toBeVisible();
+    // Crop dimensions are initialized only after the image has loaded.
+    await expect(this.page.getByRole('button', { name: 'Apply' })).toBeEnabled();
   }
 
   /**
