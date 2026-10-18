@@ -9,4 +9,5 @@ export default baseConfig({
     'global-setup': './src/global-setup.ts',
     setup: './src/setup.ts',
   },
+  rootDir: './src',
 });

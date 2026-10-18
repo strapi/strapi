@@ -5,4 +5,5 @@ export default baseConfig({
     index: './src/index.ts',
     cli: './src/cli/index.ts',
   },
+  rootDir: './src',
 });

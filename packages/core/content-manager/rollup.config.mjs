@@ -43,6 +43,7 @@ export default defineConfig([
     input: {
       index: './shared/index.ts',
     },
+    rootDir: './shared',
     outDir: './dist/shared',
   }),
 ]);

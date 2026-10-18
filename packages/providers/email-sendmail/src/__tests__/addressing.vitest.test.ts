@@ -5,7 +5,7 @@ import {
   getHostFromAddress,
   groupRecipientsByDomain,
   parseAddressList,
-} from '../src/addressing';
+} from '../addressing';
 
 describe('addressing', () => {
   describe('extractEmail', () => {

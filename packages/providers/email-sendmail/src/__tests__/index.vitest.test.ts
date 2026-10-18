@@ -5,7 +5,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { resolveMx } from 'dns/promises';
 
-import provider from '../src/index';
+import provider from '../index';
 import { MinimalSmtpServer } from './helpers/minimal-smtp-server';
 
 vi.mock('dns/promises', () => ({

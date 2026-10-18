@@ -3,6 +3,7 @@
   "include": ["src"],
   "exclude": ["**/__tests__/**"],
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node"],
+    "rootDir": "src"
   }
 }

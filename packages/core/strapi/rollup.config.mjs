@@ -7,4 +7,5 @@ export default baseConfig({
     admin: './src/admin.ts',
     'admin-test': './src/admin-test.ts',
   },
+  rootDir: './src',
 });

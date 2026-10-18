@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vitest';
 import { resolveMx } from 'dns/promises';
 
-import { resolveMxHosts, sendDirectSmtp } from '../src/direct-smtp';
+import { resolveMxHosts, sendDirectSmtp } from '../direct-smtp';
 
 vi.mock('dns/promises', () => ({
   resolveMx: vi.fn(),

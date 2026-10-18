@@ -3,7 +3,6 @@
   "include": ["./src", "../shared"],
   "exclude": ["tests", "**/*.test.*"],
   "compilerOptions": {
-    "rootDir": "../",
     "outDir": "../dist",
     "noEmit": false
   }
