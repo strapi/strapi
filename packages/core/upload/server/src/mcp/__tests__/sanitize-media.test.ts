@@ -73,7 +73,8 @@ describe('sanitizeMediaAsset', () => {
 
   test('keeps a field added to the file content-type invisible until allowlisted', () => {
     // The point of the allowlist: a new column must not leak by default.
-    const sanitized = sanitizeMediaAsset({ ...rawFile, newSensitiveField: 'leaked' });
+    const fileWithNewField = { ...rawFile, newSensitiveField: 'leaked' };
+    const sanitized = sanitizeMediaAsset(fileWithNewField);
 
     expect(sanitized).not.toHaveProperty('newSensitiveField');
   });

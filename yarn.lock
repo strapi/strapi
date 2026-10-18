@@ -10838,7 +10838,6 @@ __metadata:
     cropperjs: "npm:1.6.2"
     date-fns: "npm:2.30.0"
     file-type: "npm:21.3.4"
-    formidable: "npm:3.5.4"
     formik: "npm:2.4.9"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
@@ -19077,17 +19076,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"formidable@npm:3.5.4, formidable@npm:^3.5.4":
-  version: 3.5.4
-  resolution: "formidable@npm:3.5.4"
-  dependencies:
-    "@paralleldrive/cuid2": "npm:^2.2.2"
-    dezalgo: "npm:^1.0.4"
-    once: "npm:^1.4.0"
-  checksum: 10c0/3a311ce57617eb8f532368e91c0f2bbfb299a0f1a35090e085bd6ca772298f196fbb0b66f0d4b5549d7bf3c5e1844439338d4402b7b6d1fedbe206ad44a931f8
-  languageName: node
-  linkType: hard
-
 "formidable@npm:^2.0.1":
   version: 2.1.5
   resolution: "formidable@npm:2.1.5"
@@ -19097,6 +19085,17 @@ __metadata:
     once: "npm:^1.4.0"
     qs: "npm:^6.11.0"
   checksum: 10c0/2c68ca6cccc1ac3de497c50236631fafea8e1a09396d88b4dd2dc9db6029b5abaeb6747b8b97ebc1143cd40cf62c27ba485b8c6317088c066fc999af3ac621d4
+  languageName: node
+  linkType: hard
+
+"formidable@npm:^3.5.4":
+  version: 3.5.4
+  resolution: "formidable@npm:3.5.4"
+  dependencies:
+    "@paralleldrive/cuid2": "npm:^2.2.2"
+    dezalgo: "npm:^1.0.4"
+    once: "npm:^1.4.0"
+  checksum: 10c0/3a311ce57617eb8f532368e91c0f2bbfb299a0f1a35090e085bd6ca772298f196fbb0b66f0d4b5549d7bf3c5e1844439338d4402b7b6d1fedbe206ad44a931f8
   languageName: node
   linkType: hard
 

@@ -205,7 +205,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         files: validFiles,
       });
 
-      const signedFiles = await async.map(uploadedFiles as any[], getService('file').signFileUrls);
+      const signedFiles = await async.map(uploadedFiles, getService('file').signFileUrls);
 
       ctx.body = await sanitizeOutput(signedFiles, ctx);
       ctx.status = 201;
