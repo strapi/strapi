@@ -130,9 +130,11 @@ void articles.findMany({ filters: { missing: { $eq: 1 } } });
 void articles.findMany({ populate: ['missing'] });
 // @ts-expect-error `status` is `draft` or `published`.
 void articles.findMany({ status: 'archived' });
-// @ts-expect-error Create requires required attributes.
+// A draft may miss required attributes; a published entry may not (see `document-write.ts`).
 void articles.create({ data: { views: 1 } });
-void articles.create({ data: { title: 'Title', views: 1 } });
+// @ts-expect-error Publishing requires required attributes.
+void articles.create({ data: { views: 1 }, status: 'published' });
+void articles.create({ data: { title: 'Title', views: 1 }, status: 'published' });
 
 // `update` takes `status`, as at runtime: `published` publishes the updated draft.
 void articles.update({ documentId: 'a', data: { views: 1 }, status: 'published' });

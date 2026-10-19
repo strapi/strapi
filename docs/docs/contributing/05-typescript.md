@@ -203,6 +203,27 @@ types what the runtime returns, not what the schema asks for:
 The JSDoc on each type gives the runtime reason. Without strict types, results keep develop's
 `Result` type.
 
+### Document write inputs
+
+With strict types, the `data` of Document Service `create`, `update` and `clone`, and of the core
+service `create`, follows the entity validator
+(`packages/core/types/src/modules/documents/params/write.ts`). The rules come from the modifiers
+type generation already emits, `Schema.Attribute.Required` and `Schema.Attribute.DefaultTo`:
+
+- The status of the call selects the mode. A draft of a draft and publish content type needs only
+  its required repeatable components and dynamic zones. A published entry, or any entry without
+  draft and publish, also needs the other required attributes, except those with a default.
+- `null` is accepted on optional attributes, and on required ones in drafts. Repeatable components
+  and dynamic zones never accept it.
+- Required relations and media stay optional: the runtime enforces them only with
+  `api.documents.strictRelations`.
+- `update` and `clone` require no key. On update, a component value with `id` is partial; a value
+  without `id` creates a component and follows the create rules.
+- `create` requires `data`.
+
+A schema with unknown attributes, such as an unregistered or generic UID, keeps develop's
+`Data.Input`. Without strict types, the params keep develop's types.
+
 ## Keeping types unchanged without strict mode
 
 A type in `@strapi/types` or `@strapi/strapi` that behaves differently in strict mode resolves
@@ -212,7 +233,10 @@ both shapes from `IsStrict` (`packages/core/types/src/core/strictness.ts`):
 type Lookup = IsStrict extends false ? LegacyLookup : StrictLookup;
 ```
 
-The legacy shape is the previous release's type, copied as is. The strict-off parity fixtures in
+The legacy shape is the previous release's type, copied as is. When the published type is an alias
+that applications see, such as `Params.Create`, keep the alias and gate inside it: a `never` key or
+an `unknown` intersection member without strict types. A conditional at the top of the alias
+resolves to its legacy branch, which prints under another name and changes the strict-off surface. The strict-off parity fixtures in
 `tests/types/registries/fixtures/parity-*.ts` pin that shape: they must compile against both the
 current code and the previous release. `tests/types/registries/consumer.test.cjs` compiles them.
 

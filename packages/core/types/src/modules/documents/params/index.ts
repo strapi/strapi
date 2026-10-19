@@ -13,6 +13,7 @@ import type * as PublicationStatus from './status';
 import type * as Data from './data';
 import type * as Search from './search';
 import type * as Locale from './locale';
+import type * as Write from './write';
 
 // Utils
 import type * as Attribute from './attributes';
@@ -102,4 +103,5 @@ export type {
   Attribute,
   PublicationStatus,
   Locale,
+  Write,
 };

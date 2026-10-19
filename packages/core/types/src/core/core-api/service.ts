@@ -5,6 +5,7 @@ import type { Documents } from '../../modules';
 import type { IsStrict } from '../strictness';
 import type { Pick as ParamsPick } from '../../modules/documents/params';
 import type { StrictResult } from '../../modules/documents/result';
+import type { CreateInput } from '../../modules/documents/params/write';
 
 // TODO: Migration to use Documents
 type Document = Documents.AnyDocument;
@@ -75,6 +76,18 @@ export type Entry<TContentTypeUID extends UID.ContentType, TParams> = StrictResu
 type Data = Record<string, unknown>;
 
 /**
+ * The params of a core service `create`, with strict types. The core service calls the Document
+ * Service with `{ status: 'published', ...params }` (`core-api/service/core-service.ts:2-7` in
+ * `@strapi/core`), so `data` follows the published write rules ({@link CreateInput}) unless the
+ * params pass `status: 'draft'`.
+ */
+type CreateParams<TContentTypeUID extends UID.ContentType> = ReadParams<TContentTypeUID> &
+  (
+    | { status?: 'published'; data: CreateInput<TContentTypeUID, 'published'> }
+    | { status: 'draft'; data: CreateInput<TContentTypeUID, 'draft'> }
+  );
+
+/**
  * Base Core-API service type
  */
 export interface Base {
@@ -137,8 +150,11 @@ export interface StrictCollectionType<TContentTypeUID extends UID.ContentType> e
     docId: Documents.ID,
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
-  /** The created entry, published unless the params pass another `status`. */
-  create<const TParams extends ReadParams<TContentTypeUID> & { data: Data }>(
+  /**
+   * The created entry, published unless the params pass another `status`. `data` follows the write
+   * rules of that status (see {@link CreateParams}).
+   */
+  create<const TParams extends CreateParams<TContentTypeUID>>(
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams>>;
   /** `null` when the document does not exist. */

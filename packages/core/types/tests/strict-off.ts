@@ -137,6 +137,59 @@ declare const documentParamChecks: [
 ];
 documentParamChecks satisfies unknown;
 
+// Document Service write params keep develop's types: the write inputs are strict-only.
+type Pick<
+  TUID extends UID.ContentType,
+  TKind extends Modules.Documents.Params.Kind,
+> = Modules.Documents.Params.Pick<TUID, TKind>;
+type WriteParams<TUID extends UID.ContentType> = Modules.Documents.ServiceParams<TUID>;
+type DocumentId = { documentId: Modules.Documents.ID };
+declare const writeParamChecks: [
+  Expect<
+    Equal<
+      WriteParams<'api::strict-only.page'>['create'],
+      Pick<
+        'api::strict-only.page',
+        'data' | 'fields' | 'populate' | 'locale:string' | 'lookup' | 'status'
+      >
+    >
+  >,
+  Expect<
+    Equal<
+      WriteParams<'api::strict-only.page'>['update'],
+      Pick<
+        'api::strict-only.page',
+        'data:partial' | 'fields' | 'populate' | 'locale:string' | 'lookup'
+      > &
+        DocumentId
+    >
+  >,
+  Expect<
+    Equal<
+      WriteParams<'api::strict-only.page'>['clone'],
+      Pick<
+        'api::strict-only.page',
+        'data' | 'fields' | 'populate' | 'status' | 'locale:string' | 'lookup'
+      > &
+        DocumentId
+    >
+  >,
+  Expect<
+    Equal<
+      WriteParams<UID.ContentType>['create'],
+      Pick<UID.ContentType, 'data' | 'fields' | 'populate' | 'locale:string' | 'lookup' | 'status'>
+    >
+  >,
+  // The core service's `create` keeps its loose data.
+  Expect<
+    Equal<
+      Parameters<Core.CoreAPI.Service.CollectionType['create']>[0],
+      { data: Record<string, unknown>; [key: string]: unknown }
+    >
+  >,
+];
+writeParamChecks satisfies unknown;
+
 // Hooks keep develop's types, even for the hooks registered by `@strapi/types`.
 declare const hookStrapi: Core.Strapi;
 const hook = hookStrapi.hook('strapi::content-types.beforeSync');
