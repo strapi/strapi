@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 import { produce } from 'immer';
 import pull from 'lodash/pull';
 

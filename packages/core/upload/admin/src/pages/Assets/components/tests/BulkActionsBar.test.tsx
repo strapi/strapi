@@ -151,7 +151,6 @@ describe('BulkActionsBar', () => {
     it('reserves nothing without a selection', () => {
       setup();
 
-      // eslint-disable-next-line testing-library/no-node-access
       expect(document.querySelector('[data-bar-spacer]')).not.toBeInTheDocument();
     });
 
@@ -163,7 +162,6 @@ describe('BulkActionsBar', () => {
 
       await waitFor(() =>
         // 64, not 48: reserving only the height would leave the gap uncovered.
-        // eslint-disable-next-line testing-library/no-node-access
         expect(document.querySelector('[data-bar-spacer]')).toHaveStyle({ height: '64px' })
       );
     });
@@ -176,7 +174,6 @@ describe('BulkActionsBar', () => {
       await selectOne();
 
       await waitFor(() =>
-        // eslint-disable-next-line testing-library/no-node-access
         expect(document.querySelector('[data-bar-spacer]')).toHaveStyle({ height: '0px' })
       );
     });

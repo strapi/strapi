@@ -12,7 +12,6 @@ export const indexByDocumentId = <T extends { documentId?: string | null }>(
   for (const item of items) {
     const key = item.documentId;
     if (!key) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 

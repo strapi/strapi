@@ -476,7 +476,6 @@ const inheritConditionsAtPath = (
 const getStoredForm = (state: State, path: string[]): unknown =>
   state.isInitialDataStored ? get(state.initialData, path) : undefined;
 
-/* eslint-disable consistent-return */
 const reducer = (state: State, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {

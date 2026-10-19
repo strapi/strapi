@@ -2,6 +2,7 @@
 
 /** @type {import('eslint').Linter.Config} */
 const config = {
+  reportUnusedDisableDirectives: true,
   root: true,
   extends: ['@strapi/eslint-config/front/typescript'],
   overrides: [

@@ -532,7 +532,6 @@ const PositionCell = ({ documentId, position, total, ...props }: PositionCellPro
     if (isEditing) {
       return (
         <PositionInput
-          // eslint-disable-next-line jsx-a11y/no-autofocus -- the input replaces the button that was just activated
           autoFocus
           aria-label={formatMessage(
             {

@@ -539,7 +539,6 @@ export interface UseTrackingReturn {
     event: TEvent['name'],
     properties?: never
   ): Promise<null | AxiosResponse<string>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trackUsage<TEvent extends Extract<TrackingEvent, { properties: object }>>(
     event: TEvent['name'],
     properties: TEvent['properties']

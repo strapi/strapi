@@ -1,6 +1,5 @@
 import * as Homepage from '../../../shared/contracts/homepage';
 
-/* eslint-disable check-file/filename-naming-convention */
 import { reviewWorkflowsApi } from './api';
 
 import type {
