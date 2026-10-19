@@ -389,7 +389,7 @@ describe('Role controller', () => {
         );
       });
 
-      test("Checks an admin token request against the token's permissions, not its owner", async () => {
+      test('Checks an admin token request against the token permissions and its owner', async () => {
         const adminPermissions = [{ action: 'admin::roles.update', subject: null }];
         const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
         const { ctx } = setup(checkPermissionsCeiling, {
@@ -399,7 +399,7 @@ describe('Role controller', () => {
         await roleController.updatePermissions(ctx);
 
         expect(checkPermissionsCeiling).toHaveBeenCalledWith(
-          { tokenPermissions: adminPermissions },
+          { tokenPermissions: adminPermissions, owner: user },
           roleID,
           normalizedPermissions
         );
@@ -414,7 +414,7 @@ describe('Role controller', () => {
         await roleController.updatePermissions(ctx);
 
         expect(checkPermissionsCeiling).toHaveBeenCalledWith(
-          { tokenPermissions: [] },
+          { tokenPermissions: [], owner: user },
           roleID,
           normalizedPermissions
         );

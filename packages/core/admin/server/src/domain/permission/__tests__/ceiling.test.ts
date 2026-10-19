@@ -3,6 +3,7 @@ import {
   coversCondition,
   coversPropertyValue,
   findMatchingPermissions,
+  getInheritedConditions,
   getRestrictedProperties,
   isPermissionWithinCeiling,
 } from '../ceiling';
@@ -554,5 +555,145 @@ describe('Permission ceiling', () => {
         );
       });
     });
+  });
+
+  describe('getInheritedConditions', () => {
+    type Props = Record<string, unknown> | undefined;
+
+    const perm = (properties: Props, conditions: string[] = [], action = READ) => ({
+      action,
+      subject: ARTICLE,
+      ...(properties === undefined ? {} : { properties }),
+      conditions,
+    });
+
+    // The owner from the review: `title` on `en` unconditionally, `body` on `fr` if creator
+    const reviewOwner = [
+      perm({ fields: ['title'], locales: ['en'] }),
+      perm({ fields: ['body'], locales: ['fr'] }, [IS_CREATOR]),
+    ];
+
+    const cases: Array<
+      [string, ReturnType<typeof perm>[], ReturnType<typeof perm>, string[] | null]
+    > = [
+      [
+        'Rejects a field on a locale held by another permission',
+        reviewOwner,
+        perm({ fields: ['title'], locales: ['fr'] }),
+        null,
+      ],
+      [
+        'Inherits no condition from an unconditional holder',
+        reviewOwner,
+        perm({ fields: ['title'], locales: ['en'] }),
+        [],
+      ],
+      [
+        'Inherits the conditions of the only holder',
+        reviewOwner,
+        perm({ fields: ['body'], locales: ['fr'] }),
+        [IS_CREATOR],
+      ],
+      [
+        'Rejects every field on every locale when no single permission holds them',
+        reviewOwner,
+        perm({ fields: ['title', 'body'], locales: ['en', 'fr'] }),
+        null,
+      ],
+      [
+        'Rejects a field with no holder on the locale',
+        reviewOwner,
+        perm({ fields: ['title', 'body'], locales: ['en'] }),
+        null,
+      ],
+      [
+        'Inherits no condition when unconditional holders cover every field',
+        [perm({ fields: ['title'] }), perm({ fields: ['body'] })],
+        perm({ fields: ['title', 'body'] }),
+        [],
+      ],
+      [
+        'Rejects fields whose holders share no condition',
+        [perm({ fields: ['title'] }, [IS_CREATOR]), perm({ fields: ['body'] }, [SAME_ROLE])],
+        perm({ fields: ['title', 'body'] }),
+        null,
+      ],
+      [
+        'Inherits only the conditions every field is held under',
+        [
+          perm({ fields: ['title'] }, [IS_CREATOR, SAME_ROLE]),
+          perm({ fields: ['body'] }, [SAME_ROLE]),
+        ],
+        perm({ fields: ['title', 'body'] }),
+        [SAME_ROLE],
+      ],
+      [
+        'Inherits the condition of the conditional holder alongside an unconditional one',
+        [perm({ fields: ['title'] }), perm({ fields: ['body'] }, [IS_CREATOR])],
+        perm({ fields: ['title', 'body'] }),
+        [IS_CREATOR],
+      ],
+      [
+        'Ignores the conditions on the request',
+        [perm({ fields: ['title'] }, [IS_CREATOR])],
+        perm({ fields: ['title'] }, []),
+        [IS_CREATOR],
+      ],
+      [
+        'Covers a nested field by its parent',
+        [perm({ fields: ['seo'] })],
+        perm({ fields: ['seo.title'] }),
+        [],
+      ],
+      [
+        'Rejects omitted fields against a field-restricted holder',
+        [perm({ fields: ['title'] })],
+        perm(undefined),
+        null,
+      ],
+      [
+        'Rejects omitted locales against a locale-restricted holder',
+        [perm({ locales: ['en'] })],
+        perm({ fields: ['title'] }),
+        null,
+      ],
+      [
+        'Does not treat an empty locale list as a dimension',
+        [perm({ locales: ['en'] })],
+        perm({ fields: ['title'], locales: [] }),
+        [],
+      ],
+      [
+        'Rejects against a holder with no fields',
+        [perm({ fields: [] })],
+        perm({ fields: ['title'] }),
+        null,
+      ],
+      [
+        'Inherits no condition for a request with no fields',
+        [perm({ fields: ['title'] }, [IS_CREATOR], CREATE)],
+        perm({ fields: [] }),
+        [],
+      ],
+      [
+        'Rejects without a matching action',
+        [perm({ fields: ['title'] }, [], CREATE)],
+        perm({ fields: ['title'] }),
+        null,
+      ],
+    ];
+
+    test.each(cases)('%s', (_, held, requested, expected) => {
+      expect(getInheritedConditions(requested, held)).toEqual(expected);
+    });
+
+    test.each(cases.filter(([, , , expected]) => expected !== null))(
+      'Stays within the ceiling with the inherited conditions: %s',
+      (_, held, requested) => {
+        const conditions = getInheritedConditions(requested, held);
+
+        expect(isPermissionWithinCeiling({ ...requested, conditions }, held)).toBe(true);
+      }
+    );
   });
 });

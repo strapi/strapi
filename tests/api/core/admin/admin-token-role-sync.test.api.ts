@@ -71,7 +71,7 @@ describe('Admin Token Role Sync (api)', () => {
         pluralName: 'sync-articles',
         displayName: 'SyncArticle',
         draftAndPublish: false,
-        attributes: { title: { type: 'string' } },
+        attributes: { title: { type: 'string' }, body: { type: 'string' } },
       })
       .build();
 
@@ -348,7 +348,7 @@ describe('Admin Token Role Sync (api)', () => {
           ]);
 
           // user has SYNC_ACTION from roleX (conditioned) AND roleY (unconditional)
-          // → anyUserPermIsUnconditional = true → enforcedConditions = [] → token updated
+          // → the unconditional permission covers the token → conditions [] → token updated
           const afterPerms = await getAdminPermissionsFromDB(tempToken.id);
           const afterPerm = afterPerms.find((p) => p.action === SYNC_ACTION);
           expect(afterPerm).toBeDefined();
@@ -361,6 +361,63 @@ describe('Admin Token Role Sync (api)', () => {
         await strapi.db.query('admin::role').delete({ where: { id: roleX.id } });
         await strapi.db.query('admin::role').delete({ where: { id: roleY.id } });
       }
+    });
+
+    describe('T1-6 Fields and locales are re-clamped per permission', () => {
+      const ownerPermission = (fields: string[], locales: string[], conditions: string[] = []) => ({
+        action: SYNC_ACTION,
+        subject: SYNC_SUBJECT,
+        conditions,
+        properties: { fields, locales },
+      });
+
+      let tokenFieldsLocales: { id: number };
+
+      beforeEach(async () => {
+        const utils = createUtils(strapi);
+
+        await utils.assignPermissionsToRole(roleA.id, [
+          ownerPermission(['title', 'body'], ['en']),
+          ...ADMIN_TOKEN_PERMS,
+        ]);
+
+        const res = await rqSync({
+          url: '/admin/admin-tokens',
+          method: 'POST',
+          body: {
+            name: 'sync-token-fields-locales',
+            adminPermissions: [ownerPermission(['title', 'body'], ['en'])],
+          },
+        });
+        expect(res.status).toBe(201);
+        tokenFieldsLocales = res.body.data;
+      });
+
+      test('One field becomes conditional → token inherits the condition', async () => {
+        const utils = createUtils(strapi);
+
+        await utils.assignPermissionsToRole(roleA.id, [
+          ownerPermission(['title'], ['en']),
+          ownerPermission(['body'], ['en'], ['admin::is-creator']),
+          ...ADMIN_TOKEN_PERMS,
+        ]);
+
+        const perms = await getAdminPermissionsFromDB(tokenFieldsLocales.id);
+        expect(perms).toStrictEqual([{ action: SYNC_ACTION, conditions: ['admin::is-creator'] }]);
+      });
+
+      test('One field moves to another locale → token permission deleted', async () => {
+        const utils = createUtils(strapi);
+
+        await utils.assignPermissionsToRole(roleA.id, [
+          ownerPermission(['title'], ['en']),
+          ownerPermission(['body'], ['fr']),
+          ...ADMIN_TOKEN_PERMS,
+        ]);
+
+        const perms = await getAdminPermissionsFromDB(tokenFieldsLocales.id);
+        expect(perms).toStrictEqual([]);
+      });
     });
   });
 

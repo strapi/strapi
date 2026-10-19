@@ -397,26 +397,40 @@ const assignPermissions = async (
 /**
  * Who updates the role, which decides the permissions they can grant: an admin user grants up
  * to their own permissions (all of them for a super admin), an admin token up to the token's
- * permissions, whoever owns it.
+ * permissions and, unless its owner is a super admin, up to the owner's current permissions.
  */
-export type CeilingRequester = { user: AdminUser } | { tokenPermissions: CeilingPermission[] };
+export type CeilingRequester =
+  { user: AdminUser } | { tokenPermissions: CeilingPermission[]; owner: AdminUser };
 
-const findRequesterPermissions = async (
+/**
+ * The permission sets a granted permission must stay within, all of them. Empty when the
+ * requester is not limited (a super admin).
+ */
+const findRequesterCeilings = async (
   requester: CeilingRequester
-): Promise<CeilingPermission[] | null> => {
+): Promise<CeilingPermission[][]> => {
   if ('tokenPermissions' in requester) {
-    return requester.tokenPermissions;
+    // A token can carry permissions its owner lost since it was written
+    if (hasSuperAdminRole(requester.owner)) {
+      return [requester.tokenPermissions];
+    }
+
+    const ownerPermissions = await getService('permission').findUserPermissions(requester.owner);
+
+    return [requester.tokenPermissions, ownerPermissions];
   }
 
   if (hasSuperAdminRole(requester.user)) {
-    return null;
+    return [];
   }
 
-  return getService('permission').findUserPermissions(requester.user);
+  return [await getService('permission').findUserPermissions(requester.user)];
 };
 
 /**
- * Make sure a requester cannot grant a role permissions they do not hold themselves.
+ * Make sure a requester cannot grant a role permissions they do not hold themselves. A request
+ * made with an admin token is limited by the token's permissions and, unless the token owner is
+ * a super admin, by the owner's.
  * Only permissions that are new to the role are checked: permissions the role already
  * carries are preserved as they are, and removing them is always allowed.
  * @param requester - the admin user or admin token performing the update
@@ -428,10 +442,10 @@ const checkPermissionsCeiling = async (
   roleId: Data.ID,
   permissions: CreatePermissionPayload[] = []
 ): Promise<void> => {
-  const heldPermissions = await findRequesterPermissions(requester);
+  const ceilings = await findRequesterCeilings(requester);
 
   // Super admins hold every permission
-  if (heldPermissions === null) {
+  if (ceilings.length === 0) {
     return;
   }
 
@@ -447,8 +461,8 @@ const checkPermissionsCeiling = async (
     arePermissionsEqual
   );
 
-  const rejectedPermissions = newPermissions.filter(
-    (permission) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, heldPermissions)
+  const rejectedPermissions = newPermissions.filter((permission) =>
+    ceilings.some((held) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, held))
   );
 
   if (rejectedPermissions.length > 0) {

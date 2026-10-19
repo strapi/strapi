@@ -1068,6 +1068,97 @@ describe('Role CRUD End to End', () => {
         expect(rolePermissions).toHaveLength(1);
         expect(rolePermissions[0]).toMatchObject({ action: READ_ACTION, subject: SUBJECT });
       });
+
+      /**
+       * A token owned by an admin who is not a super admin is also limited by the owner's current
+       * permissions, so a token permission the owner no longer holds (written before the
+       * per-permission rule, or not yet re-synced) cannot be granted.
+       */
+      describe('owned by an admin who is not a super admin', () => {
+        const outOfScopePermission = {
+          action: OUT_OF_SCOPE_ACTION,
+          subject: null,
+          properties: {},
+          conditions: [],
+        };
+
+        let ownerRole;
+        let owner;
+        let rqOwnerToken;
+
+        beforeAll(async () => {
+          ownerRole = await utils.createRole({
+            name: 'ceiling-token-owner-role',
+            description: 'Owns an admin token that can update roles',
+          });
+
+          await utils.assignPermissionsToRole(ownerRole.id, [
+            ...ROLE_PERMISSIONS,
+            { action: 'admin::admin-tokens.create', subject: null, conditions: [], properties: {} },
+            readPermission,
+          ]);
+
+          owner = await utils.createUser({
+            email: 'ceiling-token-owner@strapi.io',
+            firstname: 'Ceiling',
+            lastname: 'TokenOwner',
+            isActive: true,
+            roles: [ownerRole.id],
+          });
+
+          const rqOwner = await createAuthRequest({ strapi, userInfo: { email: owner.email } });
+
+          const res = await rqOwner({
+            url: '/admin/admin-tokens',
+            method: 'POST',
+            body: {
+              name: 'ceiling-owner-token',
+              adminPermissions: [...ROLE_PERMISSIONS, readPermission],
+            },
+          });
+
+          expect(res.statusCode).toBe(201);
+          tokenIds.push(res.body.data.id);
+
+          // A token permission the owner does not hold, as a token stored before the
+          // per-permission rule could carry
+          await strapi.db.query('admin::permission').create({
+            data: { ...outOfScopePermission, actionParameters: {}, apiToken: res.body.data.id },
+          });
+
+          const token = await strapi.db.query('admin::api-token').findOne({
+            where: { id: res.body.data.id },
+            populate: ['adminPermissions'],
+          });
+          expect(token.adminPermissions.map((permission) => permission.action)).toContain(
+            OUT_OF_SCOPE_ACTION
+          );
+
+          rqOwnerToken = createRequest({ strapi }).setToken(res.body.data.accessKey);
+        });
+
+        afterAll(async () => {
+          // Deleting the owner deletes their tokens and the tokens' permissions
+          await utils.deleteUserById(owner.id);
+          await utils.deleteRolesById([ownerRole.id]);
+        });
+
+        test('Cannot grant a permission the token holds but its owner does not', async () => {
+          const rolePermissionsBefore = await getTargetRolePermissions();
+
+          const res = await updateTargetRolePermissions(rqOwnerToken, [outOfScopePermission]);
+
+          expect(res.statusCode).toBe(403);
+          expect(res.body.error.details.permissions).toEqual([outOfScopePermission]);
+          expect(await getTargetRolePermissions()).toEqual(rolePermissionsBefore);
+        });
+
+        test('Can grant a permission both the token and its owner hold', async () => {
+          const res = await updateTargetRolePermissions(rqOwnerToken, [readPermission]);
+
+          expect(res.statusCode).toBe(200);
+        });
+      });
     });
   });
 });

@@ -2552,24 +2552,28 @@ describe('API Token', () => {
       expect(toUpdate[0]).toEqual({ id: 1, conditions: [] });
     });
 
-    test('Computes union of conditions across multiple matching user permissions', () => {
+    test('Deletes a permission whose fields are held under no shared condition', () => {
       const userPerms = [
-        makeUserPerm('plugin::cm.read', 'api::article.article', ['admin::is-creator']),
-        makeUserPerm('plugin::cm.read', 'api::article.article', ['admin::has-draft-state']),
+        makeUserPerm('plugin::cm.read', 'api::article.article', ['admin::is-creator'], ['title']),
+        makeUserPerm(
+          'plugin::cm.read',
+          'api::article.article',
+          ['admin::has-draft-state'],
+          ['body']
+        ),
       ];
-      const tokenPerms = [makeTokenPerm(1, 'plugin::cm.read', 'api::article.article', [])];
+      const tokenPerms = [
+        makeTokenPerm(1, 'plugin::cm.read', 'api::article.article', [], ['title', 'body']),
+        makeTokenPerm(2, 'plugin::cm.read', 'api::article.article', [], ['title']),
+      ];
 
       const { toDelete, toUpdate } = reconcileTokenPermissionsToUserCeiling(
         userPerms as any,
         tokenPerms as any
       );
 
-      expect(toDelete).toHaveLength(0);
-      expect(toUpdate).toHaveLength(1);
-      expect(toUpdate[0].conditions).toEqual(
-        expect.arrayContaining(['admin::is-creator', 'admin::has-draft-state'])
-      );
-      expect(toUpdate[0].conditions).toHaveLength(2);
+      expect(toDelete.map((p) => p.id)).toEqual([1]);
+      expect(toUpdate).toEqual([{ id: 2, conditions: ['admin::is-creator'] }]);
     });
 
     test('Keeps permission unchanged when conditions are the same set in different order', () => {
@@ -2654,13 +2658,20 @@ describe('API Token', () => {
       expect(toUpdate).toHaveLength(0);
     });
 
-    test('One user perm unconditional among conditional ones forces conditions to empty', () => {
+    test('Inherits the conditions of a conditional holder covering some of the fields', () => {
       const userPerms = [
-        makeUserPerm('plugin::cm.read', 'api::article.article', ['admin::is-creator']),
-        makeUserPerm('plugin::cm.read', 'api::article.article', []),
+        makeUserPerm('plugin::cm.read', 'api::article.article', [], ['title']),
+        makeUserPerm('plugin::cm.read', 'api::article.article', ['admin::is-creator'], ['body']),
       ];
       const tokenPerms = [
-        makeTokenPerm(1, 'plugin::cm.read', 'api::article.article', ['admin::is-creator']),
+        makeTokenPerm(1, 'plugin::cm.read', 'api::article.article', [], ['title', 'body']),
+        makeTokenPerm(
+          2,
+          'plugin::cm.read',
+          'api::article.article',
+          ['admin::is-creator'],
+          ['title']
+        ),
       ];
 
       const { toDelete, toUpdate } = reconcileTokenPermissionsToUserCeiling(
@@ -2669,12 +2680,76 @@ describe('API Token', () => {
       );
 
       expect(toDelete).toHaveLength(0);
-      expect(toUpdate).toHaveLength(1);
-      expect(toUpdate[0]).toEqual({ id: 1, conditions: [] });
+      expect(toUpdate).toEqual([
+        { id: 1, conditions: ['admin::is-creator'] },
+        { id: 2, conditions: [] },
+      ]);
+    });
+
+    test('Deletes a field on a locale only held on another locale', () => {
+      const userPerms = [
+        {
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: [],
+          properties: { fields: ['title'], locales: ['en'] },
+        },
+      ];
+      const tokenPerms = [
+        {
+          id: 1,
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: [],
+          properties: { fields: ['title'], locales: ['fr'] },
+        },
+      ];
+
+      const { toDelete, toUpdate } = reconcileTokenPermissionsToUserCeiling(
+        userPerms as any,
+        tokenPerms as any
+      );
+
+      expect(toDelete.map((p) => p.id)).toEqual([1]);
+      expect(toUpdate).toHaveLength(0);
+    });
+
+    test('Deletes fields and locales held by different permissions', () => {
+      const userPerms = [
+        {
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: [],
+          properties: { fields: ['title'], locales: ['en'] },
+        },
+        {
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: ['admin::is-creator'],
+          properties: { fields: ['body'], locales: ['fr'] },
+        },
+      ];
+      const tokenPerms = [
+        {
+          id: 1,
+          action: 'plugin::cm.read',
+          subject: 'api::article.article',
+          conditions: [],
+          properties: { fields: ['title', 'body'], locales: ['en', 'fr'] },
+        },
+      ];
+
+      const { toDelete, toUpdate } = reconcileTokenPermissionsToUserCeiling(
+        userPerms as any,
+        tokenPerms as any
+      );
+
+      expect(toDelete.map((p) => p.id)).toEqual([1]);
+      expect(toUpdate).toHaveLength(0);
     });
 
     describe('Role-merge condition semantics', () => {
-      test('[isCreator] + [isOwner] = [isCreator, isOwner]: unions conditions from two roles', () => {
+      test('[isCreator] + [isOwner] = [isCreator, isOwner]: both roles cover every field, so both conditions apply', () => {
         const userPerms = [
           makeUserPerm('plugin::cm.read', 'api::article.article', ['admin::is-creator']),
           makeUserPerm('plugin::cm.read', 'api::article.article', ['admin::is-owner']),
@@ -2742,6 +2817,7 @@ describe('API Token', () => {
     }) => {
       const updateMock = jest.fn().mockResolvedValue({});
       const deleteByIdsMock = jest.fn().mockResolvedValue({});
+      const warnMock = jest.fn();
 
       global.strapi = {
         db: {
@@ -2759,6 +2835,7 @@ describe('API Token', () => {
           }),
         },
         config: { get: jest.fn(() => '') },
+        log: { warn: warnMock },
         admin: {
           services: {
             permission: {
@@ -2769,7 +2846,7 @@ describe('API Token', () => {
         },
       } as any;
 
-      return { updateMock, deleteByIdsMock };
+      return { updateMock, deleteByIdsMock, warnMock };
     };
 
     test('Skips sync when user does not exist', async () => {
@@ -2825,12 +2902,18 @@ describe('API Token', () => {
         },
       ];
 
-      const { deleteByIdsMock, updateMock } = buildStrapi({ user, userPermissions, tokens });
+      const { deleteByIdsMock, updateMock, warnMock } = buildStrapi({
+        user,
+        userPermissions,
+        tokens,
+      });
 
       await syncApiTokenPermissionsForUser(1);
 
       expect(deleteByIdsMock).toHaveBeenCalledWith([102]);
       expect(updateMock).not.toHaveBeenCalled();
+      expect(warnMock).toHaveBeenCalledTimes(1);
+      expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('102 plugin::cm.delete'));
     });
 
     test('Updates conditions on token permissions whose conditions have drifted', async () => {
@@ -2858,7 +2941,11 @@ describe('API Token', () => {
         },
       ];
 
-      const { deleteByIdsMock, updateMock } = buildStrapi({ user, userPermissions, tokens });
+      const { deleteByIdsMock, updateMock, warnMock } = buildStrapi({
+        user,
+        userPermissions,
+        tokens,
+      });
 
       await syncApiTokenPermissionsForUser(1);
 
@@ -2867,6 +2954,8 @@ describe('API Token', () => {
         where: { id: 101 },
         data: { conditions: ['admin::is-creator'] },
       });
+      expect(warnMock).toHaveBeenCalledTimes(1);
+      expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('101 plugin::cm.read'));
     });
 
     test('Does nothing when token permissions are already in sync', async () => {
@@ -2894,12 +2983,17 @@ describe('API Token', () => {
         },
       ];
 
-      const { deleteByIdsMock, updateMock } = buildStrapi({ user, userPermissions, tokens });
+      const { deleteByIdsMock, updateMock, warnMock } = buildStrapi({
+        user,
+        userPermissions,
+        tokens,
+      });
 
       await syncApiTokenPermissionsForUser(1);
 
       expect(deleteByIdsMock).not.toHaveBeenCalled();
       expect(updateMock).not.toHaveBeenCalled();
+      expect(warnMock).not.toHaveBeenCalled();
     });
 
     test('Skips tokens with no adminPermissions', async () => {
@@ -3026,9 +3120,76 @@ describe('API Token', () => {
         },
       ] as any;
 
+      await expect(enforceAdminPermissionsCeiling(ownerUser, requestedPermissions)).rejects.toThrow(
+        'fields are required due to owner field restrictions'
+      );
+    });
+  });
+
+  describe('enforceAdminPermissionsCeiling — per-permission rule', () => {
+    const READ = 'plugin::content-manager.explorer.read';
+    const ARTICLE = 'api::article.article';
+    const ownerUser = { id: 42, roles: [{ code: 'strapi-editor' }] } as any;
+
+    const read = (properties: Record<string, unknown>, conditions: string[] = []) => ({
+      action: READ,
+      subject: ARTICLE,
+      properties,
+      conditions,
+    });
+
+    beforeEach(() => {
+      // `title` on `en` unconditionally, `body` on `fr` only for entries the owner created
+      const ownerPermissions = [
+        read({ fields: ['title'], locales: ['en'] }),
+        read({ fields: ['body'], locales: ['fr'] }, ['admin::is-creator']),
+      ];
+
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
+            },
+          },
+        },
+      } as any;
+    });
+
+    test('Rejects a field on a locale that only another owner permission holds', async () => {
       await expect(
-        enforceAdminPermissionsCeiling(ownerUser, requestedPermissions)
-      ).rejects.toThrow();
+        enforceAdminPermissionsCeiling(ownerUser, [
+          read({ fields: ['title'], locales: ['fr'] }),
+        ] as any)
+      ).rejects.toThrow(
+        `Exceeding: ${READ} on ${ARTICLE} (fields, locales and conditions are not held together)`
+      );
+    });
+
+    test('Rejects fields held by different owner permissions on one locale', async () => {
+      await expect(
+        enforceAdminPermissionsCeiling(ownerUser, [
+          read({ fields: ['title', 'body'], locales: ['en'] }),
+        ] as any)
+      ).rejects.toThrow('fields, locales and conditions are not held together');
+    });
+
+    test('Rejects omitted locales against a locale-restricted owner', async () => {
+      await expect(
+        enforceAdminPermissionsCeiling(ownerUser, [read({ fields: ['title'] })] as any)
+      ).rejects.toThrow('locales are required due to owner locale restrictions');
+    });
+
+    test('Inherits the conditions of the owner permission covering the request', async () => {
+      await expect(
+        enforceAdminPermissionsCeiling(ownerUser, [
+          read({ fields: ['body'], locales: ['fr'] }),
+          read({ fields: ['title'], locales: ['en'] }, ['admin::is-creator']),
+        ] as any)
+      ).resolves.toEqual([
+        read({ fields: ['body'], locales: ['fr'] }, ['admin::is-creator']),
+        read({ fields: ['title'], locales: ['en'] }, []),
+      ]);
     });
   });
 });

@@ -37,15 +37,19 @@ interface RequestAuth {
 }
 
 /**
- * A request made with an admin token can only grant the token's own permissions. Its owner is
- * in `ctx.state.user`, but the token may hold fewer permissions, and a super-admin owner must
- * not lift the check.
+ * A request made with an admin token can only grant what both the token and its owner (in
+ * `ctx.state.user`) hold: the token may hold fewer permissions than its owner, and a token
+ * written before the owner lost a permission may hold more. A super-admin owner is limited by
+ * the token only.
  */
 const getCeilingRequester = (ctx: Context): CeilingRequester => {
   const auth: RequestAuth | undefined = ctx.state.auth;
 
   if (auth?.strategy?.name === adminTokenStrategy.name) {
-    return { tokenPermissions: auth.credentials?.adminPermissions ?? [] };
+    return {
+      tokenPermissions: auth.credentials?.adminPermissions ?? [],
+      owner: ctx.state.user,
+    };
   }
 
   return { user: ctx.state.user };

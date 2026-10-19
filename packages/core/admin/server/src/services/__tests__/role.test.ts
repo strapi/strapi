@@ -1145,41 +1145,115 @@ describe('Role', () => {
         { action: 'admin::roles.update' },
       ]);
 
-      test('Checks the token permissions with no super-admin bypass', async () => {
-        const { findUserPermissions, findMany } = setupStrapi();
+      describe('owned by a super admin', () => {
+        const owner = superAdminUser;
 
-        await expectForbidden(
-          checkPermissionsCeiling({ tokenPermissions: superAdminLikeTokenPermissions }, ROLE_ID, [
-            { action: READ, subject: ARTICLE },
-            { action: READ, subject: AUTHOR },
-          ]),
-          [{ action: READ, subject: AUTHOR, properties: {}, conditions: [] }]
-        );
+        test('Checks the token permissions only', async () => {
+          const { findUserPermissions, findMany } = setupStrapi();
 
-        expect(findUserPermissions).not.toHaveBeenCalled();
-        expect(findMany).toHaveBeenCalledWith({ where: { role: { id: ROLE_ID } } });
+          await expectForbidden(
+            checkPermissionsCeiling(
+              { tokenPermissions: superAdminLikeTokenPermissions, owner },
+              ROLE_ID,
+              [
+                { action: READ, subject: ARTICLE },
+                { action: READ, subject: AUTHOR },
+              ]
+            ),
+            [{ action: READ, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+
+          expect(findUserPermissions).not.toHaveBeenCalled();
+          expect(findMany).toHaveBeenCalledWith({ where: { role: { id: ROLE_ID } } });
+        });
+
+        test('Allows permissions the token holds', async () => {
+          const { findUserPermissions } = setupStrapi();
+
+          await expect(
+            checkPermissionsCeiling(
+              { tokenPermissions: superAdminLikeTokenPermissions, owner },
+              ROLE_ID,
+              [
+                { action: READ, subject: ARTICLE },
+                { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+              ]
+            )
+          ).resolves.toBeUndefined();
+
+          expect(findUserPermissions).not.toHaveBeenCalled();
+        });
+
+        test('Rejects everything when the token holds no permission', async () => {
+          setupStrapi();
+
+          await expectForbidden(
+            checkPermissionsCeiling({ tokenPermissions: [], owner }, ROLE_ID, [
+              { action: READ, subject: ARTICLE },
+            ]),
+            [{ action: READ, subject: ARTICLE, properties: {}, conditions: [] }]
+          );
+        });
       });
 
-      test('Allows permissions the token holds', async () => {
-        setupStrapi();
+      describe('owned by another admin', () => {
+        const owner = user;
 
-        await expect(
-          checkPermissionsCeiling({ tokenPermissions: superAdminLikeTokenPermissions }, ROLE_ID, [
-            { action: READ, subject: ARTICLE },
-            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
-          ])
-        ).resolves.toBeUndefined();
-      });
+        test('Rejects a permission the token holds but its owner no longer does', async () => {
+          const { findUserPermissions } = setupStrapi({
+            userPermissions: [{ action: READ, subject: ARTICLE }],
+          });
 
-      test('Rejects everything when the token holds no permission', async () => {
-        setupStrapi();
+          await expectForbidden(
+            checkPermissionsCeiling(
+              { tokenPermissions: superAdminLikeTokenPermissions, owner },
+              ROLE_ID,
+              [
+                { action: READ, subject: ARTICLE },
+                { action: CREATE, subject: ARTICLE },
+              ]
+            ),
+            [{ action: CREATE, subject: ARTICLE, properties: {}, conditions: [] }]
+          );
 
-        await expectForbidden(
-          checkPermissionsCeiling({ tokenPermissions: [] }, ROLE_ID, [
-            { action: READ, subject: ARTICLE },
-          ]),
-          [{ action: READ, subject: ARTICLE, properties: {}, conditions: [] }]
-        );
+          expect(findUserPermissions).toHaveBeenCalledWith(owner);
+        });
+
+        test('Rejects a permission the owner holds but the token does not', async () => {
+          setupStrapi({ userPermissions: [{ action: READ, subject: AUTHOR }] });
+
+          await expectForbidden(
+            checkPermissionsCeiling(
+              { tokenPermissions: superAdminLikeTokenPermissions, owner },
+              ROLE_ID,
+              [{ action: READ, subject: AUTHOR }]
+            ),
+            [{ action: READ, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+        });
+
+        test('Lists a permission both lack once', async () => {
+          setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+          await expectForbidden(
+            checkPermissionsCeiling({ tokenPermissions: [], owner }, ROLE_ID, [
+              { action: READ, subject: AUTHOR },
+            ]),
+            [{ action: READ, subject: AUTHOR, properties: {}, conditions: [] }]
+          );
+        });
+
+        test('Allows a permission both the token and its owner hold', async () => {
+          setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+          await expect(
+            checkPermissionsCeiling(
+              { tokenPermissions: superAdminLikeTokenPermissions, owner },
+              ROLE_ID,
+              [{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }]
+            )
+          ).resolves.toBeUndefined();
+        });
       });
     });
 

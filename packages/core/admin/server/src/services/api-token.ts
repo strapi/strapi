@@ -228,20 +228,49 @@ const assertAdminPermissionsValidity = async (adminPermissions?: PermissionInput
 };
 
 /**
+ * Why a requested admin permission cannot be inherited from the user's permissions, for the
+ * error message. `null` when the user holds no permission with the same action and subject.
+ */
+const describeCeilingRejection = (
+  requested: PermissionInput,
+  userPermissions: Permission[]
+): string | null => {
+  const matching = permissionDomain.ceiling.findMatchingPermissions(requested, userPermissions);
+
+  if (matching.length === 0) {
+    return null;
+  }
+
+  const isOpenAgainstRestriction = (property: string) =>
+    !Array.isArray(requested.properties?.[property]) &&
+    matching.some((permission) => Array.isArray(permission.properties?.[property]));
+
+  if (isOpenAgainstRestriction('fields')) {
+    return 'fields are required due to owner field restrictions';
+  }
+
+  if (isOpenAgainstRestriction('locales')) {
+    return 'locales are required due to owner locale restrictions';
+  }
+
+  return 'fields, locales and conditions are not held together';
+};
+
+/**
  * Enforce that every requested admin permission stays within the calling
  * user's own permission ceiling, then return the clamped permissions.
  *
  * Super-admins bypass this (they hold every permission).
  * When admin permissions are requested, an authenticated user is required (no bypass when user is missing).
  *
- * For each requested permission:
- *  - action + subject must match at least one user permission
- *  - properties.fields must be ⊆ user's properties.fields
- *    (if the user's permission defines no fields, all fields are allowed)
- *  - conditions are inherited from the user's matching permission(s);
- *    the caller cannot configure conditions on their own tokens
+ * Each requested permission follows the same per-permission rule as roles (`ceiling.ts`): every
+ * combination of a requested field and locale must be covered by one user permission, and
+ * omitting `fields` or `locales` against a user restricted on it is rejected. A request that
+ * only several user permissions together would cover (`title` on `fr` from `title` on `en` plus
+ * `body` on `fr`) is rejected. Conditions are inherited from the user, never taken from the
+ * request (`getInheritedConditions`).
  *
- * Returns the permissions with conditions enforced from the user's role.
+ * Returns the permissions with their inherited conditions.
  * Throws ValidationError if any permission exceeds the user's ceiling.
  *
  * Guaranteed postcondition: all returned permissions have conditions filtered to
@@ -277,75 +306,37 @@ const enforceAdminPermissionsCeiling = async (
 
   const clamped = requestedPermissions.map((requested) => {
     const requestedSubject = requested.subject || null;
-
-    // Find all user permissions matching action + subject
-    const matchingUserPerms = userPermissions.filter((userPerm: Permission) => {
-      if (userPerm.action !== requested.action) return false;
-      const userSubject = userPerm.subject || null;
-      return requestedSubject === userSubject;
-    });
-
     const label =
       requestedSubject !== null ? `${requested.action} on ${requestedSubject}` : requested.action;
 
-    if (matchingUserPerms.length === 0) {
-      exceeding.push(label);
+    const conditions = permissionDomain.ceiling.getInheritedConditions(requested, userPermissions);
+
+    if (conditions === null) {
+      const reason = describeCeilingRejection(requested, userPermissions);
+      exceeding.push(reason === null ? label : `${label} (${reason})`);
       return requested;
     }
 
-    // --- Field-level ceiling ---
-    // If any matching user perm has no fields defined → all fields are allowed.
-    // Otherwise, effective user fields = union of all matching perms' fields.
-    const anyUserPermHasAllFields = matchingUserPerms.some(
-      (p) => !p.properties?.fields || p.properties.fields.length === 0
-    );
-
-    const requestedFields = requested.properties?.fields;
-
-    if (!anyUserPermHasAllFields) {
-      const effectiveUserFields = new Set(
-        matchingUserPerms.flatMap((p) => p.properties?.fields || [])
-      );
-
-      // When the owner is field-restricted, omitting fields would widen access to all fields.
-      // Force explicit field selection so token scope can't exceed the owner's ceiling.
-      if (requestedFields === undefined || requestedFields === null) {
-        exceeding.push(`${label} (fields are required due to owner field restrictions)`);
-        return requested;
-      }
-
-      if (requestedFields.length > 0) {
-        const exceedingFields = requestedFields.filter((f) => !effectiveUserFields.has(f));
-
-        if (exceedingFields.length > 0) {
-          exceeding.push(`${label} (fields: ${exceedingFields.join(', ')})`);
-          return requested;
-        }
-      }
-    }
-
-    // --- Condition-level ceiling ---
-    // Conditions are always inherited from the user's matching permission(s).
-    // If any matching user perm is unconditional → token gets no conditions.
-    // Otherwise → union of conditions across matching perms.
-    const anyUserPermIsUnconditional = matchingUserPerms.some(
-      (p) => !p.conditions || p.conditions.length === 0
-    );
-
-    const enforcedConditions: string[] = anyUserPermIsUnconditional
-      ? []
-      : ([...new Set(matchingUserPerms.flatMap((p) => p.conditions || []))] as string[]);
-
-    return {
-      ...requested,
-      conditions: enforcedConditions,
-    };
+    return { ...requested, conditions };
   });
 
   if (exceeding.length > 0) {
     throw new ValidationError(
       `Cannot assign admin permissions that exceed your own. ` +
         `Exceeding: ${exceeding.join(', ')}`
+    );
+  }
+
+  // The inherited conditions must keep every permission inside the ceiling. A failure here is a
+  // bug in getInheritedConditions, so refuse to store the permission rather than widen the token.
+  const outsideCeiling = clamped.filter(
+    (permission) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, userPermissions)
+  );
+
+  if (outsideCeiling.length > 0) {
+    throw new ValidationError(
+      `Cannot assign admin permissions that exceed your own. ` +
+        `Exceeding: ${outsideCeiling.map((permission) => permission.action).join(', ')}`
     );
   }
 
@@ -451,13 +442,13 @@ const assignAdminPermissionsToToken = async (
 };
 
 /**
- * Reconcile a token's admin permissions against the owner's current effective ceiling.
+ * Reconcile a token's admin permissions against the owner's current effective ceiling, with the
+ * same rule as `enforceAdminPermissionsCeiling` (`getInheritedConditions`).
  *
  * Pure / sync — no DB calls. Returns two buckets:
- *   toDelete  – permissions that are no longer within the user's scope (action/subject missing
- *               or requested fields exceed the allowed set)
- *   toUpdate  – permissions that are still in scope but whose conditions must be re-clamped
- *               to the current union of the matching user permissions' conditions
+ *   toDelete  – permissions no single user permission covers any more: some combination of a
+ *               field and locale is not held, or no condition is shared by all of them
+ *   toUpdate  – permissions that are still covered but whose inherited conditions changed
  */
 const reconcileTokenPermissionsToUserCeiling = (
   userPermissions: Permission[],
@@ -467,56 +458,20 @@ const reconcileTokenPermissionsToUserCeiling = (
   const toUpdate: { id: Data.ID; conditions: string[] }[] = [];
 
   tokenPermissions.forEach((tokenPerm) => {
-    const tokenSubject = tokenPerm.subject || null;
+    const conditions = permissionDomain.ceiling.getInheritedConditions(tokenPerm, userPermissions);
 
-    const matchingUserPerms = userPermissions.filter(
-      (userPerm) =>
-        userPerm.action === tokenPerm.action && (userPerm.subject || null) === tokenSubject
-    );
-
-    if (matchingUserPerms.length === 0) {
+    if (conditions === null) {
       toDelete.push(tokenPerm);
       return;
     }
-
-    // Field-level ceiling check (mirrors enforceAdminPermissionsCeiling)
-    const anyUserPermHasAllFields = matchingUserPerms.some(
-      (p) => !p.properties?.fields || p.properties.fields.length === 0
-    );
-    const tokenFields = tokenPerm.properties?.fields;
-
-    const fieldCeilingExceeded =
-      !anyUserPermHasAllFields &&
-      tokenFields !== undefined &&
-      tokenFields !== null &&
-      tokenFields.length > 0 &&
-      (() => {
-        const effectiveUserFields = new Set(
-          matchingUserPerms.flatMap((p) => p.properties?.fields || [])
-        );
-        return tokenFields.some((f) => !effectiveUserFields.has(f));
-      })();
-
-    if (fieldCeilingExceeded) {
-      toDelete.push(tokenPerm);
-      return;
-    }
-
-    // Condition: force conditions to be the ones of the user permission(s)
-    const anyUserPermIsUnconditional = matchingUserPerms.some(
-      (p) => !p.conditions || p.conditions.length === 0
-    );
-    const enforcedConditions: string[] = anyUserPermIsUnconditional
-      ? []
-      : ([...new Set(matchingUserPerms.flatMap((p) => p.conditions || []))] as string[]);
 
     const currentConditions: string[] = (tokenPerm.conditions as string[]) || [];
     const conditionsChanged =
-      enforcedConditions.length !== currentConditions.length ||
-      enforcedConditions.some((c) => !currentConditions.includes(c));
+      conditions.length !== currentConditions.length ||
+      conditions.some((c) => !currentConditions.includes(c));
 
     if (conditionsChanged) {
-      toUpdate.push({ id: tokenPerm.id as Data.ID, conditions: enforcedConditions });
+      toUpdate.push({ id: tokenPerm.id as Data.ID, conditions });
     }
   });
 
@@ -561,8 +516,21 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
       tokenPermissions
     );
 
+    const tokenLabel = `Admin token ${token.id} (${token.name}) of user ${userId}`;
+    const describePermission = (id: Data.ID) =>
+      `${id} ${tokenPermissions.find((p) => p.id === id)?.action}`;
+
     if (toDelete.length > 0) {
+      const permissions = toDelete.map((p) => describePermission(p.id)).join(', ');
+      strapi.log.warn(
+        `${tokenLabel}: deleting permissions outside the owner's ceiling: ${permissions}`
+      );
       await getService('permission').deleteByIds(toDelete.map((p) => p.id as Data.ID));
+    }
+
+    if (toUpdate.length > 0) {
+      const permissions = toUpdate.map(({ id }) => describePermission(id)).join(', ');
+      strapi.log.warn(`${tokenLabel}: updating conditions to the owner's ceiling: ${permissions}`);
     }
 
     for (const { id, conditions } of toUpdate) {

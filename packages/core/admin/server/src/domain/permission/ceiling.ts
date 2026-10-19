@@ -15,9 +15,10 @@
  * property, so it is not a dimension: it needs nothing to cover it, but the other properties and
  * the conditions are still checked. An empty `fields` list grants nothing at all.
  *
- * Admin tokens enforce a similar ceiling against the token owner in `services/api-token.ts`
- * (`enforceAdminPermissionsCeiling`), with its own rules for now: fields only, and conditions
- * inherited from the owner instead of chosen.
+ * Admin tokens follow the same rule against the token owner, but their conditions are inherited
+ * instead of chosen: `getInheritedConditions` computes them, and a token permission it returns
+ * `null` for is rejected (`enforceAdminPermissionsCeiling` in `services/api-token.ts`) or
+ * removed (`reconcileTokenPermissionsToUserCeiling`).
  */
 import { uniq } from 'lodash';
 
@@ -188,6 +189,34 @@ const everyCombination = (
 };
 
 /**
+ * Every combination of the dimensions, for when the same combinations are checked more than
+ * once.
+ */
+const collectCombinations = (
+  dimensions: PropertyDimension[],
+  properties: Record<string, string | null> = {}
+): Record<string, string | null>[] => {
+  if (dimensions.length === 0) {
+    return [properties];
+  }
+
+  const [{ property, values }, ...rest] = dimensions;
+
+  return values.flatMap((value) => collectCombinations(rest, { ...properties, [property]: value }));
+};
+
+/**
+ * The property dimensions of `requested` against the matching held permissions.
+ */
+const getDimensions = (
+  requested: CeilingPermission,
+  matching: CeilingPermission[]
+): PropertyDimension[] =>
+  getRestrictedProperties(requested, matching)
+    .map((property) => getPropertyDimension(requested, property))
+    .filter((dimension): dimension is PropertyDimension => dimension !== null);
+
+/**
  * Whether `requested` is covered by the `held` permissions: same action and subject, and every
  * combination of a requested property value and condition covered by one held permission.
  */
@@ -206,9 +235,7 @@ export const isPermissionWithinCeiling = (
     return false;
   }
 
-  const dimensions = getRestrictedProperties(requested, matching)
-    .map((property) => getPropertyDimension(requested, property))
-    .filter((dimension): dimension is PropertyDimension => dimension !== null);
+  const dimensions = getDimensions(requested, matching);
 
   const requestedConditions = requested.conditions ?? [];
   const conditions: (string | null)[] =
@@ -221,6 +248,47 @@ export const isPermissionWithinCeiling = (
   );
 };
 
+/**
+ * The conditions a permission inherits when it is written on behalf of a holder (admin tokens):
+ * `[]` when every atom of `requested` is covered by an unconditional held permission, otherwise
+ * every held condition under which every atom is covered. `null` when the request is not
+ * coverable: no matching permission, an atom no held permission covers, a property the request
+ * leaves open while a matching permission restricts it, or no condition shared by all atoms.
+ * `requested.conditions` is ignored.
+ */
+export const getInheritedConditions = (
+  requested: CeilingPermission,
+  held: CeilingPermission[]
+): string[] | null => {
+  // A permission with no fields grants nothing, so it needs no condition
+  if (hasNoFields(requested)) {
+    return [];
+  }
+
+  const matching = findMatchingPermissions(requested, held);
+
+  if (matching.length === 0) {
+    return null;
+  }
+
+  const atoms = collectCombinations(getDimensions(requested, matching));
+
+  const isCoveredUnder = (condition: string | null) =>
+    atoms.every((properties) =>
+      matching.some((permission) => coversAtom(permission, { properties, condition }))
+    );
+
+  if (isCoveredUnder(null)) {
+    return [];
+  }
+
+  const allowed = uniq(matching.flatMap((permission) => permission.conditions ?? [])).filter(
+    (condition) => isCoveredUnder(condition)
+  );
+
+  return allowed.length === 0 ? null : allowed;
+};
+
 export default {
   hasNoFields,
   findMatchingPermissions,
@@ -230,4 +298,5 @@ export default {
   coversCondition,
   coversAtom,
   isPermissionWithinCeiling,
+  getInheritedConditions,
 };
