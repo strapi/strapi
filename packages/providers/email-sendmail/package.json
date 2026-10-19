@@ -51,7 +51,6 @@
   },
   "devDependencies": {
     "@types/node": "20.19.41",
-    "@types/nodemailer": "7.0.11",
     "eslint-config-custom": "5.58.0",
     "tsconfig": "5.58.0",
     "vitest": "catalog:",
