@@ -90,11 +90,10 @@ type HasDefault<TAttribute> =
 /**
  * A field hidden by its `conditions.visible` rule skips validation
  * (`entity-validator/index.ts:449-456`). The rule depends on the data, so the types treat a
- * conditional field as optional and nullable.
+ * conditional field as optional and nullable. Type generation marks it with
+ * {@link Schema.Attribute.Conditional} (strict types only).
  */
-type IsConditional<TAttribute> = TAttribute extends { conditions: { visible: unknown } }
-  ? true
-  : false;
+type IsConditional<TAttribute> = TAttribute extends Schema.Attribute.Conditional ? true : false;
 
 type IsRequired<TAttribute> = TAttribute extends Schema.Attribute.Required ? true : false;
 

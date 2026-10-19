@@ -23,6 +23,7 @@ export const NAMESPACES = {
  */
 export interface Attribute {
   type: string;
+  conditions?: { visible?: unknown };
   [key: string]: any;
 }
 

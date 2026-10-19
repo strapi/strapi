@@ -217,6 +217,8 @@ type generation already emits, `Schema.Attribute.Required` and `Schema.Attribute
   and dynamic zones never accept it.
 - Required relations and media stay optional: the runtime enforces them only with
   `api.documents.strictRelations`.
+- An attribute with a `conditions.visible` rule is optional and nullable: a hidden field skips
+  validation. Type generation marks it with `Schema.Attribute.Conditional`, with strict types only.
 - `update` and `clone` require no key. On update, a component value with `id` is partial; a value
   without `id` creates a component and follows the create rules.
 - `create` requires `data`.

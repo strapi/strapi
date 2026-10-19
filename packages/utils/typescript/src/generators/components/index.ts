@@ -33,7 +33,8 @@ export const generateComponentsDefinitions = async (
     uid: component.uid,
     definition: models.schema.generateSchemaDefinition(
       component,
-      interfaceNames.get(component.uid)
+      interfaceNames.get(component.uid),
+      { strict }
     ),
   }));
 

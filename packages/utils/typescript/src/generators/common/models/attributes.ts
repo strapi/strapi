@@ -33,9 +33,24 @@ export const getAttributeType = (
 };
 
 /**
+ * Options of the attribute generators.
+ */
+export type AttributeOptions = {
+  /**
+   * Whether the application enables `typescript.strictTypes`. Strict-only modifiers, such as
+   * `Schema.Attribute.Conditional`, are emitted only then, so generated files without strict types
+   * stay as in previous releases.
+   */
+  strict?: boolean;
+};
+
+/**
  * Collect every modifier node from an attribute
  */
-export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
+export const getAttributeModifiers = (
+  attribute: Attribute,
+  { strict = false }: AttributeOptions = {}
+): ts.TypeNode[] => {
   const modifiers: ts.TypeNode[] = [];
 
   // Required
@@ -146,6 +161,16 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
     );
   }
 
+  // Conditional (strict types only): a field hidden by its `conditions.visible` rule skips
+  // validation, so the strict write inputs make it optional and nullable
+  if (strict === true && attribute.conditions?.visible !== undefined) {
+    modifiers.push(
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(withAttributeNamespace('Conditional'))
+      )
+    );
+  }
+
   // Default (ignore if default is a function)
   if (attribute.default != null && typeof attribute.default !== 'function') {
     const defaultLiteral = toTypeLiteral(attribute.default);
@@ -167,7 +192,8 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
 export const attributeToPropertySignature = (
   schema: Schema,
   attributeName: string,
-  attribute: Attribute
+  attribute: Attribute,
+  options: AttributeOptions = {}
 ): ts.PropertySignature | null => {
   const baseType = getAttributeType(attributeName, attribute, schema.uid);
 
@@ -175,7 +201,7 @@ export const attributeToPropertySignature = (
     return null;
   }
 
-  const modifiers = getAttributeModifiers(attribute);
+  const modifiers = getAttributeModifiers(attribute, options);
 
   const nodes = [baseType, ...modifiers];
 
