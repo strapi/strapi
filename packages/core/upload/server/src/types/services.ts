@@ -1,5 +1,5 @@
 import type upload from '../services/upload';
-import type { Config, UploadInputFile } from '../types';
+import type { Config, File, Folder, UploadInputFile } from '../types';
 import type imageManipulation from '../services/image-manipulation';
 import type apiUploadFolder from '../services/api-upload-folder';
 import type provider from '../services/provider';
@@ -103,6 +103,20 @@ declare global {
         plugin_upload_metrics: { lastWeeklyUpdate?: number; weeklySchedule?: string };
         'plugin_upload_api-folder': { id: number };
         plugin_upload_media_library_default_notice: { shown: boolean };
+      }
+
+      /**
+       * Events the upload plugin emits on the event hub, also forwarded to webhooks. `media` is the
+       * file sanitized as a default output (private fields removed), `folder` the folder row.
+       * `media-folder.delete` passes every deleted folder, nested ones included.
+       */
+      interface Events {
+        'media.create': [{ media: File }];
+        'media.update': [{ media: File }];
+        'media.delete': [{ media: File }];
+        'media-folder.create': [{ folder: Folder }];
+        'media-folder.update': [{ folder: Folder }];
+        'media-folder.delete': [{ folders: Folder[] }];
       }
 
       interface PackageServices {

@@ -178,6 +178,20 @@ declare global {
       interface Stores {}
 
       /**
+       * Event payloads keyed by event name (e.g. `'entry.create'`), read by `strapi.eventHub`.
+       * Each value is the tuple of arguments an emit passes after the name: the union of every
+       * payload the producers of the name pass (e.g. `[{ user: User } | { users: User[] }]`).
+       *
+       * Additive only, with no `Package*` and `App*` pair. Nothing defines an event at runtime: any
+       * code emits any name. The package that emits a name registers it, with the payload of each of
+       * its producers; applications register the events they emit. A listener can then rely on the
+       * registered payload, so with strict types an emit of a registered name must match it.
+       * Redeclaring a name with another payload is a type error.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface Events {}
+
+      /**
        * Content-type schemas keyed by UID, read in strict mode instead of `Public.ContentTypeSchemas`.
        * Type generation is the only producer: it writes `types/generated/contentTypes.d.ts`.
        * Applications do not override schemas, so there is no `Package*` and `App*` pair.

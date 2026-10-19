@@ -8,6 +8,9 @@ import type createValidationService from '../services/validation';
 import type createWorkflowsService from '../services/workflows';
 import type { createHomepageService } from '../homepage/services/homepage';
 
+/** A stage in the `review-workflows.updateEntryStage` event. */
+type StageEvent = { id: number | string; name: string };
+
 /** Review Workflows services by name, as registered by the plugin. */
 export type Services = {
   assignees: ReturnType<typeof createAssigneesService>;
@@ -36,6 +39,29 @@ declare global {
        */
       interface Stores {
         plugin_ee_metrics: { lastWeeklyUpdate?: number; weeklySchedule?: string };
+      }
+
+      /**
+       * The stage change of an entry, emitted by the Document Service middleware after an update
+       * that moved the entry to another stage, and forwarded to webhooks. The payload names the entry
+       * `entity` (not `entry`, unlike the `entry.*` events). IDs are database IDs, `uid` the content
+       * type UID (plain types: this package only has a dev dependency on `@strapi/types`).
+       */
+      interface Events {
+        'review-workflows.updateEntryStage': [
+          {
+            model: string;
+            uid: string;
+            entity: {
+              id: number | string;
+              documentId: string;
+              /** `null` for a content type that is not localized. */
+              locale: string | null;
+              status: 'draft';
+            };
+            workflow: { id: number | string; stages: { from: StageEvent; to: StageEvent } };
+          },
+        ];
       }
 
       // Registered only when the `review-workflows` EE feature is enabled, so a CE application, or a

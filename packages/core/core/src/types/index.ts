@@ -1,4 +1,4 @@
-import type { Struct } from '@strapi/types';
+import type { Modules, Struct, UID } from '@strapi/types';
 import type * as ResolvedConfig from './config';
 import type { body } from '../middlewares/body';
 import type { compression } from '../middlewares/compression';
@@ -14,6 +14,13 @@ import type { session } from '../middlewares/session';
 
 /** The config a middleware factory declares as its first parameter. */
 type FactoryConfig<TFactory extends (...args: never[]) => unknown> = Parameters<TFactory>[0];
+
+/** The payload of the `entry.*` events of the Document Service. */
+type EntryEvent = {
+  model: string;
+  uid: UID.Schema;
+  entry: Modules.Documents.AnyDocument;
+};
 
 /** Resolved config contracts, e.g. `ResolvedConfig.Server`. Input types are `Core.Config.*` in `@strapi/types`. */
 export type * as ResolvedConfig from './config';
@@ -57,6 +64,29 @@ declare global {
       interface Stores {
         strapi_content_types_schema: Record<string, Struct.ContentTypeSchema>;
         'strapi_unidirectional-join-table-repair-ran': boolean;
+      }
+
+      /**
+       * Events `@strapi/core` emits on the event hub.
+       *
+       * The `entry.*` events are emitted by the Document Service after the transaction commits, one
+       * per entry: `model` is the model name, `uid` its UID, `entry` the entry sanitized as a default
+       * output (private fields removed). It is fetched again with a deep populate, except for
+       * `entry.delete` and `entry.unpublish`, which pass the entry as it was before. `entry.*` events
+       * are also forwarded to webhooks with the same payload.
+       *
+       * The `ee.*` events report a license change, with no payload.
+       */
+      interface Events {
+        'entry.create': [EntryEvent];
+        'entry.update': [EntryEvent];
+        'entry.delete': [EntryEvent];
+        'entry.publish': [EntryEvent];
+        'entry.unpublish': [EntryEvent];
+        'entry.draft-discard': [EntryEvent];
+        'ee.enable': [];
+        'ee.disable': [];
+        'ee.update': [];
       }
 
       /**
