@@ -24,6 +24,6 @@ The schema generators (`src/generators/common/models/attributes.ts`) write each 
 
 `@strapi/types` reads these modifiers. `Required` and `DefaultTo` decide which keys the strict Document Service write inputs require (see [document write path](../../../architecture/05-document-write-path.md#validation)).
 
-With `typescript.strictTypes`, the generators also write `Schema.Attribute.Conditional` on an attribute with a `conditions.visible` rule. A hidden field skips validation, so the strict write inputs make a conditional attribute optional and nullable. Without strict types, the generators write no strict-only modifier, and generated files stay as in previous releases. Unit tests in `src/__tests__/generators/schemas/` check both outputs.
+With `typescript.strictTypes`, the generators also write `Schema.Attribute.Conditional` on an attribute with a `conditions.visible` rule. A hidden field skips validation, so the strict write inputs make a conditional attribute optional and nullable. With strict types, each attribute also gets a JSDoc line with its write rule when it has one, for example `Required when published. \`null\` only in drafts.` (`getAttributeWriteRule`). Editors show it on the input keys of the Document Service. Without strict types, the generators write no strict-only modifier and no comment, and generated files stay as in previous releases. Unit tests in `src/__tests__/generators/schemas/` check both outputs.
 
 ## Related
