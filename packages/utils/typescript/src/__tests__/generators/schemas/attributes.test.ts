@@ -4,6 +4,7 @@ import {
   attributeToPropertySignature,
   getAttributeType,
   getAttributeModifiers,
+  getAttributeWriteRule,
 } from '../../../generators/common/models/attributes';
 import { addImport } from '../../../generators/common/imports';
 
@@ -387,6 +388,60 @@ describe('Attributes', () => {
           expect(typeArgument.elements[1].text).toBe('default.comp2');
         });
       });
+    });
+  });
+
+  describe('Get Attribute Write Rule', () => {
+    test.each([
+      ['optional', { type: 'string' }, undefined],
+      ['optional with a default', { type: 'integer', default: 0 }, 'Default: 0.'],
+      ['optional list', { type: 'dynamiczone', components: [] }, 'Never `null`.'],
+      [
+        'required',
+        { type: 'string', required: true },
+        'Required when published. `null` only in drafts.',
+      ],
+      [
+        'required with a default',
+        { type: 'string', required: true, default: 'a' },
+        'Default: "a". `null` only in drafts.',
+      ],
+      [
+        'required list',
+        { type: 'component', component: 'a.b', repeatable: true, required: true },
+        'Required on every create, drafts included (`[]` is enough). Never `null`.',
+      ],
+      [
+        'required relation',
+        { type: 'relation', relation: 'oneToOne', required: true },
+        'Required when published, only with `api.documents.strictRelations`.',
+      ],
+      [
+        'required media',
+        { type: 'media', required: true },
+        'Required when published, only with `api.documents.strictRelations`.',
+      ],
+      [
+        'required and conditional',
+        { type: 'string', required: true, conditions: { visible: { var: 'a' } } },
+        'Required only when its condition shows it.',
+      ],
+      ['not writable', { type: 'string', required: true, writable: false }, undefined],
+      ['function default', { type: 'string', default: () => 'a' }, undefined],
+      ['default that ends a comment', { type: 'string', default: '*/' }, 'Default: "*\\/".'],
+    ])('%s', (_, attribute, rule) => {
+      expect(getAttributeWriteRule(attribute)).toBe(rule);
+    });
+
+    test('without draft and publish, every write publishes', () => {
+      const options = { draftAndPublish: false };
+
+      expect(getAttributeWriteRule({ type: 'string', required: true }, options)).toBe(
+        'Required. Never `null`.'
+      );
+      expect(getAttributeWriteRule({ type: 'string', required: true, default: 'a' }, options)).toBe(
+        'Default: "a". Never `null`.'
+      );
     });
   });
 
