@@ -224,7 +224,7 @@ describe('handlePost', () => {
 
     const handler = createPostHandler(deps);
 
-    const requestBody = { method: 'initialize' };
+    const requestBody = { jsonrpc: '2.0', id: 1, method: 'initialize' };
     const req = makeReq();
     const res = { headersSent: false } as unknown as ServerResponse;
     const ctx = makeCtx(req, res, requestBody);
@@ -237,6 +237,7 @@ describe('handlePost', () => {
       isDevMode: mockConfig.isDevMode(),
       ability: expect.objectContaining({ can: expect.any(Function) }),
       user: { id: 42 },
+      toolRegistration: { mode: 'none' },
     });
     expect(NodeStreamableHTTPServerTransport).toHaveBeenCalledWith({
       sessionIdGenerator: undefined,
@@ -245,6 +246,82 @@ describe('handlePost', () => {
     expect(mockTransport.handleRequest).toHaveBeenCalledWith(req, res, requestBody);
     expect(sendDidUseMcpServer).toHaveBeenCalledWith(mockStrapi);
     expect(mockMcpServer.close).toHaveBeenCalledTimes(1);
+  });
+
+  test('should register tools only for the JSON-RPC method', async () => {
+    const createServerWithRegistries = jest.fn().mockReturnValue({
+      mcpServer: {
+        connect: jest.fn().mockResolvedValue(undefined),
+        close: jest.fn().mockResolvedValue(undefined),
+      },
+      registries: {},
+    });
+    const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+    NodeStreamableHTTPServerTransport.mockImplementation(() => ({
+      handleRequest: jest.fn().mockResolvedValue(undefined),
+    }));
+
+    const handler = createPostHandler({
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries,
+      capabilityDefinitions: {} as any,
+    });
+
+    const cases: Array<{ body: unknown; toolRegistration: unknown }> = [
+      {
+        body: { jsonrpc: '2.0', method: 'notifications/initialized' },
+        toolRegistration: { mode: 'none' },
+      },
+      {
+        body: { jsonrpc: '2.0', id: 1, method: 'ping' },
+        toolRegistration: { mode: 'none' },
+      },
+      {
+        body: { jsonrpc: '2.0', id: 1, method: 'unknown/method' },
+        toolRegistration: { mode: 'none' },
+      },
+      {
+        body: { not: 'json-rpc' },
+        toolRegistration: { mode: 'none' },
+      },
+      {
+        body: { jsonrpc: '2.0', id: 1, method: 'tools/list' },
+        toolRegistration: { mode: 'list' },
+      },
+      {
+        body: {
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name: 'list_article', arguments: {} },
+        },
+        toolRegistration: { mode: 'call', names: new Set(['list_article']) },
+      },
+      {
+        body: [
+          { jsonrpc: '2.0', id: 1, method: 'tools/list' },
+          {
+            jsonrpc: '2.0',
+            id: 2,
+            method: 'tools/call',
+            params: { name: 'get_article' },
+          },
+        ],
+        toolRegistration: { mode: 'none' },
+      },
+    ];
+
+    for (const { body, toolRegistration } of cases) {
+      createServerWithRegistries.mockClear();
+      await handler(makeCtx(makeReq(), { headersSent: false } as ServerResponse, body), () =>
+        Promise.resolve()
+      );
+      expect(createServerWithRegistries).toHaveBeenCalledWith(
+        expect.objectContaining({ toolRegistration })
+      );
+    }
   });
 
   test('should expose the authenticated user and mcp audit source on ctx.state', async () => {

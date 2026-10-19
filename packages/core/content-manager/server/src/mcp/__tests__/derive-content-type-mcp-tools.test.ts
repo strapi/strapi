@@ -1692,7 +1692,75 @@ describe('buildFiltersSchema', () => {
     expect(schema.description).not.toContain('secret');
     expect(schema.description).toContain('title');
   });
+
+  it('builds the recursive filters object once per JSON Schema conversion', () => {
+    // Zod's toJSONSchema calls z.lazy getters directly from isTransforming,
+    // once per visited node, and that bypasses ZodLazy's own inner cache.
+    // Each uncached call allocates a fresh operator object for every field.
+    const schema = buildFiltersSchema(attrs);
+    const lazy = findLazySchema(schema);
+    const getter = lazy._zod.def.getter;
+    const built = new Set<z.ZodTypeAny>();
+
+    lazy._zod.def.getter = () => {
+      const inner = getter();
+      built.add(inner);
+      return inner;
+    };
+
+    // Tool input schemas are converted with io: "input". That path calls
+    // isTransforming on every node, and isTransforming invokes z.lazy getters
+    // directly instead of Zod's cached inner type.
+    const jsonSchema = z.toJSONSchema(schema, { io: 'input' });
+
+    expect(JSON.stringify(jsonSchema)).toContain('title');
+    expect(JSON.stringify(jsonSchema)).toContain('$and');
+    // Distinct inner schemas produced while converting this one filters schema.
+    expect({ rebuilt: built.size }).toEqual({ rebuilt: 1 });
+    expect(
+      schema.safeParse({ title: { $eq: 'hello' }, $and: [{ count: { $gt: 1 } }] }).success
+    ).toBe(true);
+  });
+
+  it('does not reuse a filters schema built for a different permitted field set', () => {
+    const permittedTitle = buildFiltersSchema(attrs, new Set(['title']));
+    const permittedTitleAgain = buildFiltersSchema(attrs, new Set(['title']));
+    const permittedCount = buildFiltersSchema(attrs, new Set(['count']));
+    const jsonSchema = (schema: z.ZodTypeAny) => z.toJSONSchema(schema, { io: 'input' });
+
+    expect(jsonSchema(permittedTitle)).toEqual(jsonSchema(permittedTitleAgain));
+    expect(jsonSchema(permittedTitle)).not.toEqual(jsonSchema(permittedCount));
+    expect(permittedTitle.safeParse({ title: { $eq: 'hello' } }).success).toBe(true);
+    expect(permittedTitle.safeParse({ count: { $gt: 1 } }).success).toBe(false);
+    expect(permittedCount.safeParse({ count: { $gt: 1 } }).success).toBe(true);
+    expect(permittedCount.safeParse({ title: { $eq: 'hello' } }).success).toBe(false);
+  });
 });
+
+type LazyZodSchema = z.ZodTypeAny & {
+  _zod: {
+    def: {
+      type?: string;
+      innerType?: LazyZodSchema;
+      getter: () => z.ZodTypeAny;
+    };
+  };
+};
+
+const findLazySchema = (schema: z.ZodTypeAny): LazyZodSchema => {
+  let current: LazyZodSchema | undefined = schema as LazyZodSchema;
+  const seen = new Set<LazyZodSchema>();
+
+  while (current && seen.has(current) === false) {
+    seen.add(current);
+    if (current._zod.def.type === 'lazy') {
+      return current;
+    }
+    current = current._zod.def.innerType;
+  }
+
+  throw new Error('expected buildFiltersSchema to wrap a lazy schema');
+};
 
 // ---------------------------------------------------------------------------
 // Locale permission segregation tests

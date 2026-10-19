@@ -63,7 +63,7 @@ const connectClient = async (
   strapi: Core.Strapi,
   definitions: Partial<Parameters<typeof createMcpServerWithRegistries>[0]['definitions']>
 ) => {
-  const { mcpServer } = createMcpServerWithRegistries({
+  const { mcpServer } = await createMcpServerWithRegistries({
     strapi,
     definitions: {
       tools:

@@ -128,8 +128,8 @@ describe('createMcpServerWithRegistries', () => {
     >('resource');
   });
 
-  test('should create MCP server with registries', () => {
-    const result = createMcpServerWithRegistries({
+  test('should create MCP server with registries', async () => {
+    const result = await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -147,7 +147,7 @@ describe('createMcpServerWithRegistries', () => {
     expect(result.registries.resources).toBeDefined();
   });
 
-  test('should enable devModeOnly capabilities when in dev mode', () => {
+  test('should enable devModeOnly capabilities when in dev mode', async () => {
     // Add a devModeOnly tool
     toolDefinitions.define({
       name: 'dev-tool',
@@ -159,7 +159,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
     });
 
-    const result = createMcpServerWithRegistries({
+    const result = await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -176,7 +176,7 @@ describe('createMcpServerWithRegistries', () => {
     expect(enabledTools.some((t) => t.name === 'dev-tool')).toBe(true);
   });
 
-  test('should not enable devModeOnly capabilities when not in dev mode', () => {
+  test('should not enable devModeOnly capabilities when not in dev mode', async () => {
     // Add a devModeOnly tool
     toolDefinitions.define({
       name: 'dev-tool',
@@ -188,7 +188,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
     });
 
-    const result = createMcpServerWithRegistries({
+    const result = await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -207,8 +207,8 @@ describe('createMcpServerWithRegistries', () => {
     expect(disabledTools.some((t) => t.name === 'dev-tool')).toBe(true);
   });
 
-  test('should handle empty definitions', () => {
-    const result = createMcpServerWithRegistries({
+  test('should handle empty definitions', async () => {
+    const result = await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -225,7 +225,7 @@ describe('createMcpServerWithRegistries', () => {
     expect(result.registries.resources.list().length).toBe(0);
   });
 
-  test('should enable auth-gated capabilities when action is allowed', () => {
+  test('should enable auth-gated capabilities when action is allowed', async () => {
     mockAbility.can.mockReturnValue(true);
     toolDefinitions.define({
       name: 'authorized-tool',
@@ -237,7 +237,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
     });
 
-    const result = createMcpServerWithRegistries({
+    const result = await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -253,7 +253,7 @@ describe('createMcpServerWithRegistries', () => {
     expect(mockAbility.can).toHaveBeenCalledWith('admin::read');
   });
 
-  test('should keep auth-gated capabilities disabled when action is denied', () => {
+  test('should keep auth-gated capabilities disabled when action is denied', async () => {
     mockAbility.can.mockReturnValue(false);
     toolDefinitions.define({
       name: 'unauthorized-tool',
@@ -265,7 +265,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => async () => ({ content: [], structuredContent: {} }),
     });
 
-    const result = createMcpServerWithRegistries({
+    const result = await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -280,7 +280,7 @@ describe('createMcpServerWithRegistries', () => {
     expect(result.registries.tools.status('unauthorized-tool')).toBe('disabled');
   });
 
-  test('should register and bind a tool with no resolveInputSchema', () => {
+  test('should register and bind a tool with no resolveInputSchema', async () => {
     mockAbility.can.mockReturnValue(true);
     toolDefinitions.define({
       name: 'no-input-tool',
@@ -291,7 +291,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => async () => ({ content: [], structuredContent: { ok: true } }),
     });
 
-    expect(() => {
+    await expect(
       createMcpServerWithRegistries({
         strapi: mockStrapi as Core.Strapi,
         definitions: {
@@ -302,8 +302,8 @@ describe('createMcpServerWithRegistries', () => {
         isDevMode: true,
         ability: mockAbility,
         user: mockUser,
-      });
-    }).not.toThrow();
+      })
+    ).resolves.toEqual(expect.objectContaining({ mcpServer: expect.anything() }));
   });
 
   test('should adapt input tool callbacks to the Strapi handler shape', async () => {
@@ -321,7 +321,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => handler,
     });
 
-    createMcpServerWithRegistries({
+    await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -357,7 +357,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => handler,
     });
 
-    createMcpServerWithRegistries({
+    await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -386,7 +386,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => handler,
     });
 
-    createMcpServerWithRegistries({
+    await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -416,7 +416,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => handler,
     });
 
-    createMcpServerWithRegistries({
+    await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -445,7 +445,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => handler,
     });
 
-    createMcpServerWithRegistries({
+    await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,
@@ -465,7 +465,7 @@ describe('createMcpServerWithRegistries', () => {
     expect(handler).toHaveBeenCalledWith(uri, expectedHandlerContext);
   });
 
-  test('should pass auth subject when checking capabilities', () => {
+  test('should pass auth subject when checking capabilities', async () => {
     mockAbility.can.mockReturnValue(true);
     resourceDefinitions.define({
       name: 'authorized-resource',
@@ -475,7 +475,7 @@ describe('createMcpServerWithRegistries', () => {
       createHandler: () => async () => ({ contents: [] }),
     });
 
-    createMcpServerWithRegistries({
+    await createMcpServerWithRegistries({
       strapi: mockStrapi as Core.Strapi,
       definitions: {
         tools: toolDefinitions,

@@ -29,6 +29,9 @@ export type DerivedTool = {
   auth: Modules.MCP.McpCapabilityAuth;
   resolveInputSchema: (context: Modules.MCP.McpHandlerContext) => z.ZodObject<z.ZodRawShape>;
   resolveOutputSchema: (context: Modules.MCP.McpHandlerContext) => z.ZodObject<z.ZodRawShape>;
+  resolveSchemaProjection: (
+    context: Modules.MCP.McpHandlerContext
+  ) => Modules.MCP.McpToolSchemaProjection;
   createHandler: (
     strapi: Core.Strapi,
     context: Modules.MCP.McpHandlerContext

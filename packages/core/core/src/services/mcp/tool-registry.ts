@@ -1,15 +1,29 @@
 import type { McpServer, RegisteredTool, ServerContext } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
+import { z } from '@strapi/utils';
+import type { McpAdminTokenAbility } from './authentication';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {
   type McpCapabilityRegistry,
   McpCapabilityRegistryBase,
 } from './internal/McpCapabilityRegistry';
+import type { McpToolRegistrationPlan } from './internal/classify-mcp-tool-registration';
+import { canUseMcpCapability } from './internal/syncMcpSessionCapabilities';
+import {
+  MCP_TOOL_JSON_SCHEMA_TARGET,
+  cachedJsonSchemaStandardSchema,
+  mcpToolSchemaCache,
+  mcpToolSchemaCacheKey,
+  readMcpToolSchemaProjection,
+  type McpToolJsonSchemas,
+} from './internal/tool-schema-cache';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
-import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
+import {
+  FAILED_REGISTERED_CAPABILITY,
+  createSafeCapabilityRegistration,
+} from './utils/createSafeCapabilityRegistration';
 import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
 import { toSdkToolResult } from './utils/toSdkMcpCapabilityResult';
-import type { McpAdminTokenAbility } from './authentication';
 
 /**
  * Defines a Strapi MCP tool with full type inference, ready to pass to
@@ -71,92 +85,240 @@ export class McpToolRegistry
     this.#user = ctx.user;
   }
 
-  bind(mcpServer: McpServer) {
+  /**
+   * `all` registers every definition with a live Zod schema, then session sync
+   * enables or disables it. Request plans register only the tools that POST
+   * needs, and only after the coarse allowlist passes. An unauthorized
+   * `tools/call` is therefore absent ("tool not found") rather than disabled.
+   */
+  async bind(
+    mcpServer: McpServer,
+    options: { plan: McpToolRegistrationPlan; isDevMode: boolean } = {
+      plan: { mode: 'all' },
+      isDevMode: false,
+    }
+  ) {
+    const { plan, isDevMode } = options;
+    if (plan.mode === 'none') {
+      return;
+    }
+
+    if (plan.mode === 'all') {
+      super.register((definition) => this.#registerLive(mcpServer, definition));
+      return;
+    }
+
+    for (const definition of this.definitions()) {
+      if (plan.mode === 'call' && plan.names.has(definition.name) === false) {
+        continue;
+      }
+
+      const allowed = canUseMcpCapability({
+        ability: this.#ability,
+        definition,
+        isDevMode,
+      });
+      if (allowed === false) {
+        continue;
+      }
+
+      const registered =
+        plan.mode === 'list'
+          ? await this.#registerListed(mcpServer, definition)
+          : this.#registerLive(mcpServer, definition);
+      this.storeRegistered(definition.name, registered);
+    }
+  }
+
+  #handlerContext(): Modules.MCP.McpHandlerContext {
+    return {
+      userAbility: this.#ability,
+      user: this.#user,
+    };
+  }
+
+  #registerLive(mcpServer: McpServer, definition: Modules.MCP.McpToolDefinition): RegisteredTool {
     const strapi = this.#strapi;
+    const context = this.#handlerContext();
+    const { name, title, description, resolveInputSchema, resolveOutputSchema, createHandler } =
+      definition;
 
-    super.register((definition) => {
-      const { name, title, description, resolveInputSchema, resolveOutputSchema, createHandler } =
-        definition;
+    return createSafeCapabilityRegistration({
+      strapi,
+      capabilityType: 'Tool',
+      name,
+      createHandler: (boundStrapi: Core.Strapi) => createHandler(boundStrapi, context),
+      createFallbackHandler(errorMessage) {
+        return async () => ({
+          content: [
+            {
+              type: 'text' as const,
+              text: `Tool "${name}" failed to initialize: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        });
+      },
+      createErrorResult(error) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Tool "${name}" execution failed: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      },
+      registerWithSdk(safeHandler) {
+        const inputSchema =
+          resolveInputSchema !== undefined ? resolveInputSchema(context) : undefined;
+        const outputSchema = resolveOutputSchema(context);
 
-      // Bind the session ability and token owner into the handler context so handlers can enforce
-      // field-level and entity-level permission checks and set creator fields.
-      const context: Modules.MCP.McpHandlerContext = {
-        userAbility: this.#ability,
-        user: this.#user,
-      };
-      const createHandlerWithContext = (strapi: Core.Strapi) => createHandler(strapi, context);
-
-      return createSafeCapabilityRegistration({
-        strapi,
-        capabilityType: 'Tool',
-        name,
-        createHandler: createHandlerWithContext,
-        createFallbackHandler(errorMessage) {
-          return async () => ({
-            content: [
-              {
-                type: 'text' as const,
-                text: `Tool "${name}" failed to initialize: ${errorMessage}`,
-              },
-            ],
-            isError: true,
-          });
-        },
-        createErrorResult(error) {
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: `Tool "${name}" execution failed: ${error.message}`,
-              },
-            ],
-            isError: true,
-          };
-        },
-        registerWithSdk(safeHandler) {
-          const inputSchema =
-            resolveInputSchema !== undefined ? resolveInputSchema(context) : undefined;
-          const outputSchema = resolveOutputSchema(context);
-
-          if (inputSchema !== undefined) {
-            // Adapt from Strapi's object parameter to the SDK's positional callback.
-            const sdkHandler = wrapCapabilityHandlerForMetrics(
-              strapi,
-              'tool',
-              name,
-              definition.telemetry,
-              async (args: unknown, context: ServerContext) =>
-                toSdkToolResult(
-                  await safeHandler({
-                    args,
-                    extra: createMcpCapabilityHandlerContext(context),
-                  } as Parameters<typeof safeHandler>[0])
-                )
-            );
-
-            return mcpServer.registerTool(
-              name,
-              { title, description, inputSchema, outputSchema },
-              sdkHandler
-            );
-          }
-
+        if (inputSchema !== undefined) {
           const sdkHandler = wrapCapabilityHandlerForMetrics(
             strapi,
             'tool',
             name,
             definition.telemetry,
-            async (context: ServerContext) =>
+            async (args: unknown, extra: ServerContext) =>
               toSdkToolResult(
                 await safeHandler({
-                  extra: createMcpCapabilityHandlerContext(context),
+                  args,
+                  extra: createMcpCapabilityHandlerContext(extra),
                 } as Parameters<typeof safeHandler>[0])
               )
           );
 
-          return mcpServer.registerTool(name, { title, description, outputSchema }, sdkHandler);
-        },
+          return mcpServer.registerTool(
+            name,
+            { title, description, inputSchema, outputSchema },
+            sdkHandler
+          );
+        }
+
+        const sdkHandler = wrapCapabilityHandlerForMetrics(
+          strapi,
+          'tool',
+          name,
+          definition.telemetry,
+          async (extra: ServerContext) =>
+            toSdkToolResult(
+              await safeHandler({
+                extra: createMcpCapabilityHandlerContext(extra),
+              } as Parameters<typeof safeHandler>[0])
+            )
+        );
+
+        return mcpServer.registerTool(name, { title, description, outputSchema }, sdkHandler);
+      },
+    });
+  }
+
+  async #registerListed(
+    mcpServer: McpServer,
+    definition: Modules.MCP.McpToolDefinition
+  ): Promise<RegisteredTool> {
+    const strapi = this.#strapi;
+    const context = this.#handlerContext();
+    const { name, title, description, resolveInputSchema, resolveOutputSchema, createHandler } =
+      definition;
+
+    let schemas: McpToolJsonSchemas;
+    try {
+      const key = mcpToolSchemaCacheKey(name, readMcpToolSchemaProjection(definition, context));
+      schemas = await mcpToolSchemaCache.getOrBuild(key, () => {
+        const inputSchema =
+          resolveInputSchema !== undefined ? resolveInputSchema(context) : undefined;
+        const outputSchema = resolveOutputSchema(context);
+        return {
+          input:
+            inputSchema === undefined
+              ? undefined
+              : (z.toJSONSchema(inputSchema, {
+                  target: MCP_TOOL_JSON_SCHEMA_TARGET,
+                  io: 'input',
+                }) as Record<string, unknown>),
+          output: z.toJSONSchema(outputSchema, {
+            target: MCP_TOOL_JSON_SCHEMA_TARGET,
+            io: 'output',
+          }) as Record<string, unknown>,
+        };
       });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      strapi.log.error(`[MCP] Failed to register tool "${name}" with MCP server: ${message}`);
+      return FAILED_REGISTERED_CAPABILITY as unknown as RegisteredTool;
+    }
+
+    return createSafeCapabilityRegistration({
+      strapi,
+      capabilityType: 'Tool',
+      name,
+      createHandler: (boundStrapi: Core.Strapi) => createHandler(boundStrapi, context),
+      createFallbackHandler(errorMessage) {
+        return async () => ({
+          content: [
+            {
+              type: 'text' as const,
+              text: `Tool "${name}" failed to initialize: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        });
+      },
+      createErrorResult(error) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Tool "${name}" execution failed: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      },
+      registerWithSdk(safeHandler) {
+        const outputSchema = cachedJsonSchemaStandardSchema(schemas.output);
+
+        if (schemas.input !== undefined) {
+          const inputSchema = cachedJsonSchemaStandardSchema(schemas.input);
+          const sdkHandler = wrapCapabilityHandlerForMetrics(
+            strapi,
+            'tool',
+            name,
+            definition.telemetry,
+            async (args: unknown, extra: ServerContext) =>
+              toSdkToolResult(
+                await safeHandler({
+                  args,
+                  extra: createMcpCapabilityHandlerContext(extra),
+                } as Parameters<typeof safeHandler>[0])
+              )
+          );
+
+          return mcpServer.registerTool(
+            name,
+            { title, description, inputSchema, outputSchema },
+            sdkHandler
+          );
+        }
+
+        const sdkHandler = wrapCapabilityHandlerForMetrics(
+          strapi,
+          'tool',
+          name,
+          definition.telemetry,
+          async (extra: ServerContext) =>
+            toSdkToolResult(
+              await safeHandler({
+                extra: createMcpCapabilityHandlerContext(extra),
+              } as Parameters<typeof safeHandler>[0])
+            )
+        );
+
+        return mcpServer.registerTool(name, { title, description, outputSchema }, sdkHandler);
+      },
     });
   }
 }

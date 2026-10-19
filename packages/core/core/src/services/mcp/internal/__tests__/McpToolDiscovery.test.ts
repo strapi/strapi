@@ -103,7 +103,7 @@ describe('MCP tool discovery', () => {
       }),
     });
 
-    const { mcpServer } = createMcpServerWithRegistries({
+    const { mcpServer } = await createMcpServerWithRegistries({
       strapi,
       definitions: {
         tools,

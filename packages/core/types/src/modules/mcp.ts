@@ -288,6 +288,16 @@ export type McpToolHandlerReturn<
 export type McpToolSchemaResolver<Schema> = (context: McpHandlerContext) => Schema;
 
 /**
+ * Concrete field and locale names that decide a tool's cached JSON Schema.
+ * Null and "all" permission results are expanded to sorted names before this is stored.
+ * Set order is part of the key (input fields, then output fields).
+ */
+export type McpToolSchemaProjection = {
+  fieldSets: ReadonlyArray<readonly string[]>;
+  localeSets: ReadonlyArray<readonly string[]>;
+};
+
+/**
  * Access-agnostic fields of a Strapi MCP tool definition.
  * Shared by the `defineTool` builder ({@link McpToolBuilder}) and
  * `McpService.registerTool`, then intersected with an access variant
@@ -307,6 +317,11 @@ export type McpToolDefinitionFields<
   telemetry?: McpCapabilityTelemetry;
   resolveInputSchema?: McpToolSchemaResolver<InputSchema>;
   resolveOutputSchema: McpToolSchemaResolver<OutputSchema>;
+  /**
+   * Names that vary the JSON Schema advertised by tools/list.
+   * Omitted when the schema does not depend on the caller's field or locale projection.
+   */
+  resolveSchemaProjection?: (context: McpHandlerContext) => McpToolSchemaProjection;
   createHandler: (
     strapi: Core.Strapi,
     context: McpHandlerContext

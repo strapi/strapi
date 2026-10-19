@@ -6,6 +6,7 @@ import {
   sendDidNotHandleMcpRequest,
   sendDidUseMcpServer,
 } from '../metrics/metrics';
+import { classifyMcpToolRegistration } from '../internal/classify-mcp-tool-registration';
 import { sendJsonRpcError } from '../utils/sendJsonRpcError';
 import { withTimeout } from '../utils/withTimeout';
 import type { McpHandlerDependencies } from './types';
@@ -44,12 +45,13 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
       ctx.state.user = authResult.user;
       ctx.state.auditSource = 'mcp';
 
-      const { mcpServer } = createServerWithRegistries({
+      const { mcpServer } = await createServerWithRegistries({
         strapi,
         definitions: capabilityDefinitions,
         isDevMode: config.isDevMode(),
         ability: authResult.ability,
         user: authResult.user,
+        toolRegistration: classifyMcpToolRegistration(ctx.request.body ?? null),
       });
 
       const transport = new NodeStreamableHTTPServerTransport({

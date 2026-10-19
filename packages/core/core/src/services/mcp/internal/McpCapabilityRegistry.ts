@@ -3,7 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/server';
 import { McpCapabilityDefinitionRegistry } from './McpCapabilityDefinitionRegistry';
 
 export interface McpCapabilityRegistry {
-  bind: (mcpServer: McpServer) => void;
+  bind: (mcpServer: McpServer) => void | Promise<void>;
 }
 
 /** Read-only registry surface for external consumers (plugins, handlers). */
@@ -32,24 +32,30 @@ export class McpCapabilityRegistryBase<
     this.#definitions = definitions;
   }
 
+  protected definitions(): Definition[] {
+    return this.#definitions.getAll();
+  }
+
+  protected storeRegistered(name: string, registered: Registered) {
+    // Defence: register() must be called at most once per registry instance (double-bind protection).
+    const existing = this.#registered.get(name);
+    if (existing !== undefined) {
+      throw new Error(
+        `[MCP] ${this.#definitions.capability} with name "${name}" is already registered. Names must be unique.`
+      );
+    }
+
+    // Disable the capability until explicitly enabled depending on devModeOnly and authorization
+    registered.disable();
+    this.#registered.set(name, registered);
+  }
+
   protected register<LocallyRegistered extends Registered>(
     registerFn: (definition: Definition) => LocallyRegistered
   ) {
     this.#definitions.forEach((definition) => {
-      // Defence: register() must be called at most once per registry instance (double-bind protection).
-      const existing = this.#registered.get(definition.name);
-      if (existing !== undefined) {
-        throw new Error(
-          `[MCP] ${this.#definitions.capability} with name "${definition.name}" is already registered. Names must be unique.`
-        );
-      }
-
       const registered = registerFn(definition);
-
-      // Disable the capability until explicitly enabled depending on devModeOnly and authorization
-      registered.disable();
-
-      this.#registered.set(definition.name, registered);
+      this.storeRegistered(definition.name, registered);
     });
   }
 

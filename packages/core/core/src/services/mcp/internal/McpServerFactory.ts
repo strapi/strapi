@@ -6,6 +6,7 @@ import { McpToolRegistry } from '../tool-registry';
 import type { McpAdminTokenAbility } from '../authentication';
 import { McpCapabilityDefinitionRegistry } from './McpCapabilityDefinitionRegistry';
 import type { McpCapabilityRegistryReadonly } from './McpCapabilityRegistry';
+import type { McpToolRegistrationPlan } from './classify-mcp-tool-registration';
 import { syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
 
 export type McpCapabilityDefinitions = {
@@ -38,15 +39,21 @@ export type CreateMcpServerWithRegistriesParams = {
   isDevMode: boolean;
   ability: McpAdminTokenAbility;
   user: Modules.MCP.McpHandlerContext['user'];
+  /**
+   * Which tool schemas this server may materialize. HTTP passes the plan from
+   * the JSON-RPC body. Omitted means every definition, with a live Zod schema.
+   */
+  toolRegistration?: McpToolRegistrationPlan;
 };
 
-export const createMcpServerWithRegistries = ({
+export const createMcpServerWithRegistries = async ({
   strapi,
   definitions,
   isDevMode,
   ability,
   user,
-}: CreateMcpServerWithRegistriesParams): McpServerWithRegistries => {
+  toolRegistration = { mode: 'all' },
+}: CreateMcpServerWithRegistriesParams): Promise<McpServerWithRegistries> => {
   const capabilities: ServerCapabilities = {
     logging: {},
   };
@@ -88,8 +95,8 @@ export const createMcpServerWithRegistries = ({
     definitions: definitions.resources,
   });
 
-  // Register capabilities (disabled by default)
-  tools.bind(mcpServer);
+  // Register capabilities (disabled by default until session sync).
+  await tools.bind(mcpServer, { plan: toolRegistration, isDevMode });
   prompts.bind(mcpServer);
   resources.bind(mcpServer);
 

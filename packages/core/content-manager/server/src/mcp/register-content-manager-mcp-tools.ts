@@ -7,7 +7,8 @@ import { getService } from '../utils';
  * Registers derived content-type MCP tools via strapi.ai.mcp.registerTool().
  * Must be called from the plugin bootstrap phase: after every plugin's register (so the
  * localization provider is installed and locale rows are readable) and before the MCP HTTP
- * server starts.
+ * server starts. Locale codes and content-type schemas are read once here.
+ * `strapi.reload()` replaces the process, which is the epoch for the tools/list JSON Schema cache.
  */
 export const registerContentManagerMcpTools = async ({
   strapi,

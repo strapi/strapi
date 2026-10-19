@@ -2,10 +2,17 @@ import { z } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { ACTIONS } from '../services/permission-checker';
+import { getService } from '../utils';
 
 import type { ContentManagerModelForMcp, McpToolsBuildContext, DerivedTool } from './types';
 import { slugifyUidForMcpToolName, describeTool } from './utils';
-import { buildLocaleSchema, resolvePermittedLocaleSchema, getPermittedFields } from './permissions';
+import {
+  buildLocaleSchema,
+  resolvePermittedLocaleSchema,
+  getPermittedFields,
+  getPermittedLocales,
+  isContentTypeLocalized,
+} from './permissions';
 import {
   statusSchema,
   documentIdSchema,
@@ -43,6 +50,39 @@ export { slugifyUidForMcpToolName } from './utils';
 export { buildSortSchema, buildFiltersSchema, buildDataSchema } from './schemas';
 export { getComponentLeafPaths } from './permissions';
 
+const concreteNames = (permitted: Set<string> | null, allNames: readonly string[]): string[] =>
+  [...(permitted === null ? allNames : permitted)].sort();
+
+const createProjectionHelpers = (
+  strapi: Core.Strapi,
+  uid: string,
+  attributes: ContentManagerModelForMcp['attributes'],
+  localeCodes: McpToolsBuildContext['localeCodes']
+) => {
+  const allFieldNames = Object.keys(attributes);
+
+  const fields = (permitted: Set<string> | null) => concreteNames(permitted, allFieldNames);
+
+  const localesFor = (context: Modules.MCP.McpHandlerContext, action: string): string[] => {
+    if (localeCodes === null || localeCodes.length === 0) {
+      return [];
+    }
+
+    if (isContentTypeLocalized(strapi, uid) === false) {
+      return [];
+    }
+
+    const permissionChecker = getService('permission-checker').create({
+      userAbility: context.userAbility,
+      model: uid,
+    });
+    const permitted = getPermittedLocales(permissionChecker, action, localeCodes);
+    return [...(permitted === null ? localeCodes : permitted)].sort();
+  };
+
+  return { fields, localesFor };
+};
+
 // ---------------------------------------------------------------------------
 // Collection-type tool-definition builder
 // ---------------------------------------------------------------------------
@@ -63,6 +103,7 @@ const buildCollectionTools = (
   const draftAndPublish = model.options?.draftAndPublish === true;
   const { attributes } = model;
   const runtimeLocaleSchema = buildLocaleSchema(ctx.localeCodes, ctx.defaultLocale);
+  const { fields, localesFor } = createProjectionHelpers(strapi, uid, attributes, ctx.localeCodes);
 
   const resolveReadFields = (context: Modules.MCP.McpHandlerContext) =>
     getPermittedFields(strapi, context.userAbility, ACTIONS.read, uid, attributes);
@@ -225,6 +266,10 @@ const buildCollectionTools = (
       telemetry: { source: 'content-manager', name: 'list' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'list' }),
       auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
+      resolveSchemaProjection: (context) => ({
+        fieldSets: [fields(resolveReadFields(context))],
+        localeSets: [localesFor(context, ACTIONS.read)],
+      }),
       resolveInputSchema: resolveListInputSchema,
       resolveOutputSchema: (context) =>
         buildListOutputSchema(attributes, resolveReadFields(context)),
@@ -235,6 +280,10 @@ const buildCollectionTools = (
       telemetry: { source: 'content-manager', name: 'get' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'get' }),
       auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
+      resolveSchemaProjection: (context) => ({
+        fieldSets: [fields(resolveReadFields(context))],
+        localeSets: [localesFor(context, ACTIONS.read)],
+      }),
       resolveInputSchema: resolveGetInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createCollectionGetHandler(uid),
@@ -244,6 +293,13 @@ const buildCollectionTools = (
       telemetry: { source: 'content-manager', name: 'create' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'create' }),
       auth: { policies: [{ action: ACTIONS.create, subject: uid }] },
+      resolveSchemaProjection: (context) => ({
+        fieldSets: [
+          fields(getPermittedFields(strapi, context.userAbility, ACTIONS.create, uid, attributes)),
+          fields(resolveReadFields(context)),
+        ],
+        localeSets: [localesFor(context, ACTIONS.create)],
+      }),
       resolveInputSchema: resolveCreateInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createCollectionCreateHandler(uid),
@@ -253,6 +309,13 @@ const buildCollectionTools = (
       telemetry: { source: 'content-manager', name: 'update' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'update' }),
       auth: { policies: [{ action: ACTIONS.update, subject: uid }] },
+      resolveSchemaProjection: (context) => ({
+        fieldSets: [
+          fields(getPermittedFields(strapi, context.userAbility, ACTIONS.update, uid, attributes)),
+          fields(resolveReadFields(context)),
+        ],
+        localeSets: [localesFor(context, ACTIONS.update)],
+      }),
       resolveInputSchema: resolveUpdateInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createCollectionUpdateHandler(uid),
@@ -262,6 +325,10 @@ const buildCollectionTools = (
       telemetry: { source: 'content-manager', name: 'delete' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'delete' }),
       auth: { policies: [{ action: ACTIONS.delete, subject: uid }] },
+      resolveSchemaProjection: (context) => ({
+        fieldSets: [fields(resolveReadFields(context))],
+        localeSets: [localesFor(context, ACTIONS.delete)],
+      }),
       resolveInputSchema: resolveDeleteInputSchema,
       resolveOutputSchema: (context) =>
         buildDeleteOutputSchema(attributes, resolveReadFields(context)),
@@ -276,6 +343,10 @@ const buildCollectionTools = (
         telemetry: { source: 'content-manager', name: 'publish' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'publish' }),
         auth: { policies: [{ action: ACTIONS.publish, subject: uid }] },
+        resolveSchemaProjection: (context) => ({
+          fieldSets: [fields(resolveReadFields(context))],
+          localeSets: [localesFor(context, ACTIONS.publish)],
+        }),
         resolveInputSchema: resolvePublishInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createCollectionPublishHandler(uid),
@@ -285,6 +356,10 @@ const buildCollectionTools = (
         telemetry: { source: 'content-manager', name: 'unpublish' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'unpublish' }),
         auth: { policies: [{ action: ACTIONS.unpublish, subject: uid }] },
+        resolveSchemaProjection: (context) => ({
+          fieldSets: [fields(resolveReadFields(context))],
+          localeSets: [localesFor(context, ACTIONS.unpublish)],
+        }),
         resolveInputSchema: resolveUnpublishInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createCollectionUnpublishHandler(uid),
@@ -294,6 +369,10 @@ const buildCollectionTools = (
         telemetry: { source: 'content-manager', name: 'discard_draft' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'discard_draft' }),
         auth: { policies: [{ action: ACTIONS.discard, subject: uid }] },
+        resolveSchemaProjection: (context) => ({
+          fieldSets: [fields(resolveReadFields(context))],
+          localeSets: [localesFor(context, ACTIONS.discard)],
+        }),
         resolveInputSchema: resolveDiscardDraftInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createCollectionDiscardDraftHandler(uid),
@@ -324,9 +403,31 @@ const buildSingleTypeTools = (
   const draftAndPublish = model.options?.draftAndPublish === true;
   const { attributes } = model;
   const runtimeLocaleSchema = buildLocaleSchema(ctx.localeCodes, ctx.defaultLocale);
+  const { fields, localesFor } = createProjectionHelpers(strapi, uid, attributes, ctx.localeCodes);
 
   const resolveReadFields = (context: Modules.MCP.McpHandlerContext) =>
     getPermittedFields(strapi, context.userAbility, ACTIONS.read, uid, attributes);
+
+  const resolveWriteFields = (context: Modules.MCP.McpHandlerContext): Set<string> | null => {
+    const createFields = getPermittedFields(
+      strapi,
+      context.userAbility,
+      ACTIONS.create,
+      uid,
+      attributes
+    );
+    const updateFields = getPermittedFields(
+      strapi,
+      context.userAbility,
+      ACTIONS.update,
+      uid,
+      attributes
+    );
+    // null means all fields permitted; union of null with anything is null (all permitted)
+    return createFields === null || updateFields === null
+      ? null
+      : new Set([...createFields, ...updateFields]);
+  };
 
   const resolveReadOutputSchema = (context: Modules.MCP.McpHandlerContext) =>
     buildDocumentOutputSchema(attributes, resolveReadFields(context));
@@ -348,25 +449,7 @@ const buildSingleTypeTools = (
   };
 
   const resolveWriteInputSchema = (context: Modules.MCP.McpHandlerContext) => {
-    const createFields = getPermittedFields(
-      strapi,
-      context.userAbility,
-      ACTIONS.create,
-      uid,
-      attributes
-    );
-    const updateFields = getPermittedFields(
-      strapi,
-      context.userAbility,
-      ACTIONS.update,
-      uid,
-      attributes
-    );
-    // null means all fields permitted; union of null with anything is null (all permitted)
-    const writeFields: Set<string> | null =
-      createFields === null || updateFields === null
-        ? null
-        : new Set([...createFields, ...updateFields]);
+    const writeFields = resolveWriteFields(context);
     const dataSchema = buildDataSchema(strapi, model, attributes, writeFields);
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
@@ -447,6 +530,10 @@ const buildSingleTypeTools = (
       telemetry: { source: 'content-manager', name: 'get' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'get' }),
       auth: { policies: [{ action: ACTIONS.read, subject: uid }] },
+      resolveSchemaProjection: (context) => ({
+        fieldSets: [fields(resolveReadFields(context))],
+        localeSets: [localesFor(context, ACTIONS.read)],
+      }),
       resolveInputSchema: resolveGetInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createSingleGetHandler(uid),
@@ -461,6 +548,10 @@ const buildSingleTypeTools = (
           { action: ACTIONS.update, subject: uid },
         ],
       },
+      resolveSchemaProjection: (context) => ({
+        fieldSets: [fields(resolveWriteFields(context)), fields(resolveReadFields(context))],
+        localeSets: [localesFor(context, ACTIONS.update)],
+      }),
       resolveInputSchema: resolveWriteInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
       createHandler: createSingleWriteHandler(uid),
@@ -470,6 +561,10 @@ const buildSingleTypeTools = (
       telemetry: { source: 'content-manager', name: 'delete' },
       ...describeTool({ apiID: model.apiID, uid, operation: 'delete' }),
       auth: { policies: [{ action: ACTIONS.delete, subject: uid }] },
+      resolveSchemaProjection: (context) => ({
+        fieldSets: [fields(resolveReadFields(context))],
+        localeSets: [localesFor(context, ACTIONS.delete)],
+      }),
       resolveInputSchema: resolveDeleteInputSchema,
       resolveOutputSchema: (context) =>
         buildDeleteOutputSchema(attributes, resolveReadFields(context)),
@@ -484,6 +579,10 @@ const buildSingleTypeTools = (
         telemetry: { source: 'content-manager', name: 'publish' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'publish' }),
         auth: { policies: [{ action: ACTIONS.publish, subject: uid }] },
+        resolveSchemaProjection: (context) => ({
+          fieldSets: [fields(resolveReadFields(context))],
+          localeSets: [localesFor(context, ACTIONS.publish)],
+        }),
         resolveInputSchema: resolvePublishInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createSinglePublishHandler(uid),
@@ -493,6 +592,10 @@ const buildSingleTypeTools = (
         telemetry: { source: 'content-manager', name: 'unpublish' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'unpublish' }),
         auth: { policies: [{ action: ACTIONS.unpublish, subject: uid }] },
+        resolveSchemaProjection: (context) => ({
+          fieldSets: [fields(resolveReadFields(context))],
+          localeSets: [localesFor(context, ACTIONS.unpublish)],
+        }),
         resolveInputSchema: resolveUnpublishInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createSingleUnpublishHandler(uid),
@@ -502,6 +605,10 @@ const buildSingleTypeTools = (
         telemetry: { source: 'content-manager', name: 'discard_draft' },
         ...describeTool({ apiID: model.apiID, uid, operation: 'discard_draft' }),
         auth: { policies: [{ action: ACTIONS.discard, subject: uid }] },
+        resolveSchemaProjection: (context) => ({
+          fieldSets: [fields(resolveReadFields(context))],
+          localeSets: [localesFor(context, ACTIONS.discard)],
+        }),
         resolveInputSchema: resolveDiscardDraftInputSchema,
         resolveOutputSchema: resolveReadOutputSchema,
         createHandler: createSingleDiscardDraftHandler(uid),

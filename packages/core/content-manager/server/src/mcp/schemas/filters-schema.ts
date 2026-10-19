@@ -77,8 +77,19 @@ export const buildFiltersSchema = (
     return z.never();
   }
 
-  // Lazy reference for recursion ($and / $or / $not)
+  // Lazy reference for recursion ($and / $or / $not).
+  //
+  // Zod converts MCP tool input schemas with io: "input". That path calls
+  // isTransforming() on every node, and isTransforming() invokes the lazy getter
+  // directly, skipping ZodLazy's cached inner type. Memoize inside this call so
+  // one conversion builds the operator object once. The cache stays in this
+  // closure: a later call with a different permittedFields set builds its own schema.
+  let cached: z.ZodTypeAny | undefined;
   const filtersSchema: z.ZodTypeAny = z.lazy(() => {
+    if (cached) {
+      return cached;
+    }
+
     const fieldShapes: Record<string, z.ZodTypeAny> = {};
 
     for (const key of scalarKeys) {
@@ -91,7 +102,7 @@ export const buildFiltersSchema = (
       fieldShapes[key] = z.union([valueSchema, operatorObject]).optional();
     }
 
-    return z
+    cached = z
       .object({
         $and: z.array(filtersSchema).optional(),
         $or: z.array(filtersSchema).optional(),
@@ -99,6 +110,8 @@ export const buildFiltersSchema = (
         ...fieldShapes,
       })
       .strict();
+
+    return cached;
   });
 
   return filtersSchema
