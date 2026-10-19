@@ -56,7 +56,7 @@ const setup = (stored: Record<string, Stored>) => {
             : read(attribute);
         }),
         findMany: jest.fn(async ({ where }: { where: { id: { $in: number[] } } }) =>
-          where.id.$in.map((id) => ({ id, ...(stored[uid]?.[id] ?? {}) }))
+          where.id.$in.map((id) => ({ id, ...stored[uid]?.[id] }))
         ),
         deleteMany: jest.fn(async () => ({ count: 1 })),
         update: jest.fn(async ({ where }: { where: { id: number } }) => ({ id: where.id })),
