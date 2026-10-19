@@ -186,6 +186,23 @@ the union of every producer's payload, e.g. `'user.delete': [{ user } | { users 
 - Events emitted through `emitAudit` (`@strapi/utils`) are not registered: it takes any payload, so
   nothing would check their producers.
 
+### Document results
+
+With strict types and generated schemas, Document Service and core service results use
+`Modules.Documents.StrictResult` (`packages/core/types/src/modules/documents/result/index.ts`). It
+types what the runtime returns, not what the schema asks for:
+
+- `id`, `documentId` and every selected scalar are present (no `?`). A scalar may be `null`, also
+  when the attribute is `Required`.
+- `publishedAt` follows draft and publish and the status of the call. Document Service reads default
+  to drafts and core service reads to published entries. `locale` is a string on localized content
+  types.
+- `datetime`, `date`, `time` and `timestamp` results are strings. Inputs still accept `Date`.
+- Populated to-many attributes are arrays, never `null`. Unpopulated attributes are absent.
+
+The JSDoc on each type gives the runtime reason. Without strict types, results keep develop's
+`Result` type.
+
 ## Keeping types unchanged without strict mode
 
 A type in `@strapi/types` or `@strapi/strapi` that behaves differently in strict mode resolves

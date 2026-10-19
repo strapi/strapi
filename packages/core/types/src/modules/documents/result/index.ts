@@ -217,3 +217,178 @@ type ParseStringPopulate<
   ],
   TPopulate
 >;
+
+/**
+ * The publication status of the entries a call reads or returns: `'draft'` or `'published'`.
+ */
+export type PublicationStatus = 'draft' | 'published';
+
+/**
+ * The status of a call, from its params.
+ *
+ * - A `status` literal in the params is the status.
+ * - No `status` key: `TDefault`, the default of the caller. Document Service reads default to
+ *   `'draft'`; the core service sends `{ status: 'published', ...params }`, so it defaults to
+ *   `'published'`.
+ * - A `status` key that may be `undefined`: `TUndefined` too. The core service spreads the params
+ *   over its default, so an explicit `status: undefined` reaches the Document Service, which reads
+ *   drafts.
+ * - A wide status (`'draft' | 'published'`) keeps both: the call may read either.
+ */
+export type StatusOf<
+  TParams,
+  TDefault extends PublicationStatus,
+  TUndefined extends PublicationStatus = TDefault,
+> = [TParams] extends [never]
+  ? TDefault
+  : TParams extends { status?: infer TStatus }
+    ? unknown extends TStatus
+      ? TDefault
+      : Extract<TStatus, PublicationStatus> | (undefined extends TStatus ? TUndefined : never)
+    : TDefault;
+
+/**
+ * Whether draft and publish is on for `TSchemaUID`: `true`, `false`, or `boolean` when the schema
+ * does not tell. The runtime only enables it when `options.draftAndPublish` is `true`
+ * (`contentTypes.hasDraftAndPublish` in `@strapi/utils`), so a missing option is `false`.
+ */
+type DraftAndPublishOf<TSchemaUID extends UID.Schema> =
+  Schema.Schema<TSchemaUID>['options'] extends infer TOptions
+    ? TOptions extends { draftAndPublish: infer TEnabled }
+      ? TEnabled extends boolean
+        ? TEnabled
+        : false
+      : false
+    : boolean;
+
+/**
+ * The `publishedAt` of a result.
+ *
+ * Every content type has a `publishedAt` attribute, draft and publish or not. Without draft and
+ * publish, every write sets it to the write date, so it is a string. With draft and publish, a
+ * published entry holds its publication date and a draft holds `null`. A call that may read either
+ * status, or a schema that does not tell whether draft and publish is on, gets `string | null`.
+ */
+type PublishedAtValue<TSchemaUID extends UID.Schema, TStatus extends PublicationStatus> = [
+  DraftAndPublishOf<TSchemaUID>,
+] extends [false]
+  ? string
+  : [DraftAndPublishOf<TSchemaUID>] extends [true]
+    ? TStatus extends 'published'
+      ? string
+      : null
+    : string | null;
+
+/**
+ * The `locale` of a result. The i18n plugin is always loaded and adds `locale` to every content type.
+ * A localized content type (`pluginOptions.i18n.localized: true`) always has one: enabling
+ * localization fills the default locale in. Other content types hold `null`, unless a write passed a
+ * locale.
+ */
+type LocaleValue<TSchemaUID extends UID.Schema> =
+  NonNullable<Schema.Schema<TSchemaUID>['pluginOptions']> extends { i18n: { localized: true } }
+    ? string
+    : string | null;
+
+/**
+ * The value of a selected scalar attribute in a result. The key is always present: the query engine
+ * returns every selected column, `null` when it is unset.
+ *
+ * - `Required` does not remove `null`: drafts skip the required check, a field made required later
+ *   is not filled in, a hidden conditional field is not validated, and raw queries or imports bypass
+ *   validation. Each of these was observed on a published read.
+ * - `datetime`, `date`, `time` and `timestamp` values are strings: the query engine formats them on
+ *   every database (`timestamp` as epoch milliseconds, e.g. `'1709528767890'`). Inputs still accept
+ *   `Date` objects.
+ * - `createdAt` and `updatedAt` are set by every write, so they are strings.
+ */
+type ScalarValue<
+  TSchemaUID extends UID.Schema,
+  TName extends Schema.AttributeNames<TSchemaUID>,
+  TStatus extends PublicationStatus,
+> = TName extends 'publishedAt'
+  ? PublishedAtValue<TSchemaUID, TStatus>
+  : TName extends 'locale'
+    ? LocaleValue<TSchemaUID>
+    : TName extends 'createdAt' | 'updatedAt'
+      ? string
+      : Schema.AttributeByName<TSchemaUID, TName> extends {
+            type: 'datetime' | 'date' | 'time' | 'timestamp';
+          }
+        ? string | null
+        : Schema.AttributeValueByName<TSchemaUID, TName> | null;
+
+/**
+ * The value of a populated attribute in a result. A to-many relation, a repeatable component, a
+ * dynamic zone or a multiple media is an array, empty when there is nothing to populate, never
+ * `null`. A to-one relation, a single component or a single media is `null` when there is nothing.
+ *
+ * The populated value itself is the attribute's value type, the target entity with every attribute:
+ * see the TODO on {@link GetValues}.
+ */
+type PopulatedValue<TValue> = TValue extends readonly unknown[] ? TValue : TValue | null;
+
+/**
+ * A strict result entry: `id` and `documentId`, every selected scalar attribute (no `?`), and every
+ * populated attribute. Unselected scalars and unpopulated attributes are absent.
+ */
+type StrictEntry<
+  TSchemaUID extends UID.Schema,
+  TScalars extends Schema.AttributeNames<TSchemaUID>,
+  TPopulated extends Schema.AttributeNames<TSchemaUID>,
+  TStatus extends PublicationStatus,
+> = { id: Data.ID; documentId: Data.DocumentID } & {
+  -readonly [TName in TScalars | TPopulated]-?: TName extends TPopulated
+    ? PopulatedValue<Schema.AttributeValueByName<TSchemaUID, TName>>
+    : ScalarValue<TSchemaUID, TName, TStatus>;
+};
+
+/**
+ * The result of a Document Service or core service call with strict types, for the entries of
+ * `TSchemaUID` read with `TParams`.
+ *
+ * It describes what the runtime returns, not what the schema asks for:
+ *
+ * - `id` and `documentId` are always present, `fields` included.
+ * - Each selected scalar attribute (all of them without `fields`) is present and may be `null`,
+ *   `Required` ones included. Private attributes are present: only content API controllers remove
+ *   them.
+ * - `publishedAt` follows draft and publish and the status of the call ({@link StatusOf} with
+ *   `TDefaultStatus`, the caller's default), `locale` follows localization, dates are strings.
+ * - Populated attributes are present; to-many ones are arrays. Unpopulated relations, components,
+ *   dynamic zones and media are absent.
+ *
+ * Without registered schemas, any document, as {@link Result}.
+ *
+ * @template TSchemaUID - The schema of the entries.
+ * @template TParams - The params of the call: `fields`, `populate` and `status` are read.
+ * @template TDefaultStatus - The status the caller reads when the params have no `status`.
+ * @template TUndefinedStatus - The status read when the params pass `status: undefined`.
+ */
+export type StrictResult<
+  TSchemaUID extends UID.Schema,
+  TParams,
+  TDefaultStatus extends PublicationStatus,
+  TUndefinedStatus extends PublicationStatus = TDefaultStatus,
+> = If<
+  Constants.AreSchemaRegistriesExtended,
+  StrictEntry<
+    TSchemaUID,
+    Guard.Never<
+      ExtractFields<TSchemaUID, ReadParams<TSchemaUID, TParams>['fields']>,
+      Schema.NonPopulatableAttributeNames<TSchemaUID>
+    >,
+    ExtractPopulate<TSchemaUID, ReadParams<TSchemaUID, TParams>['populate']>,
+    StatusOf<TParams, TDefaultStatus, TUndefinedStatus>
+  >,
+  AnyDocument
+>;
+
+/**
+ * The `fields` and `populate` of `TParams`, when they are valid params of `TSchemaUID`. Other params
+ * read every scalar and populate nothing, as the runtime does without them.
+ */
+type ReadParams<TSchemaUID extends UID.Schema, TParams> =
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'>
+    ? TParams
+    : Params.Pick<TSchemaUID, 'fields' | 'populate'>;
