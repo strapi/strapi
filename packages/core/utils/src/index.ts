@@ -46,6 +46,21 @@ export {
   type SessionEntryLike,
 } from './sessions';
 
+export {
+  generateTotpSecret,
+  base32Encode,
+  base32Decode,
+  currentTotpStep,
+  generateTotp,
+  verifyTotp,
+  buildOtpauthUri,
+  generateRecoveryCode,
+  generateRecoveryCodes,
+  normaliseRecoveryCode,
+  type TotpWindow,
+  type VerifyTotpResult,
+} from './mfa';
+
 export * from './primitives';
 export * from './content-api-router';
 export * from './security';
