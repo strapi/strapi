@@ -20,6 +20,11 @@ app.plugin('content-releases').service('release')?.findPage satisfies
 // @ts-expect-error The service may be undefined.
 app.plugin('content-releases').service('release').findPage satisfies unknown;
 app.service('admin::role').getSuperAdmin satisfies (...args: never[]) => unknown;
+// Every service of the admin service map has a contract, including the debug dump.
+void app
+  .service('admin::debug-dump')
+  .generate()
+  .then((dump) => dump.dumpVersion satisfies 1);
 // No role may match: `findOne` resolves to `null`.
 void app
   .service('admin::role')
