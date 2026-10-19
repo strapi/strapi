@@ -6,6 +6,7 @@ import { revalidateChangedContentTypes } from '..';
 type OldContentTypes = Parameters<typeof revalidateChangedContentTypes>[0]['oldContentTypes'];
 
 const UID = 'api::article.article';
+const REMOVED_UID = 'api::page.page';
 
 const contentTypes = {
   [UID]: {
@@ -14,19 +15,61 @@ const contentTypes = {
   } as unknown as Schema.ContentType,
 };
 
-const createContentType = (attributes: Schema.ContentType['attributes']) =>
+const createContentType = (uid: string, attributes: Schema.ContentType['attributes']) =>
   ({
-    uid: UID,
+    uid,
     options: { draftAndPublish: true },
     attributes,
   }) as unknown as Schema.ContentType;
 
-// The revalidation is not awaited by the hook. The mocks resolve at once, so one macrotask
-// lets every pending promise settle.
-const flushPromises = () =>
-  new Promise((resolve) => {
-    setImmediate(resolve);
-  });
+const entry = { documentId: 'doc-1', locale: 'en', title: 'Hello' };
+
+// Release actions store `entryDocumentId`; they have no `entry` relation to populate
+const createPublishAction = (id: number, contentType: string, releaseId: number) => ({
+  id,
+  type: 'publish',
+  contentType,
+  entryDocumentId: entry.documentId,
+  locale: entry.locale,
+  isEntryValid: true,
+  release: { id: releaseId },
+});
+
+const setupStrapi = (actions: ReturnType<typeof createPublishAction>[]) => {
+  const findMany = jest.fn(async ({ where }: { where: { contentType: string } }) =>
+    actions.filter((action) => action.contentType === where.contentType)
+  );
+  const update = jest.fn().mockResolvedValue({});
+  const findOne = jest.fn().mockResolvedValue(entry);
+  // The new required attribute is missing on the entry
+  const validateEntityCreation = jest.fn().mockRejectedValue(new Error('summary is required'));
+  const updateReleaseStatus = jest.fn().mockResolvedValue({});
+  const populateBuilder = jest.fn(() => ({
+    populateDeep: () => ({ build: async () => ({}) }),
+  }));
+  const documents = jest.fn(() => ({ findOne }));
+
+  global.strapi = {
+    db: { query: jest.fn(() => ({ findMany, update })) },
+    documents,
+    entityValidator: { validateEntityCreation },
+    config: { get: jest.fn() },
+    getModel: jest.fn(),
+    plugins: {
+      'content-manager': { services: { 'populate-builder': populateBuilder } },
+      'content-releases': { services: { release: { updateReleaseStatus } } },
+      'review-workflows': { services: {} },
+    },
+  } as unknown as typeof global.strapi;
+
+  return { findMany, update, findOne, validateEntityCreation, updateReleaseStatus, documents };
+};
+
+const oldAttributes = { title: { type: 'string' } } as Schema.ContentType['attributes'];
+const newAttributes = {
+  title: { type: 'string' },
+  summary: { type: 'string', required: true },
+} as Schema.ContentType['attributes'];
 
 describe('revalidateChangedContentTypes', () => {
   beforeEach(() => {
@@ -55,51 +98,14 @@ describe('revalidateChangedContentTypes', () => {
   });
 
   it('refreshes the validity of publish actions when attributes change', async () => {
-    const entry = { documentId: 'doc-1', locale: 'en', title: 'Hello' };
-    // Release actions store `entryDocumentId`; they have no `entry` relation to populate
-    const findMany = jest.fn().mockResolvedValue([
-      {
-        id: 1,
-        type: 'publish',
-        contentType: UID,
-        entryDocumentId: entry.documentId,
-        locale: entry.locale,
-        isEntryValid: true,
-        release: { id: 10 },
-      },
+    const { findMany, update, findOne, validateEntityCreation, updateReleaseStatus } = setupStrapi([
+      createPublishAction(1, UID, 10),
     ]);
-    const update = jest.fn().mockResolvedValue({});
-    const findOne = jest.fn().mockResolvedValue(entry);
-    // The new required attribute is missing on the entry
-    const validateEntityCreation = jest.fn().mockRejectedValue(new Error('summary is required'));
-    const updateReleaseStatus = jest.fn().mockResolvedValue({});
-    const populateBuilder = jest.fn(() => ({
-      populateDeep: () => ({ build: async () => ({}) }),
-    }));
-
-    global.strapi = {
-      db: { query: jest.fn(() => ({ findMany, update })) },
-      documents: jest.fn(() => ({ findOne })),
-      entityValidator: { validateEntityCreation },
-      config: { get: jest.fn() },
-      getModel: jest.fn(),
-      plugins: {
-        'content-manager': { services: { 'populate-builder': populateBuilder } },
-        'content-releases': { services: { release: { updateReleaseStatus } } },
-        'review-workflows': { services: {} },
-      },
-    } as unknown as typeof global.strapi;
 
     await revalidateChangedContentTypes({
-      oldContentTypes: { [UID]: createContentType({ title: { type: 'string' } }) },
-      contentTypes: {
-        [UID]: createContentType({
-          title: { type: 'string' },
-          summary: { type: 'string', required: true },
-        }),
-      },
+      oldContentTypes: { [UID]: createContentType(UID, oldAttributes) },
+      contentTypes: { [UID]: createContentType(UID, newAttributes) },
     });
-    await flushPromises();
 
     expect(findOne).toHaveBeenCalledWith(
       expect.objectContaining({ documentId: entry.documentId, locale: entry.locale })
@@ -116,6 +122,35 @@ describe('revalidateChangedContentTypes', () => {
       where: { id: 1 },
       data: { isEntryValid: false },
     });
+    expect(updateReleaseStatus).toHaveBeenCalledWith(10);
+  });
+
+  // The model of a deleted content type is gone after the schema sync
+  it('skips deleted content types and still revalidates the changed ones', async () => {
+    const { findMany, update, documents, updateReleaseStatus } = setupStrapi([
+      createPublishAction(1, UID, 10),
+      createPublishAction(2, REMOVED_UID, 20),
+    ]);
+
+    await revalidateChangedContentTypes({
+      oldContentTypes: {
+        [UID]: createContentType(UID, oldAttributes),
+        [REMOVED_UID]: createContentType(REMOVED_UID, oldAttributes),
+      },
+      contentTypes: { [UID]: createContentType(UID, newAttributes) },
+    });
+
+    expect(documents).not.toHaveBeenCalledWith(REMOVED_UID);
+    expect(findMany).not.toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ contentType: REMOVED_UID }) })
+    );
+    expect(documents).toHaveBeenCalledWith(UID);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: { isEntryValid: false },
+    });
+    expect(updateReleaseStatus).toHaveBeenCalledTimes(1);
     expect(updateReleaseStatus).toHaveBeenCalledWith(10);
   });
 });
