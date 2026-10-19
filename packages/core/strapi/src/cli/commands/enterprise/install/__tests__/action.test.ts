@@ -85,7 +85,6 @@ const createDependencies = async (
     isInteractive: false,
     env: { STRAPI_LICENSE: LICENSE },
     homeDir: await createTemporaryDirectory(),
-    now: new Date('2026-09-28T12:00:00.000Z'),
     fetchImplementation: createRegistryFetch({
       searchResult: [AI_BYOK],
       packuments: { [AI_BYOK]: aiByokPackument },

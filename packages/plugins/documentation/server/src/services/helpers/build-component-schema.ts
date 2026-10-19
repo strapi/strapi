@@ -57,7 +57,7 @@ const getAllSchemasForContentType = ({
   };
 
   // Get all the route methods
-  const routeMethods = routeInfo.routes.map((route: Core.Route) => route.method);
+  const routeMethods = new Set(routeInfo.routes.map((route: Core.Route) => route.method));
 
   const attributesToOmit = [
     'createdAt',
@@ -72,7 +72,7 @@ const getAllSchemasForContentType = ({
   // Get a list of required attribute names
   const requiredRequestAttributes = getRequiredAttributes(attributesForRequest);
   // Build the request schemas when the route has POST or PUT methods
-  if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
+  if (routeMethods.has('POST') || routeMethods.has('PUT')) {
     // Build localization requests schemas
 
     // Build the request schema

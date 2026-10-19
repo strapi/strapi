@@ -61,7 +61,7 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
-      {layout.map((panel, index) => {
+      {layout.map((panel) => {
         if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
           const [row] = panel;
           const [field] = row;
@@ -80,11 +80,17 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
         }
 
         return (
-          <Box key={index} {...(hasBackground && panelStyles)}>
+          <Box
+            key={panel.flatMap((row) => row.map((field) => field.name)).join('.')}
+            {...(hasBackground && panelStyles)}
+          >
             <Flex direction="column" alignItems="stretch" gap={6}>
-              {panel.map((row, gridRowIndex) => {
+              {panel.map((row) => {
                 return (
-                  <ResponsiveGridRoot key={gridRowIndex} gap={{ initial: 6, medium: 4 }}>
+                  <ResponsiveGridRoot
+                    key={row.map((field) => field.name).join('.')}
+                    gap={{ initial: 6, medium: 4 }}
+                  >
                     {row.map(({ size, ...field }) => {
                       return (
                         <ResponsiveGridItem

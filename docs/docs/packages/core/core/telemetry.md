@@ -53,12 +53,8 @@ On `register()` (when telemetry is enabled):
 ```typescript
 strapi.telemetry.send('didCreateContentType', {
   eventProperties: { kind: 'collectionType' },
-  userProperties: {
-    /* optional, per-user */
-  },
-  groupProperties: {
-    /* optional, project-level */
-  },
+  userProperties: {}, // optional, per-user
+  groupProperties: {}, // optional, project-level
 });
 ```
 
