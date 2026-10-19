@@ -15,6 +15,39 @@ interface ArticleSchema extends Struct.CollectionTypeSchema {
   };
 }
 
+// Generated-style schemas: type generation adds `createdAt`, `updatedAt`, `publishedAt` and `locale`.
+interface PageSchema extends Struct.CollectionTypeSchema {
+  collectionName: 'pages';
+  info: { singularName: 'page'; pluralName: 'pages'; displayName: 'Page' };
+  options: { draftAndPublish: true };
+  pluginOptions: { i18n: { localized: true } };
+  attributes: {
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    secret: Schema.Attribute.String & Schema.Attribute.Private;
+    day: Schema.Attribute.Date;
+    at: Schema.Attribute.Time;
+    stamp: Schema.Attribute.Timestamp;
+    tags: Schema.Attribute.Relation<'oneToMany', 'api::category.category'>;
+    seo: Schema.Attribute.Component<'shared.seo', false>;
+    blocks: Schema.Attribute.Component<'shared.seo', true>;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+  };
+}
+
+interface NoteSchema extends Struct.CollectionTypeSchema {
+  collectionName: 'notes';
+  info: { singularName: 'note'; pluralName: 'notes'; displayName: 'Note' };
+  options: { draftAndPublish: false };
+  attributes: {
+    title: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+  };
+}
+
 interface CategorySchema extends Struct.CollectionTypeSchema {
   collectionName: 'categories';
   info: { singularName: 'category'; pluralName: 'categories'; displayName: 'Category' };
@@ -35,6 +68,8 @@ declare global {
       interface ContentTypeSchemas {
         'api::article.article': ArticleSchema;
         'api::category.category': CategorySchema;
+        'api::page.page': PageSchema;
+        'api::note.note': NoteSchema;
       }
       interface ComponentSchemas {
         'shared.seo': SeoSchema;
@@ -49,7 +84,6 @@ const articles = app.documents('api::article.article');
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
-type HasKey<T, TKey extends string> = TKey extends keyof T ? true : false;
 type Result<T> = Awaited<T> extends (infer TItem)[] ? TItem : Awaited<T>;
 
 const all = articles.findMany();
@@ -69,13 +103,18 @@ type Article = Result<typeof all>;
 type Category = { id: Data.ID; documentId: string; name?: string | null };
 
 declare const checks: [
-  // Scalar attributes, without relations and components unless populated.
+  // Scalar attributes, without relations and components unless populated. A selected key is present.
   Expect<Equal<keyof Article, 'id' | 'documentId' | 'title' | 'views'>>,
-  Expect<Equal<Article['views'], number | null | undefined>>,
+  Expect<Equal<Article['views'], number | null>>,
+  Expect<
+    Equal<Partial<Pick<Article, 'views'>> extends Pick<Article, 'views'> ? true : false, false>
+  >,
+  // `Required` attributes stay nullable: drafts, later schema changes and raw writes leave them empty.
+  Expect<Equal<Article['title'], string | null>>,
   // `fields` narrows the result.
   Expect<Equal<keyof Result<typeof selected>, 'id' | 'documentId' | 'title'>>,
-  // `populate` adds the relation, typed from its target.
-  Expect<Equal<Result<typeof populated>['category'], Category | null | undefined>>,
+  // `populate` adds the relation, typed from its target, `null` when there is none.
+  Expect<Equal<Result<typeof populated>['category'], Category | null>>,
   Expect<Equal<keyof Result<typeof nested>, 'id' | 'documentId' | 'title' | 'category'>>,
   Expect<Equal<keyof Result<typeof component>, 'id' | 'documentId' | 'title' | 'views' | 'seo'>>,
   Expect<Equal<Awaited<typeof one>, Article | null>>,
@@ -133,15 +172,81 @@ void articles.unpublish({ documentId: 'a', lookup: { locale: 'fr' } });
 // @ts-expect-error `lookup` is internal.
 void articles.discardDraft({ documentId: 'a', lookup: { locale: 'fr' } });
 
-// Known gap (Required): a required attribute stays optional and nullable in results.
-// @ts-expect-error
-export type RequiredTitle = Expect<Equal<Article['title'], string>>;
-// Known gap (locale): results of a localized content type do not type `locale`.
-// @ts-expect-error
-export type LocalizedResult = Expect<HasKey<Article, 'locale'>>;
-// Known gap (status): results of a draft and publish content type do not type `publishedAt`.
-// @ts-expect-error
-export type PublishedResult = Expect<HasKey<Article, 'publishedAt'>>;
+// The result model on generated-style schemas.
+const pages = app.documents('api::page.page');
+const notes = app.documents('api::note.note');
+declare const anyStatus: 'draft' | 'published';
+const draftPage = pages.findOne({ documentId: 'a' });
+const publishedPage = pages.findOne({ documentId: 'a', status: 'published' });
+const eitherPage = pages.findFirst({ status: anyStatus });
+const populatedPage = pages.findMany({ populate: ['tags', 'seo', 'blocks'] });
+const createdDraft = pages.create({ data: { title: 'Title', day: new Date() } });
+const createdPublished = pages.create({ data: { title: 'Title' }, status: 'published' });
+const published = pages.publish({ documentId: 'a' });
+const discarded = pages.discardDraft({ documentId: 'a' });
+const deleted = pages.delete({ documentId: 'a' });
+const note = notes.findOne({ documentId: 'a' });
+type Page = NonNullable<Awaited<typeof draftPage>>;
+type Entries<T> = Awaited<T> extends { entries: (infer TEntry)[] } ? TEntry : never;
+declare const modelChecks: [
+  // Every selected scalar is present, private ones included; unpopulated attributes are absent.
+  Expect<
+    Equal<
+      keyof Page,
+      | 'id'
+      | 'documentId'
+      | 'title'
+      | 'secret'
+      | 'day'
+      | 'at'
+      | 'stamp'
+      | 'createdAt'
+      | 'updatedAt'
+      | 'publishedAt'
+      | 'locale'
+    >
+  >,
+  // `publishedAt` follows draft and publish and the status: reads default to drafts.
+  Expect<Equal<Page['publishedAt'], null>>,
+  Expect<Equal<NonNullable<Awaited<typeof publishedPage>>['publishedAt'], string>>,
+  Expect<Equal<NonNullable<Awaited<typeof eitherPage>>['publishedAt'], string | null>>,
+  Expect<Equal<Result<typeof createdDraft>['publishedAt'], null>>,
+  Expect<Equal<Result<typeof createdPublished>['publishedAt'], string>>,
+  Expect<Equal<Entries<typeof published>['publishedAt'], string>>,
+  Expect<Equal<Entries<typeof discarded>['publishedAt'], null>>,
+  Expect<Equal<Entries<typeof deleted>['publishedAt'], string | null>>,
+  // Without draft and publish, every write sets `publishedAt`.
+  Expect<Equal<NonNullable<Awaited<typeof note>>['publishedAt'], string>>,
+  // A localized content type always has a locale; others may hold `null`.
+  Expect<Equal<Page['locale'], string>>,
+  Expect<Equal<NonNullable<Awaited<typeof note>>['locale'], string | null>>,
+  // Dates are strings in results; timestamps are set by every write.
+  Expect<Equal<Page['day'], string | null>>,
+  Expect<Equal<Page['at'], string | null>>,
+  Expect<Equal<Page['stamp'], string | null>>,
+  Expect<Equal<Page['createdAt'], string>>,
+  // To-many populates are arrays, never `null`; to-one populates may be `null`.
+  Expect<Equal<null extends Result<typeof populatedPage>['tags'] ? true : false, false>>,
+  Expect<Equal<null extends Result<typeof populatedPage>['blocks'] ? true : false, false>>,
+  Expect<Equal<null extends Result<typeof populatedPage>['seo'] ? true : false, true>>,
+];
+modelChecks satisfies unknown;
+
+// The core service reads published entries unless the params pass a status.
+declare const pageService: Core.CoreAPI.Service.ContentType<'api::page.page'>;
+const coreFound = pageService.find({});
+const coreDraft = pageService.findOne('a', { status: 'draft' });
+const coreSelected = pageService.findOne('a', { fields: ['title'] });
+declare const coreChecks: [
+  Expect<Equal<Awaited<typeof coreFound>['results'][number]['publishedAt'], string>>,
+  Expect<Equal<NonNullable<Awaited<typeof coreDraft>>['publishedAt'], null>>,
+  // The params are spread over the default: an explicit `undefined` reads drafts.
+  Expect<
+    Equal<Core.CoreAPI.Service.Entry<'api::page.page', { status: undefined }>['publishedAt'], null>
+  >,
+  Expect<Equal<keyof NonNullable<Awaited<typeof coreSelected>>, 'id' | 'documentId' | 'title'>>,
+];
+coreChecks satisfies unknown;
 // Known gap (filters): filter values are not checked against the attribute type. This compiles,
 // so it is not an `@ts-expect-error` case.
 void articles.findMany({ filters: { views: { $eq: 'not a number' } } });
