@@ -484,7 +484,6 @@ describe('findOverridingConfigFiles', () => {
     const context = await setUp();
     await fse.writeFile(
       path.join(context.appDir, '.npmrc'),
-      // eslint-disable-next-line no-template-curly-in-string
       `//registry.npmjs.org/:_authToken=\${NPM_TOKEN}\n${OTHER_LICENSE_NPMRC}`
     );
 

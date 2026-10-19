@@ -104,7 +104,6 @@ export const UploadAssetDialog = ({
 
   const handleClose = () => {
     if (step === Steps.PendingAsset && assets.length > 0) {
-      // eslint-disable-next-line no-alert
       const confirm = window.confirm(
         formatMessage({
           id: 'window.confirm.close-modal.files',

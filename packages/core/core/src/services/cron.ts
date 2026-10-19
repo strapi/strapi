@@ -12,7 +12,6 @@ type Tasks = Modules.Cron.CronTasks;
 let lazyCroner: typeof import('croner') | undefined;
 const getCroner = (): typeof import('croner') => {
   if (!lazyCroner) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     lazyCroner = require('croner');
   }
   return lazyCroner as typeof import('croner');

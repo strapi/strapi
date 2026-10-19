@@ -61,7 +61,7 @@ function createMinimalDocxBuffer(): Buffer {
   const content = Buffer.from(contentTypes, 'utf8');
 
   const crc32Table = new Uint32Array(256);
-  /* eslint-disable no-bitwise, no-plusplus -- CRC32 table computation */
+  /* eslint-disable no-bitwise -- CRC32 table computation */
   for (let n = 0; n < 256; n += 1) {
     let c = n;
     for (let k = 0; k < 8; k += 1) {
@@ -76,7 +76,7 @@ function createMinimalDocxBuffer(): Buffer {
     }
     return (crc ^ -1) >>> 0;
   }
-  /* eslint-enable no-bitwise, no-plusplus */
+  /* eslint-enable no-bitwise */
 
   const crc = crc32(content);
   const len = content.length;

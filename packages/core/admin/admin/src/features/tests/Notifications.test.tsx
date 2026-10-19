@@ -79,17 +79,14 @@ describe.skip('Notifications', () => {
 
       await user.click(getByRole('button', { name: 'Trigger Notification' }));
 
-      // eslint-disable-next-line jest-dom/prefer-in-document
       expect(queryAllByText(/test/)).toHaveLength(1);
 
       jest.advanceTimersByTime(3000);
 
-      // eslint-disable-next-line jest-dom/prefer-in-document
       expect(queryAllByText(/test/)).toHaveLength(1);
 
       await user.click(getByRole('button', { name: 'Close' }));
 
-      // eslint-disable-next-line jest-dom/prefer-in-document
       expect(queryAllByText(/test/)).toHaveLength(0);
     });
 
@@ -99,7 +96,6 @@ describe.skip('Notifications', () => {
 
       await user.click(getByRole('button', { name: 'Trigger Notification' }));
 
-      // eslint-disable-next-line jest-dom/prefer-in-document
       expect(queryAllByText(/test/)).toHaveLength(1);
 
       await user.click(getByRole('button', { name: 'Close' }));
@@ -125,7 +121,6 @@ describe.skip('Notifications', () => {
 
     await user.click(getByRole('button', { name: 'Trigger Notification' }));
 
-    // eslint-disable-next-line jest-dom/prefer-in-document
     expect(queryAllByText(/test/)).toHaveLength(1);
 
     jest.advanceTimersByTime(2000);
@@ -136,7 +131,6 @@ describe.skip('Notifications', () => {
 
     act(() => jest.advanceTimersByTime(1500));
 
-    // eslint-disable-next-line jest-dom/prefer-in-document
     expect(queryAllByText(/test/)).toHaveLength(1);
   });
 });

@@ -100,7 +100,6 @@ describe('FolderTree', () => {
     const leaf = await screen.findByRole('button', {
       name: 'The folder Inner A1 has no subfolders',
     });
-    // eslint-disable-next-line testing-library/no-node-access
     const chevron = leaf.querySelector('svg') as SVGElement;
 
     expect(window.getComputedStyle(chevron).transform).toBe('rotate(-90deg)');

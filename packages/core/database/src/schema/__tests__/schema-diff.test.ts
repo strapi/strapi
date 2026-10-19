@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import createSchemaDiff from '../diff';
 import type { Index, Schema, Table } from '..';
 

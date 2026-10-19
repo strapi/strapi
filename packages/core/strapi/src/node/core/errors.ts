@@ -21,7 +21,6 @@ const handleUnexpectedError = (err: unknown) => {
   );
 
   if (isError(err) && err.stack) {
-    // eslint-disable-next-line no-console
     console.log(
       chalk.red(
         boxen(err.stack, {

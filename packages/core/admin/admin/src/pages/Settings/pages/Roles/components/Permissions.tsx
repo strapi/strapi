@@ -407,7 +407,6 @@ const inheritConditionsAtPath = (
   }
 };
 
-/* eslint-disable consistent-return */
 const reducer = (state: State, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {

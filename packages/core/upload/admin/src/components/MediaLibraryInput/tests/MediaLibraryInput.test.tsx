@@ -500,7 +500,6 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       await openMenu(user);
 
       for (const name of ['Browse library', 'Upload from device', 'Upload from URL']) {
-        // eslint-disable-next-line no-await-in-loop
         expect(await screen.findByRole('menuitem', { name })).toHaveAttribute(
           'aria-disabled',
           'true'

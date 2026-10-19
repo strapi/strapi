@@ -494,7 +494,6 @@ export const FormModal = () => {
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
-      // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components) as Internal.UID.Component[],
@@ -861,7 +860,6 @@ export const FormModal = () => {
 
           // Adding an existing component
         }
-        // eslint-disable-next-line no-lonely-if
         if (isInFirstComponentStep) {
           // Navigate the user to step 2
           onNavigateToCreateComponentStep2();
@@ -1094,7 +1092,6 @@ export const FormModal = () => {
   };
 
   const handleConfirmClose = () => {
-    // eslint-disable-next-line no-alert
     const confirm = window.confirm(
       formatMessage({
         id: 'window.confirm.close-modal.file',

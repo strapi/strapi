@@ -1,5 +1,4 @@
 import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
-/* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';

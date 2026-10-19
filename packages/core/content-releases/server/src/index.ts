@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import { register } from './register';
 import { bootstrap } from './bootstrap';
 import { destroy } from './destroy';

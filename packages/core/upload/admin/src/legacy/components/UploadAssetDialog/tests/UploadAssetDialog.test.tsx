@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import { within } from '@testing-library/react';
 import { fireEvent, render, screen } from '@tests/utils';
 
@@ -90,7 +89,6 @@ describe('UploadAssetDialog', () => {
         'http://localhost:1234/some-where-not-existing.jpg',
       ];
 
-      // eslint-disable-next-line no-restricted-syntax
       for (const url of urls) {
         await user.type(getByRole('textbox', { name: 'URL' }), url);
 
@@ -124,7 +122,6 @@ describe('UploadAssetDialog', () => {
         'http://localhost:5000/not-working-like-cors.lutin',
       ];
 
-      // eslint-disable-next-line no-restricted-syntax
       for (const url of urls) {
         await user.type(getByRole('textbox', { name: 'URL' }), url);
 
