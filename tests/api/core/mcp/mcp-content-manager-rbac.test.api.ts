@@ -336,7 +336,7 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
       documentId: seeded.documentId,
     });
     expect(response.error).toMatchObject({ code: -32602 });
-    expect(response.error?.message).toMatch(/disabled/i);
+    expect(response.error?.message).toMatch(/not found/i);
 
     const surviving = await strapi.documents(MODEL_UID as UID.CollectionType).findMany({});
     expect(surviving).toHaveLength(1);

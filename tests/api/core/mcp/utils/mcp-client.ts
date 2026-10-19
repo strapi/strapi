@@ -85,21 +85,24 @@ export const expectToolOk = (response: JsonRpcResponse): void => {
  * The three failure shapes this MCP surface actually produces, pinned so a test says which one
  * it means:
  *
- * - a tool the session may not use is never advertised, and calling it is refused by the
- *   protocol as `-32602 Tool <name> disabled` — the handler never runs;
+ * - a tool the session may not use is never registered, and calling it is refused by the
+ *   protocol as `-32602 Tool <name> not found` — the handler never runs;
  * - arguments rejected against the tool's Zod schema come back as a tool error prefixed
  *   `Input validation error:`;
  * - anything the handler itself throws comes back as `Tool "<name>" execution failed: <message>`.
  *
- * Keeping these apart is the point: a validation rejection and a not-found are both `isError`,
- * so a test that accepts either cannot catch one turning into the other.
+ * Keeping these apart is the point: a validation rejection and an execution failure are both
+ * `isError`, so a test that accepts either cannot catch one turning into the other.
  */
 
-/** A tool the session is not allowed to use: refused by the protocol, before the handler. */
+/**
+ * A tool the session is not allowed to use: it is omitted from the request, so the protocol
+ * reports it as missing before the handler runs.
+ */
 export const expectToolDisabled = (response: JsonRpcResponse, name: string): void => {
   const error = expectJsonRpcError(response);
   expect(error.code).toBe(-32602);
-  expect(error.message).toBe(`Tool ${name} disabled`);
+  expect(error.message).toBe(`Tool ${name} not found`);
 };
 
 /** Arguments rejected against the tool's input schema. Never a domain error. */
