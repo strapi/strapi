@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { EditLayout } from '../../../hooks/useDocumentLayout';
+import { NEAR_VIEWPORT_MARGIN, getScrollParent } from '../../../hooks/useHasBeenNearViewport';
 
 import { InputRenderer } from './InputRenderer';
 
@@ -31,24 +32,6 @@ const ESTIMATED_HEIGHT: Partial<Record<LayoutField['type'], number>> = {
   text: 120,
 };
 const DEFAULT_ESTIMATED_HEIGHT = 80;
-
-/**
- * How far outside of the scroll container a row starts mounting, so scrolling doesn't reveal
- * placeholders.
- */
-const MOUNT_MARGIN = '1200px 0px';
-
-const getScrollParent = (element: HTMLElement | null): HTMLElement | null => {
-  for (let node = element?.parentElement; node; node = node.parentElement) {
-    const { overflowY } = window.getComputedStyle(node);
-
-    if (/(auto|scroll)/.test(overflowY) && node.scrollHeight > node.clientHeight) {
-      return node;
-    }
-  }
-
-  return null;
-};
 
 /* -------------------------------------------------------------------------------------------------
  * Idle mount queue
@@ -196,7 +179,7 @@ const LazyFormRow = ({ fields, mountImmediately = false, children }: LazyFormRow
           setIsVisible(true);
         }
       },
-      { root: getScrollParent(placeholder), rootMargin: MOUNT_MARGIN }
+      { root: getScrollParent(placeholder), rootMargin: NEAR_VIEWPORT_MARGIN }
     );
 
     observer.observe(placeholder);
