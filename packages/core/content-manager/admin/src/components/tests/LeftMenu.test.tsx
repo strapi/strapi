@@ -1,4 +1,3 @@
-/* eslint-disable check-file/filename-naming-convention */
 import { ConfigureStoreOptions } from '@reduxjs/toolkit';
 import { defaultTestStoreConfig, render, screen, server } from '@strapi/admin/strapi-admin/test';
 import { http, HttpResponse } from 'msw';

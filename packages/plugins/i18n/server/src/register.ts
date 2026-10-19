@@ -94,7 +94,6 @@ const extendContentTypes = (strapi: Core.Strapi) => {
   });
 
   if (strapi.plugin('graphql')) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     graphqlProvider({ strapi }).register();
   }
 };

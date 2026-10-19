@@ -177,7 +177,6 @@ jest.mock('../../../../hooks/useSettingsMenu', () => ({
 }));
 
 const lightningFillFor = (label: string) =>
-  // eslint-disable-next-line testing-library/no-node-access
   screen.getByText(label).closest('a')?.querySelector('svg')?.getAttribute('fill');
 
 describe('SettingsNav', () => {
