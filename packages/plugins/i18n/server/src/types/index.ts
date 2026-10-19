@@ -17,6 +17,15 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      /**
+       * The i18n rows of the core store. `default_locale` is the code of the default locale, written
+       * when the first locale is created. `settings` holds the plugin settings.
+       */
+      interface Stores {
+        plugin_i18n_default_locale: string;
+        plugin_i18n_settings: { aiLocalizations?: boolean | undefined };
+      }
+
       interface PackageServices {
         'plugin::i18n.locales': ServiceContracts.LocaleService;
         'plugin::i18n.permissions': ServiceContracts.PermissionsService;

@@ -1,6 +1,7 @@
 import type * as Controllers from './controllers';
 import type * as Services from './services';
 import type { HasPermissionsConfig } from './policies';
+import type { Configuration } from '../../../shared/contracts/content-types';
 
 export type * as Controllers from './controllers';
 export type * as Services from './services';
@@ -12,6 +13,18 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      /**
+       * The edit and list view configurations, one row per content type or component UID
+       * (`configuration_<content_types|components>::<uid>` in the `content_manager` store). They are
+       * synced with the schemas at every start. Component rows also record `isComponent`.
+       */
+      interface Stores {
+        [key: `plugin_content_manager_configuration_content_types::${string}`]: Configuration;
+        [key: `plugin_content_manager_configuration_components::${string}`]: Configuration & {
+          isComponent: boolean;
+        };
+      }
+
       interface PackageServices {
         'plugin::content-manager.components': Services.ComponentsService;
         'plugin::content-manager.content-structure': Services.ContentStructureService;
