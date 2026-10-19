@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash';
 import type { Data, UID } from '@strapi/types';
 import type { Database, JoinTable } from '@strapi/database';

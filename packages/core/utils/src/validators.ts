@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable no-template-curly-in-string */
 import * as yup from 'yup';
 import { defaults } from 'lodash';
 import { YupValidationError } from './errors';

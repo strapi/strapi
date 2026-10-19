@@ -5,7 +5,6 @@ import { renderHook } from '@tests/utils';
 // under test.
 jest.unmock('../useTracking');
 
-// eslint-disable-next-line import/first
 import { useTracking } from '../useTracking';
 
 const mockTrackStrapiUsage = jest.fn();
