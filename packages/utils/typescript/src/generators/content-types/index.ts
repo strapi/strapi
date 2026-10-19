@@ -33,7 +33,8 @@ export const generateContentTypesDefinitions = async (
     uid: contentType.uid,
     definition: models.schema.generateSchemaDefinition(
       contentType,
-      interfaceNames.get(contentType.uid)
+      interfaceNames.get(contentType.uid),
+      { strict }
     ),
   }));
 

@@ -417,6 +417,34 @@ describe('Attributes', () => {
         });
       });
 
+      describe('Conditional', () => {
+        const attribute = {
+          type: 'string',
+          required: true,
+          conditions: { visible: { '==': [{ var: 'kind' }, 'blog'] } },
+        };
+
+        test('Without strict types, conditions emit no modifier', () => {
+          expect(getAttributeModifiers(attribute)).toHaveLength(1);
+          expect(getAttributeModifiers(attribute, { strict: false })).toHaveLength(1);
+        });
+
+        test('With strict types, conditions emit Schema.Attribute.Conditional', () => {
+          const modifiers = getAttributeModifiers(attribute, { strict: true });
+
+          expect(modifiers).toHaveLength(2);
+          expect(modifiers[1].kind).toBe(ts.SyntaxKind.TypeReference);
+          expect(modifiers[1].typeName.escapedText).toBe('Schema.Attribute.Conditional');
+        });
+
+        test('With strict types, an attribute without a visible rule is not conditional', () => {
+          expect(getAttributeModifiers({ type: 'string' }, { strict: true })).toHaveLength(0);
+          expect(
+            getAttributeModifiers({ type: 'string', conditions: {} }, { strict: true })
+          ).toHaveLength(0);
+        });
+      });
+
       describe('Private', () => {
         test('No private', () => {
           const attribute = {};

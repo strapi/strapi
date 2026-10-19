@@ -97,6 +97,58 @@ describe.each(generators)('%s generator', (_, generator, strapi) => {
   });
 });
 
+describe('conditional attributes', () => {
+  const conditions = { visible: { '==': [{ var: 'kind' }, 'blog'] } };
+  const withConditions = (attributeConditions?: object) => ({
+    contentTypes: {
+      'api::post.post': {
+        uid: 'api::post.post',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        collectionName: 'posts',
+        info: { singularName: 'post', pluralName: 'posts', displayName: 'Post' },
+        options: { draftAndPublish: true },
+        attributes: {
+          kind: { type: 'enumeration', enum: ['news', 'blog'] },
+          teaser: { type: 'text', required: true, conditions: attributeConditions },
+        },
+      },
+    },
+  });
+
+  test('without strict types, conditions do not change the output', async () => {
+    const logger = createLogger({ silent: true });
+    const { output } = await generateContentTypesDefinitions({
+      strapi: withConditions(conditions),
+      logger,
+      strict: false,
+    });
+    const { output: unconditional } = await generateContentTypesDefinitions({
+      strapi: withConditions(),
+      logger,
+      strict: false,
+    });
+
+    expect(output).toBe(unconditional);
+    expect(output).not.toContain('Conditional');
+  });
+
+  test('with strict types, a conditional attribute carries the marker', async () => {
+    const logger = createLogger({ silent: true });
+    const { output } = await generateContentTypesDefinitions({
+      strapi: withConditions(conditions),
+      logger,
+      strict: true,
+    });
+
+    expect(output).toContain(
+      'teaser: Schema.Attribute.Text & Schema.Attribute.Required & Schema.Attribute.Conditional;'
+    );
+    expect(output).toContain('kind: Schema.Attribute.Enumeration<');
+    expect(output.match(/Schema\.Attribute\.Conditional/g)).toHaveLength(1);
+  });
+});
+
 describe('duplicate interface names', () => {
   const contentType = (uid: string) => ({
     uid,
