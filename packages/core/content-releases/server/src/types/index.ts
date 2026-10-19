@@ -1,4 +1,5 @@
 import type createHomepageService from '../services/homepage';
+import type { Release } from '../../../shared/contracts/releases';
 import type { ReleaseService } from '../services/release';
 import type { FindPageQuery, ReleaseActionService } from '../services/release-action';
 import type createSchedulingService from '../services/scheduling';
@@ -61,6 +62,18 @@ declare global {
        * `defaultTimezone` left `undefined` is dropped by the JSON encoding, so the key may be
        * missing. Stored whatever the license, so it is not `undefined` like the services.
        */
+      /**
+       * The outcome of a release publish, emitted by the release service and forwarded to webhooks.
+       * `isPublished` tells the two payloads apart: the published release, or the error that stopped
+       * the publish. Emitted whatever the license, like the store row.
+       */
+      interface Events {
+        'releases.publish': [
+          | { isPublished: true; error: undefined; release: Release }
+          | { isPublished: false; error: unknown; release: undefined },
+        ];
+      }
+
       interface Stores {
         'core_content-releases_settings': { defaultTimezone?: string | null | undefined };
       }

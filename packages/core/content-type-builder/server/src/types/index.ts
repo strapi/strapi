@@ -6,6 +6,7 @@ import type { createContentStructureService } from '../services/content-structur
 import type * as ContentTypesService from '../services/content-types';
 import type * as SchemaService from '../services/schema';
 import type { ContentTypeBuilderConfig } from '../config';
+import type { SchemaHandler } from '../services/schema-builder/schema-handler';
 
 /** Content-Type Builder services by name, as registered by the plugin. */
 export type Services = {
@@ -24,6 +25,20 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      /**
+       * Schema changes the Content-Type Builder emits on the event hub, once the files are written.
+       * The payload holds the builder's schema handler of the content type or component (its `uid`,
+       * `schema`, …), not a plain schema.
+       */
+      interface Events {
+        'content-type.create': [{ contentType: SchemaHandler }];
+        'content-type.update': [{ contentType: SchemaHandler }];
+        'content-type.delete': [{ contentType: SchemaHandler }];
+        'component.create': [{ component: SchemaHandler }];
+        'component.update': [{ component: SchemaHandler }];
+        'component.delete': [{ component: SchemaHandler }];
+      }
+
       /** The plugin config merged with its defaults. */
       interface PackageConfigs {
         'plugin::content-type-builder': ContentTypeBuilderConfig;

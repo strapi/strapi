@@ -109,7 +109,11 @@ export interface Strapi extends StrapiContainer, Lookups {
   server: Modules.Server.Server;
   log: Logger;
   fs: StrapiFS;
-  eventHub: Modules.EventHub.EventHub;
+  /**
+   * The event hub. With strict types enabled, emits of registered names take their registered payload
+   * and listeners receive it; other names keep the types they have without strict types.
+   */
+  eventHub: IsStrict extends false ? Modules.EventHub.EventHub : Modules.EventHub.StrictEventHub;
   startupLogger: StartupLogger;
   cron: Modules.Cron.CronService;
   /**
