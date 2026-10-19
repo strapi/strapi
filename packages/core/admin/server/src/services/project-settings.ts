@@ -82,8 +82,7 @@ const getProjectSettings = async (): Promise<GetProjectSettings.Response> => {
 
   const projectSettings = {
     ...defaultProjectSettings,
-    // @ts-expect-error spread can be applied to return value
-    ...(await store.get({ key: 'project-settings' })),
+    ...((await store.get({ key: 'project-settings' })) as object | null),
   };
 
   // Filter file input fields

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
-import type { Core, Modules, UID, Schema } from '@strapi/types';
+import type { Core, Modules, UID, Schema, Struct } from '@strapi/types';
 
 import { loadConfiguration } from './configuration';
 import { warnDeprecatedServerConfig } from './configuration/server-config';
@@ -165,7 +165,8 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('sessionManager');
   }
 
-  get store(): Modules.CoreStore.CoreStore {
+  /** Typed as `Core.Strapi['store']`: with strict types, reads and writes follow the store registry. */
+  get store(): Core.Strapi['store'] {
     return this.get('coreStore');
   }
 
@@ -522,7 +523,7 @@ class Strapi extends Container implements Core.Strapi {
       type: 'strapi',
       name: 'content_types',
       key: 'schema',
-      value: this.contentTypes,
+      value: this.contentTypes as Record<string, Struct.ContentTypeSchema>,
     });
 
     await this.server.initMiddlewares();
