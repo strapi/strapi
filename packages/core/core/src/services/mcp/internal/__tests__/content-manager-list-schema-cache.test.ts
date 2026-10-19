@@ -1,5 +1,7 @@
 /* eslint-disable import/no-relative-packages -- content-manager tools are registered by core */
 import { Ability, AbilityBuilder } from '@casl/ability';
+import Ajv2020 from 'ajv/dist/2020';
+import addFormats from 'ajv-formats';
 import { Client } from '@modelcontextprotocol/client';
 import { InMemoryTransport } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
@@ -267,5 +269,24 @@ describe('content-manager MCP list schema cache', () => {
 
     const englishAgain = await listFor(['en']);
     expect(englishAgain).toEqual(english);
+  });
+
+  test('advertised content-manager list schemas compile as draft 2020-12', async () => {
+    const strapi = createStrapi(true);
+    const { definitions } = registerTools(strapi, ['en', 'fr']);
+    const session = await connect(strapi, definitions, { mode: 'list' }, abilityFor(['title']));
+    try {
+      const { tools } = await session.client.listTools();
+      const listed = tools.find((tool) => tool.name === 'list_article');
+      expect(listed?.inputSchema).toBeDefined();
+      expect(listed?.outputSchema).toBeDefined();
+
+      const ajv = new Ajv2020({ strict: true, strictTuples: false });
+      addFormats(ajv);
+      expect(() => ajv.compile(listed!.inputSchema)).not.toThrow();
+      expect(() => ajv.compile(listed!.outputSchema!)).not.toThrow();
+    } finally {
+      await session.close();
+    }
   });
 });

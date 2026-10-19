@@ -6,6 +6,7 @@ import type { Core, Modules } from '@strapi/types';
 import { z } from '@strapi/utils';
 import { McpCapabilityDefinitionRegistry } from '../McpCapabilityDefinitionRegistry';
 import { createMcpServerWithRegistries } from '../McpServerFactory';
+import { mcpToolSchemaCache } from '../tool-schema-cache';
 
 const JSON_SCHEMA_2020_12 = 'https://json-schema.org/draft/2020-12/schema';
 
@@ -137,6 +138,47 @@ describe('MCP tool discovery', () => {
           (tool.outputSchema === undefined || schemaIsUsable(tool.outputSchema))
       );
       expect(usableTools).toHaveLength(advertisedTools.length);
+
+      const listed = await createMcpServerWithRegistries({
+        strapi,
+        definitions: {
+          tools,
+          prompts: new McpCapabilityDefinitionRegistry<'prompt', Modules.MCP.McpPromptDefinition>(
+            'prompt'
+          ),
+          resources: new McpCapabilityDefinitionRegistry<
+            'resource',
+            Modules.MCP.McpResourceDefinition
+          >('resource'),
+        },
+        isDevMode: false,
+        ability,
+        user: { id: 1 },
+        toolRegistration: { mode: 'list' },
+      });
+      const [listedClientTransport, listedServerTransport] = InMemoryTransport.createLinkedPair();
+      const listedClient = new Client({ name: 'strict-discovery-list', version: '1.0.0' });
+      try {
+        await Promise.all([
+          listed.mcpServer.connect(listedServerTransport),
+          listedClient.connect(listedClientTransport),
+        ]);
+        const { tools: cachedTools } = await listedClient.listTools();
+        expect(cachedTools.map((tool) => tool.name)).toEqual(
+          advertisedTools.map((tool) => tool.name)
+        );
+        for (const tool of cachedTools) {
+          const live = advertisedTools.find((candidate) => candidate.name === tool.name);
+          expect(schemaIsUsable(tool.inputSchema)).toBe(true);
+          expect(tool.outputSchema === undefined || schemaIsUsable(tool.outputSchema)).toBe(true);
+          expect(tool.inputSchema).toEqual(live?.inputSchema);
+          expect(tool.outputSchema).toEqual(live?.outputSchema);
+        }
+      } finally {
+        mcpToolSchemaCache.clear();
+        await listedClient.close();
+        await listed.mcpServer.close();
+      }
 
       const representativeTool = advertisedTools.find(
         (tool) => tool.name === 'representative-tool'

@@ -105,6 +105,8 @@ On every request, after authentication, `syncMcpSessionCapabilities` (`packages/
 
 This is deliberately coarse — it decides what a client sees in `tools/list` etc. It does **not** replace per-request checks; the source comment is explicit: _"Field/entity conditions must be enforced by capability handlers with request-specific context."_
 
+The HTTP handler chooses which tool schemas exist before that sync, from the JSON-RPC body. `initialize`, notifications, `ping`, and unclassifiable bodies register none. `tools/list` registers every tool the allowlist permits. `tools/call` registers only the named tool, and only when the allowlist permits it. An unauthorized `tools/call` is not registered, so the SDK reports that the tool was not found.
+
 ### 2. Handler-level checks (fine-grained)
 
 Content-manager's derived tools re-run the same `permission-checker` service used by REST controllers inside each handler: entity-level checks (can this user act on _this_ document?), field-level filtering (`getPermittedFields`), and locale filtering (`resolvePermittedLocaleSchema`) — all computed **per request**, from the caller's ability, and folded directly into the tool's Zod input/output schema via `resolveInputSchema`/`resolveOutputSchema`. A user with `read` on an article but not on its `body` field never sees `body` in the tool's schema or output.
@@ -120,10 +122,13 @@ absent declaration as 2020-12. Capability authors and clients must interpret the
 structurally as 2020-12. For example, positional tuples use `prefixItems`, and generated recursive
 schemas use `$defs` rather than the older `definitions` container.
 
-Strapi passes each capability's authored Zod schema to the MCP SDK. Zod serializes it and the SDK
-advertises that result. Strapi does not rewrite or re-serialize advertised schemas. This boundary is
-covered by tests that enumerate through a real MCP client and through an authenticated `/mcp`
-request, then compile every advertised input and output schema as 2020-12.
+`tools/call` passes that tool's authored Zod schema to the SDK, which validates the call with Zod.
+`tools/list` converts each authorized tool with `z.toJSONSchema` (draft 2020-12) and caches the
+plain JSON Schema in the process. Registration uses a Standard Schema whose `jsonSchema` returns a
+copy, so the SDK advertises that document instead of converting Zod again. Strapi does not rewrite
+the document after the SDK returns it. This boundary is covered by tests that enumerate through a
+real MCP client and through an authenticated `/mcp` request, then compile every advertised input
+and output schema as 2020-12.
 
 ### Current content-manager schema observations
 
