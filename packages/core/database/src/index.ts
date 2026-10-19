@@ -14,6 +14,7 @@ import { Callback, transactionCtx, TransactionObject } from './transaction-conte
 import { validateDatabase } from './validations';
 import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
+import { withStrapiKnexLog } from './utils/knex-log';
 
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
@@ -124,7 +125,7 @@ class Database {
 
     this.metadata = createMetadata([]);
 
-    this.connection = createConnection(knexConfig, {
+    this.connection = createConnection(withStrapiKnexLog(knexConfig, this.logger), {
       pool: { afterCreate: afterCreate(this) },
     });
 
@@ -156,7 +157,9 @@ class Database {
       if (this.config.connection.client === 'sqlite') {
         await this.connection.raw('SELECT 1');
       } else {
-        await this.connection.client.acquireConnection();
+        // release it straight away, otherwise it holds a pool slot for the life of the process
+        const conn = await this.connection.client.acquireConnection();
+        await this.connection.client.releaseConnection(conn);
       }
     }
 
