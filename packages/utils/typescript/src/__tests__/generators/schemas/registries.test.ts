@@ -83,9 +83,11 @@ describe.each(generators)('%s generator', (_, generator, strapi) => {
     expect(output).toMatch(/namespace Strapi\s*{\s*namespace Registries\s*{/);
     expect(output).not.toContain("declare module '@strapi/strapi'");
     expect(output).not.toContain('Public');
-    // Only the extension block differs: the schema interfaces and imports are shared.
-    const body = (content: string) => content.slice(0, content.indexOf('declare '));
+    // Besides the extension block, strict output only adds the write rule comments.
+    const body = (content: string) =>
+      content.slice(0, content.indexOf('declare ')).replace(/^ *\/\*\*.*\*\/\n/gm, '');
     expect(body(output)).toBe(body(legacy));
+    expect(legacy).not.toContain('/**');
   });
 
   test('with strict types and no schemas, output is the placeholder', async () => {
@@ -94,6 +96,52 @@ describe.each(generators)('%s generator', (_, generator, strapi) => {
 
     expect(output).toBe(legacy);
     expect(output).not.toContain('declare');
+  });
+});
+
+describe('write rules', () => {
+  const schema = (modelType: 'contentType' | 'component', draftAndPublish?: boolean) => ({
+    uid: modelType === 'component' ? 'shared.rules' : 'api::rule.rule',
+    modelType,
+    ...(modelType === 'contentType'
+      ? { kind: 'collectionType', options: { draftAndPublish } }
+      : { category: 'shared' }),
+    collectionName: 'rules',
+    info: { singularName: 'rule', pluralName: 'rules', displayName: 'Rule' },
+    attributes: {
+      title: { type: 'string', required: true },
+      subtitle: { type: 'string' },
+      kind: { type: 'enumeration', enum: ['news', 'blog'], required: true, default: 'news' },
+      views: { type: 'integer', default: 0 },
+      tags: { type: 'component', component: 'shared.tag', repeatable: true, required: true },
+      extras: { type: 'component', component: 'shared.tag', repeatable: true },
+      blocks: { type: 'dynamiczone', components: ['shared.tag'], required: true },
+      author: { type: 'relation', relation: 'manyToOne', target: 'admin::user', required: true },
+      teaser: { type: 'text', required: true, conditions: { visible: { var: 'kind' } } },
+      createdBy: { type: 'relation', relation: 'oneToOne', target: 'admin::user', writable: false },
+    },
+  });
+
+  test.each([
+    ['content type with draft and publish', schema('contentType', true)],
+    ['content type without draft and publish', schema('contentType', false)],
+    ['component', schema('component')],
+  ])('with strict types, attributes of a %s carry their write rule', async (_, model) => {
+    const logger = createLogger({ silent: true });
+    const strapi =
+      model.modelType === 'component'
+        ? { components: { [model.uid]: model } }
+        : { contentTypes: { [model.uid]: model } };
+    const generator =
+      model.modelType === 'component'
+        ? generateComponentsDefinitions
+        : generateContentTypesDefinitions;
+
+    const { output } = await generator({ strapi, logger, strict: true });
+    const { output: legacy } = await generator({ strapi, logger, strict: false });
+
+    expect(output).toMatchSnapshot();
+    expect(legacy).not.toContain('/**');
   });
 });
 

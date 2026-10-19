@@ -224,7 +224,9 @@ type generation already emits, `Schema.Attribute.Required` and `Schema.Attribute
 - `create` requires `data`.
 
 A schema with unknown attributes, such as an unregistered or generic UID, keeps develop's
-`Data.Input`. Without strict types, the params keep develop's types.
+`Data.Input`. Without strict types, the params keep develop's types. With strict types, type
+generation also writes the rule of each attribute as a JSDoc line, which editors show on the input
+keys.
 
 ## Keeping types unchanged without strict mode
 
