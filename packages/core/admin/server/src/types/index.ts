@@ -25,7 +25,9 @@ import type EEPersistTablesService from '../../../ee/server/src/services/persist
 import type EERoleService from '../../../ee/server/src/services/role';
 import type EESeatEnforcementService from '../../../ee/server/src/services/seat-enforcement';
 import type EEUserService from '../../../ee/server/src/services/user';
+import type { PersistedTable } from '../../../ee/server/src/services/persist-tables';
 import type { AdminRole } from '../../../shared/contracts/shared';
+import type { HomepageLayout } from '../controllers/validation/schema';
 
 export type * as Policies from './policies';
 export type { RateLimitOptions } from './rate-limit';
@@ -115,6 +117,48 @@ export type EnterpriseServices = {
 };
 
 /**
+ * The admin authentication settings, stored under `core_admin_auth`. The admin bootstrap merges the
+ * defaults over the stored value at every start, so `providers` is always set. The EE SSO settings
+ * endpoint replaces `providers` with the validated body, which may leave out the optional members.
+ */
+type AdminAuthStore = {
+  providers: {
+    autoRegister: boolean;
+    /** The role of auto-registered SSO users. Reset to `null` at start when the role is deleted. */
+    defaultRole?: string | number | null;
+    /** The IDs of the roles SSO users cannot leave, as strings or numbers. */
+    ssoLockedRoles?: Array<string | number> | null;
+  };
+};
+
+/** A logo of the project settings: the members of the uploaded file the admin keeps. */
+type ProjectSettingsLogo = {
+  name?: string;
+  hash?: string;
+  url?: string;
+  width?: number;
+  height?: number;
+  ext?: string;
+  size?: number;
+  provider?: unknown;
+};
+
+/**
+ * The project settings, stored under `core_admin_project-settings`. A logo is missing until it is
+ * first uploaded, and `null` once removed.
+ */
+type ProjectSettingsStore = {
+  menuLogo?: ProjectSettingsLogo | null;
+  authLogo?: ProjectSettingsLogo | null;
+};
+
+/**
+ * A user disabled by EE seat enforcement, stored under `ee_disabled_users`: the user's ID and its
+ * active state before it was disabled.
+ */
+type DisabledUserStore = { id: string | number; isActive: boolean };
+
+/**
  * Default contracts loaded with the admin server types.
  * The EE edition deep-merges `auth`, `user`, `role`, `passport` and `metrics` over their CE
  * implementation: their contracts are the CE shape plus the EE-only members as optional.
@@ -153,6 +197,20 @@ declare global {
         'admin::token': typeof TokenService;
         'admin::transfer': typeof TransferService;
         'admin::user': EditionService<typeof CEUserService, typeof EEUserService>;
+      }
+
+      /**
+       * Core store rows the admin writes and reads. `ee_disabled_users` and `core_persisted_tables`
+       * are only written by the EE edition: a CE runtime has no row, so they read `null`.
+       * `core_persisted_tables` is also read by `@strapi/database` to keep the listed tables.
+       */
+      interface Stores {
+        core_admin_auth: AdminAuthStore;
+        'core_admin_project-settings': ProjectSettingsStore;
+        /** One homepage layout per admin user, keyed by user ID. */
+        [key: `core_admin_homepage-layout:${string}`]: HomepageLayout;
+        core_persisted_tables: Array<string | PersistedTable>;
+        ee_disabled_users: DisabledUserStore[];
       }
 
       interface PackagePolicies {

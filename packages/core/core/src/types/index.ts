@@ -1,3 +1,4 @@
+import type { Struct } from '@strapi/types';
 import type * as ResolvedConfig from './config';
 import type { body } from '../middlewares/body';
 import type { compression } from '../middlewares/compression';
@@ -45,6 +46,17 @@ declare global {
         info: ResolvedConfig.Info;
         dirs: ResolvedConfig.Dirs;
         enabledPlugins: ResolvedConfig.EnabledPlugins;
+      }
+
+      /**
+       * The core store rows of the Strapi instance. `strapi_content_types_schema` holds the
+       * content-type schemas of the last start, written after the database schema sync and read by
+       * the next start: they may differ from the schemas of this start, so they are keyed by any UID. `strapi_unidirectional-join-table-repair-ran` records that the one-time join
+       * table repair ran.
+       */
+      interface Stores {
+        strapi_content_types_schema: Record<string, Struct.ContentTypeSchema>;
+        'strapi_unidirectional-join-table-repair-ran': boolean;
       }
 
       /**

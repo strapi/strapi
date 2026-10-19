@@ -112,7 +112,11 @@ export interface Strapi extends StrapiContainer, Lookups {
   eventHub: Modules.EventHub.EventHub;
   startupLogger: StartupLogger;
   cron: Modules.Cron.CronService;
-  store: Modules.CoreStore.CoreStore;
+  /**
+   * The core store. With strict types enabled, registered keys read their value or `null` and
+   * writes take their value; other keys keep the types they have without strict types.
+   */
+  store: IsStrict extends false ? Modules.CoreStore.CoreStore : Modules.CoreStore.StrictCoreStore;
   /**
    * @deprecated Use the Document Service (`strapi.documents`) instead. Will be removed in the next major version.
    */

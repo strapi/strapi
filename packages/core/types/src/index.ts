@@ -158,6 +158,26 @@ declare global {
       interface Hooks {}
 
       /**
+       * Core store values keyed by the storage key the runtime builds from the params of
+       * `strapi.store`: `<type>_<name>_<key>`, or `<type>_<key>` without a name (e.g.
+       * `'plugin_i18n_default_locale'` for `{ type: 'plugin', name: 'i18n', key: 'default_locale' }`).
+       * Keys built at runtime register a template-literal key, e.g.
+       * `` [key: `core_admin_homepage-layout:${string}`]: HomepageLayout ``.
+       *
+       * The runtime stores values as JSON, so each value is the JSON shape the owner writes: a `Date`
+       * is read back as a string, `undefined` properties are dropped. With strict types enabled, reads
+       * of a registered key resolve to its value or `null`, and writes take its value.
+       *
+       * Additive only, with no `Package*` and `App*` pair. A row is data shared by every reader: any
+       * code can write it, and its owner keeps reading it with its own contract, so an application
+       * cannot replace the contract of a package key. The package that writes and reads a key
+       * registers it; applications register their own keys. Redeclaring a key with another value is
+       * a type error.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface Stores {}
+
+      /**
        * Content-type schemas keyed by UID, read in strict mode instead of `Public.ContentTypeSchemas`.
        * Type generation is the only producer: it writes `types/generated/contentTypes.d.ts`.
        * Applications do not override schemas, so there is no `Package*` and `App*` pair.

@@ -56,6 +56,15 @@ declare global {
       // license without the feature, resolves them to `undefined`.
       // TODO @Nico Redesign as a real opt-in to licensed features, so applications that have the
       // feature can drop `undefined`, instead of every application seeing it.
+      /**
+       * The releases settings, written by the settings service under the `core` type. A
+       * `defaultTimezone` left `undefined` is dropped by the JSON encoding, so the key may be
+       * missing. Stored whatever the license, so it is not `undefined` like the services.
+       */
+      interface Stores {
+        'core_content-releases_settings': { defaultTimezone?: string | null | undefined };
+      }
+
       interface PackageServices {
         'plugin::content-releases.homepage': Services['homepage'] | undefined;
         'plugin::content-releases.release': Services['release'] | undefined;

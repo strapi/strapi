@@ -85,6 +85,26 @@ declare global {
         'plugin::upload': UploadConfig;
       }
 
+      /**
+       * The upload rows of the core store. `settings` and `view_configuration` are completed with
+       * their defaults at every start. `metrics` holds the weekly metrics cron schedule, missing until
+       * it first runs (`lastWeeklyUpdate` is a timestamp in milliseconds). `api-folder` holds the ID of
+       * the folder that API uploads go to. `media_library_default_notice` records that the Media
+       * Library notice was logged.
+       */
+      interface Stores {
+        plugin_upload_settings: {
+          sizeOptimization: boolean;
+          responsiveDimensions: boolean;
+          autoOrientation?: boolean | undefined;
+          aiMetadata?: boolean | undefined;
+        };
+        plugin_upload_view_configuration: { pageSize: number; sort?: string | undefined };
+        plugin_upload_metrics: { lastWeeklyUpdate?: number; weeklySchedule?: string };
+        'plugin_upload_api-folder': { id: number };
+        plugin_upload_media_library_default_notice: { shown: boolean };
+      }
+
       interface PackageServices {
         'plugin::upload.aiMetadata': Services['aiMetadata'];
         'plugin::upload.aiMetadataJobs': Services['aiMetadataJobs'];

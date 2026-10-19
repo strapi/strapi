@@ -21,6 +21,9 @@ declare global {
         'plugin::legacy.example': { find: Core.ControllerHandler };
         'api::legacy.example': { find: Core.ControllerHandler };
       }
+      interface Stores {
+        plugin_legacy_settings: { enabled: boolean };
+      }
       interface PackageConfigs {
         'plugin::legacy': { enabled: boolean };
       }
@@ -143,6 +146,16 @@ declare const hookChecks: [
   Expect<Equal<typeof hooksRegistry, any>>,
 ];
 hookChecks satisfies unknown;
+
+// The core store keeps develop's types, even for registered keys.
+declare const storeStrapi: Core.Strapi;
+const storeRead = storeStrapi.store.get({ type: 'plugin', name: 'legacy', key: 'settings' });
+declare const storeChecks: [
+  Expect<Equal<Core.Strapi['store'], Modules.CoreStore.CoreStore>>,
+  Expect<Equal<typeof storeRead, Promise<unknown>>>,
+];
+storeChecks satisfies unknown;
+storeStrapi.store.set({ type: 'plugin', name: 'legacy', key: 'settings', value: 'any' });
 
 declare const strapi: Core.Strapi;
 strapi.service('plugin::legacy.example').anything();

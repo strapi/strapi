@@ -148,6 +148,27 @@ wraps it), but the package that calls the hook builds the context, so nobody els
   Strapi instance in `packages/core/types/src/core/hook.ts`, so packages that depend only on
   `@strapi/types` see them.
 
+### Core store contracts
+
+`Strapi.Registries.Stores` maps a core store row to the JSON shape of its value. It is keyed by the
+storage key the runtime builds from the params of `strapi.store`: `<type>_<name>_<key>`, or
+`<type>_<key>` without a name (`packages/core/core/src/services/core-store.ts`). For example,
+`{ type: 'plugin', name: 'i18n', key: 'default_locale' }` reads `plugin_i18n_default_locale`. Keys
+built at runtime register a template-literal key, e.g.
+`` [key: `core_admin_homepage-layout:${string}`] ``.
+
+- The value is the shape the owner writes, as JSON: a `Date` is read back as a string and
+  `undefined` properties are dropped. Declare it explicitly rather than reusing a type that holds
+  runtime-only values.
+- It is additive, with no `Package*` and `App*` pair. A row is shared data: any code can write it,
+  and its owner keeps reading it with its own contract. The package that writes and reads a key
+  registers it, in the same `declare global` block as its other contracts. Applications register
+  their own keys.
+- With strict types, `strapi.store` resolves to `Modules.CoreStore.StrictCoreStore`: a read of a
+  registered key resolves to its value or `null` (no row), and a write takes its whole value. The
+  type mirrors the runtime defaults: `get` reads `'core'` rows when the params have no type, `set`
+  and `delete` do not. Unregistered keys, and wide keys such as `key: string`, keep `unknown`.
+
 ## Keeping types unchanged without strict mode
 
 A type in `@strapi/types` or `@strapi/strapi` that behaves differently in strict mode resolves

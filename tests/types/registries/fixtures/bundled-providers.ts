@@ -58,3 +58,30 @@ void app.service('admin::persist-tables').persistTablesWithPrefix('prefix');
 void app.service('admin::seat-enforcement').getDisabledUserList();
 app.service('admin::seat-enforcement')?.getDisabledUserList satisfies
   ((...args: never[]) => unknown) | undefined;
+
+// Core store rows registered by the bundled packages read their JSON shape, or `null` without a row.
+void app.store.get({ type: 'plugin', name: 'i18n', key: 'default_locale' }).then((code) => {
+  code satisfies string | null;
+  // @ts-expect-error The row may be missing.
+  code satisfies string;
+});
+void app
+  .store({ type: 'plugin', name: 'upload', key: 'settings' })
+  .get()
+  .then((settings) => settings?.sizeOptimization satisfies boolean | undefined);
+void app
+  .store({ type: 'core', name: 'admin' })
+  .get({ key: `homepage-layout:${1}` })
+  .then((layout) => layout?.widgets satisfies unknown[] | undefined);
+void app.store.set({
+  type: 'plugin',
+  name: 'upload',
+  key: 'settings',
+  // @ts-expect-error A registered row takes its whole value.
+  value: { sizeOptimization: true },
+});
+// Unregistered rows keep `unknown`.
+void app.store.get({ type: 'type', key: 'setup_initHasRun' }).then((value) => {
+  // @ts-expect-error The value is unknown.
+  value.anything;
+});
