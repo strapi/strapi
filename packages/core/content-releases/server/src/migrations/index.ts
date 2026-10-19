@@ -141,15 +141,25 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
           const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
             where: {
               contentType: contentTypeUID,
+              // Released releases keep their `done` status
+              release: {
+                releasedAt: {
+                  $null: true,
+                },
+              },
             },
             populate: {
-              entry: true,
               release: true,
             },
           });
 
           await async.map(actions, async (action: ReleaseAction) => {
-            if (action.entry && action.release && action.type === 'publish') {
+            // Actions reference their entry by `entryDocumentId` and `locale`, not by a relation
+            if (
+              action.release !== null &&
+              action.release !== undefined &&
+              action.type === 'publish'
+            ) {
               const isEntryValid = await getDraftEntryValidStatus(
                 {
                   contentType: contentTypeUID,
