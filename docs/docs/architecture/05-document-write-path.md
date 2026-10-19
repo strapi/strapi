@@ -122,7 +122,22 @@ When a row goes away, through `delete`, `unpublish`, `discardDraft` or the repla
 
 ## Validation
 
-The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. For drafts, it skips `required`, `min`, `minLength` and `regex` checks. When `api.documents.strictRelations` is `true`, it also enforces required relations and media on non-draft writes.
+The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. Without D&P, `statusToData` always sets `publishedAt`, so every write is validated as a publishing write.
+
+The validator has two modes and two passes:
+
+- **Draft mode** skips `required`, `min`, `minLength` and `regex` checks, except on repeatable components and dynamic zones. Their validator is always built with `required: true`, so a required one must be present on every create, drafts included. `[]` is enough.
+- **Publishing mode** enforces every check. When `api.documents.strictRelations` is `true`, it also enforces required relations and media.
+- **The create pass** rejects a missing or `null` required value. **The update pass** only rejects `null`: a missing key keeps the stored value.
+
+Other rules:
+
+- A literal `default` fills an `undefined` value on create, drafts included. An explicit `null` is not replaced, and defaults are not applied on update.
+- `null` is accepted for optional fields, and for required fields only in draft mode. Repeatable components and dynamic zones never accept `null`.
+- A field hidden by its `conditions.visible` rule skips validation.
+- Fields inside a component follow the mode of the parent. On update, they use the update pass, also for a new component (a value without `id`). Without D&P, such a component is stored with its required fields empty. With D&P, the publish step catches it.
+
+With strict types, the Document Service input types follow these rules (`packages/core/types/src/modules/documents/params/write.ts`), except that a new component in an update follows the create rules.
 
 Database lifecycles run after the entity validator. Data that a `beforeCreate` or `beforeUpdate` subscriber adds is not validated.
 

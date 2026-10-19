@@ -782,6 +782,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       ['strapi-strict.d.ts', 'upload-files.ts'],
       ['strapi-strict.d.ts', 'action-provider.ts'],
       ['settings.d.ts', 'schemas.ts'],
+      ['settings.d.ts', 'document-write.ts'],
       ['strapi-strict.d.ts', 'generated-strict.d.ts', 'common.ts', 'bundled-providers.ts'],
       [
         generatedSchemas(true),
@@ -828,6 +829,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     assertClean(
       compile(['settings.d.ts', 'document-service.ts']),
       `${resolution}, Document Service on registered schemas`
+    );
+  });
+
+  test(`${resolution}: Document Service write inputs follow the validator in strict mode`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'document-write.ts']),
+      `${resolution}, Document Service write inputs`
     );
   });
 
