@@ -25,8 +25,8 @@ interface ArticleSchema extends Struct.CollectionTypeSchema {
     author: Schema.Attribute.Relation<'manyToOne', 'api::author.author'> &
       Schema.Attribute.Required;
     cover: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
-    teaser: Schema.Attribute.Text &
-      Schema.Attribute.Required & { conditions: { visible: { '==': [{ var: 'kind' }, 'blog'] } } };
+    // A required field hidden by its `conditions.visible` rule (type generation emits the marker).
+    teaser: Schema.Attribute.Text & Schema.Attribute.Required & Schema.Attribute.Conditional;
     target: Schema.Attribute.Relation<'morphToOne'>;
   };
 }

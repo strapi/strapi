@@ -44,6 +44,20 @@
       "relation": "manyToOne",
       "target": "api::author.author",
       "inversedBy": "articles"
+    },
+    "teaser": {
+      "type": "text",
+      "required": true,
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "category"
+            },
+            "guide"
+          ]
+        }
+      }
     }
   }
 }
