@@ -295,7 +295,9 @@ describe('Relations', () => {
       await user.click(screen.getByRole('combobox'));
 
       expect(await screen.findByRole('option', { name: /Relation entity 2/ })).toBeInTheDocument();
-      expect(searchRequests).toBeGreaterThan(0);
+      // let the debounced search params settle (300ms)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(searchRequests).toBe(1);
     });
 
     it("doesn't fetch the connected relations while the field is far from the viewport", async () => {

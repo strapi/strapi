@@ -576,7 +576,18 @@ const RelationsInput = ({
    * mounts would send one request per relation field of the document on load.
    */
   const [hasBeenOpened, setHasBeenOpened] = React.useState(false);
-  const handleOpen = React.useCallback(() => setHasBeenOpened(true), []);
+  const handleOpen = React.useCallback(
+    (search: string) => {
+      if (!hasBeenOpened) {
+        // Enabling the search sends it: searching again here would send the same request twice.
+        setHasBeenOpened(true);
+        return;
+      }
+
+      setSearchParams((params) => ({ ...params, _q: search, page: 1 }));
+    },
+    [hasBeenOpened]
+  );
 
   /**
    * Because we're using a lazy query, we need to trigger the search
@@ -737,7 +748,7 @@ interface RelationModalWithContextProps extends Omit<
   isSearchRelationsError: boolean;
   isLoadingPermissions: boolean;
   handleChange: (relationId?: string) => void;
-  onOpen: () => void;
+  onOpen: (search: string) => void;
   data?: FindAvailable.Response;
   fieldValue?: RelationsFormValue;
   setSearchParams: React.Dispatch<
@@ -842,8 +853,7 @@ const RelationModalWithContext = ({
             // Selecting an option closes the list while `textValue` still holds its label.
             // Searching on close would omit that option and cache an empty result.
             if (isOpen) {
-              onOpen();
-              handleSearch(textValue ?? '');
+              onOpen(textValue ?? '');
             }
           }}
           noOptionsMessage={() =>
