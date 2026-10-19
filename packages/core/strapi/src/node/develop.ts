@@ -7,6 +7,7 @@ import type { createStrapi as CreateStrapi } from '@strapi/core';
 import type { CLIContext } from '../cli/types';
 import { handleAdminDependencies } from './core/ensure-admin-dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
+import { createAppRelativeIgnore } from './core/watch-ignored';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
 import type { Logger } from '../cli/utils/logger';
@@ -347,8 +348,8 @@ function startWatcher(
       ignoreInitial: true,
       usePolling: polling,
       ignored: [
-        /(^|[/\\])\../, // dot files
-        /tmp/,
+        // dot files and "tmp" paths, matched relative to the app directory
+        createAppRelativeIgnore(cwd),
         '**/src/admin/**',
         '**/src/plugins/**/admin/**',
         '**/dist/src/plugins/test/admin/**',
