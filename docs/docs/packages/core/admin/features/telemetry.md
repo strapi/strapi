@@ -231,7 +231,10 @@ window.strapi = browserStrapi;
 returns `Growth` when `planPriceId` contains `growth` and `Enterprise` for other licensed
 plans.
 
-Typed in `packages/core/admin/admin/custom.d.ts`.
+Typed as `Window['strapi']` in `packages/core/types/src/globals-admin.ts`, loaded from admin
+tsconfigs as `@strapi/types/globals-admin`. The shape is not exported from the `@strapi/types`
+root, and both the interface and the `window.strapi` declaration are marked `@internal`:
+first-party plumbing, not plugin API.
 
 ---
 

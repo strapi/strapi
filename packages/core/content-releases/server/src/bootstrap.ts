@@ -3,7 +3,7 @@ import type { Core, UID, Modules } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { registerAuditEvents } from './audit-logs';
-import { getService } from './utils';
+import { getService, updateAffectedReleaseStatuses } from './utils';
 import { deleteActionsOnDelete, updateActionsOnUpdate } from './middlewares/documents';
 
 interface DeleteManyParams {
@@ -12,7 +12,10 @@ interface DeleteManyParams {
   entryDocumentId?: Modules.Documents.ID;
 }
 
-const deleteReleasesActionsAndUpdateReleaseStatus = async (params: DeleteManyParams) => {
+const deleteReleasesActionsAndUpdateReleaseStatus = async (
+  params: DeleteManyParams,
+  strapi: Core.Strapi
+) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
       actions: params,
@@ -24,9 +27,7 @@ const deleteReleasesActionsAndUpdateReleaseStatus = async (params: DeleteManyPar
   });
 
   // We update the status of each release after delete the actions
-  for (const release of releases) {
-    await getService('release', { strapi }).updateReleaseStatus(release.id);
-  }
+  await updateAffectedReleaseStatuses(releases, { strapi });
 };
 
 export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
@@ -48,11 +49,14 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
             const { where } = event.params;
 
-            await deleteReleasesActionsAndUpdateReleaseStatus({
-              contentType: model.uid,
-              locale: where?.locale ?? null,
-              ...(where?.documentId && { entryDocumentId: where.documentId }),
-            });
+            await deleteReleasesActionsAndUpdateReleaseStatus(
+              {
+                contentType: model.uid,
+                locale: where?.locale ?? null,
+                ...(where?.documentId && { entryDocumentId: where.documentId }),
+              },
+              strapi
+            );
           }
         } catch (error) {
           // If an error happens we don't want to block the delete entry flow, but we log the error

@@ -90,7 +90,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Creates a new workflow.
      * @param {object} opts - Options for creating the new workflow.
-     * @returns {Promise<object>} - Workflow object that was just created.
+     * @returns {Promise<object>} - Workflow object that was just created, populated with `WORKFLOW_POPULATE`.
      * @throws {ValidationError} - If the workflow has no stages.
      */
     async create(opts: { data: any }) {
@@ -161,10 +161,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Updates an existing workflow.
      * @param {object} workflow - The existing workflow to update.
      * @param {object} opts - Options for updating the workflow.
-     * @returns {Promise<object>} - Workflow object that was just updated.
+     * @returns {Promise<object>} - Workflow object that was just updated, populated with `WORKFLOW_POPULATE`.
      * @throws {ApplicationError} - If the supplied stage ID does not belong to the workflow.
      */
-    async update(workflow: any, opts: any) {
+    async update(workflow: any, opts: { data: any }) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
       let updatedStages: any = [];
