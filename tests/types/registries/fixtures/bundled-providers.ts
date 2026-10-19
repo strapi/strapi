@@ -85,3 +85,21 @@ void app.store.get({ type: 'type', key: 'setup_initHasRun' }).then((value) => {
   // @ts-expect-error The value is unknown.
   value.anything;
 });
+
+// Events registered by the bundled packages: emits are checked and listeners receive the payloads.
+app.eventHub.on('user.delete', (payload) => {
+  if ('users' in payload) {
+    payload.users.map((user) => user.id) satisfies Array<string | number>;
+  } else {
+    payload.user.id satisfies string | number;
+  }
+});
+app.eventHub.on('entry.publish', ({ uid, entry }) => {
+  uid satisfies string;
+  entry.documentId satisfies string;
+});
+void app.eventHub.emit('ee.enable');
+// @ts-expect-error A registered event takes its registered payload.
+void app.eventHub.emit('entry.create', { model: 'article' });
+// Unregistered events keep their permissive types.
+void app.eventHub.emit('my-app.custom', 1, 2);

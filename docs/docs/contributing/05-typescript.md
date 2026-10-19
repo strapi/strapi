@@ -169,6 +169,23 @@ built at runtime register a template-literal key, e.g.
   type mirrors the runtime defaults: `get` reads `'core'` rows when the params have no type, `set`
   and `delete` do not. Unregistered keys, and wide keys such as `key: string`, keep `unknown`.
 
+### Event contracts
+
+`Strapi.Registries.Events` maps an event name to the tuple of arguments an emit passes after the
+name. Nothing defines an event at runtime and several producers can share a name, so the tuple is
+the union of every producer's payload, e.g. `'user.delete': [{ user } | { users }]`.
+
+- It is additive, with no `Package*` and `App*` pair. The package that emits a name registers it,
+  with the payload of each of its producers. Applications register the events they emit.
+- With strict types, `strapi.eventHub` resolves to `Modules.EventHub.StrictEventHub`: an emit of a
+  registered name must pass one of its payloads, and `on`, `once` and `addListener` listeners
+  receive them. Unregistered names, and wide names such as `string`, keep their types. Subscribers
+  receive every event, so they keep any arguments.
+- An emit is only checked when its name is a literal. A helper that takes `event: string` passes
+  any payload.
+- Events emitted through `emitAudit` (`@strapi/utils`) are not registered: it takes any payload, so
+  nothing would check their producers.
+
 ## Keeping types unchanged without strict mode
 
 A type in `@strapi/types` or `@strapi/strapi` that behaves differently in strict mode resolves

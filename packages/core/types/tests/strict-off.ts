@@ -24,6 +24,9 @@ declare global {
       interface Stores {
         plugin_legacy_settings: { enabled: boolean };
       }
+      interface Events {
+        'legacy.event': [{ id: number }];
+      }
       interface PackageConfigs {
         'plugin::legacy': { enabled: boolean };
       }
@@ -156,6 +159,17 @@ declare const storeChecks: [
 ];
 storeChecks satisfies unknown;
 storeStrapi.store.set({ type: 'plugin', name: 'legacy', key: 'settings', value: 'any' });
+
+// The event hub keeps develop's types, even for registered names.
+declare const eventStrapi: Core.Strapi;
+declare const eventChecks: [
+  Expect<Equal<Core.Strapi['eventHub'], Modules.EventHub.EventHub>>,
+  Expect<
+    Equal<Parameters<Core.Strapi['eventHub']['emit']>, [eventName: string, ...args: unknown[]]>
+  >,
+];
+eventChecks satisfies unknown;
+eventStrapi.eventHub.emit('legacy.event', { off: 'contract' });
 
 declare const strapi: Core.Strapi;
 strapi.service('plugin::legacy.example').anything();

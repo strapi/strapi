@@ -26,7 +26,8 @@ import type EERoleService from '../../../ee/server/src/services/role';
 import type EESeatEnforcementService from '../../../ee/server/src/services/seat-enforcement';
 import type EEUserService from '../../../ee/server/src/services/user';
 import type { PersistedTable } from '../../../ee/server/src/services/persist-tables';
-import type { AdminRole } from '../../../shared/contracts/shared';
+import type { AdminRole, Permission, SanitizedAdminUser } from '../../../shared/contracts/shared';
+import type { AutoRegistrationEvent } from '../audit-logs/auth';
 import type { HomepageLayout } from '../controllers/validation/schema';
 
 export type * as Policies from './policies';
@@ -211,6 +212,40 @@ declare global {
         [key: `core_admin_homepage-layout:${string}`]: HomepageLayout;
         core_persisted_tables: Array<string | PersistedTable>;
         ee_disabled_users: DisabledUserStore[];
+      }
+
+      /**
+       * Events the admin emits on the event hub, with the payload of each producer (CE and EE).
+       * The audit log events (`admin-user.*`, `token.*`, `webhook.*`, `admin.auth.error`) are emitted
+       * through `emitAudit`, which takes any payload, so they are not registered.
+       */
+      interface Events {
+        /** @deprecated Removed in the next major, see `LEGACY_USER_EVENTS`. */
+        'user.create': [{ user: SanitizedAdminUser }];
+        /** @deprecated Removed in the next major, see `LEGACY_USER_EVENTS`. */
+        'user.update': [{ user: SanitizedAdminUser }];
+        /**
+         * One user for a single delete, the list for a bulk delete: listeners narrow it with
+         * `'users' in payload`.
+         * @deprecated Removed in the next major, see `LEGACY_USER_EVENTS`.
+         */
+        'user.delete': [{ user: SanitizedAdminUser } | { users: SanitizedAdminUser[] }];
+        'role.create': [{ role: Omit<AdminRole, 'users' | 'permissions'> }];
+        'role.update': [{ role: Omit<AdminRole, 'users' | 'permissions'> }];
+        /** The deleted `admin::role` row. */
+        'role.delete': [{ role: AdminRole }];
+        'permission.create': [{ permissions: Permission[] }];
+        /** The updated permission, a single one despite the name. */
+        'permission.update': [{ permissions: Permission }];
+        /** The deleted `admin::permission` rows, `null` for an ID that matched nothing. */
+        'permission.delete': [{ permissions: unknown[] }];
+        /** `provider` is `'local'` for a password login, else the SSO provider. */
+        'admin.auth.success': [{ user: SanitizedAdminUser; provider: string }];
+        'admin.logout': [{ user: SanitizedAdminUser }];
+        /** EE only: an SSO login created the user. */
+        'admin.auth.autoRegistration': [AutoRegistrationEvent];
+        /** EE only: a new audit log export, with the filters of its query. */
+        'audit-log.export': [{ filters: unknown }];
       }
 
       interface PackagePolicies {
