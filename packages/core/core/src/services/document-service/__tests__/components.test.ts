@@ -1,544 +1,401 @@
-import { updateComponents, deleteComponents, isComponentUnchanged } from '../components';
+import {
+  createComponentRelationFilter,
+  findComponentParent,
+  getParentSchemasForComponent,
+} from '../components';
 
-const PAGE_UID = 'api::page.page';
-const LINK_UID = 'monster.links';
-const SECTION_UID = 'monster.section';
+type Row = Record<string, unknown>;
 
-const models: Record<string, any> = {
-  [PAGE_UID]: {
-    uid: PAGE_UID,
+const LINK_UID = 'default.link';
+const CARD_UID = 'default.card';
+const DP_HOST_UID = 'api::dp-host.dp-host';
+const PLAIN_HOST_UID = 'api::plain-host.plain-host';
+
+const contentTypes = {
+  [DP_HOST_UID]: {
+    uid: DP_HOST_UID,
     modelType: 'contentType',
-    attributes: {
-      title: { type: 'string' },
-      links: { type: 'component', component: LINK_UID, repeatable: true },
-      hero: { type: 'component', component: LINK_UID, repeatable: false },
-      sections: { type: 'component', component: SECTION_UID, repeatable: true },
-      zone: { type: 'dynamiczone', components: [LINK_UID, SECTION_UID] },
-    },
+    collectionName: 'dp_hosts',
+    options: { draftAndPublish: true },
+    attributes: { blocks: { type: 'dynamiczone', components: [LINK_UID, CARD_UID] } },
   },
+  [PLAIN_HOST_UID]: {
+    uid: PLAIN_HOST_UID,
+    modelType: 'contentType',
+    collectionName: 'plain_hosts',
+    options: { draftAndPublish: false },
+    attributes: { blocks: { type: 'dynamiczone', components: [LINK_UID, CARD_UID] } },
+  },
+};
+
+const components = {
   [LINK_UID]: {
     uid: LINK_UID,
     modelType: 'component',
-    attributes: {
-      title: { type: 'string' },
-      tags: { type: 'relation', relation: 'oneToMany', target: 'api::tag.tag' },
-      image: { type: 'media', multiple: false },
-    },
+    modelName: 'link',
+    collectionName: 'components_default_links',
+    attributes: { target: { type: 'relation', relation: 'oneToOne', target: DP_HOST_UID } },
   },
-  [SECTION_UID]: {
-    uid: SECTION_UID,
+  [CARD_UID]: {
+    uid: CARD_UID,
     modelType: 'component',
-    attributes: {
-      title: { type: 'string' },
-      links: { type: 'component', component: LINK_UID, repeatable: true },
-    },
+    modelName: 'card',
+    collectionName: 'components_default_cards',
+    attributes: { link: { type: 'component', component: LINK_UID } },
   },
 };
 
-const NOOP_RELATION = { connect: [], disconnect: [] };
-const MEDIA_POPULATE = { populate: { image: { select: ['id'] } } };
-
-type Stored = Record<string, Record<string, unknown>>;
+const identifiers = {
+  getNameFromTokens: (tokens: { name: string; shortName?: string }[]) =>
+    tokens.map(({ name, shortName }) => shortName ?? name).join('_'),
+  getJoinColumnAttributeIdName: (name: string) => `${name}_id`,
+};
 
 /**
- * `stored[uid][entityId][attribute]` is what `strapi.db.query(uid).load(entity, attribute)` returns.
+ * A `_cmps` row linking a component instance to the entry (or parent component) that owns it.
  */
-const setup = (stored: Record<string, Stored>) => {
-  let nextId = 100;
-  const queries = Object.fromEntries(
-    Object.keys(models).map((uid) => [
-      uid,
-      {
-        load: jest.fn(async (entity: { id: number }, attribute: string | string[]) => {
-          const read = (name: string) => stored[uid]?.[entity.id]?.[name] ?? null;
-          return Array.isArray(attribute)
-            ? Object.fromEntries(attribute.map((name) => [name, read(name)]))
-            : read(attribute);
-        }),
-        findMany: jest.fn(async ({ where }: { where: { id: { $in: number[] } } }) =>
-          where.id.$in.map((id) => ({ id, ...(stored[uid]?.[id] ?? {}) }))
-        ),
-        deleteMany: jest.fn(async () => ({ count: 1 })),
-        update: jest.fn(async ({ where }: { where: { id: number } }) => ({ id: where.id })),
-        create: jest.fn(async () => {
-          nextId += 1;
-          return { id: nextId - 1 };
-        }),
-        delete: jest.fn(async () => ({})),
+const owns = (entityId: number, componentUid: string, componentId: number): Row => ({
+  entity_id: entityId,
+  cmp_id: componentId,
+  component_type: componentUid,
+});
+
+/**
+ * Minimal in-memory stand-in for the knex query builder, over a fixed set of `_cmps` tables.
+ * Records every table queried, and fails queries on the tables listed in `failingTables`.
+ */
+const createConnection = (tables: Record<string, Row[]>, failingTables: string[] = []) => {
+  const queriedTables: string[] = [];
+
+  const getConnection = jest.fn((table: string) => {
+    queriedTables.push(table);
+    let rows = tables[table] ?? [];
+
+    const result = () =>
+      failingTables.includes(table)
+        ? Promise.reject(new Error(`no such table: ${table}`))
+        : Promise.resolve(rows);
+
+    const qb: any = {
+      select: () => qb,
+      transacting: () => qb,
+      where(column: string | Row, value?: unknown) {
+        const conditions = typeof column === 'string' ? { [column]: value } : column;
+        rows = rows.filter((row) => Object.entries(conditions).every(([k, v]) => row[k] === v));
+        return qb;
       },
-    ])
-  );
+      whereIn(column: string, values: unknown[]) {
+        rows = rows.filter((row) => values.includes(row[column]));
+        return qb;
+      },
+      first: () => result().then((found) => found[0]),
+      then: (resolve: any, reject: any) => result().then(resolve, reject),
+    };
 
-  const db = {
-    query: jest.fn((uid: string) => queries[uid]),
-    transaction: jest.fn(async (run: (ctx: { trx: string }) => unknown) => run({ trx: 'trx' })),
-    entityManager: { deleteManyRelations: jest.fn(async () => undefined) },
-    lifecycles: { hasSubscribers: jest.fn(() => false) },
-  };
+    return qb;
+  });
 
-  global.strapi = {
-    getModel: jest.fn((uid: string) => models[uid]),
-    db,
-  } as any;
-
-  return Object.assign(queries, { db });
+  return { getConnection, queriedTables };
 };
 
-const link = (id: number, title: string, image: unknown = null) => ({ id, title, image });
-const linkInput = (id: number | undefined, title: string, image: unknown = null) => ({
-  ...(id === undefined ? {} : { id }),
-  title,
-  tags: NOOP_RELATION,
-  image,
-});
+const setupStrapi = ({
+  tables = {},
+  failingTables = [],
+  registeredTables = ['dp_hosts_cmps', 'plain_hosts_cmps', 'components_default_cards_cmps'],
+}: {
+  tables?: Record<string, Row[]>;
+  failingTables?: string[];
+  registeredTables?: string[];
+} = {}) => {
+  const { getConnection, queriedTables } = createConnection(tables, failingTables);
+  const getSchemaConnection = jest.fn();
 
-const pivot = (field: string, component_type: string) => ({ field, component_type });
-
-describe('updateComponents', () => {
-  const page = { id: 10 };
-
-  describe('repeatable component', () => {
-    const storedLinks = [link(1, 'a', { id: 7 }), link(2, 'b')];
-
-    it('writes nothing when the components are sent as they are stored', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
-
-      const result = await updateComponents(PAGE_UID, page, {
-        links: [linkInput(1, 'a', [{ id: 7 }]), linkInput(2, 'b')],
-      } as any);
-
-      expect(result).toEqual({});
-      expect(queries[PAGE_UID].load).toHaveBeenCalledWith(page, 'links', MEDIA_POPULATE);
-      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
-      expect(queries[LINK_UID].create).not.toHaveBeenCalled();
-      expect(queries[LINK_UID].delete).not.toHaveBeenCalled();
-    });
-
-    it('updates only the component whose data changed and reports the list', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
-
-      const result = await updateComponents(PAGE_UID, page, {
-        links: [linkInput(1, 'a', [{ id: 7 }]), linkInput(2, 'b updated')],
-      } as any);
-
-      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
-      expect(queries[LINK_UID].update).toHaveBeenCalledWith({
-        where: { id: 2 },
-        data: expect.objectContaining({ title: 'b updated' }),
-      });
-      expect(result).toEqual({
-        links: [
-          { id: 1, __pivot: pivot('links', LINK_UID) },
-          { id: 2, __pivot: pivot('links', LINK_UID) },
-        ],
-      });
-    });
-
-    it('reports the list when its order changed, without updating the components', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
-
-      const result = await updateComponents(PAGE_UID, page, {
-        links: [linkInput(2, 'b'), linkInput(1, 'a', [{ id: 7 }])],
-      } as any);
-
-      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
-      expect(result.links).toEqual([
-        { id: 2, __pivot: pivot('links', LINK_UID) },
-        { id: 1, __pivot: pivot('links', LINK_UID) },
-      ]);
-    });
-
-    it('creates the components sent without an id', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
-
-      const result = await updateComponents(PAGE_UID, page, {
-        links: [linkInput(1, 'a', [{ id: 7 }]), linkInput(2, 'b'), linkInput(undefined, 'c')],
-      } as any);
-
-      expect(queries[LINK_UID].create).toHaveBeenCalledTimes(1);
-      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
-      expect(result.links.map((item: any) => item.id)).toEqual([1, 2, 100]);
-    });
-
-    it('deletes the components that are no longer sent', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
-
-      const result = await updateComponents(PAGE_UID, page, {
-        links: [linkInput(1, 'a', [{ id: 7 }])],
-      } as any);
-
-      // ids of removed components are compared and passed as strings
-      expect(queries[LINK_UID].delete).toHaveBeenCalledWith({ where: { id: '2' } });
-      expect(result.links.map((item: any) => item.id)).toEqual([1]);
-    });
-
-    it('treats a relation with connections as a change', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
-
-      await updateComponents(PAGE_UID, page, {
-        links: [
-          { ...linkInput(1, 'a', [{ id: 7 }]), tags: { connect: [{ id: 5 }], disconnect: [] } },
-          linkInput(2, 'b'),
-        ],
-      } as any);
-
-      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
-      expect(queries[LINK_UID].update).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: 1 } })
-      );
-    });
-
-    it('treats a different media as a change', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
-
-      await updateComponents(PAGE_UID, page, {
-        links: [linkInput(1, 'a', [{ id: 8 }]), linkInput(2, 'b')],
-      } as any);
-
-      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
-      expect(queries[LINK_UID].update).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: 1 } })
-      );
-    });
-
-    it('treats a removed media as a change', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
-
-      await updateComponents(PAGE_UID, page, {
-        links: [linkInput(1, 'a', null), linkInput(2, 'b')],
-      } as any);
-
-      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('single component', () => {
-    it('writes nothing when the component is sent as it is stored', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { hero: link(3, 'hero') } } });
-
-      const result = await updateComponents(PAGE_UID, page, { hero: linkInput(3, 'hero') } as any);
-
-      expect(result).toEqual({});
-      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
-    });
-
-    it('reports the removal of the component', async () => {
-      const queries = setup({ [PAGE_UID]: { 10: { hero: link(3, 'hero') } } });
-
-      const result = await updateComponents(PAGE_UID, page, { hero: null } as any);
-
-      expect(queries[LINK_UID].delete).toHaveBeenCalledWith({ where: { id: '3' } });
-      expect(result).toEqual({ hero: null });
-    });
-
-    it('writes nothing when the component stays empty', async () => {
-      setup({ [PAGE_UID]: { 10: { hero: null } } });
-
-      const result = await updateComponents(PAGE_UID, page, { hero: null } as any);
-
-      expect(result).toEqual({});
-    });
-  });
-
-  describe('nested components', () => {
-    const stored = {
-      [PAGE_UID]: { 10: { sections: [{ id: 20, title: 's' }] } },
-      [SECTION_UID]: { 20: { links: [link(1, 'a'), link(2, 'b')] } },
-    };
-
-    it('writes nothing when the whole tree is sent as it is stored', async () => {
-      const queries = setup(stored);
-
-      const result = await updateComponents(PAGE_UID, page, {
-        sections: [{ id: 20, title: 's', links: [linkInput(1, 'a'), linkInput(2, 'b')] }],
-      } as any);
-
-      expect(result).toEqual({});
-      expect(queries[SECTION_UID].load).toHaveBeenCalledWith({ id: 20 }, 'links', MEDIA_POPULATE);
-      expect(queries[SECTION_UID].update).not.toHaveBeenCalled();
-      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
-    });
-
-    it('updates the parent when a nested component changed', async () => {
-      const queries = setup(stored);
-
-      const result = await updateComponents(PAGE_UID, page, {
-        sections: [{ id: 20, title: 's', links: [linkInput(1, 'a'), linkInput(2, 'b updated')] }],
-      } as any);
-
-      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
-      expect(queries[SECTION_UID].update).toHaveBeenCalledTimes(1);
-      expect(queries[SECTION_UID].update).toHaveBeenCalledWith({
-        where: { id: 20 },
-        data: expect.objectContaining({
-          title: 's',
-          links: [
-            { id: 1, __pivot: pivot('links', LINK_UID) },
-            { id: 2, __pivot: pivot('links', LINK_UID) },
-          ],
-        }),
-      });
-      expect(result.sections).toEqual([{ id: 20, __pivot: pivot('sections', SECTION_UID) }]);
-    });
-
-    it('updates the parent when a nested component is added', async () => {
-      const queries = setup(stored);
-
-      await updateComponents(PAGE_UID, page, {
-        sections: [
-          {
-            id: 20,
-            title: 's',
-            links: [linkInput(1, 'a'), linkInput(2, 'b'), linkInput(undefined, 'c')],
-          },
-        ],
-      } as any);
-
-      expect(queries[LINK_UID].create).toHaveBeenCalledTimes(1);
-      expect(queries[SECTION_UID].update).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('dynamic zone', () => {
-    const storedZone = [
-      { id: 1, __component: LINK_UID, title: 'a', image: null },
-      { id: 20, __component: SECTION_UID, title: 's' },
-    ];
-    const stored = {
-      [PAGE_UID]: { 10: { zone: storedZone } },
-      [SECTION_UID]: { 20: { links: [] } },
-    };
-
-    it('writes nothing when the zone is sent as it is stored', async () => {
-      const queries = setup(stored);
-
-      const result = await updateComponents(PAGE_UID, page, {
-        zone: [
-          { __component: LINK_UID, ...linkInput(1, 'a') },
-          { __component: SECTION_UID, id: 20, title: 's', links: [] },
-        ],
-      } as any);
-
-      expect(result).toEqual({});
-      expect(queries[PAGE_UID].load).toHaveBeenCalledWith(page, 'zone', {
-        on: { [LINK_UID]: MEDIA_POPULATE, [SECTION_UID]: {} },
-      });
-      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
-      expect(queries[SECTION_UID].update).not.toHaveBeenCalled();
-    });
-
-    it('reports the zone when a block changed', async () => {
-      const queries = setup(stored);
-
-      const result = await updateComponents(PAGE_UID, page, {
-        zone: [
-          { __component: LINK_UID, ...linkInput(1, 'a updated') },
-          { __component: SECTION_UID, id: 20, title: 's', links: [] },
-        ],
-      } as any);
-
-      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
-      expect(result.zone).toEqual([
-        { id: 1, __component: LINK_UID, __pivot: { field: 'zone' } },
-        { id: 20, __component: SECTION_UID, __pivot: { field: 'zone' } },
-      ]);
-    });
-
-    it('reports the zone when the blocks were reordered', async () => {
-      const queries = setup(stored);
-
-      const result = await updateComponents(PAGE_UID, page, {
-        zone: [
-          { __component: SECTION_UID, id: 20, title: 's', links: [] },
-          { __component: LINK_UID, ...linkInput(1, 'a') },
-        ],
-      } as any);
-
-      expect(queries[LINK_UID].update).not.toHaveBeenCalled();
-      expect(result.zone.map((block: any) => block.id)).toEqual([20, 1]);
-    });
-  });
-});
-
-describe('isComponentUnchanged', () => {
-  const schema = {
-    uid: 'test.all-types',
-    attributes: {
-      string: { type: 'string' },
-      bool: { type: 'boolean' },
-      int: { type: 'integer' },
-      dec: { type: 'decimal' },
-      big: { type: 'biginteger' },
-      day: { type: 'date' },
-      clock: { type: 'time' },
-      when: { type: 'datetime' },
-      stamp: { type: 'timestamp' },
-      json: { type: 'json' },
-      secret: { type: 'password' },
-      tags: { type: 'relation', relation: 'oneToMany', target: 'api::tag.tag' },
-      image: { type: 'media', multiple: true },
+  global.strapi = {
+    contentTypes,
+    components,
+    db: {
+      metadata: {
+        identifiers,
+        has: (uid: string) => registeredTables.includes(uid),
+      },
+      getConnection,
+      getSchemaConnection,
     },
   } as any;
 
-  const check = (stored: Record<string, unknown>, data: Record<string, unknown>) =>
-    isComponentUnchanged(schema, stored, data);
+  return { queriedTables, getSchemaConnection };
+};
 
-  it('ignores attributes that are not sent', () => {
-    expect(check({ string: 'a', bool: true }, {})).toBe(true);
-  });
+const linkSchema = components[LINK_UID] as any;
 
-  it('compares scalars after normalizing how they are loaded and sent', () => {
-    expect(check({ string: 'a' }, { string: 'a' })).toBe(true);
-    expect(check({ string: 'a' }, { string: 'b' })).toBe(false);
-    expect(check({ bool: false }, { bool: false })).toBe(true);
-    expect(check({ bool: false }, { bool: 'false' })).toBe(false);
-    expect(check({ int: 3 }, { int: '3' })).toBe(true);
-    expect(check({ dec: 12.5 }, { dec: '12.50' })).toBe(true);
-    expect(check({ big: '9007199254740993' }, { big: '9007199254740993' })).toBe(true);
-    expect(check({ big: '9007199254740993' }, { big: '9007199254740994' })).toBe(false);
-    expect(check({ day: '2026-10-16' }, { day: '2026-10-16' })).toBe(true);
-    expect(check({ day: '2026-10-16' }, { day: '2026-10-17' })).toBe(false);
-    expect(check({ clock: '10:30:00.000' }, { clock: '10:30' })).toBe(true);
-    expect(check({ clock: '10:30:00.000' }, { clock: '10:31' })).toBe(false);
-    expect(
-      check({ when: '2026-10-16T10:00:00.000Z' }, { when: '2026-10-16T12:00:00.000+02:00' })
-    ).toBe(true);
-    expect(check({ when: '2026-10-16T10:00:00.000Z' }, { when: '2026-10-16T10:00:01.000Z' })).toBe(
-      false
+describe('findComponentParent', () => {
+  it('returns the first candidate parent whose join table links the instance', async () => {
+    setupStrapi({
+      tables: {
+        dp_hosts_cmps: [owns(10, LINK_UID, 1)],
+        plain_hosts_cmps: [owns(20, LINK_UID, 1)],
+      },
+    });
+
+    const parent = await findComponentParent(
+      linkSchema,
+      1,
+      getParentSchemasForComponent(linkSchema)
     );
-    // timestamps are loaded as epoch strings
-    expect(
-      check({ stamp: String(Date.UTC(2026, 9, 16, 10)) }, { stamp: '2026-10-16T10:00:00.000Z' })
-    ).toBe(true);
-    expect(check({ json: { a: 1, b: [2] } }, { json: { b: [2], a: 1 } })).toBe(true);
-    expect(check({ json: { a: 1 } }, { json: '{"a":1}' })).toBe(true);
-    expect(check({ json: { a: 1 } }, { json: { a: 2 } })).toBe(false);
+
+    expect(parent).toEqual({ uid: DP_HOST_UID, table: 'dp_hosts', parentId: 10 });
   });
 
-  it('treats null and a value as a change, and null and null as no change', () => {
-    expect(check({ string: null }, { string: null })).toBe(true);
-    expect(check({ string: null }, { string: '' })).toBe(false);
-    expect(check({ int: 0 }, { int: null })).toBe(false);
-  });
+  it('only matches rows of the same component type', async () => {
+    setupStrapi({
+      tables: {
+        dp_hosts_cmps: [owns(10, CARD_UID, 1)],
+        plain_hosts_cmps: [owns(20, LINK_UID, 1)],
+      },
+    });
 
-  it('assumes a change for passwords, unknown values and attributes that were not loaded', () => {
-    expect(check({ secret: 'hash' }, { secret: 'hash' })).toBe(false);
-    expect(check({}, { string: 'a' })).toBe(false);
-    expect(check({ int: 3 }, { int: 'three' })).toBe(false);
-  });
-
-  it('only accepts relations sent without connections or disconnections', () => {
-    expect(check({}, { tags: NOOP_RELATION })).toBe(true);
-    expect(check({}, { tags: { connect: [], disconnect: [], options: { strict: true } } })).toBe(
-      true
+    const parent = await findComponentParent(
+      linkSchema,
+      1,
+      getParentSchemasForComponent(linkSchema)
     );
-    expect(check({}, { tags: { connect: [{ id: 1 }], disconnect: [] } })).toBe(false);
-    expect(check({}, { tags: { set: [] } })).toBe(false);
-    expect(check({}, { tags: [1, 2] })).toBe(false);
-    expect(check({}, { tags: null })).toBe(false);
+
+    expect(parent).toEqual({ uid: PLAIN_HOST_UID, table: 'plain_hosts', parentId: 20 });
   });
 
-  it('compares media by id and order', () => {
-    const stored = { image: [{ id: 1 }, { id: 2 }] };
-    expect(check(stored, { image: [{ id: 1 }, { id: 2 }] })).toBe(true);
-    expect(check(stored, { image: [1, 2] })).toBe(true);
-    expect(check(stored, { image: { set: [{ id: 1 }, { id: 2 }] } })).toBe(true);
-    expect(check(stored, { image: NOOP_RELATION })).toBe(true);
-    expect(check(stored, { image: [{ id: 2 }, { id: 1 }] })).toBe(false);
-    expect(check(stored, { image: [{ id: 1 }] })).toBe(false);
-    expect(check(stored, { image: null })).toBe(false);
-    expect(check({ image: null }, { image: null })).toBe(true);
-    expect(check({ image: { id: 1 } }, { image: { id: 1 } })).toBe(true);
-    expect(check({ image: { id: 1 } }, { image: [{ documentId: 'x' }] })).toBe(false);
+  it('returns null when no parent links the instance', async () => {
+    setupStrapi({ tables: { dp_hosts_cmps: [owns(10, LINK_UID, 2)] } });
+
+    const parent = await findComponentParent(
+      linkSchema,
+      1,
+      getParentSchemasForComponent(linkSchema)
+    );
+
+    expect(parent).toBeNull();
+  });
+
+  it('skips parents whose join table is not registered, without querying it or the schema', async () => {
+    const { queriedTables, getSchemaConnection } = setupStrapi({
+      tables: { plain_hosts_cmps: [owns(20, LINK_UID, 1)] },
+      registeredTables: ['plain_hosts_cmps', 'components_default_cards_cmps'],
+    });
+
+    const parent = await findComponentParent(
+      linkSchema,
+      1,
+      getParentSchemasForComponent(linkSchema)
+    );
+
+    expect(parent).toEqual({ uid: PLAIN_HOST_UID, table: 'plain_hosts', parentId: 20 });
+    expect(queriedTables).not.toContain('dp_hosts_cmps');
+    expect(getSchemaConnection).not.toHaveBeenCalled();
+  });
+
+  it('skips a parent whose lookup fails and keeps looking', async () => {
+    setupStrapi({
+      tables: {
+        dp_hosts_cmps: [owns(10, LINK_UID, 1)],
+        plain_hosts_cmps: [owns(20, LINK_UID, 1)],
+      },
+      failingTables: ['dp_hosts_cmps'],
+    });
+
+    const parent = await findComponentParent(
+      linkSchema,
+      1,
+      getParentSchemasForComponent(linkSchema)
+    );
+
+    expect(parent).toEqual({ uid: PLAIN_HOST_UID, table: 'plain_hosts', parentId: 20 });
   });
 });
 
-describe('deleteComponents', () => {
-  const entry = {
-    id: 10,
-    links: [{ id: 1 }, { id: 2 }],
-    sections: [{ id: 20 }],
-    zone: [
-      { id: 4, __component: LINK_UID },
-      { id: 21, __component: SECTION_UID },
-    ],
-  };
-  const stored = {
-    [SECTION_UID]: { 20: { links: [{ id: 3 }] }, 21: { links: [] } },
-  };
+describe('createComponentRelationFilter', () => {
+  const filterRelationsToPropagate = createComponentRelationFilter();
 
-  it('removes the whole tree with one statement per component type and per relation', async () => {
-    const queries = setup(stored);
+  /**
+   * Rows of the link component's relation join table, one per link instance id
+   */
+  const linkRelations = (ids: number[]) =>
+    ids.map((id) => ({ id: 1000 + id, link_id: id, dp_host_id: 99 }));
 
-    await deleteComponents(PAGE_UID, entry as any, { loadComponents: false });
-
-    // nested components are fetched by type, not one parent at a time
-    expect(queries[SECTION_UID].findMany).toHaveBeenCalledTimes(1);
-    expect(queries[SECTION_UID].findMany).toHaveBeenCalledWith({
-      where: { id: { $in: [20, 21] } },
-      select: ['id'],
-      populate: { links: { select: ['id'] } },
-    });
-    expect(queries[LINK_UID].findMany).not.toHaveBeenCalled();
-
-    const { deleteManyRelations } = queries.db.entityManager;
-    expect(deleteManyRelations).toHaveBeenCalledWith(LINK_UID, [1, 2, 4, 3], {
-      transaction: 'trx',
-    });
-    expect(deleteManyRelations).toHaveBeenCalledWith(SECTION_UID, [20, 21], { transaction: 'trx' });
-    expect(queries[LINK_UID].deleteMany).toHaveBeenCalledWith({
-      where: { id: { $in: [1, 2, 4, 3] } },
-    });
-    expect(queries[SECTION_UID].deleteMany).toHaveBeenCalledWith({
-      where: { id: { $in: [20, 21] } },
-    });
-    expect(queries[LINK_UID].delete).not.toHaveBeenCalled();
-    expect(queries[SECTION_UID].delete).not.toHaveBeenCalled();
-    expect(queries.db.transaction).toHaveBeenCalledTimes(1);
-  });
-
-  it('loads the first level when asked to', async () => {
-    const queries = setup({ ...stored, [PAGE_UID]: { 10: { links: [{ id: 1 }] } } });
-
-    await deleteComponents(PAGE_UID, { id: 10 } as any);
-
-    expect(queries[PAGE_UID].load).toHaveBeenCalledWith({ id: 10 }, [
-      'links',
-      'hero',
-      'sections',
-      'zone',
-    ]);
-    expect(queries.db.entityManager.deleteManyRelations).toHaveBeenCalledWith(LINK_UID, [1], {
-      transaction: 'trx',
-    });
-  });
-
-  it('does nothing when the entry holds no component', async () => {
-    const queries = setup({});
-
-    await deleteComponents(PAGE_UID, { id: 10, links: [], sections: null, zone: [] } as any, {
-      loadComponents: false,
+  it('drops relations of instances owned by a draft and publish entry, directly or through a parent component', async () => {
+    setupStrapi({
+      tables: {
+        dp_hosts_cmps: [owns(10, LINK_UID, 1), owns(11, CARD_UID, 100)],
+        plain_hosts_cmps: [owns(20, LINK_UID, 2), owns(21, CARD_UID, 200)],
+        components_default_cards_cmps: [
+          owns(100, LINK_UID, 3),
+          owns(200, LINK_UID, 4),
+          owns(300, LINK_UID, 6),
+        ],
+      },
     });
 
-    expect(queries.db.transaction).not.toHaveBeenCalled();
-  });
-
-  it('deletes the components one by one when a lifecycle subscriber listens to one of them', async () => {
-    const queries = setup(stored);
-    queries.db.lifecycles.hasSubscribers.mockImplementation(
-      (action: string, uid: string) => action === 'afterDelete' && uid === LINK_UID
+    // 1: in a draft and publish entry                    -> dropped
+    // 2: in an entry without draft and publish           -> kept
+    // 3: in a card, in a draft and publish entry         -> dropped
+    // 4: in a card, in an entry without draft and publish -> kept
+    // 5: in nothing                                      -> kept
+    // 6: in a card that is in nothing                    -> kept
+    const kept = await filterRelationsToPropagate(
+      linkRelations([1, 2, 3, 4, 5, 6]),
+      linkSchema,
+      {}
     );
 
-    await deleteComponents(PAGE_UID, entry as any, { loadComponents: false });
+    expect(kept.map((relation) => relation.link_id)).toEqual([2, 4, 5, 6]);
+  });
 
-    expect(queries.db.entityManager.deleteManyRelations).not.toHaveBeenCalled();
-    expect(queries[LINK_UID].deleteMany).not.toHaveBeenCalled();
-    // attribute by attribute: links, then the nested link of the section, then the zone
-    expect(queries[LINK_UID].delete.mock.calls.map(([params]: any) => params.where.id)).toEqual([
-      1, 2, 3, 4,
+  it('queries each candidate parent once per nesting level, however many relations there are', async () => {
+    const linkIds = Array.from({ length: 50 }, (_, i) => i + 1);
+    const { queriedTables, getSchemaConnection } = setupStrapi({
+      tables: {
+        plain_hosts_cmps: [owns(20, CARD_UID, 100)],
+        components_default_cards_cmps: linkIds.map((id) => owns(100, LINK_UID, id)),
+      },
+    });
+
+    const kept = await filterRelationsToPropagate(linkRelations(linkIds), linkSchema, {});
+
+    expect(kept).toHaveLength(50);
+    expect(queriedTables).toEqual([
+      // parents of the links
+      'dp_hosts_cmps',
+      'plain_hosts_cmps',
+      'components_default_cards_cmps',
+      // parents of the card holding them
+      'dp_hosts_cmps',
+      'plain_hosts_cmps',
     ]);
-    expect(queries[SECTION_UID].delete.mock.calls.map(([params]: any) => params.where.id)).toEqual([
-      20, 21,
-    ]);
+    expect(getSchemaConnection).not.toHaveBeenCalled();
+  });
+
+  it('stops checking candidate parents once every instance has been found', async () => {
+    const { queriedTables } = setupStrapi({
+      tables: { dp_hosts_cmps: [owns(10, LINK_UID, 1), owns(10, LINK_UID, 2)] },
+    });
+
+    const kept = await filterRelationsToPropagate(linkRelations([1, 2]), linkSchema, {});
+
+    expect(kept).toEqual([]);
+    expect(queriedTables).toEqual(['dp_hosts_cmps']);
+  });
+
+  it('looks instances up in batches', async () => {
+    const linkIds = Array.from({ length: 501 }, (_, i) => i + 1);
+    const { queriedTables } = setupStrapi({
+      tables: { dp_hosts_cmps: linkIds.map((id) => owns(10, LINK_UID, id)) },
+    });
+
+    const kept = await filterRelationsToPropagate(linkRelations(linkIds), linkSchema, {});
+
+    expect(kept).toEqual([]);
+    expect(queriedTables).toEqual(['dp_hosts_cmps', 'dp_hosts_cmps']);
+  });
+
+  it('returns relations of content types unchanged without querying', async () => {
+    const { queriedTables } = setupStrapi();
+    const relations = linkRelations([1]);
+
+    const kept = await filterRelationsToPropagate(relations, contentTypes[DP_HOST_UID] as any, {});
+
+    expect(kept).toBe(relations);
+    expect(queriedTables).toEqual([]);
+  });
+
+  it('keeps querying later parents for ids past the first batch', async () => {
+    const linkIds = Array.from({ length: 501 }, (_, i) => i + 1);
+    const plain = contentTypes[PLAIN_HOST_UID] as any;
+    const previous = plain.options.draftAndPublish;
+    plain.options.draftAndPublish = true;
+
+    try {
+      const { queriedTables } = setupStrapi({
+        tables: {
+          dp_hosts_cmps: linkIds.slice(0, 500).map((id) => owns(10, LINK_UID, id)),
+          plain_hosts_cmps: [owns(20, LINK_UID, 501)],
+        },
+      });
+
+      const kept = await filterRelationsToPropagate(linkRelations(linkIds), linkSchema, {});
+
+      expect(kept).toEqual([]);
+      expect(queriedTables).toEqual(['dp_hosts_cmps', 'dp_hosts_cmps', 'plain_hosts_cmps']);
+    } finally {
+      plain.options.draftAndPublish = previous;
+    }
+  });
+
+  it('does not stop before a later draft-and-publish parent that owns a remaining id', async () => {
+    const dp = contentTypes[DP_HOST_UID] as any;
+    const plain = contentTypes[PLAIN_HOST_UID] as any;
+    const previousDp = dp.options.draftAndPublish;
+    const previousPlain = plain.options.draftAndPublish;
+    dp.options.draftAndPublish = false;
+    plain.options.draftAndPublish = true;
+
+    try {
+      const { queriedTables } = setupStrapi({
+        tables: {
+          dp_hosts_cmps: [owns(10, LINK_UID, 1)],
+          plain_hosts_cmps: [owns(20, LINK_UID, 2)],
+        },
+      });
+
+      const kept = await filterRelationsToPropagate(linkRelations([1, 2]), linkSchema, {});
+
+      expect(kept.map((relation) => relation.link_id)).toEqual([1]);
+      expect(queriedTables).toEqual(['dp_hosts_cmps', 'plain_hosts_cmps']);
+    } finally {
+      dp.options.draftAndPublish = previousDp;
+      plain.options.draftAndPublish = previousPlain;
+    }
+  });
+
+  it('resolves two levels of nesting and does not confuse equal ids of different component types', async () => {
+    const SECTION_UID = 'default.section';
+    components[SECTION_UID] = {
+      uid: SECTION_UID,
+      modelType: 'component',
+      modelName: 'section',
+      collectionName: 'components_default_sections',
+      attributes: { card: { type: 'component', component: CARD_UID } },
+    } as any;
+
+    const dpBlocks = (contentTypes[DP_HOST_UID] as any).attributes.blocks.components as string[];
+    const plainBlocks = (contentTypes[PLAIN_HOST_UID] as any).attributes.blocks
+      .components as string[];
+    dpBlocks.push(SECTION_UID);
+    plainBlocks.push(SECTION_UID);
+
+    try {
+      // Link 5 → card 5 → section 5 → draft-and-publish host.
+      // Link 6 → card 6 → section 6 → plain host.
+      // The shared id 5 must not be treated as the link's direct parent.
+      setupStrapi({
+        tables: {
+          dp_hosts_cmps: [owns(10, SECTION_UID, 5)],
+          plain_hosts_cmps: [owns(20, SECTION_UID, 6)],
+          components_default_sections_cmps: [owns(5, CARD_UID, 5), owns(6, CARD_UID, 6)],
+          components_default_cards_cmps: [owns(5, LINK_UID, 5), owns(6, LINK_UID, 6)],
+        },
+        registeredTables: [
+          'dp_hosts_cmps',
+          'plain_hosts_cmps',
+          'components_default_cards_cmps',
+          'components_default_sections_cmps',
+        ],
+      });
+
+      const kept = await filterRelationsToPropagate(linkRelations([5, 6]), linkSchema, {});
+
+      expect(kept.map((relation) => relation.link_id)).toEqual([6]);
+    } finally {
+      delete components[SECTION_UID];
+      dpBlocks.pop();
+      plainBlocks.pop();
+    }
   });
 });

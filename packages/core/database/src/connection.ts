@@ -22,7 +22,8 @@ export const createConnection = (userConfig: Knex.Config, strapiConfig?: Partial
 
   // initialization code to run upon opening a new connection
   if (strapiConfig?.pool?.afterCreate) {
-    knexConfig.pool = knexConfig.pool || {};
+    // copy so the wrapper below is not written into the caller's pool config (shared with strapi.config)
+    knexConfig.pool = { ...knexConfig.pool };
     // if the user has set their own afterCreate in config, we will replace it and call it
     const userAfterCreate = knexConfig.pool?.afterCreate;
     const strapiAfterCreate = strapiConfig.pool.afterCreate;
