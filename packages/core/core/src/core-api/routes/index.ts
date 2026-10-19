@@ -58,7 +58,8 @@ const getSingleTypeRoutes = (
       request: {
         query: validator.queryParams(['fields', 'populate', ...conditionalQueryParams]),
       },
-      response: documentResponseSchema(validator.document),
+      // The controller sends 204 with an empty body
+      responseStatus: 204,
       config: {},
     },
   };
@@ -117,6 +118,7 @@ const getCollectionTypeRoutes = (
         body: { 'application/json': validator.body },
       },
       response: documentResponseSchema(validator.document),
+      responseStatus: 201,
       config: {},
     },
     update: {
@@ -138,7 +140,8 @@ const getCollectionTypeRoutes = (
         query: validator.queryParams(['fields', 'populate', 'filters', ...conditionalQueryParams]),
         params: { id: validator.documentID },
       },
-      response: documentResponseSchema(validator.document),
+      // The controller sends 204 with an empty body
+      responseStatus: 204,
     },
   };
 };

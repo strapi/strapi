@@ -42,6 +42,7 @@ const routeSchema = yup.object({
     })
     .notRequired(),
   response: yup.object().notRequired(),
+  responseStatus: yup.number().integer().min(100).max(599).notRequired(),
   config: yup
     .object({
       auth: yup.lazy((value) => {
