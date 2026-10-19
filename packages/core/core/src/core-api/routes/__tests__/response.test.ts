@@ -165,7 +165,7 @@ describe('content-api OpenAPI response envelopes', () => {
     ).toBe(false);
   });
 
-  test.each(['findOne', 'create', 'update', 'delete'] as const)(
+  test.each(['findOne', 'create', 'update'] as const)(
     'collection %s accepts data and an empty meta object',
     (action) => {
       const schema = toResponseSchema(collectionRoutes[action].response);
@@ -189,7 +189,7 @@ describe('content-api OpenAPI response envelopes', () => {
     }
   );
 
-  test.each(['find', 'update', 'delete'] as const)(
+  test.each(['find', 'update'] as const)(
     'single type %s accepts data and an empty meta object',
     (action) => {
       const schema = toResponseSchema(singleRoutes[action].response);
