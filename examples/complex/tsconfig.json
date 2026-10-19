@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "lib": ["ES2020"],
     "target": "ES2019",
     "strict": true,
