@@ -28,6 +28,12 @@ import { HiddenAction } from './HiddenAction';
 import { RequiredSign } from './RequiredSign';
 import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithCheckbox';
 
+const EMPTY_AVAILABLE_ACTIONS: NonNullable<CollapsePropertyMatrixProps['availableActions']> = [];
+const EMPTY_CHILDREN_FORM: NonNullable<CollapsePropertyMatrixProps['childrenForm']> = [];
+const EMPTY_ACTION_ROW_CHILDREN_FORM: NonNullable<ActionRowProps['childrenForm']> = [];
+const EMPTY_SUB_ACTION_ROW_CHILDREN_FORM: NonNullable<SubActionRowProps['childrenForm']> = [];
+const EMPTY_HEADERS: NonNullable<HeaderProps['headers']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * CollapsePropertyMatrix
  * -----------------------------------------------------------------------------------------------*/
@@ -46,8 +52,8 @@ interface PropertyAction {
 }
 
 const CollapsePropertyMatrix = ({
-  availableActions = [],
-  childrenForm = [],
+  availableActions = EMPTY_AVAILABLE_ACTIONS,
+  childrenForm = EMPTY_CHILDREN_FORM,
   isFormDisabled,
   label,
   pathToData,
@@ -138,7 +144,7 @@ interface ActionRowProps extends Pick<
 }
 
 const ActionRow = ({
-  childrenForm = [],
+  childrenForm = EMPTY_ACTION_ROW_CHILDREN_FORM,
   label,
   isFormDisabled = false,
   name,
@@ -405,7 +411,7 @@ interface SubActionRowProps {
 }
 
 const SubActionRow = ({
-  childrenForm = [],
+  childrenForm = EMPTY_SUB_ACTION_ROW_CHILDREN_FORM,
   isFormDisabled,
   recursiveLevel,
   pathToDataFromActionRow,
@@ -686,7 +692,7 @@ interface HeaderProps {
   label: string;
 }
 
-const Header = ({ headers = [], label }: HeaderProps) => {
+const Header = ({ headers = EMPTY_HEADERS, label }: HeaderProps) => {
   const { formatMessage } = useIntl();
 
   return (
