@@ -28,6 +28,8 @@ The package focuses on using a limited set of external dependencies to keep a li
 
 Route objects carry Zod schemas on `route.request` and `route.response`. Assemblers convert those schemas into OpenAPI parameters, request bodies, and response objects via `z.toJSONSchema` (see `src/utils/zod.ts` and the `ComponentsWriter` post-processor).
 
+The responses assembler puts `route.response` under the status in `route.responseStatus`, or under `200` when the route sets no status. A route that sets `responseStatus` without `response` gets a response with no content, for example `204` on the core `delete` routes.
+
 :::info
 Keeping schemas on routes avoids leaking OpenAPI domain logic into Strapi core.
 :::

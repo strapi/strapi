@@ -1,3 +1,5 @@
+import { STATUS_CODES } from 'node:http';
+
 import type { Core } from '@strapi/types';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Assembler } from '../../../..';
@@ -25,17 +27,27 @@ export class OperationResponsesAssembler implements Assembler.Operation {
       responses[errorCode] = response;
     }
 
-    if (route.response) {
-      const schema = zodToOpenAPI(route.response, context.strapi.contentAPISchemaRegistry, {
+    const { response, responseStatus } = route;
+
+    // JS routes can set `response: null`, treat it like a missing schema
+    if (response !== undefined && response !== null) {
+      // Routes without a declared status keep the historical default: 200
+      const status = responseStatus ?? 200;
+      const schema = zodToOpenAPI(response, context.strapi.contentAPISchemaRegistry, {
         extractedComponentSchemas: context.registries.extractedComponentSchemas,
       });
 
-      responses[200] = {
-        description: 'OK',
+      responses[status] = {
+        description: describeStatus(status),
         content: { 'application/json': { schema } },
       };
+    } else if (responseStatus !== undefined) {
+      // A declared status without a schema has no content (e.g. 204 No Content)
+      responses[responseStatus] = { description: describeStatus(responseStatus) };
     }
 
     output.data.responses = responses;
   }
 }
+
+const describeStatus = (status: number): string => STATUS_CODES[status] ?? 'Success';

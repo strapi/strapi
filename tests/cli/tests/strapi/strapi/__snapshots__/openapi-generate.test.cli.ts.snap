@@ -2318,7 +2318,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -2410,7 +2410,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -2609,99 +2609,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "authors": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiAuthorAuthorDocument",
-                          },
-                          "type": "array",
-                        },
-                        "content": {
-                          "description": "A blocks field",
-                          "items": {},
-                          "type": "array",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiArticleArticleDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "seo": {
-                          "$ref": "#/components/schemas/MetaSeoEntry",
-                          "description": "A component field",
-                        },
-                        "slug": {
-                          "description": "A UID field",
-                          "type": "string",
-                        },
-                        "title": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "content",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -5178,7 +5087,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -5248,7 +5157,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -5428,77 +5337,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "articles": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiArticleArticleDocument",
-                          },
-                          "type": "array",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "name": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "profile": {
-                          "$ref": "#/components/schemas/PluginUploadFileDocument",
-                          "description": "A media field",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -6582,7 +6422,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -6660,7 +6500,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -6795,85 +6635,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "complexes": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiComplexComplexDocument",
-                          },
-                          "type": "array",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiCategoryCategoryDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "shorttext": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -8355,7 +8118,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -8570,7 +8333,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -8763,222 +8526,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "admin_users_o2m": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/AdminUserDocument",
-                          },
-                          "type": "array",
-                        },
-                        "blocks": {
-                          "description": "A blocks field",
-                          "items": {},
-                          "type": "array",
-                        },
-                        "boolean": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
-                          "description": "A boolean field",
-                        },
-                        "categories_m2m": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiCategoryCategoryDocument",
-                          },
-                          "type": "array",
-                        },
-                        "component_single": {
-                          "$ref": "#/components/schemas/ComponentCategoryComponentEntry",
-                          "description": "A component field",
-                        },
-                        "component_two": {
-                          "description": "A component field",
-                          "items": {
-                            "$ref": "#/components/schemas/ComponentCategoryComponentTwoEntry",
-                          },
-                          "type": "array",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "date": {
-                          "description": "A date field",
-                          "type": "string",
-                        },
-                        "datetime": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "dynamic_zone": {
-                          "description": "A dynamic zone field",
-                          "items": {},
-                          "type": "array",
-                        },
-                        "email": {
-                          "description": "An email field",
-                          "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
-                          "type": "string",
-                        },
-                        "enum": {
-                          "description": "An enum field",
-                          "enum": [
-                            "first value",
-                            "second value",
-                            "third value",
-                            "fourth value",
-                          ],
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "json": {
-                          "description": "A JSON field",
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiComplexComplexDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "longtext": {
-                          "description": "A text field",
-                          "type": "string",
-                        },
-                        "mediamultiple": {
-                          "description": "A media field",
-                          "items": {
-                            "$ref": "#/components/schemas/PluginUploadFileDocument",
-                          },
-                          "type": "array",
-                        },
-                        "mediasingle": {
-                          "$ref": "#/components/schemas/PluginUploadFileDocument",
-                          "description": "A media field",
-                        },
-                        "morph2many": {},
-                        "morph_to_many": {},
-                        "nonlocal_text": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "numberbiginteger": {
-                          "description": "A biginteger field",
-                          "type": "string",
-                        },
-                        "numberdecimal": {
-                          "description": "A decimal field",
-                          "type": "number",
-                        },
-                        "numberfloat": {
-                          "description": "A float field",
-                          "type": "number",
-                        },
-                        "numberinteger": {
-                          "description": "An integer field",
-                          "maximum": 9007199254740991,
-                          "minimum": -9007199254740991,
-                          "type": "integer",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "required": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "shorttext": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "time": {
-                          "description": "A time field",
-                          "type": "string",
-                        },
-                        "uidlongtext": {
-                          "description": "A UID field",
-                          "type": "string",
-                        },
-                        "uidshorttext": {
-                          "description": "A UID field",
-                          "type": "string",
-                        },
-                        "uidunattached": {
-                          "description": "A UID field",
-                          "type": "string",
-                        },
-                        "unique": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "up_user_o2o": {
-                          "$ref": "#/components/schemas/PluginUsersPermissionsUserDocument",
-                          "description": "A relational field",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "blocks",
-                        "required",
-                        "publishedAt",
-                        "morph2many",
-                        "morph_to_many",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -10723,7 +10272,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -10809,7 +10358,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -10991,93 +10540,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "Author": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiArticleArticleDocument",
-                          },
-                          "type": "array",
-                        },
-                        "country": {
-                          "$ref": "#/components/schemas/ApiCountryCountryDocument",
-                          "description": "A relational field",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "isActive": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
-                          "description": "A boolean field",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "roles": {
-                          "description": "An enum field",
-                          "enum": [
-                            "tank",
-                            "dps",
-                            "heal",
-                          ],
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -14136,7 +13600,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -14230,7 +13694,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -14369,101 +13833,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "code": {
-                          "description": "A string field",
-                          "maxLength": 3,
-                          "minLength": 2,
-                          "type": "string",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiCountryCountryDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "name": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "product": {
-                          "$ref": "#/components/schemas/ApiProductProductDocument",
-                          "description": "A relational field",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "visible": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
-                          "description": "A boolean field",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "name",
-                        "code",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -15294,92 +14665,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "admin_user": {
-                          "$ref": "#/components/schemas/AdminUserDocument",
-                          "description": "A relational field",
-                        },
-                        "content": {
-                          "description": "A blocks field",
-                          "items": {},
-                          "type": "array",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiHomepageHomepageDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "seo": {
-                          "$ref": "#/components/schemas/MetaSeoEntry",
-                          "description": "A component field",
-                        },
-                        "title": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "content",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -16807,7 +16094,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -16944,7 +16231,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -17153,144 +16440,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "countries": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiCountryCountryDocument",
-                          },
-                          "type": "array",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "description": {
-                          "description": "A blocks field",
-                          "items": {},
-                          "type": "array",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "images": {
-                          "description": "A media field",
-                          "items": {
-                            "$ref": "#/components/schemas/PluginUploadFileDocument",
-                          },
-                          "type": "array",
-                        },
-                        "isAvailable": {
-                          "anyOf": [
-                            {
-                              "type": "boolean",
-                            },
-                            {
-                              "type": "null",
-                            },
-                          ],
-                          "default": true,
-                          "description": "A boolean field",
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiProductProductDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "name": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "seo": {
-                          "$ref": "#/components/schemas/MetaSeoEntry",
-                          "description": "A component field",
-                        },
-                        "sku": {
-                          "description": "An integer field",
-                          "maximum": 9007199254740991,
-                          "minimum": -9007199254740991,
-                          "type": "integer",
-                        },
-                        "slug": {
-                          "description": "A UID field",
-                          "type": "string",
-                        },
-                        "type": {
-                          "description": "An enum field",
-                          "enum": [
-                            "standard",
-                            "custom",
-                            "cheap",
-                            "fancy",
-                          ],
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "variations": {
-                          "description": "A component field",
-                          "items": {
-                            "$ref": "#/components/schemas/ProductVariationsEntry",
-                          },
-                          "type": "array",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "name",
-                        "slug",
-                        "isAvailable",
-                        "description",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -18780,7 +17931,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -18869,7 +18020,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -19055,96 +18206,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "manyToMany": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
-                          },
-                          "type": "array",
-                        },
-                        "manyToManyBi": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
-                          },
-                          "type": "array",
-                        },
-                        "manyToOne": {
-                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
-                          "description": "A relational field",
-                        },
-                        "oneToMany": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
-                          },
-                          "type": "array",
-                        },
-                        "oneToOne": {
-                          "$ref": "#/components/schemas/ApiRelationTargetRelationTargetDocument",
-                          "description": "A relational field",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "title": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "title",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -20374,7 +19437,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -20441,7 +19504,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -20619,74 +19682,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "name": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "relationLabs": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiRelationLabRelationLabDocument",
-                          },
-                          "type": "array",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "name",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -21422,89 +20419,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "content": {
-                          "description": "A dynamic zone field",
-                          "items": {},
-                          "type": "array",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiShopShopDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "seo": {
-                          "$ref": "#/components/schemas/MetaSeoEntry",
-                          "description": "A component field",
-                        },
-                        "title": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "title",
-                        "publishedAt",
-                        "content",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -22146,78 +21062,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiSingleTypeLocalizedSingleTypeLocalizedDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "shorttext": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -22693,73 +21539,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "complex_contents": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiComplexComplexDocument",
-                          },
-                          "type": "array",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "shorttext": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -23201,66 +21982,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "shorttext": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -24199,7 +22922,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -24276,7 +22999,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -24469,84 +23192,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "founded": {
-                          "description": "An integer field",
-                          "maximum": 9007199254740991,
-                          "minimum": -9007199254740991,
-                          "type": "integer",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiTeamTeamDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "name": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -25865,7 +24512,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -25967,7 +24614,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",
@@ -26170,109 +24817,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "UID": {
-                          "description": "A UID field",
-                          "type": "string",
-                        },
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "identifiers": {
-                          "$ref": "#/components/schemas/UniqueTopLevelEntry",
-                          "description": "A component field",
-                        },
-                        "locale": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "localizations": {
-                          "description": "A relational field",
-                          "items": {
-                            "$ref": "#/components/schemas/ApiUniqueUniqueDocument",
-                          },
-                          "readOnly": true,
-                          "type": "array",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "repeatableIdentifiers": {
-                          "description": "A component field",
-                          "items": {
-                            "$ref": "#/components/schemas/UniqueTopLevelEntry",
-                          },
-                          "type": "array",
-                        },
-                        "uniqueDate": {
-                          "description": "A date field",
-                          "type": "string",
-                        },
-                        "uniqueEmail": {
-                          "description": "An email field",
-                          "format": "email",
-                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
-                          "type": "string",
-                        },
-                        "uniqueNumber": {
-                          "description": "An integer field",
-                          "maximum": 9007199254740991,
-                          "minimum": -9007199254740991,
-                          "type": "integer",
-                        },
-                        "uniqueString": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -27148,76 +25694,8 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "additionalProperties": false,
-                  "properties": {
-                    "data": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "createdAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "documentId": {
-                          "description": "The document ID, represented by a UUID",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                          "type": "string",
-                        },
-                        "id": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "type": "number",
-                            },
-                          ],
-                        },
-                        "next_match": {
-                          "description": "A date field",
-                          "type": "string",
-                        },
-                        "number_of_upcoming_matches": {
-                          "description": "An integer field",
-                          "maximum": 9007199254740991,
-                          "minimum": -9007199254740991,
-                          "type": "integer",
-                        },
-                        "publishedAt": {
-                          "default": "<generated-at-runtime>",
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                        "title": {
-                          "description": "A string field",
-                          "type": "string",
-                        },
-                        "updatedAt": {
-                          "description": "A datetime field",
-                          "type": "string",
-                        },
-                      },
-                      "required": [
-                        "documentId",
-                        "id",
-                        "publishedAt",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                  "required": [
-                    "data",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "OK",
+          "204": {
+            "description": "No Content",
           },
           "400": {
             "description": "Bad request",
@@ -29626,7 +28104,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
           },
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
@@ -29726,7 +28204,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
               },
             },
-            "description": "OK",
+            "description": "Created",
           },
           "400": {
             "description": "Bad request",

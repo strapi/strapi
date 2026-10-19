@@ -107,6 +107,7 @@ The route manager in [`routing.ts`](https://github.com/strapi/strapi/blob/develo
 | `config.policies`     | Policy names or `{ name, config }` objects.                                                                                 |
 | `config.middlewares`  | Middleware UIDs, `{ name, config }` objects, or functions.                                                                  |
 | `request`, `response` | Zod schemas. See [Validation and sanitization](#validation-and-sanitization).                                               |
+| `responseStatus`      | Success status for the OpenAPI document (`201`, `204`, ...). It does not change the status that the handler sends.          |
 
 For a string handler, the generated scope is the handler prefixed with the module namespace, unless the handler already starts with it. In `src/api/article`, `article.find` gets the scope `api::article.article.find`. In the admin package, `admin.init` gets `admin::admin.init`. A scope set in the route wins. The scope has the same format as a Content API permission action, which is how the permission check matches a route.
 
