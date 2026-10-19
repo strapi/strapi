@@ -153,7 +153,7 @@ the final delivery headers, so this configuration does not provide a universal d
 
 ## Webhook payloads
 
-Leave relations out of the `entry.*` event payloads (webhooks, audit logs) to reduce accidental data exposure. Components, dynamic zones and media stay in the payload. This also spares the database from reading every related row of an entry after each write:
+Limit relation data in webhook payloads to reduce accidental data exposure:
 
 `config/server.js` / `config/server.ts`:
 

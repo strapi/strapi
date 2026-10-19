@@ -140,7 +140,7 @@ The transaction context starts the commit callbacks but does not await them. The
 When the callback runs, the event manager:
 
 1. checks `strapi.eventHub.hasListeners(eventName)`. When no listener or subscriber would receive the event, it stops here: the deep populate below is the expensive part of an event, and nothing would read its result;
-2. reads the row again with a deep populate, except for `entry.delete` and `entry.unpublish`, where the row is gone. With `server.webhooks.populateRelations: false`, relations are left out of that populate; components, dynamic zones and media stay;
+2. reads the row again with a deep populate, except for `entry.delete` and `entry.unpublish`, where the row is gone;
 3. sanitizes it with `defaultSanitizeOutput`, which removes private fields;
 4. calls `strapi.eventHub.emit(eventName, { model, uid, entry })`.
 

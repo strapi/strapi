@@ -1,5 +1,4 @@
 import { createEventManager } from '../events';
-import { getDeepPopulate } from '../utils/populate';
 
 jest.mock('../utils/populate', () => ({
   getDeepPopulate: jest.fn(() => ({})),
@@ -57,15 +56,10 @@ const discardCommitCallbacks = async (callbacks: Array<() => unknown>) => {
 describe('createEventManager', () => {
   const uid = 'api::article.article';
 
-  const setup = (findOne: jest.Mock, config: Record<string, unknown> = {}) => {
+  const setup = (findOne: jest.Mock) => {
     const commitCallbacks: Array<() => unknown> = [];
     const strapi = {
       getModel: jest.fn(() => ({ uid, modelName: 'article' })),
-      config: {
-        get: jest.fn((key: string, defaultValue: unknown) =>
-          key in config ? config[key] : defaultValue
-        ),
-      },
       db: {
         query: jest.fn(() => ({ findOne })),
         transaction: jest.fn((run: (ctx: { onCommit: (fn: () => unknown) => void }) => void) =>
@@ -149,23 +143,5 @@ describe('createEventManager', () => {
     expect(findOne).not.toHaveBeenCalled();
     expect(strapi.eventHub.emit).not.toHaveBeenCalled();
     expect(strapi.log.error).not.toHaveBeenCalled();
-  });
-
-  it('populates relations by default', () => {
-    const { strapi } = setup(jest.fn());
-    (getDeepPopulate as jest.Mock).mockClear();
-
-    createEventManager(strapi as any, uid);
-
-    expect(getDeepPopulate).toHaveBeenCalledWith(uid, {});
-  });
-
-  it('leaves relations out of the populate when server.webhooks.populateRelations is false', () => {
-    const { strapi } = setup(jest.fn(), { 'server.webhooks.populateRelations': false });
-    (getDeepPopulate as jest.Mock).mockClear();
-
-    createEventManager(strapi as any, uid);
-
-    expect(getDeepPopulate).toHaveBeenCalledWith(uid, { relations: false });
   });
 });

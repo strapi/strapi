@@ -68,13 +68,6 @@ export interface Proxy {
 }
 
 export interface Webhooks {
-  /**
-   * Whether the `entry.*` event payloads (webhooks, audit logs) include the relations of the entry.
-   *
-   * When `false`, relations are left out of the payload and only components, dynamic zones and
-   * media are populated. This keeps payloads small and spares the database from reading every
-   * related row after each write. Defaults to `true`.
-   */
   populateRelations?: boolean;
   [key: string]: unknown;
 }

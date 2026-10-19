@@ -23,10 +23,7 @@ type EventName = Utils.Object.Values<typeof EVENTS>;
 const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
   const model = strapi.getModel(uid);
 
-  // With `server.webhooks.populateRelations: false`, event payloads carry the components, dynamic
-  // zones and media of the entry but not its relations, which spares reading every related row.
-  const populateRelations = strapi.config.get<boolean>('server.webhooks.populateRelations', true);
-  const populate = getDeepPopulate(uid, populateRelations === false ? { relations: false } : {});
+  const populate = getDeepPopulate(uid, {});
 
   const emitEvent = async (eventName: EventName, entry: Modules.Documents.AnyDocument) => {
     // Reading the entry again with a deep populate is the expensive part of an event: skip it,
