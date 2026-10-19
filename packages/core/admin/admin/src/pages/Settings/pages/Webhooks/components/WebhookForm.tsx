@@ -51,9 +51,7 @@ const WebhookForm = ({
     EventTableCE,
     async () =>
       (
-        await import(
-          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Webhooks/components/EventsTable'
-        )
+        await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Webhooks/components/EventsTable')
       ).EventsTableEE
   );
 

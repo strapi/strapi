@@ -27,6 +27,8 @@ import { useItemContextMenuTrigger } from './ItemContextMenu';
 import type { File } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
 
+const EMPTY_FOLDERS: NonNullable<AssetsGridProps['folders']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
@@ -577,7 +579,7 @@ interface AssetsGridProps {
 
 export const AssetsGrid = ({
   assets,
-  folders = [],
+  folders = EMPTY_FOLDERS,
   renderedKeys,
   onAssetItemClick,
 }: AssetsGridProps) => {

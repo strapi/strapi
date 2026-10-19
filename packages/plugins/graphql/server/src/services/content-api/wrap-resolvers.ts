@@ -12,14 +12,14 @@ import { createPoliciesMiddleware } from './policy';
 
 const { ForbiddenError } = errors;
 
-const introspectionQueries = [
+const introspectionQueries = new Set([
   '__Schema',
   '__Type',
   '__Field',
   '__InputValue',
   '__EnumValue',
   '__Directive',
-];
+]);
 
 type GraphQLMiddleware = (
   resolve: GraphQLFieldResolver<any, any>,
@@ -90,7 +90,7 @@ const wrapResolvers = ({
 
   Object.entries(typeMap).forEach(([type, definition]) => {
     const isGraphQLObjectType = definition instanceof GraphQLObjectType;
-    const isIgnoredType = introspectionQueries.includes(type);
+    const isIgnoredType = introspectionQueries.has(type);
 
     if (!isGraphQLObjectType || isIgnoredType) {
       return;

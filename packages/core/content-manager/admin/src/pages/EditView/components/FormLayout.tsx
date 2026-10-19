@@ -261,7 +261,7 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
   return (
     <IdleMountContext.Provider value={scheduleMount}>
       <Flex direction="column" alignItems="stretch" gap={6}>
-        {layout.map((panel, index) => {
+        {layout.map((panel) => {
           if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
             const [row] = panel;
             const [field] = row;
@@ -286,12 +286,15 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
           }
 
           return (
-            <Box key={index} {...(hasBackground && panelStyles)}>
+            <Box
+              key={panel.flatMap((row) => row.map((field) => field.name)).join('.')}
+              {...(hasBackground && panelStyles)}
+            >
               <Flex direction="column" alignItems="stretch" gap={6}>
-                {panel.map((row, gridRowIndex) => {
+                {panel.map((row) => {
                   return (
                     <LazyFormRow
-                      key={gridRowIndex}
+                      key={row.map((field) => field.name).join('.')}
                       fields={row}
                       mountImmediately={row.some((field) =>
                         hasMountSideEffects(field.attribute, document.components)

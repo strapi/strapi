@@ -57,8 +57,7 @@ type OperationResponse<TResponse extends { data: unknown; meta?: unknown; error?
   | { error: BaseQueryError | SerializedError };
 
 type BulkOperationResponse<TResponse extends { data: unknown; error?: unknown }> =
-  | Pick<TResponse, 'data'>
-  | { error: BaseQueryError | SerializedError };
+  Pick<TResponse, 'data'> | { error: BaseQueryError | SerializedError };
 
 type QueryParams = Record<string, unknown>;
 
