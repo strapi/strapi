@@ -48,8 +48,11 @@ describe('admin provider', () => {
 
       await adminProvider.register!(registered.strapi);
       await adminProvider.destroy!(unregistered.strapi);
+      await adminProvider.destroy!(registered.strapi);
 
       expect(unregistered.admin.destroy).not.toHaveBeenCalled();
+      expect(registered.admin.destroy).toHaveBeenCalledTimes(1);
+      expect(registered.admin.destroy).toHaveBeenCalledWith({ strapi: registered.strapi });
     });
   });
 });
