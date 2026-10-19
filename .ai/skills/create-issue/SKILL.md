@@ -13,6 +13,8 @@ An issue created with `gh issue create --body-file` gets nothing from the issue 
 
 This flow is for bugs in this repository only. Route other requests to the links in [config.yml](../../../.github/ISSUE_TEMPLATE/config.yml): feature requests, RFCs, documentation, the SDKs, and the design system have their own trackers.
 
+Security vulnerabilities never go in a public issue. If the report is a vulnerability, stop before you draft anything and send the user to the GitHub Security Advisory form: https://github.com/strapi/strapi/security/advisories/new. [SECURITY.md](../../../SECURITY.md) makes it the only accepted channel and lists the required report contents. Do not run `gh issue create`.
+
 ## Flow
 
 ### 1. Analyze
@@ -59,12 +61,12 @@ Be concise. Give the cause with file paths when research found it, and steps tha
 Run the same check as CI, from anywhere in the repository:
 
 ```bash
-node --experimental-strip-types --no-warnings --input-type=module -e "import { readFileSync } from 'node:fs'; import { validateIssueTemplate } from '$(git rev-parse --show-toplevel)/.github/scripts/issue-template-check.ts'; const r = validateIssueTemplate(readFileSync(process.argv[1], 'utf8')); console.log(JSON.stringify(r)); process.exit(r.valid ? 0 : 1);" <draft-path>
+node --experimental-strip-types --no-warnings --input-type=module -e "import { readFileSync } from 'node:fs'; import { validateIssueTemplate } from '$(git rev-parse --show-toplevel)/.github/scripts/issue-template-check.ts'; const r = validateIssueTemplate(readFileSync(process.argv[1], 'utf8')); console.log(JSON.stringify(r)); process.exit(r.valid ? 0 : 1);" "<draft-path>"
 ```
 
 Exit `0` prints `{"valid":true,"missingItems":[]}`. On exit `1`, fix every item in `missingItems` and run the check again.
 
-The check accepts `[NEEDS INPUT]` as a value. Also run `grep -n 'NEEDS INPUT' <draft-path>`: any match means the draft fails.
+The check accepts `[NEEDS INPUT]` as a value. Also run `grep -n 'NEEDS INPUT' "<draft-path>"`: any match means the draft fails. No output and exit `1` means no placeholder is left, so this check passes.
 
 Never publish a draft that fails.
 
@@ -77,7 +79,7 @@ Never publish a draft that fails.
    ```bash
    gh issue create --repo strapi/strapi \
      --title "<title>" \
-     --body-file <draft-path>
+     --body-file "<draft-path>"
    ```
 
    Add `--assignee <login>` only when the user asks for it.
