@@ -26,6 +26,10 @@ export const useMediaLibraryPermissions = () => {
 
   return {
     isLoading,
+    // `plugin::upload.read` gates every Media Library endpoint, `GET /upload/settings`
+    // included. Entry forms render a media field for roles that lack it, so callers
+    // need to know before they ask the server and collect a 403.
+    canRead: Boolean(allowedActions.canRead),
     canCreate: Boolean(allowedActions.canCreate),
     canUpdate: Boolean(allowedActions.canUpdate),
     canDownload: Boolean(allowedActions.canDownload),

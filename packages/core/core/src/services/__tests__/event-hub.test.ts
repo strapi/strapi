@@ -82,6 +82,82 @@ describe('Event Hub', () => {
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
+  it('does not remove other listeners when off() is given a listener that is not registered', async () => {
+    const { on, off, emit } = createEventHub();
+
+    const fn1 = jest.fn();
+    const fn2 = jest.fn();
+    const unregistered = jest.fn();
+
+    on('my-event', fn1);
+    on('my-event', fn2);
+
+    off('my-event', unregistered);
+    await emit('my-event');
+
+    expect(fn1).toHaveBeenCalledTimes(1);
+    expect(fn2).toHaveBeenCalledTimes(1);
+    expect(unregistered).not.toHaveBeenCalled();
+  });
+
+  it('removes only the once() listener after its first call when other listeners exist', async () => {
+    const { on, once, emit } = createEventHub();
+
+    const before = jest.fn();
+    const onceFn = jest.fn();
+    const after = jest.fn();
+
+    on('my-event', before);
+    once('my-event', onceFn);
+    on('my-event', after);
+
+    await emit('my-event');
+    await emit('my-event');
+
+    expect(onceFn).toHaveBeenCalledTimes(1);
+    expect(before).toHaveBeenCalledTimes(2);
+    expect(after).toHaveBeenCalledTimes(2);
+  });
+
+  it('calls a once() listener one time when another emit starts while an earlier listener is awaiting', async () => {
+    const { on, once, emit } = createEventHub();
+
+    let release: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const onceFn = jest.fn();
+
+    on('my-event', async () => {
+      await gate;
+    });
+    once('my-event', onceFn);
+
+    const first = emit('my-event');
+    await Promise.resolve();
+    const second = emit('my-event');
+    release!();
+    await Promise.all([first, second]);
+
+    expect(onceFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('removes only the once() listener with the function that once() returns', async () => {
+    const { on, once, emit } = createEventHub();
+
+    const onceFn = jest.fn();
+    const other = jest.fn();
+
+    const removeOnce = once('my-event', onceFn);
+    on('my-event', other);
+
+    removeOnce();
+    await emit('my-event');
+
+    expect(onceFn).not.toHaveBeenCalled();
+    expect(other).toHaveBeenCalledTimes(1);
+  });
+
   it('removes all subscribers on destroy()', async () => {
     const eventHub = createEventHub();
 

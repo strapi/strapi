@@ -38,6 +38,10 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./globals-admin": {
+      "types": "./dist/globals-admin.d.ts",
+      "source": "./src/globals-admin.ts"
+    },
     "./package.json": "./package.json",
     "./*": "./*"
   },
@@ -83,7 +87,7 @@
     "lodash": "4.18.1",
     "tsconfig": "5.58.0",
     "typescript": "5.9.3",
-    "undici": "6.29.0"
+    "undici": "8.12.1"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

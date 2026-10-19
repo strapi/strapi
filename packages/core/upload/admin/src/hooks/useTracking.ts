@@ -6,6 +6,7 @@ import { useGetUploadSettingsQuery } from '../services/settings';
 import { getMediaLibraryVersion } from '../utils/mediaLibraryVersion';
 
 import { useAIMetadataAvailability } from './useAIMetadataAvailability';
+import { useMediaLibraryPermissions } from './useMediaLibraryPermissions';
 
 /**
  * `location` value for every new Media Library event. The new tree is the
@@ -28,7 +29,8 @@ export const MEDIA_LIBRARY_LOCATION = 'upload';
  */
 export const useTracking = () => {
   const { trackUsage: trackStrapiUsage } = useStrapiTracking();
-  const { data } = useGetUploadSettingsQuery();
+  const { canRead } = useMediaLibraryPermissions();
+  const { data } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
   const isAiAvailable = useAIMetadataAvailability();
 
   // Memoised so consumers can safely list `trackUsage` in effect deps (the

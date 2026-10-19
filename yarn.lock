@@ -9404,6 +9404,7 @@ __metadata:
   dependencies:
     "@juggle/resize-observer": "npm:3.4.0"
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/types": "npm:5.58.0"
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:16.3.2"
@@ -9786,6 +9787,7 @@ __metadata:
     "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.15.2"
     "@types/koa-compress": "npm:4.0.3"
+    "@types/koa-favicon": "npm:2.1.5"
     "@types/koa-static": "npm:4.0.2"
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
@@ -9838,7 +9840,7 @@ __metadata:
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.58.0"
     typescript: "npm:5.9.3"
-    undici: "npm:6.29.0"
+    undici: "npm:8.12.1"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
     yup: "npm:0.32.9"
@@ -9871,7 +9873,7 @@ __metadata:
     fs-extra: "npm:11.3.4"
     inquirer: "npm:9.3.8"
     jest: "npm:29.6.0"
-    knex: "npm:3.0.1"
+    knex: "npm:3.3.0"
     koa: "npm:2.16.4"
     lodash: "npm:4.18.1"
     mime-types: "npm:2.1.35"
@@ -9906,7 +9908,7 @@ __metadata:
     eslint-config-custom: "npm:5.58.0"
     fs-extra: "npm:11.3.4"
     jest: "npm:29.6.0"
-    knex: "npm:3.0.1"
+    knex: "npm:3.3.0"
     lodash: "npm:4.18.1"
     semver: "npm:7.7.4"
     tsconfig: "npm:5.58.0"
@@ -10585,7 +10587,7 @@ __metadata:
     "@types/webpack-hot-middleware": "npm:2.25.12"
     "@vitejs/plugin-react-swc": "npm:3.11.0"
     boxen: "npm:5.1.2"
-    browserslist: "npm:^4.28.8"
+    browserslist: "npm:^4.28.9"
     browserslist-to-esbuild: "npm:2.1.1"
     chalk: "npm:4.1.2"
     chokidar: "npm:3.6.0"
@@ -10666,7 +10668,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:2.1.0"
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
-    undici: "npm:6.29.0"
+    undici: "npm:8.12.1"
     zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
@@ -10749,7 +10751,7 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     simple-git: "npm:3.36.0"
-    undici: "npm:6.29.0"
+    undici: "npm:8.12.1"
   bin:
     upgrade: ./bin/upgrade.js
   languageName: unknown
@@ -11750,6 +11752,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/eslint@npm:8.56.12":
+  version: 8.56.12
+  resolution: "@types/eslint@npm:8.56.12"
+  dependencies:
+    "@types/estree": "npm:*"
+    "@types/json-schema": "npm:*"
+  checksum: 10c0/e4ca426abe9d55f82b69a3250bec78b6d340ad1e567f91c97ecc59d3b2d6a1d8494955ac62ad0ea14b97519db580611c02be8277cbea370bdfb0f96aa2910504
+  languageName: node
+  linkType: hard
+
 "@types/estree-jsx@npm:^1.0.0":
   version: 1.0.5
   resolution: "@types/estree-jsx@npm:1.0.5"
@@ -11989,7 +12001,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/json-schema@npm:^7.0.12, @types/json-schema@npm:^7.0.15, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
+"@types/json-schema@npm:*, @types/json-schema@npm:^7.0.12, @types/json-schema@npm:^7.0.15, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
@@ -12062,6 +12074,15 @@ __metadata:
     "@types/koa": "npm:*"
     "@types/node": "npm:*"
   checksum: 10c0/47b6fdddee779ad44721557776bc0dc9fc3945e0a08cf838b441a357dfdf5fcc92c3029e906f5b0bf0ef20abbb5c3297a957b71e2d38398d7cdafc18892a7bab
+  languageName: node
+  linkType: hard
+
+"@types/koa-favicon@npm:2.1.5":
+  version: 2.1.5
+  resolution: "@types/koa-favicon@npm:2.1.5"
+  dependencies:
+    "@types/koa": "npm:*"
+  checksum: 10c0/5b1eeeeaa801b5a870b2d2b6d29bf17406fd82f7e2e94c8e0d5adcd55dde76d03851722867c1778727c388ea507b40f0503b90ad4c03c135c374250e762642d0
   languageName: node
   linkType: hard
 
@@ -14533,7 +14554,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"baseline-browser-mapping@npm:^2.11.12, baseline-browser-mapping@npm:^2.9.0":
+"baseline-browser-mapping@npm:^2.11.20, baseline-browser-mapping@npm:^2.9.0":
   version: 2.11.26
   resolution: "baseline-browser-mapping@npm:2.11.26"
   bin:
@@ -14556,14 +14577,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:12.8.0":
-  version: 12.8.0
-  resolution: "better-sqlite3@npm:12.8.0"
+"better-sqlite3@npm:12.11.1":
+  version: 12.11.1
+  resolution: "better-sqlite3@npm:12.11.1"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 10c0/b31da8a8a9bd0dd77d44c11fbfc72141a18b7267aed1ee5bedd481397415ace18eb54140706f82aca8149e4102fb2a543f833761e80f9668470ed53d03958515
+  checksum: 10c0/162d3fa6c19a68191d09537bd113bd54a636c9fb38b0fc0796f4f270032770695ef35a1bca041a0a0fa9bfa47e20b9e17c94484a3899c31f38881af4d12b7fa5
   languageName: node
   linkType: hard
 
@@ -14767,18 +14788,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserslist@npm:^4.28.8":
-  version: 4.28.8
-  resolution: "browserslist@npm:4.28.8"
+"browserslist@npm:^4.28.9":
+  version: 4.28.9
+  resolution: "browserslist@npm:4.28.9"
   dependencies:
-    baseline-browser-mapping: "npm:^2.11.12"
-    caniuse-lite: "npm:^1.0.30001809"
-    electron-to-chromium: "npm:^1.5.402"
-    node-releases: "npm:^2.0.53"
-    update-browserslist-db: "npm:^1.3.0"
+    baseline-browser-mapping: "npm:^2.11.20"
+    caniuse-lite: "npm:^1.0.30001810"
+    electron-to-chromium: "npm:^1.5.420"
+    node-releases: "npm:^2.0.54"
+    update-browserslist-db: "npm:^1.3.2"
   bin:
     browserslist: cli.js
-  checksum: 10c0/047dd517c8d1f1f56a253d752c3127b8ad01c58e4cbb7e21cb5cd07ebd13e083a2237c3afb13eb60674282c9132bd4534aea2c3ff7c6f7d29be0687a00cbd537
+  checksum: 10c0/c4c7457cccb188bb904bb84566ff2d09e6f45ccf48619333111e5d60dfad456522a64e3e4af7c7608bc171371fc006f32bcc296877b0586bf80fb9f60841a110
   languageName: node
   linkType: hard
 
@@ -15009,10 +15030,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001809":
-  version: 1.0.30001812
-  resolution: "caniuse-lite@npm:1.0.30001812"
-  checksum: 10c0/7f7375d80dbec0c4feeb11a0f655de12d27fd38a5ecff831ef2ceb7a74a87b9fb27d9ffcdd8b114e6f33f951e401ba86cfca489b8e78de505392d3d08e223abe
+"caniuse-lite@npm:^1.0.30001810":
+  version: 1.0.30001813
+  resolution: "caniuse-lite@npm:1.0.30001813"
+  checksum: 10c0/18b160024af4a7daecf43ce0b4203aad956ec71c2438844810af54194a733c8a203a8a9e6b502a904bce30ca312b173099b3c900327ff1cd7178406ada6b684f
   languageName: node
   linkType: hard
 
@@ -15687,7 +15708,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
-    better-sqlite3: "npm:12.8.0"
+    better-sqlite3: "npm:12.11.1"
     mysql2: "npm:3.23.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -16969,7 +16990,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-to-chromium@npm:^1.5.402":
+"electron-to-chromium@npm:^1.5.420":
   version: 1.5.439
   resolution: "electron-to-chromium@npm:1.5.439"
   checksum: 10c0/cacda90b1addee4f59d57b1f850c0558a678d1b911a0f64e06af555c2ed6844562858f74255a83d7d83ea0618948377ba56e276108ef7f1249f5c3128ca96494
@@ -17020,7 +17041,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
-    better-sqlite3: "npm:12.8.0"
+    better-sqlite3: "npm:12.11.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.6"
@@ -19383,7 +19404,7 @@ __metadata:
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
     "@types/node": "npm:20.19.41"
-    better-sqlite3: "npm:12.8.0"
+    better-sqlite3: "npm:12.11.1"
     lodash: "npm:4.18.1"
     mysql2: "npm:3.23.1"
     passport-google-oauth2: "npm:0.2.0"
@@ -22071,7 +22092,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    better-sqlite3: "npm:12.8.0"
+    better-sqlite3: "npm:12.11.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.6"
@@ -22088,7 +22109,7 @@ __metadata:
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
     "@types/node": "npm:20.19.41"
-    better-sqlite3: "npm:12.8.0"
+    better-sqlite3: "npm:12.11.1"
     lodash: "npm:4.18.1"
     mysql2: "npm:3.23.1"
     passport-google-oauth2: "npm:0.2.0"
@@ -22107,9 +22128,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"knex@npm:3.0.1":
-  version: 3.0.1
-  resolution: "knex@npm:3.0.1"
+"knex@npm:3.3.0":
+  version: 3.3.0
+  resolution: "knex@npm:3.3.0"
   dependencies:
     colorette: "npm:2.0.19"
     commander: "npm:^10.0.0"
@@ -22119,14 +22140,18 @@ __metadata:
     get-package-type: "npm:^0.1.0"
     getopts: "npm:2.3.0"
     interpret: "npm:^2.2.0"
-    lodash: "npm:^4.17.21"
-    pg-connection-string: "npm:2.6.1"
+    lodash: "npm:^4.18.1"
+    pg-connection-string: "npm:2.6.2"
     rechoir: "npm:^0.8.0"
     resolve-from: "npm:^5.0.0"
-    tarn: "npm:^3.0.2"
+    tarn: "npm:^3.1.0"
     tildify: "npm:2.0.0"
+  peerDependencies:
+    pg-query-stream: ^4.14.0
   peerDependenciesMeta:
     better-sqlite3:
+      optional: true
+    mariadb:
       optional: true
     mysql:
       optional: true
@@ -22136,13 +22161,15 @@ __metadata:
       optional: true
     pg-native:
       optional: true
+    pg-query-stream:
+      optional: true
     sqlite3:
       optional: true
     tedious:
       optional: true
   bin:
     knex: bin/cli.js
-  checksum: 10c0/43ce4858642b17304ba1f524361936d6369bccbc09ae4695f7b253a7553a729708a413f0fa5e4b3a295fe4f7483e4776be5f960d72c2decff34be11186685033
+  checksum: 10c0/946fb4d0a55894075fbdd45d8bcd8d14a358f1a89f413e205ee7867b8b3c58eb897b49facd3062f2be2abedaeb6ae98b5a593e6247848830088ceb55af2b4e8a
   languageName: node
   linkType: hard
 
@@ -22847,7 +22874,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.18.1, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4":
+"lodash@npm:4.18.1, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4, lodash@npm:^4.18.1":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
   checksum: 10c0/757228fc68805c59789e82185135cf85f05d0b2d3d54631d680ca79ec21944ec8314d4533639a14b8bcfbd97a517e78960933041a5af17ecb693ec6eecb99a27
@@ -24432,7 +24459,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-releases@npm:^2.0.53":
+"node-releases@npm:^2.0.54":
   version: 2.0.57
   resolution: "node-releases@npm:2.0.57"
   checksum: 10c0/fe5b68fba1fef524243b54828a118f13a4a40db08bb42c0b92680c3ca5c246f4ae6f139515071d46b9a3a9195945f5ac78064f5b7674c4dcc3dd6bfe933ff9e8
@@ -25651,10 +25678,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-connection-string@npm:2.6.1":
-  version: 2.6.1
-  resolution: "pg-connection-string@npm:2.6.1"
-  checksum: 10c0/e5a71a2da143b8dc17143a9db7737679b210643771aa678d3bc60c7bc70da11bbb8e2d531be91c8c4eddd6ac6046307811e793f5850b9ba595a11785c948a417
+"pg-connection-string@npm:2.6.2":
+  version: 2.6.2
+  resolution: "pg-connection-string@npm:2.6.2"
+  checksum: 10c0/e8fdea74fcc8bdc3d7c5c6eadd9425fdba7e67fb7fe836f9c0cecad94c8984e435256657d1d8ce0483d1fedef667e7a57e32449a63cb805cb0289fc34b62da35
   languageName: node
   linkType: hard
 
@@ -28641,6 +28668,7 @@ __metadata:
     "@swc/core": "npm:1.13.5"
     "@swc/helpers": "npm:0.5.17"
     "@swc/jest": "npm:0.2.39"
+    "@types/eslint": "npm:8.56.12"
     "@types/fs-extra": "npm:11.0.4"
     "@types/prompts": "npm:2.4.9"
     "@types/react": "npm:18.3.2"
@@ -29345,10 +29373,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tarn@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "tarn@npm:3.0.2"
-  checksum: 10c0/ea2344e3d21936111176375bd6f34eba69a38ef1bc59434d523fd313166f8a28a47b0a847846c119f72dcf2c1e1231596d74ac3fcfc3cc73966b3d293a327269
+"tarn@npm:^3.1.0":
+  version: 3.1.2
+  resolution: "tarn@npm:3.1.2"
+  checksum: 10c0/fae37a0f2a9ee4b0ba5c309b213a1111e65bbc72cab5056be26beebcfa2980613aa0dd66f054fa0433e0cc6951875137e37c0ac52edb56812fbf05957130a795
   languageName: node
   linkType: hard
 
@@ -30169,10 +30197,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.29.0":
-  version: 6.29.0
-  resolution: "undici@npm:6.29.0"
-  checksum: 10c0/3fb2117985be977ba8b6bd6a242fec915e1b1d0f9681f5adb3f508fb1717352452d65bcfd3bed09e7c776cfda403a4e8edb24a318492f8b2d793439af2b8699b
+"undici@npm:8.12.1":
+  version: 8.12.1
+  resolution: "undici@npm:8.12.1"
+  checksum: 10c0/8ba448a30f85ec9bffe0065b45b471a578dbb56eafd4162741fd7be3b955672e98fabd7a4ab0703365d5ffc6f1927f4ed1c1221f678aa67af18fb7bc3dfe283b
   languageName: node
   linkType: hard
 
@@ -30496,7 +30524,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"update-browserslist-db@npm:^1.3.0":
+"update-browserslist-db@npm:^1.3.2":
   version: 1.3.3
   resolution: "update-browserslist-db@npm:1.3.3"
   dependencies:

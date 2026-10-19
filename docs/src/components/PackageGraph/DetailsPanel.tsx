@@ -81,6 +81,8 @@ export default function DetailsPanel({
       <p className={styles.panelName}>
         {/* Allow line breaks after `/` and `-` only, not in the middle of a word. */}
         {pkg.name.split(/(?<=[/-])/).map((part, index) => (
+          // Static, never reordered split of a string: the position is the identity.
+          // eslint-disable-next-line react/no-array-index-key
           <Fragment key={index}>
             {index > 0 && <wbr />}
             {part}

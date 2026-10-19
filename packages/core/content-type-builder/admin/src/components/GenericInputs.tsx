@@ -30,6 +30,8 @@ import { handleTimeChange, handleTimeChangeEvent } from '../utils/timeFormat';
 
 import type { Schema } from '@strapi/types';
 
+const EMPTY_OPTIONS: NonNullable<GenericInputProps['options']> = [];
+
 interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
 }
@@ -131,7 +133,7 @@ const GenericInput = ({
   name,
   onChange,
   onDelete,
-  options = [],
+  options = EMPTY_OPTIONS,
   placeholder,
   required,
   step,
