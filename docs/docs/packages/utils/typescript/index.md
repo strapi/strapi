@@ -18,4 +18,12 @@ Provides TypeScript compilation utilities and code generators for Strapi. Used i
 - **Compilers**: Basic TypeScript compiler and common utilities for handling configuration, paths, and diagnostics.
 - **Generators**: Templates and utilities to scaffold API routes, controllers, services, models, components, and content types.
 
+## Attribute modifiers
+
+The schema generators (`src/generators/common/models/attributes.ts`) write each attribute as its base type, such as `Schema.Attribute.String`, intersected with one modifier per schema option: `Required`, `Private`, `Unique`, `Configurable`, `CustomField`, `SetPluginOptions`, `SetMinMax`, `SetMinMaxLength` and `DefaultTo`. `DefaultTo` is written only for a literal default: a function or `null` default writes nothing.
+
+`@strapi/types` reads these modifiers. `Required` and `DefaultTo` decide which keys the strict Document Service write inputs require (see [document write path](../../../architecture/05-document-write-path.md#validation)).
+
+With `typescript.strictTypes`, the generators also write `Schema.Attribute.Conditional` on an attribute with a `conditions.visible` rule. A hidden field skips validation, so the strict write inputs make a conditional attribute optional and nullable. Without strict types, the generators write no strict-only modifier, and generated files stay as in previous releases. Unit tests in `src/__tests__/generators/schemas/` check both outputs.
+
 ## Related
