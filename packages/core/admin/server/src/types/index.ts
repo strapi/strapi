@@ -6,6 +6,7 @@ import type CEAuthService from '../services/auth';
 import type * as ConditionService from '../services/condition';
 import type * as ConstantsService from '../services/constants';
 import type * as ContentTypeService from '../services/content-type';
+import type DebugDumpService from '../services/debug-dump';
 import type EncryptionService from '../services/encryption';
 import type { homepageService } from '../services/homepage';
 import type CEMetricsService from '../services/metrics';
@@ -135,6 +136,11 @@ declare global {
         'admin::condition': typeof ConditionService;
         'admin::constants': typeof ConstantsService;
         'admin::content-type': typeof ContentTypeService;
+        /**
+         * Builds the support snapshot served by `GET /admin/debug-dump`. Loaded in CE and EE, like
+         * every service of the admin service map.
+         */
+        'admin::debug-dump': ReturnType<typeof DebugDumpService>;
         'admin::encryption': typeof EncryptionService;
         'admin::homepage': ReturnType<typeof homepageService>;
         'admin::metrics': EditionService<typeof CEMetricsService, typeof EEMetricsService>;
