@@ -10,7 +10,7 @@ const EVENTS = {
   ENTRY_PUBLISH: 'entry.publish',
   ENTRY_UNPUBLISH: 'entry.unpublish',
   ENTRY_DRAFT_DISCARD: 'entry.draft-discard',
-};
+} as const;
 
 type EventName = Utils.Object.Values<typeof EVENTS>;
 
@@ -27,7 +27,7 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
   const emitEvent = async (eventName: EventName, entry: Modules.Documents.AnyDocument) => {
     // There is no need to populate the entry if it has been deleted
     let populatedEntry = entry;
-    if (![EVENTS.ENTRY_DELETE, EVENTS.ENTRY_UNPUBLISH].includes(eventName)) {
+    if (eventName !== EVENTS.ENTRY_DELETE && eventName !== EVENTS.ENTRY_UNPUBLISH) {
       populatedEntry = await strapi.db.query(uid).findOne({ where: { id: entry.id }, populate });
     }
 
@@ -42,7 +42,9 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
     await strapi.eventHub.emit(eventName, {
       model: model.modelName,
       uid: model.uid,
-      entry: sanitizedEntry,
+      // The sanitized output of a document row keeps its `id` and `documentId`.
+      // TODO @Nico an entry deleted between the commit and this fetch may be emitted as `null`.
+      entry: sanitizedEntry as Modules.Documents.AnyDocument,
     });
   };
 

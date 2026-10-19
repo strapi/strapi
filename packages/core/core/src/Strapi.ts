@@ -145,7 +145,8 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('startupLogger');
   }
 
-  get eventHub(): Modules.EventHub.EventHub {
+  /** Typed as `Core.Strapi['eventHub']`: with strict types, registered events follow the registry. */
+  get eventHub(): Core.Strapi['eventHub'] {
     return this.get('eventHub');
   }
 
