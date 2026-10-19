@@ -17,9 +17,14 @@ const { GraphQLError: ApolloGraphQLError } = graphqlCjs;
 // resolver threw, so the helper mirrors that shape. unwrapResolverError only unwraps an error
 // that has a path, as graphql-js sets for every error raised inside a resolver
 const formatResolverError = (originalError: unknown) => {
+  // position 2 is the field name in `{ createPoolItem }`, so toJSON() carries locations.
+  // GraphQLError's constructor does not accept locations, which is what the generic 500 must copy.
+  const source = new graphqlCjs.Source('{ createPoolItem }');
   const wrapped = new ApolloGraphQLError('wrapped resolver error', {
     originalError: originalError as Error,
     path: ['createPoolItem'],
+    source,
+    positions: [2],
   });
 
   return formatGraphqlError(wrapped.toJSON(), wrapped);
@@ -59,6 +64,8 @@ describe('formatGraphqlError', () => {
         error: { name: 'InternalServerError', message: 'Internal Server Error' },
       });
       expect(formatted.extensions).not.toHaveProperty('error.details');
+      expect(formatted.path).toEqual(['createPoolItem']);
+      expect(formatted.locations).toEqual([{ line: 1, column: 3 }]);
     });
 
     it('does not leak anything from the internal error anywhere in the serialized response', () => {
@@ -89,6 +96,8 @@ describe('formatGraphqlError', () => {
       const formatted = formatResolverError(error);
 
       expect(formatted.message).toBe('Internal Server Error');
+      expect(formatted.path).toEqual(['createPoolItem']);
+      expect(formatted.locations).toEqual([{ line: 1, column: 3 }]);
       expect(formatted.extensions).toEqual({
         code: 'INTERNAL_SERVER_ERROR',
         error: { name: 'InternalServerError', message: 'Internal Server Error' },
@@ -153,6 +162,8 @@ describe('formatGraphqlError', () => {
       const formatted = formatGraphqlError(error.toJSON(), error);
 
       expect(formatted.message).toBe('Internal Server Error');
+      expect(formatted.path).toEqual(error.toJSON().path);
+      expect(formatted.locations).toEqual(error.toJSON().locations);
       expect(formatted.extensions).toEqual({
         code: 'INTERNAL_SERVER_ERROR',
         error: { name: 'InternalServerError', message: 'Internal Server Error' },
@@ -167,6 +178,7 @@ describe('formatGraphqlError', () => {
       const formatted = formatResolverError(new ApplicationError('Name is already taken', details));
 
       expect(formatted.message).toBe('Name is already taken');
+      expect(formatted.path).toEqual(['createPoolItem']);
       expect(formatted.extensions).toEqual({
         code: 'STRAPI_APPLICATION_ERROR',
         error: { name: 'ApplicationError', message: 'Name is already taken', details },

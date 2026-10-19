@@ -70,10 +70,26 @@ export function formatGraphqlError(formattedError: GraphQLFormattedError, error:
   // Create a generic 500 to send so we don't risk leaking any data. The error that went to the log
   // is not passed on: its name, message and details can hold SQL with bound values, hostnames and
   // driver reasons. The extension carries the same error shape as the REST 500 body.
-  return createFormattedError(
-    new GraphQLError('Internal Server Error'),
+  // path and locations stay: they name the field and the place in the query, and clients use them
+  // to attach the error. A fresh GraphQLError does not copy locations (the constructor only
+  // derives them from source positions), and spreading formattedError would also copy
+  // extensions.stacktrace in development.
+  const sanitized = createFormattedError(
+    { message: 'Internal Server Error', path: formattedError.path },
     'Internal Server Error',
     'INTERNAL_SERVER_ERROR',
     { name: 'InternalServerError', message: 'Internal Server Error' }
   );
+  // The GraphQLError type marks locations readonly. The constructor still creates a writable,
+  // enumerable field, and it will not copy locations off a formatted error, so set the field
+  // directly. Clients read it from toJSON().
+  if (formattedError.locations != null) {
+    Object.defineProperty(sanitized, 'locations', {
+      value: formattedError.locations,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
+  return sanitized;
 }

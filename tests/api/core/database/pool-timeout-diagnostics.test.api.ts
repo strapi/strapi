@@ -171,6 +171,10 @@ describe('Pool timeout diagnostics', () => {
 
       const [error] = res.body.errors;
       expect(error.message).toBe('Internal Server Error');
+      expect(error.path).toEqual(['createPoolItem']);
+      expect(error.locations).toEqual([
+        expect.objectContaining({ line: expect.any(Number), column: expect.any(Number) }),
+      ]);
       expect(error.extensions.code).toBe('INTERNAL_SERVER_ERROR');
       expect(error.extensions.error).toEqual({
         name: 'InternalServerError',
