@@ -4,8 +4,8 @@ import { defineProvider } from './provider';
 import loadAdmin from '../loaders/admin';
 
 // The provider is shared by every instance in the process. Track the instances that loaded the
-// admin services, so destroy does not run on an instance that never registered the admin
-// (e.g. the config-only instance of `strapi build`, or a SIGINT during `strapi.load()`)
+// admin services, so destroy runs only for an instance that loaded the admin services (not e.g.
+// for the config-only instance of `strapi build`, or on a SIGINT during `strapi.load()`)
 const registeredInstances = new WeakSet<Core.Strapi>();
 
 export default defineProvider({
