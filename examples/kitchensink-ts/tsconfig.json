@@ -3,7 +3,6 @@
     "outDir": "dist",
     "rootDir": ".",
     "module": "CommonJS",
-    "moduleResolution": "bundler",
     "lib": ["ES2020"],
     "target": "ES2019",
 
