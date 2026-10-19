@@ -124,7 +124,7 @@ To offer an event to webhooks, a plugin calls `strapi.get('webhookStore').addAll
 Several unsubscribe helpers use `list.splice(list.indexOf(item), 1)`. If `item` is not in the list, `indexOf` returns `-1` and `splice(-1, 1)` removes the last entry. This applies to the function that `strapi.documents.use()` returns and to the function that `strapi.db.lifecycles.subscribe()` returns.
 :::
 
-`eventHub.off(name, listener)` does nothing if `listener` is not registered for `name`. `eventHub.once(name, listener)` registers a wrapper. The wrapper removes itself before it calls `listener`, so `listener` runs one time. `emit` iterates over a copy of the listener list, so if a listener is removed during an emit, the next listener still runs.
+`eventHub.off(name, listener)` does nothing if `listener` is not registered for `name`. `eventHub.once(name, listener)` registers a wrapper. The wrapper calls `listener` only on its first call and removes itself, so `listener` runs one time, also when two emits of the same event overlap. `emit` iterates over a copy of the listener list, so if a listener is removed during an emit, the next listener still runs.
 
 ## Three hook-like mechanisms compared
 

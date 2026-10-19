@@ -119,6 +119,29 @@ describe('Event Hub', () => {
     expect(after).toHaveBeenCalledTimes(2);
   });
 
+  it('calls a once() listener one time when another emit starts while an earlier listener is awaiting', async () => {
+    const { on, once, emit } = createEventHub();
+
+    let release: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const onceFn = jest.fn();
+
+    on('my-event', async () => {
+      await gate;
+    });
+    once('my-event', onceFn);
+
+    const first = emit('my-event');
+    await Promise.resolve();
+    const second = emit('my-event');
+    release!();
+    await Promise.all([first, second]);
+
+    expect(onceFn).toHaveBeenCalledTimes(1);
+  });
+
   it('removes only the once() listener with the function that once() returns', async () => {
     const { on, once, emit } = createEventHub();
 

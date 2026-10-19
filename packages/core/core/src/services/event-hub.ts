@@ -89,8 +89,16 @@ export default function createEventHub(): EventHub {
     },
 
     once(eventName, listener) {
+      let fired = false;
+
       // Remove the registered wrapper, not the original listener which is not in the list
       const wrapper: Listener = async (...args) => {
+        // An emit that copied the listener list before the removal can still call the wrapper
+        if (fired === true) {
+          return;
+        }
+
+        fired = true;
         eventHub.off(eventName, wrapper);
         return listener(...args);
       };
