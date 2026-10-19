@@ -2,8 +2,9 @@ import {
   cloneComponentData,
   connectRelations,
   getComponentInstances,
-  getCopyScope,
+  getComponentPreview,
   getRelationsToCopy,
+  isComponentBlank,
 } from '../componentCopy';
 
 import type {
@@ -224,20 +225,69 @@ describe('componentCopy', () => {
     });
   });
 
-  describe('getCopyScope', () => {
-    it('should keep the path of a field that is not nested in a block', () => {
-      expect(getCopyScope('card', {})).toBe('card');
-      expect(getCopyScope('card.links', {})).toBe('card.links');
+  describe('getComponentPreview', () => {
+    it('should list the filled scalar fields in the order of the given fields', () => {
+      const [, , , block] = sourceDocument.blocks;
+
+      expect(
+        getComponentPreview(block.cards[0], 'shared.card', components, [
+          { name: 'links', label: 'Links' },
+          { name: 'author', label: 'Author' },
+          { name: 'title', label: 'Title' },
+        ])
+      ).toEqual([{ name: 'title', label: 'Title', type: 'string', value: 'Latest card' }]);
     });
 
-    it('should replace the position of a block by its kind', () => {
-      const targetValues = {
-        blocks: [{ __component: 'shared.link' }, { __component: 'blocks.cards', cards: [{}] }],
-      };
+    it('should fall back to the schema and leave out empty values', () => {
+      expect(
+        getComponentPreview({ title: '', label: 'ignored' }, 'shared.card', components)
+      ).toEqual([]);
+      expect(getComponentPreview({ label: 'Docs' }, 'shared.link', components)).toEqual([
+        { name: 'label', label: 'label', type: 'string', value: 'Docs' },
+      ]);
+    });
+  });
 
-      expect(getCopyScope('blocks.1.cards', targetValues)).toBe('blocks.[blocks.cards].cards');
-      expect(getCopyScope('blocks.1.cards.0.links', targetValues)).toBe(
-        'blocks.[blocks.cards].cards.[].links'
+  describe('isComponentBlank', () => {
+    it('should be blank without any value', () => {
+      expect(isComponentBlank(null, 'shared.card', components)).toBe(true);
+      expect(isComponentBlank({ __temp_key__: 'a0' }, 'shared.card', components)).toBe(true);
+      // the schema of a component served to the admin lists its ids among its attributes
+      expect(
+        isComponentBlank({ id: 8, documentId: 'abc', title: '' }, 'shared.card', {
+          ...components,
+          'shared.card': {
+            ...components['shared.card'],
+            attributes: {
+              id: { type: 'integer' },
+              documentId: { type: 'string' },
+              ...components['shared.card'].attributes,
+            },
+          },
+        } as unknown as ComponentsDictionary)
+      ).toBe(true);
+      expect(
+        isComponentBlank(
+          { title: '', author: { connect: [], disconnect: [] }, links: [] },
+          'shared.card',
+          components
+        )
+      ).toBe(true);
+    });
+
+    it('should hold content with a scalar, a relation or a filled nested component', () => {
+      expect(isComponentBlank({ title: 'Hello' }, 'shared.card', components)).toBe(false);
+      expect(
+        isComponentBlank(
+          { author: { connect: [{ id: 1 }], disconnect: [] } },
+          'shared.card',
+          components
+        )
+      ).toBe(false);
+      expect(isComponentBlank({ author: { count: 1 } }, 'shared.card', components)).toBe(false);
+      expect(isComponentBlank({ links: [{ label: '' }] }, 'shared.card', components)).toBe(true);
+      expect(isComponentBlank({ links: [{ label: 'Docs' }] }, 'shared.card', components)).toBe(
+        false
       );
     });
   });

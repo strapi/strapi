@@ -2,8 +2,10 @@ import * as React from 'react';
 
 import { useField, useNotification, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
+  Badge,
   Box,
   Flex,
+  Menu,
   TextButton,
   VisuallyHidden,
   Accordion,
@@ -11,7 +13,7 @@ import {
   useComposedRefs,
   BoxComponent,
 } from '@strapi/design-system';
-import { Plus, Drag, Trash, ArrowUp, ArrowDown, Duplicate } from '@strapi/icons';
+import { Plus, Drag, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -24,11 +26,12 @@ import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
-import { transformDocument } from '../../../utils/data';
+import { type AnyData, transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
 import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
+import { AddComponentMenuContent } from './AddComponentMenu';
 import { ComponentCopyModal } from './ComponentCopyModal';
 import { Initializer } from './Initializer';
 
@@ -39,11 +42,12 @@ import type { Schema } from '@strapi/types';
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
 
-type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
+type RepeatableComponentProps = Omit<ComponentInputProps, 'required'>;
 
 const RepeatableComponent = ({
   attribute,
   disabled,
+  label,
   name,
   mainField,
   children,
@@ -65,12 +69,25 @@ const RepeatableComponent = ({
   const addFieldRow = useForm('RepeatableComponent', (state) => state.addFieldRow);
   const moveFieldRow = useForm('RepeatableComponent', (state) => state.moveFieldRow);
   const removeFieldRow = useForm('RepeatableComponent', (state) => state.removeFieldRow);
+  const isFormModified = useForm('RepeatableComponent', (state) => state.modified);
   const { max = Infinity } = attribute;
   const value = React.useMemo(() => (Array.isArray(rawValue) ? rawValue : []), [rawValue]);
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
   const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
+  /**
+   * The entries copied from another entry are flagged until the form is saved. They're
+   * recognised by their key once the form has added them, see `handleCopyComponents`.
+   */
+  const [copiedKeys, setCopiedKeys] = React.useState<string[]>([]);
+  const pendingCopiesRef = React.useRef(0);
+
+  React.useEffect(() => {
+    if (!isFormModified) {
+      setCopiedKeys((keys) => (keys.length > 0 ? [] : keys));
+    }
+  }, [isFormModified]);
 
   React.useEffect(() => {
     const hasNestedErrors = rawError && Array.isArray(rawError) && rawError.length > 0;
@@ -127,10 +144,25 @@ const RepeatableComponent = ({
   const prevValue = usePrev(value);
 
   React.useEffect(() => {
-    /**
-     * When we add a new item to the array, we want to open the collapse.
-     */
     if (prevValue && prevValue.length < value.length) {
+      const prevKeys = new Set(prevValue.map((item) => item.__temp_key__));
+      const newKeys = value
+        .filter((item) => !prevKeys.has(item.__temp_key__))
+        .map((item) => item.__temp_key__);
+
+      /**
+       * Copied entries come in filled: they're flagged and stay collapsed.
+       */
+      if (pendingCopiesRef.current > 0) {
+        pendingCopiesRef.current = Math.max(0, pendingCopiesRef.current - newKeys.length);
+        setCopiedKeys((keys) => [...keys, ...newKeys]);
+
+        return;
+      }
+
+      /**
+       * When we add a new item to the array, we want to open the collapse.
+       */
       setCollapseToOpen(value[value.length - 1].__temp_key__);
     }
   }, [value, prevValue]);
@@ -163,8 +195,8 @@ const RepeatableComponent = ({
     }
   };
 
-  const handleCopyComponent = (componentData: Record<string, unknown>) => {
-    if (value.length >= max) {
+  const handleCopyComponents = (items: AnyData[]) => {
+    if (value.length + items.length > max) {
       toggleNotification({
         type: 'info',
         message: formatMessage({
@@ -175,7 +207,9 @@ const RepeatableComponent = ({
       return false;
     }
 
-    addFieldRow(name, componentData);
+    setCopiedKeys([]);
+    pendingCopiesRef.current = items.length;
+    items.forEach((item) => addFieldRow(name, item));
 
     return true;
   };
@@ -269,6 +303,18 @@ const RepeatableComponent = ({
 
   const level = useComponent('RepeatableComponent', (state) => state.level);
 
+  const copyModal = isCopyModalOpen && (
+    <ComponentCopyModal
+      componentUid={attribute.component}
+      fieldLabel={label}
+      mode="component"
+      onClose={() => setIsCopyModalOpen(false)}
+      onInsert={handleCopyComponents}
+      selection="multiple"
+      sourceFieldName={name}
+    />
+  );
+
   if (value.length === 0) {
     return (
       <>
@@ -278,15 +324,7 @@ const RepeatableComponent = ({
           onClick={handleClick}
           onCopyClick={canCopyFromExisting ? () => setIsCopyModalOpen(true) : undefined}
         />
-        {isCopyModalOpen && (
-          <ComponentCopyModal
-            componentUid={attribute.component}
-            mode="component"
-            onClose={() => setIsCopyModalOpen(false)}
-            onInsert={handleCopyComponent}
-            sourceFieldName={name}
-          />
-        )}
+        {copyModal}
       </>
     );
   }
@@ -336,38 +374,35 @@ const RepeatableComponent = ({
                 totalLength={value.length}
                 layout={layout}
                 renderField={children}
+                isCopied={copiedKeys.includes(key)}
               />
             </ComponentProvider>
           );
         })}
-        <TextButtonCustom disabled={disabled} onClick={handleClick} startIcon={<Plus />}>
-          {formatMessage({
-            id: getTranslation('containers.EditView.add.new-entry'),
-            defaultMessage: 'Add an entry',
-          })}
-        </TextButtonCustom>
-        {canCopyFromExisting && (
-          <TextButtonCustom
-            disabled={disabled}
-            onClick={() => setIsCopyModalOpen(true)}
-            startIcon={<Duplicate />}
-          >
+        {canCopyFromExisting ? (
+          <Menu.Root>
+            <AddEntryMenuTrigger disabled={disabled} endIcon={null} startIcon={<Plus />}>
+              {formatMessage({
+                id: getTranslation('containers.EditView.add.new-entry'),
+                defaultMessage: 'Add an entry',
+              })}
+            </AddEntryMenuTrigger>
+            <AddComponentMenuContent
+              kind="entry"
+              onAddEmpty={handleClick}
+              onCopy={() => setIsCopyModalOpen(true)}
+            />
+          </Menu.Root>
+        ) : (
+          <TextButtonCustom disabled={disabled} onClick={handleClick} startIcon={<Plus />}>
             {formatMessage({
-              id: getTranslation('components.copy-from-existing'),
-              defaultMessage: 'Copy from existing',
+              id: getTranslation('containers.EditView.add.new-entry'),
+              defaultMessage: 'Add an entry',
             })}
           </TextButtonCustom>
         )}
       </AccordionRoot>
-      {isCopyModalOpen && (
-        <ComponentCopyModal
-          componentUid={attribute.component}
-          mode="component"
-          onClose={() => setIsCopyModalOpen(false)}
-          onInsert={handleCopyComponent}
-          sourceFieldName={name}
-        />
-      )}
+      {copyModal}
     </Box>
   );
 };
@@ -404,8 +439,48 @@ const TextButtonCustom = styled(TextButton)`
   }
 `;
 
-interface RepeatableComponentFieldsProps
-  extends Pick<RepeatableComponentProps, 'children' | 'layout'> {
+/**
+ * Same look as `TextButtonCustom`, as the trigger of the menu offering to add an empty entry or
+ * to copy existing content.
+ */
+const AddEntryMenuTrigger = styled(Menu.Trigger)`
+  && {
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    border: 0;
+    border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
+    border-radius: 0;
+    background: transparent;
+    color: ${({ theme }) => theme.colors.primary600};
+    padding-inline: ${(props) => props.theme.spaces[6]};
+    padding-block: ${(props) => props.theme.spaces[3]};
+  }
+
+  &&:not([disabled]):hover,
+  &&[data-state='open'] {
+    background-color: ${(props) => props.theme.colors.primary100};
+  }
+
+  &&[disabled] {
+    color: ${({ theme }) => theme.colors.neutral600};
+  }
+
+  && span {
+    font-weight: 600;
+    font-size: 1.4rem;
+    line-height: 2.4rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: background-color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
+  }
+`;
+
+interface RepeatableComponentFieldsProps extends Pick<
+  RepeatableComponentProps,
+  'children' | 'layout'
+> {
   attributeComponent: string;
   nameWithIndex: string;
 }
@@ -465,11 +540,16 @@ RepeatableComponentFields.displayName = 'RepeatableComponentFields';
  * -----------------------------------------------------------------------------------------------*/
 
 interface ComponentProps
-  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
+  extends
+    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField' | 'layout'> {
   attributeComponent: string;
   disabled?: boolean;
   index: number;
+  /**
+   * Whether the entry was copied from another entry and not saved yet.
+   */
+  isCopied?: boolean;
   name: string;
   onDeleteComponent?: (index: number) => void;
   renderField: RepeatableComponentProps['children'];
@@ -482,6 +562,7 @@ const Component = ({
   attributeComponent,
   disabled,
   index,
+  isCopied,
   name,
   mainField = {
     name: 'id',
@@ -556,6 +637,14 @@ const Component = ({
           <Accordion.Header>
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
+              {isCopied && (
+                <Badge variant="success" size="S">
+                  {formatMessage({
+                    id: getTranslation('components.Component.copied'),
+                    defaultMessage: 'Copied',
+                  })}
+                </Badge>
+              )}
               <IconButton
                 disabled={disabled}
                 variant="ghost"

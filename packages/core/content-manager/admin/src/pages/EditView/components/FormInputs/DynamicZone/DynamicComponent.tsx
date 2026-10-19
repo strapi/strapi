@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
+  Badge,
   Box,
   Flex,
   Grid,
@@ -30,7 +31,8 @@ import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 import type { ComponentPickerProps } from './ComponentPicker';
 
 interface DynamicComponentProps
-  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
+  extends
+    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
     Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
   componentUid?: string;
   disabled?: boolean;
@@ -51,6 +53,10 @@ interface DynamicComponentProps
    * so the parent can clear the forced state.
    */
   onForceOpenHandled?: () => void;
+  /**
+   * Whether the component was copied from another entry and not saved yet.
+   */
+  isCopied?: boolean;
 }
 
 const DynamicComponent = ({
@@ -69,6 +75,7 @@ const DynamicComponent = ({
   children,
   forceOpen,
   onForceOpenHandled,
+  isCopied,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
@@ -343,7 +350,17 @@ const DynamicComponent = ({
                 >
                   {accordionTitle}
                 </Accordion.Trigger>
-                <Accordion.Actions>{accordionActions}</Accordion.Actions>
+                <Accordion.Actions>
+                  {isCopied && (
+                    <Badge variant="success" size="S">
+                      {formatMessage({
+                        id: getTranslation('components.Component.copied'),
+                        defaultMessage: 'Copied',
+                      })}
+                    </Badge>
+                  )}
+                  {accordionActions}
+                </Accordion.Actions>
               </Accordion.Header>
               <Accordion.Content>
                 <AccordionContentRadius background="neutral0">

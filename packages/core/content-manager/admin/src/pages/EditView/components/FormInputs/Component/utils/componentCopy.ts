@@ -6,6 +6,7 @@ import { type AnyData, transformDocument } from '../../../../utils/data';
 
 import type { RelationResult } from '../../../../../../../../shared/contracts/relations';
 import type { ComponentsDictionary, Document, Schema } from '../../../../../../hooks/useDocument';
+import type { Schema as StrapiSchema } from '@strapi/types';
 
 type ComponentCopyMode = 'component' | 'dynamiczone';
 
@@ -41,6 +42,12 @@ interface RelationToCopy {
 }
 
 const COMPONENT_META_KEYS = ['id', '__temp_key__'];
+
+/**
+ * The schema of a component served to the admin lists its `id` and `documentId` among its
+ * attributes, they aren't content.
+ */
+const COMPONENT_META_ATTRIBUTES = ['id', 'documentId', '__temp_key__'];
 
 /**
  * Blocks of a dynamic zone carry the uid of the component they're made of.
@@ -272,25 +279,143 @@ const getComponentInstances = ({
   });
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Previews
+ * -----------------------------------------------------------------------------------------------*/
+
 /**
- * @description Describes where a field sits regardless of the position of the blocks it's nested in,
- * e.g. `dynamiczone.1.dish` becomes `dynamiczone.[default.closingperiod].dish`. Fields sharing
- * a scope can copy the same components.
+ * The attributes a component is summed up with before it's copied: the ones with a value that
+ * reads as a single line.
  */
-const getCopyScope = (fieldName: string, targetValues: unknown) => {
-  const segments = toPath(fieldName);
+const PREVIEW_ATTRIBUTE_TYPES = new Set<StrapiSchema.Attribute.Kind>([
+  'string',
+  'text',
+  'richtext',
+  'email',
+  'uid',
+  'enumeration',
+  'integer',
+  'biginteger',
+  'float',
+  'decimal',
+  'boolean',
+  'date',
+  'datetime',
+  'time',
+]);
 
-  return segments
-    .map((segment, position) => {
-      if (!isInteger(segment)) {
-        return segment;
-      }
+interface ComponentPreviewField {
+  name: string;
+  label: string;
+  type: StrapiSchema.Attribute.Kind;
+  value: unknown;
+}
 
-      const blockUid = getDynamicZoneBlockUid(getIn(targetValues, segments.slice(0, position + 1)));
+/**
+ * @description Lists the filled scalar fields of a component, in the order of the given fields
+ * (typically the edit layout of the component) or of the schema.
+ */
+const getComponentPreview = (
+  source: unknown,
+  componentUid: string,
+  components: ComponentsDictionary,
+  fields?: Array<{ name: string; label: string }>
+): ComponentPreviewField[] => {
+  const schema = components[componentUid];
 
-      return `[${blockUid ?? ''}]`;
-    })
-    .join('.');
+  if (!schema || !isObject(source)) {
+    return [];
+  }
+
+  const previewFields =
+    fields ??
+    Object.keys(schema.attributes)
+      .filter((name) => !COMPONENT_META_ATTRIBUTES.includes(name))
+      .map((name) => ({ name, label: name }));
+
+  return previewFields.flatMap(({ name, label }) => {
+    const attribute = schema.attributes[name];
+    const value = source[name];
+
+    if (
+      !attribute ||
+      !PREVIEW_ATTRIBUTE_TYPES.has(attribute.type) ||
+      value === undefined ||
+      value === null ||
+      value === ''
+    ) {
+      return [];
+    }
+
+    return [{ name, label, type: attribute.type, value }];
+  });
+};
+
+/**
+ * @description Tells whether a component holds any content, i.e. whether copying into it would
+ * replace something. Nested components are looked into, relations count whether they're loaded
+ * (`count`) or being edited (`connect`).
+ */
+const isComponentBlank = (
+  value: unknown,
+  componentUid: string,
+  components: ComponentsDictionary
+): boolean => {
+  if (!isObject(value)) {
+    return true;
+  }
+
+  const schema = components[componentUid];
+
+  if (!schema) {
+    return Object.keys(value).every((key) => COMPONENT_META_KEYS.includes(key));
+  }
+
+  return Object.entries(schema.attributes).every(([name, attribute]) => {
+    const attributeValue = value[name];
+
+    if (
+      COMPONENT_META_ATTRIBUTES.includes(name) ||
+      attributeValue === undefined ||
+      attributeValue === null ||
+      attributeValue === ''
+    ) {
+      return true;
+    }
+
+    switch (attribute.type) {
+      case 'component':
+        if (attribute.repeatable) {
+          return (
+            !Array.isArray(attributeValue) ||
+            attributeValue.every((item) => isComponentBlank(item, attribute.component, components))
+          );
+        }
+
+        return isComponentBlank(attributeValue, attribute.component, components);
+      case 'dynamiczone':
+      case 'media':
+        return Array.isArray(attributeValue) && attributeValue.length === 0;
+      case 'relation':
+        if (Array.isArray(attributeValue)) {
+          return attributeValue.length === 0;
+        }
+
+        return (
+          isObject(attributeValue) &&
+          (!Array.isArray(attributeValue.connect) || attributeValue.connect.length === 0) &&
+          (attributeValue.count === undefined || attributeValue.count === 0)
+        );
+      case 'boolean':
+        return attributeValue === false;
+      default:
+        if (Array.isArray(attributeValue)) {
+          return attributeValue.length === 0;
+        }
+
+        return isObject(attributeValue) && Object.keys(attributeValue).length === 0;
+    }
+  });
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -374,7 +499,8 @@ export {
   cloneComponentData,
   connectRelations,
   getComponentInstances,
-  getCopyScope,
+  getComponentPreview,
   getRelationsToCopy,
+  isComponentBlank,
 };
-export type { ComponentCopyMode, ComponentInstance, RelationToCopy };
+export type { ComponentCopyMode, ComponentInstance, ComponentPreviewField, RelationToCopy };

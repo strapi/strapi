@@ -68,6 +68,7 @@ describe('RepeatableComponent', () => {
         },
       ],
     ],
+    label: 'repeatable',
     mainField: { name: 'name', type: 'string' },
     name: FIELD_NAME,
     type: 'component',
@@ -102,7 +103,19 @@ describe('RepeatableComponent', () => {
     render({ [FIELD_NAME]: null });
 
     expect(screen.getByRole('button', { name: /No entry yet/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Copy from existing' })).toBeInTheDocument();
+  });
+
+  it('offers to add an empty entry or to copy existing content from the empty initializer', async () => {
+    const { user } = render({ [FIELD_NAME]: [] });
+
+    await user.click(screen.getByRole('button', { name: /No entry yet/i }));
+
+    expect(screen.getByRole('menuitem', { name: /Empty entry/ })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /Use existing content/ })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('menuitem', { name: /Empty entry/ }));
+
+    expect(await screen.findByRole('button', { name: 'toto' })).toBeInTheDocument();
   });
 
   it('renders the empty initializer when the field value is undefined', () => {
@@ -123,5 +136,24 @@ describe('RepeatableComponent', () => {
 
     expect(screen.getByRole('button', { name: 'Entry one' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Add an entry/i })).toBeInTheDocument();
+  });
+
+  it('offers to add an empty entry or to copy existing content from the add button', async () => {
+    const { user } = render({
+      [FIELD_NAME]: [
+        {
+          __temp_key__: 'a0',
+          name: 'Entry one',
+        },
+      ],
+    });
+
+    await user.click(screen.getByRole('button', { name: /Add an entry/i }));
+
+    expect(screen.getByRole('menuitem', { name: /Use existing content/ })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('menuitem', { name: /Empty entry/ }));
+
+    expect(await screen.findByRole('button', { name: 'toto' })).toBeInTheDocument();
   });
 });

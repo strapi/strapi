@@ -5,18 +5,18 @@ import {
   Box,
   Flex,
   FlexComponent,
+  Menu,
   Popover,
   Tooltip,
   Typography,
 } from '@strapi/design-system';
-import { Duplicate } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { css, styled } from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 import { resolvePreviewImageUrl } from '../../../../../utils/previewImage';
-import { getTranslation } from '../../../../../utils/translations';
+import { AddComponentMenuContent } from '../Component/AddComponentMenu';
 
 import type { Struct } from '@strapi/types';
 
@@ -28,10 +28,11 @@ interface ComponentCategoryProps {
     icon?: string;
     preview?: Struct.PreviewImageValue;
   }>;
-  onAddComponent: (
-    componentUid: string
-  ) => React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
-  onCopyComponent?: (componentUid: string) => React.MouseEventHandler<HTMLButtonElement>;
+  onAddComponent: (componentUid: string) => () => void;
+  /**
+   * When set, picking a component offers to add it empty or to copy it from another entry.
+   */
+  onCopyComponent?: (componentUid: string) => () => void;
   variant?: Accordion.Variant;
 }
 
@@ -138,61 +139,60 @@ const ComponentCategory = ({
         <Grid paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           {components.map(({ uid, displayName, icon, preview }) => {
             const previewUrl = resolvePreviewImageUrl(preview);
+            const name = formatMessage({ id: uid, defaultMessage: displayName ?? uid });
+
+            const tile = (
+              <Flex
+                tag="span"
+                direction="column"
+                gap={1}
+                alignItems="center"
+                justifyContent="center"
+                width="100%"
+                paddingLeft={2}
+                paddingRight={2}
+              >
+                <ComponentTileVisual
+                  previewUrl={previewUrl}
+                  icon={icon}
+                  displayName={displayName}
+                />
+
+                <Tooltip label={name}>
+                  <Typography tag="span" variant="pi" fontWeight="bold" ellipsis width="100%">
+                    {name}
+                  </Typography>
+                </Tooltip>
+              </Flex>
+            );
+
+            if (onCopyComponent) {
+              return (
+                <Menu.Root key={uid}>
+                  <ComponentMenuTrigger endIcon={null}>{tile}</ComponentMenuTrigger>
+                  <AddComponentMenuContent
+                    kind="component"
+                    onAddEmpty={onAddComponent(uid)}
+                    onCopy={onCopyComponent(uid)}
+                  />
+                </Menu.Root>
+              );
+            }
 
             return (
               <ComponentBox
                 key={uid}
+                tag="button"
+                type="button"
                 background="neutral100"
                 justifyContent="center"
+                onClick={onAddComponent(uid)}
                 hasRadius
+                height="8.4rem"
                 shrink={0}
                 borderColor="neutral200"
-                direction="column"
-                alignItems="stretch"
               >
-                <ComponentAddButton type="button" onClick={onAddComponent(uid)}>
-                  <Flex
-                    direction="column"
-                    gap={1}
-                    alignItems="center"
-                    justifyContent="center"
-                    width="100%"
-                    paddingLeft={2}
-                    paddingRight={2}
-                  >
-                    <ComponentTileVisual
-                      previewUrl={previewUrl}
-                      icon={icon}
-                      displayName={displayName}
-                    />
-
-                    <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
-                      <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
-                        {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
-                      </Typography>
-                    </Tooltip>
-                  </Flex>
-                </ComponentAddButton>
-                {onCopyComponent && (
-                  <Tooltip
-                    label={formatMessage({
-                      id: getTranslation('components.copy-from-existing'),
-                      defaultMessage: 'Copy from existing',
-                    })}
-                    // below the tile, so the name of the component stays visible
-                    side="bottom"
-                  >
-                    <ComponentCopyButton type="button" onClick={onCopyComponent(uid)}>
-                      <Duplicate aria-hidden width="1.2rem" height="1.2rem" />
-                      <Typography variant="pi" fontWeight="bold">
-                        {formatMessage({
-                          id: getTranslation('components.copy-from-existing.short'),
-                          defaultMessage: 'Copy',
-                        })}
-                      </Typography>
-                    </ComponentCopyButton>
-                  </Tooltip>
-                )}
+                {tile}
               </ComponentBox>
             );
           })}
@@ -234,72 +234,55 @@ const Grid =
         }
       `;
 
-const ComponentBox = styled<FlexComponent>(Flex)`
-  /* keeps the background of the actions within the rounded corners */
-  overflow: hidden;
-
-  @media (prefers-reduced-motion: no-preference) {
-    transition: border-color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
-  }
-
-  &:focus-within,
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.primary200};
-  }
-`;
-
-/**
- * A tile holds up to two actions, adding the component and copying it from another entry.
- * Each one is highlighted on its own so it's clear which one is about to be triggered.
- */
-const tileActionStyles = css`
-  width: 100%;
-  border: 0;
-  background: transparent;
+const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
+  color: ${({ theme }) => theme.colors.neutral600};
   cursor: pointer;
 
   @media (prefers-reduced-motion: no-preference) {
-    transition:
-      background-color 120ms ${(props) => props.theme.motion.easings.easeOutQuad},
-      color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
+    transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
   }
 
-  &:focus-visible,
+  &:focus,
   &:hover {
+    border: 1px solid ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.primary600};
-    outline-offset: -2px;
-  }
-`;
-
-const ComponentAddButton = styled.button`
-  ${tileActionStyles}
-  /* 8.4rem tile (as without a copy action) minus the tile's 1px borders */
-  min-height: 8.2rem;
-  color: ${({ theme }) => theme.colors.neutral600};
-
-  &:focus-visible,
-  &:hover {
     color: ${({ theme }) => theme.colors.primary600};
   }
 `;
 
-const ComponentCopyButton = styled.button`
-  ${tileActionStyles}
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spaces[1]};
-  padding: ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[2]};
-  border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
-  color: ${({ theme }) => theme.colors.primary600};
+/**
+ * Same tile as `ComponentBox`, as the trigger of the menu offering to add the component empty or
+ * to copy it from another entry. The trigger is a button of the design system, hence the
+ * overrides.
+ */
+const ComponentMenuTrigger = styled(Menu.Trigger)`
+  && {
+    width: 100%;
+    height: 8.4rem;
+    padding: 0;
+    justify-content: center;
+    border: 1px solid ${({ theme }) => theme.colors.neutral200};
+    border-radius: ${({ theme }) => theme.borderRadius};
+    background: ${({ theme }) => theme.colors.neutral100};
+    color: ${({ theme }) => theme.colors.neutral600};
+  }
 
-  &:focus-visible,
-  &:hover {
-    color: ${({ theme }) => theme.colors.primary700};
+  /* the wrapper of the tile content */
+  && > span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
+  }
+
+  &&:focus,
+  &&:hover,
+  &&[data-state='open'] {
+    border-color: ${({ theme }) => theme.colors.primary200};
+    background: ${({ theme }) => theme.colors.primary100};
+    color: ${({ theme }) => theme.colors.primary600};
   }
 `;
 
