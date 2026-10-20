@@ -155,7 +155,7 @@ storage key the runtime builds from the params of `strapi.store`: `<type>_<name>
 `<type>_<key>` without a name (`packages/core/core/src/services/core-store.ts`). For example,
 `{ type: 'plugin', name: 'i18n', key: 'default_locale' }` reads `plugin_i18n_default_locale`. Keys
 built at runtime register a template-literal key, e.g.
-`` [key: `core_admin_homepage-layout:${string}`] ``.
+``[key: `core_admin_homepage-layout:${string}`]``.
 
 - The value is the shape the owner writes, as JSON: a `Date` is read back as a string and
   `undefined` properties are dropped. Declare it explicitly rather than reusing a type that holds
