@@ -14,7 +14,7 @@ Provides TypeScript compilation utilities and code generators for Strapi. Used i
 
 ## Key concepts
 
-- **Compiler interface**: `compile()` function compiles TypeScript in a source directory using detected tsconfig. Supports configurable compiler options. On TS 6, defaults `ignoreDeprecations: '6.0'` when the user tsconfig does not set it, so pre-TS 6 app tsconfigs (`moduleResolution: "Node"` + `noEmitOnError`) still emit. See [compile.ts](https://github.com/strapi/strapi/tree/develop/packages/utils/typescript).
+- **Compiler interface**: `compile()` function compiles TypeScript in a source directory using detected tsconfig. Supports configurable compiler options. See [compile.ts](https://github.com/strapi/strapi/tree/develop/packages/utils/typescript).
 - **Compilers**: Basic TypeScript compiler and common utilities for handling configuration, paths, and diagnostics.
 - **Generators**: Templates and utilities to scaffold API routes, controllers, services, models, components, and content types.
 
