@@ -2,7 +2,7 @@ import { reducer, actions, type State } from '../reducer';
 
 import { initCT, initCompo, init as initUtils } from './utils';
 
-import type { Struct } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 const baseContentType = initCT('test', {});
 const relatedContentType = initCT('relationship', {});
@@ -67,7 +67,7 @@ const getType = (
   return state.current[forTarget === 'contentType' ? 'contentTypes' : 'components'][targetUid];
 };
 
-describe.each<{ forTarget: Struct.ModelType; targetUid: string }>([
+describe.each<{ forTarget: Struct.ModelType; targetUid: Internal.UID.Schema }>([
   {
     forTarget: 'contentType',
     targetUid: 'api::test.test',

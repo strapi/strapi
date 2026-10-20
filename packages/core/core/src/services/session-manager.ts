@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import type { VerifyOptions, Algorithm } from 'jsonwebtoken';
 import type { Database } from '@strapi/database';
+import type { UID } from '@strapi/types';
 import { DEFAULT_ALGORITHM } from '../constants';
 
 export interface SessionProvider {
@@ -70,9 +71,9 @@ export interface ValidateRefreshTokenResult {
 class DatabaseSessionProvider implements SessionProvider {
   private db: Database;
 
-  private contentType: string;
+  private contentType: UID.ContentType;
 
-  constructor(db: Database, contentType: string) {
+  constructor(db: Database, contentType: UID.ContentType) {
     this.db = db;
     this.contentType = contentType;
   }
@@ -757,7 +758,7 @@ class SessionManager {
   }
 }
 
-const createDatabaseProvider = (db: Database, contentType: string): SessionProvider => {
+const createDatabaseProvider = (db: Database, contentType: UID.ContentType): SessionProvider => {
   return new DatabaseSessionProvider(db, contentType);
 };
 

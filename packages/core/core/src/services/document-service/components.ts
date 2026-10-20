@@ -444,7 +444,7 @@ const assignComponentData = curry(
     Component relation handling for document operations
 ************************** */
 
-type ComponentParent = { uid: string; table: string; parentId: number | string };
+type ComponentParent = { uid: UID.Schema; table: string; parentId: number | string };
 
 // Component instance ids are bound as query parameters, so look them up in batches that stay
 // well below the bind parameter limit of every supported database

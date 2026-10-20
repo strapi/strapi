@@ -266,8 +266,8 @@ const resolveAllRelationsBatched = async (
   relationsByUid: RelationsByUid,
   targetLocale: string,
   userAbility: any
-): Promise<Map<string, UidResolutionData>> => {
-  const result = new Map<string, UidResolutionData>();
+): Promise<Map<UID.ContentType, UidResolutionData>> => {
+  const result = new Map<UID.ContentType, UidResolutionData>();
   await Promise.all(
     [...relationsByUid.entries()].map(async ([targetUid, allRels]) => {
       const empty: UidResolutionData = {
@@ -387,9 +387,12 @@ const resolveAllRelationsBatched = async (
 const buildConnectFromPreResolved = (
   value: unknown,
   attribute: Schema.Attribute.Relation,
-  preResolved: Map<string, UidResolutionData>
+  preResolved: Map<UID.ContentType, UidResolutionData>
 ): { connect: unknown[]; disconnect: unknown[] } => {
-  const attr = attribute as Schema.Attribute.Relation & { relation?: string; target?: string };
+  const attr = attribute as Schema.Attribute.Relation & {
+    relation?: string;
+    target?: UID.ContentType;
+  };
   if (attr.relation?.toLowerCase().includes('morph') || !attr.target) {
     return { connect: [], disconnect: [] };
   }
@@ -438,7 +441,7 @@ const processDocumentData = async (
   data: Record<string, unknown>,
   schema: Schema.ContentType | Schema.Component,
   components: Record<string, Schema.Component>,
-  preResolved: Map<string, UidResolutionData>
+  preResolved: Map<UID.ContentType, UidResolutionData>
 ): Promise<Record<string, unknown>> => {
   if (!data) {
     return {};

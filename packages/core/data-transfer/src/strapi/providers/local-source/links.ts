@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import type { ILink } from '../../../types';
 import { createCappedWarningReporter } from '../../../utils/capped-warnings';
@@ -18,7 +18,10 @@ export const createLinksStream = (
   strapi: Core.Strapi,
   options: { onWarning?: (message: string) => void } = {}
 ) => {
-  const uids = [...Object.keys(strapi.contentTypes), ...Object.keys(strapi.components)] as string[];
+  const uids = [
+    ...Object.keys(strapi.contentTypes),
+    ...Object.keys(strapi.components),
+  ] as UID.Schema[];
   let orphanedLinkCount = 0;
   const warnings = createCappedWarningReporter(options.onWarning);
 

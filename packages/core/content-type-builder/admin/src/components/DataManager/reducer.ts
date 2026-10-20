@@ -142,12 +142,12 @@ type ReorderFolderChildrenPayload = {
 type AddAttributePayload = {
   attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
 };
 
 type AddCreateComponentToDynamicZonePayload = {
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
   dynamicZoneTarget: string;
   componentsToAdd: Internal.UID.Component[];
 };
@@ -155,18 +155,18 @@ type AddCreateComponentToDynamicZonePayload = {
 type AddCustomFieldAttributePayload = {
   attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
 };
 
 type ChangeDynamicZoneComponentsPayload = {
   dynamicZoneTarget: string;
   newComponents: Internal.UID.Component[];
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
 };
 
 type CreateComponentSchemaPayload = {
-  uid: string;
+  uid: Internal.UID.Component;
   data: {
     icon?: string;
     displayName: string;
@@ -209,27 +209,27 @@ type RenameConsentPayload = {
 type EditAttributePayload = RenameConsentPayload & {
   attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
   name: string;
 };
 
 type EditCustomFieldAttributePayload = RenameConsentPayload & {
   attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
   name: string;
 };
 
 type RemoveComponentFromDynamicZonePayload = {
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
   dzName: string;
   componentToRemoveIndex: number;
 };
 
 type RemoveFieldPayload = {
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
   attributeToRemoveName: string;
 };
 
@@ -259,7 +259,7 @@ type UpdateSchemaPayload = {
 
 type MoveAttributePayload = {
   forTarget: Struct.ModelType;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
   from: number;
   to: number;
 };
@@ -551,7 +551,10 @@ const setGroupStatus = (group: ContentStructureGroup, status: GroupStatus): void
  * Remove a content type reference from every group of a section, mark the group as changed if a reference was removed.
  * @returns true if a reference was removed, false otherwise.
  */
-const removeContentTypeChild = (groups: ContentStructureGroup[], uid: string): boolean => {
+const removeContentTypeChild = (
+  groups: ContentStructureGroup[],
+  uid: Internal.UID.Schema
+): boolean => {
   let removed = false;
 
   for (const group of groups) {
@@ -749,7 +752,7 @@ const slice = createUndoRedoSlice(
         const { uid, data, componentCategory } = action.payload;
 
         const newSchema: Component = {
-          uid: uid as Internal.UID.Component,
+          uid,
           status: 'NEW',
           category: componentCategory,
           modelName: data.displayName,

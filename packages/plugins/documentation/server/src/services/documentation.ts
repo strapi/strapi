@@ -7,7 +7,7 @@ import { builApiEndpointPath, buildComponentSchema, getRelationTargetSchemaNames
 import { getPluginsThatNeedDocumentation } from './utils/get-plugins-that-need-documentation';
 import { getService } from '../utils';
 
-import type { Config, PluginConfig } from '../types';
+import type { Api, Config, PluginConfig } from '../types';
 
 export type Version = {
   version: string;
@@ -98,8 +98,8 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       await fs.remove(path.join(this.getFullDocumentationPath(), version));
     },
 
-    getPluginAndApiInfo() {
-      const pluginsToDocument = pluginsThatNeedDocumentation.map((plugin) => {
+    getPluginAndApiInfo(): Api[] {
+      const pluginsToDocument = pluginsThatNeedDocumentation.map((plugin): Api => {
         return {
           name: plugin,
           getter: 'plugin',
@@ -107,7 +107,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
         };
       });
 
-      const apisToDocument = Object.keys(strapi.apis).map((api) => {
+      const apisToDocument = Object.keys(strapi.apis).map((api): Api => {
         return {
           name: api,
           getter: 'api',

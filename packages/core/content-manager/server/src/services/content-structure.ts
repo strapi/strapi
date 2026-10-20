@@ -8,7 +8,7 @@ interface CoreContentStructureService {
 
 type ResolvedGroupNode = Modules.ContentStructure.ResolvedGroupNode;
 
-const isInternalUid = (uid: string): boolean => {
+const isInternalUid = (uid: UID.ContentType): boolean => {
   return uid.startsWith('admin::') || uid.startsWith('strapi::');
 };
 

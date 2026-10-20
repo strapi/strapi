@@ -25,7 +25,7 @@ import { DynamicComponent, DynamicComponentProps } from './DynamicComponent';
 import { DynamicZoneLabel, DynamicZoneLabelProps } from './DynamicZoneLabel';
 
 import type { InputRendererProps } from '../../InputRenderer';
-import type { Schema } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 interface DynamicZoneContextValue {
   isInDynamicZone: boolean;
@@ -145,7 +145,7 @@ const DynamicZone = ({
   const dynamicDisplayedComponentsLength = value.length;
 
   const handleAddComponent = React.useCallback(
-    (uid: string, position?: number) => {
+    (uid: UID.Component, position?: number) => {
       const schema = components[uid];
 
       if (!schema) {

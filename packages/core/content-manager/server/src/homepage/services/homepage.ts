@@ -100,7 +100,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
-  const getPermissionChecker = (uid: string) =>
+  const getPermissionChecker = (uid: RecentDocument['contentTypeUid']) =>
     permissionCheckerService.create({
       userAbility: strapi.requestContext.get()?.state.userAbility,
       model: uid,
