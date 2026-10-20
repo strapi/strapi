@@ -12,9 +12,6 @@ import { formatYupErrors } from './format-yup-error';
  */
 const CLASS_IDS = Symbol.for('strapi.errors.classIds');
 
-// Fixed ids, not `constructor.name`, which a bundler may rename.
-const classIds = new WeakMap<object, string>();
-
 const getClassIds = (ErrorClass: unknown) => {
   const ids: string[] = [];
 
@@ -198,7 +195,8 @@ class NotImplementedError<
   }
 }
 
-const ERROR_CLASS_IDS: Array<[object, string]> = [
+// Fixed ids, not `constructor.name`, which a bundler may rename.
+const classIds = new Map<unknown, string>([
   [ApplicationError, 'ApplicationError'],
   [ValidationError, 'ValidationError'],
   [YupValidationError, 'YupValidationError'],
@@ -210,9 +208,7 @@ const ERROR_CLASS_IDS: Array<[object, string]> = [
   [PayloadTooLargeError, 'PayloadTooLargeError'],
   [PolicyError, 'PolicyError'],
   [NotImplementedError, 'NotImplementedError'],
-];
-
-ERROR_CLASS_IDS.forEach(([ErrorClass, id]) => classIds.set(ErrorClass, id));
+]);
 
 export {
   HttpError,
