@@ -8781,6 +8781,8 @@ All five routes set `config: { auth: false }` — Strapi's own admin/content-API
 
 The transport is the MCP SDK's `NodeStreamableHTTPServerTransport` with `sessionIdGenerator: undefined`, i.e. **stateless**: a fresh `McpServer` instance is created and connected for every POST request, then closed in a `finally` block (`packages/core/core/src/services/mcp/handlers/handlePost.ts`).
 
+Every tool is registered on each per-request server, but only some tools resolve their Zod schemas, because `resolveInputSchema`/`resolveOutputSchema` is the main per-request cost. `resolveToolSchemaScope` (`internal/resolveToolSchemaScope.ts`) reads the JSON-RPC body before the server is built: `tools/list` needs every tool, `tools/call` needs only the called tool, and other messages (`initialize`, notifications) need none. A tool resolves its schemas only when it is in that scope **and** the token may use it (`canUseMcpCapability`). The other tools are registered without schemas and with a handler that only returns an error, so a call to a tool the token cannot use still gets the SDK's `Tool <name> disabled` error.
+
 An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) intercepts `/.well-known/oauth-*` and `/register` with a plain JSON 404, since some MCP clients probe these paths and would otherwise hit Strapi's default HTML 404 page.
 
 ### Authentication
