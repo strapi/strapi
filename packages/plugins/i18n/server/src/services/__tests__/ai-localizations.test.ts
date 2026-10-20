@@ -521,7 +521,7 @@ describe('ai-localizations service', () => {
   });
 
   describe('generateDocumentLocalizations - issue #26579 (maxLength constraints)', () => {
-    const MODEL = 'api::article.article' as UID.ContentType;
+    const MODEL: UID.ContentType = 'api::article.article';
 
     const buildSchema = (): Schema.Schema =>
       ({

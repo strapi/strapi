@@ -70,9 +70,9 @@ describe('fieldUtils', () => {
       description: mockTextAttribute,
     };
 
-    const textComponentUid = 'basic.text-component' as UID.Component;
-    const nestedComponentUid = 'basic.nested-component' as UID.Component;
-    const articleUid = 'api::article.article' as UID.ContentType;
+    const textComponentUid: UID.Component = 'basic.text-component';
+    const nestedComponentUid: UID.Component = 'basic.nested-component';
+    const articleUid: UID.ContentType = 'api::article.article';
 
     // Simplified mock objects that satisfy the function's needs without complex typing
     const mockComponents = {

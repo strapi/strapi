@@ -1,16 +1,15 @@
 import type { FlatMenuSection, FolderMenuSection } from '../hooks/useContentTypeBuilderMenu';
 import type { ContentTypeLink } from '../lib/buildFolderTree';
-import type { UID } from '@strapi/types';
 
 const collectionTypeLinks: ContentTypeLink[] = [
   {
-    uid: 'api::address.address' as UID.ContentType,
+    uid: 'api::address.address',
     to: '/plugins/content-type-builder/content-types/api::address.address',
     title: 'address',
     status: 'UNCHANGED',
   },
   {
-    uid: 'api::category.category' as UID.ContentType,
+    uid: 'api::category.category',
     to: '/plugins/content-type-builder/content-types/api::category.category',
     title: 'category',
     status: 'UNCHANGED',
@@ -19,7 +18,7 @@ const collectionTypeLinks: ContentTypeLink[] = [
 
 const singleTypeLinks: ContentTypeLink[] = [
   {
-    uid: 'api::homepage.homepage' as UID.ContentType,
+    uid: 'api::homepage.homepage',
     to: '/plugins/content-type-builder/content-types/api::homepage.homepage',
     title: 'Homepage',
     status: 'UNCHANGED',
