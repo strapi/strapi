@@ -79,7 +79,9 @@ export type PreviewController = ReturnType<typeof createPreviewController>;
 
 /** Registered core controllers, keyed as they appear in the plugin's runtime map. */
 export type RegisteredControllers = {
-  [TUID in keyof Strapi.Registries.PackageControllers as TUID extends `plugin::content-manager.${infer TName}`
-    ? TName
-    : never]: Strapi.Registries.PackageControllers[TUID];
+  [
+    TUID in keyof Strapi.Registries.PackageControllers as TUID extends `plugin::content-manager.${infer TName}`
+      ? TName
+      : never
+  ]: Strapi.Registries.PackageControllers[TUID];
 };

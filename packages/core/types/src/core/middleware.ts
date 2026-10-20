@@ -25,8 +25,7 @@ export type Middleware = MiddlewareHandler | MiddlewareFactory;
 
 /** Middleware UIDs that have a registered config contract. */
 export type RegisteredMiddlewareName =
-  | keyof Strapi.Registries.AppMiddlewares
-  | keyof Strapi.Registries.PackageMiddlewares;
+  keyof Strapi.Registries.AppMiddlewares | keyof Strapi.Registries.PackageMiddlewares;
 
 /** Resolves application overrides before package defaults. */
 export type MiddlewareConfigFor<TName extends RegisteredMiddlewareName> =
@@ -115,14 +114,12 @@ type ResolvedMiddlewareReference = { resolve: string; config?: unknown };
  * has `Function.name: string`, so the object literal narrows to it. Bare names are listed.
  */
 export type MiddlewareReference = IsStrict extends false
-  ?
-      | SuggestedMiddlewareName
-      | MiddlewareHandler
-      | { name: SuggestedMiddlewareName; config?: unknown }
-      | ResolvedMiddlewareReference
-  :
-      | MiddlewareHandler
-      | ResolvedMiddlewareReference
-      | {
-          [TName in RegisteredMiddlewareName]: RegisteredMiddlewareReference<TName>;
-        }[RegisteredMiddlewareName];
+  ? | SuggestedMiddlewareName
+    | MiddlewareHandler
+    | { name: SuggestedMiddlewareName; config?: unknown }
+    | ResolvedMiddlewareReference
+  : | MiddlewareHandler
+    | ResolvedMiddlewareReference
+    | {
+        [TName in RegisteredMiddlewareName]: RegisteredMiddlewareReference<TName>;
+      }[RegisteredMiddlewareName];

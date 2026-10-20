@@ -44,8 +44,7 @@ export type Policy<TConfig = unknown> =
 
 /** Policy UIDs that have a registered config contract. */
 export type RegisteredPolicyName =
-  | keyof Strapi.Registries.AppPolicies
-  | keyof Strapi.Registries.PackagePolicies;
+  keyof Strapi.Registries.AppPolicies | keyof Strapi.Registries.PackagePolicies;
 
 /** Resolves application overrides before package defaults. */
 export type PolicyConfigFor<TName extends RegisteredPolicyName> =
@@ -108,9 +107,8 @@ type RegisteredPolicyReference<
   TNamespace extends string,
   TConfig = PolicyReferenceConfig<PolicyConfigFor<TName>>,
 > = [undefined] extends [TConfig]
-  ?
-      | PolicyReferenceName<TName, TNamespace>
-      | { name: PolicyReferenceName<TName, TNamespace>; config?: TConfig }
+  ? | PolicyReferenceName<TName, TNamespace>
+    | { name: PolicyReferenceName<TName, TNamespace>; config?: TConfig }
   : { name: PolicyReferenceName<TName, TNamespace>; config: TConfig };
 
 /** Any policy name. Registered names, and their relative forms in `TNamespace`, are listed for completion. */
