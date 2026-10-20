@@ -10429,7 +10429,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.59.0"
-    nodemailer: "npm:9.0.1"
+    nodemailer: "npm:10.0.9"
     tsconfig: "npm:5.59.0"
     vitest: "catalog:"
     vitest-config: "npm:5.59.0"
@@ -10454,9 +10454,9 @@ __metadata:
   dependencies:
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
-    eslint-config-custom: "npm:5.59.0"
+    eslint-config-custom: "npm:5.58.0"
     nodemailer: "npm:9.0.1"
-    tsconfig: "npm:5.59.0"
+    tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.59.0"
   languageName: unknown
@@ -12297,15 +12297,6 @@ __metadata:
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10c0/aa2a07317bbd700bea68d5784b403a738dbcebadbe2d8ef05649f7953065120d5d37f7edfdd7881df3a3bd15328c8a4dc46fdd69732ab540d552c505378c585b
-  languageName: node
-  linkType: hard
-
-"@types/nodemailer@npm:7.0.11":
-  version: 7.0.11
-  resolution: "@types/nodemailer@npm:7.0.11"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10c0/dc6472c26600e763c38721b0691fc3014eb868d20b97eb48cfbc4fe9a7a09f66c0ccd8d647033a4be91051cc3c7bdca73c006db2f7a9e8bdd1ce65bb5ec2599c
   languageName: node
   linkType: hard
 
@@ -24502,10 +24493,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:9.0.1":
-  version: 9.0.1
-  resolution: "nodemailer@npm:9.0.1"
-  checksum: 10c0/4213f01aa211127c1ce33243c5e45e7f831601a933d03fa864cd827b1bd5ea2782cb4b43722bee7028cbc193733d9802dad1120fe67181448eb0b7de52218a37
+"nodemailer@npm:10.0.9":
+  version: 10.0.9
+  resolution: "nodemailer@npm:10.0.9"
+  checksum: 10c0/4ab2a9e1441df0864923aefccdbbe365996534a75028f926afefc43941fdec6af4b026568103746e7c7ba6f1afa578cca391e485db05e8aed0c308eadfcacf95
   languageName: node
   linkType: hard
 
