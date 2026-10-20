@@ -1,138 +1,80 @@
-import type { Modules, UID } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
-import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
-import { getService, getDraftEntryValidity, UNPUBLISH_VALIDITY } from '../utils';
+import { getService, runAfterCommit } from '../utils';
 
 type Middleware = Modules.Documents.Middleware.Middleware;
 
-interface ReleaseActionsParams {
-  contentType: UID.ContentType;
-  entryDocumentId?: Modules.Documents.ID;
-  locale?: string;
-}
+const createDeleteActionsOnDelete =
+  ({ strapi }: { strapi: Core.Strapi }): Middleware =>
+  async (ctx, next) => {
+    if (ctx.action !== 'delete') {
+      return next();
+    }
 
-const updateActionsStatusAndUpdateReleaseStatus = async (
-  contentType: UID.ContentType,
-  entry: Modules.Documents.AnyDocument
-) => {
-  const plannedActionsWhere = {
-    contentType,
-    entryDocumentId: entry.documentId,
-    locale: entry.locale,
-    outcome: null,
-    release: { releasedAt: { $null: true } },
-  };
+    if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
+      return next();
+    }
 
-  const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-    where: {
-      releasedAt: null,
-      actions: { contentType, entryDocumentId: entry.documentId, locale: entry.locale },
-    },
-  });
+    const contentType = ctx.contentType.uid;
+    const { documentId, locale } = ctx.params;
 
-  if (releases.length === 0) {
-    return;
-  }
+    const result = await next();
 
-  const publishActionsWhere = { ...plannedActionsWhere, type: 'publish' };
+    if (!result) {
+      return result;
+    }
 
-  if ((await strapi.db.query(RELEASE_ACTION_MODEL_UID).count({ where: publishActionsWhere })) > 0) {
-    const validity = await getDraftEntryValidity(
-      { contentType, documentId: entry.documentId, locale: entry.locale },
-      { strapi }
+    runAfterCommit(
+      { strapi },
+      () =>
+        getService('release-action', { strapi }).deleteEntryActions({
+          contentType,
+          entryDocumentId: documentId,
+          ...(locale !== '*' && { locale }),
+        }),
+      'Error while deleting release actions after delete'
     );
 
-    await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-      where: publishActionsWhere,
-      data: validity,
-    });
-  }
-
-  await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-    where: { ...plannedActionsWhere, type: 'unpublish', isEntryValid: false },
-    data: UNPUBLISH_VALIDITY,
-  });
-
-  for (const release of releases) {
-    await getService('release', { strapi }).updateReleaseStatus(release.id);
-  }
-};
-
-// Only planned releases: a release that ran keeps the entry's action and what its run recorded
-const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams) => {
-  const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-    where: {
-      releasedAt: null,
-      actions: params,
-    },
-  });
-
-  await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-    where: { ...params, release: { releasedAt: { $null: true } } },
-  });
-
-  for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
-  }
-};
-
-const deleteActionsOnDelete: Middleware = async (ctx, next) => {
-  if (ctx.action !== 'delete') {
-    return next();
-  }
-
-  if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
-    return next();
-  }
-
-  const contentType = ctx.contentType.uid;
-  const { documentId, locale } = ctx.params;
-
-  const result = await next();
-
-  if (!result) {
     return result;
-  }
+  };
 
-  try {
-    deleteActionsAndUpdateReleaseStatus({
-      contentType,
-      entryDocumentId: documentId,
-      ...(locale !== '*' && { locale }),
-    });
-  } catch (error) {
-    strapi.log.error('Error while deleting release actions after delete', {
-      error,
-    });
-  }
+// An update or a discarded draft changes the draft a planned release would publish
+const createRevalidateActionsOnDraftChange =
+  ({ strapi }: { strapi: Core.Strapi }): Middleware =>
+  async (ctx, next) => {
+    if (ctx.action !== 'update' && ctx.action !== 'discardDraft') {
+      return next();
+    }
 
-  return result;
-};
+    if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
+      return next();
+    }
 
-const updateActionsOnUpdate: Middleware = async (ctx, next) => {
-  if (ctx.action !== 'update') {
-    return next();
-  }
+    const contentType = ctx.contentType.uid;
+    const { action } = ctx;
 
-  if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
-    return next();
-  }
+    const result = await next();
 
-  const contentType = ctx.contentType.uid;
+    // Neither action returns a count or a list; nothing to revalidate without a result
+    if (!result || typeof result !== 'object' || Array.isArray(result)) {
+      return result;
+    }
 
-  const result = (await next()) as Modules.Documents.AnyDocument;
+    // `update` returns the updated draft (which may have its own `entries` field); `discardDraft`
+    // `{ entries }`, the new draft of each locale it discarded
+    const drafts = action === 'discardDraft' && 'entries' in result ? result.entries : [result];
 
-  if (!result) {
+    runAfterCommit(
+      { strapi },
+      async () => {
+        for (const draft of drafts) {
+          await getService('release-action', { strapi }).revalidateEntryActions(contentType, draft);
+        }
+      },
+      `Error while updating release actions after ${action}`
+    );
+
     return result;
-  }
+  };
 
-  updateActionsStatusAndUpdateReleaseStatus(contentType, result).catch((error: unknown) => {
-    strapi.log.error('Error while updating release actions after update', {
-      error,
-    });
-  });
-
-  return result;
-};
-
-export { deleteActionsOnDelete, updateActionsOnUpdate };
+export { createDeleteActionsOnDelete, createRevalidateActionsOnDraftChange };

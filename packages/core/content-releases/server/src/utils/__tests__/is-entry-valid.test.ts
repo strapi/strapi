@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { getDraftEntryValidity, getEntryPublishability } from '../index';
+import { getActionValidity, getEntryPublishability } from '../index';
 
 /**
  * `getEntryPublishability` powers the "valid" badge shown in the release UI. It must read
@@ -75,7 +75,7 @@ describe('content-releases utils - getEntryPublishability: strict relations', ()
   });
 });
 
-describe('content-releases utils - getDraftEntryValidity', () => {
+describe('content-releases utils - getActionValidity', () => {
   test('stores a failing draft read as not valid, with only the error name', async () => {
     const strapi = {
       plugin: () => ({
@@ -86,8 +86,13 @@ describe('content-releases utils - getDraftEntryValidity', () => {
       }),
     } as unknown as Core.Strapi; // only what the draft read touches
 
-    const validity = await getDraftEntryValidity(
-      { contentType: 'api::article.article', documentId: 'article-1', locale: 'en' },
+    const validity = await getActionValidity(
+      {
+        type: 'publish',
+        contentType: 'api::article.article',
+        entryDocumentId: 'article-1',
+        locale: 'en',
+      },
       { strapi }
     );
 

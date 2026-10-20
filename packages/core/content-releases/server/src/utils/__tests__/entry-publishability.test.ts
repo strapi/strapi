@@ -1,7 +1,11 @@
 import { errors, yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-import { getEntryPublishability, getPublishabilityForActions } from '../index';
+import {
+  getEntryPublishability,
+  getPublishabilityForActions,
+  getValidityForActions,
+} from '../index';
 
 const contentTypeUid = 'api::article.article';
 const reviewStage = { id: 1, name: 'Review' };
@@ -233,5 +237,70 @@ describe('getPublishabilityForActions', () => {
         [3, null],
       ]
     );
+  });
+});
+
+describe('getValidityForActions', () => {
+  test("stores a draft that can't be read as not publishable, without stopping the others", async () => {
+    const populateBuilder = jest.fn(() => ({
+      populateDeep: () => ({ build: jest.fn().mockResolvedValue({}) }),
+    }));
+    const findOne = jest.fn(({ documentId }) =>
+      documentId === 'unreadable'
+        ? Promise.reject(new TypeError('connection lost'))
+        : Promise.resolve({
+            documentId,
+            strapi_stage: documentId === 'approved' ? doneStage : reviewStage,
+          })
+    );
+    const strapi = buildStrapi({ populateBuilder, workflowsService: requiringDone(), findOne });
+
+    const result = await getValidityForActions(
+      [
+        { id: 1, contentType: contentTypeUid, entryDocumentId: 'unreadable' },
+        { id: 2, contentType: contentTypeUid, entryDocumentId: 'approved' },
+        { id: 3, contentType: contentTypeUid, entryDocumentId: 'in-review' },
+      ],
+      { strapi }
+    );
+
+    expect(result.map(({ action, validity }) => [action.id, validity])).toEqual([
+      [1, { isEntryValid: false, reason: { error: { name: 'TypeError' } } }],
+      [2, { isEntryValid: true, reason: null }],
+      [
+        3,
+        {
+          isEntryValid: false,
+          reason: { stage: { entryStage: reviewStage, requiredStage: doneStage } },
+        },
+      ],
+    ]);
+  });
+
+  test('reads the draft of an entry in several planned releases once', async () => {
+    const populateBuilder = jest.fn(() => ({
+      populateDeep: () => ({ build: jest.fn().mockResolvedValue({}) }),
+    }));
+    const findOne = jest.fn(({ documentId }) =>
+      Promise.resolve({ documentId, strapi_stage: doneStage })
+    );
+    const strapi = buildStrapi({ populateBuilder, workflowsService: requiringDone(), findOne });
+
+    const result = await getValidityForActions(
+      [
+        // One entry's actions in two releases, then another locale of it
+        { id: 1, contentType: contentTypeUid, entryDocumentId: 'a', locale: 'en' },
+        { id: 2, contentType: contentTypeUid, entryDocumentId: 'a', locale: 'en' },
+        { id: 3, contentType: contentTypeUid, entryDocumentId: 'a', locale: 'fr' },
+      ],
+      { strapi }
+    );
+
+    expect(findOne).toHaveBeenCalledTimes(2);
+    expect(result.map(({ action, validity }) => [action.id, validity.isEntryValid])).toEqual([
+      [1, true],
+      [2, true],
+      [3, true],
+    ]);
   });
 });
