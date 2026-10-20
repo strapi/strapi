@@ -466,3 +466,10 @@ declare const serviceFactoryChecks: ServiceFactoryChecks;
 serviceFactoryChecks satisfies unknown;
 (() => ({ count: () => 'any' })) satisfies Core.ServiceFactory<'plugin::legacy.example'>;
 (() => ({ anything: true })) satisfies Core.ServiceFactory<'api::unregistered.example'>;
+
+// Without strict types, auth `verify` resolves to `any`, as on develop.
+type AuthVerifyChecks = [
+  Expect<Equal<Awaited<ReturnType<Modules.Auth.AuthenticationService['verify']>>, any>>,
+];
+declare const authVerifyChecks: AuthVerifyChecks;
+authVerifyChecks satisfies unknown;
