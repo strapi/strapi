@@ -52,10 +52,11 @@ export const lockRelease = <TColumn extends keyof Release>(
     .forUpdate()
     .execute();
 
-// Starts the releases' work after a change to entries, without waiting for it, and outside the
-// caller's transaction: once that commits, or right away without one. So it reads the committed
-// entries, nothing it does can undo the caller's writes, and it never runs for a change that was
-// rolled back. Each release it changes gets its own transaction (`changePlannedActionsByRelease`).
+// Starts the releases' work after a change to entries or to a review workflow, without waiting
+// for it, and outside the caller's transaction: once that commits, or right away without one. So
+// it reads the committed data, nothing it does can undo the caller's writes, and it never runs
+// for a change that was rolled back. Each release it changes gets its own transaction
+// (`changePlannedActionsByRelease`).
 // A failure is logged, never an unhandled rejection.
 export const runAfterCommit = (
   { strapi }: { strapi: Core.Strapi },

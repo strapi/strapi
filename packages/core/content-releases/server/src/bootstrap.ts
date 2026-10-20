@@ -22,23 +22,24 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
        * deleteMany is still used outside documents service, for example when deleting a locale
        */
       afterDeleteMany(event) {
+        const model = strapi.getModel(event.model.uid as UID.Schema);
+        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+        if (model.kind !== 'collectionType' || !model.options?.draftAndPublish) {
+          return;
+        }
+
+        const { where } = event.params;
+
         // Not awaited: the delete entry flow doesn't wait for its releases, and isn't blocked by
         // their failure, which is logged
         runAfterCommit(
           { strapi },
-          async () => {
-            const model = strapi.getModel(event.model.uid as UID.Schema);
-            // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-            if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-              const { where } = event.params;
-
-              await getService('release-action', { strapi }).deleteEntryActions({
-                contentType: model.uid,
-                locale: where?.locale ?? null,
-                ...(where?.documentId && { entryDocumentId: where.documentId }),
-              });
-            }
-          },
+          () =>
+            getService('release-action', { strapi }).deleteEntryActions({
+              contentType: model.uid,
+              locale: where?.locale ?? null,
+              ...(where?.documentId && { entryDocumentId: where.documentId }),
+            }),
           'Error while deleting release actions after entry deleteMany'
         );
       },

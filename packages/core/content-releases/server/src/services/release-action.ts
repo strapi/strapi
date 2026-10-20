@@ -31,6 +31,7 @@ import {
   getEntryStatus,
   getValidityForActions,
   lockRelease,
+  runAfterCommit,
   UNPUBLISH_VALIDITY,
 } from '../utils';
 import type { EntryValidity } from '../utils';
@@ -137,10 +138,11 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
   // A background change to planned actions of several releases (after an entry or a workflow
-  // changed): one release at a time, each under its lock with its status. A release that ran or
-  // was deleted in between is left alone. A release whose change fails is rolled back and logged
-  // without stopping the others; the savepoint keeps a caller's transaction (a review workflow
-  // change) usable after such a failure. Returns the releases whose change failed.
+  // changed): one release at a time, each in its own transaction under its lock with its status.
+  // Never runs inside a caller's transaction (callers start it after their commit, or at
+  // startup), so it holds one release lock at a time and its status counts read after the lock.
+  // A release that ran or was deleted in between is left alone. A release whose change fails is
+  // rolled back and logged without stopping the others. Returns the releases whose change failed.
   const changePlannedActionsByRelease = async <TAction extends { release: { id: Data.ID } }>(
     actions: TAction[],
     change: (releaseActions: TAction[]) => Promise<void>
@@ -158,18 +160,16 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     const failedReleaseIds: Data.ID[] = [];
     for (const [releaseId, releaseActions] of actionsByRelease) {
       try {
-        await strapi.db.transaction(() =>
-          strapi.db.savepoint(async () => {
-            const release = await lockRelease({ strapi }, releaseId, ['releasedAt']);
+        await strapi.db.transaction(async () => {
+          const release = await lockRelease({ strapi }, releaseId, ['releasedAt']);
 
-            if (!release || release.releasedAt) {
-              return;
-            }
+          if (!release || release.releasedAt) {
+            return;
+          }
 
-            await change(releaseActions);
-            await getService('release', { strapi }).updateReleaseStatus(releaseId);
-          })
-        );
+          await change(releaseActions);
+          await getService('release', { strapi }).updateReleaseStatus(releaseId);
+        });
       } catch (error: unknown) {
         failedReleaseIds.push(releaseId);
         strapi.log.error(`Error while changing the actions of release ${releaseId}`, { error });
@@ -610,9 +610,15 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
-    // After a review workflow change: what "at the required stage" means may have changed
-    async validateActionsByContentTypes(contentTypeUids: UID.ContentType[]) {
-      await revalidatePlannedActions({ contentType: { $in: contentTypeUids } });
+    // After a review workflow change: what "at the required stage" means may have changed. Not
+    // awaited, and outside the workflow's transaction: it starts once that commits, so the
+    // workflow's stage writes never wait on a release lock (a run holds it while it publishes)
+    validateActionsByContentTypes(contentTypeUids: UID.ContentType[]) {
+      runAfterCommit(
+        { strapi },
+        () => revalidatePlannedActions({ contentType: { $in: contentTypeUids } }),
+        'Error while revalidating release actions after a review workflow change'
+      );
     },
   };
 };

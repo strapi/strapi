@@ -1,6 +1,9 @@
 'use strict';
 
+import { readFileSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
+
+import { parse } from 'dotenv';
 
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
@@ -14,6 +17,11 @@ import type {
 import { migrateReleaseConditionReleases } from '../../../../packages/core/content-releases/server/src/migrations';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
+// The test app's database, as the server reads it at startup
+const databaseClient =
+  process.env.DATABASE_CLIENT ??
+  parse(readFileSync(process.env.ENV_PATH as string)).DATABASE_CLIENT;
 
 const productUID = 'api::product.product';
 const productModel = {
@@ -141,6 +149,8 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   // Publishing one of these documents runs a query that fails in the database, inside the run's
   // transaction: Postgres aborts the transaction, SQLite and MySQL only fail the statement
   const documentIdsFailingInDatabase = new Set<string>();
+  // Publishing one of these documents waits for its pause first, through the same middleware
+  const publishPauses = new Map<string, () => Promise<void>>();
   // The next release-action query of this kind fails in the database
   const failNextActionQuery: { kind: 'findMany' | 'updateMany' | 'count' | null } = { kind: null };
   let unsubscribeFailingActionQueries: () => void;
@@ -324,6 +334,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     rqContent = createContentAPIRequest({ strapi });
 
     strapi.documents.use(async (ctx, next) => {
+      if (ctx.action === 'publish') {
+        await publishPauses.get(ctx.params?.documentId)?.();
+      }
+
       if (ctx.action === 'publish' && documentIdsFailingToPublish.has(ctx.params?.documentId)) {
         throw new Error('Test-only publish failure');
       }
@@ -2990,11 +3004,14 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         });
         expect(updateRes.statusCode).toBe(200);
 
+        // Revalidated once the workflow change commits, after the response
+        expect(await waitFor(async () => (await getRelease(release.id)).status === 'ready')).toBe(
+          true
+        );
         expect(await getAction(release.id, data.documentId)).toMatchObject({
           isEntryValid: true,
           reason: null,
         });
-        expect((await getRelease(release.id)).status).toBe('ready');
 
         await rq({
           method: 'PUT',
@@ -3056,11 +3073,14 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
       expect(res.statusCode).toBe(200);
 
+      // Revalidated once the workflow change commits, after the response
+      expect(await waitFor(async () => (await getRelease(release.id)).status === 'ready')).toBe(
+        true
+      );
       expect(await getPublishAction(release.id, documentId)).toMatchObject({
         isEntryValid: true,
         reason: null,
       });
-      expect((await getRelease(release.id)).status).toBe('ready');
     });
 
     test('a new workflow without a required stage that takes the content type over unblocks its entries', async () => {
@@ -3073,11 +3093,149 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       await createWorkflow({ contentTypes: [reviewItemUID], stages: [{ name: 'Draft' }] });
 
+      expect(await waitFor(async () => (await getRelease(release.id)).status === 'ready')).toBe(
+        true
+      );
       expect(await getPublishAction(release.id, documentId)).toMatchObject({
         isEntryValid: true,
         reason: null,
       });
-      expect((await getRelease(release.id)).status).toBe('ready');
+    });
+
+    // Each test holds one transaction open while another runs: SQLite's single connection would
+    // run them one after the other, so the interleaving can't happen there
+    describeOnCondition(databaseClient !== 'sqlite')('while other transactions run', () => {
+      const WORKFLOW_MODEL_UID = 'plugin::review-workflows.workflow';
+
+      // Fails the test after a while, instead of hanging it on a lock wait
+      const createSignal = () => {
+        let send!: () => void;
+        const sent = new Promise<void>((resolve) => {
+          send = resolve;
+        });
+        const wait = (label: string) =>
+          Promise.race([
+            sent,
+            sleep(15_000).then(() => {
+              throw new Error(`Timed out waiting for ${label}`);
+            }),
+          ]);
+
+        return { send, wait };
+      };
+
+      test("a workflow change during a scheduled run doesn't stop the run", async () => {
+        await createWorkflow({ contentTypes: [reviewItemUID], stages: [{ name: 'Review' }] });
+        // Published, then edited: the run replaces the published version
+        const { data } = await createEntry(reviewItemUID, { name: 'Version 1' });
+        const { documentId } = data;
+        await strapi.documents(reviewItemUID).publish({ documentId });
+        await strapi.documents(reviewItemUID).update({ documentId, data: { name: 'Version 2' } });
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId, contentType: reviewItemUID },
+        ]);
+
+        const runPublishing = createSignal();
+        const stagesMoved = createSignal();
+        // The run holds the release lock here, and hasn't written the entry yet
+        publishPauses.set(documentId, async () => {
+          publishPauses.delete(documentId);
+          runPublishing.send();
+          await stagesMoved.wait('the workflow change');
+        });
+        // The workflow's transaction has moved the entries' stages here, and goes on
+        let armed = true;
+        const unsubscribe = strapi.db.lifecycles.subscribe({
+          models: [WORKFLOW_MODEL_UID],
+          afterCreate() {
+            if (armed) {
+              armed = false;
+              stagesMoved.send();
+            }
+          },
+        });
+
+        try {
+          const run = runScheduled(release.id);
+          await runPublishing.wait('the run');
+
+          // Takes the content type over: every entry moves to the new workflow's first stage
+          const [released] = await Promise.all([
+            run,
+            createWorkflow({ contentTypes: [reviewItemUID], stages: [{ name: 'Draft' }] }),
+          ]);
+          expect(released.status).toBe('done');
+        } finally {
+          unsubscribe();
+          publishPauses.delete(documentId);
+        }
+
+        const published = await strapi
+          .documents(reviewItemUID)
+          .findOne({ documentId, status: 'published' });
+        expect(published.name).toBe('Version 2');
+      });
+
+      test('an entry added during a workflow change keeps the release blocked', async () => {
+        const workflow = await createWorkflow({
+          contentTypes: [reviewItemUID],
+          stages: [{ name: 'Review' }, { name: 'Done' }],
+          stageRequiredToPublishName: 'Done',
+        });
+        // Not at the required stage, but valid
+        const { release, documentId } = await createBlockedRelease();
+        // Too short a code to publish, whatever the stage
+        const { data: invalid } = await createEntry(reviewItemUID, { name: 'Invalid', code: 'ab' });
+
+        const workflowWritten = createSignal();
+        const entryAdded = createSignal();
+        // Inside the workflow's transaction, after its first reads
+        let armed = true;
+        const unsubscribe = strapi.db.lifecycles.subscribe({
+          models: [WORKFLOW_MODEL_UID],
+          async afterUpdate() {
+            if (armed) {
+              armed = false;
+              workflowWritten.send();
+              await entryAdded.wait('the entry to be added');
+            }
+          },
+        });
+
+        try {
+          // The entry is now at the required stage: its action becomes publishable
+          // (Promise.resolve sends the request: it's only sent once awaited)
+          const workflowChange = Promise.resolve(
+            rq({
+              method: 'PUT',
+              url: `/review-workflows/workflows/${workflow.id}?populate=*`,
+              body: { data: { stageRequiredToPublishName: 'Review' } },
+            })
+          );
+          await workflowWritten.wait('the workflow change');
+
+          const res = await createReleaseAction(release.id, {
+            contentType: reviewItemUID,
+            entryDocumentId: invalid.documentId,
+            type: 'publish',
+          });
+          expect(res.statusCode).toBe(201);
+          entryAdded.send();
+
+          expect((await workflowChange).statusCode).toBe(200);
+        } finally {
+          unsubscribe();
+        }
+
+        // Revalidated once the workflow change commits, after the response
+        expect(
+          await waitFor(
+            async () => (await getPublishAction(release.id, documentId)).isEntryValid === true
+          )
+        ).toBe(true);
+        // The added entry still can't be published
+        expect((await getRelease(release.id)).status).toBe('blocked');
+      });
     });
   });
 });
