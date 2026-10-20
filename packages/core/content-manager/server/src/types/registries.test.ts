@@ -64,8 +64,7 @@ strapi.controller('plugin::content-manager.homepage')
   .getRecentDocuments satisfies Core.ControllerHandler;
 strapi.controller('plugin::content-manager.preview').getPreviewUrl satisfies Core.ControllerHandler;
 strapi.controller('plugin::content-manager.history-version')?.findMany satisfies
-  | Core.ControllerHandler
-  | undefined;
+  Core.ControllerHandler | undefined;
 // @ts-expect-error Registered feature controllers have no arbitrary actions.
 strapi.controller('plugin::content-manager.preview').missing();
 // History services only exist with the `cms-content-history` feature.

@@ -43,9 +43,7 @@ export type RouteInputFor<TControllers, TNamespace extends string = never> = Omi
   'handler' | 'config'
 > & {
   handler:
-    | ControllerActionReference<TControllers, TNamespace>
-    | MiddlewareHandler
-    | MiddlewareHandler[];
+    ControllerActionReference<TControllers, TNamespace> | MiddlewareHandler | MiddlewareHandler[];
   config?: RouteConfigFor<TNamespace>;
 };
 

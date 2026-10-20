@@ -17,9 +17,7 @@ documents.findLocales('document', 'api::article.article', { populate: { author: 
 
 const metadata = app.plugin('content-manager').service('document-metadata');
 metadata.getStatus({ documentId: 'document', publishedAt: null }) satisfies
-  | 'draft'
-  | 'published'
-  | 'modified';
+  'draft' | 'published' | 'modified';
 // @ts-expect-error Version metadata requires a document, not null.
 metadata.getMetadata('api::article.article', null);
 
