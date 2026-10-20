@@ -184,6 +184,32 @@ function validateAllowBanLists(
   };
 }
 
+/**
+ * The kind of file a MIME type stands for, coarse enough that formats which share a
+ * container or are read as plain markup don't count as a mismatch: audio and video
+ * are one kind (`.weba` content is detected as `video/webm`), and SVG is markup like
+ * the `application/xml` detection returns for it.
+ */
+function getFileKind(mime: string): 'image' | 'audio-video' | 'markup' | 'document' {
+  const type = mime.split(';')[0].trim().toLowerCase();
+
+  if (type === 'image/svg+xml' || type === 'application/xml' || type === 'text/xml') {
+    return 'markup';
+  }
+
+  const [topLevel] = type.split('/');
+
+  if (topLevel === 'image') {
+    return 'image';
+  }
+
+  if (topLevel === 'audio' || topLevel === 'video') {
+    return 'audio-video';
+  }
+
+  return 'document';
+}
+
 function isDeclaredGeneric(declaredMimeType: string): boolean {
   return !declaredMimeType || declaredMimeType === 'application/octet-stream';
 }
@@ -302,6 +328,33 @@ export async function validateFile(
           fileName,
           reason:
             'File content was detected as a type not in the allow list; extension or declared type cannot override',
+          declaredType: declaredMimeType,
+          detectedType: detectedMime,
+          expectedMimeFromExtension: expectedMimeFromExt,
+          allowedTypes,
+          deniedTypes,
+        },
+      },
+    };
+  }
+
+  // Reject when the content is a different kind of file than its name or declared type
+  // says, e.g. a PDF renamed to `.png`. Stored as `image/png`, it would show as a broken
+  // image and could be picked for, or replace a file in, an images-only media field.
+  // `application/octet-stream` (from `.bin`, or a client that sends no type) claims
+  // nothing, so it never conflicts with what the content is.
+  const claimedMime = [expectedMimeFromExt, declaredMimeType].find(
+    (mime): mime is string => Boolean(mime) && !isDeclaredGeneric(mime as string)
+  );
+  if (detectedMime && claimedMime && getFileKind(detectedMime) !== getFileKind(claimedMime)) {
+    return {
+      isValid: false,
+      error: {
+        code: 'MIME_TYPE_NOT_ALLOWED',
+        message: `The content of ${fileName} is ${detectedMime}, which does not match ${claimedMime}`,
+        details: {
+          fileName,
+          reason: 'File content is a different kind of file than its extension or declared type',
           declaredType: declaredMimeType,
           detectedType: detectedMime,
           expectedMimeFromExtension: expectedMimeFromExt,
