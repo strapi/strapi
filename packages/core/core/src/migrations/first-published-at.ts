@@ -1,5 +1,6 @@
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import _ from 'lodash';
+import type { UID } from '@strapi/types';
 import { Input } from './draft-publish';
 
 interface ContentTypeData {
@@ -16,7 +17,10 @@ const enableFirstPublishedAt = async ({ oldContentTypes, contentTypes }: Input) 
   }
 
   return strapi.db.transaction(async (trx) => {
-    for (const uid in contentTypes) {
+    // eslint-disable-next-line guard-for-in
+    for (const key in contentTypes) {
+      const uid = key as UID.ContentType;
+
       if (!oldContentTypes[uid]) {
         continue;
       }

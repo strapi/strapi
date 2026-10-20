@@ -41,6 +41,11 @@ export type {
   PoolTimeoutDetails,
 } from './pool-diagnostics';
 
+/**
+ * @internal Types consumed by `@strapi/types`, use the `DB` types from `@strapi/types` instead.
+ */
+export type * as Internal from './internal';
+
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;

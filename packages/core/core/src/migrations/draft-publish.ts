@@ -1,11 +1,11 @@
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 import { getBatchToDiscard } from './database/5.0.0-discard-drafts';
 
 export interface Input {
-  oldContentTypes: Record<string, Schema.ContentType>;
-  contentTypes: Record<string, Schema.ContentType>;
+  oldContentTypes: Record<UID.ContentType, Schema.ContentType>;
+  contentTypes: Record<UID.ContentType, Schema.ContentType>;
 }
 
 /**
@@ -23,7 +23,10 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) =
 
   // run the after content types migrations
   return strapi.db.transaction(async (trx) => {
-    for (const uid in contentTypes) {
+    // eslint-disable-next-line guard-for-in
+    for (const key in contentTypes) {
+      const uid = key as UID.ContentType;
+
       if (!oldContentTypes[uid]) {
         continue;
       }
@@ -59,7 +62,10 @@ const disableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) 
     return;
   }
 
-  for (const uid in contentTypes) {
+  // eslint-disable-next-line guard-for-in
+  for (const key in contentTypes) {
+    const uid = key as UID.ContentType;
+
     if (!oldContentTypes[uid]) {
       continue;
     }

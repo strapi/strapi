@@ -1,4 +1,5 @@
-import { Input } from './draft-publish';
+import type { UID } from '@strapi/types';
+import type { Input } from './draft-publish';
 
 // if i18N enabled set default locale
 const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
@@ -8,7 +9,10 @@ const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     return;
   }
 
-  for (const uid in contentTypes) {
+  // eslint-disable-next-line guard-for-in
+  for (const key in contentTypes) {
+    const uid = key as UID.ContentType;
+
     if (!oldContentTypes[uid]) {
       continue;
     }
@@ -34,7 +38,10 @@ const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     return;
   }
 
-  for (const uid in contentTypes) {
+  // eslint-disable-next-line guard-for-in
+  for (const key in contentTypes) {
+    const uid = key as UID.ContentType;
+
     if (!oldContentTypes[uid]) {
       continue;
     }

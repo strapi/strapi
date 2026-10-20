@@ -191,7 +191,7 @@ const buildWhereForRelations = (
 
 type ValidRelation = { documentId: string; id?: number; locale?: string };
 type ResolvedRelation = { documentId: string; id: number | string; locale?: string };
-type RelationsByUid = Map<string, ValidRelation[]>;
+type RelationsByUid = Map<UID.ContentType, ValidRelation[]>;
 
 interface UidResolutionData {
   blocked: boolean;
@@ -214,7 +214,7 @@ const collectRelationsByUid = (
 ): RelationsByUid => {
   const result: RelationsByUid = new Map();
 
-  const addRels = (uid: string, rels: ValidRelation[]) => {
+  const addRels = (uid: UID.ContentType, rels: ValidRelation[]) => {
     const existing = result.get(uid) ?? [];
     result.set(uid, existing.concat(rels));
   };
@@ -228,7 +228,7 @@ const collectRelationsByUid = (
       if (attribute.type === 'relation') {
         const attr = attribute as Schema.Attribute.Relation & {
           relation?: string;
-          target?: string;
+          target?: UID.ContentType;
         };
         if (attr.relation?.toLowerCase().includes('morph') || !attr.target) continue;
         const validRels = normalizeToArray(value).filter(isValidRelation);

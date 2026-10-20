@@ -1,7 +1,7 @@
 import _, { get, has, omit } from 'lodash';
 
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
-import type { Modules, UID, Data, Utils, Schema, Core } from '@strapi/types';
+import type { Modules, UID, Data, Utils, Schema, Core, DB } from '@strapi/types';
 
 type LoadedComponents<TUID extends UID.Schema> = Data.Entity<
   TUID,
@@ -152,7 +152,9 @@ const getComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   entity: { id: Modules.EntityService.Params.Attribute.ID }
 ): Promise<LoadedComponents<TUID>> => {
-  const componentAttributes = contentTypesUtils.getComponentAttributes(strapi.getModel(uid));
+  const componentAttributes = contentTypesUtils.getComponentAttributes(
+    strapi.getModel(uid)
+  ) as DB.Params.PopulatableAttribute<TUID>[];
 
   if (_.isEmpty(componentAttributes)) {
     return {} as LoadedComponents<TUID>;
@@ -279,7 +281,7 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   componentUID: UID.Component,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
-  attributeName: string,
+  attributeName: DB.Params.PopulatableAttribute<TUID>[],
   componentValue: Schema.Attribute.Value<Schema.Attribute.Component>
 ) => {
   const previousValue = (await strapi.db

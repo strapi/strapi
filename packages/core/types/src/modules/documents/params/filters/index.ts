@@ -57,7 +57,7 @@ type AttributeCondition<
         } & {
           [TIter in Operator.DynamicValue]?: TAttributeValue;
         } & {
-          [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
+          [TIter in Operator.DynamicArrayValue]?: readonly TAttributeValue[];
         } & {
           [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
         } & {

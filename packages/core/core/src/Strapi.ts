@@ -2,9 +2,9 @@ import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { Logger, createLogger } from '@strapi/logger';
-import { Database } from '@strapi/database';
+import { Database as DatabaseClass } from '@strapi/database';
 
-import type { Core, Modules, UID, Schema } from '@strapi/types';
+import type { Core, Modules, UID, Schema, DB } from '@strapi/types';
 
 import { loadConfiguration } from './configuration';
 import { warnDeprecatedServerConfig } from './configuration/server-config';
@@ -94,7 +94,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('reload');
   }
 
-  get db(): Database {
+  get db(): DB.Database {
     return this.get('db');
   }
 
@@ -311,7 +311,7 @@ class Strapi extends Container implements Core.Strapi {
         const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;
         const tsMigrationsEnabled = useTSM && tsDir;
         const projectDir = tsMigrationsEnabled ? tsDir : this.dirs.app.root;
-        return new Database(
+        return new DatabaseClass(
           _.merge(this.config.get('database'), {
             logger,
             getPhase: () => (this.isLoaded ? 'runtime' : 'boot'),

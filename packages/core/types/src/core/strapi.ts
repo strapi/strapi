@@ -1,8 +1,8 @@
 import type { Logger } from '@strapi/logger';
-import type { Database } from '@strapi/database';
 
 import type { PropertyPath } from 'lodash';
 import type * as Core from '.';
+import type { Database } from '../database';
 import type * as Modules from '../modules';
 import type * as Schema from '../schema';
 
