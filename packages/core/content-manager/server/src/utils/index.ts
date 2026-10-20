@@ -17,7 +17,7 @@ type Services = {
  * With strict types, the registered contract, including application overrides. Without them, as on
  * develop, so the declarations emitted from inferred types stay the same.
  */
-type ServiceOf<TName extends string> = Strapi.Registries.Settings extends { strict: true }
+type ServiceOf<TName extends string> = Core.IsStrict extends true
   ? Core.ServiceFor<`plugin::content-manager.${TName}`>
   : ReturnType<Services[TName]>;
 

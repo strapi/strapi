@@ -39,7 +39,7 @@ type DevelopService<T extends keyof S> = S[T] extends (...args: any) => any
  * With strict types, the registered contract, including application overrides. Without them, as on
  * develop, so the declarations emitted from inferred types stay the same.
  */
-type ServiceOf<T extends keyof S> = Strapi.Registries.Settings extends { strict: true }
+type ServiceOf<T extends keyof S> = Core.IsStrict extends true
   ? Core.ServiceFor<`plugin::i18n.${T}`>
   : DevelopService<T>;
 
