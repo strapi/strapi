@@ -89,6 +89,11 @@ declare global {
 - Do not augment `Strapi.Registries.Settings` in published source. Only `@strapi/types/strict`
   sets the switch.
 - Check implementations against their contracts with a type annotation or `satisfies`.
+- Check the names of the runtime maps (`services`, `controllers`) against the registered names,
+  given by `keyof Core.RegisteredFor<Strapi.Registries.PackageServices, 'plugin::x'>`. A plain
+  object literal that `satisfies Record<RegisteredNames, unknown>` is checked both ways. Spread
+  entries escape the excess property check: compare such maps with
+  `Core.Assert<Core.SameNames<…>>`.
 - Declare one contract per UID. Conflicting `Package*` declarations fail with TS2717, and
   `skipLibCheck` can hide the conflict in a consumer.
 - A package bundled with `@strapi/strapi` that registers contracts must also be imported by

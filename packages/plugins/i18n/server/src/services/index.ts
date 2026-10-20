@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import permissions from './permissions';
 import metrics from './metrics';
 import localizations from './localizations';
@@ -14,11 +15,7 @@ import { createFillFromLocaleService } from './fill-from-locale';
 import type {} from '../types';
 
 /** Names of the registered i18n services. */
-type RegisteredNames = keyof Strapi.Registries.PackageServices extends infer TUID
-  ? TUID extends `plugin::i18n.${infer TName}`
-    ? TName
-    : never
-  : never;
+type RegisteredNames = keyof Core.RegisteredFor<Strapi.Registries.PackageServices, 'plugin::i18n'>;
 
 // Every registered service has an implementation. Only the names are checked: the implementations keep
 // their published develop types, which the registered contracts refine.
