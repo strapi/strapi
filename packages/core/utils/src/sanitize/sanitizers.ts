@@ -138,6 +138,14 @@ const defaultSanitizeSort = curry((ctx: Context, sort: unknown) => {
   )(sort);
 });
 
+/**
+ * A step that removes an entry from a fields list leaves `undefined` in its place, and the
+ * fields traversal only reads a list made of strings. The gaps are dropped after every step, so
+ * each step sees every entry the previous one kept.
+ */
+const removeNilFields = (value: unknown) =>
+  Array.isArray(value) ? value.filter((field) => field != null) : value;
+
 const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
   if (!ctx.schema) {
     throw new Error('Missing schema in defaultSanitizeFields');
@@ -156,12 +164,13 @@ const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
         remove(key);
       }
     }, ctx),
+    removeNilFields,
     // Remove private fields
     traverseQueryFields(removePrivate, ctx),
+    removeNilFields,
     // Remove password fields
     traverseQueryFields(removePassword, ctx),
-    // Remove nil values from fields array
-    (value) => (Array.isArray(value) ? value.filter((field) => field != null) : value)
+    removeNilFields
   )(fields);
 });
 
