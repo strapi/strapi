@@ -63,8 +63,9 @@ type ControllerInstance<TEntry> = TEntry extends (...args: any[]) => infer TCont
  * With `TNamespace` (e.g. `'plugin::my-plugin'`), `'<namespace>.<controller>.<action>'` is accepted too.
  */
 export type ControllerActionReference<TControllers, TNamespace extends string = never> = {
-  [TName in keyof TControllers &
-    string]: `${TName}.${keyof ControllerInstance<TControllers[TName]> & string}`;
+  [
+    TName in keyof TControllers & string
+  ]: `${TName}.${keyof ControllerInstance<TControllers[TName]> & string}`;
 }[keyof TControllers & string] extends infer TRelative extends string
   ? TRelative | `${TNamespace}.${TRelative}`
   : never;

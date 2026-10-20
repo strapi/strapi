@@ -31,10 +31,9 @@ export type ModuleServiceMap<TNamespace extends string> = IsStrict extends false
   ? Record<string, Service>
   : RegisteredRecord<
       {
-        [TName in ModuleEntryNames<
-          RegisteredServiceUID,
-          TNamespace
-        >]: ServiceFor<`${TNamespace}.${TName}`>;
+        [
+          TName in ModuleEntryNames<RegisteredServiceUID, TNamespace>
+        ]: ServiceFor<`${TNamespace}.${TName}`>;
       },
       Service
     >;
@@ -47,10 +46,9 @@ export type ModuleControllerMap<TNamespace extends string> = IsStrict extends fa
   ? Record<string, Controller>
   : RegisteredRecord<
       {
-        [TName in ModuleEntryNames<
-          RegisteredControllerUID,
-          TNamespace
-        >]: ControllerFor<`${TNamespace}.${TName}`>;
+        [
+          TName in ModuleEntryNames<RegisteredControllerUID, TNamespace>
+        ]: ControllerFor<`${TNamespace}.${TName}`>;
       },
       Controller
     >;

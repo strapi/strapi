@@ -8,8 +8,7 @@ app.service('plugin::content-manager.document-manager').missing();
 app.plugin('content-manager').service('document-metadata').getMetadata('anything', null);
 app.service('plugin::content-manager.populate-builder').custom();
 app.plugin('content-manager').controller('collection-types').custom satisfies
-  | Core.ControllerHandler
-  | undefined;
+  Core.ControllerHandler | undefined;
 
 ({
   type: 'admin',

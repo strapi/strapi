@@ -14,8 +14,7 @@ const buildScalarFilters = ({ strapi }: Context) => {
   return (helpers.getEnabledScalars() as string[]).reduce((acc: any, type: string) => {
     // `graphqlScalarToOperators` keeps develop's published (wrong) `boolean` return type.
     const operators = mappers.graphqlScalarToOperators(type) as unknown as
-      | { add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string): void }[]
-      | undefined;
+      { add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string): void }[] | undefined;
     const typeName = naming.getScalarFilterInputTypeName(type);
 
     if (!operators || operators.length === 0) {

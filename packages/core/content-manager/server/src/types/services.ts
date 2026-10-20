@@ -127,13 +127,7 @@ export type PopulateBuilderService = (uid: UID.Schema) => PopulateBuilder;
 
 /** Actions with shortcuts attached to the checker functions at runtime, such as `can.read(entity)`. */
 export type PermissionCheckerAction =
-  | 'read'
-  | 'create'
-  | 'update'
-  | 'delete'
-  | 'publish'
-  | 'unpublish'
-  | 'discard';
+  'read' | 'create' | 'update' | 'delete' | 'publish' | 'unpublish' | 'discard';
 
 // TODO @Nico tighten contract: output and input sanitizers forward the admin permissions manager's
 // `unknown` results, which callers use as non-null documents. A document type needs null handling

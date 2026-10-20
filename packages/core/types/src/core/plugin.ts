@@ -46,8 +46,7 @@ type PluginConfigKey<TPlugin extends string> = [PluginConfigNamespace<TPlugin>] 
 
 /** Any plugin config key. Top-level keys of the registered contract are listed for completion. */
 type PluginConfigPath<TPlugin extends string> =
-  | SuggestedString<PluginConfigKey<TPlugin>>
-  | Exclude<PropertyPath, string>;
+  SuggestedString<PluginConfigKey<TPlugin>> | Exclude<PropertyPath, string>;
 
 /** Completion candidates for a partially typed dotted path of the plugin's config contract, e.g. `'init.debug'`. */
 type PluginConfigPathSuggestion<TPlugin extends string, TKey> = [

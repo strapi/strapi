@@ -29,8 +29,7 @@ const routes: {
         config: {
           middlewares: ((ctx: Context, next: Next) => Promise<any>)[];
           policies: (
-            | string
-            | { name: string; config: { actions: string[]; hasAtLeastOne: boolean } }
+            string | { name: string; config: { actions: string[]; hasAtLeastOne: boolean } }
           )[];
         };
       }
