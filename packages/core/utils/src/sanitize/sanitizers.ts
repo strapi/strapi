@@ -191,9 +191,10 @@ const defaultSanitizePopulate = curry((ctx: Context, populate: unknown) => {
         set(key, await defaultSanitizeFields({ schema, getModel, parent }, value));
       }
 
-      if (key === 'populate') {
-        set(key, await defaultSanitizePopulate({ schema, getModel, parent }, value));
-      }
+      // A nested `populate` is not sanitized here. The populate traversal walks into it with
+      // each visitor of this pipeline (the `isKeyword('populate')` handler in
+      // traverse/query-populate.ts), so sanitizing it here as well walked every nested level
+      // twice, and the work doubled with each level of nesting.
     }, ctx),
     // Remove private fields
     traverseQueryPopulate(removePrivate, ctx)

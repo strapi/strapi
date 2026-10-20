@@ -879,16 +879,17 @@ exports[`populate validation and sanitization corpus > depth 2: filters that emp
     },
     "throws": "ValidationError: Invalid key $notAnOperator at author.name",
   },
-  "queryLayer": "b15e81977948",
+  "queryLayer": "ba89533f7354",
   "sanitized": {
     "removed": [
       "categories.populate.articles.populate.related.filters.author.name.$notAnOperator",
       "categories.populate.articles.populate.related.filters.$and[0].title.$notAnOperator",
     ],
     "set": {
-      "categories.populate.articles.populate.related.filters": {},
+      "categories.populate.articles.populate.related.filters.$and": [],
+      "categories.populate.articles.populate.related.filters.author": {},
     },
-    "sha1": "137dbb575b82",
+    "sha1": "927d2b258da4",
   },
   "sanitizedWithoutAuth": "same as with auth",
   "validate": {
@@ -1302,12 +1303,12 @@ exports[`populate validation and sanitization corpus > depth 2: private relation
   "sanitizedWithoutAuth": "same as with auth",
   "validate": {
     "details": {
-      "key": "folder",
+      "key": "createdBy",
       "param": "populate",
-      "path": "categories.articles.related.image.folder",
+      "path": "categories.articles.related.createdBy",
       "source": "query",
     },
-    "throws": "ValidationError: Invalid key folder at categories.articles.related.image.folder",
+    "throws": "ValidationError: Invalid key createdBy at categories.articles.related.createdBy",
   },
 }
 `;
@@ -1561,16 +1562,17 @@ exports[`populate validation and sanitization corpus > depth 4: filters that emp
     },
     "throws": "ValidationError: Invalid key $notAnOperator at author.name",
   },
-  "queryLayer": "7865a870d970",
+  "queryLayer": "452280d6e24d",
   "sanitized": {
     "removed": [
       "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.name.$notAnOperator",
       "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.$and[0].title.$notAnOperator",
     ],
     "set": {
-      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters": {},
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.$and": [],
+      "categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author": {},
     },
-    "sha1": "9542143dc599",
+    "sha1": "f4fce4b29618",
   },
   "sanitizedWithoutAuth": "same as with auth",
   "validate": {
@@ -1984,12 +1986,12 @@ exports[`populate validation and sanitization corpus > depth 4: private relation
   "sanitizedWithoutAuth": "same as with auth",
   "validate": {
     "details": {
-      "key": "folder",
+      "key": "createdBy",
       "param": "populate",
-      "path": "categories.articles.categories.articles.related.image.folder",
+      "path": "categories.articles.categories.articles.related.createdBy",
       "source": "query",
     },
-    "throws": "ValidationError: Invalid key folder at categories.articles.categories.articles.related.image.folder",
+    "throws": "ValidationError: Invalid key createdBy at categories.articles.categories.articles.related.createdBy",
   },
 }
 `;
@@ -2243,16 +2245,17 @@ exports[`populate validation and sanitization corpus > depth 6: filters that emp
     },
     "throws": "ValidationError: Invalid key $notAnOperator at author.name",
   },
-  "queryLayer": "2346f3b4b2db",
+  "queryLayer": "41d3734f7cbe",
   "sanitized": {
     "removed": [
       "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author.name.$notAnOperator",
       "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.$and[0].title.$notAnOperator",
     ],
     "set": {
-      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters": {},
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.$and": [],
+      "categories.populate.articles.populate.categories.populate.articles.populate.categories.populate.articles.populate.related.filters.author": {},
     },
-    "sha1": "0680776906e7",
+    "sha1": "9cb726b638b7",
   },
   "sanitizedWithoutAuth": "same as with auth",
   "validate": {
@@ -2666,12 +2669,12 @@ exports[`populate validation and sanitization corpus > depth 6: private relation
   "sanitizedWithoutAuth": "same as with auth",
   "validate": {
     "details": {
-      "key": "folder",
+      "key": "createdBy",
       "param": "populate",
-      "path": "categories.articles.categories.articles.categories.articles.related.image.folder",
+      "path": "categories.articles.categories.articles.categories.articles.related.createdBy",
       "source": "query",
     },
-    "throws": "ValidationError: Invalid key folder at categories.articles.categories.articles.categories.articles.related.image.folder",
+    "throws": "ValidationError: Invalid key createdBy at categories.articles.categories.articles.categories.articles.related.createdBy",
   },
 }
 `;
