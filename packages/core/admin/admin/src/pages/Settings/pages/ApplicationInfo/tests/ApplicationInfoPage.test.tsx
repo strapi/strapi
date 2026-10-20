@@ -228,6 +228,20 @@ describe('ApplicationInfoPage – upgrade banner', () => {
       await screen.findByText('Update available');
       expect(screen.queryByText('Strapi v5.10.0 is available')).not.toBeInTheDocument();
     });
+
+    it('shows the banner and persists dismissals when the instance has no UUID', async () => {
+      mockScope = false;
+      const { user, unmount } = renderPage('5.9.0', 'v5.10.0');
+
+      await user.click(await screen.findByRole('button', { name: 'Hide until the next version' }));
+      expect(window.localStorage.getItem(`${DISMISSED_VERSION_KEY}:false`)).toBe('v5.10.0');
+      unmount();
+
+      renderPage('5.9.0', 'v5.10.0');
+
+      await screen.findByText('Update available');
+      expect(screen.queryByText('Strapi v5.10.0 is available')).not.toBeInTheDocument();
+    });
   });
 
   it('keeps working when localStorage is unavailable', async () => {

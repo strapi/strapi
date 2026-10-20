@@ -52,7 +52,12 @@ const UpgradeBanner = () => {
     (state) => state.latestStrapiReleaseTag
   );
 
-  // Wait for the instance ID so dismissals are always read and written under the project's key
+  /**
+   * Wait for the init query (`undefined`) so dismissals are read and written under the project's
+   * key. An instance without a UUID resolves to `false`: the banner still shows, and its dismissals
+   * share the `:false` key like every other `useScopedPersistentState` value, since there is no
+   * project ID to scope them to.
+   */
   if (severity === 'none' || !strapiVersion || !latestStrapiReleaseTag || scope === undefined) {
     return null;
   }
