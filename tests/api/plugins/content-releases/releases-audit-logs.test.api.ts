@@ -572,9 +572,10 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
 
     it('records nothing when it freezes a release that failed before the upgrade', async () => {
       const release = await createRelease({ name: 'Failed before', timezone: 'Europe/Paris' });
-      await strapi.db
-        .query('plugin::content-releases.release')
-        .update({ where: { id: release.id }, data: { status: 'failed' } });
+      await strapi.db.query('plugin::content-releases.release').update({
+        where: { id: release.id },
+        data: { status: 'failed', scheduledAt: new Date(Date.now() - 10 * 60_000) },
+      });
       await clearAuditLogs();
 
       await strapi.hook('strapi::content-types.afterSync').call({

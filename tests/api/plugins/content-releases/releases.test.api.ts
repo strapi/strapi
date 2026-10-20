@@ -3394,9 +3394,42 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       ]);
 
       expect((await publishManually(release.id)).statusCode).toBe(200);
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-10) });
       await sweep();
 
-      expect(await getRelease(release.id)).toMatchObject({ status: 'done', failureReason: null });
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'done',
+        failureReason: null,
+        totalPublishedEntries: 1,
+        totalSkippedEntries: 0,
+      });
+    });
+
+    test('a frozen release refuses a reschedule and a delete, and stays as the sweep left it', async () => {
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-10) });
+      await sweep();
+      const frozen = await getRelease(release.id);
+      expect(frozen).toMatchObject({ status: 'failed', failureReason: 'missed_schedule' });
+
+      const rescheduled = await rq({
+        method: 'PUT',
+        url: `/content-releases/${release.id}`,
+        body: { name: frozen.name, scheduledAt: minutesFromNow(60), timezone: 'Europe/Paris' },
+      });
+      const deleted = await rq({ method: 'DELETE', url: `/content-releases/${release.id}` });
+
+      expect(rescheduled.statusCode).toBe(400);
+      expect(rescheduled.body.error.message).toBe('Release already published');
+      expect(deleted.statusCode).toBe(400);
+      expect(deleted.body.error.message).toBe('Release already published');
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'failed',
+        scheduledAt: frozen.scheduledAt,
+        releasedAt: frozen.releasedAt,
+      });
     });
 
     test.each([

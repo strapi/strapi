@@ -32,7 +32,7 @@ import {
   lockRelease,
 } from '../utils';
 import type { PublishabilityOutcome } from '../utils';
-import { getReleaseChanges } from '../audit-logs';
+import { emitAuditOnCommit, getReleaseChanges } from '../audit-logs';
 
 type PublishTrigger = 'manual' | 'scheduled';
 
@@ -315,34 +315,42 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         validateScheduledAtIsLaterThanNow(releaseWithCreatorFields.scheduledAt),
       ]);
 
-      const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({ where: { id } });
+      const { release, updatedRelease } = await strapi.db.transaction(async () => {
+        const locked = await lockRelease({ strapi }, id, ['releasedAt']);
 
-      if (!release) {
-        throw new errors.NotFoundError(`No release found for id ${id}`);
-      }
+        if (!locked) {
+          throw new errors.NotFoundError(`No release found for id ${id}`);
+        }
 
-      if (release.releasedAt) {
-        throw new errors.ValidationError('Release already published');
-      }
+        if (locked.releasedAt) {
+          throw new errors.ValidationError('Release already published');
+        }
 
-      const updatedRelease = await strapi.db.query(RELEASE_MODEL_UID).update({
-        where: { id },
-        data: releaseWithCreatorFields,
-      });
+        const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({ where: { id } });
 
-      // Audited before scheduling, against the pre-image read next to the write.
-      // A write that matched no row (deleted in between) has nothing to report.
-      if (updatedRelease) {
+        const updatedRelease = await strapi.db.query(RELEASE_MODEL_UID).update({
+          where: { id },
+          data: releaseWithCreatorFields,
+        });
+
+        if (!updatedRelease) {
+          throw new errors.NotFoundError(`No release found for id ${id}`);
+        }
+
         const changes = getReleaseChanges(release, updatedRelease);
 
         if (Object.keys(changes).length > 0) {
-          await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_UPDATE, {
+          await emitAuditOnCommit({ strapi }, AUDITED_EVENTS.RELEASE_UPDATE, {
             releaseId: updatedRelease.id,
             name: updatedRelease.name,
             changes,
           });
         }
-      }
+
+        await this.updateReleaseStatus(id);
+
+        return { release, updatedRelease };
+      });
 
       const schedulingService = getService('scheduling', { strapi });
 
@@ -353,8 +361,6 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         // When user don't send a scheduledAt and we have one on the release, means that user want to unschedule it
         schedulingService.cancel(id);
       }
-
-      await this.updateReleaseStatus(id);
 
       strapi.telemetry.send('didUpdateContentRelease');
 
@@ -384,26 +390,26 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async delete(releaseId: DeleteRelease.Request['params']['id']) {
-      const release: Release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
-        where: { id: releaseId },
-        populate: {
-          actions: {
-            select: ['id'],
+      const release: Release = await strapi.db.transaction(async () => {
+        const locked = await lockRelease({ strapi }, releaseId, ['releasedAt']);
+
+        if (!locked) {
+          throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+        }
+
+        if (locked.releasedAt) {
+          throw new errors.ValidationError('Release already published');
+        }
+
+        const release: Release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
+          where: { id: releaseId },
+          populate: {
+            actions: {
+              select: ['id'],
+            },
           },
-        },
-      });
+        });
 
-      if (!release) {
-        throw new errors.NotFoundError(`No release found for id ${releaseId}`);
-      }
-
-      if (release.releasedAt) {
-        throw new errors.ValidationError('Release already published');
-      }
-
-      // Only delete the release and its actions is you in fact can delete all the actions and the release
-      // Otherwise, if the transaction fails it throws an error
-      await strapi.db.transaction(async () => {
         await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
           where: {
             id: {
@@ -417,6 +423,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             id: releaseId,
           },
         });
+
+        return release;
       });
 
       if (release.scheduledAt) {
@@ -653,20 +661,13 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       return release;
     },
 
-    async recordMissedRun(releaseId: Release['id']) {
+    async recordMissedRun(releaseId: Release['id']): Promise<Release | null> {
       const actions: Pick<ReleaseAction, 'id'>[] = await strapi.db
         .query(RELEASE_ACTION_MODEL_UID)
         .findMany({ where: { release: { id: releaseId } }, select: ['id'] });
 
-      if (actions.length > 0) {
-        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-          where: { id: { $in: actions.map((action) => action.id) } },
-          data: { outcome: 'skipped_missed' },
-        });
-      }
-
-      return strapi.db.query(RELEASE_MODEL_UID).update({
-        where: { id: releaseId },
+      const release: Release | null = await strapi.db.query(RELEASE_MODEL_UID).update({
+        where: { id: releaseId, releasedAt: null },
         data: {
           status: 'failed',
           releasedAt: new Date(),
@@ -676,10 +677,24 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           totalSkippedEntries: actions.length,
         },
       });
+
+      if (!release) {
+        return null;
+      }
+
+      if (actions.length > 0) {
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+          where: { id: { $in: actions.map((action) => action.id) }, outcome: null },
+          data: { outcome: 'skipped_missed' },
+        });
+      }
+
+      return release;
     },
 
-    // Under the release row lock that runs and action changes take: the counts it reads are
-    // those of the last committed change, so a recalculation never lands after a newer one
+    // Under the release row lock that runs and action changes take: the status counts it reads
+    // are those of the last committed change, so a status never lands after a newer one. (Not the
+    // stored validity: a re-check reads the draft before the lock, so it can lag behind the draft.)
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 

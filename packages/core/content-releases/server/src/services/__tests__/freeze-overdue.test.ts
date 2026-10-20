@@ -53,7 +53,10 @@ const setup = ({ rows, locked = rows }: { rows: Row[]; locked?: Row[] }) => {
 
   const strapi = {
     db: {
-      query: jest.fn(() => ({ findMany })),
+      query: jest.fn(() => ({
+        findMany,
+        findOne: jest.fn(async ({ where }) => ({ id: where.id })),
+      })),
       queryBuilder,
       inTransaction: jest.fn(() => false),
       transaction: jest.fn((work: (arg: { trx: object }) => unknown) => work({ trx: {} })),
@@ -68,7 +71,7 @@ const setup = ({ rows, locked = rows }: { rows: Row[]; locked?: Row[] }) => {
   // @ts-expect-error Ignore missing properties
   const service = createSchedulingService({ strapi });
 
-  return { service, strapi, findMany, recordMissedRun, emit, logError };
+  return { service, strapi, findMany, recordMissedRun, emit, logError, cronRemove };
 };
 
 const release = (overrides: Partial<Row> & Pick<Row, 'id'>): Row => ({
@@ -186,5 +189,32 @@ describe('Scheduling service: freezeOverdueReleases', () => {
       'The overdue sweep must not run inside a transaction'
     );
     expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it('cancels the job still armed for a release it freezes', async () => {
+    const { service, cronRemove } = setup({
+      rows: [release({ id: 1, scheduledAt: minutesAgo(10) })],
+    });
+    await service.set(1, minutesAgo(10));
+
+    await service.freezeOverdueReleases({ now: NOW });
+
+    expect(cronRemove).toHaveBeenCalledWith('publishRelease_1');
+    expect(service.getAll().has('1')).toBe(false);
+  });
+
+  it('neither reports nor cancels a release whose freeze matched nothing (it ran meanwhile)', async () => {
+    const { service, recordMissedRun, emit, cronRemove } = setup({
+      rows: [release({ id: 1, scheduledAt: minutesAgo(10) })],
+    });
+    await service.set(1, minutesAgo(10));
+    recordMissedRun.mockResolvedValueOnce(null as never);
+
+    const frozen = await service.freezeOverdueReleases({ now: NOW });
+
+    expect(frozen).toHaveLength(0);
+    expect(emit).not.toHaveBeenCalled();
+    expect(mockEmitAudit).not.toHaveBeenCalled();
+    expect(cronRemove).not.toHaveBeenCalled();
   });
 });
