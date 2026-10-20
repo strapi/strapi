@@ -2,6 +2,7 @@ import type * as UID from '../uid';
 import type * as InternalUID from '../internal/uid';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict, RegisteredRecord } from './strictness';
+import type { Strapi } from './strapi';
 
 /**
  * Resolves application overrides before package defaults. With strict types enabled, an unregistered
@@ -45,6 +46,38 @@ export type ServiceLookupUID = SuggestedString<RegisteredServiceUID, UID.Service
 export type ServiceMap = IsStrict extends false
   ? Record<string, Service>
   : RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, Service>;
+
+/**
+ * A UID accepted by {@link ServiceFactory}. With strict types enabled, only registered UIDs: a
+ * factory checked against a UID without a contract would accept any service.
+ */
+export type ServiceFactoryUID = IsStrict extends false ? UID.Service : RegisteredServiceUID;
+
+/**
+ * A service factory, checked against the contract registered for `TUID`. The services registry calls
+ * a function service once with `{ strapi }` and caches its result as the service
+ * (`packages/core/core/src/registries/services.ts:30-33`), which `strapi.service(uid)` returns.
+ *
+ * With strict types disabled, the factory may return any service, as on develop.
+ *
+ * Type generation registers an application service with the type its own source exports
+ * (`types/generated/services.d.ts`), so checking that factory against its UID checks it against
+ * itself. A hand-declared `AppServices` entry for the same UID must be the identical type: a
+ * different one is a conflicting declaration (TS2717, hidden by `skipLibCheck`).
+ *
+
+ * @example
+ * ```ts
+ * export default (({ strapi }) => ({
+ *   async count() {
+ *     return strapi.documents('api::invite.invite').count({});
+ *   },
+ * })) satisfies Core.ServiceFactory<'api::invite.invite'>;
+ * ```
+ */
+export type ServiceFactory<TUID extends ServiceFactoryUID> = (params: {
+  strapi: Strapi;
+}) => ServiceFor<TUID>;
 
 export type Service = {
   // TODO [V5] Consider changing the any value to unknown.

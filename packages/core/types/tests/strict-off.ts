@@ -453,3 +453,16 @@ declare const rolePolicy: Core.Policy<{ role: string }>;
 // @ts-expect-error A policy that needs a config is not assignable to `Policy<unknown>`.
 const anyConfigPolicy: Core.Policy = rolePolicy;
 anyConfigPolicy satisfies unknown;
+
+// Without strict types, `Core.IsStrict` is `false` and a service factory may return any service, as
+// on develop, for registered and unregistered UIDs.
+type ServiceFactoryChecks = [
+  Expect<Equal<Core.IsStrict, false>>,
+  Expect<Equal<Core.ServiceFactoryUID, UID.Service>>,
+  Expect<Equal<ReturnType<Core.ServiceFactory<'plugin::legacy.example'>>, Core.Service>>,
+  Expect<Equal<ReturnType<Core.ServiceFactory<'api::unregistered.example'>>, Core.Service>>,
+];
+declare const serviceFactoryChecks: ServiceFactoryChecks;
+serviceFactoryChecks satisfies unknown;
+(() => ({ count: () => 'any' })) satisfies Core.ServiceFactory<'plugin::legacy.example'>;
+(() => ({ anything: true })) satisfies Core.ServiceFactory<'api::unregistered.example'>;
