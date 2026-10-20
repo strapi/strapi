@@ -267,8 +267,6 @@ class Strapi extends Container implements Core.Strapi {
         await this.load();
       }
 
-      utils.warnOnDuplicatedUtils(this);
-
       await this.listen();
 
       return this;
