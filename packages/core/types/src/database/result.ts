@@ -1,5 +1,6 @@
 import type { Internal } from '@strapi/database';
 
+import type * as Schema from '../schema';
 import type * as UID from '../uid';
 import type { Constants, If } from '../utils';
 import type { ID } from '../data';
@@ -22,7 +23,12 @@ export type AnyEntry = any;
  */
 export type EntryReference = { id: ID };
 
-type ExtractSelect<TParams> = TParams extends { select: infer TSelect } ? TSelect : never;
+/**
+ * The document params only accept mutable arrays, while `const` type params infer readonly tuples.
+ */
+type Mutable<TValue> = TValue extends readonly (infer TItem)[] ? TItem[] : TValue;
+
+type ExtractSelect<TParams> = TParams extends { select: infer TSelect } ? Mutable<TSelect> : never;
 
 type ExtractPopulate<TSchemaUID extends UID.Schema, TParams> = TParams extends {
   populate: infer TPopulate;
@@ -30,10 +36,16 @@ type ExtractPopulate<TSchemaUID extends UID.Schema, TParams> = TParams extends {
   ? TPopulate extends true
     ? DocumentParams.Populate.WildcardNotation
     : TPopulate extends readonly string[]
-      ? TPopulate
+      ? Mutable<TPopulate>
       : TPopulate extends Params.PopulateObjectNotation<TSchemaUID>
-        ? // TODO: Handle attributes set to false in object notation
-          Extract<keyof TPopulate, string>
+        ? Extract<
+            {
+              [TAttributeName in keyof TPopulate]-?: TPopulate[TAttributeName] extends false
+                ? never
+                : TAttributeName;
+            }[keyof TPopulate],
+            string
+          >
         : never
   : never;
 
@@ -48,12 +60,44 @@ type ToDocumentParams<TSchemaUID extends UID.Schema, TParams> = {
   ? TDocumentParams
   : never;
 
+type SelectedNames<TParams> = TParams extends { select: infer TSelect }
+  ? TSelect extends readonly (infer TName)[]
+    ? TName
+    : TSelect
+  : never;
+
+type IdentityName = 'id' | 'documentId';
+
+/**
+ * `id` and `documentId` aren't schema attributes, so a `select` naming only them leaves
+ * {@link DocumentResult} without fields, which it reads as every field.
+ *
+ * Keeps `id`, the selected identity names and the populated attributes instead.
+ */
+type NarrowIdentitySelect<TSchemaUID extends UID.Schema, TParams, TResult> = [
+  SelectedNames<TParams>,
+] extends [never]
+  ? TResult
+  : [Exclude<SelectedNames<TParams>, IdentityName>] extends [never]
+    ? Omit<
+        TResult,
+        Exclude<
+          Schema.NonPopulatableAttributeNames<TSchemaUID> | IdentityName,
+          SelectedNames<TParams> | 'id'
+        >
+      >
+    : TResult;
+
 /**
  * A database entry for the given schema, shaped by the `select` and `populate` params.
  */
 export type Entry<TSchemaUID extends UID.Schema, TParams = never> = If<
   Constants.AreSchemaRegistriesExtended,
-  DocumentResult<TSchemaUID, ToDocumentParams<TSchemaUID, TParams>>,
+  NarrowIdentitySelect<
+    TSchemaUID,
+    TParams,
+    DocumentResult<TSchemaUID, ToDocumentParams<TSchemaUID, TParams>>
+  >,
   AnyEntry
 >;
 
