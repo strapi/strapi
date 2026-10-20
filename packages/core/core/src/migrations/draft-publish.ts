@@ -1,11 +1,11 @@
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
-import type { Schema, UID } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 import { getBatchToDiscard } from './database/5.0.0-discard-drafts';
 
 export interface Input {
-  oldContentTypes: Record<UID.ContentType, Schema.ContentType>;
-  contentTypes: Record<UID.ContentType, Schema.ContentType>;
+  oldContentTypes: Record<string, Schema.ContentType>;
+  contentTypes: Record<string, Schema.ContentType>;
 }
 
 /**
@@ -23,16 +23,14 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) =
 
   // run the after content types migrations
   return strapi.db.transaction(async (trx) => {
-    // eslint-disable-next-line guard-for-in
-    for (const key in contentTypes) {
-      const uid = key as UID.ContentType;
+    for (const contentType of Object.values(contentTypes)) {
+      const { uid } = contentType;
 
       if (!oldContentTypes[uid]) {
         continue;
       }
 
       const oldContentType = oldContentTypes[uid];
-      const contentType = contentTypes[uid];
 
       // if d&p was enabled set publishedAt to eq createdAt
       if (
@@ -62,16 +60,14 @@ const disableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) 
     return;
   }
 
-  // eslint-disable-next-line guard-for-in
-  for (const key in contentTypes) {
-    const uid = key as UID.ContentType;
+  for (const contentType of Object.values(contentTypes)) {
+    const { uid } = contentType;
 
     if (!oldContentTypes[uid]) {
       continue;
     }
 
     const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
 
     // if d&p was disabled remove unpublish content before sync
     if (

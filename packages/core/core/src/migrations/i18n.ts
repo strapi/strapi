@@ -1,5 +1,4 @@
-import type { UID } from '@strapi/types';
-import type { Input } from './draft-publish';
+import { Input } from './draft-publish';
 
 // if i18N enabled set default locale
 const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
@@ -9,16 +8,14 @@ const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     return;
   }
 
-  // eslint-disable-next-line guard-for-in
-  for (const key in contentTypes) {
-    const uid = key as UID.ContentType;
+  for (const contentType of Object.values(contentTypes)) {
+    const { uid } = contentType;
 
     if (!oldContentTypes[uid]) {
       continue;
     }
 
     const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
 
     if (!isLocalizedContentType(oldContentType) && isLocalizedContentType(contentType)) {
       const defaultLocale = await getDefaultLocale();
@@ -38,16 +35,14 @@ const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     return;
   }
 
-  // eslint-disable-next-line guard-for-in
-  for (const key in contentTypes) {
-    const uid = key as UID.ContentType;
+  for (const contentType of Object.values(contentTypes)) {
+    const { uid } = contentType;
 
     if (!oldContentTypes[uid]) {
       continue;
     }
 
     const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
 
     // if i18N is disabled remove non default locales before sync
     if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {

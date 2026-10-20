@@ -38,7 +38,7 @@ const deleteEntitiesRecords = async (
 ): Promise<IDeleteResults> => {
   const { entities } = options;
 
-  const models = strapi.get('models').get() as DB.Model[];
+  const models: DB.Model[] = strapi.get('models').get();
   const contentTypes = Object.values(strapi.contentTypes) as Struct.ContentTypeSchema[];
 
   const contentTypesToClear = contentTypes
