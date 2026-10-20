@@ -18,9 +18,11 @@ import documentMetadata from './document-metadata';
 import documentManager from './document-manager';
 
 type RegisteredServiceFactories = {
-  [TUID in keyof Strapi.Registries.PackageServices as TUID extends `plugin::content-manager.${infer TName}`
-    ? TName
-    : never]: (context: { strapi: Core.Strapi }) => Strapi.Registries.PackageServices[TUID];
+  [
+    TUID in keyof Strapi.Registries.PackageServices as TUID extends `plugin::content-manager.${infer TName}`
+      ? TName
+      : never
+  ]: (context: { strapi: Core.Strapi }) => Strapi.Registries.PackageServices[TUID];
 };
 
 /**

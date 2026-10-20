@@ -14,8 +14,10 @@ export interface RouterInput extends Omit<Router, 'routes'> {
 }
 
 /** A router whose string handlers must reference an action of `TControllers`. See {@link ControllerActionReference}. */
-export interface RouterInputFor<TControllers, TNamespace extends string = never>
-  extends Omit<Router, 'routes'> {
+export interface RouterInputFor<TControllers, TNamespace extends string = never> extends Omit<
+  Router,
+  'routes'
+> {
   routes: RouteInputFor<TControllers, TNamespace>[];
 }
 
