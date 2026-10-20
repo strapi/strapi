@@ -126,6 +126,23 @@ describe('Project', () => {
       expect(project.strapiVersion.raw).toBe(currentStrapiVersion);
     });
 
+    test('AppProject includes the root tsconfig.json file', () => {
+      vol.fromNestedJSON({ ...appVolume, 'tsconfig.json': '{}' }, defaultCWD);
+
+      const project = projectFactory(defaultCWD);
+
+      assertAppProject(project);
+
+      expect(project.files.length).toBe(8);
+      expect(project.files).toStrictEqual(
+        expect.arrayContaining([
+          path.join(defaultCWD, 'package.json'),
+          path.join(defaultCWD, 'tsconfig.json'),
+          ...srcFilenames(defaultCWD),
+        ])
+      );
+    });
+
     test('Succeed for valid PluginProject', () => {
       vol.fromNestedJSON(pluginVolume, defaultCWD);
 

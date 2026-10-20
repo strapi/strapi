@@ -50,7 +50,8 @@
   "files": [
     "bin",
     "dist",
-    "resources"
+    "resources",
+    "!resources/**/__tests__"
   ],
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
