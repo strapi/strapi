@@ -1,5 +1,5 @@
-import type { Schema, UID } from '@strapi/types';
-import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
+import type { Core, Schema, UID } from '@strapi/types';
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
@@ -8,55 +8,47 @@ import {
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
 } from '../constants';
-import { getDraftEntryValidity, getService, UNPUBLISH_VALIDITY } from '../utils';
+import { getActionValidity, getService } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
-import { ReleaseAction } from '../../../shared/contracts/release-actions';
 
-interface Input {
+export interface ContentTypesSyncInput {
   oldContentTypes: Record<string, Schema.ContentType>;
   contentTypes: Record<string, Schema.ContentType>;
 }
 
-export async function deleteActionsOnDisableDraftAndPublish({
-  oldContentTypes,
-  contentTypes,
-}: Input) {
+// Its entries can no longer be published: its actions leave every release (see
+// `deleteContentTypeActions`)
+export async function deleteActionsOnDisableDraftAndPublish(
+  { oldContentTypes, contentTypes }: ContentTypesSyncInput,
+  { strapi }: { strapi: Core.Strapi }
+) {
   if (!oldContentTypes) {
     return;
   }
 
-  for (const uid in contentTypes) {
-    if (!oldContentTypes[uid]) {
-      continue;
-    }
+  const disabledContentTypes = Object.keys(contentTypes).filter(
+    (uid) =>
+      oldContentTypes[uid] &&
+      contentTypesUtils.hasDraftAndPublish(oldContentTypes[uid]) &&
+      !contentTypesUtils.hasDraftAndPublish(contentTypes[uid])
+  ) as UID.ContentType[];
 
-    const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
-
-    if (
-      contentTypesUtils.hasDraftAndPublish(oldContentType) &&
-      !contentTypesUtils.hasDraftAndPublish(contentType)
-    ) {
-      await strapi.db
-        ?.queryBuilder(RELEASE_ACTION_MODEL_UID)
-        .delete()
-        .where({ contentType: uid })
-        .execute();
-    }
+  if (disabledContentTypes.length > 0) {
+    await getService('release-action', { strapi }).deleteContentTypeActions(disabledContentTypes);
   }
 }
 
-export async function deleteActionsOnDeleteContentType({ oldContentTypes, contentTypes }: Input) {
-  const deletedContentTypes = difference(keys(oldContentTypes), keys(contentTypes)) ?? [];
+export async function deleteActionsOnDeleteContentType(
+  { oldContentTypes, contentTypes }: ContentTypesSyncInput,
+  { strapi }: { strapi: Core.Strapi }
+) {
+  const deletedContentTypes = difference(
+    keys(oldContentTypes),
+    keys(contentTypes)
+  ) as UID.ContentType[];
 
-  if (deletedContentTypes.length) {
-    await async.map(deletedContentTypes, async (deletedContentTypeUID: unknown) => {
-      return strapi.db
-        ?.queryBuilder(RELEASE_ACTION_MODEL_UID)
-        .delete()
-        .where({ contentType: deletedContentTypeUID })
-        .execute();
-    });
+  if (deletedContentTypes.length > 0) {
+    await getService('release-action', { strapi }).deleteContentTypeActions(deletedContentTypes);
   }
 }
 
@@ -78,17 +70,7 @@ export async function migrateIsValidAndStatusReleases() {
         );
 
         for (const action of notValidatedActions) {
-          const validity =
-            action.type === 'publish'
-              ? await getDraftEntryValidity(
-                  {
-                    contentType: action.contentType,
-                    documentId: action.entryDocumentId,
-                    locale: action.locale,
-                  },
-                  { strapi }
-                )
-              : UNPUBLISH_VALIDITY;
+          const validity = await getActionValidity(action, { strapi });
 
           await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
             where: { id: action.id, outcome: null },
@@ -113,61 +95,18 @@ export async function migrateIsValidAndStatusReleases() {
   });
 }
 
-export async function addReasonsToInvalidActions() {
-  const actions: ReleaseAction[] = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
-    where: {
-      type: 'publish',
-      isEntryValid: false,
-      reason: { $null: true },
-      outcome: null,
-      // The relation filter is a left join: without the id check, an action whose release is
-      // gone would match `releasedAt IS NULL`
-      release: { id: { $notNull: true }, releasedAt: { $null: true } },
-    },
-    populate: { release: { select: ['id'] } },
-  });
-
-  if (actions.length === 0) {
-    return;
-  }
-
-  const revalidate = async () => {
-    const releaseIds = new Set<Release['id']>();
-
-    // One action failing must not stop the others: it would stop at the same action on every start
-    for (const action of actions) {
-      try {
-        const validity = await getDraftEntryValidity(
-          {
-            contentType: action.contentType,
-            documentId: action.entryDocumentId,
-            locale: action.locale,
-          },
-          { strapi }
-        );
-
-        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-          where: { id: action.id, outcome: null },
-          data: validity,
-        });
-        releaseIds.add(action.release.id);
-      } catch (error: unknown) {
-        strapi.log.error(`Error while adding the reason of release action ${action.id}`, {
-          error,
-        });
-      }
-    }
-
-    for (const releaseId of releaseIds) {
-      await getService('release', { strapi }).updateReleaseStatus(releaseId);
-    }
-  };
-
-  revalidate().catch((error: unknown) => {
-    strapi.log.error('Error while adding reasons to release actions that are not publishable', {
-      error,
+// Planned actions stored as not publishable before reasons existed: publish actions get their
+// draft's reason, unpublish actions an earlier version stored as invalid become valid. Finds
+// nothing to do once every one has been through it.
+export async function addReasonsToInvalidActions({ strapi }: { strapi: Core.Strapi }) {
+  getService('release-action', { strapi })
+    .revalidatePlannedActions({ isEntryValid: false, reason: { $null: true } })
+    // Not awaited by startup: a failure must not become an unhandled rejection
+    .catch((error: unknown) => {
+      strapi.log.error('Error while adding reasons to release actions that are not publishable', {
+        error,
+      });
     });
-  });
 }
 
 export async function migrateReleaseConditionReleases() {
@@ -177,66 +116,42 @@ export async function migrateReleaseConditionReleases() {
   });
 }
 
-export async function revalidateChangedContentTypes({ oldContentTypes, contentTypes }: Input) {
-  if (oldContentTypes !== undefined && contentTypes !== undefined) {
-    const contentTypesWithDraftAndPublish = Object.keys(oldContentTypes).filter(
-      (uid) => oldContentTypes[uid]?.options?.draftAndPublish
-    );
-    const releasesAffected = new Set();
-
-    async
-      .map(contentTypesWithDraftAndPublish, async (contentTypeUID: UID.ContentType) => {
-        const oldContentType = oldContentTypes[contentTypeUID];
-        const contentType = contentTypes[contentTypeUID];
-
-        // If attributes have changed, we need to revalidate actions because maybe validations rules are different.
-        // A deleted content type's actions are removed by deleteActionsOnDeleteContentType
-        if (contentType && !isEqual(oldContentType?.attributes, contentType?.attributes)) {
-          const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
-            where: {
-              contentType: contentTypeUID,
-              type: 'publish',
-              outcome: null,
-              release: { id: { $notNull: true }, releasedAt: { $null: true } },
-            },
-            populate: { release: { select: ['id'] } },
-          });
-
-          await async.map(actions, async (action: ReleaseAction) => {
-            const validity = await getDraftEntryValidity(
-              {
-                contentType: contentTypeUID,
-                documentId: action.entryDocumentId,
-                locale: action.locale,
-              },
-              { strapi }
-            );
-
-            releasesAffected.add(action.release.id);
-
-            await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-              where: { id: action.id, outcome: null },
-              data: validity,
-            });
-          });
-        }
-      })
-      .then(() => {
-        // We need to update the status of the releases affected
-        return async.map(releasesAffected, async (releaseId: Release['id']) => {
-          return getService('release', { strapi }).updateReleaseStatus(releaseId);
-        });
-      })
-      // Not awaited by startup: a failure must not become an unhandled rejection
-      .catch((error: unknown) => {
-        strapi.log.error('Error while revalidating release actions after a content type change', {
-          error,
-        });
-      });
+export async function revalidateChangedContentTypes(
+  { oldContentTypes, contentTypes }: ContentTypesSyncInput,
+  { strapi }: { strapi: Core.Strapi }
+) {
+  if (oldContentTypes === undefined || contentTypes === undefined) {
+    return;
   }
+
+  // Changed attributes can change the validation rules. The actions of a deleted content type, or
+  // of one that lost Draft and Publish, are removed (deleteContentTypeActions).
+  const changedContentTypes = Object.keys(oldContentTypes).filter(
+    (uid) =>
+      contentTypes[uid] &&
+      contentTypesUtils.hasDraftAndPublish(oldContentTypes[uid]) &&
+      contentTypesUtils.hasDraftAndPublish(contentTypes[uid]) &&
+      !isEqual(oldContentTypes[uid]?.attributes, contentTypes[uid]?.attributes)
+  );
+
+  if (changedContentTypes.length === 0) {
+    return;
+  }
+
+  getService('release-action', { strapi })
+    .revalidatePlannedActions({ contentType: { $in: changedContentTypes } })
+    // Not awaited by startup: a failure must not become an unhandled rejection
+    .catch((error: unknown) => {
+      strapi.log.error('Error while revalidating release actions after a content type change', {
+        error,
+      });
+    });
 }
 
-export async function disableContentTypeLocalized({ oldContentTypes, contentTypes }: Input) {
+export async function disableContentTypeLocalized({
+  oldContentTypes,
+  contentTypes,
+}: ContentTypesSyncInput) {
   if (!oldContentTypes) {
     return;
   }
@@ -265,7 +180,10 @@ export async function disableContentTypeLocalized({ oldContentTypes, contentType
   }
 }
 
-export async function enableContentTypeLocalized({ oldContentTypes, contentTypes }: Input) {
+export async function enableContentTypeLocalized({
+  oldContentTypes,
+  contentTypes,
+}: ContentTypesSyncInput) {
   if (!oldContentTypes) {
     return;
   }

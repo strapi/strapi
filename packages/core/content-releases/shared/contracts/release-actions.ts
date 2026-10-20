@@ -43,6 +43,8 @@ export interface ReleaseAction extends Entity {
   locale?: string;
   release: Release;
   isEntryValid: boolean;
+  // What a run did with the entry. Null until a run records it: a planned release, and a
+  // release that ran before outcomes existed.
   outcome: ReleaseActionOutcome | null;
   reason: ReleaseActionReason | null;
   status: 'draft' | 'published' | 'modified';

@@ -215,19 +215,15 @@ describe('Release controller', () => {
           },
         },
       };
-      // We mock the count all actions
       mockCountActions.mockResolvedValueOnce(2);
-      // We mock the count of publish actions that aren't publishable
-      mockCountActions.mockResolvedValueOnce(1);
+      // The release is planned: one of its publish actions isn't publishable
+      mockCountNotReadyByRelease.mockResolvedValueOnce(new Map([[1, 1]]));
 
       // @ts-expect-error partial context
       await releaseController.findOne(ctx);
       expect(ctx.body.data.actions.meta).toEqual({
         count: 2,
         notReadyCount: 1,
-      });
-      expect(mockCountActions).toHaveBeenLastCalledWith({
-        filters: { release: 1, type: 'publish', isEntryValid: false },
       });
     });
 
@@ -243,6 +239,8 @@ describe('Release controller', () => {
         },
         user: {},
       };
+
+      mockCountNotReadyByRelease.mockResolvedValueOnce(new Map());
 
       // @ts-expect-error partial context
       await releaseController.findOne(ctx);
