@@ -1,11 +1,23 @@
 import { setImmediate } from 'node:timers/promises';
 
-import type { Modules } from '@strapi/types';
+import type { Core, Modules, Schema } from '@strapi/types';
 
+import { bootstrap } from '../../bootstrap';
 import { RELEASE_ACTION_MODEL_UID } from '../../constants';
-import { deleteActionsOnDelete } from '../documents';
+import { isEntryValid } from '../../utils';
+import { deleteActionsOnDelete, updateActionsOnUpdate } from '../documents';
 
-type Context = Parameters<Modules.Documents.Middleware.Middleware>[0];
+jest.mock('../../utils', () => ({
+  ...jest.requireActual('../../utils'),
+  isEntryValid: jest.fn().mockResolvedValue(true),
+}));
+
+type Middleware = Modules.Documents.Middleware.Middleware;
+type Context = Parameters<Middleware>[0];
+type Subscriber = Exclude<
+  Parameters<Core.Strapi['db']['lifecycles']['subscribe']>[0],
+  (event: never) => unknown
+>;
 
 const UID = 'api::article.article';
 
@@ -82,5 +94,164 @@ describe('deleteActionsOnDelete', () => {
 
     expect(next).toHaveBeenCalled();
     expect(actionDeleteMany).not.toHaveBeenCalled();
+  });
+});
+
+const contentType: Schema.ContentType = {
+  uid: UID,
+  modelType: 'contentType',
+  modelName: 'article',
+  globalId: 'Article',
+  kind: 'collectionType',
+  collectionName: 'articles',
+  info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+  options: { draftAndPublish: true },
+  attributes: {},
+};
+
+describe('content-releases cleanup failures', () => {
+  const error = new Error('database unavailable');
+  const findMany = jest.fn();
+  const deleteMany = jest.fn();
+  const updateMany = jest.fn();
+  const updateStatus = jest.fn();
+  const logError = jest.fn();
+  let deleteMiddleware: Middleware;
+  let updateMiddleware: Middleware;
+  let subscriber: Subscriber;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+    deleteMany.mockResolvedValue({ count: 1 });
+    updateMany.mockResolvedValue({ count: 1 });
+    updateStatus.mockResolvedValue({});
+    jest.mocked(isEntryValid).mockResolvedValue(true);
+
+    const strapi = {
+      db: {
+        query: jest.fn(() => ({ findMany, deleteMany, updateMany })),
+        lifecycles: {
+          subscribe(value: Subscriber) {
+            subscriber = value;
+          },
+        },
+      },
+      log: { error: logError },
+      ee: { features: { isEnabled: () => true } },
+      contentTypes: { [contentType.uid]: contentType },
+      getModel: () => contentType,
+      documents: {
+        use(middleware: Middleware) {
+          if (middleware === deleteActionsOnDelete) {
+            deleteMiddleware = middleware;
+          }
+          if (middleware === updateActionsOnUpdate) {
+            updateMiddleware = middleware;
+          }
+        },
+      },
+      plugins: {
+        'content-releases': {
+          services: {
+            release: { updateReleaseStatus: updateStatus },
+            scheduling: { syncFromDatabase: jest.fn().mockResolvedValue(undefined) },
+          },
+        },
+      },
+      localization: {
+        isLocalizedContentType: () => false,
+        getDefaultLocale: jest.fn().mockResolvedValue('en'),
+      },
+      get: () => ({ addAllowedEvent: jest.fn() }),
+      has: () => false,
+    } as unknown as Core.Strapi;
+
+    global.strapi = strapi;
+    await bootstrap({ strapi });
+  });
+
+  describe.each(['delete', 'update', 'afterDeleteMany'] as const)('%s', (action) => {
+    const invoke = async () => {
+      if (action === 'afterDeleteMany') {
+        await subscriber.afterDeleteMany!({
+          action: 'afterDeleteMany',
+          model: {
+            uid: contentType.uid,
+            singularName: 'article',
+            tableName: 'articles',
+            attributes: {},
+            columnToAttribute: {},
+            indexes: [],
+            foreignKeys: [],
+            lifecycles: {},
+          },
+          params: { where: { locale: 'en', documentId: 'doc-1' } },
+          state: {},
+        });
+        return;
+      }
+
+      const result = { id: 1, documentId: 'doc-1', locale: 'en' };
+      const ctx = {
+        action,
+        uid: contentType.uid,
+        contentType,
+        params: { documentId: 'doc-1', locale: 'en', ...(action === 'update' && { data: {} }) },
+      } as unknown as Context;
+      const middleware = action === 'delete' ? deleteMiddleware : updateMiddleware;
+      await expect(middleware(ctx, async () => result)).resolves.toBe(result);
+    };
+
+    it.each(['lookup', 'cleanup', 'status'] as const)(
+      'logs a %s failure without blocking the operation',
+      async (stage) => {
+        // Keep the rejection handled even if an await regresses, so the log assertion reports it.
+        const rejected = Promise.reject(error);
+        rejected.catch(() => {});
+        const failingCall = {
+          lookup: findMany,
+          status: updateStatus,
+          cleanup: action === 'update' ? updateMany : deleteMany,
+        }[stage];
+        failingCall.mockReturnValueOnce(rejected);
+        await invoke();
+        const message = {
+          update: 'Error while updating release actions after update',
+          delete: 'Error while deleting release actions after delete',
+          afterDeleteMany: 'Error while deleting release actions after entry deleteMany',
+        }[action];
+        expect(logError).toHaveBeenCalledTimes(1);
+        expect(logError).toHaveBeenCalledWith(message, { error });
+      }
+    );
+
+    it('updates every affected release on success', async () => {
+      await invoke();
+      expect(updateStatus.mock.calls).toEqual([[1], [2]]);
+      expect(logError).not.toHaveBeenCalled();
+    });
+
+    it('updates later releases when one status refresh fails', async () => {
+      findMany.mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      const rejected = Promise.reject(error);
+      rejected.catch(() => {});
+      updateStatus.mockReset();
+      updateStatus
+        .mockResolvedValueOnce({})
+        .mockReturnValueOnce(rejected)
+        .mockResolvedValueOnce({});
+
+      await invoke();
+
+      expect(updateStatus.mock.calls).toEqual([[1], [2], [3]]);
+      const message = {
+        update: 'Error while updating release actions after update',
+        delete: 'Error while deleting release actions after delete',
+        afterDeleteMany: 'Error while deleting release actions after entry deleteMany',
+      }[action];
+      expect(logError).toHaveBeenCalledTimes(1);
+      expect(logError).toHaveBeenCalledWith(message, { error });
+    });
   });
 });

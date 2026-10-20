@@ -42,7 +42,7 @@
   "list.assets.loading-asset": "Henter forhåndsvisning for mediet: {path}",
   "list.assets.not-supported-content": "Ingen forhåndsvisning mulig",
   "list.assets.preview-asset": "Forhåndsvisning af videoen her {path}",
-  "list.assets.selected": "{number, plural, =0 {Ingen medier} one {1 medie} other {# medier}} valgt",
+  "list.assets.selected": "{numberFolders, plural, one {1 mappe} other {# mapper}} - {numberAssets, plural, one {1 medie} other {# medier}}",
   "list.assets.type-not-allowed": "Filtypen er ikke tilladt.",
   "mediaLibraryInput.actions.nextSlide": "Næste slide",
   "mediaLibraryInput.actions.previousSlide": "Forrige slide",
