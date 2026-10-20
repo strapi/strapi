@@ -1,4 +1,4 @@
-import type { Core, UID, Struct } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import type { Model } from '@strapi/database';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
@@ -42,7 +42,7 @@ const deleteEntitiesRecords = async (
   const models = strapi.get('models').get() as Model[];
   const contentTypes = Object.values(strapi.contentTypes) as Struct.ContentTypeSchema[];
 
-  const contentTypesToClear = contentTypes
+  const contentTypesToClear: string[] = contentTypes
     .filter((contentType) => {
       let removeThisContentType = true;
 
@@ -67,7 +67,7 @@ const deleteEntitiesRecords = async (
 
   const modelsToClear = models
     .filter((model) => {
-      if (contentTypesToClear.includes(model.uid as UID.ContentType)) {
+      if (contentTypesToClear.includes(model.uid)) {
         return false;
       }
 

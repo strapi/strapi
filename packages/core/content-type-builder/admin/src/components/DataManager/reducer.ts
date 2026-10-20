@@ -178,7 +178,7 @@ type FolderAssignmentPayload =
   { targetGroupId: string | null } | { newFolderId: string; newFolderName: string };
 
 type CreateSchemaPayload = {
-  uid: string;
+  uid: Internal.UID.ContentType;
   data: {
     displayName: string;
     singularName: string;
@@ -253,7 +253,7 @@ type UpdateSchemaPayload = {
     draftAndPublish: boolean;
     pluginOptions: PluginOptions;
   };
-  uid: string;
+  uid: Internal.UID.ContentType;
   folder?: FolderAssignmentPayload;
 };
 
@@ -771,7 +771,7 @@ const slice = createUndoRedoSlice(
           data;
 
         const newSchema: ContentType = {
-          uid: uid as Internal.UID.ContentType,
+          uid,
           status: 'NEW',
           visible: true,
           modelType: 'contentType',
@@ -798,7 +798,7 @@ const slice = createUndoRedoSlice(
         if (folder) {
           applyFolderAssignment(
             state.contentStructure.sections[sectionKeyForKind(kind)],
-            uid as UID.ContentType,
+            uid,
             folder
           );
         }
@@ -1168,7 +1168,7 @@ const slice = createUndoRedoSlice(
         if (folder) {
           applyFolderAssignment(
             state.contentStructure.sections[sectionKeyForKind(kind)],
-            uid as UID.ContentType,
+            uid,
             folder
           );
         }

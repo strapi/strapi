@@ -342,8 +342,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           );
 
           await strapi.db.transaction(async () => {
-            for (const contentTypeUid of contentTypeUids) {
-              const contentType = contentTypeUid as UID.ContentType;
+            for (const contentType of contentTypeUids) {
               const { publish, unpublish } = formattedActions[contentType];
 
               // Serialize within a content type: concurrent publishes of related documents

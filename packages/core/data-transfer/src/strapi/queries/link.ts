@@ -1,6 +1,6 @@
 import type { Knex } from 'knex';
 import { clone } from 'lodash';
-import type { Core, UID } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { ILink } from '../../types';
 
@@ -45,7 +45,7 @@ const loadExistingRefs = async (
 
   for (let i = 0; i < numericIds.length; i += EXISTENCE_CHECK_CHUNK_SIZE) {
     const chunk = numericIds.slice(i, i + EXISTENCE_CHECK_CHUNK_SIZE);
-    const rows = await strapi.db.query(uid as UID.Schema).findMany({
+    const rows = await strapi.db.query(uid).findMany({
       select: ['id'],
       where: { id: { $in: chunk } },
     });
@@ -57,7 +57,7 @@ const loadExistingRefs = async (
 
   for (let i = 0; i < documentIds.length; i += EXISTENCE_CHECK_CHUNK_SIZE) {
     const chunk = documentIds.slice(i, i + EXISTENCE_CHECK_CHUNK_SIZE);
-    const rows = await strapi.db.query(uid as UID.Schema).findMany({
+    const rows = await strapi.db.query(uid).findMany({
       select: ['id', 'documentId'],
       where: { documentId: { $in: chunk } },
     });

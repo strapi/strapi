@@ -80,7 +80,7 @@ export interface DataManagerContextValue {
       draftAndPublish: boolean;
       pluginOptions: Record<string, unknown>;
     };
-    uid: Internal.UID.Schema;
+    uid: Internal.UID.ContentType;
     folder?: FolderSelection;
   }) => void;
   changeDynamicZoneComponents: (opts: {

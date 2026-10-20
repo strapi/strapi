@@ -11,7 +11,7 @@ import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { normalizeXToOneRelationValue } from '../utils/xto-one';
 
 const { isPolymorphic } = relations;
-const MEDIA_UID = 'plugin::upload.file' as UID.ContentType;
+const MEDIA_UID: UID.ContentType = 'plugin::upload.file';
 
 interface Options {
   uid: UID.Schema;

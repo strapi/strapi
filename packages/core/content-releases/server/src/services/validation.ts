@@ -1,5 +1,5 @@
 import { errors, contentTypes } from '@strapi/utils';
-import type { Core, UID } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
@@ -50,7 +50,7 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
     contentTypeUid: CreateReleaseAction.Request['body']['contentType'],
     entryDocumentId: CreateReleaseAction.Request['body']['entryDocumentId']
   ) {
-    const contentType = strapi.contentType(contentTypeUid as UID.ContentType);
+    const contentType = strapi.contentType(contentTypeUid);
 
     if (!contentType) {
       throw new errors.NotFoundError(`No content type found for uid ${contentTypeUid}`);

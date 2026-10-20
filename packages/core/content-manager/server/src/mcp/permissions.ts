@@ -5,8 +5,8 @@ import { getService } from '../utils';
 import type { ContentManagerModelForMcp } from './types';
 
 /** Returns true if the registered localization provider reports the content type identified by `uid` as localized. */
-export const isContentTypeLocalized = (strapi: Core.Strapi, uid: string): boolean => {
-  const ct = strapi.contentTypes?.[uid as UID.ContentType];
+export const isContentTypeLocalized = (strapi: Core.Strapi, uid: UID.ContentType): boolean => {
+  const ct = strapi.contentTypes?.[uid];
   if (ct === undefined) return false;
   return strapi.localization.isLocalizedContentType(ct);
 };
@@ -65,7 +65,7 @@ export const resolvePermittedLocaleSchema = (
   strapi: Core.Strapi,
   context: Modules.MCP.McpHandlerContext,
   action: string,
-  uid: string,
+  uid: UID.ContentType,
   localeCodes: [string, ...string[]] | null,
   defaultLocale: string | null,
   baseLocaleSchema: z.ZodTypeAny
