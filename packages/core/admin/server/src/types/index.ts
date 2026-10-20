@@ -22,6 +22,7 @@ import type EEAuthService from '../../../ee/server/src/services/auth';
 import type EEMetricsService from '../../../ee/server/src/services/metrics';
 import type EEPassportService from '../../../ee/server/src/services/passport';
 import type EEPersistTablesService from '../../../ee/server/src/services/persist-tables';
+import type { AdminRoleWithUsersCount } from '../services/role';
 import type EERoleService from '../../../ee/server/src/services/role';
 import type EESeatEnforcementService from '../../../ee/server/src/services/seat-enforcement';
 import type EEUserService from '../../../ee/server/src/services/user';
@@ -47,14 +48,23 @@ type EditionService<TCE, TEE> = TCE & Partial<Omit<TEE, keyof TCE>>;
 type EnterpriseService<TCE, TEE> = Omit<TCE, keyof TEE> & TEE;
 
 /**
- * The `admin::role` service as runtime calls it: `findOne` resolves to `null` when no role matches.
- * The implementation keeps develop's published `Promise<AdminRole>`.
+ * The `admin::role` service as runtime calls it: `findOne`, `findOneWithUsersCount` and
+ * `getSuperAdmin` resolve to `null` when no role matches, the result of the query engine's `findOne`
+ * (`services/role.ts:87-107`, `:228`). The implementation keeps develop's published
+ * `Promise<AdminRole>`, `Promise<AdminRoleWithUsersCount>` and `Promise<AdminRole | undefined>`.
  */
 type RoleService<TService extends { findOne: (...args: never[]) => unknown }> = Omit<
   TService,
-  'findOne'
+  'findOne' | 'findOneWithUsersCount' | 'getSuperAdmin'
 > & {
   findOne(...args: Parameters<(typeof CERoleService)['findOne']>): Promise<AdminRole | null>;
+  findOneWithUsersCount(
+    ...args: Parameters<(typeof CERoleService)['findOneWithUsersCount']>
+  ): Promise<AdminRoleWithUsersCount | null>;
+  getSuperAdmin(): Promise<AdminRole | null>;
+  // TODO @Nico `getSuperAdminWithUsersCount` resolves to `null` too when the super admin role is
+  // missing, but its callers in `services/user.ts` read `id` and `usersCount` without a check: typing
+  // it `| null` needs a runtime decision first.
 };
 
 /**
