@@ -1,19 +1,21 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 
+import { useDroppable } from '@dnd-kit/core';
 import { SubNav } from '@strapi/admin/strapi-admin';
-import { Box, Flex, IconButton, Loader, Typography } from '@strapi/design-system';
-import { ChevronDown, Folder as FolderIcon, House } from '@strapi/icons';
+import { Box, Flex, IconButton, Loader, Tooltip, Typography } from '@strapi/design-system';
+import { ChevronDown, ChevronRight, Folder as FolderIcon, House, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { css, styled } from 'styled-components';
 
-import { TruncatedText } from '../../../../components/TruncatedText';
 import { useGetFolderStructureQuery } from '../../../../services/folders';
 import { findFolderPath } from '../../../../utils/findFolderPath';
 import { isEventFromWithin } from '../../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
+import { toFolderTreeSummaryId } from '../Dnd/dndIds';
 import { useFolderTreeDroppable } from '../Dnd/useFolderTreeDroppable';
 
+import { getCollapsedBranch, type CollapsedBranch } from './collapsedBranch';
 import { FolderTreeRowMenu } from './FolderTreeRowMenu';
 import { useSpringLoadedExpand } from './useSpringLoadedExpand';
 
@@ -76,6 +78,7 @@ const TreeRow = styled(Flex)<{
   $isValidDropTarget?: boolean;
   $isInvalidDropCursor?: boolean;
   $isMovePending?: boolean;
+  $isHiddenAncestor?: boolean;
 }>`
   cursor: ${({ $isMovePending, $isInvalidDropCursor }) => {
     if ($isMovePending) {
@@ -86,13 +89,21 @@ const TreeRow = styled(Flex)<{
   }};
   pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
   border-radius: ${({ theme }) => theme.borderRadius};
-  background: ${({ $isActive, theme }) => ($isActive ? theme.colors.primary100 : 'transparent')};
+  background: ${({ $isActive, $isHiddenAncestor, theme }) => {
+    if ($isActive) {
+      return theme.colors.primary100;
+    }
+
+    // Tinted so the folders a summary row reveals read as its group rather than
+    // as siblings of the rows around them.
+    return $isHiddenAncestor ? theme.colors.neutral100 : 'transparent';
+  }};
 
   // The whole row lights up, so pointing anywhere along it — chevron, label or
   // the actions trigger — reads as one target.
   &:hover {
-    background: ${({ $isActive, theme }) =>
-      $isActive ? theme.colors.primary100 : theme.colors.neutral100};
+    background: ${({ $isActive, $isHiddenAncestor, theme }) =>
+      $isActive || $isHiddenAncestor ? theme.colors.primary100 : theme.colors.neutral100};
   }
 
   ${({ $isValidDropTarget, theme }) =>
@@ -204,6 +215,15 @@ const NavList = styled.ul`
 const INDENT_PER_LEVEL_REM = 1.6;
 
 /**
+ * Deeper rows keep this level's indent, so a name never runs out of room however
+ * deep the tree goes. Rows past it stay readable through their path tooltip.
+ */
+const MAX_VISUAL_LEVEL = 4;
+
+export const getIndentRem = (level: number) =>
+  Math.min(level, MAX_VISUAL_LEVEL) * INDENT_PER_LEVEL_REM;
+
+/**
  * Breathing room between the row's highlight and the controls at either end.
  * Asymmetric on purpose: the chevron reads as part of the indent, while the
  * actions trigger sits closer to the edge so it stays out of the name's way.
@@ -272,6 +292,15 @@ interface FolderTreeItemProps {
   onExpand: (id: number) => void;
   onSelect: (folderId: number) => void;
   isMovePending: boolean;
+  /** Root folder first, down to this folder's parent — for the path tooltip. */
+  ancestorNames: string[];
+  /**
+   * Listed under an opened "N parent folders" row: the next folder on the path is
+   * already the row below it, so it shows no chevron and no subfolders.
+   */
+  isHiddenAncestor?: boolean;
+  /** Rendered in place of the subfolders while expanded — the collapsed branch. */
+  subtree?: ReactNode;
 }
 
 interface FolderTreeItemInnerProps extends Omit<FolderTreeItemProps, 'node'> {
@@ -293,6 +322,9 @@ const FolderTreeItemInner = ({
   onExpand,
   onSelect,
   isMovePending,
+  ancestorNames,
+  isHiddenAncestor = false,
+  subtree,
 }: FolderTreeItemInnerProps) => {
   const { formatMessage } = useIntl();
   const hasChildren = folderChildren.length > 0;
@@ -301,6 +333,11 @@ const FolderTreeItemInner = ({
   // show" — otherwise the chevron stays rotated on what is now a leaf.
   const isFolderExpanded = isExpanded(id) && hasChildren;
   const isActive = showActiveFolder && currentFolderId === id;
+  const pathLabel = [
+    formatMessage({ id: getTranslationKey('plugin.name'), defaultMessage: 'Media Library' }),
+    ...ancestorNames,
+    name,
+  ].join(' / ');
 
   const {
     droppable: { setNodeRef },
@@ -318,7 +355,7 @@ const FolderTreeItemInner = ({
 
   useSpringLoadedExpand({
     isOver,
-    canExpand: hasChildren && !isFolderExpanded,
+    canExpand: !isHiddenAncestor && hasChildren && !isFolderExpanded,
     onExpand: handleExpand,
   });
 
@@ -332,10 +369,11 @@ const FolderTreeItemInner = ({
         alignItems="center"
         // Indent plus the row's own inset, so the chevron never sits flush
         // against the edge of the highlight at any depth.
-        paddingLeft={`${level * INDENT_PER_LEVEL_REM + ROW_INSET_LEFT_REM}rem`}
+        paddingLeft={`${getIndentRem(level) + ROW_INSET_LEFT_REM}rem`}
         paddingRight={`${ROW_INSET_RIGHT_REM}rem`}
         gap={1}
         $isActive={isActive}
+        $isHiddenAncestor={isHiddenAncestor}
         $isValidDropTarget={showValidDropHighlight}
         $isInvalidDropCursor={showInvalidDropCursor}
         $isMovePending={isMovePending}
@@ -348,55 +386,63 @@ const FolderTreeItemInner = ({
           setMenuPosition({ x: event.clientX, y: event.clientY });
         }}
       >
-        <ChevronButton
-          label={
-            hasChildren
-              ? formatMessage(
-                  {
-                    id: getTranslationKey(
-                      isFolderExpanded ? 'sidebar.tree.collapse' : 'sidebar.tree.expand'
-                    ),
-                    defaultMessage: isFolderExpanded ? 'Collapse {name}' : 'Expand {name}',
-                  },
-                  { name }
-                )
-              : formatMessage(
-                  {
-                    id: getTranslationKey('sidebar.tree.no-subfolders'),
-                    defaultMessage: 'The folder {name} has no subfolders',
-                  },
-                  { name }
-                )
-          }
-          disabled={!hasChildren}
-          onClick={(event: React.MouseEvent) => {
-            event.stopPropagation();
-            onToggle(id);
-          }}
-          variant="ghost"
-          withTooltip={false}
-          aria-expanded={hasChildren ? isFolderExpanded : undefined}
-        >
-          <RotatingChevron $expanded={isFolderExpanded} fill="neutral500" />
-        </ChevronButton>
+        {isHiddenAncestor ? (
+          <IconSlot aria-hidden />
+        ) : (
+          <ChevronButton
+            label={
+              hasChildren
+                ? formatMessage(
+                    {
+                      id: getTranslationKey(
+                        isFolderExpanded ? 'sidebar.tree.collapse' : 'sidebar.tree.expand'
+                      ),
+                      defaultMessage: isFolderExpanded ? 'Collapse {name}' : 'Expand {name}',
+                    },
+                    { name }
+                  )
+                : formatMessage(
+                    {
+                      id: getTranslationKey('sidebar.tree.no-subfolders'),
+                      defaultMessage: 'The folder {name} has no subfolders',
+                    },
+                    { name }
+                  )
+            }
+            disabled={!hasChildren}
+            onClick={(event: React.MouseEvent) => {
+              event.stopPropagation();
+              onToggle(id);
+            }}
+            variant="ghost"
+            withTooltip={false}
+            aria-expanded={hasChildren ? isFolderExpanded : undefined}
+          >
+            <RotatingChevron $expanded={isFolderExpanded} fill="neutral500" />
+          </ChevronButton>
+        )}
 
         <Box flex="1" minWidth={0}>
-          <RowButton
-            ref={rowButtonRef}
-            type="button"
-            $isActive={isActive}
-            $isValidDropTarget={showValidDropHighlight}
-            $isInvalidDropCursor={showInvalidDropCursor}
-            $isMovePending={isMovePending}
-            aria-current={isActive ? 'page' : undefined}
-            onClick={() => onSelect(id)}
-            data-testid={`folder-tree-node-${id}`}
-            data-folder-id={id}
-          >
-            <TruncatedText variant="omega" fontWeight={isActive ? 'semiBold' : 'regular'}>
-              {name}
-            </TruncatedText>
-          </RowButton>
+          {/* Always on, unlike a truncation-only tooltip: the path is more than
+              the visible name, so it never just repeats what is on screen. */}
+          <Tooltip label={pathLabel}>
+            <RowButton
+              ref={rowButtonRef}
+              type="button"
+              $isActive={isActive}
+              $isValidDropTarget={showValidDropHighlight}
+              $isInvalidDropCursor={showInvalidDropCursor}
+              $isMovePending={isMovePending}
+              aria-current={isActive ? 'page' : undefined}
+              onClick={() => onSelect(id)}
+              data-testid={`folder-tree-node-${id}`}
+              data-folder-id={id}
+            >
+              <Typography ellipsis variant="omega" fontWeight={isActive ? 'semiBold' : 'regular'}>
+                {name}
+              </Typography>
+            </RowButton>
+          </Tooltip>
         </Box>
 
         <FolderTreeRowMenu
@@ -408,25 +454,29 @@ const FolderTreeItemInner = ({
         />
       </TreeRow>
 
-      {hasChildren && isFolderExpanded && (
-        <NavList>
-          {folderChildren.map((child) => (
-            <FolderTreeItem
-              key={child.id ?? child.name}
-              node={child}
-              parentId={id}
-              level={level + 1}
-              currentFolderId={currentFolderId}
-              showActiveFolder={showActiveFolder}
-              isExpanded={isExpanded}
-              onToggle={onToggle}
-              onExpand={onExpand}
-              onSelect={onSelect}
-              isMovePending={isMovePending}
-            />
-          ))}
-        </NavList>
-      )}
+      {hasChildren &&
+        isFolderExpanded &&
+        !isHiddenAncestor &&
+        (subtree ?? (
+          <NavList>
+            {folderChildren.map((child) => (
+              <FolderTreeItem
+                key={child.id ?? child.name}
+                node={child}
+                parentId={id}
+                level={level + 1}
+                currentFolderId={currentFolderId}
+                showActiveFolder={showActiveFolder}
+                isExpanded={isExpanded}
+                onToggle={onToggle}
+                onExpand={onExpand}
+                onSelect={onSelect}
+                isMovePending={isMovePending}
+                ancestorNames={[...ancestorNames, name]}
+              />
+            ))}
+          </NavList>
+        ))}
     </li>
   );
 };
@@ -442,6 +492,155 @@ const FolderTreeItem = ({ node, ...props }: FolderTreeItemProps) => {
       id={node.id}
       name={node.name ?? ''}
       folderChildren={node.children ?? []}
+    />
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * CollapsedAncestors — the "N parent folders" row of a deep branch (internal)
+ * -----------------------------------------------------------------------------------------------*/
+
+const SummaryLabel = styled(Typography)`
+  font-style: italic;
+`;
+
+const SummaryChevron = styled(ChevronRight)<{ $expanded: boolean }>`
+  transform: rotate(${({ $expanded }) => ($expanded ? '90deg' : '0deg')});
+  transition: transform 0.2s ease;
+`;
+
+type SharedItemProps = Pick<
+  FolderTreeItemProps,
+  | 'currentFolderId'
+  | 'showActiveFolder'
+  | 'isExpanded'
+  | 'onToggle'
+  | 'onExpand'
+  | 'onSelect'
+  | 'isMovePending'
+>;
+
+interface CollapsedAncestorsProps extends SharedItemProps {
+  branch: CollapsedBranch;
+}
+
+/**
+ * Stands in for the folders between a deep branch's root and the selected
+ * folder's parent, and lists them in place when opened. Starts closed on every
+ * selection: the caller keys it on the selected folder.
+ */
+const CollapsedAncestors = ({ branch, ...itemProps }: CollapsedAncestorsProps) => {
+  const { formatMessage } = useIntl();
+  const [isOpen, setIsOpen] = useState(false);
+  const listId = useId();
+  const open = useCallback(() => setIsOpen(true), []);
+
+  const rootName = branch.root.name ?? '';
+  const hiddenNames = branch.hidden.map((node) => node.name ?? '');
+
+  // Without this the hidden folders would be unreachable mid-drag, since the row
+  // can't be clicked while dragging. It never resolves to a destination.
+  const { setNodeRef, isOver } = useDroppable({
+    id: toFolderTreeSummaryId(branch.root.id!),
+    disabled: itemProps.isMovePending,
+  });
+
+  useSpringLoadedExpand({ isOver, canExpand: !isOpen, onExpand: open });
+
+  return (
+    <li>
+      <TreeRow
+        ref={setNodeRef}
+        data-native-context-menu
+        alignItems="center"
+        paddingLeft={`${getIndentRem(1) + ROW_INSET_LEFT_REM}rem`}
+        paddingRight={`${ROW_INSET_RIGHT_REM}rem`}
+        $isInvalidDropCursor={isOver}
+        $isMovePending={itemProps.isMovePending}
+      >
+        <Tooltip label={hiddenNames.join(' / ')}>
+          <RowButton
+            type="button"
+            $isActive={false}
+            $isInvalidDropCursor={isOver}
+            $isMovePending={itemProps.isMovePending}
+            aria-expanded={isOpen}
+            aria-controls={isOpen ? listId : undefined}
+            onClick={() => setIsOpen((prev) => !prev)}
+            data-testid="folder-tree-hidden-ancestors"
+          >
+            <IconSlot>
+              <More aria-hidden fill="neutral500" />
+            </IconSlot>
+            <Box flex="1" minWidth={0}>
+              <SummaryLabel ellipsis variant="omega" textColor="neutral600">
+                {formatMessage(
+                  {
+                    id: getTranslationKey('sidebar.tree.hidden-ancestors'),
+                    defaultMessage:
+                      '{count, plural, one {# parent folder} other {# parent folders}}',
+                  },
+                  { count: branch.hidden.length }
+                )}
+              </SummaryLabel>
+            </Box>
+            <IconSlot>
+              <SummaryChevron aria-hidden $expanded={isOpen} fill="neutral500" />
+            </IconSlot>
+          </RowButton>
+        </Tooltip>
+      </TreeRow>
+
+      {isOpen && (
+        <NavList id={listId}>
+          {branch.hidden.map((node, index) => (
+            <FolderTreeItem
+              {...itemProps}
+              key={node.id ?? node.name}
+              node={node}
+              parentId={(index === 0 ? branch.root.id : branch.hidden[index - 1].id) ?? null}
+              // All at one level: they are a list of the path, not a nested tree.
+              level={2}
+              ancestorNames={[rootName, ...hiddenNames.slice(0, index)]}
+              isHiddenAncestor
+            />
+          ))}
+        </NavList>
+      )}
+    </li>
+  );
+};
+
+/**
+ * The root folder of a deep branch, with everything between it and the selected
+ * folder's parent folded into one row. See `getCollapsedBranch`.
+ */
+const CollapsedBranchItem = ({ branch, ...itemProps }: CollapsedAncestorsProps) => {
+  const ancestorNamesOfParent = [branch.root, ...branch.hidden].map((node) => node.name ?? '');
+
+  return (
+    <FolderTreeItem
+      {...itemProps}
+      node={branch.root}
+      parentId={null}
+      level={0}
+      ancestorNames={[]}
+      subtree={
+        <NavList>
+          <CollapsedAncestors
+            {...itemProps}
+            key={itemProps.currentFolderId ?? 'home'}
+            branch={branch}
+          />
+          <FolderTreeItem
+            {...itemProps}
+            node={branch.parent}
+            parentId={branch.hidden[branch.hidden.length - 1]?.id ?? branch.root.id ?? null}
+            level={2}
+            ancestorNames={ancestorNamesOfParent}
+          />
+        </NavList>
+      }
     />
   );
 };
@@ -494,6 +693,19 @@ export const FolderTree = ({
     currentFolderId
   );
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
+  const collapsedBranch = useMemo(
+    () => getCollapsedBranch(folderStructure, currentFolderId),
+    [folderStructure, currentFolderId]
+  );
+  const sharedItemProps: SharedItemProps = {
+    currentFolderId,
+    showActiveFolder,
+    isExpanded,
+    onToggle: toggleExpanded,
+    onExpand: expandFolder,
+    onSelect: onSelectFolder,
+    isMovePending,
+  };
 
   const isHomeActive = showActiveFolder && currentFolderId == null;
   const homeLabel = formatMessage({
@@ -615,22 +827,25 @@ export const FolderTree = ({
               </Box>
             ) : (
               <NavList>
-                {folderStructure.map((node) => (
-                  <FolderTreeItem
-                    key={node.id ?? node.name}
-                    node={node}
-                    // Top of the tree — these sit at the library root.
-                    parentId={null}
-                    level={0}
-                    currentFolderId={currentFolderId}
-                    showActiveFolder={showActiveFolder}
-                    isExpanded={isExpanded}
-                    onToggle={toggleExpanded}
-                    onExpand={expandFolder}
-                    onSelect={onSelectFolder}
-                    isMovePending={isMovePending}
-                  />
-                ))}
+                {folderStructure.map((node) =>
+                  collapsedBranch && node.id === collapsedBranch.root.id ? (
+                    <CollapsedBranchItem
+                      key={node.id}
+                      branch={collapsedBranch}
+                      {...sharedItemProps}
+                    />
+                  ) : (
+                    <FolderTreeItem
+                      key={node.id ?? node.name}
+                      node={node}
+                      // Top of the tree — these sit at the library root.
+                      parentId={null}
+                      level={0}
+                      ancestorNames={[]}
+                      {...sharedItemProps}
+                    />
+                  )
+                )}
               </NavList>
             )}
           </Box>
