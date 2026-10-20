@@ -438,6 +438,114 @@ jobs:
         if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
         run: exit 1
 
+  # Checks that changes do not break @strapi-enterprise/plugin-byok. The plugin is private: its
+  # code (source, built files, source maps) and the prompts it sends must never become public.
+  # See docs/docs/contributing/03-testing/e2e/03-enterprise-plugins.md.
+  #
+  # - Fork PRs skip this job: GitHub gives them no secrets, so they cannot install the plugin. The
+  #   push run on develop catches what a fork PR breaks.
+  # - Never run this job, or any PR code with the license, from `pull_request_target` or
+  #   `workflow_run`: fork code could then read the license and the plugin.
+  # - Caches are restored, never saved, so no cache can hold the plugin. Do not use the
+  #   `yarn-nm-install` or `run-build` actions here: they save caches.
+  # - The plugin is installed in $RUNNER_TEMP, outside the paths that caches and artifacts use.
+  e2e_enterprise_plugins:
+    if: >-
+      ${{ (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
+      && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true') }}
+    timeout-minutes: 30
+    needs: [conditions, build]
+    name: '[EE] e2e enterprise plugins (browser: chromium)'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Read yarn cache folder
+        id: yarn-config
+        env:
+          YARN_ENABLE_GLOBAL_CACHE: 'false'
+        run: echo "CACHE_FOLDER=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore yarn cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.yarn-config.outputs.CACHE_FOLDER }}
+          key: yarn-download-cache-default-${{ hashFiles('yarn.lock', '.yarnrc.yml') }}
+          restore-keys: |
+            yarn-download-cache-default-
+
+      - name: Monorepo install
+        run: yarn install --immutable --inline-builds
+        env:
+          YARN_ENABLE_GLOBAL_CACHE: 'false'
+          YARN_ENABLE_MIRROR: 'false'
+          YARN_NM_MODE: 'hardlinks-local'
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore build cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: yarn-build-cache
+        with:
+          path: packages/**/dist
+          key: yarn-build-cache-${{ github.sha }}
+
+      - name: Monorepo build
+        if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
+        run: yarn nx run-many --targets build --nx-ignore-cycles --skip-nx-cache
+
+      - name: Install the BYOK plugin
+        env:
+          STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+        run: |
+          tests/scripts/install-byok-plugin.sh "$RUNNER_TEMP/enterprise-plugins"
+          echo "STRAPI_BYOK_PLUGIN_PATH=$RUNNER_TEMP/enterprise-plugins/node_modules/@strapi-enterprise/plugin-byok" >> "$GITHUB_ENV"
+
+      - name: Run [EE] e2e enterprise plugins E2E tests
+        id: e2e
+        continue-on-error: true
+        uses: ./.github/actions/run-e2e-tests
+        env:
+          STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+        with:
+          runEE: true
+          domains: enterprise-plugins
+          jestOptions: '--project=chromium'
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ steps.e2e.outcome == 'failure' }}
+        with:
+          name: ee-enterprise-plugins-playwright-trace-${{ github.run_id }}-${{ github.job }}
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
+      - name: Upload results to trunk
+        id: trunk
+        if: '!cancelled()'
+        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
+        with:
+          junit-paths: test-apps/junit-reports/*.xml
+          org-slug: strapi
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
+        continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
+
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
