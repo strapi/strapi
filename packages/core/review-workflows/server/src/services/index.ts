@@ -1,3 +1,6 @@
+import type { Core } from '@strapi/types';
+import type {} from '../types';
+
 import workflows from './workflows';
 import stages from './stages';
 import stagePermissions from './stage-permissions';
@@ -7,6 +10,12 @@ import reviewWorkflowsMetrics from './metrics';
 import reviewWorkflowsWeeklyMetrics from './metrics/weekly-metrics';
 import documentServiceMiddleware from './document-service-middleware';
 import homepage from '../homepage';
+
+/** Names of the registered Review Workflows services. */
+type RegisteredNames = keyof Core.RegisteredFor<
+  Strapi.Registries.PackageServices,
+  'plugin::review-workflows'
+>;
 
 export default {
   workflows,
@@ -18,4 +27,4 @@ export default {
   'workflow-metrics': reviewWorkflowsMetrics,
   'workflow-weekly-metrics': reviewWorkflowsWeeklyMetrics,
   ...homepage.services,
-};
+} satisfies Record<RegisteredNames, unknown>;
