@@ -89,9 +89,12 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
           [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter>;
         },
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
+        // Note: the index signature also applies to the group operators, so it must accept their value
         {
           [TKey in string]?:
-            AttributeCondition<TSchemaUID, never> | NestedAttributeCondition<TSchemaUID, never>;
+            | AttributeCondition<TSchemaUID, never>
+            | NestedAttributeCondition<TSchemaUID, never>
+            | readonly ObjectNotation<TSchemaUID>[];
         }
       >
     : never);

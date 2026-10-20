@@ -1,7 +1,7 @@
 import { get, xor, differenceWith } from 'lodash';
 
 import pmap from 'p-map';
-import type { Data } from '@strapi/types';
+import type { Data, DB } from '@strapi/types';
 import { getService } from '../../utils';
 import permissionDomain, { CreatePermissionPayload } from '../../domain/permission';
 import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
@@ -59,7 +59,10 @@ export const createMany = async (permissions: CreatePermissionPayload[]): Promis
  * @param params
  * @param attributes
  */
-const update = async (params: unknown, attributes: Partial<Permission>) => {
+const update = async (
+  params: DB.Params.Where<'admin::permission'>,
+  attributes: Partial<Permission>
+) => {
   const updatedPermission = (await strapi.db
     .query('admin::permission')
     .update({ where: params, data: attributes })) as Permission;

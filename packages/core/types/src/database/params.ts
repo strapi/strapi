@@ -28,6 +28,23 @@ export type Select<TSchemaUID extends UID.Schema> =
  */
 export type Where<TSchemaUID extends UID.Schema> = DocumentParams.Filters.Any<TSchemaUID>;
 
+/**
+ * Context given to a {@link Filters} function, for the root query and for every nested populate query.
+ */
+export type FiltersContext = Readonly<{
+  qb: unknown;
+  uid: UID.Schema;
+  meta: { readonly uid: UID.Schema };
+  db: unknown;
+}>;
+
+/**
+ * `filters` param — like `where`, or a function resolving the conditions for each query it applies to,
+ * including nested populate queries.
+ */
+export type Filters<TSchemaUID extends UID.Schema> =
+  Where<TSchemaUID> | ((context: FiltersContext) => Where<UID.Schema> | null | undefined);
+
 export type OrderDirection = 'asc' | 'desc' | 'ASC' | 'DESC';
 
 type OrderByAttribute<TSchemaUID extends UID.Schema> =
@@ -79,7 +96,7 @@ export type PopulateTarget<TSchemaUID extends UID.Schema, TAttributeName extends
 export type PopulateFragment<TSchemaUID extends UID.Schema> = Readonly<{
   select?: Select<TSchemaUID>;
   where?: Where<TSchemaUID>;
-  filters?: Where<TSchemaUID>;
+  filters?: Filters<TSchemaUID>;
   orderBy?: OrderBy<TSchemaUID>;
   ordering?: 'desc' | 'asc';
   populate?: Populate<TSchemaUID>;
@@ -136,7 +153,7 @@ export type PartialData<TSchemaUID extends UID.Schema> = If<
 
 export type FindOne<TSchemaUID extends UID.Schema> = Readonly<{
   where?: Where<TSchemaUID>;
-  filters?: Where<TSchemaUID>;
+  filters?: Filters<TSchemaUID>;
   select?: Select<TSchemaUID>;
   populate?: Populate<TSchemaUID>;
   orderBy?: OrderBy<TSchemaUID>;

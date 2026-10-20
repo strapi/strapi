@@ -341,7 +341,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params || {});
 
-    return strapi.db.query(uid).findMany(query);
+    return strapi.db.query<UID.Schema>(uid).findMany(query);
   }
 
   async function findFirst(params = {} as any) {
@@ -356,7 +356,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return strapi.db.query<UID.Schema>(uid).findOne(query);
   }
 
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
@@ -375,7 +375,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return strapi.db.query<UID.Schema>(uid).findOne(query);
   }
 
   async function deleteDocument(opts = {} as any) {
@@ -401,7 +401,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       throw new Error('Cannot delete a draft document');
     }
 
-    const entriesToDelete = await strapi.db.query(uid).findMany(lookupQuery);
+    const entriesToDelete = await strapi.db.query<UID.Schema>(uid).findMany(lookupQuery);
 
     const deletedEntries = await async.map(entriesToDelete, (entryToDelete: any) =>
       entries.delete(entryToDelete.id, selectionQuery)
@@ -449,7 +449,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     )(params);
 
     // Get deep populate
-    const entriesToClone = await strapi.db.query(uid).findMany({
+    const entriesToClone = await strapi.db.query<UID.Schema>(uid).findMany({
       where: {
         ...queryParams?.lookup,
         documentId,
@@ -491,7 +491,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         );
 
         const clonedEntry = needsRelationFollowUp
-          ? await strapi.db.query(uid).findOne({
+          ? await strapi.db.query<UID.Schema>(uid).findOne({
               ...selectionQuery,
               where: { id: doc.id },
               populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
@@ -528,7 +528,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           return doc;
         }
 
-        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+        return strapi.db
+          .query<UID.Schema>(uid)
+          .findOne({ ...selectionQuery, where: { id: doc.id } });
       }
     );
 
@@ -608,7 +610,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).count(query);
+    return strapi.db.query<UID.Schema>(uid).count(query);
   }
 
   async function publish(opts = {} as any) {
@@ -622,7 +624,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     )(params);
 
     const [draftsToPublish, oldPublishedVersions] = await Promise.all([
-      strapi.db.query(uid).findMany({
+      strapi.db.query<UID.Schema>(uid).findMany({
         where: {
           ...queryParams?.lookup,
           documentId,
@@ -631,7 +633,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         // Populate relations, media, compos and dz
         populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
       }),
-      strapi.db.query(uid).findMany({
+      strapi.db.query<UID.Schema>(uid).findMany({
         where: {
           ...queryParams?.lookup,
           documentId,
@@ -715,7 +717,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     )(params);
 
     // Delete all published versions
-    const versionsToDelete = await strapi.db.query(uid).findMany(query);
+    const versionsToDelete = await strapi.db.query<UID.Schema>(uid).findMany(query);
     await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
     versionsToDelete.forEach(emitEvent('entry.unpublish'));
@@ -733,7 +735,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     )(params);
 
     const [versionsToDraft, oldDrafts] = await Promise.all([
-      strapi.db.query(uid).findMany({
+      strapi.db.query<UID.Schema>(uid).findMany({
         where: {
           ...queryParams?.lookup,
           documentId,
@@ -742,7 +744,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         // Populate relations, media, compos and dz
         populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
       }),
-      strapi.db.query(uid).findMany({
+      strapi.db.query<UID.Schema>(uid).findMany({
         where: {
           ...queryParams?.lookup,
           documentId,

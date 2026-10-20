@@ -1,4 +1,5 @@
 import _, { castArray, toNumber } from 'lodash';
+import type { Data } from '@strapi/types';
 
 import { arrays, errors } from '@strapi/utils';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
@@ -139,7 +140,7 @@ const updateById = async (id: any, attributes: any) => {
  * @param id id of the user to delete
  * @returns {Promise<user>}
  */
-const deleteById = async (id: unknown) => {
+const deleteById = async (id: Data.ID) => {
   // Check at least one super admin remains
   const userToDelete = await strapi.db.query('admin::user').findOne({
     where: { id },

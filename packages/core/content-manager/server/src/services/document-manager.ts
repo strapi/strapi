@@ -1,7 +1,7 @@
 import { omit, flow } from 'lodash';
 
 import { contentTypes, pagination } from '@strapi/utils';
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Core, DB, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
@@ -34,7 +34,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       id: string | string[] | undefined,
       uid: UID.CollectionType,
       opts: {
-        populate?: Modules.Documents.Params.Pick<any, 'populate'>;
+        populate?: DB.Params.Populate<UID.CollectionType>;
         locale?: string | string[] | '*';
         isPublished?: boolean;
       }

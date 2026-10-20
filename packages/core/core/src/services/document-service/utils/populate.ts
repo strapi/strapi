@@ -1,4 +1,4 @@
-import type { UID } from '@strapi/types';
+import type { DB, UID } from '@strapi/types';
 
 interface Options {
   /**
@@ -10,7 +10,10 @@ interface Options {
 const deepPopulateCache = new Map<string, any>();
 
 // We want to build a populate object based on the schema
-export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}): Record<string, unknown> => {
+export const getDeepPopulate = (
+  uid: UID.Schema,
+  opts: Options = {}
+): DB.Params.PopulateObjectNotation<UID.Schema> => {
   const cacheKey = `${uid}::${JSON.stringify(opts)}`;
   const cached = deepPopulateCache.get(cacheKey);
   if (cached) {

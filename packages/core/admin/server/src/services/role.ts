@@ -3,7 +3,7 @@ import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
 /* eslint-disable @typescript-eslint/default-param-last */
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
-import type { Data } from '@strapi/types';
+import type { Data, DB } from '@strapi/types';
 
 import permissionDomain from '../domain/permission';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
@@ -84,7 +84,10 @@ const create = async (attributes: Partial<AdminRole>): Promise<AdminRole> => {
  * @param params query params to find the role
  * @param populate
  */
-const findOne = (params = {}, populate?: unknown): Promise<AdminRole> => {
+const findOne = (
+  params: DB.Params.Where<'admin::role'> = {},
+  populate?: DB.Params.Populate<'admin::role'>
+): Promise<AdminRole> => {
   return strapi.db.query('admin::role').findOne({ where: params, populate });
 };
 
@@ -94,8 +97,8 @@ const findOne = (params = {}, populate?: unknown): Promise<AdminRole> => {
  * @param populate
  */
 const findOneWithUsersCount = async (
-  params = {},
-  populate?: unknown
+  params: DB.Params.Where<'admin::role'> = {},
+  populate?: DB.Params.Populate<'admin::role'>
 ): Promise<AdminRoleWithUsersCount> => {
   const role = await strapi.db.query('admin::role').findOne({ where: params, populate });
 
@@ -111,7 +114,10 @@ const findOneWithUsersCount = async (
  * @param params query params to find the roles
  * @param populate
  */
-const find = (params = {}, populate: unknown): Promise<AdminRole[]> => {
+const find = (
+  params: DB.Params.Where<'admin::role'> = {},
+  populate?: DB.Params.Populate<'admin::role'>
+): Promise<AdminRole[]> => {
   return strapi.db.query('admin::role').findMany({ where: params, populate });
 };
 
@@ -163,7 +169,7 @@ const update = async (params: any, attributes: Partial<AdminRole>): Promise<Admi
  * Check if a role exists in database
  * @param params query params to find the role
  */
-const exists = async (params = {} as unknown): Promise<boolean> => {
+const exists = async (params: DB.Params.Where<'admin::role'> = {}): Promise<boolean> => {
   const count = await strapi.db.query('admin::role').count({ where: params });
   return count > 0;
 };

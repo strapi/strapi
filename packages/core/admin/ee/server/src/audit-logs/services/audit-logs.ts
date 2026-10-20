@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import {
   AUDIT_LOG_EXPORT_EVENT,
@@ -333,7 +333,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       };
     },
 
-    async findOne(id: unknown) {
+    async findOne(id: Data.ID) {
       const result: any = await strapi.db.query('admin::audit-log').findOne({
         where: { id },
         populate: ['user'],

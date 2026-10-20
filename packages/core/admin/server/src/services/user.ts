@@ -2,7 +2,7 @@
 import _, { defaults } from 'lodash';
 
 import { arrays, errors, emitAudit } from '@strapi/utils';
-import type { Data } from '@strapi/types';
+import type { Data, DB } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
 import {
   AUDITED_EVENTS,
@@ -271,7 +271,7 @@ const isFirstSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
  * Check if a user with specific attributes exists in the database
  * @param attributes A partial user object
  */
-const exists = async (attributes = {} as unknown): Promise<boolean> => {
+const exists = async (attributes: DB.Params.Where<'admin::user'> = {}): Promise<boolean> => {
   return (await strapi.db.query('admin::user').count({ where: attributes })) > 0;
 };
 
