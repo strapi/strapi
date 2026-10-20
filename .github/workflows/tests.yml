@@ -951,6 +951,7 @@ jobs:
         e2e_ee,
         e2e_media_library,
         e2e_media_library_legacy,
+        e2e_enterprise_plugins,
         cli,
         migration_v5,
         api_ce_pg,

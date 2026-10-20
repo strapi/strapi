@@ -25,6 +25,8 @@ The tests make no real AI call. A small OpenAI-compatible server in the test pro
 
 Pull requests from forks skip the job. GitHub gives no secrets to fork runs, so the job cannot install the plugin. The push run on `develop` reports what a fork pull request broke, after the merge.
 
+The job is part of the required `aggregate_test_result` check, so a failure blocks the merge. A skipped job does not block it.
+
 ## Keep the plugin code private
 
 The plugin code is not public: not its source, not its built files, and not the prompts it sends to the AI provider. The job follows these rules. Keep them when you change it.
