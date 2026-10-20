@@ -12,6 +12,7 @@ import { Layouts } from '../../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../../features/BackButton';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 
+import { BodyInput } from './BodyInput';
 import { EventTableCE } from './EventsTable';
 import { HeadersInput } from './HeadersInput';
 import { TriggerContainer } from './TriggerContainer';
@@ -23,6 +24,11 @@ interface WebhookFormValues {
   url: Modules.WebhookStore.Webhook['url'];
   headers: Array<{ key: string; value: string }>;
   events: Modules.WebhookStore.Webhook['events'];
+  /**
+   * The body template as JSON text. An empty text means the default payload.
+   */
+  body: string;
+  bodyMode: Modules.WebhookStore.BodyMode;
 }
 
 interface WebhookFormProps {
@@ -78,6 +84,8 @@ const WebhookForm = ({
         url: data?.url || '',
         headers: mapHeaders(data?.headers || {}),
         events: data?.events || [],
+        body: data?.body ? JSON.stringify(data.body, null, 2) : '',
+        bodyMode: data?.bodyMode || 'merge',
       }}
       method={isCreating ? 'POST' : 'PUT'}
       onSubmit={handleSubmit}
@@ -178,6 +186,7 @@ const WebhookForm = ({
                     ))}
                   </Grid.Root>
                   <HeadersInput />
+                  <BodyInput />
                   <EventTable />
                 </Flex>
               </Box>
@@ -191,6 +200,24 @@ const WebhookForm = ({
 
 const NAME_REGEX = /(^$)|(^[A-Za-z][_0-9A-Za-z ]*$)/;
 const URL_REGEX = /(^$)|((https?:\/\/.*)(d*)\/?(.*))/;
+
+/**
+ * Parses the text of the body editor into the body template saved on the webhook.
+ * An empty text is the default payload (`null`). Throws when the text is not a JSON object.
+ */
+const parseWebhookBody = (body: string): Modules.WebhookStore.Webhook['body'] => {
+  if (body.trim() === '') {
+    return null;
+  }
+
+  const parsed: unknown = JSON.parse(body);
+
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('The body must be a JSON object');
+  }
+
+  return parsed as Record<string, unknown>;
+};
 
 const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatMessage'>) =>
   yup.object().shape({
@@ -262,7 +289,23 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
       );
     }),
     events: yup.array(),
+    body: yup.string().test(
+      'is-json-object',
+      formatMessage({
+        id: 'Settings.webhooks.validation.body',
+        defaultMessage: 'The body must be a valid JSON object',
+      }),
+      (value = '') => {
+        try {
+          parseWebhookBody(value);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+    ),
+    bodyMode: yup.string().oneOf(['merge', 'replace']),
   });
 
-export { WebhookForm };
+export { WebhookForm, parseWebhookBody };
 export type { WebhookFormValues, WebhookFormProps };

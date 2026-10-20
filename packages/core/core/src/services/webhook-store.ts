@@ -28,6 +28,12 @@ const webhookModel: Model = {
     events: {
       type: 'json',
     },
+    body: {
+      type: 'json',
+    },
+    bodyMode: {
+      type: 'string',
+    },
     enabled: {
       type: 'boolean',
     },
@@ -35,7 +41,13 @@ const webhookModel: Model = {
 };
 
 type Webhook = Modules.WebhookStore.Webhook;
-type DBOutput = Omit<Webhook, 'id' | 'isEnabled'> & { id: string | number; enabled: boolean };
+type DBOutput = Omit<Webhook, 'id' | 'isEnabled' | 'body' | 'bodyMode'> & {
+  id: string | number;
+  enabled: boolean;
+  // null for the default payload, also for webhooks saved before the body could be customized
+  body?: Webhook['body'];
+  bodyMode?: Webhook['bodyMode'] | null;
+};
 type DBInput = Omit<DBOutput, 'id'>;
 
 const toDBObject = (data: Webhook): DBInput => {
@@ -44,6 +56,8 @@ const toDBObject = (data: Webhook): DBInput => {
     url: data.url,
     headers: data.headers,
     events: data.events,
+    body: data.body ?? null,
+    bodyMode: data.bodyMode ?? 'merge',
     enabled: data.isEnabled,
   };
 };
@@ -55,6 +69,8 @@ const fromDBObject = (row: DBOutput): Webhook => {
     url: row.url,
     headers: row.headers,
     events: row.events,
+    body: row.body ?? null,
+    bodyMode: row.bodyMode ?? 'merge',
     isEnabled: row.enabled,
   };
 };

@@ -8,6 +8,7 @@ import type { Logger } from '@strapi/logger';
 
 import type { Modules } from '@strapi/types';
 import WorkerQueue from './worker-queue';
+import { renderWebhookBody } from './webhook-body';
 import type { EventHub } from './event-hub';
 import type { Fetch } from '../utils/fetch';
 
@@ -35,6 +36,23 @@ const debug = createdDebugger('strapi:webhook');
 
 const defaultConfiguration: Config = {
   defaultHeaders: {},
+};
+
+/**
+ * The default payload with the rendered body template of the webhook added to it, a rendered
+ * key overriding the default key of the same name, or the rendered template alone when the
+ * webhook replaces the default payload.
+ */
+const getRequestBody = (webhook: Webhook, payload: Record<string, unknown>) => {
+  const { body, bodyMode } = webhook;
+
+  if (!body) {
+    return payload;
+  }
+
+  const rendered = renderWebhookBody(body, payload);
+
+  return bodyMode === 'replace' ? rendered : { ...payload, ...rendered };
 };
 
 class WebhookRunner {
@@ -114,13 +132,15 @@ class WebhookRunner {
   run(webhook: Webhook, event: string, info = {}) {
     const { url, headers } = webhook;
 
+    const payload = {
+      event,
+      createdAt: new Date(),
+      ...info,
+    };
+
     return this.fetch(url, {
       method: 'post',
-      body: JSON.stringify({
-        event,
-        createdAt: new Date(),
-        ...info,
-      }),
+      body: JSON.stringify(getRequestBody(webhook, payload)),
       headers: {
         ...this.config.defaultHeaders,
         ...headers,

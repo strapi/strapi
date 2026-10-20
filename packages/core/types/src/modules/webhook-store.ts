@@ -1,9 +1,24 @@
+/**
+ * How the body template of a webhook is sent: added to the default payload (`merge`),
+ * or in place of it (`replace`).
+ */
+export type BodyMode = 'merge' | 'replace';
+
 export interface Webhook {
   id: string;
   name: string;
   url: string;
   headers: Record<string, string>;
   events: string[];
+  /**
+   * Template of the request body. A string value can reference the payload with `{{ path }}`
+   * placeholders, e.g. `{{ event }}` or `{{ entry.title }}`. `null` sends the default payload.
+   */
+  body?: Record<string, unknown> | null;
+  /**
+   * Whether the body template is added to the default payload (the default) or replaces it.
+   */
+  bodyMode?: BodyMode;
   isEnabled: boolean;
 }
 

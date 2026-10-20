@@ -12,7 +12,12 @@ import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 
-import { WebhookForm, WebhookFormProps, WebhookFormValues } from './components/WebhookForm';
+import {
+  WebhookForm,
+  WebhookFormProps,
+  WebhookFormValues,
+  parseWebhookBody,
+} from './components/WebhookForm';
 import { useWebhooks } from './hooks/useWebhooks';
 
 import type { Modules } from '@strapi/types';
@@ -32,6 +37,7 @@ const cleanData = (
 
     return acc;
   }, {}),
+  body: parseWebhookBody(data.body),
 });
 
 const EditPage = () => {

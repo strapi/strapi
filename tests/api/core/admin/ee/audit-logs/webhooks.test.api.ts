@@ -111,10 +111,40 @@ describeOnCondition(edition === 'EE')('Webhooks in audit logs (api)', () => {
         url: 'https://example.com',
         events: ['entry.create', 'entry.update'],
         headers: ['Authorization', 'X-Env'],
+        body: null,
+        bodyMode: 'merge',
         isEnabled: true,
       },
     });
     expectNoSecret(log);
+  });
+
+  test('webhook.create and webhook.update record the body template keys and mode only', async () => {
+    const BODY_SECRET = 'glptt-s3cret-trigger-token';
+    const webhook = await createWebhook({
+      ...baseWebhook,
+      body: { token: BODY_SECRET, ref: 'main' },
+      bodyMode: 'replace',
+    });
+
+    const createLog = await expectExactlyOneLog('webhook.create');
+    expect(createLog.payload.details).toMatchObject({
+      body: ['ref', 'token'],
+      bodyMode: 'replace',
+    });
+    expect(JSON.stringify(createLog.payload)).not.toContain(BODY_SECRET);
+    await clearAuditLogs();
+
+    await updateWebhook(webhook.id, { ...baseWebhook, body: null, bodyMode: 'merge' });
+
+    const updateLog = await expectExactlyOneLog('webhook.update');
+    expect(updateLog.payload.details).toEqual({
+      changes: {
+        body: { before: ['ref', 'token'], after: null },
+        bodyMode: { before: 'replace', after: 'merge' },
+      },
+    });
+    expect(JSON.stringify(updateLog.payload)).not.toContain(BODY_SECRET);
   });
 
   test('webhook.update records the changed fields with before and after', async () => {

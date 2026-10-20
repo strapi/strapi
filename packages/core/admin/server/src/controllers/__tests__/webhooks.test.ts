@@ -63,6 +63,8 @@ describe('Webhooks controller audit events', () => {
       url: 'https://example.com',
       events: ['entry.create', 'entry.update'],
       headers: ['Authorization', 'X-Env'],
+      body: null,
+      bodyMode: 'merge',
       isEnabled: true,
     });
     expect(JSON.stringify(emitAuditMock.mock.calls[0][2])).not.toMatch(/s3cret|prod/);
@@ -140,5 +142,139 @@ describe('Webhooks controller audit events', () => {
       ['webhook.delete', { webhookId: '4', name: 'Deploy site' }],
       ['webhook.delete', { webhookId: '5', name: 'Other' }],
     ]);
+  });
+});
+
+describe('Webhooks controller body template', () => {
+  beforeEach(() => {
+    emitAuditMock.mockClear();
+  });
+
+  test('createWebhook saves the body template and audits its keys only', async () => {
+    const template = {
+      token: 'glptt-s3cret',
+      ref: 'main',
+      variables: { TITLE: '{{ entry.title }}' },
+    };
+    const store = { createWebhook: jest.fn(async (data) => ({ ...webhook, ...data, id: '4' })) };
+    const runner = setStrapi(store);
+    const ctx = createCtx({ body: { ...body, body: template } });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(store.createWebhook).toHaveBeenCalledWith(expect.objectContaining({ body: template }));
+    expect(runner.add).toHaveBeenCalledWith(expect.objectContaining({ body: template }));
+    expect(emitAuditMock.mock.calls[0][2]).toMatchObject({
+      body: ['ref', 'token', 'variables'],
+      bodyMode: 'merge',
+    });
+    expect(JSON.stringify(emitAuditMock.mock.calls[0][2])).not.toMatch(/s3cret|main/);
+  });
+
+  test('createWebhook records a null body for the default payload', async () => {
+    setStrapi({ createWebhook: jest.fn(async () => webhook) });
+    const ctx = createCtx({ body });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(emitAuditMock.mock.calls[0][2]).toMatchObject({ body: null, bodyMode: 'merge' });
+  });
+
+  test('createWebhook saves the replace mode', async () => {
+    const store = { createWebhook: jest.fn(async (data) => ({ ...webhook, ...data, id: '4' })) };
+    setStrapi(store);
+    const ctx = createCtx({ body: { ...body, body: { ref: 'main' }, bodyMode: 'replace' } });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(store.createWebhook).toHaveBeenCalledWith(
+      expect.objectContaining({ body: { ref: 'main' }, bodyMode: 'replace' })
+    );
+    expect(emitAuditMock.mock.calls[0][2]).toMatchObject({ body: ['ref'], bodyMode: 'replace' });
+  });
+
+  test('createWebhook rejects an unknown body mode', async () => {
+    const store = { createWebhook: jest.fn() };
+    setStrapi(store);
+    const ctx = createCtx({ body: { ...body, body: { ref: 'main' }, bodyMode: 'append' } });
+
+    await expect(webhooksController.createWebhook(ctx as any)).rejects.toThrow(
+      'bodyMode must be one of the following values: merge, replace'
+    );
+    expect(store.createWebhook).not.toHaveBeenCalled();
+  });
+
+  test.each([[['ref']], ['{"ref":"main"}'], [42], [true]])(
+    'createWebhook rejects a body that is not a JSON object (%j)',
+    async (invalidBody) => {
+      const store = { createWebhook: jest.fn() };
+      setStrapi(store);
+      const ctx = createCtx({ body: { ...body, body: invalidBody } });
+
+      await expect(webhooksController.createWebhook(ctx as any)).rejects.toThrow(
+        'body must be a JSON object'
+      );
+      expect(store.createWebhook).not.toHaveBeenCalled();
+    }
+  );
+
+  test('updateWebhook keeps the saved body when the request has none', async () => {
+    const saved = { ...webhook, body: { ref: 'main' } };
+    const store = {
+      findWebhook: jest.fn(async () => saved),
+      updateWebhook: jest.fn(async (_id, data) => data),
+    };
+    setStrapi(store);
+    const ctx = createCtx({ params: { id: '4' }, body: { ...body, name: 'Renamed' } });
+
+    await webhooksController.updateWebhook(ctx as any);
+
+    expect(store.updateWebhook).toHaveBeenCalledWith(
+      '4',
+      expect.objectContaining({ name: 'Renamed', body: { ref: 'main' } })
+    );
+    expect(emitAuditMock.mock.calls[0][2].changes).toEqual({
+      name: { before: 'Deploy site', after: 'Renamed' },
+    });
+  });
+
+  test('updateWebhook resets the body with null and audits the change', async () => {
+    const saved = { ...webhook, body: { ref: 'main' } };
+    const store = {
+      findWebhook: jest.fn(async () => saved),
+      updateWebhook: jest.fn(async (_id, data) => data),
+    };
+    setStrapi(store);
+    const ctx = createCtx({ params: { id: '4' }, body: { ...body, body: null } });
+
+    await webhooksController.updateWebhook(ctx as any);
+
+    expect(store.updateWebhook).toHaveBeenCalledWith('4', expect.objectContaining({ body: null }));
+    expect(emitAuditMock.mock.calls[0][2].changes).toEqual({
+      body: { before: ['ref'], after: null },
+    });
+  });
+
+  test('updateWebhook switches the body mode and audits it', async () => {
+    const saved = { ...webhook, body: { ref: 'main' } };
+    const store = {
+      findWebhook: jest.fn(async () => saved),
+      updateWebhook: jest.fn(async (_id, data) => data),
+    };
+    setStrapi(store);
+    const ctx = createCtx({
+      params: { id: '4' },
+      body: { ...body, body: { ref: 'main' }, bodyMode: 'replace' },
+    });
+
+    await webhooksController.updateWebhook(ctx as any);
+
+    expect(store.updateWebhook).toHaveBeenCalledWith(
+      '4',
+      expect.objectContaining({ body: { ref: 'main' }, bodyMode: 'replace' })
+    );
+    expect(emitAuditMock.mock.calls[0][2].changes).toEqual({
+      bodyMode: { before: 'merge', after: 'replace' },
+    });
   });
 });
