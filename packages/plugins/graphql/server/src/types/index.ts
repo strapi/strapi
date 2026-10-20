@@ -1,11 +1,12 @@
 import type createBuilders from '../services/builders';
 import type createConstants from '../services/constants';
 import type createContentAPI from '../services/content-api';
-import type createExtension from '../services/extension';
 import type createFormat from '../services/format';
 import type createInternals from '../services/internals';
-import type createTypeRegistry from '../services/type-registry';
 import type createUtils from '../services/utils';
+import type { ExtensionService, TypeRegistryService } from './services';
+
+export type * from './services';
 
 /**
  * `strapi.config.get('plugin::graphql')`: the plugin config merged with its defaults
@@ -34,10 +35,10 @@ export type Services = {
   builders: ReturnType<typeof createBuilders>;
   constants: ReturnType<typeof createConstants>;
   'content-api': ReturnType<typeof createContentAPI>;
-  extension: ReturnType<typeof createExtension>;
+  extension: ExtensionService;
   format: ReturnType<typeof createFormat>;
   internals: ReturnType<typeof createInternals>;
-  'type-registry': ReturnType<typeof createTypeRegistry>;
+  'type-registry': TypeRegistryService;
   utils: ReturnType<typeof createUtils>;
 };
 

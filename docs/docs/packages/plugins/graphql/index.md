@@ -39,6 +39,8 @@ The `content-api` service ([`services/content-api/`](https://github.com/strapi/s
 
 `strapi.plugin('graphql').service('extension')` is the public hook. `use(config)` takes an object or a factory `({ strapi, nexus, typeRegistry })`. The config can hold `types`, `typeDefs`, `resolvers`, `resolversConfig` and Nexus `plugins`. `shadowCRUD(uid)` returns a manager. Its methods include `disable`, `disableQueries`, `disableMutations`, `disableActions` and `field(name)`. The schema is built once, so plugins call the service in `register`, before this plugin's `bootstrap`. The [users-permissions](../users-permissions/index.md) and [i18n](../i18n/index.md) plugins do this.
 
+With strict types, the registered contracts in `server/src/types/services.ts` type the `extension` and `type-registry` services from their runtime use: the factory's `typeRegistry` is the registry of the schema being built, `resolvers` is a `@graphql-tools` resolver map, and `resolversConfig` entries are checked (`auth` is `false` or a route auth config, `policies` are policy references). The implementations keep their published `object` options.
+
 ### Resolver wrapping
 
 `wrapResolvers` in `services/content-api/wrap-resolvers.ts` reads `resolversConfig`. The keys are `Type.field` paths. Each entry can set `auth` (with a `scope`), `middlewares` and `policies`. The auth check reads `context.state.auth`. Policies run last, through `createPoliciesMiddleware`.
