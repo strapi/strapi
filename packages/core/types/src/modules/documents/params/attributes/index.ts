@@ -111,7 +111,7 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
       [
         Extends<TAttribute, Schema.Attribute.OfType<'dynamiczone'>>,
         TAttribute extends Schema.Attribute.DynamicZone<infer TComponentsUIDs>
-          ? Array<
+          ? ReadonlyArray<
               // Extract tuple values to a component uid union type
               Array.Values<TComponentsUIDs> extends infer TComponentUID
                 ? TComponentUID extends UID.Component
@@ -127,7 +127,7 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
         TAttribute extends Schema.Attribute.Component<infer TComponentUID, infer TRepeatable>
           ? TComponentUID extends UID.Component
             ? GetValues<TComponentUID> extends infer TValues
-              ? If<TRepeatable, TValues[], TValues>
+              ? If<TRepeatable, ReadonlyArray<TValues>, TValues>
               : never
             : never
           : never,
@@ -151,12 +151,30 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
       [Extends<TAttribute, Schema.Attribute.Timestamp | Schema.Attribute.DateTime>, DateTimeValue],
       // Fallback
       // If none of the above attribute type, fallback to the original Attribute.GetValue (while making sure it's an attribute)
-      [Constants.True, Schema.Attribute.Value<TAttribute>],
+      [Constants.True, ReadonlyInput<Schema.Attribute.Value<TAttribute>>],
     ],
     unknown
   >,
   unknown
 >;
+
+/**
+ * Deeply widens arrays and objects of a value type so that readonly inputs are accepted.
+ *
+ * Input params are never mutated, so they shouldn't require mutable arrays or objects.
+ * The original value types are kept mutable since they're also used for results.
+ */
+type ReadonlyInput<TValue> =
+  // Keep `any` as is instead of distributing it over every branch
+  0 extends 1 & TValue
+    ? TValue
+    : TValue extends ReadonlyArray<infer TItem>
+      ? ReadonlyArray<ReadonlyInput<TItem>>
+      : TValue extends Date | ((...args: never[]) => unknown)
+        ? TValue
+        : TValue extends object
+          ? { readonly [TKey in keyof TValue]: ReadonlyInput<TValue[TKey]> }
+          : TValue;
 
 // Re-export useful types
 

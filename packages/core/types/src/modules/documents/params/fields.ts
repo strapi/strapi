@@ -50,10 +50,9 @@ export type StringNotation<TSchemaUID extends UID.Schema> =
  * type F = ['populatableField']; // ❌
  * type G = ['<random_string>']; // ❌
  */
-export type ArrayNotation<TSchemaUID extends UID.Schema> = Exclude<
-  StringNotation<TSchemaUID>,
-  WildcardNotation
->[];
+export type ArrayNotation<TSchemaUID extends UID.Schema> = ReadonlyArray<
+  Exclude<StringNotation<TSchemaUID>, WildcardNotation>
+>;
 
 /**
  * Represents any notation for a sort (string, array, object)

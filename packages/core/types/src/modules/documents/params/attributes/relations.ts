@@ -19,15 +19,18 @@ interface PositionalArguments {
 
 type WithPositionArguments<T> = T & { position?: PositionalArguments };
 
-type Set = { set: ShortHand[] | LongHand[] | null };
-type Connect = { connect: ShortHand[] | WithPositionArguments<LongHand>[] };
-type Disconnect = { disconnect: ShortHand[] | LongHand[] };
+type Set = { set: ReadonlyArray<ShortHand> | ReadonlyArray<LongHand> | null };
+type Connect = {
+  connect: ReadonlyArray<ShortHand> | ReadonlyArray<WithPositionArguments<LongHand>>;
+};
+type Disconnect = { disconnect: ReadonlyArray<ShortHand> | ReadonlyArray<LongHand> };
 
 type FullUpdate = Set;
 type PartialUpdate = Partial<Connect & Disconnect>;
 
 type XOneInput = ShortHand | LongHand | null;
-type XManyInput = ShortHand[] | LongHand[] | null | PartialUpdate | FullUpdate;
+type XManyInput =
+  ReadonlyArray<ShortHand> | ReadonlyArray<LongHand> | null | PartialUpdate | FullUpdate;
 
 export type RelationInputValue<TRelationKind extends Schema.Attribute.RelationKind.Any> = If<
   Schema.Attribute.IsManyRelation<TRelationKind>,

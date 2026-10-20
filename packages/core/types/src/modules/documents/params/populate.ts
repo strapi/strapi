@@ -51,10 +51,9 @@ export type StringNotation<TSchemaUID extends UID.Schema> =
  * type D = ['<random_string>']; // ❌
  * type E = ['*']; // ❌
  */
-export type ArrayNotation<TSchemaUID extends UID.Schema> = Exclude<
-  StringNotation<TSchemaUID>,
-  WildcardNotation
->[];
+export type ArrayNotation<TSchemaUID extends UID.Schema> = ReadonlyArray<
+  Exclude<StringNotation<TSchemaUID>, WildcardNotation>
+>;
 
 type GetPopulatableKeysWithTarget<TSchemaUID extends UID.Schema> = Extract<
   Schema.PopulatableAttributeNames<TSchemaUID>,
