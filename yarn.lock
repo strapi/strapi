@@ -10746,6 +10746,7 @@ __metadata:
     fs-extra: "npm:11.3.4"
     jest: "npm:29.6.0"
     jscodeshift: "npm:17.3.0"
+    jsonc-parser: "npm:3.3.1"
     lodash: "npm:4.18.1"
     memfs: "npm:4.68.1"
     ora: "npm:5.4.1"
@@ -21956,7 +21957,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonc-parser@npm:^3.2.0, jsonc-parser@npm:^3.3.1":
+"jsonc-parser@npm:3.3.1, jsonc-parser@npm:^3.2.0, jsonc-parser@npm:^3.3.1":
   version: 3.3.1
   resolution: "jsonc-parser@npm:3.3.1"
   checksum: 10c0/269c3ae0a0e4f907a914bf334306c384aabb9929bd8c99f909275ebd5c2d3bc70b9bcd119ad794f339dec9f24b6a4ee9cd5a8ab2e6435e730ad4075388fc2ab6
