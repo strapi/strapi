@@ -94,6 +94,7 @@ declare global {
   object literal that `satisfies Record<RegisteredNames, unknown>` is checked both ways. Spread
   entries escape the excess property check: compare such maps with
   `Core.Assert<Core.SameNames<…>>`.
+- `Core.ServiceFactory<uid>` checks a service factory against the contract registered for `uid`.
 - Declare one contract per UID. Conflicting `Package*` declarations fail with TS2717, and
   `skipLibCheck` can hide the conflict in a consumer.
 - A package bundled with `@strapi/strapi` that registers contracts must also be imported by

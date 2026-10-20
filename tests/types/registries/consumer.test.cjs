@@ -338,6 +338,17 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     });
   }
 
+  test(`${resolution}: registry helpers check factories and names against contracts`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'registry-helpers.ts']),
+      `${resolution}, registry helpers with strict types`
+    );
+    assertClean(
+      compile(['registry-helpers-permissive.ts']),
+      `${resolution}, registry helpers without strict types`
+    );
+  });
+
   test(`${resolution}: config defaults preserve inferred nullability`, () => {
     assertClean(
       compile(['settings.d.ts', 'config-defaults.ts']),
@@ -775,6 +786,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     for (const names of [
       ['settings.d.ts', 'i18n-adoption.ts'],
       ['settings.d.ts', 'content-manager-adoption.ts'],
+      ['settings.d.ts', 'registry-helpers.ts'],
       ['settings.d.ts', 'config-defaults.ts'],
       ['strapi-strict.d.ts', 'middlewares.ts'],
       ['strapi-strict.d.ts', 'policy-namespaces.ts'],

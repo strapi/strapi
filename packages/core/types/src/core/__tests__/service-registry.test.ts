@@ -2,7 +2,7 @@ import type * as PublicRegistries from '../../public/registries';
 import type { Controller } from '../controller';
 import type { Module } from '../module';
 import type { Plugin } from '../plugin';
-import type { ServiceFor } from '../service';
+import type { ServiceFactory, ServiceFor } from '../service';
 import type { Strapi as StrapiInstance } from '../strapi';
 
 // @ts-expect-error Service contract registries are global, not part of the Public registries.
@@ -222,3 +222,19 @@ contextualApi satisfies unknown;
 strapi.admin.service('type-lab').anything();
 const contextualAdmin: GreetingService = strapi.admin.service('type-lab');
 contextualAdmin satisfies GreetingService;
+
+// `ServiceFactory` checks a factory against the registered contract, application overrides first.
+(({ strapi: instance }) => ({
+  greet: async (name: string) => `${name} ${instance.config.get('server.host', 'localhost')}`,
+})) satisfies ServiceFactory<'plugin::type-lab.greeting'>;
+(() => ({ count: () => 1 })) satisfies ServiceFactory<'plugin::type-lab.counter'>;
+// @ts-expect-error The factory must return the registered contract.
+(() => ({ count: () => 'one' })) satisfies ServiceFactory<'plugin::type-lab.counter'>;
+// @ts-expect-error The factory must implement every member of the contract.
+(() => ({})) satisfies ServiceFactory<'plugin::type-lab.counter'>;
+// @ts-expect-error The application override replaces the package contract.
+(() => ({ greet: (value: number) => value })) satisfies ServiceFactory<'plugin::type-lab.greeting'>;
+// @ts-expect-error A UID without a contract cannot check a factory.
+(() => ({})) satisfies ServiceFactory<'api::type-lab.unregistered'>;
+// @ts-expect-error Names outside the UID pattern are not services.
+(() => ({})) satisfies ServiceFactory<'not-a-uid'>;
