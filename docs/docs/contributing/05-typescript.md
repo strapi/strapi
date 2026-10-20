@@ -231,7 +231,8 @@ keys.
 ## Keeping types unchanged without strict mode
 
 A type in `@strapi/types` or `@strapi/strapi` that behaves differently in strict mode resolves
-both shapes from `IsStrict` (`packages/core/types/src/core/strictness.ts`):
+both shapes from `IsStrict` (`packages/core/types/src/core/strictness.ts`). Other packages read the
+same switch as `Core.IsStrict`:
 
 ```ts
 type Lookup = IsStrict extends false ? LegacyLookup : StrictLookup;
