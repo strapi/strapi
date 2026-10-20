@@ -90,8 +90,8 @@ const localeToData: Transform = (contentType, params) => {
 };
 
 /**
- * Mutates the provided data object in place and returns the same reference
- * with populated media values replaced by their upload file IDs.
+ * Returns a copy of the provided data with populated media values replaced by their upload file IDs.
+ * The provided data, and the components nested in it, are left untouched.
  */
 const normalizeMediaIds = (
   schema: Schema.ContentType | Schema.Component,
@@ -100,6 +100,8 @@ const normalizeMediaIds = (
   if (!schema?.attributes || !data || typeof data !== 'object') {
     return data;
   }
+
+  const normalized = { ...data };
 
   Object.entries(schema.attributes).forEach(([attributeName, attribute]) => {
     const value = data[attributeName];
@@ -110,13 +112,13 @@ const normalizeMediaIds = (
 
     if (attribute.type === 'media') {
       if (attribute.multiple) {
-        data[attributeName] = Array.isArray(value)
+        normalized[attributeName] = Array.isArray(value)
           ? value.map((file: unknown) =>
               file && typeof file === 'object' && 'id' in file ? file.id : file
             )
           : value;
       } else {
-        data[attributeName] =
+        normalized[attributeName] =
           value && typeof value === 'object' && 'id' in value ? value.id : value;
       }
 
@@ -126,27 +128,26 @@ const normalizeMediaIds = (
     if (attribute.type === 'component') {
       const componentSchema = strapi.getModel(attribute.component);
 
-      if (attribute.repeatable && Array.isArray(value)) {
-        value.forEach((componentValue: Record<string, any>) =>
-          normalizeMediaIds(componentSchema, componentValue)
-        );
-      } else {
-        normalizeMediaIds(componentSchema, value);
-      }
+      normalized[attributeName] =
+        attribute.repeatable && Array.isArray(value)
+          ? value.map((componentValue: Record<string, any>) =>
+              normalizeMediaIds(componentSchema, componentValue)
+            )
+          : normalizeMediaIds(componentSchema, value);
 
       return;
     }
 
     if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
-      value.forEach((componentValue: Record<string, any>) => {
-        if (componentValue?.__component) {
-          normalizeMediaIds(strapi.getModel(componentValue.__component), componentValue);
-        }
-      });
+      normalized[attributeName] = value.map((componentValue: Record<string, any>) =>
+        componentValue?.__component
+          ? normalizeMediaIds(strapi.getModel(componentValue.__component), componentValue)
+          : componentValue
+      );
     }
   });
 
-  return data;
+  return normalized;
 };
 /**
  * Copy non-localized fields from an existing entry to a new entry being created
