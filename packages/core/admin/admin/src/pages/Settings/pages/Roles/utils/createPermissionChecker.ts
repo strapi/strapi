@@ -30,24 +30,37 @@ export const EMPTY_SELECTION: Selection = { properties: {}, conditions: [] };
 
 /**
  * One combination of the selection. Only the dimensions present are checked: a property with
- * nothing ticked yet or no condition does not constrain the held permission.
+ * nothing ticked yet or an absent `condition` does not constrain the held permission. A `null`
+ * value means the permission is unrestricted on that dimension (no `fields`, `locales: null`, no
+ * conditions), which only a held permission unrestricted on the same dimension covers.
  */
 export interface SelectionAtom {
-  properties: Record<string, string>;
-  condition?: string;
+  properties: Record<string, string | null>;
+  condition?: string | null;
+}
+
+/**
+ * The shape of a permission the ceiling rules read, matching the server's `CeilingPermission`.
+ * Both the permissions of a role and the ones the user holds satisfy it.
+ */
+export interface CeilingPermission {
+  action: string;
+  subject?: string | null;
+  properties?: Record<string, unknown> | null;
+  conditions?: string[] | null;
 }
 
 /* -------------------------------------------------------------------------------------------------
  * Rules shared with the server ceiling
  * -----------------------------------------------------------------------------------------------*/
 
-const hasNoFields = (permission: AuthPermission): boolean => {
+const hasNoFields = (permission: CeilingPermission): boolean => {
   const fields = permission.properties?.fields;
 
   return Array.isArray(fields) && fields.length === 0;
 };
 
-const isUnconditional = (permission: AuthPermission): boolean =>
+const isUnconditional = (permission: CeilingPermission): boolean =>
   !permission.conditions || permission.conditions.length === 0;
 
 /**
@@ -67,12 +80,13 @@ export const findMatchingPermissions = (
 /**
  * Whether `held` covers `value` of `property`: a permission not restricted on the property
  * (unset or `null`) covers every value; otherwise the value must be listed. A nested field is
- * covered by its parent (`seo.title` by `seo`), like the permission engine does.
+ * covered by its parent (`seo.title` by `seo`), like the permission engine does. A `null` value
+ * (unrestricted) is only covered by a held permission that is unrestricted too.
  */
 export const coversPropertyValue = (
   held: AuthPermission,
   property: string,
-  value: string
+  value: string | null
 ): boolean => {
   const heldValues = held.properties?.[property];
 
@@ -80,7 +94,7 @@ export const coversPropertyValue = (
     return true;
   }
 
-  if (!Array.isArray(heldValues)) {
+  if (value === null || !Array.isArray(heldValues)) {
     return false;
   }
 
@@ -91,10 +105,11 @@ export const coversPropertyValue = (
 
 /**
  * Conditions are OR-ed by the permission engine, so an unconditional held permission covers any
- * condition; otherwise the condition must be listed.
+ * condition; otherwise the condition must be listed. No condition (`null`) needs an
+ * unconditional holder.
  */
-export const coversCondition = (held: AuthPermission, condition: string): boolean =>
-  isUnconditional(held) || (held.conditions ?? []).includes(condition);
+export const coversCondition = (held: AuthPermission, condition: string | null): boolean =>
+  isUnconditional(held) || (condition !== null && (held.conditions ?? []).includes(condition));
 
 /**
  * Whether a single held permission covers every dimension of `atom`.
@@ -128,6 +143,83 @@ export const isPermissionHeld = (
   }
 
   return matching.some((perm) => coversPropertyValue(perm, property, value));
+};
+
+const combineValues = <T extends string | null>(
+  dimensions: [property: string, values: T[]][]
+): Record<string, T>[] =>
+  dimensions.reduce<Record<string, T>[]>(
+    (combinations, [property, values]) =>
+      combinations.flatMap((combination) =>
+        values.map((value) => ({ ...combination, [property]: value }))
+      ),
+    [{}]
+  );
+
+/**
+ * The values of `property` on `permission` as a dimension of its atoms: `[null]` when it is not
+ * restricted on the property, the listed values otherwise. An empty list (`locales: []`) grants
+ * no value of the property, so it gives no dimension; the other properties and the conditions
+ * are still checked.
+ */
+const getPropertyValues = (permission: CeilingPermission, property: string): (string | null)[] => {
+  const values = permission.properties?.[property];
+
+  if (!Array.isArray(values)) {
+    return [null];
+  }
+
+  return [...new Set(values as string[])];
+};
+
+/**
+ * Whether the user may grant `permission` as a whole: every combination of its property values
+ * and conditions must be covered by one held permission. Same rule as `isPermissionWithinCeiling`
+ * in `server/src/domain/permission/ceiling.ts`, on the same primitives as {@link canTick}, so the
+ * disabled states of the form and this check cannot disagree. Used where a stored permission is
+ * copied into a form that has no existing-permission exemption (duplicating a role), so that the
+ * server does not reject the whole update.
+ */
+export const isPermissionWithinCeiling = (
+  userPermissions: AuthPermission[],
+  permission: CeilingPermission
+): boolean => {
+  // A permission with no fields grants nothing
+  if (hasNoFields(permission)) {
+    return true;
+  }
+
+  const matching = findMatchingPermissions(userPermissions, permission.action, permission.subject);
+
+  if (matching.length === 0) {
+    return false;
+  }
+
+  const restrictedProperties = [
+    ...new Set([
+      ...Object.keys(permission.properties ?? {}),
+      ...matching.flatMap((perm) => Object.keys(perm.properties ?? {})),
+    ]),
+  ];
+
+  const propertyCombinations = combineValues(
+    restrictedProperties
+      .map((property): [string, (string | null)[]] => [
+        property,
+        getPropertyValues(permission, property),
+      ])
+      .filter(([, values]) => values.length > 0)
+  );
+
+  const requestedConditions = permission.conditions ?? [];
+  const conditions: (string | null)[] =
+    requestedConditions.length === 0 ? [null] : [...new Set(requestedConditions)];
+
+  return conditions.every((condition) =>
+    propertyCombinations.every((properties) =>
+      matching.some((perm) => coversAtom(perm, { properties, condition }))
+    )
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -222,14 +314,8 @@ const withValue = (selection: Selection, property: string, value: string): Selec
  * at least one, times the ticked conditions (none gives atoms without a condition).
  */
 const getAtoms = (selection: Selection): SelectionAtom[] => {
-  const dimensions = Object.entries(selection.properties).filter(([, values]) => values.length > 0);
-
-  const propertyCombinations = dimensions.reduce<Record<string, string>[]>(
-    (combinations, [property, values]) =>
-      combinations.flatMap((combination) =>
-        values.map((value) => ({ ...combination, [property]: value }))
-      ),
-    [{}]
+  const propertyCombinations = combineValues(
+    Object.entries(selection.properties).filter(([, values]) => values.length > 0)
   );
 
   if (selection.conditions.length === 0) {

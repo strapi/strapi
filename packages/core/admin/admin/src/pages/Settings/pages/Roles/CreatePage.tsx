@@ -38,6 +38,7 @@ import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
+import { isPermissionWithinCeiling } from './utils/createPermissionChecker';
 
 /* -------------------------------------------------------------------------------------------------
  * CreatePage
@@ -81,6 +82,7 @@ const CreatePage = () => {
   const currentUser = useAuth('CreatePage', (state) => state.user);
   const isCurrentUserSuperAdmin =
     currentUser?.roles.some((role) => role.code === SUPER_ADMIN_CODE) ?? false;
+  const userPermissions = isCurrentUserSuperAdmin ? undefined : currentUserPermissions;
 
   const { isLoading: isLoadingPermissionsLayout, currentData: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
@@ -103,6 +105,21 @@ const CreatePage = () => {
       skip: !id,
       refetchOnMountOrArgChange: true,
     }
+  );
+
+  /**
+   * A duplicated role can only carry what the user may grant: the new role has no permissions
+   * yet, so nothing is exempt from the ceiling, and the server rejects the whole update when one
+   * copied permission is outside it. Permissions outside it are left unticked.
+   */
+  const permissionsToCopy = React.useMemo(
+    () =>
+      userPermissions === undefined
+        ? rolePermissions
+        : rolePermissions?.filter((permission) =>
+            isPermissionWithinCeiling(userPermissions, permission)
+          ),
+    [rolePermissions, userPermissions]
   );
 
   const [createRole] = useCreateRoleMutation();
@@ -175,7 +192,8 @@ const CreatePage = () => {
     }
   };
 
-  if ((isLoadingPermissionsLayout && isLoadingRole) || !permissionsLayout) {
+  // The permissions form reads its initial permissions once, when it mounts
+  if (isLoadingPermissionsLayout || isLoadingRole || !permissionsLayout) {
     return <Page.Loading />;
   }
 
@@ -324,9 +342,9 @@ const CreatePage = () => {
                       isFormDisabled={false}
                       onLocaleValidationChange={setHasLocaleValidationErrors}
                       ref={permissionsRef}
-                      permissions={rolePermissions}
+                      permissions={permissionsToCopy}
                       layout={permissionsLayout}
-                      userPermissions={isCurrentUserSuperAdmin ? undefined : currentUserPermissions}
+                      userPermissions={userPermissions}
                     />
                   </Box>
                 </Flex>

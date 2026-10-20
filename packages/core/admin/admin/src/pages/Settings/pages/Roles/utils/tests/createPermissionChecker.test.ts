@@ -1,12 +1,15 @@
 import {
   canTick,
   coversAtom,
+  coversCondition,
+  coversPropertyValue,
   createBulkPermissionChecker,
   createSubjectBulkPermissionChecker,
   findActionForm,
   getActionSelection,
   getAllowedConditions,
   isPermissionHeld,
+  isPermissionWithinCeiling,
   isValueSelected,
 } from '../createPermissionChecker';
 import { updateValuesWithPermissions } from '../updateValues';
@@ -28,6 +31,9 @@ const permission = (
 
 const read = (properties: AuthPermission['properties'], conditions?: string[]) =>
   permission(READ, SUBJECT, properties, conditions);
+
+// `fields: null` (unrestricted) is stored by the server but not allowed by the contract type
+const readAnyField = () => read({ fields: null } as unknown as AuthPermission['properties']);
 
 // Two held permissions that must not be recombined
 const titleEn = read({ fields: ['title'], locales: ['en'] });
@@ -92,6 +98,218 @@ describe('createPermissionChecker', () => {
       );
       // A dimension that is absent does not constrain the permission
       expect(coversAtom(held, { properties: { fields: 'title' } })).toBe(true);
+    });
+
+    it('needs an unrestricted holder for an unrestricted dimension', () => {
+      expect(coversPropertyValue(read({ fields: ['title'] }), 'fields', null)).toBe(false);
+      expect(coversPropertyValue(read({ locales: null }), 'locales', null)).toBe(true);
+      expect(coversPropertyValue(read({}), 'fields', null)).toBe(true);
+
+      expect(coversCondition(read({}, [IS_CREATOR]), null)).toBe(false);
+      expect(coversCondition(read({}), null)).toBe(true);
+    });
+  });
+
+  /**
+   * Mirrors the `isPermissionWithinCeiling` cases of the server
+   * (`server/src/domain/permission/__tests__/ceiling.test.ts`), so the duplicate filter and the
+   * server agree.
+   */
+  describe('isPermissionWithinCeiling', () => {
+    const titleFr = read({ fields: ['title'], locales: ['fr'] });
+    const bodyAlways = read({ fields: ['body'] });
+
+    it('checks the action and subject', () => {
+      const held = [read({})];
+
+      expect(isPermissionWithinCeiling(held, read({}))).toBe(true);
+      expect(isPermissionWithinCeiling(held, permission(READ, 'api::author.author'))).toBe(false);
+      expect(isPermissionWithinCeiling(held, permission(CREATE, SUBJECT))).toBe(false);
+      expect(
+        isPermissionWithinCeiling([permission('admin::roles.read', null)], {
+          action: 'admin::roles.read',
+        })
+      ).toBe(true);
+    });
+
+    it('allows any fields when the holder is not restricted on fields', () => {
+      expect(isPermissionWithinCeiling([read({})], read({ fields: ['title', 'body'] }))).toBe(true);
+      expect(isPermissionWithinCeiling([readAnyField()], read({ fields: ['title', 'body'] }))).toBe(
+        true
+      );
+    });
+
+    it('always allows requesting no fields, and ignores a held permission with no fields', () => {
+      expect(isPermissionWithinCeiling([titleAlways], read({ fields: [] }))).toBe(true);
+      expect(isPermissionWithinCeiling([], read({ fields: [] }))).toBe(true);
+      expect(isPermissionWithinCeiling([read({ fields: [] })], read({}))).toBe(false);
+      expect(isPermissionWithinCeiling([read({ fields: [] })], read({ fields: ['title'] }))).toBe(
+        false
+      );
+    });
+
+    it('allows a subset of the held fields, including nested fields by their parent', () => {
+      const held = [read({ fields: ['title', 'seo'] })];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title', 'seo.description'] }))).toBe(
+        true
+      );
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title', 'body'] }))).toBe(false);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['seoTitle'] }))).toBe(false);
+      expect(
+        isPermissionWithinCeiling([read({ locales: ['en'] })], read({ locales: ['en.US'] }))
+      ).toBe(false);
+    });
+
+    it('rejects an omitted or null property when the holder is restricted on it', () => {
+      expect(isPermissionWithinCeiling([titleAlways], read({}))).toBe(false);
+      expect(isPermissionWithinCeiling([titleAlways], readAnyField())).toBe(false);
+      // Restricted on the request only, against an unrestricted holder
+      expect(
+        isPermissionWithinCeiling([titleAlways], read({ fields: ['title'], locales: ['en'] }))
+      ).toBe(true);
+    });
+
+    it('applies the same rule to locales', () => {
+      const held = [read({ fields: ['title'], locales: ['en', 'fr'] })];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['fr'] }))).toBe(
+        true
+      );
+      expect(
+        isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['fr', 'de'] }))
+      ).toBe(false);
+      expect(
+        isPermissionWithinCeiling(
+          [read({ fields: ['title'], locales: null })],
+          read({ fields: ['title'], locales: ['en', 'fr', 'de'] })
+        )
+      ).toBe(true);
+    });
+
+    it('needs an unrestricted holder for omitted or null locales', () => {
+      const restricted = [titleEn, titleFr];
+
+      expect(isPermissionWithinCeiling(restricted, read({ fields: ['title'] }))).toBe(false);
+      expect(
+        isPermissionWithinCeiling(restricted, read({ fields: ['title'], locales: null }))
+      ).toBe(false);
+      expect(
+        isPermissionWithinCeiling(
+          [read({ fields: ['title'], locales: null })],
+          read({ fields: ['title'], locales: null })
+        )
+      ).toBe(true);
+    });
+
+    it('treats empty locales as no locales, still checking fields and conditions', () => {
+      const held = [read({ fields: ['title'], locales: [] })];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: [] }))).toBe(true);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['en'] }))).toBe(
+        false
+      );
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'] }))).toBe(false);
+      expect(isPermissionWithinCeiling([titleEn], read({ fields: ['body'], locales: [] }))).toBe(
+        false
+      );
+      expect(
+        isPermissionWithinCeiling(
+          [read({ fields: ['title'] }, [IS_CREATOR])],
+          read({ fields: ['title'], locales: [] })
+        )
+      ).toBe(false);
+    });
+
+    it('allows a non-empty subset of the held conditions', () => {
+      const held = [read({}, [IS_CREATOR, SAME_ROLE])];
+
+      expect(isPermissionWithinCeiling(held, read({}, [IS_CREATOR, SAME_ROLE]))).toBe(true);
+      expect(isPermissionWithinCeiling(held, read({}, [IS_CREATOR]))).toBe(true);
+      expect(
+        isPermissionWithinCeiling([read({}, [IS_CREATOR])], read({}, [IS_CREATOR, SAME_ROLE]))
+      ).toBe(false);
+    });
+
+    it('allows any conditions when the permission is held unconditionally', () => {
+      const held = [read({}, [IS_CREATOR]), read({})];
+
+      expect(isPermissionWithinCeiling(held, read({}))).toBe(true);
+      expect(isPermissionWithinCeiling(held, read({}, [IS_CREATOR, SAME_ROLE]))).toBe(true);
+    });
+
+    it('rejects no conditions when the permission is only held with conditions', () => {
+      expect(isPermissionWithinCeiling([read({}, [IS_CREATOR])], read({}))).toBe(false);
+      expect(isPermissionWithinCeiling([read({}, [IS_CREATOR])], read({}, []))).toBe(false);
+    });
+
+    it('does not mix the fields of one permission with the locales of another', () => {
+      const held = [titleEn, bodyFr];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['fr'] }))).toBe(
+        false
+      );
+      expect(isPermissionWithinCeiling(held, read({ fields: ['body'], locales: ['en'] }))).toBe(
+        false
+      );
+      expect(
+        isPermissionWithinCeiling(held, read({ fields: ['title', 'body'], locales: ['en', 'fr'] }))
+      ).toBe(false);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['en'] }))).toBe(
+        true
+      );
+    });
+
+    it('does not lift the conditions of one permission with an unconditional one', () => {
+      const held = [titleAlways, bodyIfCreator];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['body'] }))).toBe(false);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title', 'body'] }))).toBe(false);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['body'] }, [IS_CREATOR]))).toBe(true);
+      expect(
+        isPermissionWithinCeiling(held, read({ fields: ['title', 'body'] }, [IS_CREATOR]))
+      ).toBe(true);
+    });
+
+    it('still allows unions on one dimension across held permissions', () => {
+      expect(
+        isPermissionWithinCeiling([titleAlways, bodyAlways], read({ fields: ['title', 'body'] }))
+      ).toBe(true);
+      expect(
+        isPermissionWithinCeiling(
+          [titleEn, titleFr],
+          read({ fields: ['title'], locales: ['en', 'fr'] })
+        )
+      ).toBe(true);
+      expect(
+        isPermissionWithinCeiling(
+          [read({ fields: ['title'] }, [IS_CREATOR]), read({ fields: ['title'] }, [SAME_ROLE])],
+          read({ fields: ['title'] }, [IS_CREATOR, SAME_ROLE])
+        )
+      ).toBe(true);
+    });
+
+    it('does not mix a condition held on one locale with another locale', () => {
+      const held = [
+        read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR]),
+        read({ fields: ['title'], locales: ['fr'] }, [SAME_ROLE]),
+      ];
+
+      expect(
+        isPermissionWithinCeiling(
+          held,
+          read({ fields: ['title'], locales: ['en', 'fr'] }, [IS_CREATOR, SAME_ROLE])
+        )
+      ).toBe(false);
+      expect(
+        isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR]))
+      ).toBe(true);
+    });
+
+    it('drops a partially held permission as a whole', () => {
+      expect(isPermissionWithinCeiling([titleAlways], read({ fields: ['title', 'body'] }))).toBe(
+        false
+      );
     });
   });
 
