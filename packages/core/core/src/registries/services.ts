@@ -2,7 +2,10 @@ import { has, pickBy } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
-export type ServiceFactory = (params: { strapi: Core.Strapi }) => Core.Service | Core.Service;
+/**
+ * A registered service: a factory called once with `{ strapi }`, or the service itself (`get` below).
+ */
+export type ServiceFactory = ((params: { strapi: Core.Strapi }) => Core.Service) | Core.Service;
 export type ServiceFactoryMap = Record<string, ServiceFactory>;
 export type ServiceMap = Record<string, Core.Service>;
 export type ServiceExtendFn = (service: Core.Service) => Core.Service;
