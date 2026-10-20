@@ -48,11 +48,7 @@ export interface Repository {
   deleteRelations(id: ID): Promise<any>;
   populate(entity: Entity, populate: Params['populate']): Promise<any>;
   load(entity: any, field: string | string[], populate?: Params['populate']): Promise<any>;
-  loadPages<TField extends string = string>(
-    entity: any,
-    field: TField,
-    populate?: Params['populate']
-  ): Promise<PaginatedResult>;
+  loadPages(entity: any, field: string, populate?: Params['populate']): Promise<PaginatedResult>;
 }
 
 export type Entity = {
