@@ -67,10 +67,6 @@ export type ResolverConfig = {
    * Functions run as {@link ResolverMiddleware}. A name, or `{ name, options }`, resolves a registered
    * middleware (`wrap-resolvers.ts:38-62`).
    */
-  // TODO @Nico A name resolves a middleware factory, which runs as the resolver middleware itself, and
-  // `{ name, options }` the koa handler that factory returns (`wrap-resolvers.ts:48-55`): neither
-  // receives `(resolve, parent, args, context, info)` as a factory or a koa handler expects. Check the
-  // runtime before narrowing these two forms.
   middlewares?: Array<string | ResolverMiddleware | { name: string; options?: unknown }>;
 };
 
