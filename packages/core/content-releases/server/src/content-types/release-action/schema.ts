@@ -43,7 +43,8 @@ export default {
     isEntryValid: {
       type: 'boolean',
     },
-    // What the run did with the entry. Null when no run recorded it.
+    // What the run did with the entry, or `skipped_missed` when the release's scheduled run never
+    // happened. Null when nothing recorded it.
     outcome: {
       type: 'enumeration',
       enum: [
@@ -53,6 +54,7 @@ export default {
         'skipped_not_approved',
         'skipped_error',
         'skipped_held',
+        'skipped_missed',
       ],
     },
     reason: {

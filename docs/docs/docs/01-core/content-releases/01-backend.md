@@ -198,15 +198,19 @@ packages/core/content-releases/server/src/services/validation.ts
 
 ### Scheduling
 
-:::caution
-Scheduling is still under development, but you can try it **at your own risk** with future flags. The future flag to enable scheduling is `contentReleasesScheduling`.
-:::
-
 Exposes methods to schedule release date for releases.
 
 ```
 packages/core/content-releases/server/src/services/scheduling.ts
 ```
+
+#### Overdue releases
+
+A release whose scheduled run didn't happen would otherwise stay in Pending with a past date: `syncFromDatabase` only arms future dates. `freezeOverdueReleases` runs at bootstrap, before `syncFromDatabase`, and then every minute. It freezes as "Failed" (`releasedAt` set, nothing published) every release without `releasedAt` whose `scheduledAt` is older than the grace period (`OVERDUE_GRACE_PERIOD_MS`, 5 minutes): the server was down at that time, or the run was rolled back by a database error. `failureReason` is `missed_schedule`. Every entry gets the outcome `skipped_missed` and keeps the `isEntryValid` and `reason` last checked before the date (nothing is checked at freeze time), and the totals are 0 published, 0 unpublished, every entry skipped. It sends the `releases.publish` webhook (`isPublished: false`, an error named `MissedSchedule`, worded for both causes: the release "wasn't released at its scheduled time") and a `release.trigger` audit failure attributed to the scheduler.
+
+Each release is frozen in its own transaction, under the same row lock as a run, and checked again under that lock: a run in progress, or a reschedule to a later date, wins. It locks the release row first, then writes only that release's action rows, in the same order as a run, and reads no entry, so it can't deadlock with a run or a review workflow change. It must not run inside another transaction (it throws), which would hold every lock until that transaction ends. A sweep that starts while one is still running (waiting on a long run's lock) joins it, and on a cluster each node sweeps: the lock lets one node freeze and report each release. A release that fails to freeze is left for the next sweep. On MySQL, a run still going more than 5 minutes after its date can make the sweep's lock wait time out (`innodb_lock_wait_timeout`): that's logged every minute until the run commits, and the release isn't touched. `failureReason` is `null` on every release that ran.
+
+Releases that failed before failed runs were frozen kept `status: failed` without `releasedAt`, so they stayed planned. A one-time update after the schema sync (`freezeReleasesFailedBeforeUpgrade`, before the bootstrap arms scheduled jobs) freezes them as they are: `releasedAt` set, `failureReason` is `failed_before_upgrade`. What their run did isn't known, so the outcomes and totals stay `null`, and no webhook or audit event is sent (they sent them when they failed).
 
 ### Release status update triggers:
 
@@ -266,7 +270,7 @@ How a run ends:
 - Some entries released and some not (an `allow_partial` run that skipped entries): "Partial", with `releasedAt` set.
 - No entry released (an `allow_partial` run whose entries all failed, or an `all_or_nothing` run stopped by an error): "Failed", with `releasedAt` set, and the request fails. The release leaves Pending and can't be published again: its entries go out in a new release.
 
-A run either records its outcome or doesn't happen. Only the failures the run decides are recorded as "Failed" (a scheduled run stopped by the check, an `all_or_nothing` run stopped by an entry error, an `allow_partial` run where every entry failed). Any other error (reading the entries, writing the result, the writes of a rejected manual publish) rolls the whole transaction back, the entries it released included: the request fails, the release stays as it was, and no webhook or audit event is sent. A scheduled release whose run rolled back keeps its past date in Pending until the overdue sweep freezes it (planned, EE-243); a manual one can be published again.
+A run either records its outcome or doesn't happen. Only the failures the run decides are recorded as "Failed" (a scheduled run stopped by the check, an `all_or_nothing` run stopped by an entry error, an `allow_partial` run where every entry failed). Any other error (reading the entries, writing the result, the writes of a rejected manual publish) rolls the whole transaction back, the entries it released included: the request fails, the release stays as it was, and no webhook or audit event is sent. A scheduled release whose run rolled back is frozen by the overdue sweep (see Scheduling); a manual one can be published again.
 
 Each entry of the run records what happened to it on its release action, returned by `GET /content-releases/:releaseId/actions`:
 
@@ -278,6 +282,7 @@ Each entry of the run records what happened to it on its release action, returne
 | `skipped_not_approved` | the entry wasn't at the stage required to publish                                                                                                                                  | `stage`: the entry's stage and the required one                                                                                    |
 | `skipped_error`        | publishing or unpublishing the entry threw an error other than a validation error                                                                                                  | `error.name`, never its message                                                                                                    |
 | `skipped_held`         | the entry was publishable, but an `all_or_nothing` run released nothing (at the check or after an error)                                                                           | `null`                                                                                                                             |
+| `skipped_missed`       | the release's scheduled run never happened (frozen by the overdue sweep, see Scheduling): nothing was checked or released                                                          | unchanged: the last check before the date                                                                                          |
 
 An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status, with the validity the run found: `isEntryValid` is `false` for `skipped_invalid` and `skipped_not_approved`, and `true` for every other outcome (a `skipped_error` entry had passed the check), so it never contradicts the outcome. A release runs once: its outcomes are never rewritten afterwards, a `failed` release included. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
 

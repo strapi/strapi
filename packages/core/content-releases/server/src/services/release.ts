@@ -45,8 +45,10 @@ export type RunTotals = {
 
 export type RecordedRelease = Pick<Release, 'id' | 'name' | 'releasedAt' | 'status'> & RunTotals;
 
+type RunOutcome = Exclude<ReleaseActionOutcome, 'skipped_missed'>;
+
 interface RecordedOutcome {
-  outcome: ReleaseActionOutcome;
+  outcome: RunOutcome;
   reason: ReleaseActionReason | null;
 }
 
@@ -64,7 +66,7 @@ const getErrorOutcome = (error: unknown): RecordedOutcome =>
 // exactly for the outcomes of an entry that isn't publishable. An entry that threw while being
 // released (`skipped_error`) had passed the check.
 const IS_ENTRY_VALID_BY_OUTCOME: Record<PublishabilityOutcome, false> &
-  Record<Exclude<ReleaseActionOutcome, PublishabilityOutcome>, true> = {
+  Record<Exclude<RunOutcome, PublishabilityOutcome>, true> = {
   published: true,
   unpublished: true,
   skipped_held: true,
@@ -160,7 +162,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Entries without a reason share one write per outcome; a reason is written per entry
   const recordOutcomes = async (outcomes: Map<ReleaseAction['id'], RecordedOutcome>) => {
-    const idsByOutcome = new Map<ReleaseActionOutcome, ReleaseAction['id'][]>();
+    const idsByOutcome = new Map<RunOutcome, ReleaseAction['id'][]>();
     for (const [id, { outcome, reason }] of outcomes) {
       if (reason) {
         await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
@@ -651,6 +653,31 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       return release;
     },
 
+    async recordMissedRun(releaseId: Release['id']) {
+      const actions: Pick<ReleaseAction, 'id'>[] = await strapi.db
+        .query(RELEASE_ACTION_MODEL_UID)
+        .findMany({ where: { release: { id: releaseId } }, select: ['id'] });
+
+      if (actions.length > 0) {
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+          where: { id: { $in: actions.map((action) => action.id) } },
+          data: { outcome: 'skipped_missed' },
+        });
+      }
+
+      return strapi.db.query(RELEASE_MODEL_UID).update({
+        where: { id: releaseId },
+        data: {
+          status: 'failed',
+          releasedAt: new Date(),
+          failureReason: 'missed_schedule',
+          totalPublishedEntries: 0,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: actions.length,
+        },
+      });
+    },
+
     // Under the release row lock that runs and action changes take: the counts it reads are
     // those of the last committed change, so a recalculation never lands after a newer one
     async updateReleaseStatus(releaseId: Release['id']) {
@@ -660,9 +687,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         const release = await lockRelease({ strapi }, releaseId, [
           'releaseCondition',
           'releasedAt',
+          'status',
         ]);
 
-        if (!release || release.releasedAt) {
+        if (!release || release.releasedAt || release.status === 'failed') {
           return;
         }
 

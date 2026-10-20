@@ -1101,6 +1101,19 @@ describe('Release service', () => {
       ]);
     });
 
+    it('leaves a release that failed before the upgrade as failed, for the startup freeze', async () => {
+      const { strapiMock, update } = createStrapiMock(
+        { releaseCondition: 'all_or_nothing', releasedAt: null, status: 'failed' },
+        { total: 3, invalid: 0 }
+      );
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+      await releaseService.updateReleaseStatus(1);
+
+      expect(update).not.toHaveBeenCalled();
+    });
+
     it('does nothing for a release that no longer exists', async () => {
       const { strapiMock, update } = createStrapiMock(null, { total: 3, invalid: 1 });
 
@@ -1296,6 +1309,53 @@ describe('Release service', () => {
 
       expect(release).toEqual({ id: 1, name: 'test', scheduledAt: scheduledDate });
       expect(mockSchedulingSet).toHaveBeenCalledWith(1, mockReleaseArgs.scheduledAt);
+    });
+  });
+
+  describe('recordMissedRun', () => {
+    const setup = (actionIds: number[]) => {
+      const findMany = jest.fn().mockResolvedValue(actionIds.map((id) => ({ id })));
+      const updateMany = jest.fn();
+      const update = jest.fn(async ({ data }) => ({ id: 1, ...data }));
+      const strapi = { db: { query: jest.fn(() => ({ findMany, updateMany, update })) } };
+
+      // @ts-expect-error Ignore missing properties
+      const service = createReleaseService({ strapi });
+
+      return { service, findMany, updateMany, update };
+    };
+
+    it('marks every entry of a missed release as missed and counts it as skipped', async () => {
+      const { service, updateMany, update } = setup([10, 11]);
+
+      const release = await service.recordMissedRun(1);
+
+      expect(updateMany.mock.calls).toStrictEqual([
+        [{ where: { id: { $in: [10, 11] } }, data: { outcome: 'skipped_missed' } }],
+      ]);
+      expect(update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: {
+          status: 'failed',
+          releasedAt: expect.any(Date),
+          failureReason: 'missed_schedule',
+          totalPublishedEntries: 0,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 2,
+        },
+      });
+      expect(release).toMatchObject({ status: 'failed', totalSkippedEntries: 2 });
+    });
+
+    it('freezes an empty missed release with no skipped entries', async () => {
+      const { service, updateMany, update } = setup([]);
+
+      await service.recordMissedRun(1);
+
+      expect(updateMany).not.toHaveBeenCalled();
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ totalSkippedEntries: 0 }) })
+      );
     });
   });
 });

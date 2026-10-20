@@ -2,9 +2,13 @@ import { errors } from '@strapi/utils';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import type { Entity, UserInfo } from '../types';
 import type { ReleaseAction } from './release-actions';
-import type { ReleaseCondition, ReleaseStatus } from '../../server/src/constants';
+import type {
+  ReleaseCondition,
+  ReleaseFailureReason,
+  ReleaseStatus,
+} from '../../server/src/constants';
 
-export type { ReleaseCondition, ReleaseStatus };
+export type { ReleaseCondition, ReleaseFailureReason, ReleaseStatus };
 
 export interface Release extends Entity {
   name: string;
@@ -19,6 +23,7 @@ export interface Release extends Entity {
   totalPublishedEntries: number | null;
   totalUnpublishedEntries: number | null;
   totalSkippedEntries: number | null;
+  failureReason: ReleaseFailureReason | null;
   actions: ReleaseAction[];
 }
 

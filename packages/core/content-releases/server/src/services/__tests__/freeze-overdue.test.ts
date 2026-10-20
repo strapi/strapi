@@ -1,0 +1,190 @@
+import type * as strapiUtils from '@strapi/utils';
+
+import createSchedulingService from '../scheduling';
+import { OVERDUE_GRACE_PERIOD_MS } from '../../constants';
+
+const mockEmitAudit = jest.fn();
+
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual<typeof strapiUtils>('@strapi/utils'),
+  emitAudit: (...args: unknown[]) => mockEmitAudit(...args),
+}));
+
+const NOW = new Date('2026-10-15T09:00:00.000Z');
+const minutesAgo = (minutes: number) => new Date(NOW.getTime() - minutes * 60 * 1000);
+
+type Row = {
+  id: number;
+  name: string;
+  releasedAt: Date | null;
+  scheduledAt: Date | null;
+  status: string;
+};
+
+const setup = ({ rows, locked = rows }: { rows: Row[]; locked?: Row[] }) => {
+  const findMany = jest.fn().mockResolvedValue(rows.map(({ id }) => ({ id })));
+  const recordMissedRun = jest.fn(async (id: number) => ({
+    id,
+    name: `Release ${id}`,
+    status: 'failed',
+    failureReason: 'missed_schedule',
+  }));
+  const emit = jest.fn();
+  const logError = jest.fn();
+  const cronRemove = jest.fn();
+
+  type QueryBuilderMock = Record<string, jest.Mock>;
+
+  const queryBuilder = jest.fn(() => {
+    let id: number;
+    const builder: QueryBuilderMock = {
+      where: jest.fn((where: { id: number }) => {
+        id = where.id;
+        return builder;
+      }),
+      select: jest.fn(() => builder),
+      first: jest.fn(() => builder),
+      transacting: jest.fn(() => builder),
+      forUpdate: jest.fn(() => builder),
+      execute: jest.fn(async () => locked.find((row) => row.id === id)),
+    };
+    return builder;
+  });
+
+  const strapi = {
+    db: {
+      query: jest.fn(() => ({ findMany })),
+      queryBuilder,
+      inTransaction: jest.fn(() => false),
+      transaction: jest.fn((work: (arg: { trx: object }) => unknown) => work({ trx: {} })),
+    },
+    plugin: jest.fn(() => ({ service: jest.fn(() => ({ recordMissedRun })) })),
+    eventHub: { emit },
+    log: { error: logError },
+    cron: { add: jest.fn(), remove: cronRemove },
+    requestContext: { run: jest.fn((_ctx: unknown, cb: () => unknown) => cb()) },
+  };
+
+  // @ts-expect-error Ignore missing properties
+  const service = createSchedulingService({ strapi });
+
+  return { service, strapi, findMany, recordMissedRun, emit, logError };
+};
+
+const release = (overrides: Partial<Row> & Pick<Row, 'id'>): Row => ({
+  name: `Release ${overrides.id}`,
+  releasedAt: null,
+  scheduledAt: null,
+  status: 'ready',
+  ...overrides,
+});
+
+describe('Scheduling service: freezeOverdueReleases', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('looks for releases overdue by more than the grace period', async () => {
+    const { service, findMany } = setup({ rows: [] });
+
+    await service.freezeOverdueReleases({ now: NOW });
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        releasedAt: null,
+        scheduledAt: { $lt: new Date(NOW.getTime() - OVERDUE_GRACE_PERIOD_MS) },
+      },
+      select: ['id'],
+    });
+  });
+
+  it('freezes a release that missed its schedule and reports it as the scheduler', async () => {
+    const { service, recordMissedRun, emit } = setup({
+      rows: [release({ id: 1, scheduledAt: minutesAgo(10) })],
+    });
+
+    const frozen = await service.freezeOverdueReleases({ now: NOW });
+
+    expect(frozen).toHaveLength(1);
+    expect(recordMissedRun.mock.calls).toStrictEqual([[1]]);
+    expect(emit).toHaveBeenCalledWith('releases.publish', {
+      isPublished: false,
+      error: expect.objectContaining({ name: 'MissedSchedule' }),
+      release: { id: 1, name: 'Release 1', status: 'failed', failureReason: 'missed_schedule' },
+    });
+    expect(mockEmitAudit).toHaveBeenCalledWith(expect.anything(), 'release.trigger', {
+      releaseId: 1,
+      name: 'Release 1',
+      outcome: 'failure',
+      reason: 'MissedSchedule',
+    });
+  });
+
+  it.each([
+    ['a run froze it meanwhile', { releasedAt: NOW, status: 'done' }],
+    [
+      'it was rescheduled to the future meanwhile',
+      { scheduledAt: new Date(NOW.getTime() + 60_000) },
+    ],
+    ['it is overdue by less than the grace period', { scheduledAt: minutesAgo(2) }],
+    ['it has no schedule', { scheduledAt: null }],
+  ])('leaves a release alone when, under the lock, %s', async (_, lockedState) => {
+    const row = release({ id: 1, scheduledAt: minutesAgo(10) });
+    const { service, recordMissedRun, emit } = setup({
+      rows: [row],
+      locked: [{ ...row, ...lockedState }],
+    });
+
+    const frozen = await service.freezeOverdueReleases({ now: NOW });
+
+    expect(frozen).toHaveLength(0);
+    expect(recordMissedRun).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('logs a release that fails to freeze and still freezes the others', async () => {
+    const { service, recordMissedRun, logError } = setup({
+      rows: [
+        release({ id: 1, scheduledAt: minutesAgo(10) }),
+        release({ id: 2, scheduledAt: minutesAgo(10) }),
+      ],
+    });
+    recordMissedRun.mockRejectedValueOnce(new Error('write failed'));
+
+    const frozen = await service.freezeOverdueReleases({ now: NOW });
+
+    expect(frozen.map(({ id }) => id)).toEqual([2]);
+    expect(logError).toHaveBeenCalledWith(
+      "[Content Releases] Couldn't freeze overdue release 1",
+      expect.objectContaining({ error: expect.any(Error) })
+    );
+  });
+
+  it('runs one sweep at a time: a tick during a sweep joins it', async () => {
+    const { service, findMany } = setup({
+      rows: [release({ id: 1, scheduledAt: minutesAgo(10) })],
+    });
+
+    const [first, second] = await Promise.all([
+      service.freezeOverdueReleases({ now: NOW }),
+      service.freezeOverdueReleases({ now: NOW }),
+    ]);
+
+    expect(findMany).toHaveBeenCalledTimes(1);
+    expect(second).toBe(first);
+
+    // Once it ended, the next tick sweeps again
+    await service.freezeOverdueReleases({ now: NOW });
+    expect(findMany).toHaveBeenCalledTimes(2);
+  });
+
+  it('refuses to run inside a transaction, which would hold every release lock until it ends', async () => {
+    const { service, strapi, findMany } = setup({ rows: [] });
+    strapi.db.inTransaction.mockReturnValue(true);
+
+    await expect(service.freezeOverdueReleases({ now: NOW })).rejects.toThrow(
+      'The overdue sweep must not run inside a transaction'
+    );
+    expect(findMany).not.toHaveBeenCalled();
+  });
+});

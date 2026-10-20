@@ -1,13 +1,27 @@
 import type { Core } from '@strapi/types';
 
-import { errors } from '@strapi/utils';
+import { emitAudit, errors } from '@strapi/utils';
 import { Release } from '../../../shared/contracts/releases';
-import { getService } from '../utils';
-import { RELEASE_MODEL_UID } from '../constants';
+import { getService, lockRelease } from '../utils';
+import {
+  ALLOWED_WEBHOOK_EVENTS,
+  AUDITED_EVENTS,
+  OVERDUE_GRACE_PERIOD_MS,
+  RELEASE_MODEL_UID,
+} from '../constants';
 import { runAsSystem } from '../audit-logs';
+
+type LockedRelease = Pick<Release, 'id' | 'name' | 'releasedAt' | 'scheduledAt'>;
+
+const isOverdue = (
+  release: Pick<LockedRelease, 'releasedAt' | 'scheduledAt'>,
+  overdueBefore: Date
+): boolean =>
+  !release.releasedAt && !!release.scheduledAt && new Date(release.scheduledAt) < overdueBefore;
 
 const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
   const scheduledJobs = new Map<Release['id'], string>();
+  let sweepInProgress: Promise<Release[]> | null = null;
 
   return {
     async set(releaseId: Release['id'], scheduleDate: Date) {
@@ -61,6 +75,92 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     getAll() {
       return scheduledJobs;
+    },
+
+    freezeOverdueReleases({ now = new Date() }: { now?: Date } = {}): Promise<Release[]> {
+      if (!sweepInProgress) {
+        sweepInProgress = this.sweepOverdueReleases(now).finally(() => {
+          sweepInProgress = null;
+        });
+      }
+
+      return sweepInProgress;
+    },
+
+    async sweepOverdueReleases(now: Date): Promise<Release[]> {
+      if (strapi.db.inTransaction()) {
+        throw new Error('The overdue sweep must not run inside a transaction');
+      }
+
+      const overdueBefore = new Date(now.getTime() - OVERDUE_GRACE_PERIOD_MS);
+
+      const candidates: Pick<Release, 'id'>[] = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+        where: {
+          releasedAt: null,
+          scheduledAt: { $lt: overdueBefore },
+        },
+        select: ['id'],
+      });
+
+      const frozen: Release[] = [];
+
+      for (const { id } of candidates) {
+        try {
+          const result = await strapi.db.transaction(async (): Promise<Release | null> => {
+            const locked: LockedRelease | undefined = await lockRelease({ strapi }, id, [
+              'id',
+              'name',
+              'releasedAt',
+              'scheduledAt',
+            ]);
+
+            if (!locked || !isOverdue(locked, overdueBefore)) {
+              return null;
+            }
+
+            return getService('release', { strapi }).recordMissedRun(id);
+          });
+
+          if (result) {
+            // Its job, if one is still armed, has nothing left to run
+            this.cancel(id);
+            frozen.push(result);
+          }
+        } catch (error) {
+          strapi.log.error(`[Content Releases] Couldn't freeze overdue release ${id}`, { error });
+        }
+      }
+
+      for (const release of frozen) {
+        try {
+          await runAsSystem({ strapi }, 'scheduler', () => this.reportMissedSchedule(release));
+        } catch (error) {
+          strapi.log.error(
+            `[Content Releases] Couldn't report that release ${release.id} missed its schedule`,
+            { error }
+          );
+        }
+      }
+
+      return frozen;
+    },
+
+    async reportMissedSchedule(release: Release) {
+      const error = new Error(`Release ${release.name} wasn't released at its scheduled time`);
+      error.name = 'MissedSchedule';
+
+      strapi.eventHub.emit(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
+        isPublished: false,
+        error,
+        release,
+      });
+
+      await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
+        releaseId: release.id,
+        name: release.name,
+        outcome: 'failure',
+        reason: error.name,
+      });
     },
 
     /**

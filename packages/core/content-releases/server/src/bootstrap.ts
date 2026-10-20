@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { Core, UID } from '@strapi/types';
 
-import { ALLOWED_WEBHOOK_EVENTS } from './constants';
+import { ALLOWED_WEBHOOK_EVENTS, OVERDUE_SWEEP_CRON_RULE } from './constants';
 import { registerAuditEvents } from './audit-logs';
 import { getService, runAfterCommit } from './utils';
 import {
@@ -49,15 +49,32 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.documents.use(createDeleteActionsOnDelete({ strapi }));
     strapi.documents.use(createRevalidateActionsOnDraftChange({ strapi }));
 
-    getService('scheduling', { strapi })
-      .syncFromDatabase()
-      .catch((err: Error) => {
-        strapi.log.error(
-          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
-        );
-
-        throw err;
+    const schedulingService = getService('scheduling', { strapi });
+    const freezeOverdueReleases = () =>
+      schedulingService.freezeOverdueReleases().catch((error: unknown) => {
+        strapi.log.error('Error while freezing overdue releases in the content-releases plugin', {
+          error,
+        });
       });
+
+    // Overdue releases are frozen before the jobs are armed: a release that failed before the
+    // upgrade must not be armed for a date it won't run on
+    freezeOverdueReleases()
+      .then(() => schedulingService.syncFromDatabase())
+      .catch((error: unknown) => {
+        strapi.log.error(
+          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.',
+          { error }
+        );
+      });
+
+    // Then every minute: a release whose scheduled run didn't happen leaves Pending
+    strapi.cron.add({
+      'content-releases::freezeOverdueReleases': {
+        task: freezeOverdueReleases,
+        options: OVERDUE_SWEEP_CRON_RULE,
+      },
+    });
 
     Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
       strapi.get('webhookStore').addAllowedEvent(key, value);

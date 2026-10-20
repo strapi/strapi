@@ -109,6 +109,17 @@ export async function addReasonsToInvalidActions({ strapi }: { strapi: Core.Stra
     });
 }
 
+export async function freezeReleasesFailedBeforeUpgrade({ strapi }: { strapi: Core.Strapi }) {
+  try {
+    await strapi.db.query(RELEASE_MODEL_UID).updateMany({
+      where: { status: 'failed', releasedAt: null },
+      data: { releasedAt: new Date(), failureReason: 'failed_before_upgrade' },
+    });
+  } catch (error: unknown) {
+    strapi.log.error('Error while freezing releases that failed before the upgrade', { error });
+  }
+}
+
 export async function migrateReleaseConditionReleases() {
   await strapi.db.query(RELEASE_MODEL_UID).updateMany({
     where: { releaseCondition: null },
