@@ -167,6 +167,95 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         expect(await rowsNamedAsset()).toBe(2);
       });
 
+      // The crop editor's number fields render with the locale's group separator
+      // ("5,616"), so compare parsed values rather than the displayed string.
+      const readNumberField = async (label: string) =>
+        Number(
+          (await page.getByLabel(label, { exact: true }).inputValue()).replace(/[^\d.-]/g, '')
+        );
+      const readDimensions = async () => {
+        const [width, height] = (
+          (await assetsPage.getDrawerDetailValue('Dimensions').first().textContent()) ?? ''
+        )
+          .replace(/[,\s]/g, '')
+          .split(/[x×]/)
+          .map(Number);
+        return { width, height };
+      };
+
+      await test.step('I rotate an image', async () => {
+        const rotateRight = page.getByRole('button', { name: 'Rotate 90° right' });
+        const cropImage = page.getByTestId('crop-editor-image');
+
+        // Rotating remaps the focal point, and nothing re-seeds it once the image
+        // loads, so the control must stay disabled until then. Hold the editor's
+        // image request (the only one carrying `updatedAt=`) to observe it.
+        let releaseImage!: () => void;
+        const imageHeld = new Promise<void>((resolve) => {
+          releaseImage = resolve;
+        });
+        await page.route(/[?&]updatedAt=\d+/, async (route) => {
+          await imageHeld;
+          await route.continue();
+        });
+
+        // A narrow viewport is where a quarter turn broke the layout: the image is
+        // taken out of flow and has to fit the box sized by an in-flow spacer.
+        const viewport = page.viewportSize();
+        await page.setViewportSize({ width: 768, height: 1024 });
+
+        const before = await readDimensions();
+        expect(before.width).not.toBe(before.height);
+
+        await assetsPage.openCropEditor();
+        await expect(rotateRight).toBeDisabled();
+
+        releaseImage();
+        await expect(rotateRight).toBeEnabled({ timeout: 15_000 });
+        await page.unroute(/[?&]updatedAt=\d+/);
+
+        await expect.poll(() => readNumberField('Width (px)')).toBe(before.width);
+        await expect.poll(() => readNumberField('Height (px)')).toBe(before.height);
+
+        await rotateRight.click();
+
+        // The size fields remount on rotation, so they re-seed with swapped values.
+        await expect.poll(() => readNumberField('Width (px)')).toBe(before.height);
+        await expect.poll(() => readNumberField('Height (px)')).toBe(before.width);
+
+        // The rotated image fills its crop area instead of overflowing it.
+        const imageBox = await cropImage.boundingBox();
+        const areaBox = await cropImage.locator('..').boundingBox();
+        expect(imageBox).not.toBeNull();
+        expect(areaBox).not.toBeNull();
+        expect(imageBox!.height).toBeGreaterThan(imageBox!.width);
+        expect(Math.abs(imageBox!.x - areaBox!.x)).toBeLessThanOrEqual(1);
+        expect(Math.abs(imageBox!.y - areaBox!.y)).toBeLessThanOrEqual(1);
+        expect(Math.abs(imageBox!.width - areaBox!.width)).toBeLessThanOrEqual(1);
+        expect(Math.abs(imageBox!.height - areaBox!.height)).toBeLessThanOrEqual(1);
+
+        await assetsPage.applyCrop();
+        await expect(assetsPage.getDrawerToast(/File updated/i)).toBeVisible({ timeout: 10_000 });
+
+        if (viewport) {
+          await page.setViewportSize(viewport);
+        }
+
+        // The saved file is the rotated one.
+        await expect
+          .poll(readDimensions, { timeout: 10_000 })
+          .toEqual({ width: before.height, height: before.width });
+
+        // The rotation was baked into the file, not kept as a pending turn.
+        await assetsPage.openCropEditor();
+        await expect(rotateRight).toBeEnabled({ timeout: 15_000 });
+        await expect(cropImage).not.toHaveAttribute('style', /rotate/);
+        await expect.poll(() => readNumberField('Width (px)')).toBe(before.height);
+        await expect.poll(() => readNumberField('Height (px)')).toBe(before.width);
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('button', { name: 'Apply' })).not.toBeVisible();
+      });
+
       await test.step('I set a focal point', async () => {
         await assetsPage.openCropEditor();
 
@@ -200,19 +289,13 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await assetsPage.applyCrop();
         await expect(assetsPage.getDrawerToast(/File updated/i)).toBeVisible({ timeout: 10_000 });
 
-        // It persists after Save. The field renders the number with the
-        // locale's group separator ("1,404"), so compare the parsed value
-        // instead of the displayed string.
+        // It persists after Save.
         await assetsPage.openCropEditor();
-        const readFocal = async (label: string) =>
-          Number(
-            (await page.getByLabel(label, { exact: true }).inputValue()).replace(/[^\d.-]/g, '')
-          );
         await expect
-          .poll(() => readFocal('Focal point X (px)'), { timeout: 10_000 })
+          .poll(() => readNumberField('Focal point X (px)'), { timeout: 10_000 })
           .toBe(Number(targetX));
         await expect
-          .poll(() => readFocal('Focal point Y (px)'), { timeout: 10_000 })
+          .poll(() => readNumberField('Focal point Y (px)'), { timeout: 10_000 })
           .toBe(Number(targetY));
         await page.keyboard.press('Escape');
         await expect(page.getByRole('button', { name: 'Apply' })).not.toBeVisible();
