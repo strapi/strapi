@@ -31,6 +31,8 @@ The `hooks` namespace creates hook objects: `createAsyncSeriesHook`, `createAsyn
 
 The `errors` namespace defines `ApplicationError` and its subclasses, for example `ValidationError`, `NotFoundError`, `ForbiddenError`, `UnauthorizedError` and `PolicyError`. Each error has a `name`, a `message` and `details`. The errors middleware in `@strapi/core` formats these errors into the HTTP error response.
 
+An app can load two copies of `@strapi/utils` when its Strapi packages are on different versions. `instanceof` on these errors still matches across copies: each error records the ids of its classes under `Symbol.for('strapi.errors.classIds')`, and `ApplicationError` checks them in `Symbol.hasInstance`. Both copies need this check for it to work.
+
 ### Schema traversal
 
 `traverseEntity` walks a data entity along its schema. It calls a `Visitor` for each attribute, and it recurses into relations, media, components and dynamic zones. The `traverse` namespace does the same for query parameters: fields, filters, sort and populate. See [traverseEntity](./traverse-entity.md).

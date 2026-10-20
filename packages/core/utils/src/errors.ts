@@ -4,6 +4,33 @@ import * as yup from 'yup';
 import { HttpError } from 'http-errors';
 import { formatYupErrors } from './format-yup-error';
 
+/**
+ * An app can load two copies of `@strapi/utils` (packages on different
+ * versions), and `instanceof` fails between them. Each error records the ids
+ * of its classes under a registry symbol, shared by every copy, so
+ * `instanceof` can match on those instead.
+ */
+const CLASS_IDS = Symbol.for('strapi.errors.classIds');
+
+// Fixed ids, not `constructor.name`, which a bundler may rename.
+const classIds = new WeakMap<object, string>();
+
+const getClassIds = (ErrorClass: unknown) => {
+  const ids: string[] = [];
+
+  for (let current = ErrorClass; current && current !== Error; ) {
+    const id = classIds.get(current);
+
+    if (id) {
+      ids.push(id);
+    }
+
+    current = Object.getPrototypeOf(current);
+  }
+
+  return ids;
+};
+
 /* ApplicationError */
 class ApplicationError<
   TName extends string = 'ApplicationError',
@@ -16,6 +43,22 @@ class ApplicationError<
 
   message: TMessage;
 
+  static [Symbol.hasInstance](value: unknown): boolean {
+    if (Function.prototype[Symbol.hasInstance].call(this, value)) {
+      return true;
+    }
+
+    const id = classIds.get(this);
+
+    if (!id || typeof value !== 'object' || value === null) {
+      return false;
+    }
+
+    const ids = (value as { [CLASS_IDS]?: unknown })[CLASS_IDS];
+
+    return Array.isArray(ids) && ids.includes(id);
+  }
+
   constructor(
     message = 'An application error occurred' as TMessage,
     details: TDetails = {} as TDetails
@@ -24,6 +67,8 @@ class ApplicationError<
     this.name = 'ApplicationError' as TName;
     this.message = message;
     this.details = details;
+
+    Object.defineProperty(this, CLASS_IDS, { value: getClassIds(new.target) });
   }
 }
 
@@ -152,6 +197,22 @@ class NotImplementedError<
     this.message = message;
   }
 }
+
+const ERROR_CLASS_IDS: Array<[object, string]> = [
+  [ApplicationError, 'ApplicationError'],
+  [ValidationError, 'ValidationError'],
+  [YupValidationError, 'YupValidationError'],
+  [PaginationError, 'PaginationError'],
+  [NotFoundError, 'NotFoundError'],
+  [ForbiddenError, 'ForbiddenError'],
+  [UnauthorizedError, 'UnauthorizedError'],
+  [RateLimitError, 'RateLimitError'],
+  [PayloadTooLargeError, 'PayloadTooLargeError'],
+  [PolicyError, 'PolicyError'],
+  [NotImplementedError, 'NotImplementedError'],
+];
+
+ERROR_CLASS_IDS.forEach(([ErrorClass, id]) => classIds.set(ErrorClass, id));
 
 export {
   HttpError,

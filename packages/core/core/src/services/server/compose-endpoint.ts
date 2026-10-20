@@ -4,7 +4,6 @@ import { errors } from '@strapi/utils';
 import Router from '@koa/router';
 
 import compose from 'koa-compose';
-import { isStrapiError } from '../errors';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
 
@@ -40,13 +39,13 @@ const createAuthorizeMiddleware =
 
       return await next();
     } catch (error) {
-      if (isStrapiError(error, errors.UnauthorizedError)) {
+      if (error instanceof errors.UnauthorizedError) {
         return ctx.unauthorized();
       }
 
-      if (isStrapiError(error, errors.ForbiddenError)) {
+      if (error instanceof errors.ForbiddenError) {
         // allow PolicyError as an exception to throw a publicly visible message in the API
-        if (isStrapiError(error, errors.PolicyError)) {
+        if (error instanceof errors.PolicyError) {
           throw error;
         }
         return ctx.forbidden();
