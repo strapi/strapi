@@ -19,21 +19,23 @@ export type Params = {
   count?: boolean;
 };
 
+export type PaginatedResult = {
+  results: any[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    pageCount: number;
+    total: number;
+  };
+};
+
 export type FindOneParams = Pick<Params, 'where' | 'select' | 'populate' | '_q' | 'orderBy'>;
 
 export interface Repository {
   findOne(params?: FindOneParams): Promise<any>;
   findMany(params?: Params): Promise<any[]>;
   findWithCount(params?: Params): Promise<[any[], number]>;
-  findPage(params: Params): Promise<{
-    results: any[];
-    pagination: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    };
-  }>;
+  findPage(params: Params): Promise<PaginatedResult>;
   create(params: Params): Promise<any>;
   createMany(params: Params): Promise<CountResult & { ids: ID[] }>;
   update(params: Params): Promise<any>;
@@ -46,11 +48,7 @@ export interface Repository {
   deleteRelations(id: ID): Promise<any>;
   populate(entity: Entity, populate: Params['populate']): Promise<any>;
   load(entity: any, field: string | string[], populate?: Params['populate']): Promise<any>;
-  loadPages<TField extends string>(
-    entity: any,
-    field: TField | TField[],
-    populate?: Params['populate']
-  ): Promise<any>;
+  loadPages(entity: any, field: string, populate?: Params['populate']): Promise<PaginatedResult>;
 }
 
 export type Entity = {
