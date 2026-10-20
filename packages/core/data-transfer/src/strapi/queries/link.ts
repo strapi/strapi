@@ -1,6 +1,6 @@
 import type { Knex } from 'knex';
 import { clone } from 'lodash';
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import { ILink } from '../../types';
 
@@ -29,7 +29,7 @@ const refKey = (ref: number | string) => `${typeof ref}:${ref}`;
  */
 const loadExistingRefs = async (
   strapi: Core.Strapi,
-  uid: string,
+  uid: UID.Schema,
   refs: Array<number | string>
 ): Promise<Set<string>> => {
   const existing = new Set<string>();
@@ -83,7 +83,7 @@ const filterMorphLinksByTargetExistence = async function* filterMorphLinksByTarg
   links: ILink[],
   onOrphanedLink?: (link: ILink) => void
 ): AsyncGenerator<ILink> {
-  const refsByType = new Map<string, Array<number | string>>();
+  const refsByType = new Map<UID.Schema, Array<number | string>>();
 
   for (const link of links) {
     const { type, ref } = link.right;
@@ -91,9 +91,11 @@ const filterMorphLinksByTargetExistence = async function* filterMorphLinksByTarg
     if (ref == null || type == null) {
       onOrphanedLink?.(link);
     } else {
-      const bucket = refsByType.get(type) ?? [];
+      // The transfer payload carries the morph type as a plain string
+      const uid = type as UID.Schema;
+      const bucket = refsByType.get(uid) ?? [];
       bucket.push(ref);
-      refsByType.set(type, bucket);
+      refsByType.set(uid, bucket);
     }
   }
 
