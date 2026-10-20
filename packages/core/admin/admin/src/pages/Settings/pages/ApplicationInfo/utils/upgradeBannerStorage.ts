@@ -4,7 +4,7 @@ const DISMISSED_VERSION_KEY = 'STRAPI_UPGRADE_BANNER_DISMISSED_VERSION';
 const REMIND_LATER_AT_KEY = 'STRAPI_UPGRADE_BANNER_REMIND_LATER_AT';
 
 /**
- * How long the urgent banner stays hidden after "Remind me later".
+ * How long the urgent banner stays hidden after "Hide for 7 days".
  */
 const REMIND_LATER_DELAY_MS = 7 * 24 * 60 * 60 * 1000;
 

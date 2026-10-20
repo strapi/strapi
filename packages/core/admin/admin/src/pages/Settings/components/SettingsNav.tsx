@@ -126,9 +126,7 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
                         {link?.hasNotification && (
                           <StyledBadge
                             aria-label="Notification"
-                            backgroundColor={
-                              link.notificationVariant === 'warning' ? 'warning700' : 'primary600'
-                            }
+                            backgroundColor="primary600"
                             textColor="neutral0"
                           >
                             1

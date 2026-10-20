@@ -62,7 +62,7 @@ describe('ApplicationInfoPage – upgrade banner', () => {
     await screen.findByRole('heading', { name: 'Overview' });
 
     expect(screen.queryByText(/is available/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/releases behind/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/minor versions behind/)).not.toBeInTheDocument();
     expect(screen.queryByText('Update available')).not.toBeInTheDocument();
   });
 
@@ -80,28 +80,28 @@ describe('ApplicationInfoPage – upgrade banner', () => {
 
       expect(await screen.findByText('Strapi v5.10.0 is available')).toBeInTheDocument();
       expect(
-        screen.getByText(
-          "You're on v5.9.0. Upgrade to get the latest features, fixes and security patches."
-        )
+        screen.getByText('You are on v5.9.0. Upgrade to get the latest features and fixes.')
       ).toBeInTheDocument();
       expect(screen.getByText('Update available')).toBeInTheDocument();
 
-      const whatsNew = screen.getByRole('link', { name: /What's new/ });
-      expect(whatsNew).toHaveAttribute('href', RELEASES_URL);
-      expect(whatsNew).toHaveAttribute('target', '_blank');
-      expect(whatsNew).toHaveAttribute('rel', expect.stringMatching(/noopener/));
-      expect(whatsNew).toHaveAttribute('rel', expect.stringMatching(/noreferrer/));
+      const releaseNotes = screen.getByRole('link', { name: /Release notes/ });
+      expect(releaseNotes).toHaveAttribute('href', RELEASES_URL);
+      expect(releaseNotes).toHaveAttribute('target', '_blank');
+      expect(releaseNotes).toHaveAttribute('rel', expect.stringMatching(/noopener/));
+      expect(releaseNotes).toHaveAttribute('rel', expect.stringMatching(/noreferrer/));
 
-      const howToUpgrade = screen.getByRole('link', { name: /How to upgrade/ });
-      expect(howToUpgrade).toHaveAttribute('href', UPGRADE_DOCS_URL);
-      expect(howToUpgrade).toHaveAttribute('target', '_blank');
+      const upgradeGuide = screen.getByRole('link', { name: /Upgrade guide/ });
+      expect(upgradeGuide).toHaveAttribute('href', UPGRADE_DOCS_URL);
+      expect(upgradeGuide).toHaveAttribute('target', '_blank');
       expect(UPGRADE_DOCS_URL).toContain('utm_source=admin-panel');
 
-      expect(screen.getByRole('button', { name: 'Dismiss for this version' })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Remind me later' })).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Hide until the next version' })
+      ).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Hide for 7 days' })).not.toBeInTheDocument();
     });
 
-    it('stays the default state when exactly 10 releases behind', async () => {
+    it('stays the default state when exactly 10 minor versions behind', async () => {
       renderPage('5.0.0', 'v5.10.0');
 
       expect(await screen.findByText('Strapi v5.10.0 is available')).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('ApplicationInfoPage – upgrade banner', () => {
     it('dismisses the banner for the current latest version only', async () => {
       const { user, unmount } = renderPage('5.9.0', 'v5.10.0');
 
-      await user.click(await screen.findByRole('button', { name: 'Dismiss for this version' }));
+      await user.click(await screen.findByRole('button', { name: 'Hide until the next version' }));
 
       expect(screen.queryByText('Strapi v5.10.0 is available')).not.toBeInTheDocument();
       expect(window.localStorage.getItem(`${DISMISSED_VERSION_KEY}:${PROJECT_UUID}`)).toBe(
@@ -136,54 +136,52 @@ describe('ApplicationInfoPage – upgrade banner', () => {
   });
 
   describe('urgent state', () => {
-    it('shows the urgent banner, links and version badge when 11 releases behind', async () => {
+    it('shows the urgent banner, links and version badge when 11 minor versions behind', async () => {
       renderPage('5.0.0', 'v5.11.0');
 
       expect(
-        await screen.findByText('Your Strapi version is 11 releases behind')
+        await screen.findByText('Your Strapi version is 11 minor versions behind')
       ).toBeInTheDocument();
       expect(
         screen.getByText(
-          "You're on v5.0.0 and missing fixes and security patches shipped since. Upgrade to v5.11.0 as soon as you can."
+          'You are on v5.0.0 and missing the fixes released since. Upgrade to v5.11.0 as soon as you can.'
         )
       ).toBeInTheDocument();
-      expect(screen.getByText('11 releases behind')).toBeInTheDocument();
+      expect(screen.getByText('11 minor versions behind')).toBeInTheDocument();
       expect(screen.queryByText('Update available')).not.toBeInTheDocument();
 
-      expect(screen.getByRole('link', { name: /What's new/ })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /Release notes/ })).toHaveAttribute(
         'href',
         RELEASES_URL
       );
-      const upgradeNow = screen.getByRole('link', { name: /Upgrade now/ });
-      expect(upgradeNow).toHaveAttribute('href', UPGRADE_DOCS_URL);
-      expect(upgradeNow).toHaveAttribute('target', '_blank');
-      expect(upgradeNow).toHaveAttribute('rel', 'noopener noreferrer');
+      const upgradeGuide = screen.getByRole('link', { name: /Upgrade guide/ });
+      expect(upgradeGuide).toHaveAttribute('href', UPGRADE_DOCS_URL);
+      expect(upgradeGuide).toHaveAttribute('target', '_blank');
+      expect(upgradeGuide).toHaveAttribute('rel', 'noopener noreferrer');
 
-      expect(screen.getByRole('button', { name: 'Remind me later' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Hide for 7 days' })).toBeInTheDocument();
       expect(
-        screen.queryByRole('button', { name: 'Dismiss for this version' })
+        screen.queryByRole('button', { name: 'Hide until the next version' })
       ).not.toBeInTheDocument();
     });
 
     it('uses a dedicated title when on an older major', async () => {
       renderPage('4.25.0', 'v5.2.0');
 
-      expect(
-        await screen.findByText("You're on Strapi 4, version 5 is available")
-      ).toBeInTheDocument();
+      expect(await screen.findByText('Strapi 5 is available')).toBeInTheDocument();
       expect(screen.getByText('Major update available')).toBeInTheDocument();
     });
 
-    it('hides the banner for 7 days with "Remind me later"', async () => {
+    it('hides the banner for 7 days with "Hide for 7 days"', async () => {
       const now = new Date('2026-10-15T10:00:00Z').getTime();
       jest.useFakeTimers({ now, advanceTimers: true });
 
       const { user, unmount } = renderPage('5.0.0', 'v5.11.0');
 
-      await user.click(await screen.findByRole('button', { name: 'Remind me later' }));
+      await user.click(await screen.findByRole('button', { name: 'Hide for 7 days' }));
 
       expect(
-        screen.queryByText('Your Strapi version is 11 releases behind')
+        screen.queryByText('Your Strapi version is 11 minor versions behind')
       ).not.toBeInTheDocument();
       const remindLaterAt = Number(
         window.localStorage.getItem(`${REMIND_LATER_AT_KEY}:${PROJECT_UUID}`)
@@ -195,9 +193,9 @@ describe('ApplicationInfoPage – upgrade banner', () => {
       // Still hidden just before 7 days
       jest.setSystemTime(remindLaterAt + REMIND_LATER_DELAY_MS - 60 * 1000);
       const { unmount: unmountBefore } = renderPage('5.0.0', 'v5.11.0');
-      await screen.findByText('11 releases behind');
+      await screen.findByText('11 minor versions behind');
       expect(
-        screen.queryByText('Your Strapi version is 11 releases behind')
+        screen.queryByText('Your Strapi version is 11 minor versions behind')
       ).not.toBeInTheDocument();
       unmountBefore();
 
@@ -205,7 +203,7 @@ describe('ApplicationInfoPage – upgrade banner', () => {
       jest.setSystemTime(remindLaterAt + REMIND_LATER_DELAY_MS);
       renderPage('5.0.0', 'v5.11.0');
       expect(
-        await screen.findByText('Your Strapi version is 11 releases behind')
+        await screen.findByText('Your Strapi version is 11 minor versions behind')
       ).toBeInTheDocument();
     });
   });
@@ -214,7 +212,7 @@ describe('ApplicationInfoPage – upgrade banner', () => {
     it('keeps a dismissal to the project that made it', async () => {
       const { user, unmount } = renderPage('5.9.0', 'v5.10.0');
 
-      await user.click(await screen.findByRole('button', { name: 'Dismiss for this version' }));
+      await user.click(await screen.findByRole('button', { name: 'Hide until the next version' }));
       unmount();
 
       mockScope = 'other-project-uuid';
@@ -242,7 +240,7 @@ describe('ApplicationInfoPage – upgrade banner', () => {
 
     const { user } = renderPage('5.9.0', 'v5.10.0');
 
-    await user.click(await screen.findByRole('button', { name: 'Dismiss for this version' }));
+    await user.click(await screen.findByRole('button', { name: 'Hide until the next version' }));
     expect(screen.queryByText('Strapi v5.10.0 is available')).not.toBeInTheDocument();
 
     getItem.mockRestore();

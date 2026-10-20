@@ -58,14 +58,13 @@ describe('getGeneralLinks', () => {
     window.localStorage.clear();
   });
 
-  it('keeps the warning badge on Settings after the upgrade banner is dismissed', async () => {
+  it('keeps the badge on Settings after the upgrade banner is dismissed', async () => {
     dismissUpgradeBanner({ severity: 'urgent', latestVersion: 'v5.11.0', scope: 'project-uuid' });
     expect(window.localStorage.getItem(`${REMIND_LATER_AT_KEY}:project-uuid`)).not.toBeNull();
 
     const [settings] = await getGeneralLinks([settingsLink], 'urgent', checkUserHasPermissions);
 
     expect(settings.notificationsCount).toBe(1);
-    expect(settings.notificationsVariant).toBe('warning');
   });
 
   it('shows no badge when Strapi is up to date', async () => {

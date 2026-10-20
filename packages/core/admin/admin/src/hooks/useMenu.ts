@@ -15,10 +15,6 @@ import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
 export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'> & {
   navigationLink?: string;
-  /**
-   * Color of the notifications badge, defaults to `primary`.
-   */
-  notificationsVariant?: 'primary' | 'warning';
 };
 export type MobileMenuItem = {
   to: string;
@@ -172,8 +168,6 @@ const getGeneralLinks = async (
 
   authorizedGeneralLinksClone[settingsLinkIndex].notificationsCount =
     strapiUpdateSeverity !== 'none' ? 1 : 0;
-  authorizedGeneralLinksClone[settingsLinkIndex].notificationsVariant =
-    strapiUpdateSeverity === 'urgent' ? 'warning' : 'primary';
 
   return authorizedGeneralLinksClone;
 };

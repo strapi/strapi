@@ -233,29 +233,6 @@ describe('SettingsNav', () => {
     expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.primary600);
   });
 
-  it('renders the Overview notification badge in primary by default', () => {
-    render(<SettingsNav />);
-
-    expect(screen.getByLabelText('Notification')).toHaveStyle({
-      backgroundColor: lightTheme.colors.primary600,
-    });
-  });
-
-  it('renders the Overview notification badge in warning when the update is urgent', () => {
-    const overview = menu[0].links[0] as (typeof menu)[number]['links'][number] & {
-      notificationVariant?: 'primary' | 'warning';
-    };
-    overview.notificationVariant = 'warning';
-
-    render(<SettingsNav />);
-
-    expect(screen.getByLabelText('Notification')).toHaveStyle({
-      backgroundColor: lightTheme.colors.warning700,
-    });
-
-    delete overview.notificationVariant;
-  });
-
   it('should render and match snapshot', () => {
     const { getByText } = render(<SettingsNav />);
 

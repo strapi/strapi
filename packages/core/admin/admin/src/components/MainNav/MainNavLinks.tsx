@@ -94,9 +94,7 @@ const MainNavIcons = ({
             ) : badgeContentNumeric ? (
               <NavLinkBadgeCounter
                 label={badgeContentNumeric}
-                backgroundColor={
-                  link.notificationsVariant === 'warning' ? 'warning700' : 'primary600'
-                }
+                backgroundColor="primary600"
                 width="2.3rem"
                 color="neutral0"
               >
@@ -171,9 +169,7 @@ const MainNavBurgerMenuLinks = ({
                 ) : badgeContentNumeric ? (
                   <NavLinkBadgeCounter
                     label={badgeContentNumeric}
-                    backgroundColor={
-                      link.notificationsVariant === 'warning' ? 'warning700' : 'primary600'
-                    }
+                    backgroundColor="primary600"
                     width="2.3rem"
                     color="neutral0"
                   >

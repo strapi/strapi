@@ -172,7 +172,7 @@ const ApplicationInfoPage = () => {
                                 {
                                   id: 'Settings.application.update-badge.releases-behind',
                                   defaultMessage:
-                                    '{count, plural, one {# release} other {# releases}} behind',
+                                    '{count, plural, one {# minor version} other {# minor versions}} behind',
                                 },
                                 { count: strapiReleasesBehind }
                               )}
