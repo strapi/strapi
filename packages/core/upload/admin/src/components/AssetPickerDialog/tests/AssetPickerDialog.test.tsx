@@ -1,4 +1,4 @@
-import { within } from '@testing-library/react';
+import { createEvent, within } from '@testing-library/react';
 import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { useLocation } from 'react-router-dom';
@@ -495,6 +495,27 @@ describe('AssetPickerDialog', () => {
         expect(await screen.findByRole('button', { name: 'Confirm' })).toBeDisabled();
       });
 
+      it('lets an asset outside allowedTypes be removed, but not picked again', async () => {
+        const onConfirm = jest.fn();
+        renderDialog({
+          multiple: true,
+          allowedTypes: ['images'],
+          initialSelection: [hero, brochure],
+          onConfirm,
+        });
+
+        expect(await screen.findByRole('checkbox', { name: 'Select brochure.pdf' })).toBeEnabled();
+
+        fireEvent.click(checkboxFor('brochure.pdf'));
+
+        expect(checkboxFor('brochure.pdf')).toBeDisabled();
+
+        fireEvent.click(screen.getByText('brochure.pdf'));
+        fireEvent.click(confirmButton());
+
+        expect(onConfirm).toHaveBeenCalledWith([hero]);
+      });
+
       it('confirms what is left after unchecking, which removes it from the field', async () => {
         const onConfirm = jest.fn();
         renderDialog({ multiple: true, initialSelection: [hero, banner], onConfirm });
@@ -514,6 +535,23 @@ describe('AssetPickerDialog', () => {
   describe('reordering', () => {
     const hero = createAsset(1, 'hero.png');
     const banner = createAsset(2, 'banner.png');
+
+    // The test setup's PointerEvent mock drops `isPrimary` and the coordinates,
+    // and dnd-kit's pointer sensor ignores a pointer that isn't primary.
+    const firePointer = (
+      target: Element | Document,
+      type: 'pointerDown' | 'pointerMove',
+      clientX: number
+    ) => {
+      const event = createEvent[type](target);
+      Object.defineProperties(event, {
+        isPrimary: { value: true },
+        button: { value: 0 },
+        clientX: { value: clientX },
+        clientY: { value: 0 },
+      });
+      fireEvent(target, event);
+    };
 
     afterEach(() => {
       window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
@@ -572,6 +610,56 @@ describe('AssetPickerDialog', () => {
       } finally {
         document.removeEventListener('keydown', recordKey);
       }
+    });
+
+    it('cancels a keyboard reorder on Escape without closing the picker', async () => {
+      const onClose = jest.fn();
+      const onConfirm = jest.fn();
+      renderDialog({ multiple: true, initialSelection: [hero, banner], onClose, onConfirm });
+      await openSelectedTab();
+
+      const grip = await screen.findByRole('button', { name: 'Reorder hero.png' });
+      grip.focus();
+      fireEvent.keyDown(grip, { key: ' ', code: 'Space' });
+      await waitFor(() => expect(grip).toHaveAttribute('aria-pressed', 'true'));
+
+      fireEvent.keyDown(grip, { key: 'ArrowRight', code: 'ArrowRight' });
+      fireEvent.keyDown(grip, { key: 'Escape', code: 'Escape' });
+
+      await waitFor(() => expect(grip).not.toHaveAttribute('aria-pressed', 'true'));
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled();
+
+      // With the drag over, Escape closes the picker again.
+      fireEvent.keyDown(grip, { key: 'Escape', code: 'Escape' });
+
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('does not un-pick an asset released after its pointer drag was cancelled', async () => {
+      const onClose = jest.fn();
+      renderDialog({ multiple: true, initialSelection: [hero, banner], onClose });
+      await openSelectedTab();
+
+      const card = await screen.findByText('hero.png');
+      const grip = screen.getByRole('button', { name: 'Reorder hero.png' });
+
+      firePointer(card, 'pointerDown', 0);
+      firePointer(document, 'pointerMove', 20);
+      await waitFor(() => expect(grip).toHaveAttribute('aria-pressed', 'true'));
+
+      fireEvent.keyDown(document, { key: 'Escape', code: 'Escape' });
+      await waitFor(() => expect(grip).not.toHaveAttribute('aria-pressed', 'true'));
+
+      // dnd-kit blocks clicks for 50ms after a drag; the button is released later.
+      await act(() => new Promise((resolve) => setTimeout(resolve, 100)));
+      fireEvent.pointerUp(card);
+      fireEvent.click(card);
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(
+        within(screen.getByRole('tab', { name: /Selected assets/ })).getByText('2')
+      ).toBeInTheDocument();
     });
 
     it('does not un-pick an asset when its grip is clicked', async () => {

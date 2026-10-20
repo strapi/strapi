@@ -35,6 +35,9 @@ export const addFiles = (selection: PickerSelection, files: File[]): PickerSelec
 export const removeFile = (selection: PickerSelection, id: number): PickerSelection =>
   selection.filter((file) => file.id !== id);
 
+export const removeFiles = (selection: PickerSelection, ids: Set<number>): PickerSelection =>
+  selection.filter((file) => !ids.has(file.id));
+
 /**
  * Moves one file to where another one is, the others shifting to make room.
  * Unknown ids leave the selection as it is.

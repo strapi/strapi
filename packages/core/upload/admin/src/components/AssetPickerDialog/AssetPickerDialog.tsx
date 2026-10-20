@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import { Page, usePersistentState } from '@strapi/admin/strapi-admin';
 import { Badge, Box, Button, Flex, Loader, Modal, Tabs, Typography } from '@strapi/design-system';
@@ -220,7 +228,11 @@ const BrowseTab = ({ list }: BrowseTabProps) => {
 
 // Always a grid, whatever view Browse uses: the selection is short, and its
 // order (which reordering changes) reads best as tiles.
-const SelectedTab = () => {
+interface SelectedTabProps {
+  onReorderingChange: (reordering: boolean) => void;
+}
+
+const SelectedTab = ({ onReorderingChange }: SelectedTabProps) => {
   const { formatMessage } = useIntl();
   const { selection } = usePickerSelection();
   const toggleAsset = useToggleAsset();
@@ -239,7 +251,7 @@ const SelectedTab = () => {
         ) : (
           <ListSettingsProvider {...PICKER_LIST_SETTINGS}>
             {/* The order here is the order the field will hold. */}
-            <SortableSelection>
+            <SortableSelection onReorderingChange={onReorderingChange}>
               <AssetsGrid assets={selection} onAssetItemClick={toggleAsset} />
             </SortableSelection>
           </ListSettingsProvider>
@@ -260,9 +272,16 @@ interface PickerContentProps {
   initialSelection: File[];
   onClose: () => void;
   onConfirm: (files: File[]) => void;
+  onReorderingChange: (reordering: boolean) => void;
 }
 
-const PickerContent = ({ title, initialSelection, onClose, onConfirm }: PickerContentProps) => {
+const PickerContent = ({
+  title,
+  initialSelection,
+  onClose,
+  onConfirm,
+  onReorderingChange,
+}: PickerContentProps) => {
   const { formatMessage } = useIntl();
   const { selection } = usePickerSelection();
   // Always Browse, even when the field already holds assets: the picker is
@@ -308,7 +327,7 @@ const PickerContent = ({ title, initialSelection, onClose, onConfirm }: PickerCo
           <BrowseTab list={list} />
         </TabPanel>
         <TabPanel value="selected" tabIndex={selection.length > 0 ? -1 : undefined}>
-          <SelectedTab />
+          <SelectedTab onReorderingChange={onReorderingChange} />
         </TabPanel>
       </TabsRoot>
       <Footer>
@@ -443,28 +462,45 @@ export const AssetPickerDialog = ({
   multiple = false,
   allowedTypes,
   onConfirm,
-}: AssetPickerDialogProps) => (
-  <Modal.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-    <StyledModalContent>
-      <ReadAccessGate title={title} onClose={onClose}>
-        {/* Inside the content so every opening starts from fresh list and selection state. */}
-        <ListQueryStateProvider>
-          <ListSettingsProvider {...PICKER_LIST_SETTINGS} showSectionHeadings showGridSelectAll>
-            <PickerSelectionRoot
-              initialSelection={initialSelection}
-              multiple={multiple}
-              allowedTypes={allowedTypes}
-            >
-              <PickerContent
-                title={title}
+}: AssetPickerDialogProps) => {
+  // A ref, not state: nothing renders from it, only the Escape handler reads it.
+  const isReorderingRef = useRef(false);
+  const setReordering = useCallback((reordering: boolean) => {
+    isReorderingRef.current = reordering;
+  }, []);
+
+  return (
+    <Modal.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <StyledModalContent
+        // Radix handles Escape on the document in the capture phase, before
+        // dnd-kit's sensor sees it. During a drag, Escape cancels the drag instead.
+        onEscapeKeyDown={(event) => {
+          if (isReorderingRef.current) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <ReadAccessGate title={title} onClose={onClose}>
+          {/* Inside the content so every opening starts from fresh list and selection state. */}
+          <ListQueryStateProvider>
+            <ListSettingsProvider {...PICKER_LIST_SETTINGS} showSectionHeadings showGridSelectAll>
+              <PickerSelectionRoot
                 initialSelection={initialSelection}
-                onClose={onClose}
-                onConfirm={onConfirm}
-              />
-            </PickerSelectionRoot>
-          </ListSettingsProvider>
-        </ListQueryStateProvider>
-      </ReadAccessGate>
-    </StyledModalContent>
-  </Modal.Root>
-);
+                multiple={multiple}
+                allowedTypes={allowedTypes}
+              >
+                <PickerContent
+                  title={title}
+                  initialSelection={initialSelection}
+                  onClose={onClose}
+                  onConfirm={onConfirm}
+                  onReorderingChange={setReordering}
+                />
+              </PickerSelectionRoot>
+            </ListSettingsProvider>
+          </ListQueryStateProvider>
+        </ReadAccessGate>
+      </StyledModalContent>
+    </Modal.Root>
+  );
+};

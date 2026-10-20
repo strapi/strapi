@@ -670,7 +670,7 @@ export const AssetsTable = ({
 }: AssetsTableProps) => {
   const isDesktop = useIsDesktop();
   const { formatMessage } = useIntl();
-  const { isEnabled, canSelectAll, selectedKeys, selectAll, deselect, getSelectability } =
+  const { isEnabled, canSelectAll, selectedKeys, selectAll, deselectAll, getSelectability } =
     useAssetSelection();
   const { showItemActions } = useListSettings();
   const { trackUsage } = useTracking();
@@ -701,9 +701,7 @@ export const AssetsTable = ({
 
   const handleSelectAll = () => {
     if (allSelected) {
-      // Only what this header covers: the picker's selection also holds assets
-      // from other folders and the ones already in the field.
-      selectableKeys.forEach((key) => deselect(key));
+      deselectAll(selectableKeys);
     } else {
       trackUsage('didSelectAllMediaLibraryElements');
       selectAll(selectableKeys);

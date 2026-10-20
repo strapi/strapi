@@ -70,6 +70,13 @@ export interface AssetSelection {
   selectOnly: (key: ItemKey) => void;
   /** Row-level "..." menu — drops one key when its item leaves the list (move, delete). */
   deselect: (key: ItemKey) => void;
+  /**
+   * Header checkbox, when everything it covers is selected. The host decides how
+   * far that reaches: the Media Library page clears the whole selection, because
+   * it can still hold keys that left the list without being deselected (moved or
+   * deleted from the details drawer). The picker drops only these keys.
+   */
+  deselectAll: (orderedKeys: ItemKey[]) => void;
   /** Close button / folder navigation / list-identity changes. */
   clear: () => void;
 }
@@ -173,6 +180,7 @@ export const AssetSelectionProvider = ({
       selectAll,
       selectOnly,
       deselect,
+      deselectAll: clear,
       clear,
     }),
     [

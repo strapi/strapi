@@ -8,6 +8,7 @@ import {
   useSensor,
   useSensors,
   type Announcements,
+  type DragCancelEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
 import {
@@ -70,10 +71,15 @@ const swallowNextClick = () => {
 
 interface SortableSelectionProps {
   children: ReactNode;
+  /**
+   * Called with `true` when a drag starts and `false` when it ends or is
+   * cancelled, so the dialog can keep Escape for cancelling the drag.
+   */
+  onReorderingChange?: (reordering: boolean) => void;
 }
 
 /** Makes the picker's selected assets reorderable (the Selected tab is always a grid). */
-export const SortableSelection = ({ children }: SortableSelectionProps) => {
+export const SortableSelection = ({ children, onReorderingChange }: SortableSelectionProps) => {
   const { formatMessage } = useIntl();
   const { selection, moveFile } = usePickerSelection();
 
@@ -140,14 +146,27 @@ export const SortableSelection = ({ children }: SortableSelectionProps) => {
       moveFile(Number(active.id), Number(over.id));
     }
 
+    onReorderingChange?.(false);
     swallowNextClick();
+  };
+
+  // Escape cancels a pointer drag while the button is still down, so the click
+  // that would un-pick the item comes with the release, possibly much later.
+  const handleDragCancel = ({ activatorEvent }: DragCancelEvent) => {
+    onReorderingChange?.(false);
+
+    if (activatorEvent.type === 'pointerdown') {
+      window.addEventListener('pointerup', swallowNextClick, { capture: true, once: true });
+    }
   };
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      onDragStart={() => onReorderingChange?.(true)}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
       accessibility={{ announcements }}
     >
       <SortableContext items={ids} strategy={rectSortingStrategy}>

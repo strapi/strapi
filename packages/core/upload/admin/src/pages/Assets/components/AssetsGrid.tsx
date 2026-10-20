@@ -634,7 +634,7 @@ const GridSection = ({ title, action, children }: GridSectionProps) => (
  */
 const GridSelectAll = ({ assets }: { assets: File[] }) => {
   const { formatMessage } = useIntl();
-  const { selectedKeys, selectAll, deselect, getSelectability } = useAssetSelection();
+  const { selectedKeys, selectAll, deselectAll, getSelectability } = useAssetSelection();
   const { trackUsage } = useTracking();
 
   const selectableKeys = assets
@@ -644,8 +644,7 @@ const GridSelectAll = ({ assets }: { assets: File[] }) => {
 
   const handleChange = () => {
     if (allSelected) {
-      // Only these: a picker's selection also holds assets from elsewhere.
-      selectableKeys.forEach((key) => deselect(key));
+      deselectAll(selectableKeys);
     } else {
       trackUsage('didSelectAllMediaLibraryElements');
       selectAll(selectableKeys);

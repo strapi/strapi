@@ -1,4 +1,11 @@
-import { addFiles, isSameSelection, moveFile, removeFile, toggleFile } from '../pickerSelection';
+import {
+  addFiles,
+  isSameSelection,
+  moveFile,
+  removeFile,
+  removeFiles,
+  toggleFile,
+} from '../pickerSelection';
 
 import type { File } from '../../../../../shared/contracts/files';
 
@@ -44,6 +51,10 @@ describe('pickerSelection', () => {
 
   it('removeFile drops one file and keeps the order', () => {
     expect(ids(removeFile([file(1), file(2), file(3)], 2))).toEqual([1, 3]);
+  });
+
+  it('removeFiles drops every listed file and keeps the order', () => {
+    expect(ids(removeFiles([file(1), file(2), file(3), file(4)], new Set([1, 3])))).toEqual([2, 4]);
   });
 
   describe('moveFile', () => {

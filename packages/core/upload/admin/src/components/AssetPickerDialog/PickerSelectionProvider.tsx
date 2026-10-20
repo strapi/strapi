@@ -13,6 +13,7 @@ import {
   hasFile,
   moveFile,
   removeFile,
+  removeFiles,
   toggleFile,
   type PickerSelection,
 } from './pickerSelection';
@@ -77,6 +78,8 @@ export const PickerSelectionProvider = ({
     return map;
   }, [knownFiles, selection]);
 
+  const selectedIds = useMemo(() => new Set(selection.map((file) => file.id)), [selection]);
+
   const resolveSelectableFile = useCallback(
     (key: ItemKey): File | null => {
       const id = parseAssetId(key);
@@ -95,22 +98,35 @@ export const PickerSelectionProvider = ({
         return 'hidden';
       }
 
+      // `allowedTypes` only stops adding an asset. One the field already holds,
+      // for example from before the schema was narrowed, must stay removable.
+      if (selectedIds.has(id)) {
+        return 'enabled';
+      }
+
       const file = filesById.get(id);
 
       return file && !isAllowedAssetType(allowedTypes, file.mime) ? 'disabled' : 'enabled';
     },
-    [allowedTypes, filesById]
+    [allowedTypes, filesById, selectedIds]
   );
 
   const toggle = useCallback(
     (key: ItemKey) => {
+      const id = parseAssetId(key);
+
+      if (id !== null && selectedIds.has(id)) {
+        setSelection((prev) => removeFile(prev, id));
+        return;
+      }
+
       const file = resolveSelectableFile(key);
 
       if (file) {
         setSelection((prev) => toggleFile(prev, file, { multiple }));
       }
     },
-    [multiple, resolveSelectableFile]
+    [multiple, resolveSelectableFile, selectedIds]
   );
 
   // Select-all over the assets on screen that can be picked, appended in their
@@ -149,13 +165,20 @@ export const PickerSelectionProvider = ({
     }
   }, []);
 
+  const deselectAll = useCallback((orderedKeys: ItemKey[]) => {
+    const ids = new Set(
+      orderedKeys.map((key) => parseAssetId(key)).filter((id): id is number => id !== null)
+    );
+
+    setSelection((prev) => removeFiles(prev, ids));
+  }, []);
+
   const clear = useCallback(() => setSelection([]), []);
 
   const selectedKeys = useMemo(
     () => new Set(selection.map((file) => assetKey(file.id))),
     [selection]
   );
-  const selectedIds = useMemo(() => new Set(selection.map((file) => file.id)), [selection]);
 
   const isSelected = useCallback(
     (key: ItemKey) => {
@@ -183,6 +206,7 @@ export const PickerSelectionProvider = ({
       selectAll,
       selectOnly,
       deselect,
+      deselectAll,
       clear,
     }),
     [
@@ -195,6 +219,7 @@ export const PickerSelectionProvider = ({
       selectAll,
       selectOnly,
       deselect,
+      deselectAll,
       clear,
     ]
   );
