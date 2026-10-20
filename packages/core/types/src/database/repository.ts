@@ -59,11 +59,29 @@ export interface Repository<TSchemaUID extends UID.Schema = UID.Schema>
     populate: TPopulate
   ): Promise<Result.Entry<TSchemaUID, { populate: TPopulate }>>;
 
+  /**
+   * Loads a relational attribute of an entry.
+   */
   load<const TAttributeName extends Params.PopulatableAttribute<TSchemaUID>>(
     entity: Result.EntryReference,
-    field: TAttributeName | TAttributeName[],
+    field: TAttributeName,
     populate?: Params.Load<Params.PopulateTarget<TSchemaUID, TAttributeName>>
   ): Promise<Result.Load<TSchemaUID, TAttributeName>>;
+
+  /**
+   * Loads relational attributes of an entry, resolves to an object with the given fields.
+   */
+  load<const TAttributeName extends Params.PopulatableAttribute<TSchemaUID>>(
+    entity: Result.EntryReference,
+    field: readonly TAttributeName[],
+    populate?: Params.Load<Params.PopulateTarget<TSchemaUID, TAttributeName>>
+  ): Promise<Result.Load<TSchemaUID, readonly TAttributeName[]>>;
+
+  load<const TAttributeName extends Params.PopulatableAttribute<TSchemaUID>>(
+    entity: Result.EntryReference,
+    field: TAttributeName | readonly TAttributeName[],
+    populate?: Params.Load<Params.PopulateTarget<TSchemaUID, TAttributeName>>
+  ): Promise<Result.Load<TSchemaUID, TAttributeName | readonly TAttributeName[]>>;
 
   /**
    * Only accepts a single `oneToMany` or `manyToMany` relation attribute.

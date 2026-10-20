@@ -42,9 +42,9 @@ type OrderByRelation<TSchemaUID extends UID.Schema> = Exclude<
  * `orderBy` object notation — `{ attribute: 'asc' | 'desc' }`, nested for relations.
  */
 export type OrderByObjectNotation<TSchemaUID extends UID.Schema> = {
-  [TAttributeName in OrderByAttribute<TSchemaUID>]?: OrderDirection;
+  readonly [TAttributeName in OrderByAttribute<TSchemaUID>]?: OrderDirection;
 } & {
-  [TAttributeName in OrderByRelation<TSchemaUID>]?: OrderByObjectNotation<
+  readonly [TAttributeName in OrderByRelation<TSchemaUID>]?: OrderByObjectNotation<
     PopulateTarget<TSchemaUID, TAttributeName>
   >;
 };
@@ -76,7 +76,7 @@ export type PopulateTarget<TSchemaUID extends UID.Schema, TAttributeName extends
 /**
  * Nested populate options applied to the populated target.
  */
-export type PopulateFragment<TSchemaUID extends UID.Schema> = {
+export type PopulateFragment<TSchemaUID extends UID.Schema> = Readonly<{
   select?: Select<TSchemaUID>;
   where?: Where<TSchemaUID>;
   filters?: Where<TSchemaUID>;
@@ -89,11 +89,11 @@ export type PopulateFragment<TSchemaUID extends UID.Schema> = {
   /**
    * Per-target populate for polymorphic attributes (dynamic zones, morph relations).
    */
-  on?: { [TTargetUID in UID.Schema]?: PopulateFragment<TTargetUID> };
-};
+  on?: { readonly [TTargetUID in UID.Schema]?: PopulateFragment<TTargetUID> };
+}>;
 
 export type PopulateObjectNotation<TSchemaUID extends UID.Schema> = {
-  [TAttributeName in PopulatableAttribute<TSchemaUID>]?:
+  readonly [TAttributeName in PopulatableAttribute<TSchemaUID>]?:
     boolean | PopulateFragment<PopulateTarget<TSchemaUID, TAttributeName>>;
 };
 
@@ -110,7 +110,15 @@ export type Populate<TSchemaUID extends UID.Schema> =
   | PopulateObjectNotation<TSchemaUID>;
 
 /**
+ * Params are readonly: the query engine doesn't mutate them, except for the entries in `data`.
+ * Note that lifecycle subscribers receive the same `params` object (`event.params`).
+ */
+
+/**
  * Data accepted when writing an entry.
+ *
+ * Not readonly: the built-in timestamps lifecycle subscriber sets `createdAt` / `updatedAt`
+ * on the given data object.
  */
 export type Data<TSchemaUID extends UID.Schema> = If<
   Constants.AreSchemaRegistriesExtended,
@@ -126,7 +134,7 @@ export type PartialData<TSchemaUID extends UID.Schema> = If<
   Record<string, any>
 >;
 
-export type FindOne<TSchemaUID extends UID.Schema> = {
+export type FindOne<TSchemaUID extends UID.Schema> = Readonly<{
   where?: Where<TSchemaUID>;
   filters?: Where<TSchemaUID>;
   select?: Select<TSchemaUID>;
@@ -134,15 +142,15 @@ export type FindOne<TSchemaUID extends UID.Schema> = {
   orderBy?: OrderBy<TSchemaUID>;
   offset?: number;
   _q?: string;
-};
+}>;
 
 export type FindMany<TSchemaUID extends UID.Schema> = FindOne<TSchemaUID> & {
-  limit?: number;
+  readonly limit?: number;
 };
 
 export type FindPage<TSchemaUID extends UID.Schema> = Omit<FindOne<TSchemaUID>, 'offset'> & {
-  page?: number;
-  pageSize?: number;
+  readonly page?: number;
+  readonly pageSize?: number;
 };
 
 export type Count<TSchemaUID extends UID.Schema> = Pick<
@@ -150,37 +158,44 @@ export type Count<TSchemaUID extends UID.Schema> = Pick<
   'where' | 'filters' | '_q' | 'limit' | 'offset'
 >;
 
-export type Create<TSchemaUID extends UID.Schema> = {
+export type Create<TSchemaUID extends UID.Schema> = Readonly<{
   data: Data<TSchemaUID>;
   select?: Select<TSchemaUID>;
   populate?: Populate<TSchemaUID>;
-};
+}>;
 
-export type CreateMany<TSchemaUID extends UID.Schema> = {
-  data: Data<TSchemaUID>[];
-};
+export type CreateMany<TSchemaUID extends UID.Schema> = Readonly<{
+  data: readonly Data<TSchemaUID>[];
+}>;
 
-export type Update<TSchemaUID extends UID.Schema> = {
+export type Update<TSchemaUID extends UID.Schema> = Readonly<{
   where: Where<TSchemaUID>;
   data: PartialData<TSchemaUID>;
   select?: Select<TSchemaUID>;
   populate?: Populate<TSchemaUID>;
-};
+}>;
 
-export type UpdateMany<TSchemaUID extends UID.Schema> = {
+export type UpdateMany<TSchemaUID extends UID.Schema> = Readonly<{
   where?: Where<TSchemaUID>;
   data: PartialData<TSchemaUID>;
-};
+}>;
 
-export type Delete<TSchemaUID extends UID.Schema> = {
+export type Delete<TSchemaUID extends UID.Schema> = Readonly<{
   where: Where<TSchemaUID>;
   select?: Select<TSchemaUID>;
   populate?: Populate<TSchemaUID>;
-};
+}>;
 
-export type DeleteMany<TSchemaUID extends UID.Schema> = {
+export type DeleteMany<TSchemaUID extends UID.Schema> = Readonly<{
   where?: Where<TSchemaUID>;
-};
+}>;
+
+export type LoadField<TSchemaUID extends UID.Schema> =
+  PopulatableAttribute<TSchemaUID> | readonly PopulatableAttribute<TSchemaUID>[];
+
+export type LoadedAttribute<TField> = TField extends readonly (infer TAttributeName)[]
+  ? Extract<TAttributeName, string>
+  : Extract<TField, string>;
 
 export type Load<TSchemaUID extends UID.Schema> = PopulateFragment<TSchemaUID>;
 
@@ -188,6 +203,6 @@ export type LoadPages<TSchemaUID extends UID.Schema> = Omit<
   PopulateFragment<TSchemaUID>,
   'limit' | 'offset' | 'count'
 > & {
-  page?: number;
-  pageSize?: number;
+  readonly page?: number;
+  readonly pageSize?: number;
 };

@@ -64,17 +64,29 @@ export type PaginatedResult<TSchemaUID extends UID.Schema, TParams = never> = {
 
 export type CreateManyResult = CountResult & { ids: ID[] };
 
+type LoadedEntry<TSchemaUID extends UID.Schema, TAttributeName extends string> = Entry<
+  TSchemaUID,
+  { select: 'id'; populate: TAttributeName[] }
+>;
+
 /**
- * Value of the loaded attribute(s) for the given entry.
+ * Value of the loaded attribute for a single field, or an object with the loaded attributes for a list of fields.
+ *
+ * Resolves to `null` when the entry doesn't exist.
  */
-export type Load<
-  TSchemaUID extends UID.Schema,
-  TAttributeName extends Params.PopulatableAttribute<TSchemaUID>,
-> = If<
+export type Load<TSchemaUID extends UID.Schema, TField extends Params.LoadField<TSchemaUID>> = If<
   Constants.AreSchemaRegistriesExtended,
-  Entry<TSchemaUID, { select: 'id'; populate: [TAttributeName] }>[Extract<
-    TAttributeName,
-    keyof Entry<TSchemaUID, { select: 'id'; populate: [TAttributeName] }>
-  >],
+  | (Params.LoadedAttribute<TField> extends infer TAttributeName extends string
+      ? TField extends readonly unknown[]
+        ? Pick<
+            LoadedEntry<TSchemaUID, TAttributeName>,
+            Extract<TAttributeName, keyof LoadedEntry<TSchemaUID, TAttributeName>>
+          >
+        : LoadedEntry<TSchemaUID, TAttributeName>[Extract<
+            TAttributeName,
+            keyof LoadedEntry<TSchemaUID, TAttributeName>
+          >]
+      : never)
+  | null,
   any
 >;

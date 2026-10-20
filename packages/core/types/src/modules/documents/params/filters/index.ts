@@ -59,11 +59,11 @@ type AttributeCondition<
         } & {
           [TIter in Operator.DynamicArrayValue]?: readonly TAttributeValue[];
         } & {
-          [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
+          [TIter in Operator.DynamicBoundValue]?: readonly [TAttributeValue, TAttributeValue];
         } & {
           [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
         } & {
-          [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
+          [TIter in Operator.Group]?: readonly AttributeCondition<TSchemaUID, TAttributeName>[];
         })
     : never;
 
@@ -71,7 +71,7 @@ type AttributeCondition<
  * Tree representation of a Strapi filter for a given schema UID
  */
 export type ObjectNotation<TSchemaUID extends UID.Schema> = {
-  [TIter in Operator.Group]?: ObjectNotation<TSchemaUID>[];
+  [TIter in Operator.Group]?: readonly ObjectNotation<TSchemaUID>[];
 } & {
   [TIter in Operator.Logical]?: ObjectNotation<TSchemaUID>;
 } & ([AttributeUtils.GetScalarKeys<TSchemaUID>, AttributeUtils.GetNestedKeys<TSchemaUID>] extends [
