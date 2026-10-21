@@ -16,6 +16,12 @@ export const PLANNED_ACTION_WHERE = {
   release: { id: { $notNull: true }, releasedAt: { $null: true } },
 };
 
+export const RELEASE_FAILURE_REASONS = ['missed_schedule', 'failed_before_upgrade'] as const;
+export type ReleaseFailureReason = (typeof RELEASE_FAILURE_REASONS)[number];
+
+export const OVERDUE_GRACE_PERIOD_MS = 5 * 60 * 1000;
+export const OVERDUE_SWEEP_CRON_RULE = '* * * * *';
+
 export const ACTIONS = [
   {
     section: 'plugins',

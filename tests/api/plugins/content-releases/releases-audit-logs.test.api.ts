@@ -150,6 +150,8 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
 
     rq = await createAuthRequest({ strapi, userInfo: actingAdmin });
 
+    strapi.cron.remove('content-releases::freezeOverdueReleases');
+
     strapi.documents.use((ctx, next) => {
       if (ctx.action === 'publish' && documentIdsFailingToPublish.has(ctx.params?.documentId)) {
         throw new errors.ValidationError('Test-only publish failure');
@@ -541,6 +543,54 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         resource: { type: 'release', id: release.id, name: 'Scheduled to fail' },
       });
       expect(log.payload.details).toEqual({ reason: 'ValidationError' });
+    });
+
+    it('records a release that missed its schedule as a failure attributed to the scheduler', async () => {
+      const release = await createRelease({
+        name: 'Missed its schedule',
+        timezone: 'Europe/Paris',
+        scheduledAt: inFuture(60),
+      });
+      await strapi.db.query('plugin::content-releases.release').update({
+        where: { id: release.id },
+        data: { scheduledAt: new Date(Date.now() - 10 * 60_000) },
+      });
+      await clearAuditLogs();
+
+      await strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
+
+      const log = await expectExactlyOneLog('release.trigger');
+      expect(log.user).toBeNull();
+      expect(log.payload).toMatchObject({
+        actor: { type: 'system' },
+        origin: 'scheduler',
+        outcome: 'failure',
+        resource: { type: 'release', id: release.id, name: 'Missed its schedule' },
+      });
+      expect(log.payload.details).toEqual({ reason: 'MissedSchedule' });
+    });
+
+    it('records nothing when it freezes a release that failed before the upgrade', async () => {
+      const release = await createRelease({ name: 'Failed before', timezone: 'Europe/Paris' });
+      await strapi.db.query('plugin::content-releases.release').update({
+        where: { id: release.id },
+        data: { status: 'failed', scheduledAt: new Date(Date.now() - 10 * 60_000) },
+      });
+      await clearAuditLogs();
+
+      await strapi.hook('strapi::content-types.afterSync').call({
+        oldContentTypes: strapi.contentTypes,
+        contentTypes: strapi.contentTypes,
+      });
+      await strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
+
+      expect(
+        await strapi.db
+          .query('plugin::content-releases.release')
+          .findOne({ where: { id: release.id } })
+      ).toMatchObject({ status: 'failed', failureReason: 'failed_before_upgrade' });
+
+      await expectNoLog('release.trigger');
     });
 
     it('reports the resource id as a number in every event', async () => {

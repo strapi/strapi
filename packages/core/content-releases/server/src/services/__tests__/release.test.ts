@@ -136,108 +136,99 @@ const mockUser = {
   updatedAt: '01/01/1900',
 };
 
+const lockedReleaseDb = (
+  locked: { releasedAt: Date | null } | undefined,
+  queries: Record<string, jest.Mock>
+) => ({
+  ...baseStrapiMock.db,
+  inTransaction: jest.fn(() => false),
+  transaction: jest.fn((fn) => fn({ trx: {} })),
+  queryBuilder: jest.fn().mockReturnValue({
+    select: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    first: jest.fn().mockReturnThis(),
+    forUpdate: jest.fn().mockReturnThis(),
+    execute: jest.fn().mockResolvedValue(locked),
+  }),
+  query: jest.fn(() => queries),
+});
+
 describe('Release service', () => {
   describe('update', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it('updates the release', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          ...baseStrapiMock.db,
-          query: () => ({
-            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-            update: jest.fn().mockReturnValue({ id: 1, name: 'Release name' }),
-            updateMany: jest.fn(),
-            count: jest.fn(),
-          }),
-        },
+    const setup = (
+      locked: { releasedAt: Date | null } | undefined,
+      stored: Record<string, unknown>,
+      updated: Record<string, unknown>
+    ) => {
+      const queries = {
+        findOne: jest.fn().mockResolvedValue(stored),
+        update: jest.fn().mockResolvedValue(updated),
+        updateMany: jest.fn(),
+        count: jest.fn(),
       };
+      const strapiMock = { ...baseStrapiMock, db: lockedReleaseDb(locked, queries) };
 
       // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
+      return { releaseService: createReleaseService({ strapi: strapiMock }), queries };
+    };
 
-      const mockReleaseArgs = {
-        name: 'Release name',
-      };
+    it('updates the release', async () => {
+      const { releaseService } = setup(
+        { releasedAt: null },
+        { id: 1, name: 'test' },
+        { id: 1, name: 'Release name' }
+      );
 
-      const release = await releaseService.update(1, mockReleaseArgs, { user: mockUser });
+      const release = await releaseService.update(1, { name: 'Release name' }, { user: mockUser });
 
       expect(release).toEqual({ id: 1, name: 'Release name' });
     });
 
     it('throws an error if the release does not exist', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          query: () => ({
-            findOne: jest.fn().mockReturnValue(null),
-            update: jest.fn().mockReturnValue(null),
-          }),
-        },
-      };
+      const { releaseService, queries } = setup(undefined, {}, {});
 
-      // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
-
-      const mockReleaseArgs = {
-        name: 'Release name',
-      };
-
-      await expect(releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
-        'No release found for id 1'
-      );
+      await expect(
+        releaseService.update(1, { name: 'Release name' }, { user: mockUser })
+      ).rejects.toThrow('No release found for id 1');
+      expect(queries.update).not.toHaveBeenCalled();
     });
 
-    it('throws an error if the release is already published', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          query: () => ({
-            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', releasedAt: new Date() }),
-          }),
-        },
-      };
+    it('throws an error, and writes nothing, if the release is already published', async () => {
+      const { releaseService, queries } = setup({ releasedAt: new Date() }, {}, {});
 
-      // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
+      await expect(
+        releaseService.update(1, { name: 'Release name' }, { user: mockUser })
+      ).rejects.toThrow('Release already published');
+      expect(queries.update).not.toHaveBeenCalled();
+      expect(mockSchedulingSet).not.toHaveBeenCalled();
+    });
 
-      const mockReleaseArgs = {
-        name: 'Release name',
-      };
-
-      await expect(releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
-        'Release already published'
+    it('throws a not found error, and reports nothing, if the write matched no release', async () => {
+      const { releaseService } = setup(
+        { releasedAt: null },
+        { id: 1, name: 'test' },
+        null as never
       );
+
+      await expect(
+        releaseService.update(1, { name: 'Release name' }, { user: mockUser })
+      ).rejects.toThrow('No release found for id 1');
+      expect(mockSchedulingSet).not.toHaveBeenCalled();
     });
 
     it('should set scheduling if scheduledAt is present', async () => {
       const scheduledDate = new Date();
+      const { releaseService } = setup(
+        { releasedAt: null },
+        { id: 1, name: 'test' },
+        { id: 1, name: 'Release name', scheduledAt: scheduledDate }
+      );
 
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          ...baseStrapiMock.db,
-          query: () => ({
-            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-            update: jest
-              .fn()
-              .mockReturnValue({ id: 1, name: 'Release name', scheduledAt: scheduledDate }),
-            count: jest.fn(),
-            updateMany: jest.fn(),
-          }),
-        },
-      } as any;
-
-      const releaseService = createReleaseService({ strapi: strapiMock });
-
-      const mockReleaseArgs = {
-        name: 'Release name',
-        scheduledAt: scheduledDate,
-      };
-
+      const mockReleaseArgs = { name: 'Release name', scheduledAt: scheduledDate };
       const release = await releaseService.update(1, mockReleaseArgs, { user: mockUser });
 
       expect(release).toEqual({ id: 1, name: 'Release name', scheduledAt: scheduledDate });
@@ -245,27 +236,17 @@ describe('Release service', () => {
     });
 
     it('should remove scheduling if scheduledAt is null', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          ...baseStrapiMock.db,
-          query: () => ({
-            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
-            update: jest.fn().mockReturnValue({ id: 1, name: 'Release name', scheduledAt: null }),
-            updateMany: jest.fn(),
-            count: jest.fn(),
-          }),
-        },
-      } as any;
+      const { releaseService } = setup(
+        { releasedAt: null },
+        { id: 1, name: 'test', scheduledAt: new Date() },
+        { id: 1, name: 'Release name', scheduledAt: null }
+      );
 
-      const releaseService = createReleaseService({ strapi: strapiMock });
-
-      const mockReleaseArgs = {
-        name: 'Release name',
-        scheduledAt: null,
-      };
-
-      const release = await releaseService.update(1, mockReleaseArgs, { user: mockUser });
+      const release = await releaseService.update(
+        1,
+        { name: 'Release name', scheduledAt: null },
+        { user: mockUser }
+      );
 
       expect(release).toEqual({ id: 1, name: 'Release name', scheduledAt: null });
       expect(mockSchedulingCancel).toHaveBeenCalledWith(1);
@@ -654,28 +635,26 @@ describe('Release service', () => {
   });
 
   describe('update audit', () => {
-    it('reports nothing when the update matched no release', async () => {
+    it('reports nothing when the update changed nothing', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
-        db: {
-          ...baseStrapiMock.db,
-          query: jest.fn().mockReturnValue({
-            findOne: jest.fn().mockReturnValue({ id: 1, name: 'March', releasedAt: null }),
+        db: lockedReleaseDb(
+          { releasedAt: null },
+          {
+            findOne: jest.fn().mockResolvedValue({ id: 1, name: 'March', releasedAt: null }),
+            update: jest.fn().mockResolvedValue({ id: 1, name: 'March', releasedAt: null }),
             updateMany: jest.fn(),
-            // The release was deleted between the read and the write
-            update: jest.fn().mockReturnValue(null),
             count: jest.fn(),
-          }),
-        },
+          }
+        ),
       };
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      const result = await releaseService.update(1, { name: 'Renamed' }, { user: mockUser });
+      await releaseService.update(1, { name: 'March' }, { user: mockUser });
 
-      expect(result).toBeNull();
       expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
     });
   });
@@ -1101,6 +1080,19 @@ describe('Release service', () => {
       ]);
     });
 
+    it('leaves a release that failed before the upgrade as failed, for the startup freeze', async () => {
+      const { strapiMock, update } = createStrapiMock(
+        { releaseCondition: 'all_or_nothing', releasedAt: null, status: 'failed' },
+        { total: 3, invalid: 0 }
+      );
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+      await releaseService.updateReleaseStatus(1);
+
+      expect(update).not.toHaveBeenCalled();
+    });
+
     it('does nothing for a release that no longer exists', async () => {
       const { strapiMock, update } = createStrapiMock(null, { total: 3, invalid: 1 });
 
@@ -1117,76 +1109,45 @@ describe('Release service', () => {
       jest.clearAllMocks();
     });
 
-    it('deletes the release', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          query() {
-            return {
-              findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-              delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-            };
-          },
-          transaction: jest.fn(),
-        },
+    const setup = (locked: { releasedAt: Date | null } | undefined, stored = {}) => {
+      const queries = {
+        findOne: jest.fn().mockResolvedValue({ id: 1, name: 'test', actions: [], ...stored }),
+        deleteMany: jest.fn(),
+        delete: jest.fn().mockResolvedValue({ id: 1, name: 'test' }),
       };
+      const strapiMock = { ...baseStrapiMock, db: lockedReleaseDb(locked, queries) };
 
       // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
+      return { releaseService: createReleaseService({ strapi: strapiMock }), queries };
+    };
+
+    it('deletes the release and its actions', async () => {
+      const { releaseService, queries } = setup({ releasedAt: null }, { actions: [{ id: 5 }] });
 
       const release = await releaseService.delete(1);
 
-      expect(release).toEqual({ id: 1, name: 'test' });
+      expect(release).toEqual({ id: 1, name: 'test', actions: [{ id: 5 }] });
+      expect(queries.deleteMany).toHaveBeenCalledWith({ where: { id: { $in: [5] } } });
+      expect(queries.delete).toHaveBeenCalledWith({ where: { id: 1 } });
     });
 
-    it('throws an error if the release does not exist or was already published', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          query() {
-            return {
-              findOne: jest.fn().mockReturnValue(null),
-            };
-          },
-        },
-      };
-
-      // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
+    it('throws an error if the release does not exist', async () => {
+      const { releaseService, queries } = setup(undefined);
 
       await expect(releaseService.delete(1)).rejects.toThrow('No release found for id 1');
+      expect(queries.delete).not.toHaveBeenCalled();
     });
 
-    it('throws an error if the release is already published', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          query: () => ({
-            findOne: jest.fn().mockReturnValue({ releasedAt: new Date() }),
-          }),
-        },
-      };
-
-      // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
+    it('throws an error, and deletes nothing, if the release is already published', async () => {
+      const { releaseService, queries } = setup({ releasedAt: new Date() });
 
       await expect(releaseService.delete(1)).rejects.toThrow('Release already published');
+      expect(queries.deleteMany).not.toHaveBeenCalled();
+      expect(queries.delete).not.toHaveBeenCalled();
     });
 
     it('removes the scheduling if the release is scheduled', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          query: () => ({
-            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
-            delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-          }),
-          transaction: jest.fn(),
-        },
-      };
-
-      // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
+      const { releaseService } = setup({ releasedAt: null }, { scheduledAt: new Date() });
 
       await releaseService.delete(1);
 
@@ -1194,19 +1155,7 @@ describe('Release service', () => {
     });
 
     it('does not remove the scheduling if the release is not scheduled', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          query: () => ({
-            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-            delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-          }),
-          transaction: jest.fn(),
-        },
-      };
-
-      // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
+      const { releaseService } = setup({ releasedAt: null });
 
       await releaseService.delete(1);
 
@@ -1296,6 +1245,66 @@ describe('Release service', () => {
 
       expect(release).toEqual({ id: 1, name: 'test', scheduledAt: scheduledDate });
       expect(mockSchedulingSet).toHaveBeenCalledWith(1, mockReleaseArgs.scheduledAt);
+    });
+  });
+
+  describe('recordMissedRun', () => {
+    const setup = (actionIds: number[]) => {
+      const findMany = jest.fn().mockResolvedValue(actionIds.map((id) => ({ id })));
+      const updateMany = jest.fn();
+      const update = jest.fn(async ({ data }) => ({ id: 1, ...data }));
+      const strapi = { db: { query: jest.fn(() => ({ findMany, updateMany, update })) } };
+
+      // @ts-expect-error Ignore missing properties
+      const service = createReleaseService({ strapi });
+
+      return { service, findMany, updateMany, update };
+    };
+
+    it('marks every entry of a missed release as missed and counts it as skipped', async () => {
+      const { service, updateMany, update } = setup([10, 11]);
+
+      const release = await service.recordMissedRun(1);
+
+      expect(updateMany.mock.calls).toStrictEqual([
+        [
+          {
+            where: { id: { $in: [10, 11] }, outcome: null },
+            data: { outcome: 'skipped_missed' },
+          },
+        ],
+      ]);
+      expect(update).toHaveBeenCalledWith({
+        where: { id: 1, releasedAt: null },
+        data: {
+          status: 'failed',
+          releasedAt: expect.any(Date),
+          failureReason: 'missed_schedule',
+          totalPublishedEntries: 0,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 2,
+        },
+      });
+      expect(release).toMatchObject({ status: 'failed', totalSkippedEntries: 2 });
+    });
+
+    it('freezes an empty missed release with no skipped entries', async () => {
+      const { service, updateMany, update } = setup([]);
+
+      await service.recordMissedRun(1);
+
+      expect(updateMany).not.toHaveBeenCalled();
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ totalSkippedEntries: 0 }) })
+      );
+    });
+
+    it('writes nothing, and returns null, for a release that already ran', async () => {
+      const { service, updateMany, update } = setup([10]);
+      update.mockResolvedValueOnce(null);
+
+      expect(await service.recordMissedRun(1)).toBeNull();
+      expect(updateMany).not.toHaveBeenCalled();
     });
   });
 });

@@ -2,6 +2,7 @@ import {
   DEFAULT_RELEASE_CONDITION,
   RELEASE_ACTION_MODEL_UID,
   RELEASE_CONDITIONS,
+  RELEASE_FAILURE_REASONS,
   RELEASE_STATUSES,
 } from '../../constants';
 
@@ -58,6 +59,10 @@ export default {
     // Every entry the run didn't release, whatever the reason
     totalSkippedEntries: {
       type: 'integer',
+    },
+    failureReason: {
+      type: 'enumeration',
+      enum: [...RELEASE_FAILURE_REASONS],
     },
     actions: {
       type: 'relation',
