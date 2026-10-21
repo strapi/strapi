@@ -273,6 +273,7 @@
   "Settings.permissions.auditLogs.payload": "Payload",
   "Settings.permissions.auditLogs.permission.create": "Create permission",
   "Settings.permissions.auditLogs.permission.delete": "Delete permission",
+  "Settings.permissions.auditLogs.project-settings.update": "Update project settings",
   "Settings.permissions.auditLogs.release.create": "Create release",
   "Settings.permissions.auditLogs.release.update": "Update release",
   "Settings.permissions.auditLogs.release.delete": "Delete release",
