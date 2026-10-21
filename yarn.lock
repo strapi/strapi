@@ -10398,12 +10398,18 @@ __metadata:
   resolution: "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses"
   dependencies:
     "@aws-sdk/client-ses": "npm:3.1023.0"
+    "@strapi/types": "npm:5.58.0"
     "@strapi/utils": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.58.0"
     tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10411,6 +10417,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
+    "@strapi/types": "npm:5.58.0"
     "@strapi/utils": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.58.0"
@@ -10419,6 +10426,11 @@ __metadata:
     tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10426,12 +10438,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@strapi/types": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.58.0"
     nodemailer: "npm:10.0.9"
     tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10440,10 +10458,16 @@ __metadata:
   resolution: "@strapi/provider-email-sendgrid@workspace:packages/providers/email-sendgrid"
   dependencies:
     "@sendgrid/mail": "npm:8.1.3"
+    "@strapi/types": "npm:5.58.0"
     "@strapi/utils": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.58.0"
     tsconfig: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10451,12 +10475,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
+    "@strapi/types": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.58.0"
     nodemailer: "npm:10.0.9"
     tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10468,12 +10498,18 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:3.1023.0"
     "@aws-sdk/s3-request-presigner": "npm:3.1023.0"
     "@aws-sdk/types": "npm:3.973.6"
+    "@strapi/types": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     eslint-config-custom: "npm:5.58.0"
     lodash: "npm:4.18.1"
     tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10481,12 +10517,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
+    "@strapi/types": "npm:5.58.0"
     "@strapi/utils": "npm:5.58.0"
     "@types/node": "npm:20.19.41"
     cloudinary: "npm:^2.7.0"
     eslint-config-custom: "npm:5.58.0"
     into-stream: "npm:^5.1.0"
     tsconfig: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10503,6 +10545,11 @@ __metadata:
     tsconfig: "npm:5.58.0"
     vitest: "catalog:"
     vitest-config: "npm:5.58.0"
+  peerDependencies:
+    "@strapi/types": ^5.58.0
+  peerDependenciesMeta:
+    "@strapi/types":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -10789,7 +10836,6 @@ __metadata:
     cropperjs: "npm:1.6.2"
     date-fns: "npm:2.30.0"
     file-type: "npm:21.3.4"
-    formidable: "npm:3.5.4"
     formik: "npm:2.4.9"
     fs-extra: "npm:11.3.4"
     immer: "npm:9.0.21"
@@ -19019,17 +19065,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"formidable@npm:3.5.4, formidable@npm:^3.5.4":
-  version: 3.5.4
-  resolution: "formidable@npm:3.5.4"
-  dependencies:
-    "@paralleldrive/cuid2": "npm:^2.2.2"
-    dezalgo: "npm:^1.0.4"
-    once: "npm:^1.4.0"
-  checksum: 10c0/3a311ce57617eb8f532368e91c0f2bbfb299a0f1a35090e085bd6ca772298f196fbb0b66f0d4b5549d7bf3c5e1844439338d4402b7b6d1fedbe206ad44a931f8
-  languageName: node
-  linkType: hard
-
 "formidable@npm:^2.0.1":
   version: 2.1.5
   resolution: "formidable@npm:2.1.5"
@@ -19039,6 +19074,17 @@ __metadata:
     once: "npm:^1.4.0"
     qs: "npm:^6.11.0"
   checksum: 10c0/2c68ca6cccc1ac3de497c50236631fafea8e1a09396d88b4dd2dc9db6029b5abaeb6747b8b97ebc1143cd40cf62c27ba485b8c6317088c066fc999af3ac621d4
+  languageName: node
+  linkType: hard
+
+"formidable@npm:^3.5.4":
+  version: 3.5.4
+  resolution: "formidable@npm:3.5.4"
+  dependencies:
+    "@paralleldrive/cuid2": "npm:^2.2.2"
+    dezalgo: "npm:^1.0.4"
+    once: "npm:^1.4.0"
+  checksum: 10c0/3a311ce57617eb8f532368e91c0f2bbfb299a0f1a35090e085bd6ca772298f196fbb0b66f0d4b5549d7bf3c5e1844439338d4402b7b6d1fedbe206ad44a931f8
   languageName: node
   linkType: hard
 

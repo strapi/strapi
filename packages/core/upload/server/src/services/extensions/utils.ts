@@ -7,7 +7,7 @@ import type { Schema, UID } from '@strapi/types';
 import { getService } from '../../utils';
 import { FILE_MODEL_UID } from '../../constants';
 
-import type { Config, File } from '../../types';
+import type { Config, File, FileFormat, SignableFile } from '../../types';
 
 type SignEntityMediaVisitor = (
   args: {
@@ -62,9 +62,13 @@ type BlocksNode = {
   [key: string]: unknown;
 };
 
-type ImageFormat = { url?: string; isUrlSigned?: boolean; [key: string]: unknown };
-
-function isFile(value: unknown, attribute: Schema.Attribute.AnyAttribute): value is File {
+/**
+ * A media value is a file, or a list of files when the attribute is `multiple`.
+ */
+function isMedia(
+  value: unknown,
+  attribute: Schema.Attribute.AnyAttribute
+): value is SignableFile | SignableFile[] {
   if (!value || attribute.type !== 'media') {
     return false;
   }
@@ -144,12 +148,12 @@ const removeQueryParams = (url: string, names: string[]): string => {
  * signing has the same limit because `path` is not persisted on the file
  * (`content-types/file.ts`). Not addressed here.
  */
-const getFileFromUrl = (url: string): File => {
+const getFileFromUrl = (url: string): SignableFile => {
   const unsignedUrl = stripQueryString(url);
   const { provider } = strapi.config.get<Config>('plugin::upload');
   const { name, ext } = path.parse(unsignedUrl.split('/').pop() ?? '');
 
-  return { url: unsignedUrl, hash: name, ext, provider } as File;
+  return { url: unsignedUrl, hash: name, ext, provider };
 };
 
 /**
@@ -163,7 +167,7 @@ const getFileFromUrl = (url: string): File => {
  * only reliable signal. `file.url` must already be the bare URL so the
  * comparison is meaningful.
  */
-const signFileIfOwned = (file: File, cache: SignCache): Promise<string | null> => {
+const signFileIfOwned = (file: SignableFile, cache: SignCache): Promise<string | null> => {
   const bareUrl = file.url ?? '';
   const cached = cache.get(bareUrl);
 
@@ -290,8 +294,8 @@ const mapBlocksImages = async (
   });
 };
 
-const getImageFormats = (image: File): [string, ImageFormat][] =>
-  Object.entries(image.formats ?? {}) as [string, ImageFormat][];
+const getImageFormats = (image: File): [string, FileFormat][] =>
+  Object.entries(image.formats ?? {});
 
 /** True when the node still carries anything `unsignImage` would remove. */
 const hasSignatureTraces = (image: File) => {
@@ -374,9 +378,9 @@ const createSignEntityMediaVisitor =
         return;
 
       case 'media': {
-        if (isFile(value, attribute)) {
+        if (isMedia(value, attribute)) {
           // If the attribute is repeatable sign each file
-          if (attribute.multiple) {
+          if (Array.isArray(value)) {
             const signedFiles = await async.map(value, signFileUrls);
             set(key, signedFiles);
             return;

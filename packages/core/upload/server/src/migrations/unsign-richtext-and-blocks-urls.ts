@@ -11,6 +11,7 @@ import {
   unsignImage,
 } from '../services/extensions/utils';
 import type { SignCache } from '../services/extensions/utils';
+import type { UploadProvider } from '../types';
 
 const BATCH_SIZE = 100;
 const LOG_PREFIX = '[unsign-richtext-and-blocks-urls]';
@@ -138,7 +139,7 @@ const migrateSchema = async (
 };
 
 const migrateUp = async (trx: MigrationTrx, db: Database) => {
-  const { provider } = strapi.plugins.upload;
+  const provider: UploadProvider | undefined = strapi.plugins.upload.provider;
 
   // Nothing is signed on a public provider, so there is nothing to strip
   if (!provider || !(await provider.isPrivate())) {

@@ -12,7 +12,13 @@ import { async, errors, file as fileUtils } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
 
-import { Config, type File } from '../types';
+import {
+  Config,
+  type File,
+  type FileFormat,
+  type SignableFile,
+  type UploadProvider,
+} from '../types';
 
 const { ApplicationError } = errors;
 const { bytesToHumanReadable } = fileUtils;
@@ -285,8 +291,8 @@ const deleteByIds = async (ids: number[] = []) => {
   return filesToDelete;
 };
 
-const signFileUrls = async (file: File) => {
-  const { provider } = strapi.plugins.upload;
+const signFileUrls = async <T extends SignableFile>(file: T): Promise<T> => {
+  const provider: UploadProvider = strapi.plugins.upload.provider;
   const { provider: providerConfig } = strapi.config.get<Config>('plugin::upload');
   const isPrivate = await provider.isPrivate();
   file.isUrlSigned = false;
@@ -296,7 +302,7 @@ const signFileUrls = async (file: File) => {
     return file;
   }
 
-  const signUrl = async (file: File) => {
+  const signUrl = async (file: SignableFile | FileFormat) => {
     const signedUrl = await provider.getSignedUrl(file);
     file.url = signedUrl.url;
     file.isUrlSigned = true;
