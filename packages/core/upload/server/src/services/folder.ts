@@ -92,6 +92,7 @@ const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOpt
   // A folder deletion cascades to every file in its subtree. Let callers enforce
   // request-scoped permissions against the complete set before the first destructive action.
   await validateFiles?.(filesToDelete);
+  await getService('upload').validateNoFileRelations(filesToDelete);
 
   await Promise.all(filesToDelete.map((file: File) => getService('upload').remove(file)));
 
