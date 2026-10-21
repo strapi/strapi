@@ -7,7 +7,7 @@ import { parse } from 'dotenv';
 
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
-import { describeOnCondition } from 'api-tests/utils';
+import { createUtils, describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 
 import type {
@@ -129,6 +129,22 @@ const slugItemModel = {
   attributes: {
     title: { type: 'string' },
     slug: { type: 'uid' },
+  },
+};
+
+// Each locale of a document gets its own release action
+const localizedItemUID = 'api::localized-item.localized-item';
+const localizedItemModel = {
+  draftAndPublish: true,
+  pluginOptions: { i18n: { localized: true } },
+  singularName: 'localized-item',
+  pluralName: 'localized-items',
+  displayName: 'Localized Item',
+  kind: 'collectionType',
+  attributes: {
+    name: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+    // Drafts without it can't be published
+    description: { type: 'string', required: true, pluginOptions: { i18n: { localized: true } } },
   },
 };
 
@@ -327,7 +343,15 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   beforeAll(async () => {
     await builder
       .addContentType(productModel)
-      .addContentTypes([categoryModel, articleModel, pageModel, reviewItemModel, slugItemModel])
+      .addContentTypes([
+        categoryModel,
+        articleModel,
+        pageModel,
+        reviewItemModel,
+        slugItemModel,
+        localizedItemModel,
+      ])
+      .addFixtures('plugin::i18n.locale', [{ name: 'French (fr)', code: 'fr' }])
       .build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -386,6 +410,8 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   afterAll(async () => {
     jest.useRealTimers();
     unsubscribeFailingActionQueries?.();
+    // The homepage suite expects only its own pending releases
+    await deleteAllReleases();
 
     await strapi.destroy();
     await builder.cleanup();
@@ -2079,6 +2105,8 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
 
       afterAll(async () => {
+        // Otherwise the workflow deletion revalidates the last test's release in the background
+        await deleteAllReleases();
         await rq({ method: 'DELETE', url: `/review-workflows/workflows/${workflow.id}` });
       });
 
@@ -2157,6 +2185,42 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
             requiredStage: { id: workflow.stages[1].id, name: 'Done' },
           },
         });
+      });
+
+      test('a release from skipped entries checks the stage of each entry as it is now', async () => {
+        const approvedSinceId = await createReviewItem({ approved: false });
+        const notApprovedId = await createReviewItem({ approved: false });
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: approvedSinceId, contentType: reviewItemUID },
+          { documentId: notApprovedId, contentType: reviewItemUID },
+        ]);
+        await expect(runScheduled(release.id)).rejects.toThrow('No entries were published');
+        const approveRes = await rq({
+          method: 'PUT',
+          url: `/review-workflows/content-manager/collection-types/${reviewItemUID}/${approvedSinceId}/stage`,
+          body: { data: { id: workflow.stages[1].id } },
+        });
+        expect(approveRes.statusCode).toBe(200);
+
+        const res = await rq({
+          method: 'POST',
+          url: `/content-releases/${release.id}/create-from-skipped-entries`,
+          body: { name: 'Approved since', scheduledAt: null, releaseCondition: 'allow_partial' },
+        });
+
+        expect(res.statusCode).toBe(201);
+        const actions = await getActionsByEntry(res.body.data.id);
+        expect(actions[approvedSinceId]).toMatchObject({ isEntryValid: true, reason: null });
+        expect(actions[notApprovedId]).toMatchObject({
+          isEntryValid: false,
+          reason: {
+            stage: {
+              entryStage: { id: workflow.stages[0].id, name: 'Review' },
+              requiredStage: { id: workflow.stages[1].id, name: 'Done' },
+            },
+          },
+        });
+        expect(res.body.data.status).toBe('ready');
       });
     });
 
@@ -2558,6 +2622,398 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         status: null,
       });
       expect((await getRelease(ranRelease.id)).status).toBe('partial');
+    });
+  });
+
+  describe('Create a release from skipped entries', () => {
+    const createFromSkippedEntries = (
+      releaseId,
+      body: Record<string, unknown> = {},
+      request: typeof rq = rq
+    ) =>
+      request({
+        method: 'POST',
+        url: `/content-releases/${releaseId}/create-from-skipped-entries`,
+        body: { name: `From skipped ${Math.random().toString(36)}`, scheduledAt: null, ...body },
+      });
+
+    // An allow_partial release that ran: one entry published, two skipped
+    const createPartialRelease = async () => {
+      const publishedId = await createProduct({ valid: true });
+      const invalidId = await createProduct({ valid: false });
+      const failingId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: publishedId },
+        { documentId: invalidId },
+        { documentId: failingId },
+      ]);
+
+      documentIdsFailingToPublish.add(failingId);
+      try {
+        expect((await publishManually(release.id)).statusCode).toBe(200);
+      } finally {
+        documentIdsFailingToPublish.delete(failingId);
+      }
+      expect((await getRelease(release.id)).status).toBe('partial');
+
+      return { release, publishedId, invalidId, failingId };
+    };
+
+    test('carries over every skipped entry, in order, in a new planned release', async () => {
+      const { release, invalidId, failingId } = await createPartialRelease();
+
+      const res = await createFromSkippedEntries(release.id);
+
+      expect(res.statusCode).toBe(201);
+      const newRelease = res.body.data;
+      expect(newRelease).toMatchObject({ releasedAt: null, status: 'blocked' });
+      const actions = await strapi.db.query('plugin::content-releases.release-action').findMany({
+        where: { release: { id: newRelease.id } },
+        orderBy: { id: 'asc' },
+      });
+      expect(actions.map((action) => action.entryDocumentId)).toEqual([invalidId, failingId]);
+      for (const action of actions) {
+        expect(action).toMatchObject({ type: 'publish', outcome: null });
+      }
+    });
+
+    test('carries over only the entries asked for', async () => {
+      const { release, failingId } = await createPartialRelease();
+      const sourceActions = await getActionsByEntry(release.id);
+
+      const res = await createFromSkippedEntries(release.id, {
+        actionIds: [sourceActions[failingId].id],
+      });
+
+      expect(res.statusCode).toBe(201);
+      const actions = await getActionsByEntry(res.body.data.id);
+      expect(Object.keys(actions)).toEqual([failingId]);
+      expect(res.body.data.status).toBe('ready');
+    });
+
+    test('rejects an entry the run released, or an entry of another release', async () => {
+      const { release, publishedId, failingId } = await createPartialRelease();
+      const sourceActions = await getActionsByEntry(release.id);
+      const publishedActionId = sourceActions[publishedId].id;
+      const other = await createPartialRelease();
+      const otherActionId = (await getActionsByEntry(other.release.id))[other.failingId].id;
+
+      for (const actionId of [publishedActionId, otherActionId]) {
+        const res = await createFromSkippedEntries(release.id, {
+          actionIds: [sourceActions[failingId].id, actionId],
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.message).toBe(
+          `Actions with ids ${actionId} are not skipped entries of release ${release.id}`
+        );
+      }
+    });
+
+    test('the new release gets the name, schedule, timezone and release condition sent', async () => {
+      const { release } = await createPartialRelease();
+
+      const res = await createFromSkippedEntries(release.id, {
+        name: 'Second try',
+        scheduledAt: new Date('2024-10-10T00:00:00.000Z'),
+        timezone: 'Europe/Madrid',
+        releaseCondition: 'all_or_nothing',
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data).toMatchObject({
+        name: 'Second try',
+        scheduledAt: '2024-10-10T00:00:00.000Z',
+        timezone: 'Europe/Madrid',
+        releaseCondition: 'all_or_nothing',
+      });
+    });
+
+    test('validates the new release like any new release', async () => {
+      const { release } = await createPartialRelease();
+      const { name } = (await createRelease()).body.data;
+
+      const res = await createFromSkippedEntries(release.id, { name });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toBe(`Release with name ${name} already exists`);
+
+      const pastRes = await createFromSkippedEntries(release.id, {
+        scheduledAt: new Date('2022-10-10T00:00:00.000Z'),
+        timezone: 'Europe/Madrid',
+      });
+      expect(pastRes.statusCode).toBe(400);
+      expect(pastRes.body.error.message).toBe('Scheduled at must be later than now');
+
+      // Body validation errors
+      for (const [body, path] of [
+        [{ releaseCondition: 'publish_everything' }, ['releaseCondition']],
+        [{ actionIds: [] }, ['actionIds']],
+        [{ actionIds: ['abc'] }, ['actionIds', '0']],
+        [{ actionIds: [1.5] }, ['actionIds', '0']],
+        [{ actionIds: [2 ** 31] }, ['actionIds', '0']],
+        [{ actionIds: null }, ['actionIds']],
+        [{ unknownField: true }, []],
+      ] as const) {
+        const bodyRes = await createFromSkippedEntries(release.id, body);
+        expect(bodyRes.statusCode).toBe(400);
+        expect(bodyRes.body.error.details.errors.map((error) => error.path)).toEqual([path]);
+      }
+    });
+
+    test('carries over every entry of a failed release, with its type', async () => {
+      const validId = await createProduct({ valid: true });
+      const invalidId = await createProduct({ valid: false });
+      const toUnpublishId = await createProduct({ valid: true });
+      await strapi.documents(productUID).publish({ documentId: toUnpublishId });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: validId },
+        { documentId: invalidId },
+        { documentId: toUnpublishId, type: 'unpublish' },
+      ]);
+      await expect(runScheduled(release.id)).rejects.toThrow(INVALID_PRODUCT_MESSAGE);
+
+      const res = await createFromSkippedEntries(release.id);
+
+      expect(res.statusCode).toBe(201);
+      const actions = await getActionsByEntry(res.body.data.id);
+      expect(Object.keys(actions).sort()).toEqual([validId, invalidId, toUnpublishId].sort());
+      expect(actions[validId]).toMatchObject({ type: 'publish', isEntryValid: true });
+      expect(actions[invalidId]).toMatchObject({ type: 'publish', isEntryValid: false });
+      expect(actions[toUnpublishId]).toMatchObject({ type: 'unpublish', isEntryValid: true });
+      expect(res.body.data.status).toBe('blocked');
+    });
+
+    test('carries over the entries of a release that ran before outcomes were recorded', async () => {
+      const { release, publishedId, invalidId, failingId } = await createPartialRelease();
+      await strapi.db
+        .query('plugin::content-releases.release-action')
+        .updateMany({ where: { release: { id: release.id } }, data: { outcome: null } });
+
+      const res = await createFromSkippedEntries(release.id);
+
+      expect(res.statusCode).toBe(201);
+      const actions = await getActionsByEntry(res.body.data.id);
+      expect(Object.keys(actions).sort()).toEqual([publishedId, invalidId, failingId].sort());
+    });
+
+    test('each entry starts from its current state, not from what the run recorded', async () => {
+      const fixedId = await createProduct({ valid: false });
+      const stillBrokenId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: fixedId },
+        { documentId: stillBrokenId },
+      ]);
+      await expect(runScheduled(release.id)).rejects.toThrow('No entries were published');
+
+      for (const [documentId, data] of [
+        [fixedId, { description: 'Fixed' }],
+        // Description fixed, but the code is too short to publish
+        [stillBrokenId, { description: 'Fixed', code: 'ab' }],
+      ] as const) {
+        const updateRes = await rq({
+          method: 'PUT',
+          url: `/content-manager/collection-types/${productUID}/${documentId}`,
+          body: data,
+        });
+        expect(updateRes.statusCode).toBe(200);
+      }
+
+      const res = await createFromSkippedEntries(release.id, { releaseCondition: 'allow_partial' });
+
+      expect(res.statusCode).toBe(201);
+      const actions = await getActionsByEntry(res.body.data.id);
+      expect(actions[fixedId]).toMatchObject({ isEntryValid: true, reason: null, outcome: null });
+      expect(actions[stillBrokenId]).toMatchObject({ isEntryValid: false, outcome: null });
+      expect(actions[stillBrokenId].reason.validation.errors).toEqual([
+        { path: ['code'], message: expect.any(String) },
+      ]);
+      expect(await getRelease(res.body.data.id)).toMatchObject({
+        status: 'ready',
+        actions: { meta: { count: 2, notReadyCount: 1 } },
+      });
+    });
+
+    test('leaves out an entry deleted since the run', async () => {
+      const { release, invalidId, failingId } = await createPartialRelease();
+      const { id: invalidActionId } = (await getActionsByEntry(release.id))[invalidId];
+      await strapi.documents(productUID).delete({ documentId: invalidId, locale: '*' });
+
+      const res = await createFromSkippedEntries(release.id);
+
+      expect(res.statusCode).toBe(201);
+      expect(Object.keys(await getActionsByEntry(res.body.data.id))).toEqual([failingId]);
+
+      const requestedRes = await createFromSkippedEntries(release.id, {
+        actionIds: [invalidActionId],
+      });
+      expect(requestedRes.statusCode).toBe(400);
+      expect(requestedRes.body.error.message).toBe(
+        'The requested entries can no longer be released'
+      );
+    });
+
+    test('each entry keeps its locale, and a locale deleted since the run is left out', async () => {
+      // No description: neither locale can be published
+      const bothLocales = await strapi
+        .documents(localizedItemUID)
+        .create({ data: { name: 'Both locales' }, locale: 'en' });
+      await strapi.documents(localizedItemUID).update({
+        documentId: bothLocales.documentId,
+        locale: 'fr',
+        data: { name: 'Les deux' },
+      });
+      const frenchOnly = await strapi
+        .documents(localizedItemUID)
+        .create({ data: { name: 'Français' }, locale: 'fr' });
+
+      const release = (await createRelease({ releaseCondition: 'allow_partial' })).body.data;
+      for (const [documentId, locale] of [
+        [bothLocales.documentId, 'en'],
+        [bothLocales.documentId, 'fr'],
+        [frenchOnly.documentId, 'fr'],
+      ]) {
+        const addRes = await rq({
+          method: 'POST',
+          url: `/content-releases/${release.id}/actions`,
+          body: {
+            contentType: localizedItemUID,
+            entryDocumentId: documentId,
+            locale,
+            type: 'publish',
+          },
+        });
+        expect(addRes.statusCode).toBe(201);
+      }
+      await expect(runScheduled(release.id)).rejects.toThrow('No entries were published');
+
+      await strapi
+        .documents(localizedItemUID)
+        .delete({ documentId: bothLocales.documentId, locale: 'fr' });
+
+      const res = await createFromSkippedEntries(release.id);
+
+      expect(res.statusCode).toBe(201);
+      const actionsRes = await rq({
+        method: 'GET',
+        url: `/content-releases/${res.body.data.id}/actions`,
+        qs: { pageSize: 100 },
+      });
+      const carried = Object.values(actionsRes.body.data)
+        .flat()
+        .map(
+          (action: { entryDocumentId: string; locale: { code: string } | null }) =>
+            `${action.entryDocumentId}:${action.locale?.code}`
+        );
+      expect(carried.sort()).toEqual(
+        [`${bothLocales.documentId}:en`, `${frenchOnly.documentId}:fr`].sort()
+      );
+    });
+
+    test('the new release is separate: changing or deleting it leaves the original as it ran', async () => {
+      const { release, invalidId, failingId } = await createPartialRelease();
+      const sourceActions = await getActionsByEntry(release.id);
+      const newRelease = (await createFromSkippedEntries(release.id)).body.data;
+      const newActions = await getActionsByEntry(newRelease.id);
+
+      const changes = [
+        await rq({
+          method: 'PUT',
+          url: `/content-releases/${newRelease.id}/actions/${newActions[failingId].id}`,
+          body: { type: 'unpublish' },
+        }),
+        await rq({
+          method: 'DELETE',
+          url: `/content-releases/${newRelease.id}/actions/${newActions[invalidId].id}`,
+        }),
+        await rq({ method: 'DELETE', url: `/content-releases/${newRelease.id}` }),
+      ];
+      for (const changeRes of changes) {
+        expect(changeRes.statusCode).toBe(200);
+      }
+
+      expect(await getActionsByEntry(release.id)).toEqual(sourceActions);
+      expect((await getRelease(release.id)).status).toBe('partial');
+    });
+
+    test('creates nothing when the new release status cannot be written', async () => {
+      const { release } = await createPartialRelease();
+
+      const res = await withFailingStatusUpdate(() =>
+        createFromSkippedEntries(release.id, { name: 'Rolled back' })
+      );
+
+      expect(res.statusCode).toBe(500);
+      const pending = await rq({ method: 'GET', url: '/content-releases' });
+      expect(pending.body.meta.pendingReleasesCount).toBe(0);
+    });
+
+    test('rejects a planned or done release, and a release that does not exist', async () => {
+      const planned = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: false }) },
+      ]);
+      const done = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+      expect((await publishManually(done.id)).statusCode).toBe(200);
+      expect((await getRelease(done.id)).status).toBe('done');
+
+      const plannedRes = await createFromSkippedEntries(planned.id);
+      expect(plannedRes.statusCode).toBe(400);
+      expect(plannedRes.body.error.message).toBe('Release not published yet');
+
+      const doneRes = await createFromSkippedEntries(done.id);
+      expect(doneRes.statusCode).toBe(400);
+      expect(doneRes.body.error.message).toBe('Release has no skipped entries');
+
+      expect((await createFromSkippedEntries(999999)).statusCode).toBe(404);
+    });
+
+    describe('permissions', () => {
+      const utils = () => createUtils(strapi);
+      const created: { roleIds: number[]; userIds: number[] } = { roleIds: [], userIds: [] };
+
+      const createRequestWith = async (name: string, actions: string[]) => {
+        const role = await utils().createRole({ name: `releases-${name}`, description: name });
+        created.roleIds.push(role.id);
+        await utils().assignPermissionsToRole(
+          role.id,
+          actions.map((action) => ({ action }))
+        );
+        const user = await utils().createUser({
+          firstname: name,
+          lastname: 'User',
+          email: `releases-${name}@strapi.io`,
+          roles: [role.id],
+        });
+        created.userIds.push(user.id);
+
+        return createAuthRequest({ strapi, userInfo: user });
+      };
+
+      afterAll(async () => {
+        await utils().deleteUsersById(created.userIds);
+        await utils().deleteRolesById(created.roleIds);
+      });
+
+      test('needs the permissions to create a release and add its entries', async () => {
+        const { release } = await createPartialRelease();
+        const rqCreateOnly = await createRequestWith('create-only', [
+          'plugin::content-releases.create',
+        ]);
+        const rqAddOnly = await createRequestWith('add-only', [
+          'plugin::content-releases.create-action',
+        ]);
+        const rqCreateAndAdd = await createRequestWith('create-and-add', [
+          'plugin::content-releases.create',
+          'plugin::content-releases.create-action',
+        ]);
+
+        expect((await createFromSkippedEntries(release.id, {}, rqCreateOnly)).statusCode).toBe(403);
+        expect((await createFromSkippedEntries(release.id, {}, rqAddOnly)).statusCode).toBe(403);
+        expect((await createFromSkippedEntries(release.id, {}, rqCreateAndAdd)).statusCode).toBe(
+          201
+        );
+      });
     });
   });
 

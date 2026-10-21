@@ -87,6 +87,9 @@ packages/core/content-releases/server/src/routes/release.ts
   ```ts
   {
     name: string;
+    scheduledAt: string | null; // ISO date
+    timezone: string | null; // required when scheduledAt is set
+    releaseCondition?: 'all_or_nothing' | 'allow_partial'; // all_or_nothing if omitted
   }
   ```
 
@@ -110,6 +113,22 @@ packages/core/content-releases/server/src/routes/release.ts
 
 - method: `POST`
 - endpoint: `/content-releases/:id/publish`
+
+**Create a release from skipped entries**:
+
+- method: `POST`
+- endpoint: `/content-releases/:id/create-from-skipped-entries`
+- permissions: `plugin::content-releases.create` and `plugin::content-releases.create-action`
+- body:
+  ```ts
+  {
+    name: string;
+    scheduledAt: string | null; // ISO date
+    timezone: string | null; // required when scheduledAt is set
+    releaseCondition?: 'all_or_nothing' | 'allow_partial';
+    actionIds?: number[]; // skipped entries to carry over; all of them if omitted
+  }
+  ```
 
 ### Release Action
 
@@ -235,6 +254,17 @@ Considering that retrieving the status of all entries in a release is a heavy op
 #### Creating a release:
 
 When creating a release, its status is automatically set to "Empty" as there are no entries initially.
+
+#### Creating a release from skipped entries:
+
+A release that ran can't change, so its skipped entries are released again through a new release: `POST /content-releases/:id/create-from-skipped-entries`.
+
+- An entry is skipped when its outcome is neither `published` nor `unpublished`, or when it has no outcome (releases that ran before outcomes were recorded).
+- Only a `partial` or `failed` release that ran is accepted. A release that hasn't run is rejected with `Release not published yet`, a `done` one with `Release has no skipped entries` (both 400). An unknown `:id` is a 404.
+- The new release's fields are validated like any new release. `actionIds` restricts the entries to those actions; an id that isn't a skipped entry of the release is a 400.
+- Each entry keeps its type and locale, in the order it was added. Its validity is read from the entry as it is now, and the new release's status follows from it.
+- Entries deleted since the run (in their locale, for a localized content type), or whose content type was deleted or lost Draft and Publish, are left out. If nothing is left, the request is rejected with a 400: `Release has no skipped entries`, or `The requested entries can no longer be released` when `actionIds` was given.
+- The release, its entries and its status are written in one transaction. The source release isn't changed.
 
 #### Adding an entry to a release:
 

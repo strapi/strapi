@@ -11,6 +11,7 @@ import {
 import type {
   GetReleases,
   CreateRelease,
+  CreateReleaseFromSkippedEntries,
   UpdateRelease,
   PublishRelease,
   GetRelease,
@@ -219,50 +220,118 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
+  // The checks every new release goes through, before anything is written
+  const validateNewRelease = async (
+    releaseData: CreateRelease.Request['body'],
+    { user }: { user: UserInfo }
+  ) => {
+    const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
+
+    const {
+      validatePendingReleasesLimit,
+      validateUniqueNameForPendingRelease,
+      validateScheduledAtIsLaterThanNow,
+    } = getService('release-validation', { strapi });
+
+    await Promise.all([
+      validatePendingReleasesLimit(),
+      validateUniqueNameForPendingRelease(releaseWithCreatorFields.name),
+      validateScheduledAtIsLaterThanNow(releaseWithCreatorFields.scheduledAt),
+    ]);
+
+    return releaseWithCreatorFields;
+  };
+
+  // Takes validated data with creator fields. In a transaction, the audit waits for the commit.
+  const insertRelease = async (releaseData: CreateRelease.Request['body']): Promise<Release> => {
+    const release: Release = await strapi.db.query(RELEASE_MODEL_UID).create({
+      data: {
+        ...releaseData,
+        status: 'empty',
+      },
+    });
+
+    // Audited before scheduling: a scheduling failure shouldn't leave the write unrecorded
+    await emitAuditOnCommit({ strapi }, AUDITED_EVENTS.RELEASE_CREATE, {
+      releaseId: release.id,
+      name: release.name,
+      ...(release.scheduledAt && {
+        scheduledAt: release.scheduledAt,
+        timezone: release.timezone,
+      }),
+      releaseCondition: release.releaseCondition,
+    });
+
+    return release;
+  };
+
+  const scheduleCreatedRelease = async (release: Release) => {
+    if (release.scheduledAt) {
+      await getService('scheduling', { strapi }).set(release.id, release.scheduledAt);
+    }
+
+    strapi.telemetry.send('didCreateContentRelease');
+
+    return release;
+  };
+
   return {
     async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
-      const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
+      const release = await insertRelease(await validateNewRelease(releaseData, { user }));
 
-      const {
-        validatePendingReleasesLimit,
-        validateUniqueNameForPendingRelease,
-        validateScheduledAtIsLaterThanNow,
-      } = getService('release-validation', { strapi });
+      return scheduleCreatedRelease(release);
+    },
 
-      await Promise.all([
-        validatePendingReleasesLimit(),
-        validateUniqueNameForPendingRelease(releaseWithCreatorFields.name),
-        validateScheduledAtIsLaterThanNow(releaseWithCreatorFields.scheduledAt),
-      ]);
+    /**
+     * Creates a release with the skipped entries of a partial or failed release (only
+     * `actionIds`, if given). The source release is left untouched.
+     */
+    async createFromSkippedEntries(
+      releaseId: CreateReleaseFromSkippedEntries.Request['params']['id'],
+      { actionIds, ...releaseData }: CreateReleaseFromSkippedEntries.Request['body'],
+      { user }: { user: UserInfo }
+    ) {
+      const sourceRelease: Pick<Release, 'id' | 'releasedAt' | 'status'> | null = await strapi.db
+        .query(RELEASE_MODEL_UID)
+        .findOne({ where: { id: releaseId }, select: ['id', 'releasedAt', 'status'] });
 
-      const release = await strapi.db.query(RELEASE_MODEL_UID).create({
-        data: {
-          ...releaseWithCreatorFields,
-          status: 'empty',
-        },
-      });
-
-      // Audited before scheduling: a scheduling failure shouldn't leave the write
-      // unrecorded.
-      await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_CREATE, {
-        releaseId: release.id,
-        name: release.name,
-        ...(release.scheduledAt && {
-          scheduledAt: release.scheduledAt,
-          timezone: release.timezone,
-        }),
-        releaseCondition: release.releaseCondition,
-      });
-
-      if (releaseWithCreatorFields.scheduledAt) {
-        const schedulingService = getService('scheduling', { strapi });
-
-        await schedulingService.set(release.id, release.scheduledAt);
+      if (!sourceRelease) {
+        throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      strapi.telemetry.send('didCreateContentRelease');
+      if (!sourceRelease.releasedAt) {
+        throw new errors.ValidationError('Release not published yet');
+      }
 
-      return release;
+      if (sourceRelease.status !== 'partial' && sourceRelease.status !== 'failed') {
+        throw new errors.ValidationError('Release has no skipped entries');
+      }
+
+      const releaseWithCreatorFields = await validateNewRelease(releaseData, { user });
+
+      const releaseActionService = getService('release-action', { strapi });
+      // Read outside the transaction, so reading drafts doesn't hold it open
+      const prepared = await releaseActionService.prepareSkippedActions(
+        sourceRelease.id,
+        actionIds
+      );
+
+      if (prepared.length === 0) {
+        throw new errors.ValidationError(
+          actionIds
+            ? 'The requested entries can no longer be released'
+            : 'Release has no skipped entries'
+        );
+      }
+
+      const release: Release = await strapi.db.transaction(async () => {
+        const createdRelease = await insertRelease(releaseWithCreatorFields);
+        await releaseActionService.createPrepared(createdRelease.id, prepared);
+
+        return strapi.db.query(RELEASE_MODEL_UID).findOne({ where: { id: createdRelease.id } });
+      });
+
+      return scheduleCreatedRelease(release);
     },
 
     async findOne(id: GetRelease.Request['params']['id'], query = {}) {

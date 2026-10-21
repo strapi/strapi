@@ -1164,16 +1164,17 @@ describe('Release service', () => {
   });
 
   describe('create', () => {
+    const createDb = (create: jest.Mock) => ({
+      query: () => ({ create }),
+      inTransaction: () => false,
+    });
+
     it('should set creator fields', async () => {
       const createFn = jest.fn().mockReturnValue({ id: 1, name: 'test' });
 
       const strapiMock = {
         ...baseStrapiMock,
-        db: {
-          query: () => ({
-            create: createFn,
-          }),
-        },
+        db: createDb(createFn),
       };
 
       // @ts-expect-error Ignore missing properties
@@ -1196,14 +1197,12 @@ describe('Release service', () => {
       });
     });
 
-    it('should create a release', async () => {
+    it('should create a release and audit it', async () => {
+      const emit = jest.fn();
       const strapiMock = {
         ...baseStrapiMock,
-        db: {
-          query: () => ({
-            create: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-          }),
-        },
+        eventHub: { emit },
+        db: createDb(jest.fn().mockReturnValue({ id: 1, name: 'test' })),
       };
 
       // @ts-expect-error Ignore missing properties
@@ -1218,6 +1217,7 @@ describe('Release service', () => {
       const release = await releaseService.create(mockReleaseArgs, { user: mockUser });
 
       expect(release).toEqual({ id: 1, name: 'test' });
+      expect(emit).toHaveBeenCalledWith('release.create', { releaseId: 1, name: 'test' });
     });
 
     it('should set scheduling if scheduledAt is present', async () => {
@@ -1225,11 +1225,9 @@ describe('Release service', () => {
 
       const strapiMock = {
         ...baseStrapiMock,
-        db: {
-          query: () => ({
-            create: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: scheduledDate }),
-          }),
-        },
+        db: createDb(
+          jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: scheduledDate })
+        ),
       };
 
       // @ts-expect-error Ignore missing properties

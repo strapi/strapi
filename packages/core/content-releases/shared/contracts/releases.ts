@@ -153,6 +153,30 @@ export declare namespace CreateRelease {
 }
 
 /**
+ * POST /content-releases/:id/create-from-skipped-entries - Create a release from the entries a
+ * partial or failed release skipped
+ */
+export declare namespace CreateReleaseFromSkippedEntries {
+  export interface Request {
+    state: {
+      user: UserInfo;
+    };
+    params: {
+      id: Release['id'];
+    };
+    body: CreateRelease.Request['body'] & {
+      // Action ids of the skipped entries to carry over; all of them if omitted
+      actionIds?: number[];
+    };
+  }
+
+  export interface Response {
+    data: ReleaseDataResponse;
+    error?: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
+  }
+}
+
+/**
  * PUT /content-releases/:id - Update a release
  */
 export declare namespace UpdateRelease {

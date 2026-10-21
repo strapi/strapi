@@ -938,4 +938,94 @@ describe('Release Action service', () => {
       );
     });
   });
+
+  describe('prepareSkippedActions', () => {
+    it('leaves out entries that were deleted, or whose content type was deleted or lost D&P', async () => {
+      const action = (id: number, contentType: string, documentId: string, locale?: string) => ({
+        id,
+        type: 'publish',
+        contentType,
+        entryDocumentId: documentId,
+        locale: locale ?? null,
+      });
+      const skippedActions = [
+        action(1, 'api::kept.kept', 'doc-a'),
+        action(2, 'api::kept.kept', 'doc-deleted'),
+        action(3, 'api::removed.removed', 'doc-b'),
+        action(4, 'api::no-dp.no-dp', 'doc-c'),
+        action(5, 'api::localized.localized', 'doc-d', 'en'),
+        action(6, 'api::localized.localized', 'doc-d', 'fr'),
+        // A locale on a content type that isn't localized is ignored
+        { ...action(7, 'api::kept.kept', 'doc-e', 'en'), type: 'unpublish' },
+      ];
+      const entriesByContentType: Record<string, unknown[]> = {
+        'api::kept.kept': [{ documentId: 'doc-a' }, { documentId: 'doc-e' }],
+        'api::no-dp.no-dp': [{ documentId: 'doc-c' }],
+        'api::localized.localized': [{ documentId: 'doc-d', locale: 'en' }],
+      };
+      const entryFindMany = jest.fn(async (uid: string) => entriesByContentType[uid]);
+      const strapiMock = {
+        ...baseStrapiMock,
+        contentType: jest.fn((uid: string) =>
+          uid === 'api::removed.removed'
+            ? undefined
+            : { uid, options: { draftAndPublish: uid !== 'api::no-dp.no-dp' } }
+        ),
+        localization: {
+          isLocalizedContentType: ({ uid }: { uid: string }) => uid === 'api::localized.localized',
+        },
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn((uid: string) =>
+            uid === 'plugin::content-releases.release-action'
+              ? { findMany: jest.fn().mockResolvedValue(skippedActions) }
+              : { findMany: () => entryFindMany(uid) }
+          ),
+        },
+      };
+      const invalid = { isEntryValid: false, reason: { validation: { errors: [] } } };
+      mockGetValidityForActions.mockImplementationOnce(async (actions) =>
+        actions.map((publishAction) => ({ action: publishAction, validity: invalid }))
+      );
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      const prepared = await releaseActionService.prepareSkippedActions(1);
+
+      expect(prepared).toEqual([
+        {
+          action: {
+            type: 'publish',
+            contentType: 'api::kept.kept',
+            entryDocumentId: 'doc-a',
+            locale: null,
+          },
+          validity: invalid,
+        },
+        {
+          action: {
+            type: 'publish',
+            contentType: 'api::localized.localized',
+            entryDocumentId: 'doc-d',
+            locale: 'en',
+          },
+          validity: invalid,
+        },
+        {
+          action: {
+            type: 'unpublish',
+            contentType: 'api::kept.kept',
+            entryDocumentId: 'doc-e',
+            locale: 'en',
+          },
+          validity: { isEntryValid: true, reason: null },
+        },
+      ]);
+      // One read per content type that still has D&P
+      expect(entryFindMany.mock.calls.map(([uid]) => uid)).toEqual([
+        'api::kept.kept',
+        'api::localized.localized',
+      ]);
+    });
+  });
 });
