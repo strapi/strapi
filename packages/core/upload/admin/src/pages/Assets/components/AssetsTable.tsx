@@ -18,7 +18,6 @@ import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { TruncatedText } from '../../../components/TruncatedText';
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../../hooks/useTracking';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
@@ -28,6 +27,7 @@ import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS, TABLE_HEADERS } 
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { useListSettings } from '../hooks/useListSettings';
 import { type MixedItem } from '../utils/mergeMixedList';
 import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
@@ -55,12 +55,6 @@ const StyledTable = styled(RawTable)`
      so the dates never wrap. The name cell is what absorbs the leftover and
      ellipsizes — see NameTd. */
   table-layout: auto;
-
-  & td:last-child,
-  & th:last-child {
-    width: 5.6rem;
-    white-space: nowrap;
-  }
 `;
 
 const StyledThead = styled(RawThead)`
@@ -92,10 +86,14 @@ const flexColumn = css`
   overflow: hidden;
 `;
 
-const StyledTh = styled(RawTh)<{ $flex?: boolean }>`
+const headerCellStyles = css`
   height: 40px;
   padding: 0 ${({ theme }) => theme.spaces[4]};
   text-align: left;
+`;
+
+const StyledTh = styled(RawTh)<{ $flex?: boolean }>`
+  ${headerCellStyles}
 
   ${({ $flex }) => ($flex ? flexColumn : hugColumn)}
 `;
@@ -122,19 +120,22 @@ const StyledTr = styled.tr<{
   $isValidDropTarget?: boolean;
   $isInvalidDropTarget?: boolean;
   $isSelected?: boolean;
+  /** Shown but not choosable here (the picker's `allowedTypes`). */
+  $isUnselectable?: boolean;
 }>`
   height: 48px;
   user-select: none;
   background: ${({ theme, $isSelected }) =>
     $isSelected ? theme.colors.primary100 : theme.colors.neutral0};
-  cursor: ${({ $isMovePending, $isBusy, $isInvalidDropTarget }) => {
+  cursor: ${({ $isMovePending, $isBusy, $isInvalidDropTarget, $isUnselectable }) => {
     if ($isMovePending || $isBusy) {
       return 'wait';
     }
 
-    return $isInvalidDropTarget ? 'not-allowed' : 'pointer';
+    return $isInvalidDropTarget || $isUnselectable ? 'not-allowed' : 'pointer';
   }};
-  opacity: ${({ $isDragging, $isBusy }) => ($isDragging || $isBusy ? 0.4 : 1)};
+  opacity: ${({ $isDragging, $isBusy, $isUnselectable }) =>
+    $isDragging || $isBusy || $isUnselectable ? 0.4 : 1};
   pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
 
   ${({ $isValidDropTarget, theme }) =>
@@ -161,6 +162,19 @@ const StyledTr = styled.tr<{
   }
 `;
 
+// The trailing actions column ("..." menu), sized by name rather than as the
+// last column: where the column is hidden (the Content Manager asset picker),
+// the last column is the name or the size, which must not shrink to this.
+const ActionsTd = styled(StyledTd)`
+  width: 5.6rem;
+  white-space: nowrap;
+`;
+
+const ActionsTh = styled(StyledTh)`
+  width: 5.6rem;
+  white-space: nowrap;
+`;
+
 // Leading checkbox column. Fixed narrow width so it holds its own column under
 // the mobile fixed table-layout (a 1% width would collapse and let the name
 // cell's preview overlap the control).
@@ -170,6 +184,15 @@ const CheckboxTd = styled(StyledTd)`
 `;
 
 const CheckboxTh = styled(StyledTh)`
+  width: 5.6rem;
+  white-space: nowrap;
+`;
+
+// The checkbox column's header when there is no select-all (a single-value
+// picker): a plain cell, since as an empty `RawTh` the design system's grid
+// would make the cell itself a Tab stop.
+const EmptyCheckboxTh = styled.th.attrs({ role: 'gridcell' })`
+  ${headerCellStyles}
   width: 5.6rem;
   white-space: nowrap;
 `;
@@ -253,13 +276,14 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
-  const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { isEnabled, isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
+  const { showItemActions } = useListSettings();
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
   const openContextMenu = useItemContextMenuTrigger();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
+  const selectability = getSelectability(key);
 
   // Caption and alternative text apply to every file type — same "empty =
   // falsy" rule as the drawer's per-field warning.
@@ -329,6 +353,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       $isMovePending={isMovePending}
       $isBusy={busyMessage !== null}
       $isSelected={selected}
+      $isUnselectable={selectability === 'disabled'}
       tabIndex={0}
       role="row"
       // Right-click opens this asset's own actions, or the selection's when it
@@ -349,23 +374,26 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
         }
       }}
     >
-      {/* No checkbox without the update permission (nothing selectable can be
-          acted on). Shown at every viewport width otherwise. */}
-      {canUpdate && (
+      {/* The column exists whenever selection is on (at every viewport width);
+          a row outside the selection keeps an empty cell so columns line up. */}
+      {isEnabled && (
         <CheckboxTd {...ASSET_ITEM_CONTROL_PROPS} onClick={stopRowEvent} onKeyDown={stopRowEvent}>
-          <Flex>
-            <Checkbox
-              checked={selected}
-              onClick={handleCheckboxClick}
-              aria-label={formatMessage(
-                {
-                  id: getTranslationKey('list.table.row.select'),
-                  defaultMessage: 'Select {name}',
-                },
-                { name: asset.name }
-              )}
-            />
-          </Flex>
+          {selectability !== 'hidden' && (
+            <Flex>
+              <Checkbox
+                checked={selected}
+                disabled={selectability === 'disabled'}
+                onClick={handleCheckboxClick}
+                aria-label={formatMessage(
+                  {
+                    id: getTranslationKey('list.table.row.select'),
+                    defaultMessage: 'Select {name}',
+                  },
+                  { name: asset.name }
+                )}
+              />
+            </Flex>
+          )}
         </CheckboxTd>
       )}
       <NameTd>
@@ -422,16 +450,18 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
           the menu trigger (Enter would open the details drawer). */}
-      <StyledTd
-        {...ASSET_ITEM_CONTROL_PROPS}
-        onClick={stopRowEvent}
-        onKeyDown={stopRowEvent}
-        onPointerDown={stopRowEvent}
-      >
-        <Flex justifyContent="flex-end">
-          <AssetActionsMenu asset={asset} dragData={dragData} />
-        </Flex>
-      </StyledTd>
+      {showItemActions && (
+        <ActionsTd
+          {...ASSET_ITEM_CONTROL_PROPS}
+          onClick={stopRowEvent}
+          onKeyDown={stopRowEvent}
+          onPointerDown={stopRowEvent}
+        >
+          <Flex justifyContent="flex-end">
+            <AssetActionsMenu asset={asset} dragData={dragData} />
+          </Flex>
+        </ActionsTd>
+      )}
     </StyledTr>
   );
 };
@@ -451,8 +481,8 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
   const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
-  const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { isEnabled, isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
+  const { showItemActions } = useListSettings();
   const openContextMenu = useItemContextMenuTrigger();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
@@ -546,21 +576,24 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
         }
       }}
     >
-      {canUpdate && (
+      {isEnabled && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
-          <Flex>
-            <Checkbox
-              checked={isSelected(key)}
-              onClick={handleCheckboxClick}
-              aria-label={formatMessage(
-                {
-                  id: getTranslationKey('list.table.row.select'),
-                  defaultMessage: 'Select {name}',
-                },
-                { name: folder.name }
-              )}
-            />
-          </Flex>
+          {getSelectability(key) !== 'hidden' && (
+            <Flex>
+              <Checkbox
+                checked={isSelected(key)}
+                disabled={getSelectability(key) === 'disabled'}
+                onClick={handleCheckboxClick}
+                aria-label={formatMessage(
+                  {
+                    id: getTranslationKey('list.table.row.select'),
+                    defaultMessage: 'Select {name}',
+                  },
+                  { name: folder.name }
+                )}
+              />
+            </Flex>
+          )}
         </CheckboxTd>
       )}
       <NameTd>
@@ -604,11 +637,13 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
           the menu trigger (Enter would navigate into the folder). */}
-      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
-        <Flex justifyContent="flex-end">
-          <FolderActionsMenu folder={folder} dragData={dragData} />
-        </Flex>
-      </StyledTd>
+      {showItemActions && (
+        <ActionsTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
+          <Flex justifyContent="flex-end">
+            <FolderActionsMenu folder={folder} dragData={dragData} />
+          </Flex>
+        </ActionsTd>
+      )}
     </FolderTr>
   );
 };
@@ -635,20 +670,22 @@ export const AssetsTable = ({
 }: AssetsTableProps) => {
   const isDesktop = useIsDesktop();
   const { formatMessage } = useIntl();
-  const { selectedKeys, selectAll, clear } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { isEnabled, canSelectAll, selectedKeys, selectAll, deselectAll, getSelectability } =
+    useAssetSelection();
+  const { showItemActions } = useListSettings();
   const { trackUsage } = useTracking();
 
   // Below the desktop breakpoint only the name (and actions) column is kept —
   // the date/size columns don't fit; size moves under the name as a subtitle.
-  const visibleHeaders = isDesktop
-    ? TABLE_HEADERS
-    : TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions');
+  const visibleHeaders = (
+    isDesktop
+      ? TABLE_HEADERS
+      : TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions')
+  ).filter((h) => showItemActions || h.name !== 'actions');
 
   // The checkbox column is a dedicated structural column (not part of
-  // TABLE_HEADERS). Hidden only without the update permission — every bulk
-  // action needs `assets.update`, so a read-only user has nothing to select for.
-  const showCheckboxColumn = canUpdate;
+  // TABLE_HEADERS), shown whenever selection is on.
+  const showCheckboxColumn = isEnabled;
   const colCount = visibleHeaders.length + (showCheckboxColumn ? 1 : 0);
 
   const totalRows = folders.length + assets.length;
@@ -657,14 +694,17 @@ export const AssetsTable = ({
   // Range selection follows it.
   const orderedItemKeys: ItemKey[] =
     renderedKeys ?? buildRenderedKeys({ folders, assets, mixedItems });
-  const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, orderedItemKeys);
+  // Select-all only reaches what can be selected: folders in the picker, or
+  // assets outside its `allowedTypes`, are left out.
+  const selectableKeys = orderedItemKeys.filter((key) => getSelectability(key) === 'enabled');
+  const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, selectableKeys);
 
   const handleSelectAll = () => {
     if (allSelected) {
-      clear();
+      deselectAll(selectableKeys);
     } else {
       trackUsage('didSelectAllMediaLibraryElements');
-      selectAll(orderedItemKeys);
+      selectAll(selectableKeys);
     }
   };
 
@@ -678,12 +718,12 @@ export const AssetsTable = ({
     <StyledTable colCount={colCount} rowCount={(mixedItems ? mixedItems.length : totalRows) + 1}>
       <StyledThead>
         <RawTr>
-          {showCheckboxColumn && (
+          {showCheckboxColumn && canSelectAll && (
             <CheckboxTh>
               <Flex>
                 <Checkbox
                   checked={isIndeterminate ? 'indeterminate' : allSelected}
-                  disabled={orderedItemKeys.length === 0}
+                  disabled={selectableKeys.length === 0}
                   onCheckedChange={handleSelectAll}
                   aria-label={formatMessage({
                     id: getTranslationKey('list.table.header.select-all'),
@@ -693,20 +733,21 @@ export const AssetsTable = ({
               </Flex>
             </CheckboxTh>
           )}
+          {showCheckboxColumn && !canSelectAll && <EmptyCheckboxTh />}
           {visibleHeaders.map((header) => {
             const tableHeaderLabel = formatMessage(header.label);
             const isVisuallyHidden = 'isVisuallyHidden' in header && header.isVisuallyHidden;
 
             if (isVisuallyHidden) {
               return (
-                <StyledTh key={header.name} $flex={header.name === 'name'}>
+                <ActionsTh key={header.name}>
                   <VisuallyHidden>
                     {formatMessage({
                       id: getTranslationKey('table.header.actions'),
                       defaultMessage: 'actions',
                     })}
                   </VisuallyHidden>
-                </StyledTh>
+                </ActionsTh>
               );
             }
 
