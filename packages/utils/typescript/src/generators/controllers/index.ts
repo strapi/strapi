@@ -2,6 +2,8 @@ import {
   collectAppSources,
   emitRegistryDefinitions,
   filterRegisteredSources,
+  findTypeExports,
+  generateContractHelperDefinition,
   generateInstanceHelperDefinition,
   instanceTypeOf,
 } from '../common/sources';
@@ -10,6 +12,8 @@ import type { GeneratorOptions } from '../utils';
 const REGISTRY = 'AppControllers';
 // Same helper as the services generator's ServiceInstance
 const INSTANCE_HELPER = 'ControllerInstance';
+const CONTRACT_EXPORT = 'ControllerContract';
+const CONTRACT_HELPER = 'ControllerContractOf';
 
 const NO_CONTROLLER_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any controllers yet.
@@ -29,13 +33,15 @@ export {};
  *     namespace Registries {
  *       interface AppControllers {
  *         'api::<api>.<controller>': ControllerInstance<typeof import('<relative path to the source>')>;
+ *         'api::<api>.<controller>': ControllerContractOf<import('<relative path to the source>').ControllerContract>;
  *       }
  *     }
  *   }
  * }
  *
- * A JS source registers as `unknown`: without `allowJs` its import is an error type. So does a
- * controller module typed `any` or whose import no longer resolves.
+ * A controller whose module exports a `ControllerContract` type registers that contract; any other
+ * controller registers the type its default export provides. A JS source registers as `unknown`:
+ * without `allowJs` its import is an error type. So do a controller module and a contract typed `any`.
  */
 export const generateControllersDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
@@ -58,6 +64,12 @@ export const generateControllersDefinitions = async (
 
   logger.debug(`Found ${controllersDefinitions.length} controllers.`);
 
+  const contract = {
+    exportName: CONTRACT_EXPORT,
+    helper: CONTRACT_HELPER,
+    uids: await findTypeExports(controllersDefinitions, CONTRACT_EXPORT, logger),
+  };
+
   if (controllersDefinitions.length === 0) {
     return { output: NO_CONTROLLER_PLACEHOLDER_COMMENT, stats: {} };
   }
@@ -69,9 +81,17 @@ export const generateControllersDefinitions = async (
         INSTANCE_HELPER,
         '*\n * Type of the controller exposed by a controller module: the return type of its default export\n * when it is a factory, the default export itself otherwise.\n '
       ),
+      ...(contract.uids.size > 0
+        ? [
+            generateContractHelperDefinition(
+              CONTRACT_HELPER,
+              '*\n * Contract a controller module exports as `ControllerContract`, `unknown` when it is typed `any`.\n '
+            ),
+          ]
+        : []),
     ],
     controllersDefinitions,
-    instanceTypeOf(INSTANCE_HELPER, logger)
+    instanceTypeOf(INSTANCE_HELPER, logger, contract)
   );
 
   return { output, stats: {} };

@@ -359,6 +359,24 @@ declare global {
 
 `controllers.d.ts` follows the same rules for `src/api/<api>/controllers/*.{ts,js}`, with its own `ControllerInstance` helper so that each file stands alone. A `createCoreController(...)` export registers the controller the factory returns: the content-type actions (`find`, `findOne`, ...) and the custom actions. `strapi.controller('api::article.article')` and `strapi.api('article').controller('article')` then resolve to that type, and an unregistered uid resolves to `unknown`.
 
+A controller module can export its contract as `ControllerContract`, which the generator registers through a `ControllerContractOf` helper, with the same rules as `ServiceContract`. `satisfies Core.ControllerFactory<uid>` then checks the factory against it, including a `createCoreController(...)` factory, whose missing custom actions are reported:
+
+```ts title="my-app/src/api/article/controllers/article.ts"
+import { factories, type Core } from '@strapi/strapi';
+
+export type ControllerContract = Core.CoreAPI.Controller.ContentType<'api::article.article'> & {
+  titles: Core.ControllerHandler<string[]>;
+};
+
+export default factories.createCoreController('api::article.article', ({ strapi }) => ({
+  async titles() {
+    return strapi.service('api::article.article').findPublishedTitles();
+  },
+})) satisfies Core.ControllerFactory<'api::article.article'>;
+```
+
+With strict types disabled, `Core.ControllerFactory` accepts a factory that returns any object, as develop has no controller factory type.
+
 `policies.d.ts` walks `src/policies/*.{ts,js}` (`global::<name>`, names kept as is, like the global policies loader) and `src/api/<api>/policies/*.{ts,js}` (`api::<api>.<name>`, kebab-cased), with its own `PolicyConfig` helper. The registered value is the config the policy accepts: the second parameter of its handler, for a bare handler and for `{ handler, validator }`. A handler without that parameter registers `undefined`, so its name alone is a valid reference; an untyped (`any`) config, a module without a default export and a JS policy, whose import does not resolve without `allowJs`, register `unknown`. Typed route configs (`Core.RouterInputFor`, `Core.RouteConfigFor`) then accept these policies and check their `config`, next to the policies bundled packages register in `PackagePolicies`, and `strapi.policy('global::is-owner')` resolves to a policy that receives that config.
 
 Middlewares follow the same model in `Strapi.Registries.PackageMiddlewares` and `AppMiddlewares`: the registered value is the config the factory accepts as its first parameter, `undefined` when it takes none. Bundled packages register theirs (`strapi::*`, `admin::*`, `plugin::email.rateLimit`, ...), so `strapi.middleware('strapi::cors')` resolves to a factory that receives the CORS config. Typed route configs accept registered names (alone only when the config is optional), `{ name, config }` checked against the registered config, inline handlers and `{ resolve, config }` entries, and reject unregistered names.
