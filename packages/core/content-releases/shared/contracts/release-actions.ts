@@ -2,6 +2,9 @@ import type { Schema, Modules, UID, Struct, Data } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
+import type { ReleaseActionFilter } from '../../server/src/constants';
+
+export type { ReleaseActionFilter };
 
 export type ReleaseActionEntryType = 'single-types' | 'collection-types';
 
@@ -136,6 +139,7 @@ export declare namespace GetReleaseActions {
     };
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
       groupBy?: ReleaseActionGroupBy;
+      filter?: ReleaseActionFilter;
     };
   }
 

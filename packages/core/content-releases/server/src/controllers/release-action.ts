@@ -70,11 +70,14 @@ const releaseActionController = {
     ctx.query.sort = ctx.query.groupBy === 'action' ? 'type' : ctx.query.groupBy;
     delete ctx.query.groupBy;
 
-    const query = await permissionsManager.sanitizeQuery(ctx.query);
+    // Not a query parameter of the model: kept out of the sanitizer
+    const { filter, ...listQuery } = ctx.query as NonNullable<GetReleaseActions.Request['query']>;
+    const query = await permissionsManager.sanitizeQuery(listQuery);
 
     const releaseActionService = getService('release-action', { strapi });
     const { results, pagination } = await releaseActionService.findPage(releaseId, {
       ...query,
+      filter,
     });
 
     /**

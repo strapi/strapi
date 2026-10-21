@@ -719,6 +719,94 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.data.publish.length).toBe(2);
       expect(res.body.data.unpublish.length).toBe(1);
     });
+
+    describe('filtered', () => {
+      const findFiltered = async (releaseId, filter: string) => {
+        const res = await rq({
+          method: 'GET',
+          url: `/content-releases/${releaseId}/actions`,
+          qs: { filter },
+        });
+        expect(res.statusCode).toBe(200);
+
+        const actions = Object.values(res.body.data).flat() as { entryDocumentId: string }[];
+
+        return {
+          documentIds: actions.map((action) => action.entryDocumentId).sort(),
+          total: res.body.meta.pagination.total,
+        };
+      };
+
+      test('by readiness, on a planned release', async () => {
+        const readyId = await createProduct({ valid: true });
+        const notReadyId = await createProduct({ valid: false });
+        // An unpublish needs no checks: it is always ready
+        const unpublishId = await createProduct({ valid: false });
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: readyId },
+          { documentId: notReadyId },
+          { documentId: unpublishId, type: 'unpublish' },
+        ]);
+
+        expect(await findFiltered(release.id, 'ready')).toEqual({
+          documentIds: [readyId, unpublishId].sort(),
+          total: 2,
+        });
+        expect(await findFiltered(release.id, 'notReady')).toEqual({
+          documentIds: [notReadyId],
+          total: 1,
+        });
+        // Nothing ran yet, so nothing was skipped
+        expect(await findFiltered(release.id, 'skipped')).toEqual({ documentIds: [], total: 0 });
+      });
+
+      test('by what the run did, on a release that ran', async () => {
+        const publishedId = await createProduct({ valid: true });
+        const skippedId = await createProduct({ valid: false });
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: publishedId },
+          { documentId: skippedId },
+        ]);
+        expect((await publishManually(release.id)).statusCode).toBe(200);
+
+        expect(await findFiltered(release.id, 'released')).toEqual({
+          documentIds: [publishedId],
+          total: 1,
+        });
+        expect(await findFiltered(release.id, 'skipped')).toEqual({
+          documentIds: [skippedId],
+          total: 1,
+        });
+      });
+
+      test('an entry the run never recorded counts as skipped', async () => {
+        const documentId = await createProduct({ valid: true });
+        const release = await createReleaseWithActions('allow_partial', [{ documentId }]);
+        // As a release frozen before outcomes existed: released, with no outcome on its entries
+        await strapi.db.query('plugin::content-releases.release').update({
+          where: { id: release.id },
+          data: { releasedAt: new Date(), status: 'failed' },
+        });
+
+        expect(await findFiltered(release.id, 'skipped')).toEqual({
+          documentIds: [documentId],
+          total: 1,
+        });
+        expect(await findFiltered(release.id, 'released')).toEqual({ documentIds: [], total: 0 });
+      });
+
+      test('rejects an unknown filter', async () => {
+        const release = (await createRelease()).body.data;
+
+        const res = await rq({
+          method: 'GET',
+          url: `/content-releases/${release.id}/actions`,
+          qs: { filter: 'published' },
+        });
+
+        expect(res.statusCode).toBe(400);
+      });
+    });
   });
 
   describe('Edit Release Action', () => {
@@ -3070,6 +3158,40 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
           totalSkippedEntries: null,
         }),
       ]);
+    });
+
+    test('filters by status, release condition and schedule', async () => {
+      const blocked = await createReleaseWithActions('all_or_nothing', [
+        { documentId: await createProduct({ valid: false }) },
+      ]);
+      const empty = (await createRelease({ releaseCondition: 'allow_partial' })).body.data;
+      const scheduled = (
+        await createRelease({
+          releaseCondition: 'allow_partial',
+          scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          timezone: 'Europe/Paris',
+        })
+      ).body.data;
+      // Releases from earlier tests stay listed: only read these three
+      const ids = [blocked.id, empty.id, scheduled.id];
+      const findIds = async (filters: Record<string, unknown>) => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-releases',
+          qs: { filters: { id: { $in: ids }, ...filters } },
+        });
+        expect(res.statusCode).toBe(200);
+
+        return res.body.data.map((release) => release.id).sort();
+      };
+
+      expect(await findIds({ status: { $in: ['blocked'] } })).toEqual([blocked.id]);
+      expect(await findIds({ releaseCondition: 'allow_partial' })).toEqual(
+        [empty.id, scheduled.id].sort()
+      );
+      expect(await findIds({ scheduledAt: { $null: true } })).toEqual(
+        [blocked.id, empty.id].sort()
+      );
     });
 
     test('Find many releases with an entry attached', async () => {

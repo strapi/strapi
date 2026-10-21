@@ -10,6 +10,7 @@ import {
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
 } from '../constants';
+import type { ReleaseActionFilter } from '../constants';
 import { emitAuditOnCommit } from '../audit-logs';
 import { AlreadyOnReleaseError } from './validation';
 
@@ -76,6 +77,19 @@ type LockedRelease = Pick<Release, 'id' | 'name' | 'releasedAt'>;
 
 // Any other outcome, or none, means the run skipped the entry
 const RELEASED_OUTCOMES = ['published', 'unpublished'] satisfies ReleaseAction['outcome'][];
+// Releases that ran before outcomes existed recorded none
+const SKIPPED_OUTCOME_WHERE = {
+  $or: [{ outcome: null }, { outcome: { $notIn: RELEASED_OUTCOMES } }],
+};
+
+const ACTION_FILTER_WHERE: Record<ReleaseActionFilter, object> = {
+  // An unpublish needs no checks
+  ready: { $or: [{ type: 'unpublish' }, { isEntryValid: true }] },
+  notReady: { type: 'publish', isEntryValid: false },
+  released: { outcome: { $in: RELEASED_OUTCOMES } },
+  // Only a release that ran skipped anything
+  skipped: { release: { releasedAt: { $notNull: true } }, ...SKIPPED_OUTCOME_WHERE },
+};
 
 const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getLocalesDataForActions = async () => {
@@ -408,8 +422,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         .findMany({
           where: {
             release: { id: releaseId, releasedAt: { $notNull: true } },
-            // Releases that ran before outcomes existed recorded none
-            $or: [{ outcome: null }, { outcome: { $notIn: RELEASED_OUTCOMES } }],
+            ...SKIPPED_OUTCOME_WHERE,
             ...(actionIds && { id: { $in: actionIds } }),
           },
           orderBy: { id: 'asc' },
@@ -470,14 +483,15 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
+      const { filter, ...params } = query ?? {};
+      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, params);
       const { results: actions, pagination } = await strapi.db
         .query(RELEASE_ACTION_MODEL_UID)
         .findPage({
           ...dbQuery,
-          where: {
-            release: releaseId,
-          },
+          where: filter
+            ? { $and: [{ release: releaseId }, ACTION_FILTER_WHERE[filter]] }
+            : { release: releaseId },
         });
 
       // For each contentType on the release, we create a custom populate object for nested relations

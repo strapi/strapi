@@ -49,6 +49,22 @@ export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'a
   actions: ReleaseAction[];
 }
 
+// A release field's value, or a condition on it
+type ReleaseFieldFilter<T> =
+  | T
+  | {
+      $eq?: T;
+      $ne?: T;
+      $in?: T[];
+      $notIn?: T[];
+      $lt?: T;
+      $lte?: T;
+      $gt?: T;
+      $gte?: T;
+      $null?: boolean;
+      $notNull?: boolean;
+    };
+
 /**
  * GET /content-releases/ - Get releases paginated
  */
@@ -57,7 +73,17 @@ export declare namespace GetReleases {
     state: {
       userAbility: {};
     };
-    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
+    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
+      filters?: {
+        status?: ReleaseFieldFilter<ReleaseStatus>;
+        releaseCondition?: ReleaseFieldFilter<ReleaseCondition>;
+        scheduledAt?: ReleaseFieldFilter<string>;
+        releasedAt?: ReleaseFieldFilter<string>;
+        failureReason?: ReleaseFieldFilter<ReleaseFailureReason>;
+      };
+      // e.g. 'updatedAt:desc'
+      sort?: string | string[];
+    };
   }
 
   export interface Response {

@@ -16,6 +16,10 @@ export const PLANNED_ACTION_WHERE = {
   release: { id: { $notNull: true }, releasedAt: { $null: true } },
 };
 
+// What the entries of a release can be narrowed to: readiness while planned, the run's result after
+export const RELEASE_ACTION_FILTERS = ['ready', 'notReady', 'released', 'skipped'] as const;
+export type ReleaseActionFilter = (typeof RELEASE_ACTION_FILTERS)[number];
+
 export const RELEASE_FAILURE_REASONS = ['missed_schedule', 'failed_before_upgrade'] as const;
 export type ReleaseFailureReason = (typeof RELEASE_FAILURE_REASONS)[number];
 

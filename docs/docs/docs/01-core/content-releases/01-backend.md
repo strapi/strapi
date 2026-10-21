@@ -57,6 +57,10 @@ packages/core/content-releases/server/src/routes/release.ts
   {
     page: number;
     pageSize: number;
+    // Any of: status, releaseCondition, scheduledAt, releasedAt, failureReason,
+    // e.g. filters[status][$in][0]=failed or filters[scheduledAt][$null]=true
+    filters?: Record<string, unknown>;
+    sort?: string; // e.g. 'updatedAt:desc'
   }
   ```
 
@@ -151,11 +155,16 @@ packages/core/content-releases/server/src/routes/release.ts
 
 - method: `GET`
 - endpoint: `/content-releases/:releaseId/actions`
-- body:
+- params:
   ```ts
   {
     page: number;
     pageSize: number;
+    groupBy?: 'contentType' | 'action' | 'locale';
+    // ready: publishable now, and every unpublish; notReady: publish entries that aren't.
+    // released: published or unpublished by the run; skipped: anything else in a release that ran,
+    // including entries with no outcome (a release that ran before outcomes existed)
+    filter?: 'ready' | 'notReady' | 'released' | 'skipped';
   }
   ```
 

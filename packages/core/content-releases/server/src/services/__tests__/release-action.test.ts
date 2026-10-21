@@ -165,6 +165,54 @@ describe('Release Action service', () => {
         'No release found for id 1'
       );
     });
+
+    describe('a filter', () => {
+      const setup = () => {
+        const findPage = jest
+          .fn()
+          .mockResolvedValue({ results: [], pagination: { page: 1, pageSize: 10 } });
+        const transformer = queryParams.createTransformer({
+          getModel: () => ({ uid: 'plugin::content-releases.release-action', attributes: {} }),
+        } as any);
+        const strapiMock = {
+          ...baseStrapiMock,
+          get: () => ({ transform: transformer.transformQueryParams }),
+          db: {
+            ...baseStrapiMock.db,
+            query: jest.fn().mockReturnValue({
+              findOne: jest.fn().mockResolvedValue({ id: 1 }),
+              findPage,
+            }),
+          },
+        };
+
+        // @ts-expect-error Ignore missing properties
+        const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+
+        return { releaseActionService, findPage };
+      };
+
+      it('narrows the actions of the release, never the release itself', async () => {
+        const { releaseActionService, findPage } = setup();
+
+        await releaseActionService.findPage(1, { filter: 'notReady', page: 2 });
+
+        const [params] = findPage.mock.calls[0];
+        expect(params).not.toHaveProperty('filter');
+        expect(params.where).toEqual({
+          $and: [{ release: 1 }, { type: 'publish', isEntryValid: false }],
+        });
+        expect(params.page).toBe(2);
+      });
+
+      it('lists every action of the release without one', async () => {
+        const { releaseActionService, findPage } = setup();
+
+        await releaseActionService.findPage(1, {});
+
+        expect(findPage.mock.calls[0][0].where).toEqual({ release: 1 });
+      });
+    });
   });
 
   describe('create', () => {
