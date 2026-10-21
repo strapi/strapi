@@ -129,7 +129,8 @@ export class AppProject extends Project {
   /**
    * Returns an array of allowed file paths for a Strapi application
    *
-   * The resulting paths include app default files and the root package.json file.
+   * The resulting paths include app default files, the root package.json file and the root
+   * tsconfig.json file.
    */
   private static get paths() {
     const allowedRootPaths = formatGlobCollectionPattern(constants.PROJECT_APP_ALLOWED_ROOT_PATHS);
@@ -142,6 +143,8 @@ export class AppProject extends Project {
       `!./**/dist/**/*`,
       // Root package.json file
       constants.PROJECT_PACKAGE_JSON,
+      // Root tsconfig.json file (TypeScript apps only)
+      constants.PROJECT_TSCONFIG_JSON,
     ];
   }
 

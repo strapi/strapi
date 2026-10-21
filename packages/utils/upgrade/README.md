@@ -80,6 +80,8 @@ Note that "short-description-of-action" will be converted to text displayed to t
 
 Your transform will be called for every json file in a user's project, and you must return the json object (modified or not) at the end to be passed to the next transform.
 
+For an application, the scanned json files are the root `package.json`, the root `tsconfig.json`, and the json files in `src`, `config` and `public`. Files are parsed as JSONC, so comments and trailing commas are allowed. When a transform changes a file, only the changed properties are written back: comments and formatting of the other parts stay as they are.
+
 Here is an example JSON Transform script:
 
 ```typescript

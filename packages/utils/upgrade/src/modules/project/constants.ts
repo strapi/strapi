@@ -1,5 +1,7 @@
 export const PROJECT_PACKAGE_JSON = 'package.json';
 
+export const PROJECT_TSCONFIG_JSON = 'tsconfig.json';
+
 export const PROJECT_APP_ALLOWED_ROOT_PATHS = ['src', 'config', 'public'];
 
 export const PROJECT_PLUGIN_ALLOWED_ROOT_PATHS = ['admin', 'server'];

@@ -50,7 +50,8 @@
   "files": [
     "bin",
     "dist",
-    "resources"
+    "resources",
+    "!resources/**/__tests__"
   ],
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
@@ -74,6 +75,7 @@
     "fast-glob": "3.3.2",
     "fs-extra": "11.3.4",
     "jscodeshift": "17.3.0",
+    "jsonc-parser": "3.3.1",
     "lodash": "4.18.1",
     "memfs": "4.68.1",
     "ora": "5.4.1",

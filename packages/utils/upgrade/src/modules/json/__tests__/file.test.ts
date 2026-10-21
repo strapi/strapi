@@ -36,6 +36,29 @@ describe('File (json)', () => {
       expect(json).toStrictEqual(obj);
     });
 
+    test('Reading a JSONC file (comments, trailing commas) returns a valid JSON object', async () => {
+      const filepath = path.join(cwd, 'tsconfig.json');
+
+      vol.fromJSON(
+        {
+          [filepath]: '{\n  // comment\n  "foo": "bar", /* block */\n  "bar": { "baz": 42, },\n}\n',
+        },
+        cwd
+      );
+
+      const json = await readJSON(filepath);
+
+      expect(json).toStrictEqual(obj);
+    });
+
+    test('Reading an invalid JSON file throws', async () => {
+      const filepath = path.join(cwd, 'a.json');
+
+      vol.fromJSON({ [filepath]: '{ "foo": ' }, cwd);
+
+      await expect(() => readJSON(filepath)).rejects.toThrowError(SyntaxError);
+    });
+
     test(`Reading a JSON file which doesn't exist`, async () => {
       vol.fromJSON({}, cwd);
 
@@ -60,10 +83,53 @@ describe('File (json)', () => {
 
       const result = await readJSON(filepath);
 
-      expect(fse.readFile).toHaveBeenCalledTimes(2);
+      // saveJSON reads the existing file to keep its comments and formatting
+      expect(fse.readFile).toHaveBeenCalledTimes(3);
       expect(fse.writeFile).toHaveBeenCalledTimes(1);
       expect(result).toStrictEqual(updated);
       expect(current).not.toStrictEqual(updated);
+    });
+
+    test('saveJSON keeps the comments and formatting of an existing file', async () => {
+      const filepath = path.join(cwd, 'tsconfig.json');
+      const source = [
+        '{',
+        '  "compilerOptions": {',
+        '    "module": "CommonJS",',
+        '    "moduleResolution": "Node",',
+        '    "strict": true',
+        '  },',
+        '  "include": [',
+        '    // Include root files',
+        '    "./"',
+        '  ]',
+        '}',
+        '',
+      ].join('\n');
+
+      vol.fromJSON({ [filepath]: source }, cwd);
+
+      await saveJSON(filepath, {
+        compilerOptions: { module: 'CommonJS', strict: true, outDir: 'dist' },
+        include: ['./'],
+      });
+
+      expect(vol.readFileSync(filepath).toString()).toBe(
+        [
+          '{',
+          '  "compilerOptions": {',
+          '    "module": "CommonJS",',
+          '    "strict": true,',
+          '    "outDir": "dist"',
+          '  },',
+          '  "include": [',
+          '    // Include root files',
+          '    "./"',
+          '  ]',
+          '}',
+          '',
+        ].join('\n')
+      );
     });
 
     test('saveJSON can create a new file', async () => {
