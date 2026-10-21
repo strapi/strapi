@@ -1,7 +1,13 @@
-import { getChildrenMaxDepth, getComponentDepth } from '../getMaxDepth';
+import {
+  getChildrenMaxDepth,
+  getComponentDepth,
+  getDzDepth,
+  getMaxDownwardDzDepth,
+} from '../getMaxDepth';
 
 import type { ComponentWithChildren } from '../../components/DataManager/utils/retrieveComponentsThatHaveComponents';
 import type { NestedComponent } from '../../components/DataManager/utils/retrieveNestedComponents';
+import type { Components } from '../../types';
 
 const componentsWithChildComponents: Array<ComponentWithChildren> = [
   {
@@ -138,6 +144,125 @@ describe('Component Depth Calculations', () => {
       expect(getComponentDepth('basic.nested-compo1', nestedComponents)).toEqual(1);
       expect(getComponentDepth('basic.nested-compo4', nestedComponents)).toEqual(4);
       expect(getComponentDepth('basic.nested-compo6', nestedComponents)).toEqual(6);
+    });
+  });
+
+  describe('getDzDepth', () => {
+    it('should return 0 for a component not in the list', () => {
+      expect(getDzDepth('unknown.component', [])).toEqual(0);
+    });
+
+    it('should return 0 for a component nested only via component attributes', () => {
+      const components: Array<NestedComponent> = [
+        {
+          component: 'basic.child',
+          uidsOfAllParents: ['basic.parent'],
+          dzParentUids: [],
+        },
+      ];
+      expect(getDzDepth('basic.child', components)).toEqual(0);
+    });
+
+    it('should return 1 for a component directly inside a DZ', () => {
+      // ComponentA -> (dz) -> ComponentB
+      const components: Array<NestedComponent> = [
+        {
+          component: 'basic.comp-b',
+          uidsOfAllParents: ['basic.comp-a'],
+          dzParentUids: ['basic.comp-a'],
+        },
+      ];
+      expect(getDzDepth('basic.comp-b', components)).toEqual(1);
+    });
+
+    it('should propagate DZ depth through component edges', () => {
+      // ComponentA -> (dz) -> ComponentB -> (component) -> ComponentC
+      // ComponentC's DZ depth = 1 (inherits B's DZ nesting)
+      const components: Array<NestedComponent> = [
+        {
+          component: 'basic.comp-b',
+          uidsOfAllParents: ['basic.comp-a'],
+          dzParentUids: ['basic.comp-a'],
+        },
+        {
+          component: 'basic.comp-c',
+          uidsOfAllParents: ['basic.comp-b'],
+          dzParentUids: [],
+        },
+      ];
+      expect(getDzDepth('basic.comp-c', components)).toEqual(1);
+    });
+
+    it('should count multiple DZ transitions in a chain', () => {
+      // ComponentA -> (dz) -> ComponentB -> (dz) -> ComponentC
+      // ComponentC's DZ depth = 2
+      const components: Array<NestedComponent> = [
+        {
+          component: 'basic.comp-b',
+          uidsOfAllParents: ['basic.comp-a'],
+          dzParentUids: ['basic.comp-a'],
+        },
+        {
+          component: 'basic.comp-c',
+          uidsOfAllParents: ['basic.comp-b'],
+          dzParentUids: ['basic.comp-b'],
+        },
+      ];
+      expect(getDzDepth('basic.comp-c', components)).toEqual(2);
+    });
+  });
+
+  describe('getMaxDownwardDzDepth', () => {
+    const makeComp = (attrs: Array<Record<string, unknown>>) =>
+      ({ attributes: attrs }) as unknown as Components[string];
+
+    it('should return 0 for an unknown component', () => {
+      expect(getMaxDownwardDzDepth('unknown.comp' as any, {})).toEqual(0);
+    });
+
+    it('should return 0 for a component with no DZ attributes', () => {
+      const components = {
+        'basic.leaf': makeComp([{ type: 'text' }]),
+      } as unknown as Components;
+      expect(getMaxDownwardDzDepth('basic.leaf' as any, components)).toEqual(0);
+    });
+
+    it('should return 1 for a component that has a DZ with leaf children', () => {
+      // A -> (dz) -> [B]   where B has no DZ
+      const components = {
+        'basic.a': makeComp([{ type: 'dynamiczone', components: ['basic.b'] }]),
+        'basic.b': makeComp([{ type: 'text' }]),
+      } as unknown as Components;
+      expect(getMaxDownwardDzDepth('basic.a' as any, components)).toEqual(1);
+    });
+
+    it('should return 0 for a component whose child (via component attr) has no DZ', () => {
+      // A -> (component) -> B   where B has no DZ
+      const components = {
+        'basic.a': makeComp([{ type: 'component', component: 'basic.b' }]),
+        'basic.b': makeComp([{ type: 'text' }]),
+      } as unknown as Components;
+      expect(getMaxDownwardDzDepth('basic.a' as any, components)).toEqual(0);
+    });
+
+    it('should count DZ depth through component edges', () => {
+      // A -> (component) -> B -> (dz) -> [C]
+      const components = {
+        'basic.a': makeComp([{ type: 'component', component: 'basic.b' }]),
+        'basic.b': makeComp([{ type: 'dynamiczone', components: ['basic.c'] }]),
+        'basic.c': makeComp([{ type: 'text' }]),
+      } as unknown as Components;
+      expect(getMaxDownwardDzDepth('basic.a' as any, components)).toEqual(1);
+    });
+
+    it('should count chained DZ transitions', () => {
+      // A -> (dz) -> [B] -> (dz) -> [C]
+      const components = {
+        'basic.a': makeComp([{ type: 'dynamiczone', components: ['basic.b'] }]),
+        'basic.b': makeComp([{ type: 'dynamiczone', components: ['basic.c'] }]),
+        'basic.c': makeComp([{ type: 'text' }]),
+      } as unknown as Components;
+      expect(getMaxDownwardDzDepth('basic.a' as any, components)).toEqual(2);
     });
   });
 });
