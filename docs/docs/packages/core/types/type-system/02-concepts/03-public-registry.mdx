@@ -352,7 +352,7 @@ declare global {
 ```
 
 - The contract does not depend on the default export, so `satisfies Core.ServiceFactory<'api::article.article'>` checks the factory against it: a member with the wrong type, or a missing member, is reported at the factory. A member the factory returns outside the contract is not reported, and `strapi.service(uid)` callers do not see it.
-- A module without a `ServiceContract` export keeps the inferred type. Checking its factory against its own uid is then circular: TypeScript reports TS7022 and types the default export `any`, which is silent without `noImplicitAny`.
+- A module without a `ServiceContract` export keeps the inferred type. Checking its factory against its own uid is then circular. Whether TypeScript reports it depends on the order it checks files in: when it reaches a lookup of the uid first, such as in a controller that uses the service, it reports TS7022 and types the default export and the lookup `any`. Without `noImplicitAny`, that is silent.
 - The generator reads each source on its own, without a type checker: it finds `export type ServiceContract`, `export interface ServiceContract` and export specifiers such as `export type { ArticleContract as ServiceContract } from '../contract'`. It does not follow `export *`, and it skips JS sources.
 - A contract typed `any` registers `unknown`. A reference that no longer resolves, because the export was renamed after the generation or names a value, behaves as `any` until the next generation; `skipLibCheck` hides the TS2694 that the generated file reports.
 - Keep a shared contract file out of `services/` and `controllers/`: the API loader registers every file there, so `services/contract.ts` would register an `api::article.contract` service.

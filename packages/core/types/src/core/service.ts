@@ -63,9 +63,11 @@ export type ServiceFactoryUID = IsStrict extends false ? UID.Service : Registere
  * Type generation registers an application service with the `ServiceContract` type its module
  * exports (`types/generated/services.d.ts`), so the factory of that module can be checked against
  * its own UID. A module without that export registers the type its default export provides: a
- * factory checked against its own UID is then circular, and its type is implicitly `any` (TS7022,
- * silent without `noImplicitAny`). Keep a shared contract out of `services/` and `controllers/`: the
- * API loader registers every file there (`packages/core/core/src/loaders/apis.ts:91-102`).
+ * factory checked against its own UID is then circular. When the checker reaches a lookup of the UID
+ * before the factory, as in a controller that uses the service, the default export is implicitly
+ * `any` (TS7022, silent without `noImplicitAny`) and so is the lookup. Keep a shared contract out of
+ * `services/` and `controllers/`: the API loader registers every file there
+ * (`packages/core/core/src/loaders/apis.ts:91-102`).
  *
  * A hand-declared `AppServices` entry for the same UID must be the identical type: a different one
  * is a conflicting declaration (TS2717, hidden by `skipLibCheck`).
