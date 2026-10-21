@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "Node",
     "lib": ["ES2020"],
+    "types": ["node"],
     "target": "ES2019",
     "strict": true,
     "skipLibCheck": true,

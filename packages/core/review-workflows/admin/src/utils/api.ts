@@ -18,7 +18,7 @@ interface Query {
  * and appends them to the root of the query
  */
 type TransformedQuery<TQuery extends Query> = Omit<TQuery, 'plugins'> & {
-  [key: string]: string;
+  [key: string]: unknown;
 };
 
 /**
@@ -26,13 +26,14 @@ type TransformedQuery<TQuery extends Query> = Omit<TQuery, 'plugins'> & {
  * Creates a valid query params object for get requests
  * ie. plugins[18n][locale]=en becomes locale=en
  */
-const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery<TQuery> => {
-  if (!query) return query;
+const buildValidParams = (query: object): TransformedQuery<Query> => {
+  const q = query as Query;
+  if (!q) return q;
 
   // Extract pluginOptions from the query, they shouldn't be part of the URL
   const { plugins: _, ...validQueryParams } = {
-    ...query,
-    ...Object.values(query?.plugins ?? {}).reduce<Record<string, string>>(
+    ...q,
+    ...Object.values(q?.plugins ?? {}).reduce<Record<string, string>>(
       (acc, current) => Object.assign(acc, current),
       {}
     ),

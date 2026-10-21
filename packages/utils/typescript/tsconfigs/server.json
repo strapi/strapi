@@ -3,7 +3,6 @@
 
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "Node",
     "lib": ["ES2020"],
     "target": "ES2019",
 

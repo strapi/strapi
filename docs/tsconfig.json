@@ -3,8 +3,11 @@
 {
   "extends": "@docusaurus/tsconfig",
   "compilerOptions": {
-    // `paths` (`@site/*`) in `@docusaurus/tsconfig` resolve against the `baseUrl` set here.
-    "baseUrl": ".",
+    // TS6 deprecates `baseUrl` (set by `@docusaurus/tsconfig`): unset it and resolve `@site/*` from here.
+    "baseUrl": null,
+    "paths": {
+      "@site/*": ["./*"]
+    },
     "strict": true,
     "verbatimModuleSyntax": true,
     "types": []

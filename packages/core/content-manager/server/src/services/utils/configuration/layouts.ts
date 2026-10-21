@@ -72,24 +72,23 @@ function syncLayouts(configuration: any, schema: any) {
     const newRow: unknown[] = [];
 
     for (const el of row) {
-      if (!hasEditableAttribute(schema, el.name)) continue;
+      if (hasEditableAttribute(schema, el.name)) {
+        // Check if the field is a custom field with a custom size.
+        // If so, use the custom size instead of the type size
+        const { hasFieldSize } = getService('field-sizes');
+        const fieldType = hasFieldSize(schema.attributes[el.name].customField)
+          ? schema.attributes[el.name].customField
+          : schema.attributes[el.name].type;
 
-      // Check if the field is a custom field with a custom size.
-      // If so, use the custom size instead of the type size
-      const { hasFieldSize } = getService('field-sizes');
-      const fieldType = hasFieldSize(schema.attributes[el.name].customField)
-        ? schema.attributes[el.name].customField
-        : schema.attributes[el.name].type;
-
-      /* if the type of a field was changed (ex: string -> json) or a new field was added in the schema
-         and the new type doesn't allow the size of the previous type, append the field at the end of layouts
-      */
-      if (!isAllowedFieldSize(fieldType, el.size)) {
-        elementsToReAppend.push(el.name);
-        continue;
+        /* if the type of a field was changed (ex: string -> json) or a new field was added in the schema
+           and the new type doesn't allow the size of the previous type, append the field at the end of layouts
+        */
+        if (!isAllowedFieldSize(fieldType, el.size)) {
+          elementsToReAppend.push(el.name);
+        } else {
+          newRow.push(el);
+        }
       }
-
-      newRow.push(el);
     }
 
     if (newRow.length > 0) {

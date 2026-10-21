@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import { merge } from 'lodash';
 
+import { defaultIgnoreDeprecations } from '../utils/ignore-deprecations';
 import { reportDiagnostics } from '../utils/report-diagnostics';
 import { resolveConfigOptions } from '../utils/resolve-config-options';
 
@@ -18,7 +19,7 @@ export function run(tsConfigPath: string, configOptions: ConfigOptions = {}) {
   // Parse the tsconfig.json file & resolve the configuration options
   const { fileNames, options, projectReferences } = resolveConfigOptions(tsConfigPath);
 
-  const compilerOptions = merge(options, configOptions.options);
+  const compilerOptions = merge(options, defaultIgnoreDeprecations(options), configOptions.options);
 
   if (ignoreDiagnostics) {
     Object.assign(compilerOptions, { noEmit: false, noEmitOnError: false });
