@@ -1,16 +1,13 @@
 import os from 'os';
 import type ts from 'typescript';
 import type { Logger } from './logger';
+import { lazyInit } from './lazy-init';
 
 // Lazy: defer `typescript` (~115 ms) until a CLI command actually loads tsconfig
-let lazyTs: typeof ts | undefined;
-const tsLib = (): typeof ts => {
-  if (!lazyTs) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyTs = require('typescript');
-  }
-  return lazyTs as typeof ts;
-};
+const tsLib = lazyInit((): typeof ts => require('typescript'));
+const tsUtilsLib = lazyInit((): typeof import('@strapi/typescript-utils') =>
+  require('@strapi/typescript-utils')
+);
 
 interface TsConfig {
   config: ts.ParsedCommandLine;
@@ -32,7 +29,8 @@ const loadTsConfig = ({
   logger: Logger;
 }): TsConfig | undefined => {
   const tsApi = tsLib();
-  const configPath = tsApi.findConfigFile(cwd, tsApi.sys.fileExists, path);
+  // Only accept a tsconfig inside `cwd`, never one inherited from a parent directory
+  const configPath = tsUtilsLib().getConfigPath(cwd, { filename: path });
 
   if (!configPath) {
     return undefined;

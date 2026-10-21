@@ -1,0 +1,28 @@
+{
+  "extends": "tsconfig/tools",
+  "include": [
+    "*.js",
+    "*.cjs",
+    "*.mjs",
+    "*.ts",
+    "*.cts",
+    "*.mts",
+    ".*.js",
+    ".*.cjs",
+    ".*.mjs",
+    ".*.ts",
+    ".*.cts",
+    ".*.mts",
+    "**/.eslintrc.cjs",
+    ".github/**/.eslintrc.cjs",
+    "**/lint-staged.config.mjs",
+    ".github/**/lint-staged.config.mjs",
+    "**/rollup.config.mjs",
+    "**/jest.config.js",
+    ".github/**/jest.config.js",
+    "**/jest.config.front.js",
+    "docs/.eslintrc.docs.js",
+    "packages/*/*/vitest.config.ts"
+  ],
+  "exclude": ["**/node_modules", "**/dist"]
+}
