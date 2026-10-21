@@ -269,6 +269,7 @@
   "Settings.permissions.auditLogs.locale.update": "Update locale",
   "Settings.permissions.auditLogs.media.create": "Create media",
   "Settings.permissions.auditLogs.media.delete": "Delete media",
+  "Settings.permissions.auditLogs.media.move": "Move media",
   "Settings.permissions.auditLogs.media.update": "Update media",
   "Settings.permissions.auditLogs.payload": "Payload",
   "Settings.permissions.auditLogs.permission.create": "Create permission",

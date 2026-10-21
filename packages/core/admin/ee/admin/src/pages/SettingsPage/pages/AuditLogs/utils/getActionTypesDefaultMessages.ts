@@ -7,6 +7,7 @@ export const actionTypes = {
   'media.create': 'Create media',
   'media.update': 'Update media',
   'media.delete': 'Delete media',
+  'media.move': 'Move media',
   'media-folder.create': 'Create media folder',
   'media-folder.update': 'Update media folder',
   'media-folder.delete': 'Delete media folder',
