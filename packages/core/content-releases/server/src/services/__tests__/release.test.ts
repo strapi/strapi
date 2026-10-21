@@ -1025,7 +1025,7 @@ describe('Release service', () => {
     const createStrapiMock = (release: unknown, counts: { total: number; invalid: number }) => {
       const update = jest.fn();
       const countActions = jest.fn(({ filters }) =>
-        filters.isEntryValid === false ? counts.invalid : counts.total
+        filters.type === 'publish' ? counts.invalid : counts.total
       );
       // The release row, read under its lock
       const lockedRead = {

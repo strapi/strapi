@@ -16,7 +16,14 @@ export const PLANNED_ACTION_WHERE = {
   release: { id: { $notNull: true }, releasedAt: { $null: true } },
 };
 
-// What the entries of a release can be narrowed to: readiness while planned, the run's result after
+// A release action that can't publish now: an unpublish needs no checks, and a publish whose
+// validity was never recorded (an action stored before validation existed) counts as not ready
+export const NOT_READY_ACTION_WHERE = {
+  type: 'publish' as const,
+  $or: [{ isEntryValid: false }, { isEntryValid: { $null: true } }],
+};
+
+// What the entries of a release can be narrowed to: their readiness, or what the run did with them
 export const RELEASE_ACTION_FILTERS = ['ready', 'notReady', 'released', 'skipped'] as const;
 export type ReleaseActionFilter = (typeof RELEASE_ACTION_FILTERS)[number];
 

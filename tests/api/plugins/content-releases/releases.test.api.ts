@@ -762,21 +762,99 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       test('by what the run did, on a release that ran', async () => {
         const publishedId = await createProduct({ valid: true });
+        const unpublishedId = await createProduct({ valid: true });
+        await strapi.documents(productUID).publish({ documentId: unpublishedId });
         const skippedId = await createProduct({ valid: false });
         const release = await createReleaseWithActions('allow_partial', [
           { documentId: publishedId },
+          { documentId: unpublishedId, type: 'unpublish' },
           { documentId: skippedId },
         ]);
         expect((await publishManually(release.id)).statusCode).toBe(200);
 
         expect(await findFiltered(release.id, 'released')).toEqual({
-          documentIds: [publishedId],
-          total: 1,
+          documentIds: [publishedId, unpublishedId].sort(),
+          total: 2,
         });
         expect(await findFiltered(release.id, 'skipped')).toEqual({
           documentIds: [skippedId],
           total: 1,
         });
+      });
+
+      test('by readiness, on a release that ran: what the run found', async () => {
+        const heldId = await createProduct({ valid: true });
+        const invalidId = await createProduct({ valid: false });
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: heldId },
+          { documentId: invalidId },
+        ]);
+        await expect(runScheduled(release.id)).rejects.toThrow(INVALID_PRODUCT_MESSAGE);
+
+        // Held back by the invalid entry, the valid one is still ready
+        expect(await findFiltered(release.id, 'ready')).toEqual({
+          documentIds: [heldId],
+          total: 1,
+        });
+        expect(await findFiltered(release.id, 'notReady')).toEqual({
+          documentIds: [invalidId],
+          total: 1,
+        });
+        expect(await findFiltered(release.id, 'skipped')).toEqual({
+          documentIds: [heldId, invalidId].sort(),
+          total: 2,
+        });
+      });
+
+      test('a publish entry never validated is not ready, in the list and in the count', async () => {
+        const validatedId = await createProduct({ valid: true });
+        const neverValidatedId = await createProduct({ valid: true });
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: validatedId },
+          { documentId: neverValidatedId },
+        ]);
+        // As an action stored before validation existed
+        await strapi.db.query('plugin::content-releases.release-action').update({
+          where: { release: release.id, entryDocumentId: neverValidatedId },
+          data: { isEntryValid: null },
+        });
+
+        expect(await findFiltered(release.id, 'notReady')).toEqual({
+          documentIds: [neverValidatedId],
+          total: 1,
+        });
+        expect(await findFiltered(release.id, 'ready')).toEqual({
+          documentIds: [validatedId],
+          total: 1,
+        });
+        expect((await getRelease(release.id)).actions.meta.notReadyCount).toBe(1);
+      });
+
+      test('keeps the grouping of the entries it narrows', async () => {
+        const readyId = await createProduct({ valid: true });
+        const unpublishId = await createProduct({ valid: false });
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: readyId },
+          { documentId: await createProduct({ valid: false }) },
+          { documentId: unpublishId, type: 'unpublish' },
+        ]);
+
+        const res = await rq({
+          method: 'GET',
+          url: `/content-releases/${release.id}/actions`,
+          qs: { filter: 'ready', groupBy: 'action' },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.meta.pagination.total).toBe(2);
+        expect(
+          Object.fromEntries(
+            Object.entries(res.body.data).map(([type, actions]) => [
+              type,
+              (actions as { entryDocumentId: string }[]).map((action) => action.entryDocumentId),
+            ])
+          )
+        ).toEqual({ publish: [readyId], unpublish: [unpublishId] });
       });
 
       test('an entry the run never recorded counts as skipped', async () => {

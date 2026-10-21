@@ -6,6 +6,7 @@ import _ from 'lodash/fp';
 
 import {
   AUDITED_EVENTS,
+  NOT_READY_ACTION_WHERE,
   PLANNED_ACTION_WHERE,
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
@@ -77,18 +78,30 @@ type LockedRelease = Pick<Release, 'id' | 'name' | 'releasedAt'>;
 
 // Any other outcome, or none, means the run skipped the entry
 const RELEASED_OUTCOMES = ['published', 'unpublished'] satisfies ReleaseAction['outcome'][];
-// Releases that ran before outcomes existed recorded none
-const SKIPPED_OUTCOME_WHERE = {
-  $or: [{ outcome: null }, { outcome: { $notIn: RELEASED_OUTCOMES } }],
-};
 
-const ACTION_FILTER_WHERE: Record<ReleaseActionFilter, object> = {
-  // An unpublish needs no checks
-  ready: { $or: [{ type: 'unpublish' }, { isEntryValid: true }] },
-  notReady: { type: 'publish', isEntryValid: false },
-  released: { outcome: { $in: RELEASED_OUTCOMES } },
-  // Only a release that ran skipped anything
-  skipped: { release: { releasedAt: { $notNull: true } }, ...SKIPPED_OUTCOME_WHERE },
+// The actions of a release, narrowed by a filter
+const releaseActionsWhere = (
+  releaseId: Release['id'],
+  filter?: ReleaseActionFilter
+): ReleaseActionWhere => {
+  switch (filter) {
+    case 'ready':
+      // An unpublish needs no checks
+      return { release: releaseId, $or: [{ type: 'unpublish' }, { isEntryValid: true }] };
+    case 'notReady':
+      return { release: releaseId, ...NOT_READY_ACTION_WHERE };
+    case 'released':
+      return { release: releaseId, outcome: { $in: RELEASED_OUTCOMES } };
+    case 'skipped':
+      // Only a release that ran skipped anything. Releases that ran before outcomes existed
+      // recorded none.
+      return {
+        release: { id: releaseId, releasedAt: { $notNull: true } },
+        $or: [{ outcome: null }, { outcome: { $notIn: RELEASED_OUTCOMES } }],
+      };
+    default:
+      return { release: releaseId };
+  }
 };
 
 const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
@@ -421,8 +434,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         .query(RELEASE_ACTION_MODEL_UID)
         .findMany({
           where: {
-            release: { id: releaseId, releasedAt: { $notNull: true } },
-            ...SKIPPED_OUTCOME_WHERE,
+            ...releaseActionsWhere(releaseId, 'skipped'),
             ...(actionIds && { id: { $in: actionIds } }),
           },
           orderBy: { id: 'asc' },
@@ -487,12 +499,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, params);
       const { results: actions, pagination } = await strapi.db
         .query(RELEASE_ACTION_MODEL_UID)
-        .findPage({
-          ...dbQuery,
-          where: filter
-            ? { $and: [{ release: releaseId }, ACTION_FILTER_WHERE[filter]] }
-            : { release: releaseId },
-        });
+        .findPage({ ...dbQuery, where: releaseActionsWhere(releaseId, filter) });
 
       // For each contentType on the release, we create a custom populate object for nested relations
       const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
@@ -604,7 +611,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         .findMany({
           where: { id: { $in: releaseIds }, releasedAt: null },
           select: ['id'],
-          populate: { actions: { count: true, where: { type: 'publish', isEntryValid: false } } },
+          populate: { actions: { count: true, where: NOT_READY_ACTION_WHERE } },
         });
 
       return new Map(releases.map((release) => [release.id, release.actions.count]));

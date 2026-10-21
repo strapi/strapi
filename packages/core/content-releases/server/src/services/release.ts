@@ -5,6 +5,7 @@ import type { Core, Struct, Data } from '@strapi/types';
 import {
   ALLOWED_WEBHOOK_EVENTS,
   AUDITED_EVENTS,
+  NOT_READY_ACTION_WHERE,
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
 } from '../constants';
@@ -786,11 +787,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           }),
           // Unpublish actions are always publishable, whatever validity an edit stored on them
           releaseActionService.countActions({
-            filters: {
-              release: releaseId,
-              type: 'publish',
-              isEntryValid: false,
-            },
+            filters: { release: releaseId, ...NOT_READY_ACTION_WHERE },
           }),
         ]);
 

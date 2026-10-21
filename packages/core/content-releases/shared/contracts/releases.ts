@@ -74,12 +74,9 @@ export declare namespace GetReleases {
       userAbility: {};
     };
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
+      // Any field of the release, e.g. filters[status][$in][0]=failed
       filters?: {
-        status?: ReleaseFieldFilter<ReleaseStatus>;
-        releaseCondition?: ReleaseFieldFilter<ReleaseCondition>;
-        scheduledAt?: ReleaseFieldFilter<string>;
-        releasedAt?: ReleaseFieldFilter<string>;
-        failureReason?: ReleaseFieldFilter<ReleaseFailureReason>;
+        [Field in Exclude<keyof Release, 'actions'>]?: ReleaseFieldFilter<Release[Field]>;
       };
       // e.g. 'updatedAt:desc'
       sort?: string | string[];

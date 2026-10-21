@@ -57,10 +57,10 @@ packages/core/content-releases/server/src/routes/release.ts
   {
     page: number;
     pageSize: number;
-    // Any of: status, releaseCondition, scheduledAt, releasedAt, failureReason,
-    // e.g. filters[status][$in][0]=failed or filters[scheduledAt][$null]=true
+    // Any field of the release, e.g. filters[status][$in][0]=failed or
+    // filters[scheduledAt][$null]=true
     filters?: Record<string, unknown>;
-    sort?: string; // e.g. 'updatedAt:desc'
+    sort?: string | string[]; // e.g. 'updatedAt:desc'
   }
   ```
 
@@ -161,7 +161,10 @@ packages/core/content-releases/server/src/routes/release.ts
     page: number;
     pageSize: number;
     groupBy?: 'contentType' | 'action' | 'locale';
-    // ready: publishable now, and every unpublish; notReady: publish entries that aren't.
+    // ready: publishable now, and every unpublish; notReady: publish entries that aren't,
+    // including ones never validated. On a release that ran, readiness is what the run found:
+    // entries held back or that threw while released count as ready, invalid or not approved
+    // ones as not ready.
     // released: published or unpublished by the run; skipped: anything else in a release that ran,
     // including entries with no outcome (a release that ran before outcomes existed)
     filter?: 'ready' | 'notReady' | 'released' | 'skipped';

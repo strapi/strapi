@@ -200,7 +200,9 @@ describe('Release Action service', () => {
         const [params] = findPage.mock.calls[0];
         expect(params).not.toHaveProperty('filter');
         expect(params.where).toEqual({
-          $and: [{ release: 1 }, { type: 'publish', isEntryValid: false }],
+          release: 1,
+          type: 'publish',
+          $or: [{ isEntryValid: false }, { isEntryValid: { $null: true } }],
         });
         expect(params.page).toBe(2);
       });
