@@ -2,9 +2,14 @@ import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import { RELEASE_MODEL_UID } from '../constants';
-import { validateRelease, validatefindByDocumentAttachedParams } from './validation/release';
+import {
+  validateCreateFromSkippedEntries,
+  validateRelease,
+  validatefindByDocumentAttachedParams,
+} from './validation/release';
 import type {
   CreateRelease,
+  CreateReleaseFromSkippedEntries,
   UpdateRelease,
   PublishRelease,
   GetRelease,
@@ -249,6 +254,26 @@ const releaseController = {
 
     const releaseService = getService('release', { strapi });
     const release = await releaseService.create(releaseArgs, { user });
+
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: RELEASE_MODEL_UID,
+    });
+
+    ctx.created({
+      data: await permissionsManager.sanitizeOutput(release),
+    });
+  },
+
+  async createFromSkippedEntries(ctx: Koa.Context) {
+    const user: UserInfo = ctx.state.user;
+    const id: CreateReleaseFromSkippedEntries.Request['params']['id'] = ctx.params.id;
+    const releaseArgs = ctx.request.body as CreateReleaseFromSkippedEntries.Request['body'];
+
+    await validateCreateFromSkippedEntries(releaseArgs);
+
+    const releaseService = getService('release', { strapi });
+    const release = await releaseService.createFromSkippedEntries(id, releaseArgs, { user });
 
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,

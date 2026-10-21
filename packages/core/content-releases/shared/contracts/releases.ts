@@ -49,6 +49,22 @@ export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'a
   actions: ReleaseAction[];
 }
 
+// A release field's value, or a condition on it
+type ReleaseFieldFilter<T> =
+  | T
+  | {
+      $eq?: T;
+      $ne?: T;
+      $in?: T[];
+      $notIn?: T[];
+      $lt?: T;
+      $lte?: T;
+      $gt?: T;
+      $gte?: T;
+      $null?: boolean;
+      $notNull?: boolean;
+    };
+
 /**
  * GET /content-releases/ - Get releases paginated
  */
@@ -57,7 +73,14 @@ export declare namespace GetReleases {
     state: {
       userAbility: {};
     };
-    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
+    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
+      // Any field of the release, e.g. filters[status][$in][0]=failed
+      filters?: {
+        [Field in Exclude<keyof Release, 'actions'>]?: ReleaseFieldFilter<Release[Field]>;
+      };
+      // e.g. 'updatedAt:desc'
+      sort?: string | string[];
+    };
   }
 
   export interface Response {
@@ -149,6 +172,30 @@ export declare namespace CreateRelease {
   export interface Response {
     data: ReleaseDataResponse;
     error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
+/**
+ * POST /content-releases/:id/create-from-skipped-entries - Create a release from the entries a
+ * partial or failed release skipped
+ */
+export declare namespace CreateReleaseFromSkippedEntries {
+  export interface Request {
+    state: {
+      user: UserInfo;
+    };
+    params: {
+      id: Release['id'];
+    };
+    body: CreateRelease.Request['body'] & {
+      // Action ids of the skipped entries to carry over; all of them if omitted
+      actionIds?: number[];
+    };
+  }
+
+  export interface Response {
+    data: ReleaseDataResponse;
+    error?: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
   }
 }
 

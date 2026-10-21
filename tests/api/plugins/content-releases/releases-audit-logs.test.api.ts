@@ -837,6 +837,94 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     });
   });
 
+  describe('release from skipped entries', () => {
+    // A partial release whose `left-out` entry was skipped; the logs of the run are cleared
+    const createPartialRelease = async () => {
+      const release = await createRelease({
+        name: 'Partly published',
+        timezone: 'Europe/Paris',
+        releaseCondition: 'allow_partial',
+      });
+      const published = await createEntry('goes-out');
+      const skipped = await createEntry('left-out');
+      for (const entry of [published, skipped]) {
+        await rq({
+          url: `/content-releases/${release.id}/actions`,
+          method: 'POST',
+          body: releaseAction(entry.documentId),
+        });
+      }
+      documentIdsFailingToPublish.add(skipped.documentId);
+      const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
+      expect(res.body.data.status).toBe('partial');
+      documentIdsFailingToPublish.delete(skipped.documentId);
+      await waitForLog('release.trigger');
+      await clearAuditLogs();
+
+      return { release, skipped };
+    };
+
+    const createFromSkippedEntries = (releaseId: number) =>
+      rq({
+        url: `/content-releases/${releaseId}/create-from-skipped-entries`,
+        method: 'POST',
+        body: { name: 'Second try', scheduledAt: null },
+      });
+
+    it('records the new release and each entry it carries over', async () => {
+      const { skipped, release } = await createPartialRelease();
+
+      const res = await createFromSkippedEntries(release.id);
+      expect(res.statusCode).toBe(201);
+      const newRelease = res.body.data;
+
+      const createLog = await expectExactlyOneLog('release.create');
+      expect(createLog.payload.resource).toEqual({
+        type: 'release',
+        id: newRelease.id,
+        name: 'Second try',
+      });
+      const addLog = await expectExactlyOneLog('release.entry.add');
+      expect(addLog.payload).toMatchObject({
+        resource: { type: 'release', id: newRelease.id, name: 'Second try' },
+        details: {
+          actionType: 'publish',
+          entry: { contentType: PRODUCT_UID, documentId: skipped.documentId, locale: 'en' },
+        },
+      });
+    });
+
+    it('records nothing when the new release is rolled back', async () => {
+      const { release } = await createPartialRelease();
+      // The status update counts the new release's actions: failing it rolls everything back
+      let armed = true;
+      const unsubscribe = strapi.db.lifecycles.subscribe({
+        models: ['plugin::content-releases.release-action'],
+        beforeCount() {
+          if (armed) {
+            armed = false;
+            throw new Error('Test-only count failure');
+          }
+        },
+      });
+
+      try {
+        const res = await createFromSkippedEntries(release.id);
+        expect(res.statusCode).toBe(500);
+      } finally {
+        unsubscribe();
+      }
+
+      await expectNoLog('release.create');
+      await expectNoLog('release.entry.add');
+      expect(
+        await strapi.db
+          .query('plugin::content-releases.release')
+          .count({ where: { name: 'Second try' } })
+      ).toBe(0);
+    });
+  });
+
   describe('release settings', () => {
     it('records a settings change with its previous value', async () => {
       const res = await rq({
