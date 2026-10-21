@@ -56,18 +56,25 @@ export type ServiceFactoryUID = IsStrict extends false ? UID.Service : Registere
 /**
  * A service factory, checked against the contract registered for `TUID`. The services registry calls
  * a function service once with `{ strapi }` and caches its result as the service
- * (`packages/core/core/src/registries/services.ts:30-33`), which `strapi.service(uid)` returns.
+ * (`packages/core/core/src/registries/services.ts:33-36`), which `strapi.service(uid)` returns.
  *
  * With strict types disabled, the factory may return any service, as on develop.
  *
- * Type generation registers an application service with the type its own source exports
- * (`types/generated/services.d.ts`), so checking that factory against its UID checks it against
- * itself. A hand-declared `AppServices` entry for the same UID must be the identical type: a
- * different one is a conflicting declaration (TS2717, hidden by `skipLibCheck`).
+ * Type generation registers an application service with the `ServiceContract` type its module
+ * exports (`types/generated/services.d.ts`), so the factory of that module can be checked against
+ * its own UID. A module without that export registers the type its default export provides: a
+ * factory checked against its own UID is then circular, and its type is implicitly `any` (TS7022,
+ * silent without `noImplicitAny`). Keep a shared contract out of `services/` and `controllers/`: the
+ * API loader registers every file there (`packages/core/core/src/loaders/apis.ts:91-102`).
  *
-
+ * A hand-declared `AppServices` entry for the same UID must be the identical type: a different one
+ * is a conflicting declaration (TS2717, hidden by `skipLibCheck`).
+ *
  * @example
  * ```ts
+ * // src/api/invite/services/invite.ts
+ * export type ServiceContract = { count(): Promise<number> };
+ *
  * export default (({ strapi }) => ({
  *   async count() {
  *     return strapi.documents('api::invite.invite').count({});
