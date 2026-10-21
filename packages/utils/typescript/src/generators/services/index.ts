@@ -2,6 +2,8 @@ import {
   collectAppSources,
   emitRegistryDefinitions,
   filterRegisteredSources,
+  findTypeExports,
+  generateContractHelperDefinition,
   generateInstanceHelperDefinition,
   instanceTypeOf,
 } from '../common/sources';
@@ -9,6 +11,8 @@ import type { GeneratorOptions } from '../utils';
 
 const REGISTRY = 'AppServices';
 const INSTANCE_HELPER = 'ServiceInstance';
+const CONTRACT_EXPORT = 'ServiceContract';
+const CONTRACT_HELPER = 'ServiceContractOf';
 
 const NO_SERVICE_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any services yet.
@@ -28,13 +32,15 @@ export {};
  *     namespace Registries {
  *       interface AppServices {
  *         'api::<api>.<service>': ServiceInstance<typeof import('<relative path to the source>')>;
+ *         'api::<api>.<service>': ServiceContractOf<import('<relative path to the source>').ServiceContract>;
  *       }
  *     }
  *   }
  * }
  *
- * A JS source registers as `unknown`: without `allowJs` its import is an error type. So does a
- * service module typed `any` or whose import no longer resolves.
+ * A service whose module exports a `ServiceContract` type registers that contract; any other service
+ * registers the type its default export provides. A JS source registers as `unknown`: without
+ * `allowJs` its import is an error type. So do a service module and a contract typed `any`.
  */
 export const generateServicesDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
@@ -50,6 +56,12 @@ export const generateServicesDefinitions = async (
 
   logger.debug(`Found ${servicesDefinitions.length} services.`);
 
+  const contract = {
+    exportName: CONTRACT_EXPORT,
+    helper: CONTRACT_HELPER,
+    uids: await findTypeExports(servicesDefinitions, CONTRACT_EXPORT, logger),
+  };
+
   if (servicesDefinitions.length === 0) {
     return { output: NO_SERVICE_PLACEHOLDER_COMMENT, stats: {} };
   }
@@ -61,9 +73,17 @@ export const generateServicesDefinitions = async (
         INSTANCE_HELPER,
         '*\n * Type of the service instance exposed by a service module: the return type of its default\n * export when it is a factory, the default export itself otherwise.\n '
       ),
+      ...(contract.uids.size > 0
+        ? [
+            generateContractHelperDefinition(
+              CONTRACT_HELPER,
+              '*\n * Contract a service module exports as `ServiceContract`, `unknown` when it is typed `any`.\n '
+            ),
+          ]
+        : []),
     ],
     servicesDefinitions,
-    instanceTypeOf(INSTANCE_HELPER, logger)
+    instanceTypeOf(INSTANCE_HELPER, logger, contract)
   );
 
   return { output, stats: {} };

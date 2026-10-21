@@ -313,6 +313,50 @@ declare global {
 
 The generator mirrors the API loader: it walks `src/api/<api>/services/*.{ts,js}`, derives the uid with the same kebab-case normalization, and only emits uids the running application registered. A factory (`createCoreService(...)` or `({ strapi }) => ({ ... })`) registers its return type, a plain object registers itself, and a module without a default export resolves to `unknown`, like any unregistered service in strict mode. The registries are global interfaces, so the generated entries merge with the application's own `AppServices` declarations; declaring the same uid twice with different types is a TS2717 conflict.
 
+A service module can also export its contract as a type named `ServiceContract`. The generator then registers that type instead of the inferred one, and adds a `ServiceContractOf` helper to the file:
+
+```ts title="my-app/src/api/article/services/article.ts"
+import { factories, type Core } from '@strapi/strapi';
+
+export type ServiceContract = Core.CoreAPI.Service.ContentType<'api::article.article'> & {
+  findPublishedTitles(): Promise<string[]>;
+};
+
+export default factories.createCoreService('api::article.article', ({ strapi }) => ({
+  async findPublishedTitles() {
+    const articles = await strapi
+      .documents('api::article.article')
+      .findMany({ status: 'published' });
+    return articles.map((article) => article.title);
+  },
+})) satisfies Core.ServiceFactory<'api::article.article'>;
+```
+
+```ts title="my-app/types/generated/services.d.ts"
+type ServiceContractOf<TContract> = 0 extends 1 & TContract ? unknown : TContract;
+
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface AppServices {
+        'api::article.article': ServiceContractOf<
+          import('../../src/api/article/services/article').ServiceContract
+        >;
+        'api::legacy.legacy': ServiceInstance<
+          typeof import('../../src/api/legacy/services/legacy')
+        >;
+      }
+    }
+  }
+}
+```
+
+- The contract does not depend on the default export, so `satisfies Core.ServiceFactory<'api::article.article'>` checks the factory against it: a member with the wrong type, or a missing member, is reported at the factory. A member the factory returns outside the contract is not reported, and `strapi.service(uid)` callers do not see it.
+- A module without a `ServiceContract` export keeps the inferred type. Checking its factory against its own uid is then circular: TypeScript reports TS7022 and types the default export `any`, which is silent without `noImplicitAny`.
+- The generator reads each source on its own, without a type checker: it finds `export type ServiceContract`, `export interface ServiceContract` and export specifiers such as `export type { ArticleContract as ServiceContract } from '../contract'`. It does not follow `export *`, and it skips JS sources.
+- A contract typed `any` registers `unknown`. A reference that no longer resolves, because the export was renamed after the generation or names a value, behaves as `any` until the next generation; `skipLibCheck` hides the TS2694 that the generated file reports.
+- Keep a shared contract file out of `services/` and `controllers/`: the API loader registers every file there, so `services/contract.ts` would register an `api::article.contract` service.
+
 `controllers.d.ts` follows the same rules for `src/api/<api>/controllers/*.{ts,js}`, with its own `ControllerInstance` helper so that each file stands alone. A `createCoreController(...)` export registers the controller the factory returns: the content-type actions (`find`, `findOne`, ...) and the custom actions. `strapi.controller('api::article.article')` and `strapi.api('article').controller('article')` then resolve to that type, and an unregistered uid resolves to `unknown`.
 
 `policies.d.ts` walks `src/policies/*.{ts,js}` (`global::<name>`, names kept as is, like the global policies loader) and `src/api/<api>/policies/*.{ts,js}` (`api::<api>.<name>`, kebab-cased), with its own `PolicyConfig` helper. The registered value is the config the policy accepts: the second parameter of its handler, for a bare handler and for `{ handler, validator }`. A handler without that parameter registers `undefined`, so its name alone is a valid reference; an untyped (`any`) config, a module without a default export and a JS policy, whose import does not resolve without `allowJs`, register `unknown`. Typed route configs (`Core.RouterInputFor`, `Core.RouteConfigFor`) then accept these policies and check their `config`, next to the policies bundled packages register in `PackagePolicies`, and `strapi.policy('global::is-owner')` resolves to a policy that receives that config.

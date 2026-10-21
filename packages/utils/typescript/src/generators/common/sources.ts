@@ -261,15 +261,40 @@ export const findTypeExports = async (
 };
 
 /**
- * The type a service or controller source registers: `<helper><typeof import('<source>')>`, or
- * `unknown` for a JS source, whose import is an error type without `allowJs` (see `isTypedSource`).
+ * A type export that replaces the inferred type of the sources that have it, such as a service's
+ * `ServiceContract`.
+ */
+export type AppModuleContract = {
+  // Name of the type export
+  exportName: string;
+  // Name of the generated helper that reads it (see `generateContractHelperDefinition`)
+  helper: string;
+  // Uids of the sources whose module exports it (see `findTypeExports`)
+  uids: Set<string>;
+};
+
+/**
+ * The type a service or controller source registers:
+ * - `<contract helper><import('<source>').<contract export>>` when the module exports the contract;
+ * - `<helper><typeof import('<source>')>` otherwise, which infers it from the default export;
+ * - `unknown` for a JS source, whose import is an error type without `allowJs` (see `isTypedSource`).
+ *
+ * The contract does not depend on the default export, so the factory can be checked against its own
+ * uid (`Core.ServiceFactory<uid>`): the inferred type would then be circular (TS7022).
  */
 export const instanceTypeOf =
-  (helper: string, logger: Logger) =>
+  (helper: string, logger: Logger, contract?: AppModuleContract) =>
   (source: AppModuleSource): ts.TypeNode => {
     if (isTypedSource(source) === false) {
       logger.debug(`${source.uid} has no TypeScript source, registering it as unknown`);
       return factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+    }
+
+    if (contract !== undefined && contract.uids.has(source.uid) === true) {
+      logger.debug(`${source.uid} exports ${contract.exportName}, registering it`);
+      return factory.createTypeReferenceNode(contract.helper, [
+        importedType(source, contract.exportName),
+      ]);
     }
 
     return factory.createTypeReferenceNode(helper, [typeofImport(source)]);
@@ -285,6 +310,18 @@ export const typeofImport = (source: AppModuleSource) =>
     undefined,
     undefined,
     true
+  );
+
+/**
+ * import('<relative path to the source>').<name>
+ */
+const importedType = (source: AppModuleSource, name: string) =>
+  factory.createImportTypeNode(
+    factory.createLiteralTypeNode(factory.createStringLiteral(source.specifier, true)),
+    undefined,
+    factory.createIdentifier(name),
+    undefined,
+    false
   );
 
 export const withDocComment = <TNode extends ts.Node>(node: TNode, comment: string) =>
@@ -348,6 +385,40 @@ export const generateInstanceHelperDefinition = (name: string, comment: string) 
     comment
   );
 };
+
+/**
+ * type <name><TContract> = 0 extends 1 & TContract ? unknown : TContract;
+ *
+ * Emitted next to the instance helper when at least one source exports a contract, so that the
+ * output of an application without contracts does not change.
+ *
+ * A contract typed `any` registers `unknown`, as for an unregistered uid, rather than turning every
+ * lookup of the uid into `any`.
+ *
+ * TODO @Nico A contract reference that no longer resolves to a type (the export was renamed after
+ * the generation, names a value, or is a generic without defaults) is an error type: it behaves as
+ * `any`, and no conditional type can map it to `unknown` (an alias instantiated with the error type
+ * stays the error type). `skipLibCheck` hides the TS2694/TS2749/TS2314 in the generated file. The
+ * next generation, on every `strapi develop` start, registers the source without its contract again.
+ */
+export const generateContractHelperDefinition = (name: string, comment: string) =>
+  withDocComment(
+    factory.createTypeAliasDeclaration(
+      undefined,
+      factory.createIdentifier(name),
+      [factory.createTypeParameterDeclaration(undefined, 'TContract')],
+      factory.createConditionalTypeNode(
+        factory.createLiteralTypeNode(factory.createNumericLiteral(0)),
+        factory.createIntersectionTypeNode([
+          factory.createLiteralTypeNode(factory.createNumericLiteral(1)),
+          factory.createTypeReferenceNode('TContract'),
+        ]),
+        factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
+        factory.createTypeReferenceNode('TContract')
+      )
+    ),
+    comment
+  );
 
 /**
  * declare global {
