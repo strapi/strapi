@@ -3238,4 +3238,253 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
     });
   });
+
+  describe('Overdue releases', () => {
+    const RELEASE_UID = 'plugin::content-releases.release';
+    const minutesFromNow = (minutes: number) => new Date(Date.now() + minutes * 60 * 1000);
+
+    const sweep = () =>
+      strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
+
+    const runAfterSync = () =>
+      strapi.hook('strapi::content-types.afterSync').call({
+        oldContentTypes: strapi.contentTypes,
+        contentTypes: strapi.contentTypes,
+      });
+
+    beforeAll(() => {
+      strapi.cron.remove('content-releases::freezeOverdueReleases');
+    });
+
+    const setReleaseState = (id, data) =>
+      strapi.db.query(RELEASE_UID).update({ where: { id }, data });
+
+    const sweepListeningToWebhooks = async (releaseId) => {
+      const onPublishEvent = jest.fn();
+      const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
+
+      try {
+        await sweep();
+      } finally {
+        stopListening();
+      }
+
+      return onPublishEvent.mock.calls
+        .map(([payload]) => payload)
+        .filter((payload) => payload.release?.id === releaseId);
+    };
+
+    test('a release whose scheduled time passed is frozen as failed, and nothing is published', async () => {
+      const productId = await createProduct({ valid: true });
+      const invalidId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: productId },
+        { documentId: invalidId },
+      ]);
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-10) });
+
+      const webhooks = await sweepListeningToWebhooks(release.id);
+
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'failed',
+        releasedAt: expect.any(String),
+        failureReason: 'missed_schedule',
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 2,
+      });
+      expect(await hasPublishedVersion(productUID, productId)).toBe(false);
+
+      const actions = await getActionsByEntry(release.id);
+      expect(actions[productId]).toMatchObject({
+        outcome: 'skipped_missed',
+        isEntryValid: true,
+        reason: null,
+      });
+      expect(actions[invalidId]).toMatchObject({
+        outcome: 'skipped_missed',
+        isEntryValid: false,
+        reason: { validation: { errors: [expect.objectContaining({ path: ['description'] })] } },
+      });
+
+      expect(webhooks).toHaveLength(1);
+      expect(webhooks[0]).toMatchObject({
+        isPublished: false,
+        error: { name: 'MissedSchedule' },
+        release: {
+          id: release.id,
+          status: 'failed',
+          failureReason: 'missed_schedule',
+          totalSkippedEntries: 2,
+        },
+      });
+    });
+
+    test('two nodes sweeping at once freeze and report a release once', async () => {
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-10) });
+
+      const onPublishEvent = jest.fn();
+      const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
+      const scheduling = strapi.plugin('content-releases').service('scheduling');
+      try {
+        const [first, second] = await Promise.all([
+          scheduling.sweepOverdueReleases(new Date()),
+          scheduling.sweepOverdueReleases(new Date()),
+        ]);
+
+        expect([...first, ...second].filter((frozen) => frozen.id === release.id)).toHaveLength(1);
+      } finally {
+        stopListening();
+      }
+
+      expect(
+        onPublishEvent.mock.calls.filter(([payload]) => payload.release?.id === release.id)
+      ).toHaveLength(1);
+      expect(await getRelease(release.id)).toMatchObject({ totalSkippedEntries: 1 });
+    });
+
+    test('a release that failed before the upgrade is frozen at startup, without a webhook', async () => {
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: await createProduct({ valid: false }) },
+      ]);
+      await setReleaseState(release.id, { status: 'failed', scheduledAt: minutesFromNow(-10) });
+
+      await runAfterSync();
+      const webhooks = await sweepListeningToWebhooks(release.id);
+
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'failed',
+        releasedAt: expect.any(String),
+        failureReason: 'failed_before_upgrade',
+        totalPublishedEntries: null,
+        totalUnpublishedEntries: null,
+        totalSkippedEntries: null,
+      });
+      expect(Object.values(await getActionsByEntry(release.id))).toEqual([
+        expect.objectContaining({ outcome: null }),
+      ]);
+      expect(webhooks).toHaveLength(0);
+    });
+
+    test.each([
+      ['overdue by less than the grace period', { scheduledAt: minutesFromNow(-2) }],
+      ['scheduled in the future', { scheduledAt: minutesFromNow(60) }],
+      ['not scheduled', {}],
+    ])('a planned release %s is left as it is', async (_, state) => {
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+      await setReleaseState(release.id, state);
+
+      await sweep();
+
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'ready',
+        releasedAt: null,
+        failureReason: null,
+      });
+    });
+
+    test('a release that ran normally has no failure reason', async () => {
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+
+      expect((await publishManually(release.id)).statusCode).toBe(200);
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-10) });
+      await sweep();
+
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'done',
+        failureReason: null,
+        totalPublishedEntries: 1,
+        totalSkippedEntries: 0,
+      });
+    });
+
+    test('a frozen release refuses a reschedule and a delete, and stays as the sweep left it', async () => {
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-10) });
+      await sweep();
+      const frozen = await getRelease(release.id);
+      expect(frozen).toMatchObject({ status: 'failed', failureReason: 'missed_schedule' });
+
+      const rescheduled = await rq({
+        method: 'PUT',
+        url: `/content-releases/${release.id}`,
+        body: { name: frozen.name, scheduledAt: minutesFromNow(60), timezone: 'Europe/Paris' },
+      });
+      const deleted = await rq({ method: 'DELETE', url: `/content-releases/${release.id}` });
+
+      expect(rescheduled.statusCode).toBe(400);
+      expect(rescheduled.body.error.message).toBe('Release already published');
+      expect(deleted.statusCode).toBe(400);
+      expect(deleted.body.error.message).toBe('Release already published');
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'failed',
+        scheduledAt: frozen.scheduledAt,
+        releasedAt: frozen.releasedAt,
+      });
+    });
+
+    test.each([
+      [
+        "the entries' outcomes",
+        'beforeUpdateMany',
+        'plugin::content-releases.release-action',
+        (data) => data?.outcome === 'skipped_missed',
+      ],
+      ['the release', 'beforeUpdate', RELEASE_UID, (data) => Boolean(data?.failureReason)],
+    ])(
+      'a release whose freeze fails writing %s is left planned, and frozen by the next sweep',
+      async (_, lifecycle, model, isFreezeWrite) => {
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: await createProduct({ valid: true }) },
+        ]);
+        await setReleaseState(release.id, { scheduledAt: minutesFromNow(-10) });
+
+        let failNextFreeze = true;
+        const unsubscribe = strapi.db.lifecycles.subscribe({
+          models: [model],
+          async [lifecycle](event) {
+            if (failNextFreeze && isFreezeWrite(event.params.data)) {
+              failNextFreeze = false;
+              await failInDatabase();
+            }
+          },
+        });
+
+        try {
+          await sweep();
+          expect(failNextFreeze).toBe(false);
+          expect(await getRelease(release.id)).toMatchObject({
+            status: 'ready',
+            releasedAt: null,
+            failureReason: null,
+            totalSkippedEntries: null,
+          });
+          expect(Object.values(await getActionsByEntry(release.id))).toEqual([
+            expect.objectContaining({ outcome: null }),
+          ]);
+
+          await sweep();
+          expect(await getRelease(release.id)).toMatchObject({
+            status: 'failed',
+            failureReason: 'missed_schedule',
+            totalSkippedEntries: 1,
+          });
+          expect(Object.values(await getActionsByEntry(release.id))).toEqual([
+            expect.objectContaining({ outcome: 'skipped_missed' }),
+          ]);
+        } finally {
+          unsubscribe();
+        }
+      }
+    );
+  });
 });

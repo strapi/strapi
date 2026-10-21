@@ -8,6 +8,7 @@ import {
   migrateIsValidAndStatusReleases,
   addReasonsToInvalidActions,
   migrateReleaseConditionReleases,
+  freezeReleasesFailedBeforeUpgrade,
   revalidateChangedContentTypes,
   disableContentTypeLocalized,
   enableContentTypeLocalized,
@@ -36,7 +37,8 @@ export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
       .register((input: ContentTypesSyncInput) => revalidateChangedContentTypes(input, { strapi }))
       .register(migrateIsValidAndStatusReleases)
       .register(() => addReasonsToInvalidActions({ strapi }))
-      .register(migrateReleaseConditionReleases);
+      .register(migrateReleaseConditionReleases)
+      .register(() => freezeReleasesFailedBeforeUpgrade({ strapi }));
   }
 
   if (strapi.plugin('graphql')) {

@@ -19,7 +19,10 @@ export type ReleaseActionOutcome =
   | 'skipped_not_approved'
   | 'skipped_error'
   // The entry was publishable, but an `all_or_nothing` run released nothing
-  | 'skipped_held';
+  | 'skipped_held'
+  // The release's scheduled run never happened (frozen by the overdue sweep): nothing was
+  // checked or released. The entry keeps the validity and reason last checked before its date.
+  | 'skipped_missed';
 
 interface StageRef {
   id: Data.ID;
