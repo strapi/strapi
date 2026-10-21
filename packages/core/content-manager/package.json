@@ -117,11 +117,11 @@
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
     "@types/jest": "29.5.2",
+    "@types/koa": "2.15.2",
     "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
     "@types/prismjs": "1.26.5",
     "jest": "29.6.0",
-    "koa-body": "6.0.1",
     "msw": "2.13.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -130,10 +130,16 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
+    "@types/koa": "^2.15.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

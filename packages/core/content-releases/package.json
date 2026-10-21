@@ -103,10 +103,16 @@
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
     "@strapi/content-manager": "^5.0.0",
+    "@types/koa": "^2.15.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
