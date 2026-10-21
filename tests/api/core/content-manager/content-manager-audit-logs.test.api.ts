@@ -156,4 +156,84 @@ describeOnCondition(edition === 'EE')('Content Manager in audit logs (api)', () 
       expect(await waitForLogs('entry.unpublish', 1)).toHaveLength(1);
     });
   });
+
+  describe('entry.history.restore', () => {
+    const entryUrl = `/content-manager/collection-types/${articleUID}`;
+
+    // The history routes only exist when the licence includes content history.
+    const historyTest = (name: string, fn: () => Promise<void>) =>
+      test(name, async () => {
+        if (!strapi.ee.features.isEnabled('cms-content-history')) {
+          const res = await rq({ method: 'GET', url: '/content-manager/history-versions' });
+          expect(res.statusCode).toBe(404);
+          return;
+        }
+
+        await fn();
+      });
+
+    historyTest('records the restored version next to the entry update', async () => {
+      const created = await rq({
+        method: 'POST',
+        url: entryUrl,
+        qs: { locale: 'en' },
+        body: { title: 'first' },
+      });
+      expect(created.statusCode).toBe(201);
+      const { documentId } = created.body.data;
+
+      const updated = await rq({
+        method: 'PUT',
+        url: `${entryUrl}/${documentId}`,
+        qs: { locale: 'en' },
+        body: { title: 'second' },
+      });
+      expect(updated.statusCode).toBe(200);
+
+      const versions = await rq({
+        method: 'GET',
+        url: '/content-manager/history-versions',
+        qs: { contentType: articleUID, documentId, locale: 'en' },
+      });
+      const oldest = versions.body.data.at(-1);
+      await clearAuditLogs();
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/history-versions/${oldest.id}/restore`,
+        body: { contentType: articleUID },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const logs = await waitForLogs('entry.history.restore', 1);
+      expect(logs).toHaveLength(1);
+      expect(logs[0].user.id).toBe(actingAdminId);
+      expect(logs[0].payload).toEqual({
+        action: 'entry.history.restore',
+        date: expect.any(String),
+        actor: expectedActor(),
+        origin: 'admin-panel',
+        resource: { type: 'entry', uid: articleUID, id: documentId },
+        details: {
+          locale: 'en',
+          version: { id: oldest.id, createdAt: new Date(oldest.createdAt).toISOString() },
+        },
+      });
+      expect(JSON.stringify(logs[0].payload)).not.toContain('first');
+
+      // The document update writes its own legacy row.
+      expect(await waitForLogs('entry.update', 1)).toHaveLength(1);
+    });
+
+    historyTest('writes no row for an invalid body', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/content-manager/history-versions/999999/restore',
+        body: {},
+      });
+      expect(res.statusCode).toBe(400);
+
+      expect(await findLogs('entry.history.restore')).toHaveLength(0);
+    });
+  });
 });
