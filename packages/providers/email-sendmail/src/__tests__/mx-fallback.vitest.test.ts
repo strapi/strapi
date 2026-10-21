@@ -3,7 +3,7 @@ import { resolveMx } from 'dns/promises';
 import { hostname as osHostname } from 'os';
 import nodemailer from 'nodemailer';
 
-import { sendDirectSmtp } from '../src/direct-smtp';
+import { sendDirectSmtp } from '../direct-smtp';
 
 vi.mock('dns/promises', () => ({
   resolveMx: vi.fn(),

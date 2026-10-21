@@ -5,4 +5,5 @@ export default baseConfig({
     index: './src/index.ts',
     plopfile: './src/plopfile.ts',
   },
+  rootDir: './src',
 });

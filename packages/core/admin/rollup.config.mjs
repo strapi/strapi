@@ -6,12 +6,14 @@ export default defineConfig([
     input: {
       index: './server/src/index.ts',
     },
+    rootDir: '.',
     outDir: './dist/server',
   }),
   baseConfig({
     input: {
       _internal: './_internal/index.ts',
     },
+    rootDir: '.',
     outDir: './dist',
   }),
   baseConfig({
@@ -20,6 +22,7 @@ export default defineConfig([
       ee: './admin/src/ee.ts',
       test: './admin/tests/index.ts',
     },
+    rootDir: '.',
     outDir: './dist/admin',
   }),
 ]);

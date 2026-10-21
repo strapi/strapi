@@ -1,7 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "../",
     "outDir": "../dist",
     "noEmit": false,
     "types": ["@testing-library/jest-dom", "jest", "vite/client", "@strapi/types/globals-admin"]

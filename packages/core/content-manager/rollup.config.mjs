@@ -28,7 +28,7 @@ const serverConfig = baseConfig({
   rootDir: './server/src',
   outDir: './dist/server',
 });
-serverConfig.plugins = [...serverConfig.plugins, copyPreviewScript()];
+serverConfig.plugins = [serverConfig.plugins, copyPreviewScript()];
 
 export default defineConfig([
   serverConfig,
@@ -43,6 +43,7 @@ export default defineConfig([
     input: {
       index: './shared/index.ts',
     },
+    rootDir: './shared',
     outDir: './dist/shared',
   }),
 ]);

@@ -2,6 +2,7 @@
   "extends": "tsconfig/client.json",
   "include": ["./src"],
   "compilerOptions": {
-    "types": ["@testing-library/jest-dom", "jest"]
+    "types": ["@testing-library/jest-dom", "jest"],
+    "rootDir": "src"
   }
 }

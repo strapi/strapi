@@ -4,7 +4,8 @@
     "paths": {
       "@tests/*": ["./tests/*"]
     },
-    "types": ["@testing-library/jest-dom", "jest", "vite/client", "@strapi/types/globals-admin"]
+    "types": ["@testing-library/jest-dom", "jest", "vite/client", "@strapi/types/globals-admin"],
+    "rootDir": "../"
   },
   "include": ["./src", "../shared", "tests"]
 }

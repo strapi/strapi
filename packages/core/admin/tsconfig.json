@@ -1,7 +1,8 @@
 {
   "extends": "tsconfig/client.json",
   "compilerOptions": {
-    "types": ["@testing-library/jest-dom"]
+    "types": ["@testing-library/jest-dom"],
+    "rootDir": "."
   },
   "include": ["_internal"]
 }

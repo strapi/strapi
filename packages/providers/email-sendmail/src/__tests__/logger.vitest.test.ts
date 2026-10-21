@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createLogger } from '../src/logger';
+import { createLogger } from '../logger';
 
 describe('createLogger', () => {
   it('uses custom logger even when silent is true (legacy guileen/node-sendmail)', () => {
