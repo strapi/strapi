@@ -1,4 +1,9 @@
-import type { Controller, ControllerFor, ControllerHandler } from '../controller';
+import type {
+  Controller,
+  ControllerFactory,
+  ControllerFor,
+  ControllerHandler,
+} from '../controller';
 import type { Plugin } from '../plugin';
 import type { Strapi as StrapiInstance } from '../strapi';
 
@@ -109,3 +114,29 @@ contextualApi satisfies unknown;
 
 // @ts-expect-error A registry key outside the UID pattern is not a registered UID.
 strapi.controller('not-a-uid');
+
+// `ControllerFactory` checks a factory against the registered contract, application overrides first.
+(({ strapi: instance }) => ({
+  list: async () => instance.config.get('server.host', 'localhost'),
+  create: () => undefined,
+})) satisfies ControllerFactory<'api::controller-lab.items'>;
+(() => ({
+  list: () => undefined,
+  create: () => undefined,
+})) satisfies ControllerFactory<'plugin::controller-lab.tags'>;
+// @ts-expect-error The factory must implement every action of the contract.
+(() => ({ list: () => undefined })) satisfies ControllerFactory<'api::controller-lab.items'>;
+(() => ({
+  // @ts-expect-error Each action must be a controller handler.
+  list: 'list',
+  create: () => undefined,
+})) satisfies ControllerFactory<'api::controller-lab.items'>;
+// @ts-expect-error The application override replaces the package contract.
+(() => ({
+  list: () => undefined,
+  defaultOnly: () => undefined,
+})) satisfies ControllerFactory<'plugin::controller-lab.items'>;
+// @ts-expect-error A UID without a contract cannot check a factory.
+(() => ({})) satisfies ControllerFactory<'api::controller-lab.unregistered'>;
+// @ts-expect-error Names outside the UID pattern are not controllers.
+(() => ({})) satisfies ControllerFactory<'not-a-uid'>;

@@ -467,6 +467,27 @@ serviceFactoryChecks satisfies unknown;
 (() => ({ count: () => 'any' })) satisfies Core.ServiceFactory<'plugin::legacy.example'>;
 (() => ({ anything: true })) satisfies Core.ServiceFactory<'api::unregistered.example'>;
 
+// Without strict types, a controller factory may return any object, for registered and
+// unregistered UIDs. Develop has no public controller factory type, and `Core.Controller` rejects a
+// core controller: the returned type has no index signature.
+type ControllerFactoryChecks = [
+  Expect<Equal<Core.ControllerFactoryUID, UID.Controller>>,
+  Expect<Equal<ReturnType<Core.ControllerFactory<'plugin::legacy.example'>>, object>>,
+  Expect<Equal<ReturnType<Core.ControllerFactory<'api::unregistered.example'>>, object>>,
+];
+declare const controllerFactoryChecks: ControllerFactoryChecks;
+controllerFactoryChecks satisfies unknown;
+(() => ({ list: () => 'any' })) satisfies Core.ControllerFactory<'plugin::legacy.example'>;
+(() => ({ anything: true })) satisfies Core.ControllerFactory<'api::unregistered.example'>;
+declare const coreController: (params: {
+  strapi: Core.Strapi;
+}) => Core.CoreAPI.Controller.ContentType<'api::legacy.example'> & {
+  titles: Core.ControllerHandler;
+};
+coreController satisfies Core.ControllerFactory<'api::legacy.example'>;
+// @ts-expect-error `Core.Controller` needs an index signature that a core controller does not have.
+coreController satisfies (params: { strapi: Core.Strapi }) => Core.Controller;
+
 // Without strict types, auth `verify` resolves to `any`, as on develop.
 type AuthVerifyChecks = [
   Expect<Equal<Awaited<ReturnType<Modules.Auth.AuthenticationService['verify']>>, any>>,

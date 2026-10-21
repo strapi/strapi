@@ -4,6 +4,7 @@ import type * as UID from '../uid';
 import type * as InternalUID from '../internal/uid';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict, RegisteredRecord } from './strictness';
+import type { Strapi } from './strapi';
 
 export type Controller = Record<string, ControllerHandler>;
 
@@ -48,6 +49,38 @@ export type ControllerLookupUID = SuggestedString<RegisteredControllerUID, UID.C
 export type ControllerMap = IsStrict extends false
   ? Record<string, Controller>
   : RegisteredRecord<{ [TUID in RegisteredControllerUID]: ControllerFor<TUID> }, Controller>;
+
+/**
+ * A UID accepted by {@link ControllerFactory}. With strict types enabled, only registered UIDs: a
+ * factory checked against a UID without a contract would accept any controller.
+ */
+export type ControllerFactoryUID = IsStrict extends false
+  ? UID.Controller
+  : RegisteredControllerUID;
+
+/**
+ * A controller factory, checked against the contract registered for `TUID`. The controllers
+ * registry calls a function controller once with `{ strapi }` and caches its result as the
+ * controller (`packages/core/core/src/registries/controllers.ts:26-37`), which
+ * `strapi.controller(uid)` returns.
+ *
+ * With strict types disabled, the factory may return any object. Develop has no public type for a
+ * controller factory, and `Controller` rejects what `createCoreController` returns: its index
+ * signature is missing from the returned type (TS1360).
+ *
+ * @example
+ * ```ts
+ * // A plugin controller, whose contract the plugin registers in `PackageControllers`
+ * export default (({ strapi }) => ({
+ *   async list(ctx) {
+ *     ctx.body = await strapi.plugin('my-plugin').service('items').findAll();
+ *   },
+ * })) satisfies Core.ControllerFactory<'plugin::my-plugin.items'>;
+ * ```
+ */
+export type ControllerFactory<TUID extends ControllerFactoryUID> = (params: {
+  strapi: Strapi;
+}) => IsStrict extends false ? object : ControllerFor<TUID>;
 
 export interface ControllerHandler<TResponse = unknown> {
   (context: Context, next: Next): Promise<TResponse | void> | TResponse | void;
