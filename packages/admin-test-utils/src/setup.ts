@@ -138,7 +138,6 @@ const browserStrapi: Window['strapi'] = {
   },
 };
 
-// @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
 window.strapi = browserStrapi;
 
 /* -------------------------------------------------------------------------------------------------

@@ -5,7 +5,7 @@ import { getService } from '../utils';
 import { normalizeEmail } from '../utils/normalize-email';
 import { validateProfileUpdateInput } from '../validation/user';
 import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
-import { getSessionManager } from '../../../shared/utils/session-auth';
+import { getSessionManager } from '../utils/session-auth';
 
 export default {
   async getMe(ctx: Context) {

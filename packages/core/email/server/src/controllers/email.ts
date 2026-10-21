@@ -2,7 +2,6 @@ import { pick } from 'lodash';
 import { errors } from '@strapi/utils';
 
 import type Koa from 'koa';
-import type {} from 'koa-body';
 import type { EmailConfig, SendOptions } from '../types';
 
 const { ApplicationError } = errors;

@@ -2,7 +2,6 @@ import type { Context } from 'koa';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { extractToken, checkExpiry } from './api-token-utils';
-import '@strapi/types';
 
 const { UnauthorizedError } = errors;
 

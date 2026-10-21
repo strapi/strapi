@@ -3,6 +3,6 @@
   "include": ["src", "vitest.config.ts"],
   "exclude": ["**/__tests__/**"],
   "compilerOptions": {
-    "types": ["node", "jest"]
+    "types": ["node", "jest", "@strapi/types/globals-server"]
   }
 }

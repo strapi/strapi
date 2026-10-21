@@ -1,5 +1,3 @@
-import type {} from 'koa-body';
-
 type ID = number | string;
 
 export type Data = {

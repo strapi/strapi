@@ -1,7 +1,6 @@
 import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
-import '@strapi/types';
 import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
@@ -16,7 +15,7 @@ import {
   generateDeviceId,
   getRefreshCookieOptions,
   resolveLogoutDeviceId,
-} from '../../../shared/utils/session-auth';
+} from '../utils/session-auth';
 
 import {
   validateRegistrationInput,
