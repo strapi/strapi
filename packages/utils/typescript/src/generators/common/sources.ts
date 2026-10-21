@@ -329,7 +329,9 @@ export const withDocComment = <TNode extends ts.Node>(node: TNode, comment: stri
 
 /**
  * type <name><TModule> = TModule extends { default: infer TExport }
- *   ? TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport
+ *   ? 0 extends 1 & TExport
+ *     ? unknown
+ *     : TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport
  *   : unknown;
  *
  * Emitted in each file so that services.d.ts and controllers.d.ts stand alone.
@@ -338,8 +340,14 @@ export const withDocComment = <TNode extends ts.Node>(node: TNode, comment: stri
  * type of the default export when it is a factory, the default export itself otherwise. A module
  * without a default export registers nothing usable at runtime; with strict types enabled, an
  * unregistered uid resolves to `unknown`, so the helper does the same rather than claiming a
- * permissive contract for it. A module typed `any`, or whose import does not resolve, resolves to
- * `unknown` too.
+ * permissive contract for it. A module typed `any` and a default export typed `any` resolve to
+ * `unknown` too: `any` would match the factory branch and register `any`.
+ *
+ * TODO @Nico An import that no longer resolves (the source moved after the generation) is an error
+ * type: it behaves as `any`, and no conditional type maps it to `unknown`. `skipLibCheck` hides the
+ * TS2307 in the generated file, until the next generation drops the entry. A factory checked against
+ * its own uid without a contract export is circular: the registered property itself is `any`
+ * (TS7022), which this helper does not see either.
  */
 export const generateInstanceHelperDefinition = (name: string, comment: string) => {
   const unwrapFactory = factory.createConditionalTypeNode(
@@ -361,6 +369,17 @@ export const generateInstanceHelperDefinition = (name: string, comment: string) 
     factory.createTypeReferenceNode('TExport')
   );
 
+  // 0 extends 1 & TExport: only true when TExport is `any`
+  const guardAny = factory.createConditionalTypeNode(
+    factory.createLiteralTypeNode(factory.createNumericLiteral(0)),
+    factory.createIntersectionTypeNode([
+      factory.createLiteralTypeNode(factory.createNumericLiteral(1)),
+      factory.createTypeReferenceNode('TExport'),
+    ]),
+    factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
+    unwrapFactory
+  );
+
   const unwrapDefaultExport = factory.createConditionalTypeNode(
     factory.createTypeReferenceNode('TModule'),
     factory.createTypeLiteralNode([
@@ -371,7 +390,7 @@ export const generateInstanceHelperDefinition = (name: string, comment: string) 
         factory.createInferTypeNode(factory.createTypeParameterDeclaration(undefined, 'TExport'))
       ),
     ]),
-    unwrapFactory,
+    guardAny,
     factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
   );
 

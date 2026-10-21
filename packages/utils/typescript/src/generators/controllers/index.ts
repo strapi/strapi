@@ -41,7 +41,8 @@ export {};
  *
  * A controller whose module exports a `ControllerContract` type registers that contract; any other
  * controller registers the type its default export provides. A JS source registers as `unknown`:
- * without `allowJs` its import is an error type. So do a controller module and a contract typed `any`.
+ * without `allowJs` its import is an error type. So do a controller module, a default export and a
+ * contract typed `any`.
  */
 export const generateControllersDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions

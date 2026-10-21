@@ -15,7 +15,7 @@ jest.mock('../../../generators/utils', () => ({
 // Compare on the printed structure rather than on prettier's line breaks
 const normalize = (content: string) => content.replace(/\s+/g, ' ').replace(/;/g, '');
 
-// Output of an application without contracts, before contract exports were read
+// Output of an application without contracts: no contract helper, no contract reference
 const NO_CONTRACT_OUTPUT = `export {};
 
 /**
@@ -24,7 +24,7 @@ const NO_CONTRACT_OUTPUT = `export {};
  */
 type ServiceInstance<TModule> = TModule extends {
     default: infer TExport;
-} ? TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown;
+} ? 0 extends 1 & TExport ? unknown : TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown;
 
 declare global {
     namespace Strapi {
@@ -110,7 +110,7 @@ describe('generateServicesDefinitions', () => {
     ]);
 
     expect(normalized).toContain(
-      'type ServiceInstance<TModule> = TModule extends { default: infer TExport } ? TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown'
+      'type ServiceInstance<TModule> = TModule extends { default: infer TExport } ? 0 extends 1 & TExport ? unknown : TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown'
     );
   });
 
@@ -176,14 +176,21 @@ describe('generateServicesDefinitions', () => {
     expect(normalized).not.toContain("legacy')");
   });
 
-  test('resolves a module typed any, or whose import does not resolve, to unknown', async () => {
+  test('resolves a module or a default export typed any to unknown', async () => {
     const { root, strapi, pwd } = await createApp(
       {
         'src/api/article/services/article.ts': 'export default () => ({ find: () => 1 });',
         'src/api/article/services/untyped.ts': 'declare const service: any;\nexport = service;',
+        'src/api/article/services/anyDefault.ts':
+          'declare const service: any;\nexport default service;',
         'src/api/article/services/removed.ts': 'export default {};',
       },
-      ['api::article.article', 'api::article.untyped', 'api::article.removed']
+      [
+        'api::article.article',
+        'api::article.untyped',
+        'api::article.any-default',
+        'api::article.removed',
+      ]
     );
     roots.push(root);
 
@@ -198,32 +205,43 @@ describe('generateServicesDefinitions', () => {
     await outputFile(
       path.join(root, 'src/check.ts'),
       [
-        'type Equal<T, U> = (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;',
+        // `any` and an unresolved import pass any conditional type, such as an `Equal` assert: only
+        // assignability tells them from `unknown`.
         'type Service<TUID extends keyof Strapi.Registries.AppServices> = Strapi.Registries.AppServices[TUID];',
-        'export const checks: [',
-        "  Equal<Service<'api::article.article'>, { find: () => number }>,",
-        "  Equal<Service<'api::article.untyped'>, unknown>,",
-        "  Equal<Service<'api::article.removed'>, unknown>,",
-        '] = [true, true, true];',
+        "declare const article: Service<'api::article.article'>;",
+        "declare const untyped: Service<'api::article.untyped'>;",
+        "declare const anyDefault: Service<'api::article.any-default'>;",
+        'article.find() satisfies number;',
+        '// @ts-expect-error The inferred service has no other member.',
+        'article.missing();',
+        '// @ts-expect-error A module typed `any` registers `unknown`.',
+        'untyped satisfies number;',
+        '// @ts-expect-error A default export typed `any` registers `unknown`.',
+        'anyDefault satisfies number;',
+        'export {};',
       ].join('\n')
     );
 
-    const program = ts.createProgram(
-      [path.join(pwd, 'services.d.ts'), path.join(root, 'src/check.ts')],
-      {
-        noEmit: true,
-        strict: true,
-        skipLibCheck: true,
-        types: [],
-        module: ts.ModuleKind.CommonJS,
-        moduleResolution: ts.ModuleResolutionKind.Node10,
-      }
-    );
-    expect(
+    const check = (skipLibCheck: boolean) =>
       ts
-        .getPreEmitDiagnostics(program)
-        .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
-    ).toEqual([]);
+        .getPreEmitDiagnostics(
+          ts.createProgram([path.join(pwd, 'services.d.ts'), path.join(root, 'src/check.ts')], {
+            noEmit: true,
+            strict: true,
+            skipLibCheck,
+            types: [],
+            module: ts.ModuleKind.CommonJS,
+            moduleResolution: ts.ModuleResolutionKind.Node10,
+          })
+        )
+        .map(
+          (diagnostic) => `${path.basename(diagnostic.file?.fileName ?? '')} TS${diagnostic.code}`
+        );
+
+    expect(check(true)).toEqual([]);
+    // The import that no longer resolves is an error type, which no conditional type maps to
+    // `unknown`: only the generated file reports it, and `skipLibCheck` hides it.
+    expect(check(false)).toEqual(['services.d.ts TS2307']);
   });
 
   test('keeps the output of an application without contracts', async () => {
