@@ -40,7 +40,8 @@ export {};
  *
  * A service whose module exports a `ServiceContract` type registers that contract; any other service
  * registers the type its default export provides. A JS source registers as `unknown`: without
- * `allowJs` its import is an error type. So do a service module and a contract typed `any`.
+ * `allowJs` its import is an error type. So do a service module, a default export and a contract
+ * typed `any`.
  */
 export const generateServicesDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions

@@ -311,7 +311,7 @@ declare global {
 }
 ```
 
-The generator mirrors the API loader: it walks `src/api/<api>/services/*.{ts,js}`, derives the uid with the same kebab-case normalization, and only emits uids the running application registered. A factory (`createCoreService(...)` or `({ strapi }) => ({ ... })`) registers its return type, a plain object registers itself, and a module without a default export resolves to `unknown`, like any unregistered service in strict mode. The registries are global interfaces, so the generated entries merge with the application's own `AppServices` declarations; declaring the same uid twice with different types is a TS2717 conflict.
+The generator mirrors the API loader: it walks `src/api/<api>/services/*.{ts,js}`, derives the uid with the same kebab-case normalization, and only emits uids the running application registered. A factory (`createCoreService(...)` or `({ strapi }) => ({ ... })`) registers its return type, a plain object registers itself, and a module without a default export resolves to `unknown`, like any unregistered service in strict mode. A module or a default export typed `any` registers `unknown` too, rather than turning every lookup of the uid into `any`. The registries are global interfaces, so the generated entries merge with the application's own `AppServices` declarations; declaring the same uid twice with different types is a TS2717 conflict.
 
 A service module can also export its contract as a type named `ServiceContract`. The generator then registers that type instead of the inferred one, and adds a `ServiceContractOf` helper to the file:
 

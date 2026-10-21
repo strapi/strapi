@@ -15,7 +15,7 @@ jest.mock('../../../generators/utils', () => ({
 // Compare on the printed structure rather than on prettier's line breaks
 const normalize = (content: string) => content.replace(/\s+/g, ' ').replace(/;/g, '');
 
-// Output of an application without contracts, before contract exports were read
+// Output of an application without contracts: no contract helper, no contract reference
 const NO_CONTRACT_OUTPUT = `export {};
 
 /**
@@ -24,7 +24,7 @@ const NO_CONTRACT_OUTPUT = `export {};
  */
 type ControllerInstance<TModule> = TModule extends {
     default: infer TExport;
-} ? TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown;
+} ? 0 extends 1 & TExport ? unknown : TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown;
 
 declare global {
     namespace Strapi {
@@ -110,7 +110,7 @@ describe('generateControllersDefinitions', () => {
     ]);
 
     expect(normalized).toContain(
-      'type ControllerInstance<TModule> = TModule extends { default: infer TExport } ? TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown'
+      'type ControllerInstance<TModule> = TModule extends { default: infer TExport } ? 0 extends 1 & TExport ? unknown : TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown'
     );
   });
 
