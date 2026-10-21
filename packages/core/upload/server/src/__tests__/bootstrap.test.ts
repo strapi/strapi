@@ -21,6 +21,7 @@ const createStrapiMock = ({
   registerStrapiManagedProvider = jest.fn(),
 } = {}) =>
   ({
+    has: jest.fn(() => false),
     get(name: string) {
       switch (name) {
         case 'webhookStore':

@@ -10,6 +10,7 @@ export const actionTypes = {
   'media-folder.create': 'Create media folder',
   'media-folder.update': 'Update media folder',
   'media-folder.delete': 'Delete media folder',
+  'upload-settings.update': 'Update media library settings',
   'user.create': 'Create user',
   'user.update': 'Update user',
   'user.delete': 'Delete user',

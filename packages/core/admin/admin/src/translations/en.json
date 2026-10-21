@@ -292,6 +292,7 @@
   "Settings.permissions.auditLogs.token.delete": "Delete token",
   "Settings.permissions.auditLogs.token.regenerate": "Regenerate token",
   "Settings.permissions.auditLogs.token.update": "Update token",
+  "Settings.permissions.auditLogs.upload-settings.update": "Update media library settings",
   "Settings.permissions.auditLogs.user": "User",
   "Settings.permissions.auditLogs.user.create": "Create user",
   "Settings.permissions.auditLogs.user.delete": "Delete user",
