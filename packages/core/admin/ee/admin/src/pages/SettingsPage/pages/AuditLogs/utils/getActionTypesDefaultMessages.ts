@@ -56,6 +56,7 @@ export const actionTypes = {
   'webhook.create': 'Create webhook',
   'webhook.update': 'Update webhook',
   'webhook.delete': 'Delete webhook',
+  'sso-settings.update': 'Update SSO settings',
   'workflow.create': 'Create workflow',
   'workflow.update': 'Update workflow',
   'workflow.delete': 'Delete workflow',
