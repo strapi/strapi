@@ -164,6 +164,102 @@ export const filterRegisteredSources = (
  */
 export const isTypedSource = (source: AppModuleSource) => path.extname(source.file) === '.ts';
 
+const hasModifier = (statement: ts.Statement, kind: ts.ModifierSyntaxKind) =>
+  ts.canHaveModifiers(statement) &&
+  (ts.getModifiers(statement) ?? []).some((modifier) => modifier.kind === kind);
+
+/**
+ * Whether a top-level statement exports a type under `name`: `export type <name>`,
+ * `export interface <name>`, or an export specifier named `<name>` (`export { <name> }`,
+ * `export { type X as <name> }`, `export type { X as <name> } from './x'`).
+ *
+ * A specifier may name a value rather than a type: its reference then does not resolve, which the
+ * generated contract helper maps to `unknown`.
+ */
+const exportsTypeNamed = (statement: ts.Statement, name: string) => {
+  if (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) {
+    return (
+      statement.name.text === name &&
+      hasModifier(statement, ts.SyntaxKind.ExportKeyword) === true &&
+      hasModifier(statement, ts.SyntaxKind.DefaultKeyword) === false
+    );
+  }
+
+  if (
+    ts.isExportDeclaration(statement) &&
+    statement.exportClause !== undefined &&
+    ts.isNamedExports(statement.exportClause)
+  ) {
+    return statement.exportClause.elements.some((element) => element.name.text === name);
+  }
+
+  return false;
+};
+
+/**
+ * The uids of the TypeScript sources whose module exports a type named `name`, such as a service's
+ * `ServiceContract`.
+ *
+ * Each source is parsed on its own, without a program: type generation runs on every `strapi develop`
+ * start, before the compilation, and a program would need the application's tsconfig and its whole
+ * dependency graph. Only top-level declarations and export specifiers are read (see
+ * `exportsTypeNamed`). `export *` is not followed, and a source that cannot be read is skipped with a
+ * warning: both keep the type the source registers without a contract, rather than stopping the
+ * generation.
+ *
+ * JS sources are skipped: their import does not resolve without `allowJs` (see `isTypedSource`).
+ */
+export const findTypeExports = async (
+  sources: AppModuleSource[],
+  name: string,
+  logger: Logger
+): Promise<Set<string>> => {
+  // TODO @Nico A JS source could get a contract from a sibling `<name>.d.ts` that exports it: the
+  // extension-less import of the source resolves to that file without `allowJs`.
+  const typedSources = sources.filter(isTypedSource);
+
+  const verdicts = await Promise.all(
+    typedSources.map(async (source) => {
+      let content: string;
+
+      try {
+        content = await fs.promises.readFile(source.file, 'utf8');
+      } catch (error) {
+        logger.warn(
+          `Could not read ${source.file} to find its ${name} export, typing ${source.uid} without it: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return false;
+      }
+
+      const sourceFile = ts.createSourceFile(
+        source.file,
+        content,
+        ts.ScriptTarget.Latest,
+        false,
+        ts.ScriptKind.TS
+      );
+
+      if (sourceFile.statements.some((statement) => exportsTypeNamed(statement, name)) === true) {
+        return true;
+      }
+
+      if (
+        sourceFile.statements.some(
+          (statement) => ts.isExportDeclaration(statement) && statement.exportClause === undefined
+        ) === true
+      ) {
+        logger.debug(`${source.uid}: \`export *\` is not followed to find a ${name} export`);
+      }
+
+      return false;
+    })
+  );
+
+  return new Set(typedSources.filter((_, index) => verdicts[index] === true).map(({ uid }) => uid));
+};
+
 /**
  * The type a service or controller source registers: `<helper><typeof import('<source>')>`, or
  * `unknown` for a JS source, whose import is an error type without `allowJs` (see `isTypedSource`).
