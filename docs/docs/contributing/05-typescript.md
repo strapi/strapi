@@ -98,9 +98,10 @@ declare global {
   and `Core.ControllerFactory<uid>` does the same for a controller factory. With strict types
   disabled, `Core.ControllerFactory` accepts a factory that returns any object, because
   `Core.Controller` rejects what `createCoreController` returns.
-- In an application, type generation registers the `ServiceContract` type that a service module
-  exports. Check the module's factory against its own UID only with that export: without it, the
-  registered type is inferred from the factory itself, which is circular (TS7022).
+- In an application, type generation registers the `ServiceContract` or `ControllerContract` type
+  that a service or controller module exports. Check the module's factory against its own UID only
+  with that export: without it, the registered type is inferred from the factory itself, which is
+  circular (TS7022).
 - Declare one contract per UID. Conflicting `Package*` declarations fail with TS2717, and
   `skipLibCheck` can hide the conflict in a consumer.
 - A package bundled with `@strapi/strapi` that registers contracts must also be imported by

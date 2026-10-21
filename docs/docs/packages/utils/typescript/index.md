@@ -28,7 +28,7 @@ With `typescript.strictTypes`, the generators also write `Schema.Attribute.Condi
 
 ## Application contracts
 
-With `typescript.strictTypes`, the services generator (`src/generators/services/`) registers each `api::*` service in `Strapi.Registries.AppServices`. When the service module exports a type named `ServiceContract`, the generator registers that type. Otherwise it registers the type that the default export provides (see [public registries](../../core/types/type-system/02-concepts/03-public-registry.mdx)).
+With `typescript.strictTypes`, the services generator (`src/generators/services/`) registers each `api::*` service in `Strapi.Registries.AppServices`. When the service module exports a type named `ServiceContract`, the generator registers that type. The controllers generator does the same with `ControllerContract` in `AppControllers`. Otherwise it registers the type that the default export provides (see [public registries](../../core/types/type-system/02-concepts/03-public-registry.mdx)).
 
 `findTypeExports` (`src/generators/common/sources.ts`) finds the export without a type checker. It parses each TypeScript source with `ts.createSourceFile` and reads only the top-level statements: `export type`, `export interface` and export specifiers. A program would need the application's tsconfig and its whole dependency graph, and type generation runs on every `strapi develop` start. The cost is that `export *` is not followed. JS sources are skipped. A source that cannot be read logs a warning and keeps its inferred type, so the generation does not stop.
 
