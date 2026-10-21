@@ -7,6 +7,7 @@ const mockUpdateDocument = jest.fn();
 const mockPublish = jest.fn();
 const mockSetParentFormValue = jest.fn();
 const mockDispatch = jest.fn();
+const mockResetForm = jest.fn();
 const mockCountDraftRelations = jest.fn();
 const mockUseDraftRelationCountQuery = jest.fn();
 const mockDiscard = jest.fn();
@@ -59,7 +60,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
       validate: async () => ({ errors: undefined }),
       setSubmitting: jest.fn(),
       setErrors: jest.fn(),
-      resetForm: jest.fn(),
+      resetForm: mockResetForm,
     }),
   useQueryParams: () => [{ rawQuery: '', query: {} }],
   useGuidedTour: () => jest.fn(),
@@ -549,6 +550,31 @@ describe('nested relation parent updates', () => {
         type: 'CLEAR_PENDING_CONNECTS',
         payload: { documentMeta: { model: 'api::child.child', documentId: 'existing-child' } },
       })
+    );
+  });
+  it('preserves unsaved changes when updating a document fails with an ApplicationError', async () => {
+    mockResetForm.mockClear();
+    mockDispatch.mockClear();
+
+    mockUpdateDocument.mockResolvedValue({
+      error: {
+        name: 'ApplicationError',
+        message: 'Something went wrong',
+      },
+    });
+
+    const { user } = render(
+      <ExistingDocumentActionHarness Action={UpdateAction} label="Save existing" />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Save existing' }));
+
+    await waitFor(() => {
+      expect(mockResetForm).not.toHaveBeenCalled();
+    });
+
+    expect(mockDispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'CLEAR_PENDING_CONNECTS' })
     );
   });
 });
