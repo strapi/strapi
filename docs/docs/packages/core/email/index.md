@@ -18,13 +18,13 @@ The admin panel uses it to send password reset emails. The `users-permissions` p
 
 ### Provider
 
-A provider is a module that exports `init(providerOptions, settings)` and returns an object with a `send` function. It can also return `verify`, `isIdle`, `close` and `getCapabilities`. The `bootstrap` function reads `plugin::email` config, loads the module `@strapi/provider-email-<provider>` (or the plain module name when no such package exists), and stores the instance in `strapi.plugin('email').provider`. If the module fails to load, bootstrap throws `Could not load email provider`. See [`bootstrap.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/bootstrap.ts).
+A provider is a module that exports `init(providerOptions, settings)` and returns an object with a `send` function. It can also return `verify`, `isIdle`, `close` and `getCapabilities`. The contract is `Providers.Email.Factory` and `Providers.Email.Provider` in `@strapi/types`. The official providers check their export against it with `satisfies Providers.Email.Factory<ProviderOptions>`, and export their `name`, e.g. `nodemailer`. See [`providers/email.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/providers/email.ts). The `bootstrap` function reads `plugin::email` config. `provider` is an imported provider module, which must have a `name`, or a name. `Providers.Email.Config<typeof provider>` types the config, and checks `providerOptions` against the options of the provider's `init`. A name loads the module `@strapi/provider-email-<provider>` (or the plain module name when no such package exists) and logs a deprecation warning. Resolving by name and the default `sendmail` provider will both be removed in the next major, so the default warns too. The plugin imports `@strapi/provider-email-sendmail` statically for `sendmail`. It also warns when a module resolved by name exports no `name`, or a `name` that differs from the configured one. If the module fails to load, bootstrap throws `Could not load email provider`. `bootstrap` replaces `plugin::email.provider` with the provider name, which the `test` route reads, and stores the instance in `strapi.plugin('email').provider`. See [`bootstrap.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/bootstrap.ts).
 
 The default config uses the `sendmail` provider and a `defaultFrom` address. The package depends on `@strapi/provider-email-sendmail` for this default. See [`config.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/config.ts).
 
 ### Email service
 
-The `email` service has three functions: `send`, `sendTemplatedEmail` and `getProviderSettings`. `send` passes the options to the provider. `sendTemplatedEmail` fills `subject`, `text` and `html` with a lodash template, and allows only the variables that exist in the data object. Other code calls it as `strapi.plugin('email').service('email')`. See [`services/email.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/services/email.ts).
+The `email` service has four functions: `send`, `sendTemplatedEmail`, `getProvider` and `getProviderSettings`. `send` passes the options to the provider. `getProvider` returns the provider instance typed as `Providers.Email.Provider`. `sendTemplatedEmail` fills `subject`, `text` and `html` with a lodash template, and allows only the variables that exist in the data object. Other code calls it as `strapi.plugin('email').service('email')`. See [`services/email.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/services/email.ts).
 
 ### Routes
 
@@ -36,7 +36,7 @@ The plugin defines the middleware `plugin::email.rateLimit`, built on `koa2-rate
 
 ### Settings page
 
-The admin part adds an `Email Plugin` section to the admin settings with `app.addSettingsLink`. The page shows the config from the `settings` route and offers a test email. It also offers a connection check when the provider has a `verify` function. The `capabilities` and `isIdle` fields come from optional provider functions. The types are in [`shared/types.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/shared/types.ts).
+The admin part adds an `Email Plugin` section to the admin settings with `app.addSettingsLink`. The page shows the config from the `settings` route and offers a test email. It also offers a connection check when the provider has a `verify` function. The `capabilities` and `isIdle` fields come from optional provider functions. The response types are in [`shared/types.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/shared/types.ts). They reuse `Providers.Email.Capabilities` and `Providers.Email.Settings` from `@strapi/types`.
 
 ## Related
 

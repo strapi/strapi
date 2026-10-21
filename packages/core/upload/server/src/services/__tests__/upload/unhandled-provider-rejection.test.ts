@@ -61,6 +61,7 @@ const getFileData = () => ({
   filepath: imageFilePath,
   getStream: () => fs.createReadStream(imageFilePath),
   hash: 'image_d9b4f84424',
+  mime: 'image/png',
   height: 1000,
   size: 4,
   width: 1500,

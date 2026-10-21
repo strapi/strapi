@@ -1,4 +1,5 @@
 import type { MediaFolderNode } from '../schemas';
+import type { FileEntity } from '../../types';
 
 type RawFolder = {
   id?: unknown;
@@ -6,8 +7,11 @@ type RawFolder = {
   children?: unknown;
 };
 
-type RawAsset = Record<string, unknown> & {
-  folder?: RawFolder | null;
+/**
+ * A file row: `folder` is the folder id, or the folder when it is populated.
+ */
+type RawAsset = Partial<Record<keyof FileEntity, unknown>> & {
+  folder?: RawFolder | number | null;
 };
 
 /** Coerces a value to a string, or null when it is absent. Timestamps arrive as Date or string. */
@@ -46,7 +50,7 @@ export const sanitizeMediaAsset = (asset: RawAsset) => {
     height: toNullableNumber(asset.height),
     ext: toNullableString(asset.ext),
     folder:
-      folder !== null && folder !== undefined && folder.id !== undefined
+      typeof folder === 'object' && folder !== null && folder.id !== undefined
         ? { id: Number(folder.id), name: String(folder.name ?? '') }
         : null,
     createdAt: toNullableString(asset.createdAt),

@@ -1,3 +1,6 @@
+const sendmail = require('@strapi/provider-email-sendmail');
+const local = require('@strapi/provider-upload-local');
+
 const allowedMediaTypes = [
   'image/*',
   'video/*',
@@ -30,8 +33,14 @@ module.exports = () => ({
       },
     },
   },
+  email: {
+    config: {
+      provider: sendmail,
+    },
+  },
   upload: {
     config: {
+      provider: local,
       security: {
         allowedTypes: allowedMediaTypes,
         deniedTypes,

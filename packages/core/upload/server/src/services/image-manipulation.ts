@@ -113,14 +113,12 @@ const resizeFileTo = async (
     filepath: filePath,
     path: file.path || null,
     getStream: () => fs.createReadStream(filePath),
-  };
-
-  Object.assign(newFile, {
     width,
     height: pageHeight ?? height,
     size: size ? bytesToKbytes(size) : 0,
     sizeInBytes: size,
-  });
+  };
+
   return newFile;
 };
 

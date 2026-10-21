@@ -19,6 +19,7 @@ Stores uploaded files on the local filesystem in the `public/uploads/` directory
 - Stores files in `<strapi.dirs.static.public>/uploads/` with filename `<hash><ext>`; checks that the uploads folder exists on init.
 - URL set to `/<hash><ext>` (relative to public directory).
 - Supports both stream and buffer upload paths; replaces by writing new file first, then deleting old if the path changed (never leaves a gap).
+- The export checks itself against `Providers.Upload.Factory` from `@strapi/types` with `satisfies`. `@strapi/types` is an optional peer dependency. The published typings import it, so a project that type-checks them needs `@strapi/types` installed; a Strapi app gets it through `@strapi/strapi`.
 - Source: [github.com/strapi/strapi/tree/develop/packages/providers/upload-local](https://github.com/strapi/strapi/tree/develop/packages/providers/upload-local)
 
 ## Related

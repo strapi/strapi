@@ -1,35 +1,86 @@
-import type { File as FormidableFile } from 'formidable';
+import type { Readable } from 'node:stream';
+import type { Providers } from '@strapi/types';
 
-export type InputFile = FormidableFile & {
-  path?: string;
+/**
+ * A file that enters the upload pipeline: a multipart part parsed by formidable,
+ * or a file fetched from a URL (`fetchUrlToInputFile`). Its content sits in a
+ * temporary file at `filepath`.
+ *
+ * This is not formidable's `File` type, because:
+ * - files fetched from a URL go through the same pipeline and are not formidable
+ *   files (they lack `newFilename`, `hashAlgorithm`, `toJSON`, ...);
+ * - the pipeline only reads the fields listed here.
+ *
+ * A formidable `File` still matches this type structurally.
+ */
+export interface InputFile {
+  filepath: string;
+  originalFilename?: string | null;
+  mimetype?: string | null;
+  /**
+   * Size in bytes.
+   */
+  size: number;
   tmpWorkingDirectory?: string;
-  provider?: string;
-};
+  /**
+   * Set by the upload security check from the file content.
+   */
+  detectedMimeType?: string;
+}
 
 export interface FocalPoint {
   x: number;
   y: number;
 }
 
-export interface File {
+/**
+ * One entry of a file's `formats`: a thumbnail or a responsive size of an image.
+ * Stored as JSON in the file row.
+ */
+export interface FileFormat {
+  name: string;
+  hash: string;
+  ext?: string;
+  mime: string;
+  path?: string | null;
+  width?: number | null;
+  height?: number | null;
+  /**
+   * Size in kilobytes.
+   */
+  size: number;
+  sizeInBytes?: number;
+  url: string;
+  provider_metadata?: Record<string, unknown> | null;
+  /**
+   * Set on the signed copy the upload plugin returns, never stored.
+   */
+  isUrlSigned?: boolean;
+}
+
+/**
+ * A row of the `plugin::upload.file` content type.
+ */
+export interface FileEntity {
   id: number;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
   focalPoint?: FocalPoint | null;
-  width?: number;
-  height?: number;
-  formats?: Record<string, unknown>;
+  width?: number | null;
+  height?: number | null;
+  formats?: Record<string, FileFormat> | null;
   hash: string;
   ext?: string;
-  mime?: string;
-  size?: number;
-  sizeInBytes?: number;
-  url?: string;
-  previewUrl?: string;
-  path?: string | null;
-  provider?: string;
-  provider_metadata?: Record<string, unknown>;
+  mime: string;
+  /**
+   * Size in kilobytes.
+   */
+  size: number;
+  url: string;
+  previewUrl?: string | null;
+  provider: string;
+  provider_metadata?: Record<string, unknown> | null;
   isUrlSigned?: boolean;
   folder?: number | null;
   folderPath?: string;
@@ -44,6 +95,13 @@ export interface File {
   updatedBy?: number;
 }
 
+/**
+ * A file the upload plugin can sign: a file entity, or a file built from a bare
+ * URL found in rich text, for which only the URL, hash and extension are known.
+ */
+export type SignableFile = Providers.Upload.SignableFile &
+  Partial<Pick<FileEntity, 'provider' | 'formats' | 'isUrlSigned'>>;
+
 export interface Folder {
   id: number;
   name: string;
@@ -57,7 +115,7 @@ export interface Folder {
    */
   children?: number[];
   path: string;
-  files?: File[];
+  files?: FileEntity[];
 }
 
 export interface Config {
@@ -80,13 +138,84 @@ export interface Config {
   };
 }
 
-export interface UploadableFile extends Omit<File, 'id'> {
-  filepath?: string;
-  getStream: () => NodeJS.ReadableStream;
-  stream?: NodeJS.ReadableStream;
-  buffer?: Buffer;
-  tmpWorkingDirectory?: string;
+/**
+ * A provider module imported in the `plugin::upload` config.
+ * `init` takes `never` so a module typed with its own options matches.
+ */
+export type ProviderModule = Providers.Upload.Factory<never>;
+
+/**
+ * A provider module as the upload plugin loads it. A module resolved by name can
+ * predate `name`, so it is checked at runtime.
+ */
+export type LoadedProviderModule = Omit<ProviderModule, 'name'> & { name?: unknown };
+
+/**
+ * The `plugin::upload` config as the user writes it. The upload plugin
+ * resolves `provider` at register and replaces it with the provider name, so
+ * the config read afterwards is a {@link Config}.
+ */
+export interface UserConfig extends Omit<Config, 'provider'> {
+  /**
+   * An imported provider module, or a provider name (deprecated, except for the
+   * default `local` provider).
+   */
+  provider: string | ProviderModule;
 }
+
+type Writable<T> = { -readonly [K in keyof T]: T[K] };
+
+/**
+ * An incoming file after the upload plugin normalized it: named, hashed, sized in
+ * kilobytes and readable as a stream. The plugin hands it to the provider as a
+ * `Providers.Upload.PendingFile`, then saves it as a `FileEntity`.
+ */
+export interface UploadableFile extends Writable<Providers.Upload.PendingFile> {
+  focalPoint?: FocalPoint | null;
+  /**
+   * The thumbnail and responsive formats, uploaded along with the file.
+   */
+  formats?: Record<string, UploadableFile> | null;
+  folder?: number | null;
+  folderPath?: string;
+  related?: FileEntity['related'];
+  /**
+   * Set after the provider stored the file.
+   */
+  provider?: string;
+  filepath?: string;
+  tmpWorkingDirectory?: string;
+  getStream: () => Readable;
+}
+
+/**
+ * The provider the upload plugin stores in `strapi.plugin('upload').provider`:
+ * the provider instance, with defaults for the optional methods.
+ */
+export interface UploadProvider extends Providers.Upload.Provider {
+  checkFileSize: NonNullable<Providers.Upload.Provider['checkFileSize']>;
+  getSignedUrl: NonNullable<Providers.Upload.Provider['getSignedUrl']>;
+  isPrivate: NonNullable<Providers.Upload.Provider['isPrivate']>;
+  extend: (obj: Partial<UploadProvider>) => void;
+}
+
+/**
+ * The image the AI metadata service sends for captioning: the URL of a stored
+ * file or of its thumbnail.
+ */
+export interface AIMetadataImage {
+  /**
+   * Relative to the server URL for the `local` provider, absolute otherwise.
+   */
+  url: string;
+  mime: string;
+  provider: string;
+}
+
+/**
+ * @deprecated Use {@link FileEntity}. `File` also shadows the global `File` type.
+ */
+export type File = FileEntity;
 
 export type FileInfo = {
   name?: string | null;

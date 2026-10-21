@@ -170,6 +170,8 @@ async function run(args: string[]): Promise<void> {
       '@strapi/database': version,
       '@strapi/plugin-users-permissions': version,
       '@strapi/plugin-cloud': version,
+      '@strapi/provider-email-sendmail': version,
+      '@strapi/provider-upload-local': version,
       // third party
       react: '^18.0.0',
       'react-dom': '^18.0.0',

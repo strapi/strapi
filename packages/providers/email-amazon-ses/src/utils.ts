@@ -1,4 +1,5 @@
 import type { SendEmailCommandInput, SESClientConfig } from '@aws-sdk/client-ses';
+import type { Providers } from '@strapi/types';
 
 /** Default SES API host when `amazon` is omitted (same as legacy node-ses). */
 export const DEFAULT_SES_ENDPOINT = 'https://email.us-east-1.amazonaws.com';
@@ -18,9 +19,9 @@ export interface ProviderOptions extends Omit<SESClientConfig, 'credentials'> {
   amazon?: string;
 }
 
-export interface ProviderSettings {
-  defaultFrom: string;
-  defaultReplyTo: string | string[];
+/** SES accepts several reply-to addresses, so `defaultReplyTo` can be a list. */
+export interface ProviderSettings extends Omit<Providers.Email.Settings, 'defaultReplyTo'> {
+  defaultReplyTo?: string | string[];
 }
 
 export interface SendOptions {
@@ -31,7 +32,7 @@ export interface SendOptions {
   replyTo?: string | string[];
   subject: string;
   text: string;
-  html: string;
+  html?: string;
   [key: string]: unknown;
 }
 
