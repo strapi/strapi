@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import { objects, template } from '@strapi/utils';
 
+import type { Providers } from '@strapi/types';
 import type {
   EmailConfig,
   EmailOptions,
@@ -13,7 +14,9 @@ const { createStrictInterpolationRegExp } = template;
 
 const getProviderSettings = (): EmailConfig => strapi.config.get('plugin::email');
 
-const send = async (options: SendOptions) => strapi.plugin('email').provider.send(options);
+const getProvider = (): Providers.Email.Provider => strapi.plugin('email').provider;
+
+const send = async (options: SendOptions) => getProvider().send(options);
 
 /**
  * fill subject, text and html using lodash template
@@ -39,22 +42,19 @@ const sendTemplatedEmail = (
   const allowedInterpolationVariables = objects.keysDeep(data);
   const interpolate = createStrictInterpolationRegExp(allowedInterpolationVariables, 'g');
 
-  const templatedAttributes = attributes.reduce(
-    (compiled, attribute) =>
-      emailTemplate[attribute]
-        ? Object.assign(compiled, {
-            [attribute]: _.template(emailTemplate[attribute], {
-              interpolate,
-            })(data),
-          })
-        : compiled,
-    {}
-  );
+  const compile = (value: string) => _.template(value, { interpolate })(data);
 
-  return strapi.plugin('email').provider.send({ ...emailOptions, ...templatedAttributes });
+  const templatedAttributes = {
+    subject: compile(emailTemplate.subject),
+    text: compile(emailTemplate.text),
+    ...(emailTemplate.html ? { html: compile(emailTemplate.html) } : {}),
+  };
+
+  return getProvider().send({ ...emailOptions, ...templatedAttributes });
 };
 
 const emailService = () => ({
+  getProvider,
   getProviderSettings,
   send,
   sendTemplatedEmail,
