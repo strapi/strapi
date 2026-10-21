@@ -521,6 +521,7 @@ jobs:
           STRAPI_LICENSE: ${{ secrets.strapiLicense }}
         with:
           runEE: true
+          disableLicensePing: false
           domains: enterprise-plugins
           jestOptions: '--project=chromium'
 
