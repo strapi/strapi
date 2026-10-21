@@ -1,11 +1,14 @@
-import type { Plugin } from '@strapi/types';
+import type { Plugin, Providers } from '@strapi/types';
 
+/**
+ * The resolved `plugin::email` config. The plugin loader merges the user config
+ * over the defaults in `config.ts` with `defaultsDeep`, so `providerOptions`
+ * and `settings.defaultFrom` are always set.
+ */
 export interface EmailConfig extends Record<string, unknown> {
   provider: string;
-  providerOptions?: object;
-  settings?: {
-    defaultFrom?: string;
-  };
+  providerOptions: object;
+  settings: Providers.Email.Settings;
 }
 
 type LoadedPluginConfig = Plugin.LoadedPlugin['config'];
