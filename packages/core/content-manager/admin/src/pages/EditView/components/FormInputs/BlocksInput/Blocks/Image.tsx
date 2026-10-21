@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FlexComponent } from '@strapi/design-system';
 import { Image as Picture } from '@strapi/icons';
-import { type Element, Transforms, Editor } from 'slate';
+import { type Element, Transforms, Editor, Range } from 'slate';
 import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import { styled, css } from 'styled-components';
 
@@ -192,7 +192,15 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
     },
     matchNode: (node) => node.type === 'image',
     isInBlocksSelector: true,
-    handleBackspaceKey(editor) {
+    handleBackspaceKey(editor, event) {
+      // A selection across several blocks is Slate's own deletion to make
+      if (editor.selection && Range.isExpanded(editor.selection)) {
+        return;
+      }
+
+      // The image is removed here: Slate's own Backspace would then delete the block before it
+      event.preventDefault();
+
       // Prevent issue where the image remains when it's the only block in the document
       if (editor.children.length === 1) {
         Transforms.setNodes(editor, {

@@ -270,4 +270,59 @@ describe('Image', () => {
       },
     ]);
   });
+
+  const threeImages = () => [
+    {
+      type: 'image',
+      image: { ...mockImage, name: 'first.png' },
+      children: [{ type: 'text', text: '' }],
+    },
+    {
+      type: 'image',
+      image: { ...mockImage, name: 'second.png' },
+      children: [{ type: 'text', text: '' }],
+    },
+    {
+      type: 'image',
+      image: { ...mockImage, name: 'third.png' },
+      children: [{ type: 'text', text: '' }],
+    },
+  ];
+
+  it("deletes only the selected image and stops Slate's own Backspace", () => {
+    const baseEditor = createEditor();
+    // @ts-expect-error the mock image is enough for the block
+    baseEditor.children = threeImages();
+
+    Transforms.select(baseEditor, { path: [1, 0], offset: 0 });
+
+    const preventDefault = jest.fn();
+    // @ts-expect-error we don't need a full event object
+    imageBlocks.image.handleBackspaceKey!(baseEditor, { preventDefault });
+
+    // Otherwise Slate deletes again, from wherever the removal left the cursor:
+    // the image before.
+    expect(preventDefault).toHaveBeenCalled();
+    expect(
+      baseEditor.children.map((node) => ('image' in node ? node.image.name : node.type))
+    ).toEqual(['first.png', 'third.png']);
+  });
+
+  it('leaves a selection across several blocks to Slate', () => {
+    const baseEditor = createEditor();
+    // @ts-expect-error the mock image is enough for the block
+    baseEditor.children = threeImages();
+
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [2, 0], offset: 0 },
+    });
+
+    const preventDefault = jest.fn();
+    // @ts-expect-error we don't need a full event object
+    imageBlocks.image.handleBackspaceKey!(baseEditor, { preventDefault });
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(baseEditor.children).toHaveLength(3);
+  });
 });
