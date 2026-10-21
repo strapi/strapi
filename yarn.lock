@@ -29089,6 +29089,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"strict-types@workspace:examples/strict-types":
+  version: 0.0.0-use.local
+  resolution: "strict-types@workspace:examples/strict-types"
+  dependencies:
+    "@strapi/strapi": "workspace:*"
+    better-sqlite3: "npm:12.11.1"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-router-dom: "npm:6.30.6"
+    styled-components: "npm:6.4.1"
+  languageName: unknown
+  linkType: soft
+
 "string-argv@npm:^0.3.2, string-argv@npm:~0.3.1":
   version: 0.3.2
   resolution: "string-argv@npm:0.3.2"
