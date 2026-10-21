@@ -1,4 +1,4 @@
-import { RELEASE_MODEL_UID } from '../../constants';
+import { RELEASE_ACTION_OUTCOMES, RELEASE_MODEL_UID } from '../../constants';
 
 export default {
   collectionName: 'strapi_release_actions',
@@ -43,19 +43,10 @@ export default {
     isEntryValid: {
       type: 'boolean',
     },
-    // What the run did with the entry, or `skipped_missed` when the release's scheduled run never
-    // happened. Null when nothing recorded it.
+    // What happened to the entry when its release froze. Null while the release is planned.
     outcome: {
       type: 'enumeration',
-      enum: [
-        'published',
-        'unpublished',
-        'skipped_invalid',
-        'skipped_not_approved',
-        'skipped_error',
-        'skipped_held',
-        'skipped_missed',
-      ],
+      enum: [...RELEASE_ACTION_OUTCOMES],
     },
     reason: {
       type: 'json',

@@ -15,8 +15,17 @@ const PUBLISHABLE = {
 
 // Typed as the real helper, so a change to its shape breaks this mock at compile time
 // instead of at run time. Every publish action is publishable unless a test says otherwise.
+const checkPublishActions = <TAction extends { id: number | string; type: string }>(
+  actions: readonly TAction[],
+  check: (action: TAction) => utils.EntryPublishability | Error
+) =>
+  new Map(
+    actions
+      .filter((action) => action.type === 'publish')
+      .map((action) => [action.id, check(action)])
+  );
 const allPublishable: typeof utils.getPublishabilityForActions = async (actions) =>
-  actions.map((action) => ({ action, publishability: PUBLISHABLE }));
+  checkPublishActions(actions, () => PUBLISHABLE);
 const mockGetPublishabilityForActions = jest.fn(allPublishable);
 
 jest.mock('../../utils', () => ({
@@ -136,8 +145,9 @@ const mockUser = {
   updatedAt: '01/01/1900',
 };
 
+// The release row, as read under its lock
 const lockedReleaseDb = (
-  locked: { releasedAt: Date | null } | undefined,
+  locked: ({ releasedAt: Date | null } & Record<string, unknown>) | undefined,
   queries: Record<string, jest.Mock>
 ) => ({
   ...baseStrapiMock.db,
@@ -170,7 +180,10 @@ describe('Release service', () => {
         updateMany: jest.fn(),
         count: jest.fn(),
       };
-      const strapiMock = { ...baseStrapiMock, db: lockedReleaseDb(locked, queries) };
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: lockedReleaseDb(locked && { ...stored, ...locked }, queries),
+      };
 
       // @ts-expect-error Ignore missing properties
       return { releaseService: createReleaseService({ strapi: strapiMock }), queries };
@@ -640,9 +653,8 @@ describe('Release service', () => {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
         db: lockedReleaseDb(
-          { releasedAt: null },
+          { id: 1, name: 'March', releasedAt: null },
           {
-            findOne: jest.fn().mockResolvedValue({ id: 1, name: 'March', releasedAt: null }),
             update: jest.fn().mockResolvedValue({ id: 1, name: 'March', releasedAt: null }),
             updateMany: jest.fn(),
             count: jest.fn(),
@@ -703,18 +715,15 @@ describe('Release service', () => {
         releaseCondition: 'allow_partial',
       });
       mockGetPublishabilityForActions.mockImplementationOnce(async (actions) =>
-        actions.map((action) =>
+        checkPublishActions(actions, (action) =>
           action.entryDocumentId === 'invalid'
             ? {
-                action,
-                publishability: {
-                  publishable: false,
-                  outcome: 'skipped_invalid',
-                  reason: { validation: { errors: [] } },
-                  error: new errors.ValidationError('Invalid'),
-                },
+                publishable: false,
+                outcome: 'skipped_invalid',
+                reason: { validation: { errors: [] } },
+                error: new errors.ValidationError('Invalid'),
               }
-            : { action, publishability: PUBLISHABLE }
+            : PUBLISHABLE
         )
       );
       const publish = jest.fn(async ({ documentId }: { documentId: string }) => {
@@ -766,6 +775,152 @@ describe('Release service', () => {
         unpublished: 0,
         failed: 2,
       });
+    });
+
+    describe('an entry whose check throws', () => {
+      const run = async ({
+        releaseCondition,
+        trigger,
+        entries,
+      }: {
+        releaseCondition: 'allow_partial' | 'all_or_nothing';
+        trigger: 'manual' | 'scheduled';
+        entries: ('valid' | 'invalid' | 'unreadable')[];
+      }) => {
+        mockExecute.mockReturnValueOnce({
+          id: 1,
+          name: 'March',
+          releasedAt: null,
+          releaseCondition,
+        });
+        if (trigger === 'manual' && !entries.includes('valid')) {
+          // The status recalculation's lock, for a rejected manual publish
+          mockExecute.mockReturnValueOnce({ releasedAt: null, releaseCondition });
+        }
+        mockGetPublishabilityForActions.mockImplementationOnce(async (actions) =>
+          checkPublishActions(actions, (action) => {
+            if (action.entryDocumentId === 'unreadable') {
+              return new TypeError('connection lost');
+            }
+            return action.entryDocumentId === 'invalid'
+              ? {
+                  publishable: false,
+                  outcome: 'skipped_invalid',
+                  reason: { validation: { errors: [] } },
+                  error: new errors.ValidationError('Invalid entry'),
+                }
+              : PUBLISHABLE;
+          })
+        );
+        const publish = jest.fn();
+        const actionUpdate = jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data }));
+        const actionUpdateMany = jest.fn();
+        const storePublishValidity = jest.fn();
+        const strapiMock = {
+          ...baseStrapiMock,
+          eventHub: { emit: jest.fn() },
+          log: { info: jest.fn(), warn: jest.fn() },
+          documents: jest.fn().mockReturnValue({ publish, unpublish: jest.fn() }),
+          plugin: jest.fn().mockReturnValue({
+            service: jest.fn().mockReturnValue({
+              countActions: jest.fn().mockResolvedValue(entries.length),
+              storePublishValidity,
+            }),
+          }),
+          db: {
+            ...baseStrapiMock.db,
+            savepoint: jest.fn((cb: () => unknown) => cb()),
+            query: jest.fn().mockReturnValue({
+              findMany: jest.fn().mockReturnValue(
+                entries.map((entryDocumentId, index) => ({
+                  id: index + 1,
+                  contentType: 'collectionType',
+                  type: 'publish',
+                  entryDocumentId,
+                }))
+              ),
+              update: actionUpdate,
+              updateMany: actionUpdateMany,
+            }),
+          },
+          contentTypes: { collectionType: { kind: 'collectionType' } },
+        };
+
+        // @ts-expect-error Ignore missing properties
+        const releaseService = createReleaseService({ strapi: strapiMock });
+        const result = await releaseService.publish(1, { trigger }).then(
+          (release) => ({ release }),
+          (error: Error) => ({ error })
+        );
+
+        return {
+          result,
+          publish,
+          actionUpdate,
+          actionUpdateMany,
+          storePublishValidity,
+          strapiMock,
+        };
+      };
+
+      const UNCHECKED = {
+        outcome: 'skipped_error',
+        reason: { error: { name: 'TypeError' } },
+        isEntryValid: false,
+      };
+
+      it('allow_partial: is skipped as an error, and the others still go out', async () => {
+        const { result, publish, actionUpdate } = await run({
+          releaseCondition: 'allow_partial',
+          trigger: 'manual',
+          entries: ['valid', 'unreadable'],
+        });
+
+        expect(result).toMatchObject({ release: { status: 'partial' } });
+        expect(publish).toHaveBeenCalledTimes(1);
+        expect(actionUpdate).toHaveBeenCalledWith({ where: { id: 2 }, data: UNCHECKED });
+      });
+
+      it('all_or_nothing, scheduled: fails the run and holds back the others', async () => {
+        const { result, publish, actionUpdate, actionUpdateMany } = await run({
+          releaseCondition: 'all_or_nothing',
+          trigger: 'scheduled',
+          entries: ['valid', 'unreadable'],
+        });
+
+        expect(result).toMatchObject({ error: { name: 'TypeError' } });
+        expect(publish).not.toHaveBeenCalled();
+        expect(actionUpdate).toHaveBeenCalledWith({ where: { id: 2 }, data: UNCHECKED });
+        expect(actionUpdateMany).toHaveBeenCalledWith({
+          where: { id: { $in: [1] } },
+          data: { outcome: 'skipped_held', reason: null, isEntryValid: true },
+        });
+      });
+
+      it.each([
+        ['all_or_nothing', ['invalid', 'unreadable']],
+        ['allow_partial', ['invalid', 'unreadable']],
+      ] as const)(
+        "%s, manual, blocked: is refused with the invalid entry's error and records no run",
+        async (releaseCondition, entries) => {
+          const { result, publish, actionUpdateMany, storePublishValidity, strapiMock } = await run(
+            {
+              releaseCondition,
+              trigger: 'manual',
+              entries: [...entries],
+            }
+          );
+
+          expect(result).toMatchObject({ error: { message: 'Invalid entry' } });
+          expect(publish).not.toHaveBeenCalled();
+          expect(actionUpdateMany).not.toHaveBeenCalled();
+          expect(storePublishValidity).toHaveBeenCalledWith(entries.length, {
+            isEntryValid: false,
+            reason: { error: { name: 'TypeError' } },
+          });
+          expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
+        }
+      );
     });
 
     it('rolls the run back when writing its result fails: nothing recorded, sent or audited', async () => {
@@ -913,7 +1068,7 @@ describe('Release service', () => {
       const releaseService = createReleaseService({ strapi: strapiMock });
 
       await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
-        'Release publish failed'
+        'Non-Error thrown'
       );
       expect(strapiMock.db.query().update).not.toHaveBeenCalled();
       expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
@@ -946,18 +1101,15 @@ describe('Release service', () => {
         .mockReturnValueOnce({ releasedAt: null, releaseCondition: 'all_or_nothing' });
       const notPublishableError = new errors.ValidationError('Invalid entry');
       mockGetPublishabilityForActions.mockImplementationOnce(async (actions) =>
-        actions.map((action) =>
+        checkPublishActions(actions, (action) =>
           action.entryDocumentId === 'invalid'
             ? {
-                action,
-                publishability: {
-                  publishable: false,
-                  outcome: 'skipped_invalid',
-                  reason: { validation: { errors: [] } },
-                  error: notPublishableError,
-                },
+                publishable: false,
+                outcome: 'skipped_invalid',
+                reason: { validation: { errors: [] } },
+                error: notPublishableError,
               }
-            : { action, publishability: PUBLISHABLE }
+            : PUBLISHABLE
         )
       );
       const releaseQuery = {
@@ -974,6 +1126,7 @@ describe('Release service', () => {
         update: jest.fn(),
       };
       const publish = jest.fn();
+      const storePublishValidity = jest.fn();
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
@@ -982,6 +1135,7 @@ describe('Release service', () => {
           service: jest.fn().mockReturnValue({
             // Every action, then the publish actions that aren't publishable
             countActions: jest.fn().mockResolvedValueOnce(2).mockResolvedValueOnce(1),
+            storePublishValidity,
           }),
         }),
         db: {
@@ -1003,17 +1157,11 @@ describe('Release service', () => {
       expect(strapiMock.db.savepoint).not.toHaveBeenCalled();
       expect(publish).not.toHaveBeenCalled();
       // The check's result is stored, each entry with its reason, so the status reads blocked
-      expect(releaseQuery.updateMany).toHaveBeenCalledWith({
-        where: { id: { $in: [1] } },
-        data: { isEntryValid: true, reason: null },
-      });
+      expect(storePublishValidity.mock.calls).toStrictEqual([
+        [1, { isEntryValid: true, reason: null }],
+        [2, { isEntryValid: false, reason: { validation: { errors: [] } } }],
+      ]);
       expect(releaseQuery.update.mock.calls).toStrictEqual([
-        [
-          {
-            where: { id: 2 },
-            data: { isEntryValid: false, reason: { validation: { errors: [] } } },
-          },
-        ],
         [{ where: { id: 1 }, data: { status: 'blocked' } }],
       ]);
       // Not a run: no releases.publish webhook and no release.trigger audit event
@@ -1262,7 +1410,7 @@ describe('Release service', () => {
     it('marks every entry of a missed release as missed and counts it as skipped', async () => {
       const { service, updateMany, update } = setup([10, 11]);
 
-      const release = await service.recordMissedRun(1);
+      const release = await service.recordMissedRun(1, 'missed_schedule');
 
       expect(updateMany.mock.calls).toStrictEqual([
         [
@@ -1289,7 +1437,7 @@ describe('Release service', () => {
     it('freezes an empty missed release with no skipped entries', async () => {
       const { service, updateMany, update } = setup([]);
 
-      await service.recordMissedRun(1);
+      await service.recordMissedRun(1, 'missed_schedule');
 
       expect(updateMany).not.toHaveBeenCalled();
       expect(update).toHaveBeenCalledWith(
@@ -1301,7 +1449,7 @@ describe('Release service', () => {
       const { service, updateMany, update } = setup([10]);
       update.mockResolvedValueOnce(null);
 
-      expect(await service.recordMissedRun(1)).toBeNull();
+      expect(await service.recordMissedRun(1, 'missed_schedule')).toBeNull();
       expect(updateMany).not.toHaveBeenCalled();
     });
   });

@@ -5,6 +5,7 @@ const mockFindManyWithContentTypeEntryAttached = jest.fn();
 const mockFindManyWithoutContentTypeEntryAttached = jest.fn();
 const mockCountActions = jest.fn();
 const mockCountNotReadyByRelease = jest.fn();
+const mockCountByStatus = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
@@ -14,6 +15,7 @@ jest.mock('../../utils', () => ({
     findManyWithoutContentTypeEntryAttached: mockFindManyWithoutContentTypeEntryAttached,
     countActions: mockCountActions,
     countNotReadyByRelease: mockCountNotReadyByRelease,
+    countByStatus: mockCountByStatus,
     getContentTypesDataForActions: jest.fn(),
   })),
   getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
@@ -30,6 +32,8 @@ describe('Release controller', () => {
         pagination: {},
       });
       mockCountNotReadyByRelease.mockResolvedValue(new Map([[1, 2]]));
+      const statusCounts = { ready: 1, blocked: 0, empty: 0, done: 1, partial: 0, failed: 0 };
+      mockCountByStatus.mockResolvedValue(statusCounts);
       mockFindManyWithContentTypeEntryAttached.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
@@ -72,6 +76,8 @@ describe('Release controller', () => {
         { count: 3, notReadyCount: 2 },
         { count: 4 },
       ]);
+      // @ts-expect-error the context gets a body
+      expect(ctx.body.meta).toMatchObject({ pendingReleasesCount: 2, statusCounts });
     });
   });
   describe('create', () => {

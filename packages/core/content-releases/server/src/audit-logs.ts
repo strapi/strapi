@@ -91,7 +91,7 @@ export interface TriggerDetails {
   failed: number;
 }
 
-/** A run that released nothing: its writes were rolled back */
+/** A release that froze without releasing anything: a failed run, or a missed schedule */
 export interface TriggerFailureDetails {
   /**
    * Only the error name is stored, capped in length. Error objects may contain

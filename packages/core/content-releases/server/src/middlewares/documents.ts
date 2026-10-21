@@ -25,14 +25,14 @@ const createDeleteActionsOnDelete =
     }
 
     runAfterCommit(
-      { strapi },
       () =>
-        getService('release-action', { strapi }).deleteEntryActions({
+        getService('release-action', { strapi }).deletePlannedActions({
           contentType,
           entryDocumentId: documentId,
           ...(locale !== '*' && { locale }),
         }),
-      'Error while deleting release actions after delete'
+      'Error while deleting release actions after delete',
+      { strapi }
     );
 
     return result;
@@ -65,13 +65,17 @@ const createRevalidateActionsOnDraftChange =
     const drafts = action === 'discardDraft' && 'entries' in result ? result.entries : [result];
 
     runAfterCommit(
-      { strapi },
       async () => {
         for (const draft of drafts) {
-          await getService('release-action', { strapi }).revalidateEntryActions(contentType, draft);
+          await getService('release-action', { strapi }).revalidatePlannedActions({
+            contentType,
+            entryDocumentId: draft.documentId,
+            locale: draft.locale,
+          });
         }
       },
-      `Error while updating release actions after ${action}`
+      `Error while updating release actions after ${action}`,
+      { strapi }
     );
 
     return result;

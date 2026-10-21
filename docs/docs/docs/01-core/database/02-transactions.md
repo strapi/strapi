@@ -66,7 +66,7 @@ A nested transaction has no savepoint of its own: an error inside it that is cau
 
 ### Savepoints
 
-To undo only part of a transaction, run it in `strapi.db.savepoint`. If the callback throws, its writes are rolled back, the `onCommit` callbacks registered inside it are dropped (its `onRollback` callbacks run), and the error is rethrown; the transaction stays usable, on Postgres also after a database error. If it resolves, its writes and callbacks join the transaction. It throws outside a transaction.
+To undo only part of a transaction, run it in `strapi.db.savepoint`. If the callback throws, its writes are rolled back, the `onCommit` callbacks registered inside it are dropped (its `onRollback` callbacks run), and the error is rethrown; the transaction stays usable, on Postgres also after a database error. On MySQL, a deadlock rolls back the whole transaction, not just the savepoint. If it resolves, its writes and callbacks join the transaction. It throws outside a transaction.
 
 ```js
 await strapi.db.transaction(async () => {

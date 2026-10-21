@@ -33,14 +33,14 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         // Not awaited: the delete entry flow doesn't wait for its releases, and isn't blocked by
         // their failure, which is logged
         runAfterCommit(
-          { strapi },
           () =>
-            getService('release-action', { strapi }).deleteEntryActions({
+            getService('release-action', { strapi }).deletePlannedActions({
               contentType: model.uid,
               locale: where?.locale ?? null,
               ...(where?.documentId && { entryDocumentId: where.documentId }),
             }),
-          'Error while deleting release actions after entry deleteMany'
+          'Error while deleting release actions after entry deleteMany',
+          { strapi }
         );
       },
     });

@@ -52,6 +52,7 @@ describe('migrateIsValidAndStatusReleases', () => {
     jest.clearAllMocks();
     global.strapi = {
       db: {
+        inTransaction: () => false,
         query: jest.fn((uid: string) =>
           uid === RELEASE_ACTION_MODEL_UID
             ? { updateMany: actionUpdateMany }
@@ -68,7 +69,7 @@ describe('migrateIsValidAndStatusReleases', () => {
       { id: 10, actions: [action(1, 'publish'), action(2, 'unpublish')] },
     ]);
 
-    await migrateIsValidAndStatusReleases();
+    await migrateIsValidAndStatusReleases({ strapi });
     await flush();
 
     expect(actionUpdateMany.mock.calls).toStrictEqual([
@@ -85,7 +86,7 @@ describe('migrateIsValidAndStatusReleases', () => {
     ]);
     actionUpdateMany.mockRejectedValueOnce(new Error('write failed'));
 
-    await migrateIsValidAndStatusReleases();
+    await migrateIsValidAndStatusReleases({ strapi });
     await flush();
 
     expect(logError).toHaveBeenCalledWith(

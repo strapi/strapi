@@ -8,6 +8,8 @@ const revalidatePlannedActions = jest.fn();
 const logError = jest.fn();
 
 const strapi = {
+  // Startup runs outside a transaction
+  db: { inTransaction: () => false },
   plugin: () => ({ service: () => ({ revalidatePlannedActions }) }),
   log: { error: logError },
 } as unknown as Core.Strapi;

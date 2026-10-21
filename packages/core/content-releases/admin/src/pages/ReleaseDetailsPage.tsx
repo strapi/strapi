@@ -600,10 +600,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               <Badge>{key}</Badge>
             </Flex>
             <Table.Root
-              rows={releaseActions[key].map((item) => ({
-                ...item,
-                id: Number(item.entry.id),
-              }))}
+              rows={releaseActions[key]}
               headers={headers}
               isLoading={isLoading || isFetching}
             >
@@ -616,11 +613,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 <Table.Loading />
                 <Table.Body>
                   {releaseActions[key].map(
-                    ({ id, contentType, locale, type, entry, status }, actionIndex) => (
+                    (
+                      { id, contentType, locale, type, entry, entryDocumentId, status },
+                      actionIndex
+                    ) => (
                       <Tr key={id}>
                         <Td width="25%" maxWidth="200px">
                           <Typography ellipsis>{`${
-                            contentType.mainFieldValue || entry.id
+                            contentType.mainFieldValue || entry?.id || ''
                           }`}</Typography>
                         </Td>
                         {hasI18nEnabled && (
@@ -661,19 +661,21 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                         {!release.releasedAt && (
                           <>
                             <Td width="20%" minWidth="200px">
-                              <EntryValidationPopover
-                                action={type}
-                                schema={contentTypes?.[contentType.uid]}
-                                entry={entry}
-                                status={status}
-                              />
+                              {entry && (
+                                <EntryValidationPopover
+                                  action={type}
+                                  schema={contentTypes?.[contentType.uid]}
+                                  entry={entry}
+                                  status={status}
+                                />
+                              )}
                             </Td>
                             <Td>
                               <Flex justifyContent="flex-end">
                                 <ReleaseActionMenu.Root>
                                   <ReleaseActionMenu.ReleaseActionEntryLinkItem
                                     contentTypeUid={contentType.uid}
-                                    documentId={entry.documentId}
+                                    documentId={entryDocumentId}
                                     locale={locale?.code}
                                   />
                                   <ReleaseActionMenu.DeleteReleaseActionItem

@@ -9,8 +9,15 @@ type Context = Parameters<Modules.Documents.Middleware.Middleware>[0];
 const UID = 'api::article.article';
 const DRAFT = { documentId: 'doc-1', locale: 'en' };
 
-const deleteEntryActions = jest.fn();
-const revalidateEntryActions = jest.fn();
+// The planned actions of one entry's locale
+const entryWhere = (draft: { documentId: string; locale?: string }) => ({
+  contentType: UID,
+  entryDocumentId: draft.documentId,
+  locale: draft.locale,
+});
+
+const deletePlannedActions = jest.fn();
+const revalidatePlannedActions = jest.fn();
 const logError = jest.fn();
 
 // The caller's transaction: the work registered on its commit waits for `commit()`
@@ -23,7 +30,7 @@ const commit = () => {
 const strapi = {
   plugin: () => ({
     service: (name: string) =>
-      name === 'release-action' ? { deleteEntryActions, revalidateEntryActions } : undefined,
+      name === 'release-action' ? { deletePlannedActions, revalidatePlannedActions } : undefined,
   }),
   db: {
     // The middleware runs inside the caller's transaction unless a test says otherwise
@@ -52,8 +59,8 @@ const runMiddleware = async (
 beforeEach(() => {
   jest.clearAllMocks();
   commitCallbacks = [];
-  deleteEntryActions.mockResolvedValue(undefined);
-  revalidateEntryActions.mockResolvedValue(undefined);
+  deletePlannedActions.mockResolvedValue(undefined);
+  revalidatePlannedActions.mockResolvedValue(undefined);
 });
 
 describe('createRevalidateActionsOnDraftChange', () => {
@@ -71,7 +78,7 @@ describe('createRevalidateActionsOnDraftChange', () => {
   it("revalidates the updated entry's release actions", async () => {
     await changeDraft('update');
 
-    expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, DRAFT]]);
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([[entryWhere(DRAFT)]]);
   });
 
   it("waits for the caller's transaction to commit", async () => {
@@ -86,12 +93,12 @@ describe('createRevalidateActionsOnDraftChange', () => {
     await setImmediate();
 
     // The entry's change could still roll back, and its draft isn't committed yet
-    expect(revalidateEntryActions).not.toHaveBeenCalled();
+    expect(revalidatePlannedActions).not.toHaveBeenCalled();
 
     commit();
     await setImmediate();
 
-    expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, DRAFT]]);
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([[entryWhere(DRAFT)]]);
   });
 
   it('revalidates the release actions of each locale whose draft was discarded', async () => {
@@ -99,9 +106,9 @@ describe('createRevalidateActionsOnDraftChange', () => {
 
     await changeDraft('discardDraft', { documentId: 'doc-1', entries: [DRAFT, frDraft] });
 
-    expect(revalidateEntryActions.mock.calls).toStrictEqual([
-      [UID, DRAFT],
-      [UID, frDraft],
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([
+      [entryWhere(DRAFT)],
+      [entryWhere(frDraft)],
     ]);
   });
 
@@ -110,13 +117,13 @@ describe('createRevalidateActionsOnDraftChange', () => {
 
     await changeDraft('update', draft);
 
-    expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, draft]]);
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([[entryWhere(draft)]]);
   });
 
   it.each(['update', 'discardDraft'] as const)(
     'logs a failure to revalidate after %s and still returns the result',
     async (action) => {
-      revalidateEntryActions.mockRejectedValue(new Error('revalidation failed'));
+      revalidatePlannedActions.mockRejectedValue(new Error('revalidation failed'));
       const result = action === 'update' ? DRAFT : { documentId: 'doc-1', entries: [DRAFT] };
 
       expect(await changeDraft(action, result)).toEqual(result);
@@ -129,7 +136,7 @@ describe('createRevalidateActionsOnDraftChange', () => {
 
   it('starts right away when the change was made outside a transaction', async () => {
     jest.mocked(strapi.db.inTransaction).mockReturnValueOnce(false);
-    revalidateEntryActions.mockRejectedValueOnce(new Error('revalidation failed'));
+    revalidatePlannedActions.mockRejectedValueOnce(new Error('revalidation failed'));
 
     await createRevalidateActionsOnDraftChange({ strapi })(
       {
@@ -142,7 +149,7 @@ describe('createRevalidateActionsOnDraftChange', () => {
     await setImmediate();
 
     // Nothing to wait for: no commit() call
-    expect(revalidateEntryActions.mock.calls).toStrictEqual([[UID, DRAFT]]);
+    expect(revalidatePlannedActions.mock.calls).toStrictEqual([[entryWhere(DRAFT)]]);
     expect(logError).toHaveBeenCalledWith(
       'Error while updating release actions after update',
       expect.objectContaining({ error: expect.any(Error) })
@@ -161,7 +168,7 @@ describe('createDeleteActionsOnDelete', () => {
   it("deletes the actions of the deleted entry's locale", async () => {
     await deleteEntry();
 
-    expect(deleteEntryActions.mock.calls).toStrictEqual([
+    expect(deletePlannedActions.mock.calls).toStrictEqual([
       [{ contentType: UID, entryDocumentId: 'doc-1', locale: 'en' }],
     ]);
   });
@@ -169,13 +176,13 @@ describe('createDeleteActionsOnDelete', () => {
   it('deletes the actions of every locale when every locale is deleted', async () => {
     await deleteEntry('*');
 
-    expect(deleteEntryActions.mock.calls).toStrictEqual([
+    expect(deletePlannedActions.mock.calls).toStrictEqual([
       [{ contentType: UID, entryDocumentId: 'doc-1' }],
     ]);
   });
 
   it('logs a failure to delete the actions and still returns the deleted entry', async () => {
-    deleteEntryActions.mockRejectedValue(new Error('delete failed'));
+    deletePlannedActions.mockRejectedValue(new Error('delete failed'));
 
     const result = await deleteEntry();
 
