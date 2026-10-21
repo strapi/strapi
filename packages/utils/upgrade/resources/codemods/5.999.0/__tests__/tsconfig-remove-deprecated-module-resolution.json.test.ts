@@ -68,7 +68,7 @@ const run = async (files: Record<string, string>) => {
   return { report, read };
 };
 
-describe('5.59.0 tsconfig-remove-deprecated-module-resolution', () => {
+describe('5.999.0 tsconfig-remove-deprecated-module-resolution', () => {
   beforeEach(() => {
     vol.reset();
   });

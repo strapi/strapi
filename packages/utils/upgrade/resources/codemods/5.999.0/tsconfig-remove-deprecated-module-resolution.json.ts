@@ -2,6 +2,9 @@ import path from 'node:path';
 
 import type { modules } from '../../../dist';
 
+// TODO @Nico `5.999.0` is a placeholder so no upgrade range runs this codemod yet. Move the folder
+// to the version that ships TypeScript 6 before release.
+
 const MODULE_PATH = 'compilerOptions.module';
 const MODULE_RESOLUTION_PATH = 'compilerOptions.moduleResolution';
 
