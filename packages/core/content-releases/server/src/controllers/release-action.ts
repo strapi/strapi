@@ -70,6 +70,8 @@ const releaseActionController = {
     ctx.query.sort = ctx.query.groupBy === 'action' ? 'type' : ctx.query.groupBy;
     delete ctx.query.groupBy;
 
+    // `filter` passes the sanitizer untouched: it's validated above, and the service builds the
+    // condition it stands for
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const releaseActionService = getService('release-action', { strapi });

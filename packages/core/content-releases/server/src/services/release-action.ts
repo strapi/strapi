@@ -1,4 +1,4 @@
-import { errors, async } from '@strapi/utils';
+import { errors, async, contentTypes } from '@strapi/utils';
 
 import type { Core, Internal, Modules, UID, Data } from '@strapi/types';
 
@@ -6,10 +6,12 @@ import _ from 'lodash/fp';
 
 import {
   AUDITED_EVENTS,
+  NOT_READY_ACTION_WHERE,
   PLANNED_ACTION_WHERE,
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
 } from '../constants';
+import type { ReleaseActionFilter } from '../constants';
 import { emitAuditOnCommit } from '../audit-logs';
 import { AlreadyOnReleaseError } from './validation';
 
@@ -67,12 +69,40 @@ type EntryActionsWhere = Pick<ReleaseAction, 'contentType'> &
 type ReleaseActionWhere = Modules.Documents.Params.Filters.Any<typeof RELEASE_ACTION_MODEL_UID>;
 
 // An action checked against its release, ready to be written
-interface PreparedAction {
+export interface PreparedAction {
   action: CreateReleaseAction.Request['body'];
   validity: EntryValidity;
 }
 
 type LockedRelease = Pick<Release, 'id' | 'name' | 'releasedAt'>;
+
+// Any other outcome, or none, means the run skipped the entry
+const RELEASED_OUTCOMES = ['published', 'unpublished'] satisfies ReleaseAction['outcome'][];
+
+// The actions of a release, narrowed by a filter
+const releaseActionsWhere = (
+  releaseId: Release['id'],
+  filter?: ReleaseActionFilter
+): ReleaseActionWhere => {
+  switch (filter) {
+    case 'ready':
+      // An unpublish needs no checks
+      return { release: releaseId, $or: [{ type: 'unpublish' }, { isEntryValid: true }] };
+    case 'notReady':
+      return { release: releaseId, ...NOT_READY_ACTION_WHERE };
+    case 'released':
+      return { release: releaseId, outcome: { $in: RELEASED_OUTCOMES } };
+    case 'skipped':
+      // Only a release that ran skipped anything. Releases that ran before outcomes existed
+      // recorded none.
+      return {
+        release: { id: releaseId, releasedAt: { $notNull: true } },
+        $or: [{ outcome: null }, { outcome: { $notIn: RELEASED_OUTCOMES } }],
+      };
+    default:
+      return { release: releaseId };
+  }
+};
 
 const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getLocalesDataForActions = async () => {
@@ -301,6 +331,60 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     return releaseAction;
   };
 
+  // Keeps the actions whose entry still exists (in its locale, for a localized content type)
+  // under a Draft & Publish content type. One query per content type.
+  const filterExistingEntries = async <
+    TAction extends Pick<ReleaseAction, 'contentType' | 'entryDocumentId' | 'locale'>,
+  >(
+    actions: TAction[]
+  ) => {
+    const entryKey = (contentType: string, documentId: string, locale?: string | null) =>
+      JSON.stringify([contentType, documentId, locale ?? null]);
+    const existing = new Set<string>();
+    const localizedTypes = new Set<string>();
+
+    for (const contentType of new Set(actions.map((action) => action.contentType))) {
+      const model = strapi.contentType(contentType);
+
+      if (model && contentTypes.hasDraftAndPublish(model)) {
+        const isLocalized = strapi.localization.isLocalizedContentType(model);
+        if (isLocalized) {
+          localizedTypes.add(contentType);
+        }
+
+        const entries: { documentId: string; locale?: string | null }[] = await strapi.db
+          .query(contentType)
+          .findMany({
+            where: {
+              documentId: {
+                $in: actions
+                  .filter((action) => action.contentType === contentType)
+                  .map((action) => action.entryDocumentId),
+              },
+            },
+            select: ['documentId', ...(isLocalized ? ['locale'] : [])],
+          });
+
+        for (const entry of entries) {
+          existing.add(entryKey(contentType, entry.documentId));
+          if (isLocalized) {
+            existing.add(entryKey(contentType, entry.documentId, entry.locale));
+          }
+        }
+      }
+    }
+
+    return actions.filter((action) =>
+      existing.has(
+        entryKey(
+          action.contentType,
+          action.entryDocumentId,
+          localizedTypes.has(action.contentType) ? action.locale : null
+        )
+      )
+    );
+  };
+
   return {
     async create(
       releaseId: CreateReleaseAction.Request['params']['releaseId'],
@@ -338,6 +422,66 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       }));
     },
 
+    /**
+     * The skipped entries of a release that ran (only `actionIds`, if given), oldest first, with
+     * their current validity. Entries deleted since the run are left out. Writes nothing.
+     */
+    async prepareSkippedActions(
+      releaseId: Release['id'],
+      actionIds?: number[]
+    ): Promise<PreparedAction[]> {
+      const skippedActions: ReleaseAction[] = await strapi.db
+        .query(RELEASE_ACTION_MODEL_UID)
+        .findMany({
+          where: {
+            ...releaseActionsWhere(releaseId, 'skipped'),
+            ...(actionIds && { id: { $in: actionIds } }),
+          },
+          orderBy: { id: 'asc' },
+        });
+
+      if (actionIds) {
+        const skippedIds = new Set(skippedActions.map((action) => String(action.id)));
+        const notSkippedIds = actionIds.filter((id) => !skippedIds.has(String(id)));
+
+        if (notSkippedIds.length > 0) {
+          throw new errors.ValidationError(
+            `Actions with ids ${notSkippedIds.join(', ')} are not skipped entries of release ${releaseId}`
+          );
+        }
+      }
+
+      const actions = await filterExistingEntries(skippedActions);
+
+      const publishValidities = new Map(
+        (
+          await getValidityForActions(
+            actions.filter((action) => action.type === 'publish'),
+            { strapi }
+          )
+        ).map(({ action, validity }) => [action.id, validity])
+      );
+
+      return actions.map((action) => ({
+        action: {
+          type: action.type,
+          contentType: action.contentType,
+          entryDocumentId: action.entryDocumentId,
+          locale: action.locale,
+        },
+        validity: publishValidities.get(action.id) ?? UNPUBLISH_VALIDITY,
+      }));
+    },
+
+    // Writes prepared actions in order, with the release status they change
+    async createPrepared(releaseId: Data.ID, prepared: PreparedAction[]) {
+      return commitWithReleaseStatus(releaseId, async (release) => {
+        for (const preparedAction of prepared) {
+          await writeAction(release, preparedAction);
+        }
+      });
+    },
+
     async findPage(
       releaseId: GetReleaseActions.Request['params']['releaseId'],
       query?: GetReleaseActions.Request['query']
@@ -351,15 +495,11 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
+      const { filter, ...params } = query ?? {};
+      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, params);
       const { results: actions, pagination } = await strapi.db
         .query(RELEASE_ACTION_MODEL_UID)
-        .findPage({
-          ...dbQuery,
-          where: {
-            release: releaseId,
-          },
-        });
+        .findPage({ ...dbQuery, where: releaseActionsWhere(releaseId, filter) });
 
       // For each contentType on the release, we create a custom populate object for nested relations
       const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
@@ -471,7 +611,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         .findMany({
           where: { id: { $in: releaseIds }, releasedAt: null },
           select: ['id'],
-          populate: { actions: { count: true, where: { type: 'publish', isEntryValid: false } } },
+          populate: { actions: { count: true, where: NOT_READY_ACTION_WHERE } },
         });
 
       return new Map(releases.map((release) => [release.id, release.actions.count]));
