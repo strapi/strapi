@@ -3,6 +3,9 @@ description: 'Run e2e tests'
 inputs:
   runEE:
     description: 'Should run EE or CE e2e tests'
+  disableLicensePing:
+    description: 'Keep the EE license offline (STRAPI_DISABLE_LICENSE_PING). Only used when runEE is true.'
+    default: 'true'
   jestOptions:
     description: 'Jest options'
   domains:
@@ -20,6 +23,7 @@ runs:
     - run: $GITHUB_ACTION_PATH/script.sh
       env:
         RUN_EE: ${{ inputs.runEE }}
+        DISABLE_LICENSE_PING: ${{ inputs.disableLicensePing }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
         DOMAINS: ${{ inputs.domains }}
         STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR: true
