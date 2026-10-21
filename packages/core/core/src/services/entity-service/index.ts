@@ -40,6 +40,7 @@ const databaseErrorsToTransform = [
   databaseErrors.InvalidDateTimeError,
   databaseErrors.InvalidDateError,
   databaseErrors.InvalidRelationError,
+  databaseErrors.InvalidBooleanError,
 ];
 
 const createDefaultImplementation = ({
