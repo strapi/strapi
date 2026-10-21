@@ -65,6 +65,7 @@ export const actionTypes = {
   'workflow.delete': 'Delete workflow',
   'review-workflows.updateEntryStage': 'Change entry stage',
   'entry.assignee.update': 'Change entry assignee',
+  'entry.draft-discard': 'Discard draft',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {
