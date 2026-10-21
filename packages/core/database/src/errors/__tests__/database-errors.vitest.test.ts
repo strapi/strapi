@@ -5,6 +5,7 @@ import InvalidDateError from '../invalid-date';
 import InvalidDateTimeError from '../invalid-datetime';
 import InvalidTimeError from '../invalid-time';
 import InvalidRelationError from '../invalid-relation';
+import InvalidBooleanError from '../invalid-boolean';
 import NotNullError from '../not-null';
 
 describe('database errors', () => {
@@ -30,6 +31,16 @@ describe('database errors', () => {
 
     expect(error.name).toBe('InvalidDatetimeFormat');
     expect(error.message).toBe('Bad datetime');
+  });
+
+  it('InvalidBooleanError uses default message and name', () => {
+    const error = new InvalidBooleanError();
+
+    expect(error).toBeInstanceOf(DatabaseError);
+    expect(error.name).toBe('InvalidBooleanFormat');
+    expect(error.message).toBe(
+      'Invalid boolean, expected one of true, t, 1, false, f, 0 (case-insensitive)'
+    );
   });
 
   it('InvalidTimeError uses default message', () => {
