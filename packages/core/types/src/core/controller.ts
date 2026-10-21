@@ -68,8 +68,23 @@ export type ControllerFactoryUID = IsStrict extends false
  * controller factory, and `Controller` rejects what `createCoreController` returns: its index
  * signature is missing from the returned type (TS1360).
  *
+ * Type generation registers an application controller with the `ControllerContract` type its module
+ * exports (`types/generated/controllers.d.ts`), so the factory of that module can be checked against
+ * its own UID. Without that export, the check is circular, as for services (see `ServiceFactory`).
+ *
  * @example
  * ```ts
+ * // src/api/article/controllers/article.ts
+ * export type ControllerContract = Core.CoreAPI.Controller.ContentType<'api::article.article'> & {
+ *   titles: Core.ControllerHandler<string[]>;
+ * };
+ *
+ * export default factories.createCoreController('api::article.article', ({ strapi }) => ({
+ *   async titles() {
+ *     return strapi.service('api::article.article').findPublishedTitles();
+ *   },
+ * })) satisfies Core.ControllerFactory<'api::article.article'>;
+ *
  * // A plugin controller, whose contract the plugin registers in `PackageControllers`
  * export default (({ strapi }) => ({
  *   async list(ctx) {

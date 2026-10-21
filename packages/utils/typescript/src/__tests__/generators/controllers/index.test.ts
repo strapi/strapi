@@ -15,6 +15,29 @@ jest.mock('../../../generators/utils', () => ({
 // Compare on the printed structure rather than on prettier's line breaks
 const normalize = (content: string) => content.replace(/\s+/g, ' ').replace(/;/g, '');
 
+// Output of an application without contracts, before contract exports were read
+const NO_CONTRACT_OUTPUT = `export {};
+
+/**
+ * Type of the controller exposed by a controller module: the return type of its default export
+ * when it is a factory, the default export itself otherwise.
+ */
+type ControllerInstance<TModule> = TModule extends {
+    default: infer TExport;
+} ? TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown;
+
+declare global {
+    namespace Strapi {
+        namespace Registries {
+            interface AppControllers {
+                'api::article.article': ControllerInstance<typeof import('../../src/api/article/controllers/article')>;
+                'api::article.legacy': unknown;
+            }
+        }
+    }
+}
+`;
+
 const outputFile = async (file: string, content: string) => {
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, content);
@@ -163,6 +186,103 @@ describe('generateControllersDefinitions', () => {
 
     expect(normalized).toContain("'api::article.legacy': unknown");
     expect(normalized).not.toContain("legacy')");
+  });
+
+  test('keeps the output of an application without contracts', async () => {
+    const { output } = await generate(
+      {
+        'src/api/article/controllers/article.ts':
+          'export type ArticleContract = { find(): number };',
+        'src/api/article/controllers/legacy.js': '',
+      },
+      ['api::article.article', 'api::article.legacy']
+    );
+
+    expect(output).toBe(NO_CONTRACT_OUTPUT);
+  });
+
+  test('registers the ControllerContract export of a controller', async () => {
+    const { normalized } = await generate(
+      {
+        'src/api/article/controllers/article.ts':
+          'export type ControllerContract = { find(): Promise<number> };\nexport default () => ({ find: async () => 1 });',
+        'src/api/article/controllers/inferred.ts': 'export default () => ({ find: () => 1 });',
+        'src/api/article/controllers/legacy.js': '',
+        'src/api/article/controllers/other.ts':
+          'export type ServiceContract = { find(): number };\nexport default {};',
+      },
+      ['api::article.article', 'api::article.inferred', 'api::article.legacy', 'api::article.other']
+    );
+
+    expect(normalized).toContain(
+      "'api::article.article': ControllerContractOf<import('../../src/api/article/controllers/article').ControllerContract>"
+    );
+    // Without a contract export, a controller keeps the type it exports
+    expect(normalized).toContain(
+      "'api::article.inferred': ControllerInstance<typeof import('../../src/api/article/controllers/inferred')>"
+    );
+    expect(normalized).toContain("'api::article.legacy': unknown");
+    // A service contract is not read in a controllers file
+    expect(normalized).toContain(
+      "'api::article.other': ControllerInstance<typeof import('../../src/api/article/controllers/other')>"
+    );
+    expect(normalized).toContain(
+      'type ControllerContractOf<TContract> = 0 extends 1 & TContract ? unknown : TContract'
+    );
+    expect(normalized.match(/type ControllerContractOf</g)).toHaveLength(1);
+  });
+
+  test('resolves a contract lookup to the contract, and a contract typed any to unknown', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/api/article/controllers/article.ts':
+          'export type ControllerContract = { find(): Promise<number> };\nexport default () => ({ find: async () => 1, extra: () => 2 });',
+        'src/api/article/controllers/untyped.ts':
+          'export type ControllerContract = any;\nexport default { find: () => 1 };',
+      },
+      ['api::article.article', 'api::article.untyped']
+    );
+    roots.push(root);
+
+    const { output } = await generateControllersDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+    await outputFile(path.join(pwd, 'controllers.d.ts'), output);
+    await outputFile(
+      path.join(root, 'src/check.ts'),
+      [
+        // `any` passes any conditional type, such as an `Equal` assert: only assignability tells it
+        // from `unknown`.
+        "declare const article: Strapi.Registries.AppControllers['api::article.article'];",
+        "declare const untyped: Strapi.Registries.AppControllers['api::article.untyped'];",
+        'article.find() satisfies Promise<number>;',
+        '// @ts-expect-error The contract has no other member, even one the factory returns.',
+        'article.extra();',
+        'untyped satisfies unknown;',
+        '// @ts-expect-error A contract typed `any` registers `unknown`.',
+        'untyped satisfies number;',
+        'export {};',
+      ].join('\n')
+    );
+
+    const program = ts.createProgram(
+      [path.join(pwd, 'controllers.d.ts'), path.join(root, 'src/check.ts')],
+      {
+        noEmit: true,
+        strict: true,
+        skipLibCheck: true,
+        types: [],
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
+      }
+    );
+    expect(
+      ts
+        .getPreEmitDiagnostics(program)
+        .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
+    ).toEqual([]);
   });
 
   test('sorts the entries by uid', async () => {
