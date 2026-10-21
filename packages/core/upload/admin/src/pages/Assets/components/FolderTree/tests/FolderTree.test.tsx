@@ -478,6 +478,22 @@ describe('FolderTree', () => {
       expect(summaryRow()).toHaveTextContent('4 parent folders');
     });
 
+    it('stays closed when coming back to the folder it was opened on', async () => {
+      const { user, rerender } = renderTree({ currentFolderId: 15 });
+
+      await user.click(summaryRow());
+
+      for (const currentFolderId of [16, 15]) {
+        rerender(
+          <DndContext>
+            <FolderTree currentFolderId={currentFolderId} onSelectFolder={jest.fn()} />
+          </DndContext>
+        );
+      }
+
+      expect(summaryRow()).toHaveAttribute('aria-expanded', 'false');
+    });
+
     it('shows the full branch again once the selection is shallow', () => {
       const { rerender } = renderTree({ currentFolderId: 15 });
 

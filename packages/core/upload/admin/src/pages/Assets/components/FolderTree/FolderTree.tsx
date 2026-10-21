@@ -78,7 +78,7 @@ const TreeRow = styled(Flex)<{
   $isValidDropTarget?: boolean;
   $isInvalidDropCursor?: boolean;
   $isMovePending?: boolean;
-  $isHiddenAncestor?: boolean;
+  $isOnOpenPath?: boolean;
 }>`
   cursor: ${({ $isMovePending, $isInvalidDropCursor }) => {
     if ($isMovePending) {
@@ -89,21 +89,22 @@ const TreeRow = styled(Flex)<{
   }};
   pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
   border-radius: ${({ theme }) => theme.borderRadius};
-  background: ${({ $isActive, $isHiddenAncestor, theme }) => {
+  background: ${({ $isActive, $isOnOpenPath, theme }) => {
     if ($isActive) {
       return theme.colors.primary100;
     }
 
-    // Tinted so the folders a summary row reveals read as its group rather than
-    // as siblings of the rows around them.
-    return $isHiddenAncestor ? theme.colors.neutral100 : 'transparent';
+    // While a summary row is open, the path down to the open folder is tinted —
+    // the folders it reveals plus the parent — so the tint reads as "on the way
+    // here" and the open folder's own highlight as "here".
+    return $isOnOpenPath ? theme.colors.neutral100 : 'transparent';
   }};
 
   // The whole row lights up, so pointing anywhere along it — chevron, label or
   // the actions trigger — reads as one target.
   &:hover {
-    background: ${({ $isActive, $isHiddenAncestor, theme }) =>
-      $isActive || $isHiddenAncestor ? theme.colors.primary100 : theme.colors.neutral100};
+    background: ${({ $isActive, $isOnOpenPath, theme }) =>
+      $isActive || $isOnOpenPath ? theme.colors.primary100 : theme.colors.neutral100};
   }
 
   ${({ $isValidDropTarget, theme }) =>
@@ -299,6 +300,8 @@ interface FolderTreeItemProps {
    * already the row below it, so it shows no chevron and no subfolders.
    */
   isHiddenAncestor?: boolean;
+  /** The open folder's parent while its summary row is open. */
+  isOnOpenPath?: boolean;
   /** Rendered in place of the subfolders while expanded — the collapsed branch. */
   subtree?: ReactNode;
 }
@@ -324,6 +327,7 @@ const FolderTreeItemInner = ({
   isMovePending,
   ancestorNames,
   isHiddenAncestor = false,
+  isOnOpenPath = false,
   subtree,
 }: FolderTreeItemInnerProps) => {
   const { formatMessage } = useIntl();
@@ -373,7 +377,7 @@ const FolderTreeItemInner = ({
         paddingRight={`${ROW_INSET_RIGHT_REM}rem`}
         gap={1}
         $isActive={isActive}
-        $isHiddenAncestor={isHiddenAncestor}
+        $isOnOpenPath={isHiddenAncestor || isOnOpenPath}
         $isValidDropTarget={showValidDropHighlight}
         $isInvalidDropCursor={showInvalidDropCursor}
         $isMovePending={isMovePending}
@@ -520,20 +524,28 @@ type SharedItemProps = Pick<
   | 'isMovePending'
 >;
 
-interface CollapsedAncestorsProps extends SharedItemProps {
+interface CollapsedBranchItemProps extends SharedItemProps {
   branch: CollapsedBranch;
+}
+
+interface CollapsedAncestorsProps extends CollapsedBranchItemProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
 }
 
 /**
  * Stands in for the folders between a deep branch's root and the selected
- * folder's parent, and lists them in place when opened. Starts closed on every
- * selection: the caller keys it on the selected folder.
+ * folder's parent, and lists them in place when opened.
  */
-const CollapsedAncestors = ({ branch, ...itemProps }: CollapsedAncestorsProps) => {
+const CollapsedAncestors = ({
+  branch,
+  isOpen,
+  onOpenChange,
+  ...itemProps
+}: CollapsedAncestorsProps) => {
   const { formatMessage } = useIntl();
-  const [isOpen, setIsOpen] = useState(false);
   const listId = useId();
-  const open = useCallback(() => setIsOpen(true), []);
+  const open = useCallback(() => onOpenChange(true), [onOpenChange]);
 
   const rootName = branch.root.name ?? '';
   const hiddenNames = branch.hidden.map((node) => node.name ?? '');
@@ -566,7 +578,7 @@ const CollapsedAncestors = ({ branch, ...itemProps }: CollapsedAncestorsProps) =
             $isMovePending={itemProps.isMovePending}
             aria-expanded={isOpen}
             aria-controls={isOpen ? listId : undefined}
-            onClick={() => setIsOpen((prev) => !prev)}
+            onClick={() => onOpenChange(!isOpen)}
             data-testid="folder-tree-hidden-ancestors"
           >
             <IconSlot>
@@ -615,7 +627,19 @@ const CollapsedAncestors = ({ branch, ...itemProps }: CollapsedAncestorsProps) =
  * The root folder of a deep branch, with everything between it and the selected
  * folder's parent folded into one row. See `getCollapsedBranch`.
  */
-const CollapsedBranchItem = ({ branch, ...itemProps }: CollapsedAncestorsProps) => {
+const CollapsedBranchItem = ({ branch, ...itemProps }: CollapsedBranchItemProps) => {
+  const { currentFolderId } = itemProps;
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Closed again on every new selection, clicking a hidden folder included.
+  // Reset during render rather than in an effect, so the list never paints open
+  // for a folder it wasn't opened on.
+  const [openedOn, setOpenedOn] = useState(currentFolderId);
+  if (openedOn !== currentFolderId) {
+    setOpenedOn(currentFolderId);
+    setIsOpen(false);
+  }
+
   const ancestorNamesOfParent = [branch.root, ...branch.hidden].map((node) => node.name ?? '');
 
   return (
@@ -629,8 +653,9 @@ const CollapsedBranchItem = ({ branch, ...itemProps }: CollapsedAncestorsProps) 
         <NavList>
           <CollapsedAncestors
             {...itemProps}
-            key={itemProps.currentFolderId ?? 'home'}
             branch={branch}
+            isOpen={isOpen}
+            onOpenChange={setIsOpen}
           />
           <FolderTreeItem
             {...itemProps}
@@ -638,6 +663,7 @@ const CollapsedBranchItem = ({ branch, ...itemProps }: CollapsedAncestorsProps) 
             parentId={branch.hidden[branch.hidden.length - 1]?.id ?? branch.root.id ?? null}
             level={2}
             ancestorNames={ancestorNamesOfParent}
+            isOnOpenPath={isOpen}
           />
         </NavList>
       }
