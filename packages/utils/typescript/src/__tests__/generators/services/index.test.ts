@@ -15,6 +15,29 @@ jest.mock('../../../generators/utils', () => ({
 // Compare on the printed structure rather than on prettier's line breaks
 const normalize = (content: string) => content.replace(/\s+/g, ' ').replace(/;/g, '');
 
+// Output of an application without contracts, before contract exports were read
+const NO_CONTRACT_OUTPUT = `export {};
+
+/**
+ * Type of the service instance exposed by a service module: the return type of its default
+ * export when it is a factory, the default export itself otherwise.
+ */
+type ServiceInstance<TModule> = TModule extends {
+    default: infer TExport;
+} ? TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown;
+
+declare global {
+    namespace Strapi {
+        namespace Registries {
+            interface AppServices {
+                'api::article.article': ServiceInstance<typeof import('../../src/api/article/services/article')>;
+                'api::article.legacy': unknown;
+            }
+        }
+    }
+}
+`;
+
 const outputFile = async (file: string, content: string) => {
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, content);
@@ -201,6 +224,113 @@ describe('generateServicesDefinitions', () => {
         .getPreEmitDiagnostics(program)
         .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
     ).toEqual([]);
+  });
+
+  test('keeps the output of an application without contracts', async () => {
+    const { output } = await generate(
+      {
+        'src/api/article/services/article.ts': 'export type ArticleContract = { find(): number };',
+        'src/api/article/services/legacy.js': '',
+      },
+      ['api::article.article', 'api::article.legacy']
+    );
+
+    expect(output).toBe(NO_CONTRACT_OUTPUT);
+  });
+
+  test('registers the ServiceContract export of a service', async () => {
+    const { normalized } = await generate(
+      {
+        'src/api/article/services/article.ts':
+          'export type ServiceContract = { find(): Promise<number> };\nexport default () => ({ find: async () => 1 });',
+        'src/api/article/services/inferred.ts': 'export default () => ({ find: () => 1 });',
+        'src/api/article/services/legacy.js': '',
+        'src/api/article/services/other.ts':
+          'export type ControllerContract = { find(): number };\nexport default {};',
+      },
+      ['api::article.article', 'api::article.inferred', 'api::article.legacy', 'api::article.other']
+    );
+
+    expect(normalized).toContain(
+      "'api::article.article': ServiceContractOf<import('../../src/api/article/services/article').ServiceContract>"
+    );
+    // Without a contract export, a service keeps the type it exports
+    expect(normalized).toContain(
+      "'api::article.inferred': ServiceInstance<typeof import('../../src/api/article/services/inferred')>"
+    );
+    expect(normalized).toContain("'api::article.legacy': unknown");
+    // A controller contract is not read in a services file
+    expect(normalized).toContain(
+      "'api::article.other': ServiceInstance<typeof import('../../src/api/article/services/other')>"
+    );
+    expect(normalized).toContain(
+      'type ServiceContractOf<TContract> = 0 extends 1 & TContract ? unknown : TContract'
+    );
+    expect(normalized.match(/type ServiceContractOf</g)).toHaveLength(1);
+  });
+
+  test('resolves a contract lookup to the contract, and a contract typed any to unknown', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/api/article/services/article.ts':
+          'export type ServiceContract = { find(): Promise<number> };\nexport default () => ({ find: async () => 1, extra: () => 2 });',
+        'src/api/article/services/untyped.ts':
+          'export type ServiceContract = any;\nexport default { find: () => 1 };',
+        'src/api/article/services/renamed.ts':
+          'export type ServiceContract = { find(): number };\nexport default { find: () => 1 };',
+      },
+      ['api::article.article', 'api::article.untyped', 'api::article.renamed']
+    );
+    roots.push(root);
+
+    const { output } = await generateServicesDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+    await outputFile(path.join(pwd, 'services.d.ts'), output);
+    // The export was renamed after generation: the generated reference no longer resolves.
+    await outputFile(
+      path.join(root, 'src/api/article/services/renamed.ts'),
+      'export type Contract = { find(): number };\nexport default { find: () => 1 };'
+    );
+    await outputFile(
+      path.join(root, 'src/check.ts'),
+      [
+        // An unresolved reference or `any` passes any conditional type, such as an `Equal` assert:
+        // only assignability tells them from `unknown`.
+        "declare const article: Strapi.Registries.AppServices['api::article.article'];",
+        "declare const untyped: Strapi.Registries.AppServices['api::article.untyped'];",
+        'article.find() satisfies Promise<number>;',
+        '// @ts-expect-error The contract has no other member, even one the factory returns.',
+        'article.extra();',
+        'untyped satisfies unknown;',
+        '// @ts-expect-error A contract typed `any` registers `unknown`.',
+        'untyped satisfies number;',
+        'export {};',
+      ].join('\n')
+    );
+
+    const check = (skipLibCheck: boolean) =>
+      ts
+        .getPreEmitDiagnostics(
+          ts.createProgram([path.join(pwd, 'services.d.ts'), path.join(root, 'src/check.ts')], {
+            noEmit: true,
+            strict: true,
+            skipLibCheck,
+            types: [],
+            module: ts.ModuleKind.CommonJS,
+            moduleResolution: ts.ModuleResolutionKind.Node10,
+          })
+        )
+        .map(
+          (diagnostic) => `${path.basename(diagnostic.file?.fileName ?? '')} TS${diagnostic.code}`
+        );
+
+    expect(check(true)).toEqual([]);
+    // The stale reference is an error type that no conditional type maps to `unknown`: only the
+    // generated file reports it, and `skipLibCheck` hides it until the next generation.
+    expect(check(false)).toEqual(['services.d.ts TS2694']);
   });
 
   test('sorts the entries by uid', async () => {
