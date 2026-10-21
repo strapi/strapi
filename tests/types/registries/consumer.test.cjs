@@ -321,6 +321,32 @@ test('published middleware configs do not need third-party @types packages', () 
   }
 });
 
+// Generate `services.d.ts` and `controllers.d.ts` for `app/src/api` (or `api`), as an application
+// with strict types does, for the given registered UIDs.
+async function generateContracts(appDir, registered, api = fixture('app/src/api')) {
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const { generators } = require('@strapi/typescript-utils');
+  const strapi = {
+    dirs: { app: { api } },
+    services: Object.fromEntries(registered.services.map((uid) => [uid, {}])),
+    controllers: Object.fromEntries((registered.controllers ?? []).map((uid) => [uid, {}])),
+  };
+  await generators.generate({
+    strapi,
+    pwd: appDir,
+    artifacts: { services: true, controllers: true },
+    logger: { silent: true },
+  });
+  const files = ['services', 'controllers'].map((name) =>
+    path.join(appDir, `types/generated/${name}.d.ts`)
+  );
+  return {
+    files,
+    services: fs.readFileSync(files[0], 'utf8'),
+    controllers: fs.readFileSync(files[1], 'utf8'),
+  };
+}
+
 for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   const options = { ...baseOptions, ...resolutionOptions };
   const compile = compiler(options);
@@ -553,6 +579,30 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
           'controllers.ts',
         ]),
         `${resolution}, generated application controllers`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
+  test(`${resolution}: generated application contracts resolve in strict mode`, async () => {
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    try {
+      const generated = await generateContracts(appDir, {
+        services: ['api::article.article', 'api::article.stats', 'api::article.legacy'],
+        controllers: ['api::article.stats'],
+      });
+      assert.match(generated.services, /'api::article\.article': ServiceContractOf</);
+      assert.match(generated.services, /'api::article\.legacy': ServiceInstance</);
+      assert.match(generated.controllers, /'api::article\.stats': ControllerContractOf</);
+      assertClean(
+        compiler(options)([
+          ...generated.files,
+          'settings.d.ts',
+          'generated-strict.d.ts',
+          'contracts.ts',
+        ]),
+        `${resolution}, generated application contracts`
       );
     } finally {
       fs.rmSync(appDir, { recursive: true, force: true });
@@ -921,5 +971,56 @@ test('conflicting declaration files need one contract per UID, even with the swi
       `Conflicting contracts must report TS2717 with strict ${strict ? 'on' : 'off'}`
     );
     assertClean(compile(files), 'skipLibCheck suppresses declaration conflicts');
+  }
+});
+
+test('a factory checked against its own uid without a contract export is circular', async () => {
+  const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+  try {
+    const generated = await generateContracts(appDir, { services: ['api::article.cycle'] });
+    assert.match(generated.services, /'api::article\.cycle': ServiceInstance</);
+    const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+    const names = [...generated.files, 'settings.d.ts', 'generated-strict.d.ts'];
+    // Checked first, the factory resolves its own entry: the cycle goes unreported.
+    assertClean(compile(names), 'the factory checked before any lookup');
+    // A lookup checked first closes the cycle: TS7022 in the source, and the lookup is `any` (no
+    // TS1360 for its `satisfies number`). The `any` guard of `ServiceInstance` does not see it.
+    assert.deepEqual(
+      diagnostics(compile(['cycle-consumer.ts', ...names])).map((diagnostic) => diagnostic.code),
+      [7022],
+      'The inferred entry and the factory check reference each other'
+    );
+  } finally {
+    fs.rmSync(appDir, { recursive: true, force: true });
+  }
+});
+
+test('a contract reference that no longer resolves is only reported without skipLibCheck', async () => {
+  // The copy keeps the fixture's module resolution: it stays next to the fixtures.
+  const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+  try {
+    const api = path.join(appDir, 'src/api');
+    fs.cpSync(fixture('app/src/api'), api, { recursive: true });
+    const generated = await generateContracts(appDir, { services: ['api::article.stats'] }, api);
+    assert.match(generated.services, /'api::article\.stats': ServiceContractOf</);
+    // The export is renamed after the generation.
+    const source = path.join(api, 'article/services/stats.ts');
+    fs.writeFileSync(
+      source,
+      fs.readFileSync(source, 'utf8').replace('as ServiceContract', 'as StatsServiceContract')
+    );
+    const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+    const names = [...generated.files, 'settings.d.ts', 'generated-strict.d.ts'];
+    // The stale reference is an error type: it behaves as `any`, and no conditional type in the
+    // generated file can map it to `unknown`. The next generation drops the contract.
+    assertClean(compile(names), 'skipLibCheck hides the stale contract reference');
+    assert.deepEqual(
+      diagnostics(compile(names, { skipLibCheck: false }))
+        .filter((diagnostic) => diagnostic.file?.fileName === generated.files[0])
+        .map((diagnostic) => diagnostic.code),
+      [2694]
+    );
+  } finally {
+    fs.rmSync(appDir, { recursive: true, force: true });
   }
 });
