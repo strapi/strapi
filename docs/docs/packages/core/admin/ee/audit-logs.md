@@ -4,6 +4,7 @@ description: Guide for Audit Logs
 status: needs-review
 review_notes:
   - '`ee/server/services/audit-logs.js` moved under `ee/server/src`.'
+  - 'Events are also saved when a package registers them with `registerEvent` on the `audit-logs-lifecycle` service (upload and content-manager do), not only the `defaultEvents` list.'
 ---
 
 # Audit Logs
