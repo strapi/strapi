@@ -1,9 +1,15 @@
+import { emitAudit } from '@strapi/utils';
 import {
   parseFilesData,
   getProjectSettings,
   deleteOldFiles,
   updateProjectSettings,
 } from '../project-settings';
+
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  emitAudit: jest.fn(),
+}));
 
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
@@ -340,6 +346,13 @@ describe('Project setting', () => {
         key: 'project-settings',
         value: expectedOutput,
       });
+      expect(emitAudit).toHaveBeenCalledTimes(1);
+      expect(emitAudit).toHaveBeenCalledWith(expect.anything(), 'project-settings.update', {
+        changes: {
+          menuLogo: { before: 'name', after: 'filename.png' },
+          authLogo: { before: 'name', after: 'filename.png' },
+        },
+      });
     });
 
     it('Updates the project settings (delete)', async () => {
@@ -358,6 +371,12 @@ describe('Project setting', () => {
       expect(storeSet).toBeCalledWith({
         key: 'project-settings',
         value: expectedOutput,
+      });
+      expect(emitAudit).toHaveBeenCalledWith(expect.anything(), 'project-settings.update', {
+        changes: {
+          menuLogo: { before: 'name', after: null },
+          authLogo: { before: 'name', after: null },
+        },
       });
     });
 
@@ -393,6 +412,7 @@ describe('Project setting', () => {
         key: 'project-settings',
         value: expectedOutput,
       });
+      expect(emitAudit).not.toHaveBeenCalled();
     });
   });
 });
