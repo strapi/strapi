@@ -9,7 +9,7 @@ import type { Context } from '../types';
 const { ApplicationError } = errors;
 
 export default ({ strapi }: Context) => {
-  const buildTypeDefinition = (name: string, components: Internal.UID.Component[]) => {
+  const buildTypeDefinition = (name: string, components: readonly Internal.UID.Component[]) => {
     const { ERROR_TYPE_NAME } = strapi.plugin('graphql').service('constants');
     const isEmpty = components.length === 0;
 
@@ -42,7 +42,7 @@ export default ({ strapi }: Context) => {
     });
   };
 
-  const buildInputDefinition = (name: string, components: Internal.UID.Component[]) => {
+  const buildInputDefinition = (name: string, components: readonly Internal.UID.Component[]) => {
     const parseData = (value: any) => {
       const component = Object.values(strapi.components).find(
         (component) => component.globalId === value.__typename

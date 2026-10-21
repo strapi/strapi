@@ -5,7 +5,7 @@ export interface UIDOptions {
   separator?: string;
   lowercase?: boolean;
   decamelize?: boolean;
-  customReplacements?: Array<[string, string]>;
+  customReplacements?: ReadonlyArray<[string, string]>;
   preserveLeadingUnderscore?: boolean;
 }
 
