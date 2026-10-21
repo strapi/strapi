@@ -14,7 +14,10 @@ const getTransformers = () => {
 
 describe('Content Manager audit events', () => {
   test('registers the entry events', () => {
-    expect(Object.keys(getTransformers())).toEqual(['entry.draft-discard']);
+    expect(Object.keys(getTransformers())).toEqual([
+      'entry.draft-discard',
+      'entry.history.restore',
+    ]);
   });
 
   describe('entry.draft-discard', () => {
@@ -40,6 +43,26 @@ describe('Content Manager audit events', () => {
       ).toEqual({
         resource: { type: 'entry', uid: 'api::article.article', id: 'abc123' },
         details: { locale: null },
+      });
+    });
+  });
+
+  describe('entry.history.restore', () => {
+    test('records the entry, its locale and the restored version', () => {
+      expect(
+        getTransformers()['entry.history.restore']({
+          uid: 'api::article.article',
+          documentId: 'abc123',
+          locale: 'en',
+          versionId: 42,
+          versionCreatedAt: '2026-09-10T14:02:11.000Z',
+        })
+      ).toEqual({
+        resource: { type: 'entry', uid: 'api::article.article', id: 'abc123' },
+        details: {
+          locale: 'en',
+          version: { id: 42, createdAt: '2026-09-10T14:02:11.000Z' },
+        },
       });
     });
   });

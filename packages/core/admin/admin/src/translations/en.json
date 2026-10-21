@@ -249,6 +249,7 @@
   "Settings.permissions.auditLogs.entry.create": "Create entry{model, select, undefined {} other { ({model})}}",
   "Settings.permissions.auditLogs.entry.delete": "Delete entry{model, select, undefined {} other { ({model})}}",
   "Settings.permissions.auditLogs.entry.draft-discard": "Discard draft",
+  "Settings.permissions.auditLogs.entry.history.restore": "Restore entry version",
   "Settings.permissions.auditLogs.entry.publish": "Publish entry {model, select, undefined {} other {({model})}}",
   "Settings.permissions.auditLogs.entry.unpublish": "Unpublish entry{model, select, undefined {} other { ({model})}}",
   "Settings.permissions.auditLogs.entry.update": "Update entry{model, select, undefined {} other { ({model})}}",

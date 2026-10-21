@@ -66,6 +66,7 @@ export const actionTypes = {
   'review-workflows.updateEntryStage': 'Change entry stage',
   'entry.assignee.update': 'Change entry assignee',
   'entry.draft-discard': 'Discard draft',
+  'entry.history.restore': 'Restore entry version',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {
