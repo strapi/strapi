@@ -723,13 +723,47 @@ export const FolderTree = ({
     () => getCollapsedBranch(folderStructure, currentFolderId),
     [folderStructure, currentFolderId]
   );
+  // A selection that folds or unfolds a branch remounts the selected row, which
+  // drops focus to <body>. Whether focus was in the tree has to be read before
+  // the selection, since by the time the new row renders the old one is gone.
+  const restoreFocusRef = useRef(false);
+  const handleSelectFolder = useCallback(
+    (folderId: number) => {
+      // Re-selecting the open folder renders nothing new, so a flag set here
+      // would linger and pull focus back on a later, unrelated navigation.
+      restoreFocusRef.current =
+        folderId !== currentFolderId &&
+        document.activeElement?.closest(FOLDER_TREE_ROOT_SELECTOR) != null;
+      onSelectFolder(folderId);
+    },
+    [currentFolderId, onSelectFolder]
+  );
+
+  useEffect(() => {
+    if (!restoreFocusRef.current || currentFolderId == null) {
+      return;
+    }
+
+    restoreFocusRef.current = false;
+    // Only take back the focus the remount dropped, never steal it from elsewhere.
+    if (document.activeElement !== document.body) {
+      return;
+    }
+
+    document
+      .querySelector<HTMLElement>(
+        `${FOLDER_TREE_ROOT_SELECTOR} [data-folder-id="${currentFolderId}"]`
+      )
+      ?.focus();
+  }, [currentFolderId]);
+
   const sharedItemProps: SharedItemProps = {
     currentFolderId,
     showActiveFolder,
     isExpanded,
     onToggle: toggleExpanded,
     onExpand: expandFolder,
-    onSelect: onSelectFolder,
+    onSelect: handleSelectFolder,
     isMovePending,
   };
 

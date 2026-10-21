@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { DndContext } from '@dnd-kit/core';
 import { fireEvent, render, screen, waitFor } from '@tests/utils';
 
@@ -492,6 +494,84 @@ describe('FolderTree', () => {
       }
 
       expect(summaryRow()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    describe('focus', () => {
+      // Selecting re-renders the tree from the new id, as the page does through
+      // the URL — that is what remounts the rows.
+      const NavigableTree = ({ initialFolderId }: { initialFolderId: number }) => {
+        const [currentFolderId, setCurrentFolderId] = useState<number | null>(initialFolderId);
+
+        return (
+          <DndContext>
+            <FolderTree currentFolderId={currentFolderId} onSelectFolder={setCurrentFolderId} />
+          </DndContext>
+        );
+      };
+
+      it('stays on the selected row after selecting a hidden folder', async () => {
+        const { user } = render(<NavigableTree initialFolderId={15} />);
+
+        await user.click(summaryRow());
+        screen.getByRole('button', { name: 'L2' }).focus();
+        await user.keyboard('{Enter}');
+
+        const row = screen.getByRole('button', { name: 'L2' });
+        expect(row).toHaveAttribute('aria-current', 'page');
+        expect(row).toHaveFocus();
+      });
+
+      it('stays on the selected row when the selection folds the branch', async () => {
+        const { user } = render(<NavigableTree initialFolderId={13} />);
+
+        await user.click(screen.getByRole('button', { name: 'Expand L3' }));
+        screen.getByRole('button', { name: 'L4' }).focus();
+        await user.keyboard('{Enter}');
+
+        expect(summaryRow()).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'L4' })).toHaveFocus();
+      });
+
+      it('stays on the selected row when the parent slot moves down a level', async () => {
+        const { user } = render(<NavigableTree initialFolderId={14} />);
+
+        await user.click(screen.getByRole('button', { name: 'Expand L4' }));
+        screen.getByRole('button', { name: 'L5' }).focus();
+        await user.keyboard('{Enter}');
+
+        expect(summaryRow()).toHaveTextContent('3 parent folders');
+        expect(screen.getByRole('button', { name: 'L5' })).toHaveFocus();
+      });
+
+      it('is not taken when the selection changes from outside the tree', () => {
+        const { rerender } = renderTree({ currentFolderId: 13 });
+
+        rerender(
+          <DndContext>
+            <FolderTree currentFolderId={12} onSelectFolder={jest.fn()} />
+          </DndContext>
+        );
+
+        expect(document.body).toHaveFocus();
+      });
+
+      it('is not taken later after re-selecting the open folder', async () => {
+        const onSelectFolder = jest.fn();
+        const { user, rerender } = renderTree({ currentFolderId: 13, onSelectFolder });
+
+        screen.getByRole('button', { name: 'L3' }).focus();
+        await user.keyboard('{Enter}');
+        expect(onSelectFolder).toHaveBeenCalledWith(13);
+
+        screen.getByRole('button', { name: 'L3' }).blur();
+        rerender(
+          <DndContext>
+            <FolderTree currentFolderId={12} onSelectFolder={onSelectFolder} />
+          </DndContext>
+        );
+
+        expect(document.body).toHaveFocus();
+      });
     });
 
     it('shows the full branch again once the selection is shallow', () => {
