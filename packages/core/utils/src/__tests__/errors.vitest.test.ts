@@ -35,8 +35,11 @@ describe('errors from another copy of @strapi/utils', () => {
     expect(new otherCopy.YupValidationError(yupError)).toBeInstanceOf(errors.ValidationError);
   });
 
-  it('keep the marker off copies of the error', () => {
-    expect({ ...new otherCopy.NotFoundError() }).not.toBeInstanceOf(errors.NotFoundError);
+  it('carry nothing extra on the error itself', () => {
+    const error = new otherCopy.NotFoundError();
+
+    expect(Object.getOwnPropertySymbols(error)).toEqual([]);
+    expect({ ...error }).not.toBeInstanceOf(errors.NotFoundError);
   });
 });
 

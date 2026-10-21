@@ -31,7 +31,7 @@ The `hooks` namespace creates hook objects: `createAsyncSeriesHook`, `createAsyn
 
 The `errors` namespace defines `ApplicationError` and its subclasses, for example `ValidationError`, `NotFoundError`, `ForbiddenError`, `UnauthorizedError` and `PolicyError`. Each error has a `name`, a `message` and `details`. The errors middleware in `@strapi/core` formats these errors into the HTTP error response.
 
-An app can load two copies of `@strapi/utils` when its Strapi packages are on different versions. `instanceof` on these errors still matches across copies: each error records the ids of its classes under `Symbol.for('strapi.errors.classIds')`, and `ApplicationError` checks them in `Symbol.hasInstance`. Both copies need this check for it to work.
+An app can load two copies of `@strapi/utils` when its Strapi packages are on different versions. `instanceof` on these errors still matches across copies: each class marks its prototype with a `Symbol.for('strapi.errors.class:<Id>')` key, and `ApplicationError` looks for that key on the error's prototype chain in `Symbol.hasInstance`. Both copies need this check for it to work.
 
 ### Schema traversal
 
