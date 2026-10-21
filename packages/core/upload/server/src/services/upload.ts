@@ -9,6 +9,7 @@ import {
   sanitize,
   contentTypes as contentTypesUtils,
   errors,
+  emitAudit,
   file as fileUtils,
   pagination as paginationUtils,
 } from '@strapi/utils';
@@ -17,6 +18,7 @@ import type { Core, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
+import { AUDITED_EVENTS, getUploadSettingsChanges } from '../audit-logs';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
@@ -766,7 +768,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await getService('metrics').trackUsage('didDisableResponsiveDimensions');
     }
 
-    return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+    const previous = await getSettings();
+
+    await strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+
+    const changes = getUploadSettingsChanges(previous, value);
+
+    if (Object.keys(changes).length > 0) {
+      await emitAudit({ strapi }, AUDITED_EVENTS.UPLOAD_SETTINGS_UPDATE, { changes });
+    }
   }
 
   async function getConfiguration() {
