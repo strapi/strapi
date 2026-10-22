@@ -97,6 +97,104 @@ export type AIMetadataJobsService = Omit<
   getLatestActiveJob(): Promise<AIMetadataJobRow | null>;
 };
 
+type FolderServiceImplementation = typeof folder;
+
+/** A folder of the media library tree. Children are sorted by name. */
+export type FolderStructureNode = {
+  id: number;
+  name: string;
+  children: FolderStructureNode[];
+};
+
+/** The registered `folder` service: creates, moves and deletes media library folders. */
+export type FolderService = Omit<
+  FolderServiceImplementation,
+  'create' | 'update' | 'deleteByIds' | 'setPathIdAndPath' | 'getStructure'
+> & {
+  /**
+   * Creates a folder under `parent`, or at the root without one. The creator fields are set when a
+   * user is passed.
+   *
+   * @internal
+   */
+  create(
+    folderData: Parameters<FolderServiceImplementation['create']>[0],
+    opts?: Parameters<FolderServiceImplementation['create']>[1]
+  ): Promise<Folder>;
+  /**
+   * Renames or moves a folder. Moving it rewrites the paths of its descendant folders and files.
+   * Resolves to `undefined` when a rename finds no folder with this ID.
+   *
+   * @internal
+   */
+  update(
+    id: number | string,
+    data: {
+      name?: string;
+      /**
+       * Omit to rename in place: the name-only branch skips the transaction that rewrites
+       * descendant paths. Pass a number to re-parent, or null to move to the root.
+       */
+      parent?: number | null;
+    },
+    opts: Parameters<FolderServiceImplementation['update']>[2]
+  ): Promise<Folder | undefined>;
+  /**
+   * Deletes the folders, their subfolders and every file they hold.
+   *
+   * @returns the deleted folders, without their subfolders, and how many folders and files were
+   * deleted in total.
+   * @internal
+   */
+  deleteByIds(
+    ids?: Parameters<FolderServiceImplementation['deleteByIds']>[0],
+    opts?: Parameters<FolderServiceImplementation['deleteByIds']>[1]
+  ): Promise<{ folders: Folder[]; totalFolderNumber: number; totalFileNumber: number }>;
+  /**
+   * Sets the next `pathId` and the matching `path` on the folder, which is changed in place and
+   * returned.
+   *
+   * @internal
+   */
+  setPathIdAndPath<TFolder extends { name?: string; parent?: number | null }>(
+    folder: TFolder
+  ): Promise<TFolder & { pathId: number; path: string }>;
+  /**
+   * The root folders, each with its subfolders.
+   *
+   * @internal
+   */
+  getStructure(): Promise<FolderStructureNode[]>;
+};
+
+type APIUploadFolderServiceImplementation = typeof apiUploadFolder;
+
+/** The registered `api-upload-folder` service: the folder that Content API uploads go to. */
+export type APIUploadFolderService = Omit<
+  APIUploadFolderServiceImplementation,
+  'getAPIUploadFolder'
+> & {
+  /**
+   * The folder that Content API uploads go to. It is created at the root on first use, and again
+   * when it was deleted.
+   *
+   * @internal
+   */
+  getAPIUploadFolder(): Promise<Folder>;
+};
+
+type FileServiceImplementation = typeof file;
+
+/** The registered `file` service: file paths, URL signing and file deletion. */
+export type FileService = Omit<FileServiceImplementation, 'getFolderPath'> & {
+  /**
+   * The path of the folder with this ID, or `/` without one. Rejects when no folder has this ID.
+   *
+   * @internal
+   */
+  getFolderPath(folderId?: number | null): Promise<string>;
+};
+
 /**
  * `strapi.config.get('plugin::upload')`: the plugin config merged with its defaults. `breakpoints`
  * defaults to the responsive image sizes when it is not set.
@@ -114,11 +212,11 @@ export type Services = {
   upload: UploadService;
   'image-manipulation': typeof imageManipulation;
   provider: ReturnType<typeof provider>;
-  folder: typeof folder;
-  file: typeof file;
+  folder: FolderService;
+  file: FileService;
   weeklyMetrics: ReturnType<typeof weeklyMetrics>;
   metrics: MetricsService;
-  'api-upload-folder': typeof apiUploadFolder;
+  'api-upload-folder': APIUploadFolderService;
   extensions: typeof extensions;
   aiMetadata: ReturnType<typeof createAIMetadataService>;
   aiMetadataJobs: AIMetadataJobsService;
