@@ -1,24 +1,8 @@
 import { useRef, useCallback, useMemo, useState, useEffect, type ChangeEvent } from 'react';
 
-import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Layouts, Page, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  Flex,
-  Loader,
-  MenuItem,
-  SimpleMenu,
-  Typography,
-  VisuallyHidden,
-} from '@strapi/design-system';
-import {
-  ChevronDown,
-  Files,
-  Folder as FolderIcon,
-  GridFour as GridIcon,
-  Link,
-  List,
-} from '@strapi/icons';
+import { Box, Flex, MenuItem, SimpleMenu, Typography, VisuallyHidden } from '@strapi/design-system';
+import { ChevronDown, Files, Folder as FolderIcon, Link } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
@@ -26,9 +10,8 @@ import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../hooks/useTracking';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
-import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
 import { useGetUploadSettingsQuery } from '../../services/settings';
-import { buildItemLocations, type ItemLocations } from '../../utils/itemLocations';
+import { buildItemLocations } from '../../utils/itemLocations';
 import { getTranslationKey } from '../../utils/translations';
 import { typeFromMime } from '../../utils/typeFromMime';
 
@@ -36,50 +19,28 @@ import {
   AssetDetailsDrawer,
   useAssetDetailsParam,
 } from './components/AssetDetails/AssetDetailsDrawer';
-import { AssetsGrid } from './components/AssetsGrid';
 import { AssetsSearchInput } from './components/AssetsSearchInput';
-import { AssetsTable } from './components/AssetsTable';
-import { BulkActionsBar } from './components/BulkActionsBar';
+import { AssetsView } from './components/AssetsView';
 import { AssetsDndProvider } from './components/Dnd/AssetsDndProvider';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
-import { EmptyState, FilteredEmptyState } from './components/EmptyState';
 import { FilterBadges } from './components/FilterBadges';
 import { FilterMenu } from './components/FilterMenu';
 import { FolderFormDialog } from './components/FolderFormDialog';
 import { FOLDER_TREE_ROOT_SELECTOR, FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
-import { ItemContextMenuProvider } from './components/ItemContextMenu';
 import { MainAreaContextMenu } from './components/MainAreaContextMenu';
 import { SortMenu } from './components/SortMenu';
+import { ViewToggle } from './components/ViewToggle';
 import { localStorageKeys, viewOptions } from './constants';
-import { useAssetSearch } from './hooks/useAssetSearch';
 import { AssetSelectionProvider, useAssetSelection } from './hooks/useAssetSelection';
+import { useAssetsList } from './hooks/useAssetsList';
 import { BusyAssetsProvider } from './hooks/useBusyAssets';
 import { useFolderInfo } from './hooks/useFolderInfo';
-import { useFolderNavigation } from './hooks/useFolderNavigation';
-import { useInfiniteAssets } from './hooks/useInfiniteAssets';
-import { useInfiniteScrollSentinel } from './hooks/useInfiniteScrollSentinel';
-import { useListFilters } from './hooks/useListFilters';
 import { useListScrollRestoration } from './hooks/useListScrollRestoration';
-import { useListSort, type FoldersPosition } from './hooks/useListSort';
-import { buildAssetFilters } from './utils/buildAssetFilters';
 import { getListQueryKey } from './utils/listQueryKey';
-import { mergeMixedList } from './utils/mergeMixedList';
-import { buildRenderedKeys } from './utils/renderedKeys';
 
-import type { File, UploadFileInfo } from '../../../../shared/contracts/files';
-import type { Folder } from '../../../../shared/contracts/folders';
-
-// The negative bottom margin shrinks the trigger area by a pixel so the 1px
-// sentinel sitting exactly at the fold (when a page's rows happen to fill the
-// viewport) reads as "not visible" and doesn't pull an extra page. It still
-// triggers as soon as the sentinel scrolls a hair into view. Tune the bottom
-// value if the list over- or under-fetches near the fold.
-const INTERSECTION_OPTIONS: IntersectionObserverInit = {
-  threshold: 0,
-  rootMargin: '0px 0px -1px 0px',
-};
+import type { UploadFileInfo } from '../../../../shared/contracts/files';
 
 // Module-level so the header sentinel's observer isn't rebuilt every render.
 const HEADER_SENTINEL_OPTIONS: IntersectionObserverInit = { threshold: 0 };
@@ -118,157 +79,6 @@ const getSearchResultsCountMessage = (numberFolders: number, numberAssets: numbe
 };
 
 /* -------------------------------------------------------------------------------------------------
- * AssetsView
- * -----------------------------------------------------------------------------------------------*/
-
-interface AssetsViewProps {
-  view: number;
-  folders: Folder[];
-  isLoadingFolders: boolean;
-  assets: File[];
-  isLoadingAssets: boolean;
-  isFetchingMore: boolean;
-  hasNextPage: boolean;
-  fetchNextPage: () => void;
-  error: unknown;
-  locations: ItemLocations;
-  searchQuery: string;
-  assetsSort: string;
-  foldersPosition: FoldersPosition;
-  hasActiveFilters: boolean;
-  onClearFilters: () => void;
-  onAssetItemClick: (assetId: number) => void;
-  onAddAssets: () => void;
-  canAddAssets: boolean;
-  onClearSearch: () => void;
-}
-
-const AssetsView = ({
-  view,
-  folders,
-  isLoadingFolders,
-  assets,
-  isLoadingAssets,
-  isFetchingMore,
-  hasNextPage,
-  fetchNextPage,
-  error,
-  locations,
-  searchQuery,
-  assetsSort,
-  foldersPosition,
-  hasActiveFilters,
-  onClearFilters,
-  onAssetItemClick,
-  onAddAssets,
-  canAddAssets,
-  onClearSearch,
-}: AssetsViewProps) => {
-  const { formatMessage } = useIntl();
-
-  const isGridView = view === viewOptions.GRID;
-  const isLoading = isLoadingAssets || isLoadingFolders;
-
-  // "Folders: Mixed with files" — interleave the complete folder list into the
-  // loaded asset stream client-side, following the active sort. Table view
-  // only: the grid always keeps folders in their own band on top.
-  const mixedItems = useMemo(
-    () =>
-      foldersPosition === 'mixed' && !isGridView
-        ? mergeMixedList({ folders, assets, sort: assetsSort, hasNextPage })
-        : null,
-    [foldersPosition, isGridView, folders, assets, assetsSort, hasNextPage]
-  );
-
-  // Derived once here so the table, the grid and the bulk bar all agree on what
-  // is on screen — in mixed mode that is not simply every folder.
-  const renderedKeys = buildRenderedKeys({ folders, assets, mixedItems });
-
-  const loadMoreRef = useInfiniteScrollSentinel({
-    hasNextPage,
-    isFetchingMore,
-    onLoadMore: fetchNextPage,
-    options: INTERSECTION_OPTIONS,
-  });
-
-  if (isLoading) {
-    return (
-      <Flex justifyContent="center" padding={8}>
-        <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
-      </Flex>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box padding={8}>
-        <Typography textColor="danger600">
-          {formatMessage({
-            id: getTranslationKey('list.assets.error'),
-            defaultMessage: 'An error occurred while fetching assets.',
-          })}
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (folders.length === 0 && assets.length === 0) {
-    // While searching, the search empty state wins (it names the query); a
-    // filter-only dead end gets the filtered variant with its Clear action.
-    return hasActiveFilters && !searchQuery ? (
-      <FilteredEmptyState onClearFilters={onClearFilters} />
-    ) : (
-      <EmptyState
-        onAddAssets={onAddAssets}
-        canAddAssets={canAddAssets}
-        searchQuery={searchQuery}
-        onClearSearch={onClearSearch}
-      />
-    );
-  }
-  return (
-    <>
-      {/* Above both views so one instance serves either, and so the selection
-          menu has the `locations` its move dialog validates against. */}
-      <ItemContextMenuProvider locations={locations}>
-        {isGridView ? (
-          <AssetsGrid
-            folders={folders}
-            assets={assets}
-            renderedKeys={renderedKeys}
-            onAssetItemClick={onAssetItemClick}
-          />
-        ) : (
-          <AssetsTable
-            assets={assets}
-            folders={folders}
-            mixedItems={mixedItems}
-            renderedKeys={renderedKeys}
-            onAssetItemClick={onAssetItemClick}
-          />
-        )}
-      </ItemContextMenuProvider>
-      <div ref={loadMoreRef} style={{ height: 1 }} />
-      {isFetchingMore && (
-        <Flex justifyContent="center" padding={4}>
-          <Loader>
-            {formatMessage({
-              id: getTranslationKey('list.assets.loading-more'),
-              defaultMessage: 'Loading more assets...',
-            })}
-          </Loader>
-        </Flex>
-      )}
-      {/* Lives here rather than in `AssetsPage` so it can read the loaded
-          assets: the AI metadata action needs their mime types to know what
-          the provider can handle. `position: fixed` keeps it visually anchored
-          regardless of where it sits in the tree. */}
-      <BulkActionsBar assets={assets} renderedKeys={renderedKeys} locations={locations} />
-    </>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
  * ClearSelectionOnChange
  *
  * Selection is list-scoped: it resets when the user is looking at a different list.
@@ -296,52 +106,6 @@ const ClearSelectionOnChange = ({ listQueryKey }: ClearSelectionOnChangeProps) =
 /* -------------------------------------------------------------------------------------------------
  * AssetsPage
  * -----------------------------------------------------------------------------------------------*/
-
-/**
- * Mirrors the design-system Toggle look (grey track, white active segment
- * card) — reproduced locally because the DS component is a labels-only
- * boolean input (no icons) and paints its left segment in danger red. Here
- * both segments use the primary blue when active.
- */
-const StyledToggleGroup = styled(ToggleGroup.Root)`
-  display: flex;
-  padding: ${({ theme }) => theme.spaces[1]};
-  background: ${({ theme }) => theme.colors.neutral100};
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
-  border-radius: ${({ theme }) => theme.borderRadius};
-`;
-
-const StyledToggleItem = styled(ToggleGroup.Item)`
-  display: flex;
-  flex: 1 1 50%;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spaces[2]};
-  padding: 0.6rem ${({ theme }) => theme.spaces[3]};
-  border: 1px solid transparent;
-  border-radius: ${({ theme }) => theme.borderRadius};
-  background: transparent;
-  color: ${({ theme }) => theme.colors.neutral600};
-  cursor: pointer;
-  font-size: ${({ theme }) => theme.fontSizes[1]};
-  font-weight: ${({ theme }) => theme.fontWeights.semiBold};
-  white-space: nowrap;
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.neutral700};
-  }
-
-  &[data-state='on'] {
-    background: ${({ theme }) => theme.colors.neutral0};
-    border-color: ${({ theme }) => theme.colors.neutral200};
-    color: ${({ theme }) => theme.colors.primary600};
-  }
-
-  svg {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-`;
 
 // A single sticky header — same layout scrolled or not, so the toolbar
 // alignment can't reflow the way the shared sticky header did. Once the list
@@ -464,81 +228,31 @@ const SearchSlot = styled(Box)`
   }
 `;
 
-// Toggle labels are hidden below desktop — icons only (buttons keep aria-label).
-const ToggleLabel = styled.span`
-  display: none;
-
-  ${({ theme }) => theme.breakpoints.large} {
-    display: inline;
-  }
-`;
-
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
   const { openDetails } = useAssetDetailsParam();
   const { canCreate, canUpdate } = useMediaLibraryPermissions();
 
-  const { currentFolderId, navigateToFolderId, navigateToRoot } = useFolderNavigation();
-  // Deleted or missing folders (404) need a fetch — handled here, not in
-  // `useFolderNavigation` (which only strips malformed ?folder= values).
-  const { error: currentFolderError } = useGetFolderQuery(
-    { id: currentFolderId! },
-    { skip: currentFolderId === null }
-  );
-
-  useEffect(() => {
-    if (currentFolderError?.name === 'NotFoundError') {
-      navigateToRoot();
-    }
-  }, [currentFolderError, navigateToRoot]);
-  const { title, itemCount } = useFolderInfo(currentFolderId);
-
-  const { searchQuery, isSearching, clearSearch } = useAssetSearch();
-  const listSort = useListSort();
-  const listFilters = useListFilters();
-
-  // Resolve relative presets against "now" only when the filters change —
-  // keeps the query args (and RTK cache keys) stable between renders.
-  const builtFilters = useMemo(
-    () => buildAssetFilters(listFilters.filters, new Date()),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- serialized is the value identity of filters
-    [listFilters.serialized]
-  );
-
   const {
+    currentFolderId,
+    navigateToFolderId,
+    searchQuery,
+    isSearching,
+    clearSearch,
+    listSort,
+    listFilters,
     assets,
     subscribers: assetPageSubscribers,
     pagination,
-    isLoading: isLoadingAssets,
+    isLoadingAssets,
     isFetchingMore,
     hasNextPage,
     fetchNextPage,
-    error: assetsError,
-  } = useInfiniteAssets({
-    // The real folder is passed even while searching: the service drops the folder
-    // filter when `search` is set, so results are still global. List filters
-    // compose with both modes.
-    folder: currentFolderId,
-    search: searchQuery || undefined,
-    sort: listSort.assetsSort,
-    filters: builtFilters.fileClauses,
-    enabled: builtFilters.showFiles,
-  });
-
-  const { data: fetchedFolders = [], isLoading: isLoadingFolders } = useGetFoldersQuery(
-    {
-      parentId: currentFolderId,
-      search: searchQuery || undefined,
-      sort: listSort.foldersSort,
-      filters: builtFilters.folderClauses,
-    },
-    { skip: !builtFilters.showFolders }
-  );
-  // A type badge can exclude folders structurally (e.g. "Type is Picture").
-  const folders = useMemo(
-    () => (builtFilters.showFolders ? fetchedFolders : []),
-    [builtFilters.showFolders, fetchedFolders]
-  );
+    assetsError,
+    folders,
+    isLoadingFolders,
+  } = useAssetsList();
+  const { title, itemCount } = useFolderInfo(currentFolderId);
 
   // Both move affordances (drag and the bulk bar) resolve each item's parent
   // from the rows on screen — while searching, results are global and the
@@ -805,49 +519,7 @@ export const AssetsPage = () => {
                           <Box>
                             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
                           </Box>
-                          <StyledToggleGroup
-                            type="single"
-                            value={isGridView ? 'grid' : 'table'}
-                            onValueChange={(value) =>
-                              value &&
-                              setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
-                            }
-                            aria-label={formatMessage({
-                              id: getTranslationKey('view.switch.label'),
-                              defaultMessage: 'View options',
-                            })}
-                          >
-                            <StyledToggleItem
-                              value="table"
-                              aria-label={formatMessage({
-                                id: getTranslationKey('view.table'),
-                                defaultMessage: 'Table view',
-                              })}
-                            >
-                              <List />
-                              <ToggleLabel>
-                                {formatMessage({
-                                  id: getTranslationKey('view.table'),
-                                  defaultMessage: 'Table view',
-                                })}
-                              </ToggleLabel>
-                            </StyledToggleItem>
-                            <StyledToggleItem
-                              value="grid"
-                              aria-label={formatMessage({
-                                id: getTranslationKey('view.grid'),
-                                defaultMessage: 'Grid view',
-                              })}
-                            >
-                              <GridIcon />
-                              <ToggleLabel>
-                                {formatMessage({
-                                  id: getTranslationKey('view.grid'),
-                                  defaultMessage: 'Grid view',
-                                })}
-                              </ToggleLabel>
-                            </StyledToggleItem>
-                          </StyledToggleGroup>
+                          <ViewToggle view={view} onChange={setView} />
                         </SortToggleGroup>
                       </Toolbar>
 
