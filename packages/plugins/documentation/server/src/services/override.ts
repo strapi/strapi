@@ -10,7 +10,18 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
   const excludedFromGeneration: string[] = [];
 
   return {
+    /**
+     * The registered overrides, merged by `generateFullDoc` in registration order.
+     *
+     * @internal
+     */
     registeredOverrides,
+    /**
+     * The APIs and plugins left out of the generated paths. Names are kept as given, duplicates
+     * included.
+     *
+     * @internal
+     */
     excludedFromGeneration,
     /**
      *
@@ -26,6 +37,11 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       excludedFromGeneration.push(api);
     },
 
+    /**
+     * Whether `name` is excluded from generation. Despite its name, `true` means excluded.
+     *
+     * @internal
+     */
     isEnabled(name: string) {
       return excludedFromGeneration.includes(name);
     },
@@ -54,6 +70,9 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
         overrideToRegister = require('yaml').parse(overrideToRegister);
       }
       // receive an object we can register it directly
+      // TODO @Nico text that parses to a scalar, an array or `null` is registered as is, so
+      // `registeredOverrides` can hold more than OpenAPI parts; the exclusions above are also
+      // applied before a parse error is thrown.
       registeredOverrides.push(overrideToRegister);
     },
   };
