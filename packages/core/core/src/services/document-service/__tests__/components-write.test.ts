@@ -72,8 +72,6 @@ const setup = (stored: Record<string, Stored>) => {
               ? Object.fromEntries(attribute.map((name) => [name, read(name)]))
               : read(attribute);
           }
-        findMany: jest.fn(async ({ where }: { where: { id: { $in: number[] } } }) =>
-          where.id.$in.map((id) => ({ id, ...stored[uid]?.[id] }))
         ),
         deleteMany: jest.fn(async () => ({ count: 1 })),
         update: jest.fn(async ({ where }: { where: { id: number } }) => ({ id: where.id })),
@@ -86,8 +84,29 @@ const setup = (stored: Record<string, Stored>) => {
     ])
   );
 
+  // `strapi.db.queryBuilder(uid).init(params).execute()` returns the stored rows asked for by id
+  const builders: Record<string, { init: jest.Mock; execute: jest.Mock }> = {};
+  const queryBuilder = jest.fn((uid: string) => {
+    if (!builders[uid]) {
+      let params: { where: { id: { $in: number[] } } };
+      const builder = {
+        init: jest.fn((value: typeof params) => {
+          params = value;
+          return builder;
+        }),
+        execute: jest.fn(async () =>
+          params.where.id.$in.map((id) => ({ id, ...stored[uid]?.[id] }))
+        ),
+      };
+      builders[uid] = builder;
+    }
+
+    return builders[uid];
+  });
+
   const db = {
     query: jest.fn((uid: string) => queries[uid]),
+    queryBuilder,
     transaction: jest.fn(async (run: (ctx: { trx: string }) => unknown) => run({ trx: 'trx' })),
     entityManager: { deleteManyRelations: jest.fn(async () => undefined) },
     lifecycles: { hasSubscribers: jest.fn(() => false) },
@@ -95,10 +114,13 @@ const setup = (stored: Record<string, Stored>) => {
 
   global.strapi = {
     getModel: jest.fn((uid: string) => models[uid]),
+    components: Object.fromEntries(
+      Object.entries(models).filter(([, model]) => model.modelType === 'component')
+    ),
     db,
   } as any;
 
-  return Object.assign(queries, { db });
+  return Object.assign(queries, { db, builders });
 };
 
 const link = (id: number, title: string, image: unknown = null) => ({ id, title, image });
@@ -114,9 +136,6 @@ const pivot = (field: string, component_type: string) => ({ field, component_typ
 describe('updateComponents', () => {
   const page = { id: 10 };
 
-    components: Object.fromEntries(
-      Object.entries(models).filter(([, model]) => model.modelType === 'component')
-    ),
   describe('repeatable component', () => {
     const storedLinks = [link(1, 'a', { id: 7 }), link(2, 'b')];
 
@@ -190,6 +209,20 @@ describe('updateComponents', () => {
       // ids of removed components are compared and passed as strings
       expect(queries[LINK_UID].delete).toHaveBeenCalledWith({ where: { id: '2' } });
       expect(result.links.map((item: any) => item.id)).toEqual([1]);
+    });
+
+    it('writes the components as before when a lifecycle subscriber listens to their updates', async () => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+      queries.db.lifecycles.hasSubscribers.mockImplementation(
+        (action: string, uid: string) => action === 'afterUpdate' && uid === LINK_UID
+      );
+
+      const result = await updateComponents(PAGE_UID, page, {
+        links: [linkInput(1, 'a', [{ id: 7 }]), linkInput(2, 'b')],
+      } as any);
+
+      expect(queries[LINK_UID].update).toHaveBeenCalledTimes(2);
+      expect(result.links.map((component: any) => component.id)).toEqual([1, 2]);
     });
 
     it('treats a relation with connections as a change', async () => {
@@ -340,6 +373,7 @@ describe('updateComponents', () => {
       } as any);
 
       expect(result).toEqual({});
+      // every registered component is listed, not only the ones the zone declares
       expect(queries[PAGE_UID].load).toHaveBeenCalledWith(page, 'zone', {
         on: { [LINK_UID]: MEDIA_POPULATE, [SECTION_UID]: {}, [LEGACY_UID]: {} },
       });
@@ -377,6 +411,25 @@ describe('updateComponents', () => {
       expect(queries[LINK_UID].update).not.toHaveBeenCalled();
       expect(result.zone.map((block: any) => block.id)).toEqual([20, 1]);
     });
+
+    it('deletes a block whose type the zone no longer declares', async () => {
+      const queries = setup({
+        ...stored,
+        [PAGE_UID]: {
+          10: { zone: [...storedZone, { id: 30, __component: LEGACY_UID, title: 'old' }] },
+        },
+      });
+
+      const result = await updateComponents(PAGE_UID, page, {
+        zone: [
+          { __component: LINK_UID, ...linkInput(1, 'a') },
+          { __component: SECTION_UID, id: 20, title: 's', links: [] },
+        ],
+      } as any);
+
+      expect(queries[LEGACY_UID].delete).toHaveBeenCalledWith({ where: { id: '30' } });
+      expect(result.zone.map((block: any) => block.id)).toEqual([1, 20]);
+    });
   });
 });
 
@@ -411,25 +464,6 @@ describe('isComponentUnchanged', () => {
     expect(check({ string: 'a' }, { string: 'a' })).toBe(true);
     expect(check({ string: 'a' }, { string: 'b' })).toBe(false);
     expect(check({ bool: false }, { bool: false })).toBe(true);
-
-    it('deletes a block whose type the zone no longer declares', async () => {
-      const queries = setup({
-        ...stored,
-        [PAGE_UID]: {
-          10: { zone: [...storedZone, { id: 30, __component: LEGACY_UID, title: 'old' }] },
-        },
-      });
-
-      const result = await updateComponents(PAGE_UID, page, {
-        zone: [
-          { __component: LINK_UID, ...linkInput(1, 'a') },
-          { __component: SECTION_UID, id: 20, title: 's', links: [] },
-        ],
-      } as any);
-
-      expect(queries[LEGACY_UID].delete).toHaveBeenCalledWith({ where: { id: '30' } });
-      expect(result.zone.map((block: any) => block.id)).toEqual([1, 20]);
-    });
     expect(check({ bool: false }, { bool: 'false' })).toBe(false);
     expect(check({ int: 3 }, { int: '3' })).toBe(true);
     expect(check({ dec: 12.5 }, { dec: '12.50' })).toBe(true);
@@ -518,14 +552,14 @@ describe('deleteComponents', () => {
 
     await deleteComponents(PAGE_UID, entry as any, { loadComponents: false });
 
-    // nested components are fetched by type, not one parent at a time
-    expect(queries[SECTION_UID].findMany).toHaveBeenCalledTimes(1);
-    expect(queries[SECTION_UID].findMany).toHaveBeenCalledWith({
+    // nested components are fetched by type, not one parent at a time, and without lifecycles
+    expect(queries.builders[SECTION_UID].init).toHaveBeenCalledTimes(1);
+    expect(queries.builders[SECTION_UID].init).toHaveBeenCalledWith({
       where: { id: { $in: [20, 21] } },
       select: ['id'],
       populate: { links: { select: ['id'] } },
     });
-    expect(queries[LINK_UID].findMany).not.toHaveBeenCalled();
+    expect(queries.builders[LINK_UID]).toBeUndefined();
 
     const { deleteManyRelations } = queries.db.entityManager;
     expect(deleteManyRelations).toHaveBeenCalledWith(LINK_UID, [1, 2, 4, 3], {
@@ -586,5 +620,24 @@ describe('deleteComponents', () => {
     expect(queries[SECTION_UID].delete.mock.calls.map(([params]: any) => params.where.id)).toEqual([
       20, 21,
     ]);
+  });
+
+  it('deletes the components one by one when a subscriber listens to their bulk deletion', async () => {
+    const queries = setup(stored);
+    queries.db.lifecycles.hasSubscribers.mockImplementation(
+      (action: string, uid: string) => action === 'afterDeleteMany' && uid === SECTION_UID
+    );
+
+    await deleteComponents(PAGE_UID, entry as any, { loadComponents: false });
+
+    // the subscriber never received delete-many events for components: it must not start to
+    expect(queries[SECTION_UID].deleteMany).not.toHaveBeenCalled();
+    expect(queries[SECTION_UID].delete.mock.calls.map(([params]: any) => params.where.id)).toEqual([
+      20, 21,
+    ]);
+    // the links under a section are a tree of their own, with nobody listening: still in bulk
+    expect(queries.db.entityManager.deleteManyRelations).toHaveBeenCalledWith(LINK_UID, [3], {
+      transaction: 'trx',
+    });
   });
 });

@@ -720,7 +720,8 @@ const groupComponentsByUid = (
 
 /**
  * Ids of every component under an entry or a component, by component uid, down to the deepest
- * level. Each level costs one query per component uid, whatever the number of components.
+ * level. Each level costs one query per component uid holding nested components, whatever the
+ * number of components.
  */
 const collectComponentTree = async <TUID extends UID.Schema>(
   uid: TUID,
@@ -754,19 +755,24 @@ const collectComponentTree = async <TUID extends UID.Schema>(
         continue;
       }
 
-      const rows: Record<string, unknown>[] = await strapi.db.query(componentUID).findMany({
-        where: { id: { $in: ids } },
-        select: ['id'],
-        populate: Object.fromEntries(
-          nestedAttributes.map((attributeName) => [
-            attributeName,
-            // dynamic zone items need their __component, keep every column for them
-            componentSchema.attributes[attributeName].type === 'dynamiczone'
-              ? true
-              : { select: ['id'] },
-          ])
-        ),
-      });
+      // Read without lifecycles: the per-row path never ran `findMany` on a component type, so no
+      // subscriber should start receiving those events here
+      const rows = await strapi.db
+        .queryBuilder(componentUID)
+        .init({
+          where: { id: { $in: ids } },
+          select: ['id'],
+          populate: Object.fromEntries(
+            nestedAttributes.map((attributeName) => [
+              attributeName,
+              // dynamic zone items need their __component, keep every column for them
+              componentSchema.attributes[attributeName].type === 'dynamiczone'
+                ? true
+                : { select: ['id'] },
+            ])
+          ),
+        })
+        .execute<Record<string, unknown>[]>();
 
       for (const row of rows) {
         for (const [nestedUID, nestedIds] of groupComponentsByUid(componentSchema, row)) {
@@ -781,9 +787,21 @@ const collectComponentTree = async <TUID extends UID.Schema>(
   return tree;
 };
 
-const hasDeleteLifecycleSubscribers = (componentUID: UID.Component) =>
-  strapi.db.lifecycles.hasSubscribers('beforeDelete', componentUID) ||
-  strapi.db.lifecycles.hasSubscribers('afterDelete', componentUID);
+type LifecycleAction = Parameters<typeof strapi.db.lifecycles.hasSubscribers>[0];
+
+const UPDATE_LIFECYCLES: LifecycleAction[] = ['beforeUpdate', 'afterUpdate'];
+const DELETE_LIFECYCLES: LifecycleAction[] = [
+  'beforeDelete',
+  'afterDelete',
+  'beforeDeleteMany',
+  'afterDeleteMany',
+];
+
+/**
+ * Whether a database lifecycle subscriber would receive one of `actions` for the component type.
+ */
+const hasLifecycleSubscribers = (componentUID: UID.Component, actions: LifecycleAction[]) =>
+  actions.some((action) => strapi.db.lifecycles.hasSubscribers(action, componentUID));
 
 /**
  * Deletes the components one by one, each with its own delete lifecycles.
@@ -835,8 +853,9 @@ const DELETE_BATCH_SIZE = 500;
 /**
  * Deletes every component under an entry or a component. The whole tree is removed level by level
  * with one statement per component uid and per relation attribute. When a database lifecycle
- * subscriber listens to the deletion of one of those component uids, the components are deleted
- * one by one instead, so that each of them fires its events.
+ * subscriber listens to any delete lifecycle of one of those component uids, the components are
+ * deleted one by one instead, so that each of them fires its events and no subscriber receives an
+ * event it did not receive before.
  */
 const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.Entity<TUID>>(
   uid: TUID,
@@ -851,7 +870,11 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
     return;
   }
 
-  if ([...tree.keys()].some(hasDeleteLifecycleSubscribers)) {
+  if (
+    [...tree.keys()].some((componentUID) =>
+      hasLifecycleSubscribers(componentUID, DELETE_LIFECYCLES)
+    )
+  ) {
     await deleteComponentsOneByOne(uid, entityToDelete, { loadComponents });
     return;
   }
@@ -899,10 +922,12 @@ const updateComponent = async <TUID extends UID.Component>(
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
   // Nothing to write when the component is stored as sent. updateComponents only reports the
-  // nested attributes that changed, so an empty componentData means none of them did.
+  // nested attributes that changed, so an empty componentData means none of them did. The write
+  // is kept when a lifecycle subscriber listens to it, so that it fires as before.
   if (
     previous &&
     isEmpty(componentData) &&
+    !hasLifecycleSubscribers(uid, UPDATE_LIFECYCLES) &&
     isComponentUnchanged(schema, previous, data as Record<string, unknown>)
   ) {
     return { id: componentToUpdate.id, changed: false };

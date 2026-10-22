@@ -59,7 +59,9 @@ export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
 
     /**
      * Whether running `action` on `uid` would reach anyone: a lifecycle declared on the model, a
-     * subscriber registered for that model or for every model, or a subscriber function.
+     * subscriber registered for that model or for every model, or a subscriber function. The
+     * provider's own timestamps subscriber does not count: it only stamps the data of a write that
+     * is about to happen and observes nothing.
      */
     hasSubscribers(action, uid) {
       if (isLifecycleHooksDisabled) {
@@ -67,6 +69,10 @@ export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
       }
 
       return subscribers.some((subscriber) => {
+        if (subscriber === subscriberUtils.timestampsLifecyclesSubscriber) {
+          return false;
+        }
+
         if (subscriber === subscriberUtils.modelsLifecyclesSubscriber) {
           const model = db.metadata.get(uid);
 

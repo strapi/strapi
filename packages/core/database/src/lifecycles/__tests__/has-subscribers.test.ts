@@ -12,8 +12,9 @@ describe('lifecycles provider hasSubscribers', () => {
     const lifecycles = createLifecyclesProvider(createDb());
 
     expect(lifecycles.hasSubscribers('beforeDelete', 'api::article.article')).toBe(false);
-    // the timestamps subscriber handles creates and updates
-    expect(lifecycles.hasSubscribers('beforeCreate', 'api::article.article')).toBe(true);
+    // the timestamps subscriber only stamps the data of a write: it does not count
+    expect(lifecycles.hasSubscribers('beforeCreate', 'api::article.article')).toBe(false);
+    expect(lifecycles.hasSubscribers('beforeUpdate', 'api::article.article')).toBe(false);
   });
 
   it('is true when the model declares the lifecycle', () => {
