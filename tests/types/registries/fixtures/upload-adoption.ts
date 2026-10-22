@@ -10,6 +10,8 @@ import type {
 } from '@strapi/upload/strapi-server';
 
 declare const app: Core.Strapi;
+declare const context: Parameters<Core.ControllerHandler>[0];
+declare const next: Parameters<Core.ControllerHandler>[1];
 
 const metrics = app.plugin('upload').service('metrics');
 metrics satisfies MetricsService;
@@ -62,3 +64,20 @@ const configuration = app.service('plugin::upload.upload').getConfiguration();
 configuration satisfies Promise<{ pageSize: number; sort?: string | undefined } | null>;
 // @ts-expect-error The sort is a string.
 app.service('plugin::upload.upload').setConfiguration({ pageSize: 10, sort: 1 });
+
+app.plugin('upload').controller('admin-file').findOne(context, next);
+app.controller('plugin::upload.admin-upload').bulkUpdateFileInfo(context, next);
+// @ts-expect-error Registry controller actions do not accept misspelled names.
+app.plugin('upload').controller('admin-upload').uploadFromUrl(context, next);
+
+type Controllers = {
+  'admin-file': Strapi.Registries.PackageControllers['plugin::upload.admin-file'];
+  'admin-upload': Strapi.Registries.PackageControllers['plugin::upload.admin-upload'];
+};
+[
+  { method: 'DELETE', path: '/files/:id', handler: 'admin-file.destroy' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
+[
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  { method: 'DELETE', path: '/files/:id', handler: 'admin-file.delete' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];

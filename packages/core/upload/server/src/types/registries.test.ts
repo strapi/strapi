@@ -1,8 +1,12 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
+import type { Core } from '@strapi/types';
 import type { Folder, UploadableFile } from '../types';
+import type { Controllers } from './controllers';
 import type { AIMetadataJobRow, FolderStructureNode } from './services';
 
 declare const file: UploadableFile;
+declare const context: Parameters<Core.ControllerHandler>[0];
+declare const next: Parameters<Core.ControllerHandler>[1];
 
 const metrics = strapi.plugin('upload').service('metrics');
 metrics.trackUsage('didUploadImage') satisfies Promise<boolean>;
@@ -149,3 +153,21 @@ configuration.sort satisfies number;
 uploadService.setConfiguration({ pageSize: 10 }) satisfies Promise<void>;
 // @ts-expect-error The page size is stored.
 uploadService.setConfiguration({ sort: 'createdAt:DESC' });
+
+strapi.controller('plugin::upload.admin-file').find(context, next);
+strapi.plugin('upload').controller('admin-file').generateAIMetadata(context, next);
+// @ts-expect-error Registered controllers have no arbitrary actions.
+strapi.plugin('upload').controller('admin-file').missing(context, next);
+strapi.controller('plugin::upload.admin-upload').uploadFromUrls(context, next);
+strapi.plugin('upload').controller('admin-upload').upload(context, next);
+// @ts-expect-error Registered controllers have no arbitrary actions.
+strapi.controller('plugin::upload.admin-upload').missing(context, next);
+
+[
+  { method: 'GET', path: '/files', handler: 'admin-file.find' },
+  { method: 'POST', path: '/', handler: 'admin-upload.upload' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
+[
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  { method: 'POST', path: '/files', handler: 'admin-upload.uploadFrom' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
