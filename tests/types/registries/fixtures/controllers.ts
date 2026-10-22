@@ -1,4 +1,4 @@
-// Strict mode with a generated `controllers.d.ts`, written by the consumer test from `app/src/api`.
+// Strict mode with a generated `controllers.ts`, written by the consumer test from `app/src/api`.
 import type { Core } from '@strapi/strapi';
 
 declare const app: Core.Strapi;

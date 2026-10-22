@@ -203,7 +203,7 @@ describe('generateServicesDefinitions', () => {
       pwd,
       logger: createLogger({ silent: true }),
     });
-    await outputFile(path.join(pwd, 'services.d.ts'), output);
+    await outputFile(path.join(pwd, 'services.ts'), output);
     // The source moved after generation: the generated import no longer resolves.
     await fs.rm(path.join(root, 'src/api/article/services/removed.ts'));
     await outputFile(
@@ -229,7 +229,7 @@ describe('generateServicesDefinitions', () => {
     const check = (skipLibCheck: boolean) =>
       ts
         .getPreEmitDiagnostics(
-          ts.createProgram([path.join(pwd, 'services.d.ts'), path.join(root, 'src/check.ts')], {
+          ts.createProgram([path.join(pwd, 'services.ts'), path.join(root, 'src/check.ts')], {
             noEmit: true,
             strict: true,
             skipLibCheck,
@@ -242,10 +242,10 @@ describe('generateServicesDefinitions', () => {
           (diagnostic) => `${path.basename(diagnostic.file?.fileName ?? '')} TS${diagnostic.code}`
         );
 
-    expect(check(true)).toEqual([]);
     // The import that no longer resolves is an error type, which no conditional type maps to
-    // `unknown`: only the generated file reports it, and `skipLibCheck` hides it.
-    expect(check(false)).toEqual(['services.d.ts TS2307']);
+    // `unknown`: the generated file reports it, and `skipLibCheck` does not apply to a `.ts` file.
+    expect(check(true)).toEqual(['services.ts TS2307']);
+    expect(check(false)).toEqual(['services.ts TS2307']);
   });
 
   test('marks the uids of an application without contracts, without a contract helper', async () => {
@@ -328,7 +328,7 @@ describe('generateServicesDefinitions', () => {
       pwd,
       logger: createLogger({ silent: true }),
     });
-    await outputFile(path.join(pwd, 'services.d.ts'), output);
+    await outputFile(path.join(pwd, 'services.ts'), output);
     // The export was renamed after generation: the generated reference no longer resolves.
     await outputFile(
       path.join(root, 'src/api/article/services/renamed.ts'),
@@ -354,7 +354,7 @@ describe('generateServicesDefinitions', () => {
     const check = (skipLibCheck: boolean) =>
       ts
         .getPreEmitDiagnostics(
-          ts.createProgram([path.join(pwd, 'services.d.ts'), path.join(root, 'src/check.ts')], {
+          ts.createProgram([path.join(pwd, 'services.ts'), path.join(root, 'src/check.ts')], {
             noEmit: true,
             strict: true,
             skipLibCheck,
@@ -367,10 +367,72 @@ describe('generateServicesDefinitions', () => {
           (diagnostic) => `${path.basename(diagnostic.file?.fileName ?? '')} TS${diagnostic.code}`
         );
 
-    expect(check(true)).toEqual([]);
-    // The stale reference is an error type that no conditional type maps to `unknown`: only the
-    // generated file reports it, and `skipLibCheck` hides it until the next generation.
-    expect(check(false)).toEqual(['services.d.ts TS2694']);
+    // The stale reference is an error type that no conditional type maps to `unknown`: the generated
+    // file reports it until the next generation, and `skipLibCheck` does not apply to a `.ts` file.
+    expect(check(true)).toEqual(['services.ts TS2694']);
+    expect(check(false)).toEqual(['services.ts TS2694']);
+  });
+
+  test('emits the instance helper only when a source registers its inferred type', async () => {
+    const { normalized: allContracts } = await generate(
+      {
+        'src/api/article/services/article.ts':
+          'export type ServiceContract = { find(): number };\nexport default () => ({ find: () => 1 });',
+      },
+      ['api::article.article']
+    );
+    const { normalized: allJS } = await generate({ 'src/api/article/services/legacy.js': '' }, [
+      'api::article.legacy',
+    ]);
+
+    expect(allContracts).toContain('type ServiceContractOf<');
+    expect(allContracts).not.toContain('ServiceInstance');
+    expect(allJS).not.toContain('ServiceInstance');
+    expect(allJS).not.toContain('ServiceContractOf');
+  });
+
+  test.each([
+    [
+      'every source exports a contract',
+      {
+        'src/api/article/services/article.ts':
+          'export type ServiceContract = { find(): number };\nexport default () => ({ find: () => 1 });',
+      },
+      ['api::article.article'],
+    ],
+    ['every source is JS', { 'src/api/article/services/legacy.js': '' }, ['api::article.legacy']],
+    [
+      'every source is inferred',
+      { 'src/api/article/services/article.ts': 'export default () => ({ find: () => 1 });' },
+      ['api::article.article'],
+    ],
+  ])('compiles under noUnusedLocals when %s', async (_, files, services) => {
+    const { root, strapi, pwd } = await createApp(files, services);
+    roots.push(root);
+
+    const { output } = await generateServicesDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+    await outputFile(path.join(pwd, 'services.ts'), output);
+
+    const diagnostics = ts
+      .getPreEmitDiagnostics(
+        ts.createProgram([path.join(pwd, 'services.ts')], {
+          noEmit: true,
+          strict: true,
+          noUnusedLocals: true,
+          types: [],
+          module: ts.ModuleKind.CommonJS,
+          moduleResolution: ts.ModuleResolutionKind.Node10,
+        })
+      )
+      .map(
+        (diagnostic) => `${path.basename(diagnostic.file?.fileName ?? '')} TS${diagnostic.code}`
+      );
+
+    expect(diagnostics).toEqual([]);
   });
 
   test('sorts the entries by uid', async () => {
@@ -398,7 +460,7 @@ export {};
 `);
     // An empty file must still be a module, so that `import type {} from './services'` compiles
     expect(
-      ts.isExternalModule(ts.createSourceFile('services.d.ts', output, ts.ScriptTarget.Latest))
+      ts.isExternalModule(ts.createSourceFile('services.ts', output, ts.ScriptTarget.Latest))
     ).toBe(true);
   });
 

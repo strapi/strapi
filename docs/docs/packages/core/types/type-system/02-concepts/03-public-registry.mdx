@@ -284,12 +284,21 @@ With `strictTypes: true` in `config/typescript.ts` (typed on `Core.Config.TypeSc
 
 - `types/generated/strict.d.ts` holds `import type {} from '@strapi/strapi/strict-types'`. It enables strict mode for the whole program and loads the contracts of the plugins bundled with `@strapi/strapi`; optional plugins are loaded by `plugins.d.ts`. Going through `@strapi/strapi` keeps the application free of direct dependencies on the plugins, which it cannot resolve under a strict package manager layout such as pnpm's.
 - `types/generated/plugins.d.ts` imports the server declarations of the enabled optional plugins, such as `import type {} from '@strapi/plugin-sentry/strapi-server'`. Plugins that `@strapi/strapi/strict-types` already loads are left out, so the file holds no package manager store path.
-- `types/generated/services.d.ts` registers every `api::*` service of the application in the global `Strapi.Registries.AppServices`, typed from its source file.
-- `types/generated/controllers.d.ts` does the same for `api::*` controllers, in the global `Strapi.Registries.AppControllers`.
-- `types/generated/policies.d.ts` registers the config of every `global::*` and `api::*` policy in the global `Strapi.Registries.AppPolicies`.
-- `types/generated/middlewares.d.ts` does the same for `global::*` and `api::*` middlewares, in the global `Strapi.Registries.AppMiddlewares`.
+- `types/generated/services.ts` registers every `api::*` service of the application in the global `Strapi.Registries.AppServices`, typed from its source file.
+- `types/generated/controllers.ts` does the same for `api::*` controllers, in the global `Strapi.Registries.AppControllers`.
+- `types/generated/policies.ts` registers the config of every `global::*` and `api::*` policy in the global `Strapi.Registries.AppPolicies`.
+- `types/generated/middlewares.ts` does the same for `global::*` and `api::*` middlewares, in the global `Strapi.Registries.AppMiddlewares`.
 
-```ts title="my-app/types/generated/services.d.ts"
+These four files are sources, not declaration files, so `skipLibCheck` does not hide their errors:
+
+- A reference that went stale since the last generation, such as a renamed contract export (TS2694) or a moved or deleted source (TS2307), is reported at the generated line.
+- `strapi build` compiles without generating types, so it fails on stale committed generated files until `strapi develop` or `strapi ts:generate-types` regenerates them.
+- Each file starts with `/* eslint-disable */` and `/* oxlint-disable */`, and declares a helper (`ServiceInstance`, `ServiceContractOf`, ...) only when an entry reads it, so `noUnusedLocals` stays clean.
+- Writing one of them removes the `.d.ts` file an earlier version generated under the same name.
+
+```ts title="my-app/types/generated/services.ts"
+/* eslint-disable */
+/* oxlint-disable */
 export {};
 
 type ServiceInstance<TModule> = TModule extends { default: infer TExport }
@@ -335,7 +344,7 @@ export default factories.createCoreService('api::article.article', ({ strapi }) 
 })) satisfies Core.ServiceFactory<'api::article.article'>;
 ```
 
-```ts title="my-app/types/generated/services.d.ts"
+```ts title="my-app/types/generated/services.ts"
 type ServiceContractOf<TContract> = 0 extends 1 & TContract ? unknown : TContract;
 
 declare global {
@@ -360,10 +369,10 @@ declare global {
 - The contract does not depend on the default export, so `satisfies Core.ServiceFactory<'api::article.article'>` checks the factory against it: a member with the wrong type, or a missing member, is reported at the factory. A member the factory returns outside the contract is not reported, and `strapi.service(uid)` callers do not see it.
 - A module without a `ServiceContract` export keeps the inferred type, and the generator lists its uid in `InferredServices`. `Core.ServiceFactory` rejects that uid with TS2344 (`Type '"api::legacy.legacy"' does not satisfy the constraint …`): the inferred type is read from the factory, so checking the factory against it would be circular. The marker only has keys, so the rejection does not depend on the order TypeScript checks files in, and lookups of the uid keep the inferred type. Add a `ServiceContract` export to check the factory.
 - The generator reads each source on its own, without a type checker: it finds `export type ServiceContract`, `export interface ServiceContract` and export specifiers such as `export type { ArticleContract as ServiceContract } from '../contract'`. It does not follow `export *`, and it skips JS sources.
-- A contract typed `any` registers `unknown`. A reference that no longer resolves, because the export was renamed after the generation or names a value, behaves as `any` until the next generation; `skipLibCheck` hides the TS2694 that the generated file reports.
+- A contract typed `any` registers `unknown`. A reference that no longer resolves, because the export was renamed after the generation or names a value, behaves as `any` until the next generation drops it. The generated file reports a TS2694 meanwhile, with `skipLibCheck` too.
 - Keep a shared contract file out of `services/` and `controllers/`: the API loader registers every file there, so `services/contract.ts` would register an `api::article.contract` service.
 
-`controllers.d.ts` follows the same rules for `src/api/<api>/controllers/*.{ts,js}`, with its own `ControllerInstance` helper so that each file stands alone. A `createCoreController(...)` export registers the controller the factory returns: the content-type actions (`find`, `findOne`, ...) and the custom actions. `strapi.controller('api::article.article')` and `strapi.api('article').controller('article')` then resolve to that type, and an unregistered uid resolves to `unknown`.
+`controllers.ts` follows the same rules for `src/api/<api>/controllers/*.{ts,js}`, with its own `ControllerInstance` helper so that each file stands alone. A `createCoreController(...)` export registers the controller the factory returns: the content-type actions (`find`, `findOne`, ...) and the custom actions. `strapi.controller('api::article.article')` and `strapi.api('article').controller('article')` then resolve to that type, and an unregistered uid resolves to `unknown`.
 
 A controller module can export its contract as `ControllerContract`, which the generator registers through a `ControllerContractOf` helper, with the same rules as `ServiceContract`: a controller without it is listed in `InferredControllers`, which `Core.ControllerFactory` rejects. `satisfies Core.ControllerFactory<uid>` then checks the factory against it, including a `createCoreController(...)` factory, whose missing custom actions are reported:
 
@@ -383,11 +392,11 @@ export default factories.createCoreController('api::article.article', ({ strapi 
 
 With strict types disabled, `Core.ControllerFactory` accepts a factory that returns any object, as develop has no controller factory type.
 
-`policies.d.ts` walks `src/policies/*.{ts,js}` (`global::<name>`, names kept as is, like the global policies loader) and `src/api/<api>/policies/*.{ts,js}` (`api::<api>.<name>`, kebab-cased), with its own `PolicyConfig` helper. The registered value is the config the policy accepts: the second parameter of its handler, for a bare handler and for `{ handler, validator }`. A handler without that parameter registers `undefined`, so its name alone is a valid reference; an untyped (`any`) config, a module without a default export and a JS policy, whose import does not resolve without `allowJs`, register `unknown`. Typed route configs (`Core.RouterInputFor`, `Core.RouteConfigFor`) then accept these policies and check their `config`, next to the policies bundled packages register in `PackagePolicies`, and `strapi.policy('global::is-owner')` resolves to a policy that receives that config.
+`policies.ts` walks `src/policies/*.{ts,js}` (`global::<name>`, names kept as is, like the global policies loader) and `src/api/<api>/policies/*.{ts,js}` (`api::<api>.<name>`, kebab-cased), with its own `PolicyConfig` helper. The registered value is the config the policy accepts: the second parameter of its handler, for a bare handler and for `{ handler, validator }`. A handler without that parameter registers `undefined`, so its name alone is a valid reference; an untyped (`any`) config, a module without a default export and a JS policy, whose import does not resolve without `allowJs`, register `unknown`. Typed route configs (`Core.RouterInputFor`, `Core.RouteConfigFor`) then accept these policies and check their `config`, next to the policies bundled packages register in `PackagePolicies`, and `strapi.policy('global::is-owner')` resolves to a policy that receives that config.
 
 Middlewares follow the same model in `Strapi.Registries.PackageMiddlewares` and `AppMiddlewares`: the registered value is the config the factory accepts as its first parameter, `undefined` when it takes none. Bundled packages register theirs (`strapi::*`, `admin::*`, `plugin::email.rateLimit`, ...), so `strapi.middleware('strapi::cors')` resolves to a factory that receives the CORS config. Typed route configs accept registered names (alone only when the config is optional), `{ name, config }` checked against the registered config, inline handlers and `{ resolve, config }` entries, and reject unregistered names.
 
-`middlewares.d.ts` walks `src/middlewares/*.{ts,js}` (`global::<name>`, names kept as is, like the global middlewares loader) and `src/api/<api>/middlewares/*.{ts,js}` (`api::<api>.<name>`, kebab-cased), with its own `MiddlewareConfig` helper, and only emits uids the running application registered. The registered value is the first parameter of the exported factory: a factory without parameters registers `undefined` and an optional parameter keeps `undefined`, so the name alone is a valid reference; an untyped (`any`) config, a module without a default export and a JS middleware register `unknown`, as for policies. Typed routes then accept `{ name: 'global::rate-limit', config: { max: 10 } }` checked against that config, and `strapi.middleware('global::rate-limit')` resolves to a factory that receives it.
+`middlewares.ts` walks `src/middlewares/*.{ts,js}` (`global::<name>`, names kept as is, like the global middlewares loader) and `src/api/<api>/middlewares/*.{ts,js}` (`api::<api>.<name>`, kebab-cased), with its own `MiddlewareConfig` helper, and only emits uids the running application registered. The registered value is the first parameter of the exported factory: a factory without parameters registers `undefined` and an optional parameter keeps `undefined`, so the name alone is a valid reference; an untyped (`any`) config, a module without a default export and a JS middleware register `unknown`, as for policies. Typed routes then accept `{ name: 'global::rate-limit', config: { max: 10 } }` checked against that config, and `strapi.middleware('global::rate-limit')` resolves to a factory that receives it.
 
 ###### Strict schema registries
 
@@ -422,7 +431,7 @@ Each schema registry is one interface, without a `Package*` and `App*` pair: typ
 
 Toggling the flag rewrites both files in the other form on the next generation. A hand-written `Public` schema augmentation has no effect in strict mode: move it to the global registry.
 
-Unset or `false` keeps the previous behavior — content-type, component and plugin declarations are still generated — and removes `strict.d.ts`, `services.d.ts`, `controllers.d.ts`, `policies.d.ts` and `middlewares.d.ts` if a previous run generated them, so the program leaves strict mode when the flag is turned off. Any other value is rejected. TypeScript templates of `create-strapi-app` ship `config/typescript.ts` with `strictTypes: true`.
+Unset or `false` keeps the previous behavior — content-type, component and plugin declarations are still generated — and removes `strict.d.ts`, `services.ts`, `controllers.ts`, `policies.ts` and `middlewares.ts` (and an older `.d.ts` of the last four) if a previous run generated them, so the program leaves strict mode when the flag is turned off. Any other value is rejected. TypeScript templates of `create-strapi-app` ship `config/typescript.ts` with `strictTypes: true`.
 
 :::caution
 Strict mode is closed: a lookup without a registered contract resolves to `unknown`, including services of plugins that publish no contracts. Pass an explicit type argument (`strapi.plugin('x').service<MyService>('y')`) for those.

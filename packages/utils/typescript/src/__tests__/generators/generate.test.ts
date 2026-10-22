@@ -58,11 +58,63 @@ describe('generate', () => {
     );
   });
 
-  test('removes previously generated strict artifacts when they are disabled', async () => {
-    const { root, strapi, generated } = await createApp({
+  test('writes the services, controllers, policies and middlewares as .ts files with a lint header', async () => {
+    const { root, strapi, generated } = await createApp();
+
+    await generate({
+      strapi,
+      pwd: root,
+      artifacts: { services: true, controllers: true, policies: true, middlewares: true },
+      logger: { silent: true },
+    });
+
+    expect((await fs.readdir(path.join(root, 'types', 'generated'))).sort()).toEqual([
+      'controllers.ts',
+      'middlewares.ts',
+      'policies.ts',
+      'services.ts',
+    ]);
+    for (const file of ['services.ts', 'controllers.ts', 'policies.ts', 'middlewares.ts']) {
+      expect(await fs.readFile(generated(file), 'utf8')).toMatch(
+        /^\/\* eslint-disable \*\/\n\/\* oxlint-disable \*\/\n/
+      );
+    }
+  });
+
+  test('replaces the .d.ts files an earlier generation wrote for the .ts artifacts', async () => {
+    const { root, strapi } = await createApp({
       'services.d.ts': '// stale',
       'controllers.d.ts': '// stale',
       'policies.d.ts': '// stale',
+      'middlewares.d.ts': '// stale',
+      'contentTypes.d.ts': '// keep',
+    });
+
+    await generate({
+      strapi,
+      pwd: root,
+      artifacts: { services: true, controllers: true, policies: true, middlewares: true },
+      logger: { silent: true },
+    });
+
+    expect((await fs.readdir(path.join(root, 'types', 'generated'))).sort()).toEqual([
+      'contentTypes.d.ts',
+      'controllers.ts',
+      'middlewares.ts',
+      'policies.ts',
+      'services.ts',
+    ]);
+  });
+
+  test('removes previously generated strict artifacts when they are disabled', async () => {
+    const { root, strapi, generated } = await createApp({
+      'services.ts': '// stale',
+      'services.d.ts': '// stale',
+      'controllers.ts': '// stale',
+      'controllers.d.ts': '// stale',
+      'policies.ts': '// stale',
+      'policies.d.ts': '// stale',
+      'middlewares.ts': '// stale',
       'middlewares.d.ts': '// stale',
       'strict.d.ts': '// stale',
       'plugins.d.ts': '// keep',
@@ -82,10 +134,10 @@ describe('generate', () => {
       logger: { silent: true },
     });
 
-    expect(await pathExists(generated('services.d.ts'))).toBe(false);
-    expect(await pathExists(generated('controllers.d.ts'))).toBe(false);
-    expect(await pathExists(generated('policies.d.ts'))).toBe(false);
-    expect(await pathExists(generated('middlewares.d.ts'))).toBe(false);
+    for (const artifact of ['services', 'controllers', 'policies', 'middlewares']) {
+      expect(await pathExists(generated(`${artifact}.ts`))).toBe(false);
+      expect(await pathExists(generated(`${artifact}.d.ts`))).toBe(false);
+    }
     expect(await pathExists(generated('strict.d.ts'))).toBe(false);
     expect(await pathExists(generated('plugins.d.ts'))).toBe(true);
     expect(await pathExists(generated('contentTypes.d.ts'))).toBe(true);
@@ -94,6 +146,7 @@ describe('generate', () => {
   test('with strict types off, writes only the content-types and components files', async () => {
     const { root, strapi } = await createApp({
       'plugins.d.ts': "import type {} from '@vendor/plugin/strapi-server';\n",
+      'services.ts': '// stale',
       'strict.d.ts': '// stale',
     });
 
@@ -165,11 +218,11 @@ describe('generate', () => {
   });
 
   test('leaves artifacts that are neither enabled nor disabled untouched', async () => {
-    const { root, strapi, generated } = await createApp({ 'services.d.ts': '// keep' });
+    const { root, strapi, generated } = await createApp({ 'services.ts': '// keep' });
 
     await generate({ strapi, pwd: root, artifacts: { strict: true }, logger: { silent: true } });
 
-    expect(await fs.readFile(generated('services.d.ts'), 'utf8')).toBe('// keep');
+    expect(await fs.readFile(generated('services.ts'), 'utf8')).toBe('// keep');
   });
 
   test('disabling an artifact that was never generated is a no-op', async () => {
