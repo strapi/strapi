@@ -74,6 +74,10 @@ app.controller('plugin::upload.admin-folder-file').deleteMany(context, next);
 app.plugin('upload').controller('admin-settings').getSettings(context, next);
 // @ts-expect-error Registry controller actions do not accept misspelled names.
 app.controller('plugin::upload.admin-folder').getStructures(context, next);
+app.plugin('upload').controller('content-api').findPage(context, next);
+app.controller('plugin::upload.view-configuration').findViewConfiguration(context, next);
+// @ts-expect-error Registry controller actions do not accept misspelled names.
+app.controller('plugin::upload.content-api').uploadFile(context, next);
 
 type Controllers = {
   'admin-file': Strapi.Registries.PackageControllers['plugin::upload.admin-file'];
@@ -81,12 +85,16 @@ type Controllers = {
   'admin-folder-file': Strapi.Registries.PackageControllers['plugin::upload.admin-folder-file'];
   'admin-settings': Strapi.Registries.PackageControllers['plugin::upload.admin-settings'];
   'admin-upload': Strapi.Registries.PackageControllers['plugin::upload.admin-upload'];
+  'content-api': Strapi.Registries.PackageControllers['plugin::upload.content-api'];
+  'view-configuration': Strapi.Registries.PackageControllers['plugin::upload.view-configuration'];
 };
 [
   { method: 'DELETE', path: '/files/:id', handler: 'admin-file.destroy' },
   { method: 'GET', path: '/folders/:id', handler: 'admin-folder.findOne' },
   { method: 'POST', path: '/actions/bulk-delete', handler: 'admin-folder-file.deleteMany' },
   { method: 'GET', path: '/settings', handler: 'admin-settings.getSettings' },
+  { method: 'DELETE', path: '/files/:id', handler: 'content-api.destroy' },
+  { method: 'GET', path: '/configuration', handler: 'view-configuration.findViewConfiguration' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
 [
   // @ts-expect-error Route actions are checked against the controller contracts.
@@ -95,4 +103,8 @@ type Controllers = {
 [
   // @ts-expect-error Route actions are checked against the controller contracts.
   { method: 'PUT', path: '/settings', handler: 'admin-settings.setSettings' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
+[
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  { method: 'GET', path: '/configuration', handler: 'view-configuration.getViewConfiguration' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
