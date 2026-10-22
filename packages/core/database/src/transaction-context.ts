@@ -122,7 +122,7 @@ const runCallbacks = (callbacks: Callback[] | undefined) => {
 
 const waitForPendingCallbacks = async () => {
   while (pendingCallbacks.size > 0) {
-    await Promise.allSettled([...pendingCallbacks]);
+    await Promise.allSettled(pendingCallbacks);
   }
 };
 
