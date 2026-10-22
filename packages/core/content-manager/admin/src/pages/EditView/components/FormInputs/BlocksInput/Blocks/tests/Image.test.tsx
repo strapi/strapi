@@ -4,11 +4,14 @@ import { ReactElement } from 'react';
 
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Editor, Transforms, createEditor } from 'slate';
+import { ReactEditor } from 'slate-react';
 
 import { mockImage } from '../../tests/mock-schema';
-import { imageBlocks } from '../Image';
+import { createDroppedImagesInserter, imageBlocks } from '../Image';
 
 import { Wrapper } from './Wrapper';
+
+import type { Schema } from '@strapi/types';
 
 type MediaLibraryProps = {
   onSelectAssets: (images: (typeof mockImage)[]) => void;
@@ -324,5 +327,86 @@ describe('Image', () => {
 
     expect(preventDefault).not.toHaveBeenCalled();
     expect(baseEditor.children).toHaveLength(3);
+  });
+});
+
+describe('createDroppedImagesInserter', () => {
+  const paragraph = (text: string) => ({
+    type: 'paragraph' as const,
+    children: [{ type: 'text' as const, text }],
+  });
+  const asset = (name: string) =>
+    ({
+      ...mockImage,
+      name,
+      url: `/uploads/${name}`,
+    }) as unknown as Schema.Attribute.MediaValue<true>[number];
+  const dropEvent = {} as React.DragEvent;
+
+  /** What the editor holds, one entry per block: the image name or the paragraph text. */
+  const summary = (editor: Editor) =>
+    editor.children.map((node) =>
+      'image' in node
+        ? `image:${node.image.name}`
+        : Editor.string(editor, [editor.children.indexOf(node)])
+    );
+
+  const dropOnBlock = (index: number | null) =>
+    jest.spyOn(ReactEditor, 'findEventRange').mockImplementation(() => {
+      if (index === null) {
+        throw new Error('No block under the pointer');
+      }
+
+      return { anchor: { path: [index, 0], offset: 0 }, focus: { path: [index, 0], offset: 0 } };
+    });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('inserts the images below the block they were dropped on, in order', () => {
+    const editor = createEditor();
+    editor.children = [paragraph('First'), paragraph('Second')];
+    dropOnBlock(0);
+
+    const insert = createDroppedImagesInserter(editor, dropEvent);
+    insert(asset('one.png'));
+    insert(asset('two.png'));
+
+    expect(summary(editor)).toEqual(['First', 'image:one.png', 'image:two.png', 'Second']);
+  });
+
+  it('replaces the empty paragraph it was dropped on', () => {
+    const editor = createEditor();
+    editor.children = [paragraph('First'), paragraph('')];
+    dropOnBlock(1);
+
+    const insert = createDroppedImagesInserter(editor, dropEvent);
+    insert(asset('one.png'));
+    insert(asset('two.png'));
+
+    expect(summary(editor)).toEqual(['First', 'image:one.png', 'image:two.png']);
+  });
+
+  it('appends the images when dropped below the content', () => {
+    const editor = createEditor();
+    editor.children = [paragraph('First'), paragraph('Second')];
+    dropOnBlock(null);
+
+    createDroppedImagesInserter(editor, dropEvent)(asset('one.png'));
+
+    expect(summary(editor)).toEqual(['First', 'Second', 'image:one.png']);
+  });
+
+  it('keeps the drop position while the content is edited during the upload', () => {
+    const editor = createEditor();
+    editor.children = [paragraph('First'), paragraph('Second')];
+    dropOnBlock(1);
+
+    const insert = createDroppedImagesInserter(editor, dropEvent);
+    Transforms.insertNodes(editor, paragraph('Typed meanwhile'), { at: [0] });
+    insert(asset('one.png'));
+
+    expect(summary(editor)).toEqual(['Typed meanwhile', 'First', 'Second', 'image:one.png']);
   });
 });

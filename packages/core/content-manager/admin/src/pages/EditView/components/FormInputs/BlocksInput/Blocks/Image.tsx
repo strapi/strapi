@@ -3,8 +3,8 @@ import * as React from 'react';
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FlexComponent } from '@strapi/design-system';
 import { Image as Picture } from '@strapi/icons';
-import { type Element, Transforms, Editor, Range } from 'slate';
-import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
+import { Element, Transforms, Editor, Node, Path, Range } from 'slate';
+import { ReactEditor, useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import { styled, css } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../../utils/urls';
@@ -53,6 +53,70 @@ const IMAGE_SCHEMA_FIELDS = [
 const pick = <T extends object, K extends keyof T>(object: T, keys: K[]): Pick<T, K> => {
   const entries = keys.map((key) => [key, object[key]]);
   return Object.fromEntries(entries);
+};
+
+type MediaAsset = Schema.Attribute.MediaValue<true>[number];
+
+/** A Media Library asset as an image block stores it. */
+const toBlockImage = (asset: MediaAsset): Block<'image'>['image'] => {
+  // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
+  const expectedImage = pick(asset, IMAGE_SCHEMA_FIELDS);
+
+  return {
+    ...expectedImage,
+    alternativeText: expectedImage.alternativeText || expectedImage.name,
+    url: prefixFileUrlWithBackendUrl(asset.url),
+  };
+};
+
+const isEmptyParagraph = (node: Node) =>
+  Element.isElement(node) && node.type === 'paragraph' && Node.string(node) === '';
+
+/**
+ * For files dropped onto the editor: returns what inserts each of them, once
+ * uploaded, as an image block below the block they were dropped on (or at the
+ * end, below the last block). An empty paragraph there is replaced instead.
+ * Each image goes below the previous one from the same drop, and a path ref
+ * keeps that position right while the content is edited during the upload.
+ */
+const createDroppedImagesInserter = (editor: Editor, event: React.DragEvent) => {
+  let targetPath: Path | null = null;
+
+  try {
+    const range = ReactEditor.findEventRange(editor, event);
+    targetPath = [range.anchor.path[0]];
+  } catch {
+    // Dropped below the content or on its padding: no block under the pointer.
+  }
+
+  const lastIndex = editor.children.length - 1;
+  const target = targetPath ?? (lastIndex >= 0 ? [lastIndex] : null);
+  let previousRef = target ? Editor.pathRef(editor, target) : null;
+  let replacesTarget = target !== null && isEmptyParagraph(Node.get(editor, target));
+
+  return (asset: MediaAsset) => {
+    const imageNode: Block<'image'> = {
+      type: 'image',
+      image: toBlockImage(asset),
+      children: [{ type: 'text', text: '' }],
+    };
+
+    const previousPath = previousRef?.current;
+    let at: Path;
+
+    if (previousPath && replacesTarget && isEmptyParagraph(Node.get(editor, previousPath))) {
+      at = previousPath;
+      Transforms.removeNodes(editor, { at });
+    } else {
+      at = previousPath ? Path.next(previousPath) : [editor.children.length];
+    }
+    replacesTarget = false;
+
+    Transforms.insertNodes(editor, imageNode, { at });
+
+    previousRef?.unref();
+    previousRef = Editor.pathRef(editor, at);
+  };
 };
 
 // Type guard to force TypeScript to narrow the type of the element in Blocks component
@@ -140,20 +204,7 @@ const ImageDialog = () => {
   };
 
   const handleSelectAssets = (images: Schema.Attribute.MediaValue<true>) => {
-    const formattedImages = images.map((image) => {
-      // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
-      const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
-
-      const nodeImage: Block<'image'>['image'] = {
-        ...expectedImage,
-        alternativeText: expectedImage.alternativeText || expectedImage.name,
-        url: prefixFileUrlWithBackendUrl(image.url),
-      };
-
-      return nodeImage;
-    });
-
-    insertImages(formattedImages);
+    insertImages(images.map(toBlockImage));
     setIsOpen(false);
   };
 
@@ -232,4 +283,4 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
   },
 };
 
-export { imageBlocks };
+export { imageBlocks, createDroppedImagesInserter };
