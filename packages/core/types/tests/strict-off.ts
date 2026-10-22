@@ -13,6 +13,10 @@ declare global {
       interface AppServices {
         'plugin::legacy.example': { count(): string };
         'api::legacy.example': { count(): string };
+        'api::legacy.inferred': { count(): string };
+      }
+      interface InferredServices {
+        'api::legacy.inferred': true;
       }
       interface PackageControllers {
         'plugin::legacy.example': { list: Core.ControllerHandler };
@@ -20,6 +24,10 @@ declare global {
       interface AppControllers {
         'plugin::legacy.example': { find: Core.ControllerHandler };
         'api::legacy.example': { find: Core.ControllerHandler };
+        'api::legacy.inferred': { find: Core.ControllerHandler };
+      }
+      interface InferredControllers {
+        'api::legacy.inferred': true;
       }
       interface Stores {
         plugin_legacy_settings: { enabled: boolean };
@@ -455,25 +463,27 @@ const anyConfigPolicy: Core.Policy = rolePolicy;
 anyConfigPolicy satisfies unknown;
 
 // Without strict types, `Core.IsStrict` is `false` and a service factory may return any service, as
-// on develop, for registered and unregistered UIDs.
+// on develop, for registered, inferred and unregistered UIDs.
 type ServiceFactoryChecks = [
   Expect<Equal<Core.IsStrict, false>>,
   Expect<Equal<Core.ServiceFactoryUID, UID.Service>>,
   Expect<Equal<ReturnType<Core.ServiceFactory<'plugin::legacy.example'>>, Core.Service>>,
   Expect<Equal<ReturnType<Core.ServiceFactory<'api::unregistered.example'>>, Core.Service>>,
+  Expect<Equal<ReturnType<Core.ServiceFactory<'api::legacy.inferred'>>, Core.Service>>,
 ];
 declare const serviceFactoryChecks: ServiceFactoryChecks;
 serviceFactoryChecks satisfies unknown;
 (() => ({ count: () => 'any' })) satisfies Core.ServiceFactory<'plugin::legacy.example'>;
 (() => ({ anything: true })) satisfies Core.ServiceFactory<'api::unregistered.example'>;
 
-// Without strict types, a controller factory may return any object, for registered and
+// Without strict types, a controller factory may return any object, for registered, inferred and
 // unregistered UIDs. Develop has no public controller factory type, and `Core.Controller` rejects a
 // core controller: the returned type has no index signature.
 type ControllerFactoryChecks = [
   Expect<Equal<Core.ControllerFactoryUID, UID.Controller>>,
   Expect<Equal<ReturnType<Core.ControllerFactory<'plugin::legacy.example'>>, object>>,
   Expect<Equal<ReturnType<Core.ControllerFactory<'api::unregistered.example'>>, object>>,
+  Expect<Equal<ReturnType<Core.ControllerFactory<'api::legacy.inferred'>>, object>>,
 ];
 declare const controllerFactoryChecks: ControllerFactoryChecks;
 controllerFactoryChecks satisfies unknown;

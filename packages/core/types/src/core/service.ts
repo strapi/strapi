@@ -49,9 +49,13 @@ export type ServiceMap = IsStrict extends false
 
 /**
  * A UID accepted by {@link ServiceFactory}. With strict types enabled, only registered UIDs: a
- * factory checked against a UID without a contract would accept any service.
+ * factory checked against a UID without a contract would accept any service. An application service
+ * registered with the type its module provides (`Strapi.Registries.InferredServices`) is rejected
+ * too (TS2344): that type is read from the factory being checked.
  */
-export type ServiceFactoryUID = IsStrict extends false ? UID.Service : RegisteredServiceUID;
+export type ServiceFactoryUID = IsStrict extends false
+  ? UID.Service
+  : Exclude<RegisteredServiceUID, keyof Strapi.Registries.InferredServices>;
 
 /**
  * A service factory, checked against the contract registered for `TUID`. The services registry calls
@@ -62,11 +66,11 @@ export type ServiceFactoryUID = IsStrict extends false ? UID.Service : Registere
  *
  * Type generation registers an application service with the `ServiceContract` type its module
  * exports (`types/generated/services.d.ts`), so the factory of that module can be checked against
- * its own UID. A module without that export registers the type its default export provides: a
- * factory checked against its own UID is then circular. When the checker reaches a lookup of the UID
- * before the factory, as in a controller that uses the service, the default export is implicitly
- * `any` (TS7022, silent without `noImplicitAny`) and so is the lookup. Keep a shared contract out of
- * `services/` and `controllers/`: the API loader registers every file there
+ * its own UID. A module without that export registers the type its default export provides, and
+ * type generation lists its UID in `Strapi.Registries.InferredServices`: the UID is not a
+ * {@link ServiceFactoryUID} (TS2344), and the factory is checked against nothing, so the type it
+ * provides never depends on the check. Keep a shared contract out of `services/` and
+ * `controllers/`: the API loader registers every file there
  * (`packages/core/core/src/loaders/apis.ts:91-102`).
  *
  * A hand-declared `AppServices` entry for the same UID must be the identical type: a different one
@@ -86,7 +90,12 @@ export type ServiceFactoryUID = IsStrict extends false ? UID.Service : Registere
  */
 export type ServiceFactory<TUID extends ServiceFactoryUID> = (params: {
   strapi: Strapi;
-}) => ServiceFor<TUID>;
+}) => IsStrict extends false
+  ? Service
+  : // An inferred entry is not read: it depends on the factory checked against it
+    TUID extends keyof Strapi.Registries.InferredServices
+    ? unknown
+    : ServiceFor<TUID>;
 
 export type Service = {
   // TODO [V5] Consider changing the any value to unknown.

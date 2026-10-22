@@ -1,6 +1,7 @@
 import type {
   Controller,
   ControllerFactory,
+  ControllerFactoryUID,
   ControllerFor,
   ControllerHandler,
 } from '../controller';
@@ -25,8 +26,13 @@ declare global {
       interface AppControllers {
         'plugin::controller-lab.items': LabController;
         'api::controller-lab.items': LabController;
+        'api::controller-lab.inferred': { ping: ControllerHandler };
         // Outside the UID pattern: runtime never registers a controller under this name.
         'not-a-uid': LabController;
+      }
+
+      interface InferredControllers {
+        'api::controller-lab.inferred': true;
       }
     }
   }
@@ -140,3 +146,11 @@ strapi.controller('not-a-uid');
 (() => ({})) satisfies ControllerFactory<'api::controller-lab.unregistered'>;
 // @ts-expect-error Names outside the UID pattern are not controllers.
 (() => ({})) satisfies ControllerFactory<'not-a-uid'>;
+
+// A UID registered with the type its module provides keeps its lookup, but cannot check a factory:
+// that type is read from the factory being checked.
+strapi.controller('api::controller-lab.inferred').ping satisfies ControllerHandler;
+declare const inferredFactoryUID: Extract<ControllerFactoryUID, 'api::controller-lab.inferred'>;
+inferredFactoryUID satisfies never;
+// @ts-expect-error An inferred UID cannot check a factory, even one that provides its type.
+(() => ({ ping: () => undefined })) satisfies ControllerFactory<'api::controller-lab.inferred'>;

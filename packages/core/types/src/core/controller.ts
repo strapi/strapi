@@ -52,11 +52,13 @@ export type ControllerMap = IsStrict extends false
 
 /**
  * A UID accepted by {@link ControllerFactory}. With strict types enabled, only registered UIDs: a
- * factory checked against a UID without a contract would accept any controller.
+ * factory checked against a UID without a contract would accept any controller. An application
+ * controller registered with the type its module provides (`Strapi.Registries.InferredControllers`)
+ * is rejected too (TS2344): that type is read from the factory being checked.
  */
 export type ControllerFactoryUID = IsStrict extends false
   ? UID.Controller
-  : RegisteredControllerUID;
+  : Exclude<RegisteredControllerUID, keyof Strapi.Registries.InferredControllers>;
 
 /**
  * A controller factory, checked against the contract registered for `TUID`. The controllers
@@ -70,7 +72,9 @@ export type ControllerFactoryUID = IsStrict extends false
  *
  * Type generation registers an application controller with the `ControllerContract` type its module
  * exports (`types/generated/controllers.d.ts`), so the factory of that module can be checked against
- * its own UID. Without that export, the check is circular, as for services (see `ServiceFactory`).
+ * its own UID. Without that export, type generation lists the UID in
+ * `Strapi.Registries.InferredControllers`, so it is not a {@link ControllerFactoryUID} (TS2344), as
+ * for services (see `ServiceFactory`).
  *
  * @example
  * ```ts
@@ -95,7 +99,12 @@ export type ControllerFactoryUID = IsStrict extends false
  */
 export type ControllerFactory<TUID extends ControllerFactoryUID> = (params: {
   strapi: Strapi;
-}) => IsStrict extends false ? object : ControllerFor<TUID>;
+}) => IsStrict extends false
+  ? object
+  : // An inferred entry is not read: it depends on the factory checked against it
+    TUID extends keyof Strapi.Registries.InferredControllers
+    ? unknown
+    : ControllerFor<TUID>;
 
 export interface ControllerHandler<TResponse = unknown> {
   (context: Context, next: Next): Promise<TResponse | void> | TResponse | void;

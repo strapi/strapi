@@ -68,6 +68,16 @@ declare global {
       interface AppServices {}
 
       /**
+       * Application services registered with the type their module provides, keyed by full service
+       * UID. Type generation is the only producer: `types/generated/services.d.ts` lists every
+       * service whose module has no `ServiceContract` export. With strict types enabled,
+       * `Core.ServiceFactory` rejects these UIDs, whose registered type is read from the factory
+       * itself. Values are not read.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface InferredServices {}
+
+      /**
        * Resolved configuration contracts supplied by Strapi and plugin packages, keyed by
        * config namespace (e.g. `'plugin::my-plugin'`).
        * Application entries in {@link AppConfigs} take precedence over these contracts.
@@ -101,6 +111,16 @@ declare global {
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface AppControllers {}
+
+      /**
+       * Application controllers registered with the type their module provides, keyed by full
+       * controller UID. Type generation is the only producer: `types/generated/controllers.d.ts`
+       * lists every controller whose module has no `ControllerContract` export. With strict types
+       * enabled, `Core.ControllerFactory` rejects these UIDs, whose registered type is read from the
+       * factory itself. Values are not read.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface InferredControllers {}
 
       /**
        * Policies supplied by Strapi and plugin packages, keyed by full policy UID
