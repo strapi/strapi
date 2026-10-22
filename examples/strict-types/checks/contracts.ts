@@ -32,6 +32,8 @@ stats.missing();
 strapi.service('api::legacy.legacy').ping() satisfies 'pong';
 // @ts-expect-error The inferred service has no other member.
 strapi.service('api::legacy.legacy').missing();
+// @ts-expect-error An inferred service cannot check a factory: its type is read from the factory.
+(() => ({ ping: () => 'pong' as const })) satisfies Core.ServiceFactory<'api::legacy.legacy'>;
 
 // A factory is checked against the registered contract.
 (() => ({

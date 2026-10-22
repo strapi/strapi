@@ -23,9 +23,9 @@ yarn workspace strict-types run test:ts
 - `src/api/stats`: a plain factory service and controller, without a content type, each with a
   contract.
 - `src/api/legacy`: a service without a contract export. Type generation registers the type its
-  factory returns, and `stats` uses it. Do not check such a factory with
-  `Core.ServiceFactory<'api::legacy.legacy'>`: the check would read the type it defines, which is
-  circular (TS7022).
+  factory returns, and `stats` uses it. It also lists the UID in
+  `Strapi.Registries.InferredServices`, so `Core.ServiceFactory<'api::legacy.legacy'>` rejects it
+  (TS2344): the check would read the type it defines.
 - `checks/contracts.ts`: type checks for the lookups, and `@ts-expect-error` cases that fail without
   the contracts. If type generation stopped registering a contract, these directives would be unused
   and `tsc` would fail.
