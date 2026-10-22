@@ -4,6 +4,11 @@ import { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 import { AI_METADATA_JOB_UID } from '../models/ai-metadata-job';
 
 export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi }) => ({
+  /**
+   * Creates a `processing` job and resolves its ID.
+   *
+   * @internal
+   */
   async createJob(): Promise<number> {
     const job = await strapi.db.query(AI_METADATA_JOB_UID).create({
       data: {
@@ -21,6 +26,11 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     });
   },
 
+  /**
+   * Updates the status or the completion date of a job.
+   *
+   * @internal
+   */
   async updateJob(
     jobId: number,
     updates: Partial<Omit<AIMetadataJob, 'id' | 'createdAt'>>
@@ -31,6 +41,11 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     });
   },
 
+  /**
+   * Deletes a job.
+   *
+   * @internal
+   */
   async deleteJob(jobId: number): Promise<void> {
     await strapi.db.query(AI_METADATA_JOB_UID).delete({
       where: { id: jobId },
