@@ -102,7 +102,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
  * -----------------------------------------------------------------------------------------------*/
 interface ReleaseActionEntryLinkItemProps {
   contentTypeUid: ReleaseAction['contentType'];
-  documentId: ReleaseAction['entry']['documentId'];
+  documentId: ReleaseAction['entryDocumentId'];
   locale: ReleaseAction['locale'];
 }
 

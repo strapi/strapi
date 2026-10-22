@@ -4,6 +4,7 @@ import createReleaseActionService from '../release-action';
 import type { ReleaseActionService } from '../release-action';
 import { AlreadyOnReleaseError } from '../validation';
 import type * as utils from '../../utils';
+import { PLANNED_ACTION_WHERE } from '../../utils/action-filters';
 
 const actualGetValidityForActions =
   jest.requireActual<typeof utils>('../../utils').getValidityForActions;
@@ -172,7 +173,10 @@ describe('Release Action service', () => {
           .fn()
           .mockResolvedValue({ results: [], pagination: { page: 1, pageSize: 10 } });
         const transformer = queryParams.createTransformer({
-          getModel: () => ({ uid: 'plugin::content-releases.release-action', attributes: {} }),
+          getModel: () => ({
+            uid: 'plugin::content-releases.release-action',
+            attributes: { outcome: { type: 'enumeration' } },
+          }),
         } as any);
         const strapiMock = {
           ...baseStrapiMock,
@@ -214,6 +218,44 @@ describe('Release Action service', () => {
 
         expect(findPage.mock.calls[0][0].where).toEqual({ release: 1 });
       });
+
+      it('narrows a filter further with any other filter on the actions', async () => {
+        const { releaseActionService, findPage } = setup();
+
+        await releaseActionService.findPage(1, {
+          filter: 'skipped',
+          filters: { outcome: 'skipped_invalid' },
+        });
+
+        expect(findPage.mock.calls[0][0].where).toEqual({
+          $and: [
+            { outcome: 'skipped_invalid' },
+            { release: 1, outcome: { $notIn: ['published', 'unpublished'] } },
+          ],
+        });
+      });
+    });
+
+    it('lists an action whose content type was deleted after the release ran, without its entry', async () => {
+      const action = { id: 1, type: 'publish', contentType: 'api::removed.removed' };
+      const strapiMock = {
+        ...baseStrapiMock,
+        get: () => ({ transform: () => ({}) }),
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            findOne: jest.fn().mockResolvedValue({ id: 1 }),
+            findPage: jest.fn().mockResolvedValue({ results: [action], pagination: {} }),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      const { results } = await releaseActionService.findPage(1, {});
+
+      expect(results).toEqual([{ ...action, entry: null, status: null }]);
+      expect(strapiMock.documents).not.toHaveBeenCalled();
     });
   });
 
@@ -303,12 +345,14 @@ describe('Release Action service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         contentType: jest.fn(() => ({ uid: 'api::homepage.homepage', kind: 'singleType' })),
+        documents: jest.fn(() => ({
+          findFirst: jest.fn().mockResolvedValue({ documentId: 'homepage-doc' }),
+        })),
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
             create: actionCreate,
-            // The single type's document, then the release
-            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', documentId: 'homepage-doc' }),
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
           }),
         },
       };
@@ -755,8 +799,13 @@ describe('Release Action service', () => {
           query: jest.fn().mockReturnValue({ findMany: actionFindMany, update: actionUpdate }),
         },
       };
-      mockGetValidityForActions.mockImplementationOnce(async (found) =>
-        found.map((action) => ({ action, validity: INVALID }))
+      mockGetValidityForActions.mockImplementationOnce(
+        async (found) =>
+          new Map(
+            found
+              .filter((action) => action.type === 'publish')
+              .map((action) => [action.id, INVALID])
+          )
       );
 
       // @ts-expect-error Ignore missing properties
@@ -850,14 +899,13 @@ describe('Release Action service', () => {
 
       // @ts-expect-error Ignore missing properties
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });
-      await releaseActionService.deleteEntryActions(entry);
+      await releaseActionService.deletePlannedActions(entry);
 
       expect(actionDeleteMany.mock.calls).toStrictEqual([[{ where: { id: { $in: [1, 2] } } }]]);
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[10]]);
     });
 
-    it("removes a content type's actions from every release and recalculates the planned ones", async () => {
-      // The planned actions, then every action is removed
+    it("removes a content type's actions from planned releases only", async () => {
       const actionFindMany = jest.fn().mockResolvedValue([
         { id: 1, release: { id: 10 } },
         { id: 2, release: { id: 20 } },
@@ -877,11 +925,10 @@ describe('Release Action service', () => {
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });
       await releaseActionService.deleteContentTypeActions(['api::a.a']);
 
+      // Releases that ran keep them, with what their run recorded
       expect(actionDeleteMany.mock.calls).toStrictEqual([
         [{ where: { id: { $in: [1] } } }],
         [{ where: { id: { $in: [2] } } }],
-        // Releases that ran lose the actions too: their entries can't be read anymore
-        [{ where: { contentType: { $in: ['api::a.a'] } } }],
       ]);
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[10], [20]]);
     });
@@ -913,9 +960,9 @@ describe('Release Action service', () => {
       await releaseActionService.deleteContentTypeActions(['api::a.a']);
 
       expect(actionDeleteMany).toHaveBeenLastCalledWith({
-        where: { contentType: { $in: ['api::a.a'] } },
+        where: { contentType: { $in: ['api::a.a'] }, ...PLANNED_ACTION_WHERE },
       });
-      // Release 20 under its lock, then release 10 after the removal of every action
+      // Release 20 under its lock, then release 10 after the removal of every planned action
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[20], [10]]);
       expect(logError).toHaveBeenCalledWith(
         'Error while updating the status of release 10',
@@ -1024,18 +1071,22 @@ describe('Release Action service', () => {
         localization: {
           isLocalizedContentType: ({ uid }: { uid: string }) => uid === 'api::localized.localized',
         },
+        documents: jest.fn((uid: string) => ({ findMany: () => entryFindMany(uid) })),
         db: {
           ...baseStrapiMock.db,
-          query: jest.fn((uid: string) =>
-            uid === 'plugin::content-releases.release-action'
-              ? { findMany: jest.fn().mockResolvedValue(skippedActions) }
-              : { findMany: () => entryFindMany(uid) }
-          ),
+          query: jest
+            .fn()
+            .mockReturnValue({ findMany: jest.fn().mockResolvedValue(skippedActions) }),
         },
       };
       const invalid = { isEntryValid: false, reason: { validation: { errors: [] } } };
-      mockGetValidityForActions.mockImplementationOnce(async (actions) =>
-        actions.map((publishAction) => ({ action: publishAction, validity: invalid }))
+      mockGetValidityForActions.mockImplementationOnce(
+        async (actions) =>
+          new Map(
+            actions
+              .filter((action) => action.type === 'publish')
+              .map((action) => [action.id, invalid])
+          )
       );
 
       // @ts-expect-error Ignore missing properties

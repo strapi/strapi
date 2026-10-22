@@ -2,9 +2,9 @@ import type { Schema, Modules, UID, Struct, Data } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
-import type { ReleaseActionFilter } from '../../server/src/constants';
+import type { ReleaseActionFilter, ReleaseActionOutcome } from '../constants';
 
-export type { ReleaseActionFilter };
+export type { ReleaseActionFilter, ReleaseActionOutcome };
 
 export type ReleaseActionEntryType = 'single-types' | 'collection-types';
 
@@ -15,19 +15,7 @@ export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   locale?: string;
 };
 
-export type ReleaseActionOutcome =
-  | 'published'
-  | 'unpublished'
-  | 'skipped_invalid'
-  | 'skipped_not_approved'
-  | 'skipped_error'
-  // The entry was publishable, but an `all_or_nothing` run released nothing
-  | 'skipped_held'
-  // The release's scheduled run never happened (frozen by the overdue sweep): nothing was
-  // checked or released. The entry keeps the validity and reason last checked before its date.
-  | 'skipped_missed';
-
-interface StageRef {
+export interface StageRef {
   id: Data.ID;
   name: string;
 }
@@ -43,22 +31,23 @@ export interface ReleaseActionReason {
 
 export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
-  entry: ReleaseActionEntry;
+  // Null when the entry was deleted after its release froze
+  entry: ReleaseActionEntry | null;
   contentType: UID.ContentType;
   entryDocumentId: ReleaseActionEntry['documentId'];
   locale?: string;
   release: Release;
   isEntryValid: boolean;
-  // What a run did with the entry. Null until a run records it: a planned release, and a
-  // release that ran before outcomes existed.
+  // Null while the release is planned
   outcome: ReleaseActionOutcome | null;
   reason: ReleaseActionReason | null;
-  status: 'draft' | 'published' | 'modified';
+  status: 'draft' | 'published' | 'modified' | null;
 }
 
 export interface FormattedReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
-  entry: ReleaseActionEntry;
+  entry: ReleaseActionEntry | null;
+  entryDocumentId: ReleaseAction['entryDocumentId'];
   contentType: {
     uid: UID.ContentType;
     mainFieldValue?: string;
@@ -69,7 +58,8 @@ export interface FormattedReleaseAction extends Entity {
     code: string;
   };
   release: Release;
-  status: 'draft' | 'published' | 'modified';
+  status: ReleaseAction['status'];
+  isEntryValid: boolean;
   outcome: ReleaseActionOutcome | null;
   reason: ReleaseActionReason | null;
 }
@@ -140,6 +130,8 @@ export declare namespace GetReleaseActions {
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
       groupBy?: ReleaseActionGroupBy;
       filter?: ReleaseActionFilter;
+      // Any field of the release action, narrowing the result further
+      filters?: Modules.Documents.Params.Filters.Any<'plugin::content-releases.release-action'>;
     };
   }
 

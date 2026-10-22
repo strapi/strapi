@@ -1,6 +1,6 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import { RELEASE_ACTION_FILTERS } from '../../constants';
+import { RELEASE_ACTION_FILTERS } from '../../../../shared/constants';
 
 const RELEASE_ACTION_SCHEMA = yup.object().shape({
   contentType: yup.string().required(),

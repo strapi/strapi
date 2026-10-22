@@ -1,10 +1,10 @@
 import {
   DEFAULT_RELEASE_CONDITION,
-  RELEASE_ACTION_MODEL_UID,
   RELEASE_CONDITIONS,
   RELEASE_FAILURE_REASONS,
   RELEASE_STATUSES,
-} from '../../constants';
+} from '../../../../shared/constants';
+import { RELEASE_ACTION_MODEL_UID } from '../../constants';
 
 export default {
   collectionName: 'strapi_releases',

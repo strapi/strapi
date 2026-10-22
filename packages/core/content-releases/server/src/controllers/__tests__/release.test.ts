@@ -5,6 +5,7 @@ const mockFindManyWithContentTypeEntryAttached = jest.fn();
 const mockFindManyWithoutContentTypeEntryAttached = jest.fn();
 const mockCountActions = jest.fn();
 const mockCountNotReadyByRelease = jest.fn();
+const mockCountByStatus = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
@@ -14,6 +15,7 @@ jest.mock('../../utils', () => ({
     findManyWithoutContentTypeEntryAttached: mockFindManyWithoutContentTypeEntryAttached,
     countActions: mockCountActions,
     countNotReadyByRelease: mockCountNotReadyByRelease,
+    countByStatus: mockCountByStatus,
     getContentTypesDataForActions: jest.fn(),
   })),
   getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
@@ -30,6 +32,7 @@ describe('Release controller', () => {
         pagination: {},
       });
       mockCountNotReadyByRelease.mockResolvedValue(new Map([[1, 2]]));
+      mockCountByStatus.mockResolvedValue({});
       mockFindManyWithContentTypeEntryAttached.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),

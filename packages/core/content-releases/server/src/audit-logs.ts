@@ -1,7 +1,8 @@
 import type { Core, Modules } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
 
-import { AUDITED_EVENTS, type ReleaseCondition } from './constants';
+import type { ReleaseCondition } from '../../shared/constants';
+import { AUDITED_EVENTS } from './constants';
 
 /**
  * Transformers for the release audit events.
@@ -91,7 +92,7 @@ export interface TriggerDetails {
   failed: number;
 }
 
-/** A run that released nothing: its writes were rolled back */
+/** A release that froze without releasing anything: a failed run, or a missed schedule */
 export interface TriggerFailureDetails {
   /**
    * Only the error name is stored, capped in length. Error objects may contain

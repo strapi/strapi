@@ -1,6 +1,6 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import { RELEASE_CONDITIONS } from '../../constants';
+import { RELEASE_CONDITIONS } from '../../../../shared/constants';
 
 const RELEASE_FIELDS = {
   name: yup.string().trim().required(),

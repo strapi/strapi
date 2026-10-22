@@ -109,7 +109,7 @@ const releaseActionController = {
       ...action,
       entry: action.entry
         ? await contentTypeOutputSanitizers[action.contentType](action.entry)
-        : {},
+        : null,
     }));
 
     const groupedData = await releaseActionService.groupActions(sanitizedResults, query.sort);

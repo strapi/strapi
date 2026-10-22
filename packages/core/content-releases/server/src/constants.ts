@@ -1,35 +1,6 @@
 export const RELEASE_MODEL_UID = 'plugin::content-releases.release';
 export const RELEASE_ACTION_MODEL_UID = 'plugin::content-releases.release-action';
 
-export const RELEASE_CONDITIONS = ['allow_partial', 'all_or_nothing'] as const;
-export type ReleaseCondition = (typeof RELEASE_CONDITIONS)[number];
-export const DEFAULT_RELEASE_CONDITION = 'all_or_nothing' satisfies ReleaseCondition;
-
-// Planned (empty, ready, blocked) until a run, then frozen (done, partial, failed)
-export const RELEASE_STATUSES = ['ready', 'blocked', 'failed', 'done', 'partial', 'empty'] as const;
-export type ReleaseStatus = (typeof RELEASE_STATUSES)[number];
-
-// A release action no run has recorded, in a release that hasn't run. The relation filter is a
-// left join: the id check keeps out actions whose release no longer exists.
-export const PLANNED_ACTION_WHERE = {
-  outcome: null,
-  release: { id: { $notNull: true }, releasedAt: { $null: true } },
-};
-
-// A release action that can't publish now: an unpublish needs no checks, and a publish whose
-// validity was never recorded (an action stored before validation existed) counts as not ready
-export const NOT_READY_ACTION_WHERE = {
-  type: 'publish' as const,
-  $or: [{ isEntryValid: false }, { isEntryValid: { $null: true } }],
-};
-
-// What the entries of a release can be narrowed to: their readiness, or what the run did with them
-export const RELEASE_ACTION_FILTERS = ['ready', 'notReady', 'released', 'skipped'] as const;
-export type ReleaseActionFilter = (typeof RELEASE_ACTION_FILTERS)[number];
-
-export const RELEASE_FAILURE_REASONS = ['missed_schedule', 'failed_before_upgrade'] as const;
-export type ReleaseFailureReason = (typeof RELEASE_FAILURE_REASONS)[number];
-
 export const OVERDUE_GRACE_PERIOD_MS = 5 * 60 * 1000;
 export const OVERDUE_SWEEP_CRON_RULE = '* * * * *';
 

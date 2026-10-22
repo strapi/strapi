@@ -144,13 +144,12 @@ const releaseController = {
       };
     });
 
-    const pendingReleasesCount = await strapi.db.query(RELEASE_MODEL_UID).count({
-      where: {
-        releasedAt: null,
-      },
-    });
+    const [pendingReleasesCount, statusCounts] = await Promise.all([
+      strapi.db.query(RELEASE_MODEL_UID).count({ where: { releasedAt: null } }),
+      releaseService.countByStatus(),
+    ]);
 
-    ctx.body = { data, meta: { pagination, pendingReleasesCount } };
+    ctx.body = { data, meta: { pagination, pendingReleasesCount, statusCounts } };
   },
 
   async findOne(ctx: Koa.Context) {
@@ -274,6 +273,9 @@ const releaseController = {
 
     const releaseService = getService('release', { strapi });
     const release = await releaseService.createFromSkippedEntries(id, releaseArgs, { user });
+    const count = await getService('release-action', { strapi }).countActions({
+      filters: { release: release.id },
+    });
 
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
@@ -281,7 +283,10 @@ const releaseController = {
     });
 
     ctx.created({
-      data: await permissionsManager.sanitizeOutput(release),
+      data: {
+        ...(await permissionsManager.sanitizeOutput(release)),
+        actions: { meta: { count } },
+      },
     });
   },
 

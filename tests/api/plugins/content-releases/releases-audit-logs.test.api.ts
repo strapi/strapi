@@ -265,11 +265,12 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       const logs = await findLogs('release.update');
 
       expect(
+        // Sorted: Postgres stores the payload as jsonb, which reorders its keys
         logs.map((log: { payload: { details: { changes: object } } }) =>
-          Object.keys(log.payload.details.changes)
+          Object.keys(log.payload.details.changes).sort()
         )
       ).toEqual([
-        ['scheduledAt', 'isScheduled'],
+        ['isScheduled', 'scheduledAt'],
         // Resending the same values produces no entry
         ['name', 'timezone'],
       ]);
@@ -442,6 +443,42 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       await expectNoLog('release.trigger');
     });
 
+    it('records nothing when writing what the run did fails, which rolls the run back', async () => {
+      const release = await createRelease({ name: 'Rolled back', timezone: 'Europe/Paris' });
+      const entry = await createEntry('rolled-back');
+      await rq({
+        url: `/content-releases/${release.id}/actions`,
+        method: 'POST',
+        body: releaseAction(entry.documentId),
+      });
+      await clearAuditLogs();
+      // The run records its entries' outcomes: failing that write loses the whole run
+      let armed = true;
+      const unsubscribe = strapi.db.lifecycles.subscribe({
+        models: ['plugin::content-releases.release-action'],
+        beforeUpdateMany() {
+          if (armed) {
+            armed = false;
+            throw new Error('Test-only write failure');
+          }
+        },
+      });
+
+      try {
+        const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
+        expect(res.statusCode).toBe(500);
+      } finally {
+        unsubscribe();
+      }
+
+      await expectNoLog('release.trigger');
+      expect(
+        await strapi.db
+          .query('plugin::content-releases.release')
+          .findOne({ where: { id: release.id } })
+      ).toMatchObject({ releasedAt: null });
+    });
+
     it('records nothing for a publish of a release that never existed', async () => {
       // Any admin can request arbitrary ids; recording those attempts would let them
       // fill the log with junk rows
@@ -551,6 +588,12 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         timezone: 'Europe/Paris',
         scheduledAt: inFuture(60),
       });
+      const entry = await createEntry('missed-its-schedule');
+      await rq({
+        url: `/content-releases/${release.id}/actions`,
+        method: 'POST',
+        body: releaseAction(entry.documentId),
+      });
       await strapi.db.query('plugin::content-releases.release').update({
         where: { id: release.id },
         data: { scheduledAt: new Date(Date.now() - 10 * 60_000) },
@@ -570,6 +613,30 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       expect(log.payload.details).toEqual({ reason: 'MissedSchedule' });
     });
 
+    it('records an empty release that missed its schedule as a success, like its run', async () => {
+      const release = await createRelease({
+        name: 'Empty and missed',
+        timezone: 'Europe/Paris',
+        scheduledAt: inFuture(60),
+      });
+      await strapi.db.query('plugin::content-releases.release').update({
+        where: { id: release.id },
+        data: { scheduledAt: new Date(Date.now() - 10 * 60_000) },
+      });
+      await clearAuditLogs();
+
+      await strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
+
+      const log = await expectExactlyOneLog('release.trigger');
+      expect(log.user).toBeNull();
+      expect(log.payload).toMatchObject({
+        actor: { type: 'system' },
+        origin: 'scheduler',
+        outcome: 'success',
+        resource: { type: 'release', id: release.id, name: 'Empty and missed' },
+      });
+    });
+
     it('records nothing when it freezes a release that failed before the upgrade', async () => {
       const release = await createRelease({ name: 'Failed before', timezone: 'Europe/Paris' });
       await strapi.db.query('plugin::content-releases.release').update({
@@ -578,10 +645,6 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       });
       await clearAuditLogs();
 
-      await strapi.hook('strapi::content-types.afterSync').call({
-        oldContentTypes: strapi.contentTypes,
-        contentTypes: strapi.contentTypes,
-      });
       await strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
 
       expect(

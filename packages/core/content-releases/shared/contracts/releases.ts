@@ -1,12 +1,9 @@
 import { errors } from '@strapi/utils';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
+import type { Modules } from '@strapi/types';
 import type { Entity, UserInfo } from '../types';
 import type { ReleaseAction } from './release-actions';
-import type {
-  ReleaseCondition,
-  ReleaseFailureReason,
-  ReleaseStatus,
-} from '../../server/src/constants';
+import type { ReleaseCondition, ReleaseFailureReason, ReleaseStatus } from '../constants';
 
 export type { ReleaseCondition, ReleaseFailureReason, ReleaseStatus };
 
@@ -18,8 +15,7 @@ export interface Release extends Entity {
   // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
   timezone: string | null;
   releaseCondition: ReleaseCondition;
-  // What the run did with the release's entries. Null until a run records them: a planned
-  // release, and a release that ran before the totals existed.
+  // Null while the release is planned
   totalPublishedEntries: number | null;
   totalUnpublishedEntries: number | null;
   totalSkippedEntries: number | null;
@@ -49,22 +45,6 @@ export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'a
   actions: ReleaseAction[];
 }
 
-// A release field's value, or a condition on it
-type ReleaseFieldFilter<T> =
-  | T
-  | {
-      $eq?: T;
-      $ne?: T;
-      $in?: T[];
-      $notIn?: T[];
-      $lt?: T;
-      $lte?: T;
-      $gt?: T;
-      $gte?: T;
-      $null?: boolean;
-      $notNull?: boolean;
-    };
-
 /**
  * GET /content-releases/ - Get releases paginated
  */
@@ -75,9 +55,7 @@ export declare namespace GetReleases {
     };
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
       // Any field of the release, e.g. filters[status][$in][0]=failed
-      filters?: {
-        [Field in Exclude<keyof Release, 'actions'>]?: ReleaseFieldFilter<Release[Field]>;
-      };
+      filters?: Modules.Documents.Params.Filters.Any<'plugin::content-releases.release'>;
       // e.g. 'updatedAt:desc'
       sort?: string | string[];
     };
@@ -88,6 +66,8 @@ export declare namespace GetReleases {
     meta: {
       pagination?: Pagination;
       pendingReleasesCount?: number;
+      // How many releases have each status, whatever the filters
+      statusCounts: Record<ReleaseStatus, number>;
     };
     error?: errors.ApplicationError;
   }
@@ -103,7 +83,7 @@ export declare namespace GetReleasesByDocumentAttached {
     };
     query: {
       contentType: string;
-      entryDocumentId: ReleaseAction['entry']['entryDocumentId'];
+      entryDocumentId: ReleaseAction['entryDocumentId'];
       locale?: string;
       hasEntryAttached?: boolean;
     };
@@ -188,8 +168,8 @@ export declare namespace CreateReleaseFromSkippedEntries {
       id: Release['id'];
     };
     body: CreateRelease.Request['body'] & {
-      // Action ids of the skipped entries to carry over; all of them if omitted
-      actionIds?: number[];
+      // The skipped entries to carry over; all of them if omitted
+      actionIds?: ReleaseAction['id'][];
     };
   }
 
