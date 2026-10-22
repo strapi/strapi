@@ -73,6 +73,7 @@ export const createMcpServerWithRegistries = ({
     },
     {
       capabilities,
+      maxToolInputElements: 10_000,
     }
   );
 

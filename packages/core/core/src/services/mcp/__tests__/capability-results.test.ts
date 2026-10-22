@@ -91,6 +91,51 @@ const connectClient = async (
 };
 
 describe('MCP owned capability results', () => {
+  test.each(['array', 'record'])('limits %s input elements before tool execution', async (kind) => {
+    const handler = jest.fn(async () => ({ content: [], structuredContent: { ok: true } }));
+    const tools = new McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>(
+      'tool'
+    );
+    tools.define({
+      name: 'bounded-input-tool',
+      title: 'Bounded input tool',
+      description: 'Accepts an array or record',
+      auth: AUTH,
+      resolveInputSchema: () =>
+        z.object({ values: z.union([z.array(z.string()), z.record(z.string(), z.string())]) }),
+      resolveOutputSchema: () => z.object({ ok: z.boolean() }),
+      createHandler: () => handler,
+    });
+    const values = (count: number) =>
+      kind === 'array'
+        ? Array.from({ length: count }, () => 'value')
+        : Object.fromEntries(
+            Array.from({ length: count }, (_, index) => [`key-${index}`, 'value'])
+          );
+    const { client, close } = await connectClient(createStrapi(), { tools });
+
+    try {
+      // The outer values key counts toward the 10,000-element limit.
+      const accepted = await client.callTool({
+        name: 'bounded-input-tool',
+        arguments: { values: values(9_999) },
+      });
+      expect(accepted.isError).not.toBe(true);
+
+      const rejected = await client.callTool({
+        name: 'bounded-input-tool',
+        arguments: { values: values(10_000) },
+      });
+      expect(rejected.isError).toBe(true);
+      expect(rejected.content).toEqual([
+        { type: 'text', text: expect.stringContaining('maximum of 10000 elements') },
+      ]);
+      expect(handler).toHaveBeenCalledTimes(1);
+    } finally {
+      await close();
+    }
+  });
+
   test('every tool content variant and structured data reaches a client unchanged', async () => {
     const tools = new McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>(
       'tool'
