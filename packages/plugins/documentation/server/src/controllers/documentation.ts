@@ -159,6 +159,8 @@ export default {
       body: { password },
     } = ctx.request;
 
+    // TODO @Nico the stored config has no `password` until one is set (the first start stores
+    // `{ restrictedAccess: false }`), so `bcrypt.compare` throws and the action responds 500.
     const { password: hash } = (await strapi
       .store({ type: 'plugin', name: 'documentation', key: 'config' })
       .get()) as { password?: string };
