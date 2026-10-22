@@ -10,3 +10,5 @@ metrics.trackUsage('didUploadImage', 'properties').anything();
 app.service('plugin::upload.image-manipulation').missing();
 app.plugin('upload').service('weeklyMetrics').ensureWeeklyStoredCronSchedule(1).anything();
 app.plugin('upload').service('aiMetadataJobs').getJob('1').anything();
+app.plugin('upload').service('folder').getStructure(1).anything();
+app.service('plugin::upload.file').getFolderPath('1').anything();
