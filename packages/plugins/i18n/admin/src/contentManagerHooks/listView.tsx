@@ -13,6 +13,8 @@ interface AddColumnToTableHookArgs {
   displayedHeaders: ListFieldLayout[];
 }
 
+type CellFormatterArgs = Parameters<NonNullable<ListFieldLayout['cellFormatter']>>;
+
 const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
   const { options } = layout;
 
@@ -36,8 +38,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
         searchable: false,
         sortable: false,
         name: 'locales',
-        // @ts-expect-error – ID is seen as number | string; this will change when we move the type over.
-        cellFormatter: (props) => (
+        cellFormatter: (props: CellFormatterArgs[0]) => (
           <LocaleListCell
             documentId={props.documentId}
             locale={props.locale}
