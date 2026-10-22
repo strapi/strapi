@@ -1,4 +1,12 @@
+import { sortBy } from 'lodash';
+
 import folderService from '../folder';
+
+jest.mock('lodash', () => {
+  const actual = jest.requireActual('lodash');
+
+  return { ...actual, sortBy: jest.fn(actual.sortBy) };
+});
 
 const folderUID = '1';
 const rootPathRegex = /^\/[0-9]*$/i;
@@ -96,7 +104,7 @@ describe('folder', () => {
           id: 1,
           name: 'Zeta',
           children: [
-            // Same name: insertion order is kept (stable sort)
+            // Same name: ties keep the order the rows came back in (stable sort)
             { id: 5, name: 'a', children: [{ id: 6, name: 'c', children: [] }] },
             { id: 7, name: 'a', children: [] },
             { id: 4, name: 'b', children: [] },
@@ -104,6 +112,24 @@ describe('folder', () => {
         },
         { id: 2, name: 'alpha', children: [] },
       ]);
+    });
+
+    test('sorts each folder once, not once per insertion', async () => {
+      const sortBySpy = sortBy as unknown as jest.Mock;
+      sortBySpy.mockClear();
+
+      await folderService.getStructure();
+
+      // One sort per children list, each folder in exactly one of them: the
+      // sorted list lengths add up to the number of folders. Re-sorting the
+      // growing list on every insertion, as the code used to, adds up to more
+      // (1 + 2 + … + N for N siblings).
+      const sortedElements = sortBySpy.mock.calls.reduce(
+        (sum: number, [list]: [unknown[]]) => sum + list.length,
+        0
+      );
+
+      expect(sortedElements).toBe(rows.length);
     });
   });
 });
