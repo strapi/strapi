@@ -3,6 +3,7 @@ import type { Context } from 'koa';
 import type {} from 'koa-body';
 import type { Internal } from '@strapi/types';
 import { getService } from '../utils';
+import { formatValidationError } from '../utils/errors';
 import {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
@@ -39,7 +40,7 @@ export default {
     try {
       await validateKind(kind);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     const contentTypeService = getService('content-types');
@@ -84,7 +85,7 @@ export default {
     try {
       await validateContentTypeInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     try {
@@ -132,7 +133,7 @@ export default {
     try {
       await validateUpdateContentTypeInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     try {
