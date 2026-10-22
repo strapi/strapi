@@ -47,6 +47,23 @@ export type UploadService = Omit<
   ): ReturnType<UploadServiceImplementation['formatFileInfo']>;
 };
 
+type MetricsServiceImplementation = ReturnType<typeof metrics>;
+
+/** The registered `metrics` service: sends the upload telemetry events. */
+export type MetricsService = Omit<MetricsServiceImplementation, 'trackUsage'> & {
+  /**
+   * Sends a telemetry event. `properties.eventProperties` also gets whether AI metadata is enabled,
+   * when an AI provider is available. Resolves to `false` when the event is rate limited or the
+   * request fails, and to `true` when telemetry is disabled.
+   *
+   * @internal
+   */
+  trackUsage(
+    event: string,
+    properties?: Record<string, unknown>
+  ): ReturnType<MetricsServiceImplementation['trackUsage']>;
+};
+
 /**
  * `strapi.config.get('plugin::upload')`: the plugin config merged with its defaults. `breakpoints`
  * defaults to the responsive image sizes when it is not set.
@@ -67,7 +84,7 @@ export type Services = {
   folder: typeof folder;
   file: typeof file;
   weeklyMetrics: ReturnType<typeof weeklyMetrics>;
-  metrics: ReturnType<typeof metrics>;
+  metrics: MetricsService;
   'api-upload-folder': typeof apiUploadFolder;
   extensions: typeof extensions;
   aiMetadata: ReturnType<typeof createAIMetadataService>;
