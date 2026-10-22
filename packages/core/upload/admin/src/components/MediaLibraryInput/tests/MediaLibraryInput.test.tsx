@@ -1,4 +1,5 @@
 import { Form } from '@strapi/admin/strapi-admin';
+import { within } from '@testing-library/react';
 import { render, screen, waitFor, fireEvent, act } from '@tests/utils';
 
 import { MediaLibraryInput } from '../MediaLibraryInput';
@@ -32,10 +33,16 @@ jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
 }));
 
 /**
- * The picker still opens the legacy dialog until the Content Manager gets its
- * own. It pulls in cropperjs, which jsdom cannot parse.
+ * Editing an asset still opens the legacy details dialog, which pulls in
+ * cropperjs, and jsdom cannot parse its stylesheet.
  */
 jest.mock('cropperjs/dist/cropper.css?raw', () => '', { virtual: true });
+
+jest.mock('../../../pages/Assets/hooks/useInfiniteScrollSentinel', () => {
+  const { useRef } = jest.requireActual('react');
+
+  return { useInfiniteScrollSentinel: () => useRef(null) };
+});
 
 const asset = (id: number, name: string): AssetFile =>
   ({
@@ -440,6 +447,16 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(screen.getByRole('menuitem', { name: 'Upload from URL' })).toBeInTheDocument();
     });
 
+    it('opens the asset picker from "Browse library"', async () => {
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+      await user.click(await screen.findByRole('menuitem', { name: 'Browse library' }));
+
+      const dialog = await screen.findByRole('dialog', { name: 'Add asset for Cover' });
+      expect(within(dialog).getByRole('tab', { name: 'Browse assets' })).toBeInTheDocument();
+    });
+
     it('offers browse only when the user cannot create', async () => {
       mockPermissions.canCreate = false;
       const { user } = renderInput({ attribute: { multiple: true } });
@@ -518,10 +535,9 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       fireEvent.change(urlField, { target: { value: 'https://example.com/from-url.png' } });
       expect(urlField).toHaveValue('https://example.com/from-url.png');
 
-      const form = screen.getByRole('button', { name: 'Upload' }).closest('form')!;
-      // jsdom does not perform implicit form submission from a submit button, so
-      // the event the dialog listens for has to be raised directly.
-      fireEvent.submit(form);
+      // Not `user.click`: user-event submits through `form.requestSubmit(submitter)`,
+      // which jsdom does not implement, so the form would never submit.
+      fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
 
       await waitFor(() => expect(mockUploadFromUrls).toHaveBeenCalledTimes(1));
       expect(mockUploadFromUrls.mock.calls[0][0]).toMatchObject({
@@ -540,13 +556,14 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       // The design system paints button icons with its own per-variant
       // "svg path { fill }", so the chevron needs the fill set explicitly or it
       // stays the default grey while the label turns primary.
+      // eslint-disable-next-line testing-library/no-node-access
       const chevron = trigger.querySelector('svg path');
       expect(chevron).not.toBeNull();
       // primary600
       expect(window.getComputedStyle(chevron!).fill).toBe('#4945ff');
 
-      const label = trigger.querySelector('span');
-      expect(window.getComputedStyle(label!).fontWeight).toBe('400');
+      const label = within(trigger).getByText('Add asset');
+      expect(window.getComputedStyle(label).fontWeight).toBe('400');
     });
 
     it('disables the trigger on a disabled field', () => {
@@ -577,7 +594,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       fireEvent.change(await screen.findByRole('textbox'), {
         target: { value: 'https://example.com/photo.png\nhttps://example.com/notes.pdf' },
       });
-      fireEvent.submit(screen.getByRole('button', { name: 'Upload' }).closest('form')!);
+      fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
 
       expect(
         await screen.findByText(

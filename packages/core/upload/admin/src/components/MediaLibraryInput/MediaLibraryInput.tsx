@@ -7,15 +7,10 @@ import { useIntl } from 'react-intl';
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../hooks/useTracking';
-// Temporary: the Content Manager's own asset picker is not built on this stack
-// yet, so browsing and editing the library still go through the legacy dialogs.
-// These imports go when that modal lands.
-import { AssetDialog } from '../../legacy/components/AssetDialog/AssetDialog';
 import {
   EditAssetDialog,
   type Asset as EditableAsset,
 } from '../../legacy/components/EditAssetDialog/EditAssetContent';
-import { EditFolderDialog } from '../../legacy/components/EditFolderDialog/EditFolderDialog';
 import { ImportFromUrlDialog } from '../../pages/Assets/components/ImportFromUrlDialog';
 import { useUploadFilesMutation, useUploadFromUrlsMutation } from '../../services/api';
 import { useGetUploadSettingsQuery } from '../../services/settings';
@@ -27,6 +22,7 @@ import {
 import { prefixFileUrlWithBackendUrl } from '../../utils/files';
 import { getTranslationKey } from '../../utils/translations';
 import { typeFromMime } from '../../utils/typeFromMime';
+import { AssetPickerDialog } from '../AssetPickerDialog/AssetPickerDialog';
 
 import { AddAssetMenu } from './AddAssetMenu';
 import { AssetDropZone } from './AssetDropZone';
@@ -49,7 +45,7 @@ const CONTENT_MANAGER_LOCATION = 'content-manager';
  */
 const UPLOAD_FOLDER_ID = null;
 
-type Step = 'browse' | 'create-folder' | 'no-access';
+type Step = 'browse' | 'no-access';
 
 export interface MediaLibraryInputProps {
   name: string;
@@ -94,7 +90,6 @@ export const MediaLibraryInput = ({
   const { copy } = useClipboard();
 
   const [step, setStep] = useState<Step | undefined>(undefined);
-  const [folderId, setFolderId] = useState<number | null>(null);
   const [editedAsset, setEditedAsset] = useState<File | null>(null);
   const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -185,7 +180,6 @@ export const MediaLibraryInput = ({
   const handleSelect = (selectedAssets: File[]) => {
     setAssets(selectedAssets);
     setStep(undefined);
-    setFolderId(null);
   };
 
   const notifyUnsupported = () => {
@@ -411,26 +405,20 @@ export const MediaLibraryInput = ({
       </VisuallyHidden>
 
       {step === 'browse' && (
-        <AssetDialog
+        <AssetPickerDialog
           open
+          title={formatMessage(
+            {
+              id: getTranslationKey('asset-picker.title'),
+              defaultMessage: 'Add asset for {fieldName}',
+            },
+            { fieldName: label ?? name }
+          )}
+          initialSelection={assets}
           multiple={multiple}
-          allowedTypes={allowedTypes ?? []}
-          initiallySelectedAssets={assets}
-          folderId={folderId}
-          trackedLocation={CONTENT_MANAGER_LOCATION}
-          onClose={() => {
-            setStep(undefined);
-            setFolderId(null);
-          }}
-          onValidate={handleSelect}
-          onAddFolder={() => setStep('create-folder')}
-          // The dialog's own upload button hands back to this field's upload
-          // path, so every route to an uploaded file opens the progress dialog.
-          onAddAsset={() => {
-            setStep(undefined);
-            fileInputRef.current?.click();
-          }}
-          onChangeFolder={(nextFolderId) => setFolderId(nextFolderId)}
+          allowedTypes={allowedTypes}
+          onClose={() => setStep(undefined)}
+          onConfirm={handleSelect}
         />
       )}
 
@@ -444,10 +432,6 @@ export const MediaLibraryInput = ({
           trackedLocation={CONTENT_MANAGER_LOCATION}
           onClose={handleEditClose}
         />
-      )}
-
-      {step === 'create-folder' && (
-        <EditFolderDialog open onClose={() => setStep('browse')} parentFolderId={folderId} />
       )}
 
       {step === 'no-access' && <NoLibraryAccessDialog onClose={() => setStep(undefined)} />}

@@ -42,7 +42,13 @@ export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
 
       subscribers.push(subscriber);
 
-      return () => subscribers.splice(subscribers.indexOf(subscriber), 1);
+      return () => {
+        const index = subscribers.indexOf(subscriber);
+
+        if (index >= 0) {
+          subscribers.splice(index, 1);
+        }
+      };
     },
 
     clear() {
