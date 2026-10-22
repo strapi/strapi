@@ -1,7 +1,8 @@
 import { Table } from '@strapi/admin/strapi-admin';
-import { act, render as renderRTL, renderHook, screen, server } from '@tests/utils';
-import { http, HttpResponse } from 'msw';
+import { act, render as renderRTL, renderHook, screen, server, waitFor } from '@tests/utils';
+import { delay, http, HttpResponse } from 'msw';
 
+import { useGetAllDocumentsQuery } from '../../../../services/documents';
 import {
   CustomOrder,
   MoveToBottomAction,
@@ -25,6 +26,7 @@ const createState = (overrides: Partial<CustomOrderState> = {}): CustomOrderStat
   canReorder: true,
   isMoving: false,
   rows,
+  total: rows.length,
   getPosition: (documentId) => rows.findIndex((row) => row.documentId === documentId) + 1,
   moveToIndex: jest.fn(async () => {}),
   moveToPosition: jest.fn(async () => {}),
@@ -58,40 +60,42 @@ const Action = ({ action, documentId }: ActionProps) => {
   );
 };
 
-const render = (state: CustomOrderState) =>
-  renderRTL(
-    <CustomOrder.Root state={state}>
-      <Table.Root
-        rows={state.rows}
-        headers={[
-          { name: 'strapi_position', label: 'order' },
-          { name: 'name', label: 'name' },
-        ]}
-      >
-        <Table.Content>
-          <Table.Head>
-            <Table.HeaderCell name="strapi_position" label="order" />
-            <Table.HeaderCell name="name" label="name" />
-          </Table.Head>
-          <Table.Body>
-            {state.rows.map((row, index) => (
-              <CustomOrder.Row key={row.id} documentId={row.documentId}>
-                <CustomOrder.PositionCell
-                  documentId={row.documentId}
-                  position={index + 1}
-                  total={state.rows.length}
-                />
-                <Table.Cell>{row.name}</Table.Cell>
-              </CustomOrder.Row>
-            ))}
-          </Table.Body>
-        </Table.Content>
-      </Table.Root>
-      <Action action={MoveToTopAction} documentId="a" />
-      <Action action={MoveToTopAction} documentId="c" />
-      <Action action={MoveToBottomAction} documentId="b" />
-    </CustomOrder.Root>
-  );
+const List = ({ state }: { state: CustomOrderState }) => (
+  <CustomOrder.Root state={state}>
+    <Table.Root
+      rows={state.rows}
+      headers={[
+        { name: 'strapi_position', label: 'order' },
+        { name: 'name', label: 'name' },
+      ]}
+    >
+      <Table.Content>
+        <Table.Head>
+          <Table.HeaderCell name="strapi_position" label="order" />
+          <Table.HeaderCell name="name" label="name" />
+        </Table.Head>
+        <Table.Body>
+          {state.rows.map((row, index) => (
+            <CustomOrder.Row key={row.id} documentId={row.documentId}>
+              <CustomOrder.PositionCell
+                documentId={row.documentId}
+                position={index + 1}
+                total={state.rows.length}
+              />
+              <Table.Cell>{row.name}</Table.Cell>
+            </CustomOrder.Row>
+          ))}
+        </Table.Body>
+      </Table.Content>
+    </Table.Root>
+    <Action action={MoveToTopAction} documentId="a" />
+    <Action action={MoveToTopAction} documentId="c" />
+    <Action action={MoveToBottomAction} documentId="a" />
+    <Action action={MoveToBottomAction} documentId="c" />
+  </CustomOrder.Root>
+);
+
+const render = (state: CustomOrderState) => renderRTL(<List state={state} />);
 
 describe('CustomOrder', () => {
   describe('PositionCell', () => {
@@ -191,10 +195,11 @@ describe('CustomOrder', () => {
 
       expect(state.moveToPosition).toHaveBeenLastCalledWith('c', 1);
 
-      await user.click(screen.getByRole('button', { name: 'Move to bottom' }));
+      const [moveFirstToBottom] = screen.getAllByRole('button', { name: 'Move to bottom' });
+      await user.click(moveFirstToBottom);
 
       const [documentId, position] = jest.mocked(state.moveToPosition).mock.lastCall ?? [];
-      expect(documentId).toBe('b');
+      expect(documentId).toBe('a');
       expect(position).toBeGreaterThan(rows.length);
     });
 
@@ -204,6 +209,17 @@ describe('CustomOrder', () => {
       const [moveFirstToTop] = await screen.findAllByRole('button', { name: 'Move to top' });
 
       expect(moveFirstToTop).toBeDisabled();
+    });
+
+    it('cannot move the last entry to the bottom', async () => {
+      render(createState());
+
+      const [moveFirstToBottom, moveLastToBottom] = await screen.findAllByRole('button', {
+        name: 'Move to bottom',
+      });
+
+      expect(moveFirstToBottom).toBeEnabled();
+      expect(moveLastToBottom).toBeDisabled();
     });
 
     it('is not offered when entries cannot be moved', async () => {
@@ -232,6 +248,9 @@ interface Move {
 
 type Props = Parameters<typeof useCustomOrder>[0];
 
+/**
+ * The hook alone, with results that never change: checks what the hook sends.
+ */
 const setup = (overrides: Partial<Props> = {}) => {
   const moves: Move[] = [];
   const listRequests: URL[] = [];
@@ -267,7 +286,6 @@ const setup = (overrides: Partial<Props> = {}) => {
     params: { page: '1', pageSize: '3', sort: 'strapi_position:ASC' },
     results: hookRows,
     pagination: { page: 1, pageSize: 3, total: 7 },
-    fulfilledTimeStamp: 1,
     ...overrides,
   };
 
@@ -286,6 +304,7 @@ describe('useCustomOrder', () => {
       canReorder: true,
       isMoving: false,
       rows: hookRows,
+      total: 7,
     });
 
     rerender({ ...initialProps, sort: 'name:ASC' });
@@ -310,22 +329,15 @@ describe('useCustomOrder', () => {
     expect(result.current.getPosition('nope')).toBeUndefined();
   });
 
-  it('moves an entry down within the page and shows the new order until the list is fetched again', async () => {
-    const { result, rerender, initialProps, moves } = setup();
+  it('moves an entry down within the page', async () => {
+    const { result, moves } = setup();
 
     await act(async () => {
       await result.current.moveToIndex(0, 2);
     });
 
     expect(moves).toEqual([{ id: 'a', body: { after: 'c' }, locale: null }]);
-    expect(result.current.isMoving).toBe(true);
-    expect(result.current.rows.map((row) => row.documentId)).toEqual(['b', 'c', 'a']);
-
-    // The list has been fetched again
-    rerender({ ...initialProps, fulfilledTimeStamp: 2 });
-
     expect(result.current.isMoving).toBe(false);
-    expect(result.current.rows).toBe(hookRows);
   });
 
   it('moves an entry up within the page', async () => {
@@ -336,11 +348,10 @@ describe('useCustomOrder', () => {
     });
 
     expect(moves).toEqual([{ id: 'c', body: { before: 'a' }, locale: null }]);
-    expect(result.current.rows.map((row) => row.documentId)).toEqual(['c', 'a', 'b']);
   });
 
   it('ignores moves that go nowhere', async () => {
-    const { result, moves } = setup();
+    const { result, moves, listRequests } = setup();
 
     await act(async () => {
       await result.current.moveToIndex(1, 1);
@@ -350,6 +361,7 @@ describe('useCustomOrder', () => {
     });
 
     expect(moves).toEqual([]);
+    expect(listRequests).toEqual([]);
     expect(result.current.isMoving).toBe(false);
   });
 
@@ -419,6 +431,7 @@ describe('useCustomOrder', () => {
     });
 
     expect(moves).toEqual([]);
+    expect(result.current.isMoving).toBe(false);
   });
 
   it('shows an error when the entry at the target position cannot be fetched', async () => {
@@ -445,6 +458,7 @@ describe('useCustomOrder', () => {
 
     expect(await screen.findByText('The entries could not be fetched')).toBeInTheDocument();
     expect(moves).toEqual([]);
+    expect(result.current.isMoving).toBe(false);
   });
 
   it('shows an error and keeps the current order when a move fails', async () => {
@@ -474,5 +488,276 @@ describe('useCustomOrder', () => {
     ).toBeInTheDocument();
     expect(result.current.isMoving).toBe(false);
     expect(result.current.rows).toBe(hookRows);
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * With the list
+ * -----------------------------------------------------------------------------------------------*/
+
+const NAMES: Record<string, string> = { a: 'Alice', b: 'Bob', c: 'Chloé', d: 'Dan' };
+
+const PARAMS = { page: '1', pageSize: '3', sort: 'strapi_position:ASC' };
+
+interface ServerOptions {
+  /** Order of the entries of the whole view on the server. */
+  order?: string[];
+  /** How long the server takes to answer a list request. */
+  listDelay?: number;
+  /** How long the server takes to apply a move. */
+  moveDelay?: number;
+}
+
+/**
+ * A server holding the custom order of a view: moves change it, and a list request
+ * answers with the order known when the request reached the server.
+ */
+const mockServer = ({
+  order: initialOrder = ['a', 'b', 'c', 'd'],
+  listDelay = 0,
+  moveDelay = 10,
+}: ServerOptions = {}) => {
+  const order = [...initialOrder];
+  const moves: Move[] = [];
+  const listRequests: URL[] = [];
+
+  server.use(
+    http.post(
+      '/content-manager/collection-types/:model/:id/actions/move',
+      async ({ params, request }) => {
+        const id = String(params.id);
+        const body = (await request.json()) as { before?: string; after?: string };
+        moves.push({ id, body, locale: new URL(request.url).searchParams.get('locale') });
+
+        await delay(moveDelay);
+
+        order.splice(order.indexOf(id), 1);
+        order.splice(
+          order.indexOf(String(body.before ?? body.after)) + (body.after ? 1 : 0),
+          0,
+          id
+        );
+
+        return HttpResponse.json({ data: { documentId: id } });
+      }
+    ),
+    http.get('/content-manager/collection-types/:model', async ({ request }) => {
+      const url = new URL(request.url);
+      listRequests.push(url);
+      const snapshot = [...order];
+
+      await delay(listDelay);
+
+      const page = Number(url.searchParams.get('page') ?? 1);
+      const pageSize = Number(url.searchParams.get('pageSize') ?? snapshot.length);
+
+      return HttpResponse.json({
+        results: snapshot.slice((page - 1) * pageSize, page * pageSize).map((documentId) => ({
+          id: initialOrder.indexOf(documentId) + 1,
+          documentId,
+          name: NAMES[documentId],
+        })),
+        pagination: {
+          page,
+          pageSize,
+          pageCount: Math.ceil(snapshot.length / pageSize),
+          total: snapshot.length,
+        },
+      });
+    })
+  );
+
+  return { moves, listRequests, getOrder: () => [...order] };
+};
+
+/**
+ * The hook fed by the list query, as in the list view.
+ */
+const useList = () => {
+  const { data, fulfilledTimeStamp, refetch } = useGetAllDocumentsQuery({
+    model: MODEL,
+    params: PARAMS,
+  });
+
+  const state = useCustomOrder({
+    model: MODEL,
+    isAvailable: true,
+    canUpdate: true,
+    sort: PARAMS.sort,
+    params: PARAMS,
+    results: data?.results ?? [],
+    pagination: data?.pagination,
+    fulfilledTimeStamp,
+  });
+
+  return { ...state, refetch };
+};
+
+const setupList = async (options?: ServerOptions) => {
+  const mocks = mockServer(options);
+  const hook = renderHook(useList);
+
+  await waitFor(() => expect(hook.result.current.rows).toHaveLength(3));
+
+  return { ...hook, ...mocks };
+};
+
+const ids = (documents: Document[]) => documents.map((row) => row.documentId);
+
+/**
+ * Starts a move without waiting for it, to check what happens in the meantime.
+ */
+const start = (move: () => Promise<void>) => {
+  let moving!: Promise<void>;
+
+  act(() => {
+    moving = move();
+  });
+
+  return moving;
+};
+
+const LiveList = () => <List state={useList()} />;
+
+describe('useCustomOrder with the list', () => {
+  it('shows the new order from the start of a move until the list fetched after it has answered', async () => {
+    const { result, moves, listRequests, getOrder } = await setupList({ listDelay: 100 });
+
+    const moving = start(() => result.current.moveToIndex(0, 2));
+
+    expect(result.current.isMoving).toBe(true);
+    expect(ids(result.current.rows)).toEqual(['b', 'c', 'a']);
+
+    await waitFor(() => expect(moves).toEqual([{ id: 'a', body: { after: 'c' }, locale: null }]));
+    expect(result.current.isMoving).toBe(true);
+    expect(ids(result.current.rows)).toEqual(['b', 'c', 'a']);
+
+    await act(async () => {
+      await moving;
+    });
+
+    expect(result.current.isMoving).toBe(false);
+    expect(ids(result.current.rows)).toEqual(['b', 'c', 'a']);
+    expect(getOrder()).toEqual(['b', 'c', 'a', 'd']);
+    // The initial fetch, and the one after the move
+    expect(listRequests).toHaveLength(2);
+  });
+
+  it('keeps the new order and asks for the list again when a fetch started before the move answers', async () => {
+    const { result, listRequests, getOrder } = await setupList({ listDelay: 100 });
+
+    // That fetch reaches the server before the move, so it answers with the old order
+    act(() => {
+      void result.current.refetch();
+    });
+    const moving = start(() => result.current.moveToIndex(0, 2));
+
+    // The old order has landed, the list is asked again
+    await waitFor(() => expect(listRequests).toHaveLength(3));
+    expect(result.current.isMoving).toBe(true);
+    expect(ids(result.current.rows)).toEqual(['b', 'c', 'a']);
+
+    await act(async () => {
+      await moving;
+    });
+
+    expect(result.current.isMoving).toBe(false);
+    expect(ids(result.current.rows)).toEqual(['b', 'c', 'a']);
+    expect(getOrder()).toEqual(['b', 'c', 'a', 'd']);
+    expect(listRequests).toHaveLength(3);
+  });
+
+  it('does not start another move while the entry at the target position is being looked up', async () => {
+    const { result, moves, listRequests, getOrder } = await setupList({ listDelay: 100 });
+
+    const moving = start(() => result.current.moveToPosition('a', 4));
+
+    expect(result.current.isMoving).toBe(true);
+    await waitFor(() => expect(listRequests).toHaveLength(2));
+    expect(moves).toEqual([]);
+
+    await act(async () => {
+      await result.current.moveToIndex(1, 2);
+    });
+
+    expect(moves).toEqual([]);
+    expect(result.current.isMoving).toBe(true);
+
+    await act(async () => {
+      await moving;
+    });
+
+    expect(moves).toEqual([{ id: 'a', body: { after: 'd' }, locale: null }]);
+    expect(ids(result.current.rows)).toEqual(['b', 'c', 'd']);
+    expect(getOrder()).toEqual(['b', 'c', 'd', 'a']);
+    expect(result.current.isMoving).toBe(false);
+    expect(await screen.findByText('Entry moved to position 4')).toBeInTheDocument();
+  });
+
+  it('does not fetch the entry looked up on another page again after the next moves', async () => {
+    const { result, listRequests } = await setupList();
+    const lookups = () => listRequests.filter((url) => url.searchParams.get('pageSize') === '1');
+
+    await act(async () => {
+      await result.current.moveToPosition('a', 4);
+    });
+
+    expect(lookups()).toHaveLength(1);
+
+    await act(async () => {
+      await result.current.moveToIndex(0, 1);
+    });
+
+    expect(lookups()).toHaveLength(1);
+  });
+
+  it('rolls the order back when the move fails', async () => {
+    const { result, getOrder } = await setupList();
+    server.use(
+      http.post('/content-manager/collection-types/:model/:id/actions/move', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ApplicationError',
+              message: 'Custom order is not enabled for this content type',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    await act(async () => {
+      await result.current.moveToIndex(0, 2);
+    });
+
+    expect(
+      await screen.findByText('Custom order is not enabled for this content type')
+    ).toBeInTheDocument();
+    expect(result.current.isMoving).toBe(false);
+    expect(ids(result.current.rows)).toEqual(['a', 'b', 'c']);
+    expect(getOrder()).toEqual(['a', 'b', 'c', 'd']);
+  });
+
+  it('gives the focus back to the position button once the entry has moved', async () => {
+    const { getOrder } = mockServer({ listDelay: 50 });
+    const { user } = renderRTL(<LiveList />);
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Position 2 of 3, change position' })
+    );
+    const input = screen.getByRole('textbox');
+    await user.clear(input);
+    await user.type(input, '3{Enter}');
+
+    await waitFor(() => expect(getOrder()).toEqual(['a', 'c', 'b', 'd']));
+
+    // Once the list has been fetched again, the entry sits at its new position with the focus
+    await waitFor(() =>
+      expect(document.activeElement).toHaveAccessibleName('Position 3 of 3, change position')
+    );
+    expect(document.activeElement?.closest('tr')).toHaveTextContent('Bob');
   });
 });

@@ -16,10 +16,12 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { QueryStatus } from '@reduxjs/toolkit/query';
 import { Table, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
 import { Flex, Td, Tooltip, Typography } from '@strapi/design-system';
 import { ArrowDown, ArrowUp, Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useStore } from 'react-redux';
 import { css, styled } from 'styled-components';
 
 import { CUSTOM_ORDER_SORT } from '../../../constants/customOrder';
@@ -28,6 +30,7 @@ import { getTranslation } from '../../../utils/translations';
 
 import type { DocumentActionComponent } from '../../../content-manager';
 import type { Document } from '../../../hooks/useDocument';
+import type { Store } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
  * useCustomOrder
@@ -40,10 +43,15 @@ interface CustomOrderState {
   isActive: boolean;
   /** The user is allowed to move entries, and the list is in a state where they can be moved. */
   canReorder: boolean;
-  /** A move has been sent and the list has not been fetched again yet. */
+  /**
+   * A move is in progress: from the moment it is asked until the list shows its result.
+   * No other move can start in the meantime.
+   */
   isMoving: boolean;
   /** The entries of the page, in the order they should be displayed. */
   rows: Document[];
+  /** Number of entries in the current view, all pages included. */
+  total: number;
   /** 1-based position of an entry of the page in the current view. */
   getPosition: (documentId: string) => number | undefined;
   /** Moves an entry of the page to the place of another entry of the page. */
@@ -64,16 +72,18 @@ interface UseCustomOrderOptions {
   params: Record<string, unknown>;
   results: Document[];
   pagination?: { page: number; pageSize: number; total: number };
-  /** Changes every time the list has been fetched. */
+  /**
+   * Not needed anymore: the hook fetches the list again itself after a move and knows when
+   * that answer lands. Still accepted so that existing callers keep compiling.
+   */
   fulfilledTimeStamp?: number;
 }
 
-interface PendingMove {
-  /** Value of `fulfilledTimeStamp` when the move was sent. */
-  fetchedAt?: number;
-  /** Order to display until the server answers, when the move stays within the page. */
-  order?: string[];
-}
+/**
+ * How many times the list is asked again after a move before giving up. Each attempt waits
+ * for a whole request, so two are enough in practice (see `refetchList`).
+ */
+const MAX_REFETCH_ATTEMPTS = 3;
 
 const useCustomOrder = ({
   model,
@@ -83,37 +93,112 @@ const useCustomOrder = ({
   params,
   results,
   pagination,
-  fulfilledTimeStamp,
 }: UseCustomOrderOptions): CustomOrderState => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const [moveDocument] = useMoveDocumentMutation();
   const [fetchDocuments] = useLazyGetAllDocumentsQuery();
+  const store = useStore<ReturnType<Store['getState']>>();
 
-  const [pendingMove, setPendingMove] = React.useState<PendingMove | null>(null);
+  const [isMoving, setIsMoving] = React.useState(false);
+  // Same value for the handlers, which may run again before React has rendered the state
+  const isMovingRef = React.useRef(false);
+  /** Order to display until the move has landed, when it stays within the page. */
+  const [pendingOrder, setPendingOrder] = React.useState<string[] | null>(null);
 
   const isActive = isAvailable && sort?.toUpperCase() === CUSTOM_ORDER_SORT.toUpperCase();
 
   /**
    * The list is fetched again after each move. Until that answer lands, the table keeps
    * showing its rows instead of a loading state, which would make every move blink.
+   * Any other answer landing in the meantime does not touch the order shown.
    */
-  const isMoving = pendingMove !== null && pendingMove.fetchedAt === fulfilledTimeStamp;
-
   const rows = React.useMemo(() => {
-    if (!isMoving || !pendingMove?.order) {
+    if (!isMoving || !pendingOrder) {
       return results;
     }
 
     const rowsById = new Map(results.map((row) => [row.documentId, row]));
 
-    return pendingMove.order.flatMap((documentId) => rowsById.get(documentId) ?? []);
-  }, [isMoving, pendingMove, results]);
+    return pendingOrder.flatMap((documentId) => rowsById.get(documentId) ?? []);
+  }, [isMoving, pendingOrder, results]);
 
   const offset = pagination ? (pagination.page - 1) * pagination.pageSize : 0;
   const total = pagination?.total ?? results.length;
   const locale = typeof params.locale === 'string' ? params.locale : undefined;
+
+  /**
+   * Runs a move while blocking any other one: from the moment it is asked until the list
+   * shows its result, the handles, the position inputs and the row actions are inert.
+   */
+  const runExclusively = async (run: () => Promise<void>) => {
+    if (isMovingRef.current) {
+      return;
+    }
+
+    isMovingRef.current = true;
+    setIsMoving(true);
+
+    try {
+      await run();
+    } finally {
+      isMovingRef.current = false;
+      setPendingOrder(null);
+      setIsMoving(false);
+    }
+  };
+
+  /**
+   * Resolves once no request of the list is in flight anymore.
+   */
+  const waitForList = (queryCacheKey: string) =>
+    new Promise<void>((resolve) => {
+      const isSettled = () =>
+        store.getState().adminApi.queries[queryCacheKey]?.status !== QueryStatus.pending;
+
+      if (isSettled()) {
+        resolve();
+
+        return;
+      }
+
+      const unsubscribe = store.subscribe(() => {
+        if (isSettled()) {
+          unsubscribe();
+          resolve();
+        }
+      });
+    });
+
+  /**
+   * Waits for the list to be fetched again after a move. The mutation invalidates the list,
+   * but RTK Query drops that refetch when another request is already in flight, and that
+   * request may have started before the server applied the move. So the list is asked again
+   * until a request started after the move was answered, otherwise the table could settle on
+   * a stale snapshot. An attempt is dropped the same way when a request is in flight: it
+   * then waits for that request, which is the one the mutation started most of the time.
+   *
+   * @param movedAt - When the server answered the move
+   */
+  const refetchList = async (movedAt: number) => {
+    for (let attempt = 0; attempt < MAX_REFETCH_ATTEMPTS; attempt += 1) {
+      const request = fetchDocuments({ model, params });
+      const { requestId, startedTimeStamp = 0 } = await request;
+      // The page subscribes to the list itself
+      request.unsubscribe();
+
+      if (requestId === request.requestId) {
+        return;
+      }
+
+      await waitForList(request.queryCacheKey);
+
+      if (startedTimeStamp >= movedAt) {
+        return;
+      }
+    }
+  };
 
   const move = async (
     documentId: string,
@@ -121,21 +206,29 @@ const useCustomOrder = ({
     placement: 'before' | 'after',
     order?: string[]
   ) => {
-    setPendingMove({ fetchedAt: fulfilledTimeStamp, order });
+    if (order) {
+      setPendingOrder(order);
+    }
 
-    const res = await moveDocument({
+    const mutation = moveDocument({
       model,
       id: documentId,
       body: placement === 'before' ? { before: anchorId } : { after: anchorId },
       params: { locale },
     });
+    const res = await mutation;
 
     if ('error' in res) {
-      setPendingMove(null);
+      setPendingOrder(null);
       toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
       return false;
     }
+
+    const { fulfilledTimeStamp: movedAt = Date.now() } =
+      store.getState().adminApi.mutations[mutation.requestId] ?? {};
+
+    await refetchList(movedAt);
 
     return true;
   };
@@ -157,7 +250,9 @@ const useCustomOrder = ({
       return;
     }
 
-    await moveWithinPage(from, to);
+    await runExclusively(async () => {
+      await moveWithinPage(from, to);
+    });
   };
 
   const moveToPosition: CustomOrderState['moveToPosition'] = async (documentId, position) => {
@@ -176,48 +271,53 @@ const useCustomOrder = ({
 
     const to = targetPosition - offset - 1;
 
-    if (to >= 0 && to < rows.length) {
-      await moveWithinPage(from, to);
+    await runExclusively(async () => {
+      if (to >= 0 && to < rows.length) {
+        await moveWithinPage(from, to);
 
-      return;
-    }
+        return;
+      }
 
-    // The destination is on another page: ask the server which entry sits there in this view
-    const res = await fetchDocuments({
-      model,
-      params: { ...params, page: String(targetPosition), pageSize: '1' },
-    });
-
-    if (res.error) {
-      toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
-
-      return;
-    }
-
-    const anchor = res.data?.results[0];
-
-    if (!anchor) {
-      return;
-    }
-
-    const hasMoved = await move(
-      documentId,
-      anchor.documentId,
-      targetPosition > currentPosition ? 'after' : 'before'
-    );
-
-    if (hasMoved) {
-      toggleNotification({
-        type: 'success',
-        message: formatMessage(
-          {
-            id: getTranslation('custom-order.moved'),
-            defaultMessage: 'Entry moved to position {position}',
-          },
-          { position: targetPosition }
-        ),
+      // The destination is on another page: ask the server which entry sits there in this view
+      const lookup = fetchDocuments({
+        model,
+        params: { ...params, page: String(targetPosition), pageSize: '1' },
       });
-    }
+      const res = await lookup;
+      // Otherwise every later invalidation of the list would fetch that entry again
+      lookup.unsubscribe();
+
+      if (res.error) {
+        toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
+
+        return;
+      }
+
+      const anchor = res.data?.results[0];
+
+      if (!anchor) {
+        return;
+      }
+
+      const hasMoved = await move(
+        documentId,
+        anchor.documentId,
+        targetPosition > currentPosition ? 'after' : 'before'
+      );
+
+      if (hasMoved) {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage(
+            {
+              id: getTranslation('custom-order.moved'),
+              defaultMessage: 'Entry moved to position {position}',
+            },
+            { position: targetPosition }
+          ),
+        });
+      }
+    });
   };
 
   return {
@@ -226,6 +326,7 @@ const useCustomOrder = ({
     canReorder: isActive && canUpdate,
     isMoving,
     rows,
+    total,
     getPosition(documentId) {
       const index = rows.findIndex((row) => row.documentId === documentId);
 
@@ -242,6 +343,7 @@ const CustomOrderContext = React.createContext<CustomOrderState>({
   canReorder: false,
   isMoving: false,
   rows: [],
+  total: 0,
   getPosition: () => undefined,
   moveToIndex: async () => {},
   moveToPosition: async () => {},
@@ -390,12 +492,17 @@ const PositionCell = ({ documentId, position, total, ...props }: PositionCellPro
     [setRowNode]
   );
 
+  /**
+   * The button is disabled while the entry moves, and a disabled button cannot take the
+   * focus: when the input was left to move the entry, the focus comes back once the move
+   * is over.
+   */
   React.useEffect(() => {
-    if (!isEditing && shouldRestoreFocus.current) {
+    if (!isEditing && !isMoving && shouldRestoreFocus.current) {
       shouldRestoreFocus.current = false;
       buttonRef.current?.focus();
     }
-  }, [isEditing]);
+  }, [isEditing, isMoving]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Keeps the keys typed in the input away from the keyboard navigation of the grid
@@ -581,14 +688,15 @@ MoveToTopAction.position = 'table-row';
 
 const MoveToBottomAction: DocumentActionComponent = ({ documentId }) => {
   const { formatMessage } = useIntl();
-  const { canReorder, isMoving, moveToPosition } = React.useContext(CustomOrderContext);
+  const { canReorder, isMoving, total, getPosition, moveToPosition } =
+    React.useContext(CustomOrderContext);
 
   if (!canReorder || !documentId) {
     return null;
   }
 
   return {
-    disabled: isMoving,
+    disabled: isMoving || getPosition(documentId) === total,
     icon: <ArrowDown />,
     label: formatMessage({
       id: 'content-manager.actions.move-to-bottom.label',
