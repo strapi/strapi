@@ -1,7 +1,9 @@
 import {
   getDeepPopulate,
   getDeepPopulateDraftCount,
+  getFieldsForListView,
   getPopulateForLocalizations,
+  getPopulateOverridesForListView,
 } from '../populate';
 
 describe('Populate', () => {
@@ -386,6 +388,112 @@ describe('Populate', () => {
       jest.mocked(strapi.localization.isLocalizedContentType).mockReturnValue(false);
 
       expect(getPopulateForLocalizations('api::localized.localized' as any)).toEqual({});
+    });
+  });
+
+  describe('list view', () => {
+    const listModels = {
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          title: { type: 'string' },
+          views: { type: 'integer' },
+          body: { type: 'richtext' },
+          content: { type: 'blocks' },
+          data: { type: 'json' },
+          secret: { type: 'password' },
+          pluginData: { type: 'json', visible: false },
+          locale: { type: 'string', visible: false },
+          publishedAt: { type: 'datetime' },
+          blocks: { type: 'dynamiczone', components: ['default.block'] },
+          seo: { type: 'component', component: 'default.block' },
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+          category: { type: 'relation', relation: 'oneToOne', target: 'api::category.category' },
+          tags: { type: 'relation', relation: 'manyToMany', target: 'api::tag.tag' },
+          owner: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+          target: { type: 'relation', relation: 'morphToOne' },
+          strapi_stage: {
+            type: 'relation',
+            relation: 'manyToOne',
+            target: 'plugin::review-workflows.workflow-stage',
+            visible: false,
+          },
+        },
+      },
+      'api::author.author': {
+        uid: 'api::author.author',
+        attributes: { name: { type: 'string' }, avatar: { type: 'media' } },
+      },
+      'api::category.category': {
+        uid: 'api::category.category',
+        attributes: { label: { type: 'string' } },
+      },
+      'default.block': {
+        uid: 'default.block',
+        attributes: { text: { type: 'string' } },
+      },
+    } as any;
+
+    beforeEach(() => {
+      global.strapi = {
+        getModel: jest.fn((uid) => listModels[uid]),
+      } as any;
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('selects the scalars the list can display and the non-visible ones', () => {
+      expect(getFieldsForListView('api::article.article' as any)).toEqual([
+        'title',
+        'views',
+        'pluginData',
+        'locale',
+        'publishedAt',
+      ]);
+    });
+
+    test('skips dynamic zones and reduces visible to-one relations to their main field', () => {
+      const overrides = getPopulateOverridesForListView('api::article.article' as any, {
+        author: { edit: { mainField: 'name' } },
+        category: { edit: { mainField: 'label' } },
+        tags: { edit: { mainField: 'name' } },
+        // a main field that is not a scalar of the target only keeps the documentId
+        owner: { edit: { mainField: 'avatar' } },
+      });
+
+      expect(overrides).toEqual({
+        blocks: false,
+        author: { fields: ['name'] },
+        category: { fields: ['label'] },
+        owner: { fields: [] },
+      });
+    });
+
+    test('a to-one relation without a configured main field only keeps the documentId', () => {
+      expect(getPopulateOverridesForListView('api::article.article' as any)).toMatchObject({
+        author: { fields: [] },
+        category: { fields: [] },
+      });
+    });
+
+    test('the deep populate of the list skips dynamic zones', () => {
+      const populate = getDeepPopulate('api::article.article' as any, {
+        maxLevel: 1,
+        countMany: true,
+        initialPopulate: getPopulateOverridesForListView('api::article.article' as any, {
+          author: { edit: { mainField: 'name' } },
+        }) as any,
+      });
+
+      expect(populate).not.toHaveProperty('blocks');
+      expect(populate).toMatchObject({
+        seo: { populate: {} },
+        author: { fields: ['name'] },
+        tags: { count: true },
+        strapi_stage: true,
+      });
     });
   });
 });
