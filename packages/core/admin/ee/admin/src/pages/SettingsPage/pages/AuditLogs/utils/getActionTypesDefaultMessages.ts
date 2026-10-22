@@ -65,7 +65,7 @@ export const actionTypes = {
   'workflow.delete': 'Delete workflow',
   'review-workflows.updateEntryStage': 'Change entry stage',
   'entry.assignee.update': 'Change entry assignee',
-  'entry.draft-discard': 'Discard draft',
+  'entry.draft-discard': 'Discard entry draft',
   'entry.history.restore': 'Restore entry version',
 };
 
