@@ -1,13 +1,11 @@
 ---
 title: Custom order
 description: Entries arranged by hand in the list view, and returned in that order by the API
-tags:
-  - content-manager
 ---
 
 Custom order lets editors arrange the entries of a collection type by hand in the list view. Once it is on for a collection type, the Document Service, and therefore the REST and GraphQL APIs, return its entries in that order whenever no `sort` is requested.
 
-The feature is behind the `unstableCustomOrder` [future flag](../../06-future-flags.md).
+The feature is behind the `unstableCustomOrder` [future flag](../../../architecture/10-future-flags.md).
 
 ```ts
 // config/features.ts
