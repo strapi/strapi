@@ -1,3 +1,5 @@
+import type { Controllers } from '../types/controllers';
+
 import adminFile from './admin-file';
 import adminFolder from './admin-folder';
 import adminFolderFile from './admin-folder-file';
@@ -14,4 +16,5 @@ export const controllers = {
   'admin-upload': adminUpload,
   'content-api': contentApi,
   'view-configuration': viewConfiguration,
-};
+  // The other controllers are not registered yet.
+} satisfies Controllers & Record<string, unknown>;
