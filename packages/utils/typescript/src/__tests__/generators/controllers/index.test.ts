@@ -254,6 +254,25 @@ describe('generateControllersDefinitions', () => {
     expect(normalized).not.toContain('InferredControllers');
   });
 
+  test('emits the instance helper only when a source registers its inferred type', async () => {
+    const { normalized: allContracts } = await generate(
+      {
+        'src/api/article/controllers/article.ts':
+          'export type ControllerContract = { find(): number };\nexport default () => ({ find: () => 1 });',
+      },
+      ['api::article.article']
+    );
+    const { normalized: allJS } = await generate({ 'src/api/article/controllers/legacy.js': '' }, [
+      'api::article.legacy',
+    ]);
+
+    // `noUnusedLocals` would report a helper that no entry reads
+    expect(allContracts).toContain('type ControllerContractOf<');
+    expect(allContracts).not.toContain('ControllerInstance');
+    expect(allJS).not.toContain('ControllerInstance');
+    expect(allJS).not.toContain('ControllerContractOf');
+  });
+
   test('resolves a contract lookup to the contract, and a contract typed any to unknown', async () => {
     const { root, strapi, pwd } = await createApp(
       {
@@ -271,7 +290,7 @@ describe('generateControllersDefinitions', () => {
       pwd,
       logger: createLogger({ silent: true }),
     });
-    await outputFile(path.join(pwd, 'controllers.d.ts'), output);
+    await outputFile(path.join(pwd, 'controllers.ts'), output);
     await outputFile(
       path.join(root, 'src/check.ts'),
       [
@@ -290,7 +309,7 @@ describe('generateControllersDefinitions', () => {
     );
 
     const program = ts.createProgram(
-      [path.join(pwd, 'controllers.d.ts'), path.join(root, 'src/check.ts')],
+      [path.join(pwd, 'controllers.ts'), path.join(root, 'src/check.ts')],
       {
         noEmit: true,
         strict: true,
@@ -332,7 +351,7 @@ export {};
 `);
     // An empty file must still be a module, so that `import type {} from './controllers'` compiles
     expect(
-      ts.isExternalModule(ts.createSourceFile('controllers.d.ts', output, ts.ScriptTarget.Latest))
+      ts.isExternalModule(ts.createSourceFile('controllers.ts', output, ts.ScriptTarget.Latest))
     ).toBe(true);
   });
 

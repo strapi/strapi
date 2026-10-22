@@ -65,7 +65,7 @@ export type ServiceFactoryUID = IsStrict extends false
  * With strict types disabled, the factory may return any service, as on develop.
  *
  * Type generation registers an application service with the `ServiceContract` type its module
- * exports (`types/generated/services.d.ts`), so the factory of that module can be checked against
+ * exports (`types/generated/services.ts`), so the factory of that module can be checked against
  * its own UID. A module without that export registers the type its default export provides, and
  * type generation lists its UID in `Strapi.Registries.InferredServices`: the UID is not a
  * {@link ServiceFactoryUID} (TS2344), and the factory is checked against nothing, so the type it

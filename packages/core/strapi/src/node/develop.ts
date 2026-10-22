@@ -374,6 +374,8 @@ function startWatcher(
         '**/exports/**',
         '**/dist/**',
         '**/*.d.ts',
+        // Type generation writes `.ts` artifacts here, regenerated before each strict compile
+        path.join(cwd, 'types', 'generated'),
         '**/.yalc/**',
         '**/yalc.lock',
         // TODO v6: watch only src folder by default, and flip this to watchIncludeFiles

@@ -76,13 +76,20 @@ export const generateServicesDefinitions = async (
     return { output: NO_SERVICE_PLACEHOLDER_COMMENT, stats: {} };
   }
 
+  const inferredUIDs = servicesDefinitions.filter(isInferredSource(contract)).map(({ uid }) => uid);
+
+  // Each helper is only emitted when an entry reads it: `noUnusedLocals` reports an unused one
   const output = await emitRegistryDefinitions(
     REGISTRY,
     [
-      generateInstanceHelperDefinition(
-        INSTANCE_HELPER,
-        '*\n * Type of the service instance exposed by a service module: the return type of its default\n * export when it is a factory, the default export itself otherwise.\n '
-      ),
+      ...(inferredUIDs.length > 0
+        ? [
+            generateInstanceHelperDefinition(
+              INSTANCE_HELPER,
+              '*\n * Type of the service instance exposed by a service module: the return type of its default\n * export when it is a factory, the default export itself otherwise.\n '
+            ),
+          ]
+        : []),
       ...(contract.uids.size > 0
         ? [
             generateContractHelperDefinition(
@@ -97,7 +104,7 @@ export const generateServicesDefinitions = async (
     [
       {
         registry: INFERRED_REGISTRY,
-        uids: servicesDefinitions.filter(isInferredSource(contract)).map(({ uid }) => uid),
+        uids: inferredUIDs,
       },
     ]
   );

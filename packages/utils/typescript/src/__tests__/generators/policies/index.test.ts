@@ -126,7 +126,7 @@ describe('generatePoliciesDefinitions', () => {
 
     const logger = createLogger({ silent: true });
     const { output } = await generatePoliciesDefinitions({ strapi, pwd, logger });
-    await outputFile(path.join(pwd, 'policies.d.ts'), output);
+    await outputFile(path.join(pwd, 'policies.ts'), output);
     // A global stub for the registry namespace that @strapi/types declares
     await outputFile(
       path.join(root, 'registries.d.ts'),
@@ -138,7 +138,7 @@ describe('generatePoliciesDefinitions', () => {
     );
 
     const program = ts.createProgram({
-      rootNames: ['registries.d.ts', 'types/generated/policies.d.ts', 'check.ts'].map((file) =>
+      rootNames: ['registries.d.ts', 'types/generated/policies.ts', 'check.ts'].map((file) =>
         path.join(root, file)
       ),
       options: { noEmit: true, strict: true, types: [] },
@@ -247,6 +247,17 @@ describe('generatePoliciesDefinitions', () => {
     expect(logger.warnings).toBe(2);
   });
 
+  test('emits no config helpers when every source is JS', async () => {
+    const { output } = await generate(
+      { 'src/policies/legacy.js': 'module.exports = () => true;' },
+      ['global::legacy']
+    );
+
+    expect(output).toContain("'global::legacy': unknown");
+    // `noUnusedLocals` would report a helper that no entry reads
+    expect(output).not.toContain('PolicyConfig');
+  });
+
   test('sorts the entries by uid', async () => {
     const { output } = await generate(
       {
@@ -272,7 +283,7 @@ export {};
 `);
     // An empty file must still be a module, so that `import type {} from './policies'` compiles
     expect(
-      ts.isExternalModule(ts.createSourceFile('policies.d.ts', output, ts.ScriptTarget.Latest))
+      ts.isExternalModule(ts.createSourceFile('policies.ts', output, ts.ScriptTarget.Latest))
     ).toBe(true);
   });
 });

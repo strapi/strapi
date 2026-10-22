@@ -1,4 +1,4 @@
-// Strict mode with generated `services.d.ts` and `controllers.d.ts`, written by the consumer test
+// Strict mode with generated `services.ts` and `controllers.ts`, written by the consumer test
 // from `app/src/api`. The application sources check their factories against their contracts.
 import type { Core } from '@strapi/strapi';
 

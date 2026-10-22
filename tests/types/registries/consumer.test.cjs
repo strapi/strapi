@@ -321,7 +321,7 @@ test('published middleware configs do not need third-party @types packages', () 
   }
 });
 
-// Generate `services.d.ts` and `controllers.d.ts` for `app/src/api` (or `api`), as an application
+// Generate `services.ts` and `controllers.ts` for `app/src/api` (or `api`), as an application
 // with strict types does, for the given registered UIDs.
 async function generateContracts(appDir, registered, api = fixture('app/src/api')) {
   // eslint-disable-next-line import/no-extraneous-dependencies
@@ -338,7 +338,7 @@ async function generateContracts(appDir, registered, api = fixture('app/src/api'
     logger: { silent: true },
   });
   const files = ['services', 'controllers'].map((name) =>
-    path.join(appDir, `types/generated/${name}.d.ts`)
+    path.join(appDir, `types/generated/${name}.ts`)
   );
   return {
     files,
@@ -547,7 +547,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     // eslint-disable-next-line import/no-extraneous-dependencies
     const { generators } = require('@strapi/typescript-utils');
     const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
-    const generatedFile = path.join(appDir, 'types/generated/controllers.d.ts');
+    const generatedFile = path.join(appDir, 'types/generated/controllers.ts');
     const strapi = {
       dirs: { app: { api: fixture('app/src/api') } },
       // `helpers` has no default export; plugin controllers are left to their packages.
@@ -613,7 +613,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     // eslint-disable-next-line import/no-extraneous-dependencies
     const { generators } = require('@strapi/typescript-utils');
     const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
-    const generatedFile = path.join(appDir, 'types/generated/policies.d.ts');
+    const generatedFile = path.join(appDir, 'types/generated/policies.ts');
     const strapi = {
       dirs: { app: { api: fixture('app/src/api'), policies: fixture('app/src/policies') } },
       // Package policies are left to their packages.
@@ -651,7 +651,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     // eslint-disable-next-line import/no-extraneous-dependencies
     const { generators } = require('@strapi/typescript-utils');
     const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
-    const generatedFile = path.join(appDir, 'types/generated/middlewares.d.ts');
+    const generatedFile = path.join(appDir, 'types/generated/middlewares.ts');
     const strapi = {
       dirs: { app: { api: fixture('app/src/api'), middlewares: fixture('app/src/middlewares') } },
       // Bundled middlewares are left to their packages.
@@ -1020,7 +1020,7 @@ test('a factory checked against its own inferred uid fails with TS2344 in every 
   }
 });
 
-test('a contract reference that no longer resolves is only reported without skipLibCheck', async () => {
+test('a contract reference that no longer resolves is reported with skipLibCheck', async () => {
   // The copy keeps the fixture's module resolution: it stays next to the fixtures.
   const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
   try {
@@ -1036,15 +1036,17 @@ test('a contract reference that no longer resolves is only reported without skip
     );
     const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
     const names = [...generated.files, 'settings.d.ts', 'generated-strict.d.ts'];
-    // The stale reference is an error type: it behaves as `any`, and no conditional type in the
-    // generated file can map it to `unknown`. The next generation drops the contract.
-    assertClean(compile(names), 'skipLibCheck hides the stale contract reference');
-    assert.deepEqual(
-      diagnostics(compile(names, { skipLibCheck: false }))
-        .filter((diagnostic) => diagnostic.file?.fileName === generated.files[0])
-        .map((diagnostic) => diagnostic.code),
-      [2694]
-    );
+    // The generated file is a `.ts` file: skipLibCheck does not hide the stale reference. The next
+    // generation drops the contract.
+    for (const skipLibCheck of [true, false]) {
+      assert.deepEqual(
+        diagnostics(compile(names, { skipLibCheck }))
+          .filter((diagnostic) => diagnostic.file?.fileName === generated.files[0])
+          .map((diagnostic) => diagnostic.code),
+        [2694],
+        `skipLibCheck: ${skipLibCheck}`
+      );
+    }
   } finally {
     fs.rmSync(appDir, { recursive: true, force: true });
   }

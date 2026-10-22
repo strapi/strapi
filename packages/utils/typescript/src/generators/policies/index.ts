@@ -32,7 +32,8 @@ export {};
  *   ? PolicyHandlerConfig<TExport extends { handler: infer THandler } ? THandler : TExport>
  *   : unknown;
  *
- * Emitted in the file so that policies.d.ts stands alone, like the services and controllers helpers.
+ * Emitted in the file so that policies.ts stands alone, like the services and controllers helpers,
+ * and only when a TypeScript policy reads them.
  *
  * Resolves the config a policy accepts from the type of its module: the second parameter of its
  * handler, for both runtime forms (a bare handler, or `{ handler, validator }`). A handler without
@@ -184,9 +185,10 @@ export const generatePoliciesDefinitions = async (
     return { output: NO_POLICY_PLACEHOLDER_COMMENT, stats: {} };
   }
 
+  // The helpers are only emitted when an entry reads them: `noUnusedLocals` reports unused ones
   const output = await emitRegistryDefinitions(
     REGISTRY,
-    generateConfigHelpersDefinition(),
+    policiesDefinitions.some(isTypedSource) === true ? generateConfigHelpersDefinition() : [],
     policiesDefinitions,
     (source) =>
       isTypedSource(source)

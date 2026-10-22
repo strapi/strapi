@@ -1,4 +1,4 @@
-// Strict mode with a generated `middlewares.d.ts`, written by the consumer test from `app/src`.
+// Strict mode with a generated `middlewares.ts`, written by the consumer test from `app/src`.
 import type { Core } from '@strapi/strapi';
 
 declare const app: Core.Strapi;

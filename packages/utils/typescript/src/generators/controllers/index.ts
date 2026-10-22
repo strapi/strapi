@@ -84,13 +84,22 @@ export const generateControllersDefinitions = async (
     return { output: NO_CONTROLLER_PLACEHOLDER_COMMENT, stats: {} };
   }
 
+  const inferredUIDs = controllersDefinitions
+    .filter(isInferredSource(contract))
+    .map(({ uid }) => uid);
+
+  // Each helper is only emitted when an entry reads it: `noUnusedLocals` reports an unused one
   const output = await emitRegistryDefinitions(
     REGISTRY,
     [
-      generateInstanceHelperDefinition(
-        INSTANCE_HELPER,
-        '*\n * Type of the controller exposed by a controller module: the return type of its default export\n * when it is a factory, the default export itself otherwise.\n '
-      ),
+      ...(inferredUIDs.length > 0
+        ? [
+            generateInstanceHelperDefinition(
+              INSTANCE_HELPER,
+              '*\n * Type of the controller exposed by a controller module: the return type of its default export\n * when it is a factory, the default export itself otherwise.\n '
+            ),
+          ]
+        : []),
       ...(contract.uids.size > 0
         ? [
             generateContractHelperDefinition(
@@ -105,7 +114,7 @@ export const generateControllersDefinitions = async (
     [
       {
         registry: INFERRED_REGISTRY,
-        uids: controllersDefinitions.filter(isInferredSource(contract)).map(({ uid }) => uid),
+        uids: inferredUIDs,
       },
     ]
   );

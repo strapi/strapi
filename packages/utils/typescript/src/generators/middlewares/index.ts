@@ -40,7 +40,8 @@ export {};
  *   ? MiddlewareFactoryConfig<TExport>
  *   : unknown;
  *
- * Emitted in the file so that middlewares.d.ts stands alone, like the policies helpers.
+ * Emitted in the file so that middlewares.ts stands alone, and only when a TypeScript middleware
+ * reads them, like the policies helpers.
  *
  * Resolves the config a middleware accepts from the type of its module: the first parameter of the
  * factory it exports. A factory without parameters takes no config: `undefined`, as in
@@ -228,9 +229,10 @@ export const generateMiddlewaresDefinitions = async (
     return { output: NO_MIDDLEWARE_PLACEHOLDER_COMMENT, stats: {} };
   }
 
+  // The helpers are only emitted when an entry reads them: `noUnusedLocals` reports unused ones
   const output = await emitRegistryDefinitions(
     REGISTRY,
-    generateConfigHelpersDefinition(),
+    middlewaresDefinitions.some(isTypedSource) === true ? generateConfigHelpersDefinition() : [],
     middlewaresDefinitions,
     (source) =>
       isTypedSource(source)

@@ -69,7 +69,7 @@ declare global {
 
       /**
        * Application services registered with the type their module provides, keyed by full service
-       * UID. Type generation is the only producer: `types/generated/services.d.ts` lists every
+       * UID. Type generation is the only producer: `types/generated/services.ts` lists every
        * service whose module has no `ServiceContract` export. With strict types enabled,
        * `Core.ServiceFactory` rejects these UIDs, whose registered type is read from the factory
        * itself. Values are not read.
@@ -114,7 +114,7 @@ declare global {
 
       /**
        * Application controllers registered with the type their module provides, keyed by full
-       * controller UID. Type generation is the only producer: `types/generated/controllers.d.ts`
+       * controller UID. Type generation is the only producer: `types/generated/controllers.ts`
        * lists every controller whose module has no `ControllerContract` export. With strict types
        * enabled, `Core.ControllerFactory` rejects these UIDs, whose registered type is read from the
        * factory itself. Values are not read.

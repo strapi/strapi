@@ -71,7 +71,7 @@ export type ControllerFactoryUID = IsStrict extends false
  * signature is missing from the returned type (TS1360).
  *
  * Type generation registers an application controller with the `ControllerContract` type its module
- * exports (`types/generated/controllers.d.ts`), so the factory of that module can be checked against
+ * exports (`types/generated/controllers.ts`), so the factory of that module can be checked against
  * its own UID. Without that export, type generation lists the UID in
  * `Strapi.Registries.InferredControllers`, so it is not a {@link ControllerFactoryUID} (TS2344), as
  * for services (see `ServiceFactory`).
