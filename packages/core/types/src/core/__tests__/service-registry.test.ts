@@ -2,7 +2,7 @@ import type * as PublicRegistries from '../../public/registries';
 import type { Controller } from '../controller';
 import type { Module } from '../module';
 import type { Plugin } from '../plugin';
-import type { ServiceFactory, ServiceFor } from '../service';
+import type { ServiceFactory, ServiceFactoryUID, ServiceFor } from '../service';
 import type { Strapi as StrapiInstance } from '../strapi';
 
 // @ts-expect-error Service contract registries are global, not part of the Public registries.
@@ -37,6 +37,11 @@ declare global {
         'plugin::type-lab.greeting': GreetingService;
         'api::type-lab.greeting': GreetingService;
         'admin::type-lab': GreetingService;
+        'api::type-lab.inferred': { ping(): 'pong' };
+      }
+
+      interface InferredServices {
+        'api::type-lab.inferred': true;
       }
     }
   }
@@ -238,3 +243,11 @@ contextualAdmin satisfies GreetingService;
 (() => ({})) satisfies ServiceFactory<'api::type-lab.unregistered'>;
 // @ts-expect-error Names outside the UID pattern are not services.
 (() => ({})) satisfies ServiceFactory<'not-a-uid'>;
+
+// A UID registered with the type its module provides keeps its lookup, but cannot check a factory:
+// that type is read from the factory being checked.
+strapi.service('api::type-lab.inferred').ping() satisfies 'pong';
+declare const inferredFactoryUID: Extract<ServiceFactoryUID, 'api::type-lab.inferred'>;
+inferredFactoryUID satisfies never;
+// @ts-expect-error An inferred UID cannot check a factory, even one that provides its type.
+(() => ({ ping: () => 'pong' as const })) satisfies ServiceFactory<'api::type-lab.inferred'>;
