@@ -11,6 +11,27 @@ export type AdminFileController = {
   getLatestAIMetadataJob: Core.ControllerHandler;
 };
 
+/** Admin actions listing, reading, creating and updating folders, and reading the folder tree. */
+export type AdminFolderController = {
+  findOne: Core.ControllerHandler;
+  find: Core.ControllerHandler;
+  create: Core.ControllerHandler;
+  update: Core.ControllerHandler;
+  getStructure: Core.ControllerHandler;
+};
+
+/** Admin actions deleting and moving files and folders together. */
+export type AdminFolderFileController = {
+  deleteMany: Core.ControllerHandler;
+  moveMany: Core.ControllerHandler;
+};
+
+/** Admin actions reading and updating the upload settings. */
+export type AdminSettingsController = {
+  updateSettings: Core.ControllerHandler;
+  getSettings: Core.ControllerHandler;
+};
+
 /** Admin actions uploading and replacing files, and updating their information. */
 export type AdminUploadController = {
   bulkUpdateFileInfo: Core.ControllerHandler;
@@ -29,6 +50,9 @@ export type AdminUploadController = {
 /** The controller contracts by name, as in the plugin's controllers map. Used to check the routes. */
 export type Controllers = {
   'admin-file': AdminFileController;
+  'admin-folder': AdminFolderController;
+  'admin-folder-file': AdminFolderFileController;
+  'admin-settings': AdminSettingsController;
   'admin-upload': AdminUploadController;
 };
 
@@ -40,6 +64,9 @@ declare global {
     namespace Registries {
       interface PackageControllers {
         'plugin::upload.admin-file': Controllers['admin-file'];
+        'plugin::upload.admin-folder': Controllers['admin-folder'];
+        'plugin::upload.admin-folder-file': Controllers['admin-folder-file'];
+        'plugin::upload.admin-settings': Controllers['admin-settings'];
         'plugin::upload.admin-upload': Controllers['admin-upload'];
       }
     }
