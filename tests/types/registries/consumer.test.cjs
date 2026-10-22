@@ -974,22 +974,47 @@ test('conflicting declaration files need one contract per UID, even with the swi
   }
 });
 
-test('a factory checked against its own uid without a contract export is circular', async () => {
+test('a factory checked against its own inferred uid fails with TS2344 in every check order', async () => {
   const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
   try {
-    const generated = await generateContracts(appDir, { services: ['api::article.cycle'] });
+    const generated = await generateContracts(appDir, {
+      services: ['api::article.cycle'],
+      controllers: ['api::article.cycle'],
+    });
     assert.match(generated.services, /'api::article\.cycle': ServiceInstance</);
-    const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
-    const names = [...generated.files, 'settings.d.ts', 'generated-strict.d.ts'];
-    // Checked first, the factory resolves its own entry: the cycle goes unreported.
-    assertClean(compile(names), 'the factory checked before any lookup');
-    // A lookup checked first closes the cycle: TS7022 in the source, and the lookup is `any` (no
-    // TS1360 for its `satisfies number`). The `any` guard of `ServiceInstance` does not see it.
-    assert.deepEqual(
-      diagnostics(compile(['cycle-consumer.ts', ...names])).map((diagnostic) => diagnostic.code),
-      [7022],
-      'The inferred entry and the factory check reference each other'
+    assert.match(
+      generated.services,
+      /interface InferredServices \{\s*'api::article\.cycle': true;/
     );
+    assert.match(generated.controllers, /'api::article\.cycle': ControllerInstance</);
+    assert.match(
+      generated.controllers,
+      /interface InferredControllers \{\s*'api::article\.cycle': true;/
+    );
+    const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+    const sources = [
+      'app/src/api/article/services/cycle.ts',
+      'app/src/api/article/controllers/cycle.ts',
+    ];
+    const names = [...generated.files, 'settings.d.ts', 'generated-strict.d.ts'];
+    // The sources first, then the lookups first. A lookup checked first used to close the cycle
+    // (TS7022 in the source, an `any` lookup); the marker only has keys, so the order no longer
+    // matters. `cycle-consumer.ts` fails with TS2578 if a lookup is `any`.
+    for (const order of [
+      [...sources, ...names, 'cycle-consumer.ts'],
+      ['cycle-consumer.ts', ...names, ...sources],
+    ]) {
+      assert.deepEqual(
+        diagnostics(compile(order))
+          .map(
+            (diagnostic) =>
+              `${path.relative(fixture('.'), diagnostic.file?.fileName ?? '')} TS${diagnostic.code}`
+          )
+          .sort(),
+        sources.map((source) => `${source} TS2344`).sort(),
+        `The inferred uid is not a factory uid, checked in the order ${order.join(', ')}`
+      );
+    }
   } finally {
     fs.rmSync(appDir, { recursive: true, force: true });
   }

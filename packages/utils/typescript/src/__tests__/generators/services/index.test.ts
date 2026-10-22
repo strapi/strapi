@@ -15,7 +15,8 @@ jest.mock('../../../generators/utils', () => ({
 // Compare on the printed structure rather than on prettier's line breaks
 const normalize = (content: string) => content.replace(/\s+/g, ' ').replace(/;/g, '');
 
-// Output of an application without contracts: no contract helper, no contract reference
+// Output of an application without contracts: no contract helper, no contract reference, and its
+// TypeScript sources marked as inferred
 const NO_CONTRACT_OUTPUT = `export {};
 
 /**
@@ -32,6 +33,9 @@ declare global {
             interface AppServices {
                 'api::article.article': ServiceInstance<typeof import('../../src/api/article/services/article')>;
                 'api::article.legacy': unknown;
+            }
+            interface InferredServices {
+                'api::article.article': true;
             }
         }
     }
@@ -143,7 +147,7 @@ describe('generateServicesDefinitions', () => {
       ['api::article.article', 'api::article.readme', 'api::article.schema', 'api::hidden.hidden']
     );
 
-    expect(output.match(/'api::article\.article'/g)).toHaveLength(1);
+    expect(output.match(/'api::article\.article': ServiceInstance</g)).toHaveLength(1);
     expect(output).not.toContain('README');
     expect(output).not.toContain('schema');
     expect(output).not.toContain('hidden');
@@ -159,7 +163,7 @@ describe('generateServicesDefinitions', () => {
     );
 
     expect(output).toContain("typeof import('../../src/api/article/services/article')");
-    expect(output.match(/'api::article\.article'/g)).toHaveLength(1);
+    expect(output.match(/'api::article\.article': ServiceInstance</g)).toHaveLength(1);
     expect(logger.warnings).toBe(1);
   });
 
@@ -244,7 +248,7 @@ describe('generateServicesDefinitions', () => {
     expect(check(false)).toEqual(['services.d.ts TS2307']);
   });
 
-  test('keeps the output of an application without contracts', async () => {
+  test('marks the uids of an application without contracts, without a contract helper', async () => {
     const { output } = await generate(
       {
         'src/api/article/services/article.ts': 'export type ArticleContract = { find(): number };',
@@ -285,6 +289,24 @@ describe('generateServicesDefinitions', () => {
       'type ServiceContractOf<TContract> = 0 extends 1 & TContract ? unknown : TContract'
     );
     expect(normalized.match(/type ServiceContractOf</g)).toHaveLength(1);
+    // Only the TypeScript services without a contract export are marked as inferred
+    expect(normalized).toContain(
+      "interface InferredServices { 'api::article.inferred': true 'api::article.other': true }"
+    );
+  });
+
+  test('emits no inferred marker when every source exports a contract or is JS', async () => {
+    const { normalized } = await generate(
+      {
+        'src/api/article/services/article.ts':
+          'export type ServiceContract = { find(): number };\nexport default () => ({ find: () => 1 });',
+        'src/api/article/services/legacy.js': '',
+      },
+      ['api::article.article', 'api::article.legacy']
+    );
+
+    expect(normalized).toContain("'api::article.article': ServiceContractOf<");
+    expect(normalized).not.toContain('InferredServices');
   });
 
   test('resolves a contract lookup to the contract, and a contract typed any to unknown', async () => {

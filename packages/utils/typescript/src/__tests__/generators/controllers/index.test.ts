@@ -15,7 +15,8 @@ jest.mock('../../../generators/utils', () => ({
 // Compare on the printed structure rather than on prettier's line breaks
 const normalize = (content: string) => content.replace(/\s+/g, ' ').replace(/;/g, '');
 
-// Output of an application without contracts: no contract helper, no contract reference
+// Output of an application without contracts: no contract helper, no contract reference, and its
+// TypeScript sources marked as inferred
 const NO_CONTRACT_OUTPUT = `export {};
 
 /**
@@ -32,6 +33,9 @@ declare global {
             interface AppControllers {
                 'api::article.article': ControllerInstance<typeof import('../../src/api/article/controllers/article')>;
                 'api::article.legacy': unknown;
+            }
+            interface InferredControllers {
+                'api::article.article': true;
             }
         }
     }
@@ -155,7 +159,7 @@ describe('generateControllersDefinitions', () => {
       ['api::article.article', 'api::article.readme', 'api::article.schema', 'api::hidden.hidden']
     );
 
-    expect(output.match(/'api::article\.article'/g)).toHaveLength(1);
+    expect(output.match(/'api::article\.article': ControllerInstance</g)).toHaveLength(1);
     expect(output).not.toContain('README');
     expect(output).not.toContain('schema');
     expect(output).not.toContain('hidden');
@@ -171,7 +175,7 @@ describe('generateControllersDefinitions', () => {
     );
 
     expect(output).toContain("typeof import('../../src/api/article/controllers/article')");
-    expect(output.match(/'api::article\.article'/g)).toHaveLength(1);
+    expect(output.match(/'api::article\.article': ControllerInstance</g)).toHaveLength(1);
     expect(logger.warnings).toBe(1);
   });
 
@@ -188,7 +192,7 @@ describe('generateControllersDefinitions', () => {
     expect(normalized).not.toContain("legacy')");
   });
 
-  test('keeps the output of an application without contracts', async () => {
+  test('marks the uids of an application without contracts, without a contract helper', async () => {
     const { output } = await generate(
       {
         'src/api/article/controllers/article.ts':
@@ -230,6 +234,24 @@ describe('generateControllersDefinitions', () => {
       'type ControllerContractOf<TContract> = 0 extends 1 & TContract ? unknown : TContract'
     );
     expect(normalized.match(/type ControllerContractOf</g)).toHaveLength(1);
+    // Only the TypeScript controllers without a contract export are marked as inferred
+    expect(normalized).toContain(
+      "interface InferredControllers { 'api::article.inferred': true 'api::article.other': true }"
+    );
+  });
+
+  test('emits no inferred marker when every source exports a contract or is JS', async () => {
+    const { normalized } = await generate(
+      {
+        'src/api/article/controllers/article.ts':
+          'export type ControllerContract = { find(): number };\nexport default () => ({ find: () => 1 });',
+        'src/api/article/controllers/legacy.js': '',
+      },
+      ['api::article.article', 'api::article.legacy']
+    );
+
+    expect(normalized).toContain("'api::article.article': ControllerContractOf<");
+    expect(normalized).not.toContain('InferredControllers');
   });
 
   test('resolves a contract lookup to the contract, and a contract typed any to unknown', async () => {
