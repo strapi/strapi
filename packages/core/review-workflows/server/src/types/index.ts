@@ -45,7 +45,7 @@ declare global {
        * The stage change of an entry, emitted by the Document Service middleware after an update
        * that moved the entry to another stage, and forwarded to webhooks. The payload names the entry
        * `entity` (not `entry`, unlike the `entry.*` events). IDs are database IDs, `uid` the content
-       * type UID (plain types: this package only has a dev dependency on `@strapi/types`).
+       * type UID (a plain `string`: narrowing it to `UID.ContentType` would narrow a published type).
        */
       interface Events {
         'review-workflows.updateEntryStage': [
