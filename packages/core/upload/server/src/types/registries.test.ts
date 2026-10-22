@@ -1,6 +1,6 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
-import type { UploadableFile } from '../types';
-import type { AIMetadataJobRow } from './services';
+import type { Folder, UploadableFile } from '../types';
+import type { AIMetadataJobRow, FolderStructureNode } from './services';
 
 declare const file: UploadableFile;
 
@@ -90,3 +90,35 @@ aiMetadataProvider.registerProvider({
 aiMetadataProvider.registerProvider({ provider: { name: 'custom' } });
 // @ts-expect-error Registered services have no arbitrary members.
 aiMetadataProvider.missing();
+
+const folder = strapi.plugin('upload').service('folder');
+folder.create({ name: 'Images', parent: null }, { user: { id: 1 } }) satisfies Promise<Folder>;
+folder.update('1', { parent: null }, { user: { id: 1 } }) satisfies Promise<Folder | undefined>;
+// @ts-expect-error The user is passed.
+folder.update(1, { name: 'Images' });
+folder.setPathIdAndPath({ name: 'Images' }) satisfies Promise<{
+  name: string;
+  pathId: number;
+  path: string;
+}>;
+folder.deleteByIds([1]) satisfies Promise<{
+  folders: Folder[];
+  totalFolderNumber: number;
+  totalFileNumber: number;
+}>;
+folder.exists({ name: 'Images', parent: null }) satisfies Promise<boolean>;
+declare const structure: Awaited<ReturnType<typeof folder.getStructure>>;
+structure satisfies FolderStructureNode[];
+// @ts-expect-error The structure holds folders, not IDs.
+structure satisfies number[];
+// @ts-expect-error Registered services have no arbitrary members.
+folder.missing();
+
+strapi.service('plugin::upload.api-upload-folder').getAPIUploadFolder() satisfies Promise<Folder>;
+
+const fileService = strapi.plugin('upload').service('file');
+fileService.getFolderPath(null) satisfies Promise<string>;
+// @ts-expect-error A folder is looked up by its numeric ID.
+fileService.getFolderPath('1');
+// @ts-expect-error Registered services have no arbitrary members.
+fileService.missing();
