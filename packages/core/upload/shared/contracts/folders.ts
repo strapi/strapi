@@ -4,7 +4,7 @@ export type SortOrder = 'ASC' | 'DESC';
 
 export type SortKey = 'createdAt' | 'name' | 'updatedAt';
 
-import type { File } from './files';
+import type { File, Pagination } from './files';
 
 export interface FolderDefinition extends Omit<Folder, 'children' | 'files' | 'parent'> {
   children?: {
@@ -72,6 +72,11 @@ export declare namespace GetFolders {
   export interface Request {
     body: {};
     query: {
+      /**
+       * Pagination is opt-in: sending `page` and/or `pageSize` returns one page
+       * and the `pagination` metadata. Without them every matching folder is
+       * returned and `pagination` is absent.
+       */
       page?: string;
       pageSize?: string;
       sort?: `${SortKey}:${SortOrder}`;
@@ -80,6 +85,7 @@ export declare namespace GetFolders {
 
   export interface Response {
     data: Folder[];
+    pagination?: Pagination;
     error?: errors.ApplicationError | errors.NotFoundError;
   }
 }

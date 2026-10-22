@@ -247,6 +247,70 @@ describe('Folder', () => {
         ])
       );
     });
+
+    test('Returns every folder and no pagination metadata unless a page is requested', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { sort: 'id:ASC' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.pagination).toBeUndefined();
+      expect(res.body.data.length).toBeGreaterThanOrEqual(data.folders.length);
+    });
+
+    test('Can read folders page by page', async () => {
+      const all = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { sort: 'id:ASC' },
+      });
+      const total = all.body.data.length;
+
+      const firstPage = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 1, pageSize: 1, sort: 'id:ASC' },
+      });
+
+      expect(firstPage.statusCode).toBe(200);
+      expect(firstPage.body.data).toEqual([all.body.data[0]]);
+      expect(firstPage.body.pagination).toEqual({ page: 1, pageSize: 1, pageCount: total, total });
+
+      const secondPage = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 2, pageSize: 1, sort: 'id:ASC' },
+      });
+
+      expect(secondPage.statusCode).toBe(200);
+      expect(secondPage.body.data).toEqual([all.body.data[1]]);
+      expect(secondPage.body.pagination).toEqual({ page: 2, pageSize: 1, pageCount: total, total });
+    });
+
+    test('Can paginate a folder search', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { _q: data.folders[0].name, page: 1, pageSize: 10 },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.map((folder) => folder.id)).toContain(data.folders[0].id);
+      expect(res.body.pagination).toMatchObject({ page: 1, pageSize: 10 });
+      expect(res.body.pagination.total).toBe(res.body.data.length);
+    });
+
+    test('Rejects an invalid pageSize', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 1, pageSize: -1 },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
   });
 
   describe('update', () => {

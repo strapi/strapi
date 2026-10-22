@@ -53,21 +53,36 @@ export default {
     await permissionsManager.validateQuery(ctx.query);
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
-    const results = await strapi.db.query(FOLDER_MODEL_UID).findMany(
-      strapi.get('query-params').transform(
-        FOLDER_MODEL_UID,
-        defaultsDeep({}, query, {
-          populate: {
-            children: {
-              count: true,
-            },
-            files: {
-              count: true,
-            },
+    const dbQuery = strapi.get('query-params').transform(
+      FOLDER_MODEL_UID,
+      defaultsDeep({}, query, {
+        populate: {
+          children: {
+            count: true,
           },
-        })
-      )
+          files: {
+            count: true,
+          },
+        },
+      })
     );
+
+    // Pagination is opt-in: a client that sends `page` or `pageSize` gets one
+    // page plus the `pagination` metadata. Without them the endpoint keeps
+    // returning every matching folder, which existing callers (destination
+    // selects, the legacy picker) rely on.
+    if (query.page != null || query.pageSize != null) {
+      const { results, pagination } = await strapi.db.query(FOLDER_MODEL_UID).findPage(dbQuery);
+
+      ctx.body = {
+        data: await permissionsManager.sanitizeOutput(results),
+        pagination,
+      };
+
+      return;
+    }
+
+    const results = await strapi.db.query(FOLDER_MODEL_UID).findMany(dbQuery);
 
     ctx.body = {
       data: await permissionsManager.sanitizeOutput(results),
