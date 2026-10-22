@@ -106,13 +106,20 @@ const createDroppedImagesInserter = (editor: Editor, event: React.DragEvent) => 
 
     if (previousPath && replacesTarget && isEmptyParagraph(Node.get(editor, previousPath))) {
       at = previousPath;
-      Transforms.removeNodes(editor, { at });
     } else {
       at = previousPath ? Path.next(previousPath) : [editor.children.length];
     }
-    replacesTarget = false;
 
-    Transforms.insertNodes(editor, imageNode, { at });
+    // Same as the image dialog: normalize once the image is in, or replacing the only block
+    // leaves a paragraph after it
+    Editor.withoutNormalizing(editor, () => {
+      if (replacesTarget && previousPath && Path.equals(at, previousPath)) {
+        Transforms.removeNodes(editor, { at });
+      }
+
+      Transforms.insertNodes(editor, imageNode, { at });
+    });
+    replacesTarget = false;
 
     previousRef?.unref();
     previousRef = Editor.pathRef(editor, at);
@@ -185,22 +192,26 @@ const ImageDialog = () => {
     if (!nodeEntryBeingReplaced) return;
     const [, pathToInsert] = nodeEntryBeingReplaced;
 
-    // Remove the previous node that is being replaced by an image
-    Transforms.removeNodes(editor);
+    // Normalize once the images are in: replacing the only block would otherwise leave an empty
+    // document for a moment, which normalization fills with a paragraph that stays after the images
+    Editor.withoutNormalizing(editor, () => {
+      // Remove the previous node that is being replaced by an image
+      Transforms.removeNodes(editor);
 
-    // Convert images to nodes and insert them
-    const nodesToInsert = images.map((image) => {
-      const imageNode: Block<'image'> = {
-        type: 'image',
-        image,
-        children: [{ type: 'text', text: '' }],
-      };
-      return imageNode;
+      // Convert images to nodes and insert them
+      const nodesToInsert = images.map((image) => {
+        const imageNode: Block<'image'> = {
+          type: 'image',
+          image,
+          children: [{ type: 'text', text: '' }],
+        };
+        return imageNode;
+      });
+      Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
+
+      // Set the selection on the image since it was cleared by calling removeNodes
+      Transforms.select(editor, pathToInsert);
     });
-    Transforms.insertNodes(editor, nodesToInsert, { at: pathToInsert });
-
-    // Set the selection on the image since it was cleared by calling removeNodes
-    Transforms.select(editor, pathToInsert);
   };
 
   const handleSelectAssets = (images: Schema.Attribute.MediaValue<true>) => {

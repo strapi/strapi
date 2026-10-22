@@ -6,6 +6,7 @@ import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Editor, Transforms, createEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
 
+import { withStrapiSchema } from '../../plugins/withStrapiSchema';
 import { mockImage } from '../../tests/mock-schema';
 import { createDroppedImagesInserter, imageBlocks } from '../Image';
 
@@ -138,6 +139,22 @@ describe('Image', () => {
         image: mockImage,
         children: [{ type: 'text', text: '' }],
       },
+    ]);
+  });
+
+  it('converts the only empty paragraph to an image without adding a paragraph after it', async () => {
+    const baseEditor = withStrapiSchema(createEditor());
+    baseEditor.children = [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
+
+    await waitFor(() => Transforms.select(baseEditor, { path: [0, 0], offset: 0 }));
+
+    const modalUi = imageBlocks.image.handleConvert!(baseEditor)!();
+    const { user } = render(modalUi, { baseEditor });
+
+    await user.click(screen.getByText(mockMediaLibrarySubmitButton));
+
+    expect(baseEditor.children).toEqual([
+      { type: 'image', image: mockImage, children: [{ type: 'text', text: '' }] },
     ]);
   });
 
@@ -351,17 +368,21 @@ describe('createDroppedImagesInserter', () => {
         : Editor.string(editor, [editor.children.indexOf(node)])
     );
 
-  const dropOnBlock = (index: number | null) =>
-    jest.spyOn(ReactEditor, 'findEventRange').mockImplementation(() => {
+  let findEventRange: jest.SpyInstance | undefined;
+
+  const dropOnBlock = (index: number | null) => {
+    findEventRange = jest.spyOn(ReactEditor, 'findEventRange').mockImplementation(() => {
       if (index === null) {
         throw new Error('No block under the pointer');
       }
 
       return { anchor: { path: [index, 0], offset: 0 }, focus: { path: [index, 0], offset: 0 } };
     });
+  };
 
+  // Only this spy: restoring every mock would also drop the test setup's global ones.
   afterEach(() => {
-    jest.restoreAllMocks();
+    findEventRange?.mockRestore();
   });
 
   it('inserts the images below the block they were dropped on, in order', () => {
@@ -386,6 +407,18 @@ describe('createDroppedImagesInserter', () => {
     insert(asset('two.png'));
 
     expect(summary(editor)).toEqual(['First', 'image:one.png', 'image:two.png']);
+  });
+
+  it('replaces the only, empty paragraph without leaving one after the images', () => {
+    const editor = withStrapiSchema(createEditor());
+    editor.children = [paragraph('')];
+    dropOnBlock(0);
+
+    const insert = createDroppedImagesInserter(editor, dropEvent);
+    insert(asset('one.png'));
+    insert(asset('two.png'));
+
+    expect(summary(editor)).toEqual(['image:one.png', 'image:two.png']);
   });
 
   it('appends the images when dropped below the content', () => {
