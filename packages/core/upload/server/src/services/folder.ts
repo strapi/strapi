@@ -312,6 +312,11 @@ const getStructure = async () => {
 
 export default {
   create,
+  /**
+   * Whether a folder matches these `where` parameters.
+   *
+   * @internal
+   */
   exists,
   deleteByIds,
   update,
