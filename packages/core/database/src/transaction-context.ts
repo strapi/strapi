@@ -72,17 +72,30 @@ const isDeadlockError = (error: unknown) => {
  */
 const pendingCallbacks = new Set<Promise<unknown>>();
 
+const reportCallbackError = (error: unknown) => {
+  try {
+    console.error('Transaction callback failed', error);
+  } catch {
+    // A broken logger must not leave the hook in the pending set.
+  }
+};
+
 const track = (promise: Promise<unknown>) => {
   const settled = promise.then(
     () => undefined,
     (error: unknown) => {
-      console.error('Transaction callback failed', error);
+      reportCallbackError(error);
     }
   );
   pendingCallbacks.add(settled);
-  settled.then(() => {
-    pendingCallbacks.delete(settled);
-  });
+  settled.then(
+    () => {
+      pendingCallbacks.delete(settled);
+    },
+    () => {
+      pendingCallbacks.delete(settled);
+    }
+  );
 };
 
 const runCallbacks = (callbacks: Callback[] | undefined) => {
@@ -93,9 +106,15 @@ const runCallbacks = (callbacks: Callback[] | undefined) => {
   while (callbacks.length > 0) {
     const batch = callbacks.splice(0, callbacks.length);
     for (const cb of batch) {
-      const result = cb();
-      if (result && typeof (result as Promise<unknown>).then === 'function') {
-        track(result as Promise<unknown>);
+      try {
+        const result = cb();
+        if (result && typeof (result as Promise<unknown>).then === 'function') {
+          track(result as Promise<unknown>);
+        }
+      } catch (error) {
+        // The transaction is already committed. A synchronous throw must not
+        // be retried as a deadlock.
+        reportCallbackError(error);
       }
     }
   }

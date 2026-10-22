@@ -304,6 +304,23 @@ describe('Database', () => {
         await db.destroy();
       });
 
+      it(`does not retry when a commit hook throws synchronously with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        let runs = 0;
+        await db.transaction(async ({ onCommit }) => {
+          runs += 1;
+          onCommit(() => {
+            throw Object.assign(new Error('deadlock detected'), { code: '40P01' });
+          });
+        });
+
+        expect(runs).toBe(1);
+        await db.destroy();
+      });
+
       it(`returns before commit hooks finish and destroy waits for them with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
