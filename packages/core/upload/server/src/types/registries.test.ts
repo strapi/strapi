@@ -122,3 +122,30 @@ fileService.getFolderPath(null) satisfies Promise<string>;
 fileService.getFolderPath('1');
 // @ts-expect-error Registered services have no arbitrary members.
 fileService.missing();
+
+const uploadService = strapi.plugin('upload').service('upload');
+uploadService.getSettings() satisfies Promise<{
+  sizeOptimization: boolean;
+  responsiveDimensions: boolean;
+  autoOrientation?: boolean | undefined;
+  aiMetadata?: boolean | undefined;
+} | null>;
+declare const settings: NonNullable<Awaited<ReturnType<typeof uploadService.getSettings>>>;
+// @ts-expect-error Settings saved without `aiMetadata` are stored without it.
+settings.aiMetadata satisfies boolean;
+uploadService.setSettings({
+  sizeOptimization: true,
+  responsiveDimensions: false,
+}) satisfies Promise<void>;
+// @ts-expect-error The settings are replaced as a whole.
+uploadService.setSettings({ responsiveDimensions: false });
+declare const configuration: NonNullable<
+  Awaited<ReturnType<typeof uploadService.getConfiguration>>
+>;
+configuration.pageSize satisfies number;
+configuration.sort satisfies string | undefined;
+// @ts-expect-error The sort is a string.
+configuration.sort satisfies number;
+uploadService.setConfiguration({ pageSize: 10 }) satisfies Promise<void>;
+// @ts-expect-error The page size is stored.
+uploadService.setConfiguration({ sort: 'createdAt:DESC' });

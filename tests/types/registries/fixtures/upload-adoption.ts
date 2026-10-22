@@ -6,6 +6,7 @@ import type {
   FolderService,
   FolderStructureNode,
   MetricsService,
+  UploadService,
 } from '@strapi/upload/strapi-server';
 
 declare const app: Core.Strapi;
@@ -47,3 +48,17 @@ const apiFolder = app.plugin('upload').service('api-upload-folder').getAPIUpload
 apiFolder satisfies Promise<Folder>;
 const folderPath = app.service('plugin::upload.file').getFolderPath(1);
 folderPath satisfies Promise<string>;
+
+const uploadService = app.plugin('upload').service('upload');
+uploadService satisfies UploadService;
+const settings = uploadService.getSettings();
+settings satisfies Promise<{
+  sizeOptimization: boolean;
+  responsiveDimensions: boolean;
+  autoOrientation?: boolean | undefined;
+  aiMetadata?: boolean | undefined;
+} | null>;
+const configuration = app.service('plugin::upload.upload').getConfiguration();
+configuration satisfies Promise<{ pageSize: number; sort?: string | undefined } | null>;
+// @ts-expect-error The sort is a string.
+app.service('plugin::upload.upload').setConfiguration({ pageSize: 10, sort: 1 });
