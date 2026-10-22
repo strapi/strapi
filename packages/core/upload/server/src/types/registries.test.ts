@@ -172,6 +172,21 @@ strapi.controller('plugin::upload.admin-settings').getSettings(context, next);
 strapi.plugin('upload').controller('admin-settings').updateSettings(context, next);
 // @ts-expect-error Registered controllers have no arbitrary actions.
 strapi.controller('plugin::upload.admin-settings').setSettings(context, next);
+strapi.controller('plugin::upload.content-api').findPage(context, next);
+strapi.plugin('upload').controller('content-api').upload(context, next);
+strapi.plugin('upload').controller('content-api').updateFileInfo(context, next);
+// @ts-expect-error Registered controllers have no arbitrary actions.
+strapi.plugin('upload').controller('content-api').findMany(context, next);
+strapi.controller('plugin::upload.view-configuration').findViewConfiguration(context, next);
+strapi.plugin('upload').controller('view-configuration').updateViewConfiguration(context, next);
+// @ts-expect-error Registered controllers have no arbitrary actions.
+strapi.controller('plugin::upload.view-configuration').getViewConfiguration(context, next);
+
+declare const contentApi: Core.ControllerFactory<'plugin::upload.content-api'>;
+contentApi({ strapi }).destroy(context, next);
+declare const handler: Core.ControllerHandler;
+// @ts-expect-error A content API controller factory returns every action.
+(() => ({ find: handler })) satisfies Core.ControllerFactory<'plugin::upload.content-api'>;
 
 [
   { method: 'GET', path: '/files', handler: 'admin-file.find' },
@@ -179,6 +194,8 @@ strapi.controller('plugin::upload.admin-settings').setSettings(context, next);
   { method: 'GET', path: '/folder-structure', handler: 'admin-folder.getStructure' },
   { method: 'POST', path: '/actions/bulk-move', handler: 'admin-folder-file.moveMany' },
   { method: 'PUT', path: '/settings', handler: 'admin-settings.updateSettings' },
+  { method: 'GET', path: '/files/page', handler: 'content-api.findPage' },
+  { method: 'PUT', path: '/configuration', handler: 'view-configuration.updateViewConfiguration' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
 [
   // @ts-expect-error Route actions are checked against the controller contracts.
@@ -187,4 +204,8 @@ strapi.controller('plugin::upload.admin-settings').setSettings(context, next);
 [
   // @ts-expect-error Route actions are checked against the controller contracts.
   { method: 'GET', path: '/folders', handler: 'admin-folder.findMany' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
+[
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  { method: 'GET', path: '/files', handler: 'content-api.findMany' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
