@@ -810,7 +810,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @internal
      */
     _uploadImage: uploadImage,
+    /**
+     * exposed for testing only
+     * @internal
+     */
     _replaceImage: replaceImage,
+    /**
+     * exposed for testing only
+     * @internal
+     */
     _queueConcurrentOperation: queueConcurrentOperation,
   };
 };
