@@ -168,7 +168,11 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
 
         try {
           await assetsPage.openCropEditor();
-          await expect.poll(() => didHoldImage).toBe(true);
+          await expect
+            .poll(() => didHoldImage, {
+              message: 'the crop editor image request was not intercepted',
+            })
+            .toBe(true);
           await expect(rotateRight).toBeDisabled();
         } finally {
           releaseImage();
@@ -246,6 +250,15 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await expect
           .poll(() => assetsPage.readDrawerDimensions(), { timeout: 10_000 })
           .toEqual({ width: before.height, height: typedWidth });
+
+        // Reopened, the editor starts from the saved file: the turn was baked in,
+        // not kept as a pending rotation.
+        await assetsPage.openCropEditor();
+        await expect(rotateRight).toBeEnabled({ timeout: 15_000 });
+        await expect.poll(readWidth).toBe(before.height);
+        await expect.poll(readHeight).toBe(typedWidth);
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('button', { name: 'Apply' })).not.toBeVisible();
       });
 
       /** How many table rows are currently listed under the journey's asset name. */
