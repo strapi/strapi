@@ -2,6 +2,9 @@ import type { Core } from '@strapi/strapi';
 import type {
   AIMetadataJobRow,
   AIMetadataJobsService,
+  Folder,
+  FolderService,
+  FolderStructureNode,
   MetricsService,
 } from '@strapi/upload/strapi-server';
 
@@ -33,3 +36,14 @@ const hasProvider = app.plugin('upload').service('aiMetadataProvider').hasProvid
 hasProvider satisfies boolean;
 // @ts-expect-error Registered services have no arbitrary members.
 app.service('plugin::upload.aiMetadata').missing();
+
+const folders = app.plugin('upload').service('folder');
+folders satisfies FolderService;
+const structure = folders.getStructure();
+structure satisfies Promise<FolderStructureNode[]>;
+// @ts-expect-error The structure holds folders, not IDs.
+app.service('plugin::upload.folder').getStructure() satisfies Promise<number[]>;
+const apiFolder = app.plugin('upload').service('api-upload-folder').getAPIUploadFolder();
+apiFolder satisfies Promise<Folder>;
+const folderPath = app.service('plugin::upload.file').getFolderPath(1);
+folderPath satisfies Promise<string>;
