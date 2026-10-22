@@ -269,6 +269,9 @@ const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions
 const isFaultyImage = async (file: UploadableFile) => {
   const options = getSharpOptions();
 
+  // TODO @Nico Without a `filepath`, a readable image resolves to its sharp stats (a truthy value)
+  // and an unreadable one rejects, instead of `false` and `true`. The plugin always passes a
+  // `filepath`, so only direct callers reach this branch.
   if (!file.filepath) {
     return new Promise<boolean>((resolve) => {
       const pipeline = options ? sharp(options) : sharp();
@@ -332,13 +335,61 @@ const generateFileName = (name: string) => {
 };
 
 export default {
+  /**
+   * Whether sharp fails to read the image of a file with a `filepath`.
+   *
+   * @internal
+   */
   isFaultyImage,
+  /**
+   * Whether the file is an image that `optimize` can compress (JPEG, PNG, WebP, TIFF, AVIF).
+   *
+   * @internal
+   */
   isOptimizableImage,
+  /**
+   * Whether the file is an image that thumbnails and responsive formats can be resized from (JPEG,
+   * PNG, WebP, TIFF, GIF).
+   *
+   * @internal
+   */
   isResizableImage,
+  /**
+   * Whether the file is an image the plugin processes (the resizable formats, SVG and AVIF).
+   *
+   * @internal
+   */
   isImage,
+  /**
+   * The width and height sharp reads from the image, `null` when it has none.
+   *
+   * @internal
+   */
   getDimensions,
+  /**
+   * One resized file per breakpoint smaller than the image, or none when responsive dimensions are
+   * disabled in the settings.
+   *
+   * @internal
+   */
   generateResponsiveFormats,
+  /**
+   * The thumbnail of an image larger than the thumbnail size, `null` otherwise.
+   *
+   * @internal
+   */
   generateThumbnail,
+  /**
+   * Compresses and auto-orients the image as the settings ask. The original file is returned when
+   * nothing applies or when the result would be larger.
+   *
+   * @internal
+   */
   optimize,
+  /**
+   * A slug of the name followed by a random suffix, used as the file hash.
+   *
+   * @internal
+   */
   generateFileName,
 };

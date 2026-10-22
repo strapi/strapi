@@ -69,5 +69,11 @@ const signFileUrlsOnDocumentService = async () => {
 };
 
 export default {
+  /**
+   * With a private provider, adds a document service middleware that removes the URL signatures
+   * from written data and signs the media URLs of the results.
+   *
+   * @internal
+   */
   signFileUrlsOnDocumentService,
 };
