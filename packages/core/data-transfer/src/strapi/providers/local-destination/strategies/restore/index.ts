@@ -1,5 +1,4 @@
-import type { Core, UID, Struct } from '@strapi/types';
-import type { Model } from '@strapi/database';
+import type { Core, UID, Struct, DB } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
@@ -39,7 +38,7 @@ const deleteEntitiesRecords = async (
 ): Promise<IDeleteResults> => {
   const { entities } = options;
 
-  const models = strapi.get('models').get() as Model[];
+  const models: DB.Model[] = strapi.get('models').get();
   const contentTypes = Object.values(strapi.contentTypes) as Struct.ContentTypeSchema[];
 
   const contentTypesToClear = contentTypes
@@ -118,7 +117,7 @@ const deleteConfigurationRecords = async (
 ): Promise<IDeleteResults> => {
   const { coreStore = true, webhook = true } = options?.configuration ?? {};
 
-  const models: string[] = [];
+  const models: UID.Schema[] = [];
 
   if (coreStore) {
     models.push('strapi::core-store');

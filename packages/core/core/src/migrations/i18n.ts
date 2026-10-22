@@ -8,13 +8,14 @@ const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     return;
   }
 
-  for (const uid in contentTypes) {
+  for (const contentType of Object.values(contentTypes)) {
+    const { uid } = contentType;
+
     if (!oldContentTypes[uid]) {
       continue;
     }
 
     const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
 
     if (!isLocalizedContentType(oldContentType) && isLocalizedContentType(contentType)) {
       const defaultLocale = await getDefaultLocale();
@@ -34,13 +35,14 @@ const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     return;
   }
 
-  for (const uid in contentTypes) {
+  for (const contentType of Object.values(contentTypes)) {
+    const { uid } = contentType;
+
     if (!oldContentTypes[uid]) {
       continue;
     }
 
     const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
 
     // if i18N is disabled remove non default locales before sync
     if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {

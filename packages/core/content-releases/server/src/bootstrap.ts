@@ -6,11 +6,11 @@ import { registerAuditEvents } from './audit-logs';
 import { getService, updateAffectedReleaseStatuses } from './utils';
 import { deleteActionsOnDelete, updateActionsOnUpdate } from './middlewares/documents';
 
-interface DeleteManyParams {
+type DeleteManyParams = {
   contentType: UID.ContentType;
   locale: string | null;
   entryDocumentId?: Modules.Documents.ID;
-}
+};
 
 const deleteReleasesActionsAndUpdateReleaseStatus = async (
   params: DeleteManyParams,

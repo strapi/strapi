@@ -191,7 +191,7 @@ const buildWhereForRelations = (
 
 type ValidRelation = { documentId: string; id?: number; locale?: string };
 type ResolvedRelation = { documentId: string; id: number | string; locale?: string };
-type RelationsByUid = Map<string, ValidRelation[]>;
+type RelationsByUid = Map<UID.ContentType, ValidRelation[]>;
 
 interface UidResolutionData {
   blocked: boolean;
@@ -214,7 +214,7 @@ const collectRelationsByUid = (
 ): RelationsByUid => {
   const result: RelationsByUid = new Map();
 
-  const addRels = (uid: string, rels: ValidRelation[]) => {
+  const addRels = (uid: UID.ContentType, rels: ValidRelation[]) => {
     const existing = result.get(uid) ?? [];
     result.set(uid, existing.concat(rels));
   };
@@ -228,7 +228,7 @@ const collectRelationsByUid = (
       if (attribute.type === 'relation') {
         const attr = attribute as Schema.Attribute.Relation & {
           relation?: string;
-          target?: string;
+          target?: UID.ContentType;
         };
         if (attr.relation?.toLowerCase().includes('morph') || !attr.target) continue;
         const validRels = normalizeToArray(value).filter(isValidRelation);
@@ -283,7 +283,7 @@ const resolveAllRelationsBatched = async (
         return;
       }
 
-      const mainField = await getMainField(targetUid as UID.Schema);
+      const mainField = await getMainField(targetUid);
       const validRels = allRels.filter(isValidRelation);
 
       if (validRels.length === 0) {
@@ -295,7 +295,7 @@ const resolveAllRelationsBatched = async (
       const uniqueRels = [...new Map(validRels.map((r) => [r.documentId, r])).values()];
       const resolvedList = await resolveRelationsForLocaleBatch(
         uniqueRels,
-        targetUid as UID.Schema,
+        targetUid,
         targetLocale
       );
 
@@ -318,10 +318,10 @@ const resolveAllRelationsBatched = async (
       }
 
       const documentIds = [...new Set(resolvedEntries.map((r) => r.documentId))];
-      const where = buildWhereForRelations(resolvedEntries, documentIds, targetUid as UID.Schema);
+      const where = buildWhereForRelations(resolvedEntries, documentIds, targetUid);
 
       const [allStatusEntries, labelEntries] = await Promise.all([
-        contentTypes.hasDraftAndPublish(strapi.getModel(targetUid as UID.Schema))
+        contentTypes.hasDraftAndPublish(strapi.getModel(targetUid))
           ? strapi.db.query(targetUid).findMany({ where, select: [...STATUS_FIELDS] })
           : Promise.resolve([]),
         strapi.db.query(targetUid).findMany({
@@ -335,7 +335,7 @@ const resolveAllRelationsBatched = async (
       if (allStatusEntries.length > 0) {
         const documentMetadata = strapi.plugin('content-manager')?.service('document-metadata');
         if (documentMetadata) {
-          const model = strapi.getModel(targetUid as UID.Schema);
+          const model = strapi.getModel(targetUid);
           const isLocalized = strapi
             .plugin('i18n')
             ?.service('content-types')

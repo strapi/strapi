@@ -10,13 +10,12 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     this.contentType = contentType;
   }
 
-  async getDocumentId() {
+  async getDocumentId(): Promise<string | undefined> {
     const { uid } = this.contentType;
 
-    return strapi.db
-      .query(uid)
-      .findOne()
-      .then((document) => document?.documentId as string);
+    const document = await strapi.db.query(uid).findOne();
+
+    return document?.documentId;
   }
 
   async find(params = {}) {

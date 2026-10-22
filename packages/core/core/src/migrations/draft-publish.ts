@@ -23,13 +23,14 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) =
 
   // run the after content types migrations
   return strapi.db.transaction(async (trx) => {
-    for (const uid in contentTypes) {
+    for (const contentType of Object.values(contentTypes)) {
+      const { uid } = contentType;
+
       if (!oldContentTypes[uid]) {
         continue;
       }
 
       const oldContentType = oldContentTypes[uid];
-      const contentType = contentTypes[uid];
 
       // if d&p was enabled set publishedAt to eq createdAt
       if (
@@ -59,13 +60,14 @@ const disableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) 
     return;
   }
 
-  for (const uid in contentTypes) {
+  for (const contentType of Object.values(contentTypes)) {
+    const { uid } = contentType;
+
     if (!oldContentTypes[uid]) {
       continue;
     }
 
     const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
 
     // if d&p was disabled remove unpublish content before sync
     if (

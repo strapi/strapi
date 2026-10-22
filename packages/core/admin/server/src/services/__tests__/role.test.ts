@@ -152,7 +152,6 @@ describe('Role', () => {
         db: { query: () => ({ findMany: dbFind }) },
       } as any;
 
-      // @ts-expect-error - fix types
       const foundRoles = await find();
 
       expect(dbFind).toHaveBeenCalledWith({ where: {} });

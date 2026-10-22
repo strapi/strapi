@@ -1,4 +1,4 @@
-import type { UID, Modules } from '@strapi/types';
+import type { DB, UID, Modules } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { omit } from 'lodash';
 
@@ -54,7 +54,7 @@ const createEntriesService = (
       const isLocalized = strapi.localization.isLocalizedContentType(contentType);
       const hasDraftAndPublish = contentType.options?.draftAndPublish === true;
 
-      const whereClause: Record<string, unknown> = { documentId: data.documentId };
+      const whereClause: DB.Params.Where<UID.Schema> = { documentId: data.documentId };
 
       if (isLocalized) {
         whereClause.locale = data.locale;

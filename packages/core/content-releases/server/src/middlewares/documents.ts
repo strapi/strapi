@@ -7,10 +7,10 @@ type Middleware = Modules.Documents.Middleware.Middleware;
 
 type LocaleFilter = { locale?: string | null | { $in: string[] } };
 
-interface ReleaseActionsParams extends LocaleFilter {
+type ReleaseActionsParams = LocaleFilter & {
   contentType: UID.ContentType;
   entryDocumentId?: Modules.Documents.ID;
-}
+};
 
 /**
  * The locales a document delete removed, as a filter on release actions. Resolved the way the

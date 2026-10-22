@@ -771,7 +771,7 @@ const create = async <K extends AnyApiToken['kind']>(
       select: SELECT_FIELDS,
       populate: POPULATE_FIELDS,
       data: {
-        ...(omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']) as object),
+        ...omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']),
         accessKey: hash(accessKey),
         encryptedKey,
         adminUserOwner: null,
@@ -847,7 +847,7 @@ const create = async <K extends AnyApiToken['kind']>(
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     data: {
-      ...(omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']) as object),
+      ...omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']),
       accessKey: hash(accessKey),
       encryptedKey,
       adminUserOwner: ownerId,

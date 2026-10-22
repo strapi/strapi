@@ -16,12 +16,12 @@ const enableFirstPublishedAt = async ({ oldContentTypes, contentTypes }: Input) 
   }
 
   return strapi.db.transaction(async (trx) => {
-    for (const uid in contentTypes) {
+    for (const contentType of Object.values(contentTypes)) {
+      const { uid } = contentType;
+
       if (!oldContentTypes[uid]) {
         continue;
       }
-
-      const contentType = contentTypes[uid];
 
       if (!contentTypesUtils.hasFirstPublishedAtField(contentType)) {
         continue;

@@ -1,6 +1,6 @@
 import { get, has, merge, set, unset } from 'lodash';
 
-import type { Core, Schema, UID } from '@strapi/types';
+import type { Core, DB, Schema, UID } from '@strapi/types';
 import { contentTypes, traverseEntity } from '@strapi/utils';
 import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
 import {
@@ -792,7 +792,7 @@ const resolveEntryIdsByRef = async (
   const resolvedIds: number[] = [];
 
   for (const status of statuses) {
-    const where: Record<string, unknown> = { documentId: ref.documentId };
+    const where: DB.Params.Where<UID.Schema> = { documentId: ref.documentId };
 
     if (targetHasDP) {
       where.publishedAt = status === 'draft' ? null : { $ne: null };

@@ -2,6 +2,7 @@ import type { Strapi } from './core';
 
 export type * as Core from './core';
 export type * as Data from './data';
+export type * as DB from './database';
 export type * as Internal from './internal';
 export type * as Modules from './modules';
 export type * as Plugin from './plugin';
