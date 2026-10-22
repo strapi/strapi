@@ -3,12 +3,10 @@ import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
-import {
-  DEFAULT_RELEASE_CONDITION,
-  RELEASE_ACTION_MODEL_UID,
-  RELEASE_MODEL_UID,
-} from '../constants';
-import { getActionValidity, getService } from '../utils';
+import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
+import { DEFAULT_RELEASE_CONDITION, RELEASED_OUTCOME_BY_TYPE } from '../../../shared/constants';
+import type { ReleaseActionOutcome } from '../../../shared/constants';
+import { getActionValidity, getService, runAfterCommit } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
 
 export interface ContentTypesSyncInput {
@@ -16,8 +14,7 @@ export interface ContentTypesSyncInput {
   contentTypes: Record<string, Schema.ContentType>;
 }
 
-// Its entries can no longer be published: its actions leave every release (see
-// `deleteContentTypeActions`)
+// Its entries can no longer be published: its actions leave every planned release
 export async function deleteActionsOnDisableDraftAndPublish(
   { oldContentTypes, contentTypes }: ContentTypesSyncInput,
   { strapi }: { strapi: Core.Strapi }
@@ -52,7 +49,7 @@ export async function deleteActionsOnDeleteContentType(
   }
 }
 
-export async function migrateIsValidAndStatusReleases() {
+export async function migrateIsValidAndStatusReleases({ strapi }: { strapi: Core.Strapi }) {
   const releasesWithoutStatus = (await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
       status: null,
@@ -90,37 +87,66 @@ export async function migrateIsValidAndStatusReleases() {
     });
   };
 
-  migrate().catch((error: unknown) => {
-    strapi.log.error('Error while migrating the status of releases created before v5', { error });
+  runAfterCommit(migrate, 'Error while migrating the status of releases created before v5', {
+    strapi,
   });
 }
 
-// Planned actions stored as not publishable before reasons existed: publish actions get their
-// draft's reason, unpublish actions an earlier version stored as invalid become valid. Finds
-// nothing to do once every one has been through it.
+// Planned actions stored as not publishable before reasons existed get one. Finds nothing to do
+// once every one has been through it.
 export async function addReasonsToInvalidActions({ strapi }: { strapi: Core.Strapi }) {
-  getService('release-action', { strapi })
-    .revalidatePlannedActions({ isEntryValid: false, reason: { $null: true } })
-    // Not awaited by startup: a failure must not become an unhandled rejection
-    .catch((error: unknown) => {
-      strapi.log.error('Error while adding reasons to release actions that are not publishable', {
-        error,
-      });
-    });
+  runAfterCommit(
+    () =>
+      getService('release-action', { strapi }).revalidatePlannedActions({
+        isEntryValid: false,
+        reason: { $null: true },
+      }),
+    'Error while adding reasons to release actions that are not publishable',
+    { strapi }
+  );
 }
 
-export async function freezeReleasesFailedBeforeUpgrade({ strapi }: { strapi: Core.Strapi }) {
-  try {
-    await strapi.db.query(RELEASE_MODEL_UID).updateMany({
-      where: { status: 'failed', releasedAt: null },
-      data: { releasedAt: new Date(), failureReason: 'failed_before_upgrade' },
-    });
-  } catch (error: unknown) {
-    strapi.log.error('Error while freezing releases that failed before the upgrade', { error });
+// A release that ran before outcomes and totals existed released every entry (a run that failed
+// left the release planned): each action gets its released outcome, and the release its totals
+export async function addOutcomesToReleasedReleases({ strapi }: { strapi: Core.Strapi }) {
+  const releases: { id: number }[] = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+    where: {
+      releasedAt: { $notNull: true },
+      totalSkippedEntries: null,
+      $or: [{ status: 'done' }, { status: null }],
+    },
+    select: ['id'],
+  });
+
+  const countOutcome = (releaseId: number, outcome: ReleaseActionOutcome) =>
+    strapi.db.query(RELEASE_ACTION_MODEL_UID).count({ where: { release: releaseId, outcome } });
+
+  for (const { id } of releases) {
+    try {
+      await strapi.db.transaction(async () => {
+        for (const [type, outcome] of Object.entries(RELEASED_OUTCOME_BY_TYPE)) {
+          await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+            where: { release: id, type, outcome: null },
+            data: { outcome },
+          });
+        }
+
+        await strapi.db.query(RELEASE_MODEL_UID).update({
+          where: { id },
+          data: {
+            totalPublishedEntries: await countOutcome(id, 'published'),
+            totalUnpublishedEntries: await countOutcome(id, 'unpublished'),
+            totalSkippedEntries: 0,
+          },
+        });
+      });
+    } catch (error: unknown) {
+      strapi.log.error(`Error while adding outcomes to release ${id}`, { error });
+    }
   }
 }
 
-export async function migrateReleaseConditionReleases() {
+export async function migrateReleaseConditionReleases({ strapi }: { strapi: Core.Strapi }) {
   await strapi.db.query(RELEASE_MODEL_UID).updateMany({
     where: { releaseCondition: null },
     data: { releaseCondition: DEFAULT_RELEASE_CONDITION },
@@ -149,20 +175,20 @@ export async function revalidateChangedContentTypes(
     return;
   }
 
-  getService('release-action', { strapi })
-    .revalidatePlannedActions({ contentType: { $in: changedContentTypes } })
-    // Not awaited by startup: a failure must not become an unhandled rejection
-    .catch((error: unknown) => {
-      strapi.log.error('Error while revalidating release actions after a content type change', {
-        error,
-      });
-    });
+  runAfterCommit(
+    () =>
+      getService('release-action', { strapi }).revalidatePlannedActions({
+        contentType: { $in: changedContentTypes },
+      }),
+    'Error while revalidating release actions after a content type change',
+    { strapi }
+  );
 }
 
-export async function disableContentTypeLocalized({
-  oldContentTypes,
-  contentTypes,
-}: ContentTypesSyncInput) {
+export async function disableContentTypeLocalized(
+  { oldContentTypes, contentTypes }: ContentTypesSyncInput,
+  { strapi }: { strapi: Core.Strapi }
+) {
   if (!oldContentTypes) {
     return;
   }
@@ -191,10 +217,10 @@ export async function disableContentTypeLocalized({
   }
 }
 
-export async function enableContentTypeLocalized({
-  oldContentTypes,
-  contentTypes,
-}: ContentTypesSyncInput) {
+export async function enableContentTypeLocalized(
+  { oldContentTypes, contentTypes }: ContentTypesSyncInput,
+  { strapi }: { strapi: Core.Strapi }
+) {
   if (!oldContentTypes) {
     return;
   }

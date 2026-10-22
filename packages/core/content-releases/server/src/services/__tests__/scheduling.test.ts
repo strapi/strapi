@@ -208,5 +208,33 @@ describe('Scheduling service', () => {
       expect(scheduledJobs.size).toBe(1);
       expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
     });
+
+    it('logs a release deleted or frozen since the read, and still arms the others', async () => {
+      const logError = jest.fn();
+      const strapiMock = {
+        ...baseStrapiMock,
+        log: { error: logError },
+        db: {
+          query: jest.fn(() => ({
+            findMany: jest.fn().mockReturnValue([
+              { id: 1, scheduledAt: new Date(), releasedAt: null },
+              { id: 2, scheduledAt: new Date(), releasedAt: null },
+            ]),
+            // Release 1 was frozen in between
+            findOne: jest.fn(async ({ where }) => (where.id === 1 ? null : { id: where.id })),
+          })),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const schedulingService = createSchedulingService({ strapi: strapiMock });
+      const scheduledJobs = await schedulingService.syncFromDatabase();
+
+      expect([...scheduledJobs.keys()]).toEqual(['2']);
+      expect(logError).toHaveBeenCalledWith(
+        "[Content Releases] Couldn't schedule release 1",
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    });
   });
 });

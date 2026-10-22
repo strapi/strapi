@@ -1,13 +1,9 @@
 import { errors, yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-import {
-  getEntryPublishability,
-  getPublishabilityForActions,
-  getValidityForActions,
-} from '../index';
+import { getActionValidity, getPublishabilityForActions, getValidityForActions } from '../index';
 
-const contentTypeUid = 'api::article.article';
+const contentTypeUid = 'api::article.article' as const;
 const reviewStage = { id: 1, name: 'Review' };
 const doneStage = { id: 2, name: 'Done' };
 
@@ -24,18 +20,20 @@ const invalidTitleError = () =>
   });
 
 const buildStrapi = ({
+  config = { get: (_key: string, defaultValue: unknown) => defaultValue },
   validate = jest.fn().mockResolvedValue({}),
   workflowsService = { getAssignedWorkflow: jest.fn().mockResolvedValue(null) },
   populateBuilder = jest.fn(),
   findOne = jest.fn(),
 }: {
+  config?: { get: (key: string, defaultValue: unknown) => unknown };
   validate?: jest.Mock;
   workflowsService?: { getAssignedWorkflow: jest.Mock } | undefined;
   populateBuilder?: jest.Mock;
   findOne?: jest.Mock;
 } = {}) =>
   ({
-    config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+    config,
     getModel: () => ({ uid: contentTypeUid }),
     entityValidator: { validateEntityCreation: validate },
     plugin: (name: string) => ({
@@ -46,24 +44,55 @@ const buildStrapi = ({
         return undefined;
       },
     }),
-    documents: () => ({ findOne }),
     // No entry has a published version
-    db: { query: () => ({ findOne: jest.fn().mockResolvedValue(null) }) },
+    documents: () => ({
+      findOne: (params: { status?: string }) =>
+        params.status === 'published' ? Promise.resolve(null) : findOne(params),
+    }),
   }) as unknown as Core.Strapi;
 
 const requiringDone = () => ({
   getAssignedWorkflow: jest.fn().mockResolvedValue({ stageRequiredToPublish: doneStage }),
 });
 
-describe('getEntryPublishability', () => {
+// One entry's draft, checked as a run checks it
+const checkEntry = async (entry: Record<string, unknown>, strapi: Core.Strapi) => {
+  const withDraft = {
+    ...strapi,
+    plugin: (name: string) =>
+      name === 'content-manager'
+        ? { service: () => () => ({ populateDeep: () => ({ build: async () => ({}) }) }) }
+        : strapi.plugin(name),
+    documents: () => ({
+      findOne: async ({ status }: { status?: string }) => (status === 'published' ? null : entry),
+    }),
+  } as unknown as Core.Strapi;
+
+  const results = await getPublishabilityForActions(
+    [
+      {
+        id: 1,
+        type: 'publish' as const,
+        contentType: contentTypeUid,
+        entryDocumentId: entry.documentId as string,
+      },
+    ],
+    { strapi: withDraft }
+  );
+
+  const result = results.get(1)!;
+  if (result instanceof Error) {
+    throw result;
+  }
+
+  return result;
+};
+
+describe('publishability of an entry', () => {
   test('a valid entry at the required stage is publishable', async () => {
     const strapi = buildStrapi({ workflowsService: requiringDone() });
 
-    const result = await getEntryPublishability(
-      contentTypeUid,
-      { id: 1, documentId: 'a', strapi_stage: doneStage },
-      { strapi }
-    );
+    const result = await checkEntry({ id: 1, documentId: 'a', strapi_stage: doneStage }, strapi);
 
     expect(result).toEqual({ publishable: true, outcome: null, reason: null, error: null });
   });
@@ -72,11 +101,7 @@ describe('getEntryPublishability', () => {
     const validationError = invalidTitleError();
     const strapi = buildStrapi({ validate: jest.fn().mockRejectedValue(validationError) });
 
-    const result = await getEntryPublishability(
-      contentTypeUid,
-      { id: 1, documentId: 'a' },
-      { strapi }
-    );
+    const result = await checkEntry({ id: 1, documentId: 'a' }, strapi);
 
     expect(result).toEqual({
       publishable: false,
@@ -102,11 +127,7 @@ describe('getEntryPublishability', () => {
       validate: jest.fn().mockRejectedValue(new errors.YupValidationError(yupError)),
     });
 
-    const result = await getEntryPublishability(
-      contentTypeUid,
-      { id: 1, documentId: 'a' },
-      { strapi }
-    );
+    const result = await checkEntry({ id: 1, documentId: 'a' }, strapi);
 
     expect(result.reason).toEqual({
       validation: { errors: [{ path: ['count'], message: 'count must be a `number` type' }] },
@@ -116,11 +137,7 @@ describe('getEntryPublishability', () => {
   test('a valid entry that is not at the required stage is skipped as not approved', async () => {
     const strapi = buildStrapi({ workflowsService: requiringDone() });
 
-    const result = await getEntryPublishability(
-      contentTypeUid,
-      { id: 1, documentId: 'a', strapi_stage: reviewStage },
-      { strapi }
-    );
+    const result = await checkEntry({ id: 1, documentId: 'a', strapi_stage: reviewStage }, strapi);
 
     expect(result).toMatchObject({
       publishable: false,
@@ -134,11 +151,7 @@ describe('getEntryPublishability', () => {
   test('an entry without a stage is not at the required stage', async () => {
     const strapi = buildStrapi({ workflowsService: requiringDone() });
 
-    const result = await getEntryPublishability(
-      contentTypeUid,
-      { id: 1, documentId: 'a' },
-      { strapi }
-    );
+    const result = await checkEntry({ id: 1, documentId: 'a' }, strapi);
 
     expect(result).toMatchObject({
       outcome: 'skipped_not_approved',
@@ -152,11 +165,7 @@ describe('getEntryPublishability', () => {
       workflowsService: requiringDone(),
     });
 
-    const result = await getEntryPublishability(
-      contentTypeUid,
-      { id: 1, documentId: 'a', strapi_stage: reviewStage },
-      { strapi }
-    );
+    const result = await checkEntry({ id: 1, documentId: 'a', strapi_stage: reviewStage }, strapi);
 
     expect(result).toMatchObject({
       publishable: false,
@@ -173,11 +182,7 @@ describe('getEntryPublishability', () => {
   test('without an assigned workflow only validation applies', async () => {
     const strapi = buildStrapi();
 
-    const result = await getEntryPublishability(
-      contentTypeUid,
-      { id: 1, documentId: 'a', strapi_stage: reviewStage },
-      { strapi }
-    );
+    const result = await checkEntry({ id: 1, documentId: 'a', strapi_stage: reviewStage }, strapi);
 
     expect(result.publishable).toBe(true);
   });
@@ -185,18 +190,19 @@ describe('getEntryPublishability', () => {
   test('without the review-workflows service, an entry is never skipped as not approved', async () => {
     const strapi = buildStrapi({ workflowsService: undefined });
 
-    await expect(
-      getEntryPublishability(contentTypeUid, { id: 1, documentId: 'a' }, { strapi })
-    ).resolves.toMatchObject({ publishable: true });
+    await expect(checkEntry({ id: 1, documentId: 'a' }, strapi)).resolves.toMatchObject({
+      publishable: true,
+    });
 
     const invalidStrapi = buildStrapi({
       workflowsService: undefined,
       validate: jest.fn().mockRejectedValue(invalidTitleError()),
     });
 
-    await expect(
-      getEntryPublishability(contentTypeUid, { id: 1, documentId: 'a' }, { strapi: invalidStrapi })
-    ).resolves.toMatchObject({ publishable: false, outcome: 'skipped_invalid' });
+    await expect(checkEntry({ id: 1, documentId: 'a' }, invalidStrapi)).resolves.toMatchObject({
+      publishable: false,
+      outcome: 'skipped_invalid',
+    });
   });
 });
 
@@ -217,9 +223,24 @@ describe('getPublishabilityForActions', () => {
 
     const result = await getPublishabilityForActions(
       [
-        { id: 1, contentType: contentTypeUid, entryDocumentId: 'approved-1' },
-        { id: 2, contentType: contentTypeUid, entryDocumentId: 'not-approved' },
-        { id: 3, contentType: contentTypeUid, entryDocumentId: 'approved-2' },
+        {
+          id: 1,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'approved-1',
+        },
+        {
+          id: 2,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'not-approved',
+        },
+        {
+          id: 3,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'approved-2',
+        },
       ],
       { strapi }
     );
@@ -229,14 +250,44 @@ describe('getPublishabilityForActions', () => {
     expect(workflowsService.getAssignedWorkflow).toHaveBeenCalledTimes(1);
     expect(findOne).toHaveBeenCalledTimes(3);
 
-    // Results come back in the order given, each with its own action
-    expect(result.map(({ action, publishability }) => [action.id, publishability.outcome])).toEqual(
-      [
-        [1, null],
-        [2, 'skipped_not_approved'],
-        [3, null],
-      ]
-    );
+    // Results come back in the order given
+    expect(
+      [...result].map(([id, check]) => [id, check instanceof Error ? check : check.outcome])
+    ).toEqual([
+      [1, null],
+      [2, 'skipped_not_approved'],
+      [3, null],
+    ]);
+  });
+});
+
+describe('an error that is not a validation error', () => {
+  const failingValidator = () =>
+    buildStrapi({
+      validate: jest.fn().mockRejectedValue(new TypeError('Cannot read properties of undefined')),
+      findOne: jest.fn().mockResolvedValue({ documentId: 'a' }),
+      populateBuilder: jest.fn(() => ({ populateDeep: () => ({ build: async () => ({}) }) })),
+    });
+  const action = {
+    id: 1,
+    type: 'publish' as const,
+    contentType: contentTypeUid,
+    entryDocumentId: 'a',
+  };
+
+  test('comes back as the check of the entry, for the run to decide on', async () => {
+    const result = await getPublishabilityForActions([action], { strapi: failingValidator() });
+
+    expect(result.get(1)).toBeInstanceOf(TypeError);
+  });
+
+  test('is stored with only its name, not as a validation error', async () => {
+    const result = await getValidityForActions([action], { strapi: failingValidator() });
+
+    expect(result.get(1)).toEqual({
+      isEntryValid: false,
+      reason: { error: { name: 'TypeError' } },
+    });
   });
 });
 
@@ -257,14 +308,29 @@ describe('getValidityForActions', () => {
 
     const result = await getValidityForActions(
       [
-        { id: 1, contentType: contentTypeUid, entryDocumentId: 'unreadable' },
-        { id: 2, contentType: contentTypeUid, entryDocumentId: 'approved' },
-        { id: 3, contentType: contentTypeUid, entryDocumentId: 'in-review' },
+        {
+          id: 1,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'unreadable',
+        },
+        {
+          id: 2,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'approved',
+        },
+        {
+          id: 3,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'in-review',
+        },
       ],
       { strapi }
     );
 
-    expect(result.map(({ action, validity }) => [action.id, validity])).toEqual([
+    expect([...result]).toEqual([
       [1, { isEntryValid: false, reason: { error: { name: 'TypeError' } } }],
       [2, { isEntryValid: true, reason: null }],
       [
@@ -275,6 +341,19 @@ describe('getValidityForActions', () => {
         },
       ],
     ]);
+  });
+
+  test('checks only publish actions: an unpublish action needs no draft', async () => {
+    const findOne = jest.fn();
+    const strapi = buildStrapi({ workflowsService: requiringDone(), findOne });
+
+    const result = await getValidityForActions(
+      [{ id: 1, type: 'unpublish' as const, contentType: contentTypeUid, entryDocumentId: 'a' }],
+      { strapi }
+    );
+
+    expect(findOne).not.toHaveBeenCalled();
+    expect(result.size).toBe(0);
   });
 
   test('reads the draft of an entry in several planned releases once', async () => {
@@ -289,18 +368,106 @@ describe('getValidityForActions', () => {
     const result = await getValidityForActions(
       [
         // One entry's actions in two releases, then another locale of it
-        { id: 1, contentType: contentTypeUid, entryDocumentId: 'a', locale: 'en' },
-        { id: 2, contentType: contentTypeUid, entryDocumentId: 'a', locale: 'en' },
-        { id: 3, contentType: contentTypeUid, entryDocumentId: 'a', locale: 'fr' },
+        {
+          id: 1,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'a',
+          locale: 'en',
+        },
+        {
+          id: 2,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'a',
+          locale: 'en',
+        },
+        {
+          id: 3,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'a',
+          locale: 'fr',
+        },
       ],
       { strapi }
     );
 
     expect(findOne).toHaveBeenCalledTimes(2);
-    expect(result.map(({ action, validity }) => [action.id, validity.isEntryValid])).toEqual([
+    expect([...result].map(([id, validity]) => [id, validity.isEntryValid])).toEqual([
       [1, true],
       [2, true],
       [3, true],
     ]);
+  });
+});
+
+// Mirrors the document service's publish, so an entry the check passes isn't rejected at publish
+// (issue #24927 / PR #27028)
+describe('strict relations', () => {
+  const withStrictRelations = (strictRelations: unknown, validate: jest.Mock) =>
+    buildStrapi({
+      validate,
+      config: {
+        get: (key: string, defaultValue: unknown) =>
+          key === 'api.documents.strictRelations' ? strictRelations : defaultValue,
+      },
+    });
+
+  test('forwards strictRelations: true and the entry locale to the validator', async () => {
+    const validate = jest.fn().mockResolvedValue({});
+
+    await checkEntry(
+      { id: 1, documentId: 'article-1', locale: 'en' },
+      withStrictRelations(true, validate)
+    );
+
+    const [, , options] = validate.mock.calls[0];
+    expect(options).toEqual({ isDraft: false, locale: 'en', strictRelations: true });
+  });
+
+  test('forwards strictRelations: false when the flag is unset', async () => {
+    const validate = jest.fn().mockResolvedValue({});
+
+    await checkEntry({ id: 1, documentId: 'article-1' }, withStrictRelations(undefined, validate));
+
+    const [, , options] = validate.mock.calls[0];
+    expect(options).toEqual({ isDraft: false, locale: undefined, strictRelations: false });
+  });
+
+  test('an entry missing a required relation with the flag on is not publishable', async () => {
+    const validate = jest
+      .fn()
+      .mockRejectedValue(new errors.ValidationError('author must be defined.'));
+
+    const { publishable } = await checkEntry(
+      { id: 1, documentId: 'article-1' },
+      withStrictRelations(true, validate)
+    );
+
+    expect(publishable).toBe(false);
+  });
+});
+
+describe('getActionValidity', () => {
+  test('stores a failing draft read as not valid, with only the error name', async () => {
+    const strapi = {
+      plugin: () => ({
+        service: () => () => ({ populateDeep: () => ({ build: async () => ({}) }) }),
+      }),
+      documents: () => ({
+        findOne: jest.fn().mockRejectedValue(new TypeError('connection lost: secret-value')),
+      }),
+    } as unknown as Core.Strapi; // only what the draft read touches
+
+    const validity = await getActionValidity(
+      { type: 'publish', contentType: contentTypeUid, entryDocumentId: 'article-1', locale: 'en' },
+      { strapi }
+    );
+
+    expect(validity).toStrictEqual({
+      isEntryValid: false,
+      reason: { error: { name: 'TypeError' } },
+    });
   });
 });

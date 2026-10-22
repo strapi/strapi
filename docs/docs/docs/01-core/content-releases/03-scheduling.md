@@ -39,6 +39,4 @@ The problem is starting a new Strapi instance, because we retrieve all scheduled
 
 We set up a transaction that locks the release being published using SQL forUpdate. This means that any other processes attempting to access the release row will be put on hold until the first one finishes executing.
 
-If the validation of the release entries is successful, the publish action proceeds smoothly. In this scenario, we update the releasedAt column of the release with the current date and release the row lock. Subsequently, any incoming processes attempting to access the release would simply encounter an error because the release has already been published.
-
-On the other hand, if the publish process fails, we update the release's status to "failed". When the status is marked as failed, any subsequent attempts to publish will fail silently. The "failed" status only changes when a user makes alterations to the release.
+Whatever the run's outcome (done, partial or failed), it sets the release's `releasedAt` before releasing the row lock. Any other process that then gets the lock finds the release already published and stops (`Release already published`). A run whose transaction is rolled back leaves the release planned; once its date is past the grace period, the overdue sweep freezes it as failed, or as done if it has no entries (see [Backend Design](./01-backend.md), "Overdue releases").

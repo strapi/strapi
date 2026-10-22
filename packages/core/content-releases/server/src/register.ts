@@ -8,7 +8,7 @@ import {
   migrateIsValidAndStatusReleases,
   addReasonsToInvalidActions,
   migrateReleaseConditionReleases,
-  freezeReleasesFailedBeforeUpgrade,
+  addOutcomesToReleasedReleases,
   revalidateChangedContentTypes,
   disableContentTypeLocalized,
   enableContentTypeLocalized,
@@ -22,7 +22,9 @@ export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
 
     strapi.db.migrations.providers.internal.register(addEntryDocumentToReleaseActions);
 
-    strapi.hook('strapi::content-types.beforeSync').register(disableContentTypeLocalized);
+    strapi
+      .hook('strapi::content-types.beforeSync')
+      .register((input: ContentTypesSyncInput) => disableContentTypeLocalized(input, { strapi }));
 
     // After the sync: the removals recalculate statuses, which reads the current schema
     strapi
@@ -33,12 +35,12 @@ export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
       .register((input: ContentTypesSyncInput) =>
         deleteActionsOnDisableDraftAndPublish(input, { strapi })
       )
-      .register(enableContentTypeLocalized)
+      .register((input: ContentTypesSyncInput) => enableContentTypeLocalized(input, { strapi }))
       .register((input: ContentTypesSyncInput) => revalidateChangedContentTypes(input, { strapi }))
-      .register(migrateIsValidAndStatusReleases)
+      .register(() => migrateIsValidAndStatusReleases({ strapi }))
       .register(() => addReasonsToInvalidActions({ strapi }))
-      .register(migrateReleaseConditionReleases)
-      .register(() => freezeReleasesFailedBeforeUpgrade({ strapi }));
+      .register(() => migrateReleaseConditionReleases({ strapi }))
+      .register(() => addOutcomesToReleasedReleases({ strapi }));
   }
 
   if (strapi.plugin('graphql')) {
