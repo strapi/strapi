@@ -6,6 +6,7 @@ import {
   generateContractHelperDefinition,
   generateInstanceHelperDefinition,
   instanceTypeOf,
+  isInferredSource,
 } from '../common/sources';
 import type { GeneratorOptions } from '../utils';
 
@@ -13,6 +14,7 @@ const REGISTRY = 'AppServices';
 const INSTANCE_HELPER = 'ServiceInstance';
 const CONTRACT_EXPORT = 'ServiceContract';
 const CONTRACT_HELPER = 'ServiceContractOf';
+const INFERRED_REGISTRY = 'InferredServices';
 
 const NO_SERVICE_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any services yet.
@@ -34,6 +36,9 @@ export {};
  *         'api::<api>.<service>': ServiceInstance<typeof import('<relative path to the source>')>;
  *         'api::<api>.<service>': ServiceContractOf<import('<relative path to the source>').ServiceContract>;
  *       }
+ *       interface InferredServices {
+ *         'api::<api>.<service>': true;
+ *       }
  *     }
  *   }
  * }
@@ -42,6 +47,10 @@ export {};
  * registers the type its default export provides. A JS source registers as `unknown`: without
  * `allowJs` its import is an error type. So do a service module, a default export and a contract
  * typed `any`.
+ *
+ * `InferredServices` lists the TypeScript services registered without a contract, whose type is read
+ * from the factory itself: `Core.ServiceFactory` rejects their uid. It is not emitted when there are
+ * none.
  */
 export const generateServicesDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
@@ -84,7 +93,13 @@ export const generateServicesDefinitions = async (
         : []),
     ],
     servicesDefinitions,
-    instanceTypeOf(INSTANCE_HELPER, logger, contract)
+    instanceTypeOf(INSTANCE_HELPER, logger, contract),
+    [
+      {
+        registry: INFERRED_REGISTRY,
+        uids: servicesDefinitions.filter(isInferredSource(contract)).map(({ uid }) => uid),
+      },
+    ]
   );
 
   return { output, stats: {} };
