@@ -2,6 +2,8 @@ import type { Core } from '@strapi/strapi';
 import type { OverrideService } from '@strapi/plugin-documentation/strapi-server';
 
 declare const app: Core.Strapi;
+declare const context: Parameters<Core.ControllerHandler>[0];
+declare const next: Parameters<Core.ControllerHandler>[1];
 
 const override = app.plugin('documentation').service('override');
 override satisfies OverrideService;
@@ -25,3 +27,19 @@ const generated = documentation.generateFullDoc();
 generated satisfies Promise<void>;
 // @ts-expect-error Registered services have no arbitrary members.
 app.service('plugin::documentation.documentation').missing();
+
+app.plugin('documentation').controller('documentation').getInfos(context, next);
+app.controller('plugin::documentation.documentation').updateSettings(context, next);
+// @ts-expect-error Registry controller actions do not accept misspelled names.
+app.plugin('documentation').controller('documentation').getInfo(context, next);
+
+type Controllers = {
+  documentation: Strapi.Registries.PackageControllers['plugin::documentation.documentation'];
+};
+[
+  { method: 'POST', path: '/regenerateDoc', handler: 'documentation.regenerateDoc' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::documentation'>[];
+[
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  { method: 'POST', path: '/regenerateDoc', handler: 'documentation.regenerateDocs' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::documentation'>[];

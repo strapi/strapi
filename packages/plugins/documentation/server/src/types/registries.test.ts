@@ -1,4 +1,10 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
+import type { Core } from '@strapi/types';
+import type { Controllers } from './controllers';
+
+declare const context: Parameters<Core.ControllerHandler>[0];
+declare const next: Parameters<Core.ControllerHandler>[1];
+
 const override = strapi.plugin('documentation').service('override');
 
 // Plugins register their OpenAPI parts as objects or as YAML text.
@@ -27,3 +33,22 @@ documentation.getDocumentationVersions() satisfies Array<{
 }>;
 // @ts-expect-error Registered services have no arbitrary members.
 documentation.missing();
+
+strapi.controller('plugin::documentation.documentation').regenerateDoc(context, next);
+strapi.plugin('documentation').controller('documentation').index(context, next);
+// @ts-expect-error Registered controllers have no arbitrary actions.
+strapi.plugin('documentation').controller('documentation').missing(context, next);
+
+[
+  {
+    method: 'GET',
+    path: '/',
+    handler: 'documentation.index',
+    config: { auth: false, middlewares: [async (_ctx, nextMiddleware) => nextMiddleware()] },
+  },
+  { method: 'DELETE', path: '/deleteDoc/:version', handler: 'documentation.deleteDoc' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::documentation'>[];
+[
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  { method: 'POST', path: '/regenerateDoc', handler: 'documentation.regenerate' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::documentation'>[];
