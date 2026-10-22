@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useTable, useQueryParams } from '@strapi/admin/strapi-admin';
-import { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
+import { ListCellMeta, ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
 import { Box, Popover, Typography, Button, Link } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -61,6 +61,8 @@ interface AddColumnToTableHookArgs {
   displayedHeaders: ListFieldLayout[];
 }
 
+type CellFormatterArgs = Parameters<NonNullable<ListFieldLayout['cellFormatter']>>;
+
 const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
   const { options } = layout;
 
@@ -80,10 +82,10 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
           defaultMessage: 'To be released in',
         },
         cellFormatter: (
-          props: Modules.Documents.AnyDocument,
-          _: unknown,
-          { model }: { model: UID.ContentType }
-        ) => <ReleaseListCell documentId={props.documentId} model={model} />,
+          props: CellFormatterArgs[0],
+          _header: CellFormatterArgs[1],
+          { model }: ListCellMeta
+        ) => <ReleaseListCell documentId={props.documentId} model={model as UID.ContentType} />,
       },
     ],
     layout,

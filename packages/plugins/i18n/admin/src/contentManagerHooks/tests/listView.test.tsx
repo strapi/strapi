@@ -119,7 +119,9 @@ describe('addColumnToTableHook', () => {
     };
 
     // Call the formatter during render, like the ListView does
-    const Cell = () => <>{cellFormatter?.(row, header)}</>;
+    const Cell = () => (
+      <>{cellFormatter?.(row, header, { collectionType: '', model: 'api::article.article' })}</>
+    );
 
     render(<Cell />);
 
