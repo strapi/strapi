@@ -2,7 +2,6 @@ import path from 'path';
 import { createWriteStream } from 'fs';
 import { Writable, pipeline } from 'stream';
 import fs from 'fs-extra';
-import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
 
 import type {
@@ -13,6 +12,7 @@ import type {
   ProviderType,
 } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
+import { stringer } from '../../../utils/jsonl';
 import { createDirectoryJsonlWriter, createFilePathFactory } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
