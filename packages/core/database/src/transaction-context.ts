@@ -62,13 +62,14 @@ const isDeadlockError = (error: unknown) => {
 };
 
 /**
- * Commit and rollback hooks run after the transaction finishes, and the
- * caller does not wait for them. Hooks that return a promise (document
- * events, history, audit logs) keep using the database, so they are tracked
+ * Commit and rollback hooks run after the transaction finishes. The caller
+ * waits for them, so a Document Service write does not resolve until its
+ * events have been emitted. Hooks that return a promise (document events,
+ * history, audit logs) keep using the database, so they are also tracked
  * until they settle and Database#destroy can wait before closing the pool.
- * Hooks registered synchronously while a batch runs are included. A rejection
- * is logged and does not change the transaction result: the data is already
- * committed, and failing the request would invite a retry of that write.
+ * Hooks registered while a batch runs are included. A rejection is logged
+ * and does not change the transaction result: the data is already committed,
+ * and failing the request would invite a retry of that write.
  */
 const pendingCallbacks = new Set<Promise<unknown>>();
 
@@ -96,26 +97,32 @@ const track = (promise: Promise<unknown>) => {
       pendingCallbacks.delete(settled);
     }
   );
+  return settled;
 };
 
-const runCallbacks = (callbacks: Callback[] | undefined) => {
+const runCallbacks = async (callbacks: Callback[] | undefined) => {
   if (!callbacks) {
     return;
   }
 
   while (callbacks.length > 0) {
     const batch = callbacks.splice(0, callbacks.length);
+    const pending: Promise<unknown>[] = [];
     for (const cb of batch) {
       try {
         const result = cb();
         if (result && typeof (result as Promise<unknown>).then === 'function') {
-          track(result as Promise<unknown>);
+          pending.push(track(result as Promise<unknown>));
         }
       } catch (error) {
         // The transaction is already committed. A synchronous throw must not
         // be retried as a deadlock.
         reportCallbackError(error);
       }
+    }
+
+    if (pending.length > 0) {
+      await Promise.allSettled(pending);
     }
   }
 };
@@ -162,7 +169,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    runCallbacks(store?.commitCallbacks);
+    await runCallbacks(store?.commitCallbacks);
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -182,7 +189,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    runCallbacks(store?.rollbackCallbacks);
+    await runCallbacks(store?.rollbackCallbacks);
   },
 
   onCommit(cb: Callback) {
