@@ -11,6 +11,7 @@ import type extensions from '../services/extensions';
 import type { createAIMetadataService } from '../services/ai-metadata';
 import type { createAIMetadataJobsService } from '../services/ai-metadata-jobs';
 import type { createAIMetadataProviderService } from '../services/ai-metadata-provider';
+import type { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 
 type UploadServiceImplementation = ReturnType<typeof upload>;
 
@@ -64,6 +65,38 @@ export type MetricsService = Omit<MetricsServiceImplementation, 'trackUsage'> & 
   ): ReturnType<MetricsServiceImplementation['trackUsage']>;
 };
 
+type AIMetadataJobsServiceImplementation = ReturnType<typeof createAIMetadataJobsService>;
+
+/**
+ * An AI metadata job as the database reads it back: dates are ISO strings, and `completedAt` is
+ * `null` until the job completes or fails.
+ */
+export type AIMetadataJobRow = {
+  id: number;
+  status: AIMetadataJob['status'];
+  createdAt: string;
+  completedAt: string | null;
+};
+
+/** The registered `aiMetadataJobs` service: tracks the AI metadata backfill jobs. */
+export type AIMetadataJobsService = Omit<
+  AIMetadataJobsServiceImplementation,
+  'getJob' | 'getLatestActiveJob'
+> & {
+  /**
+   * The job with this ID, or `null` when there is none.
+   *
+   * @internal
+   */
+  getJob(jobId: number): Promise<AIMetadataJobRow | null>;
+  /**
+   * The most recently created job, whatever its status, or `null` when no job exists.
+   *
+   * @internal
+   */
+  getLatestActiveJob(): Promise<AIMetadataJobRow | null>;
+};
+
 /**
  * `strapi.config.get('plugin::upload')`: the plugin config merged with its defaults. `breakpoints`
  * defaults to the responsive image sizes when it is not set.
@@ -88,7 +121,7 @@ export type Services = {
   'api-upload-folder': typeof apiUploadFolder;
   extensions: typeof extensions;
   aiMetadata: ReturnType<typeof createAIMetadataService>;
-  aiMetadataJobs: ReturnType<typeof createAIMetadataJobsService>;
+  aiMetadataJobs: AIMetadataJobsService;
   aiMetadataProvider: ReturnType<typeof createAIMetadataProviderService>;
 };
 
