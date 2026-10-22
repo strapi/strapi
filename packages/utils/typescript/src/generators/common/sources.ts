@@ -342,7 +342,8 @@ export const withDocComment = <TNode extends ts.Node>(node: TNode, comment: stri
  *     : TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport
  *   : unknown;
  *
- * Emitted in each file so that services.d.ts and controllers.d.ts stand alone.
+ * Emitted in each file so that services.ts and controllers.ts stand alone, and only when a source
+ * registers its inferred type.
  *
  * Resolves the type registered for a service or a controller from the type of its module: the return
  * type of the default export when it is a factory, the default export itself otherwise. A module
@@ -351,9 +352,9 @@ export const withDocComment = <TNode extends ts.Node>(node: TNode, comment: stri
  * permissive contract for it. A module typed `any` and a default export typed `any` resolve to
  * `unknown` too: `any` would match the factory branch and register `any`.
  *
- * TODO @Nico An import that no longer resolves (the source moved after the generation) is an error
- * type: it behaves as `any`, and no conditional type maps it to `unknown`. `skipLibCheck` hides the
- * TS2307 in the generated file, until the next generation drops the entry.
+ * An import that no longer resolves (the source moved after the generation) is an error type, which
+ * no conditional type maps to `unknown`. The generated file is a `.ts` file, so `tsc` reports the
+ * TS2307 there, `skipLibCheck` or not, until the next generation drops the entry.
  */
 export const generateInstanceHelperDefinition = (name: string, comment: string) => {
   const unwrapFactory = factory.createConditionalTypeNode(
@@ -414,17 +415,18 @@ export const generateInstanceHelperDefinition = (name: string, comment: string) 
 /**
  * type <name><TContract> = 0 extends 1 & TContract ? unknown : TContract;
  *
- * Emitted next to the instance helper only when at least one source exports a contract: an
- * application without contracts does not get it.
+ * Emitted only when at least one source exports a contract: an application without contracts does
+ * not get it.
  *
  * A contract typed `any` registers `unknown`, as for an unregistered uid, rather than turning every
  * lookup of the uid into `any`.
  *
- * TODO @Nico A contract reference that no longer resolves to a type (the export was renamed after
- * the generation, names a value, or is a generic without defaults) is an error type: it behaves as
- * `any`, and no conditional type can map it to `unknown` (an alias instantiated with the error type
- * stays the error type). `skipLibCheck` hides the TS2694/TS2749/TS2314 in the generated file. The
- * next generation, on every `strapi develop` start, registers the source without its contract again.
+ * A contract reference that no longer resolves to a type (the export was renamed after the
+ * generation, names a value, or is a generic without defaults) is an error type, which no conditional
+ * type can map to `unknown` (an alias instantiated with the error type stays the error type). The
+ * generated file is a `.ts` file, so `tsc` reports the TS2694/TS2749/TS2314 there, `skipLibCheck` or
+ * not. The next generation, on every `strapi develop` start, registers the source without its
+ * contract again.
  */
 export const generateContractHelperDefinition = (name: string, comment: string) =>
   withDocComment(

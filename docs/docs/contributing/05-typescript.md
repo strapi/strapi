@@ -143,7 +143,7 @@ names. A package that registers policies or middlewares registers all of them.
   explicitly: `strapi.middleware<Core.MiddlewareFactory>(name)`.
 - `@strapi/core` registers the `strapi::*` middlewares in `packages/core/core/src/types/index.ts`.
   Type generation registers application middlewares (`global::*`, `api::*`) in `AppMiddlewares`
-  (`types/generated/middlewares.d.ts`).
+  (`types/generated/middlewares.ts`).
 
 ### Hook contracts
 

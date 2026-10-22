@@ -26,8 +26,8 @@ export const isStrictTypesEnabled = (strapi: Core.Strapi): boolean => {
  * With the flag off, the output equals the legacy one: only content-type and component definitions.
  * `plugins` loads the contracts of enabled optional plugins, so it is generated with the strict
  * artifacts. They are passed as `false` rather than left out when the flag is off, so the generator
- * removes a stale `plugins.d.ts` / `services.d.ts` / `controllers.d.ts` / `policies.d.ts` /
- * `middlewares.d.ts` / `strict.d.ts` left by a run with the flag on.
+ * removes a stale `plugins.d.ts` / `services.ts` / `controllers.ts` / `policies.ts` /
+ * `middlewares.ts` / `strict.d.ts` left by a run with the flag on.
  */
 export const getTypeArtifacts = (strapi: Core.Strapi) => {
   const strict = isStrictTypesEnabled(strapi);

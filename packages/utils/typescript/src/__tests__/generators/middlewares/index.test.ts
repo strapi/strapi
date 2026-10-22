@@ -147,7 +147,7 @@ describe('generateMiddlewaresDefinitions', () => {
 
     const logger = createLogger({ silent: true });
     const { output } = await generateMiddlewaresDefinitions({ strapi, pwd, logger });
-    await outputFile(path.join(pwd, 'middlewares.d.ts'), output);
+    await outputFile(path.join(pwd, 'middlewares.ts'), output);
     // A global stub for the registry namespace that @strapi/types declares
     await outputFile(
       path.join(root, 'registries.d.ts'),
@@ -159,7 +159,7 @@ describe('generateMiddlewaresDefinitions', () => {
     );
 
     const program = ts.createProgram({
-      rootNames: ['registries.d.ts', 'types/generated/middlewares.d.ts', 'check.ts'].map((file) =>
+      rootNames: ['registries.d.ts', 'types/generated/middlewares.ts', 'check.ts'].map((file) =>
         path.join(root, file)
       ),
       options: { noEmit: true, strict: true, types: [] },
@@ -275,6 +275,17 @@ describe('generateMiddlewaresDefinitions', () => {
     expect(logger.warnings).toBe(2);
   });
 
+  test('emits no config helpers when every source is JS', async () => {
+    const { output } = await generate(
+      { 'src/middlewares/legacy.js': 'module.exports = () => async (ctx, next) => next();' },
+      ['global::legacy']
+    );
+
+    expect(output).toContain("'global::legacy': unknown");
+    // `noUnusedLocals` would report a helper that no entry reads
+    expect(output).not.toContain('MiddlewareConfig');
+  });
+
   test('sorts the entries by uid', async () => {
     const { output } = await generate(
       {
@@ -300,7 +311,7 @@ export {};
 `);
     // An empty file must still be a module, so that `import type {} from './middlewares'` compiles
     expect(
-      ts.isExternalModule(ts.createSourceFile('middlewares.d.ts', output, ts.ScriptTarget.Latest))
+      ts.isExternalModule(ts.createSourceFile('middlewares.ts', output, ts.ScriptTarget.Latest))
     ).toBe(true);
   });
 });
