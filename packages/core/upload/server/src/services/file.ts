@@ -314,4 +314,19 @@ const signFileUrls = async (file: File) => {
 };
 
 export type { UrlFetchedFile, FetchUrlResult, UrlFetchProgress };
-export default { getFolderPath, deleteByIds, signFileUrls, fetchUrlToInputFile };
+export default {
+  getFolderPath,
+  /**
+   * Deletes the files with these IDs, from the provider too.
+   *
+   * @internal
+   */
+  deleteByIds,
+  signFileUrls,
+  /**
+   * Streams a URL to a temporary file for the upload pipeline.
+   *
+   * @internal
+   */
+  fetchUrlToInputFile,
+};
