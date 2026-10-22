@@ -60,6 +60,32 @@ describe('review-workflows workflow content types service', () => {
     ]);
   });
 
+  test('migrate keeps the existing configuration options of the content type', async () => {
+    getAssignedWorkflows.mockResolvedValue([]);
+    // Mirrors the content-manager service: configurations are read by schema, keyed by its uid
+    const configurations: Record<string, { options: Record<string, unknown> }> = {
+      'api::a.a': { options: { custom: 'value' } },
+    };
+    const contentTypesService = {
+      findConfiguration: vi.fn(
+        async (contentType: { uid: string }) => configurations[contentType.uid] ?? { options: {} }
+      ),
+      updateConfiguration: vi.fn(),
+    };
+    const strapi = {
+      ...createStrapiMock(),
+      plugin: vi.fn(() => ({ service: vi.fn(() => contentTypesService) })),
+    };
+    const service = workflowContentTypesFactory({ strapi: strapi as any });
+
+    await service.migrate({ srcContentTypes: ['api::a.a'], destContentTypes: [], stageId: 10 });
+
+    expect(contentTypesService.updateConfiguration).toHaveBeenCalledWith(
+      { uid: 'api::a.a' },
+      { options: { custom: 'value', reviewWorkflows: false } }
+    );
+  });
+
   test('migrate returns no transfer when no other workflow had the content type', async () => {
     getAssignedWorkflows.mockResolvedValue([]);
     const service = workflowContentTypesFactory({ strapi: createStrapiMock() as any });
