@@ -15,6 +15,8 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
         query: { id: validator.fileIdOrDocumentId.optional() },
         // Note: multipart/form-data is handled by Koa middleware, not Zod
       },
+      // This route sends 201 for a new upload but 200 when `?id` replaces a file or updates its
+      // info. `responseStatus` documents one status per route, so it stays at 200.
       response: z.union([validator.file, validator.files]),
     },
     {

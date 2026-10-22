@@ -29,6 +29,14 @@ export interface Route {
   config?: RouteConfig;
   request?: RouteRequest;
   response?: RouteResponse;
+  /**
+   * HTTP status of a successful response, used to document the route (e.g. OpenAPI).
+   * It does not change the status the handler sends.
+   *
+   * When omitted, `response` is documented under 200.
+   * When set without `response`, the status is documented with no content (e.g. 204).
+   */
+  responseStatus?: number;
 }
 
 export interface SchemaReference {

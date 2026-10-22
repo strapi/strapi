@@ -83,6 +83,7 @@ module.exports = (strapi) => {
         body: { 'application/json': validator.createUserBodySchema },
       },
       response: validator.userSchema,
+      responseStatus: 201,
     },
     {
       method: 'PUT',
