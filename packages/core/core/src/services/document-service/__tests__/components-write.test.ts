@@ -437,8 +437,8 @@ describe('isComponentUnchanged', () => {
     expect(check({ big: '9007199254740993' }, { big: '9007199254740994' })).toBe(false);
     expect(check({ day: '2026-10-16' }, { day: '2026-10-16' })).toBe(true);
     expect(check({ day: '2026-10-16' }, { day: '2026-10-17' })).toBe(false);
-    expect(check({ clock: '10:30:00.000' }, { clock: '10:30' })).toBe(true);
-    expect(check({ clock: '10:30:00.000' }, { clock: '10:31' })).toBe(false);
+    expect(check({ clock: '10:30:00.000' }, { clock: '10:30:00' })).toBe(true);
+    expect(check({ clock: '10:30:00.000' }, { clock: '10:31:00' })).toBe(false);
     expect(
       check({ when: '2026-10-16T10:00:00.000Z' }, { when: '2026-10-16T12:00:00.000+02:00' })
     ).toBe(true);
@@ -458,6 +458,13 @@ describe('isComponentUnchanged', () => {
     expect(check({ string: null }, { string: null })).toBe(true);
     expect(check({ string: null }, { string: '' })).toBe(false);
     expect(check({ int: 0 }, { int: null })).toBe(false);
+  });
+
+  it('treats a date or time the database would reject as a change', () => {
+    // the database layer wants HH:mm:ss.SSS: writing this is a validation error, not a no-op
+    expect(check({ clock: '10:30:00.000' }, { clock: '10:30' })).toBe(false);
+    expect(check({ day: '2026-10-16' }, { day: 'yesterday' })).toBe(false);
+    expect(check({ when: '2026-10-16T10:00:00.000Z' }, { when: 'not a date' })).toBe(false);
   });
 
   it('assumes a change for passwords, unknown values and attributes that were not loaded', () => {

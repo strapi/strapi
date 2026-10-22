@@ -1,6 +1,7 @@
 import _, { assign, curry, has, isEmpty, isEqual, isNil, isPlainObject, omit } from 'lodash';
 import type { Utils, UID, Schema, Data, Modules } from '@strapi/types';
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
+import { createField } from '@strapi/database';
 import {
   getComponentJoinTableName,
   getComponentJoinColumnEntityName,
@@ -455,49 +456,23 @@ const toComparableBigInt = (value: unknown): string | null => {
   return null;
 };
 
-const toComparableDateTime = (value: unknown): number | null => {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value.getTime();
-  }
+/**
+ * What the database layer would store for `value`, or null when it would reject it. Both sides of
+ * a comparison go through it so that the comparison matches the write it replaces: the database
+ * parsers read a date without a time in local time, format a Date as a local day and reject a
+ * time without seconds, and none of that is reproduced here.
+ */
+const toStoredDateValue = (
+  attribute: { type: 'date' | 'time' | 'datetime' | 'timestamp' },
+  value: unknown
+): string | number | null => {
+  try {
+    const stored = createField({ type: attribute.type }).toDB(value);
 
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? value : null;
-  }
-
-  if (typeof value === 'string' && value.trim() !== '') {
-    // timestamps are loaded as epoch strings
-    const time = /^\d+$/.test(value) ? Number(value) : new Date(value).getTime();
-    return Number.isNaN(time) ? null : time;
-  }
-
-  return null;
-};
-
-const toComparableDate = (value: unknown): string | null => {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value.toISOString().slice(0, 10);
-  }
-
-  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
-    return value.slice(0, 10);
-  }
-
-  return null;
-};
-
-const toComparableTime = (value: unknown): string | null => {
-  if (typeof value !== 'string') {
+    return stored instanceof Date ? stored.getTime() : String(stored);
+  } catch {
     return null;
   }
-
-  const match = value.match(/^(\d{2}:\d{2})(?::(\d{2}))?(?:\.(\d{1,3}))?$/);
-  if (!match) {
-    return null;
-  }
-
-  const [, hoursMinutes, seconds = '00', milliseconds = '000'] = match;
-
-  return `${hoursMinutes}:${seconds}.${milliseconds.padEnd(3, '0')}`;
 };
 
 const toComparableJson = (value: unknown): unknown => {
@@ -541,18 +516,12 @@ const isScalarUnchanged = (
       const a = toComparableBigInt(stored);
       return a !== null && a === toComparableBigInt(incoming);
     }
-    case 'date': {
-      const a = toComparableDate(stored);
-      return a !== null && a === toComparableDate(incoming);
-    }
-    case 'time': {
-      const a = toComparableTime(stored);
-      return a !== null && a === toComparableTime(incoming);
-    }
+    case 'date':
+    case 'time':
     case 'datetime':
     case 'timestamp': {
-      const a = toComparableDateTime(stored);
-      return a !== null && a === toComparableDateTime(incoming);
+      const a = toStoredDateValue(attribute, stored);
+      return a !== null && a === toStoredDateValue(attribute, incoming);
     }
     case 'json':
     case 'blocks':
