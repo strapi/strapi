@@ -169,19 +169,40 @@ const hasModifier = (statement: ts.Statement, kind: ts.ModifierSyntaxKind) =>
   (ts.getModifiers(statement) ?? []).some((modifier) => modifier.kind === kind);
 
 /**
+ * Whether a top-level statement is `export type <name>` or `export interface <name>`
+ */
+const isExportedTypeDeclarationNamed = (
+  statement: ts.Statement,
+  name: string
+): statement is ts.TypeAliasDeclaration | ts.InterfaceDeclaration =>
+  (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) &&
+  statement.name.text === name &&
+  hasModifier(statement, ts.SyntaxKind.ExportKeyword) === true &&
+  hasModifier(statement, ts.SyntaxKind.DefaultKeyword) === false;
+
+/**
+ * Whether a type declaration can be referenced without type arguments, as the generated file does
+ */
+const hasDefaultTypeArguments = (statement: ts.TypeAliasDeclaration | ts.InterfaceDeclaration) =>
+  (statement.typeParameters ?? []).every((parameter) => parameter.default !== undefined);
+
+/**
  * Whether a top-level statement exports a type under `name`: `export type <name>`,
  * `export interface <name>`, or an export specifier named `<name>` (`export { <name> }`,
  * `export { type X as <name> }`, `export type { X as <name> } from './x'`).
  *
- * A specifier may name a value rather than a type: its reference then does not resolve, which the
- * generated contract helper maps to `unknown`.
+ * A generic declaration only counts when each of its type parameters has a default: the generated
+ * file references it without type arguments.
+ *
+ * A specifier may name a value rather than a type, or a generic without defaults: its reference in
+ * the generated file does not resolve, and `tsc` reports it there.
+ * TODO @Nico a specifier of a local declaration could be checked like the declaration itself
  */
 const exportsTypeNamed = (statement: ts.Statement, name: string) => {
   if (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) {
     return (
-      statement.name.text === name &&
-      hasModifier(statement, ts.SyntaxKind.ExportKeyword) === true &&
-      hasModifier(statement, ts.SyntaxKind.DefaultKeyword) === false
+      isExportedTypeDeclarationNamed(statement, name) === true &&
+      hasDefaultTypeArguments(statement) === true
     );
   }
 
@@ -243,6 +264,18 @@ export const findTypeExports = async (
 
       if (sourceFile.statements.some((statement) => exportsTypeNamed(statement, name)) === true) {
         return true;
+      }
+
+      if (
+        sourceFile.statements.some(
+          (statement) =>
+            isExportedTypeDeclarationNamed(statement, name) === true &&
+            hasDefaultTypeArguments(statement) === false
+        ) === true
+      ) {
+        logger.warn(
+          `${source.file} exports ${name} with type parameters that have no default, typing ${source.uid} without it`
+        );
       }
 
       if (
@@ -422,11 +455,10 @@ export const generateInstanceHelperDefinition = (name: string, comment: string) 
  * lookup of the uid into `any`.
  *
  * A contract reference that no longer resolves to a type (the export was renamed after the
- * generation, names a value, or is a generic without defaults) is an error type, which no conditional
- * type can map to `unknown` (an alias instantiated with the error type stays the error type). The
- * generated file is a `.ts` file, so `tsc` reports the TS2694/TS2749/TS2314 there, `skipLibCheck` or
- * not. The next generation, on every `strapi develop` start, registers the source without its
- * contract again.
+ * generation, or a specifier names a value) is an error type, which no conditional type can map to
+ * `unknown` (an alias instantiated with the error type stays the error type). The generated file is a
+ * `.ts` file, so `tsc` reports the TS2694/TS2749 there, `skipLibCheck` or not. The next generation,
+ * on every `strapi develop` start, registers the source without its contract again.
  */
 export const generateContractHelperDefinition = (name: string, comment: string) =>
   withDocComment(
