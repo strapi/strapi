@@ -88,40 +88,52 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
       }, {});
 
       // 2. Query ids
-      await async.map(
-        Object.values(idsByUidAndLocale),
-        async ({ uid, locale, documentIds, status }: any) => {
-          const findParams = {
-            select: ['id', 'documentId', 'publishedAt'],
-            where: {
-              documentId: { $in: documentIds },
-            },
-          } as any;
+      const loadGroup = async ({ uid, locale, documentIds, status }: any) => {
+        const findParams = {
+          select: ['id', 'documentId', 'publishedAt'],
+          where: {
+            documentId: { $in: documentIds },
+          },
+        } as any;
 
-          // Without a localization provider, the model has no `locale` column
-          if (isLocalizedContentType(uid)) {
-            findParams.select.push('locale');
-            findParams.where.locale = locale || null;
-          }
-
-          if (hasDraftAndPublish(uid)) {
-            findParams.where.publishedAt = status === 'draft' ? null : { $ne: null };
-          }
-
-          const result = await strapi?.db?.query(uid).findMany(findParams);
-
-          // 3. Store result in loadedIds
-          result?.forEach(({ documentId, id, locale: entryLocale, publishedAt }: any) => {
-            const key = encodeKey({
-              documentId,
-              uid,
-              locale: isLocalizedContentType(uid) ? entryLocale : null,
-              status: publishedAt ? 'published' : 'draft',
-            });
-            loadedIds.set(key, id);
-          });
+        // Without a localization provider, the model has no `locale` column
+        if (isLocalizedContentType(uid)) {
+          findParams.select.push('locale');
+          findParams.where.locale = locale || null;
         }
-      );
+
+        if (hasDraftAndPublish(uid)) {
+          findParams.where.publishedAt = status === 'draft' ? null : { $ne: null };
+        }
+
+        const result = await strapi?.db?.query(uid).findMany(findParams);
+
+        // 3. Store result in loadedIds
+        result?.forEach(({ documentId, id, locale: entryLocale, publishedAt }: any) => {
+          const key = encodeKey({
+            documentId,
+            uid,
+            locale: isLocalizedContentType(uid) ? entryLocale : null,
+            status: publishedAt ? 'published' : 'draft',
+          });
+          loadedIds.set(key, id);
+        });
+      };
+
+      const groups = Object.values(idsByUidAndLocale);
+
+      // Inside a transaction every query is bound to the transaction's single connection, and
+      // node-postgres deprecated (pg@8.19) and removes (pg@9) calling `client.query()` on a client
+      // that is already executing a query. The groups therefore load one after another there,
+      // which costs nothing: the driver was already serialising them on that one connection.
+      // Outside a transaction they fan out over the pool as before.
+      if (strapi?.db?.inTransaction?.()) {
+        for (const group of groups) {
+          await loadGroup(group);
+        }
+      } else {
+        await async.map(groups, loadGroup);
+      }
 
       // 4. Clear toLoadIds
       toLoadIds.clear();
