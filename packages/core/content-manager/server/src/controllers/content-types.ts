@@ -1,5 +1,5 @@
 import { objects } from '@strapi/utils';
-import { has, get, mapValues } from 'lodash';
+import { has, get, isPlainObject, mapValues, omit } from 'lodash';
 
 import { getService } from '../utils';
 import { createModelConfigurationSchema, validateKind } from './validation';
@@ -8,6 +8,21 @@ const assocMainField = (metadata: any) =>
   has(metadata, 'edit.mainField')
     ? objects.set(metadata, 'list.mainField', get(metadata, 'edit.mainField'))
     : metadata;
+
+/**
+ * `list.mainField` is derived from `edit.mainField` when a configuration is read (see
+ * `assocMainField`) and is not part of the stored configuration, so it is dropped from an update
+ * before validation. A configuration read from this API can then be sent back as is.
+ */
+const dissocListMainField = (metadata: any) =>
+  isPlainObject(metadata?.list)
+    ? { ...metadata, list: omit(metadata.list, 'mainField') }
+    : metadata;
+
+const withoutDerivedMetadata = (body: any) =>
+  isPlainObject(body?.metadatas)
+    ? { ...body, metadatas: mapValues(body.metadatas, dissocListMainField) }
+    : body;
 
 export default {
   async findContentTypes(ctx: any) {
@@ -99,11 +114,14 @@ export default {
 
     let input;
     try {
-      input = await createModelConfigurationSchema(contentType).validate(body, {
-        abortEarly: false,
-        stripUnknown: true,
-        strict: true,
-      });
+      input = await createModelConfigurationSchema(contentType).validate(
+        withoutDerivedMetadata(body),
+        {
+          abortEarly: false,
+          stripUnknown: true,
+          strict: true,
+        }
+      );
     } catch (error: any) {
       return ctx.badRequest(null, {
         name: 'validationError',
