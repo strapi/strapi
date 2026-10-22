@@ -16,5 +16,8 @@ export const controllers = {
   'admin-upload': adminUpload,
   'content-api': contentApi,
   'view-configuration': viewConfiguration,
-  // The other controllers are not registered yet.
-} satisfies Controllers & Record<string, unknown>;
+  // `content-api` is a factory: the registry calls it with `{ strapi }`. It is checked here and not
+  // on its returned object, whose `upload` action calls its sibling actions with `ctx` only.
+} satisfies Omit<Controllers, 'content-api'> & {
+  'content-api': import('@strapi/types').Core.ControllerFactory<'plugin::upload.content-api'>;
+};

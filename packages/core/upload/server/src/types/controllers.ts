@@ -47,6 +47,36 @@ export type AdminUploadController = {
   upload: Core.ControllerHandler;
 };
 
+/** Content API actions listing, reading, deleting and uploading files. */
+export type ContentApiController = {
+  find: Core.ControllerHandler;
+  findPage: Core.ControllerHandler;
+  findOne: Core.ControllerHandler;
+  destroy: Core.ControllerHandler;
+  /**
+   * Not routed: `upload` delegates to it when the request has a file ID and no files.
+   * @internal
+   */
+  updateFileInfo: Core.ControllerHandler;
+  /**
+   * Not routed: `upload` delegates to it when the request has files and a file ID.
+   * @internal
+   */
+  replaceFile: Core.ControllerHandler;
+  /**
+   * Not routed: `upload` delegates to it when the request has files and no file ID.
+   * @internal
+   */
+  uploadFiles: Core.ControllerHandler;
+  upload: Core.ControllerHandler;
+};
+
+/** Admin actions reading and updating the media library view configuration. */
+export type ViewConfigurationController = {
+  updateViewConfiguration: Core.ControllerHandler;
+  findViewConfiguration: Core.ControllerHandler;
+};
+
 /** The controller contracts by name, as in the plugin's controllers map. Used to check the routes. */
 export type Controllers = {
   'admin-file': AdminFileController;
@@ -54,6 +84,8 @@ export type Controllers = {
   'admin-folder-file': AdminFolderFileController;
   'admin-settings': AdminSettingsController;
   'admin-upload': AdminUploadController;
+  'content-api': ContentApiController;
+  'view-configuration': ViewConfigurationController;
 };
 
 /** Default controller contracts loaded with the Upload server types. */
@@ -68,6 +100,8 @@ declare global {
         'plugin::upload.admin-folder-file': Controllers['admin-folder-file'];
         'plugin::upload.admin-settings': Controllers['admin-settings'];
         'plugin::upload.admin-upload': Controllers['admin-upload'];
+        'plugin::upload.content-api': Controllers['content-api'];
+        'plugin::upload.view-configuration': Controllers['view-configuration'];
       }
     }
   }
