@@ -1797,11 +1797,9 @@ Read [Document write path](./05-document-write-path.md) for where middlewares si
 
 To offer an event to webhooks, a plugin calls `strapi.get('webhookStore').addAllowedEvent(key, value)`, usually in `bootstrap`.
 
-:::caution
-Several unsubscribe helpers use `list.splice(list.indexOf(item), 1)`. If `item` is not in the list, `indexOf` returns `-1` and `splice(-1, 1)` removes the last entry. This applies to the function that `strapi.documents.use()` returns and to the function that `strapi.db.lifecycles.subscribe()` returns.
-:::
-
 `eventHub.off(name, listener)` does nothing if `listener` is not registered for `name`. `eventHub.once(name, listener)` registers a wrapper. The wrapper calls `listener` only on its first call and removes itself, so `listener` runs one time, also when two emits of the same event overlap. `emit` iterates over a copy of the listener list, so if a listener is removed during an emit, the next listener still runs.
+
+The functions that `strapi.documents.use()` and `strapi.db.lifecycles.subscribe()` return remove their own entry only. They do nothing if the entry is not in the list, for example on a second call or after `strapi.db.lifecycles.clear()`.
 
 ### Three hook-like mechanisms compared
 
