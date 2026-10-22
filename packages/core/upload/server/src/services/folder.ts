@@ -297,8 +297,14 @@ const getStructure = async () => {
     }
 
     folderMap[parentId].children.push(folderMap[f.id]);
-    folderMap[parentId].children = sortBy(folderMap[parentId].children, 'name');
     delete folderMap[f.id].parent;
+  });
+
+  // Sort each children list once the tree is assembled. Re-sorting on every push
+  // made a parent with N children cost O(N² log N): ~0.5 s of blocking CPU at
+  // 5 000 subfolders and ~9 s at 20 000, holding up every other request meanwhile.
+  Object.values(folderMap).forEach((node) => {
+    node.children = sortBy(node.children, 'name');
   });
 
   return folderMap.null.children;
