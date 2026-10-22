@@ -69,15 +69,30 @@ app.plugin('upload').controller('admin-file').findOne(context, next);
 app.controller('plugin::upload.admin-upload').bulkUpdateFileInfo(context, next);
 // @ts-expect-error Registry controller actions do not accept misspelled names.
 app.plugin('upload').controller('admin-upload').uploadFromUrl(context, next);
+app.plugin('upload').controller('admin-folder').create(context, next);
+app.controller('plugin::upload.admin-folder-file').deleteMany(context, next);
+app.plugin('upload').controller('admin-settings').getSettings(context, next);
+// @ts-expect-error Registry controller actions do not accept misspelled names.
+app.controller('plugin::upload.admin-folder').getStructures(context, next);
 
 type Controllers = {
   'admin-file': Strapi.Registries.PackageControllers['plugin::upload.admin-file'];
+  'admin-folder': Strapi.Registries.PackageControllers['plugin::upload.admin-folder'];
+  'admin-folder-file': Strapi.Registries.PackageControllers['plugin::upload.admin-folder-file'];
+  'admin-settings': Strapi.Registries.PackageControllers['plugin::upload.admin-settings'];
   'admin-upload': Strapi.Registries.PackageControllers['plugin::upload.admin-upload'];
 };
 [
   { method: 'DELETE', path: '/files/:id', handler: 'admin-file.destroy' },
+  { method: 'GET', path: '/folders/:id', handler: 'admin-folder.findOne' },
+  { method: 'POST', path: '/actions/bulk-delete', handler: 'admin-folder-file.deleteMany' },
+  { method: 'GET', path: '/settings', handler: 'admin-settings.getSettings' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
 [
   // @ts-expect-error Route actions are checked against the controller contracts.
   { method: 'DELETE', path: '/files/:id', handler: 'admin-file.delete' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
+[
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  { method: 'PUT', path: '/settings', handler: 'admin-settings.setSettings' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
