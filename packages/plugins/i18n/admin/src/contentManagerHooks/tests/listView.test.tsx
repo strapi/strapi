@@ -1,3 +1,6 @@
+/* eslint-disable check-file/filename-naming-convention */
+import { render, screen } from '@tests/utils';
+
 import { addColumnToTableHook } from '../listView';
 
 import type { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
@@ -90,5 +93,55 @@ describe('addColumnToTableHook', () => {
         "sortable": false,
       }
     `);
+  });
+
+  describe('cellFormatter', () => {
+    let consoleError: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleError.mockRestore();
+    });
+
+    it('renders the locales cell for a row that has `ref` and `key` attributes', async () => {
+      const { displayedHeaders } = addColumnToTableHook({
+        displayedHeaders: [DEFAULT_FIELD],
+        layout: {
+          ...DEFAULT_LAYOUT,
+          options: {
+            i18n: {
+              localized: true,
+            },
+          },
+        },
+      });
+      const header = displayedHeaders[1];
+      // The list view translates plugin labels before calling the formatter.
+      const listViewHeader = { ...header, label: 'Available in' } as ListFieldLayout;
+
+      const row = {
+        id: 1,
+        documentId: 'abc123',
+        ref: 'ref-value',
+        key: 'key-value',
+        locale: 'en',
+        localizations: [{ locale: 'fr' }],
+      };
+
+      render(
+        <>
+          {header.cellFormatter!(row, listViewHeader, {
+            collectionType: 'collection-types',
+            model: 'api::address.address',
+          })}
+        </>
+      );
+
+      expect(await screen.findByText('English (default), Français')).toBeInTheDocument();
+      expect(consoleError).not.toHaveBeenCalled();
+    });
   });
 });
