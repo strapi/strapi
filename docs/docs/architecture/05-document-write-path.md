@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - Deadlock retry: the outermost transaction runs the handler up to 3 times. Commit callbacks stay unawaited.
+  - 'Deadlock retry: the outermost transaction runs the handler up to 3 times. Commit callbacks stay unawaited.'
   - The webhook runner paragraph describes `contentTypeEvents`. That claim was checked against `webhook-runner.ts` and `webhook-store.ts`. The rest of this page was not re-verified.
 ---
 
