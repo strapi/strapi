@@ -1,5 +1,6 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { UploadableFile } from '../types';
+import type { AIMetadataJobRow } from './services';
 
 declare const file: UploadableFile;
 
@@ -50,3 +51,42 @@ strapi
   .plugin('upload')
   .service('extensions')
   .signFileUrlsOnDocumentService() satisfies Promise<void>;
+
+const aiMetadataJobs = strapi.plugin('upload').service('aiMetadataJobs');
+aiMetadataJobs.createJob() satisfies Promise<number>;
+aiMetadataJobs.getJob(1) satisfies Promise<AIMetadataJobRow | null>;
+aiMetadataJobs.updateJob(1, {
+  status: 'completed',
+  completedAt: new Date(),
+}) satisfies Promise<void>;
+// @ts-expect-error A job is looked up by its numeric ID.
+aiMetadataJobs.getJob('1');
+declare const job: NonNullable<Awaited<ReturnType<typeof aiMetadataJobs.getLatestActiveJob>>>;
+job.createdAt satisfies string;
+job.completedAt satisfies string | null;
+// @ts-expect-error Dates are read back as ISO strings.
+job.createdAt satisfies Date;
+// @ts-expect-error The status is one of the job states.
+job.status satisfies 'pending';
+// @ts-expect-error Registered services have no arbitrary members.
+aiMetadataJobs.missing();
+
+const aiMetadata = strapi.service('plugin::upload.aiMetadata');
+aiMetadata.isEnabled() satisfies Promise<boolean>;
+aiMetadata.countImagesWithoutMetadata() satisfies Promise<{
+  imagesWithoutMetadataCount: number;
+  totalImages: number;
+}>;
+aiMetadata.processExistingFiles(1, { id: 1 }) satisfies Promise<void>;
+// @ts-expect-error Registered services have no arbitrary members.
+aiMetadata.missing();
+
+const aiMetadataProvider = strapi.plugin('upload').service('aiMetadataProvider');
+aiMetadataProvider.hasProvider() satisfies boolean;
+aiMetadataProvider.registerProvider({
+  provider: { name: 'custom', generateMetadata: async () => ({ results: [] }) },
+});
+// @ts-expect-error A provider generates the metadata.
+aiMetadataProvider.registerProvider({ provider: { name: 'custom' } });
+// @ts-expect-error Registered services have no arbitrary members.
+aiMetadataProvider.missing();
