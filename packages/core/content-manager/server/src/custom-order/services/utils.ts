@@ -1,3 +1,5 @@
+import { POSITION_ATTRIBUTE } from '../constants';
+
 export type Placement = 'before' | 'after';
 
 export interface MovePlan {
@@ -76,4 +78,70 @@ export const isEmptySort = (sort: unknown): boolean => {
   }
 
   return false;
+};
+
+type Direction = 'asc' | 'desc';
+
+const parseSortEntry = (entry: unknown): { field: string; direction: Direction } | null => {
+  if (typeof entry === 'string') {
+    const [field, direction] = entry.trim().split(':');
+
+    return field ? { field, direction: toDirection(direction) } : null;
+  }
+
+  if (entry && typeof entry === 'object') {
+    const fields = Object.keys(entry);
+    const field = fields[fields.length - 1];
+
+    return field
+      ? { field, direction: toDirection((entry as Record<string, unknown>)[field]) }
+      : null;
+  }
+
+  return null;
+};
+
+const toDirection = (value: unknown): Direction =>
+  typeof value === 'string' && value.toLowerCase() === 'desc' ? 'desc' : 'asc';
+
+/**
+ * Completes a sort that ends on the position with the `id` of the row.
+ *
+ * Positions alone don't make a total order: every row of a document shares its position,
+ * rows written outside of the Document Service have none, and without a tie-breaker each
+ * database would place those rows differently, and not always on the same page. Among
+ * equals the most recent row comes first, like new entries do.
+ *
+ * @returns the same `sort` when it does not end on the position.
+ */
+const toSortEntries = (sort: unknown): unknown[] => {
+  if (typeof sort === 'string') {
+    return sort.split(',');
+  }
+
+  return Array.isArray(sort) ? sort : [sort];
+};
+
+export const withTieBreaker = (sort: unknown): unknown => {
+  const entries = toSortEntries(sort);
+  const last = parseSortEntry(entries[entries.length - 1]);
+
+  if (!last || last.field !== POSITION_ATTRIBUTE) {
+    return sort;
+  }
+
+  const tieBreaker: Direction = last.direction === 'asc' ? 'desc' : 'asc';
+
+  if (typeof sort === 'string') {
+    return `${sort},id:${tieBreaker}`;
+  }
+
+  if (Array.isArray(sort)) {
+    return [
+      ...sort,
+      typeof entries[entries.length - 1] === 'string' ? `id:${tieBreaker}` : { id: tieBreaker },
+    ];
+  }
+
+  return { ...(sort as Record<string, unknown>), id: tieBreaker };
 };

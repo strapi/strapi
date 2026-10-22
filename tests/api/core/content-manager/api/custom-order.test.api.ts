@@ -375,4 +375,74 @@ describe('CM API - Custom order', () => {
     expect(res.statusCode).toBe(200);
     expect(await apiTitles()).toEqual(['G', 'F', 'B copy', 'A', 'E', 'C', 'D', 'B']);
   });
+
+  test('entries created at the same time get distinct positions', async () => {
+    const titles = ['H', 'I', 'J', 'K', 'L'];
+
+    await Promise.all(titles.map((title) => create(title)));
+
+    const rows = await strapi.db.query(UID).findMany({
+      select: ['title', 'strapi_position'],
+      where: { title: { $in: titles } },
+    });
+    const positions = rows.map((row: { strapi_position: number }) => row.strapi_position);
+
+    expect(new Set(positions).size).toBe(titles.length);
+
+    // All on top, the others untouched
+    const order = await apiTitles();
+    expect(order.slice(0, titles.length).sort()).toEqual(titles);
+    expect(order.slice(titles.length)).toEqual(['G', 'F', 'B copy', 'A', 'E', 'C', 'D', 'B']);
+
+    // Two entries created at the same time can still be reordered
+    const [first, second] = order;
+    const res = await move(second, { before: ids[first] });
+
+    expect(res.statusCode).toBe(200);
+    expect((await apiTitles()).slice(0, 2)).toEqual([second, first]);
+  });
+
+  test('a position sent while custom order is off is dropped', async () => {
+    const before = await apiTitles();
+    await setCustomOrder(false);
+
+    const doc = await strapi.documents(UID).create({
+      data: { title: 'M', strapi_position: -1000 },
+      locale: 'en',
+    });
+    ids.M = doc.documentId;
+    await strapi.documents(UID).update({
+      documentId: ids.M,
+      locale: 'en',
+      data: { strapi_position: -2000 },
+    });
+
+    const row = await strapi.db.query(UID).findOne({
+      select: ['strapi_position'],
+      where: { documentId: ids.M, publishedAt: null },
+    });
+    expect(row.strapi_position).toBeNull();
+
+    // Like any entry created while custom order was off, it lands on top when it is back on
+    await setCustomOrder(true);
+    expect(await apiTitles()).toEqual(['M', ...before]);
+  });
+
+  test('a row written outside of the Document Service takes the position of its document', async () => {
+    await strapi.db.query(UID).create({
+      data: { documentId: ids.A, locale: 'fr', title: 'A fr', publishedAt: null },
+    });
+
+    await strapi.service('plugin::content-manager.custom-order').assignMissingPositions(UID);
+
+    const rows = await strapi.db.query(UID).findMany({
+      select: ['locale', 'strapi_position'],
+      where: { documentId: ids.A, publishedAt: null },
+    });
+    const positionOf = (locale: string) =>
+      rows.find((row: { locale: string }) => row.locale === locale).strapi_position;
+
+    expect(positionOf('fr')).toBe(positionOf('en'));
+    expect(await apiTitles({ locale: 'fr' })).toEqual(['A fr', 'C fr', 'D fr']);
+  });
 });

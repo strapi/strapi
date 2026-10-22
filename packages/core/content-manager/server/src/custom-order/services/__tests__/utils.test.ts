@@ -1,4 +1,4 @@
-import { computeMove, isEmptySort, type Placement } from '../utils';
+import { computeMove, isEmptySort, withTieBreaker, type Placement } from '../utils';
 
 /**
  * Applies a move the way the service does, on a list of positions indexed by document.
@@ -102,5 +102,36 @@ describe('Custom order | utils', () => {
     test.each(['title:asc', ['title'], { title: 'asc' }])('%p is not empty', (sort) => {
       expect(isEmptySort(sort)).toBe(false);
     });
+  });
+});
+
+describe('Custom order | withTieBreaker', () => {
+  test.each([
+    [{ strapi_position: 'asc' }, { strapi_position: 'asc', id: 'desc' }],
+    [
+      { title: 'asc', strapi_position: 'DESC' },
+      { title: 'asc', strapi_position: 'DESC', id: 'asc' },
+    ],
+    ['strapi_position:asc', 'strapi_position:asc,id:desc'],
+    ['strapi_position', 'strapi_position,id:desc'],
+    ['title:asc, strapi_position:desc', 'title:asc, strapi_position:desc,id:asc'],
+    [['strapi_position:ASC'], ['strapi_position:ASC', 'id:desc']],
+    [[{ strapi_position: 'desc' }], [{ strapi_position: 'desc' }, { id: 'asc' }]],
+  ])('completes %p with the id, in the opposite direction', (sort, expected) => {
+    expect(withTieBreaker(sort)).toEqual(expected);
+  });
+
+  test.each([
+    'title:asc',
+    'strapi_position:asc,title:asc',
+    ['strapi_position:asc', { title: 'asc' }],
+    { strapi_position: 'asc', id: 'asc' },
+    {},
+    [],
+    undefined,
+    null,
+    42,
+  ])('leaves %p alone', (sort) => {
+    expect(withTieBreaker(sort)).toBe(sort);
   });
 });

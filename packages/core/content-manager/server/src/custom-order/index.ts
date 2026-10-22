@@ -46,6 +46,18 @@ const feature: Partial<Plugin.LoadedPlugin> = {
             private: true,
           },
         });
+
+        // Every default list sorts on the position, and moves look for rows without one
+        const { identifiers } = strapi.db.metadata;
+        const collectionName = schema.collectionName ?? schema.uid;
+
+        schema.indexes = [
+          ...(schema.indexes ?? []),
+          {
+            name: identifiers.getIndexName([collectionName, POSITION_ATTRIBUTE]),
+            columns: [identifiers.getColumnName(POSITION_ATTRIBUTE)],
+          },
+        ];
       });
     }
   },

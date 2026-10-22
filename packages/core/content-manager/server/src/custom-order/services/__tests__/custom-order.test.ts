@@ -26,6 +26,23 @@ const SINGLE_UID = 'api::homepage.homepage';
 
 const getAllConfigurations = jest.mocked(storeUtils.getAllConfigurations);
 
+const CORE_STORE_UID = 'strapi::core-store';
+
+/** Queries taking the lock on the order of the articles */
+const LOCK_CALLS = [
+  ['select', ['id']],
+  ['where', { key: `plugin_content_manager_configuration_content_types::${ARTICLE_UID}` }],
+  ['forUpdate'],
+  ['first'],
+];
+
+/** Query checking whether some rows have no position */
+const MISSING_CHECK_CALLS = [
+  ['select', ['id']],
+  ['where', { [POSITION_ATTRIBUTE]: { $null: true } }],
+  ['first'],
+];
+
 const flushPromises = () =>
   new Promise((resolve) => {
     setImmediate(resolve);
@@ -43,12 +60,14 @@ const createQueryBuilder = () => {
     const calls: unknown[][] = [];
     const chain: Record<string, jest.Mock> = {};
 
-    ['select', 'where', 'first', 'min', 'update', 'increment', 'decrement'].forEach((method) => {
-      chain[method] = jest.fn((...args: unknown[]) => {
-        calls.push([method, ...args]);
-        return chain;
-      });
-    });
+    ['select', 'where', 'first', 'min', 'update', 'increment', 'decrement', 'forUpdate'].forEach(
+      (method) => {
+        chain[method] = jest.fn((...args: unknown[]) => {
+          calls.push([method, ...args]);
+          return chain;
+        });
+      }
+    );
     chain.execute = execute;
 
     builders.push({ uid, calls });
@@ -242,6 +261,27 @@ describe('Custom order service', () => {
       expect(getAllConfigurations).toHaveBeenCalledTimes(2);
     });
 
+    test('Gives a position to the rows that have none when refreshing in the background', async () => {
+      now = jest.spyOn(Date, 'now').mockReturnValue(1_000);
+      getAllConfigurations.mockResolvedValue([
+        { uid: ARTICLE_UID, settings: { customOrder: true } },
+      ]);
+      const { strapi, execute, builders, knexResults, knexCalls } = createStrapi();
+      const service = createCustomOrderService({ strapi });
+      await service.refresh();
+
+      // A row without position, e.g. just imported
+      now.mockReturnValue(1_000 + ENABLED_CACHE_TTL_MS);
+      execute.mockResolvedValueOnce({ id: 9 }).mockResolvedValueOnce(undefined);
+      knexResults.push({ id: 9 }, { min: 4 }, 1, 2);
+      service.isEnabled(ARTICLE_UID);
+      await flushPromises();
+
+      expect(builders.map(({ uid }) => uid)).toEqual([ARTICLE_UID, CORE_STORE_UID]);
+      expect(strapi.db.transaction).toHaveBeenCalledTimes(1);
+      expect(knexCalls.filter(([, method]) => method === 'update')).toHaveLength(2);
+    });
+
     test('Logs a failed background refresh and tries again next time', async () => {
       now = jest.spyOn(Date, 'now').mockReturnValue(1_000);
       const { strapi } = createStrapi();
@@ -272,6 +312,27 @@ describe('Custom order service', () => {
     });
   });
 
+  describe('withOrderLock', () => {
+    test('Runs the work in a transaction, as the only writer of the order', async () => {
+      const { strapi, execute, builders } = createStrapi();
+      execute.mockResolvedValueOnce(undefined);
+      const service = createCustomOrderService({ strapi });
+      const work = jest.fn(async () => {
+        // The lock is taken before the work starts
+        expect(builders).toHaveLength(1);
+        expect(strapi.db.transaction).toHaveBeenCalledTimes(1);
+
+        return 'done';
+      });
+
+      await expect(service.withOrderLock(ARTICLE_UID, work)).resolves.toBe('done');
+
+      expect(work).toHaveBeenCalledTimes(1);
+      expect(builders[0].uid).toBe(CORE_STORE_UID);
+      expect(builders[0].calls).toEqual(LOCK_CALLS);
+    });
+  });
+
   describe('getTopPosition', () => {
     test.each([
       [{ min: 3 }, 2],
@@ -291,19 +352,25 @@ describe('Custom order service', () => {
   });
 
   describe('syncDocumentPosition', () => {
-    test('Gives the rows without position the position of their document', async () => {
+    test('Gives the rows without position the position of their document, under the lock', async () => {
       const { strapi, execute, builders } = createStrapi();
-      execute.mockResolvedValueOnce({ [POSITION_ATTRIBUTE]: 5 }).mockResolvedValueOnce(undefined);
+      execute
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce({ [POSITION_ATTRIBUTE]: 5 })
+        .mockResolvedValueOnce(undefined);
       const service = createCustomOrderService({ strapi });
 
       await service.syncDocumentPosition(ARTICLE_UID, 'doc');
 
-      expect(builders[0].calls).toEqual([
+      expect(strapi.db.transaction).toHaveBeenCalledTimes(1);
+      expect(builders[0].uid).toBe(CORE_STORE_UID);
+      expect(builders[0].calls).toEqual(LOCK_CALLS);
+      expect(builders[1].calls).toEqual([
         ['select', [POSITION_ATTRIBUTE]],
         ['where', { documentId: 'doc', [POSITION_ATTRIBUTE]: { $notNull: true } }],
         ['first'],
       ]);
-      expect(builders[1].calls).toEqual([
+      expect(builders[2].calls).toEqual([
         ['update', { [POSITION_ATTRIBUTE]: 5 }],
         ['where', { documentId: 'doc', [POSITION_ATTRIBUTE]: { $null: true } }],
       ]);
@@ -313,26 +380,45 @@ describe('Custom order service', () => {
       const { strapi, execute, builders } = createStrapi();
       execute
         .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ min: 2 })
         .mockResolvedValueOnce(undefined);
       const service = createCustomOrderService({ strapi });
 
       await service.syncDocumentPosition(ARTICLE_UID, 'doc');
 
-      expect(builders).toHaveLength(3);
-      expect(builders[2].calls[0]).toEqual(['update', { [POSITION_ATTRIBUTE]: 1 }]);
+      expect(builders).toHaveLength(4);
+      expect(builders[3].calls[0]).toEqual(['update', { [POSITION_ATTRIBUTE]: 1 }]);
     });
   });
 
   describe('assignMissingPositions', () => {
-    test('Does nothing when every row has a position', async () => {
-      const { strapi, knex, knexResults, knexCalls } = createStrapi();
+    test('Does nothing, without taking the lock, when every row has a position', async () => {
+      const { strapi, execute, builders, knex, knexCalls } = createStrapi();
+      execute.mockResolvedValueOnce(undefined);
+      const service = createCustomOrderService({ strapi });
+
+      await service.assignMissingPositions(ARTICLE_UID);
+
+      expect(strapi.db.transaction).not.toHaveBeenCalled();
+      expect(builders).toHaveLength(1);
+      expect(builders[0].uid).toBe(ARTICLE_UID);
+      expect(builders[0].calls).toEqual(MISSING_CHECK_CALLS);
+      expect(knexCalls).toEqual([]);
+      expect(knex.raw).not.toHaveBeenCalled();
+    });
+
+    test('Checks again under the lock, another writer may have given the positions', async () => {
+      const { strapi, execute, builders, knex, knexResults, knexCalls } = createStrapi();
+      execute.mockResolvedValueOnce({ id: 1 }).mockResolvedValueOnce(undefined);
       knexResults.push(undefined);
       const service = createCustomOrderService({ strapi });
 
       await service.assignMissingPositions(ARTICLE_UID);
 
       expect(strapi.db.transaction).toHaveBeenCalledTimes(1);
+      expect(builders[1].uid).toBe(CORE_STORE_UID);
+      expect(builders[1].calls).toEqual(LOCK_CALLS);
       expect(knexCalls).toEqual([
         ['table', 'transacting', 'trx'],
         ['table', 'whereNull', POSITION_ATTRIBUTE],
@@ -342,7 +428,8 @@ describe('Custom order service', () => {
     });
 
     test('Orders the documents by creation when nothing is ordered yet', async () => {
-      const { strapi, knex, knexResults, knexCalls } = createStrapi();
+      const { strapi, execute, knex, knexResults, knexCalls } = createStrapi();
+      execute.mockResolvedValueOnce({ id: 1 }).mockResolvedValueOnce(undefined);
       knexResults.push({ id: 1 }, { min: null }, 1);
       const service = createCustomOrderService({ strapi });
 
@@ -356,7 +443,8 @@ describe('Custom order service', () => {
     });
 
     test('Puts the documents created while custom order was off on top, most recent first', async () => {
-      const { strapi, knex, knexResults, knexCalls } = createStrapi();
+      const { strapi, execute, knex, knexResults, knexCalls } = createStrapi();
+      execute.mockResolvedValueOnce({ id: 7 }).mockResolvedValueOnce(undefined);
       knexResults.push({ id: 7 }, { min: 4 }, 1, 2);
       const service = createCustomOrderService({ strapi });
 
@@ -381,10 +469,11 @@ describe('Custom order service', () => {
       anchor?: number;
       plan: MovePlan | null;
     }) => {
-      const { strapi, execute, builders, knexResults } = createStrapi();
-      // Every row already has a position
-      knexResults.push(undefined);
+      const { strapi, execute, builders } = createStrapi();
       execute
+        // The lock, then the check that every row has a position
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(from === undefined ? undefined : { [POSITION_ATTRIBUTE]: from })
         .mockResolvedValueOnce(anchor === undefined ? undefined : { [POSITION_ATTRIBUTE]: anchor });
       jest.mocked(computeMove).mockReturnValue(plan);
@@ -404,7 +493,7 @@ describe('Custom order service', () => {
       const { service, builders } = setupMove({ from: 3, anchor: undefined, plan: null });
 
       await expect(service.move(moveParams)).rejects.toThrow(errors.NotFoundError);
-      expect(builders).toHaveLength(2);
+      expect(builders).toHaveLength(4);
     });
 
     test('Leaves a document that is already in place alone', async () => {
@@ -412,10 +501,17 @@ describe('Custom order service', () => {
 
       await service.move(moveParams);
 
-      // Positions are given to the rows that have none first
-      expect(strapi.db.transaction).toHaveBeenCalledTimes(2);
+      // The lock comes first, then positions are given to the rows that have none
+      expect(strapi.db.transaction).toHaveBeenCalledTimes(1);
+      expect(builders.map(({ uid }) => uid)).toEqual([
+        CORE_STORE_UID,
+        ARTICLE_UID,
+        ARTICLE_UID,
+        ARTICLE_UID,
+      ]);
+      expect(builders[0].calls).toEqual(LOCK_CALLS);
+      expect(builders[1].calls).toEqual(MISSING_CHECK_CALLS);
       expect(computeMove).toHaveBeenCalledWith({ from: 3, anchor: 2, placement: 'after' });
-      expect(builders).toHaveLength(2);
     });
 
     test('Shifts the documents in between and places the document', async () => {
@@ -427,11 +523,11 @@ describe('Custom order service', () => {
 
       await service.move(moveParams);
 
-      expect(builders[2].calls).toEqual([
+      expect(builders[4].calls).toEqual([
         ['where', { [POSITION_ATTRIBUTE]: { $gte: 2, $lte: 4 } }],
         ['decrement', POSITION_ATTRIBUTE],
       ]);
-      expect(builders[3].calls).toEqual([
+      expect(builders[5].calls).toEqual([
         ['update', { [POSITION_ATTRIBUTE]: 4 }],
         ['where', { documentId: 'a' }],
       ]);
@@ -446,11 +542,11 @@ describe('Custom order service', () => {
 
       await service.move({ ...moveParams, placement: 'before' });
 
-      expect(builders[2].calls).toEqual([
+      expect(builders[4].calls).toEqual([
         ['where', { [POSITION_ATTRIBUTE]: { $gte: 5 } }],
         ['increment', POSITION_ATTRIBUTE],
       ]);
-      expect(builders[3].calls[0]).toEqual(['update', { [POSITION_ATTRIBUTE]: 5 }]);
+      expect(builders[5].calls[0]).toEqual(['update', { [POSITION_ATTRIBUTE]: 5 }]);
     });
 
     test('Places the document without shifting anything when a slot is free', async () => {
@@ -462,8 +558,8 @@ describe('Custom order service', () => {
 
       await service.move(moveParams);
 
-      expect(builders).toHaveLength(3);
-      expect(builders[2].calls).toEqual([
+      expect(builders).toHaveLength(5);
+      expect(builders[4].calls).toEqual([
         ['update', { [POSITION_ATTRIBUTE]: 3 }],
         ['where', { documentId: 'a' }],
       ]);
@@ -476,15 +572,21 @@ describe('Custom order service', () => {
         { uid: ARTICLE_UID, settings: { customOrder: true } },
         { uid: PAGE_UID, settings: { customOrder: true } },
       ]);
-      const { strapi, knexResults } = createStrapi();
-      knexResults.push(undefined, undefined);
+      const { strapi, execute, builders, knexResults } = createStrapi();
+      // Only the articles have rows without position
+      execute
+        .mockResolvedValueOnce({ id: 1 })
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined);
+      knexResults.push({ id: 1 }, { min: null }, 1);
       const service = createCustomOrderService({ strapi });
 
       await service.bootstrap();
       await service.bootstrap();
 
       expect(getAllConfigurations).toHaveBeenCalledTimes(1);
-      expect(strapi.db.transaction).toHaveBeenCalledTimes(2);
+      expect(builders.map(({ uid }) => uid)).toEqual([ARTICLE_UID, CORE_STORE_UID, PAGE_UID]);
+      expect(strapi.db.transaction).toHaveBeenCalledTimes(1);
       expect(createDocumentMiddleware).toHaveBeenCalledTimes(1);
       expect(createDocumentMiddleware).toHaveBeenCalledWith(service);
       expect(strapi.documents.use).toHaveBeenCalledTimes(1);
@@ -496,8 +598,9 @@ describe('Custom order service', () => {
       getAllConfigurations.mockResolvedValue([
         { uid: ARTICLE_UID, settings: { customOrder: true } },
       ]);
-      const { strapi, knexResults } = createStrapi();
-      knexResults.push(undefined);
+      const { strapi, execute, knexResults } = createStrapi();
+      execute.mockResolvedValueOnce({ id: 1 }).mockResolvedValueOnce(undefined);
+      knexResults.push({ id: 1 }, { min: null }, 1);
       const service = createCustomOrderService({ strapi });
 
       await service.applySettings(ARTICLE_UID, { customOrder: true });

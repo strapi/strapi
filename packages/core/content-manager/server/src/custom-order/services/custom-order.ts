@@ -13,6 +13,11 @@ interface StoredConfiguration {
 
 type PositionRow = { [POSITION_ATTRIBUTE]: number | string | null };
 
+/**
+ * Core store key of the list view settings of a content type, see `services/utils/store.ts`.
+ */
+const CONFIGURATION_KEY_PREFIX = 'plugin_content_manager_configuration_content_types::';
+
 const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
   const state: {
     enabled: Set<string>;
@@ -69,6 +74,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
     state.isRefreshing = true;
 
     refresh()
+      .then(() => healMissingPositions())
       .catch((error: unknown) => {
         strapi.log.warn('[custom-order] Could not refresh the list of ordered content types', {
           error,
@@ -99,6 +105,50 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const toPosition = (value: number | string | null | undefined) =>
     value === null || value === undefined ? undefined : Number(value);
+
+  /**
+   * Takes the lock on the order of a content type until the current transaction ends.
+   *
+   * The position of a new document and a move both read positions before writing them. Two
+   * of them at the same time would give two documents the same position, and nothing could
+   * tell those two apart afterwards. The lock is the row holding the list view settings of
+   * the content type, which exists whenever custom order is on. `FOR UPDATE` holds it until
+   * the transaction ends on PostgreSQL and MySQL. SQLite ignores it, its single connection
+   * serializes writers anyway.
+   */
+  const lockOrder = async (uid: UID.ContentType) => {
+    await strapi.db
+      .queryBuilder('strapi::core-store')
+      .select(['id'])
+      .where({ key: `${CONFIGURATION_KEY_PREFIX}${uid}` })
+      .forUpdate()
+      .first()
+      .execute();
+  };
+
+  /**
+   * Runs `fn` in a transaction, as the only writer of the order of a content type.
+   */
+  const withOrderLock = async <T>(uid: UID.ContentType, fn: () => Promise<T>): Promise<T> => {
+    const result: T = await strapi.db.transaction(async () => {
+      await lockOrder(uid);
+
+      return fn();
+    });
+
+    return result;
+  };
+
+  const hasRowWithoutPosition = async (uid: UID.ContentType) => {
+    const row = await strapi.db
+      .queryBuilder(uid)
+      .select(['id'])
+      .where({ [POSITION_ATTRIBUTE]: { $null: true } })
+      .first()
+      .execute<{ id: number } | undefined>();
+
+    return row !== undefined && row !== null;
+  };
 
   /**
    * Position of a document, or undefined if it has none (or does not exist).
@@ -140,12 +190,20 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
    *   new entry they go on top, the most recent first.
    */
   const assignMissingPositions = async (uid: UID.ContentType) => {
+    // Checked before taking the lock: this runs in the background on every refresh
+    if (!(await hasRowWithoutPosition(uid))) {
+      return;
+    }
+
     const { tableName, positionColumn, documentIdColumn } = getTable(uid);
     const knex = strapi.db.connection;
 
     await strapi.db.transaction(async ({ trx }) => {
+      await lockOrder(uid);
+
       const table = () => strapi.db.getConnection(tableName).transacting(trx);
 
+      // Another writer may have given the positions in the meantime
       const rowWithoutPosition = await table().whereNull(positionColumn).first('id');
 
       if (!rowWithoutPosition) {
@@ -205,10 +263,23 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
+  /**
+   * Rows written outside of the Document Service (an import, a raw query) have no position.
+   * Until they get one they sit at one end of the list, which end depends on the database,
+   * so they get one at the next refresh rather than at the next move.
+   */
+  const healMissingPositions = async () => {
+    for (const uid of state.enabled) {
+      await assignMissingPositions(uid as UID.ContentType);
+    }
+  };
+
   const service = {
     isOrderable,
 
     refresh,
+
+    withOrderLock,
 
     /**
      * Whether the entries of a content type currently follow a custom order.
@@ -228,10 +299,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
       state.isInitialized = true;
 
       await refresh();
-
-      for (const uid of state.enabled) {
-        await assignMissingPositions(uid as UID.ContentType);
-      }
+      await healMissingPositions();
 
       strapi.documents.use(createDocumentMiddleware(service));
     },
@@ -256,13 +324,15 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
      * is created for an existing document, typically a new locale.
      */
     async syncDocumentPosition(uid: UID.ContentType, documentId: string) {
-      const position = (await getPosition(uid, documentId)) ?? (await getTopPosition(uid));
+      await withOrderLock(uid, async () => {
+        const position = (await getPosition(uid, documentId)) ?? (await getTopPosition(uid));
 
-      await strapi.db
-        .queryBuilder(uid)
-        .update({ [POSITION_ATTRIBUTE]: position })
-        .where({ documentId, [POSITION_ATTRIBUTE]: { $null: true } })
-        .execute();
+        await strapi.db
+          .queryBuilder(uid)
+          .update({ [POSITION_ATTRIBUTE]: position })
+          .where({ documentId, [POSITION_ATTRIBUTE]: { $null: true } })
+          .execute();
+      });
     },
 
     /**
@@ -285,7 +355,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
     }) {
       const { positionColumn } = getTable(uid);
 
-      await strapi.db.transaction(async () => {
+      await withOrderLock(uid, async () => {
         await assignMissingPositions(uid);
 
         const from = await getPosition(uid, documentId);

@@ -14,6 +14,14 @@ const createStrapi = ({ isFeatureEnabled = true } = {}) => {
 
   const strapi = {
     features: { future: { isEnabled } },
+    db: {
+      metadata: {
+        identifiers: {
+          getIndexName: jest.fn((names: string[]) => `${names.join('_')}_index`),
+          getColumnName: jest.fn((name: string) => name),
+        },
+      },
+    },
     contentTypes: {
       [ARTICLE_UID]: { uid: ARTICLE_UID, kind: 'collectionType', attributes: {} },
       [HIDDEN_UID]: {
@@ -66,9 +74,18 @@ describe('Custom order feature', () => {
       expect(extend).toHaveBeenCalledTimes(1);
       expect(extend).toHaveBeenCalledWith(ARTICLE_UID, expect.any(Function));
 
-      const schema = { uid: ARTICLE_UID, attributes: { title: { type: 'string' } } };
+      const schema = {
+        uid: ARTICLE_UID,
+        collectionName: 'articles',
+        attributes: { title: { type: 'string' } },
+        indexes: [{ name: 'articles_title_index', columns: ['title'] }],
+      };
       extend.mock.calls[0][1](schema as unknown as Struct.ContentTypeSchema);
 
+      expect(schema.indexes).toEqual([
+        { name: 'articles_title_index', columns: ['title'] },
+        { name: 'articles_strapi_position_index', columns: [POSITION_ATTRIBUTE] },
+      ]);
       expect(schema.attributes).toEqual({
         title: { type: 'string' },
         [POSITION_ATTRIBUTE]: {
