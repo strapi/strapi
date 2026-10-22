@@ -85,8 +85,7 @@ const getFilterDetails = (
 };
 
 interface RootProps
-  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>,
-    Popover.Props {
+  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>, Popover.Props {
   children: React.ReactNode;
 }
 
