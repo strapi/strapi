@@ -37,7 +37,7 @@ describe('parallel locale create', () => {
     });
     documentId = created.body.data.documentId;
 
-    await Promise.all([
+    const responses = await Promise.all([
       rq({
         method: 'PUT',
         url: `/content-manager/collection-types/api::race.race/${documentId}`,
@@ -51,6 +51,10 @@ describe('parallel locale create', () => {
         body: { name: 'b' },
       }),
     ]);
+
+    responses.forEach((response) => {
+      expect(response.statusCode).toBe(200);
+    });
   }, 120000);
 
   afterAll(async () => {
@@ -65,5 +69,6 @@ describe('parallel locale create', () => {
       select: ['id', 'name'],
     });
     expect(rows).toHaveLength(1);
+    expect(['a', 'b']).toContain(rows[0].name);
   });
 });

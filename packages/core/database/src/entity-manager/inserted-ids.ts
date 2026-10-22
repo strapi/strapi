@@ -3,12 +3,14 @@ import type { ID } from '../types';
 /**
  * MySQL/MariaDB inserts do not use RETURNING. Knex reports only the first
  * auto-increment id of a multi-row INSERT (`[insertId]`), while InnoDB assigns
- * the rest consecutively. Postgres and SQLite already return one id per row.
+ * the rest `auto_increment_increment` apart. Postgres and SQLite already
+ * return one id per row.
  */
 const idsFromInsertResult = (
   chunkResult: unknown,
   rowCount: number,
-  useReturning: boolean
+  useReturning: boolean,
+  increment = 1
 ): ID[] => {
   const list = Array.isArray(chunkResult) ? chunkResult : [chunkResult];
   const ids = list.map((entry) => {
@@ -28,7 +30,34 @@ const idsFromInsertResult = (
     return ids;
   }
 
-  return Array.from({ length: rowCount }, (_, index) => first + index);
+  const step = Number.isSafeInteger(increment) && increment > 0 ? increment : 1;
+
+  return Array.from({ length: rowCount }, (_, index) => first + index * step);
 };
 
-export { idsFromInsertResult };
+/**
+ * MySQL only reports the first id of a multi-row insert. The rest are
+ * `auto_increment_increment` apart, which is 1 unless the server is configured
+ * otherwise (Group Replication, Galera).
+ */
+const readAutoIncrementStep = async (db: {
+  connection: { raw: (sql: string) => Promise<unknown> };
+}): Promise<number> => {
+  try {
+    const result = await db.connection.raw('SELECT @@auto_increment_increment AS step');
+    const rows = Array.isArray(result) ? result[0] : (result as { rows?: unknown }).rows;
+    const step = Number(
+      Array.isArray(rows) ? (rows[0] as { step?: unknown } | undefined)?.step : undefined
+    );
+
+    if (Number.isSafeInteger(step) && step > 0) {
+      return step;
+    }
+  } catch {
+    // Drivers that cannot read the setting keep the consecutive-id default.
+  }
+
+  return 1;
+};
+
+export { idsFromInsertResult, readAutoIncrementStep };

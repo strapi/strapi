@@ -7,6 +7,10 @@ describe('idsFromInsertResult', () => {
     expect(idsFromInsertResult([8], 550, false)[549]).toBe(557);
   });
 
+  it('steps MySQL ids by auto_increment_increment', () => {
+    expect(idsFromInsertResult([8], 3, false, 2)).toEqual([8, 10, 12]);
+  });
+
   it('leaves RETURNING dialects and single-row inserts unchanged', () => {
     expect(idsFromInsertResult([{ id: 1 }, { id: 2 }], 2, true)).toEqual([1, 2]);
     expect(idsFromInsertResult([4], 1, false)).toEqual([4]);

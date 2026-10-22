@@ -267,6 +267,64 @@ describe('Database', () => {
 
         await db.destroy();
       });
+
+      it(`retries a deadlocked transaction and then throws with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        let runs = 0;
+        const error = new Error('deadlock detected');
+        (error as { code?: string }).code = '40P01';
+
+        await expect(
+          db.transaction(async () => {
+            runs += 1;
+            throw error;
+          })
+        ).rejects.toBe(error);
+        expect(runs).toBe(3);
+
+        await db.destroy();
+      });
+
+      it(`does not retry a transaction when a commit hook fails with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        let runs = 0;
+        await db.transaction(async ({ onCommit }) => {
+          runs += 1;
+          onCommit(() =>
+            Promise.reject(Object.assign(new Error('deadlock detected'), { code: '40P01' }))
+          );
+        });
+
+        expect(runs).toBe(1);
+        await db.destroy();
+      });
+
+      it(`returns before commit hooks finish and destroy waits for them with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        let finished = false;
+        await db.transaction(async ({ onCommit }) => {
+          onCommit(
+            () =>
+              new Promise<void>((resolve) => {
+                setTimeout(() => {
+                  finished = true;
+                  resolve();
+                }, 30);
+              })
+          );
+        });
+
+        expect(finished).toBe(false);
+        await db.destroy();
+        expect(finished).toBe(true);
+      });
     });
   });
 });

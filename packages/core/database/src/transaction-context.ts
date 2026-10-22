@@ -62,19 +62,48 @@ const isDeadlockError = (error: unknown) => {
 };
 
 /**
- * Commit hooks do database work after the transaction finishes (document
- * events, history, audit logs). Waiting for them keeps that work on the
- * caller's timeline so a later destroy does not abort it mid-query.
- * Callbacks may register more hooks; drain until none remain.
+ * Commit and rollback hooks run after the transaction finishes, and the
+ * caller does not wait for them. Hooks that return a promise (document
+ * events, history, audit logs) keep using the database, so they are tracked
+ * until they settle and Database#destroy can wait before closing the pool.
+ * Hooks registered synchronously while a batch runs are included. A rejection
+ * is logged and does not change the transaction result: the data is already
+ * committed, and failing the request would invite a retry of that write.
  */
-const runCallbacks = async (callbacks: Callback[] | undefined) => {
+const pendingCallbacks = new Set<Promise<unknown>>();
+
+const track = (promise: Promise<unknown>) => {
+  const settled = promise.then(
+    () => undefined,
+    (error: unknown) => {
+      console.error('Transaction callback failed', error);
+    }
+  );
+  pendingCallbacks.add(settled);
+  settled.then(() => {
+    pendingCallbacks.delete(settled);
+  });
+};
+
+const runCallbacks = (callbacks: Callback[] | undefined) => {
   if (!callbacks) {
     return;
   }
 
   while (callbacks.length > 0) {
     const batch = callbacks.splice(0, callbacks.length);
-    await Promise.all(batch.map((cb) => Promise.resolve(cb())));
+    for (const cb of batch) {
+      const result = cb();
+      if (result && typeof (result as Promise<unknown>).then === 'function') {
+        track(result as Promise<unknown>);
+      }
+    }
+  }
+};
+
+const waitForPendingCallbacks = async () => {
+  while (pendingCallbacks.size > 0) {
+    await Promise.allSettled([...pendingCallbacks]);
   }
 };
 
@@ -114,7 +143,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    await runCallbacks(store?.commitCallbacks);
+    runCallbacks(store?.commitCallbacks);
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -134,7 +163,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    await runCallbacks(store?.rollbackCallbacks);
+    runCallbacks(store?.rollbackCallbacks);
   },
 
   onCommit(cb: Callback) {
@@ -152,4 +181,4 @@ const transactionCtx = {
   },
 };
 
-export { isDeadlockError, transactionCtx };
+export { isDeadlockError, transactionCtx, waitForPendingCallbacks };

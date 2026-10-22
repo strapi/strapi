@@ -15,6 +15,7 @@ import {
   isDeadlockError,
   transactionCtx,
   TransactionObject,
+  waitForPendingCallbacks,
 } from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
@@ -253,9 +254,10 @@ class Database {
   async transaction<TCallback extends Callback>(
     cb?: TCallback
   ): Promise<ReturnType<TCallback> | TransactionObject> {
-    // Postgres and MySQL abort one transaction when two of them deadlock.
-    // The database requires the caller to retry. Nested work retries with the
-    // outermost transaction so a savepoint is not reused after it aborted.
+    // Postgres and MySQL abort one transaction when two of them deadlock, and
+    // the caller has to run it again. Nested work is not retried on its own:
+    // the outer transaction is already aborted, so the outermost callback
+    // runs again. Commit hooks are not part of this loop.
     const nested = !!transactionCtx.get();
     const attempts = nested ? 1 : 3;
 
@@ -314,8 +316,7 @@ class Database {
         try {
           await rollback();
         } catch {
-          // A deadlock already aborted the transaction. Keep the original error
-          // so the outermost transaction can retry it.
+          // A deadlock already aborted the transaction. Keep the original error.
         }
         throw error;
       }
@@ -386,6 +387,8 @@ class Database {
   }
 
   async destroy() {
+    await waitForPendingCallbacks();
+
     try {
       await this.lifecycles.clear();
     } finally {

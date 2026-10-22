@@ -57,6 +57,16 @@ export default (db: Database) => {
       }
 
       await db.connection.transaction(async (trx) => {
+        // Postgres refuses to drop a table another table still references.
+        // Drop Strapi's own foreign keys first instead of CASCADE, which would
+        // also remove views and constraints Strapi does not manage.
+        if (db.dialect.client === 'postgres') {
+          for (const table of schema.tables) {
+            const schemaBuilder = this.getSchemaBuilder(trx);
+            await helpers.dropTableForeignKeys(schemaBuilder, table);
+          }
+        }
+
         for (const table of schema.tables.reverse()) {
           const schemaBuilder = this.getSchemaBuilder(trx);
           await helpers.dropTable(schemaBuilder, table);
@@ -106,6 +116,28 @@ export default (db: Database) => {
 
             const schemaBuilder = this.getSchemaBuilder(trx);
             await helpers.dropTableForeignKeys(schemaBuilder, table);
+          }
+
+          // Tables that stay can still reference a table that is about to be
+          // dropped. Remove those constraints first. CASCADE would also drop
+          // views and foreign keys Strapi does not manage.
+          if (db.dialect.client === 'postgres') {
+            for (const table of schemaDiff.tables.updated) {
+              const blocking = [
+                ...(table.foreignKeys?.removed ?? []),
+                ...(table.foreignKeys?.updated ?? []).map((foreignKey) => foreignKey.object),
+              ];
+
+              if (blocking.length === 0) {
+                continue;
+              }
+
+              const schemaBuilder = this.getSchemaBuilder(trx);
+              await helpers.dropTableForeignKeys(schemaBuilder, {
+                name: table.name,
+                foreignKeys: blocking,
+              } as Table);
+            }
           }
 
           for (const table of schemaDiff.tables.removed) {
@@ -180,8 +212,8 @@ const createHelpers = (db: Database) => {
 
   /**
    * Postgres DROP CONSTRAINT fails when the constraint is already gone.
-   * DROP TABLE ... CASCADE (used while force-migrating) removes foreign keys
-   * on tables that are still being altered, after their metadata was loaded.
+   * Schema metadata is loaded before the update, so an earlier statement in
+   * the same migration may already have removed it.
    */
   const dropForeignKeyIfExists = async (
     runner: Knex,
@@ -447,19 +479,6 @@ const createHelpers = (db: Database) => {
   const dropTable = (schemaBuilder: Knex.SchemaBuilder, table: Table) => {
     if (!db.config.settings.forceMigration) {
       return;
-    }
-
-    // Postgres rejects DROP TABLE while another table still references it.
-    // MySQL disables foreign_key_checks for the schema update, and SQLite does
-    // not enforce these dependencies. CASCADE drops the dependent constraints
-    // (and views), not the other tables. The schema builder's client is the
-    // transaction, so the statement stays inside the surrounding trx.
-    if (db.dialect.client === 'postgres') {
-      const schemaName = db.getSchemaName();
-      const qualified = schemaName ? `${schemaName}.${table.name}` : table.name;
-      const runner = (schemaBuilder as Knex.SchemaBuilder & { client: Knex }).client;
-
-      return runner.raw('DROP TABLE IF EXISTS ?? CASCADE', [qualified]);
     }
 
     return schemaBuilder.dropTableIfExists(table.name);
