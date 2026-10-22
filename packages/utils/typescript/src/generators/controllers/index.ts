@@ -6,6 +6,7 @@ import {
   generateContractHelperDefinition,
   generateInstanceHelperDefinition,
   instanceTypeOf,
+  isInferredSource,
 } from '../common/sources';
 import type { GeneratorOptions } from '../utils';
 
@@ -14,6 +15,7 @@ const REGISTRY = 'AppControllers';
 const INSTANCE_HELPER = 'ControllerInstance';
 const CONTRACT_EXPORT = 'ControllerContract';
 const CONTRACT_HELPER = 'ControllerContractOf';
+const INFERRED_REGISTRY = 'InferredControllers';
 
 const NO_CONTROLLER_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any controllers yet.
@@ -35,6 +37,9 @@ export {};
  *         'api::<api>.<controller>': ControllerInstance<typeof import('<relative path to the source>')>;
  *         'api::<api>.<controller>': ControllerContractOf<import('<relative path to the source>').ControllerContract>;
  *       }
+ *       interface InferredControllers {
+ *         'api::<api>.<controller>': true;
+ *       }
  *     }
  *   }
  * }
@@ -43,6 +48,10 @@ export {};
  * controller registers the type its default export provides. A JS source registers as `unknown`:
  * without `allowJs` its import is an error type. So do a controller module, a default export and a
  * contract typed `any`.
+ *
+ * `InferredControllers` lists the TypeScript controllers registered without a contract, whose type
+ * is read from the factory itself: `Core.ControllerFactory` rejects their uid. It is not emitted when
+ * there are none.
  */
 export const generateControllersDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
@@ -92,7 +101,13 @@ export const generateControllersDefinitions = async (
         : []),
     ],
     controllersDefinitions,
-    instanceTypeOf(INSTANCE_HELPER, logger, contract)
+    instanceTypeOf(INSTANCE_HELPER, logger, contract),
+    [
+      {
+        registry: INFERRED_REGISTRY,
+        uids: controllersDefinitions.filter(isInferredSource(contract)).map(({ uid }) => uid),
+      },
+    ]
   );
 
   return { output, stats: {} };

@@ -1,9 +1,18 @@
-// Looks up a service whose factory is checked against its own UID without a contract export
-// (`app/src/api/article/services/cycle.ts`). When the checker reaches this lookup before that
-// source, as for a controller that uses the service, the lookup closes the cycle: TypeScript
-// reports TS7022 in the source, and the lookup is `any`, so the `satisfies` below is not reported.
+// Looks up a service and a controller whose factories are checked against their own UID without a
+// contract export (`app/src/api/article/{services,controllers}/cycle.ts`). Type generation marks
+// these UIDs as inferred, so each factory check fails with TS2344 whatever the order the checker
+// reaches the files in, and the lookups keep the inferred type. Without the marker, a lookup
+// checked first closed the cycle: TS7022 in the source, and an `any` lookup.
 import type { Core } from '@strapi/strapi';
 
 declare const app: Core.Strapi;
 
-app.service('api::article.cycle') satisfies number;
+const service = app.service('api::article.cycle');
+service.ping() satisfies 'pong';
+// @ts-expect-error The lookup is the inferred service, not `any`.
+service satisfies number;
+
+const controller = app.controller('api::article.cycle');
+controller.ping() satisfies 'pong';
+// @ts-expect-error The lookup is the inferred controller, not `any`.
+controller satisfies number;

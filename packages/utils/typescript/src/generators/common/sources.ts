@@ -280,7 +280,8 @@ export type AppModuleContract = {
  * - `unknown` for a JS source, whose import is an error type without `allowJs` (see `isTypedSource`).
  *
  * The contract does not depend on the default export, so the factory can be checked against its own
- * uid (`Core.ServiceFactory<uid>`): the inferred type would then be circular (TS7022).
+ * uid (`Core.ServiceFactory<uid>`). The inferred type does: the generators list those uids in a
+ * marker registry (see `isInferredSource`), which the factory types reject.
  */
 export const instanceTypeOf =
   (helper: string, logger: Logger, contract?: AppModuleContract) =>
@@ -299,6 +300,13 @@ export const instanceTypeOf =
 
     return factory.createTypeReferenceNode(helper, [typeofImport(source)]);
   };
+
+/**
+ * Whether a source registers the type its module provides (see `instanceTypeOf`): a TypeScript
+ * source whose module does not export the contract.
+ */
+export const isInferredSource = (contract: AppModuleContract) => (source: AppModuleSource) =>
+  isTypedSource(source) === true && contract.uids.has(source.uid) === false;
 
 /**
  * typeof import('<relative path to the source>')
@@ -345,9 +353,7 @@ export const withDocComment = <TNode extends ts.Node>(node: TNode, comment: stri
  *
  * TODO @Nico An import that no longer resolves (the source moved after the generation) is an error
  * type: it behaves as `any`, and no conditional type maps it to `unknown`. `skipLibCheck` hides the
- * TS2307 in the generated file, until the next generation drops the entry. A factory checked against
- * its own uid without a contract export is circular: the registered property itself is `any`
- * (TS7022), which this helper does not see either.
+ * TS2307 in the generated file, until the next generation drops the entry.
  */
 export const generateInstanceHelperDefinition = (name: string, comment: string) => {
   const unwrapFactory = factory.createConditionalTypeNode(
@@ -408,8 +414,8 @@ export const generateInstanceHelperDefinition = (name: string, comment: string) 
 /**
  * type <name><TContract> = 0 extends 1 & TContract ? unknown : TContract;
  *
- * Emitted next to the instance helper when at least one source exports a contract, so that the
- * output of an application without contracts does not change.
+ * Emitted next to the instance helper only when at least one source exports a contract: an
+ * application without contracts does not get it.
  *
  * A contract typed `any` registers `unknown`, as for an unregistered uid, rather than turning every
  * lookup of the uid into `any`.
@@ -440,12 +446,22 @@ export const generateContractHelperDefinition = (name: string, comment: string) 
   );
 
 /**
+ * A registry that lists uids without typing them, such as the uids registered with their inferred
+ * type. Each uid maps to `true`, which nothing reads: the marker never depends on a source.
+ */
+export type AppModuleMarker = {
+  registry: string;
+  uids: string[];
+};
+
+/**
  * declare global {
  *   namespace Strapi {
  *     namespace Registries {
  *       interface <registry> {
- *         '<uid>': <toValue(source)>;
+ *         '<uid>': <value>;
  *       }
+ *       …
  *     }
  *   }
  * }
@@ -455,16 +471,22 @@ export const generateContractHelperDefinition = (name: string, comment: string) 
  * route configs only consult it once the program opts into strict types.
  */
 const generateRegistryExtensionDefinition = (
-  registry: string,
-  sources: AppModuleSource[],
-  toValue: (source: AppModuleSource) => ts.TypeNode
+  registries: { registry: string; entries: [uid: string, value: ts.TypeNode][] }[]
 ) => {
-  const properties = sources.map((source) =>
-    factory.createPropertySignature(
+  const interfaces = registries.map(({ registry, entries }) =>
+    factory.createInterfaceDeclaration(
       undefined,
-      factory.createStringLiteral(source.uid, true),
+      factory.createIdentifier(registry),
       undefined,
-      toValue(source)
+      undefined,
+      entries.map(([uid, value]) =>
+        factory.createPropertySignature(
+          undefined,
+          factory.createStringLiteral(uid, true),
+          undefined,
+          value
+        )
+      )
     )
   );
 
@@ -480,17 +502,7 @@ const generateRegistryExtensionDefinition = (
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
     factory.createIdentifier('global'),
     factory.createModuleBlock([
-      namespaceOf(GLOBAL_NAMESPACE, [
-        namespaceOf(REGISTRIES_NAMESPACE, [
-          factory.createInterfaceDeclaration(
-            undefined,
-            factory.createIdentifier(registry),
-            undefined,
-            undefined,
-            properties
-          ),
-        ]),
-      ]),
+      namespaceOf(GLOBAL_NAMESPACE, [namespaceOf(REGISTRIES_NAMESPACE, interfaces)]),
     ]),
     ts.NodeFlags.GlobalAugmentation
   );
@@ -501,16 +513,18 @@ const generateRegistryExtensionDefinition = (
  *
  * <helpers>
  *
- * declare global { … <registry> … }
+ * declare global { … <registry> … <markers> … }
  *
  * The module marker turns the generated file into a module: the global augmentation is only allowed
- * in one. The helpers come first so that the file stands alone.
+ * in one. The helpers come first so that the file stands alone. A marker without uids is not
+ * emitted, so that the output of an application without such uids does not change.
  */
 export const emitRegistryDefinitions = async (
   registry: string,
   helpers: ts.Node[],
   sources: AppModuleSource[],
-  toValue: (source: AppModuleSource) => ts.TypeNode
+  toValue: (source: AppModuleSource) => ts.TypeNode,
+  markers: AppModuleMarker[] = []
 ) => {
   const allDefinitions = [
     // Module marker
@@ -526,7 +540,21 @@ export const emitRegistryDefinitions = async (
     factory.createIdentifier('\n'),
 
     // Global
-    generateRegistryExtensionDefinition(registry, sources, toValue),
+    generateRegistryExtensionDefinition([
+      {
+        registry,
+        entries: sources.map((source): [string, ts.TypeNode] => [source.uid, toValue(source)]),
+      },
+      ...markers
+        .filter((marker) => marker.uids.length > 0)
+        .map((marker) => ({
+          registry: marker.registry,
+          entries: marker.uids.map((uid): [string, ts.TypeNode] => [
+            uid,
+            factory.createLiteralTypeNode(factory.createTrue()),
+          ]),
+        })),
+    ]),
   ];
 
   return format(emitDefinitions(allDefinitions));
