@@ -30,14 +30,14 @@ const GENERATORS = {
  * with `skipLibCheck`, rather than silently typing the lookup as `any`. The other artifacts only
  * hold declarations generated from the schemas, and stay `.d.ts`.
  */
-const SOURCE_ARTIFACTS = ['services', 'controllers', 'policies', 'middlewares'];
+const SOURCE_ARTIFACTS = new Set(['services', 'controllers', 'policies', 'middlewares']);
 
 /**
  * The application's linters would check the `.ts` artifacts, whose helpers use `any`.
  */
 const LINT_DISABLE_HEADER = '/* eslint-disable */\n/* oxlint-disable */\n';
 
-const isSourceArtifact = (artifact: string) => SOURCE_ARTIFACTS.includes(artifact);
+const isSourceArtifact = (artifact: string) => SOURCE_ARTIFACTS.has(artifact);
 
 const filenameOf = (artifact: string) =>
   isSourceArtifact(artifact) === true ? `${artifact}.ts` : `${artifact}.d.ts`;
