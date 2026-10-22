@@ -351,7 +351,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   const options = { ...baseOptions, ...resolutionOptions };
   const compile = compiler(options);
 
-  for (const provider of ['i18n', 'content-manager', 'graphql']) {
+  for (const provider of ['i18n', 'content-manager', 'graphql', 'email']) {
     test(`${resolution}: ${provider} contracts reach application consumers`, () => {
       assertClean(
         compile(['settings.d.ts', `${provider}-adoption.ts`]),
@@ -838,6 +838,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       ['settings.d.ts', 'content-manager-adoption.ts'],
       ['settings.d.ts', 'registry-helpers.ts'],
       ['settings.d.ts', 'graphql-adoption.ts'],
+      ['settings.d.ts', 'email-adoption.ts'],
       ['settings.d.ts', 'config-defaults.ts'],
       ['strapi-strict.d.ts', 'middlewares.ts'],
       ['strapi-strict.d.ts', 'policy-namespaces.ts'],
