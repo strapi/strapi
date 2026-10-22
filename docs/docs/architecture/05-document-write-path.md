@@ -6,6 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
+  - The webhook runner paragraph describes `contentTypeEvents`. That claim was checked against `webhook-runner.ts` and `webhook-store.ts`. The rest of this page was not re-verified.
 ---
 
 This page follows one write through the server. It explains the layers and the order in which they run. It is not an API reference for the Document Service.
@@ -149,9 +150,9 @@ When the callback runs, the event manager:
 | `unpublish`    | `entry.unpublish` per deleted published row                                                       |
 | `discardDraft` | `entry.draft-discard` per new draft row                                                           |
 
-The webhook runner adds an event hub listener for an event when the first webhook for that event is registered. The listener only adds a job to an in-memory queue with a concurrency of 5. For each job, the runner sends a `POST` to each enabled webhook. The body is `{ event, createdAt, model, uid, entry }`. The headers are the `server.webhooks.defaultHeaders`, the webhook headers, `X-Strapi-Event` and `Content-Type: application/json`. Each request has a 10-second timeout. The runner does not retry. In the event path, it also does not report failed deliveries: `run()` turns network errors and non-2xx responses into a returned status object, and `executeListener()` does not read that object.
+The webhook runner adds an event hub listener for an event when the first webhook for that event is registered. Registration includes events selected for every content type and events selected for one content type. The listener only adds a job to an in-memory queue with a concurrency of 5. For each job, the runner sends a `POST` to each enabled webhook that the event triggers. An event listed in `events` triggers the webhook for every content type. An event listed only in `contentTypeEvents` triggers it when `info.uid` is that content type. The body is `{ event, createdAt, model, uid, entry }`. The headers are the `server.webhooks.defaultHeaders`, the webhook headers, `X-Strapi-Event` and `Content-Type: application/json`. Each request has a 10-second timeout. The runner does not retry. In the event path, it also does not report failed deliveries: `run()` turns network errors and non-2xx responses into a returned status object, and `executeListener()` does not read that object.
 
-When a webhook is created or updated, the webhook store rejects events that are not in its allowed list. Core allows the six `entry.*` events. Plugins add their own events with `addAllowedEvent`.
+When a webhook is created or updated, the webhook store rejects events that are not in its allowed list. It checks both `events` and `contentTypeEvents`. Core allows the six `entry.*` events. Plugins add their own events with `addAllowedEvent`. `contentTypeEvents` maps a content-type UID to event names. The store does not keep a per-type event that is already in `events`. A webhook saved before this field existed is read as an empty map.
 
 ## Code map
 
