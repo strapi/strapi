@@ -1,6 +1,7 @@
 /**
- * No contract export: type generation registers the type this factory returns. Do not check it
- * with `Core.ServiceFactory<'api::legacy.legacy'>`: that check reads the type it defines (TS7022).
+ * No contract export: type generation registers the type this factory returns, and marks the UID as
+ * inferred. `Core.ServiceFactory<'api::legacy.legacy'>` rejects it (TS2344): that check would read
+ * the type it defines. Export a `ServiceContract` to check the factory.
  */
 export default () => ({
   ping: () => 'pong' as const,
