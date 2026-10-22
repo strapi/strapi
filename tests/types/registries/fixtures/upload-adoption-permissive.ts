@@ -17,4 +17,5 @@ app
   .plugin('upload')
   .controller('admin-upload')
   .unknownAction?.({} as never, async () => {});
+app.controller('plugin::upload.admin-folder').unknownAction?.({} as never, async () => {});
 [{ method: 'GET', path: '/files', handler: 'admin-file.findAll' }] satisfies Core.RouteInput[];

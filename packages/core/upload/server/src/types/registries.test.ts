@@ -162,12 +162,29 @@ strapi.controller('plugin::upload.admin-upload').uploadFromUrls(context, next);
 strapi.plugin('upload').controller('admin-upload').upload(context, next);
 // @ts-expect-error Registered controllers have no arbitrary actions.
 strapi.controller('plugin::upload.admin-upload').missing(context, next);
+strapi.controller('plugin::upload.admin-folder').getStructure(context, next);
+strapi.plugin('upload').controller('admin-folder').update(context, next);
+// @ts-expect-error Registered controllers have no arbitrary actions.
+strapi.plugin('upload').controller('admin-folder').delete(context, next);
+strapi.controller('plugin::upload.admin-folder-file').moveMany(context, next);
+strapi.plugin('upload').controller('admin-folder-file').deleteMany(context, next);
+strapi.controller('plugin::upload.admin-settings').getSettings(context, next);
+strapi.plugin('upload').controller('admin-settings').updateSettings(context, next);
+// @ts-expect-error Registered controllers have no arbitrary actions.
+strapi.controller('plugin::upload.admin-settings').setSettings(context, next);
 
 [
   { method: 'GET', path: '/files', handler: 'admin-file.find' },
   { method: 'POST', path: '/', handler: 'admin-upload.upload' },
+  { method: 'GET', path: '/folder-structure', handler: 'admin-folder.getStructure' },
+  { method: 'POST', path: '/actions/bulk-move', handler: 'admin-folder-file.moveMany' },
+  { method: 'PUT', path: '/settings', handler: 'admin-settings.updateSettings' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
 [
   // @ts-expect-error Route actions are checked against the controller contracts.
   { method: 'POST', path: '/files', handler: 'admin-upload.uploadFrom' },
+] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
+[
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  { method: 'GET', path: '/folders', handler: 'admin-folder.findMany' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
