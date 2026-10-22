@@ -1,6 +1,10 @@
+import codspeedPlugin from '@codspeed/vitest-plugin';
 import { defineConfig } from 'vitest/config';
 
 export const unitPreset = defineConfig({
+  // Enables CodSpeed instrumentation when running `vitest bench` under the CodSpeed runner.
+  // It is a no-op for regular `vitest run` test executions.
+  plugins: [codspeedPlugin()],
   test: {
     // Require explicit imports from 'vitest' (no globals)
     globals: false,
@@ -10,6 +14,12 @@ export const unitPreset = defineConfig({
 
     // Only run tests with .vitest.test.ts suffix for incremental migration
     include: ['**/*.vitest.test.ts'],
+
+    // Benchmarks executed with `vitest bench`
+    benchmark: {
+      include: ['**/__bench__/**/*.bench.ts'],
+      exclude: ['**/node_modules/**', '**/dist/**'],
+    },
 
     // Exclude common non-test files and directories
     exclude: [

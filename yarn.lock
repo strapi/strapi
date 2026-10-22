@@ -2755,6 +2755,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@codspeed/core@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "@codspeed/core@npm:6.1.0"
+  dependencies:
+    axios: "npm:^1.4.0"
+    form-data: "npm:^4.0.4"
+    node-gyp-build: "npm:^4.6.0"
+    stack-trace: "npm:1.0.0-pre2"
+  checksum: 10c0/f45c4115501ab6ab74beb0175c43ed23d87f06b4acac696ba74bbbaf83d60e95bb12f119470f8a25186c51e74d503246d836ddadaadadccb4770a9ae70cfe396
+  languageName: node
+  linkType: hard
+
+"@codspeed/vitest-plugin@npm:6.1.0":
+  version: 6.1.0
+  resolution: "@codspeed/vitest-plugin@npm:6.1.0"
+  dependencies:
+    "@codspeed/core": "npm:^6.1.0"
+  peerDependencies:
+    tinybench: ">=2.9.0"
+    vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
+    vitest: ^3.2 || ^4 || ^5
+  checksum: 10c0/677a62b5c6f07f3831117bbb2c23a5f90ae2e25debb8855c4a31cb659873b834f9f645732b24eaefe534632ab3dff084733c5a07c4daf5be836c7e49a057995d
+  languageName: node
+  linkType: hard
+
 "@colors/colors@npm:1.5.0":
   version: 1.5.0
   resolution: "@colors/colors@npm:1.5.0"
@@ -14343,7 +14368,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.20.0, axios@npm:^1.6.0, axios@npm:^1.6.8, axios@npm:^1.8.3":
+"axios@npm:1.20.0, axios@npm:^1.4.0, axios@npm:^1.6.0, axios@npm:^1.6.8, axios@npm:^1.8.3":
   version: 1.20.0
   resolution: "axios@npm:1.20.0"
   dependencies:
@@ -24418,6 +24443,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-gyp-build@npm:^4.6.0":
+  version: 4.8.4
+  resolution: "node-gyp-build@npm:4.8.4"
+  bin:
+    node-gyp-build: bin.js
+    node-gyp-build-optional: optional.js
+    node-gyp-build-test: build-test.js
+  checksum: 10c0/444e189907ece2081fe60e75368784f7782cfddb554b60123743dfb89509df89f1f29c03bbfa16b3a3e0be3f48799a4783f487da6203245fa5bed239ba7407e1
+  languageName: node
+  linkType: hard
+
 "node-gyp@npm:latest":
   version: 12.2.0
   resolution: "node-gyp@npm:12.2.0"
@@ -28564,6 +28600,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stack-trace@npm:1.0.0-pre2":
+  version: 1.0.0-pre2
+  resolution: "stack-trace@npm:1.0.0-pre2"
+  checksum: 10c0/00caccc88bebfa42068fe236d6427257ca9fb87fef4afdf7d8b145df52310ae529ae94849dcc190ce2a41420db6cde1bbfb993e82c64b2b818b5b2bcb5a4f462
+  languageName: node
+  linkType: hard
+
 "stack-utils@npm:^2.0.3":
   version: 2.0.5
   resolution: "stack-utils@npm:2.0.5"
@@ -30902,6 +30945,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "vitest-config@workspace:packages/utils/vitest-config"
   dependencies:
+    "@codspeed/vitest-plugin": "npm:6.1.0"
     "@types/node": "npm:20.19.41"
     vitest: "catalog:"
   peerDependencies:

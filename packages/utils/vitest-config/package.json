@@ -13,6 +13,7 @@
     "vitest": "^4.0.0"
   },
   "devDependencies": {
+    "@codspeed/vitest-plugin": "6.1.0",
     "@types/node": "20.19.41",
     "vitest": "catalog:"
   },
