@@ -7,9 +7,9 @@ import {
   AUDITED_EVENTS,
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
-  RELEASE_STATUSES,
 } from '../constants';
-import type { ReleaseFailureReason, ReleaseStatus } from '../constants';
+import { RELEASE_STATUSES } from '../../../shared/constants';
+import type { ReleaseFailureReason, ReleaseStatus } from '../../../shared/constants';
 import type {
   GetReleases,
   CreateRelease,
@@ -33,7 +33,7 @@ import {
 } from '../utils';
 import { emitAuditOnCommit, getReleaseChanges } from '../audit-logs';
 import { createReleaseRun } from './release-run';
-import type { PublishTrigger } from './release-run';
+import type { PublishTrigger, RunTotals } from './release-run';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -48,6 +48,40 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       isPublished,
       error,
       release,
+    });
+  };
+
+  // The webhook and audit event of a release that froze as failed, so they always agree
+  const reportFailedRun = async (release: Pick<Release, 'id' | 'name'>, error: Error) => {
+    dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
+      isPublished: false,
+      error,
+      release,
+    });
+
+    await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
+      releaseId: release.id,
+      name: release.name,
+      outcome: 'failure',
+      reason: error.name,
+    });
+  };
+
+  // The webhook, telemetry and audit event of a release that froze as done or partial
+  const reportReleasedRun = async (
+    release: Pick<Release, 'id' | 'name' | 'status'> & RunTotals
+  ) => {
+    dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: true, release });
+    strapi.telemetry.send('didPublishContentRelease');
+
+    // The audit's `failed` is the release's skipped entries
+    await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
+      releaseId: release.id,
+      name: release.name,
+      outcome: release.status === 'done' ? 'success' : 'partial',
+      published: release.totalPublishedEntries,
+      unpublished: release.totalUnpublishedEntries,
+      failed: release.totalSkippedEntries,
     });
   };
 
@@ -149,12 +183,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  const { runLocked } = createReleaseRun({
-    strapi,
-    updateReleaseStatus,
-    storePublishValidity: (actionId, validity) =>
-      getService('release-action', { strapi }).storePublishValidity(actionId, validity),
-  });
+  const { runLocked } = createReleaseRun({ strapi, updateReleaseStatus });
 
   return {
     async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
@@ -409,7 +438,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Webhook and audit only once the outcome is committed: a run that rolled back sends neither
       if (result.kind === 'failed') {
         const { error, release } = result;
-        await this.reportFailedRun(release, error);
+        await reportFailedRun(release, error);
 
         // The frozen release comes with the error, telling a run that failed from a refused publish
         throw error instanceof errors.ValidationError
@@ -421,59 +450,40 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const { release } = result;
-
-      dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: true, release });
-      strapi.telemetry.send('didPublishContentRelease');
-
-      // The audit's `failed` is the release's skipped entries
-      await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
-        releaseId: release.id,
-        name: release.name,
-        outcome: release.status === 'done' ? 'success' : 'partial',
-        published: release.totalPublishedEntries,
-        unpublished: release.totalUnpublishedEntries,
-        failed: release.totalSkippedEntries,
-      });
+      await reportReleasedRun(release);
 
       return release;
     },
 
-    // The webhook and audit event of a release that froze as failed, so they always agree
-    async reportFailedRun(release: Pick<Release, 'id' | 'name'>, error: Error) {
-      dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
-        isPublished: false,
-        error,
-        release,
-      });
+    reportFailedRun,
+    reportReleasedRun,
 
-      await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
-        releaseId: release.id,
-        name: release.name,
-        outcome: 'failure',
-        reason: error.name,
-      });
-    },
-
-    // Freezes a release as failed without running it: every entry is skipped
+    // Freezes a release whose run never happened. An empty one missed nothing: it ends done, as
+    // its run would have. Any other fails with every entry skipped. The caller holds the release
+    // lock and has checked, under it, that the release is still planned.
     async recordMissedRun(
       releaseId: Release['id'],
       failureReason: ReleaseFailureReason
-    ): Promise<Release | null> {
+    ): Promise<(Release & RunTotals) | null> {
       const actions: Pick<ReleaseAction, 'id'>[] = await strapi.db
         .query(RELEASE_ACTION_MODEL_UID)
         .findMany({ where: { release: { id: releaseId } }, select: ['id'] });
 
-      const release: Release | null = await strapi.db.query(RELEASE_MODEL_UID).update({
-        where: { id: releaseId, releasedAt: null },
-        data: {
-          status: 'failed',
-          releasedAt: new Date(),
-          failureReason,
-          totalPublishedEntries: 0,
-          totalUnpublishedEntries: 0,
-          totalSkippedEntries: actions.length,
-        },
-      });
+      const endsDone = failureReason === 'missed_schedule' && actions.length === 0;
+
+      const release: (Release & RunTotals) | null = await strapi.db
+        .query(RELEASE_MODEL_UID)
+        .update({
+          where: { id: releaseId, releasedAt: null },
+          data: {
+            status: endsDone ? 'done' : 'failed',
+            releasedAt: new Date(),
+            failureReason: endsDone ? null : failureReason,
+            totalPublishedEntries: 0,
+            totalUnpublishedEntries: 0,
+            totalSkippedEntries: actions.length,
+          },
+        });
 
       if (!release) {
         return null;

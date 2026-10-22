@@ -2,11 +2,8 @@ import { errors } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
 
-import {
-  RELEASE_ACTION_MODEL_UID,
-  RELEASE_MODEL_UID,
-  RELEASED_OUTCOME_BY_TYPE,
-} from '../constants';
+import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
+import { RELEASED_OUTCOME_BY_TYPE } from '../../../shared/constants';
 import type { Release } from '../../../shared/contracts/releases';
 import type {
   ReleaseAction,
@@ -15,6 +12,7 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import {
   getErrorName,
+  getService,
   getPublishOrderForContentTypes,
   getPublishabilityForActions,
   isFailedBeforeUpgrade,
@@ -25,7 +23,7 @@ import {
   lockPlannedRelease,
   toEntryValidity,
 } from '../utils';
-import type { EntryValidity, PublishabilityOutcome } from '../utils';
+import type { PublishabilityOutcome } from '../utils';
 
 export type PublishTrigger = 'manual' | 'scheduled';
 
@@ -98,20 +96,14 @@ const getReleasedOutcome = (action: ReleaseAction): RecordedOutcome => ({
 
 /**
  * A release's run: what it checks, releases and records, under the release lock. Internal to the
- * release service (not a registered service): it gets the writes it shares with the release and
- * release-action services from them.
+ * release service (not a registered service), which passes it its status recalculation.
  */
 export const createReleaseRun = ({
   strapi,
   updateReleaseStatus,
-  storePublishValidity,
 }: {
   strapi: Core.Strapi;
   updateReleaseStatus: (releaseId: Release['id']) => Promise<void>;
-  storePublishValidity: (
-    actionId: ReleaseAction['id'],
-    validity: EntryValidity
-  ) => Promise<unknown>;
 }) => {
   /**
    * Content types in relation dependency order (a relation's target before its source), then
@@ -315,12 +307,23 @@ export const createReleaseRun = ({
 
       if (trigger === 'manual') {
         // Not a run: the check is stored so the release reads blocked, then the publish is refused
+        const releaseActionService = getService('release-action', { strapi });
         for (const [id, check] of checks) {
-          await storePublishValidity(id, toEntryValidity(check));
+          await releaseActionService.storePublishValidity(id, toEntryValidity(check));
         }
         await updateReleaseStatus(releaseId);
 
-        return { kind: 'rejected', error: blockingError };
+        // Refused like any blocked release (400). What stopped a check is named, never quoted: its
+        // message can carry row contents.
+        return {
+          kind: 'rejected',
+          error:
+            blockingError instanceof errors.ValidationError
+              ? blockingError
+              : new errors.ValidationError(
+                  `An entry couldn't be checked (${getErrorName(blockingError)})`
+                ),
+        };
       }
 
       if (!allowPartial) {

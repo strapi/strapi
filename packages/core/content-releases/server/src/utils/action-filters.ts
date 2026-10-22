@@ -1,8 +1,9 @@
 import type { Modules } from '@strapi/types';
 
 import type { Release } from '../../../shared/contracts/releases';
-import { RELEASE_ACTION_MODEL_UID, RELEASED_OUTCOMES } from '../constants';
-import type { ReleaseActionFilter } from '../constants';
+import { RELEASED_OUTCOMES } from '../../../shared/constants';
+import type { ReleaseActionFilter } from '../../../shared/constants';
+import { RELEASE_ACTION_MODEL_UID } from '../constants';
 
 // A filter on release actions, in the filter syntax the query engine's `where` takes
 export type ReleaseActionWhere = Modules.Documents.Params.Filters.Any<

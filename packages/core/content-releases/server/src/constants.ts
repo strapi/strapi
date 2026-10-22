@@ -1,24 +1,6 @@
 export const RELEASE_MODEL_UID = 'plugin::content-releases.release';
 export const RELEASE_ACTION_MODEL_UID = 'plugin::content-releases.release-action';
 
-export {
-  DEFAULT_RELEASE_CONDITION,
-  RELEASE_ACTION_FILTERS,
-  RELEASE_ACTION_OUTCOMES,
-  RELEASE_CONDITIONS,
-  RELEASE_FAILURE_REASONS,
-  RELEASE_STATUSES,
-  RELEASED_OUTCOME_BY_TYPE,
-  RELEASED_OUTCOMES,
-} from '../../shared/constants';
-export type {
-  ReleaseActionFilter,
-  ReleaseActionOutcome,
-  ReleaseCondition,
-  ReleaseFailureReason,
-  ReleaseStatus,
-} from '../../shared/constants';
-
 export const OVERDUE_GRACE_PERIOD_MS = 5 * 60 * 1000;
 export const OVERDUE_SWEEP_CRON_RULE = '* * * * *';
 

@@ -1,5 +1,5 @@
 import type { Release } from '../../../shared/contracts/releases';
-import type { ReleaseCondition } from '../constants';
+import type { ReleaseCondition } from '../../../shared/constants';
 
 /**
  * Whether a run would release nothing: the rule behind both the `blocked` status and the

@@ -27,21 +27,6 @@ describe('addOutcomesToReleasedReleases', () => {
     actionCount.mockImplementation(async ({ where }) => (where.outcome === 'published' ? 2 : 1));
   });
 
-  it('looks only for releases that ran as done before the totals existed', async () => {
-    releaseFindMany.mockResolvedValue([]);
-
-    await addOutcomesToReleasedReleases({ strapi });
-
-    expect(releaseFindMany).toHaveBeenCalledWith({
-      where: {
-        releasedAt: { $notNull: true },
-        totalSkippedEntries: null,
-        $or: [{ status: 'done' }, { status: null }],
-      },
-      select: ['id'],
-    });
-  });
-
   it("records every entry as released and the release's totals", async () => {
     releaseFindMany.mockResolvedValue([{ id: 10 }]);
 

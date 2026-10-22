@@ -4144,6 +4144,27 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
     });
 
+    test('an empty release whose scheduled time passed ends done, as its run would have', async () => {
+      const release = (await createRelease()).body.data;
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-10) });
+
+      const webhooks = await sweepListeningToWebhooks(release.id);
+
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'done',
+        releasedAt: expect.any(String),
+        failureReason: null,
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 0,
+      });
+      expect(webhooks).toHaveLength(1);
+      expect(webhooks[0]).toMatchObject({
+        isPublished: true,
+        release: { id: release.id, status: 'done' },
+      });
+    });
+
     test('two nodes sweeping at once freeze and report a release once', async () => {
       const release = await createReleaseWithActions('all_or_nothing', [
         { documentId: await createProduct({ valid: true }) },

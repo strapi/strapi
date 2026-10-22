@@ -921,6 +921,28 @@ describe('Release service', () => {
           expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
         }
       );
+
+      it.each([
+        ['all_or_nothing', ['valid', 'unreadable']],
+        ['allow_partial', ['unreadable']],
+      ] as const)(
+        '%s, manual, blocked only by an unchecked entry: is refused as a validation error',
+        async (releaseCondition, entries) => {
+          const { result, publish, strapiMock } = await run({
+            releaseCondition,
+            trigger: 'manual',
+            entries: [...entries],
+          });
+
+          // A 400 naming what stopped the check, never its message (it can carry row contents)
+          expect(result).toMatchObject({ error: { name: 'ValidationError' } });
+          expect('error' in result && result.error.message).toBe(
+            "An entry couldn't be checked (TypeError)"
+          );
+          expect(publish).not.toHaveBeenCalled();
+          expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
+        }
+      );
     });
 
     it('rolls the run back when writing its result fails: nothing recorded, sent or audited', async () => {
@@ -1434,15 +1456,32 @@ describe('Release service', () => {
       expect(release).toMatchObject({ status: 'failed', totalSkippedEntries: 2 });
     });
 
-    it('freezes an empty missed release with no skipped entries', async () => {
+    it('freezes an empty missed release as done: nothing could fail, as its run would have', async () => {
       const { service, updateMany, update } = setup([]);
 
-      await service.recordMissedRun(1, 'missed_schedule');
+      const release = await service.recordMissedRun(1, 'missed_schedule');
 
       expect(updateMany).not.toHaveBeenCalled();
+      expect(release).toMatchObject({
+        status: 'done',
+        failureReason: null,
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 0,
+      });
       expect(update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.objectContaining({ totalSkippedEntries: 0 }) })
+        expect.objectContaining({ data: expect.objectContaining({ releasedAt: expect.any(Date) }) })
       );
+    });
+
+    it('keeps an empty release that failed before the upgrade failed', async () => {
+      const { service } = setup([]);
+
+      expect(await service.recordMissedRun(1, 'failed_before_upgrade')).toMatchObject({
+        status: 'failed',
+        failureReason: 'failed_before_upgrade',
+        totalSkippedEntries: 0,
+      });
     });
 
     it('writes nothing, and returns null, for a release that already ran', async () => {

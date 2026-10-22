@@ -1,4 +1,5 @@
-import { RELEASE_ACTION_OUTCOMES, RELEASE_MODEL_UID } from '../../constants';
+import { RELEASE_ACTION_OUTCOMES } from '../../../../shared/constants';
+import { RELEASE_MODEL_UID } from '../../constants';
 
 export default {
   collectionName: 'strapi_release_actions',

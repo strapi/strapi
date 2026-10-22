@@ -1,7 +1,8 @@
 import type { Core, Modules } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
 
-import { AUDITED_EVENTS, type ReleaseCondition } from './constants';
+import type { ReleaseCondition } from '../../shared/constants';
+import { AUDITED_EVENTS } from './constants';
 
 /**
  * Transformers for the release audit events.

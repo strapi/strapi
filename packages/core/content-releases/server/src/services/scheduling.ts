@@ -4,10 +4,14 @@ import { errors } from '@strapi/utils';
 import { Release } from '../../../shared/contracts/releases';
 import { getService, isFailedBeforeUpgrade, lockRelease } from '../utils';
 import { OVERDUE_GRACE_PERIOD_MS, RELEASE_MODEL_UID } from '../constants';
-import type { ReleaseFailureReason } from '../constants';
+import type { ReleaseFailureReason } from '../../../shared/constants';
 import { runAsSystem } from '../audit-logs';
+import type { RunTotals } from './release-run';
 
 type SweepCandidate = Pick<Release, 'id' | 'name' | 'releasedAt' | 'scheduledAt' | 'status'>;
+
+// What the sweep froze, with the totals it wrote
+type FrozenRelease = Release & RunTotals;
 
 // What the sweep freezes: a release whose schedule passed the grace period, or one that failed
 // before the upgrade
@@ -30,7 +34,7 @@ const getFailureReason = (
 
 const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
   const scheduledJobs = new Map<Release['id'], string>();
-  let sweepInProgress: Promise<Release[]> | null = null;
+  let sweepInProgress: Promise<FrozenRelease[]> | null = null;
 
   const cancel = (releaseId: Release['id']) => {
     const id = String(releaseId); // normalise to match key from set()
@@ -43,14 +47,23 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
     return scheduledJobs;
   };
 
-  const reportMissedSchedule = async (release: Release) => {
-    const error = new Error(`Release ${release.name} wasn't released at its scheduled time`);
-    error.name = 'MissedSchedule';
+  // What the run the release missed would have sent: a release that froze as done (an empty one)
+  // reports success; one that missed its schedule, its failure. A release that failed before the
+  // upgrade reported its failure then.
+  const reportFrozenRelease = async (release: FrozenRelease) => {
+    const releaseService = getService('release', { strapi });
 
-    await getService('release', { strapi }).reportFailedRun(release, error);
+    if (release.status === 'done') {
+      await releaseService.reportReleasedRun(release);
+    } else if (release.failureReason === 'missed_schedule') {
+      const error = new Error(`Release ${release.name} wasn't released at its scheduled time`);
+      error.name = 'MissedSchedule';
+
+      await releaseService.reportFailedRun(release, error);
+    }
   };
 
-  const sweepOverdueReleases = async (now: Date): Promise<Release[]> => {
+  const sweepOverdueReleases = async (now: Date): Promise<FrozenRelease[]> => {
     if (strapi.db.inTransaction()) {
       throw new Error('The overdue sweep must not run inside a transaction');
     }
@@ -65,11 +78,11 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
       select: ['id'],
     });
 
-    const frozen: Release[] = [];
+    const frozen: FrozenRelease[] = [];
 
     for (const { id } of candidates) {
       try {
-        const result = await strapi.db.transaction(async (): Promise<Release | null> => {
+        const result = await strapi.db.transaction(async (): Promise<FrozenRelease | null> => {
           const locked: SweepCandidate | undefined = await lockRelease(
             id,
             ['id', 'name', 'releasedAt', 'scheduledAt', 'status'],
@@ -92,17 +105,13 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
     }
 
-    // A release that failed before the upgrade already reported its failure then
-    for (const release of frozen.filter(
-      ({ failureReason }) => failureReason === 'missed_schedule'
-    )) {
+    for (const release of frozen) {
       try {
-        await runAsSystem({ strapi }, 'scheduler', () => reportMissedSchedule(release));
+        await runAsSystem({ strapi }, 'scheduler', () => reportFrozenRelease(release));
       } catch (error) {
-        strapi.log.error(
-          `[Content Releases] Couldn't report that release ${release.id} missed its schedule`,
-          { error }
-        );
+        strapi.log.error(`[Content Releases] Couldn't report frozen release ${release.id}`, {
+          error,
+        });
       }
     }
 

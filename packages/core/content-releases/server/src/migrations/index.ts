@@ -3,13 +3,9 @@ import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
-import {
-  DEFAULT_RELEASE_CONDITION,
-  RELEASE_ACTION_MODEL_UID,
-  RELEASE_MODEL_UID,
-  RELEASED_OUTCOME_BY_TYPE,
-} from '../constants';
-import type { ReleaseActionOutcome } from '../constants';
+import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
+import { DEFAULT_RELEASE_CONDITION, RELEASED_OUTCOME_BY_TYPE } from '../../../shared/constants';
+import type { ReleaseActionOutcome } from '../../../shared/constants';
 import { getActionValidity, getService, runAfterCommit } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
 

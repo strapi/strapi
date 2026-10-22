@@ -1,5 +1,4 @@
 import createSchedulingService from '../scheduling';
-import { OVERDUE_GRACE_PERIOD_MS } from '../../constants';
 
 const NOW = new Date('2026-10-15T09:00:00.000Z');
 const minutesAgo = (minutes: number) => new Date(NOW.getTime() - minutes * 60 * 1000);
@@ -14,13 +13,14 @@ type Row = {
 
 const setup = ({ rows, locked = rows }: { rows: Row[]; locked?: Row[] }) => {
   const findMany = jest.fn().mockResolvedValue(rows.map(({ id }) => ({ id })));
-  const recordMissedRun = jest.fn(async (id: number, failureReason: string) => ({
+  const recordMissedRun = jest.fn(async (id: number, failureReason: string | null) => ({
     id,
     name: `Release ${id}`,
     status: 'failed',
     failureReason,
   }));
   const reportFailedRun = jest.fn();
+  const reportReleasedRun = jest.fn();
   const logError = jest.fn();
   const cronRemove = jest.fn();
 
@@ -52,7 +52,9 @@ const setup = ({ rows, locked = rows }: { rows: Row[]; locked?: Row[] }) => {
       inTransaction: jest.fn(() => false),
       transaction: jest.fn((work: (arg: { trx: object }) => unknown) => work({ trx: {} })),
     },
-    plugin: jest.fn(() => ({ service: jest.fn(() => ({ recordMissedRun, reportFailedRun })) })),
+    plugin: jest.fn(() => ({
+      service: jest.fn(() => ({ recordMissedRun, reportFailedRun, reportReleasedRun })),
+    })),
     log: { error: logError },
     cron: { add: jest.fn(), remove: cronRemove },
     requestContext: { run: jest.fn((_ctx: unknown, cb: () => unknown) => cb()) },
@@ -61,7 +63,16 @@ const setup = ({ rows, locked = rows }: { rows: Row[]; locked?: Row[] }) => {
   // @ts-expect-error Ignore missing properties
   const service = createSchedulingService({ strapi });
 
-  return { service, strapi, findMany, recordMissedRun, reportFailedRun, logError, cronRemove };
+  return {
+    service,
+    strapi,
+    findMany,
+    recordMissedRun,
+    reportFailedRun,
+    reportReleasedRun,
+    logError,
+    cronRemove,
+  };
 };
 
 const release = (overrides: Partial<Row> & Pick<Row, 'id'>): Row => ({
@@ -75,23 +86,6 @@ const release = (overrides: Partial<Row> & Pick<Row, 'id'>): Row => ({
 describe('Scheduling service: freezeOverdueReleases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('looks for planned releases overdue by more than the grace period, or that failed before the upgrade', async () => {
-    const { service, findMany } = setup({ rows: [] });
-
-    await service.freezeOverdueReleases({ now: NOW });
-
-    expect(findMany).toHaveBeenCalledWith({
-      where: {
-        releasedAt: null,
-        $or: [
-          { scheduledAt: { $lt: new Date(NOW.getTime() - OVERDUE_GRACE_PERIOD_MS) } },
-          { status: 'failed' },
-        ],
-      },
-      select: ['id'],
-    });
   });
 
   it.each([
@@ -126,6 +120,20 @@ describe('Scheduling service: freezeOverdueReleases', () => {
       { id: 1, name: 'Release 1', status: 'failed', failureReason: 'missed_schedule' },
       expect.objectContaining({ name: 'MissedSchedule' })
     );
+    expect(strapi.requestContext.run).toHaveBeenCalled();
+  });
+
+  it('reports an empty release it froze as done like the scheduled run it missed', async () => {
+    const { service, recordMissedRun, reportFailedRun, reportReleasedRun, strapi } = setup({
+      rows: [release({ id: 1, status: 'empty', scheduledAt: minutesAgo(10) })],
+    });
+    const done = { id: 1, name: 'Release 1', status: 'done', failureReason: null };
+    recordMissedRun.mockResolvedValueOnce(done);
+
+    await service.freezeOverdueReleases({ now: NOW });
+
+    expect(reportReleasedRun).toHaveBeenCalledWith(done);
+    expect(reportFailedRun).not.toHaveBeenCalled();
     expect(strapi.requestContext.run).toHaveBeenCalled();
   });
 

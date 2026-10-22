@@ -588,6 +588,12 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         timezone: 'Europe/Paris',
         scheduledAt: inFuture(60),
       });
+      const entry = await createEntry('missed-its-schedule');
+      await rq({
+        url: `/content-releases/${release.id}/actions`,
+        method: 'POST',
+        body: releaseAction(entry.documentId),
+      });
       await strapi.db.query('plugin::content-releases.release').update({
         where: { id: release.id },
         data: { scheduledAt: new Date(Date.now() - 10 * 60_000) },
@@ -605,6 +611,30 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         resource: { type: 'release', id: release.id, name: 'Missed its schedule' },
       });
       expect(log.payload.details).toEqual({ reason: 'MissedSchedule' });
+    });
+
+    it('records an empty release that missed its schedule as a success, like its run', async () => {
+      const release = await createRelease({
+        name: 'Empty and missed',
+        timezone: 'Europe/Paris',
+        scheduledAt: inFuture(60),
+      });
+      await strapi.db.query('plugin::content-releases.release').update({
+        where: { id: release.id },
+        data: { scheduledAt: new Date(Date.now() - 10 * 60_000) },
+      });
+      await clearAuditLogs();
+
+      await strapi.plugin('content-releases').service('scheduling').freezeOverdueReleases();
+
+      const log = await expectExactlyOneLog('release.trigger');
+      expect(log.user).toBeNull();
+      expect(log.payload).toMatchObject({
+        actor: { type: 'system' },
+        origin: 'scheduler',
+        outcome: 'success',
+        resource: { type: 'release', id: release.id, name: 'Empty and missed' },
+      });
     });
 
     it('records nothing when it freezes a release that failed before the upgrade', async () => {
