@@ -22,7 +22,13 @@ type UploadServiceImplementation = ReturnType<typeof upload>;
  */
 export type UploadService = Omit<
   UploadServiceImplementation,
-  'upload' | 'replace' | 'formatFileInfo'
+  | 'upload'
+  | 'replace'
+  | 'formatFileInfo'
+  | 'getSettings'
+  | 'setSettings'
+  | 'getConfiguration'
+  | 'setConfiguration'
 > & {
   upload(
     input: { data: Record<string, unknown>; files: UploadInputFile[] },
@@ -46,6 +52,19 @@ export type UploadService = Omit<
       ? TRest
       : never
   ): ReturnType<UploadServiceImplementation['formatFileInfo']>;
+  /**
+   * The stored media library settings, or `null` before they are first stored. Settings saved
+   * without `aiMetadata` or `autoOrientation` are stored without them.
+   */
+  getSettings(): Promise<Strapi.Registries.Stores['plugin_upload_settings'] | null>;
+  /** Replaces the stored media library settings and sends the responsive dimensions telemetry event. */
+  setSettings(value: Strapi.Registries.Stores['plugin_upload_settings']): Promise<void>;
+  /** The stored media library view configuration, or `null` before it is first stored. */
+  getConfiguration(): Promise<Strapi.Registries.Stores['plugin_upload_view_configuration'] | null>;
+  /** Replaces the stored media library view configuration. */
+  setConfiguration(
+    value: Strapi.Registries.Stores['plugin_upload_view_configuration']
+  ): Promise<void>;
 };
 
 type MetricsServiceImplementation = ReturnType<typeof metrics>;
