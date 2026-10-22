@@ -4,11 +4,22 @@ import type { Core } from '@strapi/types';
 import { Config, File, UploadableFile } from '../types';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
+  /**
+   * Passes the file and the configured `sizeLimit` to the provider's own size check.
+   *
+   * @internal
+   */
   async checkFileSize(file: UploadableFile) {
     const { sizeLimit } = strapi.config.get<Config>('plugin::upload');
     await strapi.plugin('upload').provider.checkFileSize(file, { sizeLimit });
   },
 
+  /**
+   * Sends the file to the provider, as a stream when the provider supports it, as a buffer
+   * otherwise. The provider sets the file's `url`.
+   *
+   * @internal
+   */
   async upload(file: UploadableFile) {
     if (typeof strapi.plugin('upload').provider.uploadStream === 'function') {
       file.stream = file.getStream();
@@ -31,6 +42,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
   },
 
+  /**
+   * Replaces the old file with the new one at the provider. A provider without `replace` gets a
+   * delete of the old file, then an upload of the new one.
+   *
+   * @internal
+   */
   async replace(newFile: UploadableFile, oldFile: File) {
     const provider = strapi.plugin('upload').provider;
 
