@@ -571,7 +571,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  async function add(values: any, opts?: CommonOptions) {
+  async function add(values: UploadableFile, opts?: CommonOptions) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -747,6 +747,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   async function getSettings() {
     const res = await strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).get({});
 
+    // TODO @Nico `Settings` makes `aiMetadata` required, but settings saved without it are stored
+    // without it (the validation skips the yup default). The `UploadService` contract carries the
+    // stored row instead.
     return res as Settings | null;
   }
 
@@ -767,6 +770,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       key: 'view_configuration',
     }).get({});
 
+    // TODO @Nico `ViewConfiguration` makes `sort` a required `any`, but a configuration saved
+    // without it is stored without it. The `UploadService` contract carries the stored row instead.
     return res as ViewConfiguration | null;
   }
 
