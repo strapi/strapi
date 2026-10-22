@@ -119,6 +119,19 @@ describe('findTypeExports', () => {
     expect(logger.warnings).toBe(0);
   });
 
+  test('ignores a generic contract with a type parameter that has no default, with a warning', async () => {
+    const { found, logger } = await findIn({
+      alias: 'export type ServiceContract<T> = { find(): T };',
+      iface: 'export interface ServiceContract<T, U = number> { find(): [T, U] }',
+      defaults: 'export type ServiceContract<T = number> = { find(): T };',
+      ifaceDefaults: 'export interface ServiceContract<T = number> { find(): T }',
+    });
+
+    // The generated file references the contract without type arguments
+    expect(found).toEqual(['api::defaults.defaults', 'api::ifaceDefaults.ifaceDefaults']);
+    expect(logger.warnings).toBe(2);
+  });
+
   test('looks for the requested name', async () => {
     const { found } = await findIn(
       {
