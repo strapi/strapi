@@ -203,12 +203,15 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const dataWithoutMissingRelations = await traverseEntity(
         async (options, utils) => {
+          if (options.key === 'id' && options.schema.modelType === 'component') {
+            // Ids on components throw an error when restoring
+            utils.remove('id');
+            return;
+          }
+
           if (!options.attribute) return;
 
           if (options.attribute.type === 'component') {
-            // Ids on components throw an error when restoring
-            utils.remove('id');
-
             if (options.attribute.repeatable && options.value === null) {
               // Repeatable Components should always be an array
               utils.set(options.key, [] as any);
