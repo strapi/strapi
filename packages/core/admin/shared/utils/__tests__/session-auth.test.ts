@@ -3,11 +3,37 @@ import {
   getAccessCookiePath,
   getAccessCookieDomain,
   getRefreshCookieOptions,
+  getRefreshCookiePath,
   resolveLogoutDeviceId,
 } from '../session-auth';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../auth-cookie-name';
 import { DEFAULT_AUTH_COOKIE_PATH } from '../auth-cookie-path';
 import { DEFAULT_AUTH_COOKIE_DOMAIN } from '../auth-cookie-domain';
+
+// URL config as packages/core/core/src/configuration resolves it.
+const DEFAULT_URLS = {
+  'server.absoluteUrl': 'http://localhost:1337',
+  'admin.absoluteUrl': 'http://localhost:1337/admin',
+  'admin.path': '/admin',
+};
+
+// admin.url: '/dashboard'
+const CUSTOM_ADMIN_URL = {
+  'server.absoluteUrl': 'http://localhost:1337',
+  'admin.absoluteUrl': 'http://localhost:1337/dashboard',
+  'admin.path': '/dashboard',
+};
+
+// server.url: 'https://example.com/strapi' (a reverse proxy strips the prefix)
+const SUBPATH_SERVER_URL = {
+  'server.absoluteUrl': 'https://example.com/strapi',
+  'admin.absoluteUrl': 'https://example.com/strapi/admin',
+  'admin.path': '/admin',
+};
+
+const mockConfig = (values: Record<string, unknown>) => {
+  global.strapi.config.get = jest.fn((key: string) => values[key]) as any;
+};
 
 describe('getAccessCookieName', () => {
   beforeEach(() => {
@@ -61,6 +87,123 @@ describe('getAccessCookiePath', () => {
     ) as any;
 
     expect(getAccessCookiePath()).toBe('/strapi-de/admin');
+  });
+
+  test('follows a custom admin.url so the panel can read its own cookie', () => {
+    mockConfig(CUSTOM_ADMIN_URL);
+
+    expect(getAccessCookiePath()).toBe('/dashboard');
+  });
+
+  test('includes a server.url subpath, which admin.path leaves out', () => {
+    mockConfig(SUBPATH_SERVER_URL);
+
+    expect(getAccessCookiePath()).toBe('/strapi/admin');
+  });
+
+  test('includes a server.url subpath in front of a custom admin.url', () => {
+    mockConfig({
+      'server.absoluteUrl': 'https://example.com/strapi',
+      'admin.absoluteUrl': 'https://example.com/strapi/dashboard',
+      'admin.path': '/dashboard',
+    });
+
+    expect(getAccessCookiePath()).toBe('/strapi/dashboard');
+    expect(getRefreshCookiePath()).toBe('/strapi/admin');
+  });
+
+  test('uses the root path for an admin panel served from the root of its origin', () => {
+    mockConfig({
+      'server.absoluteUrl': 'https://api.example.com',
+      'admin.absoluteUrl': 'https://admin.example.com',
+      'admin.path': '/',
+    });
+
+    expect(getAccessCookiePath()).toBe('/');
+  });
+
+  test('prefers admin.auth.cookie.path over admin.url', () => {
+    mockConfig({ ...CUSTOM_ADMIN_URL, 'admin.auth.cookie.path': '/strapi-de/admin' });
+
+    expect(getAccessCookiePath()).toBe('/strapi-de/admin');
+  });
+
+  test('treats a blank admin.auth.cookie.path as unset', () => {
+    mockConfig({ ...CUSTOM_ADMIN_URL, 'admin.auth.cookie.path': '  ' });
+
+    expect(getAccessCookiePath()).toBe('/dashboard');
+  });
+});
+
+describe('getRefreshCookiePath', () => {
+  const logWarn = jest.fn();
+
+  beforeEach(() => {
+    logWarn.mockReset();
+    global.strapi = {
+      config: {
+        get: jest.fn(() => undefined),
+      },
+      log: {
+        warn: logWarn,
+      },
+    } as any;
+  });
+
+  test('defaults to /admin', () => {
+    mockConfig(DEFAULT_URLS);
+
+    expect(getRefreshCookiePath()).toBe('/admin');
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+  });
+
+  test('stays on the admin API when admin.url is custom, so /admin/access-token receives it', () => {
+    mockConfig(CUSTOM_ADMIN_URL);
+
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+    expect(getAccessCookiePath()).toBe('/dashboard');
+    expect(logWarn).not.toHaveBeenCalled();
+  });
+
+  test('follows a server.url subpath, which is where the browser sends admin API requests', () => {
+    mockConfig(SUBPATH_SERVER_URL);
+
+    expect(getRefreshCookieOptions().path).toBe('/strapi/admin');
+  });
+
+  test('keeps an admin.auth.cookie.path that covers the admin API', () => {
+    mockConfig({
+      'server.absoluteUrl': 'https://example.com/strapi-de',
+      'admin.absoluteUrl': 'https://example.com/strapi-de/admin',
+      'admin.path': '/admin',
+      'admin.auth.cookie.path': '/strapi-de/admin',
+    });
+
+    expect(getRefreshCookieOptions().path).toBe('/strapi-de/admin');
+    expect(getAccessCookiePath()).toBe('/strapi-de/admin');
+  });
+
+  test('keeps a root admin.auth.cookie.path', () => {
+    mockConfig({ ...CUSTOM_ADMIN_URL, 'admin.auth.cookie.path': '/' });
+
+    expect(getRefreshCookieOptions().path).toBe('/');
+  });
+
+  test('ignores an admin.auth.cookie.path that does not cover the admin API, and warns once', () => {
+    // The workaround documented for a custom admin.url before the access cookie followed it.
+    mockConfig({ ...CUSTOM_ADMIN_URL, 'admin.auth.cookie.path': '/dashboard' });
+
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+    expect(getAccessCookiePath()).toBe('/dashboard');
+    expect(logWarn).toHaveBeenCalledTimes(1);
+    expect(logWarn).toHaveBeenCalledWith(expect.stringContaining('"/dashboard"'));
+  });
+
+  test('matches whole path segments only', () => {
+    mockConfig({ ...DEFAULT_URLS, 'admin.auth.cookie.path': '/adm' });
+
+    expect(getRefreshCookiePath()).toBe('/admin');
   });
 });
 

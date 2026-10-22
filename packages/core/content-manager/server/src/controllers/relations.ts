@@ -73,7 +73,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
     publishedAt: firstRelation.publishedAt !== null ? { $null: true } : { $notNull: true },
   };
 
-  const availableStatus = await strapi.query(targetUid).findMany({
+  const availableStatus = await strapi.db.query(targetUid).findMany({
     select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
     filters,
   });

@@ -49,6 +49,11 @@ export type Configuration = {
   metadatas: Metadatas;
   layouts: Layouts;
   options?: object;
+  /**
+   * Old attribute name to its current name. The list view applies this to the
+   * column list stored in the browser, which the server cannot edit.
+   */
+  attributeRenames?: Record<string, string>;
 };
 
 export interface ContentType extends Struct.ContentTypeSchema {

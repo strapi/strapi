@@ -56,9 +56,12 @@ const NonRepeatableComponentFields = React.memo(
 
     return (
       <Flex direction="column" alignItems="stretch" gap={6}>
-        {layout.map((row, index) => {
+        {layout.map((row) => {
           return (
-            <ResponsiveGridRoot gap={{ initial: 3, medium: 4 }} key={index}>
+            <ResponsiveGridRoot
+              gap={{ initial: 3, medium: 4 }}
+              key={row.map((field) => field.name).join('.')}
+            >
               {row.map(({ size, ...field }) => {
                 /**
                  * Layouts are built from schemas so they don't understand the complete

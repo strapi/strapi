@@ -17,6 +17,11 @@ import { NavBurgerMenu } from './MainNav/NavBurgerMenu';
 import { NavUser } from './MainNav/NavUser';
 import { TrialCountdown } from './MainNav/TrialCountdown';
 
+const EMPTY_GENERAL_SECTION_LINKS: NonNullable<LeftMenuProps['generalSectionLinks']> = [];
+const EMPTY_PLUGINS_SECTION_LINKS: NonNullable<LeftMenuProps['pluginsSectionLinks']> = [];
+const EMPTY_TOP_MOBILE_NAVIGATION: NonNullable<LeftMenuProps['topMobileNavigation']> = [];
+const EMPTY_BURGER_MOBILE_NAVIGATION: NonNullable<LeftMenuProps['burgerMobileNavigation']> = [];
+
 const sortLinks = (links: MenuItem[]) => {
   return links.sort((a, b) => {
     // if no position is defined, we put the link in the position of the external plugins, before the plugins list
@@ -62,10 +67,10 @@ const MenuDetails = styled(Flex)`
 `;
 
 const LeftMenu = ({
-  generalSectionLinks = [],
-  pluginsSectionLinks = [],
-  topMobileNavigation = [],
-  burgerMobileNavigation = [],
+  generalSectionLinks = EMPTY_GENERAL_SECTION_LINKS,
+  pluginsSectionLinks = EMPTY_PLUGINS_SECTION_LINKS,
+  topMobileNavigation = EMPTY_TOP_MOBILE_NAVIGATION,
+  burgerMobileNavigation = EMPTY_BURGER_MOBILE_NAVIGATION,
 }: LeftMenuProps) => {
   const [isBurgerMenuShown, setIsBurgerMenuShown] = React.useState(false);
   const { trackUsage } = useTracking();

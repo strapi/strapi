@@ -26,6 +26,9 @@ import { useQueryParams } from '../../../../hooks/useQueryParams';
 import type { AdminTokenOwner } from '../../../../../../shared/contracts/shared';
 import type { Data } from '@strapi/types';
 
+const EMPTY_HEADERS: NonNullable<TableProps['headers']> = [];
+const EMPTY_TOKENS: NonNullable<TableProps['tokens']> = [];
+
 const formatAdminUserName = (
   owner: Pick<AdminTokenOwner, 'firstname' | 'lastname' | 'email' | 'username'>
 ): string => {
@@ -52,9 +55,9 @@ interface TableProps
 
 const Table = ({
   permissions,
-  headers = [],
+  headers = EMPTY_HEADERS,
   isLoading = false,
-  tokens = [],
+  tokens = EMPTY_TOKENS,
   onConfirmDelete,
   tokenType,
   showOwner = false,
