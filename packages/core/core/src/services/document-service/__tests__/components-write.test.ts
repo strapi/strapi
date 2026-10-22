@@ -3,6 +3,8 @@ import { updateComponents, deleteComponents, isComponentUnchanged } from '../com
 const PAGE_UID = 'api::page.page';
 const LINK_UID = 'monster.links';
 const SECTION_UID = 'monster.section';
+// registered, but not part of the zone of the page
+const LEGACY_UID = 'monster.legacy';
 
 const models: Record<string, any> = {
   [PAGE_UID]: {
@@ -33,6 +35,13 @@ const models: Record<string, any> = {
       links: { type: 'component', component: LINK_UID, repeatable: true },
     },
   },
+  [LEGACY_UID]: {
+    uid: LEGACY_UID,
+    modelType: 'component',
+    attributes: {
+      title: { type: 'string' },
+    },
+  },
 };
 
 const NOOP_RELATION = { connect: [], disconnect: [] };
@@ -49,12 +58,20 @@ const setup = (stored: Record<string, Stored>) => {
     Object.keys(models).map((uid) => [
       uid,
       {
-        load: jest.fn(async (entity: { id: number }, attribute: string | string[]) => {
-          const read = (name: string) => stored[uid]?.[entity.id]?.[name] ?? null;
-          return Array.isArray(attribute)
-            ? Object.fromEntries(attribute.map((name) => [name, read(name)]))
-            : read(attribute);
-        }),
+        load: jest.fn(
+          async (entity: { id: number }, attribute: string | string[], params?: any) => {
+            const read = (name: string) => {
+              const value = stored[uid]?.[entity.id]?.[name] ?? null;
+
+              // like the DB layer, only the component types listed in `on` are returned
+              return params?.on && Array.isArray(value)
+                ? value.filter((row: any) => row.__component in params.on)
+                : value;
+            };
+            return Array.isArray(attribute)
+              ? Object.fromEntries(attribute.map((name) => [name, read(name)]))
+              : read(attribute);
+          }
         findMany: jest.fn(async ({ where }: { where: { id: { $in: number[] } } }) =>
           where.id.$in.map((id) => ({ id, ...stored[uid]?.[id] }))
         ),
@@ -97,6 +114,9 @@ const pivot = (field: string, component_type: string) => ({ field, component_typ
 describe('updateComponents', () => {
   const page = { id: 10 };
 
+    components: Object.fromEntries(
+      Object.entries(models).filter(([, model]) => model.modelType === 'component')
+    ),
   describe('repeatable component', () => {
     const storedLinks = [link(1, 'a', { id: 7 }), link(2, 'b')];
 
@@ -321,7 +341,7 @@ describe('updateComponents', () => {
 
       expect(result).toEqual({});
       expect(queries[PAGE_UID].load).toHaveBeenCalledWith(page, 'zone', {
-        on: { [LINK_UID]: MEDIA_POPULATE, [SECTION_UID]: {} },
+        on: { [LINK_UID]: MEDIA_POPULATE, [SECTION_UID]: {}, [LEGACY_UID]: {} },
       });
       expect(queries[LINK_UID].update).not.toHaveBeenCalled();
       expect(queries[SECTION_UID].update).not.toHaveBeenCalled();
@@ -391,6 +411,25 @@ describe('isComponentUnchanged', () => {
     expect(check({ string: 'a' }, { string: 'a' })).toBe(true);
     expect(check({ string: 'a' }, { string: 'b' })).toBe(false);
     expect(check({ bool: false }, { bool: false })).toBe(true);
+
+    it('deletes a block whose type the zone no longer declares', async () => {
+      const queries = setup({
+        ...stored,
+        [PAGE_UID]: {
+          10: { zone: [...storedZone, { id: 30, __component: LEGACY_UID, title: 'old' }] },
+        },
+      });
+
+      const result = await updateComponents(PAGE_UID, page, {
+        zone: [
+          { __component: LINK_UID, ...linkInput(1, 'a') },
+          { __component: SECTION_UID, id: 20, title: 's', links: [] },
+        ],
+      } as any);
+
+      expect(queries[LEGACY_UID].delete).toHaveBeenCalledWith({ where: { id: '30' } });
+      expect(result.zone.map((block: any) => block.id)).toEqual([1, 20]);
+    });
     expect(check({ bool: false }, { bool: 'false' })).toBe(false);
     expect(check({ int: 3 }, { int: '3' })).toBe(true);
     expect(check({ dec: 12.5 }, { dec: '12.50' })).toBe(true);

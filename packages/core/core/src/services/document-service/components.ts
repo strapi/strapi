@@ -258,8 +258,7 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
         uid,
         entityToUpdate,
         attributeName,
-        dynamiczoneValues,
-        attribute.components
+        dynamiczoneValues
       );
 
       if (!Array.isArray(dynamiczoneValues)) {
@@ -355,19 +354,23 @@ const getComponentLoadParams = (componentUID: UID.Component) => {
   return populate ? { populate } : undefined;
 };
 
-const getDynamicZoneLoadParams = (componentUIDs: UID.Component[]) => {
-  // Every component of the zone has to be listed: the DB layer only returns the listed types
-  const on = componentUIDs.reduce(
-    (acc, componentUID) => {
-      const populate = getMediaPopulate(componentUID);
-      acc[componentUID] = populate ? { populate } : {};
+/**
+ * Load params of a dynamic zone for the cleanup pass. The DB layer only returns the types listed
+ * in `on`, and a zone may still hold components of a type that was removed from it, so every
+ * registered component is listed, not only the ones the zone declares: those components have to
+ * be deleted too when they are no longer sent.
+ */
+const getDynamicZoneLoadParams = () => {
+  const on: Record<string, Record<string, unknown>> = {};
+  let hasMedia = false;
 
-      return acc;
-    },
-    {} as Record<string, Record<string, unknown>>
-  );
+  for (const componentUID of Object.keys(strapi.components) as UID.Component[]) {
+    const populate = getMediaPopulate(componentUID);
+    on[componentUID] = populate ? { populate } : {};
+    hasMedia = hasMedia || populate !== undefined;
+  }
 
-  return Object.values(on).some((fragment) => !isEmpty(fragment)) ? { on } : undefined;
+  return hasMedia ? { on } : undefined;
 };
 
 /**
@@ -640,16 +643,11 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   attributeName: string,
-  dynamiczoneValues: DynamicZoneValue,
-  componentUIDs: UID.Component[]
+  dynamiczoneValues: DynamicZoneValue
 ) => {
   const previousValue = (await strapi.db
     .query(uid)
-    .load(
-      entityToUpdate,
-      attributeName,
-      getDynamicZoneLoadParams(componentUIDs)
-    )) as DynamicZoneValue;
+    .load(entityToUpdate, attributeName, getDynamicZoneLoadParams())) as DynamicZoneValue;
 
   const idsToKeep = _.castArray(dynamiczoneValues)
     .filter((value) => has(value, 'id'))
