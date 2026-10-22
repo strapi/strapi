@@ -11,6 +11,7 @@ import { controllers } from './controllers';
 
 export type * from './types';
 export type * from './types/services';
+export type * from './types/controllers';
 
 export default () => ({
   register,
