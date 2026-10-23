@@ -1,5 +1,5 @@
 import type { Ability } from '@casl/ability';
-import type { Data, Modules, Schema, Struct, UID } from '@strapi/types';
+import type { Data, Modules, Schema, Struct, UID, Utils } from '@strapi/types';
 import type { ComponentConfiguration } from '../../../shared/contracts/components';
 import type { Configuration } from '../../../shared/contracts/content-types';
 import type { DocumentManagerService as DocumentManagerFactory } from '../services/document-manager';
@@ -18,13 +18,18 @@ import type { createPreviewConfigService } from '../preview/services/preview-con
 
 type DocumentManagerImplementation = ReturnType<DocumentManagerFactory>;
 type FindLocalesOptions = Parameters<DocumentManagerImplementation['findLocales']>[2];
+type FindPageOptions = NonNullable<Parameters<DocumentManagerImplementation['findPage']>[0]>;
 
 /**
  * Existing document operations, including nullable lookups and optional clone results.
  * `findLocales` takes the populate value itself; the implementation keeps its published develop
  * option type, which wraps it in `{ populate }`.
  */
-export type DocumentManagerService = Omit<DocumentManagerImplementation, 'findLocales'> & {
+export type DocumentManagerService = Omit<
+  DocumentManagerImplementation,
+  'findLocales' | 'findPage' | 'countDraftRelations'
+> & {
+  /** @internal */
   findLocales(
     id: Parameters<DocumentManagerImplementation['findLocales']>[0],
     uid: Parameters<DocumentManagerImplementation['findLocales']>[1],
@@ -32,6 +37,32 @@ export type DocumentManagerService = Omit<DocumentManagerImplementation, 'findLo
       populate?: Modules.Documents.Params.Pick<UID.ContentType, 'populate'>['populate'];
     }
   ): ReturnType<DocumentManagerImplementation['findLocales']>;
+  /**
+   * Finds one page of documents. The admin list view passes its query string as is, so
+   * `page`, `pageSize` and `hasPublishedVersion` may arrive as strings; the pagination and the
+   * document service parse them.
+   * @internal
+   */
+  findPage(
+    opts:
+      | (Omit<FindPageOptions, 'page' | 'pageSize' | 'start' | 'limit' | 'hasPublishedVersion'> &
+          Utils.XOR<
+            { page?: number | string; pageSize?: number | string },
+            Modules.Documents.Params.Pagination.OffsetNotation
+          > & { hasPublishedVersion?: boolean | 'true' | 'false' })
+      | undefined,
+    uid: Parameters<DocumentManagerImplementation['findPage']>[1]
+  ): ReturnType<DocumentManagerImplementation['findPage']>;
+  /**
+   * Counts the draft relations of a document version. Without a locale (a non-localized content
+   * type), the document service reads the default locale.
+   * @internal
+   */
+  countDraftRelations(
+    id: Parameters<DocumentManagerImplementation['countDraftRelations']>[0],
+    uid: Parameters<DocumentManagerImplementation['countDraftRelations']>[1],
+    locale?: string
+  ): ReturnType<DocumentManagerImplementation['countDraftRelations']>;
 };
 
 type DocumentMetadataImplementation = ReturnType<typeof createDocumentMetadata>;
