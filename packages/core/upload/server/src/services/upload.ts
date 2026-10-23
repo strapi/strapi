@@ -617,6 +617,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function findMany(query: any = {}): Promise<File[]> {
+    // TODO @Nico The Content API `find` passes its nested `pagination` here, which the query
+    // engine ignores: `GET /api/upload/files?pagination[pageSize]=1` returns every file.
     const files = await strapi.db
       .query(FILE_MODEL_UID)
       .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
