@@ -73,13 +73,13 @@ test.describe('Copy components from existing entries', () => {
      */
     const copiedVariation = page.getByRole('button', { name: VARIATION_NAME });
     await expect(copiedVariation).toBeVisible();
-    await expect(page.getByText('Copied')).toBeVisible();
+    await expect(page.getByText('Copied', { exact: true })).toBeVisible();
 
     await copiedVariation.click();
     await expect(page.getByRole('textbox', { name: 'price' })).toHaveValue(VARIATION_PRICE);
 
     await saveProduct(page);
-    await expect(page.getByText('Copied')).toBeHidden();
+    await expect(page.getByText('Copied', { exact: true })).toBeHidden();
     await expect(page.getByRole('button', { name: VARIATION_NAME })).toBeVisible();
 
     /**
