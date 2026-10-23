@@ -1,8 +1,10 @@
 import type { Core } from '@strapi/strapi';
 import type {
   Controllers,
+  DocumentServiceMiddlewaresService,
   HomepageController,
   StagesController,
+  ValidationService,
 } from '@strapi/review-workflows/strapi-server';
 
 declare const app: Core.Strapi;
@@ -28,3 +30,12 @@ app.controller('plugin::review-workflows.workflows')?.updates(context, next);
   // @ts-expect-error Route actions are checked against the controller contracts.
   routes: [{ method: 'GET', path: '/workflows/:workflow_id/stages', handler: 'stages.findAll' }],
 }) satisfies Core.RouterInputFor<Controllers, 'plugin::review-workflows'>;
+
+// Review Workflows services only exist with the `review-workflows` feature.
+const validation = app.plugin('review-workflows').service('validation');
+validation satisfies ValidationService | undefined;
+validation?.limits.numberOfWorkflows satisfies number | undefined;
+app.service('plugin::review-workflows.document-service-middlewares') satisfies
+  DocumentServiceMiddlewaresService | undefined;
+// @ts-expect-error Stages are checked against the service contract.
+validation?.validateWorkflowStages('Draft');
