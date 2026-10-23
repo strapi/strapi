@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { typeMap } from './content-types';
 import { clickAndWait, findAndClose, locateSequence, navToHeader } from './shared';
 
@@ -25,6 +25,24 @@ export interface CreateContentOptions {
 /**
  * Fill a single field based on its type.
  */
+/**
+ * Clicks a button that adds a component. On a collection type the button opens a menu offering
+ * an empty component or a copy of an existing one; on a single type it adds the component directly.
+ */
+const clickAddComponentButton = async (
+  page: Page,
+  button: Locator,
+  emptyItemName: 'Empty entry' | 'Empty component'
+): Promise<void> => {
+  const opensMenu = (await button.getAttribute('aria-haspopup')) === 'menu';
+
+  await button.click();
+
+  if (opensMenu) {
+    await page.getByRole('menuitem', { name: emptyItemName }).click();
+  }
+};
+
 export const fillField = async (page: Page, field: FieldValue): Promise<void> => {
   const { name, type, value } = field;
 
@@ -49,7 +67,7 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
             { type: 'div', text: componentName },
             { type: 'button', text: 'add one' },
           ]);
-          await buttonLocator.click();
+          await clickAddComponentButton(page, buttonLocator, 'Empty entry');
 
           // Fill component fields
           if (componentFields && Array.isArray(componentFields)) {
@@ -76,7 +94,9 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
 
           // Select the component to add it to the dz
           const componentButton = page.getByRole('button', { name: component.name });
-          if ((await componentButton.getAttribute('data-state')) !== 'open') {
+          if ((await componentButton.getAttribute('aria-haspopup')) === 'menu') {
+            await clickAddComponentButton(page, componentButton, 'Empty component');
+          } else if ((await componentButton.getAttribute('data-state')) !== 'open') {
             await componentButton.click();
           }
 
