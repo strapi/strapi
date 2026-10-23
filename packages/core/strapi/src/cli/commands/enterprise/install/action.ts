@@ -13,6 +13,7 @@ import { prepareRegistryAccess } from './registry-access';
 import { fetchPackument, fetchPluginCatalog } from './registry';
 import {
   buildPluginRow,
+  describeLockedRows,
   isSelectable,
   orderVisibleRows,
   promptForPlugins,
@@ -261,6 +262,12 @@ const selectPlugins = async ({
       )
     ) {
       logger.info('The Enterprise plugins in your license are installed and up to date.');
+    }
+
+    const lockedRows = describeLockedRows(visibleRows, notLicensedMessage);
+
+    if (lockedRows) {
+      logger.info(lockedRows);
     }
 
     return [];

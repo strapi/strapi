@@ -1,5 +1,5 @@
 import type { EnterprisePluginEntry } from './discovery';
-import { promptChecklist, type ChecklistChoice } from './checklist-prompt';
+import { formatLockedChoice, promptChecklist, type ChecklistChoice } from './checklist-prompt';
 import { resolvePluginStatus } from './plugin-status';
 import type { PackumentLookup } from './registry';
 import { isPrerelease } from './versions';
@@ -159,12 +159,26 @@ export const orderVisibleRows = (rows: PluginRow[]): PluginRow[] =>
 export const describeLockedGroup = (notLicensedMessage?: string): string =>
   notLicensedMessage ? `Not in your license. ${notLicensedMessage}` : 'Not in your license.';
 
+const toLockedChoices = (rows: PluginRow[]): ChecklistChoice[] =>
+  rows.filter((row) => row.state === 'locked').map(toCheckboxChoice);
+
+export const describeLockedRows = (
+  rows: PluginRow[],
+  notLicensedMessage?: string
+): string | undefined => {
+  const lockedChoices = toLockedChoices(rows);
+
+  return lockedChoices.length > 0
+    ? [describeLockedGroup(notLicensedMessage), ...lockedChoices.map(formatLockedChoice)].join('\n')
+    : undefined;
+};
+
 export const promptForPlugins = (
   rows: PluginRow[],
   notLicensedMessage?: string
 ): Promise<string[]> => {
   const visibleRows = orderVisibleRows(rows);
-  const lockedChoices = visibleRows.filter((row) => row.state === 'locked').map(toCheckboxChoice);
+  const lockedChoices = toLockedChoices(visibleRows);
 
   return promptChecklist({
     message: 'Which Enterprise plugins do you want to install or upgrade?',

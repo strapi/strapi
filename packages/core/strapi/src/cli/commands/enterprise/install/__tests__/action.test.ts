@@ -672,7 +672,7 @@ describe('runInstall with the checklist', () => {
     expect(loggedText(logger)).not.toContain('Try again later');
   });
 
-  it('asks nothing when the plugins in the license are up to date, with others locked', async () => {
+  it('asks nothing when the plugins in the license are up to date, and lists the locked ones', async () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
@@ -681,9 +681,46 @@ describe('runInstall with the checklist', () => {
         catalog: {
           plugins: [
             { name: AI_BYOK, licensed: true },
-            { name: LOCKED_PLUGIN, licensed: false },
+            {
+              name: LOCKED_PLUGIN,
+              displayName: 'Locked',
+              description: 'Does locked things.',
+              licensed: false,
+            },
           ],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
         },
+      }),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ installedPackages: { [AI_BYOK]: '1.2.0' } }),
+      packageArguments: [],
+      logger,
+      dependencies,
+    });
+
+    expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
+    expect(logger.info.mock.calls.slice(-3)).toEqual([
+      ['The Enterprise plugins in your license are installed and up to date.'],
+      [
+        [
+          `Not in your license. ${NOT_LICENSED_MESSAGE}`,
+          `  ✕ Locked (${LOCKED_PLUGIN})  Does locked things.`,
+        ].join('\n'),
+      ],
+      ['Nothing to install.'],
+    ]);
+  });
+
+  it('lists no locked group when the plugins in the license are up to date on Growth', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      fetchImplementation: createRegistryFetch({
+        searchResult: [],
+        packuments: { [AI_BYOK]: aiByokPackument },
+        catalog: { plugins: [{ name: AI_BYOK, licensed: true }] },
       }),
     });
     const logger = createTestLogger();
@@ -699,6 +736,7 @@ describe('runInstall with the checklist', () => {
     expect(logger.info).toHaveBeenCalledWith(
       'The Enterprise plugins in your license are installed and up to date.'
     );
+    expect(loggedText(logger)).not.toContain('Not in your license.');
   });
 
   it('asks nothing when everything is up to date', async () => {

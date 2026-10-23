@@ -21,6 +21,8 @@ const SUBMIT_LABEL = 'Submit';
 const fitWidth = (text: string, width: number): string =>
   text.length <= width ? text : `${text.slice(0, Math.max(width - 1, 0))}…`;
 
+export const formatLockedChoice = (choice: ChecklistChoice): string => `  ✕ ${choice.name}`;
+
 const wrapWords = (text: string, width: number): string[] =>
   text.split(' ').reduce<string[]>((lines, word) => {
     const lastLine = lines[lines.length - 1];
@@ -77,7 +79,7 @@ export const promptChecklist = ({
             '',
             ...wrapWords(lockedGroup.heading, width() - 2).map((line) => `  ${line}`),
             ...lockedGroup.choices.map((choice) =>
-              chalk.dim(fitWidth(`  ✕ ${choice.name}`, width()))
+              chalk.dim(fitWidth(formatLockedChoice(choice), width()))
             ),
           ]
         : [];

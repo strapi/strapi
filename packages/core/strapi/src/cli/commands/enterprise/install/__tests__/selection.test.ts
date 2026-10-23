@@ -3,6 +3,7 @@ import type { PackumentLookup } from '../registry';
 import {
   buildPluginRow,
   describeLockedGroup,
+  describeLockedRows,
   orderVisibleRows,
   promptForPlugins,
   toCheckboxChoice,
@@ -10,7 +11,10 @@ import {
 } from '../selection';
 import { createPackument } from './test-helpers';
 
-jest.mock('../checklist-prompt', () => ({ promptChecklist: jest.fn() }));
+jest.mock('../checklist-prompt', () => ({
+  ...jest.requireActual('../checklist-prompt'),
+  promptChecklist: jest.fn(),
+}));
 
 const aiByokEntry = {
   packageName: '@strapi-enterprise/plugin-ai-byok',
@@ -190,6 +194,32 @@ describe('describeLockedGroup', () => {
 
   it.each([undefined, ''])('is the heading alone, with no trailing space, for %j', (message) => {
     expect(describeLockedGroup(message)).toBe('Not in your license.');
+  });
+});
+
+describe('describeLockedRows', () => {
+  it('shows the locked rows under the heading, as the prompt does', () => {
+    expect(
+      describeLockedRows(
+        [{ entry: aiByokEntry, state: 'locked' }, rowFor(threeVersions, '1.2.0')],
+        'Contact Sales.'
+      )
+    ).toBe(
+      [
+        'Not in your license. Contact Sales.',
+        `  ✕ AI BYOK (@strapi-enterprise/plugin-ai-byok)  ${aiByokEntry.summary}`,
+      ].join('\n')
+    );
+  });
+
+  it('uses the heading alone when the server sends no message', () => {
+    expect(describeLockedRows([{ entry: aiByokEntry, state: 'locked' }])).toMatch(
+      /^Not in your license\.\n/
+    );
+  });
+
+  it('is undefined when no row is locked', () => {
+    expect(describeLockedRows([rowFor(threeVersions, '1.2.0')], 'Contact Sales.')).toBeUndefined();
   });
 });
 
