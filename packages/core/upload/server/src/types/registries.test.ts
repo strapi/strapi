@@ -1,10 +1,13 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Core } from '@strapi/types';
-import type { Folder, UploadableFile } from '../types';
+import type { File, Folder, UploadableFile, UploadInputFile } from '../types';
 import type { Controllers } from './controllers';
-import type { AIMetadataJobRow, FolderStructureNode } from './services';
+import type { AIMetadataJobRow, FileFormat, FolderStructureNode } from './services';
 
 declare const file: UploadableFile;
+declare const fileRow: File;
+declare const fileFormat: FileFormat;
+declare const inputFile: UploadInputFile;
 declare const context: Parameters<Core.ControllerHandler>[0];
 declare const next: Parameters<Core.ControllerHandler>[1];
 
@@ -36,6 +39,10 @@ imageManipulation.missing();
 
 const provider = strapi.plugin('upload').service('provider');
 provider.upload(file) satisfies Promise<void>;
+provider.replace(file, fileRow) satisfies Promise<void>;
+provider.replace(file, fileFormat) satisfies Promise<void>;
+// @ts-expect-error The old file is a file row or one of its formats.
+provider.replace(file, { name: 'cover.png' });
 // @ts-expect-error Registered services have no arbitrary members.
 provider.missing();
 
@@ -124,6 +131,10 @@ const fileService = strapi.plugin('upload').service('file');
 fileService.getFolderPath(null) satisfies Promise<string>;
 // @ts-expect-error A folder is looked up by its numeric ID.
 fileService.getFolderPath('1');
+fileService.deleteByIds([1]) satisfies Promise<File[]>;
+// @ts-expect-error The deleted files are file rows.
+fileService.deleteByIds([1]) satisfies Promise<number[]>;
+fileService.signFileUrls(fileRow) satisfies Promise<File>;
 // @ts-expect-error Registered services have no arbitrary members.
 fileService.missing();
 
@@ -175,6 +186,30 @@ uploadService.findOne('1', '*');
 uploadService.findOne(1, { related: { on: { 'api::writer.writer': true } } });
 // @ts-expect-error Populate is a field list or a populate object.
 uploadService.findOne(1, 1);
+uploadService.upload({ data: {}, files: [inputFile] }) satisfies Promise<File[]>;
+declare const uploaded: Awaited<ReturnType<typeof uploadService.upload>>;
+// @ts-expect-error File rows have no arbitrary keys.
+uploaded[0]?.missing satisfies unknown;
+uploadService.replace(1, { data: { fileInfo: {} }, file: inputFile }) satisfies Promise<File>;
+uploadService.updateFileInfo(1, { name: 'cover.png' }, { user: { id: 1 } }) satisfies Promise<File>;
+// @ts-expect-error The file info is an object.
+uploadService.updateFileInfo(1, 'cover.png');
+uploadService.findOne(1) satisfies Promise<File | null>;
+// @ts-expect-error No file may have this ID.
+uploadService.findOne(1) satisfies Promise<File>;
+uploadService.findMany() satisfies Promise<File[]>;
+declare const page: Awaited<ReturnType<typeof uploadService.findPage>>;
+page.results satisfies File[];
+page.pagination.pageCount satisfies number;
+// @ts-expect-error A page holds file rows.
+page.results satisfies number[];
+declare const countedPage: Awaited<ReturnType<typeof uploadService.findAndCountPage>>;
+countedPage.results satisfies File[];
+// @ts-expect-error A page holds file rows.
+countedPage.results satisfies number[];
+uploadService.remove(fileRow) satisfies Promise<File | null>;
+// @ts-expect-error The row may already be deleted.
+uploadService.remove(fileRow) satisfies Promise<File>;
 
 strapi.controller('plugin::upload.admin-file').find(context, next);
 strapi.plugin('upload').controller('admin-file').generateAIMetadata(context, next);
