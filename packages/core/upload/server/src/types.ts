@@ -36,7 +36,13 @@ export interface File {
    * null for non-image files
    */
   width?: number | null;
+  /**
+   * null for non-image files
+   */
   height?: number | null;
+  /**
+   * null for non-image files
+   */
   formats?: Record<string, unknown> | null;
   hash: string;
   ext?: string;
@@ -47,12 +53,18 @@ export interface File {
    */
   sizeInBytes?: number;
   url?: string;
+  /**
+   * Provider-dependent: null with the local provider
+   */
   previewUrl?: string | null;
   /**
    * Set on files sent to the provider, never stored on the row
    */
   path?: string | null;
   provider?: string;
+  /**
+   * Provider-dependent: null with the local provider
+   */
   provider_metadata?: Record<string, unknown> | null;
   isUrlSigned?: boolean;
   /**
