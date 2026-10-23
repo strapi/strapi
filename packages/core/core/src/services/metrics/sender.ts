@@ -30,9 +30,11 @@ export type Sender = (
 ) => Promise<boolean>;
 
 const defaultQueryOpts = {
-  timeout: 1000,
   headers: { 'Content-Type': 'application/json' },
 };
+
+// Native fetch ignores `timeout`, so the deadline is an AbortSignal created per request
+const REQUEST_TIMEOUT_MS = 1000;
 
 /**
  * Add properties from the package.json strapi key in the metadata
@@ -101,6 +103,7 @@ export default (strapi: Core.Strapi): Sender => {
           ...payload.groupProperties,
         },
       }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       ..._.merge({ headers: { 'X-Strapi-Event': event } }, defaultQueryOpts, opts),
     };
 
