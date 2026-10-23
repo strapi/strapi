@@ -3,8 +3,9 @@ import zlib from 'zlib';
 import { Readable, Writable } from 'stream';
 import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
-import { stringer } from 'stream-json/jsonl/Stringer';
-import { chain } from 'stream-chain';
+// Extension is required: stream-json's export map does not resolve the extensionless subpath.
+import { stringer } from 'stream-json/jsonl/stringer.js'; // eslint-disable-line import/extensions
+import { chainUnchecked as chain } from 'stream-chain';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
 import type {

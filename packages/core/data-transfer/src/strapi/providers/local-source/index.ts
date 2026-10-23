@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { chain } from 'stream-chain';
+import { chainUnchecked as chain } from 'stream-chain';
 import type { Core, Struct } from '@strapi/types';
 
 import type { IMetadata, ISourceProvider, ProviderType, TransferStage } from '../../../types';

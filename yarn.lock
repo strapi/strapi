@@ -9863,8 +9863,6 @@ __metadata:
     "@types/mime-types": "npm:2.1.1"
     "@types/node": "npm:20.19.41"
     "@types/semver": "npm:7.5.0"
-    "@types/stream-chain": "npm:2.0.1"
-    "@types/stream-json": "npm:1.7.8"
     "@types/tar-stream": "npm:2.2.2"
     "@types/ws": "npm:^8.18.1"
     chalk: "npm:4.1.2"
@@ -9881,8 +9879,8 @@ __metadata:
     resolve-cwd: "npm:3.0.0"
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
-    stream-chain: "npm:2.2.5"
-    stream-json: "npm:1.9.1"
+    stream-chain: "npm:4.2.6"
+    stream-json: "npm:3.6.0"
     tar: "npm:7.5.22"
     tar-stream: "npm:2.2.0"
     typescript: "npm:5.9.3"
@@ -12517,25 +12515,6 @@ __metadata:
   version: 2.0.6
   resolution: "@types/statuses@npm:2.0.6"
   checksum: 10c0/dd88c220b0e2c6315686289525fd61472d2204d2e4bef4941acfb76bda01d3066f749ac74782aab5b537a45314fcd7d6261eefa40b6ec872691f5803adaa608d
-  languageName: node
-  linkType: hard
-
-"@types/stream-chain@npm:*, @types/stream-chain@npm:2.0.1":
-  version: 2.0.1
-  resolution: "@types/stream-chain@npm:2.0.1"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10c0/625e84b5f85c613a8e36e4f1c86629545fc45f3d7b0ac172c0654e829e20f7a0d49403a24886593b302410dff0746ed3829c3de65234c42e056a86d172f4efc2
-  languageName: node
-  linkType: hard
-
-"@types/stream-json@npm:1.7.8":
-  version: 1.7.8
-  resolution: "@types/stream-json@npm:1.7.8"
-  dependencies:
-    "@types/node": "npm:*"
-    "@types/stream-chain": "npm:*"
-  checksum: 10c0/c88f4dca65332d3847b37b16a60dc9d9a7401a6c47b0553e5a424e35f989757afeede32397b1a9ee9c1e5ba4a013832d2938fa60590e2b1dffa848185ac33b93
   languageName: node
   linkType: hard
 
@@ -28740,8 +28719,8 @@ __metadata:
     rollup: "npm:4.60.4"
     rollup-plugin-html: "npm:0.2.1"
     semver: "npm:7.7.4"
-    stream-chain: "npm:2.2.5"
-    stream-json: "npm:1.9.1"
+    stream-chain: "npm:4.2.6"
+    stream-json: "npm:3.6.0"
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.22"
@@ -28763,19 +28742,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stream-chain@npm:2.2.5, stream-chain@npm:^2.2.5":
-  version: 2.2.5
-  resolution: "stream-chain@npm:2.2.5"
-  checksum: 10c0/c512f50190d7c92d688fa64e7af540c51b661f9c2b775fc72bca38ea9bca515c64c22c2197b1be463741daacbaaa2dde8a8ea24ebda46f08391224f15249121a
+"stream-chain@npm:4.2.6, stream-chain@npm:^4.2.5":
+  version: 4.2.6
+  resolution: "stream-chain@npm:4.2.6"
+  checksum: 10c0/bcfec082d8ab57ff612b23c64e5917f47db1a6111954ca6a5f5fefe2e8d1c4be6962a8cd41c23fd2dda02e3b73077d7ef73adcd2bb5f8d183d294ab1c22219a1
   languageName: node
   linkType: hard
 
-"stream-json@npm:1.9.1":
-  version: 1.9.1
-  resolution: "stream-json@npm:1.9.1"
+"stream-json@npm:3.6.0":
+  version: 3.6.0
+  resolution: "stream-json@npm:3.6.0"
   dependencies:
-    stream-chain: "npm:^2.2.5"
-  checksum: 10c0/0521e5cb3fb6b0e2561d715975e891bd81fa77d0239c8d0b1756846392bc3c7cdd7f1ddb0fe7ed77e6fdef58daab9e665d3b39f7d677bd0859e65a2bff59b92c
+    stream-chain: "npm:^4.2.5"
+  checksum: 10c0/3215fdecefff103e761bab0f01b7dd88b6bf137b01e392ebe68bc0c28465c07a87dbec7a039893003c6e993b317e0444f48ace459f771bacdc65dc6b80f48658
   languageName: node
   linkType: hard
 

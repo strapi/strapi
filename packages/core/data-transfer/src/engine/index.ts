@@ -1,9 +1,8 @@
-import { PassThrough, Transform, Readable, Writable } from 'stream';
+import { PassThrough, Transform, Readable, Writable, Duplex } from 'stream';
 import { pipeline } from 'stream/promises';
 import { extname } from 'path';
 import { EOL } from 'os';
-import type Chain from 'stream-chain';
-import { chain } from 'stream-chain';
+import { chainUnchecked as chain } from 'stream-chain';
 import { isEmpty, isNumber, pick } from 'lodash';
 import { diff as semverDiff } from 'semver';
 
@@ -216,12 +215,12 @@ class TransferEngine<
   #createStageTransformStream<T extends TransferStage>(
     key: T,
     options: { includeGlobal?: boolean } = {}
-  ): PassThrough | Transform {
+  ): PassThrough | Duplex {
     const { includeGlobal = true } = options;
     const { throttle } = this.options;
     const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
-    let stream: PassThrough | Chain = new PassThrough({ objectMode: true });
+    let stream: PassThrough | Duplex = new PassThrough({ objectMode: true });
 
     const applyTransforms = <U>(transforms: TransferTransform<U>[] = []) => {
       const chainTransforms: StreamItem[] = [];
@@ -235,7 +234,9 @@ class TransferEngine<
         }
       }
       if (chainTransforms.length) {
-        stream = stream.pipe(chain(chainTransforms));
+        const next = chain(chainTransforms);
+        stream.pipe(next);
+        stream = next;
       }
     };
 
@@ -592,7 +593,7 @@ class TransferEngine<
     stage: TransferStage;
     source?: Readable;
     destination?: Writable;
-    transform?: PassThrough | Chain;
+    transform?: PassThrough | Duplex;
     tracker?: PassThrough;
   }) {
     if (this.#aborted) {

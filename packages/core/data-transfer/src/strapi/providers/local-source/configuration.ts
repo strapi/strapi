@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { chain } from 'stream-chain';
+import { chainUnchecked as chain } from 'stream-chain';
 import type { Core } from '@strapi/types';
 
 import type { IConfiguration } from '../../../types';
@@ -14,7 +14,7 @@ export const createConfigurationStream = (strapi: Core.Strapi): Readable => {
       // Core Store
       const coreStoreStream = chain([
         strapi.db.queryBuilder('strapi::core-store').stream(),
-        (data) => ({ ...data, value: JSON.parse(data.value) }),
+        (data: { value: string }) => ({ ...data, value: JSON.parse(data.value) }),
         wrapConfigurationItem('core-store'),
       ]);
 

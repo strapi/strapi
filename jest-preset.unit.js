@@ -17,6 +17,8 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
+  // stream-json 3 and stream-chain 4 are ESM-only. Jest 29 does not native-load them.
+  transformIgnorePatterns: ['/node_modules/(?!(stream-json|stream-chain)/)', '\\.pnp\\.[^\\/]+$'],
   // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
   // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
