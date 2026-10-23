@@ -2,6 +2,7 @@ import type { Core } from '@strapi/strapi';
 import type {
   AIMetadataJobRow,
   AIMetadataJobsService,
+  FilesQuery,
   Folder,
   FolderService,
   FolderStructureNode,
@@ -64,6 +65,15 @@ const configuration = app.service('plugin::upload.upload').getConfiguration();
 configuration satisfies Promise<{ pageSize: number; sort?: string | undefined } | null>;
 // @ts-expect-error The sort is a string.
 app.service('plugin::upload.upload').setConfiguration({ pageSize: 10, sort: 1 });
+const filesQuery = {
+  filters: { name: { $containsi: 'cover' } },
+  pagination: { page: 1, pageSize: 10 },
+} satisfies FilesQuery;
+uploadService.findAndCountPage(filesQuery);
+app.service('plugin::upload.upload').findMany({ sort: 'name:asc', start: 0, limit: 10 });
+app.plugin('upload').service('upload').findOne(1, ['folder']);
+// @ts-expect-error `findPage` pages from flat `page` and `pageSize`.
+app.service('plugin::upload.upload').findPage({ pagination: { page: 1 } });
 
 app.plugin('upload').controller('admin-file').findOne(context, next);
 app.controller('plugin::upload.admin-upload').bulkUpdateFileInfo(context, next);
