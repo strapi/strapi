@@ -1,3 +1,4 @@
+import type { queryParams } from '@strapi/utils';
 import type upload from '../services/upload';
 import type { Config, File, Folder, UploadInputFile } from '../types';
 import type imageManipulation from '../services/image-manipulation';
@@ -16,6 +17,25 @@ import type { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 type UploadServiceImplementation = ReturnType<typeof upload>;
 
 /**
+ * A query of the upload service's file reads: the REST query params, with the Content API's nested
+ * `pagination`. Query string values arrive as strings. Page (`page`, `pageSize`) and offset
+ * (`start`, `limit`) notations cannot be mixed.
+ */
+export type FilesQuery = queryParams.Params & {
+  pagination?: {
+    page?: number | string;
+    pageSize?: number | string;
+    start?: number | string;
+    limit?: number | string;
+    /**
+     * `true`, `1`, `'true'`, `'t'` and `'1'` count the files; `false`, `0`, `'false'`, `'f'` and
+     * `'0'` skip the count; any other string is rejected. Defaults to `api.rest.withCount`.
+     */
+    withCount?: boolean | 0 | 1 | string;
+  };
+};
+
+/**
  * The registered `upload` service. The service reads only the {@link UploadInputFile} fields of the
  * files it receives, so hand-built files are accepted too. The implementation keeps its published
  * formidable `InputFile` parameters, which strict types would otherwise widen for every application.
@@ -29,6 +49,10 @@ export type UploadService = Omit<
   | 'setSettings'
   | 'getConfiguration'
   | 'setConfiguration'
+  | 'findOne'
+  | 'findMany'
+  | 'findPage'
+  | 'findAndCountPage'
 > & {
   upload(
     input: { data: Record<string, unknown>; files: UploadInputFile[] },
@@ -65,6 +89,20 @@ export type UploadService = Omit<
   setConfiguration(
     value: Strapi.Registries.Stores['plugin_upload_view_configuration']
   ): Promise<void>;
+  /** The file with this ID, or `null` when there is none. */
+  findOne(
+    id: Parameters<UploadServiceImplementation['findOne']>[0],
+    populate?: queryParams.Params['populate']
+  ): ReturnType<UploadServiceImplementation['findOne']>;
+  /** The matching files. `pagination` is ignored: pass flat `start` and `limit` to page. */
+  findMany(query?: FilesQuery): ReturnType<UploadServiceImplementation['findMany']>;
+  /** A page of the matching files, from flat `page` and `pageSize`. */
+  findPage(query?: queryParams.Params): ReturnType<UploadServiceImplementation['findPage']>;
+  /**
+   * A page of the matching files, from the nested `pagination` and the `api.rest` limits. Without
+   * the count, `pagination` has no `total` or `pageCount`.
+   */
+  findAndCountPage(query?: FilesQuery): ReturnType<UploadServiceImplementation['findAndCountPage']>;
 };
 
 type MetricsServiceImplementation = ReturnType<typeof metrics>;

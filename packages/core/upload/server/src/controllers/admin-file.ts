@@ -1,5 +1,5 @@
 import { merge } from 'lodash';
-import { async } from '@strapi/utils';
+import { async, type queryParams } from '@strapi/utils';
 
 import type { Context } from 'koa';
 
@@ -38,7 +38,12 @@ export default {
       (q) => pm.addPermissionsQueryTo(q)
     )(ctx.query);
 
-    const { results: files, pagination } = await getService('upload').findPage(query);
+    // TODO @Nico The pipe types the query as `unknown`. It is the validated and sanitized query
+    // string, so `sort[name]=desc` and `populate[folder]=true` arrive as strings, where
+    // `queryParams.Params` expects a sort order and a boolean.
+    const { results: files, pagination } = await getService('upload').findPage(
+      query as queryParams.Params
+    );
 
     // Sign file urls for private providers
     const signedFiles = await async.map(files, getService('file').signFileUrls);
