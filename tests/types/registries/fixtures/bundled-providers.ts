@@ -53,6 +53,16 @@ void app
     role.usersCount satisfies number;
     role?.usersCount satisfies number | undefined;
   });
+// The super admin role may be missing: `getSuperAdminWithUsersCount` resolves to `null`.
+void app
+  .service('admin::role')
+  .getSuperAdminWithUsersCount()
+  .then((role) => {
+    // @ts-expect-error The role may be null.
+    role.usersCount satisfies number;
+    role?.usersCount satisfies number | undefined;
+    role satisfies { usersCount: number } | null;
+  });
 // EE-only members stay optional on the shared contract.
 // @ts-expect-error `ssoCheckRolesIdForDeletion` only exists in EE.
 app.service('admin::role').ssoCheckRolesIdForDeletion([]);
