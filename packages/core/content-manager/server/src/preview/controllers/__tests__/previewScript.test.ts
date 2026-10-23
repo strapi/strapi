@@ -15,6 +15,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import * as stega from '@vercel/stega';
+
 const scriptSource = fs.readFileSync(path.join(__dirname, '../previewScript.js'), 'utf-8');
 // Evaluate the source in a fresh function scope and extract the declared function.
 // new Function is intentional here: previewScript.js is a self-contained IIFE with no
@@ -966,5 +968,230 @@ describe('previewScript — running the script more than once in the same page',
     expect(document.querySelectorAll('#strapi-preview-overlay')).toHaveLength(1);
     expect(firstOverlay?.isConnected).toBe(false);
     expect(countIframeClicks()).toBe(1);
+  });
+});
+
+// Every describe above sets STRAPI_DISABLE_STEGA_DECODING, because the script loads its
+// decoder at runtime from a CDN URL that a test can't fetch. These tests run the decoder
+// for real: the CDN import is swapped for the same @vercel/stega version from node_modules
+// (the one @strapi/core encodes with), so the script reads markers exactly as a browser would.
+//
+// The previewed page belongs to the frontend, which may still be streaming and hydrating it
+// while the script runs. If the script rewrites that markup, the framework compares its own
+// render against a changed DOM and reports hydration errors (or, when an inline payload
+// script is cut short, fails the whole page). So the script may read markers, but must
+// leave script payloads, text and attributes of rendered elements as they were.
+describe('previewScript — stega decoding reads the page without rewriting it', () => {
+  type PreviewWindow = Window & { __strapi_previewCleanup?: () => void };
+
+  const STEGA_CDN_IMPORT =
+    /import\(\s*(?:\/\/[^\n]*\n\s*)?'https:\/\/cdn\.jsdelivr\.net\/npm\/@vercel\/stega@[^']+'\s*\)/g;
+
+  const stegaMatches = scriptSource.match(STEGA_CDN_IMPORT) ?? [];
+  if (stegaMatches.length !== 1) {
+    throw new Error(
+      `Expected exactly one @vercel/stega CDN import in previewScript.js, found ${stegaMatches.length}`
+    );
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
+  const previewScriptWithDecoder: (config: unknown) => void = new Function(
+    '__loadStega',
+    `${scriptSource.replace(STEGA_CDN_IMPORT, '__loadStega()')}; return previewScript;`
+  )(async () => stega);
+
+  const TITLE_SOURCE = 'documentId=doc1&type=string&path=title';
+  const SUBTITLE_SOURCE = 'documentId=doc1&type=string&path=subtitle';
+  const MANUAL_SOURCE = 'documentId=doc1&type=string&path=manual';
+
+  const encode = (text: string, strapiSource: string) =>
+    stega.vercelStegaCombine(text, { strapiSource }, false);
+
+  const encodedTitle = encode('Hello title', TITLE_SOURCE);
+  // Next.js streams its RSC payload as inline scripts, with the encoded strings inside.
+  const payload = `self.__next_f.push([1,${JSON.stringify(encodedTitle)}])`;
+
+  const flush = () =>
+    new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+  const sourcedElements = () =>
+    Array.from(document.querySelectorAll('[data-strapi-source]')).map((element) => element.id);
+
+  const focusPathOnDoubleClick = (highlight: Element) => {
+    const postMessageSpy = jest.spyOn(window, 'postMessage');
+    highlight.dispatchEvent(
+      new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: 0, clientY: 0 })
+    );
+    const paths = postMessageSpy.mock.calls
+      .filter(
+        ([data]) => (data as { type?: string })?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT
+      )
+      .map(([data]) => (data as { payload: { path: string } }).payload.path);
+    postMessageSpy.mockRestore();
+    return paths;
+  };
+
+  const focusPaths = () =>
+    Array.from(document.querySelectorAll('.strapi-highlight')).flatMap(focusPathOnDoubleClick);
+
+  beforeEach(async () => {
+    global.ResizeObserver = class {
+      observe() {}
+
+      unobserve() {}
+
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+
+    // jsdom has no layout, and a field with no size has nowhere to open its editor.
+    jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 300,
+      height: 20,
+      right: 300,
+      bottom: 20,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    } as DOMRect);
+
+    document.body.innerHTML = `
+      <script id="payload">${payload}</script>
+      <h1 id="title">${encodedTitle}</h1>
+      <p id="manual" data-strapi-source="${MANUAL_SOURCE}">Rendered by the frontend</p>
+    `;
+
+    previewScriptWithDecoder({
+      colors: COLORS,
+      events: INTERNAL_EVENTS,
+      parentOrigin: PARENT_ORIGIN,
+    });
+    await flush();
+  });
+
+  afterEach(() => {
+    (window as PreviewWindow).__strapi_previewCleanup?.();
+    jest.restoreAllMocks();
+  });
+
+  test('leaves the text of an inline payload script exactly as it was', () => {
+    expect(document.getElementById('payload')?.textContent).toBe(payload);
+  });
+
+  test('leaves encoded text exactly as it was', () => {
+    expect(document.getElementById('title')?.textContent).toBe(encodedTitle);
+  });
+
+  test('never writes data-strapi-source onto elements the frontend rendered', () => {
+    expect(sourcedElements()).toEqual(['manual']);
+  });
+
+  test('still maps a decoded element to its field', () => {
+    expect(focusPaths()).toContainEqual(expect.stringContaining('path=title'));
+  });
+
+  test('still maps an element the frontend gave its own data-strapi-source', () => {
+    expect(focusPaths()).toContainEqual(expect.stringContaining('path=manual'));
+  });
+
+  test('maps an encoded element added after load, without rewriting it', async () => {
+    const encodedSubtitle = encode('Hello subtitle', SUBTITLE_SOURCE);
+    const subtitle = document.createElement('h2');
+    subtitle.id = 'subtitle';
+    subtitle.textContent = encodedSubtitle;
+    document.body.appendChild(subtitle);
+    await flush();
+
+    expect(subtitle.textContent).toBe(encodedSubtitle);
+    expect(sourcedElements()).toEqual(['manual']);
+    expect(focusPaths()).toContainEqual(expect.stringContaining('path=subtitle'));
+  });
+
+  test('maps an element whose text becomes encoded after load, without rewriting it', async () => {
+    const subtitle = document.createElement('h2');
+    subtitle.id = 'subtitle';
+    subtitle.textContent = 'Loading';
+    document.body.appendChild(subtitle);
+    await flush();
+
+    // A client-side update changes the text in place (a characterData mutation),
+    // rather than adding a new element.
+    const encodedSubtitle = encode('Hello subtitle', SUBTITLE_SOURCE);
+    (subtitle.firstChild as Text).data = encodedSubtitle;
+    await flush();
+
+    expect(subtitle.textContent).toBe(encodedSubtitle);
+    expect(focusPaths()).toContainEqual(expect.stringContaining('path=subtitle'));
+  });
+
+  describe('a decoded media field swapped to another media type while editing', () => {
+    const COVER_SOURCE = 'documentId=doc1&type=media&path=cover.url';
+
+    const addCover = async () => {
+      const cover = document.createElement('img');
+      cover.id = 'cover';
+      cover.setAttribute('src', encode('https://cdn.example.com/cover.png', COVER_SOURCE));
+      document.body.appendChild(cover);
+      await flush();
+      return cover;
+    };
+
+    const changeCover = async (url: string, mime: string) => {
+      sendMessage({ type: STRAPI_FIELD_CHANGE, payload: { field: 'cover', value: { url, mime } } });
+      await flush();
+    };
+
+    const coverPaths = () => focusPaths().filter((focusPath) => focusPath.includes('path=cover'));
+
+    test('keeps the swapped-in element mapped to the field', async () => {
+      const cover = await addCover();
+      expect(coverPaths()).toHaveLength(1);
+
+      await changeCover('https://cdn.example.com/clip.mp4', 'video/mp4');
+
+      const video = document.querySelector('video');
+      expect(video).not.toBeNull();
+      expect(cover.style.display).toBe('none');
+      expect(coverPaths()).toHaveLength(1);
+    });
+
+    test('hands the field back to the original when it is swapped back', async () => {
+      const cover = await addCover();
+      await changeCover('https://cdn.example.com/clip.mp4', 'video/mp4');
+      await changeCover('https://cdn.example.com/other.png', 'image/png');
+
+      expect(document.querySelector('video')).toBeNull();
+      expect(cover.style.display).toBe('');
+      expect(coverPaths()).toHaveLength(1);
+    });
+  });
+
+  test('keeps a media item added while editing mapped to its field', async () => {
+    const gallery = document.createElement('div');
+    gallery.style.display = 'flex';
+    const first = document.createElement('img');
+    first.setAttribute(
+      'src',
+      encode('https://cdn.example.com/a.png', 'documentId=doc1&type=media&path=gallery.url')
+    );
+    gallery.appendChild(first);
+    document.body.appendChild(gallery);
+    await flush();
+
+    const twoItems = [
+      { url: 'https://cdn.example.com/a.png', mime: 'image/png' },
+      { url: 'https://cdn.example.com/b.png', mime: 'image/png' },
+    ];
+    sendMessage({ type: STRAPI_FIELD_CHANGE, payload: { field: 'gallery', value: twoItems } });
+    await flush();
+    // A second change with the same two items must find the slot added by the first,
+    // rather than adding another one.
+    sendMessage({ type: STRAPI_FIELD_CHANGE, payload: { field: 'gallery', value: twoItems } });
+    await flush();
+
+    expect(gallery.querySelectorAll('img')).toHaveLength(2);
   });
 });
