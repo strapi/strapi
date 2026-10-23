@@ -39,7 +39,7 @@ describe('Local File Destination Provider', () => {
   });
 
   describe('Bootstrap', () => {
-    it('Throws an error if encryption is enabled and the key is not provided', () => {
+    it('Throws an error if encryption is enabled and the key is not provided', async () => {
       const providerOptions = {
         encryption: { enabled: true },
         compression: { enabled: false },
@@ -47,7 +47,7 @@ describe('Local File Destination Provider', () => {
       };
       const provider = createLocalFileDestinationProvider(providerOptions);
 
-      expect(() => provider.bootstrap()).toThrowError("Can't encrypt without a key");
+      await expect(provider.bootstrap()).rejects.toThrow("Can't encrypt without a key");
     });
 
     it('Adds .gz extension to the archive path when compression is enabled', async () => {
@@ -131,7 +131,7 @@ describe('Local File Destination Provider', () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
 
       await provider.bootstrap();
-      provider.createEntitiesWriteStream();
+      await provider.createEntitiesWriteStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();
       expect(createFilePathFactory).toHaveBeenCalledWith('entities');
@@ -140,7 +140,7 @@ describe('Local File Destination Provider', () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
 
       await provider.bootstrap();
-      const entitiesStream = provider.createEntitiesWriteStream();
+      const entitiesStream = await provider.createEntitiesWriteStream();
 
       expect(entitiesStream instanceof stream.Writable).toBeTruthy();
     });
@@ -158,7 +158,7 @@ describe('Local File Destination Provider', () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
 
       await provider.bootstrap();
-      provider.createSchemasWriteStream();
+      await provider.createSchemasWriteStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();
       expect(createFilePathFactory).toHaveBeenCalledWith('schemas');
@@ -168,7 +168,7 @@ describe('Local File Destination Provider', () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
 
       await provider.bootstrap();
-      const schemasStream = provider.createSchemasWriteStream();
+      const schemasStream = await provider.createSchemasWriteStream();
 
       expect(schemasStream instanceof stream.Writable).toBeTruthy();
     });
@@ -186,7 +186,7 @@ describe('Local File Destination Provider', () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
 
       await provider.bootstrap();
-      provider.createLinksWriteStream();
+      await provider.createLinksWriteStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();
       expect(createFilePathFactory).toHaveBeenCalledWith('links');
@@ -196,7 +196,7 @@ describe('Local File Destination Provider', () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
 
       await provider.bootstrap();
-      const linksStream = provider.createLinksWriteStream();
+      const linksStream = await provider.createLinksWriteStream();
 
       expect(linksStream instanceof stream.Writable).toBeTruthy();
     });
@@ -214,7 +214,7 @@ describe('Local File Destination Provider', () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
 
       await provider.bootstrap();
-      provider.createConfigurationWriteStream();
+      await provider.createConfigurationWriteStream();
 
       expect(createTarEntryStream).toHaveBeenCalled();
       expect(createFilePathFactory).toHaveBeenCalledWith('configuration');
@@ -224,7 +224,7 @@ describe('Local File Destination Provider', () => {
       const provider = createLocalFileDestinationProvider(providerOptions);
 
       await provider.bootstrap();
-      const configurationStream = provider.createConfigurationWriteStream();
+      const configurationStream = await provider.createConfigurationWriteStream();
 
       expect(configurationStream instanceof stream.Writable).toBeTruthy();
     });
@@ -246,7 +246,7 @@ describe('Local File Destination Provider', () => {
       });
       await provider.bootstrap();
 
-      const writeStream = provider.createEntitiesWriteStream();
+      const writeStream = await provider.createEntitiesWriteStream();
       const chunks = Array.from({ length: 25 }, (_, i) => ({ id: i, title: `Item ${i}` }));
 
       const { sourcePaused } = await assertWriteStreamBackpressure(writeStream, chunks, {

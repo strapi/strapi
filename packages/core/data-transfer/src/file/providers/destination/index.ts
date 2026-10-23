@@ -3,11 +3,9 @@ import zlib from 'zlib';
 import { Readable, Writable } from 'stream';
 import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
-// Extension is required: stream-json's export map does not resolve the extensionless subpath.
-import { stringer } from 'stream-json/jsonl/stringer.js'; // eslint-disable-line import/extensions
-import { chainUnchecked as chain } from 'stream-chain';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 import type {
   IAsset,
   IDestinationProvider,
@@ -108,7 +106,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return zlib.createGzip();
   }
 
-  bootstrap(diagnostics: IDiagnosticReporter): void | Promise<void> {
+  async bootstrap(diagnostics: IDiagnosticReporter): Promise<void> {
+    const { chain } = await loadStreamDeps();
     this.#diagnostics = diagnostics;
     this.#closed = false;
     const { compression, encryption } = this.options;
@@ -201,7 +200,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return createTarEntryStream(stream, () => 'metadata.json');
   }
 
-  createSchemasWriteStream() {
+  async createSchemasWriteStream(): Promise<Writable> {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -214,10 +213,11 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       this.options.file.maxSizeJsonl
     );
 
+    const { chain, stringer } = await loadStreamDeps();
     return chain([stringer(), entryStream]);
   }
 
-  createEntitiesWriteStream(): Writable {
+  async createEntitiesWriteStream(): Promise<Writable> {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -230,10 +230,11 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       this.options.file.maxSizeJsonl
     );
 
+    const { chain, stringer } = await loadStreamDeps();
     return chain([stringer(), entryStream]);
   }
 
-  createLinksWriteStream(): Writable {
+  async createLinksWriteStream(): Promise<Writable> {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -246,10 +247,11 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       this.options.file.maxSizeJsonl
     );
 
+    const { chain, stringer } = await loadStreamDeps();
     return chain([stringer(), entryStream]);
   }
 
-  createConfigurationWriteStream(): Writable {
+  async createConfigurationWriteStream(): Promise<Writable> {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
@@ -262,6 +264,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       this.options.file.maxSizeJsonl
     );
 
+    const { chain, stringer } = await loadStreamDeps();
     return chain([stringer(), entryStream]);
   }
 

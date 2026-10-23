@@ -4,9 +4,6 @@ import { PassThrough } from 'stream';
 
 import fs from 'fs-extra';
 import { isEmpty, keyBy } from 'lodash';
-import { chainUnchecked as chain } from 'stream-chain';
-// Extension is required: stream-json's export map does not resolve the extensionless subpath.
-import { parser } from 'stream-json/jsonl/parser.js'; // eslint-disable-line import/extensions
 import type { Struct } from '@strapi/types';
 
 import type {
@@ -20,6 +17,7 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 import {
   ProviderInitializationError,
   ProviderTransferError,
@@ -282,6 +280,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
   }
 
   async #pipeJsonlDirectoryToStream(outStream: PassThrough, posixSubdir: string): Promise<void> {
+    const { chain, parser } = await loadStreamDeps();
     const files = await this.#listJsonlFiles(posixSubdir);
     for (const absPath of files) {
       const transforms = [

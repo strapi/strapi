@@ -2,9 +2,6 @@ import path from 'path';
 import { createWriteStream } from 'fs';
 import { Writable, pipeline } from 'stream';
 import fs from 'fs-extra';
-// Extension is required: stream-json's export map does not resolve the extensionless subpath.
-import { stringer } from 'stream-json/jsonl/stringer.js'; // eslint-disable-line import/extensions
-import { chainUnchecked as chain } from 'stream-chain';
 
 import type {
   IAsset,
@@ -14,6 +11,7 @@ import type {
   ProviderType,
 } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 import { createDirectoryJsonlWriter, createFilePathFactory } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
@@ -113,7 +111,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
     }
   }
 
-  createSchemasWriteStream() {
+  async createSchemasWriteStream(): Promise<Writable> {
     this.#reportInfo('creating schemas write stream');
     const filePathFactory = createFilePathFactory('schemas');
     const entryStream = createDirectoryJsonlWriter(
@@ -121,10 +119,11 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
+    const { chain, stringer } = await loadStreamDeps();
     return chain([stringer(), entryStream]);
   }
 
-  createEntitiesWriteStream(): Writable {
+  async createEntitiesWriteStream(): Promise<Writable> {
     this.#reportInfo('creating entities write stream');
     const filePathFactory = createFilePathFactory('entities');
     const entryStream = createDirectoryJsonlWriter(
@@ -132,10 +131,11 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
+    const { chain, stringer } = await loadStreamDeps();
     return chain([stringer(), entryStream]);
   }
 
-  createLinksWriteStream(): Writable {
+  async createLinksWriteStream(): Promise<Writable> {
     this.#reportInfo('creating links write stream');
     const filePathFactory = createFilePathFactory('links');
     const entryStream = createDirectoryJsonlWriter(
@@ -143,10 +143,11 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
+    const { chain, stringer } = await loadStreamDeps();
     return chain([stringer(), entryStream]);
   }
 
-  createConfigurationWriteStream(): Writable {
+  async createConfigurationWriteStream(): Promise<Writable> {
     this.#reportInfo('creating configuration write stream');
     const filePathFactory = createFilePathFactory('configuration');
     const entryStream = createDirectoryJsonlWriter(
@@ -154,6 +155,7 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
+    const { chain, stringer } = await loadStreamDeps();
     return chain([stringer(), entryStream]);
   }
 
