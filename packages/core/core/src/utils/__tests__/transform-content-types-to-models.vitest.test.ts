@@ -311,6 +311,19 @@ describe('transformContentTypesToModels', () => {
       expect(models).toMatchModels(expectedModels);
     });
 
+    it('passes component lifecycles through to the component model', () => {
+      const beforeCreate = vi.fn();
+      const withLifecycles = cloneDeep(contentTypes);
+      const component = withLifecycles.find((ct) => ct.modelType === 'component')!;
+      component.lifecycles = { beforeCreate };
+
+      const models = transformContentTypesToModels(withLifecycles, identifiers);
+
+      expect(models.find((model) => model.uid === component.uid)?.lifecycles).toEqual({
+        beforeCreate,
+      });
+    });
+
     it.each(['id', 'document_id', 'ID', 'documentId'])(
       'throws on restricted attribute name: %s',
       (restrictedName) => {
