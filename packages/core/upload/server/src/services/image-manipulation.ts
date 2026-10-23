@@ -30,7 +30,7 @@ const getSharpOptions = (): SharpOptions | undefined => {
   return { limitInputPixels };
 };
 
-const FORMATS_TO_RESIZE = new Set(['jpeg', 'png', 'webp', 'tiff', 'gif']);
+const FORMATS_TO_RESIZE = new Set(['jpeg', 'png', 'webp', 'tiff', 'gif', 'avif']);
 const FORMATS_TO_PROCESS = new Set(['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif']);
 const FORMATS_TO_OPTIMIZE = new Set(['jpeg', 'png', 'webp', 'tiff', 'avif']);
 
@@ -38,6 +38,13 @@ const isOptimizableFormat = (
   format: string | undefined
 ): format is 'jpeg' | 'png' | 'webp' | 'tiff' | 'avif' =>
   format !== undefined && FORMATS_TO_OPTIMIZE.has(format);
+
+/**
+ * sharp reports AVIF files as `heif` with `av1` compression. Normalize them to `avif`;
+ * other HEIF files (e.g. HEIC, `hevc` compression) keep the `heif` format and stay unprocessed.
+ */
+const getFormat = ({ format, compression }: Metadata) =>
+  format === 'heif' && compression === 'av1' ? 'avif' : format;
 
 const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
   new Promise<void>((resolve, reject) => {
@@ -149,7 +156,9 @@ const optimize = async (file: UploadableFile) => {
   const { sizeOptimization = false, autoOrientation = false } =
     (await getService('upload').getSettings()) ?? {};
 
-  const { format, size } = await getMetadata(file);
+  const metadata = await getMetadata(file);
+  const format = getFormat(metadata);
+  const { size } = metadata;
 
   if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
     let transformer;
@@ -289,7 +298,7 @@ const isOptimizableImage = async (file: UploadableFile) => {
   let format;
   try {
     const metadata = await getMetadata(file);
-    format = metadata.format;
+    format = getFormat(metadata);
   } catch {
     // throw when the file is not a supported image
     return false;
@@ -301,7 +310,7 @@ const isResizableImage = async (file: UploadableFile) => {
   let format;
   try {
     const metadata = await getMetadata(file);
-    format = metadata.format;
+    format = getFormat(metadata);
   } catch {
     // throw when the file is not a supported image
     return false;
@@ -313,7 +322,7 @@ const isImage = async (file: UploadableFile) => {
   let format;
   try {
     const metadata = await getMetadata(file);
-    format = metadata.format;
+    format = getFormat(metadata);
   } catch {
     // throw when the file is not a supported image
     return false;
