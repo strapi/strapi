@@ -112,7 +112,7 @@ This route returns a list of all stages associated with a specific workflow iden
 
 #### GET `/review-workflows/workflows/:workflow_id/stages/:id`
 
-This route returns the details of a specific stage identified by the id parameter and associated with the workflow identified by the workflow_id parameter.
+This route returns the details of a specific stage identified by the id parameter and associated with the workflow identified by the workflow_id parameter. It returns a 404 when the stage does not exist or belongs to another workflow.
 
 #### PUT `/review-workflows/workflows/:workflow_id/stages`
 
