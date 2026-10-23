@@ -287,17 +287,30 @@ const cleanOrderColumns = async ({
     switch (strapi.db.dialect.client) {
       case 'mysql': {
         // Here it's MariaDB and MySQL 8
-        const select = selectRowsToOrder(joinTable.name);
-
-        await db
-          .getConnection()
-          .raw(
-            `UPDATE ?? as a, ( ${select.sql} ) AS b
-            SET ?? = b.src_order
-            WHERE b.id = a.id`,
-            [joinTable.name, ...select.bindings, orderColumnName]
-          )
+        // NOTE: A multi-table UPDATE joined to a derived ROW_NUMBER() table is rejected by
+        // MariaDB Galera Cluster (errno 4165, "Galera replication not supported"). Compute the
+        // ranking app-side and apply it as a single-table, PK-keyed UPDATE instead.
+        const rows: { id: ID }[] = await db
+          .connection(joinTable.name)
+          .select('id')
+          .where(joinColumn.name, id)
+          .orderBy([{ column: orderColumnName }, { column: 'id' }])
           .transacting(trx);
+
+        if (rows.length > 0) {
+          const ids = rows.map((row) => row.id);
+          const cases = ids.map(() => 'WHEN ? THEN ?').join(' ');
+          const casesBindings = ids.flatMap((rowId, index) => [rowId, index + 1]);
+          const placeholders = ids.map(() => '?').join(', ');
+
+          await db
+            .getConnection()
+            .raw(
+              `UPDATE ?? SET ?? = CASE id ${cases} END WHERE id IN (${placeholders})`,
+              [joinTable.name, orderColumnName, ...casesBindings, ...ids]
+            )
+            .transacting(trx);
+        }
 
         break;
       }
@@ -345,17 +358,42 @@ const cleanOrderColumns = async ({
     switch (strapi.db.dialect.client) {
       case 'mysql': {
         // Here it's MariaDB and MySQL 8
-        const select = selectRowsToOrder(joinTable.name);
-
-        await db
-          .getConnection()
-          .raw(
-            `UPDATE ?? as a, ( ${select.sql} ) AS b
-            SET ?? = b.inv_order
-            WHERE b.id = a.id`,
-            [joinTable.name, ...select.bindings, inverseOrderColumnName]
-          )
+        // NOTE: A multi-table UPDATE joined to a derived ROW_NUMBER() table is rejected by
+        // MariaDB Galera Cluster (errno 4165, "Galera replication not supported"). Compute the
+        // per-partition ranking app-side and apply it as a single-table, PK-keyed UPDATE instead.
+        const rows: { id: ID; [key: string]: ID }[] = await db
+          .connection(joinTable.name)
+          .select('id', inverseJoinColumn.name)
+          .where(inverseJoinColumn.name, 'in', inverseRelIds)
+          .orderBy([
+            { column: inverseJoinColumn.name },
+            { column: inverseOrderColumnName },
+            { column: 'id' },
+          ])
           .transacting(trx);
+
+        if (rows.length > 0) {
+          const counters = new Map<ID, number>();
+          const ranked = rows.map((row) => {
+            const partition = row[inverseJoinColumn.name];
+            const next = (counters.get(partition) ?? 0) + 1;
+            counters.set(partition, next);
+            return { id: row.id, order: next };
+          });
+
+          const cases = ranked.map(() => 'WHEN ? THEN ?').join(' ');
+          const casesBindings = ranked.flatMap((row) => [row.id, row.order]);
+          const ids = ranked.map((row) => row.id);
+          const placeholders = ids.map(() => '?').join(', ');
+
+          await db
+            .getConnection()
+            .raw(
+              `UPDATE ?? SET ?? = CASE id ${cases} END WHERE id IN (${placeholders})`,
+              [joinTable.name, inverseOrderColumnName, ...casesBindings, ...ids]
+            )
+            .transacting(trx);
+        }
         break;
       }
       default: {
