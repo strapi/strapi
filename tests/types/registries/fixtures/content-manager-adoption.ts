@@ -20,6 +20,15 @@ metadata.getStatus({ documentId: 'document', publishedAt: null }) satisfies
   'draft' | 'published' | 'modified';
 // @ts-expect-error Version metadata requires a document, not null.
 metadata.getMetadata('api::article.article', null);
+const availableLocales = metadata
+  .getMetadata('api::article.article', { documentId: 'document', locale: 'en' })
+  .then((result) => result.availableLocales);
+availableLocales satisfies Promise<Services.AvailableLocale[]>;
+availableLocales.then((locales) => locales.map((locale) => locale.locale)) satisfies Promise<
+  (string | null)[]
+>;
+// @ts-expect-error Available locales are typed, not `any`.
+availableLocales satisfies Promise<{ locale: number }[]>;
 
 const structure = app.service('plugin::content-manager.content-structure').getContentStructure();
 structure satisfies Promise<Modules.ContentStructure.ResolvedContentStructure | null>;

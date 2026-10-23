@@ -46,6 +46,26 @@ status satisfies 'draft' | 'published' | 'modified';
 // @ts-expect-error Metadata version input cannot be missing.
 getService('document-metadata').getMetadata('api::article.article', null);
 
+const metadata = getService('document-metadata');
+const rows = metadata.getManyAvailableStatus('api::article.article', [
+  { id: 1, documentId: 'document', locale: null, publishedAt: null },
+]);
+rows satisfies Promise<{ documentId: string; locale: string | null; publishedAt: string | null }[]>;
+// @ts-expect-error Version rows are typed, not `any`.
+rows satisfies Promise<{ documentId: number }[]>;
+const formatted = metadata.formatDocumentWithMetadata('api::article.article', {
+  id: 1,
+  documentId: 'document',
+  locale: null,
+  title: 'Hello',
+});
+formatted satisfies Promise<{
+  data: { title: string; status: 'draft' | 'published' | 'modified' | undefined };
+  meta: { availableLocales: { locale: string | null; status?: string }[] };
+}>;
+// @ts-expect-error Available locales are typed, not `any`.
+formatted satisfies Promise<{ meta: { availableLocales: { locale: number }[] } }>;
+
 const contentTypes = getService('content-types');
 contentTypes.findConfiguration({ uid: 'api::article.article' }) satisfies Promise<{
   uid: UID.ContentType;
