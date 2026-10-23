@@ -54,7 +54,7 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     await page.getByRole('combobox', { name: /^time$/i }).click();
     await page.getByRole('option', { name: '08:00' }).click();
 
-    await clickAndWait(page, page.getByRole('button', { name: /continue/i }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Create release' }));
     // Success navigates to the release details page; the toast is too brief to assert reliably in CI.
     await page.waitForURL('/admin/plugins/content-releases/*');
     await expect(page.getByRole('heading', { name: nextReleaseName })).toBeVisible();

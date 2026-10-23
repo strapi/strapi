@@ -288,6 +288,9 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
   const filterExistingEntries = async <TAction extends DraftRef>(actions: TAction[]) => {
     const existing = new Set<string>();
     const localizedTypes = new Set<string>();
+    // A localized action stored without a locale is run in the default locale, as the Document
+    // Service resolves a missing locale
+    let defaultLocale: string | null = null;
 
     for (const contentType of new Set(actions.map((action) => action.contentType))) {
       const model = strapi.contentType(contentType);
@@ -296,6 +299,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         const isLocalized = strapi.localization.isLocalizedContentType(model);
         if (isLocalized) {
           localizedTypes.add(contentType);
+          defaultLocale ??= await strapi.localization.getDefaultLocale();
         }
 
         const entries = await strapi.documents(contentType).findMany({
@@ -323,7 +327,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         getEntryKey(
           action.contentType,
           action.entryDocumentId,
-          localizedTypes.has(action.contentType) ? action.locale : null
+          localizedTypes.has(action.contentType) ? (action.locale ?? defaultLocale) : null
         )
       )
     );

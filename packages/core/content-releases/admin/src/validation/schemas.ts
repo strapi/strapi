@@ -2,6 +2,8 @@ import { translatedErrors } from '@strapi/admin/strapi-admin';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import * as yup from 'yup';
 
+import { RELEASE_CONDITIONS } from '../../../shared/constants';
+
 /**
  * FormikErrors type enforce us to always return a string as error.
  * We need these errors to be translated, so we need to create a hook to be able to use the formatMessage function.
@@ -48,6 +50,7 @@ export const RELEASE_SCHEMA = yup
       then: yup.string().required(translatedErrors.required.id).nullable(),
       otherwise: yup.string().nullable(),
     }),
+    releaseCondition: yup.string().oneOf([...RELEASE_CONDITIONS]),
   })
   .required()
   .noUnknown();

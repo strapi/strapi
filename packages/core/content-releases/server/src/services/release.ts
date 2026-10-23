@@ -194,7 +194,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Creates a release with the skipped entries of a partial or failed release (only
-     * `actionIds`, if given). The source release is left untouched.
+     * `actionIds`, if given), with how many it got. The source release is left untouched.
      */
     async createFromSkippedEntries(
       releaseId: CreateReleaseFromSkippedEntries.Request['params']['id'],
@@ -241,7 +241,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         return strapi.db.query(RELEASE_MODEL_UID).findOne({ where: { id: createdRelease.id } });
       });
 
-      return scheduleCreatedRelease(release);
+      return { release: await scheduleCreatedRelease(release), actionsCount: prepared.length };
     },
 
     async findOne(id: GetRelease.Request['params']['id'], query = {}) {
@@ -267,15 +267,20 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
+    // One grouped query: a status no release has counts 0
     async countByStatus(): Promise<Record<ReleaseStatus, number>> {
-      const counts = await Promise.all(
-        RELEASE_STATUSES.map(
-          async (status) =>
-            [status, await strapi.db.query(RELEASE_MODEL_UID).count({ where: { status } })] as const
-        )
-      );
+      const qb = strapi.db.queryBuilder(RELEASE_MODEL_UID);
+      const rows = await qb
+        .select(['status', qb.raw('count(*) AS count')])
+        .groupBy('status')
+        .execute<{ status: ReleaseStatus; count: number | string }[]>({ mapResults: false });
 
-      return Object.fromEntries(counts) as Record<ReleaseStatus, number>;
+      // Postgres returns counts as strings
+      const counts = new Map(rows.map(({ status, count }) => [status, Number(count)]));
+
+      return Object.fromEntries(
+        RELEASE_STATUSES.map((status) => [status, counts.get(status) ?? 0])
+      ) as Record<ReleaseStatus, number>;
     },
 
     findMany(query?: any) {

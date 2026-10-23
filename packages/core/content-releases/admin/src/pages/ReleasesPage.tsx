@@ -30,14 +30,14 @@ import {
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { format } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { DEFAULT_RELEASE_CONDITION } from '../../../shared/constants';
 import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
-import { ReleaseModal, FormValues } from '../components/ReleaseModal';
+import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
 import { PERMISSIONS } from '../constants';
 import {
   useGetReleasesQuery,
@@ -164,15 +164,6 @@ const StyledAlert = styled(Alert)`
   }
 `;
 
-const INITIAL_FORM_VALUES = {
-  name: '',
-  date: format(new Date(), 'yyyy-MM-dd'),
-  time: '',
-  isScheduled: true,
-  scheduledAt: null,
-  timezone: null,
-} satisfies FormValues;
-
 const ReleasesPage = () => {
   const location = useLocation();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
@@ -182,7 +173,7 @@ const ReleasesPage = () => {
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
-  const { data, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
+  const { data: settings, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
   const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
@@ -237,12 +228,8 @@ const ReleasesPage = () => {
     });
   };
 
-  const handleAddRelease = async ({ name, scheduledAt, timezone }: FormValues) => {
-    const response = await createRelease({
-      name,
-      scheduledAt,
-      timezone,
-    });
+  const handleAddRelease = async (values: ReleaseDrawerValues) => {
+    const response = await createRelease(values);
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
       toggleNotification({
@@ -390,15 +377,27 @@ const ReleasesPage = () => {
             </Pagination.Root>
           </>
         </Layouts.Content>
-        <ReleaseModal
+        <ReleaseDrawer
           open={releaseModalShown}
-          handleClose={toggleAddReleaseModal}
-          handleSubmit={handleAddRelease}
-          isLoading={isSubmittingForm}
+          onClose={toggleAddReleaseModal}
+          onSubmit={handleAddRelease}
+          title={formatMessage({
+            id: 'content-releases.release-drawer.create.title',
+            defaultMessage: 'New release',
+          })}
+          submitLabel={formatMessage({
+            id: 'content-releases.release-drawer.form.submit.create',
+            defaultMessage: 'Create release',
+          })}
+          isSubmitting={isSubmittingForm}
           initialValues={{
-            ...INITIAL_FORM_VALUES,
-            timezone: data?.data.defaultTimezone ? data.data.defaultTimezone.split('&')[1] : null,
+            name: '',
+            isScheduled: true,
+            scheduledAt: null,
+            timezone: null,
+            releaseCondition: DEFAULT_RELEASE_CONDITION,
           }}
+          defaultTimezone={settings?.data.defaultTimezone}
         />
       </Main>
     </Layouts.Root>

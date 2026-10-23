@@ -245,6 +245,10 @@ export declare namespace PublishRelease {
       totalUnpublishedEntries: number;
       totalSkippedEntries: number;
     };
-    error?: errors.ApplicationError | errors.ValidationError;
+    // A run that failed sends the release it froze, but only with a validation error (400): any
+    // other error is sent as is. A refused publish never ran, so it has no release.
+    error?:
+      | errors.ApplicationError
+      | errors.ValidationError<string, { release?: Omit<Release, 'actions'> }>;
   }
 }

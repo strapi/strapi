@@ -248,7 +248,7 @@ packages/core/content-releases/server/src/services/scheduling.ts
 - a release whose `scheduledAt` is older than the grace period (`OVERDUE_GRACE_PERIOD_MS`, 5 minutes): the server was down, or the run was rolled back by a database error. `failureReason` is `missed_schedule`. It sends the `releases.publish` webhook (`isPublished: false`, an error named `MissedSchedule`) and a `release.trigger` audit failure attributed to the scheduler. A release with no entries missed nothing: it ends "Done" instead (totals all 0, `failureReason` `null`), with the success webhook and audit event its scheduled run would have sent.
 - a release that failed before the upgrade: before failed runs were frozen, they left `status: failed` without `releasedAt`. It's frozen whatever its schedule, its job never armed. `failureReason` is `failed_before_upgrade`, and nothing is sent: it reported its failure then.
 
-Every entry gets the outcome `skipped_missed` and keeps the validity last checked (nothing is checked at freeze time). The totals are 0 published, 0 unpublished, every entry skipped, so "Create release from skipped entries" carries over every entry. For `failed_before_upgrade` they don't say what went out: the old run stopped at its first error and kept the entries released before it, and nothing recorded which. Read them as unknown, not as skipped: the admin shows no per-entry result and no released/skipped counts for such a release.
+Every entry gets the outcome `skipped_missed` and keeps the validity last checked (nothing is checked at freeze time). The totals are 0 published, 0 unpublished, every entry skipped, so "Create release from skipped entries" carries over every entry. For `failed_before_upgrade` they don't say what went out: the old run stopped at its first error and kept the entries released before it, and nothing recorded which. Read them as unknown, not as skipped: the API returns `skipped_missed` and these totals, with only `failureReason` telling the two apart. The admin hides "Create release from skipped entries" for such a release, so it doesn't publish entries again, but otherwise shows it like one that missed its schedule. The route itself doesn't refuse it.
 
 Each release is frozen in its own transaction, under a run's row lock, and checked again under it: a run in progress, or a reschedule to a later date, wins. It reads no entry, so it can't deadlock with a run. It throws inside another transaction, which would hold every lock until that one ends. A sweep that starts during another joins it; on a cluster, the lock lets one node freeze and report each release. A release that fails to freeze is left for the next sweep. On MySQL, a run still going 5 minutes after its date can make the sweep's lock wait time out (`innodb_lock_wait_timeout`): that's logged every minute until the run commits. `failureReason` is `null` on every release that ran, and on an empty one the sweep froze as done.
 
@@ -326,8 +326,8 @@ The run decides from this check, not from the stored status: a release that read
 
 Database caveats:
 
-- On MySQL, a deadlock rolls back the whole transaction, not the savepoint, so even under `allow_partial` it loses the run, as below.
-- An unexpected error that stops a manual `all_or_nothing` run is recorded as "Failed", and the request fails with a 500.
+- On MySQL, a deadlock rolls back the whole transaction, not the savepoint, so the deadlock isn't recorded as `skipped_error`: under either mode it rolls the whole run back, nothing is recorded, and the request fails with a 500.
+- An unexpected error that stops a manual `all_or_nothing` run is recorded as "Failed", and the request fails with that error: an `ApplicationError` keeps its own status (a validation error is a 400, and only it carries the frozen release in `error.details.release`), anything else is a 500.
 
 How a run ends:
 
@@ -381,7 +381,7 @@ These run on every content type sync. The revalidation passes aren't awaited by 
   - `migrateIsValidAndStatusReleases`: releases from before statuses existed get one.
   - `addReasonsToInvalidActions`: see above.
   - `migrateReleaseConditionReleases`: releases from before the condition existed get `all_or_nothing`.
-  - `addOutcomesToReleasedReleases`: a release that ran before outcomes existed released every entry (a failed run left it planned), so each action gets `published` or `unpublished` and the release its totals.
+  - `addOutcomesToReleasedReleases`: a release that ran before outcomes existed released every entry (a failed run left it planned), so each action gets `published` or `unpublished` and the release its totals. A release a since-removed migration froze as `failed_before_upgrade`, without totals, gets every entry `skipped_missed` and all-skipped totals, as the sweep writes.
 
 Releases that failed before the upgrade are frozen by the overdue sweep at bootstrap (see Scheduling).
 

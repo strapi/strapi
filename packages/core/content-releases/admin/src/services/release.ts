@@ -13,6 +13,7 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import type {
   CreateRelease,
+  CreateReleaseFromSkippedEntries,
   DeleteRelease,
   GetReleases,
   GetReleasesByDocumentAttached,
@@ -242,6 +243,24 @@ const releaseApi = adminApi
           },
           invalidatesTags: [{ type: 'Release', id: 'LIST' }, 'UpcomingReleasesList'],
         }),
+        createReleaseFromSkippedEntries: build.mutation<
+          CreateReleaseFromSkippedEntries.Response,
+          CreateReleaseFromSkippedEntries.Request['params'] &
+            CreateReleaseFromSkippedEntries.Request['body']
+        >({
+          query({ id, ...data }) {
+            return {
+              url: `/content-releases/${id}/create-from-skipped-entries`,
+              method: 'POST',
+              data,
+            };
+          },
+          invalidatesTags: [
+            { type: 'Release', id: 'LIST' },
+            { type: 'EntriesInRelease' },
+            'UpcomingReleasesList',
+          ],
+        }),
         updateRelease: build.mutation<
           void,
           UpdateRelease.Request['params'] & UpdateRelease.Request['body']
@@ -427,6 +446,7 @@ const {
   useGetReleaseQuery,
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
+  useCreateReleaseFromSkippedEntriesMutation,
   useCreateReleaseActionMutation,
   useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
@@ -445,6 +465,7 @@ export {
   useGetReleaseQuery,
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
+  useCreateReleaseFromSkippedEntriesMutation,
   useCreateReleaseActionMutation,
   useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,

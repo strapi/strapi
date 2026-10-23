@@ -25,12 +25,15 @@ const buildStrapi = ({
   workflowsService = { getAssignedWorkflow: jest.fn().mockResolvedValue(null) },
   populateBuilder = jest.fn(),
   findOne = jest.fn(),
+  // No entry has a published version
+  findPublished = jest.fn().mockResolvedValue(null),
 }: {
   config?: { get: (key: string, defaultValue: unknown) => unknown };
   validate?: jest.Mock;
   workflowsService?: { getAssignedWorkflow: jest.Mock } | undefined;
   populateBuilder?: jest.Mock;
   findOne?: jest.Mock;
+  findPublished?: jest.Mock;
 } = {}) =>
   ({
     config,
@@ -44,11 +47,12 @@ const buildStrapi = ({
         return undefined;
       },
     }),
-    // No entry has a published version
     documents: () => ({
       findOne: (params: { status?: string }) =>
-        params.status === 'published' ? Promise.resolve(null) : findOne(params),
+        params.status === 'published' ? findPublished(params) : findOne(params),
     }),
+    // Checks outside a transaction read without a savepoint
+    db: { inTransaction: () => false },
   }) as unknown as Core.Strapi;
 
 const requiringDone = () => ({
@@ -259,6 +263,73 @@ describe('getPublishabilityForActions', () => {
       [3, null],
     ]);
   });
+
+  test("leaves the entry's published version out of its unique checks", async () => {
+    const validate = jest.fn().mockResolvedValue({});
+    const findPublished = jest.fn().mockResolvedValue({ id: 7, documentId: 'a' });
+    const strapi = buildStrapi({
+      validate,
+      findPublished,
+      findOne: jest.fn().mockResolvedValue({ id: 1, documentId: 'a', locale: 'en' }),
+      populateBuilder: jest.fn(() => ({ populateDeep: () => ({ build: async () => ({}) }) })),
+    });
+
+    await getPublishabilityForActions(
+      [
+        {
+          id: 1,
+          type: 'publish' as const,
+          contentType: contentTypeUid,
+          entryDocumentId: 'a',
+          locale: 'en',
+        },
+      ],
+      { strapi }
+    );
+
+    expect(findPublished).toHaveBeenCalledWith(
+      expect.objectContaining({ documentId: 'a', locale: 'en', status: 'published' })
+    );
+    const [, , , publishedVersion] = validate.mock.calls[0];
+    expect(publishedVersion).toEqual({ id: 7, documentId: 'a' });
+  });
+
+  describe('a MySQL deadlock', () => {
+    const deadlock = Object.assign(new Error('Deadlock found when trying to get lock'), {
+      code: 'ER_LOCK_DEADLOCK',
+    });
+    const deadlockedStrapi = () =>
+      buildStrapi({
+        findOne: jest.fn().mockRejectedValue(deadlock),
+        populateBuilder: jest.fn(() => ({ populateDeep: () => ({ build: async () => ({}) }) })),
+      });
+    const action = {
+      id: 1,
+      type: 'publish' as const,
+      contentType: contentTypeUid,
+      entryDocumentId: 'a',
+    };
+
+    test("stops every check in a transaction: the caller's transaction is gone", async () => {
+      const strapi = deadlockedStrapi();
+      const inTransaction = {
+        ...strapi,
+        db: { inTransaction: () => true, savepoint: (cb: () => unknown) => cb() },
+      } as unknown as Core.Strapi;
+
+      await expect(getPublishabilityForActions([action], { strapi: inTransaction })).rejects.toBe(
+        deadlock
+      );
+    });
+
+    test('fails only its own check outside a transaction', async () => {
+      const results = await getPublishabilityForActions([action], {
+        strapi: deadlockedStrapi(),
+      });
+
+      expect(results.get(action.id)).toBe(deadlock);
+    });
+  });
 });
 
 describe('an error that is not a validation error', () => {
@@ -458,6 +529,7 @@ describe('getActionValidity', () => {
       documents: () => ({
         findOne: jest.fn().mockRejectedValue(new TypeError('connection lost: secret-value')),
       }),
+      db: { inTransaction: () => false },
     } as unknown as Core.Strapi; // only what the draft read touches
 
     const validity = await getActionValidity(
