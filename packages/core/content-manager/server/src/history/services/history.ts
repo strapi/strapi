@@ -21,6 +21,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const serviceUtils = createServiceUtils({ strapi });
 
   return {
+    /** @internal */
     async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {
       await query.create({
         data: {
@@ -183,6 +184,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       };
     },
 
+    /** @internal */
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
 

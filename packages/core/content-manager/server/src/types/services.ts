@@ -2,6 +2,10 @@ import type { Ability } from '@casl/ability';
 import type { Data, Modules, Schema, Struct, UID, Utils } from '@strapi/types';
 import type { ComponentConfiguration } from '../../../shared/contracts/components';
 import type { Configuration } from '../../../shared/contracts/content-types';
+import type {
+  HistoryVersionDataResponse,
+  Pagination,
+} from '../../../shared/contracts/history-versions';
 import type { DocumentManagerService as DocumentManagerFactory } from '../services/document-manager';
 import type createDocumentMetadata from '../services/document-metadata';
 import type { DocumentVersion, GetMetadataOptions } from '../services/document-metadata';
@@ -408,8 +412,57 @@ export type PermissionService = {
 /** Homepage widgets: recent and counted documents. */
 export type HomepageService = ReturnType<typeof createHomepageService>;
 
-/** History versions. Only registered when the `cms-content-history` feature is enabled. */
-export type HistoryService = ReturnType<typeof createHistoryService>;
+type HistoryServiceImplementation = ReturnType<typeof createHistoryService>;
+
+/** A reference to the admin user who recorded a history version. */
+export type CreatorReference = { id: number };
+
+/**
+ * The document values of a history version as `findVersionsPage` returns them. A relation or
+ * media value becomes `{ results, meta: { missingCount } }`: the related entries the user may
+ * read, and the number of entries that no longer exist.
+ */
+export type HistoryVersionResultData = {
+  // TODO @Nico runtime bug: `findVersionsPage` removes the root `id` instead of the component `id`
+  // when it visits a component attribute, so `id` is absent from versions with components.
+  id?: number;
+  documentId: string;
+  locale: string | null;
+  [attribute: string]: unknown;
+};
+
+/**
+ * A history version as `findVersionsPage` returns it. `createdBy` is `null` for a version
+ * recorded without an admin user, and `locale` is `null` for a content type without i18n.
+ */
+// TODO @Nico runtime bug: the history version model has no `componentsSchemas` attribute, so
+// `createVersion` drops it and versions are read without it, unlike `HistoryVersionDataResponse`.
+export type HistoryVersionResult = Omit<
+  HistoryVersionDataResponse,
+  'componentsSchemas' | 'createdBy' | 'data'
+> & {
+  createdBy: CreatorReference | null;
+  data: HistoryVersionResultData;
+};
+
+// TODO @Nico runtime bug: `restoreVersion` throws a `TypeError` for an unknown version id (HTTP
+// 500), and fails for a version whose component was replaced since, because it removes the root
+// `id` instead of the component `id`.
+/**
+ * History versions. Only registered when the `cms-content-history` feature is enabled.
+ * `createVersion` data and `restoreVersion` results keep the document service fallback,
+ * `AnyDocument`, like the document manager.
+ */
+export type HistoryService = Omit<HistoryServiceImplementation, 'findVersionsPage'> & {
+  /**
+   * One page of the versions of a content type, newest first: of one document when `documentId`
+   * is given, and of one locale (the default one without `locale`) for a localized content type.
+   * @internal
+   */
+  findVersionsPage(
+    params: Parameters<HistoryServiceImplementation['findVersionsPage']>[0]
+  ): Promise<{ results: HistoryVersionResult[]; pagination: Pagination }>;
+};
 
 /** History recording lifecycles. Only registered when the `cms-content-history` feature is enabled. */
 export type LifecyclesService = ReturnType<typeof createLifecyclesService>;
