@@ -37,6 +37,8 @@
     "watch": "nx watch --all -- 'nx run-many --targets build:code,build:types --projects $NX_PROJECT_NAME'",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "build:watch": "nx watch --all --nx-ignore-cycles -- nx run \\$NX_PROJECT_NAME:build --nx-ignore-cycles",
+    "check:breaking": "tsx scripts/breaking-changes/index.ts",
+    "check:breaking:test": "tsx --test scripts/breaking-changes/__tests__/*.test.ts",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
     "commit": "commit",
     "doc:api": "node scripts/open-api/serve.js",
