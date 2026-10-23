@@ -10,6 +10,7 @@ import type {
   StagesService,
   ValidationService,
   WorkflowWeeklyMetricsService,
+  WorkflowsService,
 } from '@strapi/review-workflows/strapi-server';
 
 declare const app: Core.Strapi;
@@ -68,3 +69,13 @@ const stageCount = app.plugin('review-workflows').service('stages')?.count({ wor
 stageCount satisfies Promise<number> | undefined;
 // @ts-expect-error Stage IDs are checked against the service contract.
 app.service('plugin::review-workflows.stages')?.findById({ id: 1 });
+app.service('plugin::review-workflows.workflows') satisfies WorkflowsService | undefined;
+const assignedWorkflow = app
+  .plugin('review-workflows')
+  .service('workflows')
+  ?.getAssignedWorkflow('api::article.article', { populate: 'stageRequiredToPublish' });
+assignedWorkflow satisfies
+  | Promise<{ id: number; stageRequiredToPublish: { id: number; name: string } | null } | null>
+  | undefined;
+// @ts-expect-error Content type UIDs are checked against the service contract.
+app.plugin('review-workflows').service('workflows')?.getAssignedWorkflow({});
