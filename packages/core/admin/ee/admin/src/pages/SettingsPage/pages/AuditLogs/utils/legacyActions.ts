@@ -1,14 +1,18 @@
 /**
- * Admin-account rows stored before the `admin-user.*` events kept their old action keys
- * and stay until retention removes them. The Action filter offers the new key only and
- * queries both, so one option covers the whole history.
+ * Rows stored before an event moved to a new action key keep their old key and stay until
+ * retention removes them. The Action filter offers the new key only and queries both, so
+ * one option covers the whole history.
  *
- * Remove together with the deprecated `user.*` event hub events.
+ * Admin accounts: remove together with the deprecated `user.*` event hub events.
+ * Media folders: now recorded as `media.*` with `resource.type: "media-folder"`.
  */
 export const LEGACY_ACTIONS: Record<string, string> = {
   'admin-user.create': 'user.create',
   'admin-user.update': 'user.update',
   'admin-user.delete': 'user.delete',
+  'media.create': 'media-folder.create',
+  'media.update': 'media-folder.update',
+  'media.delete': 'media-folder.delete',
 };
 
 const LEGACY_KEYS = new Set(Object.values(LEGACY_ACTIONS));

@@ -5,6 +5,7 @@ status: needs-review
 review_notes:
   - '`ee/server/services/audit-logs.js` moved under `ee/server/src`.'
   - 'Events are also saved when a package registers them with `registerEvent` on the `audit-logs-lifecycle` service (upload and content-manager do), not only the `defaultEvents` list.'
+  - '`registerEvent` takes an `action` option to store a row under another action name. Upload uses it to record media folders as `media.*` and `media.update` from an audit-only event, since `media.*` are also webhook events.'
 ---
 
 # Audit Logs
