@@ -366,6 +366,56 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
+    test('Returns the error message when the validation of a creation throws a native error', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/content-type-builder/content-types',
+        body: {
+          contentType: {
+            displayName: 'Native error',
+            singularName: 'native-error',
+            pluralName: 'native-errors',
+            attributes: {
+              title: {
+                type: 'string',
+                regex: '(',
+              },
+            },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        error: {
+          name: 'SyntaxError',
+          message: expect.stringContaining('Invalid regular expression'),
+          details: {},
+        },
+      });
+    });
+
+    test('Returns the error message when the validation of an update throws a native error', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/content-types/${ctWithDpUID}`,
+        body: {
+          contentType: {
+            kind: 'collectionType',
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        error: {
+          name: 'TypeError',
+          message: expect.stringContaining('undefined'),
+          details: {},
+        },
+      });
+    });
+
     test('Can edit displayName but singularName and pluralName are ignored', async () => {
       const uid = 'api::ct-with-dp.ct-with-dp';
       let res = await rq({
