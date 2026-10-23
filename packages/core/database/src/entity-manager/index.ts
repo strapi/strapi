@@ -1724,6 +1724,113 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
     },
 
+    /**
+     * Deletes the relations of several entities of one model at once, with one statement per
+     * attribute. An attribute whose other side keeps an order column (bidirectional) is handled
+     * entity by entity, so that side gets renumbered.
+     */
+    async deleteManyRelations(uid, ids, options) {
+      if (ids.length === 0) {
+        return;
+      }
+
+      const { attributes } = db.metadata.get(uid);
+      const { transaction: trx } = options ?? {};
+
+      for (const attributeName of Object.keys(attributes)) {
+        const attribute = attributes[attributeName];
+
+        if (attribute.type !== 'relation') {
+          continue;
+        }
+
+        if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
+          const { target, morphBy } = attribute;
+
+          const targetAttribute = db.metadata.get(target).attributes[morphBy];
+
+          if (targetAttribute.type === 'relation' && targetAttribute.relation === 'morphToOne') {
+            const { idColumn, typeColumn } = targetAttribute.morphColumn;
+
+            await this.createQueryBuilder(target)
+              .update({ [idColumn.name]: null, [typeColumn.name]: null })
+              .where({ [idColumn.name]: { $in: ids }, [typeColumn.name]: uid })
+              .transacting(trx)
+              .execute();
+          } else if (
+            targetAttribute.type === 'relation' &&
+            targetAttribute.relation === 'morphToMany'
+          ) {
+            const { joinTable } = targetAttribute;
+            const { idColumn, typeColumn } = joinTable.morphColumn;
+
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({
+                [idColumn.name]: { $in: ids },
+                [typeColumn.name]: uid,
+                ...joinTable.on,
+                field: attributeName,
+              })
+              .transacting(trx)
+              .execute();
+          }
+
+          continue;
+        }
+
+        if (attribute.relation === 'morphToMany') {
+          const { joinTable } = attribute;
+          const { joinColumn } = joinTable;
+
+          await this.createQueryBuilder(joinTable.name)
+            .delete()
+            .where({ [joinColumn.name]: { $in: ids }, ...joinTable.on })
+            .transacting(trx)
+            .execute();
+
+          continue;
+        }
+
+        // do not need to delete links when using foreign keys
+        if (db.dialect.usesForeignKeys()) {
+          continue;
+        }
+
+        if ('joinColumn' in attribute && attribute.joinColumn && attribute.owner) {
+          continue;
+        }
+
+        if ('joinColumn' in attribute && attribute.joinColumn && !attribute.owner) {
+          const { target } = attribute;
+
+          await this.createQueryBuilder(target)
+            .where({ [attribute.joinColumn.referencedColumn]: { $in: ids } })
+            .update({ [attribute.joinColumn.referencedColumn]: null })
+            .transacting(trx)
+            .execute();
+        }
+
+        if ('joinTable' in attribute && attribute.joinTable) {
+          if (hasInverseOrderColumn(attribute)) {
+            for (const id of ids) {
+              await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
+            }
+
+            continue;
+          }
+
+          const { joinTable } = attribute;
+
+          await this.createQueryBuilder(joinTable.name)
+            .delete()
+            .where({ [joinTable.joinColumn.name]: { $in: ids }, ...joinTable.on })
+            .transacting(trx)
+            .execute();
+        }
+      }
+    },
+
     // TODO: add lifecycle events
     async populate(uid, entity, populate) {
       const entry = await this.findOne(uid, {

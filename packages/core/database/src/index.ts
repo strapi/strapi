@@ -26,6 +26,7 @@ import { withStrapiKnexLog } from './utils/knex-log';
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
 export { attributeNaming } from './metadata';
+export { createField } from './fields';
 export type { AttributeNaming, Meta } from './metadata';
 export type {
   AttributeRenamesOperation,

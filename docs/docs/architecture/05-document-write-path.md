@@ -36,7 +36,7 @@ Use `documentId` for stable references. Do not store a row `id` of a D&P content
 | 3     | Repository      | `document-service/repository.ts`     | Each public method runs in `strapi.db.transaction()`. It turns the params into an internal query and calls the entries service. It schedules events.          |
 | 4     | Entries service | `document-service/entries.ts`        | Resolves relation `documentId` values to row `id` values, checks uniqueness, runs the entity validator, writes components, then calls `strapi.db.query(uid)`. |
 | 5     | Entity manager  | `@strapi/database` `entity-manager/` | Runs the database lifecycles, applies attribute defaults, inserts or updates the row, attaches relations and reads the row back.                              |
-| 6     | Event manager   | `document-service/events.ts`         | After the commit, reads the row with a deep populate, sanitizes it and emits the event on the event hub.                                                      |
+| 6     | Event manager   | `document-service/events.ts`         | After the commit, when something listens to the event, reads the row with a deep populate, sanitizes it and emits the event on the event hub.                 |
 | 7     | Webhook runner  | `services/webhook-runner.ts`         | Queues the event and sends an HTTP `POST` to each enabled webhook for that event.                                                                             |
 
 The built-in middleware converts invalid date, time, datetime and relation errors from the database layer into `ValidationError`.
@@ -97,6 +97,8 @@ Read methods use the same idea. `statusToLookup` and `localeToLookup` write cond
 - If the row does not exist, but the document exists in another locale, the repository creates a row for the new locale. It copies the non-localized fields from an existing row. It schedules `entry.create`, not `entry.update`.
 - If the document does not exist, `update` returns `null`.
 
+For each component or dynamic zone attribute present in the data, the entries service loads the stored components (with the ids of their media), deletes the ones that are no longer sent, creates the ones sent without an id, and compares the others with the data sent for them. The components of a dynamic zone are loaded whatever their registered type, including a type the zone no longer declares, so that they are deleted when they are no longer sent. A component is not written again when its scalars and media are stored exactly as sent, its relations arrive with empty `connect` and `disconnect` lists, and none of its nested components changed. When a whole list is unchanged and kept its order, its join rows are left alone too. Dates and times are compared as the database layer would store them, so a value that the write would normalize differently or reject counts as a change, and so does a value that cannot be compared with certainty, such as a password. When a database lifecycle subscriber listens to `beforeUpdate` or `afterUpdate` of a component type (`strapi.db.lifecycles.hasSubscribers`, which leaves out the database layer's own timestamps subscriber), its components are written on every save as before, so that each of them fires its events. The entry row itself is always updated, so `updatedAt` moves on every save.
+
 If the caller passed `status: 'published'` and a row was written, `update` then calls the inner `publish` function.
 
 **`publish`** exists only on D&P content types. For the requested locales, it:
@@ -116,6 +118,8 @@ When `create` or `update` calls the inner `publish` function, the call does not 
 :::
 
 The other D&P methods follow the same model. `unpublish` deletes the published rows. `discardDraft` replaces the draft rows with copies of the published rows. `delete` removes all rows of the requested locales and throws if the caller passes `status: 'draft'`.
+
+When a row goes away, through `delete`, `unpublish`, `discardDraft` or the replacement of a published row, its components go with it. The entries service collects the whole component tree level by level, with one lifecycle-free query per component type holding nested components, then removes it with one statement per component type and per relation attribute (`entityManager.deleteManyRelations` and `deleteMany`). When a database lifecycle subscriber listens to any delete lifecycle (`beforeDelete`, `afterDelete`, `beforeDeleteMany` or `afterDeleteMany`) of one of those component types (`strapi.db.lifecycles.hasSubscribers`), the components are deleted one by one instead, so that each of them fires its events and no subscriber receives an event it did not receive before. The read lifecycles that the per-row API fires as a side effect of each update or delete (`beforeFindOne`, `afterFindOne`) are not fired for a skipped write or a bulk deletion.
 
 ## Validation
 
@@ -137,9 +141,10 @@ The transaction context starts those callbacks and does not await them. The Docu
 
 When the callback runs, the event manager:
 
-1. reads the row again with a deep populate, except for `entry.delete` and `entry.unpublish`, where the row is gone;
-2. sanitizes it with `defaultSanitizeOutput`, which removes private fields;
-3. calls `strapi.eventHub.emit(eventName, { model, uid, entry })`.
+1. checks `strapi.eventHub.hasListeners(eventName)`. When no listener or subscriber would receive the event, it stops here: the deep populate below is the expensive part of an event, and nothing would read its result;
+2. reads the row again with a deep populate, except for `entry.delete` and `entry.unpublish`, where the row is gone;
+3. sanitizes it with `defaultSanitizeOutput`, which removes private fields;
+4. calls `strapi.eventHub.emit(eventName, { model, uid, entry })`.
 
 | Method         | Events                                                                                            |
 | -------------- | ------------------------------------------------------------------------------------------------- |
