@@ -896,6 +896,145 @@ describe('Admin Admin Token CRUD (api)', () => {
     });
   });
 
+  /**
+   * Token permissions follow the same per-permission rule as roles: a requested permission must
+   * be covered, field by locale, by one owner permission, and its conditions are inherited from
+   * that rule. The owner holds `username` on `en` unconditionally and `email` on `fr` only for
+   * entries they created.
+   */
+  describe('D2 — Per-permission ceiling with fields and locales', () => {
+    const READ_ACTION = 'plugin::content-manager.explorer.read';
+    const SUBJECT = 'plugin::users-permissions.user';
+    const NOT_HELD_TOGETHER = 'fields, locales and conditions are not held together';
+
+    let localeRoleId: number;
+    let localeUserId: number;
+    let rqLocale: Awaited<ReturnType<typeof createAuthRequest>>;
+
+    const read = (properties: Record<string, unknown>, conditions: string[] = []) => ({
+      action: READ_ACTION,
+      subject: SUBJECT,
+      properties,
+      conditions,
+    });
+
+    const createLocaleToken = (name: string, adminPermissions: unknown[]) =>
+      rqLocale({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: { name, adminPermissions },
+      });
+
+    beforeAll(async () => {
+      const utils = createUtils(strapi);
+
+      const localeRole = await utils.createRole({
+        name: 'token-locale-ceiling-test-role',
+        description: 'Holds content permissions split across fields, locales and conditions',
+      });
+      localeRoleId = localeRole.id;
+
+      await utils.assignPermissionsToRole(localeRole.id, [
+        { action: 'admin::admin-tokens.create', subject: null, conditions: [], properties: {} },
+        { action: 'admin::admin-tokens.read', subject: null, conditions: [], properties: {} },
+        { action: 'admin::admin-tokens.update', subject: null, conditions: [], properties: {} },
+        read({ fields: ['username'], locales: ['en'] }),
+        read({ fields: ['email'], locales: ['fr'] }, ['admin::is-creator']),
+      ]);
+
+      const localeUser = await utils.createUser({
+        email: 'token-locale-ceiling@test.com',
+        firstname: 'Locale',
+        lastname: 'Ceiling',
+        isActive: true,
+        roles: [localeRole.id],
+      });
+      localeUserId = localeUser.id;
+
+      rqLocale = await createAuthRequest({
+        strapi,
+        userInfo: {
+          email: 'token-locale-ceiling@test.com',
+          firstname: 'Locale',
+          lastname: 'Ceiling',
+          password: 'Password123',
+        },
+      });
+    });
+
+    afterAll(async () => {
+      if (localeUserId !== undefined)
+        await strapi.db.query('admin::user').delete({ where: { id: localeUserId } });
+      if (localeRoleId !== undefined)
+        await strapi.db.query('admin::role').delete({ where: { id: localeRoleId } });
+    });
+
+    test('A field on a locale only another permission holds → 400', async () => {
+      const res = await createLocaleToken('admin-token_d2-username-fr', [
+        read({ fields: ['username'], locales: ['fr'] }),
+      ]);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain(NOT_HELD_TOGETHER);
+    });
+
+    test('Fields held by different permissions on one locale → 400', async () => {
+      const res = await createLocaleToken('admin-token_d2-both-en', [
+        read({ fields: ['username', 'email'], locales: ['en'] }),
+      ]);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain(NOT_HELD_TOGETHER);
+    });
+
+    test('Omitted locales against a locale-restricted owner → 400', async () => {
+      const res = await createLocaleToken('admin-token_d2-no-locales', [
+        read({ fields: ['username'] }),
+      ]);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain('locales are required');
+    });
+
+    test('A permission held under a condition → 201 with the condition inherited', async () => {
+      const res = await createLocaleToken('admin-token_d2-email-fr', [
+        read({ fields: ['email'], locales: ['fr'] }),
+      ]);
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.adminPermissions).toMatchObject([
+        read({ fields: ['email'], locales: ['fr'] }, ['admin::is-creator']),
+      ]);
+    });
+
+    test('A permission held unconditionally → 201 with no condition', async () => {
+      const res = await createLocaleToken('admin-token_d2-username-en', [
+        read({ fields: ['username'], locales: ['en'] }, ['admin::is-creator']),
+      ]);
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.adminPermissions).toMatchObject([
+        read({ fields: ['username'], locales: ['en'] }, []),
+      ]);
+    });
+
+    test('Updating a token to a field on a locale only another permission holds → 400', async () => {
+      const created = await createLocaleToken('admin-token_d2-update', [
+        read({ fields: ['username'], locales: ['en'] }),
+      ]);
+      expect(created.statusCode).toBe(201);
+
+      const res = await rqLocale({
+        url: `/admin/admin-tokens/${created.body.data.id}`,
+        method: 'PUT',
+        body: { adminPermissions: [read({ fields: ['username'], locales: ['fr'] })] },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain(NOT_HELD_TOGETHER);
+    });
+  });
+
   describe('G — Owner immutability', () => {
     test('Update with different adminUserOwner → 400 ValidationError', async () => {
       const token = await createValidSuperAdminAdminToken({

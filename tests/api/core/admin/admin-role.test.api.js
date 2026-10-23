@@ -3,7 +3,8 @@
 const _ = require('lodash');
 
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
+const { createAuthRequest, createRequest } = require('api-tests/request');
+const { createUtils } = require('api-tests/utils');
 
 const data = {
   rolesWithUsers: [],
@@ -713,6 +714,511 @@ describe('Role CRUD End to End', () => {
         if (permission.fields && permission.fields.length > 0) {
           expect(permission.fields).toEqual(expect.arrayContaining([expect.any(String)]));
         }
+      });
+    });
+  });
+
+  /**
+   * An admin who can update roles must not be able to grant a permission they do not hold
+   * themselves (action + subject, properties and conditions). Permissions a role already
+   * holds are preserved on save, and super admins are not restricted.
+   */
+  describe('Permissions ceiling', () => {
+    const READ_ACTION = 'plugin::content-manager.explorer.read';
+    const CREATE_ACTION = 'plugin::content-manager.explorer.create';
+    const SUBJECT = 'plugin::users-permissions.user';
+    const OUT_OF_SCOPE_ACTION = 'plugin::users-permissions.roles.update';
+
+    let utils;
+    let requesterRole;
+    let targetRole;
+    let requester;
+    let rqRequester;
+
+    const updateTargetRolePermissions = (request, permissions) =>
+      request({
+        url: `/admin/roles/${targetRole.id}/permissions`,
+        method: 'PUT',
+        body: { permissions },
+      });
+
+    const getTargetRolePermissions = async () => {
+      const res = await rq({ url: `/admin/roles/${targetRole.id}/permissions`, method: 'GET' });
+
+      return res.body.data;
+    };
+
+    beforeAll(async () => {
+      utils = createUtils(strapi);
+
+      // The requester can manage roles but only holds a restricted set of content permissions
+      requesterRole = await utils.createRole({
+        name: 'ceiling-requester-role',
+        description: 'Can update roles with a restricted set of content permissions',
+      });
+
+      await utils.assignPermissionsToRole(requesterRole.id, [
+        { action: 'admin::roles.read', subject: null, conditions: [], properties: {} },
+        { action: 'admin::roles.update', subject: null, conditions: [], properties: {} },
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          conditions: [],
+          properties: { fields: ['username', 'email'] },
+        },
+        {
+          action: CREATE_ACTION,
+          subject: SUBJECT,
+          conditions: ['admin::is-creator'],
+          properties: { fields: ['username'] },
+        },
+        // Held next to the unconditional read above, on another field and with a condition
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          conditions: ['admin::is-creator'],
+          properties: { fields: ['provider'] },
+        },
+      ]);
+
+      targetRole = await utils.createRole({
+        name: 'ceiling-target-role',
+        description: 'Role edited by the requester',
+      });
+
+      requester = await utils.createUser({
+        email: 'ceiling-requester@strapi.io',
+        firstname: 'Ceiling',
+        lastname: 'Requester',
+        isActive: true,
+        roles: [requesterRole.id],
+      });
+
+      rqRequester = await createAuthRequest({ strapi, userInfo: { email: requester.email } });
+    });
+
+    afterAll(async () => {
+      await utils.deleteUserById(requester.id);
+      await utils.deleteRolesById([targetRole.id, requesterRole.id]);
+    });
+
+    test('Can grant permissions within the requester own permissions', async () => {
+      const res = await updateTargetRolePermissions(rqRequester, [
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'] },
+          conditions: [],
+        },
+        {
+          action: CREATE_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'] },
+          conditions: ['admin::is-creator'],
+        },
+      ]);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toHaveLength(2);
+    });
+
+    test('Cannot grant permissions the requester does not hold', async () => {
+      const permissions = [
+        // action + subject the requester does not hold
+        { action: OUT_OF_SCOPE_ACTION, subject: null, properties: {}, conditions: [] },
+        // fields outside the requester's own fields
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username', 'provider'] },
+          conditions: [],
+        },
+        // the requester only holds this permission with a condition
+        {
+          action: CREATE_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'] },
+          conditions: [],
+        },
+      ];
+
+      const res = await updateTargetRolePermissions(rqRequester, permissions);
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 403,
+          name: 'ForbiddenError',
+          message: 'You cannot grant permissions you do not hold yourself',
+          details: { permissions },
+        },
+      });
+
+      // Nothing was written: the role still has the permissions granted in the previous test
+      const rolePermissions = await getTargetRolePermissions();
+      expect(rolePermissions).toHaveLength(2);
+      expect(rolePermissions.map(({ action }) => action).sort()).toEqual(
+        [CREATE_ACTION, READ_ACTION].sort()
+      );
+    });
+
+    test('Cannot combine the fields of one held permission with the conditions of another', async () => {
+      // `provider` is only held with a condition; the unconditional read on other fields does not lift it
+      const unconditionalProvider = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['provider'] },
+        conditions: [],
+      };
+      const unconditionalMixed = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username', 'provider'] },
+        conditions: [],
+      };
+
+      for (const permission of [unconditionalProvider, unconditionalMixed]) {
+        const res = await updateTargetRolePermissions(rqRequester, [permission]);
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error.details.permissions).toEqual([permission]);
+      }
+
+      // Under the condition, every field is covered by one held permission or the other
+      const conditionalRes = await updateTargetRolePermissions(rqRequester, [
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username', 'provider'] },
+          conditions: ['admin::is-creator'],
+        },
+      ]);
+      expect(conditionalRes.statusCode).toBe(200);
+
+      // A union on fields alone is still fine
+      const sameDimensionRes = await updateTargetRolePermissions(rqRequester, [
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username', 'email'] },
+          conditions: [],
+        },
+      ]);
+      expect(sameDimensionRes.statusCode).toBe(200);
+    });
+
+    test('Still checks fields and conditions when a property lists no value', async () => {
+      // `locales: []` is accepted on any content-type action because i18n adds `locales` to all
+      // of them, and stays as is on a non-localized subject like this one
+      const rolePermissionsBefore = await getTargetRolePermissions();
+
+      const unheldField = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['password'], locales: [] },
+        conditions: [],
+      };
+      const omittedFields = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { locales: [] },
+        conditions: [],
+      };
+      // Only held under `admin::is-creator`
+      const droppedConditions = {
+        action: CREATE_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'], locales: [] },
+        conditions: [],
+      };
+
+      for (const permission of [unheldField, omittedFields, droppedConditions]) {
+        const res = await updateTargetRolePermissions(rqRequester, [permission]);
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error.details.permissions).toEqual([permission]);
+        expect(await getTargetRolePermissions()).toEqual(rolePermissionsBefore);
+      }
+
+      const heldFieldRes = await updateTargetRolePermissions(rqRequester, [
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'], locales: [] },
+          conditions: [],
+        },
+      ]);
+      expect(heldFieldRes.statusCode).toBe(200);
+
+      const rolePermissions = await getTargetRolePermissions();
+      expect(rolePermissions).toHaveLength(1);
+      expect(rolePermissions[0]).toMatchObject({
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'], locales: [] },
+      });
+    });
+
+    test('Preserves permissions the role already holds, even if the requester does not hold them', async () => {
+      const outOfScopePermission = {
+        action: OUT_OF_SCOPE_ACTION,
+        subject: null,
+        properties: {},
+        conditions: [],
+      };
+      const inScopePermission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'] },
+        conditions: [],
+      };
+
+      // Super admins are not restricted
+      const superAdminRes = await updateTargetRolePermissions(rq, [
+        outOfScopePermission,
+        inScopePermission,
+      ]);
+      expect(superAdminRes.statusCode).toBe(200);
+
+      // Re-sending the out-of-scope permission unchanged is allowed
+      const unchangedRes = await updateTargetRolePermissions(rqRequester, [
+        outOfScopePermission,
+        inScopePermission,
+      ]);
+      expect(unchangedRes.statusCode).toBe(200);
+      expect(await getTargetRolePermissions()).toHaveLength(2);
+
+      // Changing it is not
+      const changedRes = await updateTargetRolePermissions(rqRequester, [
+        { ...outOfScopePermission, conditions: ['admin::is-creator'] },
+        inScopePermission,
+      ]);
+      expect(changedRes.statusCode).toBe(403);
+      expect(changedRes.body.error.details.permissions).toEqual([
+        { ...outOfScopePermission, conditions: ['admin::is-creator'] },
+      ]);
+
+      // Removing it is allowed
+      const removalRes = await updateTargetRolePermissions(rqRequester, [inScopePermission]);
+      expect(removalRes.statusCode).toBe(200);
+
+      const rolePermissions = await getTargetRolePermissions();
+      expect(rolePermissions).toHaveLength(1);
+      expect(rolePermissions[0]).toMatchObject(inScopePermission);
+    });
+
+    test('Treats a reordered existing permission as unchanged', async () => {
+      // The requester does not hold the update action at all
+      const UPDATE_ACTION = 'plugin::content-manager.explorer.update';
+      const inScopePermission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'] },
+        conditions: [],
+      };
+      const outOfScopePermission = {
+        action: UPDATE_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username', 'email'] },
+        conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+      };
+
+      const superAdminRes = await updateTargetRolePermissions(rq, [
+        outOfScopePermission,
+        inScopePermission,
+      ]);
+      expect(superAdminRes.statusCode).toBe(200);
+
+      const storedPermission = (await getTargetRolePermissions()).find(
+        ({ action }) => action === UPDATE_ACTION
+      );
+
+      // The role editor sends fields and conditions back in layout order
+      const reorderedRes = await updateTargetRolePermissions(rqRequester, [
+        {
+          ...outOfScopePermission,
+          properties: { fields: ['email', 'username'] },
+          conditions: ['admin::has-same-role-as-creator', 'admin::is-creator'],
+        },
+        inScopePermission,
+      ]);
+      expect(reorderedRes.statusCode).toBe(200);
+
+      const rolePermissions = await getTargetRolePermissions();
+      expect(rolePermissions).toHaveLength(2);
+      expect(rolePermissions.find(({ action }) => action === UPDATE_ACTION).id).toBe(
+        storedPermission.id
+      );
+
+      // Adding a field is still a change
+      const extendedPermission = {
+        ...outOfScopePermission,
+        properties: { fields: ['email', 'username', 'provider'] },
+      };
+      const extendedRes = await updateTargetRolePermissions(rqRequester, [
+        extendedPermission,
+        inScopePermission,
+      ]);
+      expect(extendedRes.statusCode).toBe(403);
+      expect(extendedRes.body.error.details.permissions).toEqual([extendedPermission]);
+
+      // Leave the role as the previous test did
+      const removalRes = await updateTargetRolePermissions(rqRequester, [inScopePermission]);
+      expect(removalRes.statusCode).toBe(200);
+      expect(await getTargetRolePermissions()).toHaveLength(1);
+    });
+
+    /**
+     * A request made with an admin token is checked against the token's own permissions, even
+     * when its owner (here the super admin) holds more.
+     */
+    describe('with an admin token', () => {
+      const ROLE_PERMISSIONS = [
+        { action: 'admin::roles.read', subject: null, conditions: [], properties: {} },
+        { action: 'admin::roles.update', subject: null, conditions: [], properties: {} },
+      ];
+      const readPermission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: {},
+        conditions: [],
+      };
+
+      const tokenIds = [];
+
+      const createAdminToken = async (name, adminPermissions) => {
+        const res = await rq({
+          url: '/admin/admin-tokens',
+          method: 'POST',
+          body: { name, adminPermissions },
+        });
+
+        expect(res.statusCode).toBe(201);
+        tokenIds.push(res.body.data.id);
+
+        return createRequest({ strapi }).setToken(res.body.data.accessKey);
+      };
+
+      afterAll(async () => {
+        await strapi.db.query('admin::api-token').deleteMany({ where: { id: { $in: tokenIds } } });
+      });
+
+      test('Cannot grant a permission the token does not hold, even if its owner does', async () => {
+        const rolePermissionsBefore = await getTargetRolePermissions();
+        const rqToken = await createAdminToken('ceiling-roles-only-token', ROLE_PERMISSIONS);
+
+        const res = await updateTargetRolePermissions(rqToken, [readPermission]);
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error.details.permissions).toEqual([readPermission]);
+        expect(await getTargetRolePermissions()).toEqual(rolePermissionsBefore);
+      });
+
+      test('Can grant a permission the token holds', async () => {
+        const rqToken = await createAdminToken('ceiling-roles-and-read-token', [
+          ...ROLE_PERMISSIONS,
+          readPermission,
+        ]);
+
+        const res = await updateTargetRolePermissions(rqToken, [readPermission]);
+
+        expect(res.statusCode).toBe(200);
+
+        const rolePermissions = await getTargetRolePermissions();
+        expect(rolePermissions).toHaveLength(1);
+        expect(rolePermissions[0]).toMatchObject({ action: READ_ACTION, subject: SUBJECT });
+      });
+
+      /**
+       * A token owned by an admin who is not a super admin is also limited by the owner's current
+       * permissions, so a token permission the owner no longer holds (written before the
+       * per-permission rule, or not yet re-synced) cannot be granted.
+       */
+      describe('owned by an admin who is not a super admin', () => {
+        const outOfScopePermission = {
+          action: OUT_OF_SCOPE_ACTION,
+          subject: null,
+          properties: {},
+          conditions: [],
+        };
+
+        let ownerRole;
+        let owner;
+        let rqOwnerToken;
+
+        beforeAll(async () => {
+          ownerRole = await utils.createRole({
+            name: 'ceiling-token-owner-role',
+            description: 'Owns an admin token that can update roles',
+          });
+
+          await utils.assignPermissionsToRole(ownerRole.id, [
+            ...ROLE_PERMISSIONS,
+            { action: 'admin::admin-tokens.create', subject: null, conditions: [], properties: {} },
+            readPermission,
+          ]);
+
+          owner = await utils.createUser({
+            email: 'ceiling-token-owner@strapi.io',
+            firstname: 'Ceiling',
+            lastname: 'TokenOwner',
+            isActive: true,
+            roles: [ownerRole.id],
+          });
+
+          const rqOwner = await createAuthRequest({ strapi, userInfo: { email: owner.email } });
+
+          const res = await rqOwner({
+            url: '/admin/admin-tokens',
+            method: 'POST',
+            body: {
+              name: 'ceiling-owner-token',
+              adminPermissions: [...ROLE_PERMISSIONS, readPermission],
+            },
+          });
+
+          expect(res.statusCode).toBe(201);
+          tokenIds.push(res.body.data.id);
+
+          // A token permission the owner does not hold, as a token stored before the
+          // per-permission rule could carry
+          await strapi.db.query('admin::permission').create({
+            data: { ...outOfScopePermission, actionParameters: {}, apiToken: res.body.data.id },
+          });
+
+          const token = await strapi.db.query('admin::api-token').findOne({
+            where: { id: res.body.data.id },
+            populate: ['adminPermissions'],
+          });
+          expect(token.adminPermissions.map((permission) => permission.action)).toContain(
+            OUT_OF_SCOPE_ACTION
+          );
+
+          rqOwnerToken = createRequest({ strapi }).setToken(res.body.data.accessKey);
+        });
+
+        afterAll(async () => {
+          // Deleting the owner deletes their tokens and the tokens' permissions
+          await utils.deleteUserById(owner.id);
+          await utils.deleteRolesById([ownerRole.id]);
+        });
+
+        test('Cannot grant a permission the token holds but its owner does not', async () => {
+          const rolePermissionsBefore = await getTargetRolePermissions();
+
+          const res = await updateTargetRolePermissions(rqOwnerToken, [outOfScopePermission]);
+
+          expect(res.statusCode).toBe(403);
+          expect(res.body.error.details.permissions).toEqual([outOfScopePermission]);
+          expect(await getTargetRolePermissions()).toEqual(rolePermissionsBefore);
+        });
+
+        test('Can grant a permission both the token and its owner hold', async () => {
+          const res = await updateTargetRolePermissions(rqOwnerToken, [readPermission]);
+
+          expect(res.statusCode).toBe(200);
+        });
       });
     });
   });

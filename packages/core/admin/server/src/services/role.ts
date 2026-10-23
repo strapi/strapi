@@ -1,13 +1,22 @@
-import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
+import _, {
+  omit,
+  pick,
+  differenceWith,
+  differenceBy,
+  isEqual,
+  isPlainObject,
+  mapValues,
+} from 'lodash';
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
-import permissionDomain from '../domain/permission';
+import permissionDomain, { type CreatePermissionPayload } from '../domain/permission';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
 import type { Action } from '../domain/action';
+import type { CeilingPermission } from '../domain/permission/ceiling';
 
 import { validatePermissionsExist } from '../validation/permission';
 import roleConstants from './constants';
@@ -16,7 +25,7 @@ import { getService } from '../utils';
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION, ROLE_TEXT_MAX_LENGTH } = roleConstants;
 
 const { createAsyncSeriesWaterfallHook } = hooksUtils;
-const { ApplicationError } = errors;
+const { ApplicationError, ForbiddenError } = errors;
 
 const hooks = {
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
@@ -38,14 +47,32 @@ const pickComparableFields = (permission: Permission) => pick(permission, COMPAR
 const jsonClean = <T extends object>(data: T): T => JSON.parse(JSON.stringify(data));
 
 /**
+ * Arrays of strings in a permission (`conditions`, `properties.fields`, `properties.locales`
+ * and any other property) are sets: the engine applies them regardless of order. Dedupe and
+ * sort them so two permissions that differ only in order compare equal. `null`, `[]` and a
+ * missing key stay distinct, and arrays holding anything but strings are left as they are.
+ */
+const normalizeSets = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.every((item) => typeof item === 'string') ? [...new Set(value)].sort() : value;
+  }
+  if (isPlainObject(value)) {
+    return mapValues(value as Record<string, unknown>, normalizeSets);
+  }
+  return value;
+};
+
+/**
  * Compare two permissions
  */
 const arePermissionsEqual = (p1: Permission, p2: Permission): boolean => {
-  if (p1.action === p2.action) {
-    return isEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
+  if (p1.action !== p2.action) {
+    return false;
   }
-
-  return false;
+  return isEqual(
+    jsonClean(normalizeSets(pickComparableFields(p1)) as object),
+    jsonClean(normalizeSets(pickComparableFields(p2)) as object)
+  );
 };
 
 /**
@@ -393,6 +420,86 @@ const assignPermissions = async (
   return permissionsToReturn;
 };
 
+/**
+ * Who updates the role, which decides the permissions they can grant: an admin user grants up
+ * to their own permissions (all of them for a super admin), an admin token up to the token's
+ * permissions and, unless its owner is a super admin, up to the owner's current permissions.
+ */
+export type CeilingRequester =
+  { user: AdminUser } | { tokenPermissions: CeilingPermission[]; owner: AdminUser };
+
+/**
+ * The permission sets a granted permission must stay within, all of them. Empty when the
+ * requester is not limited (a super admin).
+ */
+const findRequesterCeilings = async (
+  requester: CeilingRequester
+): Promise<CeilingPermission[][]> => {
+  if ('tokenPermissions' in requester) {
+    // A token can carry permissions its owner lost since it was written
+    if (hasSuperAdminRole(requester.owner)) {
+      return [requester.tokenPermissions];
+    }
+
+    const ownerPermissions = await getService('permission').findUserPermissions(requester.owner);
+
+    return [requester.tokenPermissions, ownerPermissions];
+  }
+
+  if (hasSuperAdminRole(requester.user)) {
+    return [];
+  }
+
+  return [await getService('permission').findUserPermissions(requester.user)];
+};
+
+/**
+ * Make sure a requester cannot grant a role permissions they do not hold themselves. A request
+ * made with an admin token is limited by the token's permissions and, unless the token owner is
+ * a super admin, by the owner's.
+ * Only permissions that are new to the role are checked: permissions the role already
+ * carries are preserved as they are, and removing them is always allowed.
+ * @param requester - the admin user or admin token performing the update
+ * @param roleId - the role being updated
+ * @param permissions - the permissions requested for the role
+ */
+const checkPermissionsCeiling = async (
+  requester: CeilingRequester,
+  roleId: Data.ID,
+  permissions: CreatePermissionPayload[] = []
+): Promise<void> => {
+  const ceilings = await findRequesterCeilings(requester);
+
+  // Super admins hold every permission
+  if (ceilings.length === 0) {
+    return;
+  }
+
+  const permissionService = getService('permission');
+
+  const existingPermissions = await permissionService.findMany({
+    where: { role: { id: roleId } },
+  });
+
+  const newPermissions = differenceWith(
+    permissions.map((permission) => permissionDomain.create(permission)),
+    existingPermissions,
+    arePermissionsEqual
+  );
+
+  const rejectedPermissions = newPermissions.filter((permission) =>
+    ceilings.some((held) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, held))
+  );
+
+  if (rejectedPermissions.length > 0) {
+    throw new ForbiddenError('You cannot grant permissions you do not hold yourself', {
+      permissions: rejectedPermissions.map((permission) =>
+        pick(permission, ['action', 'subject', 'properties', 'conditions'])
+      ),
+    });
+  }
+};
+
 const addPermissions = async (roleId: Data.ID, permissions: any) => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
@@ -487,6 +594,7 @@ export default {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   hasSuperAdminRole,
+  checkPermissionsCeiling,
   assignPermissions,
   resetSuperAdminPermissions,
   checkRolesIdForDeletion,

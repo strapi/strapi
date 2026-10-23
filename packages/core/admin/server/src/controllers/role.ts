@@ -20,9 +20,40 @@ import type {
   BatchDelete,
 } from '../../../shared/contracts/roles';
 import { AdminRole } from '../../../shared/contracts/shared';
+import type { AdminApiToken } from '../../../shared/contracts/admin-token';
+import type { CeilingRequester } from '../services/role';
+import adminTokenStrategy from '../strategies/admin-token';
 
-const { ApplicationError } = errors;
+const { ApplicationError, ForbiddenError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
+
+/**
+ * The part of `ctx.state.auth` (set by the auth service) used to tell an admin token request
+ * from an admin user one.
+ */
+interface RequestAuth {
+  strategy?: { name?: string };
+  credentials?: Partial<Pick<AdminApiToken, 'adminPermissions'>> | null;
+}
+
+/**
+ * A request made with an admin token can only grant what both the token and its owner (in
+ * `ctx.state.user`) hold: the token may hold fewer permissions than its owner, and a token
+ * written before the owner lost a permission may hold more. A super-admin owner is limited by
+ * the token only.
+ */
+const getCeilingRequester = (ctx: Context): CeilingRequester => {
+  const auth: RequestAuth | undefined = ctx.state.auth;
+
+  if (auth?.strategy?.name === adminTokenStrategy.name) {
+    return {
+      tokenPermissions: auth.credentials?.adminPermissions ?? [],
+      owner: ctx.state.user,
+    };
+  }
+
+  return { user: ctx.state.user };
+};
 
 export default {
   /**
@@ -165,6 +196,22 @@ export default {
     const normalizedPermissions = (await roleService.hooks.willValidateUpdatePermissions.call(
       input.permissions
     )) as typeof input.permissions;
+
+    try {
+      await roleService.checkPermissionsCeiling(
+        getCeilingRequester(ctx),
+        role.id,
+        normalizedPermissions
+      );
+    } catch (error) {
+      // A ForbiddenError thrown from a controller is turned into a bare 403 by the auth
+      // middleware, so respond here to keep the message and the rejected permissions.
+      if (error instanceof ForbiddenError) {
+        return ctx.forbidden(error.message, error.details);
+      }
+
+      throw error;
+    }
 
     const permissions = await roleService.assignPermissions(role.id, normalizedPermissions);
 
