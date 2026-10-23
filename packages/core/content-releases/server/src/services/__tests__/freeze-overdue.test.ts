@@ -1,3 +1,4 @@
+import { OVERDUE_GRACE_PERIOD_MS } from '../../constants';
 import createSchedulingService from '../scheduling';
 
 const NOW = new Date('2026-10-15T09:00:00.000Z');
@@ -86,6 +87,23 @@ const release = (overrides: Partial<Row> & Pick<Row, 'id'>): Row => ({
 describe('Scheduling service: freezeOverdueReleases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('looks for unreleased releases overdue by more than the grace period, or failed', async () => {
+    const { service, findMany } = setup({ rows: [] });
+
+    await service.freezeOverdueReleases({ now: NOW });
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        releasedAt: null,
+        $or: [
+          { scheduledAt: { $lt: new Date(NOW.getTime() - OVERDUE_GRACE_PERIOD_MS) } },
+          { status: 'failed' },
+        ],
+      },
+      select: ['id'],
+    });
   });
 
   it.each([

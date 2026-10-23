@@ -32,7 +32,8 @@ describe('Release controller', () => {
         pagination: {},
       });
       mockCountNotReadyByRelease.mockResolvedValue(new Map([[1, 2]]));
-      mockCountByStatus.mockResolvedValue({});
+      const statusCounts = { ready: 1, blocked: 0, failed: 0, done: 1, partial: 0, empty: 0 };
+      mockCountByStatus.mockResolvedValue(statusCounts);
       mockFindManyWithContentTypeEntryAttached.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
@@ -75,6 +76,8 @@ describe('Release controller', () => {
         { count: 3, notReadyCount: 2 },
         { count: 4 },
       ]);
+      // @ts-expect-error the context gets a body
+      expect(ctx.body.meta).toEqual({ pagination: {}, pendingReleasesCount: 2, statusCounts });
     });
   });
   describe('create', () => {

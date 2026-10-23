@@ -1070,6 +1070,7 @@ describe('Release Action service', () => {
         ),
         localization: {
           isLocalizedContentType: ({ uid }: { uid: string }) => uid === 'api::localized.localized',
+          getDefaultLocale: jest.fn().mockResolvedValue('en'),
         },
         documents: jest.fn((uid: string) => ({ findMany: () => entryFindMany(uid) })),
         db: {
@@ -1126,6 +1127,56 @@ describe('Release Action service', () => {
       expect(entryFindMany.mock.calls.map(([uid]) => uid)).toEqual([
         'api::kept.kept',
         'api::localized.localized',
+      ]);
+    });
+
+    it('matches a localized action stored without a locale to the default locale', async () => {
+      const action = (id: number, documentId: string) => ({
+        id,
+        type: 'unpublish',
+        contentType: 'api::localized.localized',
+        entryDocumentId: documentId,
+        locale: null,
+      });
+      const strapiMock = {
+        ...baseStrapiMock,
+        contentType: jest.fn((uid: string) => ({ uid, options: { draftAndPublish: true } })),
+        localization: {
+          isLocalizedContentType: () => true,
+          getDefaultLocale: jest.fn().mockResolvedValue('en'),
+        },
+        documents: jest.fn(() => ({
+          findMany: jest.fn().mockResolvedValue([
+            { documentId: 'doc-default', locale: 'en' },
+            { documentId: 'doc-other', locale: 'fr' },
+          ]),
+        })),
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            findMany: jest
+              .fn()
+              .mockResolvedValue([action(1, 'doc-default'), action(2, 'doc-other')]),
+          }),
+        },
+      };
+      mockGetValidityForActions.mockResolvedValueOnce(new Map());
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      const prepared = await releaseActionService.prepareSkippedActions(1);
+
+      // Kept only when the entry exists in the default locale, where the run would release it
+      expect(prepared).toEqual([
+        {
+          action: {
+            type: 'unpublish',
+            contentType: 'api::localized.localized',
+            entryDocumentId: 'doc-default',
+            locale: null,
+          },
+          validity: { isEntryValid: true, reason: null },
+        },
       ]);
     });
   });

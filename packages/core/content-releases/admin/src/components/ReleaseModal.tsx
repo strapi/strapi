@@ -274,7 +274,7 @@ interface ITimezoneOption {
   value: string;
 }
 
-const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOption[] }) => {
+export const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOption[] }) => {
   const { values, errors, setFieldValue } = useFormikContext<FormValues>();
   const { formatMessage } = useIntl();
   const [timezoneList, setTimezoneList] = React.useState<ITimezoneOption[]>(timezoneOptions);

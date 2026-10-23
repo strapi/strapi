@@ -175,6 +175,10 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       await expect(
         page.getByRole('gridcell', { name: 'This entry was unpublished.' }).first()
       ).toBeVisible();
+      // Nothing was skipped, so there is nothing to carry over to a new release
+      await expect(
+        page.getByRole('button', { name: 'Create release from skipped entries' })
+      ).toBeHidden();
     }
   );
 });

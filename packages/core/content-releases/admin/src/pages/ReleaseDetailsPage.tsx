@@ -39,6 +39,7 @@ import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { CreateReleaseFromSkippedDrawer } from '../components/CreateReleaseFromSkippedDrawer';
 import { EntryValidationPopover } from '../components/EntryValidationPopover';
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
@@ -104,9 +105,10 @@ const ReleaseDetailsLayout = ({
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const { allowedActions } = useRBAC(PERMISSIONS);
-  const { canUpdate, canDelete, canPublish } = allowedActions;
+  const { canCreate, canCreateAction, canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
   const { trackUsage } = useTracking();
+  const [isSkippedDrawerOpen, setIsSkippedDrawerOpen] = React.useState(false);
 
   const release = data?.data;
 
@@ -194,6 +196,12 @@ const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
+  // The new release is created with actions, so it takes both permissions, as the route does
+  const canCreateFromSkipped =
+    Boolean(release.releasedAt) &&
+    (release.status === 'partial' || release.status === 'failed') &&
+    canCreate &&
+    canCreateAction;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
   const isScheduled = release.scheduledAt && release.timezone;
@@ -242,7 +250,16 @@ const ReleaseDetailsLayout = ({
           }
           navigationAction={<BackButton fallback=".." />}
           primaryAction={
-            !release.releasedAt && (
+            release.releasedAt ? (
+              canCreateFromSkipped && (
+                <Button size="S" variant="default" onClick={() => setIsSkippedDrawerOpen(true)}>
+                  {formatMessage({
+                    id: 'content-releases.header.actions.create-from-skipped',
+                    defaultMessage: 'Create release from skipped entries',
+                  })}
+                </Button>
+              )
+            ) : (
               <Flex gap={2}>
                 <SimpleMenuButton
                   label={<More />}
@@ -328,6 +345,13 @@ const ReleaseDetailsLayout = ({
           }
         />
         {children}
+        {canCreateFromSkipped && (
+          <CreateReleaseFromSkippedDrawer
+            release={release}
+            open={isSkippedDrawerOpen}
+            onClose={() => setIsSkippedDrawerOpen(false)}
+          />
+        )}
       </Main>
     </Layouts.Root>
   );
@@ -620,7 +644,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                       <Tr key={id}>
                         <Td width="25%" maxWidth="200px">
                           <Typography ellipsis>{`${
-                            contentType.mainFieldValue || entry?.id || ''
+                            contentType.mainFieldValue || entry?.id || entryDocumentId
                           }`}</Typography>
                         </Td>
                         {hasI18nEnabled && (

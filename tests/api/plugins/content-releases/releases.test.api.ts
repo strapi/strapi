@@ -169,6 +169,8 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   // Publishing one of these documents runs a query that fails in the database, inside the run's
   // transaction: Postgres aborts the transaction, SQLite and MySQL only fail the statement
   const documentIdsFailingInDatabase = new Set<string>();
+  // Reading one of these documents throws, so checking it before a run fails
+  const documentIdsFailingToRead = new Set<string>();
   // Publishing one of these documents waits for its pause first, through the same middleware
   const publishPauses = new Map<string, () => Promise<void>>();
   // The next release-action query of this kind fails in the database
@@ -374,6 +376,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       if (ctx.action === 'publish' && documentIdsFailingInDatabase.has(ctx.params?.documentId)) {
         await failInDatabase();
+      }
+
+      if (ctx.action === 'findOne' && documentIdsFailingToRead.has(ctx.params?.documentId)) {
+        throw new Error('Test-only read failure');
       }
 
       return next();
@@ -1178,6 +1184,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
           timezone: 'Europe/Paris',
         })
       ).body.data;
+
+      expect(
+        strapi.plugin('content-releases').service('scheduling').getAll().has(String(release.id))
+      ).toBe(true);
 
       const res = await rq({
         method: 'PUT',
@@ -2813,6 +2823,50 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       }
     });
 
+    test('an allow_partial entry whose check throws is recorded as skipped_error and the others are published', async () => {
+      const uncheckableId = await createProduct({ valid: true });
+      const validId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: uncheckableId },
+        { documentId: validId },
+      ]);
+
+      documentIdsFailingToRead.add(uncheckableId);
+      try {
+        expect((await publishManually(release.id)).statusCode).toBe(200);
+      } finally {
+        documentIdsFailingToRead.delete(uncheckableId);
+      }
+
+      const actions = await getActionsByEntry(release.id);
+      expect(actions[uncheckableId]).toMatchObject({
+        outcome: 'skipped_error',
+        isEntryValid: false,
+        reason: { error: { name: 'Error' } },
+      });
+      expect(actions[validId].outcome).toBe('published');
+    });
+
+    test('an all_or_nothing release with an entry whose check throws refuses a manual publish', async () => {
+      const uncheckableId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: uncheckableId },
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+
+      documentIdsFailingToRead.add(uncheckableId);
+      let res;
+      try {
+        res = await publishManually(release.id);
+      } finally {
+        documentIdsFailingToRead.delete(uncheckableId);
+      }
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toBe("An entry couldn't be checked (Error)");
+      expect((await getRelease(release.id)).releasedAt).toBeNull();
+    });
+
     test('a scheduled allow_partial run with no publishable entry records each entry with its own skip reason', async () => {
       const invalidIds = [
         await createProduct({ valid: false }),
@@ -2923,7 +2977,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(kept).toMatchObject({
         outcome: 'skipped_invalid',
         reason: recorded.reason,
-        entry: {},
+        entry: null,
         status: null,
       });
       expect((await getRelease(ranRelease.id)).status).toBe('partial');

@@ -186,12 +186,19 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
             $gte: new Date(),
           },
           releasedAt: null,
+          // A release that failed before the upgrade is frozen by the sweep, never armed.
+          // `$ne` alone would drop rows whose status is null.
+          $or: [{ status: { $ne: 'failed' } }, { status: null }],
         },
       });
 
       for (const release of releases) {
-        // A release deleted or frozen since the read has nothing left to arm
         await this.set(release.id, release.scheduledAt).catch((error: unknown) => {
+          // A release deleted or frozen since the read has nothing left to arm
+          if (error instanceof errors.NotFoundError) {
+            return;
+          }
+
           strapi.log.error(`[Content Releases] Couldn't schedule release ${release.id}`, { error });
         });
       }

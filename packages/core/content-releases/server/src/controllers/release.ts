@@ -272,10 +272,11 @@ const releaseController = {
     await validateCreateFromSkippedEntries(releaseArgs);
 
     const releaseService = getService('release', { strapi });
-    const release = await releaseService.createFromSkippedEntries(id, releaseArgs, { user });
-    const count = await getService('release-action', { strapi }).countActions({
-      filters: { release: release.id },
-    });
+    const { release, actionsCount } = await releaseService.createFromSkippedEntries(
+      id,
+      releaseArgs,
+      { user }
+    );
 
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
@@ -285,7 +286,7 @@ const releaseController = {
     ctx.created({
       data: {
         ...(await permissionsManager.sanitizeOutput(release)),
-        actions: { meta: { count } },
+        actions: { meta: { count: actionsCount } },
       },
     });
   },

@@ -16,6 +16,7 @@ import {
   getPublishOrderForContentTypes,
   getPublishabilityForActions,
   isFailedBeforeUpgrade,
+  isMySqlDeadlock,
   isReleaseBlocked,
   toError,
   toErrorReason,
@@ -202,7 +203,8 @@ export const createReleaseRun = ({
   };
 
   // `allow_partial`: each entry in its own savepoint, so one that fails is skipped with its
-  // published version restored, and the others still go out
+  // published version restored, and the others still go out. Not after a MySQL deadlock: it
+  // rolled back the whole run, so the run fails with it and records nothing.
   const releaseEachEntry = async (
     releaseName: string,
     actions: ReleaseAction[],
@@ -214,6 +216,9 @@ export const createReleaseRun = ({
         await strapi.db.savepoint(() => releaseEntry(action));
         outcomes.set(action.id, getReleasedOutcome(action));
       } catch (actionError) {
+        if (isMySqlDeadlock(actionError)) {
+          throw actionError;
+        }
         outcomes.set(action.id, getErrorOutcome(actionError));
         strapi.log.warn(
           `[Content Releases] Release ${releaseName}: skipped an entry that failed to ${action.type} (${getErrorName(actionError)})`
@@ -223,7 +228,7 @@ export const createReleaseRun = ({
   };
 
   // `all_or_nothing`: one savepoint for every entry, so the first error rolls back the ones
-  // before it. Returns that error.
+  // before it. Returns that error, unless it's a MySQL deadlock, which rolled back the whole run.
   const releaseAllEntries = async (
     actions: ReleaseAction[],
     outcomes: Outcomes
@@ -234,9 +239,13 @@ export const createReleaseRun = ({
         for (const action of actions) {
           inFlight = action;
           await releaseEntry(action);
+          inFlight = undefined;
         }
       });
     } catch (error) {
+      if (isMySqlDeadlock(error)) {
+        throw error;
+      }
       if (inFlight) {
         outcomes.set(inFlight.id, getErrorOutcome(error));
       }
@@ -254,9 +263,11 @@ export const createReleaseRun = ({
     releaseId: Release['id'],
     trigger: PublishTrigger
   ): Promise<LockedPublishResult> => {
-    const release = await lockPlannedRelease(releaseId, ['name', 'status', 'releaseCondition'], {
-      strapi,
-    });
+    const release = await lockPlannedRelease(
+      releaseId,
+      ['name', 'status', 'releaseCondition', 'releasedAt'],
+      { strapi }
+    );
 
     // Not frozen by the sweep yet
     if (isFailedBeforeUpgrade(release)) {

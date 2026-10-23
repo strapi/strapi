@@ -27,8 +27,27 @@ describe('addOutcomesToReleasedReleases', () => {
     actionCount.mockImplementation(async ({ where }) => (where.outcome === 'published' ? 2 : 1));
   });
 
+  it('selects the released releases that have no totals yet', async () => {
+    releaseFindMany.mockResolvedValue([]);
+
+    await addOutcomesToReleasedReleases({ strapi });
+
+    expect(releaseFindMany).toHaveBeenCalledWith({
+      where: {
+        releasedAt: { $notNull: true },
+        totalSkippedEntries: null,
+        $or: [
+          { status: 'done' },
+          { status: null },
+          { status: 'failed', failureReason: 'failed_before_upgrade' },
+        ],
+      },
+      select: ['id', 'status'],
+    });
+  });
+
   it("records every entry as released and the release's totals", async () => {
-    releaseFindMany.mockResolvedValue([{ id: 10 }]);
+    releaseFindMany.mockResolvedValue([{ id: 10, status: 'done' }]);
 
     await addOutcomesToReleasedReleases({ strapi });
 
@@ -47,8 +66,39 @@ describe('addOutcomesToReleasedReleases', () => {
     });
   });
 
+  it('records every entry of a release frozen before upgrade as skipped', async () => {
+    releaseFindMany.mockResolvedValue([{ id: 30, status: 'failed' }]);
+    actionCount.mockResolvedValue(3);
+
+    await addOutcomesToReleasedReleases({ strapi });
+
+    expect(actionUpdateMany.mock.calls).toStrictEqual([
+      [{ where: { release: 30, outcome: null }, data: { outcome: 'skipped_missed' } }],
+    ]);
+    expect(actionCount).toHaveBeenCalledWith({ where: { release: 30 } });
+    expect(releaseUpdate).toHaveBeenCalledWith({
+      where: { id: 30 },
+      data: { totalPublishedEntries: 0, totalUnpublishedEntries: 0, totalSkippedEntries: 3 },
+    });
+  });
+
+  it('logs a failed scan instead of stopping the startup', async () => {
+    releaseFindMany.mockRejectedValue(new Error('read failed'));
+
+    await expect(addOutcomesToReleasedReleases({ strapi })).resolves.toBeUndefined();
+
+    expect(logError).toHaveBeenCalledWith(
+      'Error while finding releases to add outcomes to',
+      expect.objectContaining({ error: expect.any(Error) })
+    );
+    expect(releaseUpdate).not.toHaveBeenCalled();
+  });
+
   it('logs a release that fails and still migrates the others', async () => {
-    releaseFindMany.mockResolvedValue([{ id: 10 }, { id: 20 }]);
+    releaseFindMany.mockResolvedValue([
+      { id: 10, status: 'done' },
+      { id: 20, status: null },
+    ]);
     actionUpdateMany.mockRejectedValueOnce(new Error('write failed'));
 
     await addOutcomesToReleasedReleases({ strapi });
