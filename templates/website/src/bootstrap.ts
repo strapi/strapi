@@ -60,7 +60,7 @@ async function isFirstRun() {
 
 async function setPublicPermissions(newPermissions: Record<string, string[]>) {
   // Find the ID of the public role
-  const publicRole = await strapi.query('plugin::users-permissions.role').findOne({
+  const publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({
     where: {
       type: 'public',
     },
@@ -71,7 +71,7 @@ async function setPublicPermissions(newPermissions: Record<string, string[]>) {
   Object.keys(newPermissions).map((controller) => {
     const actions = newPermissions[controller];
     const permissionsToCreate = actions.map((action) => {
-      return strapi.query('plugin::users-permissions.permission').create({
+      return strapi.db.query('plugin::users-permissions.permission').create({
         data: {
           action: `api::${controller}.${controller}.${action}`,
           role: publicRole.id,
@@ -257,7 +257,7 @@ async function importSeedData() {
     'lead-form-submission': ['create'],
   });
 
-  await strapi.query('plugin::i18n.locale').create({
+  await strapi.db.query('plugin::i18n.locale').create({
     data: {
       name: 'French (fr)',
       code: 'fr',

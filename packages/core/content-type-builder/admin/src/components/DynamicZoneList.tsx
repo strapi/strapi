@@ -14,6 +14,8 @@ import { useDataManager } from './DataManager/useDataManager';
 
 import type { Internal, Struct } from '@strapi/types';
 
+const EMPTY_COMPONENTS: NonNullable<DynamicZoneListProps['components']> = [];
+
 interface DynamicZoneListProps {
   addComponent: (name?: string) => void;
   components: Array<Internal.UID.Component>;
@@ -46,7 +48,7 @@ const ComponentStack = styled(Flex)`
 `;
 
 export const DynamicZoneList = ({
-  components = [],
+  components = EMPTY_COMPONENTS,
   addComponent,
   name,
   forTarget,

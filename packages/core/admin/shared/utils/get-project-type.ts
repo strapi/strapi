@@ -35,7 +35,7 @@ const getProjectType = ({
 
 // The statuses a license can be in once it has been read. `none` (never licensed) is left out
 // on purpose, and so is a missing status, which a mixed-version install can produce.
-const LICENSED_STATUSES: readonly string[] = ['active', 'expired', 'unknown'];
+const LICENSED_STATUSES: ReadonlySet<string> = new Set(['active', 'expired', 'unknown']);
 
 /**
  * Resolves the plan a license was issued for, including one that has lapsed or can no longer
@@ -57,7 +57,7 @@ const getLicensedPlan = ({
   planPriceId?: string | null;
 }): ProjectType =>
   getProjectType({
-    isEE: Boolean(type) && LICENSED_STATUSES.includes(licenseStatus ?? ''),
+    isEE: Boolean(type) && LICENSED_STATUSES.has(licenseStatus ?? ''),
     planPriceId: planPriceId ?? undefined,
   });
 

@@ -36,6 +36,9 @@ import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 
+const EMPTY_HEADERS: [] = [];
+const EMPTY_ROWS: [] = [];
+
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
@@ -55,8 +58,10 @@ interface TableHeader<TData = object, THeader = object> {
   sortable?: boolean;
 }
 
-interface TableContextValue<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
-  extends Pick<TableProps, 'footer'> {
+interface TableContextValue<
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+> extends Pick<TableProps, 'footer'> {
   colCount: number;
   hasHeaderCheckbox: boolean;
   headers: THeader[];
@@ -80,13 +85,15 @@ const GenericTableProvider = TableProvider as <
   props: TableContextValue<TRow, THeader> & { children?: React.ReactNode }
 ) => React.ReactElement;
 
-interface RootProps<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
-  extends Partial<
-    Pick<
-      TableContextValue<TRow, THeader>,
-      'footer' | 'headers' | 'isLoading' | 'rows' | 'selectedRows'
-    >
-  > {
+interface RootProps<
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+> extends Partial<
+  Pick<
+    TableContextValue<TRow, THeader>,
+    'footer' | 'headers' | 'isLoading' | 'rows' | 'selectedRows'
+  >
+> {
   children?: React.ReactNode;
   defaultSelectedRows?: TRow[];
   onSelectedRowsChange?: (selectedRows: TRow[]) => void;
@@ -96,10 +103,10 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
   children,
   defaultSelectedRows,
   footer,
-  headers = [],
+  headers = EMPTY_HEADERS,
   isLoading = false,
   onSelectedRowsChange,
-  rows = [],
+  rows = EMPTY_ROWS,
   selectedRows: selectedRowsProps,
 }: RootProps<TRow, THeader>) => {
   const [selectedRows = [], setSelectedRows] = useControllableState({

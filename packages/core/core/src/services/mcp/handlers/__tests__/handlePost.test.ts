@@ -237,6 +237,8 @@ describe('handlePost', () => {
       isDevMode: mockConfig.isDevMode(),
       ability: expect.objectContaining({ can: expect.any(Function) }),
       user: { id: 42 },
+      // `initialize` lists and calls no tool, so no tool schema is needed.
+      toolSchemaScope: new Set(),
     });
     expect(NodeStreamableHTTPServerTransport).toHaveBeenCalledWith({
       sessionIdGenerator: undefined,
@@ -245,6 +247,43 @@ describe('handlePost', () => {
     expect(mockTransport.handleRequest).toHaveBeenCalledWith(req, res, requestBody);
     expect(sendDidUseMcpServer).toHaveBeenCalledWith(mockStrapi);
     expect(mockMcpServer.close).toHaveBeenCalledTimes(1);
+  });
+
+  test('should scope tool schemas to the tool a tools/call request invokes', async () => {
+    const mockMcpServer = {
+      connect: jest.fn().mockResolvedValue(undefined),
+      close: jest.fn().mockResolvedValue(undefined),
+    };
+    const createServerWithRegistries = jest.fn().mockReturnValue({
+      mcpServer: mockMcpServer,
+      registries: { tools: {}, prompts: {}, resources: {} },
+    });
+
+    const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+    NodeStreamableHTTPServerTransport.mockImplementation(() => ({
+      handleRequest: jest.fn().mockResolvedValue(undefined),
+    }));
+
+    const handler = createPostHandler({
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries,
+      capabilityDefinitions: { tools: {} as any, prompts: {} as any, resources: {} as any },
+    });
+
+    const requestBody = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'tools/call',
+      params: { name: 'get_page', arguments: {} },
+    };
+    const res = { headersSent: false } as unknown as ServerResponse;
+    await handler(makeCtx(makeReq(), res, requestBody), () => Promise.resolve());
+
+    expect(createServerWithRegistries).toHaveBeenCalledWith(
+      expect.objectContaining({ toolSchemaScope: new Set(['get_page']) })
+    );
   });
 
   test('should expose the authenticated user and mcp audit source on ctx.state', async () => {

@@ -103,6 +103,8 @@ removeListener();
 
 Removes a listener function. You need to give it the name of the event it's listening to, as well as the reference of the listener as an argument.
 
+If the listener is not registered for this event, `off` does nothing.
+
 ```ts
 // Types
 type Listener = (args: any[]) => void | Promise<void>;

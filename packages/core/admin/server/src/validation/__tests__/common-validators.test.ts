@@ -20,9 +20,7 @@ import { permission, password } from '../common-validators';
 import passwordPolicyService, { DEFAULT_PASSWORD_POLICY } from '../../services/password-policy';
 
 type ProviderResult =
-  | { actionId: string; subjects?: unknown; options?: unknown }
-  | undefined
-  | null;
+  { actionId: string; subjects?: unknown; options?: unknown } | undefined | null;
 
 const stubActionProvider = (get: (actionId: string) => ProviderResult) => {
   (global as any).strapi = {
