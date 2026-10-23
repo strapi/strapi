@@ -2,7 +2,10 @@
 import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type {
+  AssigneesService,
   DocumentServiceMiddlewaresService,
+  HomepageService,
+  StagePermissionsService,
   ValidationService,
   WorkflowMetricsService,
   WorkflowWeeklyMetricsService,
@@ -114,3 +117,50 @@ weeklyMetrics?.sendWeeklyMetrics();
   // @ts-expect-error The factory is checked against the registered contract.
   ensureWeeklyStoredCronSchedule: () => Promise.resolve(undefined),
 })) satisfies Core.ServiceFactory<'plugin::review-workflows.workflow-weekly-metrics'>;
+
+strapi.service('plugin::review-workflows.stage-permissions') satisfies
+  StagePermissionsService | undefined;
+const stagePermissions = strapi.plugin('review-workflows').service('stage-permissions');
+stagePermissions?.can('admin::review-workflows.stage.transition', undefined) satisfies
+  boolean | undefined;
+stagePermissions
+  ?.registerTo({
+    roleId: 1,
+    action: 'admin::review-workflows.stage.transition',
+    toStage: 2,
+  })
+  .then((permissions) => permissions.map((permission) => permission.actionParameters.to));
+stagePermissions?.unregister([{ id: 1 }]) satisfies Promise<void> | undefined;
+strapi.plugin('review-workflows').service('assignees') satisfies AssigneesService | undefined;
+const assignees = strapi.service('plugin::review-workflows.assignees');
+assignees?.findEntityAssigneeId(1, 'api::article.article') satisfies
+  Promise<number | null> | undefined;
+assignees?.updateEntityAssignee(
+  { id: 1, documentId: 'abc', locale: null, updatedAt: '2026-01-01T00:00:00.000Z' },
+  'api::article.article',
+  2
+);
+strapi.service('plugin::review-workflows.homepage') satisfies HomepageService | undefined;
+// @ts-expect-error Stage IDs are checked against the service contract.
+stagePermissions?.canTransitionToStage('2');
+stagePermissions
+  ?.register({
+    roleId: 1,
+    action: 'admin::review-workflows.stage.transition',
+    fromStage: 1,
+  })
+  .then((permissions) =>
+    permissions.map(
+      (permission) =>
+        // @ts-expect-error A "from" permission has no "to" stage.
+        permission.actionParameters.to
+    )
+  );
+// @ts-expect-error Registered services have no arbitrary members.
+strapi.service('plugin::review-workflows.homepage')?.getRecentDocuments();
+
+(() => ({
+  findEntityAssigneeId: () => Promise.resolve(null),
+  // @ts-expect-error The factory is checked against the registered contract.
+  updateEntityAssignee: () => Promise.resolve(true),
+})) satisfies Core.ServiceFactory<'plugin::review-workflows.assignees'>;
