@@ -504,3 +504,15 @@ type AuthVerifyChecks = [
 ];
 declare const authVerifyChecks: AuthVerifyChecks;
 authVerifyChecks satisfies unknown;
+
+// Without strict types, preview handler params keep develop's `string` status.
+type PreviewStatusChecks = [
+  Expect<
+    Equal<
+      Parameters<NonNullable<Core.Config.Admin['preview']>['config']['handler']>[1]['status'],
+      string | undefined
+    >
+  >,
+];
+declare const previewStatusChecks: PreviewStatusChecks;
+previewStatusChecks satisfies unknown;

@@ -1,3 +1,4 @@
+import type * as Core from '..';
 import type { Plugin } from '../plugin';
 import type { ConfigProvider, Strapi as StrapiInstance } from '../strapi';
 
@@ -305,3 +306,12 @@ contextual.port satisfies number;
 // The global `strapi` instance resolves through the same registries.
 const globalEnabled = globalThis.strapi.config.get('plugin::config-lab').enabled;
 globalEnabled satisfies boolean;
+
+// The preview URL validation only accepts document statuses.
+declare const previewParams: Parameters<
+  NonNullable<Core.Config.Admin['preview']>['config']['handler']
+>[1];
+previewParams.status satisfies 'draft' | 'published' | undefined;
+// @ts-expect-error Other status strings are rejected by the preview URL validation.
+const otherPreviewStatus: typeof previewParams.status = 'modified';
+otherPreviewStatus satisfies unknown;
