@@ -1,6 +1,6 @@
 import type { queryParams } from '@strapi/utils';
 import type upload from '../services/upload';
-import type { Config, File, Folder, UploadInputFile } from '../types';
+import type { Config, File, Folder, UploadableFile, UploadInputFile } from '../types';
 import type imageManipulation from '../services/image-manipulation';
 import type apiUploadFolder from '../services/api-upload-folder';
 import type provider from '../services/provider';
@@ -15,6 +15,9 @@ import type { createAIMetadataProviderService } from '../services/ai-metadata-pr
 import type { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 
 type UploadServiceImplementation = ReturnType<typeof upload>;
+
+/** A page of files: the page result of the implementation, with its files typed. */
+type FilesPage<TPage> = Omit<Awaited<TPage>, 'results'> & { results: File[] };
 
 /**
  * A query of the upload service's file reads: the REST query params, with the Content API's nested
@@ -39,11 +42,17 @@ export type FilesQuery = queryParams.Params & {
  * The registered `upload` service. The service reads only the {@link UploadInputFile} fields of the
  * files it receives, so hand-built files are accepted too. The implementation keeps its published
  * formidable `InputFile` parameters, which strict types would otherwise widen for every application.
+ *
+ * Files are `plugin::upload.file` rows. Writes return the stored row without its relations. Reads
+ * add `isUrlSigned`, and carry `folder`, `related`, `createdBy` and `updatedBy` only when
+ * populated.
  */
 export type UploadService = Omit<
   UploadServiceImplementation,
   | 'upload'
   | 'replace'
+  | 'updateFileInfo'
+  | 'remove'
   | 'formatFileInfo'
   | 'getSettings'
   | 'setSettings'
@@ -54,10 +63,15 @@ export type UploadService = Omit<
   | 'findPage'
   | 'findAndCountPage'
 > & {
+  /** Uploads the files and stores one file row per file, in the order of `files`. */
   upload(
     input: { data: Record<string, unknown>; files: UploadInputFile[] },
     opts?: Parameters<UploadServiceImplementation['upload']>[1]
-  ): ReturnType<UploadServiceImplementation['upload']>;
+  ): Promise<File[]>;
+  /**
+   * Replaces the file's content, keeping its hash and extension so its URL does not change.
+   * Rejects with a `NotFoundError` when no file has this ID.
+   */
   replace(
     id: Parameters<UploadServiceImplementation['replace']>[0],
     input: {
@@ -65,7 +79,23 @@ export type UploadService = Omit<
       file: UploadInputFile;
     },
     opts?: Parameters<UploadServiceImplementation['replace']>[2]
-  ): ReturnType<UploadServiceImplementation['replace']>;
+  ): Promise<File>;
+  /**
+   * Updates the file's name, alternative text, caption, focal point or folder. Rejects with a
+   * `NotFoundError` when no file has this ID.
+   */
+  updateFileInfo(
+    id: Parameters<UploadServiceImplementation['updateFileInfo']>[0],
+    fileInfo: Parameters<UploadServiceImplementation['updateFileInfo']>[1],
+    opts?: Parameters<UploadServiceImplementation['updateFileInfo']>[2]
+  ): Promise<File>;
+  /**
+   * Deletes the file and its formats from the provider when they are stored with the configured
+   * provider, then deletes its row.
+   *
+   * @returns the deleted row, or `null` when the row was already deleted.
+   */
+  remove(file: File): Promise<File | null>;
   /** A missing name (formidable's nullable `originalFilename`) is rejected as an invalid name. */
   formatFileInfo(
     file: { filename: string | null | undefined; type: string; size: number },
@@ -93,16 +123,27 @@ export type UploadService = Omit<
   findOne(
     id: Parameters<UploadServiceImplementation['findOne']>[0],
     populate?: queryParams.Params['populate']
-  ): ReturnType<UploadServiceImplementation['findOne']>;
-  /** The matching files. `pagination` is ignored: pass flat `start` and `limit` to page. */
-  findMany(query?: FilesQuery): ReturnType<UploadServiceImplementation['findMany']>;
-  /** A page of the matching files, from flat `page` and `pageSize`. */
-  findPage(query?: queryParams.Params): ReturnType<UploadServiceImplementation['findPage']>;
+  ): Promise<File | null>;
+  /**
+   * The matching files. `pagination` is ignored: pass flat `start` and `limit` to page. With
+   * `fields`, a file has only the selected fields, its `id` and its `documentId`.
+   */
+  findMany(query?: FilesQuery): Promise<File[]>;
+  /**
+   * A page of the matching files, from flat `page` and `pageSize`. With `fields`, a file has only
+   * the selected fields, its `id` and its `documentId`.
+   */
+  findPage(
+    query?: queryParams.Params
+  ): Promise<FilesPage<ReturnType<UploadServiceImplementation['findPage']>>>;
   /**
    * A page of the matching files, from the nested `pagination` and the `api.rest` limits. Without
-   * the count, `pagination` has no `total` or `pageCount`.
+   * the count, `pagination` has no `total` or `pageCount`. With `fields`, a file has only the
+   * selected fields, its `id` and its `documentId`.
    */
-  findAndCountPage(query?: FilesQuery): ReturnType<UploadServiceImplementation['findAndCountPage']>;
+  findAndCountPage(
+    query?: FilesQuery
+  ): Promise<FilesPage<ReturnType<UploadServiceImplementation['findAndCountPage']>>>;
 };
 
 type MetricsServiceImplementation = ReturnType<typeof metrics>;
@@ -243,13 +284,53 @@ export type APIUploadFolderService = Omit<
 type FileServiceImplementation = typeof file;
 
 /** The registered `file` service: file paths, URL signing and file deletion. */
-export type FileService = Omit<FileServiceImplementation, 'getFolderPath'> & {
+export type FileService = Omit<FileServiceImplementation, 'getFolderPath' | 'deleteByIds'> & {
   /**
    * The path of the folder with this ID, or `/` without one. Rejects when no folder has this ID.
    *
    * @internal
    */
   getFolderPath(folderId?: number | null): Promise<string>;
+  /**
+   * Deletes the files with these IDs, from the provider too.
+   *
+   * @returns the deleted file rows, without their relations.
+   * @internal
+   */
+  deleteByIds(ids?: number[]): Promise<File[]>;
+};
+
+type ProviderServiceImplementation = ReturnType<typeof provider>;
+
+/**
+ * One entry of a file's `formats` (`thumbnail`, `small`, `medium`, `large`): a resized copy of the
+ * image, stored on the file row. It has no ID of its own.
+ */
+export type FileFormat = {
+  name: string;
+  hash: string;
+  ext: string;
+  mime: string;
+  /** The `path` sent with the upload, or null without one */
+  path: string | null;
+  width: number;
+  height: number;
+  /** In kilobytes */
+  size: number;
+  sizeInBytes: number;
+  url: string;
+};
+
+/** The registered `provider` service: sends files to the configured upload provider. */
+export type ProviderService = Omit<ProviderServiceImplementation, 'replace'> & {
+  /**
+   * Replaces the old file with the new one at the provider. A provider without `replace` gets a
+   * delete of the old file, then an upload of the new one. The old file is a file row, or one of
+   * its formats when an image format is replaced.
+   *
+   * @internal
+   */
+  replace(newFile: UploadableFile, oldFile: File | FileFormat): Promise<void>;
 };
 
 /**
@@ -268,7 +349,7 @@ export type UploadConfig = Omit<Config, 'providerOptions'> & {
 export type Services = {
   upload: UploadService;
   'image-manipulation': typeof imageManipulation;
-  provider: ReturnType<typeof provider>;
+  provider: ProviderService;
   folder: FolderService;
   file: FileService;
   weeklyMetrics: ReturnType<typeof weeklyMetrics>;

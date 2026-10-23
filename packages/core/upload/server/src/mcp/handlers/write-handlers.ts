@@ -19,6 +19,10 @@ import {
 } from './constants';
 import { ok } from '../utils';
 
+// TODO @Nico `sanitizeMediaAsset` takes a `Record<string, unknown>`, which the `File` interface is
+// not assignable to (no index signature). Widening its parameter to `File` changes its declaration.
+type RawMediaAsset = Parameters<typeof sanitizeMediaAsset>[0];
+
 // Type-level only: the MCP SDK validates `args` against the tool's strict Zod input schema
 // before the handler runs, so unknown keys never reach here.
 type MediaUpdateAssetArgs = {
@@ -122,7 +126,7 @@ export const createMediaUpdateAssetHandler =
 
     const updated = await getService('upload', strapi).findOne(id, ['folder']);
 
-    return ok({ data: sanitizeMediaAsset(updated ?? written) });
+    return ok({ data: sanitizeMediaAsset((updated ?? written) as unknown as RawMediaAsset) });
   };
 
 /**
@@ -339,7 +343,7 @@ export const createMediaDeleteAssetsHandler =
       // The preview stops here: the asset resolved and this token may delete it, which is
       // everything the agent needs to confirm — reported in the same shape the real run uses.
       if (dryRun) {
-        deleted.push(sanitizeMediaAsset(file));
+        deleted.push(sanitizeMediaAsset(file as unknown as RawMediaAsset));
         continue;
       }
 
@@ -348,7 +352,7 @@ export const createMediaDeleteAssetsHandler =
 
         // Reported from the row read before the delete: the asset no longer exists, so this is
         // the only description of it the agent will ever get.
-        deleted.push(sanitizeMediaAsset(file));
+        deleted.push(sanitizeMediaAsset(file as unknown as RawMediaAsset));
       } catch (error) {
         /**
          * A failed removal is reported against its own id rather than thrown, for the reason
