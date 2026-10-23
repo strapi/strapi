@@ -1,13 +1,16 @@
-import type { Core } from '@strapi/strapi';
+import type { Core, Struct } from '@strapi/strapi';
 import type {
   ApiHandlerService,
   BuilderService,
   ComponentCategoriesService,
+  ComponentHandler,
+  ComponentsService,
   ContentStructureService,
   ContentTypeHandler,
   ContentTypesService,
   Controllers,
   SchemaController,
+  SchemaService,
 } from '@strapi/content-type-builder/strapi-server';
 
 declare const app: Core.Strapi;
@@ -63,6 +66,26 @@ app
 contentTypes.createContentType({
   // @ts-expect-error A content type payload sends its attributes.
   contentType: { displayName: 'Tag', singularName: 'tag', pluralName: 'tags' },
+});
+
+const components = app.plugin('content-type-builder').service('components');
+components satisfies ComponentsService;
+components.createComponent({
+  component: { category: 'shared', displayName: 'Seo', attributes: { title: { type: 'string' } } },
+}) satisfies Promise<ComponentHandler>;
+declare const seo: Struct.ComponentSchema;
+app.service('plugin::content-type-builder.components').formatComponent(seo).schema
+  .description satisfies string;
+// @ts-expect-error An update sends the builder payload, with the `info` fields at the top level.
+components.editComponent('shared.seo', { component: seo });
+
+const schema = app.service('plugin::content-type-builder.schema');
+schema satisfies SchemaService;
+schema.renameAttribute('api::article.article', 'title', 'heading') satisfies Promise<void>;
+app.eventHub.on('component.delete', ({ component }) => {
+  component.category satisfies string | undefined;
+  // @ts-expect-error Event payloads have no handler methods.
+  component.rollback();
 });
 
 app.plugin('content-type-builder').controller('content-types').getContentType(context, next);

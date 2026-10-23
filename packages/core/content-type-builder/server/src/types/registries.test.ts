@@ -1,9 +1,9 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
-import type { Core, Schema, Struct } from '@strapi/types';
+import type { Core, Modules, Schema, Struct, UID } from '@strapi/types';
 import { getService } from '../utils';
 import isDevelopmentMode from '../middlewares/is-development-mode';
 import type { Controllers } from './controllers';
-import type { ContentTypeHandler } from './services';
+import type { ComponentHandler, ContentTypeHandler } from './services';
 
 declare const context: Parameters<Core.ControllerHandler>[0];
 declare const next: Parameters<Core.ControllerHandler>[1];
@@ -132,6 +132,88 @@ contentTypes.generateAPI({
   kind: 'component',
 });
 contentTypes.getRestrictRelationsTo(loaded) satisfies string[] | null;
+
+const components = getService('components');
+declare const loadedComponent: Struct.ComponentSchema;
+const formattedComponent = components.formatComponent(loadedComponent);
+formattedComponent.uid satisfies UID.Component;
+formattedComponent.schema.description satisfies string;
+Object.values(formattedComponent.schema.attributes).forEach((formattedAttribute) => {
+  formattedAttribute.type satisfies string;
+});
+// @ts-expect-error Formatted components are read from a loaded schema.
+components.formatComponent({ uid: 'shared.seo' });
+
+const createdComponent = components.createComponent({
+  component: {
+    category: 'shared',
+    displayName: 'Seo',
+    icon: 'search',
+    attributes: { title: { type: 'string' }, meta: { type: 'component', component: 'tmp.meta' } },
+  },
+  components: [{ tmpUID: 'tmp.meta', category: 'shared', displayName: 'Meta', attributes: {} }],
+});
+createdComponent satisfies Promise<ComponentHandler>;
+createdComponent.then((handler) => {
+  handler.uid satisfies UID.Component;
+  handler.category satisfies string | undefined;
+  handler.schema.info.displayName satisfies string;
+  // @ts-expect-error Mutation results have no handler methods.
+  handler.setUID('shared.other');
+});
+components.createComponent({
+  // @ts-expect-error A component payload sends its category.
+  component: { displayName: 'Seo', attributes: {} },
+});
+components.editComponent('shared.seo', {
+  component: { category: 'shared', displayName: 'Seo', attributes: {} },
+  components: undefined,
+}) satisfies Promise<ComponentHandler>;
+// @ts-expect-error An update sends the builder payload, with the `info` fields at the top level.
+components.editComponent('shared.seo', { component: loadedComponent });
+components.deleteComponent('shared.seo') satisfies Promise<ComponentHandler>;
+
+const schemaService = strapi.plugin('content-type-builder').service('schema');
+schemaService.getSchema().then((schema) => {
+  Object.values(schema.contentTypes).forEach((contentType) => {
+    contentType.visible satisfies boolean;
+    contentType.restrictRelationsTo satisfies string[] | null;
+    contentType.attributes.forEach(
+      (formattedAttribute) => formattedAttribute.name satisfies string
+    );
+  });
+  Object.values(schema.components).forEach((component) => component.category satisfies string);
+  schema.contentStructure satisfies Modules.ContentStructure.ContentStructureFile | null;
+  // @ts-expect-error The schema has no content structure until one is written.
+  schema.contentStructure satisfies Modules.ContentStructure.ContentStructureFile;
+});
+const formattedAttribute = schemaService.formatAttribute(attribute);
+if (formattedAttribute.type === 'relation') {
+  formattedAttribute.targetAttribute satisfies string | null;
+  // @ts-expect-error A one-way relation has no target attribute.
+  formattedAttribute.targetAttribute satisfies string;
+}
+schemaService.updateSchema({
+  components: [],
+  contentTypes: [{ action: 'delete', uid: 'api::article.article' }],
+}) satisfies Promise<void>;
+schemaService.updateSchema({
+  components: [],
+  // @ts-expect-error Each schema change names its action.
+  contentTypes: [{ uid: 'api::article.article' }],
+});
+schemaService.renameAttribute('api::article.article', 'title', 'heading') satisfies Promise<void>;
+// @ts-expect-error The old and new attribute names are separate arguments.
+schemaService.renameAttribute('api::article.article', { title: 'heading' });
+
+strapi.eventHub.on('component.update', ({ component }) => {
+  component.uid satisfies UID.Component;
+  // @ts-expect-error Event payloads have no handler methods.
+  component.flush();
+});
+strapi.eventHub.on('content-type.delete', ({ contentType }) => {
+  contentType.kind satisfies Struct.ContentTypeKind;
+});
 
 strapi.controller('plugin::content-type-builder.content-types').getContentTypes(context, next);
 strapi.plugin('content-type-builder').controller('schema').getUpdateSchemaStatus(context, next);
