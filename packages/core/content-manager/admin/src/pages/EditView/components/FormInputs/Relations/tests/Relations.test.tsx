@@ -286,6 +286,50 @@ describe('Relations', () => {
       );
     });
 
+    it('only lets a single relation be replaced once its saved relation is loaded', async () => {
+      let respond: () => void = () => {};
+      const isAnswered = new Promise<void>((resolve) => {
+        respond = resolve;
+      });
+
+      server.use(
+        http.get('/content-manager/relations/:model/:id/:fieldName', async () => {
+          await isAnswered;
+
+          return HttpResponse.json({
+            results: [{ id: 1, documentId: 'abc', name: 'Relation entity 1', status: 'draft' }],
+            pagination: { page: 1, pageCount: 1, pageSize: 5, total: 1 },
+          });
+        })
+      );
+
+      const { user } = render({
+        attribute: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: 'api::category.category',
+          // @ts-expect-error – this is what the API returns
+          targetModel: 'api::category.category',
+          relationType: 'manyToOne',
+        },
+        initialValues: { relations: { connect: [], disconnect: [] } },
+      });
+
+      // The saved relation isn't known yet: picking an entry couldn't disconnect it
+      expect(await screen.findByRole('combobox')).toBeDisabled();
+
+      respond();
+
+      await screen.findByRole('button', { name: 'Relation entity 1' });
+      await waitFor(() => expect(screen.getByRole('combobox')).toBeEnabled());
+
+      await user.click(screen.getByRole('combobox'));
+      await user.click(await screen.findByRole('option', { name: /Relation entity 2/ }));
+
+      expect(await screen.findByRole('button', { name: 'Relation entity 2' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Relation entity 1' })).not.toBeInTheDocument();
+    });
+
     it('only searches for options once the combobox is opened', async () => {
       const { user } = render({});
 

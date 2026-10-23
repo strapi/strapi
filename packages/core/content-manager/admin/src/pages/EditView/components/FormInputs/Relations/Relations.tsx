@@ -262,6 +262,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       }
     );
 
+    /**
+     * Choosing a new entry for a single relation replaces the saved one, which `handleConnect`
+     * can only disconnect once it is loaded. Until then, the combobox stays disabled.
+     */
+    const shouldLoadSavedRelations = Boolean(id) && isRelatedToCurrentDocument;
+    const isWaitingForSavedRelation =
+      ONE_WAY_RELATIONS.has(props.attribute.relation) && shouldLoadSavedRelations && !data;
+
     const handleLoadMore = () => {
       /**
        * The relations cache is shared by every instance of this field that targets the same
@@ -411,7 +419,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       >
         <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
           <MemoizedRelationsComboboxInput
-            disabled={isDisabled}
+            disabled={isDisabled || isWaitingForSavedRelation}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
             id={id}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
