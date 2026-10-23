@@ -139,7 +139,10 @@ describe('Search query', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.beds = await builder.sanitizedFixturesFor(bedModel.singularName, strapi);
+    // The list doesn't return rich text fields, it can't display them
+    data.beds = (await builder.sanitizedFixturesFor(bedModel.singularName, strapi)).map((bed) =>
+      omit(bed, ['description'])
+    );
   });
 
   afterAll(async () => {

@@ -125,4 +125,19 @@ interface ListFieldLayout {
 }
 ```
 
-The `cellFormatter` property is paramount to plugin developers being able to inject their own columns, because we, most likely, will not have the components necessary to render the data the plugin provides. This is why they receive the data for the entire row & the header that they injected via the `'Admin/CM/pages/ListView/inject-column-in-table'` hook.
+The `cellFormatter` property is paramount to plugin developers being able to inject their own columns, because we, most likely, will not have the components necessary to render the data the plugin provides. This is why they receive the row returned by the list endpoint & the header that they injected via the `'Admin/CM/pages/ListView/inject-column-in-table'` hook.
+
+#### Row data
+
+The list endpoint (`GET /content-manager/collection-types/:model`, the `find` action of the [`collection-types` controller](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/controllers/collection-types.ts)) only returns what a list column can display. Any listable attribute can become a column from the "View settings" menu without a new request, so the response covers every listable attribute, not only the displayed columns:
+
+- Scalar fields, except the visible `richtext`, `blocks`, `json` and `password` attributes, which can't be list columns. Non-visible scalars (`locale`, `publishedAt`, fields added by plugins) are kept.
+- Components and media, one level deep.
+- To-many relations as a count (`{ count }`).
+- Visible to-one relations with the `documentId` and the main field of their target only. The main field is the relation's `mainField` from the content-type configuration.
+- Non-visible relations (`createdBy`, `updatedBy`, review workflow stage and assignee) as before, and `localizations` with `locale`, `documentId`, `publishedAt` and `updatedAt`.
+- No dynamic zones.
+
+`getFieldsForListView` and `getPopulateOverridesForListView` in [`services/utils/populate.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/services/utils/populate.ts) build the fields and the populate.
+
+A plugin `cellFormatter` that needs another value (a rich text field, a dynamic zone, another field of a related entry) has to fetch it, for example with the document's `findOne`.
