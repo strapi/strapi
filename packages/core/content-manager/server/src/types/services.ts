@@ -1,5 +1,6 @@
 import type { Ability } from '@casl/ability';
-import type { Modules, Struct, UID } from '@strapi/types';
+import type { Modules, Schema, Struct, UID } from '@strapi/types';
+import type { ComponentConfiguration } from '../../../shared/contracts/components';
 import type { Configuration } from '../../../shared/contracts/content-types';
 import type { DocumentManagerService as DocumentManagerFactory } from '../services/document-manager';
 import type createDocumentMetadata from '../services/document-metadata';
@@ -163,13 +164,31 @@ export type PermissionCheckerService = {
   create(options: { userAbility: Ability; model: string }): PermissionChecker;
 };
 
-/** A content type or component as the Content Manager models it. */
+/**
+ * A model attribute as the Content Manager lists it. Relations also carry their target as
+ * `targetModel` and their kind as `relationType`.
+ */
+export type ContentManagerAttribute = Schema.Attribute.AnyAttribute & {
+  targetModel?: UID.ContentType;
+  relationType?: Schema.Attribute.RelationKind.Any;
+};
+
+/**
+ * A content type or component as the Content Manager models it. Its attributes are the visible
+ * ones, timestamps and creator fields, plus `id` and `documentId`; morph relations are left out.
+ */
 export type ContentManagerModel<TModel extends Struct.ComponentSchema | Struct.ContentTypeSchema> =
   TModel & {
     apiID: string;
     isDisplayed: boolean;
-    attributes: Record<string, any>;
+    attributes: Record<string, ContentManagerAttribute>;
   };
+
+/** A content type's edit and list view configuration, with its UID. */
+export type ContentTypeConfiguration = Configuration & { uid: UID.ContentType };
+
+/** A component's edit and list view configuration, with its UID and category. */
+export type ComponentModelConfiguration = ComponentConfiguration & { uid: UID.Component };
 
 type ComponentsImplementation = ReturnType<typeof createComponentsService>;
 
@@ -179,22 +198,44 @@ type ComponentsImplementation = ReturnType<typeof createComponentsService>;
  */
 export type ComponentsService = Omit<
   ComponentsImplementation,
-  'findAllComponents' | 'findComponent' | 'findComponentsConfigurations'
+  | 'findAllComponents'
+  | 'findComponent'
+  | 'findComponentsConfigurations'
+  | 'findConfiguration'
+  | 'updateConfiguration'
 > & {
   findAllComponents(): ContentManagerModel<Struct.ComponentSchema>[];
+  /** @internal */
   findComponent(uid: UID.Component): ContentManagerModel<Struct.ComponentSchema> | undefined;
-  /** Content types and components both hold component attributes. */
+  /**
+   * Content types and components both hold component attributes.
+   *
+   * @internal
+   */
   findComponentsConfigurations(
     model: Struct.ComponentSchema | Struct.ContentTypeSchema
   ): ReturnType<ComponentsImplementation['findComponentsConfigurations']>;
+  /** @internal */
+  findConfiguration(
+    component: Pick<Struct.ComponentSchema, 'uid' | 'category'>
+  ): Promise<ComponentModelConfiguration>;
+  /**
+   * Each top-level key of the update replaces the stored one: a partial `settings` drops the
+   * settings it leaves out.
+   *
+   * @internal
+   */
+  updateConfiguration(
+    component: Pick<Struct.ComponentSchema, 'uid' | 'category'>,
+    newConfiguration: ConfigurationUpdate
+  ): Promise<ComponentModelConfiguration>;
 };
 
 type ContentTypesImplementation = ReturnType<typeof createContentTypesService>;
 
 /**
  * Content type models and their edit and list view configurations. Configurations are read and
- * written by UID alone, and updates may be partial: the store merges them. The implementation
- * keeps its published develop parameter types.
+ * written by UID alone. The implementation keeps its published develop parameter types.
  */
 export type ContentTypesService = Omit<
   ContentTypesImplementation,
@@ -205,19 +246,31 @@ export type ContentTypesService = Omit<
   | 'findConfiguration'
   | 'updateConfiguration'
 > & {
+  /** @internal */
   findAllContentTypes(): ContentManagerModel<Struct.ContentTypeSchema>[];
+  /** @internal */
   findContentType(uid: UID.ContentType): ContentManagerModel<Struct.ContentTypeSchema> | undefined;
+  /** @internal */
   findDisplayedContentTypes(): ContentManagerModel<Struct.ContentTypeSchema>[];
-  findContentTypesByKind(kind: {
-    kind: Struct.ContentTypeKind | undefined;
-  }): ContentManagerModel<Struct.ContentTypeSchema>[];
+  /**
+   * Without a kind, every content type.
+   *
+   * @internal
+   */
+  findContentTypesByKind(
+    kind?: Struct.ContentTypeKind | null
+  ): ContentManagerModel<Struct.ContentTypeSchema>[];
   findConfiguration(
     contentType: Pick<Struct.ContentTypeSchema, 'uid'>
-  ): ReturnType<ContentTypesImplementation['findConfiguration']>;
+  ): Promise<ContentTypeConfiguration>;
+  /**
+   * Each top-level key of the update replaces the stored one: a partial `settings` drops the
+   * settings it leaves out, so pass complete `settings`.
+   */
   updateConfiguration(
     contentType: Pick<Struct.ContentTypeSchema, 'uid'>,
     newConfiguration: Partial<ConfigurationUpdate>
-  ): ReturnType<ContentTypesImplementation['updateConfiguration']>;
+  ): Promise<ContentTypeConfiguration>;
 };
 
 /**
@@ -228,6 +281,7 @@ export type DataMapperService = Omit<
   ReturnType<typeof createDataMapperService>,
   'toContentManagerModel'
 > & {
+  /** @internal */
   toContentManagerModel<TModel extends Struct.ComponentSchema | Struct.ContentTypeSchema>(
     model: TModel
   ): ContentManagerModel<TModel>;

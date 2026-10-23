@@ -35,6 +35,7 @@ export default () => ({
     };
   },
 
+  /** @internal */
   toDto: <T extends object>(model: T) => pick(model, dtoFields),
 });
 
