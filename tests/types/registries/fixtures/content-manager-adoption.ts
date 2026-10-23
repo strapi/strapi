@@ -115,6 +115,16 @@ builder.populateDeep('all');
 // @ts-expect-error Registered builders have no arbitrary chain methods.
 builder.missing();
 
+const versions = app
+  .service('plugin::content-manager.history')
+  ?.findVersionsPage({ query: { contentType: 'api::article.article' }, state: { userAbility: {} } })
+  .then((page) => page.results);
+versions satisfies Promise<Services.HistoryVersionResult[]> | undefined;
+const versionTitles = versions?.then((results) => results.map(({ data: { title } }) => title));
+// @ts-expect-error Version values are `unknown`, not `any`.
+versionTitles satisfies Promise<string[]> | undefined;
+app.plugin('content-manager').service('lifecycles')?.destroy() satisfies Promise<void> | undefined;
+
 app.plugin('content-manager').controller('collection-types')
   .findOne satisfies Core.ControllerHandler;
 app.controller('plugin::content-manager.components')
