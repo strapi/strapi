@@ -9,33 +9,28 @@ import {
 
 import { CoreService } from './core-service';
 
+/**
+ * @internal Exported so apps can extend it. Not a stable API yet: it may change in a minor release.
+ */
 export class CollectionTypeService
-  extends CoreService
+  extends CoreService<Struct.CollectionTypeSchema>
   implements Core.CoreAPI.Service.CollectionType
 {
-  private contentType: Struct.CollectionTypeSchema;
-
-  constructor(contentType: Struct.CollectionTypeSchema) {
-    super();
-
-    this.contentType = contentType;
-  }
-
   async find(params = {}) {
     const { uid } = this.contentType;
 
     const fetchParams = this.getFetchParams(params);
 
-    const paginationInfo = getPaginationInfo(fetchParams);
+    const paginationInfo = getPaginationInfo(this.strapi, fetchParams);
     const isPaged = isPagedPagination(fetchParams.pagination);
 
-    const results = await strapi.documents(uid).findMany({
+    const results = await this.strapi.documents(uid).findMany({
       ...fetchParams,
       ...paginationInfo,
     });
 
-    if (shouldCount(fetchParams)) {
-      const count = await strapi.documents(uid).count({ ...fetchParams, ...paginationInfo });
+    if (shouldCount(this.strapi, fetchParams)) {
+      const count = await this.strapi.documents(uid).count({ ...fetchParams, ...paginationInfo });
 
       if (typeof count !== 'number') {
         throw new Error('Count should be a number');
@@ -56,7 +51,7 @@ export class CollectionTypeService
   findOne(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).findOne({
+    return this.strapi.documents(uid).findOne({
       ...this.getFetchParams(params),
       documentId,
     });
@@ -65,13 +60,13 @@ export class CollectionTypeService
   async create(params = { data: {} }) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).create(this.getFetchParams(params));
+    return this.strapi.documents(uid).create(this.getFetchParams(params));
   }
 
   update(documentId: Modules.Documents.ID, params = { data: {} }) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).update({
+    return this.strapi.documents(uid).update({
       ...this.getFetchParams(params),
       documentId,
     });
@@ -80,7 +75,7 @@ export class CollectionTypeService
   async delete(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    const { entries } = await strapi.documents(uid).delete({
+    const { entries } = await this.strapi.documents(uid).delete({
       ...this.getFetchParams(params),
       documentId,
     });
@@ -88,16 +83,3 @@ export class CollectionTypeService
     return { deletedEntries: entries.length };
   }
 }
-
-/**
- *
- * Returns a collection type service to handle default core-api actions
- */
-
-const createCollectionTypeService = (
-  contentType: Struct.CollectionTypeSchema
-): Core.CoreAPI.Service.CollectionType => {
-  return new CollectionTypeService(contentType);
-};
-
-export { createCollectionTypeService };
