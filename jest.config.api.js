@@ -33,10 +33,7 @@ module.exports = {
     '<rootDir>/coverage/',
   ],
   transform: {
-    'node_modules/(stream-json|stream-chain)/.*\\.js$': ['@swc/jest'],
     '^.+\\.ts$': ['@swc/jest'],
   },
-  // stream-json 3 and stream-chain 4 are ESM-only. Jest 29 does not native-load them.
-  transformIgnorePatterns: ['/node_modules/(?!(stream-json|stream-chain)/)', '\\.pnp\\.[^\\/]+$'],
   modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
 };
