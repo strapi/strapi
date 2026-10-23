@@ -659,4 +659,4 @@ const BlocksContent = ({
   );
 };
 
-export { BlocksContent, BlocksContentProps };
+export { BlocksContent, type BlocksContentProps };
