@@ -68,10 +68,10 @@
   "scripts": {
     "build": "run -T run-p build:code build:types",
     "build:code": "run -T  rollup -c",
-    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:types": "run -T tsc -p tsconfig.build.json",
     "watch": "run -T run-p watch:code watch:types",
     "watch:code": "run -T rollup -c -w",
-    "watch:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly -w",
+    "watch:types": "run -T tsc -p tsconfig.build.json -w",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc -p tsconfig.json"

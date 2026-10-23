@@ -3,8 +3,10 @@
   "compilerOptions": {
     "rootDir": "../",
     "outDir": "../dist",
+    "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo",
     "noEmit": false
   },
-  "include": ["src", "../shared"],
+  "include": ["src"],
+  "references": [{ "path": "../shared/tsconfig.build.json" }],
   "exclude": ["**/*.test.*"]
 }

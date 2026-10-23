@@ -4,8 +4,10 @@
     "rootDir": "../",
     "outDir": "../dist",
     "noEmit": false,
+    "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo",
     "types": ["@testing-library/jest-dom", "jest", "vite/client", "@strapi/types/globals-admin"]
   },
-  "include": ["./src", "../shared"],
+  "include": ["./src"],
+  "references": [{ "path": "../shared/tsconfig.build.json" }],
   "exclude": ["**/__mocks__", "**/*.test.*"]
 }
