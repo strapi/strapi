@@ -231,6 +231,11 @@ export const createCollectionCreateHandler =
       throw new errors.ForbiddenError();
     }
 
+    const permissionQuery = await permissionChecker.sanitizedQuery.create({ locale });
+    const populate = await getService('populate-builder')(uid)
+      .populateFromQuery(permissionQuery)
+      .build();
+
     const sanitizedData = setCreatorFields({ user })(
       await permissionChecker.sanitizeCreateInput(data)
     ) as Record<string, unknown>;
@@ -242,6 +247,7 @@ export const createCollectionCreateHandler =
         data: sanitizedData,
         locale: resolvedLocale,
         status,
+        populate,
       });
 
       return sanitizeFormatShape(permissionChecker, uid, document, {
@@ -318,7 +324,7 @@ export const createCollectionUpdateHandler =
       const updatedDocument = await documentManager.update(
         documentVersion?.documentId ?? documentId,
         uid,
-        { data: sanitizedData, locale: resolvedLocale }
+        { data: sanitizedData, locale: resolvedLocale, populate }
       );
 
       return sanitizeFormatShape(permissionChecker, uid, updatedDocument);
@@ -405,6 +411,11 @@ export const createCollectionPublishHandler =
       throw new errors.ForbiddenError();
     }
 
+    const permissionQuery = await permissionChecker.sanitizedQuery.publish({ locale });
+    const populate = await getService('populate-builder')(uid)
+      .populateFromQuery(permissionQuery)
+      .build();
+
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const publishedDocument = await strapi.db.transaction(async () => {
@@ -428,6 +439,7 @@ export const createCollectionPublishHandler =
 
       const publishResult = await documentManager.publish(document.documentId, uid, {
         locale: resolvedLocale,
+        populate,
       });
 
       if (!publishResult || publishResult.length === 0) {
@@ -499,7 +511,10 @@ export const createCollectionUnpublishHandler =
         await documentManager.discardDraft(document.documentId, uid, { locale: resolvedLocale });
       }
 
-      return documentManager.unpublish(document.documentId, uid, { locale: resolvedLocale });
+      return documentManager.unpublish(document.documentId, uid, {
+        locale: resolvedLocale,
+        populate,
+      });
     });
 
     const result = await sanitizeFormatShape(permissionChecker, uid, unpublishedDocument);
@@ -551,7 +566,8 @@ export const createCollectionDiscardDraftHandler =
     }
 
     const discardedDocument = await asyncPipe.pipe(
-      (doc: any) => documentManager.discardDraft(doc.documentId, uid, { locale: resolvedLocale }),
+      (doc: any) =>
+        documentManager.discardDraft(doc.documentId, uid, { locale: resolvedLocale, populate }),
       (doc: unknown) => sanitizeFormatShape(permissionChecker, uid, doc)
     )(document);
 
