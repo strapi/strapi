@@ -8,7 +8,7 @@ export interface MediaProperties<
   TKind extends MediaKind | undefined = undefined,
   TMultiple extends Constants.BooleanValue = Constants.False,
 > {
-  allowedTypes?: TKind | TKind[];
+  allowedTypes?: TKind | readonly TKind[];
   multiple?: TMultiple;
 }
 

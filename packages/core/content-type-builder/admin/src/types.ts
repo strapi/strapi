@@ -81,7 +81,7 @@ export type AnyAttribute = Base &
     | Schema.Attribute.DateTime
     | Schema.Attribute.Date
     | Schema.Attribute.Decimal
-    | Schema.Attribute.DynamicZone
+    | Schema.Attribute.DynamicZone<UID.Component[]>
     | Schema.Attribute.Email
     | Schema.Attribute.Enumeration<string[]>
     | Schema.Attribute.Float
