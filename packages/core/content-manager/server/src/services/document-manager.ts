@@ -181,6 +181,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return { count: deletedEntries.length };
     },
 
+    // TODO @Nico without draft and publish, the document service has no `publish`: this throws a
+    // TypeError, which the single type publish route answers with HTTP 500.
     /** @internal */
     async publish(
       id: Modules.Documents.ID,
@@ -237,6 +239,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return { count: unpublishedEntitiesCount };
     },
 
+    // TODO @Nico without draft and publish, the document service has no `unpublish`: this throws a
+    // TypeError, which the single type unpublish route answers with HTTP 500.
     /** @internal */
     async unpublish(
       id: Modules.Documents.ID,
@@ -254,6 +258,8 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         .then((result) => result?.entries.at(0));
     },
 
+    // TODO @Nico without draft and publish, the document service has no `discardDraft`: this throws
+    // a TypeError, which the single type discard route answers with HTTP 500.
     /** @internal */
     async discardDraft(
       id: Modules.Documents.ID,
