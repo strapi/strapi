@@ -168,6 +168,8 @@ export default {
     }
 
     const sourceUid = model;
+    // TODO @Nico A morph-to field (`morphToOne`, `morphToMany`) has no `target`: it passes the check
+    // above, and the request then fails on the undefined target model instead of a validation error.
     const targetUid = attribute.target;
 
     const { locale, isSourceLocalized, isTargetLocalized } = validateLocale(
@@ -185,6 +187,9 @@ export default {
     const isComponent = sourceSchema.modelType === 'component';
     if (!isComponent) {
       if (permissionChecker.cannot.read(null, targetField)) {
+        // TODO @Nico `ctx.forbidden()` sets the 403 body and returns nothing, so this resolves
+        // `undefined`: `findAvailable` and `findExisting` then fail destructuring it, and the request
+        // answers 500 instead of 403.
         return ctx.forbidden();
       }
     }
