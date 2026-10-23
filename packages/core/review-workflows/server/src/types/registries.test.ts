@@ -1,6 +1,7 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
+import type { DocumentServiceMiddlewaresService, ValidationService } from './services';
 
 declare const context: Parameters<Core.ControllerHandler>[0];
 declare const next: Parameters<Core.ControllerHandler>[1];
@@ -50,3 +51,33 @@ strapi.plugin('review-workflows').controller('stages')?.missing(context, next);
   Core.RegisteredFor<Strapi.Registries.PackageControllers, 'plugin::review-workflows'>,
   'plugin::review-workflows'
 >;
+
+// Services only exist with the `review-workflows` feature.
+strapi.service('plugin::review-workflows.validation') satisfies ValidationService | undefined;
+strapi
+  .plugin('review-workflows')
+  .service('validation')
+  ?.validateWorkflowStages([{ name: 'Draft' }]);
+strapi.service('plugin::review-workflows.validation')?.validateWorkflowCountStages(1, 2);
+strapi.plugin('review-workflows').service('document-service-middlewares') satisfies
+  DocumentServiceMiddlewaresService | undefined;
+const middlewares = strapi.service('plugin::review-workflows.document-service-middlewares');
+if (middlewares !== undefined) {
+  strapi.documents.use(middlewares.checkStageBeforePublish);
+}
+// @ts-expect-error The service may be undefined.
+strapi.service('plugin::review-workflows.validation').validateWorkflowCount();
+const validationService = strapi.plugin('review-workflows').service('validation');
+// @ts-expect-error Stages are checked against the service contract.
+validationService?.validateWorkflowStages([{ title: 'Draft' }]);
+// @ts-expect-error Registered services have no arbitrary members.
+strapi.service('plugin::review-workflows.document-service-middlewares')?.missing();
+
+(() => ({
+  limits: { numberOfWorkflows: 1, stagesPerWorkflow: 1 },
+  register: () => undefined,
+  validateWorkflowStages: () => undefined,
+  validateWorkflowCountStages: () => Promise.resolve(),
+  // @ts-expect-error The factory is checked against the registered contract.
+  validateWorkflowCount: () => true,
+})) satisfies Core.ServiceFactory<'plugin::review-workflows.validation'>;
