@@ -190,3 +190,19 @@ requestInfo satisfies Promise<{ mainField: string }>;
 // History services only exist with the `cms-content-history` feature.
 // @ts-expect-error The service may be undefined.
 strapi.plugin('content-manager').service('history').findVersionsPage satisfies unknown;
+const history = strapi.service('plugin::content-manager.history');
+const versions = history
+  ?.findVersionsPage({ query: { contentType: 'api::article.article' }, state: { userAbility: {} } })
+  .then((page) => page.results);
+versions?.then((results) => results.map((version) => version.createdBy?.id)) satisfies
+  Promise<(number | undefined)[]> | undefined;
+versions?.then((results) => results.map((version) => version.data.documentId)) satisfies
+  Promise<string[]> | undefined;
+const versionTitles = versions?.then((results) => results.map((version) => version.data.title));
+// @ts-expect-error Version values are `unknown`, not `any`.
+versionTitles satisfies Promise<string[]> | undefined;
+// @ts-expect-error Versions are read without their components schemas.
+versions?.then((results) => results.map((version) => version.componentsSchemas));
+history?.restoreVersion('1') satisfies Promise<Modules.Documents.AnyDocument> | undefined;
+strapi.service('plugin::content-manager.lifecycles')?.bootstrap() satisfies
+  Promise<void> | undefined;
