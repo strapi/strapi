@@ -153,6 +153,28 @@ configuration.sort satisfies number;
 uploadService.setConfiguration({ pageSize: 10 }) satisfies Promise<void>;
 // @ts-expect-error The page size is stored.
 uploadService.setConfiguration({ sort: 'createdAt:DESC' });
+uploadService.findMany();
+uploadService.findMany({
+  filters: { mime: { $contains: 'image' } },
+  sort: ['name:asc'],
+  populate: { related: true },
+  fields: ['name', 'url'],
+  pagination: { page: '1', pageSize: '10' },
+});
+// @ts-expect-error A query is an object.
+uploadService.findMany('name:asc');
+uploadService.findPage({ _q: 'cover', page: '1', pageSize: '10', populate: { folder: true } });
+// @ts-expect-error `findPage` pages from flat `page` and `pageSize`.
+uploadService.findPage({ pagination: { page: 1 } });
+uploadService.findAndCountPage({ pagination: { start: '0', limit: '10', withCount: 'false' } });
+uploadService.findAndCountPage({ pagination: { page: 2, withCount: false } });
+// @ts-expect-error Pagination values are numbers or strings.
+uploadService.findAndCountPage({ pagination: { page: true } });
+uploadService.findOne(1, ['createdBy', 'folder']);
+uploadService.findOne('1', '*');
+uploadService.findOne(1, { related: { on: { 'api::writer.writer': true } } });
+// @ts-expect-error Populate is a field list or a populate object.
+uploadService.findOne(1, 1);
 
 strapi.controller('plugin::upload.admin-file').find(context, next);
 strapi.plugin('upload').controller('admin-file').generateAIMetadata(context, next);

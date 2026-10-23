@@ -13,6 +13,7 @@ app.plugin('upload').service('aiMetadataJobs').getJob('1').anything();
 app.plugin('upload').service('folder').getStructure(1).anything();
 app.service('plugin::upload.file').getFolderPath('1').anything();
 app.plugin('upload').service('upload').getSettings(1).anything();
+app.service('plugin::upload.upload').findPage({ pagination: true }).anything();
 app
   .plugin('upload')
   .controller('admin-upload')
