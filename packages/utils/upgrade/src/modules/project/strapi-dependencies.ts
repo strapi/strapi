@@ -34,6 +34,13 @@ export const isPinnedSemVer = (version: string): boolean => {
   return isLiteralSemVer(version) && semver.valid(version) === version;
 };
 
+const followsStrapiReleaseVersion = (name: string): boolean => {
+  return (
+    name.startsWith(constants.SCOPED_STRAPI_PACKAGE_PREFIX) &&
+    !constants.NON_LOCKSTEP_STRAPI_PACKAGE_NAMES.includes(name)
+  );
+};
+
 export const findUnpinnedStrapiDependencies = (
   dependencies: Record<string, string> | undefined,
   devDependencies: Record<string, string> | undefined
@@ -51,9 +58,7 @@ export const findUnpinnedStrapiDependencies = (
     }
 
     for (const [name, version] of Object.entries(deps)) {
-      const isScopedStrapiPackage = name.startsWith(constants.SCOPED_STRAPI_PACKAGE_PREFIX);
-
-      if (isScopedStrapiPackage && !isPinnedSemVer(version)) {
+      if (followsStrapiReleaseVersion(name) && !isPinnedSemVer(version)) {
         unpinned.push({ name, declaredVersion: version, section });
       }
     }
