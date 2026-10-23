@@ -83,7 +83,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
           props: Modules.Documents.AnyDocument,
           _: unknown,
           { model }: { model: UID.ContentType }
-        ) => <ReleaseListCell {...props} model={model} />,
+        ) => <ReleaseListCell documentId={props.documentId} model={model} />,
       },
     ],
     layout,
@@ -94,7 +94,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
  * ReleaseListCell
  * -----------------------------------------------------------------------------------------------*/
 
-interface ReleaseListCellProps extends Modules.Documents.AnyDocument {
+interface ReleaseListCellProps {
   documentId: Modules.Documents.ID;
   model: UID.ContentType;
 }

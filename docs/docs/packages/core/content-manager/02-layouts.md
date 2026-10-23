@@ -126,3 +126,5 @@ interface ListFieldLayout {
 ```
 
 The `cellFormatter` property is paramount to plugin developers being able to inject their own columns, because we, most likely, will not have the components necessary to render the data the plugin provides. This is why they receive the data for the entire row & the header that they injected via the `'Admin/CM/pages/ListView/inject-column-in-table'` hook.
+
+Pass the row fields your cell needs as explicit props. Do not spread the row into a component (`<MyCell {...row} />`): a content type can have attributes named `ref` or `key`, and React treats them as special props instead of passing them through.
