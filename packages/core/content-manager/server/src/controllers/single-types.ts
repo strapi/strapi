@@ -184,7 +184,8 @@ export default {
       }
     }
 
-    const deletedEntity = await documentManager.delete(documentLocales.at(0).documentId, model, {
+    // The length check above guarantees a first locale.
+    const deletedEntity = await documentManager.delete(documentLocales.at(0)!.documentId, model, {
       locale,
     });
 
