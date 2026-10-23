@@ -35,15 +35,15 @@ export interface File {
   /**
    * null for non-image files
    */
-  width?: number | null;
+  width: number | null;
   /**
    * null for non-image files
    */
-  height?: number | null;
+  height: number | null;
   /**
-   * null for non-image files
+   * null or `{}` when the file has no generated formats, e.g. non-image files
    */
-  formats?: Record<string, unknown> | null;
+  formats: Record<string, unknown> | null;
   hash: string;
   ext?: string;
   mime?: string;
@@ -56,7 +56,7 @@ export interface File {
   /**
    * Provider-dependent: null with the local provider
    */
-  previewUrl?: string | null;
+  previewUrl: string | null;
   /**
    * Set on files sent to the provider, never stored on the row
    */
@@ -65,7 +65,7 @@ export interface File {
   /**
    * Provider-dependent: null with the local provider
    */
-  provider_metadata?: Record<string, unknown> | null;
+  provider_metadata: Record<string, unknown> | null;
   isUrlSigned?: boolean;
   /**
    * Present only when populated
@@ -126,7 +126,23 @@ export interface Config {
   };
 }
 
-export interface UploadableFile extends Omit<File, 'id' | 'documentId' | 'folder' | 'related'> {
+export interface UploadableFile extends Omit<
+  File,
+  | 'id'
+  | 'documentId'
+  | 'folder'
+  | 'related'
+  | 'width'
+  | 'height'
+  | 'formats'
+  | 'previewUrl'
+  | 'provider_metadata'
+> {
+  width?: number | null;
+  height?: number | null;
+  formats?: Record<string, unknown> | null;
+  previewUrl?: string | null;
+  provider_metadata?: Record<string, unknown> | null;
   folder?: number | null;
   related?: {
     id: string | number;
