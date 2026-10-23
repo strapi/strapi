@@ -16,6 +16,14 @@ import workflowsContentTypesFactory, { type ContentTypeTransfer } from './workfl
 // `replaceStages` returns the input stages with their ids filled in, not full stage entities
 type ReplacedStage = Pick<Stage, 'id' | 'name'>;
 
+/**
+ * `plugin::content-releases.release-action`. Review workflows does not depend on content releases,
+ * so its registered contract is not loaded here.
+ */
+type ReleaseActionService = {
+  validateActionsByContentTypes(contentTypeUids: string[]): Promise<void>;
+};
+
 const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {
   const processedFilters = { ...filters };
 
@@ -132,6 +140,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           });
         }
 
+        // TODO @Nico `name` is `unique` in the schema, but the query engine does not enforce it:
+        // `create` and `update` accept a name that another workflow already has.
         // Create Workflow
         const createdWorkflow = await strapi.db
           .query(WORKFLOW_MODEL_UID)
@@ -142,7 +152,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (opts.data.stageRequiredToPublishName) {
           await strapi
             .plugin('content-releases')
-            .service('release-action')
+            .service<ReleaseActionService>('release-action')
             ?.validateActionsByContentTypes(opts.data.contentTypes);
         }
 
@@ -198,6 +208,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
 
         if (opts.data.stageRequiredToPublishName !== undefined) {
+          // TODO @Nico `updatedStages` starts as `[]`, so without `stages` in the data a name is
+          // searched in no stage and always rejected.
           const stages = updatedStages ?? workflow.stages;
 
           if (opts.data.stageRequiredToPublishName === null) {
@@ -242,7 +254,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         await strapi
           .plugin('content-releases')
-          .service('release-action')
+          .service<ReleaseActionService>('release-action')
           ?.validateActionsByContentTypes([
             ...workflow.contentTypes,
             ...(opts.data.contentTypes || []),
@@ -303,7 +315,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         await strapi
           .plugin('content-releases')
-          .service('release-action')
+          .service<ReleaseActionService>('release-action')
           ?.validateActionsByContentTypes(workflow.contentTypes);
 
         return deletedWorkflow;

@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import { objects, template } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 
 import type {
   EmailConfig,
@@ -27,6 +28,8 @@ const sendTemplatedEmail = (
   emailTemplate: EmailTemplate,
   data: EmailTemplateData
 ) => {
+  // TODO @Nico `EmailTemplate` declares `html` optional, but a template without an `html` key
+  // throws here.
   const attributes = ['subject', 'text', 'html'];
   const missingAttributes = _.difference(attributes, Object.keys(emailTemplate));
 
@@ -54,10 +57,10 @@ const sendTemplatedEmail = (
   return strapi.plugin('email').provider.send({ ...emailOptions, ...templatedAttributes });
 };
 
-const emailService = () => ({
+const emailService = (() => ({
   getProviderSettings,
   send,
   sendTemplatedEmail,
-});
+})) satisfies Core.ServiceFactory<'plugin::email.email'>;
 
 export default emailService;

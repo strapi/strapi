@@ -1,4 +1,5 @@
-import type { Plugin } from '@strapi/types';
+import type { Core, Plugin } from '@strapi/types';
+import type { RouteControllers } from '../../types/controllers';
 
 const info = { pluginName: 'content-manager', type: 'admin' };
 
@@ -24,6 +25,6 @@ const historyVersionRouter: Plugin.LoadedPlugin['routes'][string] = {
       },
     },
   ],
-};
+} satisfies Core.RouterInputFor<RouteControllers, 'plugin::content-manager'>;
 
 export { historyVersionRouter };

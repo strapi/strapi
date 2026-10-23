@@ -1,0 +1,84 @@
+import type { Core } from '@strapi/strapi';
+
+declare const app: Core.Strapi;
+
+// Loading all providers and application declarations must not turn the switch on.
+app.plugin('i18n').service('locales').anything();
+app.service('plugin::i18n.locales').anything();
+app.plugin('sentry').service('sentry').anything();
+strapi.plugin('sentry').service('sentry').anything();
+app.plugin('i18n').controller('locales').anything satisfies Core.ControllerHandler | undefined;
+app.controller('plugin::i18n.settings').anything satisfies Core.ControllerHandler | undefined;
+// Unregistered literal names keep the permissive signature without the switch.
+app.service('plugin::i18n.unregistered').anything();
+app.plugin('unregistered').service('greeting').anything();
+app.plugin('i18n').controller('unregistered').anything satisfies Core.ControllerHandler | undefined;
+
+// Dynamic names keep the permissive signature without the switch.
+declare const dynamicName: string;
+app.plugin(dynamicName).service('locales').anything();
+app.plugin('i18n').service(dynamicName).anything();
+
+const config = app.config.get('plugin::sentry');
+// @ts-expect-error Without an inferred generic, legacy config lookup returns unknown.
+config satisfies { dsn: string | null };
+const dsn = app.plugin('sentry').config('dsn');
+// @ts-expect-error Loaded provider contracts do not narrow the legacy unknown result.
+dsn satisfies string | null;
+const contextualConfig: number = app.config.get('plugin::sentry.dsn');
+const contextualPluginConfig: number = app.plugin('sentry').config('dsn');
+contextualConfig satisfies number;
+contextualPluginConfig satisfies number;
+app.config.get('plugin::sentry.sendMetadata', 'yes');
+app.plugin('sentry').config('sendMetadata', 'yes');
+// Defaults infer widening literals, as before registries, even for loaded provider contracts.
+let sendMetadata = app.config.get('plugin::sentry.sendMetadata', false);
+sendMetadata = true;
+let pluginSendMetadata = app.plugin('sentry').config('sendMetadata', false);
+pluginSendMetadata = true;
+[sendMetadata, pluginSendMetadata] satisfies unknown;
+
+({
+  policies: [
+    'global::unregistered',
+    'admin::hasPermissions',
+    { name: 'admin::hasPermissions', config: { actions: 'read' } },
+    { name: 'plugin::content-manager.hasPermissions', config: { hasAtLeastOne: 'yes' } },
+  ],
+}) satisfies Core.RouteConfigFor;
+// @ts-expect-error Full UID lookups take no type argument without the switch, as on develop.
+app.service<{ greet(): string }>('plugin::i18n.unregistered');
+
+// Plural accessors keep the legacy records without the switch, including `undefined` under
+// `noUncheckedIndexedAccess` for registered keys.
+app.services['plugin::i18n.locales']?.anything();
+app.plugin('i18n').services.locales?.anything();
+app.plugins.i18n?.services.locales?.anything();
+app.controllers['plugin::i18n.locales']?.anything satisfies Core.ControllerHandler | undefined;
+// @ts-expect-error Registered keys are not narrowed without the switch.
+app.services['plugin::i18n.locales'].anything();
+const pluralServices: Record<string, Core.Service> = app.services;
+const legacyPluralServices: typeof app.services = pluralServices;
+legacyPluralServices satisfies Record<string, Core.Service>;
+
+// Policy and API module lookups keep their previous types without the switch.
+type Equal<T, U> =
+  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+type Expect<T extends true> = T;
+const adminPolicy = app.policy('admin::isAuthenticatedAdmin');
+const unregisteredPolicy = app.policy('global::unregistered');
+const pluginPolicy = app.plugin('content-manager').policy('hasPermissions');
+const apiService = app.api('article').service('article');
+const apiController = app.api('article').controller('article');
+// @ts-expect-error Modules have no policy lookup without the switch, as on develop.
+app.api('article').policy('isOwner');
+declare const lookupChecks: [
+  Expect<Equal<typeof adminPolicy, Core.Policy>>,
+  Expect<Equal<typeof unregisteredPolicy, Core.Policy>>,
+  Expect<Equal<typeof pluginPolicy, any>>,
+  Expect<Equal<typeof apiService, Core.Service>>,
+  Expect<Equal<typeof apiController, Core.Controller>>,
+];
+lookupChecks satisfies unknown;
+const contextualApiService: { greet(): string } = app.api('article').service('article');
+contextualApiService.greet() satisfies string;

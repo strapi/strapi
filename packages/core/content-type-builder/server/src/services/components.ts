@@ -4,6 +4,7 @@ import { get, has } from 'lodash';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import type { SchemaHandler } from './schema-builder/schema-handler';
+import type { ComponentHandler } from '../types';
 
 /**
  * Formats a component attributes
@@ -51,7 +52,11 @@ export const createComponent = async ({
 
   await builder.writeFiles();
 
-  strapi.eventHub.emit('component.create', { component: newComponent });
+  // `SchemaHandler` types `uid` as a content type uid, so the component handler is cast to the
+  // event payload.
+  strapi.eventHub.emit('component.create', {
+    component: newComponent as unknown as ComponentHandler,
+  });
 
   return newComponent;
 };
@@ -65,6 +70,9 @@ export const editComponent = async (
   uid: Internal.UID.Component,
   { component, components = [] }: ComponentToCreate
 ): Promise<SchemaHandler> => {
+  // TODO @Nico The payload is the flat builder payload (`EditComponentPayload`), not a
+  // `Struct.ComponentSchema`, and `SchemaHandler` types `uid` as a content type uid. Fixing the
+  // published signatures of `createComponent` and `editComponent` waits for a strict-off change.
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);

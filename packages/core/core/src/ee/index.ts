@@ -190,9 +190,14 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     const license = shouldContactRegistry
-      ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(
-          fallback
-        )
+      ? await fetchLicense(
+          { strapi },
+          ee.licenseInfo.licenseKey,
+          // TODO @Nico `uuid` is unset when `package.json` has no `strapi.uuid`, and the license
+          // registry then receives no project id. `fetchLicense` and `generateInstallId` type it as a
+          // string; widening them changes published signatures.
+          strapi.config.get('uuid') as string
+        ).catch(fallback)
       : storedInfo.license;
 
     if (license) {

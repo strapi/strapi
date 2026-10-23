@@ -3,6 +3,8 @@ import fs from 'fs-extra';
 import * as openapi from '@strapi/openapi';
 import type { Core } from '@strapi/types';
 
+import type * as ResolvedConfig from '../../types/config';
+
 type OpenAPIConfig = Core.Config.OpenAPI;
 type OpenAPIRouteType = keyof OpenAPIConfig;
 type OpenAPIEndpointConfig = NonNullable<OpenAPIConfig[OpenAPIRouteType]>;
@@ -136,7 +138,12 @@ const buildRouteConfig = (config: ResolvedEndpointConfig): Record<string, unknow
 };
 
 const resolveOpenAPIConfig = (strapi: Core.Strapi) => {
-  const rawConfig = strapi.config.get('server.openapi', {}) as OpenAPIConfig;
+  // TODO @Nico The loader always defines `server.openapi` (`ResolvedConfig.Server`), so the `{}`
+  // fallback is dead outside partial mocks. Drop it with a runtime change; the cast keeps runtime as is.
+  const rawConfig: OpenAPIConfig = strapi.config.get(
+    'server.openapi',
+    {} as ResolvedConfig.Server['openapi']
+  );
 
   return [
     resolveEndpointConfig(strapi, rawConfig['content-api'], 'content-api'),

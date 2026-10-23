@@ -67,6 +67,7 @@
     "@koa/cors": "5.0.0",
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
+    "@strapi/types": "5.59.0",
     "@strapi/utils": "5.59.0",
     "graphql": "^16.8.1",
     "graphql-depth-limit": "^1.1.0",
@@ -81,7 +82,6 @@
   "devDependencies": {
     "@strapi/admin": "5.59.0",
     "@strapi/strapi": "5.59.0",
-    "@strapi/types": "5.59.0",
     "@types/graphql-depth-limit": "1.1.5",
     "@types/koa-bodyparser": "4.3.12",
     "@types/koa__cors": "5.0.0",
@@ -115,5 +115,12 @@
     "name": "graphql",
     "description": "Adds GraphQL endpoint with default API methods.",
     "kind": "plugin"
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "dist/server/src/index.d.ts"
+      ]
+    }
   }
 }

@@ -63,6 +63,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
+    /** @internal */
     async findMany(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
       const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
       return strapi.documents(uid).findMany(params);
@@ -99,11 +100,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, data: publishData, populate, status: 'draft' };
+      const params = { ...opts, data: publishData, populate, status: 'draft' as const };
 
       return strapi.documents(uid).update({ ...params, documentId: id });
     },
 
+    /** @internal */
     async clone(
       id: Modules.Documents.ID,
       body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
@@ -128,6 +130,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      *  Check if a document exists
+     * @internal
      */
     async exists(uid: UID.CollectionType, id?: string) {
       // Collection type
@@ -141,6 +144,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return count > 0;
     },
 
+    /** @internal */
     async delete(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
@@ -154,6 +158,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     // FIXME: handle relations
+    /** @internal */
     async deleteMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
@@ -166,6 +171,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return { count: deletedEntries.length };
     },
 
+    // TODO @Nico without draft and publish, the document service has no `publish`: this throws a
+    // TypeError, which the single type publish route answers with HTTP 500.
+    /** @internal */
     async publish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
@@ -180,6 +188,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         .then((result) => result?.entries);
     },
 
+    /** @internal */
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
       return strapi.db.transaction(async () => {
         const results = await Promise.all(
@@ -191,6 +200,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
+    /** @internal */
     async unpublishMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
@@ -213,6 +223,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return { count: unpublishedEntitiesCount };
     },
 
+    // TODO @Nico without draft and publish, the document service has no `unpublish`: this throws a
+    // TypeError, which the single type unpublish route answers with HTTP 500.
+    /** @internal */
     async unpublish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
@@ -227,6 +240,9 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         .then((result) => result?.entries.at(0));
     },
 
+    // TODO @Nico without draft and publish, the document service has no `discardDraft`: this throws
+    // a TypeError, which the single type discard route answers with HTTP 500.
+    /** @internal */
     async discardDraft(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
@@ -256,6 +272,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return sumDraftCounts(strapi, document, uid);
     },
 
+    /** @internal */
     async countManyEntriesDraftRelations(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,

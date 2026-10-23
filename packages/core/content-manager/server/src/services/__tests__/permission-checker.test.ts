@@ -1,6 +1,11 @@
 import type { Ability } from '@casl/ability';
 
 import permissionCheckerService from '../permission-checker';
+import type { PermissionCheckerService } from '../../types/services';
+
+// The registered contract describes the action shortcuts attached at runtime.
+const createService = (strapi: unknown) =>
+  permissionCheckerService({ strapi } as any) as unknown as PermissionCheckerService;
 
 const createStrapiMock = () => ({
   service: jest.fn(() => ({
@@ -28,7 +33,7 @@ describe('permission-checker', () => {
       cannot: jest.fn(),
     } as unknown as Ability;
 
-    const permissionChecker = permissionCheckerService({ strapi } as any).create({
+    const permissionChecker = createService(strapi).create({
       userAbility,
       model: 'api::article.article',
     });
@@ -44,7 +49,7 @@ describe('permission-checker', () => {
       cannot: jest.fn(),
     } as unknown as Ability;
 
-    const permissionChecker = permissionCheckerService({ strapi } as any).create({
+    const permissionChecker = createService(strapi).create({
       userAbility,
       model: 'api::article.article',
     });

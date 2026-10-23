@@ -34,6 +34,9 @@ const getEntityStage = async (uid: any, id: any, params: any) => {
  * Ensures the entity is assigned to the default workflow stage
  */
 const assignStageOnCreate: Middleware = async (ctx, next) => {
+  // TODO @Nico A locale created through `update` (the Content Manager creates a new locale of an
+  // existing document with a PUT) gets no stage, so it stays outside the workflow until a stage is
+  // set explicitly.
   if (ctx.action !== 'create' && ctx.action !== 'clone') {
     return next();
   }

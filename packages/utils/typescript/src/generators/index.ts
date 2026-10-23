@@ -1,24 +1,69 @@
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import chalk from 'chalk';
 
 import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
-import { saveDefinitionToFileSystem, createLogger, timer } from './utils';
+import { saveDefinitionToFileSystem, createLogger, timer, pathExists } from './utils';
 import { generateContentTypesDefinitions } from './content-types';
 import { generateComponentsDefinitions } from './components';
+import { generatePluginDefinitions } from './plugins';
+import { generateServicesDefinitions } from './services';
+import { generateControllersDefinitions } from './controllers';
+import { generatePoliciesDefinitions } from './policies';
+import { generateMiddlewaresDefinitions } from './middlewares';
+import { generateStrictDefinitions } from './strict';
 
 const GENERATORS = {
   contentTypes: generateContentTypesDefinitions,
   components: generateComponentsDefinitions,
+  plugins: generatePluginDefinitions,
+  services: generateServicesDefinitions,
+  controllers: generateControllersDefinitions,
+  policies: generatePoliciesDefinitions,
+  middlewares: generateMiddlewaresDefinitions,
+  strict: generateStrictDefinitions,
 };
+
+/**
+ * Artifacts written as `.ts` rather than `.d.ts`: they import the application's sources, and a
+ * reference that no longer resolves (a moved source, a renamed contract) is reported by `tsc` even
+ * with `skipLibCheck`, rather than silently typing the lookup as `any`. The other artifacts only
+ * hold declarations generated from the schemas, and stay `.d.ts`.
+ */
+const SOURCE_ARTIFACTS = new Set(['services', 'controllers', 'policies', 'middlewares']);
+
+/**
+ * The application's linters would check the `.ts` artifacts, whose helpers use `any`.
+ */
+const LINT_DISABLE_HEADER = '/* eslint-disable */\n/* oxlint-disable */\n';
+
+const isSourceArtifact = (artifact: string) => SOURCE_ARTIFACTS.has(artifact);
+
+const filenameOf = (artifact: string) =>
+  isSourceArtifact(artifact) === true ? `${artifact}.ts` : `${artifact}.d.ts`;
+
+/**
+ * File name an earlier generation wrote the artifact to, removed with the artifact's own file
+ */
+const previousFilenameOf = (artifact: string) =>
+  isSourceArtifact(artifact) === true ? `${artifact}.d.ts` : undefined;
 
 export interface GenerateConfig {
   strapi: any;
   pwd: string;
   rootDir?: string;
+  /**
+   * Artifacts to generate. `true` generates the artifact, `false` removes the file a previous
+   * run may have generated for it, unset leaves it untouched.
+   * `services`, `controllers`, `policies`, `middlewares` and `strict` are the strict types artifacts
+   * (`typescript.strictTypes`).
+   */
   artifacts?: {
     contentTypes?: boolean;
     components?: boolean;
+    plugins?: boolean;
     services?: boolean;
+    strict?: boolean;
     controllers?: boolean;
     policies?: boolean;
     middlewares?: boolean;
@@ -40,7 +85,9 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
   const psTimer = timer().start();
 
   const registryPwd = path.join(pwd, rootDir, GENERATED_OUT_DIR);
-  const generatorConfig = { strapi, pwd: registryPwd, logger };
+  // Strict mode reads only the global schema registries, so schemas use that form with the opt-in.
+  const strict = artifacts.strict === true;
+  const generatorConfig = { strapi, pwd: registryPwd, appDir: pwd, logger, strict };
 
   const returnWithMessage = () => {
     const nbWarnings = chalk.yellow(`${logger.warnings} warning(s)`);
@@ -57,6 +104,9 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
 
   const enabledArtifacts = Object.keys(artifacts).filter(
     (p) => (artifacts as Record<string, boolean>)[p] === true
+  );
+  const disabledArtifacts = Object.keys(artifacts).filter(
+    (p) => (artifacts as Record<string, boolean>)[p] === false && p in GENERATORS
   );
 
   logger.info('Starting the type generation process');
@@ -95,10 +145,21 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
     const artifactFsTimer = timer().start();
 
     const report = reports[artifact];
-    const filename = `${artifact}.d.ts`;
+    const filename = filenameOf(artifact);
+    const previousFilename = previousFilenameOf(artifact);
+    const content =
+      isSourceArtifact(artifact) === true
+        ? `${LINT_DISABLE_HEADER}${report.output}`
+        : report.output;
 
     try {
-      const outPath = await saveDefinitionToFileSystem(registryPwd, filename, report.output);
+      const outPath = await saveDefinitionToFileSystem(registryPwd, filename, content);
+
+      // A stale `.d.ts` would declare the registry entries a second time
+      if (previousFilename !== undefined) {
+        await fs.rm(path.join(registryPwd, previousFilename), { force: true });
+      }
+
       const relativeOutPath = path.relative(process.cwd(), outPath);
 
       artifactFsTimer.end();
@@ -108,6 +169,37 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
     } catch (e) {
       logger.error(
         `An error occurred while saving ${boldArtifact} types to the filesystem: ${
+          (e as any).message ?? (e as any).toString()
+        }. Exiting`
+      );
+      return returnWithMessage();
+    }
+  }
+
+  // Disabled artifacts are removed so that a stale generated file does not keep applying
+  for (const artifact of disabledArtifacts) {
+    const boldArtifact = chalk.bold(artifact); // used for log messages
+    const previousFilename = previousFilenameOf(artifact);
+    const outPaths = [
+      filenameOf(artifact),
+      ...(previousFilename === undefined ? [] : [previousFilename]),
+    ].map((filename) => path.join(registryPwd, filename));
+
+    try {
+      for (const outPath of outPaths) {
+        if ((await pathExists(outPath)) === false) {
+          continue;
+        }
+
+        await fs.rm(outPath);
+
+        logger.info(
+          `Removed ${boldArtifact} types from ${chalk.bold(path.relative(process.cwd(), outPath))} (artifact disabled)`
+        );
+      }
+    } catch (e) {
+      logger.error(
+        `An error occurred while removing ${boldArtifact} types from the filesystem: ${
           (e as any).message ?? (e as any).toString()
         }. Exiting`
       );

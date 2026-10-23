@@ -9,20 +9,25 @@ import {
 } from './utils';
 import type { Schema } from './utils';
 import { attributeToPropertySignature } from './attributes';
+import type { AttributeOptions } from './attributes';
 import { addImport } from '../imports';
+import { compareEnglish } from '../compare';
 
 const { factory } = ts;
 
 /**
  * Generate a property signature for the schema's `attributes` field
  */
-const generateAttributePropertySignature = (schema: Schema): ts.PropertySignature => {
+const generateAttributePropertySignature = (
+  schema: Schema,
+  options: AttributeOptions
+): ts.PropertySignature => {
   const { attributes } = schema;
 
   const properties = Object.entries(attributes)
-    .sort((a, b) => a[0].localeCompare(b[0]))
+    .sort((a, b) => compareEnglish(a[0], b[0]))
     .map(([attributeName, attribute]) => {
-      return attributeToPropertySignature(schema, attributeName, attribute);
+      return attributeToPropertySignature(schema, attributeName, attribute, options);
     });
 
   return factory.createPropertySignature(
@@ -45,11 +50,12 @@ const generatePropertyLiteralDefinitionFactory = (schema: Schema) => (key: strin
 /**
  * Generate an interface declaration for a given schema
  */
-export const generateSchemaDefinition = (schema: Schema): ts.InterfaceDeclaration => {
-  const { uid } = schema;
-
+export const generateSchemaDefinition = (
+  schema: Schema,
+  interfaceName: string = getSchemaInterfaceName(schema.uid),
+  options: AttributeOptions = {}
+): ts.InterfaceDeclaration => {
   // Resolve the different interface names needed to declare the schema's interface
-  const interfaceName = getSchemaInterfaceName(uid);
   const parentType = getSchemaExtendsTypeName(schema);
 
   // Make sure the Struct namespace is imported
@@ -63,7 +69,7 @@ export const generateSchemaDefinition = (schema: Schema): ts.InterfaceDeclaratio
     .map(generatePropertyLiteralDefinitionFactory(schema));
 
   // Generate the `attributes` literal type definition
-  const attributesProp = generateAttributePropertySignature(schema);
+  const attributesProp = generateAttributePropertySignature(schema, options);
 
   // Merge every schema's definition in a single list
   const schemaProperties = [...literalPropertiesDefinitions, attributesProp];

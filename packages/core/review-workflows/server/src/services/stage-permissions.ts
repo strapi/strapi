@@ -3,6 +3,14 @@ import { async, errors } from '@strapi/utils';
 import { getAdminService } from '../utils';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
 
+/**
+ * A stage with its permissions populated with roles, what `canTransitionToStageWithPermissions`
+ * reads. Its parameter keeps develop's inline type, so the published signature does not change.
+ */
+export type StageWithPermissions = {
+  permissions?: { actionParameters?: { to?: number }; role?: { id: number } | number }[];
+};
+
 const { ApplicationError } = errors;
 const validActions = new Set([STAGE_TRANSITION_UID]);
 
@@ -19,6 +27,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return (requestState.user?.roles as { id: number; code: string }[] | undefined) ?? null;
   };
 
+  // `register` and `registerTo` publish develop's `Promise<any>`: the inferred admin permission type
+  // is not portable in the emitted declarations.
   return {
     async register({
       roleId,
@@ -28,7 +38,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       roleId: number;
       action: string;
       fromStage: number;
-    }) {
+    }): Promise<any> {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
@@ -55,7 +65,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       roleId: number;
       action: string;
       toStage: number;
-    }) {
+    }): Promise<any> {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }

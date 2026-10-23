@@ -33,9 +33,24 @@ export const getAttributeType = (
 };
 
 /**
+ * Options of the attribute generators.
+ */
+export type AttributeOptions = {
+  /**
+   * Whether the application enables `typescript.strictTypes`. Strict-only modifiers, such as
+   * `Schema.Attribute.Conditional`, are emitted only then, so generated files without strict types
+   * stay as in previous releases.
+   */
+  strict?: boolean;
+};
+
+/**
  * Collect every modifier node from an attribute
  */
-export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
+export const getAttributeModifiers = (
+  attribute: Attribute,
+  { strict = false }: AttributeOptions = {}
+): ts.TypeNode[] => {
   const modifiers: ts.TypeNode[] = [];
 
   // Required
@@ -146,6 +161,16 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
     );
   }
 
+  // Conditional (strict types only): a field hidden by its `conditions.visible` rule skips
+  // validation, so the strict write inputs make it optional and nullable
+  if (strict === true && attribute.conditions?.visible !== undefined) {
+    modifiers.push(
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(withAttributeNamespace('Conditional'))
+      )
+    );
+  }
+
   // Default (ignore if default is a function)
   if (attribute.default != null && typeof attribute.default !== 'function') {
     const defaultLiteral = toTypeLiteral(attribute.default);
@@ -162,12 +187,75 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
 };
 
 /**
+ * Whether the attribute is a list of components: a repeatable component or a dynamic zone.
+ */
+const isComponentList = (attribute: Attribute) =>
+  attribute.type === 'dynamiczone' ||
+  (attribute.type === 'component' && attribute.repeatable === true);
+
+/**
+ * The write rule of an attribute, as one sentence for its JSDoc, or `undefined` when the attribute
+ * has none to tell. It mirrors the strict write inputs of `@strapi/types`
+ * (`modules/documents/params/write.ts`), which follow the entity validator of `@strapi/core`.
+ *
+ * `draftAndPublish` is `undefined` for a component: its fields follow the mode of the parent entry.
+ */
+export const getAttributeWriteRule = (
+  attribute: Attribute,
+  { draftAndPublish }: { draftAndPublish?: boolean } = {}
+): string | undefined => {
+  // The validator skips attributes that are not writable
+  if (attribute.writable === false) {
+    return undefined;
+  }
+
+  const hasDefault =
+    attribute.default !== undefined &&
+    attribute.default !== null &&
+    typeof attribute.default !== 'function';
+  // `*/` in a default value would end the comment
+  const defaultRule =
+    hasDefault === true
+      ? `Default: ${JSON.stringify(attribute.default).replaceAll('*/', '*\\/')}.`
+      : '';
+
+  if (attribute.required !== true) {
+    if (isComponentList(attribute) === true) {
+      return 'Never `null`.';
+    }
+
+    return hasDefault === true ? defaultRule : undefined;
+  }
+
+  if (attribute.conditions?.visible !== undefined) {
+    return 'Required only when its condition shows it.';
+  }
+
+  if (isComponentList(attribute) === true) {
+    return 'Required on every create, drafts included (`[]` is enough). Never `null`.';
+  }
+
+  if (attribute.type === 'relation' || attribute.type === 'media') {
+    return 'Required when published, only with `api.documents.strictRelations`.';
+  }
+
+  if (draftAndPublish === false) {
+    return hasDefault === true ? `${defaultRule} Never \`null\`.` : 'Required. Never `null`.';
+  }
+
+  return hasDefault === true
+    ? `${defaultRule} \`null\` only in drafts.`
+    : 'Required when published. `null` only in drafts.';
+};
+
+/**
  * Generate a property signature node for a given attribute
  */
 export const attributeToPropertySignature = (
   schema: Schema,
   attributeName: string,
-  attribute: Attribute
+  attribute: Attribute,
+  options: AttributeOptions = {}
 ): ts.PropertySignature | null => {
   const baseType = getAttributeType(attributeName, attribute, schema.uid);
 
@@ -175,16 +263,35 @@ export const attributeToPropertySignature = (
     return null;
   }
 
-  const modifiers = getAttributeModifiers(attribute);
+  const modifiers = getAttributeModifiers(attribute, options);
 
   const nodes = [baseType, ...modifiers];
 
-  return factory.createPropertySignature(
+  const signature = factory.createPropertySignature(
     undefined,
     factory.createIdentifier(attributeName),
     undefined,
     factory.createIntersectionTypeNode(nodes)
   );
+
+  // Strict types only: editors show the write rule on the attribute and on the input keys
+  if (options.strict === true) {
+    const rule = getAttributeWriteRule(attribute, {
+      draftAndPublish:
+        schema.modelType === 'contentType' ? schema.options?.draftAndPublish === true : undefined,
+    });
+
+    if (rule !== undefined) {
+      ts.addSyntheticLeadingComment(
+        signature,
+        ts.SyntaxKind.MultiLineCommentTrivia,
+        `* ${rule} `,
+        true
+      );
+    }
+  }
+
+  return signature;
 };
 
 export { mappers };

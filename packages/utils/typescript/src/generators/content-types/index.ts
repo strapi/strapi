@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { sortBy } from 'lodash';
 
 import { models } from '../common';
+import { resolveInterfaceNames } from '../common/interface-names';
 import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
 import type { GeneratorOptions } from '../utils';
 
@@ -18,16 +19,23 @@ const NO_CONTENT_TYPE_PLACEHOLDER_COMMENT = `/*
 export const generateContentTypesDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
 ) => {
-  const { strapi } = options;
+  const { strapi, strict = false } = options;
 
   const { contentTypes } = strapi;
 
-  const contentTypesDefinitions = sortBy(
-    Object.values<models.utils.Schema>(contentTypes ?? {}),
-    'uid'
-  ).map((contentType) => ({
+  const schemas = sortBy(Object.values<models.utils.Schema>(contentTypes ?? {}), 'uid');
+  const interfaceNames = resolveInterfaceNames(
+    schemas.map(({ uid }) => uid),
+    options.logger,
+    { strict }
+  );
+  const contentTypesDefinitions = schemas.map((contentType) => ({
     uid: contentType.uid,
-    definition: models.schema.generateSchemaDefinition(contentType),
+    definition: models.schema.generateSchemaDefinition(
+      contentType,
+      interfaceNames.get(contentType.uid),
+      { strict }
+    ),
   }));
 
   options.logger.debug(`Found ${contentTypesDefinitions.length} content-types.`);
@@ -59,7 +67,7 @@ export const generateContentTypesDefinitions = async (
     ...formattedSchemasDefinitions,
 
     // Global
-    generateSharedExtensionDefinition('ContentTypeSchemas', contentTypesDefinitions),
+    generateSharedExtensionDefinition('ContentTypeSchemas', contentTypesDefinitions, { strict }),
   ];
 
   const output = emitDefinitions(allDefinitions);

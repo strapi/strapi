@@ -94,5 +94,28 @@ describe('Action', () => {
         expect.arrayContaining(fixtures.filter((f) => f.actionId !== PUBLISH_ACTION))
       );
     });
+
+    test('throws a not found error if no role matches', async () => {
+      const findOneRoleMock = jest.fn(async () => null);
+
+      global.strapi = {
+        admin: {
+          services: {
+            role: {
+              findOne: findOneRoleMock,
+            },
+            permission: {
+              actionProvider: {
+                values() {
+                  return fixtures;
+                },
+              },
+            },
+          },
+        },
+      } as any;
+
+      await expect(getAllowedActionsForRole('1')).rejects.toThrow('role.notFound');
+    });
   });
 });

@@ -21,6 +21,7 @@ import { getService } from '../utils';
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
 import type { Settings } from '../controllers/validation/admin/settings';
+import type { FileFormat } from '../types/services';
 
 type User = {
   id: string | number;
@@ -366,7 +367,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     const replaceFormat = async (key: string, newFormat: UploadableFile) => {
-      const oldFormat = oldFile.formats?.[key] as File | undefined;
+      const oldFormat = oldFile.formats?.[key] as FileFormat | undefined;
       if (oldFormat) {
         await getService('provider').replace(newFormat, oldFormat);
       } else {
@@ -517,6 +518,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         _.assign(fileData, { folderPath: dbFile.folderPath });
       }
 
+      // TODO @Nico A non-image that replaces an image keeps the image's `width` and `height`, and
+      // stores `formats: {}` instead of `null`: `update` writes only the keys set here.
       // clear old formats — replaceImage / replace will set new ones
       _.set(fileData, 'formats', {});
 
@@ -571,7 +574,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  async function add(values: any, opts?: CommonOptions) {
+  async function add(values: UploadableFile, opts?: CommonOptions) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -608,6 +611,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function findMany(query: any = {}): Promise<File[]> {
+    // TODO @Nico The Content API `find` passes its nested `pagination` here, which the query
+    // engine ignores: `GET /api/upload/files?pagination[pageSize]=1` returns every file.
     const files = await strapi.db
       .query(FILE_MODEL_UID)
       .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
@@ -747,6 +752,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   async function getSettings() {
     const res = await strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).get({});
 
+    // TODO @Nico `Settings` makes `aiMetadata` required, but settings saved without it are stored
+    // without it (the validation skips the yup default). The `UploadService` contract carries the
+    // stored row instead.
     return res as Settings | null;
   }
 
@@ -767,6 +775,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       key: 'view_configuration',
     }).get({});
 
+    // TODO @Nico `ViewConfiguration` makes `sort` a required `any`, but a configuration saved
+    // without it is stored without it. The `UploadService` contract carries the stored row instead.
     return res as ViewConfiguration | null;
   }
 
@@ -796,7 +806,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @internal
      */
     _uploadImage: uploadImage,
+    /**
+     * exposed for testing only
+     * @internal
+     */
     _replaceImage: replaceImage,
+    /**
+     * exposed for testing only
+     * @internal
+     */
     _queueConcurrentOperation: queueConcurrentOperation,
   };
 };

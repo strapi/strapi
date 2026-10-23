@@ -4,6 +4,7 @@ import {
   attributeToPropertySignature,
   getAttributeType,
   getAttributeModifiers,
+  getAttributeWriteRule,
 } from '../../../generators/common/models/attributes';
 import { addImport } from '../../../generators/common/imports';
 
@@ -390,6 +391,60 @@ describe('Attributes', () => {
     });
   });
 
+  describe('Get Attribute Write Rule', () => {
+    test.each([
+      ['optional', { type: 'string' }, undefined],
+      ['optional with a default', { type: 'integer', default: 0 }, 'Default: 0.'],
+      ['optional list', { type: 'dynamiczone', components: [] }, 'Never `null`.'],
+      [
+        'required',
+        { type: 'string', required: true },
+        'Required when published. `null` only in drafts.',
+      ],
+      [
+        'required with a default',
+        { type: 'string', required: true, default: 'a' },
+        'Default: "a". `null` only in drafts.',
+      ],
+      [
+        'required list',
+        { type: 'component', component: 'a.b', repeatable: true, required: true },
+        'Required on every create, drafts included (`[]` is enough). Never `null`.',
+      ],
+      [
+        'required relation',
+        { type: 'relation', relation: 'oneToOne', required: true },
+        'Required when published, only with `api.documents.strictRelations`.',
+      ],
+      [
+        'required media',
+        { type: 'media', required: true },
+        'Required when published, only with `api.documents.strictRelations`.',
+      ],
+      [
+        'required and conditional',
+        { type: 'string', required: true, conditions: { visible: { var: 'a' } } },
+        'Required only when its condition shows it.',
+      ],
+      ['not writable', { type: 'string', required: true, writable: false }, undefined],
+      ['function default', { type: 'string', default: () => 'a' }, undefined],
+      ['default that ends a comment', { type: 'string', default: '*/' }, 'Default: "*\\/".'],
+    ])('%s', (_, attribute, rule) => {
+      expect(getAttributeWriteRule(attribute)).toBe(rule);
+    });
+
+    test('without draft and publish, every write publishes', () => {
+      const options = { draftAndPublish: false };
+
+      expect(getAttributeWriteRule({ type: 'string', required: true }, options)).toBe(
+        'Required. Never `null`.'
+      );
+      expect(getAttributeWriteRule({ type: 'string', required: true, default: 'a' }, options)).toBe(
+        'Default: "a". Never `null`.'
+      );
+    });
+  });
+
   describe('Get Attribute Modifiers', () => {
     describe('Units', () => {
       describe('Required', () => {
@@ -414,6 +469,34 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
           expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.Required');
+        });
+      });
+
+      describe('Conditional', () => {
+        const attribute = {
+          type: 'string',
+          required: true,
+          conditions: { visible: { '==': [{ var: 'kind' }, 'blog'] } },
+        };
+
+        test('Without strict types, conditions emit no modifier', () => {
+          expect(getAttributeModifiers(attribute)).toHaveLength(1);
+          expect(getAttributeModifiers(attribute, { strict: false })).toHaveLength(1);
+        });
+
+        test('With strict types, conditions emit Schema.Attribute.Conditional', () => {
+          const modifiers = getAttributeModifiers(attribute, { strict: true });
+
+          expect(modifiers).toHaveLength(2);
+          expect(modifiers[1].kind).toBe(ts.SyntaxKind.TypeReference);
+          expect(modifiers[1].typeName.escapedText).toBe('Schema.Attribute.Conditional');
+        });
+
+        test('With strict types, an attribute without a visible rule is not conditional', () => {
+          expect(getAttributeModifiers({ type: 'string' }, { strict: true })).toHaveLength(0);
+          expect(
+            getAttributeModifiers({ type: 'string', conditions: {} }, { strict: true })
+          ).toHaveLength(0);
         });
       });
 

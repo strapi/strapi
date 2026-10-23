@@ -237,6 +237,8 @@ export const editContentType = async (
 ) => {
   const builder = createBuilder();
 
+  // TODO @Nico An unknown uid throws a `TypeError` here (no `contentType.notFound` guard): the
+  // controller checks the uid first, but direct callers get the native error.
   const previousSchema = builder.contentTypes.get(uid).schema;
   const isPluginContentType = Boolean(builder.contentTypes.get(uid).plugin);
   const previousKind = previousSchema.kind;
@@ -321,6 +323,8 @@ export const editContentType = async (
       strapi.log.error(error);
     }
 
+    // TODO @Nico A kind change returns before `content-type.update` is emitted, so listeners of
+    // the event miss this update.
     return updatedContentType;
   }
 

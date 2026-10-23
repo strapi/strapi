@@ -17,7 +17,7 @@ export const registerAuditLogsEntitlements = (strapi: Core.Strapi) => {
         get(feature) {
           return computeRetentionDays(
             typeof feature === 'object' ? feature.options?.retentionDays : undefined,
-            strapi.config.get('admin.auditLogs.retentionDays')
+            strapi.config.get<number | null | undefined>('admin.auditLogs.retentionDays')
           );
         },
       },

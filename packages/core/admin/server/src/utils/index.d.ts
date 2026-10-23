@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import auth from '../services/auth';
 import role from '../services/role';
 import user from '../services/user';
@@ -13,8 +14,16 @@ import * as transfer from '../services/transfer';
 import { homepageService } from '../services/homepage';
 import debugDump from '../services/debug-dump';
 
+/**
+ * With strict types, the registered contract: `findOne` may resolve to `null`. Without them, as on
+ * develop, so the declarations emitted from inferred types stay the same.
+ */
+type RoleService = Core.IsStrict extends true
+  ? Strapi.Registries.PackageServices['admin::role']
+  : typeof role;
+
 type S = {
-  role: typeof role;
+  role: RoleService;
   user: typeof user;
   passport: typeof passport;
   permission: typeof permission;

@@ -3,7 +3,13 @@ import { resolve } from 'path';
 import koaFavicon from 'koa-favicon';
 import type { Core } from '@strapi/types';
 
-export type Config = NonNullable<Parameters<typeof koaFavicon>[1]>;
+/** Options the `strapi::favicon` middleware reads. */
+export type Config = {
+  /** Favicon path, relative to the application root. */
+  path?: string;
+  /** Browser cache max-age of the favicon, in milliseconds. */
+  maxAge?: number;
+};
 
 const defaults = {
   path: 'favicon.png',

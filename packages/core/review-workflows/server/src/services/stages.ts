@@ -29,6 +29,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     findById(id: string | number, { populate }: any = {}) {
+      // TODO @Nico `workflowId` is ignored, so a stage of another workflow is returned: the route
+      // `GET /review-workflows/workflows/:workflow_id/stages/:id` passes it.
       return strapi.db.query(STAGE_MODEL_UID).findOne({
         where: { id },
         populate,
@@ -233,6 +235,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           );
 
           // Assign the new stage to entities that had the deleted stage
+          // TODO @Nico `updateEntitiesStage` is not awaited (the callback has no `return`), and it
+          // ignores `trx`, so the move can run after the transaction and its errors are unhandled.
           await async.map(contentTypesToMigrate, (contentTypeUID: any) => {
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,

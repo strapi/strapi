@@ -8,6 +8,7 @@ import {
   matchesProperty,
   upperFirst,
 } from 'lodash';
+import { compareEnglish } from '../compare';
 
 const { factory } = ts;
 
@@ -22,6 +23,7 @@ export const NAMESPACES = {
  */
 export interface Attribute {
   type: string;
+  conditions?: { visible?: unknown };
   [key: string]: any;
 }
 
@@ -120,7 +122,7 @@ export const toTypeLiteral = (data: any): any => {
     throw new Error(`Cannot convert to object literal. Unknown type "${typeof data}"`);
   }
 
-  const entries = Object.entries(data).sort((a, b) => a[0].localeCompare(b[0]));
+  const entries = Object.entries(data).sort((a, b) => compareEnglish(a[0], b[0]));
 
   const props = entries.reduce<any[]>((acc, [key, value]) => {
     // Handle keys such as content-type-builder & co.

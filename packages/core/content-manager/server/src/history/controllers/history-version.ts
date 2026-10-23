@@ -54,15 +54,17 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
        */
       const permissionChecker = getContentManagerService('permission-checker').create({
         userAbility: ctx.state.userAbility,
-        model: ctx.query.contentType,
+        model: contentTypeUid,
       });
 
       if (permissionChecker.cannot.read()) {
         return ctx.forbidden();
       }
 
-      const query: HistoryVersions.GetHistoryVersions.Request['query'] =
-        await permissionChecker.sanitizeQuery(ctx.query);
+      // Sanitizing keeps `contentType` and `documentId`, which the checks above require.
+      const query = (await permissionChecker.sanitizeQuery(
+        ctx.query
+      )) as HistoryVersions.GetHistoryVersions.Request['query'];
 
       const { results, pagination } = await getService(strapi, 'history').findVersionsPage({
         query: {
