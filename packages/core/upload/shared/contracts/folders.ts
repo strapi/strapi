@@ -75,8 +75,9 @@ export declare namespace GetFolders {
       /**
        * Pagination is opt-in: sending `page` and/or `pageSize` returns one page
        * and the `pagination` metadata (`pageSize` defaults to 10 when only
-       * `page` is sent). Without them every matching folder is returned and
-       * `pagination` is absent.
+       * `page` is sent). Without them `pagination` is absent and every matching
+       * folder is returned, unless the offset parameters `start`/`limit` are
+       * used to slice the list.
        */
       page?: string;
       pageSize?: string;

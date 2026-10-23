@@ -290,16 +290,26 @@ describe('Folder', () => {
     });
 
     test('Can paginate a folder search', async () => {
+      // Both fixture folders ('folder 1', 'folder-2') match, so a page of 1
+      // proves that `total` counts the matches rather than the page.
+      const all = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { _q: 'folder', sort: 'id:ASC' },
+      });
+      const total = all.body.data.length;
+
+      expect(total).toBeGreaterThanOrEqual(2);
+
       const res = await rq({
         method: 'GET',
         url: '/upload/folders',
-        qs: { _q: data.folders[0].name, page: 1, pageSize: 10 },
+        qs: { _q: 'folder', page: 1, pageSize: 1, sort: 'id:ASC' },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.data.map((folder) => folder.id)).toContain(data.folders[0].id);
-      expect(res.body.pagination).toMatchObject({ page: 1, pageSize: 10 });
-      expect(res.body.pagination.total).toBe(res.body.data.length);
+      expect(res.body.data).toEqual([all.body.data[0]]);
+      expect(res.body.pagination).toEqual({ page: 1, pageSize: 1, pageCount: total, total });
     });
 
     test('Rejects an invalid pageSize', async () => {
@@ -310,6 +320,24 @@ describe('Folder', () => {
       });
 
       expect(res.statusCode).toBe(400);
+    });
+
+    test('Rejects a page or pageSize too large for the database', async () => {
+      const hugePageSize = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 1, pageSize: '99999999999999999999' },
+      });
+
+      expect(hugePageSize.statusCode).toBe(400);
+
+      const hugeOffset = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 1000000000, pageSize: 1000000000 },
+      });
+
+      expect(hugeOffset.statusCode).toBe(400);
     });
   });
 

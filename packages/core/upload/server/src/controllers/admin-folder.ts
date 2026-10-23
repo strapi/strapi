@@ -2,6 +2,8 @@ import { defaultsDeep } from 'lodash';
 
 import type { Context } from 'koa';
 
+import { errors } from '@strapi/utils';
+
 import { getService } from '../utils';
 import { FOLDER_MODEL_UID } from '../constants';
 import { validateCreateFolder, validateUpdateFolder } from './validation/admin/folder';
@@ -72,6 +74,15 @@ export default {
     // returning every matching folder, which existing callers (destination
     // selects, the legacy picker) rely on.
     if (query.page != null || query.pageSize != null) {
+      // The query transform accepts any positive integer, so an oversized page
+      // or pageSize would reach the database as an out-of-range LIMIT/OFFSET
+      // and fail there with a 500. Reject it as a bad request instead.
+      const { page = 1, pageSize = 10 } = dbQuery;
+
+      if (!Number.isSafeInteger(page * pageSize)) {
+        throw new errors.ValidationError('page and pageSize are too large');
+      }
+
       const { results, pagination } = await strapi.db.query(FOLDER_MODEL_UID).findPage(dbQuery);
 
       ctx.body = {
