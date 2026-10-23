@@ -1,5 +1,5 @@
 import type { Stats } from 'node:fs';
-import type { Readable } from 'stream';
+import type { Duplex, Readable } from 'stream';
 
 import zip from 'zlib';
 import path from 'path';
@@ -8,8 +8,9 @@ import { finished } from 'stream/promises';
 import fs from 'fs-extra';
 import { Parser, type ReadEntry } from 'tar';
 import { isEmpty, keyBy } from 'lodash';
-import { chain } from 'stream-chain';
-import { parser } from 'stream-json/jsonl/Parser';
+import { chainUnchecked as chain } from 'stream-chain';
+// Extension is required: stream-json's export map does not resolve the extensionless subpath.
+import { parser } from 'stream-json/jsonl/parser.js'; // eslint-disable-line import/extensions
 import type { Struct } from '@strapi/types';
 
 import type {
@@ -36,7 +37,7 @@ import {
   validateAssetMetadata,
 } from './utils';
 
-type StreamItemArray = Parameters<typeof chain>[0];
+type StreamItemArray = Array<Readable | Duplex>;
 
 /**
  * Constant for the metadata file path
@@ -425,14 +426,15 @@ class LocalFileSourceProvider implements ISourceProvider {
             await runReadEntry(async () => {
               const transforms = [
                 // JSONL parser to read the data chunks one by one (line by line)
-                parser({
+                parser.asStream({
                   checkErrors: true,
                 }),
                 // The JSONL parser returns each line as key/value
                 (line: { key: string; value: object }) => line.value,
               ];
 
-              const stream = entry.pipe(chain(transforms));
+              const stream = chain(transforms);
+              entry.pipe(stream);
 
               try {
                 for await (const chunk of stream) {

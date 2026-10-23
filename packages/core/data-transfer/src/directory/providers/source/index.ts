@@ -4,8 +4,9 @@ import { PassThrough } from 'stream';
 
 import fs from 'fs-extra';
 import { isEmpty, keyBy } from 'lodash';
-import { chain } from 'stream-chain';
-import { parser } from 'stream-json/jsonl/Parser';
+import { chainUnchecked as chain } from 'stream-chain';
+// Extension is required: stream-json's export map does not resolve the extensionless subpath.
+import { parser } from 'stream-json/jsonl/parser.js'; // eslint-disable-line import/extensions
 import type { Struct } from '@strapi/types';
 
 import type {
@@ -284,13 +285,14 @@ class LocalDirectorySourceProvider implements ISourceProvider {
     const files = await this.#listJsonlFiles(posixSubdir);
     for (const absPath of files) {
       const transforms = [
-        parser({
+        parser.asStream({
           checkErrors: true,
         }),
         (line: { key: string; value: object }) => line.value,
       ];
 
-      const stream = fs.createReadStream(absPath).pipe(chain(transforms));
+      const stream = chain(transforms);
+      fs.createReadStream(absPath).pipe(stream);
 
       try {
         for await (const chunk of stream) {

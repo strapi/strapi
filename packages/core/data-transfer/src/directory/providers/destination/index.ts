@@ -2,8 +2,9 @@ import path from 'path';
 import { createWriteStream } from 'fs';
 import { Writable, pipeline } from 'stream';
 import fs from 'fs-extra';
-import { stringer } from 'stream-json/jsonl/Stringer';
-import { chain } from 'stream-chain';
+// Extension is required: stream-json's export map does not resolve the extensionless subpath.
+import { stringer } from 'stream-json/jsonl/stringer.js'; // eslint-disable-line import/extensions
+import { chainUnchecked as chain } from 'stream-chain';
 
 import type {
   IAsset,

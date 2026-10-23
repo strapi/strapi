@@ -4,7 +4,6 @@ import stream from 'stream';
 jest.mock('fs');
 
 import fs from 'fs-extra';
-import { Writable } from 'stream-chain';
 import { createLocalFileDestinationProvider, ILocalFileDestinationProviderOptions } from '..';
 import {
   assertWriteStreamBackpressure,
@@ -15,7 +14,7 @@ import { createFilePathFactory, createTarEntryStream } from '../utils';
 
 fs.createWriteStream = jest.fn().mockImplementation(
   () =>
-    new Writable({
+    new stream.Writable({
       objectMode: true,
       write() {},
     })
