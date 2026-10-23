@@ -3,6 +3,7 @@ import { errors, queryParams, emitAudit } from '@strapi/utils';
 import constants from '../constants';
 import userService from '../user';
 import userContentType from '../../content-types/User';
+import passwordPolicyService, { DEFAULT_PASSWORD_POLICY } from '../password-policy';
 
 jest.mock('@strapi/utils', () => ({
   ...jest.requireActual('@strapi/utils'),
@@ -10,6 +11,12 @@ jest.mock('@strapi/utils', () => ({
 }));
 
 const { SUPER_ADMIN_CODE } = constants;
+
+// The password validator reads the policy through `admin::password-policy`; serve the defaults.
+const passwordPolicyServiceMock = {
+  ...passwordPolicyService,
+  getPolicy: jest.fn(async () => DEFAULT_PASSWORD_POLICY),
+};
 
 const {
   create,
@@ -397,6 +404,7 @@ describe('User', () => {
             auth: {
               hashPassword,
             },
+            'password-policy': passwordPolicyServiceMock,
           },
         },
       } as any;
@@ -1106,9 +1114,20 @@ describe('User', () => {
       expect(findOne).toHaveBeenCalledWith({ where: { email }, populate: ['roles'] });
     });
 
-    test.each(['abc', 'Abcd', 'Abcdefgh', 'Abcd123'])(
-      'Throws on invalid password',
-      async (password) => {
+    test.each([
+      [
+        'abc',
+        'The password must be at least 8 characters. The password must contain at least one uppercase character. The password must contain at least one number.',
+      ],
+      [
+        'Abcd',
+        'The password must be at least 8 characters. The password must contain at least one number.',
+      ],
+      ['Abcdefgh', 'The password must contain at least one number.'],
+      ['Abcd123', 'The password must be at least 8 characters.'],
+    ])(
+      'Throws on invalid password %s, listing the broken rules of the policy',
+      async (password, reasons) => {
         const email = 'email@email.fr';
 
         const findOne = jest.fn(() => ({ id: 1 }));
@@ -1122,12 +1141,15 @@ describe('User', () => {
               };
             },
           },
+          admin: {
+            services: {
+              'password-policy': passwordPolicyServiceMock,
+            },
+          },
         } as any;
 
         await expect(resetPasswordByEmail(email, password)).rejects.toEqual(
-          new Error(
-            'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
-          )
+          new Error(`Invalid password. ${reasons}`)
         );
 
         expect(findOne).toHaveBeenCalledWith({ where: { email }, populate: ['roles'] });

@@ -222,6 +222,20 @@ export const actions = [
     category: 'project',
   },
   {
+    uid: 'password-policy.read',
+    displayName: 'Read the password policy',
+    pluginName: 'admin',
+    section: 'settings',
+    category: 'password policy',
+  },
+  {
+    uid: 'password-policy.update',
+    displayName: 'Update the password policy',
+    pluginName: 'admin',
+    section: 'settings',
+    category: 'password policy',
+  },
+  {
     uid: 'debug-dump.read',
     displayName: 'Generate a support debug dump',
     pluginName: 'admin',

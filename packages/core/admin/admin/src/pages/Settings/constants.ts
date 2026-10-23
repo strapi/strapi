@@ -96,6 +96,18 @@ export const ROUTES_CE = (): RouteObject[] => [
   },
   {
     lazy: async () => {
+      const { ProtectedPasswordPolicyPage } = await import(
+        './pages/PasswordPolicy/PasswordPolicyPage'
+      );
+
+      return {
+        Component: ProtectedPasswordPolicyPage,
+      };
+    },
+    path: 'password-policy',
+  },
+  {
+    lazy: async () => {
       const { ProtectedCreatePage } = await import('./pages/Webhooks/CreatePage');
 
       return {
