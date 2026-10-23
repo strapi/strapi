@@ -8,3 +8,4 @@ export * as UID from './uid';
 export * as ReviewWorkflows from './review-workflows';
 export * as HistoryVersions from './history-versions';
 export * as Preview from './preview';
+export * as CustomOrder from './custom-order';

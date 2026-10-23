@@ -2,6 +2,7 @@ import { getService } from './utils';
 import { ALLOWED_WEBHOOK_EVENTS } from './constants';
 import history from './history';
 import preview from './preview';
+import customOrder from './custom-order';
 import { registerContentManagerMcpTools } from './mcp/register-content-manager-mcp-tools';
 
 export default async () => {
@@ -18,4 +19,5 @@ export default async () => {
 
   await history.bootstrap?.({ strapi });
   await preview.bootstrap?.({ strapi });
+  await customOrder.bootstrap?.({ strapi });
 };

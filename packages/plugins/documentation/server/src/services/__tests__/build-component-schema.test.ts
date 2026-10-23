@@ -335,6 +335,43 @@ describe('Documentation plugin | Build component schema', () => {
     expect(requestObjectsSchemas).toStrictEqual(expectedSchemas);
   });
 
+  it('leaves out the attributes Strapi hides from the Content API', () => {
+    global.strapi.contentType = (() => ({
+      info: {},
+      attributes: {
+        test: { type: 'string' },
+        // Internal, e.g. the position of a document in the custom order of its collection type
+        strapi_position: { type: 'integer', private: true, visible: false },
+        // Hidden from the Content Manager but part of the Content API
+        locale: { type: 'string', private: false, visible: false },
+        // Private but still accepted as input
+        secret: { type: 'string', private: true },
+      },
+    })) as any;
+    global.strapi.apis.restaurant.routes.restaurant.routes = [
+      { method: 'POST', path: '/test', handler: 'test.create' },
+    ] as any;
+
+    const schemas = buildComponentSchema({
+      name: 'restaurant',
+      getter: 'api',
+      ctNames: ['restaurant'],
+    }) as any;
+
+    expect(Object.keys(schemas.Restaurant.properties)).toEqual([
+      'id',
+      'documentId',
+      'test',
+      'locale',
+      'secret',
+    ]);
+    expect(Object.keys(schemas.RestaurantRequest.properties.data.properties)).toEqual([
+      'test',
+      'locale',
+      'secret',
+    ]);
+  });
+
   it('creates the correct name given multiple content types', () => {
     const apiMock = {
       name: 'users-permissions',
