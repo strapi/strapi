@@ -1,4 +1,3 @@
-import type createStagesService from '../services/stages';
 import type createWorkflowsService from '../services/workflows';
 import type { Controllers } from './controllers';
 import type {
@@ -6,6 +5,7 @@ import type {
   DocumentServiceMiddlewaresService,
   HomepageService,
   StagePermissionsService,
+  StagesService,
   ValidationService,
   WorkflowMetricsService,
   WorkflowWeeklyMetricsService,
@@ -23,7 +23,7 @@ export type Services = {
   'document-service-middlewares': DocumentServiceMiddlewaresService;
   homepage: HomepageService;
   'stage-permissions': StagePermissionsService;
-  stages: ReturnType<typeof createStagesService>;
+  stages: StagesService;
   validation: ValidationService;
   'workflow-metrics': WorkflowMetricsService;
   'workflow-weekly-metrics': WorkflowWeeklyMetricsService;

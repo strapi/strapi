@@ -1,4 +1,5 @@
 import type { Data, Modules, UID } from '@strapi/types';
+import type { queryParams } from '@strapi/utils';
 import type { GetRecentlyAssignedDocuments } from '../../../shared/contracts/homepage';
 import type { WeeklyMetrics } from '../services/metrics';
 import type { StageWithPermissions } from '../services/stage-permissions';
@@ -297,4 +298,201 @@ export type HomepageService = {
    * @internal
    */
   getRecentlyAssignedDocuments(): Promise<GetRecentlyAssignedDocuments.Response['data']>;
+};
+
+/** A stage row as the database returns it, without its relations. */
+export type StageRow = {
+  id: number;
+  documentId: string;
+  name: string;
+  color: string;
+  /** Stages are not localized. */
+  locale: null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+};
+
+/** A transition permission of a stage, as the database returns it. */
+export type StagePermissionRow = {
+  id: number;
+  documentId: string;
+  action: string;
+  /** `from` lets the role move entries out of the stage, `to` into it. */
+  actionParameters: { from?: number; to?: number };
+  subject: string | null;
+  properties: Record<string, unknown>;
+  conditions: string[];
+  locale: null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  /** The admin role, present when populated. */
+  role?: {
+    id: number;
+    documentId: string;
+    name: string;
+    code: string;
+    description: string | null;
+    locale: null;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+  };
+};
+
+/** A stage row with the relations that the read's `populate` asked for. */
+export type PopulatedStageRow = StageRow & {
+  permissions?: StagePermissionRow[];
+  workflow?: {
+    id: number;
+    documentId: string;
+    name: string;
+    contentTypes: UID.ContentType[];
+    locale: null;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+  };
+};
+
+/** A stage to create or update, as the workflow routes receive it. */
+export type StageInput = {
+  name: string;
+  color?: string;
+  workflow?: Data.ID;
+  /** The roles that may move entries out of the stage. */
+  fromPermissions?: { role: number; action: string }[];
+  /** The roles that may move entries into the stage. */
+  toPermissions?: { role: number; action: string }[];
+};
+
+/** A stage of a workflow read with its permissions and their roles. */
+export type StoredStage = {
+  id: number;
+  name: string;
+  color: string;
+  permissions?: {
+    id: number;
+    action: string;
+    actionParameters?: { from?: number; to?: number };
+    /** The role ID, or the populated role. */
+    role: number | { id: number };
+  }[];
+};
+
+/**
+ * The `stages` service: the stages of the workflows, their transition permissions, and the stage
+ * of each entry.
+ */
+export type StagesService = {
+  /**
+   * Resolves the stages of a workflow.
+   *
+   * @internal
+   */
+  find(params: {
+    workflowId: Data.ID;
+    populate?: queryParams.Params['populate'];
+  }): Promise<PopulatedStageRow[]>;
+  /**
+   * Resolves the stage with this ID, `null` when there is none. `workflowId` is ignored: the stage
+   * can belong to any workflow.
+   *
+   * @internal
+   */
+  findById(
+    id: Data.ID,
+    params?: { workflowId?: Data.ID; populate?: queryParams.Params['populate'] }
+  ): Promise<PopulatedStageRow | null>;
+  /**
+   * Creates the stages and their transition permissions. Resolves the created rows, with only the
+   * `fields` when given.
+   *
+   * @internal
+   */
+  createMany<TField extends keyof StageRow = keyof StageRow>(
+    stagesList: StageInput[],
+    options?: { fields?: TField[] }
+  ): Promise<Pick<StageRow, TField>[]>;
+  /**
+   * Updates `srcStage` with `destStage`. When `destStage` has `fromPermissions` or
+   * `toPermissions`, replaces the transition permissions, keeping the stored ones of the other
+   * direction. Resolves `null` when the stage does not exist.
+   *
+   * @internal
+   */
+  update(srcStage: StoredStage, destStage: StageInput & { id: number }): Promise<StageRow | null>;
+  /**
+   * Deletes the stage and its transition permissions. Resolves the deleted row, `null` when the
+   * stage does not exist.
+   *
+   * @internal
+   */
+  delete(stage: { id: number; permissions?: { id: number }[] }): Promise<StageRow | null>;
+  /**
+   * Deletes the stages and their transition permissions.
+   *
+   * @internal
+   */
+  deleteMany(stages: { id: number; permissions?: { id: number }[] }[]): Promise<{ count: number }>;
+  /**
+   * Deletes the transition permissions of the stages.
+   *
+   * @internal
+   */
+  deleteStagePermissions(stages: { permissions?: { id: number }[] }[]): Promise<void>;
+  /**
+   * Counts the stages, of one workflow when `workflowId` is given.
+   *
+   * @internal
+   */
+  count(params?: { workflowId?: Data.ID }): Promise<number>;
+  /**
+   * Replaces the stages of a workflow: creates, updates and deletes stages to match `destStages`,
+   * and moves the entries of the `contentTypesToMigrate` at a deleted stage to the nearest
+   * remaining stage. Resolves `destStages` with the IDs of the created stages. Rejects with a
+   * `ValidationError` when no stage would remain.
+   *
+   * @internal
+   */
+  replaceStages(
+    srcStages: StoredStage[],
+    destStages: (StageInput & { id?: number })[],
+    contentTypesToMigrate?: UID.ContentType[]
+  ): Promise<(StageInput & { id: number })[]>;
+  /**
+   * Moves the entry to the stage `stageId`, and keeps the entry's `updatedAt`. Rejects with an
+   * `ApplicationError` when the stage does not exist. Resolves the entry with its stage populated.
+   *
+   * @internal
+   */
+  updateEntity(
+    entityToUpdate: {
+      id: Data.ID;
+      documentId: string;
+      /** `null` for a content type that is not localized. */
+      locale: string | null;
+      updatedAt: string;
+    },
+    model: UID.ContentType,
+    stageId: Data.ID
+  ): Promise<Modules.Documents.AnyDocument | null>;
+  /**
+   * Moves the entries of a content type to the stage `toStageId`: the entries at `fromStageId`,
+   * the entries without a stage when it is `null`, or the entries with a stage when it is
+   * `undefined`. `trx` is ignored. Resolves what the database driver returns for the write.
+   *
+   * @internal
+   */
+  updateEntitiesStage(
+    contentTypeUID: UID.ContentType,
+    params: { fromStageId?: number | null; toStageId: number; trx?: unknown }
+  ): Promise<number | number[]>;
+  /**
+   * Removes the stage of every entry of a content type. Resolves the number of removed links.
+   *
+   * @internal
+   */
+  deleteAllEntitiesStage(contentTypeUID: UID.ContentType): Promise<number>;
 };
