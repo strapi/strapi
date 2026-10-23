@@ -48,23 +48,22 @@ type EditionService<TCE, TEE> = TCE & Partial<Omit<TEE, keyof TCE>>;
 type EnterpriseService<TCE, TEE> = Omit<TCE, keyof TEE> & TEE;
 
 /**
- * The `admin::role` service as runtime calls it: `findOne`, `findOneWithUsersCount` and
- * `getSuperAdmin` resolve to `null` when no role matches, the result of the query engine's `findOne`
- * (`services/role.ts:87-107`, `:228`). The implementation keeps develop's published
- * `Promise<AdminRole>`, `Promise<AdminRoleWithUsersCount>` and `Promise<AdminRole | undefined>`.
+ * The `admin::role` service as runtime calls it: `findOne`, `findOneWithUsersCount`,
+ * `getSuperAdmin` and `getSuperAdminWithUsersCount` resolve to `null` when no role matches, the
+ * result of the query engine's `findOne` (`services/role.ts:87-107`, `:228-233`). The implementation
+ * keeps develop's published `Promise<AdminRole>`, `Promise<AdminRoleWithUsersCount>` and
+ * `Promise<AdminRole | undefined>`.
  */
 type RoleService<TService extends { findOne: (...args: never[]) => unknown }> = Omit<
   TService,
-  'findOne' | 'findOneWithUsersCount' | 'getSuperAdmin'
+  'findOne' | 'findOneWithUsersCount' | 'getSuperAdmin' | 'getSuperAdminWithUsersCount'
 > & {
   findOne(...args: Parameters<(typeof CERoleService)['findOne']>): Promise<AdminRole | null>;
   findOneWithUsersCount(
     ...args: Parameters<(typeof CERoleService)['findOneWithUsersCount']>
   ): Promise<AdminRoleWithUsersCount | null>;
   getSuperAdmin(): Promise<AdminRole | null>;
-  // TODO @Nico `getSuperAdminWithUsersCount` resolves to `null` too when the super admin role is
-  // missing, but its callers in `services/user.ts` read `id` and `usersCount` without a check: typing
-  // it `| null` needs a runtime decision first.
+  getSuperAdminWithUsersCount(): Promise<AdminRoleWithUsersCount | null>;
 };
 
 /**
