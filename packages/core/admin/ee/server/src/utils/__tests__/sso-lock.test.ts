@@ -24,14 +24,14 @@ describe('isSsoLocked', () => {
     roles: [{ id: 3 }, { id: 4 }],
   };
 
+  const load = jest.fn(async () => {
+    return [{ id: 2 }];
+  });
+
   global.strapi = {
     db: {
       query: jest.fn(() => {
-        return {
-          load: jest.fn(async () => {
-            return [{ id: 2 }];
-          }),
-        };
+        return { load };
       }),
     },
     store: jest.fn(() => {
@@ -77,5 +77,7 @@ describe('isSsoLocked', () => {
     ssoEnabled = true;
     expect(await isSsoLocked(userWithLoadedLockedRoles)).toBe(true);
     expect(global.strapi.db.query).toHaveBeenCalledTimes(1);
+    expect(global.strapi.db.query).toHaveBeenCalledWith('admin::user');
+    expect(load).toHaveBeenCalledWith(userWithLoadedLockedRoles, 'roles', { select: ['id'] });
   });
 });
