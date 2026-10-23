@@ -13,6 +13,8 @@ export default function createBuilder() {
   const components = Object.values(strapi.components).map((componentInput) => ({
     category: componentInput.category,
     modelName: componentInput.modelName,
+    // TODO @Nico The component handler's `plugin` is set to the model name, so a component
+    // named `admin` is reported as not writable.
     plugin: componentInput.modelName,
     uid: componentInput.uid,
     filename: componentInput.__filename__,

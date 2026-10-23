@@ -16,7 +16,7 @@ type RegisteredNames = keyof Core.RegisteredFor<
 >;
 
 export default {
-  'content-types': contentTypes,
+  'content-types': contentTypes satisfies Services['content-types'],
   components,
   'component-categories': componentCategories satisfies Services['component-categories'],
   builder: builder satisfies Services['builder'],
