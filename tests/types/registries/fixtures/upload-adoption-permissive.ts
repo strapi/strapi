@@ -14,6 +14,8 @@ app.plugin('upload').service('folder').getStructure(1).anything();
 app.service('plugin::upload.file').getFolderPath('1').anything();
 app.plugin('upload').service('upload').getSettings(1).anything();
 app.service('plugin::upload.upload').findPage({ pagination: true }).anything();
+app.plugin('upload').service('upload').findOne(1).anything();
+app.service('plugin::upload.provider').replace(1, 2).anything();
 app
   .plugin('upload')
   .controller('admin-upload')
