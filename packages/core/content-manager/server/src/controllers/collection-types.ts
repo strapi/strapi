@@ -539,7 +539,9 @@ export default {
     }
 
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
+    // TODO @Nico an update that matches no document resolves to `null`, which the metadata helper
+    // returns as `data` with empty metadata. Its `document` type does not admit it.
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion!);
   },
 
   async clone(ctx: any) {
@@ -576,7 +578,12 @@ export default {
     const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any, excludeNotCreatable);
     const sanitizedBody = await sanitizeFn(body);
 
-    const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
+    const clonedDocument = await documentManager.clone(
+      document.documentId,
+      // `async.pipe` types its result as its first stage's, here the request body as `unknown`.
+      sanitizedBody as Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
+      model
+    );
 
     // The source document can be deleted between the existence check and the clone
     if (clonedDocument === undefined) {
@@ -584,7 +591,9 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
+    // TODO @Nico a clone of a source that no longer exists resolves to `undefined`, which the
+    // metadata helper returns as `data` with empty metadata. Its `document` type does not admit it.
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
       availableStatus: false,

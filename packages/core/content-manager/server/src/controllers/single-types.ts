@@ -79,7 +79,8 @@ const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
 
   if (!documentId) {
     return documentManager.create(model, {
-      data: sanitizedBody,
+      // `async.pipe` types its result as its first stage's, here the request body as `unknown`.
+      data: sanitizedBody as Modules.Documents.Params.Data.Input<UID.ContentType>,
       ...sanitizedQuery,
       locale,
     });
@@ -155,7 +156,9 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
+    // TODO @Nico an update that matches no document resolves to `null`, which the metadata helper
+    // returns as `data` with empty metadata. Its `document` type does not admit it.
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!);
   },
 
   async delete(ctx: any) {
@@ -249,7 +252,9 @@ export default {
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
+    // TODO @Nico a publish that publishes no version resolves to `undefined`, which the metadata
+    // helper returns as `data` with empty metadata. Its `document` type does not admit it.
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!);
   },
 
   async unpublish(ctx: any) {
