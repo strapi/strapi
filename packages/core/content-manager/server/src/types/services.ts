@@ -18,23 +18,31 @@ type DocumentManagerImplementation = ReturnType<DocumentManagerFactory>;
 type FindLocalesOptions = Parameters<DocumentManagerImplementation['findLocales']>[2];
 type FindPageOptions = NonNullable<Parameters<DocumentManagerImplementation['findPage']>[0]>;
 
+// TODO @Nico type results and write data by content type UID, with `createdBy`/`updatedBy` as
+// minimal creator references; the methods take `UID.CollectionType`, not a generic UID.
 /**
  * Existing document operations, including nullable lookups and optional clone results.
  * `findLocales` takes the populate value itself; the implementation keeps its published develop
  * option type, which wraps it in `{ populate }`.
+ *
+ * Documents and write data are the document service types for any content type: without schema
+ * registries, `AnyDocument` and its input counterpart.
  */
 export type DocumentManagerService = Omit<
   DocumentManagerImplementation,
   'findLocales' | 'findPage' | 'countDraftRelations'
 > & {
-  /** @internal */
+  /**
+   * The versions as database rows: no `status`, and relations only as populated.
+   * @internal
+   */
   findLocales(
     id: Parameters<DocumentManagerImplementation['findLocales']>[0],
     uid: Parameters<DocumentManagerImplementation['findLocales']>[1],
     opts: Omit<FindLocalesOptions, 'populate'> & {
       populate?: Modules.Documents.Params.Pick<UID.ContentType, 'populate'>['populate'];
     }
-  ): ReturnType<DocumentManagerImplementation['findLocales']>;
+  ): Promise<Modules.Documents.AnyDocument[]>;
   /**
    * Finds one page of documents. The admin list view passes its query string as is, so
    * `page`, `pageSize` and `hasPublishedVersion` may arrive as strings; the pagination and the
