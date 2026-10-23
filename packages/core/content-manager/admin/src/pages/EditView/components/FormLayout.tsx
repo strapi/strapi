@@ -6,6 +6,7 @@ import { styled } from 'styled-components';
 
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
+import { CopiedComponentsProvider } from './FormInputs/Component/CopiedComponents';
 import { InputRenderer } from './InputRenderer';
 
 import type { UseDocument } from '../../../hooks/useDocument';
@@ -60,63 +61,65 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
   };
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={6}>
-      {layout.map((panel) => {
-        if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
-          const [row] = panel;
-          const [field] = row;
+    <CopiedComponentsProvider>
+      <Flex direction="column" alignItems="stretch" gap={6}>
+        {layout.map((panel) => {
+          if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
+            const [row] = panel;
+            const [field] = row;
+
+            return (
+              <Grid.Root key={field.name} gap={4}>
+                <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
+                  <InputRenderer
+                    {...field}
+                    label={getLabel(field.name, field.label)}
+                    document={document}
+                  />
+                </Grid.Item>
+              </Grid.Root>
+            );
+          }
 
           return (
-            <Grid.Root key={field.name} gap={4}>
-              <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                <InputRenderer
-                  {...field}
-                  label={getLabel(field.name, field.label)}
-                  document={document}
-                />
-              </Grid.Item>
-            </Grid.Root>
+            <Box
+              key={panel.flatMap((row) => row.map((field) => field.name)).join('.')}
+              {...(hasBackground && panelStyles)}
+            >
+              <Flex direction="column" alignItems="stretch" gap={6}>
+                {panel.map((row) => {
+                  return (
+                    <ResponsiveGridRoot
+                      key={row.map((field) => field.name).join('.')}
+                      gap={{ initial: 6, medium: 4 }}
+                    >
+                      {row.map(({ size, ...field }) => {
+                        return (
+                          <ResponsiveGridItem
+                            col={size}
+                            key={field.name}
+                            s={12}
+                            xs={12}
+                            direction="column"
+                            alignItems="stretch"
+                          >
+                            <InputRenderer
+                              {...field}
+                              label={getLabel(field.name, field.label)}
+                              document={document}
+                            />
+                          </ResponsiveGridItem>
+                        );
+                      })}
+                    </ResponsiveGridRoot>
+                  );
+                })}
+              </Flex>
+            </Box>
           );
-        }
-
-        return (
-          <Box
-            key={panel.flatMap((row) => row.map((field) => field.name)).join('.')}
-            {...(hasBackground && panelStyles)}
-          >
-            <Flex direction="column" alignItems="stretch" gap={6}>
-              {panel.map((row) => {
-                return (
-                  <ResponsiveGridRoot
-                    key={row.map((field) => field.name).join('.')}
-                    gap={{ initial: 6, medium: 4 }}
-                  >
-                    {row.map(({ size, ...field }) => {
-                      return (
-                        <ResponsiveGridItem
-                          col={size}
-                          key={field.name}
-                          s={12}
-                          xs={12}
-                          direction="column"
-                          alignItems="stretch"
-                        >
-                          <InputRenderer
-                            {...field}
-                            label={getLabel(field.name, field.label)}
-                            document={document}
-                          />
-                        </ResponsiveGridItem>
-                      );
-                    })}
-                  </ResponsiveGridRoot>
-                );
-              })}
-            </Flex>
-          </Box>
-        );
-      })}
-    </Flex>
+        })}
+      </Flex>
+    </CopiedComponentsProvider>
   );
 });
 

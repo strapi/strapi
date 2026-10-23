@@ -69,4 +69,26 @@ describe('ComponentPicker', () => {
 
     expect(onClickAddComponent).toHaveBeenCalledWith('blog.test-como');
   });
+
+  it('should offer to add an empty component or to copy one when copying is available', async () => {
+    const onClickAddComponent = jest.fn();
+    const onClickCopyComponent = jest.fn();
+    const { user } = render({
+      onClickAddComponent,
+      onClickCopyComponent,
+    });
+
+    await user.click(screen.getByRole('button', { name: 'component' }));
+
+    expect(onClickAddComponent).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('menuitem', { name: /Use existing content/ }));
+
+    expect(onClickCopyComponent).toHaveBeenCalledWith('blog.test-como');
+
+    await user.click(screen.getByRole('button', { name: 'component' }));
+    await user.click(screen.getByRole('menuitem', { name: /Empty component/ }));
+
+    expect(onClickAddComponent).toHaveBeenCalledWith('blog.test-como');
+  });
 });

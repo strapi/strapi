@@ -2,8 +2,10 @@ import * as React from 'react';
 
 import { useField, useNotification, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
+  Badge,
   Box,
   Flex,
+  Menu,
   TextButton,
   VisuallyHidden,
   Accordion,
@@ -17,17 +19,21 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
-import { transformDocument } from '../../../utils/data';
+import { type AnyData, transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
 import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
+import { AddComponentMenuContent } from './AddComponentMenu';
+import { ComponentCopyModal } from './ComponentCopyModal';
+import { useCopiedComponents } from './CopiedComponents';
 import { Initializer } from './Initializer';
 
 import type { ComponentInputProps } from './Input';
@@ -42,11 +48,12 @@ const DEFAULT_MAIN_FIELD: NonNullable<ComponentProps['mainField']> = {
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
 
-type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
+type RepeatableComponentProps = Omit<ComponentInputProps, 'required'>;
 
 const RepeatableComponent = ({
   attribute,
   disabled,
+  label,
   name,
   mainField,
   children,
@@ -56,8 +63,9 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const { currentDocument } = useDocumentContext('RepeatableComponent');
+  const { currentDocument, currentDocumentMeta } = useDocumentContext('RepeatableComponent');
   const components = currentDocument.components;
+  const canCopyFromExisting = currentDocumentMeta.collectionType === COLLECTION_TYPES;
 
   const {
     value: rawValue,
@@ -72,6 +80,9 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
+  const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
+  // The entries copied from another entry are flagged until the form is saved.
+  const { isCopied, insertCopies } = useCopiedComponents(name);
 
   React.useEffect(() => {
     const hasNestedErrors = rawError && Array.isArray(rawError) && rawError.length > 0;
@@ -128,13 +139,25 @@ const RepeatableComponent = ({
   const prevValue = usePrev(value);
 
   React.useEffect(() => {
-    /**
-     * When we add a new item to the array, we want to open the collapse.
-     */
     if (prevValue && prevValue.length < value.length) {
+      const prevKeys = new Set(prevValue.map((item) => item.__temp_key__));
+      const newKeys = value
+        .filter((item) => !prevKeys.has(item.__temp_key__))
+        .map((item) => item.__temp_key__);
+
+      /**
+       * Copied entries come in filled: they stay collapsed.
+       */
+      if (newKeys.length > 0 && newKeys.every(isCopied)) {
+        return;
+      }
+
+      /**
+       * When we add a new item to the array, we want to open the collapse.
+       */
       setCollapseToOpen(value[value.length - 1].__temp_key__);
     }
-  }, [value, prevValue]);
+  }, [value, prevValue, isCopied]);
 
   React.useEffect(() => {
     if (typeof componentTmpKeyWithFocussedField === 'string') {
@@ -146,6 +169,16 @@ const RepeatableComponent = ({
     setCollapseToOpen('');
   }, []);
 
+  const notifyMaximumReached = () => {
+    toggleNotification({
+      type: 'info',
+      message: formatMessage({
+        id: getTranslation('components.notification.info.maximum-requirement'),
+        defaultMessage: 'You have already reached the maximum number of fields',
+      }),
+    });
+  };
+
   const handleClick = () => {
     if (value.length < max) {
       const schema = components[attribute.component];
@@ -155,13 +188,35 @@ const RepeatableComponent = ({
       addFieldRow(name, data);
       // setCollapseToOpen(nextTempKey);
     } else if (value.length >= max) {
-      toggleNotification({
-        type: 'info',
-        message: formatMessage({
-          id: getTranslation('components.notification.info.maximum-requirement'),
-        }),
-      });
+      notifyMaximumReached();
     }
+  };
+
+  /**
+   * Like adding an empty entry, copying into a full field is refused right away rather than
+   * opening a modal where nothing can be inserted.
+   */
+  const handleCopyClick = () => {
+    if (value.length >= max) {
+      notifyMaximumReached();
+
+      return;
+    }
+
+    setIsCopyModalOpen(true);
+  };
+
+  const handleCopyComponents = (items: AnyData[]) => {
+    // The modal doesn't let more items than there's room for be selected, this is a safety net.
+    if (value.length + items.length > max) {
+      notifyMaximumReached();
+
+      return false;
+    }
+
+    insertCopies(items);
+
+    return true;
   };
 
   const handleMoveComponentField = React.useCallback(
@@ -253,8 +308,31 @@ const RepeatableComponent = ({
 
   const level = useComponent('RepeatableComponent', (state) => state.level);
 
+  const copyModal = isCopyModalOpen && (
+    <ComponentCopyModal
+      componentUid={attribute.component}
+      fieldLabel={label}
+      maxSelection={max - value.length}
+      mode="component"
+      onClose={() => setIsCopyModalOpen(false)}
+      onInsert={handleCopyComponents}
+      selection="multiple"
+      sourceFieldName={name}
+    />
+  );
+
   if (value.length === 0) {
-    return <Initializer disabled={disabled} name={name} onClick={handleClick} />;
+    return (
+      <>
+        <Initializer
+          disabled={disabled}
+          name={name}
+          onClick={handleClick}
+          onCopyClick={canCopyFromExisting ? handleCopyClick : undefined}
+        />
+        {copyModal}
+      </>
+    );
   }
 
   return (
@@ -302,17 +380,35 @@ const RepeatableComponent = ({
                 totalLength={value.length}
                 layout={layout}
                 renderField={children}
+                isCopied={isCopied(key)}
               />
             </ComponentProvider>
           );
         })}
-        <TextButtonCustom disabled={disabled} onClick={handleClick} startIcon={<Plus />}>
-          {formatMessage({
-            id: getTranslation('containers.EditView.add.new-entry'),
-            defaultMessage: 'Add an entry',
-          })}
-        </TextButtonCustom>
+        {canCopyFromExisting ? (
+          <Menu.Root>
+            <AddEntryMenuTrigger disabled={disabled} endIcon={null} startIcon={<Plus />}>
+              {formatMessage({
+                id: getTranslation('containers.EditView.add.new-entry'),
+                defaultMessage: 'Add an entry',
+              })}
+            </AddEntryMenuTrigger>
+            <AddComponentMenuContent
+              kind="entry"
+              onAddEmpty={handleClick}
+              onCopy={handleCopyClick}
+            />
+          </Menu.Root>
+        ) : (
+          <TextButtonCustom disabled={disabled} onClick={handleClick} startIcon={<Plus />}>
+            {formatMessage({
+              id: getTranslation('containers.EditView.add.new-entry'),
+              defaultMessage: 'Add an entry',
+            })}
+          </TextButtonCustom>
+        )}
       </AccordionRoot>
+      {copyModal}
     </Box>
   );
 };
@@ -339,6 +435,44 @@ const TextButtonCustom = styled(TextButton)`
   }
 
   span {
+    font-weight: 600;
+    font-size: 1.4rem;
+    line-height: 2.4rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: background-color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
+  }
+`;
+
+/**
+ * Same look as `TextButtonCustom`, as the trigger of the menu offering to add an empty entry or
+ * to copy existing content.
+ */
+const AddEntryMenuTrigger = styled(Menu.Trigger)`
+  && {
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    border: 0;
+    border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
+    border-radius: 0;
+    background: transparent;
+    color: ${({ theme }) => theme.colors.primary600};
+    padding-inline: ${(props) => props.theme.spaces[6]};
+    padding-block: ${(props) => props.theme.spaces[3]};
+  }
+
+  &&:not([disabled]):hover,
+  &&[data-state='open'] {
+    background-color: ${(props) => props.theme.colors.primary100};
+  }
+
+  &&[disabled] {
+    color: ${({ theme }) => theme.colors.neutral600};
+  }
+
+  && span {
     font-weight: 600;
     font-size: 1.4rem;
     line-height: 2.4rem;
@@ -418,6 +552,10 @@ interface ComponentProps
   attributeComponent: string;
   disabled?: boolean;
   index: number;
+  /**
+   * Whether the entry was copied from another entry and not saved yet.
+   */
+  isCopied?: boolean;
   name: string;
   onDeleteComponent?: (index: number) => void;
   renderField: RepeatableComponentProps['children'];
@@ -430,6 +568,7 @@ const Component = ({
   attributeComponent,
   disabled,
   index,
+  isCopied,
   name,
   mainField = DEFAULT_MAIN_FIELD,
   layout,
@@ -501,6 +640,14 @@ const Component = ({
           <Accordion.Header>
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
+              {isCopied && (
+                <Badge variant="success" size="S">
+                  {formatMessage({
+                    id: getTranslation('components.Component.copied'),
+                    defaultMessage: 'Copied',
+                  })}
+                </Badge>
+              )}
               <IconButton
                 disabled={disabled}
                 variant="ghost"
