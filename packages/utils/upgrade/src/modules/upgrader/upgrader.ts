@@ -10,7 +10,6 @@ import { constants as projectConstants } from '../project';
 import {
   isSemverInstance,
   isSemVerReleaseType,
-  isValidSemVer,
   rangeFromVersions,
   semVerFactory,
 } from '../version';
@@ -26,7 +25,7 @@ import type { NPM } from '../npm';
 import type { AppProject } from '../project';
 import type { ConfirmationCallback } from '../common/types';
 
-type DependenciesEntries = Array<[name: string, version: Version.SemVer]>;
+type DependenciesEntries = Array<[name: string, version: string]>;
 
 export class Upgrader implements UpgraderInterface {
   private readonly project: AppProject;
@@ -298,13 +297,15 @@ export class Upgrader implements UpgraderInterface {
 
     const strapiDependencies: DependenciesEntries = [];
 
-    // Find all @strapi/* packages matching the current Strapi version
+    // Find all @strapi/* packages whose declared range includes the current Strapi version
     for (const [name, version] of Object.entries(dependencies)) {
       const isScopedStrapiPackage = name.startsWith(projectConstants.SCOPED_STRAPI_PACKAGE_PREFIX);
-      const isOnCurrentStrapiVersion = isValidSemVer(version) && version === strapiVersion.raw;
+      const versionRange = semver.validRange(version);
+      const isOnCurrentStrapiVersion =
+        versionRange !== null && semver.satisfies(strapiVersion.raw, versionRange);
 
       if (isScopedStrapiPackage && isOnCurrentStrapiVersion) {
-        strapiDependencies.push([name, semVerFactory(version)]);
+        strapiDependencies.push([name, version]);
       }
     }
 
