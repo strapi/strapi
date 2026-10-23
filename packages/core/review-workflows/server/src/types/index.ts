@@ -1,12 +1,15 @@
 import type createAssigneesService from '../services/assignees';
-import type MetricsService from '../services/metrics';
-import type createWeeklyMetricsService from '../services/metrics/weekly-metrics';
 import type createStagePermissionsService from '../services/stage-permissions';
 import type createStagesService from '../services/stages';
 import type createWorkflowsService from '../services/workflows';
 import type { createHomepageService } from '../homepage/services/homepage';
 import type { Controllers } from './controllers';
-import type { DocumentServiceMiddlewaresService, ValidationService } from './services';
+import type {
+  DocumentServiceMiddlewaresService,
+  ValidationService,
+  WorkflowMetricsService,
+  WorkflowWeeklyMetricsService,
+} from './services';
 
 export type * from './controllers';
 export type * from './services';
@@ -22,8 +25,8 @@ export type Services = {
   'stage-permissions': ReturnType<typeof createStagePermissionsService>;
   stages: ReturnType<typeof createStagesService>;
   validation: ValidationService;
-  'workflow-metrics': typeof MetricsService;
-  'workflow-weekly-metrics': ReturnType<typeof createWeeklyMetricsService>;
+  'workflow-metrics': WorkflowMetricsService;
+  'workflow-weekly-metrics': WorkflowWeeklyMetricsService;
   workflows: ReturnType<typeof createWorkflowsService>;
 };
 
