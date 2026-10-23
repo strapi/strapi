@@ -28,6 +28,105 @@ export interface Store {
 
 const storage = new AsyncLocalStorage<Store>();
 
+const isDeadlockError = (error: unknown) => {
+  const seen = new Set<unknown>();
+
+  const matches = (candidate: unknown): boolean => {
+    if (!candidate || typeof candidate !== 'object' || seen.has(candidate)) {
+      return false;
+    }
+
+    seen.add(candidate);
+    const current = candidate as {
+      code?: string;
+      errno?: number;
+      message?: string;
+      original?: unknown;
+      cause?: unknown;
+    };
+
+    if (
+      current.code === '40P01' ||
+      current.code === 'ER_LOCK_DEADLOCK' ||
+      current.errno === 1213 ||
+      current.message?.includes('deadlock detected') ||
+      current.message?.includes('Deadlock found')
+    ) {
+      return true;
+    }
+
+    return matches(current.original) || matches(current.cause);
+  };
+
+  return matches(error);
+};
+
+/**
+ * Commit and rollback hooks run after the transaction finishes, and the
+ * caller does not wait for them. Hooks that return a promise (document
+ * events, history, audit logs) keep using the database, so they are tracked
+ * until they settle and Database#destroy can wait before closing the pool.
+ * Hooks registered synchronously while a batch runs are included. A rejection
+ * is logged and does not change the transaction result: the data is already
+ * committed, and failing the request would invite a retry of that write.
+ */
+const pendingCallbacks = new Set<Promise<unknown>>();
+
+const reportCallbackError = (error: unknown) => {
+  try {
+    console.error('Transaction callback failed', error);
+  } catch {
+    // A broken logger must not leave the hook in the pending set.
+  }
+};
+
+const track = (promise: Promise<unknown>) => {
+  const settled = promise.then(
+    () => undefined,
+    (error: unknown) => {
+      reportCallbackError(error);
+    }
+  );
+  pendingCallbacks.add(settled);
+  settled.then(
+    () => {
+      pendingCallbacks.delete(settled);
+    },
+    () => {
+      pendingCallbacks.delete(settled);
+    }
+  );
+  return settled;
+};
+
+const runCallbacks = (callbacks: Callback[] | undefined) => {
+  if (!callbacks) {
+    return;
+  }
+
+  while (callbacks.length > 0) {
+    const batch = callbacks.splice(0, callbacks.length);
+    for (const cb of batch) {
+      try {
+        const result = cb();
+        if (result && typeof (result as Promise<unknown>).then === 'function') {
+          track(result as Promise<unknown>);
+        }
+      } catch (error) {
+        // The transaction is already committed. A synchronous throw must not
+        // be retried as a deadlock.
+        reportCallbackError(error);
+      }
+    }
+  }
+};
+
+const waitForPendingCallbacks = async () => {
+  while (pendingCallbacks.size > 0) {
+    await Promise.allSettled(pendingCallbacks);
+  }
+};
+
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const store = storage.getStore();
@@ -64,13 +163,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    if (!store?.commitCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.commitCallbacks.forEach((cb) => cb());
-    store.commitCallbacks = [];
+    runCallbacks(store?.commitCallbacks);
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -90,13 +183,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    if (!store?.rollbackCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.rollbackCallbacks.forEach((cb) => cb());
-    store.rollbackCallbacks = [];
+    runCallbacks(store?.rollbackCallbacks);
   },
 
   onCommit(cb: Callback) {
@@ -114,4 +201,4 @@ const transactionCtx = {
   },
 };
 
-export { transactionCtx };
+export { isDeadlockError, transactionCtx, waitForPendingCallbacks };

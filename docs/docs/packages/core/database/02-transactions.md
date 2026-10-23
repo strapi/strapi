@@ -27,6 +27,8 @@ await strapi.db.transaction(async ({ trx, rollback, commit, onCommit, onRollback
 
 After the transaction handler is executed, the transaction is committed if all operations succeed. If any of the operations throws, the transaction is rolled back and the data is restored to its previous state.
 
+Postgres and MySQL abort a transaction on deadlock and require the caller to run it again. A top-level `strapi.db.transaction` does that up to 3 times. The handler can therefore run more than once, and it must be safe to repeat: database work from the failed attempt has been rolled back, but other side effects (an email, an HTTP call) have not. Do that kind of work in `onCommit`, which runs only after a successful commit and is not retried. Nested `strapi.db.transaction` calls are not retried on their own; the outermost handler runs again. `onCommit` and `onRollback` callbacks are not awaited. A callback that throws or rejects is logged. It does not fail the write and it does not cause another retry. `db.destroy()` waits for callbacks that are still running.
+
 :::note
 Every `strapi.db.query` operation performed in a transaction block will implicitly use the transaction.
 :::

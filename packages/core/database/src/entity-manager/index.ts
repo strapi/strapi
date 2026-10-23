@@ -38,6 +38,8 @@ import {
   deleteRelations,
   cleanOrderColumns,
 } from './regular-relations';
+import { idsFromInsertResult, readAutoIncrementStep } from './inserted-ids';
+import { isDeadlockError, transactionCtx } from '../transaction-context';
 import { relationsOrderer } from './relations-orderer';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
@@ -341,6 +343,10 @@ export const createEntityManager = (db: Database): EntityManager => {
 
       const id = isRecord(res[0]) ? res[0].id : res[0];
 
+      // Inside a document write this is the outer transaction. A deadlock has
+      // already aborted it, so deleting the new row throws "current transaction
+      // is aborted" and the outermost retry never sees the deadlock.
+      const nested = Boolean(transactionCtx.get());
       const trx = await strapi.db.transaction();
       try {
         await this.attachRelations(uid, id, data, { transaction: trx.get() });
@@ -348,7 +354,10 @@ export const createEntityManager = (db: Database): EntityManager => {
         await trx.commit();
       } catch (e) {
         await trx.rollback();
-        await this.createQueryBuilder(uid).where({ id }).delete().execute();
+
+        if (!(nested && isDeadlockError(e))) {
+          await this.createQueryBuilder(uid).where({ id }).delete().execute();
+        }
         throw e;
       }
 
@@ -386,6 +395,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
 
       const batchSize = db.dialect.getBatchInsertSize();
+      const increment = db.dialect.useReturning() ? 1 : await readAutoIncrementStep(db);
       const trx = await db.transaction();
       let createdEntries: Array<ID | { id: ID }> = [];
       try {
@@ -396,7 +406,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .transacting(trx.get())
             .execute<Array<ID | { id: ID }>>();
           createdEntries = createdEntries.concat(
-            Array.isArray(chunkResult) ? chunkResult : [chunkResult]
+            idsFromInsertResult(chunkResult, chunk.length, db.dialect.useReturning(), increment)
           );
         }
         await trx.commit();
@@ -447,14 +457,39 @@ export const createEntityManager = (db: Database): EntityManager => {
         await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
       }
 
-      const trx = await strapi.db.transaction();
-      try {
-        await this.updateRelations(uid, id, data, { transaction: trx.get() });
-        await trx.commit();
-      } catch (e) {
-        await trx.rollback();
-        await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
-        throw e;
+      // Relation order updates deadlock when two users share a role and both
+      // change it. Retry only when this update owns the transaction. Inside a
+      // document write the outer transaction is already aborted, and retrying
+      // here would run the next statements outside it.
+      const nested = Boolean(transactionCtx.get());
+      const maxAttempts = nested ? 1 : 3;
+      let relationsUpdated = false;
+      let lastError: unknown;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        const trx = await strapi.db.transaction();
+        try {
+          await this.updateRelations(uid, id, data, { transaction: trx.get() });
+          await trx.commit();
+          relationsUpdated = true;
+          break;
+        } catch (e) {
+          await trx.rollback();
+
+          lastError = e;
+          if (nested || attempt === maxAttempts || !isDeadlockError(e)) {
+            break;
+          }
+        }
+      }
+
+      if (!relationsUpdated) {
+        // The scalar update above is in the same aborted transaction, so a
+        // restore query would hide the deadlock with "transaction is aborted".
+        if (!(nested && isDeadlockError(lastError))) {
+          await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
+        }
+        throw lastError;
       }
 
       // TODO: do not trigger the findOne lifecycles ?

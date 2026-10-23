@@ -10,7 +10,13 @@ import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
-import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import {
+  Callback,
+  isDeadlockError,
+  transactionCtx,
+  TransactionObject,
+  waitForPendingCallbacks,
+} from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
@@ -249,6 +255,31 @@ class Database {
   async transaction<TCallback extends Callback>(
     cb?: TCallback
   ): Promise<ReturnType<TCallback> | TransactionObject> {
+    // Postgres and MySQL abort one transaction when two of them deadlock, and
+    // the caller has to run it again. Nested work is not retried on its own:
+    // the outer transaction is already aborted, so the outermost callback
+    // runs again. Commit hooks are not part of this loop.
+    const nested = !!transactionCtx.get();
+    const attempts = nested ? 1 : 3;
+
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        return await this.runTransaction(cb);
+      } catch (error) {
+        lastError = error;
+        if (nested || attempt === attempts || !isDeadlockError(error)) {
+          throw error;
+        }
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async runTransaction<TCallback extends Callback>(
+    cb?: TCallback
+  ): Promise<ReturnType<TCallback> | TransactionObject> {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
       ? await this.connection.transaction()
@@ -339,6 +370,8 @@ class Database {
   }
 
   async destroy() {
+    await waitForPendingCallbacks();
+
     try {
       await this.lifecycles.clear();
     } finally {

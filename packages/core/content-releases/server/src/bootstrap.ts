@@ -71,15 +71,15 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.documents.use(deleteActionsOnDelete);
     strapi.documents.use(updateActionsOnUpdate);
 
-    getService('scheduling', { strapi })
-      .syncFromDatabase()
-      .catch((err: Error) => {
-        strapi.log.error(
-          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
-        );
+    try {
+      await getService('scheduling', { strapi }).syncFromDatabase();
+    } catch (err) {
+      strapi.log.error(
+        'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
+      );
 
-        throw err;
-      });
+      throw err;
+    }
 
     Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
       strapi.get('webhookStore').addAllowedEvent(key, value);

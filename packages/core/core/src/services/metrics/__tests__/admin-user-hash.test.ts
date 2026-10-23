@@ -14,6 +14,7 @@ describe('user email hash', () => {
     const ctx = createContext({}, { state });
 
     const strapi = {
+      has: jest.fn(() => true),
       requestContext: {
         get: jest.fn(() => ctx),
       },
@@ -29,6 +30,7 @@ describe('user email hash', () => {
     const ctx = createContext({}, {});
 
     const strapi = {
+      has: jest.fn(() => true),
       requestContext: {
         get: jest.fn(() => ctx),
       },
@@ -36,5 +38,16 @@ describe('user email hash', () => {
 
     const userId = generateAdminUserHash(strapi as any);
     expect(userId).toBe('');
+  });
+
+  test('returns empty string after request context has been released', () => {
+    const strapi = {
+      has: jest.fn(() => false),
+      get requestContext() {
+        throw new Error('Could not resolve service requestContext');
+      },
+    };
+
+    expect(generateAdminUserHash(strapi as any)).toBe('');
   });
 });
