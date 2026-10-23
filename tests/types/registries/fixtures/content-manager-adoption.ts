@@ -78,6 +78,22 @@ app.service('plugin::content-manager.permission').canConfigureContentType({
   contentType,
 });
 
+declare const userAbility: Parameters<
+  Services.PermissionCheckerService['create']
+>[0]['userAbility'];
+const checker = app
+  .service('plugin::content-manager.permission-checker')
+  .create({ userAbility, model: 'api::article.article' });
+declare const article: Modules.Documents.AnyDocument | null;
+checker.sanitizeOutput(article) satisfies Promise<Modules.Documents.AnyDocument | null>;
+// @ts-expect-error Sanitized output keeps the type of its input, not `any`.
+checker.sanitizeOutput(article) satisfies Promise<{ documentId: number }>;
+checker
+  .sanitizeUpdateInput(article)({ title: 'Article' })
+  .then((data) => data.title) satisfies Promise<string>;
+// @ts-expect-error Sanitized input keeps the type of its input, not `any`.
+checker.sanitizeCreateInput({ title: 'Article' }) satisfies Promise<{ title: number }>;
+
 const contentTypes = app.plugin('content-manager').service('content-types');
 contentTypes
   .findConfiguration({ uid: 'api::article.article' })
