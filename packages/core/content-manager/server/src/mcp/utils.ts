@@ -2,6 +2,7 @@ import type { Modules, UID } from '@strapi/types';
 
 import { formatDocumentWithMetadata } from '../controllers/utils/metadata';
 import type { GetMetadataOptions } from '../services/document-metadata';
+import type { PermissionChecker } from '../types/services';
 import { shapeRelationsForMcp } from './sanitizers/shape-relations';
 
 /**
@@ -21,9 +22,7 @@ export const slugifyUidForMcpToolName = (uid: string): string => {
   return `${namespace.toLowerCase()}-${parts.join('_')}`;
 };
 
-type McpPermissionChecker = {
-  sanitizeOutput: (doc: unknown) => Promise<Record<string, unknown>>;
-};
+type McpPermissionChecker = Pick<PermissionChecker, 'sanitizeOutput'>;
 
 /**
  * Output chokepoint for MCP handlers returning `{ data, meta }`.

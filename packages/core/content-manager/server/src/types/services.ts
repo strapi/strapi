@@ -234,12 +234,6 @@ export type PopulateBuilderService = (uid: UID.Schema) => PopulateBuilder;
 export type PermissionCheckerAction =
   'read' | 'create' | 'update' | 'delete' | 'publish' | 'unpublish' | 'discard';
 
-// TODO @Nico tighten contract: output and input sanitizers forward the admin permissions manager's
-// `unknown` results, which callers use as non-null documents. A document type needs null handling
-// at about 19 controller and MCP call sites.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Sanitized = any;
-
 /** A request query, without the fields and populate the ability does not permit. */
 type SanitizedQuery = Record<string, unknown>;
 
@@ -253,10 +247,13 @@ export type PermissionChecker = {
   cannot: PermissionCheck;
   /** Whether the entity is needed to evaluate the action, because a rule has conditions. */
   requiresEntity: ((action: string) => boolean) & Record<PermissionCheckerAction, () => boolean>;
-  sanitizeOutput(data: unknown, options?: { action?: string }): Promise<Sanitized>;
+  /** Resolves to `data` without the fields the user may not read. */
+  sanitizeOutput<TData>(data: TData, options?: { action?: string }): Promise<TData>;
   sanitizeQuery(query: unknown, options?: { action?: string }): Promise<SanitizedQuery>;
-  sanitizeCreateInput(data: unknown): Promise<Sanitized>;
-  sanitizeUpdateInput(entity: unknown): (data: unknown) => Promise<Sanitized>;
+  /** Resolves to `data` without the fields the user may not create. */
+  sanitizeCreateInput<TData>(data: TData): Promise<TData>;
+  /** Resolves to `data` without the fields the user may not update on `entity`. */
+  sanitizeUpdateInput(entity: unknown): <TData>(data: TData) => Promise<TData>;
   validateQuery(query: unknown, options?: { action?: string }): Promise<unknown>;
   validateInput(action: string, data: unknown, entity?: unknown): Promise<unknown>;
   /** Sanitizes a query, then restricts it to what the ability permits. */
