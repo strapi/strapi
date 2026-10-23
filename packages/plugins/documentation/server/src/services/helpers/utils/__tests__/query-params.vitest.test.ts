@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import queryParams from '../query-params';
 
 describe('Documentation plugin | query params', () => {

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import buildComponentSchema from '../helpers/build-component-schema';
 
 const strapi = {
@@ -37,6 +38,12 @@ const strapi = {
     },
   },
   contentType: () => ({ info: {}, attributes: { test: { type: 'string' } } }),
+  plugin(name: string) {
+    return this.plugins[name];
+  },
+  api(name: string) {
+    return this.apis[name];
+  },
 } as any;
 
 describe('Documentation plugin | Build component schema', () => {
@@ -382,7 +389,7 @@ describe('Documentation plugin | Build component schema', () => {
         },
       },
     };
-    (global.strapi as any).contentType = jest.fn((uid: string) => {
+    (global.strapi as any).contentType = vi.fn((uid: string) => {
       return (
         (global.strapi as any).apis.restaurant.contentTypes[uid.split('.').at(-1)!] ?? {
           attributes: {},
@@ -430,7 +437,7 @@ describe('Documentation plugin | Build component schema', () => {
     (global.strapi as any).apis.restaurant.routes = {
       article: { routes: [] },
     };
-    (global.strapi as any).contentType = jest.fn(
+    (global.strapi as any).contentType = vi.fn(
       () => (global.strapi as any).apis.restaurant.contentTypes.article
     );
 
