@@ -13161,6 +13161,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vercel/detect-agent@npm:1.2.7":
+  version: 1.2.7
+  resolution: "@vercel/detect-agent@npm:1.2.7"
+  checksum: 10c0/3698a94a8275f6980d3f7b536c9a104e7b5c7b1080d0690a2768955742b1f38602adf15d180caf27d68779792dcc2bb0c8b389785db6933d7af9c50d2c3da434
+  languageName: node
+  linkType: hard
+
 "@vercel/ncc@npm:0.38.2":
   version: 0.38.2
   resolution: "@vercel/ncc@npm:0.38.2"
@@ -16046,8 +16053,10 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/inquirer": "npm:9.0.9"
     "@types/node": "npm:20.19.41"
+    "@vercel/detect-agent": "npm:1.2.7"
     async-retry: "npm:1.3.3"
     chalk: "npm:4.1.2"
+    ci-info: "npm:4.0.0"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:5.58.0"
     execa: "npm:5.1.1"
