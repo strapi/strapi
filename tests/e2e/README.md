@@ -4,11 +4,12 @@ Playwright specs live under **`tests/e2e/tests/`** (each top-level folder is a *
 
 **Do not duplicate setup here.** Use the contributor documentation:
 
-| Guide                                                                            | Contents                                                                                                                                                                |
-| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Setup](../../docs/docs/contributing/03-testing/e2e/00-setup.md)                 | Playwright install, `tests/e2e/.env` / `STRAPI_LICENSE`, `yarn test:e2e` / `:ce` / `:ee`, domains, concurrency, runner vs Playwright args, env vars, cleaning test apps |
-| [App template](../../docs/docs/contributing/03-testing/e2e/01-app-template.md)   | How the shared `tests/app-template` feeds generated `test-apps/e2e/`                                                                                                    |
-| [Data transfer](../../docs/docs/contributing/03-testing/e2e/02-data-transfer.md) | DTS-related e2e workflows                                                                                                                                               |
+| Guide                                                                                      | Contents                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Setup](../../docs/docs/contributing/03-testing/e2e/00-setup.md)                           | Playwright install, `tests/e2e/.env` / `STRAPI_LICENSE`, `yarn test:e2e` / `:ce` / `:ee`, domains, concurrency, runner vs Playwright args, env vars, cleaning test apps |
+| [App template](../../docs/docs/contributing/03-testing/e2e/01-app-template.md)             | How the shared `tests/app-template` feeds generated `test-apps/e2e/`                                                                                                    |
+| [Data transfer](../../docs/docs/contributing/03-testing/e2e/02-data-transfer.md)           | DTS-related e2e workflows                                                                                                                                               |
+| [Enterprise plugins](../../docs/docs/contributing/03-testing/e2e/03-enterprise-plugins.md) | Opt-in `enterprise-plugins` domain and its CI job, which check that changes do not break the private BYOK plugin                                                        |
 
 For scripted or agent-driven runs from the repo root, see **[AGENTS.md](../../AGENTS.md)**.
 
