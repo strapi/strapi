@@ -73,6 +73,7 @@ const mockEntries = [
 
 const mockGetDocuments = jest.fn();
 const mockGetDocument = jest.fn();
+let mockIsFetchingDocument = false;
 const mockGetAllRelations = jest.fn();
 
 jest.mock('../../../../../../services/documents', () => {
@@ -94,7 +95,7 @@ jest.mock('../../../../../../services/documents', () => {
 
       return [getDocuments, { data: { results }, isFetching: false, isUninitialized: false }];
     },
-    useLazyGetDocumentQuery: () => [mockGetDocument, { isFetching: false }],
+    useLazyGetDocumentQuery: () => [mockGetDocument, { isFetching: mockIsFetchingDocument }],
   };
 });
 
@@ -180,6 +181,7 @@ describe('ComponentCopyModal', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockIsFetchingDocument = false;
   });
 
   const render = (props: Partial<ComponentCopyModalProps> = {}) =>
@@ -392,6 +394,23 @@ describe('ComponentCopyModal', () => {
         'false'
       );
       expect(screen.getByText('Pick an entry to see its openingTimes.')).toBeInTheDocument();
+    });
+
+    it('keeps the focus on the picked entry while it loads', async () => {
+      mockIsFetchingDocument = true;
+
+      const { user } = render();
+
+      const bistro = await screen.findByRole('button', { name: /Le Petit Bistro/ });
+
+      // not `disabled`, which would drop the focus of the entry that was just picked
+      expect(bistro).toHaveAttribute('aria-disabled', 'true');
+      expect(bistro).toBeEnabled();
+
+      await user.click(bistro);
+
+      expect(bistro).toHaveFocus();
+      expect(mockGetDocument).not.toHaveBeenCalled();
     });
   });
 

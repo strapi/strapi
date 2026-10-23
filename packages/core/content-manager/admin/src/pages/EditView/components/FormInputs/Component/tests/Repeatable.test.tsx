@@ -240,20 +240,22 @@ describe('RepeatableComponent', () => {
 
       await user.click(screen.getByRole('button', { name: /No entry yet/i }));
       await user.click(screen.getByRole('menuitem', { name: /Use existing content/ }));
-      await user.click(screen.getByRole('button', { name: 'Insert 1' }));
+      await user.click(screen.getByRole('button', { name: 'Insert 2' }));
 
+      expect(getCopiedBadges()).toHaveLength(2);
+
+      // the first copy keeps the form modified: the flags aren't cleared as a whole
+      await user.click(screen.getAllByRole('button', { name: 'Delete' })[1]);
+
+      expect(screen.queryByRole('button', { name: 'Copy 2' })).not.toBeInTheDocument();
       expect(getCopiedBadges()).toHaveLength(1);
 
-      await user.click(screen.getByRole('button', { name: 'Delete' }));
-
-      expect(screen.getByRole('button', { name: /No entry yet/i })).toBeInTheDocument();
-
       // the form hands the new entry the key the copy had
-      await user.click(screen.getByRole('button', { name: /No entry yet/i }));
+      await user.click(screen.getByRole('button', { name: /Add an entry/i }));
       await user.click(screen.getByRole('menuitem', { name: /Empty entry/ }));
 
       expect(await screen.findByRole('button', { name: 'toto' })).toBeInTheDocument();
-      expect(getCopiedBadges()).toHaveLength(0);
+      expect(getCopiedBadges()).toHaveLength(1);
     });
 
     it('should tell the modal how many entries can still be added and refuse more', async () => {

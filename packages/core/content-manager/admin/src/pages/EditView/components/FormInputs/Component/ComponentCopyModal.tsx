@@ -273,7 +273,7 @@ const ComponentCopyModal = ({
       return;
     }
 
-    getDocuments({
+    void getDocuments({
       model: currentDocumentMeta.model,
       params: {
         ...currentDocumentMeta.params,
@@ -935,13 +935,19 @@ const EntriesPane = ({
       );
     }
 
+    // While locked, the entries aren't `disabled`: the picked one keeps the focus while it loads.
     return rows.map((row) => (
       <EntryButton
         key={row.documentId}
         type="button"
         aria-pressed={row.documentId === selectedDocumentId}
-        disabled={row.disabled || isSelectionLocked}
-        onClick={() => onSelect(row)}
+        aria-disabled={isSelectionLocked || undefined}
+        disabled={row.disabled}
+        onClick={() => {
+          if (!isSelectionLocked) {
+            onSelect(row);
+          }
+        }}
       >
         <Flex gap={2} alignItems="center" wrap="wrap">
           <Typography fontWeight="bold" textColor="inherit">
@@ -1263,7 +1269,7 @@ const EntryButton = styled.button`
   text-align: left;
   cursor: pointer;
 
-  &:not(:disabled):hover {
+  &:not(:disabled):not([aria-disabled='true']):hover {
     background: ${({ theme }) => theme.colors.neutral100};
   }
 
@@ -1277,7 +1283,8 @@ const EntryButton = styled.button`
     background: ${({ theme }) => theme.colors.primary100};
   }
 
-  &:disabled {
+  &:disabled,
+  &[aria-disabled='true'] {
     cursor: not-allowed;
     color: ${({ theme }) => theme.colors.neutral500};
   }

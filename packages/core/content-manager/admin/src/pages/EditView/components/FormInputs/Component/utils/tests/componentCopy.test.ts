@@ -59,6 +59,14 @@ const components = {
       links: { type: 'component', component: 'shared.link', repeatable: true },
     },
   },
+  'shared.flag': {
+    uid: 'shared.flag',
+    info: { displayName: 'Flag' },
+    attributes: {
+      enabled: { type: 'boolean' },
+      archived: { type: 'boolean', default: false },
+    },
+  },
 } as unknown as ComponentsDictionary;
 
 const schema = {
@@ -164,6 +172,22 @@ describe('componentCopy', () => {
         // falls back to the display name when the main field is empty
         { label: 'Link 2', sourcePath: 'links.1' },
       ]);
+    });
+
+    it('should not label the components after their id when it is their main field', () => {
+      const instances = getComponentInstances({
+        componentUid: 'shared.link',
+        components,
+        // the main field of a component without any string attribute
+        getMainField: () => 'id',
+        mode: 'component',
+        schema,
+        sourceDocument,
+        sourceFieldName: 'links',
+        targetValues: {},
+      });
+
+      expect(instances.map(({ label }) => label)).toEqual(['Link 1', 'Link 2']);
     });
 
     it('should only return the components of the given kind from a dynamic zone', () => {
@@ -325,7 +349,12 @@ describe('componentCopy', () => {
           components
         )
       ).toBe(true);
-      expect(isComponentBlank({ indexable: false }, 'shared.seo', components)).toBe(true);
+      // `false` is content when the attribute defaults to `true`
+      expect(isComponentBlank({ indexable: false }, 'shared.seo', components)).toBe(false);
+      expect(isComponentBlank({ enabled: false, archived: false }, 'shared.flag', components)).toBe(
+        true
+      );
+      expect(isComponentBlank({ enabled: true }, 'shared.flag', components)).toBe(false);
       expect(isComponentBlank({ title: 'Home', indexable: true }, 'shared.seo', components)).toBe(
         false
       );

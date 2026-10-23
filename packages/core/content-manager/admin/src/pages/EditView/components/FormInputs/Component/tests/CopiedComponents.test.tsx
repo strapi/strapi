@@ -151,18 +151,25 @@ describe('CopiedComponents', () => {
       const { result } = render('blocks', { blocks: [] });
 
       act(() => {
-        result.current.insertCopies([{ heading: 'Copy' }]);
+        result.current.insertCopies([{ heading: 'Copy 1' }, { heading: 'Copy 2' }]);
       });
+
+      const [, deletedCopy] = result.current.rows;
+
+      // the first copy keeps the form modified: the flags aren't cleared as a whole
       act(() => {
-        result.current.form.removeFieldRow('blocks', 0);
+        result.current.form.removeFieldRow('blocks', 1);
       });
       // the form hands the next row the key the copy had
       act(() => {
         result.current.form.addFieldRow('blocks', { heading: '' });
       });
 
-      const [row] = result.current.rows;
+      const [firstCopy, row] = result.current.rows;
 
+      expect(result.current.form.modified).toBe(true);
+      expect(row.__temp_key__).toBe(deletedCopy.__temp_key__);
+      expect(result.current.isCopied(firstCopy.__temp_key__)).toBe(true);
       expect(result.current.isCopied(row.__temp_key__)).toBe(false);
     });
 

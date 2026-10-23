@@ -165,7 +165,8 @@ const getInstanceLabel = (
   mainField: string | undefined,
   components: ComponentsDictionary
 ) => {
-  const fieldValue = mainField ? getIn(componentData, mainField) : undefined;
+  // `id` is the main field of a component without any string attribute: not a label
+  const fieldValue = mainField && mainField !== 'id' ? getIn(componentData, mainField) : undefined;
 
   if (fieldValue !== undefined && fieldValue !== null && String(fieldValue).trim().length > 0) {
     return String(fieldValue);
@@ -374,7 +375,8 @@ const getComponentPreview = (
  * @description Tells whether a component holds any content, i.e. whether copying into it would
  * replace something. A value still equal to the default of its attribute isn't content: a
  * component that was just added is filled with its defaults. Nested components are looked into,
- * relations count whether they're loaded (`count`) or being edited (`connect`).
+ * relations count whether they're loaded (`count`) or being edited (`connect`), a boolean set to
+ * `false` is content when its attribute defaults to `true`.
  */
 const isComponentBlank = (
   value: unknown,
@@ -406,39 +408,60 @@ const isComponentBlank = (
       return true;
     }
 
-    switch (attribute.type) {
-      case 'component':
-        if (attribute.repeatable) {
-          return (
-            !Array.isArray(attributeValue) ||
-            attributeValue.every((item) => isComponentBlank(item, attribute.component, components))
-          );
-        }
-
-        return isComponentBlank(attributeValue, attribute.component, components);
-      case 'dynamiczone':
-      case 'media':
-        return Array.isArray(attributeValue) && attributeValue.length === 0;
-      case 'relation':
-        if (Array.isArray(attributeValue)) {
-          return attributeValue.length === 0;
-        }
-
-        return (
-          isObject(attributeValue) &&
-          (!Array.isArray(attributeValue.connect) || attributeValue.connect.length === 0) &&
-          (attributeValue.count === undefined || attributeValue.count === 0)
-        );
-      case 'boolean':
-        return attributeValue === false;
-      default:
-        if (Array.isArray(attributeValue)) {
-          return attributeValue.length === 0;
-        }
-
-        return isObject(attributeValue) && Object.keys(attributeValue).length === 0;
-    }
+    return isAttributeValueBlank(attribute, attributeValue, components);
   });
+};
+
+/**
+ * A relation is blank when nothing is connected: loaded relations come as a `count`, relations
+ * being edited as `connect` entries.
+ */
+const isRelationValueBlank = (value: unknown) => {
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+
+  return (
+    isObject(value) &&
+    (!Array.isArray(value.connect) || value.connect.length === 0) &&
+    (value.count === undefined || value.count === 0)
+  );
+};
+
+/**
+ * Whether the value of an attribute is blank, once the obvious cases (no value, the default of the
+ * attribute) are ruled out by `isComponentBlank`.
+ */
+const isAttributeValueBlank = (
+  attribute: StrapiSchema.Attribute.AnyAttribute,
+  value: unknown,
+  components: ComponentsDictionary
+): boolean => {
+  switch (attribute.type) {
+    case 'component':
+      if (attribute.repeatable) {
+        return (
+          !Array.isArray(value) ||
+          value.every((item) => isComponentBlank(item, attribute.component, components))
+        );
+      }
+
+      return isComponentBlank(value, attribute.component, components);
+    case 'dynamiczone':
+    case 'media':
+      return Array.isArray(value) && value.length === 0;
+    case 'relation':
+      return isRelationValueBlank(value);
+    case 'boolean':
+      // `false` is content when the attribute defaults to `true`
+      return value === false && attribute.default !== true;
+    default:
+      if (Array.isArray(value)) {
+        return value.length === 0;
+      }
+
+      return isObject(value) && Object.keys(value).length === 0;
+  }
 };
 
 /* -------------------------------------------------------------------------------------------------
