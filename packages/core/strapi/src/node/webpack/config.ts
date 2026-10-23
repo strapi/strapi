@@ -16,9 +16,18 @@ import { getMonorepoAliases } from '../core/aliases';
 import { getModulePath } from '../core/resolve-module';
 import { buildSingletonAliasEntries } from '../core/admin-vite-aliases';
 
-const resolveBaseConfig = async (ctx: BuildContext) => {
+// esbuild's support table does not recognize current browserslist versions, so the
+// intersection of those targets is reported as missing arbitrary module namespace
+// names. Dual-published packages then fail on `export { x as "module.exports" }`.
+// The syntax has been supported by the admin's browsers since 2021.
+const esbuildSupported = {
+  'arbitrary-module-namespace-names': true,
+};
+
+const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'production') => {
   const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
+  const bundledEnv = { ...ctx.env, NODE_ENV: nodeEnv };
 
   return {
     experiments: {
@@ -42,16 +51,32 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
       },
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
+      // micromatch (used by the content-type builder) imports Node builtins.
+      fallback: {
+        path: require.resolve('path-browserify'),
+        util: require.resolve('util/'),
+      },
     },
     module: {
       rules: [
         {
-          test: /\.(ts|tsx)$/,
+          test: /\.tsx$/,
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: 'tsx',
             target,
             jsx: 'automatic',
+            supported: esbuildSupported,
+          },
+        },
+        {
+          // The tsx loader parses `<T, U>` generics as JSX and fails the admin build.
+          test: /\.ts$/,
+          loader: require.resolve('esbuild-loader'),
+          options: {
+            loader: 'ts',
+            target,
+            supported: esbuildSupported,
           },
         },
         {
@@ -62,6 +87,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
               loader: 'jsx',
               target,
               jsx: 'automatic',
+              supported: esbuildSupported,
             },
           },
         },
@@ -104,12 +130,15 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         inject: true,
         template: path.resolve(ctx.runtimeDir, 'index.html'),
       }),
-      new DefinePlugin(
-        Object.entries(ctx.env).reduce<Record<string, string>>((acc, [key, value]) => {
+      new DefinePlugin({
+        ...Object.entries(bundledEnv).reduce<Record<string, string>>((acc, [key, value]) => {
           acc[`process.env.${key}`] = JSON.stringify(value);
           return acc;
-        }, {})
-      ),
+        }, {}),
+        // Unlisted `process.env.*` reads (optional flags) must resolve to undefined
+        // in the browser instead of throwing `process is not defined`.
+        'process.env': JSON.stringify(bundledEnv),
+      }),
       ctx.tsconfig &&
         new ForkTsCheckerPlugin({
           typescript: {
@@ -126,7 +155,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
 };
 
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuration> => {
-  const baseConfig = await resolveBaseConfig(ctx);
+  const baseConfig = await resolveBaseConfig(ctx, 'development');
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
   const linkedDesignSystemPath = getLinkedDesignSystemPath();
 
@@ -184,7 +213,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
   const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
-  const baseConfig = await resolveBaseConfig(ctx);
+  const baseConfig = await resolveBaseConfig(ctx, 'production');
 
   return {
     ...baseConfig,
