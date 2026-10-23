@@ -32,6 +32,30 @@ describe('Documentation plugin | Override service', () => {
     expect(overrideService.registeredOverrides).toEqual([mockOverride]);
   });
 
+  it('should parse a YAML string override and warn that it is deprecated', () => {
+    const warn = jest.fn();
+    strapi = { ...strapiMock, log: { warn } };
+
+    const overrideService = override({ strapi });
+    overrideService.registerOverride('openapi: 3.0.0\ninfo:\n  title: My API\n');
+
+    expect(overrideService.registeredOverrides).toEqual([
+      { openapi: '3.0.0', info: { title: 'My API' } },
+    ]);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+  });
+
+  it('should not warn when the override is an object', () => {
+    const warn = jest.fn();
+    strapi = { ...strapiMock, log: { warn } };
+
+    const overrideService = override({ strapi });
+    overrideService.registerOverride({ openapi: '3.0.0' } as any);
+
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it('should not register an override from a plugin that is not in the config', () => {
     const mockOverride = {
       openapi: '3.0.0',
