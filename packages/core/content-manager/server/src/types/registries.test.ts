@@ -38,9 +38,20 @@ builder.missing();
 getService('document-manager').findOne('document', 'api::article.article');
 // @ts-expect-error Document identifiers are strings.
 getService('document-manager').findOne(1, 'api::article.article');
-getService('document-manager').findLocales('document', 'api::article.article', {
+const locales = getService('document-manager').findLocales('document', 'api::article.article', {
   populate: { author: true },
 });
+locales.then((rows) => rows.map((row) => row.documentId)) satisfies Promise<string[]>;
+// @ts-expect-error Locale rows are documents, not `any`.
+locales satisfies Promise<{ documentId: number }[]>;
+const clone = getService('document-manager').clone(
+  'document',
+  { title: 'Copy' },
+  'api::article.article'
+);
+clone satisfies Promise<Modules.Documents.AnyDocument | undefined>;
+// @ts-expect-error An unknown source document clones nothing.
+clone satisfies Promise<Modules.Documents.AnyDocument>;
 const page = getService('document-manager').findPage(
   { page: '2', pageSize: '10', hasPublishedVersion: 'true', locale: 'en' },
   'api::article.article'

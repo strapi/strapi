@@ -13,7 +13,12 @@ document satisfies Promise<Modules.Documents.AnyDocument>;
 app.service('plugin::content-manager.document-manager').findOne(1, 'api::article.article');
 // @ts-expect-error Registered document services have no arbitrary methods.
 documents.missing();
-documents.findLocales('document', 'api::article.article', { populate: { author: true } });
+const locales = documents.findLocales('document', 'api::article.article', {
+  populate: { author: true },
+});
+locales.then((rows) => rows.map((row) => row.documentId)) satisfies Promise<string[]>;
+// @ts-expect-error Locale rows are documents, not `any`.
+locales satisfies Promise<{ documentId: number }[]>;
 documents
   .findPage({ page: '1', pageSize: '10' }, 'api::article.article')
   .then((result) => result.pagination.page) satisfies Promise<number>;
