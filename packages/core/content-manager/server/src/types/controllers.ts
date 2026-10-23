@@ -1,8 +1,6 @@
-import type { Core } from '@strapi/types';
-import type relations from '../controllers/relations';
+import type { Context } from 'koa';
+import type { Core, Data, Schema, Struct } from '@strapi/types';
 import type { createHistoryVersionController } from '../history/controllers/history-version';
-import type { createHomepageController } from '../homepage/controllers/homepage';
-import type { createPreviewController } from '../preview/controllers/preview';
 
 /** Actions exposed by the Content Manager collection type controller. */
 export type CollectionTypesController = {
@@ -48,7 +46,33 @@ export type InitController = {
 export type RelationsController = {
   findAvailable: Core.ControllerHandler;
   findExisting: Core.ControllerHandler;
-  extractAndValidateRequestInfo: typeof relations.extractAndValidateRequestInfo;
+  /**
+   * Reads and checks the route params and query shared by `findAvailable` and `findExisting`.
+   * Resolves `undefined` once it has set a 403 response.
+   * @internal
+   */
+  extractAndValidateRequestInfo(
+    ctx: Context,
+    id?: Data.ID
+  ): Promise<RelationRequestInfo | undefined>;
+};
+
+/** The relational field of a relation route request, with its source and target models. */
+type RelationRequestInfo = {
+  /** The source entry id, when the request names a source document or component. */
+  entryId: Data.ID | null;
+  /** The `locale` query parameter; a bare `?locale` reads as `null`. */
+  locale: string | null | undefined;
+  /** `undefined` for a source content type without draft and publish. */
+  status: 'published' | 'draft' | undefined;
+  attribute: Schema.Attribute.Relation;
+  fieldsToSelect: string[];
+  mainField: string;
+  source: { schema: Struct.ContentTypeSchema | Struct.ComponentSchema; isLocalized: boolean };
+  target: { schema: Struct.ContentTypeSchema; isLocalized: boolean };
+  sourceSchema: Struct.ContentTypeSchema | Struct.ComponentSchema;
+  targetSchema: Struct.ContentTypeSchema;
+  targetField: string;
 };
 
 /** Actions exposed by the Content Manager single type controller. */
@@ -72,10 +96,16 @@ export type UIDController = {
 export type HistoryVersionController = ReturnType<typeof createHistoryVersionController>;
 
 /** Homepage widget actions: recent and counted documents. */
-export type HomepageController = ReturnType<typeof createHomepageController>;
+export type HomepageController = {
+  getRecentDocuments: Core.ControllerHandler;
+  getCountDocuments: Core.ControllerHandler;
+};
 
-/** Preview URL actions. */
-export type PreviewController = ReturnType<typeof createPreviewController>;
+/** Preview actions: the preview URL of a document and the standalone preview script. */
+export type PreviewController = {
+  getPreviewUrl: Core.ControllerHandler;
+  getPreviewScript: Core.ControllerHandler;
+};
 
 /** Registered core controllers, keyed as they appear in the plugin's runtime map. */
 export type RegisteredControllers = {
