@@ -16,6 +16,8 @@ const { ApplicationError } = errors;
  * @param {string} param.email user email for which to reset the password
  */
 const forgotPassword = async ({ email }: any = {}) => {
+  // Captured before any await: the email can fail after strapi.destroy() has deleted the global
+  const { log } = strapi;
   const user = await strapi.db.query('admin::user').findOne({ where: { email, isActive: true } });
 
   if (!user || (await isSsoLocked(user))) {
@@ -45,7 +47,7 @@ const forgotPassword = async ({ email }: any = {}) => {
     )
     .catch((err: unknown) => {
       // log error server side but do not disclose it to the user to avoid leaking informations
-      strapi.log.error(err);
+      log.error(err);
     });
 };
 
