@@ -149,6 +149,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return componentsMap;
   },
 
+  /** @internal */
   syncConfigurations() {
     return configurationService.syncConfigurations();
   },
