@@ -1,4 +1,4 @@
-import type { Core, Modules, Schema } from '@strapi/strapi';
+import type { Core, Modules, Schema, Struct } from '@strapi/strapi';
 import type { Controllers, Services } from '@strapi/content-manager/strapi-server';
 import type {} from '@strapi/admin/strapi-server';
 
@@ -54,9 +54,24 @@ const fields = app.plugin('content-manager').service('field-sizes');
 fields.getFieldSize('string').default satisfies number;
 // @ts-expect-error A field size is an object with a default size.
 fields.setFieldSize('string', 12);
+fields.hasFieldSize(undefined) satisfies boolean;
 const metrics = app.plugin('content-manager').service('metrics');
 // @ts-expect-error A configuration event requires its content type and configuration.
 metrics.sendDidConfigureListView();
+
+const preview = app.plugin('content-manager').service('preview');
+preview.getPreviewUrl('api::article.article', {
+  documentId: 'document',
+  status: 'published',
+}) satisfies Promise<string | null | undefined>;
+// @ts-expect-error The document version needs its publication status.
+preview.getPreviewUrl('api::article.article', { documentId: 'document', locale: 'en' });
+declare const contentType: Struct.ContentTypeSchema;
+app.service('plugin::content-manager.permission').canConfigureContentType({
+  // @ts-expect-error Configuration checks take a user ability, not any value.
+  userAbility: {},
+  contentType,
+});
 
 const contentTypes = app.plugin('content-manager').service('content-types');
 contentTypes
