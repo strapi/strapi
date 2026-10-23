@@ -9,7 +9,6 @@ import fs from 'fs-extra';
 import { Parser, type ReadEntry } from 'tar';
 import { isEmpty, keyBy } from 'lodash';
 import { chain } from 'stream-chain';
-import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
 import type {
@@ -23,6 +22,7 @@ import type {
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
+import { parser } from '../../../utils/jsonl';
 import { write } from '../../../utils/writable-async-write';
 import {
   ProviderInitializationError,

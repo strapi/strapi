@@ -9878,7 +9878,6 @@ __metadata:
     "@types/node": "npm:20.19.41"
     "@types/semver": "npm:7.5.0"
     "@types/stream-chain": "npm:2.0.1"
-    "@types/stream-json": "npm:1.7.8"
     "@types/tar-stream": "npm:2.2.2"
     "@types/ws": "npm:^8.18.1"
     chalk: "npm:4.1.2"
@@ -9896,7 +9895,6 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     stream-chain: "npm:2.2.5"
-    stream-json: "npm:1.9.1"
     tar: "npm:7.5.22"
     tar-stream: "npm:2.2.0"
     typescript: "npm:5.9.3"
@@ -12534,22 +12532,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/stream-chain@npm:*, @types/stream-chain@npm:2.0.1":
+"@types/stream-chain@npm:2.0.1":
   version: 2.0.1
   resolution: "@types/stream-chain@npm:2.0.1"
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/625e84b5f85c613a8e36e4f1c86629545fc45f3d7b0ac172c0654e829e20f7a0d49403a24886593b302410dff0746ed3829c3de65234c42e056a86d172f4efc2
-  languageName: node
-  linkType: hard
-
-"@types/stream-json@npm:1.7.8":
-  version: 1.7.8
-  resolution: "@types/stream-json@npm:1.7.8"
-  dependencies:
-    "@types/node": "npm:*"
-    "@types/stream-chain": "npm:*"
-  checksum: 10c0/c88f4dca65332d3847b37b16a60dc9d9a7401a6c47b0553e5a424e35f989757afeede32397b1a9ee9c1e5ba4a013832d2938fa60590e2b1dffa848185ac33b93
   languageName: node
   linkType: hard
 
@@ -28774,7 +28762,6 @@ __metadata:
     rollup-plugin-html: "npm:0.2.1"
     semver: "npm:7.7.4"
     stream-chain: "npm:2.2.5"
-    stream-json: "npm:1.9.1"
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.22"
@@ -28796,19 +28783,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stream-chain@npm:2.2.5, stream-chain@npm:^2.2.5":
+"stream-chain@npm:2.2.5":
   version: 2.2.5
   resolution: "stream-chain@npm:2.2.5"
   checksum: 10c0/c512f50190d7c92d688fa64e7af540c51b661f9c2b775fc72bca38ea9bca515c64c22c2197b1be463741daacbaaa2dde8a8ea24ebda46f08391224f15249121a
-  languageName: node
-  linkType: hard
-
-"stream-json@npm:1.9.1":
-  version: 1.9.1
-  resolution: "stream-json@npm:1.9.1"
-  dependencies:
-    stream-chain: "npm:^2.2.5"
-  checksum: 10c0/0521e5cb3fb6b0e2561d715975e891bd81fa77d0239c8d0b1756846392bc3c7cdd7f1ddb0fe7ed77e6fdef58daab9e665d3b39f7d677bd0859e65a2bff59b92c
   languageName: node
   linkType: hard
 

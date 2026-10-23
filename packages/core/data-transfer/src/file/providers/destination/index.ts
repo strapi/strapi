@@ -3,10 +3,10 @@ import zlib from 'zlib';
 import { Readable, Writable } from 'stream';
 import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
-import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
+import { stringer } from '../../../utils/jsonl';
 import type {
   IAsset,
   IDestinationProvider,
