@@ -3,6 +3,7 @@ import type * as ContentTypesService from '../services/content-types';
 import type * as SchemaService from '../services/schema';
 import type { ContentTypeBuilderConfig } from '../config';
 import type { SchemaHandler } from '../services/schema-builder/schema-handler';
+import type { Controllers } from './controllers';
 import type {
   ApiHandlerService,
   BuilderService,
@@ -10,6 +11,7 @@ import type {
   ContentStructureService,
 } from './services';
 
+export type * from './controllers';
 export type * from './services';
 
 /** Content-Type Builder services by name, as registered by the plugin. */
@@ -56,6 +58,14 @@ declare global {
         'plugin::content-type-builder.content-structure': Services['content-structure'];
         'plugin::content-type-builder.content-types': Services['content-types'];
         'plugin::content-type-builder.schema': Services['schema'];
+      }
+
+      interface PackageControllers {
+        'plugin::content-type-builder.builder': Controllers['builder'];
+        'plugin::content-type-builder.component-categories': Controllers['component-categories'];
+        'plugin::content-type-builder.components': Controllers['components'];
+        'plugin::content-type-builder.content-types': Controllers['content-types'];
+        'plugin::content-type-builder.schema': Controllers['schema'];
       }
 
       interface PackageMiddlewares {
