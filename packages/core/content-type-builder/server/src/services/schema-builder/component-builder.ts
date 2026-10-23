@@ -22,7 +22,7 @@ export default function createComponentBuilder() {
       }, {});
     },
 
-    createComponentAttributes(this: any, uid: string, attributes: any) {
+    createComponentAttributes(this: any, uid: Internal.UID.Component, attributes: any) {
       if (!this.components.has(uid)) {
         throw new ApplicationError('component.notFound');
       }

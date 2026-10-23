@@ -737,7 +737,7 @@ export default {
 
   async bulkFindForValidation(ctx: any) {
     const { userAbility } = ctx.state;
-    const { model } = ctx.params;
+    const { model }: { model: UID.CollectionType } = ctx.params;
     const { documentIds, locale, sort } = ctx.request.body;
 
     await validateBulkActionInput(ctx.request.body);
@@ -748,9 +748,9 @@ export default {
       return ctx.forbidden();
     }
 
-    const populate = await buildDeepPopulate(model as UID.CollectionType);
+    const populate = await buildDeepPopulate(model);
 
-    const documents = await strapi.documents(model as UID.CollectionType).findMany({
+    const documents = await strapi.documents(model).findMany({
       populate,
       filters: { documentId: { $in: documentIds } } as any,
       locale,

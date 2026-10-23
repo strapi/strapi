@@ -2,7 +2,6 @@ import { transformAttributesFromChatToCTB, transformChatToCTB } from '../toCTB';
 
 import type { ContentType, Component } from '../../../../../../types';
 import type { Schema } from '../../../types/schema';
-import type { UID } from '@strapi/types';
 
 const makeSchema = (overrides: Partial<Schema> = {}): Schema => ({
   action: 'create',
@@ -122,7 +121,7 @@ describe('transformChatToCTB', () => {
   describe('plugin content-types', () => {
     it('preserves identity fields when updating an existing plugin content-type', () => {
       const oldSchema: ContentType = {
-        uid: 'plugin::my-plugin.my-thing' as UID.ContentType,
+        uid: 'plugin::my-plugin.my-thing',
         modelType: 'contentType',
         kind: 'collectionType',
         plugin: 'my-plugin',
@@ -164,7 +163,7 @@ describe('transformChatToCTB', () => {
 
   describe('rename migration compatibility', () => {
     const oldSchema: ContentType = {
-      uid: 'api::article.article' as UID.ContentType,
+      uid: 'api::article.article',
       modelType: 'contentType',
       kind: 'collectionType',
       modelName: 'article',

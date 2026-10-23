@@ -16,20 +16,20 @@ import { styled } from 'styled-components';
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 import { resolvePreviewImageUrl } from '../../../../../utils/previewImage';
 
-import type { Struct } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
 
 const EMPTY_COMPONENTS: NonNullable<ComponentCategoryProps['components']> = [];
 
 interface ComponentCategoryProps {
   category: string;
   components?: Array<{
-    uid: string;
+    uid: UID.Component;
     displayName: string;
     icon?: string;
     preview?: Struct.PreviewImageValue;
   }>;
   onAddComponent: (
-    componentUid: string
+    componentUid: UID.Component
   ) => React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
   variant?: Accordion.Variant;
 }

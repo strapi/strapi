@@ -19,13 +19,13 @@ const grp = (
 ): ContentStructureGroup => ({ id, name, parent, children, status });
 
 const groupChild = (id: string): ContentStructureChild => ({ type: 'group', id });
-const ctChild = (uid: string): ContentStructureChild => ({
+const ctChild = (uid: UID.ContentType): ContentStructureChild => ({
   type: 'contentType',
-  uid: uid as UID.ContentType,
+  uid,
 });
 
-const ct = (uid: string, status: Status = 'NEW'): ContentType => ({
-  uid: uid as UID.ContentType,
+const ct = (uid: UID.ContentType, status: Status = 'NEW'): ContentType => ({
+  uid,
   attributes: [],
   modelType: 'contentType',
   kind: 'collectionType',
@@ -341,7 +341,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
         stateWith([grp('grp_a', 'A', null)]),
         actions.assignContentTypeToFolder({
           section,
-          uid: 'api::x.x' as UID.ContentType,
+          uid: 'api::x.x',
           targetGroupId: 'grp_a',
         })
       );
@@ -356,7 +356,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
         stateWith([grp('grp_a', 'A', null, [ctChild('api::x.x')]), grp('grp_b', 'B', null)]),
         actions.assignContentTypeToFolder({
           section,
-          uid: 'api::x.x' as UID.ContentType,
+          uid: 'api::x.x',
           targetGroupId: 'grp_b',
         })
       );
@@ -372,7 +372,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
         stateWith([grp('grp_a', 'A', null, [ctChild('api::x.x')])]),
         actions.assignContentTypeToFolder({
           section,
-          uid: 'api::x.x' as UID.ContentType,
+          uid: 'api::x.x',
           targetGroupId: null,
         })
       );
@@ -385,7 +385,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
         stateWith([grp('grp_a', 'A', null, [ctChild('api::p.p'), ctChild('api::q.q')])]),
         actions.assignContentTypeToFolder({
           section,
-          uid: 'api::x.x' as UID.ContentType,
+          uid: 'api::x.x',
           targetGroupId: 'grp_a',
           index: 1,
         })
@@ -405,7 +405,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
       const state = stateWith([grp('grp_a', 'A', null, [ctChild(uid), ctChild('api::bar.bar')])]);
       state.current.contentTypes = { [uid]: ct(uid, 'NEW') };
 
-      const next = reducer(state, actions.deleteContentType(uid as UID.ContentType));
+      const next = reducer(state, actions.deleteContentType(uid));
 
       expect(findGroup(next, 'grp_a')?.children).toEqual([ctChild('api::bar.bar')]);
       expect(findGroup(next, 'grp_a')?.status).toBe('CHANGED');
@@ -417,7 +417,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
       const state = stateWith([grp('grp_a', 'A', null, [ctChild(uid)])]);
       state.current.contentTypes = { [uid]: ct(uid, 'UNCHANGED') };
 
-      const next = reducer(state, actions.deleteContentType(uid as UID.ContentType));
+      const next = reducer(state, actions.deleteContentType(uid));
 
       expect(findGroup(next, 'grp_a')?.children).toEqual([]);
       expect(next.current.contentTypes[uid]?.status).toBe('REMOVED');
@@ -428,7 +428,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
       const before = stateWith([grp('grp_a', 'A', null)]);
       before.current.contentTypes = { [uid]: ct(uid, 'NEW') };
 
-      const next = reducer(before, actions.deleteContentType(uid as UID.ContentType));
+      const next = reducer(before, actions.deleteContentType(uid));
 
       expect(groupsOf(next)).toEqual(groupsOf(before));
     });
@@ -448,7 +448,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
       return state;
     };
 
-    const contentTypeUids = ['api::a.a', 'api::b.b'] as UID.ContentType[];
+    const contentTypeUids: UID.ContentType[] = ['api::a.a', 'api::b.b'];
 
     it('deletes the folder subtree and the content types filed within it', () => {
       const next = reducer(
@@ -498,7 +498,7 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
     });
 
     it('deletes only CTB-owned application types and ungroups protected types', () => {
-      const protectedUid = 'plugin::example.article' as UID.ContentType;
+      const protectedUid: UID.ContentType = 'plugin::example.article';
       const before = folderWithContentState();
       before.current.contentTypes[protectedUid] = {
         ...ct(protectedUid, 'UNCHANGED'),

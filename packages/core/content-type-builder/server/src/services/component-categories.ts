@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { strings, errors } from '@strapi/utils';
-import type { Struct } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 import createBuilder from './schema-builder';
 
 type Infos = {
@@ -8,9 +8,9 @@ type Infos = {
 };
 
 interface WorkingComponent extends Struct.ComponentSchema {
-  setUID: (uid: string) => WorkingComponent;
+  setUID: (uid: Internal.UID.Component) => WorkingComponent;
   setDir: (dir: string) => WorkingComponent;
-  updateComponent: (oldUID: string, newUID: string) => void;
+  updateComponent: (oldUID: Internal.UID.Component, newUID: Internal.UID.Component) => void;
 }
 
 /**
@@ -34,7 +34,7 @@ export const editCategory = async (name: string, infos: Infos) => {
 
   builder.components.forEach((component: WorkingComponent) => {
     const oldUID = component.uid;
-    const newUID = `${newName}.${component.modelName}`;
+    const newUID: Internal.UID.Component = `${newName}.${component.modelName}`;
 
     // only edit the components in this specific category
     if (component.category !== name) return;

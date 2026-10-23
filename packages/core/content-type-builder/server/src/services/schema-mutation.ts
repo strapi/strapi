@@ -1,13 +1,14 @@
 import * as fse from 'fs-extra';
+import type { Internal, UID } from '@strapi/types';
 
 type SchemaBuilder = {
   rollback(): Promise<unknown>;
 };
 
 type ApiHandler = {
-  rollback(uid: string): Promise<void>;
+  rollback(uid: Internal.UID.ContentType): Promise<void>;
   clearGenerated(apiName: string): Promise<void>;
-  finalize(uid: string): Promise<void>;
+  finalize(uid: Internal.UID.ContentType): Promise<void>;
 };
 
 export const finalizeSchemaMutation = async ({
@@ -15,7 +16,7 @@ export const finalizeSchemaMutation = async ({
   backedUpApiUids = [],
 }: {
   apiHandler: ApiHandler;
-  backedUpApiUids?: string[];
+  backedUpApiUids?: UID.ContentType[];
 }) => {
   const errors: unknown[] = [];
 
@@ -46,7 +47,7 @@ export const rollbackSchemaMutation = async ({
 }: {
   builder: SchemaBuilder;
   apiHandler: ApiHandler;
-  backedUpApiUids?: string[];
+  backedUpApiUids?: UID.ContentType[];
   generatedApiNames?: string[];
   schemaAlreadyRolledBack?: boolean;
   migrationFilePath?: string | null;

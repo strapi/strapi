@@ -49,7 +49,7 @@ export const singleCreateOrUpdate = async (
   const { userAbility, user } = context;
   const { data, locale } = args;
   // TODO: fix UID.SingleType assignability in @strapi/types
-  const typedUid = uid as UID.ContentType;
+  const typedUid: UID.ContentType = uid;
 
   const documentManager = getService('document-manager');
   const permissionChecker = getService('permission-checker').create({
@@ -142,7 +142,7 @@ export const createSingleGetHandler =
     const { userAbility } = context;
     const { locale, status } = args;
     // TODO: fix UID.SingleType assignability in @strapi/types
-    const typedUid = uid as UID.ContentType;
+    const typedUid: UID.ContentType = uid;
 
     const permissionChecker = getService('permission-checker').create({
       userAbility,
@@ -235,7 +235,7 @@ export const createSingleDeleteHandler =
     const { userAbility } = context;
     const { locale } = args;
     // TODO: fix UID.SingleType assignability in @strapi/types
-    const typedUid = uid as UID.ContentType;
+    const typedUid: UID.ContentType = uid;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
@@ -298,7 +298,7 @@ export const createSinglePublishHandler =
     const { userAbility } = context;
     const { locale } = args;
     // TODO: fix UID.SingleType assignability in @strapi/types
-    const typedUid = uid as UID.ContentType;
+    const typedUid: UID.ContentType = uid;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
@@ -355,7 +355,7 @@ export const createSingleUnpublishHandler =
     const { userAbility } = context;
     const { locale, discardDraft } = args;
     // TODO: fix UID.SingleType assignability in @strapi/types
-    const typedUid = uid as UID.ContentType;
+    const typedUid: UID.ContentType = uid;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({
@@ -419,7 +419,7 @@ export const createSingleDiscardDraftHandler =
     const { userAbility } = context;
     const { locale } = args;
     // TODO: fix UID.SingleType assignability in @strapi/types
-    const typedUid = uid as UID.ContentType;
+    const typedUid: UID.ContentType = uid;
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({

@@ -6,7 +6,7 @@ import { Route, Routes } from 'react-router-dom';
 import { type HistoryContextValue, HistoryProvider } from '../../pages/History';
 import { VersionHeader } from '../VersionHeader';
 
-import type { UID } from '@strapi/types';
+import type { HistoryVersionDataResponse } from '../../../../../shared/contracts/history-versions';
 
 const render = (
   context: Partial<HistoryContextValue>,
@@ -45,9 +45,9 @@ const render = (
 describe('VersionHeader', () => {
   describe('collection types', () => {
     // Mocks
-    const selectedVersion = {
+    const selectedVersion: HistoryVersionDataResponse = {
       id: '26',
-      contentType: 'api::kitchensink.kitchensink' as UID.ContentType,
+      contentType: 'api::kitchensink.kitchensink',
       relatedDocumentId: 'pcwmq3rlmp5w0be3cuplhnpr',
       createdAt: '2022-01-01T00:00:00Z',
       status: 'draft' as const,
@@ -130,9 +130,9 @@ describe('VersionHeader', () => {
 
   describe('single types', () => {
     // Mocks
-    const selectedVersion = {
+    const selectedVersion: HistoryVersionDataResponse = {
       id: '26',
-      contentType: 'api::homepage.homepage' as UID.ContentType,
+      contentType: 'api::homepage.homepage',
       relatedDocumentId: 'documentid',
       createdAt: '2022-01-01T00:00:00Z',
       status: 'draft' as const,

@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import buildComponentSchema from '../helpers/build-component-schema';
+import type { Api } from '../../types';
 
 const strapi = {
   plugins: {
@@ -51,7 +52,7 @@ describe('Documentation plugin | Build component schema', () => {
   });
 
   it('builds the Response schema', () => {
-    const apiMocks = [
+    const apiMocks: Api[] = [
       {
         name: 'users-permissions',
         getter: 'plugin',
@@ -128,7 +129,7 @@ describe('Documentation plugin | Build component schema', () => {
       { method: 'GET', path: '/test', handler: 'test.find' },
     ] as any;
 
-    const apiMocks = [
+    const apiMocks: Api[] = [
       {
         name: 'users-permissions',
         getter: 'plugin',
@@ -275,7 +276,7 @@ describe('Documentation plugin | Build component schema', () => {
       { method: 'POST', path: '/test', handler: 'test.create' },
     ] as any;
 
-    const apiMocks = [
+    const apiMocks: Api[] = [
       {
         name: 'users-permissions',
         getter: 'plugin',
@@ -336,7 +337,7 @@ describe('Documentation plugin | Build component schema', () => {
   });
 
   it('creates the correct name given multiple content types', () => {
-    const apiMock = {
+    const apiMock: Api = {
       name: 'users-permissions',
       getter: 'plugin',
       ctNames: ['permission', 'role', 'user'],

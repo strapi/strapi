@@ -191,7 +191,7 @@ const buildWhereForRelations = (
 
 type ValidRelation = { documentId: string; id?: number; locale?: string };
 type ResolvedRelation = { documentId: string; id: number | string; locale?: string };
-type RelationsByUid = Map<string, ValidRelation[]>;
+type RelationsByUid = Map<UID.ContentType, ValidRelation[]>;
 
 interface UidResolutionData {
   blocked: boolean;
@@ -214,7 +214,7 @@ const collectRelationsByUid = (
 ): RelationsByUid => {
   const result: RelationsByUid = new Map();
 
-  const addRels = (uid: string, rels: ValidRelation[]) => {
+  const addRels = (uid: UID.ContentType, rels: ValidRelation[]) => {
     const existing = result.get(uid) ?? [];
     result.set(uid, existing.concat(rels));
   };
@@ -228,7 +228,7 @@ const collectRelationsByUid = (
       if (attribute.type === 'relation') {
         const attr = attribute as Schema.Attribute.Relation & {
           relation?: string;
-          target?: string;
+          target?: UID.ContentType;
         };
         if (attr.relation?.toLowerCase().includes('morph') || !attr.target) continue;
         const validRels = normalizeToArray(value).filter(isValidRelation);
@@ -266,8 +266,8 @@ const resolveAllRelationsBatched = async (
   relationsByUid: RelationsByUid,
   targetLocale: string,
   userAbility: any
-): Promise<Map<string, UidResolutionData>> => {
-  const result = new Map<string, UidResolutionData>();
+): Promise<Map<UID.ContentType, UidResolutionData>> => {
+  const result = new Map<UID.ContentType, UidResolutionData>();
   await Promise.all(
     [...relationsByUid.entries()].map(async ([targetUid, allRels]) => {
       const empty: UidResolutionData = {
@@ -283,7 +283,7 @@ const resolveAllRelationsBatched = async (
         return;
       }
 
-      const mainField = await getMainField(targetUid as UID.Schema);
+      const mainField = await getMainField(targetUid);
       const validRels = allRels.filter(isValidRelation);
 
       if (validRels.length === 0) {
@@ -295,7 +295,7 @@ const resolveAllRelationsBatched = async (
       const uniqueRels = [...new Map(validRels.map((r) => [r.documentId, r])).values()];
       const resolvedList = await resolveRelationsForLocaleBatch(
         uniqueRels,
-        targetUid as UID.Schema,
+        targetUid,
         targetLocale
       );
 
@@ -318,10 +318,10 @@ const resolveAllRelationsBatched = async (
       }
 
       const documentIds = [...new Set(resolvedEntries.map((r) => r.documentId))];
-      const where = buildWhereForRelations(resolvedEntries, documentIds, targetUid as UID.Schema);
+      const where = buildWhereForRelations(resolvedEntries, documentIds, targetUid);
 
       const [allStatusEntries, labelEntries] = await Promise.all([
-        contentTypes.hasDraftAndPublish(strapi.getModel(targetUid as UID.Schema))
+        contentTypes.hasDraftAndPublish(strapi.getModel(targetUid))
           ? strapi.db.query(targetUid).findMany({ where, select: [...STATUS_FIELDS] })
           : Promise.resolve([]),
         strapi.db.query(targetUid).findMany({
@@ -335,7 +335,7 @@ const resolveAllRelationsBatched = async (
       if (allStatusEntries.length > 0) {
         const documentMetadata = strapi.plugin('content-manager')?.service('document-metadata');
         if (documentMetadata) {
-          const model = strapi.getModel(targetUid as UID.Schema);
+          const model = strapi.getModel(targetUid);
           const isLocalized = strapi
             .plugin('i18n')
             ?.service('content-types')
@@ -387,9 +387,12 @@ const resolveAllRelationsBatched = async (
 const buildConnectFromPreResolved = (
   value: unknown,
   attribute: Schema.Attribute.Relation,
-  preResolved: Map<string, UidResolutionData>
+  preResolved: Map<UID.ContentType, UidResolutionData>
 ): { connect: unknown[]; disconnect: unknown[] } => {
-  const attr = attribute as Schema.Attribute.Relation & { relation?: string; target?: string };
+  const attr = attribute as Schema.Attribute.Relation & {
+    relation?: string;
+    target?: UID.ContentType;
+  };
   if (attr.relation?.toLowerCase().includes('morph') || !attr.target) {
     return { connect: [], disconnect: [] };
   }
@@ -438,7 +441,7 @@ const processDocumentData = async (
   data: Record<string, unknown>,
   schema: Schema.ContentType | Schema.Component,
   components: Record<string, Schema.Component>,
-  preResolved: Map<string, UidResolutionData>
+  preResolved: Map<UID.ContentType, UidResolutionData>
 ): Promise<Record<string, unknown>> => {
   if (!data) {
     return {};

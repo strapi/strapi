@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { Core, Struct } from '@strapi/types';
+import type { Core, Struct, UID } from '@strapi/types';
 
 import cleanSchemaAttributes from './utils/clean-schema-attributes';
 import loopContentTypeNames from './utils/loop-content-type-names';
@@ -37,7 +37,7 @@ const getAllSchemasForContentType = ({
   attributes,
   uniqueName,
   relationTargetSchemaNames,
-}: ApiInfo & { relationTargetSchemaNames: Map<string, string> }) => {
+}: ApiInfo & { relationTargetSchemaNames: Map<UID.ContentType, string> }) => {
   // Store response and request schemas in an object
   let strapiComponentSchemas = {};
   const schemas: OpenAPIV3.ComponentsObject = {};
@@ -161,7 +161,7 @@ const getAllSchemasForContentType = ({
 };
 
 const getRelationTargetSchemaNames = (api: Api) => {
-  const relationTargetSchemaNames = new Map<string, string>();
+  const relationTargetSchemaNames = new Map<UID.ContentType, string>();
 
   loopContentTypeNames(api, ({ uid, uniqueName }) => {
     relationTargetSchemaNames.set(uid, pascalCase(uniqueName));

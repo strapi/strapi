@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+import type { UID } from '@strapi/types';
+
 import type { Api, ApiInfo } from '../../../types';
 
 /**
@@ -9,9 +11,9 @@ const loopContentTypeNames = (api: Api, callback: (info: ApiInfo) => any) => {
   let result = {};
   for (const contentTypeName of api.ctNames) {
     // Get the attributes found on the api's contentType
-    const uid = `${api.getter}::${api.name}.${contentTypeName}`;
+    const uid: UID.ContentType = `${api.getter}::${api.name}.${contentTypeName}`;
 
-    const { attributes, info: contentTypeInfo, kind } = strapi.contentType(uid as any);
+    const { attributes, info: contentTypeInfo, kind } = strapi.contentType(uid);
 
     // Get the routes for the current api
     const routeInfo =

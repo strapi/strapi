@@ -29,12 +29,12 @@ const createEntityQuery = (strapi: Core.Strapi): any => {
       return assign({}, entityComponents, dataWithoutComponents);
     },
 
-    async get<T extends object>(uid: string, entity: T) {
-      return componentsService.getComponents(uid as UID.Schema, entity as any);
+    async get<T extends object>(uid: UID.Schema, entity: T) {
+      return componentsService.getComponents(uid, entity as any);
     },
 
-    delete<T extends object>(uid: string, componentsToDelete: T) {
-      return componentsService.deleteComponents(uid as UID.Schema, componentsToDelete as any, {
+    delete<T extends object>(uid: UID.Schema, componentsToDelete: T) {
+      return componentsService.deleteComponents(uid, componentsToDelete as any, {
         loadComponents: false,
       });
     },

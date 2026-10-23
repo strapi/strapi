@@ -78,8 +78,8 @@ const captureJoinBatches = async (
     publishedCol: string;
     /** The other FK; may be remapped via draftToPublishedMap. */
     relatedCol: string;
-    /** Content type behind `relatedCol` (used for D&P + table name). */
-    relatedUid: UID.ContentType;
+    /** Model behind `relatedCol` (used for D&P + table name). */
+    relatedUid: UID.Schema;
     relatedHasDraftAndPublish: boolean;
     /** Model that owns this attribute; draft capture is skipped for components. */
     schemaUid: UID.ContentType;
@@ -257,7 +257,7 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
           ? joinTable.inverseJoinColumn.name
           : joinTable.joinColumn.name;
 
-        const relatedUid = (isOwningSide ? attribute.target : model.uid) as UID.ContentType;
+        const relatedUid: UID.Schema = isOwningSide ? attribute.target : model.uid;
 
         const batches = await captureJoinBatches(trx, {
           joinTable,
@@ -265,7 +265,7 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
           relatedCol,
           relatedUid,
           relatedHasDraftAndPublish: isOwningSide
-            ? !!strapi.contentTypes[relatedUid]?.options?.draftAndPublish
+            ? !!strapi.contentTypes[attribute.target]?.options?.draftAndPublish
             : !!model.options?.draftAndPublish,
           schemaUid: model.uid as UID.ContentType,
           isOwningSide,

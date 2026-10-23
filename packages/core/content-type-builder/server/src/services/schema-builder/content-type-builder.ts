@@ -110,7 +110,7 @@ export default function createComponentBuilder() {
 
     createContentTypeAttributes(
       this: any,
-      uid: string,
+      uid: Internal.UID.ContentType,
       attributes: CreateContentTypeInput['attributes']
     ) {
       if (!this.contentTypes.has(uid)) {
@@ -387,7 +387,7 @@ export default function createComponentBuilder() {
       return contentType;
     },
 
-    deleteContentType(this: any, uid: string) {
+    deleteContentType(this: any, uid: Internal.UID.ContentType) {
       if (!this.contentTypes.has(uid)) {
         throw new ApplicationError('contentType.notFound');
       }

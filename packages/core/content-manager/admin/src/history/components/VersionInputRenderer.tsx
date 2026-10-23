@@ -37,7 +37,7 @@ import { getRemaingFieldsLayout } from './VersionContent';
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations/Relations';
 import type { RelationResult } from '../../services/relations';
-import type { Schema } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
 const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {}, shadow: 'none' })`
@@ -324,7 +324,7 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
  * should render a fallback instead of crashing on the destructuring.
  */
 const resolveComponentRenderResources = (
-  componentUID: string,
+  componentUID: UID.Component,
   componentsLayout: { [uid: string]: { layout: unknown } | undefined },
   configurationComponents: { [uid: string]: { metadatas: unknown } | undefined },
   components: { [uid: string]: { attributes: unknown } | undefined }

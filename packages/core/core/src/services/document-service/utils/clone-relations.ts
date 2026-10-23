@@ -355,7 +355,7 @@ export const prepareCloneData = async (
     ) {
       delete data[attributeName];
       deferredCopies.push({
-        schemaUid: contentType.uid as UID.Schema,
+        schemaUid: contentType.uid,
         attributeName,
         kind: 'joinTable',
         ownerPath: null,
@@ -371,7 +371,7 @@ export const prepareCloneData = async (
     ) {
       delete data[attributeName];
       deferredCopies.push({
-        schemaUid: contentType.uid as UID.Schema,
+        schemaUid: contentType.uid,
         attributeName,
         kind: 'fkColumn',
         ownerPath: null,
@@ -383,7 +383,7 @@ export const prepareCloneData = async (
     if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
       delete data[attributeName];
       deferredCopies.push({
-        schemaUid: contentType.uid as UID.Schema,
+        schemaUid: contentType.uid,
         attributeName,
         kind: 'morphToOne',
         ownerPath: null,
@@ -410,7 +410,7 @@ export const prepareCloneData = async (
       postCloneUpdates.push({
         dataPath: attributeName,
         value: submittedValue,
-        schemaUid: contentType.uid as UID.Schema,
+        schemaUid: contentType.uid,
         ownerPath: null,
       });
     }
@@ -840,7 +840,7 @@ const getMorphTypeField = (attribute: CloneRelationAttribute) => {
 
 const hasRelationTarget = (
   attribute: CloneRelationAttribute
-): attribute is CloneRelationAttribute & { target: string } => {
+): attribute is CloneRelationAttribute & { target: UID.ContentType } => {
   return 'target' in attribute && typeof (attribute as { target?: unknown }).target === 'string';
 };
 
@@ -910,13 +910,7 @@ const disconnectMatchesCurrent = async (
       continue;
     }
 
-    const ids = await resolveEntryIdsByRef(
-      strapi,
-      sourceUid,
-      attribute.target as UID.Schema,
-      ref,
-      opts
-    );
+    const ids = await resolveEntryIdsByRef(strapi, sourceUid, attribute.target, ref, opts);
     if (ids.includes(currentId)) {
       return true;
     }
@@ -1026,13 +1020,7 @@ const resolveInlineRelationAssignment = async (
     throw new Error('Inline FK clone update requires a relation target');
   }
 
-  const id = await resolveEntryIdByRef(
-    strapi,
-    opts.sourceUid,
-    attribute.target as UID.Schema,
-    targetRef,
-    opts
-  );
+  const id = await resolveEntryIdByRef(strapi, opts.sourceUid, attribute.target, targetRef, opts);
 
   if (id == null) {
     throw new Error(`Unable to resolve relation target for clone relation update`);
