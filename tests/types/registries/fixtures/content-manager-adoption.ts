@@ -14,6 +14,12 @@ app.service('plugin::content-manager.document-manager').findOne(1, 'api::article
 // @ts-expect-error Registered document services have no arbitrary methods.
 documents.missing();
 documents.findLocales('document', 'api::article.article', { populate: { author: true } });
+documents
+  .findPage({ page: '1', pageSize: '10' }, 'api::article.article')
+  .then((result) => result.pagination.page) satisfies Promise<number>;
+documents.countDraftRelations('document', 'api::article.article');
+// @ts-expect-error A given locale is a string.
+documents.countDraftRelations('document', 'api::article.article', 1);
 
 const metadata = app.plugin('content-manager').service('document-metadata');
 metadata.getStatus({ documentId: 'document', publishedAt: null }) satisfies
