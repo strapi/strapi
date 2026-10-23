@@ -185,6 +185,7 @@
     "husky": "9.1.7",
     "inquirer": "9.3.8",
     "jest-cli": "29.6.0",
+    "jest-environment-node": "29.6.0",
     "jest-watch-typeahead": "2.2.2",
     "lint-staged": "16.4.0",
     "lodash": "4.18.1",
