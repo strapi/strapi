@@ -13,7 +13,7 @@ describe('legacyActions', () => {
     expect(isLegacyAction('entry.create')).toBe(false);
   });
 
-  it('finds folder rows stored before EE-104 under the media action', () => {
+  it('finds old folder rows under the matching media action', () => {
     expect(expandLegacyActionFilters({ $and: [{ action: { $eq: 'media.delete' } }] })).toEqual({
       $and: [{ action: { $in: ['media.delete', 'media-folder.delete'] } }],
     });
