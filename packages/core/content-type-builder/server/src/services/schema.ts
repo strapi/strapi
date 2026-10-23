@@ -12,6 +12,7 @@ import type {
 } from './migration-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
+import { isValidUidTarget } from '../utils/uid-target';
 import { validateUpdateSchema } from '../controllers/validation/schema';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import type { AttributeRenameMigrationMode } from '../config';
@@ -71,7 +72,9 @@ const removeDeletedUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
         if (
           properties.type === 'uid' &&
           properties.targetField &&
-          !contentType.attributes.find((attr) => attr.name === properties.targetField)
+          !contentType.attributes.some(
+            (attr) => attr.action !== 'delete' && attr.name === properties.targetField
+          )
         ) {
           properties.targetField = undefined;
         }
@@ -155,6 +158,48 @@ const renameConditionVarsOnUpdates = (schema: CTBSchema) => {
           fieldVar.var = finalName;
         }
       });
+    });
+  });
+};
+
+/**
+ * Keeps a uid field attached to its target when that target is renamed in this
+ * save. A `targetField` that names a saved (non-deleted) attribute of the
+ * payload is left alone: the caller already resolved it. When the renamed
+ * target is not a string or text field (custom fields are resolved to their
+ * underlying type), the uid is detached.
+ */
+const renameUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
+  schema.contentTypes.forEach((contentType) => {
+    if (contentType.action !== 'update' || !Array.isArray(contentType.renames)) {
+      return;
+    }
+
+    const finalNames = composeRenames(contentType.renames);
+    const savedAttributes = contentType.attributes.filter((attr) => attr.action !== 'delete');
+    const saved = new Set(savedAttributes.map((attr) => attr.name));
+
+    contentType.attributes.forEach((attribute) => {
+      if (attribute.action !== 'update') {
+        return;
+      }
+
+      const { properties } = attribute;
+
+      if (properties.type !== 'uid' || !properties.targetField) {
+        return;
+      }
+
+      const finalName = finalNames.get(properties.targetField);
+
+      if (!finalName || saved.has(properties.targetField)) {
+        return;
+      }
+
+      const target = savedAttributes.find((attr) => attr.name === finalName);
+
+      properties.targetField =
+        target && isValidUidTarget(target.properties) ? finalName : undefined;
     });
   });
 };
@@ -564,6 +609,7 @@ export const updateSchema = async (schema: CTBSchema) => {
 
   // pre-process data
   removeEmptyDefaultsOnUpdates(schema);
+  renameUIDTargetFieldsOnUpdates(schema);
   removeDeletedUIDTargetFieldsOnUpdates(schema);
   renameConditionVarsOnUpdates(schema);
 

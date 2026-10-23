@@ -33,6 +33,11 @@ import { Initializer } from './Initializer';
 import type { ComponentInputProps } from './Input';
 import type { Schema } from '@strapi/types';
 
+const DEFAULT_MAIN_FIELD: NonNullable<ComponentProps['mainField']> = {
+  name: 'id',
+  type: 'integer',
+};
+
 /* -------------------------------------------------------------------------------------------------
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
@@ -344,8 +349,10 @@ const TextButtonCustom = styled(TextButton)`
   }
 `;
 
-interface RepeatableComponentFieldsProps
-  extends Pick<RepeatableComponentProps, 'children' | 'layout'> {
+interface RepeatableComponentFieldsProps extends Pick<
+  RepeatableComponentProps,
+  'children' | 'layout'
+> {
   attributeComponent: string;
   nameWithIndex: string;
 }
@@ -356,9 +363,9 @@ const RepeatableComponentFields = React.memo(
 
     return (
       <>
-        {layout.map((row, index) => {
+        {layout.map((row) => {
           return (
-            <ResponsiveGridRoot gap={4} key={index}>
+            <ResponsiveGridRoot gap={4} key={row.map((field) => field.name).join('.')}>
               {row.map(({ size, ...field }) => {
                 /**
                  * Layouts are built from schemas so they don't understand the complete
@@ -405,7 +412,8 @@ RepeatableComponentFields.displayName = 'RepeatableComponentFields';
  * -----------------------------------------------------------------------------------------------*/
 
 interface ComponentProps
-  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
+  extends
+    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField' | 'layout'> {
   attributeComponent: string;
   disabled?: boolean;
@@ -423,10 +431,7 @@ const Component = ({
   disabled,
   index,
   name,
-  mainField = {
-    name: 'id',
-    type: 'integer',
-  },
+  mainField = DEFAULT_MAIN_FIELD,
   layout,
   onDeleteComponent,
   renderField,
