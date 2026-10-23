@@ -4,9 +4,13 @@ import type {
   BuilderService,
   ComponentCategoriesService,
   ContentStructureService,
+  Controllers,
+  SchemaController,
 } from '@strapi/content-type-builder/strapi-server';
 
 declare const app: Core.Strapi;
+declare const context: Parameters<Core.ControllerHandler>[0];
+declare const next: Parameters<Core.ControllerHandler>[1];
 
 const apiHandler = app.plugin('content-type-builder').service('api-handler');
 apiHandler satisfies ApiHandlerService;
@@ -35,3 +39,19 @@ contentStructure.commitFromUpdate({
 }) satisfies Promise<boolean>;
 // @ts-expect-error Deleted uids are a set.
 contentStructure.commitFromUpdate({ deletedUids: ['api::article.article'] });
+
+app.plugin('content-type-builder').controller('content-types').getContentType(context, next);
+app.controller('plugin::content-type-builder.components').updateComponent(context, next);
+app.plugin('content-type-builder').controller('schema') satisfies SchemaController;
+// @ts-expect-error Registry controller actions do not accept misspelled names.
+app.controller('plugin::content-type-builder.builder').getReservedName(context, next);
+
+({
+  type: 'admin',
+  routes: [{ method: 'GET', path: '/schema', handler: 'schema.getSchema' }],
+}) satisfies Core.RouterInputFor<Controllers, 'plugin::content-type-builder'>;
+({
+  type: 'admin',
+  // @ts-expect-error Route actions are checked against the controller contracts.
+  routes: [{ method: 'GET', path: '/schema', handler: 'schema.getSchemas' }],
+}) satisfies Core.RouterInputFor<Controllers, 'plugin::content-type-builder'>;
