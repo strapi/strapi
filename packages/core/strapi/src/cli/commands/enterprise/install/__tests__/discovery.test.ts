@@ -341,6 +341,72 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
     expect(lockedPlugins).toEqual([]);
   });
 
+  it.each([
+    ['answers with a plugin list that is not an array', { plugins: 'not-a-list' }],
+    ['answers with no object', null],
+  ])('uses the registry search when the catalog %s', async (_case, catalog) => {
+    const { plugins } = await discover(
+      await createTemporaryDirectory(),
+      createRegistryFetch({
+        searchResult: [AI_BYOK],
+        packuments: { [AI_BYOK]: aiByokPackument },
+        catalog,
+      })
+    );
+
+    expect(plugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
+  });
+
+  it('uses the registry search when the catalog times out', async () => {
+    const registryFetch = createRegistryFetch({
+      searchResult: [AI_BYOK],
+      packuments: { [AI_BYOK]: aiByokPackument },
+    });
+    const fetchImplementation = jest.fn(async (input: Parameters<typeof fetch>[0]) => {
+      if (new URL(String(input)).pathname === '/-/strapi/plugins') {
+        throw new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+      }
+
+      return registryFetch(input);
+    });
+
+    const { plugins, lockedPlugins } = await discover(
+      await createTemporaryDirectory(),
+      fetchImplementation
+    );
+
+    expect(plugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
+    expect(lockedPlugins).toEqual([]);
+  });
+
+  it('lists a plugin the catalog repeats once, as licensed when one entry says so', async () => {
+    const fetchImplementation = createRegistryFetch({
+      searchResult: [],
+      packuments: { [AI_BYOK]: aiByokPackument },
+      catalog: {
+        plugins: [
+          catalogPlugin(AI_BYOK, false),
+          catalogPlugin(AI_BYOK, true),
+          catalogPlugin(NEW_PLUGIN, false),
+          catalogPlugin(NEW_PLUGIN, false),
+        ],
+      },
+    });
+
+    const { plugins, lockedPlugins } = await discover(
+      await createTemporaryDirectory(),
+      fetchImplementation
+    );
+
+    expect(plugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
+    expect(lockedPlugins.map(({ packageName }) => packageName)).toEqual([NEW_PLUGIN]);
+    expect(
+      fetchImplementation.mock.calls.filter(
+        ([input]) => new URL(String(input)).pathname === `/${AI_BYOK}`
+      )
+    ).toHaveLength(1);
+  });
+
   it('stops with the license error when the catalog rejects the license', async () => {
     await expect(
       discover(
@@ -389,6 +455,28 @@ describe('describeEnterprisePlugin', () => {
       summary: 'Bring your own key.',
       kind: 'plugin',
     });
+  });
+
+  it('removes control characters, ANSI codes and format characters from the copy', () => {
+    const entry = describeEnterprisePlugin(AI_BYOK, {
+      status: 'available',
+      packument: createPackument(
+        AI_BYOK,
+        [
+          {
+            version: '1.0.0',
+            strapi: {
+              displayName: '\u001B[31mAI\u001B[0m\u202E BYOK',
+              description: 'Bring\r\nyour own\u200B key.\u0007',
+              kind: 'plugin',
+            },
+          },
+        ],
+        { latest: '1.0.0' }
+      ),
+    });
+
+    expect(entry).toMatchObject({ displayName: 'AI BYOK', summary: 'Bring your own key.' });
   });
 
   it('is undefined for a library, which declares no kind', () => {

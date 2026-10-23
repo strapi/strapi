@@ -5,6 +5,7 @@ import {
   fetchPackument,
   fetchPluginCatalog,
   searchPackageNames,
+  toPrintableText,
   type CatalogPlugin,
   type Packument,
   type PackumentLookup,
@@ -94,8 +95,11 @@ export const describeEnterprisePlugin = (
 
   return {
     packageName,
-    displayName: strapiMetadata.displayName ?? packageName,
-    summary: strapiMetadata.description ?? latestManifest?.description ?? '',
+    displayName: toPrintableText(strapiMetadata.displayName) ?? packageName,
+    summary:
+      toPrintableText(strapiMetadata.description) ??
+      toPrintableText(latestManifest?.description) ??
+      '',
     kind: strapiMetadata.kind,
   };
 };
@@ -243,12 +247,18 @@ export const discoverEnterprisePlugins = async ({
   const enterpriseCatalogPlugins = catalogResult.plugins.filter(({ name }) =>
     isValidPackageName(name)
   );
-  const lockedPlugins = enterpriseCatalogPlugins
-    .filter(({ name, licensed }) => !licensed && !installedPluginNames.includes(name))
-    .map(describeCatalogPlugin);
-  const licensedPackageNames = enterpriseCatalogPlugins
-    .filter(({ licensed }) => licensed)
-    .map(({ name }) => name);
+  const licensedPackageNames = [
+    ...new Set(enterpriseCatalogPlugins.filter(({ licensed }) => licensed).map(({ name }) => name)),
+  ];
+  const lockedCatalogPlugins = new Map(
+    enterpriseCatalogPlugins
+      .filter(
+        ({ name, licensed }) =>
+          !licensed && !licensedPackageNames.includes(name) && !installedPluginNames.includes(name)
+      )
+      .map((plugin) => [plugin.name, plugin])
+  );
+  const lockedPlugins = [...lockedCatalogPlugins.values()].map(describeCatalogPlugin);
 
   return {
     plugins: await describeCandidatePlugins({

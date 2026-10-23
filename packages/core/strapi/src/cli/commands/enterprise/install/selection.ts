@@ -23,8 +23,9 @@ type PluginRowState =
   | { state: 'no-compatible-version'; requiredStrapiRange: string }
   /** Not installed, and only prerelease versions exist. */
   | { state: 'no-stable-release' }
+  /** Not installed, and the catalog lists it outside the license. Shown, but not selectable. */
   | { state: 'locked' }
-  /** Not installed, and not available to this license: not shown. */
+  /** Not installed, not available to this license, and not in the catalog: not shown. */
   | { state: 'hidden' };
 
 export type PluginRow = { entry: EnterprisePluginEntry } & PluginRowState;
@@ -140,7 +141,10 @@ export const toCheckboxChoice = (row: PluginRow): ChecklistChoice => {
     case 'no-stable-release':
       return { name: label, disabled: 'no stable release yet' };
     case 'locked':
-      return { name: `${label}  ${row.entry.summary}`, disabled: 'not in your license' };
+      return {
+        name: row.entry.summary ? `${label}  ${row.entry.summary}` : label,
+        disabled: 'not in your license',
+      };
     default:
       return { name: label, disabled: 'unavailable' };
   }

@@ -184,6 +184,28 @@ describe('promptChecklist', () => {
     await prompt.cancel();
   });
 
+  it('splits a word longer than a narrow terminal, so the link is never cut', async () => {
+    const link = 'https://strapi.io/contact-sales';
+    const prompt = startPrompt(choices, 25, {
+      ...lockedGroup,
+      heading: `Not in your license. Contact Sales to enable them: ${link}`,
+    });
+
+    const lines = prompt.screen().split('\n');
+    const linkIndex = lines.indexOf('  https://strapi.io/cont');
+    expect(linkIndex).toBeGreaterThan(-1);
+    expect(lines[linkIndex + 1]).toBe('  act-sales');
+    expect(lines.every((line) => line.length <= 24)).toBe(true);
+    await prompt.cancel();
+  });
+
+  it('shows the heading alone, with no trailing space, when there is no message', async () => {
+    const prompt = startPrompt(choices, 120, { ...lockedGroup, heading: 'Not in your license.' });
+
+    expect(prompt.screen().split('\n')).toContain('  Not in your license.');
+    await prompt.cancel();
+  });
+
   it('stops with a PromptCancelledError on Ctrl+C', async () => {
     const prompt = startPrompt();
 

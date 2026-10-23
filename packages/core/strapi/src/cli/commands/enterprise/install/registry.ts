@@ -3,6 +3,7 @@ import { stripVTControlCharacters } from 'node:util';
 import { BILLING_URL, ENTERPRISE_REGISTRY_URL } from './constants';
 
 const REQUEST_TIMEOUT_MS = 15 * 1000;
+const CATALOG_TIMEOUT_MS = 5 * 1000;
 const SEARCH_PAGE_SIZE = 250;
 
 export interface StrapiPackageMetadata {
@@ -163,13 +164,15 @@ export type CatalogResult =
   | { status: 'unavailable' };
 
 const CONTROL_CHARACTERS = /\p{Cc}/gu;
+const FORMAT_CHARACTERS = /\p{Cf}/gu;
 
-const toPrintableText = (text: unknown): string | undefined => {
+export const toPrintableText = (text: unknown): string | undefined => {
   if (typeof text !== 'string') {
     return undefined;
   }
 
   const printableText = stripVTControlCharacters(text)
+    .replace(FORMAT_CHARACTERS, '')
     .replace(CONTROL_CHARACTERS, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -209,7 +212,7 @@ export const fetchPluginCatalog = async ({
   try {
     const response = await fetchImplementation(`${registryUrl}/-/strapi/plugins`, {
       headers: { ...authorizationHeader(license), Accept: 'application/json' },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
     });
 
     if (response.status === 401) {

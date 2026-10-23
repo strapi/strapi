@@ -222,6 +222,29 @@ describe('fetchPluginCatalog', () => {
     });
   });
 
+  it('removes format characters, such as a right-to-left override, without adding a space', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(
+      createFetchResponse(200, {
+        plugins: [],
+        notLicensedMessage: 'Contact\u200B \u202Eselas\u202C https://strapi.io/con\u200Btact',
+      })
+    );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toMatchObject({
+      notLicensedMessage: 'Contact selas https://strapi.io/contact',
+    });
+  });
+
+  it('gives up on the catalog after 5 seconds, since the search can replace it', async () => {
+    const timeoutSpy = jest.spyOn(AbortSignal, 'timeout');
+    const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(404));
+
+    await fetchCatalog(fetchImplementation);
+
+    expect(timeoutSpy).toHaveBeenCalledWith(5000);
+    timeoutSpy.mockRestore();
+  });
+
   it('drops a message with nothing printable', async () => {
     const fetchImplementation = jest
       .fn()
@@ -251,6 +274,28 @@ describe('fetchPluginCatalog', () => {
     ['cannot be reached', jest.fn().mockRejectedValue(new TypeError('fetch failed'))],
     ['answers with no plugin list', jest.fn().mockResolvedValue(createFetchResponse(200, {}))],
     ['answers with no object', jest.fn().mockResolvedValue(createFetchResponse(200, null))],
+    [
+      'answers with a plugin list that is not an array',
+      jest.fn().mockResolvedValue(createFetchResponse(200, { plugins: 'not-a-list' })),
+    ],
+    [
+      'answers with invalid JSON',
+      jest.fn().mockResolvedValue({
+        status: 200,
+        ok: true,
+        async json() {
+          throw new SyntaxError('Unexpected token < in JSON');
+        },
+      }),
+    ],
+    [
+      'times out',
+      jest
+        .fn()
+        .mockRejectedValue(
+          new DOMException('The operation was aborted due to timeout', 'TimeoutError')
+        ),
+    ],
   ])('reports the catalog as unavailable when it %s', async (_case, fetchImplementation) => {
     await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({ status: 'unavailable' });
   });

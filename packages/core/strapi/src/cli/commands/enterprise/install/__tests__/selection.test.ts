@@ -175,6 +175,12 @@ describe('toCheckboxChoice for a locked row', () => {
       disabled: 'not in your license',
     });
   });
+
+  it('ends with the label when there is no summary', () => {
+    expect(toCheckboxChoice({ entry: { ...aiByokEntry, summary: '' }, state: 'locked' }).name).toBe(
+      'AI BYOK (@strapi-enterprise/plugin-ai-byok)'
+    );
+  });
 });
 
 describe('describeLockedGroup', () => {
@@ -230,5 +236,14 @@ describe('promptForPlugins', () => {
         ],
       },
     });
+  });
+
+  it('shows the heading alone when the server sends no message', async () => {
+    const promptChecklistMock = promptChecklist as jest.Mock;
+    promptChecklistMock.mockResolvedValueOnce([]);
+
+    await promptForPlugins([{ entry: aiByokEntry, state: 'locked' }, rowFor(threeVersions)]);
+
+    expect(promptChecklistMock.mock.lastCall[0].lockedGroup.heading).toBe('Not in your license.');
   });
 });
