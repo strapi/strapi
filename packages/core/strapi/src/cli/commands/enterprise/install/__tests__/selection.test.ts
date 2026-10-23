@@ -2,6 +2,7 @@ import { promptChecklist } from '../checklist-prompt';
 import type { PackumentLookup } from '../registry';
 import {
   buildPluginRow,
+  describeLockedGroup,
   orderVisibleRows,
   promptForPlugins,
   toCheckboxChoice,
@@ -80,8 +81,9 @@ describe('buildPluginRow', () => {
 });
 
 describe('orderVisibleRows', () => {
-  it('puts upgrades first and drops hidden rows', () => {
+  it('puts upgrades first, locked rows last, and drops hidden rows', () => {
     const rows: PluginRow[] = [
+      { entry: aiByokEntry, state: 'locked' },
       { entry: aiByokEntry, state: 'installed', installedVersion: '1.2.0' },
       { entry: aiByokEntry, state: 'hidden' },
       { entry: aiByokEntry, state: 'install', targetVersion: '1.2.0' },
@@ -98,6 +100,7 @@ describe('orderVisibleRows', () => {
       'upgrade',
       'install',
       'installed',
+      'locked',
     ]);
   });
 });
@@ -165,6 +168,25 @@ describe('toCheckboxChoice', () => {
   });
 });
 
+describe('toCheckboxChoice for a locked row', () => {
+  it('shows the summary and is not selectable', () => {
+    expect(toCheckboxChoice({ entry: aiByokEntry, state: 'locked' })).toEqual({
+      name: `AI BYOK (@strapi-enterprise/plugin-ai-byok)  ${aiByokEntry.summary}`,
+      disabled: 'not in your license',
+    });
+  });
+});
+
+describe('describeLockedGroup', () => {
+  it('adds the server message after the heading', () => {
+    expect(describeLockedGroup('Contact Sales.')).toBe('Not in your license. Contact Sales.');
+  });
+
+  it.each([undefined, ''])('is the heading alone, with no trailing space, for %j', (message) => {
+    expect(describeLockedGroup(message)).toBe('Not in your license.');
+  });
+});
+
 describe('promptForPlugins', () => {
   it('shows the visible rows as a checklist and returns the selected install specs', async () => {
     const promptChecklistMock = promptChecklist as jest.Mock;
@@ -182,6 +204,31 @@ describe('promptForPlugins', () => {
           checked: true,
         }),
       ],
+    });
+    expect(promptChecklistMock.mock.lastCall[0].lockedGroup).toBeUndefined();
+  });
+
+  it('shows the locked rows apart, under the heading with the message', async () => {
+    const promptChecklistMock = promptChecklist as jest.Mock;
+    promptChecklistMock.mockResolvedValueOnce([]);
+    const lockedEntry = { ...aiByokEntry, packageName: '@strapi-enterprise/plugin-locked' };
+
+    await promptForPlugins(
+      [{ entry: lockedEntry, state: 'locked' }, rowFor(threeVersions)],
+      'Contact Sales.'
+    );
+
+    expect(promptChecklistMock).toHaveBeenCalledWith({
+      message: 'Which Enterprise plugins do you want to install or upgrade?',
+      choices: [expect.objectContaining({ value: '@strapi-enterprise/plugin-ai-byok@1.2.0' })],
+      lockedGroup: {
+        heading: 'Not in your license. Contact Sales.',
+        choices: [
+          expect.objectContaining({
+            name: expect.stringContaining('@strapi-enterprise/plugin-locked'),
+          }),
+        ],
+      },
     });
   });
 });

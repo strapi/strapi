@@ -1,6 +1,10 @@
 import { PassThrough } from 'node:stream';
 
-import { promptChecklist, type ChecklistChoice } from '../checklist-prompt';
+import {
+  promptChecklist,
+  type ChecklistChoice,
+  type ChecklistLockedGroup,
+} from '../checklist-prompt';
 import { PromptCancelledError } from '../errors';
 
 const KEYS = { enter: '\r', down: '\u001B[B', up: '\u001B[A', space: ' ', ctrlC: '\u0003' };
@@ -20,7 +24,16 @@ const choices: ChecklistChoice[] = [
   },
 ];
 
-const startPrompt = (promptChoices: ChecklistChoice[] = choices, columns = 120) => {
+const lockedGroup: ChecklistLockedGroup = {
+  heading: 'Not in your license. Contact Sales.',
+  choices: [{ name: 'Plugin D  Does things.', disabled: 'not in your license' }],
+};
+
+const startPrompt = (
+  promptChoices: ChecklistChoice[] = choices,
+  columns = 120,
+  promptLockedGroup?: ChecklistLockedGroup
+) => {
   const input = new PassThrough() as unknown as NodeJS.ReadStream;
   const output = new PassThrough() as unknown as NodeJS.WriteStream;
   Object.assign(output, { columns });
@@ -32,6 +45,7 @@ const startPrompt = (promptChoices: ChecklistChoice[] = choices, columns = 120) 
   const answer = promptChecklist({
     message: 'Which plugins?',
     choices: promptChoices,
+    lockedGroup: promptLockedGroup,
     input,
     output,
   });
@@ -117,6 +131,56 @@ describe('promptChecklist', () => {
     const choiceLine = prompt.screen().split('\n')[2];
     expect(choiceLine).toHaveLength(39);
     expect(choiceLine.endsWith('…')).toBe(true);
+    await prompt.cancel();
+  });
+
+  it('shows the locked group under its heading, after the choices and before Submit', async () => {
+    const prompt = startPrompt(choices, 120, lockedGroup);
+
+    expect(prompt.screen()).toBe(
+      [
+        '',
+        'Which plugins?',
+        '❯ ◯ Plugin A  1.0.0',
+        '  - Plugin B (not in your license)',
+        '  ◉ Plugin C  1.0.0 → 1.1.0 [upgrade]',
+        '',
+        '  Not in your license. Contact Sales.',
+        '  ✕ Plugin D  Does things.',
+        '',
+        '  Submit',
+        '',
+      ].join('\n')
+    );
+    await prompt.cancel();
+  });
+
+  it('never lands on a locked row, and never returns one', async () => {
+    const prompt = startPrompt(choices, 120, lockedGroup);
+
+    prompt.press(KEYS.down, KEYS.down);
+    expect(prompt.screen()).toContain('❯ Submit');
+
+    prompt.press(KEYS.up);
+    expect(prompt.screen()).toContain('❯ ◉ Plugin C');
+
+    prompt.press(KEYS.up, KEYS.up);
+    expect(prompt.screen()).toContain('❯ Submit');
+
+    prompt.press(KEYS.enter);
+    await expect(prompt.answer).resolves.toEqual(['plugin-c@1.1.0']);
+  });
+
+  it('wraps a long heading on words, so the link is never cut', async () => {
+    const link = 'https://strapi.io/contact-sales';
+    const prompt = startPrompt(choices, 40, {
+      ...lockedGroup,
+      heading: `Not in your license. Contact Sales to enable them: ${link}`,
+    });
+
+    const lines = prompt.screen().split('\n');
+    expect(lines).toContain(`  ${link}`);
+    expect(lines.every((line) => line.length <= 39)).toBe(true);
     await prompt.cancel();
   });
 

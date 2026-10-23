@@ -23,6 +23,7 @@ type PluginRowState =
   | { state: 'no-compatible-version'; requiredStrapiRange: string }
   /** Not installed, and only prerelease versions exist. */
   | { state: 'no-stable-release' }
+  | { state: 'locked' }
   /** Not installed, and not available to this license: not shown. */
   | { state: 'hidden' };
 
@@ -85,6 +86,7 @@ const ROW_ORDER: PluginRow['state'][] = [
   'not-licensed',
   'no-compatible-version',
   'no-stable-release',
+  'locked',
 ];
 
 export const isSelectable = (row: PluginRow): row is SelectableRow =>
@@ -137,6 +139,8 @@ export const toCheckboxChoice = (row: PluginRow): ChecklistChoice => {
       return { name: label, disabled: `requires Strapi ${row.requiredStrapiRange}` };
     case 'no-stable-release':
       return { name: label, disabled: 'no stable release yet' };
+    case 'locked':
+      return { name: `${label}  ${row.entry.summary}`, disabled: 'not in your license' };
     default:
       return { name: label, disabled: 'unavailable' };
   }
@@ -148,8 +152,22 @@ export const orderVisibleRows = (rows: PluginRow[]): PluginRow[] =>
     .filter((row) => row.state !== 'hidden')
     .sort((left, right) => ROW_ORDER.indexOf(left.state) - ROW_ORDER.indexOf(right.state));
 
-export const promptForPlugins = (rows: PluginRow[]): Promise<string[]> =>
-  promptChecklist({
+export const describeLockedGroup = (notLicensedMessage?: string): string =>
+  notLicensedMessage ? `Not in your license. ${notLicensedMessage}` : 'Not in your license.';
+
+export const promptForPlugins = (
+  rows: PluginRow[],
+  notLicensedMessage?: string
+): Promise<string[]> => {
+  const visibleRows = orderVisibleRows(rows);
+  const lockedChoices = visibleRows.filter((row) => row.state === 'locked').map(toCheckboxChoice);
+
+  return promptChecklist({
     message: 'Which Enterprise plugins do you want to install or upgrade?',
-    choices: orderVisibleRows(rows).map(toCheckboxChoice),
+    choices: visibleRows.filter((row) => row.state !== 'locked').map(toCheckboxChoice),
+    lockedGroup:
+      lockedChoices.length > 0
+        ? { heading: describeLockedGroup(notLicensedMessage), choices: lockedChoices }
+        : undefined,
   });
+};

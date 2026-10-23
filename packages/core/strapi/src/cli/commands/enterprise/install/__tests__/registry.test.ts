@@ -1,4 +1,4 @@
-import { fetchPackument, searchPackageNames } from '../registry';
+import { fetchPackument, fetchPluginCatalog, searchPackageNames } from '../registry';
 import { createFetchResponse, createPackument } from './test-helpers';
 
 const packageName = '@strapi-enterprise/plugin-ai-byok';
@@ -144,5 +144,114 @@ describe('fetchPackument with invalid data', () => {
       message:
         'https://packages.strapi.io answered with invalid data for @strapi-enterprise/plugin-ai-byok. Try again later.',
     });
+  });
+});
+
+describe('fetchPluginCatalog', () => {
+  const fetchCatalog = (fetchImplementation: typeof fetch) =>
+    fetchPluginCatalog({ license: 'the-license', fetchImplementation });
+
+  it('lists the plugins with whether the license includes them, and the message', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(
+      createFetchResponse(200, {
+        plugins: [
+          {
+            name: packageName,
+            displayName: 'AI BYOK',
+            description: 'Bring your own key.',
+            kind: 'plugin',
+            licensed: false,
+          },
+        ],
+        notLicensedMessage: 'Contact Sales to enable them: https://strapi.io/contact-sales',
+      })
+    );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({
+      status: 'available',
+      plugins: [
+        {
+          name: packageName,
+          displayName: 'AI BYOK',
+          description: 'Bring your own key.',
+          kind: 'plugin',
+          licensed: false,
+        },
+      ],
+      notLicensedMessage: 'Contact Sales to enable them: https://strapi.io/contact-sales',
+    });
+    expect(fetchImplementation).toHaveBeenCalledWith(
+      'https://packages.strapi.io/-/strapi/plugins',
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer the-license', Accept: 'application/json' },
+      })
+    );
+  });
+
+  it('leaves out a plugin with no name or no licensed flag', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(
+      createFetchResponse(200, {
+        plugins: [
+          { name: packageName, licensed: true },
+          { name: '@strapi-enterprise/plugin-other' },
+          { licensed: true },
+          'not-an-object',
+        ],
+      })
+    );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({
+      status: 'available',
+      plugins: [{ name: packageName, licensed: true }],
+    });
+  });
+
+  it('removes control characters and ANSI codes from the strings it prints', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(
+      createFetchResponse(200, {
+        plugins: [
+          { name: packageName, displayName: '\u001B[1mAI\u001B[22m BYOK\u0007', licensed: false },
+        ],
+        notLicensedMessage: '\u001B[31mContact\u001B[0m Sales.\r\n\u001B]0;title\u0007Now.\u009B',
+      })
+    );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toMatchObject({
+      plugins: [{ displayName: 'AI BYOK' }],
+      notLicensedMessage: 'Contact Sales. Now.',
+    });
+  });
+
+  it('drops a message with nothing printable', async () => {
+    const fetchImplementation = jest
+      .fn()
+      .mockResolvedValue(
+        createFetchResponse(200, { plugins: [], notLicensedMessage: ' \u001B[0m ' })
+      );
+
+    await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({
+      status: 'available',
+      plugins: [],
+      notLicensedMessage: undefined,
+    });
+  });
+
+  it('tells a rejected license apart from an unavailable catalog', async () => {
+    await expect(
+      fetchCatalog(jest.fn().mockResolvedValue(createFetchResponse(401)))
+    ).resolves.toEqual({
+      status: 'license-rejected',
+      message: expect.stringContaining('https://packages.strapi.io rejected this Strapi license.'),
+    });
+  });
+
+  it.each([
+    ['is missing, as on an older registry', jest.fn().mockResolvedValue(createFetchResponse(404))],
+    ['answers with an error', jest.fn().mockResolvedValue(createFetchResponse(500))],
+    ['cannot be reached', jest.fn().mockRejectedValue(new TypeError('fetch failed'))],
+    ['answers with no plugin list', jest.fn().mockResolvedValue(createFetchResponse(200, {}))],
+    ['answers with no object', jest.fn().mockResolvedValue(createFetchResponse(200, null))],
+  ])('reports the catalog as unavailable when it %s', async (_case, fetchImplementation) => {
+    await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({ status: 'unavailable' });
   });
 });

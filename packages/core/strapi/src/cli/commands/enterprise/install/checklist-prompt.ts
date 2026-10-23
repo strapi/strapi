@@ -11,19 +11,39 @@ export interface ChecklistChoice {
   disabled?: string;
 }
 
+export interface ChecklistLockedGroup {
+  heading: string;
+  choices: ChecklistChoice[];
+}
+
 const SUBMIT_LABEL = 'Submit';
 
 const fitWidth = (text: string, width: number): string =>
   text.length <= width ? text : `${text.slice(0, Math.max(width - 1, 0))}…`;
 
+const wrapWords = (text: string, width: number): string[] =>
+  text.split(' ').reduce<string[]>((lines, word) => {
+    const lastLine = lines[lines.length - 1];
+
+    if (lastLine !== undefined && lastLine.length + word.length + 1 <= width) {
+      lines[lines.length - 1] = `${lastLine} ${word}`;
+    } else {
+      lines.push(fitWidth(word, width));
+    }
+
+    return lines;
+  }, []);
+
 export const promptChecklist = ({
   message,
   choices,
+  lockedGroup,
   input = process.stdin,
   output = process.stdout,
 }: {
   message: string;
   choices: ChecklistChoice[];
+  lockedGroup?: ChecklistLockedGroup;
   input?: NodeJS.ReadStream;
   output?: NodeJS.WriteStream;
 }): Promise<string[]> =>
@@ -51,6 +71,17 @@ export const promptChecklist = ({
       return isActive ? `${chalk.cyan('❯')} ${box} ${chalk.cyan(name)}` : `  ${box} ${name}`;
     };
 
+    const renderLockedGroup = (): string[] =>
+      lockedGroup
+        ? [
+            '',
+            ...wrapWords(lockedGroup.heading, width() - 2).map((line) => `  ${line}`),
+            ...lockedGroup.choices.map((choice) =>
+              chalk.dim(fitWidth(`  ✕ ${choice.name}`, width()))
+            ),
+          ]
+        : [];
+
     const renderSubmit = () =>
       stops[cursor] === submitIndex
         ? `${chalk.cyan('❯')} ${chalk.cyan.bold(SUBMIT_LABEL)}`
@@ -68,7 +99,8 @@ export const promptChecklist = ({
     };
 
     const question = chalk.bold(message);
-    const render = () => draw([question, ...choices.map(renderChoice), '', renderSubmit()]);
+    const render = () =>
+      draw([question, ...choices.map(renderChoice), ...renderLockedGroup(), '', renderSubmit()]);
 
     const stop = () => {
       input.removeListener('keypress', onKeypress);

@@ -1,3 +1,5 @@
+import { stripVTControlCharacters } from 'node:util';
+
 import { BILLING_URL, ENTERPRISE_REGISTRY_URL } from './constants';
 
 const REQUEST_TIMEOUT_MS = 15 * 1000;
@@ -141,4 +143,103 @@ export const fetchPackument = async ({
   }
 
   return { status: 'available', packument: packument as Packument };
+};
+
+export interface CatalogPlugin {
+  name: string;
+  displayName?: string;
+  description?: string;
+  kind?: string;
+  licensed: boolean;
+}
+
+export type CatalogResult =
+  | {
+      status: 'available';
+      plugins: CatalogPlugin[];
+      notLicensedMessage?: string;
+    }
+  | { status: 'license-rejected'; message: string }
+  | { status: 'unavailable' };
+
+const CONTROL_CHARACTERS = /\p{Cc}/gu;
+
+const toPrintableText = (text: unknown): string | undefined => {
+  if (typeof text !== 'string') {
+    return undefined;
+  }
+
+  const printableText = stripVTControlCharacters(text)
+    .replace(CONTROL_CHARACTERS, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return printableText || undefined;
+};
+
+const parseCatalogPlugin = (plugin: unknown): CatalogPlugin | undefined => {
+  if (typeof plugin !== 'object' || plugin === null) {
+    return undefined;
+  }
+
+  const { name, displayName, description, kind, licensed } = plugin as Record<string, unknown>;
+
+  if (typeof name !== 'string' || typeof licensed !== 'boolean') {
+    return undefined;
+  }
+
+  return {
+    name,
+    displayName: toPrintableText(displayName),
+    description: toPrintableText(description),
+    kind: toPrintableText(kind),
+    licensed,
+  };
+};
+
+export const fetchPluginCatalog = async ({
+  license,
+  fetchImplementation,
+}: {
+  license: string;
+  fetchImplementation: typeof fetch;
+}): Promise<CatalogResult> => {
+  const registryUrl = REGISTRY_URL;
+
+  try {
+    const response = await fetchImplementation(`${registryUrl}/-/strapi/plugins`, {
+      headers: { ...authorizationHeader(license), Accept: 'application/json' },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+
+    if (response.status === 401) {
+      return { status: 'license-rejected', message: describeRejectedLicense(registryUrl) };
+    }
+
+    if (!response.ok) {
+      return { status: 'unavailable' };
+    }
+
+    const catalog: unknown = await response.json();
+
+    if (typeof catalog !== 'object' || catalog === null) {
+      return { status: 'unavailable' };
+    }
+
+    const { plugins, notLicensedMessage } = catalog as Record<string, unknown>;
+
+    if (!Array.isArray(plugins)) {
+      return { status: 'unavailable' };
+    }
+
+    return {
+      status: 'available',
+      plugins: plugins
+        .map(parseCatalogPlugin)
+        .filter((plugin): plugin is CatalogPlugin => plugin !== undefined),
+      notLicensedMessage: toPrintableText(notLicensedMessage),
+    };
+  } catch {
+    return { status: 'unavailable' };
+  }
 };
