@@ -69,12 +69,14 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
 const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
+      // A released release is a record of what was published, its actions must stay
+      releasedAt: null,
       actions: params,
     },
   });
 
   await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-    where: params,
+    where: { ...params, release: { releasedAt: null } },
   });
 
   await updateAffectedReleaseStatuses(releases, { strapi });
