@@ -313,11 +313,7 @@ class Database {
         await commit();
         return res;
       } catch (error) {
-        try {
-          await rollback();
-        } catch {
-          // A deadlock already aborted the transaction. Keep the original error.
-        }
+        await rollback();
         throw error;
       }
     });
@@ -332,21 +328,7 @@ class Database {
   getConnection(tableName?: string): Knex | Knex.QueryBuilder {
     const schema = this.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
-
-    if (!schema) {
-      return connection;
-    }
-
-    // knex.withSchema() returns a query builder. The no-arg connection is also
-    // used as a schema inspector (`db.getConnection().schema.hasTable`).
-    const query = connection.withSchema(schema);
-    if (!tableName) {
-      Object.defineProperty(query, 'schema', {
-        value: this.connection.schema.withSchema(schema),
-      });
-    }
-
-    return query;
+    return schema ? connection.withSchema(schema) : connection;
   }
 
   // Returns basic info about the database connection

@@ -353,11 +353,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
         await trx.commit();
       } catch (e) {
-        try {
-          await trx.rollback();
-        } catch {
-          // The deadlock already aborted the transaction.
-        }
+        await trx.rollback();
 
         if (!(nested && isDeadlockError(e))) {
           await this.createQueryBuilder(uid).where({ id }).delete().execute();
@@ -415,11 +411,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         }
         await trx.commit();
       } catch (e) {
-        try {
-          await trx.rollback();
-        } catch {
-          // The deadlock already aborted the transaction.
-        }
+        await trx.rollback();
         throw e;
       }
 
@@ -482,11 +474,7 @@ export const createEntityManager = (db: Database): EntityManager => {
           relationsUpdated = true;
           break;
         } catch (e) {
-          try {
-            await trx.rollback();
-          } catch {
-            // The deadlock already aborted the transaction.
-          }
+          await trx.rollback();
 
           lastError = e;
           if (nested || attempt === maxAttempts || !isDeadlockError(e)) {
@@ -573,11 +561,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
         await trx.commit();
       } catch (e) {
-        try {
-          await trx.rollback();
-        } catch {
-          // The deadlock already aborted the transaction.
-        }
+        await trx.rollback();
         throw e;
       }
 

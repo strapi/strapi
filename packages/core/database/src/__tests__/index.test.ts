@@ -321,7 +321,7 @@ describe('Database', () => {
         await db.destroy();
       });
 
-      it(`resolves only after commit hooks finish with ${title}`, async () => {
+      it(`returns before commit hooks finish and destroy waits for them with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
 
@@ -338,8 +338,9 @@ describe('Database', () => {
           );
         });
 
-        expect(finished).toBe(true);
+        expect(finished).toBe(false);
         await db.destroy();
+        expect(finished).toBe(true);
       });
     });
   });
