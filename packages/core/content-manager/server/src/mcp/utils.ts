@@ -55,7 +55,10 @@ export const sanitizeFormatShape = async (
     return formatted;
   }
 
-  const shapedData = await shapeRelationsForMcp(uid, formatted.data as Record<string, unknown>);
+  const shapedData = await shapeRelationsForMcp(
+    uid,
+    formatted.data as unknown as Record<string, unknown>
+  );
   return { ...formatted, data: shapedData };
 };
 

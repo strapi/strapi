@@ -1,5 +1,5 @@
 import type { Ability } from '@casl/ability';
-import type { Modules, Schema, Struct, UID } from '@strapi/types';
+import type { Data, Modules, Schema, Struct, UID } from '@strapi/types';
 import type { ComponentConfiguration } from '../../../shared/contracts/components';
 import type { Configuration } from '../../../shared/contracts/content-types';
 import type { DocumentManagerService as DocumentManagerFactory } from '../services/document-manager';
@@ -42,6 +42,25 @@ export type MetadataDocumentVersion = Omit<DocumentVersion, 'locale' | 'localiza
   localizations?: MetadataDocumentVersion[];
 };
 
+/** A version row as the metadata service reads it from the database: dates are ISO strings. */
+export type MetadataVersionRow = {
+  id: Data.ID;
+  documentId: string;
+  locale: string | null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+};
+
+/**
+ * Another locale of a document. With draft and publish, it is the draft version with its status.
+ * Items also hold other fields of the version, such as its non-localized fields.
+ */
+export type AvailableLocale = MetadataVersionRow & {
+  status?: 'published' | 'draft' | 'modified';
+  [key: string]: unknown;
+};
+
 /**
  * Metadata operations shared by collection, single type and relation controllers. Versions may be
  * partial, `locale` may be `null`, and statuses are the Content Manager ones. The implementation
@@ -49,17 +68,33 @@ export type MetadataDocumentVersion = Omit<DocumentVersion, 'locale' | 'localiza
  */
 export type DocumentMetadataService = Omit<
   DocumentMetadataImplementation,
-  'getAvailableLocales' | 'getAvailableStatus' | 'getStatus' | 'getMetadata'
+  | 'getAvailableLocales'
+  | 'getAvailableStatus'
+  | 'getManyAvailableStatus'
+  | 'getStatus'
+  | 'getMetadata'
+  | 'formatDocumentWithMetadata'
 > & {
+  /** @internal */
   getAvailableLocales(
     uid: UID.ContentType,
     version: Partial<MetadataDocumentVersion>,
     allVersions: MetadataDocumentVersion[]
-  ): ReturnType<DocumentMetadataImplementation['getAvailableLocales']>;
+  ): Promise<AvailableLocale[]>;
+  /** @internal */
   getAvailableStatus(
     version: Partial<MetadataDocumentVersion>,
     allVersions: MetadataDocumentVersion[]
   ): Partial<MetadataDocumentVersion> | undefined;
+  /**
+   * Versions of the given documents in the other publication status, read from the status of the
+   * first document.
+   * @internal
+   */
+  getManyAvailableStatus(
+    uid: UID.ContentType,
+    documents: MetadataDocumentVersion[]
+  ): Promise<MetadataVersionRow[]>;
   getStatus(
     version: Partial<MetadataDocumentVersion>,
     otherDocumentStatuses?: Partial<MetadataDocumentVersion>[]
@@ -69,9 +104,24 @@ export type DocumentMetadataService = Omit<
     version: Pick<MetadataDocumentVersion, 'documentId'> & Partial<MetadataDocumentVersion>,
     options?: GetMetadataOptions
   ): Promise<{
-    availableLocales: Awaited<ReturnType<DocumentMetadataImplementation['getAvailableLocales']>>;
+    availableLocales: AvailableLocale[];
     availableStatus: Partial<MetadataDocumentVersion>[];
     versions: MetadataDocumentVersion[];
+  }>;
+  /**
+   * The document with its status, which is `undefined` without draft and publish, and its metadata.
+   * @internal
+   */
+  formatDocumentWithMetadata<TDocument extends MetadataDocumentVersion>(
+    uid: UID.ContentType,
+    document: TDocument,
+    opts?: GetMetadataOptions
+  ): Promise<{
+    data: TDocument & { status: 'published' | 'draft' | 'modified' | undefined };
+    meta: {
+      availableLocales: AvailableLocale[];
+      availableStatus: Partial<MetadataDocumentVersion>[];
+    };
   }>;
 };
 
