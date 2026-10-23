@@ -39,6 +39,17 @@ getService('document-manager').findOne(1, 'api::article.article');
 getService('document-manager').findLocales('document', 'api::article.article', {
   populate: { author: true },
 });
+const page = getService('document-manager').findPage(
+  { page: '2', pageSize: '10', hasPublishedVersion: 'true', locale: 'en' },
+  'api::article.article'
+);
+page.then((result) => result.pagination.pageSize) satisfies Promise<number>;
+getService('document-manager').findPage({ start: 0, limit: 10 }, 'api::article.article');
+// @ts-expect-error Page and offset pagination cannot be mixed.
+getService('document-manager').findPage({ page: '2', start: 0 }, 'api::article.article');
+getService('document-manager').countDraftRelations('document', 'api::article.article', undefined);
+// @ts-expect-error A given locale is a string.
+getService('document-manager').countDraftRelations('document', 'api::article.article', 1);
 
 const status = getService('document-metadata').getStatus({ documentId: 'document' });
 status satisfies 'draft' | 'published' | 'modified';
