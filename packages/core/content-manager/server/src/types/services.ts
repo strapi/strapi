@@ -9,11 +9,9 @@ import type createComponentsService from '../services/components';
 import type createContentTypesService from '../services/content-types';
 import type { ConfigurationUpdate } from '../services/configuration';
 import type createDataMapperService from '../services/data-mapper';
-import type createPermissionService from '../services/permission';
 import type { createHomepageService } from '../homepage/services/homepage';
 import type { createHistoryService } from '../history/services/history';
 import type { createLifecyclesService } from '../history/services/lifecycles';
-import type { createPreviewService } from '../preview/services/preview';
 import type { createPreviewConfigService } from '../preview/services/preview-config';
 
 type DocumentManagerImplementation = ReturnType<DocumentManagerFactory>;
@@ -158,6 +156,7 @@ export type DocumentMetadataService = Omit<
 
 /** Content types visible in the Content Manager folder navigation. */
 export type ContentStructureService = {
+  /** @internal */
   getContentStructure(): Promise<Modules.ContentStructure.ResolvedContentStructure | null>;
 };
 
@@ -165,15 +164,24 @@ type FieldSize = NonNullable<Modules.CustomFields.CustomFieldServerOptions['inpu
 
 /** Sizes of built-in and registered custom fields in the edit view. */
 export type FieldSizesService = {
+  /** @internal */
   getAllFieldSizes(): Record<string, FieldSize>;
-  hasFieldSize(type: string): boolean;
+  /**
+   * Layout syncs pass the attribute's custom field name, which is `undefined` for built-in fields.
+   * @internal
+   */
+  hasFieldSize(type: string | undefined): boolean;
+  /** @internal */
   getFieldSize(type?: string): FieldSize;
+  /** @internal */
   setFieldSize(type: string, size: FieldSize): void;
+  /** @internal */
   setCustomFieldInputSizes(): void;
 };
 
 /** Telemetry sent when the Content Manager list view is configured. */
 export type MetricsService = {
+  /** @internal */
   sendDidConfigureListView(
     contentType: Struct.ContentTypeSchema,
     configuration: Configuration
@@ -188,8 +196,11 @@ type UIDField = {
 
 /** Generate and check UID values within the selected content type and locale. */
 export type UIDService = {
+  /** @internal */
   generateUIDField(options: UIDField & { data: Record<string, unknown> }): Promise<string>;
+  /** @internal */
   findUniqueUID(options: UIDField & { value: string }): Promise<string>;
+  /** @internal */
   checkUIDAvailability(options: UIDField & { value: string }): Promise<boolean>;
 };
 
@@ -369,7 +380,22 @@ export type DataMapperService = Omit<
 };
 
 /** Content Manager permission registration and configuration checks. */
-export type PermissionService = ReturnType<typeof createPermissionService>;
+export type PermissionService = {
+  /**
+   * Whether the ability may configure the views of the content type: the single type or the
+   * collection type configure-view action.
+   * @internal
+   */
+  canConfigureContentType(options: {
+    userAbility: Ability;
+    contentType: Struct.ContentTypeSchema;
+  }): boolean;
+  /**
+   * Registers the Content Manager admin actions. It throws after the bootstrap phase.
+   * @internal
+   */
+  registerPermissions(): Promise<void>;
+};
 
 /** Homepage widgets: recent and counted documents. */
 export type HomepageService = ReturnType<typeof createHomepageService>;
@@ -380,8 +406,29 @@ export type HistoryService = ReturnType<typeof createHistoryService>;
 /** History recording lifecycles. Only registered when the `cms-content-history` feature is enabled. */
 export type LifecyclesService = ReturnType<typeof createLifecyclesService>;
 
+/**
+ * The document version to preview. The controller fills `documentId` (the single type's document)
+ * and `status` (draft with draft and publish, published otherwise). A localized content type gets
+ * the requested `locale`; a bare `locale` query parameter arrives as `null`.
+ */
+type PreviewUrlParams = {
+  documentId: string;
+  // TODO @Nico the configured handler's `PreviewHandlerParams.locale` (`@strapi/types`) is
+  // `string | undefined`, but a bare `locale` query parameter reaches it as `null`.
+  locale?: string | null;
+  status: 'published' | 'draft';
+};
+
 /** Preview URLs. */
-export type PreviewService = ReturnType<typeof createPreviewService>;
+export type PreviewService = {
+  /**
+   * The URL the configured handler returns for the document version; `null` or `undefined` when
+   * it has none, `undefined` when preview is disabled. Throws a `NotFoundError` without a preview
+   * configuration and an `ApplicationError` when the handler throws.
+   * @internal
+   */
+  getPreviewUrl(uid: UID.ContentType, params: PreviewUrlParams): Promise<string | null | undefined>;
+};
 
 /** Preview configuration. */
 export type PreviewConfigService = ReturnType<typeof createPreviewConfigService>;
