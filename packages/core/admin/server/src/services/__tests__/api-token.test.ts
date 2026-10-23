@@ -18,6 +18,7 @@ import {
   reconcileTokenPermissionsToUserCeiling,
   syncApiTokenPermissionsForUser,
   enforceAdminPermissionsCeiling,
+  assignAdminPermissionsToToken,
 } from '../api-token';
 import encryptionService from '../encryption';
 
@@ -2800,6 +2801,62 @@ describe('API Token', () => {
 
       expect(toDelete).toHaveLength(0);
       expect(toUpdate).toHaveLength(0);
+    });
+  });
+
+  describe('assignAdminPermissionsToToken', () => {
+    test('Does not delete and recreate a permission that only changed order', async () => {
+      const superAdmin = { id: 1, roles: [{ code: 'strapi-super-admin' }] } as any;
+      const findMany = jest.fn().mockResolvedValue([
+        {
+          id: 101,
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::article.article',
+          properties: { fields: ['body', 'title'], locales: ['fr', 'en'] },
+          conditions: ['admin::has-same-role-as-creator', 'admin::is-creator'],
+          actionParameters: {},
+        },
+      ]);
+      const createMany = jest.fn();
+      const deleteByIds = jest.fn();
+
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              findMany,
+              createMany,
+              deleteByIds,
+              actionProvider: {
+                values: jest.fn(() => [
+                  {
+                    actionId: 'plugin::content-manager.explorer.read',
+                    section: 'contentTypes',
+                    subjects: ['api::article.article'],
+                  },
+                ]),
+              },
+              conditionProvider: { has: jest.fn(() => true) },
+            },
+          },
+        },
+      } as any;
+
+      await assignAdminPermissionsToToken(
+        10,
+        [
+          {
+            action: 'plugin::content-manager.explorer.read',
+            subject: 'api::article.article',
+            properties: { fields: ['title', 'body'], locales: ['en', 'fr'] },
+            conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+          },
+        ],
+        superAdmin
+      );
+
+      expect(deleteByIds).not.toHaveBeenCalled();
+      expect(createMany).not.toHaveBeenCalled();
     });
   });
 

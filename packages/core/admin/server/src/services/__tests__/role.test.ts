@@ -1020,6 +1020,67 @@ describe('Role', () => {
       expect(deleteByIds).toHaveBeenCalledTimes(0);
       expect(returnedPermissions).toEqual(permissions);
     });
+
+    test('Does not delete and recreate a permission that only changed order', async () => {
+      const createMany = jest.fn(() => Promise.resolve([]));
+      const deleteByIds = jest.fn();
+      const sendDidUpdateRolePermissions = jest.fn();
+      const syncPermissionsForRole = jest.fn();
+      const findMany = jest.fn(() =>
+        Promise.resolve([
+          {
+            id: 3,
+            action: 'action-0',
+            subject: 'api::article.article',
+            properties: { fields: ['body', 'title'] },
+            conditions: ['admin::has-same-role-as-creator', 'admin::is-creator'],
+            actionParameters: {},
+            role: { id: 1 },
+          },
+        ])
+      );
+
+      global.strapi = {
+        admin: {
+          services: {
+            metrics: { sendDidUpdateRolePermissions },
+            role: { getSuperAdmin: jest.fn(() => Promise.resolve({ id: 0 })) },
+            'api-token-admin': { syncPermissionsForRole },
+            permission: {
+              findMany,
+              createMany,
+              deleteByIds,
+              actionProvider: {
+                values: jest.fn(() => [
+                  {
+                    actionId: 'action-0',
+                    section: 'contentTypes',
+                    subjects: ['api::article.article'],
+                  },
+                ]),
+              },
+            },
+          },
+        },
+        eventHub: {
+          emit: jest.fn(),
+        },
+      } as any;
+
+      await assignPermissions(1, [
+        {
+          action: 'action-0',
+          subject: 'api::article.article',
+          properties: { fields: ['title', 'body'] },
+          conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+        },
+      ] as any);
+
+      expect(deleteByIds).not.toHaveBeenCalled();
+      expect(createMany).not.toHaveBeenCalled();
+      expect(sendDidUpdateRolePermissions).not.toHaveBeenCalled();
+      expect(syncPermissionsForRole).not.toHaveBeenCalled();
+    });
   });
 
   describe('checkPermissionsCeiling', () => {
@@ -1316,6 +1377,73 @@ describe('Role', () => {
             },
           ]
         );
+      });
+
+      test('Treats a reordered existing permission as unchanged', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [
+            {
+              id: 1,
+              role: ROLE_ID,
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['body', 'title'], locales: ['fr', 'en'] },
+              conditions: ['admin::has-same-role-as-creator', 'admin::is-creator'],
+            },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            {
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'body'], locales: ['en', 'fr'] },
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ])
+        ).resolves.toBeUndefined();
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            {
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'body', 'slug'], locales: ['en', 'fr'] },
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ]),
+          [
+            {
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'body', 'slug'], locales: ['en', 'fr'] },
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ]
+        );
+      });
+
+      test('Treats duplicated members as the same set', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [
+            {
+              id: 1,
+              role: ROLE_ID,
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title'] },
+            },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'title'] } },
+          ])
+        ).resolves.toBeUndefined();
       });
 
       test('Allows removing an existing out-of-scope permission', async () => {

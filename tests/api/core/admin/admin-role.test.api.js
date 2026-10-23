@@ -1008,6 +1008,67 @@ describe('Role CRUD End to End', () => {
       expect(rolePermissions[0]).toMatchObject(inScopePermission);
     });
 
+    test('Treats a reordered existing permission as unchanged', async () => {
+      // The requester does not hold the update action at all
+      const UPDATE_ACTION = 'plugin::content-manager.explorer.update';
+      const inScopePermission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'] },
+        conditions: [],
+      };
+      const outOfScopePermission = {
+        action: UPDATE_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username', 'email'] },
+        conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+      };
+
+      const superAdminRes = await updateTargetRolePermissions(rq, [
+        outOfScopePermission,
+        inScopePermission,
+      ]);
+      expect(superAdminRes.statusCode).toBe(200);
+
+      const storedPermission = (await getTargetRolePermissions()).find(
+        ({ action }) => action === UPDATE_ACTION
+      );
+
+      // The role editor sends fields and conditions back in layout order
+      const reorderedRes = await updateTargetRolePermissions(rqRequester, [
+        {
+          ...outOfScopePermission,
+          properties: { fields: ['email', 'username'] },
+          conditions: ['admin::has-same-role-as-creator', 'admin::is-creator'],
+        },
+        inScopePermission,
+      ]);
+      expect(reorderedRes.statusCode).toBe(200);
+
+      const rolePermissions = await getTargetRolePermissions();
+      expect(rolePermissions).toHaveLength(2);
+      expect(rolePermissions.find(({ action }) => action === UPDATE_ACTION).id).toBe(
+        storedPermission.id
+      );
+
+      // Adding a field is still a change
+      const extendedPermission = {
+        ...outOfScopePermission,
+        properties: { fields: ['email', 'username', 'provider'] },
+      };
+      const extendedRes = await updateTargetRolePermissions(rqRequester, [
+        extendedPermission,
+        inScopePermission,
+      ]);
+      expect(extendedRes.statusCode).toBe(403);
+      expect(extendedRes.body.error.details.permissions).toEqual([extendedPermission]);
+
+      // Leave the role as the previous test did
+      const removalRes = await updateTargetRolePermissions(rqRequester, [inScopePermission]);
+      expect(removalRes.statusCode).toBe(200);
+      expect(await getTargetRolePermissions()).toHaveLength(1);
+    });
+
     /**
      * A request made with an admin token is checked against the token's own permissions, even
      * when its owner (here the super admin) holds more.

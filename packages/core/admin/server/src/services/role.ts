@@ -1,4 +1,12 @@
-import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
+import _, {
+  omit,
+  pick,
+  differenceWith,
+  differenceBy,
+  isEqual,
+  isPlainObject,
+  mapValues,
+} from 'lodash';
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 
@@ -39,14 +47,32 @@ const pickComparableFields = (permission: Permission) => pick(permission, COMPAR
 const jsonClean = <T extends object>(data: T): T => JSON.parse(JSON.stringify(data));
 
 /**
+ * Arrays of strings in a permission (`conditions`, `properties.fields`, `properties.locales`
+ * and any other property) are sets: the engine applies them regardless of order. Dedupe and
+ * sort them so two permissions that differ only in order compare equal. `null`, `[]` and a
+ * missing key stay distinct, and arrays holding anything but strings are left as they are.
+ */
+const normalizeSets = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.every((item) => typeof item === 'string') ? [...new Set(value)].sort() : value;
+  }
+  if (isPlainObject(value)) {
+    return mapValues(value as Record<string, unknown>, normalizeSets);
+  }
+  return value;
+};
+
+/**
  * Compare two permissions
  */
 const arePermissionsEqual = (p1: Permission, p2: Permission): boolean => {
-  if (p1.action === p2.action) {
-    return isEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
+  if (p1.action !== p2.action) {
+    return false;
   }
-
-  return false;
+  return isEqual(
+    jsonClean(normalizeSets(pickComparableFields(p1)) as object),
+    jsonClean(normalizeSets(pickComparableFields(p2)) as object)
+  );
 };
 
 /**
