@@ -39,6 +39,8 @@ export default {
     try {
       await validateKind(kind);
     } catch (error) {
+      // TODO @Nico A native error thrown while validating (e.g. a `TypeError`) is sent as
+      // `{ error: {} }`: its own properties are not enumerable, so the client gets no message.
       return ctx.send({ error }, 400);
     }
 
@@ -84,6 +86,8 @@ export default {
     try {
       await validateContentTypeInput(body);
     } catch (error) {
+      // TODO @Nico A native error thrown while validating (e.g. a `TypeError`) is sent as
+      // `{ error: {} }`: its own properties are not enumerable, so the client gets no message.
       return ctx.send({ error }, 400);
     }
 
@@ -132,6 +136,8 @@ export default {
     try {
       await validateUpdateContentTypeInput(body);
     } catch (error) {
+      // TODO @Nico A native error thrown while validating (e.g. a `TypeError`) is sent as
+      // `{ error: {} }`: its own properties are not enumerable, so the client gets no message.
       return ctx.send({ error }, 400);
     }
 
