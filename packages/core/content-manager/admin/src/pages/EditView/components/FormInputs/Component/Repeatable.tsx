@@ -33,6 +33,7 @@ import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { AddComponentMenuContent } from './AddComponentMenu';
 import { ComponentCopyModal } from './ComponentCopyModal';
+import { useCopiedComponents } from './CopiedComponents';
 import { Initializer } from './Initializer';
 
 import type { ComponentInputProps } from './Input';
@@ -69,25 +70,14 @@ const RepeatableComponent = ({
   const addFieldRow = useForm('RepeatableComponent', (state) => state.addFieldRow);
   const moveFieldRow = useForm('RepeatableComponent', (state) => state.moveFieldRow);
   const removeFieldRow = useForm('RepeatableComponent', (state) => state.removeFieldRow);
-  const isFormModified = useForm('RepeatableComponent', (state) => state.modified);
   const { max = Infinity } = attribute;
   const value = React.useMemo(() => (Array.isArray(rawValue) ? rawValue : []), [rawValue]);
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
   const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
-  /**
-   * The entries copied from another entry are flagged until the form is saved. They're
-   * recognised by their key once the form has added them, see `handleCopyComponents`.
-   */
-  const [copiedKeys, setCopiedKeys] = React.useState<string[]>([]);
-  const pendingCopiesRef = React.useRef(0);
-
-  React.useEffect(() => {
-    if (!isFormModified) {
-      setCopiedKeys((keys) => (keys.length > 0 ? [] : keys));
-    }
-  }, [isFormModified]);
+  // The entries copied from another entry are flagged until the form is saved.
+  const { isCopied, insertCopies } = useCopiedComponents(name);
 
   React.useEffect(() => {
     const hasNestedErrors = rawError && Array.isArray(rawError) && rawError.length > 0;
@@ -151,12 +141,9 @@ const RepeatableComponent = ({
         .map((item) => item.__temp_key__);
 
       /**
-       * Copied entries come in filled: they're flagged and stay collapsed.
+       * Copied entries come in filled: they stay collapsed.
        */
-      if (pendingCopiesRef.current > 0) {
-        pendingCopiesRef.current = Math.max(0, pendingCopiesRef.current - newKeys.length);
-        setCopiedKeys((keys) => [...keys, ...newKeys]);
-
+      if (newKeys.length > 0 && newKeys.every(isCopied)) {
         return;
       }
 
@@ -165,7 +152,7 @@ const RepeatableComponent = ({
        */
       setCollapseToOpen(value[value.length - 1].__temp_key__);
     }
-  }, [value, prevValue]);
+  }, [value, prevValue, isCopied]);
 
   React.useEffect(() => {
     if (typeof componentTmpKeyWithFocussedField === 'string') {
@@ -177,6 +164,16 @@ const RepeatableComponent = ({
     setCollapseToOpen('');
   }, []);
 
+  const notifyMaximumReached = () => {
+    toggleNotification({
+      type: 'info',
+      message: formatMessage({
+        id: getTranslation('components.notification.info.maximum-requirement'),
+        defaultMessage: 'You have already reached the maximum number of fields',
+      }),
+    });
+  };
+
   const handleClick = () => {
     if (value.length < max) {
       const schema = components[attribute.component];
@@ -186,30 +183,33 @@ const RepeatableComponent = ({
       addFieldRow(name, data);
       // setCollapseToOpen(nextTempKey);
     } else if (value.length >= max) {
-      toggleNotification({
-        type: 'info',
-        message: formatMessage({
-          id: getTranslation('components.notification.info.maximum-requirement'),
-        }),
-      });
+      notifyMaximumReached();
     }
   };
 
+  /**
+   * Like adding an empty entry, copying into a full field is refused right away rather than
+   * opening a modal where nothing can be inserted.
+   */
+  const handleCopyClick = () => {
+    if (value.length >= max) {
+      notifyMaximumReached();
+
+      return;
+    }
+
+    setIsCopyModalOpen(true);
+  };
+
   const handleCopyComponents = (items: AnyData[]) => {
+    // The modal doesn't let more items than there's room for be selected, this is a safety net.
     if (value.length + items.length > max) {
-      toggleNotification({
-        type: 'info',
-        message: formatMessage({
-          id: getTranslation('components.notification.info.maximum-requirement'),
-        }),
-      });
+      notifyMaximumReached();
 
       return false;
     }
 
-    setCopiedKeys([]);
-    pendingCopiesRef.current = items.length;
-    items.forEach((item) => addFieldRow(name, item));
+    insertCopies(items);
 
     return true;
   };
@@ -307,6 +307,7 @@ const RepeatableComponent = ({
     <ComponentCopyModal
       componentUid={attribute.component}
       fieldLabel={label}
+      maxSelection={max - value.length}
       mode="component"
       onClose={() => setIsCopyModalOpen(false)}
       onInsert={handleCopyComponents}
@@ -322,7 +323,7 @@ const RepeatableComponent = ({
           disabled={disabled}
           name={name}
           onClick={handleClick}
-          onCopyClick={canCopyFromExisting ? () => setIsCopyModalOpen(true) : undefined}
+          onCopyClick={canCopyFromExisting ? handleCopyClick : undefined}
         />
         {copyModal}
       </>
@@ -374,7 +375,7 @@ const RepeatableComponent = ({
                 totalLength={value.length}
                 layout={layout}
                 renderField={children}
-                isCopied={copiedKeys.includes(key)}
+                isCopied={isCopied(key)}
               />
             </ComponentProvider>
           );
@@ -390,7 +391,7 @@ const RepeatableComponent = ({
             <AddComponentMenuContent
               kind="entry"
               onAddEmpty={handleClick}
-              onCopy={() => setIsCopyModalOpen(true)}
+              onCopy={handleCopyClick}
             />
           </Menu.Root>
         ) : (
@@ -477,10 +478,8 @@ const AddEntryMenuTrigger = styled(Menu.Trigger)`
   }
 `;
 
-interface RepeatableComponentFieldsProps extends Pick<
-  RepeatableComponentProps,
-  'children' | 'layout'
-> {
+interface RepeatableComponentFieldsProps
+  extends Pick<RepeatableComponentProps, 'children' | 'layout'> {
   attributeComponent: string;
   nameWithIndex: string;
 }
@@ -540,8 +539,7 @@ RepeatableComponentFields.displayName = 'RepeatableComponentFields';
  * -----------------------------------------------------------------------------------------------*/
 
 interface ComponentProps
-  extends
-    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
+  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField' | 'layout'> {
   attributeComponent: string;
   disabled?: boolean;

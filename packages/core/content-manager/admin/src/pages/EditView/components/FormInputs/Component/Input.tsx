@@ -20,8 +20,7 @@ import { RepeatableComponent } from './Repeatable';
 import { isComponentBlank } from './utils/componentCopy';
 
 interface ComponentInputProps
-  extends
-    Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
+  extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {
   labelAction?: React.ReactNode;
   children: (props: InputRendererProps) => React.ReactNode;
@@ -68,6 +67,10 @@ const ComponentInput = ({
     field.onChange(name, data);
   };
 
+  /**
+   * The copy replaces the component in place. It has no id, so the inputs holding server data for
+   * the replaced component (relations) drop it, see `RelationsField`.
+   */
   const handleCopyComponent = ([componentData]: AnyData[]) => {
     field.onChange(name, componentData);
 
@@ -88,7 +91,7 @@ const ComponentInput = ({
           <Flex gap={1}>
             {canCopyFromExisting && (
               <Button
-                variant="tertiary"
+                variant="ghost"
                 size="S"
                 startIcon={<Duplicate />}
                 onClick={() => setIsCopyModalOpen(true)}

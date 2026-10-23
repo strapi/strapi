@@ -48,6 +48,17 @@ const components = {
       cards: { type: 'component', component: 'shared.card', repeatable: true },
     },
   },
+  'shared.seo': {
+    uid: 'shared.seo',
+    info: { displayName: 'SEO' },
+    attributes: {
+      title: { type: 'string', default: 'Untitled page' },
+      slug: { type: 'uid', targetField: 'title' },
+      canonical: { type: 'string', unique: true },
+      indexable: { type: 'boolean', default: true },
+      links: { type: 'component', component: 'shared.link', repeatable: true },
+    },
+  },
 } as unknown as ComponentsDictionary;
 
 const schema = {
@@ -238,6 +249,20 @@ describe('componentCopy', () => {
       ).toEqual([{ name: 'title', label: 'Title', type: 'string', value: 'Latest card' }]);
     });
 
+    it('should leave out the fields whose value is not copied', () => {
+      const seo = {
+        title: 'Home',
+        slug: 'home',
+        canonical: 'https://example.com',
+        indexable: true,
+      };
+
+      expect(getComponentPreview(seo, 'shared.seo', components)).toEqual([
+        { name: 'title', label: 'title', type: 'string', value: 'Home' },
+        { name: 'indexable', label: 'indexable', type: 'boolean', value: true },
+      ]);
+    });
+
     it('should fall back to the schema and leave out empty values', () => {
       expect(
         getComponentPreview({ title: '', label: 'ignored' }, 'shared.card', components)
@@ -289,6 +314,22 @@ describe('componentCopy', () => {
       expect(isComponentBlank({ links: [{ label: 'Docs' }] }, 'shared.card', components)).toBe(
         false
       );
+    });
+
+    it('should be blank while the values are the defaults of the schema', () => {
+      // what a component holds right after it's added
+      expect(
+        isComponentBlank(
+          { title: 'Untitled page', indexable: true, links: [] },
+          'shared.seo',
+          components
+        )
+      ).toBe(true);
+      expect(isComponentBlank({ indexable: false }, 'shared.seo', components)).toBe(true);
+      expect(isComponentBlank({ title: 'Home', indexable: true }, 'shared.seo', components)).toBe(
+        false
+      );
+      expect(isComponentBlank({ slug: 'home' }, 'shared.seo', components)).toBe(false);
     });
   });
 
@@ -391,6 +432,45 @@ describe('componentCopy', () => {
       cloneComponentData(link, 'shared.link', components);
 
       expect(link).toEqual({ id: 10, label: 'First link', pages: { count: 2 } });
+    });
+
+    it('should blank the uid and unique values, including in nested components', () => {
+      const seo = {
+        id: 40,
+        title: 'Home',
+        slug: 'home',
+        canonical: 'https://example.com',
+        indexable: false,
+        links: [{ id: 41, label: 'Docs', pages: { count: 0 } }],
+      };
+      const copy = cloneComponentData(seo, 'shared.seo', {
+        ...components,
+        'shared.link': {
+          ...components['shared.link'],
+          attributes: {
+            ...components['shared.link'].attributes,
+            label: { type: 'string', unique: true },
+          },
+        },
+      } as unknown as ComponentsDictionary);
+
+      expect(copy).toEqual({
+        title: 'Home',
+        slug: null,
+        canonical: null,
+        indexable: false,
+        links: [
+          {
+            __temp_key__: expect.any(String),
+            label: null,
+            pages: { connect: [], disconnect: [] },
+          },
+        ],
+      });
+      // a value that was already empty stays as it is
+      expect(cloneComponentData({ title: 'Home' }, 'shared.seo', components)).toEqual({
+        title: 'Home',
+      });
     });
   });
 });

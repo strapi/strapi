@@ -227,7 +227,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { data, isLoading, isFetching, isError, refetch } = useGetRelationsQuery(
+    const isQuerySkipped = !id || !isRelatedToCurrentDocument;
+    const {
+      data: loadedData,
+      isLoading,
+      isFetching,
+      isError,
+      refetch,
+    } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -241,9 +248,16 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id || !isRelatedToCurrentDocument,
+        skip: isQuerySkipped,
       }
     );
+
+    /**
+     * A skipped query keeps returning the data of the last query that ran. When a saved component
+     * is replaced in place by one without an id (e.g. a copy of another component), that data is
+     * the relations of the replaced component: nothing is loaded for a component without an id.
+     */
+    const data = isQuerySkipped ? undefined : loadedData;
 
     const handleLoadMore = () => {
       /**

@@ -57,7 +57,7 @@ const AddComponentMenuContent = ({ kind, onAddEmpty, onCopy }: AddComponentMenuC
           <Typography tag="span" variant="pi" textColor="neutral600">
             {formatMessage({
               id: getTranslation('components.AddComponentMenu.copy.hint'),
-              defaultMessage: 'From an entry that already uses this component',
+              defaultMessage: 'From another entry',
             })}
           </Typography>
         </Flex>

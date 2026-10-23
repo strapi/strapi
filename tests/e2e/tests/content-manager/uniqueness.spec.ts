@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Locator, Page } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { findAndClose, clickAndWait } from '../../../utils/shared';
@@ -99,6 +99,15 @@ test.describe('Uniqueness', () => {
   const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
   const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
+  /**
+   * On a collection type, the "add" buttons of component fields open a menu offering an empty
+   * entry or a copy of an existing one.
+   */
+  const addEmptyEntry = async (page: Page, addButton: Locator) => {
+    await clickAndWait(page, addButton);
+    await clickAndWait(page, page.getByRole('menuitem', { name: 'Empty entry' }));
+  };
+
   const clickSave = async (page: Page) => {
     await clickAndWait(page, page.getByRole('tab', { name: 'Draft' }));
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
@@ -114,11 +123,17 @@ test.describe('Uniqueness', () => {
       // testing against
 
       if (isSingle) {
-        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).first());
-        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).first());
+        await addEmptyEntry(
+          page,
+          page.getByRole('button', { name: 'No entry yet. Click' }).first()
+        );
+        await addEmptyEntry(
+          page,
+          page.getByRole('button', { name: 'No entry yet. Click' }).first()
+        );
       } else {
-        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).nth(1));
-        await clickAndWait(
+        await addEmptyEntry(page, page.getByRole('button', { name: 'No entry yet. Click' }).nth(1));
+        await addEmptyEntry(
           page,
           page.getByLabel('', { exact: true }).getByRole('button', { name: 'No entry yet. Click' })
         );
@@ -188,8 +203,8 @@ test.describe('Uniqueness', () => {
       if (isRepeatableComponentField) {
         // If the field is a repeatable component field, we add an entry and fill
         // it with the same value to test uniqueness within the same entity.
-        await clickAndWait(page, page.getByRole('button', { name: 'Add an entry' }));
-        await clickAndWait(
+        await addEmptyEntry(page, page.getByRole('button', { name: 'Add an entry' }));
+        await addEmptyEntry(
           page,
           page.getByRole('region').getByRole('button', { name: 'No entry yet. Click' })
         );

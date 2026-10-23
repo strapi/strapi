@@ -1,8 +1,10 @@
 import { generateNKeysBetween } from 'fractional-indexing';
+import isEqual from 'lodash/isEqual';
 import toPath from 'lodash/toPath';
 
 import { getIn, isInteger, isObject, setIn } from '../../../../../../utils/objects';
 import { type AnyData, transformDocument } from '../../../../utils/data';
+import { createDefaultForm } from '../../../../utils/forms';
 
 import type { RelationResult } from '../../../../../../../../shared/contracts/relations';
 import type { ComponentsDictionary, Document, Schema } from '../../../../../../hooks/useDocument';
@@ -55,14 +57,23 @@ const COMPONENT_META_ATTRIBUTES = ['id', 'documentId', '__temp_key__'];
 const getDynamicZoneBlockUid = (block: unknown) =>
   isObject(block) && typeof block.__component === 'string' ? block.__component : undefined;
 
+/**
+ * The value of a `uid` or `unique` attribute can't be copied: it's checked against the other
+ * published entries when the entry is published, and against the other rows of a repeatable
+ * component. Like the entry clone, the copy leaves it blank for the user to fill in.
+ */
+const isUniqueAttribute = (attribute: StrapiSchema.Attribute.AnyAttribute) =>
+  attribute.type === 'uid' || ('unique' in attribute && attribute.unique === true);
+
 /* -------------------------------------------------------------------------------------------------
  * cloneComponentData
  * -----------------------------------------------------------------------------------------------*/
 
 /**
  * @description Creates a standalone copy of a component: ids and temp keys are removed
- * (the component and the ones nested in it will be created as new ones) and the data
- * is prepared for the form, where relations start empty, see `connectRelations`.
+ * (the component and the ones nested in it will be created as new ones), `uid` and `unique`
+ * values are blanked and the data is prepared for the form, where relations start empty,
+ * see `connectRelations`.
  */
 const cloneComponentData = (
   value: unknown,
@@ -91,6 +102,12 @@ const cloneComponentData = (
       const currentValue = datum[attributeName];
 
       if (currentValue == null) {
+        return;
+      }
+
+      if (isUniqueAttribute(attribute)) {
+        datum[attributeName] = null;
+
         return;
       }
 
@@ -313,7 +330,8 @@ interface ComponentPreviewField {
 
 /**
  * @description Lists the filled scalar fields of a component, in the order of the given fields
- * (typically the edit layout of the component) or of the schema.
+ * (typically the edit layout of the component) or of the schema. The fields whose value isn't
+ * copied (`uid`, `unique`) are left out.
  */
 const getComponentPreview = (
   source: unknown,
@@ -340,6 +358,7 @@ const getComponentPreview = (
     if (
       !attribute ||
       !PREVIEW_ATTRIBUTE_TYPES.has(attribute.type) ||
+      isUniqueAttribute(attribute) ||
       value === undefined ||
       value === null ||
       value === ''
@@ -353,8 +372,9 @@ const getComponentPreview = (
 
 /**
  * @description Tells whether a component holds any content, i.e. whether copying into it would
- * replace something. Nested components are looked into, relations count whether they're loaded
- * (`count`) or being edited (`connect`).
+ * replace something. A value still equal to the default of its attribute isn't content: a
+ * component that was just added is filled with its defaults. Nested components are looked into,
+ * relations count whether they're loaded (`count`) or being edited (`connect`).
  */
 const isComponentBlank = (
   value: unknown,
@@ -371,6 +391,8 @@ const isComponentBlank = (
     return Object.keys(value).every((key) => COMPONENT_META_KEYS.includes(key));
   }
 
+  const defaults = createDefaultForm(schema, components);
+
   return Object.entries(schema.attributes).every(([name, attribute]) => {
     const attributeValue = value[name];
 
@@ -378,7 +400,8 @@ const isComponentBlank = (
       COMPONENT_META_ATTRIBUTES.includes(name) ||
       attributeValue === undefined ||
       attributeValue === null ||
-      attributeValue === ''
+      attributeValue === '' ||
+      (name in defaults && isEqual(attributeValue, defaults[name]))
     ) {
       return true;
     }
