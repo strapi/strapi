@@ -252,7 +252,18 @@ const processData = (
       if ('morphColumn' in attribute && attribute.morphColumn && attribute.owner) {
         const { idColumn, typeColumn, typeField = '__type' } = attribute.morphColumn;
 
-        const value = data[attributeName] as Record<string, unknown>;
+        let value = data[attributeName] as Record<string, unknown> | null | undefined;
+
+        if (
+          value &&
+          typeof value === 'object' &&
+          !Array.isArray(value) &&
+          !has(value, 'id') &&
+          ('set' in value || 'connect' in value)
+        ) {
+          const list = (value as any).set ?? (value as any).connect;
+          value = Array.isArray(list) && list.length > 0 ? list[list.length - 1] : null;
+        }
 
         if (value === null) {
           Object.assign(obj, {
@@ -589,25 +600,30 @@ export const createEntityManager = (db: Database): EntityManager => {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
-            const relId = toId(cleanRelationData.set?.[0]);
+            const targetEntry = cleanRelationData.set?.[0] ?? cleanRelationData.connect?.[0];
+            const relId = toId(targetEntry);
 
-            await this.createQueryBuilder(target)
-              .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: relId })
-              .transacting(trx)
-              .execute();
+            if (relId !== undefined) {
+              await this.createQueryBuilder(target)
+                .update({ [idColumn.name]: id, [typeColumn.name]: uid })
+                .where({ id: relId })
+                .transacting(trx)
+                .execute();
+            }
           } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
             const { joinColumn, morphColumn } = joinTable;
 
             const { idColumn, typeColumn } = morphColumn;
 
-            if (isEmpty(cleanRelationData.set)) {
+            const items = cleanRelationData.set ?? cleanRelationData.connect;
+
+            if (isEmpty(items)) {
               continue;
             }
 
             const rows =
-              cleanRelationData.set?.map((data, idx) => {
+              items?.map((data, idx) => {
                 return {
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
