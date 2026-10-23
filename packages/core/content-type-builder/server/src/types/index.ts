@@ -1,20 +1,24 @@
-import type * as ApiHandlerService from '../services/api-handler';
-import type * as BuilderService from '../services/builder';
-import type * as ComponentCategoriesService from '../services/component-categories';
 import type * as ComponentsService from '../services/components';
-import type { createContentStructureService } from '../services/content-structure';
 import type * as ContentTypesService from '../services/content-types';
 import type * as SchemaService from '../services/schema';
 import type { ContentTypeBuilderConfig } from '../config';
 import type { SchemaHandler } from '../services/schema-builder/schema-handler';
+import type {
+  ApiHandlerService,
+  BuilderService,
+  ComponentCategoriesService,
+  ContentStructureService,
+} from './services';
+
+export type * from './services';
 
 /** Content-Type Builder services by name, as registered by the plugin. */
 export type Services = {
-  'api-handler': typeof ApiHandlerService;
-  builder: typeof BuilderService;
-  'component-categories': typeof ComponentCategoriesService;
+  'api-handler': ApiHandlerService;
+  builder: BuilderService;
+  'component-categories': ComponentCategoriesService;
   components: typeof ComponentsService;
-  'content-structure': ReturnType<typeof createContentStructureService>;
+  'content-structure': ContentStructureService;
   'content-types': typeof ContentTypesService;
   schema: typeof SchemaService;
 };
