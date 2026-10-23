@@ -4,8 +4,6 @@ import { PassThrough } from 'stream';
 
 import fs from 'fs-extra';
 import { isEmpty, keyBy } from 'lodash';
-import { chain } from 'stream-chain';
-import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
 import type {
@@ -19,6 +17,7 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 import {
   ProviderInitializationError,
   ProviderTransferError,
@@ -281,16 +280,18 @@ class LocalDirectorySourceProvider implements ISourceProvider {
   }
 
   async #pipeJsonlDirectoryToStream(outStream: PassThrough, posixSubdir: string): Promise<void> {
+    const { chain, parser } = await loadStreamDeps();
     const files = await this.#listJsonlFiles(posixSubdir);
     for (const absPath of files) {
       const transforms = [
-        parser({
+        parser.asStream({
           checkErrors: true,
         }),
         (line: { key: string; value: object }) => line.value,
       ];
 
-      const stream = fs.createReadStream(absPath).pipe(chain(transforms));
+      const stream = chain(transforms);
+      fs.createReadStream(absPath).pipe(stream);
 
       try {
         for await (const chunk of stream) {

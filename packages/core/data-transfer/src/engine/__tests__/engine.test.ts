@@ -2,7 +2,7 @@ import path, { posix, win32 } from 'path';
 import os from 'os';
 import fs from 'fs-extra';
 import { cloneDeep, get, set } from 'lodash';
-import { Readable, Writable } from 'stream-chain';
+import { Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { Struct } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';

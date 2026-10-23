@@ -1,9 +1,7 @@
-import { PassThrough, Transform, Readable, Writable } from 'stream';
+import { PassThrough, Transform, Readable, Writable, Duplex } from 'stream';
 import { pipeline } from 'stream/promises';
 import { extname } from 'path';
 import { EOL } from 'os';
-import type Chain from 'stream-chain';
-import { chain } from 'stream-chain';
 import { isEmpty, isNumber, pick } from 'lodash';
 import { diff as semverDiff } from 'semver';
 
@@ -46,6 +44,7 @@ import {
 } from '../utils/diagnostic';
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';
+import { loadStreamDeps } from '../utils/esm-deps';
 import { ProviderTransferError } from '../errors/providers';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
@@ -213,15 +212,16 @@ class TransferEngine<
    *
    * Allowed transformations includes 'filter' and 'map'.
    */
-  #createStageTransformStream<T extends TransferStage>(
+  async #createStageTransformStream<T extends TransferStage>(
     key: T,
     options: { includeGlobal?: boolean } = {}
-  ): PassThrough | Transform {
+  ): Promise<PassThrough | Duplex> {
+    const { chain } = await loadStreamDeps();
     const { includeGlobal = true } = options;
     const { throttle } = this.options;
     const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
-    let stream: PassThrough | Chain = new PassThrough({ objectMode: true });
+    let stream: PassThrough | Duplex = new PassThrough({ objectMode: true });
 
     const applyTransforms = <U>(transforms: TransferTransform<U>[] = []) => {
       const chainTransforms: StreamItem[] = [];
@@ -235,7 +235,9 @@ class TransferEngine<
         }
       }
       if (chainTransforms.length) {
-        stream = stream.pipe(chain(chainTransforms));
+        const next = chain(chainTransforms);
+        stream.pipe(next);
+        stream = next;
       }
     };
 
@@ -592,7 +594,7 @@ class TransferEngine<
     stage: TransferStage;
     source?: Readable;
     destination?: Writable;
-    transform?: PassThrough | Chain;
+    transform?: PassThrough | Duplex;
     tracker?: PassThrough;
   }) {
     if (this.#aborted) {
@@ -964,7 +966,7 @@ class TransferEngine<
     const source = await this.sourceProvider.createSchemasReadStream?.();
     const destination = await this.destinationProvider.createSchemasWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = await this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, {
       key: (value: Struct.Schema) => value.modelType,
     });
@@ -981,8 +983,9 @@ class TransferEngine<
     const source = await this.sourceProvider.createEntitiesReadStream?.();
     const destination = await this.destinationProvider.createEntitiesWriteStream?.();
 
+    const { chain } = await loadStreamDeps();
     const transform = chain([
-      this.#createStageTransformStream(stage),
+      await this.#createStageTransformStream(stage),
       new Transform({
         objectMode: true,
         transform: async (entity: IEntity, _encoding, callback) => {
@@ -1026,8 +1029,9 @@ class TransferEngine<
     const source = await this.sourceProvider.createLinksReadStream?.();
     const destination = await this.destinationProvider.createLinksWriteStream?.();
 
+    const { chain } = await loadStreamDeps();
     const transform = chain([
-      this.#createStageTransformStream(stage),
+      await this.#createStageTransformStream(stage),
       new Transform({
         objectMode: true,
         transform: async (link: ILink, _encoding, callback) => {
@@ -1064,7 +1068,7 @@ class TransferEngine<
     const source = await this.sourceProvider.createAssetsReadStream?.();
     const destination = await this.destinationProvider.createAssetsWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = await this.#createStageTransformStream(stage);
     const tracker = this.#progressTrackerChunks(stage, {
       key: (value: IAsset) => extname(value.filename) || 'No extension',
     });
@@ -1109,7 +1113,7 @@ class TransferEngine<
     const source = await this.sourceProvider.createConfigurationReadStream?.();
     const destination = await this.destinationProvider.createConfigurationWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = await this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage);
 
     await this.#transferStage({ stage, source, destination, transform, tracker });

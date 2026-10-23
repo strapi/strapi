@@ -1,8 +1,8 @@
 import { Readable } from 'stream';
-import { chain } from 'stream-chain';
 import type { Core } from '@strapi/types';
 
 import type { IConfiguration } from '../../../types';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 import { enrichProjectSettingsForExport } from '../../utils/project-settings-logos';
 
 /**
@@ -11,10 +11,12 @@ import { enrichProjectSettingsForExport } from '../../utils/project-settings-log
 export const createConfigurationStream = (strapi: Core.Strapi): Readable => {
   return Readable.from(
     (async function* configurationGenerator(): AsyncGenerator<IConfiguration> {
+      const { chain } = await loadStreamDeps();
+
       // Core Store
       const coreStoreStream = chain([
         strapi.db.queryBuilder('strapi::core-store').stream(),
-        (data) => ({ ...data, value: JSON.parse(data.value) }),
+        (data: { value: string }) => ({ ...data, value: JSON.parse(data.value) }),
         wrapConfigurationItem('core-store'),
       ]);
 
