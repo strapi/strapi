@@ -73,12 +73,27 @@ const RowButton = styled.button<{
   }
 `;
 
+/**
+ * Where a row sits in the tinted path an open summary row reveals: its hidden
+ * folders, then the open folder's parent.
+ */
+type OpenPathSegment = 'start' | 'middle' | 'end';
+
+// Squared where path rows meet, so the path reads as one block rather than a
+// stack of separately highlighted rows.
+const getOpenPathRadius = (segment: OpenPathSegment, radius: string) =>
+  ({
+    start: `${radius} ${radius} 0 0`,
+    middle: '0',
+    end: `0 0 ${radius} ${radius}`,
+  })[segment];
+
 const TreeRow = styled(Flex)<{
   $isActive?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropCursor?: boolean;
   $isMovePending?: boolean;
-  $isOnOpenPath?: boolean;
+  $openPathSegment?: OpenPathSegment;
 }>`
   cursor: ${({ $isMovePending, $isInvalidDropCursor }) => {
     if ($isMovePending) {
@@ -88,8 +103,11 @@ const TreeRow = styled(Flex)<{
     return $isInvalidDropCursor ? 'not-allowed' : 'default';
   }};
   pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  background: ${({ $isActive, $isOnOpenPath, theme }) => {
+  border-radius: ${({ $openPathSegment, theme }) =>
+    $openPathSegment
+      ? getOpenPathRadius($openPathSegment, theme.borderRadius)
+      : theme.borderRadius};
+  background: ${({ $isActive, $openPathSegment, theme }) => {
     if ($isActive) {
       return theme.colors.primary100;
     }
@@ -97,14 +115,21 @@ const TreeRow = styled(Flex)<{
     // While a summary row is open, the path down to the open folder is tinted —
     // the folders it reveals plus the parent — so the tint reads as "on the way
     // here" and the open folder's own highlight as "here".
-    return $isOnOpenPath ? theme.colors.neutral100 : 'transparent';
+    return $openPathSegment ? theme.colors.neutral100 : 'transparent';
   }};
 
   // The whole row lights up, so pointing anywhere along it — chevron, label or
-  // the actions trigger — reads as one target.
+  // the actions trigger — reads as one target. A path row steps past its tint
+  // rather than to primary100, which would make it look like a second open
+  // folder (and, in dark mode, is the same colour as the tint).
   &:hover {
-    background: ${({ $isActive, $isOnOpenPath, theme }) =>
-      $isActive || $isOnOpenPath ? theme.colors.primary100 : theme.colors.neutral100};
+    background: ${({ $isActive, $openPathSegment, theme }) => {
+      if ($isActive) {
+        return theme.colors.primary100;
+      }
+
+      return $openPathSegment ? theme.colors.neutral150 : theme.colors.neutral100;
+    }};
   }
 
   ${({ $isValidDropTarget, theme }) =>
@@ -300,8 +325,8 @@ interface FolderTreeItemProps {
    * already the row below it, so it shows no chevron and no subfolders.
    */
   isHiddenAncestor?: boolean;
-  /** The open folder's parent while its summary row is open. */
-  isOnOpenPath?: boolean;
+  /** Set while a summary row is open, on the rows of the path it reveals. */
+  openPathSegment?: OpenPathSegment;
   /** Rendered in place of the subfolders while expanded — the collapsed branch. */
   subtree?: ReactNode;
 }
@@ -327,7 +352,7 @@ const FolderTreeItemInner = ({
   isMovePending,
   ancestorNames,
   isHiddenAncestor = false,
-  isOnOpenPath = false,
+  openPathSegment,
   subtree,
 }: FolderTreeItemInnerProps) => {
   const { formatMessage } = useIntl();
@@ -377,7 +402,7 @@ const FolderTreeItemInner = ({
         paddingRight={`${ROW_INSET_RIGHT_REM}rem`}
         gap={1}
         $isActive={isActive}
-        $isOnOpenPath={isHiddenAncestor || isOnOpenPath}
+        $openPathSegment={openPathSegment}
         $isValidDropTarget={showValidDropHighlight}
         $isInvalidDropCursor={showInvalidDropCursor}
         $isMovePending={isMovePending}
@@ -615,6 +640,7 @@ const CollapsedAncestors = ({
               level={2}
               ancestorNames={[rootName, ...hiddenNames.slice(0, index)]}
               isHiddenAncestor
+              openPathSegment={index === 0 ? 'start' : 'middle'}
             />
           ))}
         </NavList>
@@ -663,7 +689,7 @@ const CollapsedBranchItem = ({ branch, ...itemProps }: CollapsedBranchItemProps)
             parentId={branch.hidden[branch.hidden.length - 1]?.id ?? branch.root.id ?? null}
             level={2}
             ancestorNames={ancestorNamesOfParent}
-            isOnOpenPath={isOpen}
+            openPathSegment={isOpen ? 'end' : undefined}
           />
         </NavList>
       }
