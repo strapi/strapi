@@ -21,6 +21,7 @@ import { getService } from '../utils';
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
 import type { Settings } from '../controllers/validation/admin/settings';
+import type { FileFormat } from '../types/services';
 
 type User = {
   id: string | number;
@@ -366,7 +367,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     const replaceFormat = async (key: string, newFormat: UploadableFile) => {
-      const oldFormat = oldFile.formats?.[key] as File | undefined;
+      const oldFormat = oldFile.formats?.[key] as FileFormat | undefined;
       if (oldFormat) {
         await getService('provider').replace(newFormat, oldFormat);
       } else {
