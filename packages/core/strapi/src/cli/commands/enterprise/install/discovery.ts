@@ -29,7 +29,7 @@ export interface DiscoveredPlugin {
   installedVersion?: string;
 }
 
-export interface DiscoveryResult {
+interface DiscoveryResult {
   plugins: DiscoveredPlugin[];
   lockedPlugins: EnterprisePluginEntry[];
   notLicensedMessage?: string;

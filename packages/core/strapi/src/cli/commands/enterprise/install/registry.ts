@@ -154,7 +154,7 @@ export interface CatalogPlugin {
   licensed: boolean;
 }
 
-export type CatalogResult =
+type CatalogResult =
   | {
       status: 'available';
       plugins: CatalogPlugin[];
