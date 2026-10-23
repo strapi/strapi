@@ -74,13 +74,16 @@ export default {
     // returning every matching folder, which existing callers (destination
     // selects, the legacy picker) rely on.
     if (query.page != null || query.pageSize != null) {
-      // The query transform accepts any positive integer, so an oversized page
-      // or pageSize would reach the database as an out-of-range LIMIT/OFFSET
-      // and fail there with a 500. Reject it as a bad request instead.
+      // The query transform accepts any positive integer, even past
+      // Number.MAX_SAFE_INTEGER. Such a pageSize fails in the database (500 on
+      // SQLite) and such an offset cannot be computed exactly, so reject both.
+      // 10 is findPage's default pageSize.
       const { page = 1, pageSize = 10 } = dbQuery;
 
-      if (!Number.isSafeInteger(page * pageSize)) {
-        throw new errors.ValidationError('page and pageSize are too large');
+      if (!Number.isSafeInteger(pageSize) || !Number.isSafeInteger((page - 1) * pageSize)) {
+        throw new errors.PaginationError(
+          `Invalid pagination parameters. pageSize and the resulting offset must be at most ${Number.MAX_SAFE_INTEGER}`
+        );
       }
 
       const { results, pagination } = await strapi.db.query(FOLDER_MODEL_UID).findPage(dbQuery);

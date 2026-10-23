@@ -322,7 +322,7 @@ describe('Folder', () => {
       expect(res.statusCode).toBe(400);
     });
 
-    test('Rejects a page or pageSize too large for the database', async () => {
+    test('Rejects a pageSize or offset past the safe integer range', async () => {
       const hugePageSize = await rq({
         method: 'GET',
         url: '/upload/folders',
@@ -330,6 +330,7 @@ describe('Folder', () => {
       });
 
       expect(hugePageSize.statusCode).toBe(400);
+      expect(hugePageSize.body.error.name).toBe('PaginationError');
 
       const hugeOffset = await rq({
         method: 'GET',
@@ -338,6 +339,19 @@ describe('Folder', () => {
       });
 
       expect(hugeOffset.statusCode).toBe(400);
+      expect(hugeOffset.body.error.name).toBe('PaginationError');
+    });
+
+    test('Returns an empty page for a large offset within range', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 100000, pageSize: 100000 },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toEqual([]);
+      expect(res.body.pagination).toMatchObject({ page: 100000, pageSize: 100000 });
     });
   });
 
