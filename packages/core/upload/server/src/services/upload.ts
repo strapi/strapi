@@ -17,6 +17,11 @@ import type { Core, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
+import {
+  describeMediaTypes,
+  isMediaTypeAllowed,
+  type AllowedMediaType,
+} from '../utils/media-types';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
@@ -56,6 +61,42 @@ const { bytesToKbytes } = fileUtils;
 const queueConcurrentOperation = <T>(queue: Promise<T>[], operation: Promise<T>) => {
   Promise.resolve(operation).catch(() => undefined);
   queue.push(operation);
+};
+
+const normalizeMime = (mime: string) => mime.split(';')[0].trim().toLowerCase();
+
+/**
+ * `formatFileInfo` builds `.false` for a file with no extension and a MIME type that has
+ * none either. A replace keeps the old extension rather than move the file there.
+ */
+const isUsableExtension = (ext?: string | null) => Boolean(ext) && ext !== '.false';
+
+/**
+ * Browsers decode a raster image from its bytes, so a JPEG served under a `.png` url
+ * still shows. SVG is markup, so it never shares an extension with a raster image.
+ */
+const isRasterImage = (mime: string) => mime.startsWith('image/') && mime !== 'image/svg+xml';
+
+/**
+ * Whether a replacement can keep the old extension, and so the old url: the same MIME
+ * type, two MIME types that map to the same extension, or two raster images. A file
+ * stored without a MIME type keeps its extension, as before.
+ */
+const canKeepExtension = (oldMime?: string | null, newMime?: string | null) => {
+  if (!oldMime || !newMime) {
+    return true;
+  }
+
+  const oldType = normalizeMime(oldMime);
+  const newType = normalizeMime(newMime);
+
+  if (oldType === newType || (isRasterImage(oldType) && isRasterImage(newType))) {
+    return true;
+  }
+
+  const oldExtension = extension(oldType);
+
+  return oldExtension !== false && oldExtension === extension(newType);
 };
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
@@ -470,6 +511,48 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return update(id, newInfos, { user });
   }
 
+  /**
+   * The media fields using `file` that accept its current type but would not accept
+   * `mime`, each named "<display name> (<field>)" with its `allowedTypes`. A field that
+   * already holds a file it doesn't accept (set through the API, for instance) is left
+   * out: a replace doesn't make it worse, so it shouldn't be blocked by it.
+   */
+  async function findFieldsRejectingMime(file: File, mime: string | undefined) {
+    // @ts-expect-error - no dynamic types
+    const { joinTable } = strapi.db.metadata.get(FILE_MODEL_UID).attributes.related;
+    const typeColumn = joinTable.morphColumn.typeColumn.name;
+
+    const usages: Array<Record<string, string>> = await strapi.db
+      .queryBuilder(joinTable.name)
+      .select([typeColumn, 'field'])
+      .where({ [joinTable.joinColumn.name]: file.id })
+      .execute();
+
+    const rejecting = new Map<string, { field: string; allowedTypes: AllowedMediaType[] }>();
+
+    for (const usage of usages) {
+      const uid = usage[typeColumn];
+      const fieldName = usage.field;
+      const model = strapi.getModel(uid as UID.Schema);
+      const attribute = model?.attributes?.[fieldName];
+
+      if (attribute?.type !== 'media') {
+        continue;
+      }
+
+      const allowedTypes = (attribute.allowedTypes ?? []) as AllowedMediaType[];
+
+      if (isMediaTypeAllowed(allowedTypes, file.mime) && !isMediaTypeAllowed(allowedTypes, mime)) {
+        rejecting.set(`${uid}.${fieldName}`, {
+          field: `${model.info?.displayName ?? uid} (${fieldName})`,
+          allowedTypes,
+        });
+      }
+    }
+
+    return [...rejecting.values()];
+  }
+
   async function replace(
     id: ID,
     { data, file }: { data: { fileInfo: FileInfo } & Metas; file: InputFile },
@@ -504,10 +587,32 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // the same post-optimization file as the create path (uploadFileAndPersist).
       await getService('provider').checkFileSize(fileData);
 
-      // keep a constant hash and extension so the file url doesn't change when the file is replaced
+      // A field's `allowedTypes` is only checked when a file is picked for it. Without
+      // this, replacing the file could put a PDF in an images-only field of every entry
+      // that uses it. Checked before any provider write.
+      const rejectingFields = await findFieldsRejectingMime(dbFile, fileData.mime);
+
+      if (rejectingFields.length > 0) {
+        throw new ApplicationError(
+          rejectingFields
+            .map(
+              ({ field, allowedTypes }) =>
+                `${field} only accepts ${describeMediaTypes(allowedTypes)}.`
+            )
+            .join(' '),
+          { fields: rejectingFields }
+        );
+      }
+
+      // Keep a constant hash so the file url doesn't change when the file is replaced.
+      // The old extension is kept only while the url can still serve the new file:
+      // a PDF stored under the old `.png` url is served as an image and shows as broken.
       _.assign(fileData, {
         hash: dbFile.hash,
-        ext: dbFile.ext,
+        ext:
+          canKeepExtension(dbFile.mime, fileData.mime) || !isUsableExtension(fileData.ext)
+            ? dbFile.ext
+            : fileData.ext,
       });
 
       // A plain replace sends no folder, so `formatFileInfo` resolved folderPath to
@@ -520,8 +625,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // clear old formats — replaceImage / replace will set new ones
       _.set(fileData, 'formats', {});
 
+      const replacesWithImage = await isImage(fileData);
+
+      // Only images have dimensions. Without this, a non-image replacing an image
+      // keeps the old width and height.
+      if (!replacesWithImage) {
+        _.assign(fileData, { width: null, height: null });
+      }
+
       if (dbFile.provider === config.provider) {
-        if (await isImage(fileData)) {
+        if (replacesWithImage) {
           await replaceImage(fileData, dbFile);
         } else {
           // The new file is not an image, so it has no formats. Replace the main
@@ -536,7 +649,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             );
           }
         }
-      } else if (await isImage(fileData)) {
+      } else if (replacesWithImage) {
         // Cross-provider replacement: no delete on the old provider, upload to the new one.
         await uploadImage(fileData);
       } else {
