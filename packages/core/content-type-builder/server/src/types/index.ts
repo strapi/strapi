@@ -1,5 +1,4 @@
 import type * as ComponentsService from '../services/components';
-import type * as ContentTypesService from '../services/content-types';
 import type * as SchemaService from '../services/schema';
 import type { ContentTypeBuilderConfig } from '../config';
 import type { SchemaHandler } from '../services/schema-builder/schema-handler';
@@ -9,6 +8,7 @@ import type {
   BuilderService,
   ComponentCategoriesService,
   ContentStructureService,
+  ContentTypesService,
 } from './services';
 
 export type * from './controllers';
@@ -21,7 +21,7 @@ export type Services = {
   'component-categories': ComponentCategoriesService;
   components: typeof ComponentsService;
   'content-structure': ContentStructureService;
-  'content-types': typeof ContentTypesService;
+  'content-types': ContentTypesService;
   schema: typeof SchemaService;
 };
 
