@@ -21361,7 +21361,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-environment-node@npm:^29.6.0":
+"jest-environment-node@npm:29.6.0, jest-environment-node@npm:^29.6.0":
   version: 29.6.0
   resolution: "jest-environment-node@npm:29.6.0"
   dependencies:
@@ -28736,6 +28736,7 @@ __metadata:
     husky: "npm:9.1.7"
     inquirer: "npm:9.3.8"
     jest-cli: "npm:29.6.0"
+    jest-environment-node: "npm:29.6.0"
     jest-watch-typeahead: "npm:2.2.2"
     lint-staged: "npm:16.4.0"
     lodash: "npm:4.18.1"
