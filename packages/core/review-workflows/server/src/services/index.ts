@@ -19,7 +19,7 @@ type RegisteredNames = keyof Core.RegisteredFor<
 
 export default {
   workflows,
-  stages,
+  stages: stages satisfies Core.ServiceFactory<'plugin::review-workflows.stages'>,
   'stage-permissions':
     stagePermissions satisfies Core.ServiceFactory<'plugin::review-workflows.stage-permissions'>,
   assignees: assignees satisfies Core.ServiceFactory<'plugin::review-workflows.assignees'>,
