@@ -112,7 +112,13 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
  * -----------------------------------------------------------------------------------------------*/
 
 const RELATIONS_TO_DISPLAY = 5;
-const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
+const ONE_WAY_RELATIONS = new Set([
+  'oneWay',
+  'oneToOne',
+  'manyToOne',
+  'oneToManyMorph',
+  'oneToOneMorph',
+]);
 const EMPTY_RELATION_RESULTS: RelationResult[] = [];
 
 type RelationPosition =
@@ -140,7 +146,8 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
 }
 
 interface RelationsFieldProps
-  extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
+  extends
+    Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {}
 
 export interface RelationsFormValue {
@@ -374,7 +381,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           href: `../${COLLECTION_TYPES}/${targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
         };
 
-        if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
+        if (ONE_WAY_RELATIONS.has(props.attribute.relation)) {
           // Remove any existing relation so they can be replaced with the new one
           field.value?.connect?.forEach(handleDisconnect);
           relations.forEach(handleDisconnect);
@@ -716,8 +723,10 @@ const RelationsInput = ({
 
 const MemoizedRelationsComboboxInput = React.memo(RelationsInput);
 
-interface RelationModalWithContextProps
-  extends Omit<RelationsInputProps, 'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'> {
+interface RelationModalWithContextProps extends Omit<
+  RelationsInputProps,
+  'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'
+> {
   relation: DocumentMeta;
   hasNextPage: boolean;
   isLoadingSearchRelations: boolean;
@@ -1108,7 +1117,7 @@ const RelationsList = ({
    * These relation types will only ever have one item
    * in their list, so you can't reorder a single item!
    */
-  const canReorder = !ONE_WAY_RELATIONS.includes(relationType);
+  const canReorder = !ONE_WAY_RELATIONS.has(relationType);
 
   const dynamicListHeight =
     data.length > RELATIONS_TO_DISPLAY

@@ -29,10 +29,6 @@ const ApplicationInfoPage = () => {
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 
-  const latestStrapiReleaseTag = useAppInfo(
-    'ApplicationInfoPage',
-    (state) => state.latestStrapiReleaseTag
-  );
   const nodeVersion = useAppInfo('ApplicationInfoPage', (state) => state.nodeVersion);
   const shouldUpdateStrapi = useAppInfo('ApplicationInfoPage', (state) => state.shouldUpdateStrapi);
   const strapiVersion = useAppInfo('ApplicationInfoPage', (state) => state.strapiVersion);
@@ -146,7 +142,7 @@ const ApplicationInfoPage = () => {
                       <Typography>v{strapiVersion}</Typography>
                       {shouldUpdateStrapi && (
                         <Link
-                          href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
+                          href={`https://docs.strapi.io/cms/upgrades`}
                           endIcon={<ExternalLink />}
                           target="_blank"
                           rel="noopener noreferrer"

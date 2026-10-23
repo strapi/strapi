@@ -39,6 +39,11 @@ import { Initializer } from './Initializer';
 import type { ComponentInputProps } from './Input';
 import type { Schema } from '@strapi/types';
 
+const DEFAULT_MAIN_FIELD: NonNullable<ComponentProps['mainField']> = {
+  name: 'id',
+  type: 'integer',
+};
+
 /* -------------------------------------------------------------------------------------------------
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
@@ -490,9 +495,9 @@ const RepeatableComponentFields = React.memo(
 
     return (
       <>
-        {layout.map((row, index) => {
+        {layout.map((row) => {
           return (
-            <ResponsiveGridRoot gap={4} key={index}>
+            <ResponsiveGridRoot gap={4} key={row.map((field) => field.name).join('.')}>
               {row.map(({ size, ...field }) => {
                 /**
                  * Layouts are built from schemas so they don't understand the complete
@@ -562,10 +567,7 @@ const Component = ({
   index,
   isCopied,
   name,
-  mainField = {
-    name: 'id',
-    type: 'integer',
-  },
+  mainField = DEFAULT_MAIN_FIELD,
   layout,
   onDeleteComponent,
   renderField,

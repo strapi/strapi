@@ -20,7 +20,8 @@ import { RepeatableComponent } from './Repeatable';
 import { isComponentBlank } from './utils/componentCopy';
 
 interface ComponentInputProps
-  extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
+  extends
+    Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {
   labelAction?: React.ReactNode;
   children: (props: InputRendererProps) => React.ReactNode;
