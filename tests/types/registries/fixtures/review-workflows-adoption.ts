@@ -5,6 +5,7 @@ import type {
   HomepageController,
   StagesController,
   ValidationService,
+  WorkflowWeeklyMetricsService,
 } from '@strapi/review-workflows/strapi-server';
 
 declare const app: Core.Strapi;
@@ -39,3 +40,12 @@ app.service('plugin::review-workflows.document-service-middlewares') satisfies
   DocumentServiceMiddlewaresService | undefined;
 // @ts-expect-error Stages are checked against the service contract.
 validation?.validateWorkflowStages('Draft');
+app.service('plugin::review-workflows.workflow-weekly-metrics') satisfies
+  WorkflowWeeklyMetricsService | undefined;
+const schedule = app
+  .plugin('review-workflows')
+  .service('workflow-weekly-metrics')
+  ?.ensureWeeklyStoredCronSchedule();
+schedule satisfies Promise<string> | undefined;
+// @ts-expect-error Workflow IDs are checked against the service contract.
+app.service('plugin::review-workflows.workflow-metrics')?.sendDidCreateWorkflow({ id: 1 }, false);
