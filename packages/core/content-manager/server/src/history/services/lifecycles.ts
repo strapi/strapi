@@ -83,6 +83,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
   >;
 
   return {
+    /** @internal */
     async bootstrap() {
       // Prevent initializing the service twice
       if (state.isInitialized) {
@@ -202,6 +203,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       state.isInitialized = true;
     },
 
+    /** @internal */
     async destroy() {
       strapi.cron.remove('deleteHistoryDaily');
     },
