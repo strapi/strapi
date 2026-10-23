@@ -9,7 +9,7 @@ const setDefaultLocaleToRelation = <T extends Record<string, any>>(
 ): T & { locale: string | null } => {
   const position = relation.position;
   if (position && typeof position === 'object' && !position.locale) {
-    position.locale = defaultLocale;
+    return { ...relation, locale: defaultLocale, position: { ...position, locale: defaultLocale } };
   }
 
   return { ...relation, locale: defaultLocale };

@@ -64,7 +64,7 @@ export type StringNotation<TSchemaUID extends UID.Schema> =
  * type F = 'title'; // ❌
  */
 export type ArrayNotation<TSchemaUID extends UID.Schema> =
-  StringNotation<TSchemaUID>[] | ObjectNotation<TSchemaUID>[];
+  ReadonlyArray<StringNotation<TSchemaUID>> | ReadonlyArray<ObjectNotation<TSchemaUID>>;
 
 /**
  * Object notation for a sort

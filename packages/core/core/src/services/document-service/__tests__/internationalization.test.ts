@@ -88,4 +88,68 @@ describe('Document localization capability', () => {
       populate: ['cover'],
     });
   });
+
+  it('normalizes media inside components and dynamic zones without mutating the input', async () => {
+    const seo = {
+      uid: 'shared.seo',
+      modelType: 'component',
+      modelName: 'seo',
+      globalId: 'ComponentSharedSeo',
+      category: 'shared',
+      info: { displayName: 'Seo' },
+      attributes: {
+        image: { type: 'media', multiple: false },
+        gallery: { type: 'media', multiple: true },
+      },
+    } satisfies Struct.ComponentSchema;
+    const page = {
+      ...article,
+      attributes: {
+        title: { type: 'string' },
+        seo: { type: 'component', component: 'shared.seo', repeatable: false },
+        seos: { type: 'component', component: 'shared.seo', repeatable: true },
+        blocks: { type: 'dynamiczone', components: ['shared.seo'] },
+      },
+    } satisfies Struct.CollectionTypeSchema;
+
+    global.strapi = {
+      localization,
+      db: { query },
+      getModel: () => seo,
+    } as unknown as Core.Strapi;
+    localization.register({
+      isLocalizedContentType: () => true,
+      getDefaultLocale: async () => 'en',
+      getLocales: async () => [],
+      getNestedPopulateOfNonLocalizedAttributes: () => [],
+      getNonLocalizedAttributes: () => [],
+      fillNonLocalizedAttributes() {},
+    });
+    query.mockReturnValue({ findOne: jest.fn(async () => ({ title: 'Hello' })) });
+
+    const deepFreeze = <T>(value: T): T => {
+      if (value && typeof value === 'object') {
+        Object.values(value).forEach(deepFreeze);
+        Object.freeze(value);
+      }
+      return value;
+    };
+    const component = { image: { id: 1 }, gallery: [{ id: 2 }, 3] };
+    const input = deepFreeze({
+      title: 'Bonjour',
+      seo: component,
+      seos: [component],
+      blocks: [{ __component: 'shared.seo', ...component }],
+    });
+    const snapshot = structuredClone(input);
+
+    const normalized = { image: 1, gallery: [2, 3] };
+    await expect(copyNonLocalizedFields(page, 'page-1', input)).resolves.toEqual({
+      title: 'Bonjour',
+      seo: normalized,
+      seos: [normalized],
+      blocks: [{ __component: 'shared.seo', ...normalized }],
+    });
+    expect(input).toEqual(snapshot);
+  });
 });
