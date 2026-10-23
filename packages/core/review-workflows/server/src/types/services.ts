@@ -1,5 +1,7 @@
-import type { Data, Modules } from '@strapi/types';
+import type { Data, Modules, UID } from '@strapi/types';
+import type { GetRecentlyAssignedDocuments } from '../../../shared/contracts/homepage';
 import type { WeeklyMetrics } from '../services/metrics';
+import type { StageWithPermissions } from '../services/stage-permissions';
 
 /**
  * The `validation` service: the workflow and stage limits of the license, and the checks that apply
@@ -164,4 +166,135 @@ export type WorkflowWeeklyMetricsService = {
    * @internal
    */
   registerCron(): Promise<void>;
+};
+
+/**
+ * An admin permission that the `stage-permissions` service created for a stage: `from` lets a role
+ * move entries out of the stage, `to` lets it move entries into the stage.
+ */
+export type RegisteredStagePermission<TDirection extends 'from' | 'to'> = {
+  id: number;
+  action: string;
+  actionParameters: { [TKey in TDirection]: number };
+  subject: string | null;
+  properties: Record<string, unknown>;
+  conditions: string[];
+};
+
+/**
+ * The `stage-permissions` service: the stage transition permissions of admin roles. The checks
+ * read the user of the current admin request: they return `false` outside a request, and `true`
+ * for a super admin.
+ */
+export type StagePermissionsService = {
+  /**
+   * Creates the permission for a role to move entries out of `fromStage`. Rejects with an
+   * `ApplicationError` when `action` is not the stage transition action.
+   *
+   * @internal
+   */
+  register(permission: {
+    roleId: number;
+    action: string;
+    fromStage: number;
+  }): Promise<RegisteredStagePermission<'from'>[]>;
+  /**
+   * Calls {@link StagePermissionsService.register} for each permission.
+   *
+   * @internal
+   */
+  registerMany(
+    permissions: { roleId: number; action: string; fromStage: number }[]
+  ): Promise<RegisteredStagePermission<'from'>[][]>;
+  /**
+   * Creates the permission for a role to move entries into `toStage`. Rejects with an
+   * `ApplicationError` when `action` is not the stage transition action.
+   *
+   * @internal
+   */
+  registerTo(permission: {
+    roleId: number;
+    action: string;
+    toStage: number;
+  }): Promise<RegisteredStagePermission<'to'>[]>;
+  /**
+   * Calls {@link StagePermissionsService.registerTo} for each permission.
+   *
+   * @internal
+   */
+  registerManyTo(
+    permissions: { roleId: number; action: string; toStage: number }[]
+  ): Promise<RegisteredStagePermission<'to'>[][]>;
+  /**
+   * Deletes the permissions by ID.
+   *
+   * @internal
+   */
+  unregister(permissions: { id: number }[]): Promise<void>;
+  /**
+   * Whether the current user may run `action` on entries at `fromStage`. `fromStage` is
+   * `undefined` for an entry without a stage.
+   *
+   * @internal
+   */
+  can(action: string, fromStage: number | undefined): boolean;
+  /**
+   * Whether the current user may move entries into the stage, read with its permissions.
+   *
+   * @internal
+   */
+  canTransitionToStage(toStageId: number): Promise<boolean>;
+  /**
+   * Whether the current user may move entries into a stage whose permissions are already populated
+   * with their roles.
+   *
+   * @internal
+   */
+  canTransitionToStageWithPermissions(stage: StageWithPermissions): boolean;
+};
+
+/**
+ * The `assignees` service: the admin user assigned to review an entry.
+ */
+export type AssigneesService = {
+  /**
+   * Resolves the admin user ID assigned to the entry with database ID `id`, `null` when there is
+   * none.
+   *
+   * @internal
+   */
+  findEntityAssigneeId(id: Data.ID, model: UID.ContentType): Promise<number | null>;
+  /**
+   * Assigns the admin user `assigneeId` to the entry, or removes the assignee when it is `null`,
+   * and keeps the entry's `updatedAt`. Rejects with an `ApplicationError` when the user does not
+   * exist. Resolves the entry with its assignee populated.
+   *
+   * @internal
+   */
+  updateEntityAssignee(
+    entityToUpdate: {
+      id: Data.ID;
+      documentId: string;
+      /** `null` for a content type that is not localized. */
+      locale: string | null;
+      updatedAt: string;
+    },
+    model: UID.ContentType,
+    assigneeId: Data.ID | null
+  ): Promise<Modules.Documents.AnyDocument | null>;
+};
+
+/**
+ * The `homepage` service: the data of the admin homepage widget.
+ */
+export type HomepageService = {
+  // TODO @Nico `strapi_stage` is `null` for a document whose workflow was deleted, which
+  // `RecentDocument` does not allow. Widening it changes the shared contract and the controller.
+  /**
+   * Resolves the last documents assigned to the user of the current admin request. Rejects outside
+   * an admin request.
+   *
+   * @internal
+   */
+  getRecentlyAssignedDocuments(): Promise<GetRecentlyAssignedDocuments.Response['data']>;
 };
