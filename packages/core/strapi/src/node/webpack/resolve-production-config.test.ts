@@ -80,8 +80,11 @@ describe('Webpack admin configuration', () => {
         }),
       },
     });
-    expect(String(config.resolve?.fallback?.path)).toContain('path-browserify');
-    expect(String(config.resolve?.fallback?.util)).toContain(`${path.sep}util${path.sep}`);
+    const fallback = config.resolve?.fallback;
+    const fallbackByName = fallback && !Array.isArray(fallback) ? fallback : undefined;
+
+    expect(String(fallbackByName?.path)).toContain('path-browserify');
+    expect(String(fallbackByName?.util)).toContain(`${path.sep}util${path.sep}`);
 
     const definePlugin = config.plugins?.find(
       (plugin) => plugin?.constructor.name === 'DefinePlugin'
