@@ -16,6 +16,7 @@ app.service('plugin::review-workflows.workflow-weekly-metrics').missing();
 app.plugin('review-workflows').service('stage-permissions').canTransitionToStage({}).anything();
 app.service('plugin::review-workflows.assignees').missing();
 app.service('plugin::review-workflows.homepage').getRecentlyAssignedDocuments(1).anything();
+app.plugin('review-workflows').service('stages').findById({ id: 1 }).anything();
 app
   .plugin('review-workflows')
   .controller('stages')

@@ -7,6 +7,7 @@ import type {
   HomepageService,
   StagePermissionsService,
   StagesController,
+  StagesService,
   ValidationService,
   WorkflowWeeklyMetricsService,
 } from '@strapi/review-workflows/strapi-server';
@@ -62,3 +63,8 @@ const canTransition = app
 canTransition satisfies boolean | undefined;
 // @ts-expect-error Stage IDs are checked against the service contract.
 app.plugin('review-workflows').service('stage-permissions')?.canTransitionToStage('2');
+app.service('plugin::review-workflows.stages') satisfies StagesService | undefined;
+const stageCount = app.plugin('review-workflows').service('stages')?.count({ workflowId: 1 });
+stageCount satisfies Promise<number> | undefined;
+// @ts-expect-error Stage IDs are checked against the service contract.
+app.service('plugin::review-workflows.stages')?.findById({ id: 1 });
