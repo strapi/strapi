@@ -681,7 +681,6 @@ const ListViewPage = () => {
                             if (typeof cellFormatter === 'function') {
                               return (
                                 <Table.Cell key={header.name}>
-                                  {/* @ts-expect-error – TODO: fix this TS error */}
                                   {cellFormatter(row, header, { collectionType, model })}
                                 </Table.Cell>
                               );

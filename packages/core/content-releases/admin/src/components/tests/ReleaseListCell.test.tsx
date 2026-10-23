@@ -28,10 +28,7 @@ describe('ReleaseListCell', () => {
 
     // Call the formatter during render, like the ListView does
     const Cell = () => (
-      <>
-        {// @ts-expect-error – the ListView passes a third `meta` argument that isn't typed yet
-        cellFormatter?.(row, header, { collectionType: '', model: 'api::article.article' })}
-      </>
+      <>{cellFormatter?.(row, header, { collectionType: '', model: 'api::article.article' })}</>
     );
 
     render(
