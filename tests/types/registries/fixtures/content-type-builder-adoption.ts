@@ -4,6 +4,8 @@ import type {
   BuilderService,
   ComponentCategoriesService,
   ContentStructureService,
+  ContentTypeHandler,
+  ContentTypesService,
   Controllers,
   SchemaController,
 } from '@strapi/content-type-builder/strapi-server';
@@ -39,6 +41,29 @@ contentStructure.commitFromUpdate({
 }) satisfies Promise<boolean>;
 // @ts-expect-error Deleted uids are a set.
 contentStructure.commitFromUpdate({ deletedUids: ['api::article.article'] });
+
+const contentTypes = app.plugin('content-type-builder').service('content-types');
+contentTypes satisfies ContentTypesService;
+const created = contentTypes.createContentType({
+  contentType: {
+    displayName: 'Article',
+    singularName: 'article',
+    pluralName: 'articles',
+    attributes: { title: { type: 'string' } },
+  },
+});
+created satisfies Promise<ContentTypeHandler>;
+created.then((handler) => {
+  // @ts-expect-error Mutation results have no handler methods.
+  handler.rollback();
+});
+app
+  .service('plugin::content-type-builder.content-types')
+  .formatContentType(app.contentType('api::article.article')).schema.visible satisfies boolean;
+contentTypes.createContentType({
+  // @ts-expect-error A content type payload sends its attributes.
+  contentType: { displayName: 'Tag', singularName: 'tag', pluralName: 'tags' },
+});
 
 app.plugin('content-type-builder').controller('content-types').getContentType(context, next);
 app.controller('plugin::content-type-builder.components').updateComponent(context, next);
