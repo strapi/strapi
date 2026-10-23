@@ -6,7 +6,12 @@ import { async, type queryParams } from '@strapi/utils';
 
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
-import type { Services, WorkflowPopulate } from '../types';
+import type {
+  Services,
+  WorkflowCreateInput,
+  WorkflowPopulate,
+  WorkflowUpdateInput,
+} from '../types';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 
@@ -111,7 +116,8 @@ export default {
     const workflowService = getService('workflows') as Services['workflows'];
     const createdWorkflow = await workflowService
       .create({
-        data: await sanitizeCreateInput(workflowBody),
+        // The validator checks that each content type exists; its output type keeps plain strings.
+        data: await sanitizeCreateInput(workflowBody as WorkflowCreateInput),
       })
       .then(formatWorkflowToAdmin);
 
@@ -141,7 +147,8 @@ export default {
 
     // Sanitize input data
     const getPermittedFieldToUpdate = sanitizeUpdateInput(workflow);
-    const dataToUpdate = await getPermittedFieldToUpdate(workflowBody);
+    // The validator checks that each content type exists; its output type keeps plain strings.
+    const dataToUpdate = await getPermittedFieldToUpdate(workflowBody as WorkflowUpdateInput);
 
     // Update workflow
     const updatedWorkflow = await workflowService
