@@ -55,7 +55,7 @@ const aiWorkflowsPackument = createPackument(AI_WORKFLOWS, [{ version: '0.1.0' }
   latest: '0.1.0',
 });
 
-const MESSAGE = 'Contact Sales to enable them: https://strapi.io/contact-sales';
+const MESSAGE = 'To get access, please contact Sales: https://strapi.io/contact-sales';
 
 const catalogPlugin = (name: string, licensed: boolean) => ({
   name,

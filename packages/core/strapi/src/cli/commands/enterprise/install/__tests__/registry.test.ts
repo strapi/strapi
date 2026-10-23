@@ -163,7 +163,7 @@ describe('fetchPluginCatalog', () => {
             licensed: false,
           },
         ],
-        notLicensedMessage: 'Contact Sales to enable them: https://strapi.io/contact-sales',
+        notLicensedMessage: 'To get access, please contact Sales: https://strapi.io/contact-sales',
       })
     );
 
@@ -178,7 +178,7 @@ describe('fetchPluginCatalog', () => {
           licensed: false,
         },
       ],
-      notLicensedMessage: 'Contact Sales to enable them: https://strapi.io/contact-sales',
+      notLicensedMessage: 'To get access, please contact Sales: https://strapi.io/contact-sales',
     });
     expect(fetchImplementation).toHaveBeenCalledWith(
       'https://packages.strapi.io/-/strapi/plugins',

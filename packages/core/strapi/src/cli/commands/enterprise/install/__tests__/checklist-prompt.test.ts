@@ -175,7 +175,7 @@ describe('promptChecklist', () => {
     const link = 'https://strapi.io/contact-sales';
     const prompt = startPrompt(choices, 40, {
       ...lockedGroup,
-      heading: `Not in your license. Contact Sales to enable them: ${link}`,
+      heading: `Not in your license. To get access, please contact Sales: ${link}`,
     });
 
     const lines = prompt.screen().split('\n');
@@ -188,7 +188,7 @@ describe('promptChecklist', () => {
     const link = 'https://strapi.io/contact-sales';
     const prompt = startPrompt(choices, 25, {
       ...lockedGroup,
-      heading: `Not in your license. Contact Sales to enable them: ${link}`,
+      heading: `Not in your license. To get access, please contact Sales: ${link}`,
     });
 
     const lines = prompt.screen().split('\n');
