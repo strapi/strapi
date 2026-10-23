@@ -179,6 +179,12 @@ describe('Upload plugin bootstrap function', () => {
 
     expect(auditLogsLifecycle.registerEvent.mock.calls.map(([name]) => name)).toEqual([
       'upload-settings.update',
+      'media.create',
+      'media.update.audit',
+      'media.delete',
+      'media-folder.create',
+      'media-folder.update',
+      'media-folder.delete.audit',
       'media.move',
     ]);
   });

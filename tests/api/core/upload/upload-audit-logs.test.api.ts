@@ -330,4 +330,218 @@ describeOnCondition(edition === 'EE')('Media library in audit logs (api)', () =>
       expect(await findLogs('media.move')).toHaveLength(0);
     });
   });
+  describe('media and folder create, update and delete', () => {
+    const createdFolderIds: number[] = [];
+    const createdFileIds: number[] = [];
+
+    const folder = async (name: string, parent: number | null = null) => {
+      const created = await createFolder(name, parent);
+      createdFolderIds.push(created.id);
+      return created;
+    };
+
+    const file = async (parent: number | null = null) => {
+      const created = await createFile(parent);
+      createdFileIds.push(created.id);
+      return created;
+    };
+
+    const rowsFor = async (action: string, type: string, id: number, count = 1) => {
+      for (let attempt = 0; attempt < 40; attempt += 1) {
+        const logs = (await findLogs(action)).filter(
+          (log) => log.payload.resource?.type === type && log.payload.resource?.id === id
+        );
+        if (logs.length >= count && logs.every((log) => log.user)) {
+          return logs;
+        }
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50);
+        });
+      }
+      return [];
+    };
+
+    const updateFileInfo = (id: number, fileInfo: Record<string, unknown>) =>
+      rq({
+        method: 'POST',
+        url: `/upload?id=${id}`,
+        formData: { fileInfo: JSON.stringify(fileInfo) },
+      });
+
+    const row = (
+      action: string,
+      resource: Record<string, unknown>,
+      details?: Record<string, unknown>
+    ) => ({
+      action,
+      date: expect.any(String),
+      actor: expectedActor(),
+      origin: 'admin-panel',
+      resource,
+      ...(details && { details }),
+    });
+
+    afterAll(async () => {
+      await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: { fileIds: createdFileIds, folderIds: createdFolderIds },
+      });
+    });
+
+    test('records an uploaded file and a created folder as media.create', async () => {
+      const created = await file(null);
+      const createdFolder = await folder('audit-create-folder');
+
+      const [fileRow] = await rowsFor('media.create', 'media', created.id);
+      expect(fileRow.user.id).toBe(actingAdminId);
+      expect(fileRow.payload).toEqual(
+        row(
+          'media.create',
+          { type: 'media', id: created.id, name: created.name },
+          { mime: 'image/jpeg', size: expect.any(Number) }
+        )
+      );
+
+      const [folderRow] = await rowsFor('media.create', 'media-folder', createdFolder.id);
+      expect(folderRow.payload).toEqual(
+        row('media.create', {
+          type: 'media-folder',
+          id: createdFolder.id,
+          name: createdFolder.name,
+        })
+      );
+
+      expect(await findLogs('media-folder.create')).toHaveLength(0);
+      expect(JSON.stringify(fileRow.payload)).not.toMatch(/uploads|"hash"/);
+    });
+
+    test('records the changed fields of a file, including a move to another folder', async () => {
+      const destination = await folder('audit-update-destination');
+      const updated = await file(null);
+      await clearAuditLogs();
+
+      const res = await updateFileInfo(updated.id, {
+        alternativeText: 'An alt text',
+        folder: destination.id,
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [updateRow] = await rowsFor('media.update', 'media', updated.id);
+      expect(updateRow.payload).toEqual(
+        row(
+          'media.update',
+          { type: 'media', id: updated.id, name: updated.name },
+          {
+            changes: {
+              alternativeText: { before: null, after: 'An alt text' },
+              folder: { before: null, after: { id: destination.id, name: destination.name } },
+            },
+          }
+        )
+      );
+    });
+
+    test('writes no media.update row when nothing changed', async () => {
+      const unchanged = await file(null);
+      await clearAuditLogs();
+
+      const res = await updateFileInfo(unchanged.id, { name: unchanged.name });
+      expect(res.statusCode).toBe(200);
+
+      // A later row proves the earlier update was processed
+      const marker = await folder('audit-update-marker');
+      await rowsFor('media.create', 'media-folder', marker.id);
+      expect(
+        (await findLogs('media.update')).filter((log) => log.payload.resource.id === unchanged.id)
+      ).toHaveLength(0);
+    });
+
+    test('leaves the media.update webhook event as it was', async () => {
+      const destination = await folder('audit-webhook-destination');
+      const updated = await file(null);
+      const payloads: any[] = [];
+      const listener = (payload: any) => {
+        payloads.push(payload);
+      };
+      strapi.eventHub.on('media.update', listener);
+
+      try {
+        const res = await updateFileInfo(updated.id, {
+          caption: 'A caption',
+          folder: destination.id,
+        });
+        expect(res.statusCode).toBe(200);
+      } finally {
+        strapi.eventHub.off('media.update', listener);
+      }
+
+      expect(payloads).toHaveLength(1);
+      expect(Object.keys(payloads[0])).toEqual(['media']);
+      expect(payloads[0].media).toMatchObject({ id: updated.id, caption: 'A caption' });
+      expect(payloads[0].media).not.toHaveProperty('folder');
+      expect(payloads[0].media).not.toHaveProperty('folderPath');
+    });
+
+    test('records a renamed folder and a folder moved to another parent', async () => {
+      const parent = await folder('audit-folder-parent');
+      const moved = await folder('audit-folder-moved');
+      await clearAuditLogs();
+
+      const rename = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${moved.id}`,
+        body: { name: 'audit-folder-renamed' },
+      });
+      expect(rename.statusCode).toBe(200);
+
+      const [renameRow] = await rowsFor('media.update', 'media-folder', moved.id);
+      expect(renameRow.payload.details).toEqual({
+        changes: { name: { before: 'audit-folder-moved', after: 'audit-folder-renamed' } },
+      });
+
+      const move = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${moved.id}`,
+        body: { name: 'audit-folder-renamed', parent: parent.id },
+      });
+      expect(move.statusCode).toBe(200);
+
+      const rows = await rowsFor('media.update', 'media-folder', moved.id, 2);
+      expect(rows[1].payload).toEqual(
+        row(
+          'media.update',
+          { type: 'media-folder', id: moved.id, name: 'audit-folder-renamed' },
+          { changes: { parent: { before: null, after: { id: parent.id, name: parent.name } } } }
+        )
+      );
+      expect(await findLogs('media-folder.update')).toHaveLength(0);
+    });
+
+    test('records each deleted folder and the files inside it as media.delete', async () => {
+      const first = await folder('audit-delete-first');
+      const second = await folder('audit-delete-second');
+      const inside = await createFile(first.id);
+      await clearAuditLogs();
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: { fileIds: [], folderIds: [first.id, second.id] },
+      });
+      expect(res.statusCode).toBe(200);
+
+      for (const deleted of [first, second]) {
+        const [deleteRow] = await rowsFor('media.delete', 'media-folder', deleted.id);
+        expect(deleteRow.payload).toEqual(
+          row('media.delete', { type: 'media-folder', id: deleted.id, name: deleted.name })
+        );
+      }
+      const [fileRow] = await rowsFor('media.delete', 'media', inside.id);
+      expect(fileRow.payload).toEqual(
+        row('media.delete', { type: 'media', id: inside.id, name: inside.name })
+      );
+      expect(await findLogs('media-folder.delete')).toHaveLength(0);
+    });
+  });
 });
