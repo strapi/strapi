@@ -441,7 +441,7 @@ describe('File source provider', () => {
       });
       await provider.bootstrap();
 
-      const stream = provider.createEntitiesReadStream();
+      const stream = await provider.createEntitiesReadStream();
       const { sourcePaused, chunks } = await assertReadStreamBackpressure(stream, {
         delayMs: 12,
         minChunksForBackpressure: 10,

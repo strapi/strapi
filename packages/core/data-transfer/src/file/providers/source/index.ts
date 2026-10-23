@@ -8,9 +8,6 @@ import { finished } from 'stream/promises';
 import fs from 'fs-extra';
 import { Parser, type ReadEntry } from 'tar';
 import { isEmpty, keyBy } from 'lodash';
-import { chainUnchecked as chain } from 'stream-chain';
-// Extension is required: stream-json's export map does not resolve the extensionless subpath.
-import { parser } from 'stream-json/jsonl/parser.js'; // eslint-disable-line import/extensions
 import type { Struct } from '@strapi/types';
 
 import type {
@@ -25,6 +22,7 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 import {
   ProviderInitializationError,
   ProviderTransferError,
@@ -149,12 +147,12 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async #loadMetadata() {
-    const backupStream = this.#getBackupStream();
+    const backupStream = await this.#getBackupStream();
     this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
   async #loadAssetMetadata(sidecarPath: string) {
-    const backupStream = this.#getBackupStream();
+    const backupStream = await this.#getBackupStream();
     const filename = path.posix.basename(sidecarPath).replace(/\.json$/, '');
     return validateAssetMetadata(
       await this.#parseJSONFile<IFile>(backupStream, sidecarPath),
@@ -174,7 +172,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   async getSchemas() {
     this.#reportInfo('getting schemas');
     const schemaCollection = await utils.stream.collect<Struct.Schema>(
-      this.createSchemasReadStream()
+      await this.createSchemasReadStream()
     );
 
     if (isEmpty(schemaCollection)) {
@@ -195,7 +193,7 @@ class LocalFileSourceProvider implements ISourceProvider {
 
     const uploads = new Set<string>();
     const sidecars = new Map<string, Buffer>();
-    const inStream = this.#getBackupStream();
+    const inStream = await this.#getBackupStream();
 
     await new Promise<void>((resolve, reject) => {
       let activeEntries = 0;
@@ -295,29 +293,29 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#assetMetadata = metadata;
   }
 
-  createEntitiesReadStream(): Readable {
+  async createEntitiesReadStream(): Promise<Readable> {
     this.#reportInfo('creating entities read stream');
     return this.#streamJsonlDirectory('entities');
   }
 
-  createSchemasReadStream(): Readable {
+  async createSchemasReadStream(): Promise<Readable> {
     this.#reportInfo('creating schemas read stream');
     return this.#streamJsonlDirectory('schemas');
   }
 
-  createLinksReadStream(): Readable {
+  async createLinksReadStream(): Promise<Readable> {
     this.#reportInfo('creating links read stream');
     return this.#streamJsonlDirectory('links');
   }
 
-  createConfigurationReadStream(): Readable {
+  async createConfigurationReadStream(): Promise<Readable> {
     this.#reportInfo('creating configuration read stream');
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
 
-  createAssetsReadStream(): Readable | Promise<Readable> {
-    const inStream = this.#getBackupStream();
+  async createAssetsReadStream(): Promise<Readable> {
+    const inStream = await this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
     const assetMetadata = this.#assetMetadata;
@@ -372,7 +370,8 @@ class LocalFileSourceProvider implements ISourceProvider {
     return outStream;
   }
 
-  #getBackupStream() {
+  async #getBackupStream() {
+    const { chain } = await loadStreamDeps();
     const { file, encryption, compression } = this.options;
 
     const streams: StreamItemArray = [];
@@ -395,8 +394,9 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   // `directory` must be posix formatted path
-  #streamJsonlDirectory(directory: string) {
-    const inStream = this.#getBackupStream();
+  async #streamJsonlDirectory(directory: string) {
+    const { chain, parser } = await loadStreamDeps();
+    const inStream = await this.#getBackupStream();
 
     const outStream = new PassThrough({ objectMode: true });
 
