@@ -58,6 +58,8 @@ This code is separated into several elements:
 
 This content type stores the workflow information and is responsible for holding all the information about stages and their order. In MVP, only one workflow is stored inside the Strapi database.
 
+The workflow `name` is unique. The `workflows` service checks it on create and on rename, because `db.query` does not enforce the `unique` attribute option.
+
 #### strapi_workflows_stages
 
 This content type store the stage information such as its name.

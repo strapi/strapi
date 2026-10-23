@@ -232,6 +232,28 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         createdWorkflow = res.body.data;
       });
+      test('It should not create a workflow with a name that already exists', async () => {
+        const res = await requests.admin.post('/review-workflows/workflows', {
+          body: {
+            data: {
+              name: testWorkflow.name,
+              stages: [{ name: 'Stage 1' }],
+            },
+          },
+        });
+
+        if (hasRW) {
+          expect(res.status).toBe(400);
+          expect(res.body.error).toMatchObject({
+            name: 'ValidationError',
+            message: 'A workflow with this name already exists.',
+            details: { errors: [{ path: ['name'] }] },
+          });
+        } else {
+          expect(res.status).toBe(404);
+          expect(res.body.data).toBeUndefined();
+        }
+      });
     });
 
     describe('Update workflow', () => {
@@ -273,6 +295,24 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
               { id: createdWorkflow.stages[0].id, name: 'Stage 1_Updated' },
               { name: 'Stage 2' },
             ],
+          });
+        } else {
+          expect(res.status).toBe(404);
+          expect(res.body.data).toBeUndefined();
+        }
+      });
+
+      test('It should not rename a workflow to a name that already exists', async () => {
+        const res = await requests.admin.put(`/review-workflows/workflows/${createdWorkflow.id}`, {
+          body: { data: { name: testWorkflow.name } },
+        });
+
+        if (hasRW) {
+          expect(res.status).toBe(400);
+          expect(res.body.error).toMatchObject({
+            name: 'ValidationError',
+            message: 'A workflow with this name already exists.',
+            details: { errors: [{ path: ['name'] }] },
           });
         } else {
           expect(res.status).toBe(404);
