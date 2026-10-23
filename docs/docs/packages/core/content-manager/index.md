@@ -44,6 +44,34 @@ The edit view response holds only a count for each relation field, and the relat
 
 `server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost. The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). Both folders carry their own `LICENSE` file.
 
+#### What creates a history version
+
+The history middleware on the Document Service calls `resolveHistoryOrigin` (`server/src/history/origin.ts`). It names each origin that may create a version, and returns `null` for any other write:
+
+| Origin            | Rule                                                                | Default   |
+| ----------------- | ------------------------------------------------------------------- | --------- |
+| `content-manager` | The matched route is an admin route of the `content-manager` plugin | always on |
+| `content-api`     | The matched route has `info.type` `content-api` (REST and GraphQL)  | off       |
+
+Writes from other admin routes (content-releases, review-workflows, MCP) and writes with no request (cron, bootstrap, `strapi import`) create no version. The middleware also keeps its older rules: it records only `create`, `update`, `clone`, `publish`, `unpublish` and `discardDraft`, only for `api::` content types, and it skips the `update` that a Content Manager publish emits. Deletes create no version.
+
+The `content-api` origin is opt-in. Set `admin.history.contentApi` to `true` to enable it. The history code reads the flag at each write. `@strapi/types` does not declare it.
+
+#### Author of a version
+
+`createdBy` is a relation to `admin::user`, so the history service fills it only when the actor is an admin user. The `actor` JSON column of `strapi_history_versions` describes every author (`resolveHistoryAuthor` in `server/src/history/actor.ts`, which returns the actor and `createdBy` together):
+
+- `{ type: 'admin-user' }`: the details stay in `createdBy`.
+- `{ type: 'api-token', token: { id, name } }`: a content API token.
+- `{ type: 'end-user', user: { id, username } }`: a users-permissions user. The email is not stored, to limit personal data.
+- `{ type: 'unknown' }`: a public route.
+
+Versions created before the `actor` column existed have no actor. The history sidebar shows the actor name when `createdBy` is empty.
+
+#### Failure handling
+
+Recording a version is fail-open. The middleware catches any error from the whole step: the locale lookup, the schema lookup, the deep populate and the insert. The insert runs in an `onCommit` callback that nobody awaits, so that callback has its own guard. It logs the error message at `error` level and the stack at `debug` level. A failed history write never crashes the process or fails the API request.
+
 ## Related
 
 - [Document write path](../../../architecture/05-document-write-path.md): the Document Service calls behind the CM actions.

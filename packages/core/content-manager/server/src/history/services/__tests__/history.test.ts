@@ -116,6 +116,24 @@ const mockStrapi = {
 // @ts-expect-error - we're not mocking the full Strapi object
 const historyService = createHistoryService({ strapi: mockStrapi });
 
+const historyVersionData = {
+  contentType: 'api::article.article' as UID.ContentType,
+  data: {
+    documentId: '1234',
+    id: 1,
+    title: 'My article',
+  },
+  locale: 'en',
+  relatedDocumentId: 'randomid',
+  schema: {
+    title: {
+      type: 'string' as const,
+    },
+  },
+  componentsSchemas: {},
+  status: 'draft' as const,
+};
+
 describe('history-version service', () => {
   afterEach(() => {
     jest.useRealTimers();
@@ -124,28 +142,11 @@ describe('history-version service', () => {
   it('creates a history version with the author', async () => {
     jest.useFakeTimers().setSystemTime(fakeDate);
 
-    const historyVersionData = {
-      contentType: 'api::article.article' as UID.ContentType,
-      data: {
-        documentId: '1234',
-        id: 1,
-        title: 'My article',
-      },
-      locale: 'en',
-      relatedDocumentId: 'randomid',
-      schema: {
-        title: {
-          type: 'string' as const,
-        },
-      },
-      componentsSchemas: {},
-      status: 'draft' as const,
-    };
-
     await historyService.createVersion(historyVersionData);
     expect(createMock).toHaveBeenCalledWith({
       data: {
         ...historyVersionData,
+        actor: { type: 'admin-user' },
         createdBy: userId,
         createdAt: fakeDate,
       },
@@ -155,30 +156,38 @@ describe('history-version service', () => {
   it('creates a history version without any author', async () => {
     jest.useFakeTimers().setSystemTime(fakeDate);
 
-    const historyVersionData = {
-      contentType: 'api::article.article' as UID.ContentType,
-      data: {
-        documentId: '1234',
-        id: 1,
-        title: 'My article',
-      },
-      locale: 'en',
-      relatedDocumentId: 'randomid',
-      componentsSchemas: {},
-      schema: {
-        title: {
-          type: 'string' as const,
-        },
-      },
-      status: null,
-    };
-
     mockGetRequestContext.mockReturnValueOnce(null as any);
 
-    await historyService.createVersion(historyVersionData);
+    await historyService.createVersion({ ...historyVersionData, status: null });
     expect(createMock).toHaveBeenCalledWith({
       data: {
         ...historyVersionData,
+        status: null,
+        actor: undefined,
+        createdBy: undefined,
+        createdAt: fakeDate,
+      },
+    });
+  });
+
+  it('creates a history version with an api token actor and no admin author', async () => {
+    jest.useFakeTimers().setSystemTime(fakeDate);
+
+    mockGetRequestContext.mockReturnValueOnce({
+      state: {
+        auth: {
+          strategy: { name: 'content-api-token' },
+          credentials: { id: 7, name: 'Mobile app' },
+        },
+      },
+    } as any);
+
+    await historyService.createVersion(historyVersionData);
+
+    expect(createMock).toHaveBeenCalledWith({
+      data: {
+        ...historyVersionData,
+        actor: { type: 'api-token', token: { id: 7, name: 'Mobile app' } },
         createdBy: undefined,
         createdAt: fakeDate,
       },

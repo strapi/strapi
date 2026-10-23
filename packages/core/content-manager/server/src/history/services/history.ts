@@ -8,6 +8,7 @@ import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
+import { resolveHistoryAuthor } from '../actor';
 import { createServiceUtils } from './utils';
 import { getService as getContentManagerService } from '../../utils';
 
@@ -21,11 +22,14 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {
+      const author = resolveHistoryAuthor(strapi.requestContext.get());
+
       await query.create({
         data: {
           ...historyVersionData,
+          actor: author?.actor,
           createdAt: new Date(),
-          createdBy: strapi.requestContext.get()?.state?.user.id,
+          createdBy: author?.createdBy,
         },
       });
     },

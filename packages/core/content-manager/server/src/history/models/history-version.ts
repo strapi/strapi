@@ -31,6 +31,9 @@ const historyVersion: Model = {
     schema: {
       type: 'json',
     },
+    actor: {
+      type: 'json',
+    },
     createdAt: {
       type: 'datetime',
       default: () => new Date(),
