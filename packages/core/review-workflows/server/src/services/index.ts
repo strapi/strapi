@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import type {} from '../types';
+import type { Services } from '../types';
 
 import workflows from './workflows';
 import stages from './stages';
@@ -26,7 +26,8 @@ export default {
     reviewWorkflowsValidation satisfies Core.ServiceFactory<'plugin::review-workflows.validation'>,
   'document-service-middlewares':
     documentServiceMiddleware satisfies Core.ServiceFactory<'plugin::review-workflows.document-service-middlewares'>,
-  'workflow-metrics': reviewWorkflowsMetrics,
-  'workflow-weekly-metrics': reviewWorkflowsWeeklyMetrics,
+  'workflow-metrics': reviewWorkflowsMetrics satisfies Services['workflow-metrics'],
+  'workflow-weekly-metrics':
+    reviewWorkflowsWeeklyMetrics satisfies Core.ServiceFactory<'plugin::review-workflows.workflow-weekly-metrics'>,
   ...homepage.services,
 } satisfies Record<RegisteredNames, unknown>;
