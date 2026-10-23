@@ -1,8 +1,11 @@
 import type { Core } from '@strapi/strapi';
 import type {
+  AssigneesService,
   Controllers,
   DocumentServiceMiddlewaresService,
   HomepageController,
+  HomepageService,
+  StagePermissionsService,
   StagesController,
   ValidationService,
   WorkflowWeeklyMetricsService,
@@ -49,3 +52,13 @@ const schedule = app
 schedule satisfies Promise<string> | undefined;
 // @ts-expect-error Workflow IDs are checked against the service contract.
 app.service('plugin::review-workflows.workflow-metrics')?.sendDidCreateWorkflow({ id: 1 }, false);
+app.plugin('review-workflows').service('stage-permissions') satisfies
+  StagePermissionsService | undefined;
+app.service('plugin::review-workflows.assignees') satisfies AssigneesService | undefined;
+app.service('plugin::review-workflows.homepage') satisfies HomepageService | undefined;
+const canTransition = app
+  .service('plugin::review-workflows.stage-permissions')
+  ?.can('admin::review-workflows.stage.transition', undefined);
+canTransition satisfies boolean | undefined;
+// @ts-expect-error Stage IDs are checked against the service contract.
+app.plugin('review-workflows').service('stage-permissions')?.canTransitionToStage('2');
