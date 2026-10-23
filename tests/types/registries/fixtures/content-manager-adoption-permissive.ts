@@ -12,6 +12,11 @@ app.service('plugin::content-manager.populate-builder').custom();
 app.service('plugin::content-manager.history').findVersionsPage({ query: {} });
 app.plugin('content-manager').service('preview').getPreviewUrl('anything', {});
 app.service('plugin::content-manager.permission').canConfigureContentType({ userAbility: {} });
+app
+  .plugin('content-manager')
+  .service('permission-checker')
+  .create({})
+  .sanitizeOutput(1) satisfies Promise<string>;
 app.plugin('content-manager').service('content-types').findContentTypesByKind({ kind: 'nope' });
 app.plugin('content-manager').controller('collection-types').custom satisfies
   Core.ControllerHandler | undefined;
