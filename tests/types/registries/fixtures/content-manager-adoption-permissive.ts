@@ -17,6 +17,8 @@ app.plugin('content-manager').controller('collection-types').custom satisfies
   Core.ControllerHandler | undefined;
 app.controller('plugin::content-manager.homepage').custom satisfies
   Core.ControllerHandler | undefined;
+app.controller('plugin::content-manager.history-version').custom satisfies
+  Core.ControllerHandler | undefined;
 
 ({
   type: 'admin',
@@ -32,3 +34,7 @@ app.controller('plugin::content-manager.homepage').custom satisfies
     { method: 'GET', path: '/preview/script', handler: 'preview.getPreviewScript' },
   ],
 }) satisfies Core.RouterInputFor<Controllers.RegisteredControllers, 'plugin::content-manager'>;
+({
+  type: 'admin',
+  routes: [{ method: 'PUT', path: '/', handler: 'history-version.restoreVersion' }],
+}) satisfies Core.RouterInputFor<Controllers.RouteControllers, 'plugin::content-manager'>;

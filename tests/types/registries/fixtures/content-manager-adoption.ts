@@ -142,6 +142,10 @@ app.plugin('content-manager').controller('preview')
   .getPreviewScript satisfies Core.ControllerHandler;
 // @ts-expect-error Feature controller contracts are hand-written: no arbitrary actions.
 app.controller('plugin::content-manager.homepage').getRecentDocument satisfies unknown;
+app.controller('plugin::content-manager.history-version')?.findMany satisfies
+  Core.ControllerHandler | undefined;
+// @ts-expect-error The history version contract is hand-written: no arbitrary actions.
+app.controller('plugin::content-manager.history-version')?.findVersions satisfies unknown;
 // @ts-expect-error Registered controller actions reject typos.
 app.plugin('content-manager').controller('collection-types').findOn satisfies unknown;
 
@@ -170,6 +174,21 @@ app.plugin('content-manager').controller('collection-types').findOn satisfies un
   // @ts-expect-error Feature routes are checked against the feature controller contracts.
   routes: [{ method: 'GET', path: '/', handler: 'homepage.getRecentDocument' }],
 }) satisfies Core.RouterInputFor<Controllers.RegisteredControllers, 'plugin::content-manager'>;
+({
+  type: 'admin',
+  routes: [
+    {
+      method: 'PUT',
+      path: '/history-versions/:versionId/restore',
+      handler: 'history-version.restoreVersion',
+    },
+  ],
+}) satisfies Core.RouterInputFor<Controllers.RouteControllers, 'plugin::content-manager'>;
+({
+  type: 'admin',
+  // @ts-expect-error History routes are checked against the history version contract.
+  routes: [{ method: 'PUT', path: '/', handler: 'history-version.restore' }],
+}) satisfies Core.RouterInputFor<Controllers.RouteControllers, 'plugin::content-manager'>;
 ({
   // @ts-expect-error Relative policy references enforce the registered boolean option.
   policies: [{ name: 'hasPermissions', config: { hasAtLeastOne: 'yes' } }],

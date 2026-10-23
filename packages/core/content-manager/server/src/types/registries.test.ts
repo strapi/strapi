@@ -3,7 +3,7 @@ import type { Ability } from '@casl/ability';
 import type { Context } from 'koa';
 import type { Core, Modules, Schema, Struct, UID } from '@strapi/types';
 import type { RelationResult } from '../../../shared/contracts/relations';
-import type { RegisteredControllers } from './controllers';
+import type { RegisteredControllers, RouteControllers } from './controllers';
 
 // Registered lookups, as applications with strict types make them.
 const getService = <TName extends string>(name: TName) =>
@@ -179,6 +179,24 @@ strapi.controller('plugin::content-manager.homepage').getRecentDocument satisfie
   // @ts-expect-error Feature routes are checked against the feature controller contracts.
   routes: [{ method: 'GET', path: '/', handler: 'preview.getPreviewScripts' }],
 }) satisfies Core.RouterInputFor<RegisteredControllers, 'plugin::content-manager'>;
+strapi.controller('plugin::content-manager.history-version')?.restoreVersion satisfies
+  Core.ControllerHandler | undefined;
+// @ts-expect-error The history version contract is hand-written: no arbitrary actions.
+strapi.controller('plugin::content-manager.history-version')?.findVersions satisfies unknown;
+({
+  type: 'admin',
+  routes: [{ method: 'GET', path: '/history-versions', handler: 'history-version.findMany' }],
+}) satisfies Core.RouterInputFor<RouteControllers, 'plugin::content-manager'>;
+({
+  type: 'admin',
+  // @ts-expect-error Feature controllers registered with `undefined` need the route controller map.
+  routes: [{ method: 'GET', path: '/history-versions', handler: 'history-version.findMany' }],
+}) satisfies Core.RouterInputFor<RegisteredControllers, 'plugin::content-manager'>;
+({
+  type: 'admin',
+  // @ts-expect-error History routes are checked against the history version contract.
+  routes: [{ method: 'GET', path: '/history-versions', handler: 'history-version.findVersions' }],
+}) satisfies Core.RouterInputFor<RouteControllers, 'plugin::content-manager'>;
 
 declare const ctx: Context;
 const requestInfo = strapi
