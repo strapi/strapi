@@ -95,6 +95,21 @@ export const StringInput = forwardRef<HTMLInputElement, InputProps>(
 
 To handle the CM specific inputs, the EditView domain has its own `InputRenderer` component which follows the same principle but this will additionally handle attributes like custom-fields etc. The EditView them "simply" renders over its layout, passing props to the `InputRenderer`, if there's a dynamic-zone or component we recursively render the layout by utilising the `components` property of the `EditLayout` data-structure, as previously said, because this follows the same structure as its parent, we can iterate over it the exact same way rendering _any fields_ required, incl. deeply nested components and dynamic-zones.
 
+#### Progressive mounting
+
+[`FormLayout`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/pages/EditView/components/FormLayout.tsx) does not mount every row of the layout on the first render. The first render depends on the size of the screen, not on the size of the model.
+
+- A row that is not mounted yet renders a placeholder with an estimated height.
+- A row mounts when it gets close to the viewport. An `IntersectionObserver` watches its placeholder, with the edit view's scroll container as root.
+- The other rows mount in the background, one per idle period (`requestIdleCallback`, inside `startTransition` so that user input interrupts it).
+- A row with a field in error mounts right away, so the error is displayed and the field can receive the focus. It stays mounted after the errors are cleared.
+- A row with a required UID or a custom field mounts with the page, including when the field is inside a non-repeatable component. These inputs can set a value when they mount: a required UID fetches its default value, and a custom field may set a default.
+- Once mounted, a row stays mounted.
+
+Relation fields follow the same idea for their requests. A relation field fetches its connected relations once it gets close to the viewport (`useHasBeenNearViewport`, same margin as the rows), not when it mounts, and searches for the options of its combobox only once the combobox has been opened. After a save, only the fields that have already been near the viewport refetch their relations.
+
+A field in a row that is not mounted yet is not in the DOM. This affects browser search, autofill, end-to-end tests that look for a field low in the form without scrolling, and plugins that query inputs in the DOM. The form values do not depend on mounting: they live in the form state.
+
 ### ListView
 
 Because the list view is essentially a giant table, its data-structure is considerably simpler than the edit view:
