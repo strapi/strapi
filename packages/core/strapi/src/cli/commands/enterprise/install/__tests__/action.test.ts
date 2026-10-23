@@ -12,6 +12,7 @@ import {
   createTestLogger,
   expectedSetupWarning,
   loggedText,
+  NOT_LICENSED_MESSAGE,
 } from './test-helpers';
 
 type InstallDependencies = Parameters<typeof runInstall>[0]['dependencies'];
@@ -20,7 +21,6 @@ const LICENSE = createTestLicense();
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
 
 const LOCKED_PLUGIN = '@strapi-enterprise/plugin-locked';
-const NOT_LICENSED_MESSAGE = 'To get access, please contact Sales: https://strapi.io/contact-sales';
 
 const AI_BYOK_METADATA = { name: 'ai-byok', displayName: 'AI BYOK', kind: 'plugin' };
 

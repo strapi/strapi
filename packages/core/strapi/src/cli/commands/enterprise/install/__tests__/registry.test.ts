@@ -1,5 +1,5 @@
 import { fetchPackument, fetchPluginCatalog, searchPackageNames } from '../registry';
-import { createFetchResponse, createPackument } from './test-helpers';
+import { createFetchResponse, createPackument, NOT_LICENSED_MESSAGE } from './test-helpers';
 
 const packageName = '@strapi-enterprise/plugin-ai-byok';
 
@@ -163,7 +163,7 @@ describe('fetchPluginCatalog', () => {
             licensed: false,
           },
         ],
-        notLicensedMessage: 'To get access, please contact Sales: https://strapi.io/contact-sales',
+        notLicensedMessage: NOT_LICENSED_MESSAGE,
       })
     );
 
@@ -178,7 +178,7 @@ describe('fetchPluginCatalog', () => {
           licensed: false,
         },
       ],
-      notLicensedMessage: 'To get access, please contact Sales: https://strapi.io/contact-sales',
+      notLicensedMessage: NOT_LICENSED_MESSAGE,
     });
     expect(fetchImplementation).toHaveBeenCalledWith(
       'https://packages.strapi.io/-/strapi/plugins',

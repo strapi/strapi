@@ -6,6 +6,7 @@ import {
   type ChecklistLockedGroup,
 } from '../checklist-prompt';
 import { PromptCancelledError } from '../errors';
+import { CONTACT_SALES_URL, NOT_LICENSED_MESSAGE } from './test-helpers';
 
 const KEYS = { enter: '\r', down: '\u001B[B', up: '\u001B[A', space: ' ', ctrlC: '\u0003' };
 
@@ -172,23 +173,21 @@ describe('promptChecklist', () => {
   });
 
   it('wraps a long heading on words, so the link is never cut', async () => {
-    const link = 'https://strapi.io/contact-sales';
     const prompt = startPrompt(choices, 40, {
       ...lockedGroup,
-      heading: `Not in your license. To get access, please contact Sales: ${link}`,
+      heading: `Not in your license. ${NOT_LICENSED_MESSAGE}`,
     });
 
     const lines = prompt.screen().split('\n');
-    expect(lines).toContain(`  ${link}`);
+    expect(lines).toContain(`  ${CONTACT_SALES_URL}`);
     expect(lines.every((line) => line.length <= 39)).toBe(true);
     await prompt.cancel();
   });
 
   it('splits a word longer than a narrow terminal, so the link is never cut', async () => {
-    const link = 'https://strapi.io/contact-sales';
     const prompt = startPrompt(choices, 25, {
       ...lockedGroup,
-      heading: `Not in your license. To get access, please contact Sales: ${link}`,
+      heading: `Not in your license. ${NOT_LICENSED_MESSAGE}`,
     });
 
     const lines = prompt.screen().split('\n');

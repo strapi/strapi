@@ -12,6 +12,7 @@ import {
   createTemporaryDirectory,
   createTestLogger,
   installFakePackage,
+  NOT_LICENSED_MESSAGE,
 } from './test-helpers';
 
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
@@ -54,8 +55,6 @@ const newPluginPackument = createPackument(
 const aiWorkflowsPackument = createPackument(AI_WORKFLOWS, [{ version: '0.1.0' }], {
   latest: '0.1.0',
 });
-
-const MESSAGE = 'To get access, please contact Sales: https://strapi.io/contact-sales';
 
 const catalogPlugin = (name: string, licensed: boolean) => ({
   name,
@@ -242,7 +241,7 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
       packuments: { [AI_BYOK]: aiByokPackument, [NEW_PLUGIN]: 403 },
       catalog: {
         plugins: [catalogPlugin(AI_BYOK, true), catalogPlugin(NEW_PLUGIN, false)],
-        notLicensedMessage: MESSAGE,
+        notLicensedMessage: NOT_LICENSED_MESSAGE,
       },
     });
 
@@ -267,7 +266,7 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
         kind: 'plugin',
       },
     ]);
-    expect(notLicensedMessage).toBe(MESSAGE);
+    expect(notLicensedMessage).toBe(NOT_LICENSED_MESSAGE);
     const requestedPaths = fetchImplementation.mock.calls.map(
       ([input]) => new URL(String(input)).pathname
     );
@@ -284,7 +283,10 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
       createRegistryFetch({
         searchResult: [],
         packuments: { [NEW_PLUGIN]: 403 },
-        catalog: { plugins: [catalogPlugin(NEW_PLUGIN, false)], notLicensedMessage: MESSAGE },
+        catalog: {
+          plugins: [catalogPlugin(NEW_PLUGIN, false)],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
       })
     );
 
@@ -300,7 +302,10 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
       createRegistryFetch({
         searchResult: [],
         packuments: { [AI_BYOK]: aiByokPackument },
-        catalog: { plugins: [catalogPlugin(AI_BYOK, true)], notLicensedMessage: MESSAGE },
+        catalog: {
+          plugins: [catalogPlugin(AI_BYOK, true)],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
       })
     );
 

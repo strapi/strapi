@@ -5,6 +5,10 @@ import fse from 'fs-extra';
 import type { Logger } from '../../../../utils/logger';
 import type { StrapiPackageMetadata } from '../registry';
 
+export const CONTACT_SALES_URL = 'https://strapi.io/contact-sales';
+
+export const NOT_LICENSED_MESSAGE = `To get access, please contact Sales: ${CONTACT_SALES_URL}`;
+
 export const createTemporaryDirectory = (): Promise<string> =>
   fse.mkdtemp(path.join(os.tmpdir(), 'strapi-enterprise-install-'));
 
