@@ -69,4 +69,35 @@ describe('<ColorPickerInput />', () => {
 
     expect(textInput).toHaveValue(testColor);
   });
+
+  it('shows the typed color in the preview', async () => {
+    const { user, getByRole } = render();
+
+    await user.click(getByRole('button', { name: 'Color picker toggle' }));
+
+    const textInput = getByRole('textbox', { name: 'Color picker input' });
+
+    await user.clear(textInput);
+    await user.type(textInput, '#ff3c0c');
+
+    const preview = getByRole('button', { name: 'Color picker toggle' })
+      // eslint-disable-next-line testing-library/no-node-access
+      .querySelector('div[style]');
+    expect(preview).toHaveStyle({ backgroundColor: '#ff3c0c' });
+  });
+
+  it('does not write a typed value into the shared stylesheet', async () => {
+    const { user, getByRole } = render();
+
+    await user.click(getByRole('button', { name: 'Color picker toggle' }));
+
+    const textInput = getByRole('textbox', { name: 'Color picker input' });
+
+    await user.clear(textInput);
+    await user.type(textInput, '#ff(');
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const styles = Array.from(document.querySelectorAll('style'), (style) => style.textContent);
+    expect(styles.join('')).not.toContain('#ff(');
+  });
 });
