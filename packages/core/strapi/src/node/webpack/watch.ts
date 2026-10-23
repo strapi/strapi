@@ -21,7 +21,11 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
   return new Promise<WebpackWatcher>((res) => {
     const compiler = webpack(finalConfig);
 
-    const devMiddleware = webpackDevMiddleware(compiler);
+    // The wrapper exposes devMiddleware at runtime, but 8.5.0 omits it from its declarations.
+    const koaMiddleware = webpackDevMiddleware.koaWrapper(compiler) as ReturnType<
+      typeof webpackDevMiddleware.koaWrapper
+    > & { devMiddleware: ReturnType<typeof webpackDevMiddleware> };
+    const devMiddleware = koaMiddleware.devMiddleware;
 
     const hotMiddleware = webpackHotMiddleware(compiler, {
       log: false,
@@ -37,35 +41,7 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
       });
     });
 
-    ctx.strapi.server.app.use((context, next) => {
-      // wait for webpack-dev-middleware to signal that the build is ready
-      const ready = new Promise((resolve) => {
-        devMiddleware.waitUntilValid(() => {
-          resolve(true);
-        });
-      });
-      // tell webpack-dev-middleware to handle the request
-      const init = new Promise((resolve) => {
-        devMiddleware(
-          context.req,
-          {
-            // @ts-expect-error ignored
-            end(content) {
-              // eslint-disable-next-line no-param-reassign
-              context.body = content;
-              resolve(true);
-            },
-            getHeader: context.get.bind(context),
-            // @ts-expect-error ignored
-            setHeader: context.set.bind(context),
-            locals: context.state,
-          },
-          () => resolve(next())
-        );
-      });
-
-      return Promise.all([ready, init]);
-    });
+    ctx.strapi.server.app.use(koaMiddleware);
 
     const serveAdmin: Core.MiddlewareHandler = async (ctx, next) => {
       await next();
