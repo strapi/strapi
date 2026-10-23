@@ -3,15 +3,22 @@ import os from 'node:os';
 import { loadEnv } from '../../../../node/core/env';
 import type { Logger } from '../../../utils/logger';
 import { ENTERPRISE_SCOPE, STRAPI_PACKAGE_NAME } from './constants';
-import { discoverEnterprisePlugins } from './discovery';
+import { discoverEnterprisePlugins, isValidPackageName } from './discovery';
 import { EnterpriseInstallError, PackageManagerError, PromptCancelledError } from './errors';
 import { buildInstallCommand, installPackages } from './install-packages';
 import { promptForLicense, resolveLicense } from './license';
 import { detectPackageManager } from './package-manager';
 import { resolvePluginStatus } from './plugin-status';
 import { prepareRegistryAccess } from './registry-access';
-import { fetchPackument } from './registry';
-import { buildPluginRow, isSelectable, orderVisibleRows, promptForPlugins } from './selection';
+import { fetchPackument, fetchPluginCatalog } from './registry';
+import {
+  buildPluginRow,
+  describeLockedRows,
+  isSelectable,
+  orderVisibleRows,
+  promptForPlugins,
+  type PluginRow,
+} from './selection';
 import { printSetupLinks } from './setup-links';
 import {
   canCheckStrapiCompatibility,
@@ -50,11 +57,28 @@ interface InstallContext {
   dependencies: InstallDependencies;
 }
 
-const ENTERPRISE_PACKAGE_NAME = new RegExp(`^${ENTERPRISE_SCOPE}/[a-z0-9-][a-z0-9._-]*$`);
-const MAX_PACKAGE_NAME_LENGTH = 214;
+const describeNotLicensed = async (
+  packageName: string,
+  { license, dependencies }: InstallContext
+): Promise<string> => {
+  const catalogResult = await fetchPluginCatalog({
+    license,
+    fetchImplementation: dependencies.fetchImplementation,
+  });
+  const isListedOutsideLicense =
+    catalogResult.status === 'available' &&
+    catalogResult.plugins.some(({ name, licensed }) => name === packageName && !licensed);
 
-const isValidPackageName = (packageName: string) =>
-  packageName.length <= MAX_PACKAGE_NAME_LENGTH && ENTERPRISE_PACKAGE_NAME.test(packageName);
+  if (!isListedOutsideLicense) {
+    return `Your license does not include ${packageName}, or it does not exist. Run strapi enterprise install without a name to see the plugins you can install.`;
+  }
+
+  const { notLicensedMessage } = catalogResult;
+
+  return notLicensedMessage
+    ? `Your license does not include ${packageName}. ${notLicensedMessage}`
+    : `Your license does not include ${packageName}.`;
+};
 
 interface RequestedPackage {
   packageName: string;
@@ -87,8 +111,9 @@ export const parsePackageArgument = (packageArgument: string): RequestedPackage 
 
 const resolveNamedPackages = async (
   requestedPackages: RequestedPackage[],
-  { appDir, license, strapiVersion, logger, dependencies }: InstallContext
+  context: InstallContext
 ): Promise<string[]> => {
+  const { appDir, license, strapiVersion, logger, dependencies } = context;
   const installSpecs: string[] = [];
 
   for (const { packageName, requestedVersion } of requestedPackages) {
@@ -137,9 +162,7 @@ const resolveNamedPackages = async (
 
     switch (status.state) {
       case 'not-licensed':
-        throw new EnterpriseInstallError(
-          `Your license does not include ${packageName}, or it does not exist. Run strapi enterprise install without a name to see the plugins you can install.`
-        );
+        throw new EnterpriseInstallError(await describeNotLicensed(packageName, context));
       case 'not-found':
         throw new EnterpriseInstallError(
           `No Enterprise package named ${packageName}. Run strapi enterprise install without a name to see the plugins you can install.`
@@ -188,16 +211,23 @@ const selectPlugins = async ({
   logger,
   dependencies,
 }: InstallContext): Promise<string[]> => {
-  const discoveredPlugins = await discoverEnterprisePlugins({
+  const {
+    plugins: discoveredPlugins,
+    lockedPlugins,
+    notLicensedMessage,
+  } = await discoverEnterprisePlugins({
     appDir,
     license,
     logger,
     fetchImplementation: dependencies.fetchImplementation,
   });
 
-  const rows = discoveredPlugins.map(({ entry, lookup, installedVersion }) =>
-    buildPluginRow({ entry, lookup, installedVersion, strapiVersion })
-  );
+  const rows: PluginRow[] = [
+    ...discoveredPlugins.map(({ entry, lookup, installedVersion }) =>
+      buildPluginRow({ entry, lookup, installedVersion, strapiVersion })
+    ),
+    ...lockedPlugins.map((entry): PluginRow => ({ entry, state: 'locked' })),
+  ];
   const isAnyPluginLicensed = discoveredPlugins.some(({ lookup }) => lookup.status === 'available');
 
   rows
@@ -226,14 +256,24 @@ const selectPlugins = async ({
       }
     });
 
-    if (visibleRows.every((row) => row.state === 'installed' || row.state === 'not-licensed')) {
+    if (
+      visibleRows.every(
+        (row) => row.state === 'installed' || row.state === 'not-licensed' || row.state === 'locked'
+      )
+    ) {
       logger.info('The Enterprise plugins in your license are installed and up to date.');
+    }
+
+    const lockedRows = describeLockedRows(visibleRows, notLicensedMessage);
+
+    if (lockedRows) {
+      logger.info(lockedRows);
     }
 
     return [];
   }
 
-  return dependencies.promptForPlugins(rows);
+  return dependencies.promptForPlugins(rows, notLicensedMessage);
 };
 
 const warnWhenCompatibilityIsUnknown = (strapiVersion: string | undefined, logger: Logger) => {

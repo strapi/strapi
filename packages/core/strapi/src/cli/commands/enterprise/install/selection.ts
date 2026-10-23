@@ -1,5 +1,5 @@
 import type { EnterprisePluginEntry } from './discovery';
-import { promptChecklist, type ChecklistChoice } from './checklist-prompt';
+import { formatLockedChoice, promptChecklist, type ChecklistChoice } from './checklist-prompt';
 import { resolvePluginStatus } from './plugin-status';
 import type { PackumentLookup } from './registry';
 import { isPrerelease } from './versions';
@@ -23,7 +23,9 @@ type PluginRowState =
   | { state: 'no-compatible-version'; requiredStrapiRange: string }
   /** Not installed, and only prerelease versions exist. */
   | { state: 'no-stable-release' }
-  /** Not installed, and not available to this license: not shown. */
+  /** Not installed, and the catalog lists it outside the license. Shown, but not selectable. */
+  | { state: 'locked' }
+  /** Not installed, not available to this license, and not in the catalog: not shown. */
   | { state: 'hidden' };
 
 export type PluginRow = { entry: EnterprisePluginEntry } & PluginRowState;
@@ -85,6 +87,7 @@ const ROW_ORDER: PluginRow['state'][] = [
   'not-licensed',
   'no-compatible-version',
   'no-stable-release',
+  'locked',
 ];
 
 export const isSelectable = (row: PluginRow): row is SelectableRow =>
@@ -137,6 +140,11 @@ export const toCheckboxChoice = (row: PluginRow): ChecklistChoice => {
       return { name: label, disabled: `requires Strapi ${row.requiredStrapiRange}` };
     case 'no-stable-release':
       return { name: label, disabled: 'no stable release yet' };
+    case 'locked':
+      return {
+        name: row.entry.summary ? `${label}  ${row.entry.summary}` : label,
+        disabled: 'not in your license',
+      };
     default:
       return { name: label, disabled: 'unavailable' };
   }
@@ -148,8 +156,36 @@ export const orderVisibleRows = (rows: PluginRow[]): PluginRow[] =>
     .filter((row) => row.state !== 'hidden')
     .sort((left, right) => ROW_ORDER.indexOf(left.state) - ROW_ORDER.indexOf(right.state));
 
-export const promptForPlugins = (rows: PluginRow[]): Promise<string[]> =>
-  promptChecklist({
+export const describeLockedGroup = (notLicensedMessage?: string): string =>
+  notLicensedMessage ? `Not in your license. ${notLicensedMessage}` : 'Not in your license.';
+
+const toLockedChoices = (rows: PluginRow[]): ChecklistChoice[] =>
+  rows.filter((row) => row.state === 'locked').map(toCheckboxChoice);
+
+export const describeLockedRows = (
+  rows: PluginRow[],
+  notLicensedMessage?: string
+): string | undefined => {
+  const lockedChoices = toLockedChoices(rows);
+
+  return lockedChoices.length > 0
+    ? [describeLockedGroup(notLicensedMessage), ...lockedChoices.map(formatLockedChoice)].join('\n')
+    : undefined;
+};
+
+export const promptForPlugins = (
+  rows: PluginRow[],
+  notLicensedMessage?: string
+): Promise<string[]> => {
+  const visibleRows = orderVisibleRows(rows);
+  const lockedChoices = toLockedChoices(visibleRows);
+
+  return promptChecklist({
     message: 'Which Enterprise plugins do you want to install or upgrade?',
-    choices: orderVisibleRows(rows).map(toCheckboxChoice),
+    choices: visibleRows.filter((row) => row.state !== 'locked').map(toCheckboxChoice),
+    lockedGroup:
+      lockedChoices.length > 0
+        ? { heading: describeLockedGroup(notLicensedMessage), choices: lockedChoices }
+        : undefined,
   });
+};

@@ -3,7 +3,10 @@ import { ENTERPRISE_REGISTRY_URL, ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
 import {
   fetchPackument,
+  fetchPluginCatalog,
   searchPackageNames,
+  toPrintableText,
+  type CatalogPlugin,
   type Packument,
   type PackumentLookup,
 } from './registry';
@@ -26,7 +29,19 @@ export interface DiscoveredPlugin {
   installedVersion?: string;
 }
 
+interface DiscoveryResult {
+  plugins: DiscoveredPlugin[];
+  lockedPlugins: EnterprisePluginEntry[];
+  notLicensedMessage?: string;
+}
+
 const isEnterprisePackage = (packageName: string) => packageName.startsWith(`${ENTERPRISE_SCOPE}/`);
+
+const ENTERPRISE_PACKAGE_NAME = new RegExp(`^${ENTERPRISE_SCOPE}/[a-z0-9-][a-z0-9._-]*$`);
+const MAX_PACKAGE_NAME_LENGTH = 214;
+
+export const isValidPackageName = (packageName: string) =>
+  packageName.length <= MAX_PACKAGE_NAME_LENGTH && ENTERPRISE_PACKAGE_NAME.test(packageName);
 
 export const declaresStrapiKind = (strapiKind: unknown): strapiKind is string =>
   typeof strapiKind === 'string' && strapiKind.length > 0;
@@ -80,27 +95,43 @@ export const describeEnterprisePlugin = (
 
   return {
     packageName,
-    displayName: strapiMetadata.displayName ?? packageName,
-    summary: strapiMetadata.description ?? latestManifest?.description ?? '',
-    kind: strapiMetadata.kind,
+    displayName: toPrintableText(strapiMetadata.displayName) ?? packageName,
+    summary:
+      toPrintableText(strapiMetadata.description) ??
+      toPrintableText(latestManifest?.description) ??
+      '',
+    kind: toPrintableText(strapiMetadata.kind),
   };
 };
 
-export const discoverEnterprisePlugins = async ({
-  appDir,
+const describeCatalogPlugin = ({
+  name,
+  displayName,
+  description,
+  kind,
+}: CatalogPlugin): EnterprisePluginEntry => ({
+  packageName: name,
+  displayName: displayName ?? name,
+  summary: description ?? '',
+  kind,
+});
+
+const searchCandidatePackageNames = async ({
   license,
   logger,
   fetchImplementation,
+  installedPluginNames,
 }: {
-  appDir: string;
   license: string;
   logger: Logger;
   fetchImplementation: typeof fetch;
-}): Promise<DiscoveredPlugin[]> => {
-  const [searchResult, installedPluginNames] = await Promise.all([
-    searchPackageNames({ text: ENTERPRISE_SCOPE, license, fetchImplementation }),
-    listInstalledEnterprisePlugins(appDir),
-  ]);
+  installedPluginNames: string[];
+}): Promise<string[]> => {
+  const searchResult = await searchPackageNames({
+    text: ENTERPRISE_SCOPE,
+    license,
+    fetchImplementation,
+  });
 
   if (searchResult.status === 'license-rejected') {
     throw new EnterpriseInstallError(searchResult.message);
@@ -118,14 +149,27 @@ export const discoverEnterprisePlugins = async ({
     logger.warn(
       `Could not search ${registryHost}, so only the installed Enterprise plugins are listed.`
     );
+
+    return [];
   }
 
-  const candidatePackageNames = [
-    ...new Set([
-      ...(searchResult.status === 'available' ? searchResult.packageNames : []),
-      ...installedPluginNames,
-    ]),
-  ].filter(isEnterprisePackage);
+  return searchResult.packageNames;
+};
+
+const describeCandidatePlugins = async ({
+  appDir,
+  license,
+  logger,
+  fetchImplementation,
+  packageNames,
+}: {
+  appDir: string;
+  license: string;
+  logger: Logger;
+  fetchImplementation: typeof fetch;
+  packageNames: string[];
+}): Promise<DiscoveredPlugin[]> => {
+  const candidatePackageNames = [...new Set(packageNames)].filter(isValidPackageName);
 
   const lookupFailures: string[] = [];
 
@@ -158,4 +202,73 @@ export const discoverEnterprisePlugins = async ({
   return discoveredPlugins.filter(
     (discoveredPlugin): discoveredPlugin is DiscoveredPlugin => discoveredPlugin !== undefined
   );
+};
+
+export const discoverEnterprisePlugins = async ({
+  appDir,
+  license,
+  logger,
+  fetchImplementation,
+}: {
+  appDir: string;
+  license: string;
+  logger: Logger;
+  fetchImplementation: typeof fetch;
+}): Promise<DiscoveryResult> => {
+  const [catalogResult, installedPluginNames] = await Promise.all([
+    fetchPluginCatalog({ license, fetchImplementation }),
+    listInstalledEnterprisePlugins(appDir),
+  ]);
+
+  if (catalogResult.status === 'license-rejected') {
+    throw new EnterpriseInstallError(catalogResult.message);
+  }
+
+  if (catalogResult.status === 'unavailable') {
+    const searchedPackageNames = await searchCandidatePackageNames({
+      license,
+      logger,
+      fetchImplementation,
+      installedPluginNames,
+    });
+
+    return {
+      plugins: await describeCandidatePlugins({
+        appDir,
+        license,
+        logger,
+        fetchImplementation,
+        packageNames: [...searchedPackageNames, ...installedPluginNames],
+      }),
+      lockedPlugins: [],
+    };
+  }
+
+  const enterpriseCatalogPlugins = catalogResult.plugins.filter(({ name }) =>
+    isValidPackageName(name)
+  );
+  const licensedPackageNames = [
+    ...new Set(enterpriseCatalogPlugins.filter(({ licensed }) => licensed).map(({ name }) => name)),
+  ];
+  const lockedCatalogPlugins = new Map(
+    enterpriseCatalogPlugins
+      .filter(
+        ({ name, licensed }) =>
+          !licensed && !licensedPackageNames.includes(name) && !installedPluginNames.includes(name)
+      )
+      .map((plugin) => [plugin.name, plugin])
+  );
+  const lockedPlugins = [...lockedCatalogPlugins.values()].map(describeCatalogPlugin);
+
+  return {
+    plugins: await describeCandidatePlugins({
+      appDir,
+      license,
+      logger,
+      fetchImplementation,
+      packageNames: [...licensedPackageNames, ...installedPluginNames],
+    }),
+    lockedPlugins,
+    notLicensedMessage: lockedPlugins.length > 0 ? catalogResult.notLicensedMessage : undefined,
+  };
 };
