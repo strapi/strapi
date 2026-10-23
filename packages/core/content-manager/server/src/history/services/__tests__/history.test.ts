@@ -5,6 +5,8 @@ import { createHistoryService } from '../history';
 const createMock = jest.fn();
 const findPageMock = jest.fn();
 const findManyMock = jest.fn();
+const findOneMock = jest.fn();
+const updateMock = jest.fn();
 const userId = 'user-id';
 const fakeDate = new Date('1970-01-01T00:00:00.000Z');
 
@@ -44,6 +46,7 @@ const mockStrapi = {
           create: createMock,
           findPage: findPageMock,
           findMany: findManyMock,
+          findOne: findOneMock,
         };
       }
     },
@@ -64,6 +67,7 @@ const mockStrapi = {
   },
   documents: jest.fn(() => ({
     findOne: mockFindOne,
+    update: updateMock,
   })),
   config: {
     get: () => undefined,
@@ -95,6 +99,7 @@ const mockStrapi = {
 
     if (uid === 'some.component') {
       return {
+        modelType: 'component',
         attributes: {
           title: {
             type: 'string',
@@ -229,5 +234,39 @@ describe('history-version service', () => {
     } as any);
 
     expect(results.map((result) => result.id)).toEqual([2]);
+  });
+
+  it('removes the component ids before restoring a version', async () => {
+    const attributes = mockStrapi.getModel('api::article.article')!.attributes;
+    findOneMock.mockResolvedValueOnce({
+      id: 1,
+      contentType: 'api::article.article',
+      relatedDocumentId: 'randomid',
+      locale: null,
+      schema: attributes,
+      data: {
+        id: 10,
+        documentId: 'randomid',
+        title: 'My article',
+        relation: null,
+        media: null,
+        component: { id: 20, title: 'My component', relation: null, medias: null },
+      },
+    });
+    updateMock.mockResolvedValueOnce({ documentId: 'randomid' });
+
+    await historyService.restoreVersion(1);
+
+    expect(updateMock).toHaveBeenCalledWith({
+      documentId: 'randomid',
+      locale: null,
+      data: {
+        documentId: 'randomid',
+        title: 'My article',
+        relation: null,
+        media: null,
+        component: { title: 'My component', relation: null, medias: null },
+      },
+    });
   });
 });

@@ -17,6 +17,21 @@ const componentModel = {
   },
 };
 
+const seoComponentModel = {
+  displayName: 'seo',
+  category: 'default',
+  attributes: {
+    metaTitle: {
+      type: 'string',
+    },
+    metaImage: {
+      allowedTypes: ['images'],
+      type: 'media',
+      multiple: false,
+    },
+  },
+};
+
 const componentToNest = {
   displayName: 'first-level-compo',
   category: 'tests',
@@ -165,6 +180,11 @@ const collectionTypeModel = {
       repeatable: false,
       component: 'tests.root-compo',
     },
+    seo: {
+      type: 'component',
+      repeatable: false,
+      component: 'default.seo',
+    },
   },
 };
 
@@ -287,6 +307,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
   beforeAll(async () => {
     builder.addComponent(componentModel);
+    builder.addComponent(seoComponentModel);
     builder.addComponent(componentToNest);
     builder.addComponent(componentWithImageModel);
     builder.addContentTypes([relationModel, collectionTypeModel, singleTypeModel]);
@@ -795,6 +816,54 @@ describeOnCondition(edition === 'EE')('History API', () => {
         },
       });
       expect(res.statusCode).toBe(200);
+    });
+
+    test('Restores a version with a component that the draft no longer contains', async () => {
+      // Create a document that contains a component
+      const currentDocument = await createEntry({
+        uid: collectionTypeUid,
+        data: {
+          name: 'Product with components',
+          seo: { metaTitle: 'Initial title' },
+        },
+      });
+      const { documentId } = currentDocument.data;
+
+      // Publish, then discard the draft: the draft gets new component ids
+      await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${documentId}/actions/publish`,
+        body: {},
+        qs: { locale: 'en' },
+      });
+      await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${documentId}/actions/discard`,
+        body: {},
+        qs: { locale: 'en' },
+      });
+
+      // Restore the initial version
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${documentId}&locale=en`,
+      });
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/history-versions/${versions.body.data.at(-1).id}/restore`,
+        body: {
+          contentType: collectionTypeUid,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const restoredDocument = await strapi.documents(collectionTypeUid).findOne({
+        documentId,
+        populate: ['seo'],
+      });
+
+      expect(restoredDocument.seo).toMatchObject({ metaTitle: 'Initial title' });
     });
   });
 
