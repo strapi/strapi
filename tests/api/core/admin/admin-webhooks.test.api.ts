@@ -12,19 +12,20 @@ let rq;
 let strapi: LoadedStrapi;
 
 const ARTICLE_UID = 'api::webhook-article.webhook-article';
+const PAGE_UID = 'api::webhook-page.webhook-page';
 
-const articleModel = {
+const createModel = (name: string) => ({
   draftAndPublish: false,
-  singularName: 'webhook-article',
-  pluralName: 'webhook-articles',
-  displayName: 'webhook-article',
+  singularName: name,
+  pluralName: `${name}s`,
+  displayName: name,
   kind: 'collectionType',
   attributes: {
-    title: {
+    name: {
       type: 'string',
     },
   },
-};
+});
 
 const defaultWebhook = {
   name: 'test',
@@ -80,7 +81,9 @@ const deleteWebhook = async (id: string) => {
 describe('Admin API Webhooks', () => {
   // Initialization Actions
   beforeAll(async () => {
-    await builder.addContentTypes([articleModel]).build();
+    await builder
+      .addContentTypes([createModel('webhook-article'), createModel('webhook-page')])
+      .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -162,7 +165,7 @@ describe('Admin API Webhooks', () => {
   describe('Body template', () => {
     const template = {
       ref: 'main',
-      inputs: { event: '{{ event }}', uid: '{{ uid }}', title: '{{ entry.title }}' },
+      inputs: { event: '{{ event }}', uid: '{{ uid }}', title: '{{ entry.name }}' },
       entry: '{{ entry }}',
     };
 
@@ -180,13 +183,13 @@ describe('Admin API Webhooks', () => {
       expect(createdWebhook).toMatchObject({ body: template, bodyMode: 'merge' });
 
       const { webhook, status: updateStatus } = await updateWebhook(createdWebhook.id, {
-        body: { text: 'Published: {{ entry.title }}' },
+        body: { text: 'Published: {{ entry.name }}' },
         bodyMode: 'replace',
       });
 
       expect(updateStatus).toBe(200);
       expect(webhook).toMatchObject({
-        body: { text: 'Published: {{ entry.title }}' },
+        body: { text: 'Published: {{ entry.name }}' },
         bodyMode: 'replace',
       });
     });
@@ -267,7 +270,7 @@ describe('Admin API Webhooks', () => {
 
         const article = await strapi
           .documents(ARTICLE_UID as any)
-          .create({ data: { title: 'Hello' } });
+          .create({ data: { name: 'Hello' } });
 
         const timeout = Date.now() + 10000;
         while (getDeliveries('/default').length < 1 && Date.now() < timeout) {
@@ -276,7 +279,7 @@ describe('Admin API Webhooks', () => {
           });
         }
 
-        const entry = expect.objectContaining({ documentId: article.documentId, title: 'Hello' });
+        const entry = expect.objectContaining({ documentId: article.documentId, name: 'Hello' });
         const defaultPayload = {
           event: 'entry.create',
           createdAt: expect.any(String),
@@ -293,6 +296,165 @@ describe('Admin API Webhooks', () => {
         expect(getDeliveries('/default')).toEqual([defaultPayload]);
         expect(getDeliveries('/merge')).toEqual([{ ...defaultPayload, ...rendered }]);
         expect(getDeliveries('/replace')).toEqual([rendered]);
+      } finally {
+        await new Promise((resolve) => {
+          server.close(resolve);
+        });
+      }
+    });
+  });
+
+  describe('Content type events', () => {
+    test('A webhook has no content type events by default', async () => {
+      const { webhook, status } = await createWebhook({});
+
+      expect(status).toBe(201);
+      expect(webhook.contentTypeEvents).toEqual({});
+    });
+
+    test('Can select events per content type', async () => {
+      const { webhook: createdWebhook, status } = await createWebhook({
+        contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] },
+      });
+
+      expect(status).toBe(201);
+      expect(createdWebhook.contentTypeEvents).toEqual({ [ARTICLE_UID]: ['entry.create'] });
+
+      const contentTypeEvents = {
+        [ARTICLE_UID]: ['entry.create', 'entry.update'],
+        [PAGE_UID]: ['entry.delete'],
+      };
+      const { webhook, status: updateStatus } = await updateWebhook(createdWebhook.id, {
+        contentTypeEvents,
+      });
+
+      expect(updateStatus).toBe(200);
+      expect(webhook.contentTypeEvents).toEqual(contentTypeEvents);
+    });
+
+    test('Events selected for every content type are not saved per content type', async () => {
+      const { webhook } = await createWebhook({
+        events: ['entry.create'],
+        contentTypeEvents: { [ARTICLE_UID]: ['entry.create', 'entry.update'], [PAGE_UID]: [] },
+      });
+
+      expect(webhook.events).toEqual(['entry.create']);
+      expect(webhook.contentTypeEvents).toEqual({ [ARTICLE_UID]: ['entry.update'] });
+    });
+
+    test('Updating a webhook without content type events keeps the saved ones', async () => {
+      const { webhook: createdWebhook } = await createWebhook({
+        contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] },
+      });
+
+      const { webhook, status } = await updateWebhook(createdWebhook.id, { name: 'renamed' });
+
+      expect(status).toBe(200);
+      expect(webhook).toMatchObject({
+        name: 'renamed',
+        contentTypeEvents: { [ARTICLE_UID]: ['entry.create'] },
+      });
+    });
+
+    test('Can not select events for a content type that does not exist', async () => {
+      const contentTypeEvents = { 'api::unknown.unknown': ['entry.create'] };
+      const { status } = await createWebhook({ contentTypeEvents });
+
+      expect(status).toBe(400);
+
+      const { webhook: createdWebhook } = await createWebhook({});
+      const { status: updateStatus } = await updateWebhook(createdWebhook.id, {
+        contentTypeEvents,
+      });
+
+      expect(updateStatus).toBe(400);
+    });
+
+    test('Can not select an unsupported event for a content type', async () => {
+      const { status } = await createWebhook({
+        contentTypeEvents: { [ARTICLE_UID]: ['entry.unknown'] },
+      });
+
+      expect(status).toBe(400);
+    });
+
+    test.each([[['entry.create']], [{ [ARTICLE_UID]: 'entry.create' }], ['entry.create']])(
+      'Can not create a webhook with invalid content type events (%j)',
+      async (contentTypeEvents: any) => {
+        const { status } = await createWebhook({ contentTypeEvents });
+
+        expect(status).toBe(400);
+      }
+    );
+
+    test('Entry events are sent according to the events selected per content type', async () => {
+      const requests: Array<{ url: string; delivery: string }> = [];
+
+      const server = http.createServer((req, res) => {
+        let body = '';
+        req.on('data', (chunk) => {
+          body += chunk;
+        });
+        req.on('end', () => {
+          const { event, uid } = JSON.parse(body);
+          requests.push({ url: req.url, delivery: `${event} ${uid}` });
+          res.end();
+        });
+      });
+
+      await new Promise<void>((resolve) => {
+        server.listen(0, '127.0.0.1', resolve);
+      });
+
+      const { port } = server.address() as AddressInfo;
+      const getDeliveries = (url: string) =>
+        requests
+          .filter((req) => req.url === url)
+          .map((req) => req.delivery)
+          .sort();
+
+      try {
+        // For each event, webhooks are sent one after the other, in the order they were created.
+        // So once the second webhook received an event, the first one was already handled.
+        await createWebhook({
+          url: `http://127.0.0.1:${port}/per-content-type`,
+          events: [],
+          contentTypeEvents: { [ARTICLE_UID]: ['entry.create'], [PAGE_UID]: ['entry.update'] },
+        });
+        await createWebhook({
+          url: `http://127.0.0.1:${port}/all`,
+          events: ['entry.create', 'entry.update'],
+        });
+
+        const page = await strapi.documents(PAGE_UID as any).create({ data: { name: 'page' } });
+        const article = await strapi
+          .documents(ARTICLE_UID as any)
+          .create({ data: { name: 'article' } });
+
+        await strapi
+          .documents(PAGE_UID as any)
+          .update({ documentId: page.documentId, data: { name: 'updated' } as any });
+        await strapi
+          .documents(ARTICLE_UID as any)
+          .update({ documentId: article.documentId, data: { name: 'updated' } as any });
+
+        const timeout = Date.now() + 10000;
+        while (getDeliveries('/all').length < 4 && Date.now() < timeout) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 50);
+          });
+        }
+
+        expect(getDeliveries('/all')).toEqual([
+          `entry.create ${ARTICLE_UID}`,
+          `entry.create ${PAGE_UID}`,
+          `entry.update ${ARTICLE_UID}`,
+          `entry.update ${PAGE_UID}`,
+        ]);
+        expect(getDeliveries('/per-content-type')).toEqual([
+          `entry.create ${ARTICLE_UID}`,
+          `entry.update ${PAGE_UID}`,
+        ]);
       } finally {
         await new Promise((resolve) => {
           server.close(resolve);

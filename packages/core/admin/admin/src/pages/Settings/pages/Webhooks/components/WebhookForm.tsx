@@ -29,6 +29,7 @@ interface WebhookFormValues {
    */
   body: string;
   bodyMode: Modules.WebhookStore.BodyMode;
+  contentTypeEvents: NonNullable<Modules.WebhookStore.Webhook['contentTypeEvents']>;
 }
 
 interface WebhookFormProps {
@@ -86,6 +87,7 @@ const WebhookForm = ({
         events: data?.events || [],
         body: data?.body ? JSON.stringify(data.body, null, 2) : '',
         bodyMode: data?.bodyMode || 'merge',
+        contentTypeEvents: data?.contentTypeEvents || {},
       }}
       method={isCreating ? 'POST' : 'PUT'}
       onSubmit={handleSubmit}
@@ -305,6 +307,7 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
       }
     ),
     bodyMode: yup.string().oneOf(['merge', 'replace']),
+    contentTypeEvents: yup.object(),
   });
 
 export { WebhookForm, parseWebhookBody };

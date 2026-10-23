@@ -23,13 +23,22 @@ export interface WebhookEvent {
 export interface AuditedWebhook extends WebhookEvent {
   url: string;
   events: string[];
+  contentTypeEvents: Record<string, string[]>;
   headers: string[];
   body: string[] | null;
   bodyMode: Modules.WebhookStore.BodyMode;
   isEnabled: boolean;
 }
 
-const AUDITED_FIELDS = ['name', 'url', 'events', 'body', 'bodyMode', 'isEnabled'] as const;
+const AUDITED_FIELDS = [
+  'name',
+  'url',
+  'events',
+  'contentTypeEvents',
+  'body',
+  'bodyMode',
+  'isEnabled',
+] as const;
 
 /**
  * Header values are secrets, so the diff lists names only. `changed`: headers whose
@@ -45,6 +54,7 @@ export type WebhookChanges = Partial<{
   name: Modules.AuditLogs.FieldChange<string>;
   url: Modules.AuditLogs.FieldChange<string>;
   events: Modules.AuditLogs.FieldChange<string[]>;
+  contentTypeEvents: Modules.AuditLogs.FieldChange<Record<string, string[]>>;
   headers: HeaderChanges;
   body: Modules.AuditLogs.FieldChange<string[] | null>;
   bodyMode: Modules.AuditLogs.FieldChange<Modules.WebhookStore.BodyMode>;
@@ -79,6 +89,12 @@ export const toAuditedWebhook = (webhook: Webhook): AuditedWebhook => ({
   name: webhook.name,
   url: toAuditedUrl(webhook.url),
   events: sortStrings(webhook.events ?? []),
+  contentTypeEvents: Object.fromEntries(
+    sortStrings(Object.keys(webhook.contentTypeEvents ?? {})).map((uid) => [
+      uid,
+      sortStrings(webhook.contentTypeEvents?.[uid] ?? []),
+    ])
+  ),
   headers: sortStrings(Object.keys(webhook.headers ?? {})),
   body: webhook.body ? sortStrings(Object.keys(webhook.body)) : null,
   bodyMode: webhook.bodyMode ?? 'merge',
@@ -170,6 +186,7 @@ export const registerWebhookAuditEvents = (auditLogsLifecycle: AuditLogsLifecycl
       details: {
         url: event.url,
         events: event.events,
+        contentTypeEvents: event.contentTypeEvents,
         headers: event.headers,
         body: event.body,
         bodyMode: event.bodyMode,

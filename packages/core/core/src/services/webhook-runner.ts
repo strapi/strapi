@@ -55,6 +55,32 @@ const getRequestBody = (webhook: Webhook, payload: Record<string, unknown>) => {
   return bodyMode === 'replace' ? rendered : { ...payload, ...rendered };
 };
 
+/**
+ * Every event the webhook has to listen to, including the ones it only sends for some content types.
+ */
+const getEvents = ({ events, contentTypeEvents = {} }: Webhook) => {
+  return [...new Set([...events, ...Object.values(contentTypeEvents).flat()])];
+};
+
+/**
+ * A webhook is triggered by the events it listens to for every content type,
+ * and by the events it listens to for the content type the event is about.
+ */
+const isTriggeredBy = (webhook: Webhook, event: string, info?: Event['info']) => {
+  const { events, contentTypeEvents = {} } = webhook;
+  const uid = info?.uid;
+
+  if (events.includes(event)) {
+    return true;
+  }
+
+  return (
+    typeof uid === 'string' &&
+    Object.hasOwn(contentTypeEvents, uid) &&
+    contentTypeEvents[uid].includes(event)
+  );
+};
+
 class WebhookRunner {
   private eventHub: EventHub;
 
@@ -119,7 +145,9 @@ class WebhookRunner {
   async executeListener({ event, info }: Event) {
     debug(`Executing webhook for event '${event}'`);
     const webhooks = this.webhooksMap.get(event) || [];
-    const activeWebhooks = webhooks.filter((webhook) => webhook.isEnabled === true);
+    const activeWebhooks = webhooks.filter(
+      (webhook) => webhook.isEnabled === true && isTriggeredBy(webhook, event, info)
+    );
 
     for (const webhook of activeWebhooks) {
       await this.run(webhook, event, info).catch((error: unknown) => {
@@ -171,9 +199,7 @@ class WebhookRunner {
 
   add(webhook: Webhook) {
     debug(`Registering webhook '${webhook.id}'`);
-    const { events } = webhook;
-
-    events.forEach((event) => {
+    getEvents(webhook).forEach((event) => {
       if (this.webhooksMap.has(event)) {
         this.webhooksMap.get(event)?.push(webhook);
       } else {

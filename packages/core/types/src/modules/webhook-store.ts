@@ -19,6 +19,12 @@ export interface Webhook {
    * Whether the body template is added to the default payload (the default) or replaces it.
    */
   bodyMode?: BodyMode;
+  /**
+   * Events triggered for a single content type only, by content type UID,
+   * e.g. `{ 'api::article.article': ['entry.create'] }`.
+   * The events listed in `events` are triggered for every content type.
+   */
+  contentTypeEvents?: Record<string, string[]>;
   isEnabled: boolean;
 }
 
