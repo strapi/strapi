@@ -9503,7 +9503,7 @@ __metadata:
     styled-components: "npm:6.4.1"
     typescript: "npm:5.9.3"
     use-context-selector: "npm:1.4.4"
-    vite: "npm:6.4.4"
+    vite: "npm:6.4.5"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
     zod: "npm:4.4.3"
@@ -9828,7 +9828,7 @@ __metadata:
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.59.0"
     typescript: "npm:5.9.3"
-    undici: "npm:8.12.1"
+    undici: "npm:8.12.3"
     vitest: "catalog:"
     vitest-config: "npm:5.59.0"
     yup: "npm:0.32.9"
@@ -10613,7 +10613,7 @@ __metadata:
     tailwindcss: "npm:4.3.3"
     tsconfig: "npm:5.59.0"
     typescript: "npm:5.9.3"
-    vite: "npm:6.4.4"
+    vite: "npm:6.4.5"
     webpack: "npm:5.109.2"
     webpack-bundle-analyzer: "npm:5.3.0"
     webpack-dev-middleware: "npm:6.1.3"
@@ -10658,7 +10658,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:2.1.0"
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
-    undici: "npm:8.12.1"
+    undici: "npm:8.12.3"
     zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
@@ -10741,7 +10741,7 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     simple-git: "npm:4.0.2"
-    undici: "npm:8.12.1"
+    undici: "npm:8.12.3"
   bin:
     upgrade: ./bin/upgrade.js
   languageName: unknown
@@ -30132,10 +30132,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:8.12.1":
-  version: 8.12.1
-  resolution: "undici@npm:8.12.1"
-  checksum: 10c0/8ba448a30f85ec9bffe0065b45b471a578dbb56eafd4162741fd7be3b955672e98fabd7a4ab0703365d5ffc6f1927f4ed1c1221f678aa67af18fb7bc3dfe283b
+"undici@npm:8.12.3":
+  version: 8.12.3
+  resolution: "undici@npm:8.12.3"
+  checksum: 10c0/714919e62b4160eea195fb35c7f5c4907235741e47bfde8a014ac58f6d24df13434e23400d7f48e2c455fd2b259d27f07fce514f04a5b4e99936ba62cbc4bb71
   languageName: node
   linkType: hard
 
@@ -30149,9 +30149,9 @@ __metadata:
   linkType: hard
 
 "undici@npm:^6.28.0":
-  version: 6.28.1
-  resolution: "undici@npm:6.28.1"
-  checksum: 10c0/9c7c277da83972f4f506d564b1d627e3e78aadf866915eab768d96fc70daeae8ff7d87d0cdb32403ae1afdf3aef0f11715e0847d66910fda62822c33c5a7e674
+  version: 6.29.1
+  resolution: "undici@npm:6.29.1"
+  checksum: 10c0/2d6970289fcbaca69a484e968fbb5e6fdadf7d9bff30bb5476f71b619d143ec76df1c75a309ac3cb3b3d78238793c613dcaad47dc9d92b63f9e8e73b86ffec23
   languageName: node
   linkType: hard
 
@@ -30680,9 +30680,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:6.4.4":
-  version: 6.4.4
-  resolution: "vite@npm:6.4.4"
+"vite@npm:6.4.5":
+  version: 6.4.5
+  resolution: "vite@npm:6.4.5"
   dependencies:
     esbuild: "npm:^0.25.0"
     fdir: "npm:^6.4.4"
@@ -30731,7 +30731,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/47cdacbf7b370c7962326238bd0d206c9d56d72e1e7b14f9fb0edca369d3dfa8d0fd7f16eb3c0d448959eb7c6969ff33a126039be06f216b232c47e63c49ba9b
+  checksum: 10c0/e9bb246caa72197d2cac0ad05cf2c7c2f71d0affa45ce981e555176b26028db5769b98fc919ca7ff368499ae95c534710e56c4e4adfd8d57ea4b41c396ccd7b0
   languageName: node
   linkType: hard
 
