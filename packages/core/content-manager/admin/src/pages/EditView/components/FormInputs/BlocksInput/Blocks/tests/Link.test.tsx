@@ -155,6 +155,39 @@ describe('Link', () => {
     expect(saveButton).toBeDisabled();
   });
 
+  it.each(['sms:+123456789', 'geo:37.786971,-122.399677', 'myapp://deep/link'])(
+    'allows saving a link URL with a non-web scheme: %s',
+    async (url) => {
+      const { user } = render(
+        linkBlocks.link.renderElement({
+          children: 'Some link',
+          element: {
+            type: 'link',
+            url: 'https://example.com',
+            rel: '',
+            target: '',
+            children: [{ type: 'text', text: 'Some link' }],
+          },
+          attributes: {
+            'data-slate-node': 'element',
+            ref: null,
+          },
+        }),
+        {
+          renderOptions: {
+            wrapper: Wrapper,
+          },
+        }
+      );
+
+      await user.click(screen.getByRole('link', { name: 'Some link' }));
+      await user.clear(await screen.findByPlaceholderText('Paste link'));
+      await user.type(screen.getByPlaceholderText('Paste link'), url);
+
+      expect(await screen.findByRole('button', { name: /save/i })).toBeEnabled();
+    }
+  );
+
   it.each([
     'javascript:alert(1)',
     'VbScRiPt:msgbox(1)',
