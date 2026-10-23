@@ -49,7 +49,7 @@ const COMPONENT_META_KEYS = ['id', '__temp_key__'];
  * The schema of a component served to the admin lists its `id` and `documentId` among its
  * attributes, they aren't content.
  */
-const COMPONENT_META_ATTRIBUTES = ['id', 'documentId', '__temp_key__'];
+const COMPONENT_META_ATTRIBUTES = new Set(['id', 'documentId', '__temp_key__']);
 
 /**
  * Blocks of a dynamic zone carry the uid of the component they're made of.
@@ -348,7 +348,7 @@ const getComponentPreview = (
   const previewFields =
     fields ??
     Object.keys(schema.attributes)
-      .filter((name) => !COMPONENT_META_ATTRIBUTES.includes(name))
+      .filter((name) => !COMPONENT_META_ATTRIBUTES.has(name))
       .map((name) => ({ name, label: name }));
 
   return previewFields.flatMap(({ name, label }) => {
@@ -397,7 +397,7 @@ const isComponentBlank = (
     const attributeValue = value[name];
 
     if (
-      COMPONENT_META_ATTRIBUTES.includes(name) ||
+      COMPONENT_META_ATTRIBUTES.has(name) ||
       attributeValue === undefined ||
       attributeValue === null ||
       attributeValue === '' ||
