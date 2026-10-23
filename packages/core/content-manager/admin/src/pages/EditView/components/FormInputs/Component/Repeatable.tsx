@@ -78,9 +78,14 @@ const RepeatableComponent = ({
     const hasNestedValue = value && Array.isArray(value) && value.length > 0;
 
     if (hasNestedErrors && hasNestedValue) {
+      /**
+       * `rawError` can contain empty entries for items without errors
+       * (e.g. errors on items 3 and 12 give `[undefined, undefined, {...}, ...]`),
+       * so only keep the items that actually have an error.
+       */
       const errorOpenItems = rawError
-        .map((_: unknown, idx: number) => {
-          return value[idx] ? value[idx].__temp_key__ : null;
+        .map((itemError: unknown, idx: number) => {
+          return itemError && value[idx] ? value[idx].__temp_key__ : null;
         })
         .filter((value) => !!value);
 
@@ -349,10 +354,8 @@ const TextButtonCustom = styled(TextButton)`
   }
 `;
 
-interface RepeatableComponentFieldsProps extends Pick<
-  RepeatableComponentProps,
-  'children' | 'layout'
-> {
+interface RepeatableComponentFieldsProps
+  extends Pick<RepeatableComponentProps, 'children' | 'layout'> {
   attributeComponent: string;
   nameWithIndex: string;
 }
@@ -412,8 +415,7 @@ RepeatableComponentFields.displayName = 'RepeatableComponentFields';
  * -----------------------------------------------------------------------------------------------*/
 
 interface ComponentProps
-  extends
-    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
+  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField' | 'layout'> {
   attributeComponent: string;
   disabled?: boolean;
