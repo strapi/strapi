@@ -4,7 +4,9 @@ import type {} from '@strapi/review-workflows/strapi-server';
 declare const app: Core.Strapi;
 
 // Loading the Review Workflows contracts does not opt applications into strictness: lookups keep
-// develop's permissive controller types, which are never `undefined`.
+// develop's permissive service and controller types, which are never `undefined`.
+app.plugin('review-workflows').service('validation').validateWorkflowStages('Draft').anything();
+app.service('plugin::review-workflows.document-service-middlewares').missing();
 app
   .plugin('review-workflows')
   .controller('stages')
