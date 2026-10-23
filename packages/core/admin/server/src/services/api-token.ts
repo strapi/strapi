@@ -582,6 +582,44 @@ const syncApiTokenPermissionsForRole = async (roleId: Data.ID): Promise<void> =>
 };
 
 /**
+ * Re-clamp every admin token to its owner's current ceiling. Runs when the server starts so a
+ * token written under an earlier rule, or edited while the server was down, cannot grant more
+ * than its owner holds before the owner's next role or user change.
+ *
+ * Sequential per owner so the writes do not race, and one failing owner is logged and skipped
+ * rather than aborting the start.
+ */
+const syncApiTokenPermissionsForAllUsers = async (): Promise<void> => {
+  const tokens = await strapi.db.query('admin::api-token').findMany({
+    where: { kind: 'admin' },
+    populate: { adminUserOwner: { select: ['id'] }, adminPermissions: { select: ['id'] } },
+  });
+
+  const ownerIds = [
+    ...new Set(
+      tokens
+        .filter(
+          (token) => Array.isArray(token.adminPermissions) && token.adminPermissions.length > 0
+        )
+        .map((token) => token.adminUserOwner?.id)
+        .filter((id): id is Data.ID => id !== undefined && id !== null)
+    ),
+  ];
+
+  for (const ownerId of ownerIds) {
+    try {
+      await syncApiTokenPermissionsForUser(ownerId);
+    } catch (error) {
+      strapi.log.warn(
+        `Could not re-clamp the admin token permissions of user ${ownerId} on startup: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+};
+
+/**
  * Flatten a token's database permissions objects to an array of strings
  */
 const flattenTokenPermissions = (permissions: { action: string }[] | undefined): string[] => {
@@ -1374,6 +1412,7 @@ export interface AdminTokenService extends SharedTokenMethods {
   ): Promise<Permission[]>;
   syncPermissionsForUser(userId: Data.ID): Promise<void>;
   syncPermissionsForRole(roleId: Data.ID): Promise<void>;
+  syncPermissionsForAllUsers(): Promise<void>;
   deleteTokensForUser(userId: Data.ID): Promise<void>;
 }
 
@@ -1445,6 +1484,7 @@ function createTokenService(
     assignAdminPermissionsToToken,
     syncPermissionsForUser: syncApiTokenPermissionsForUser,
     syncPermissionsForRole: syncApiTokenPermissionsForRole,
+    syncPermissionsForAllUsers: syncApiTokenPermissionsForAllUsers,
     deleteTokensForUser: deleteAdminTokensForUser,
   };
   return svc;
@@ -1472,5 +1512,6 @@ export {
   reconcileTokenPermissionsToUserCeiling,
   syncApiTokenPermissionsForUser,
   syncApiTokenPermissionsForRole,
+  syncApiTokenPermissionsForAllUsers,
   deleteAdminTokensForUser,
 };

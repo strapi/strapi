@@ -17,6 +17,7 @@ import {
   getByName,
   reconcileTokenPermissionsToUserCeiling,
   syncApiTokenPermissionsForUser,
+  syncApiTokenPermissionsForAllUsers,
   enforceAdminPermissionsCeiling,
   assignAdminPermissionsToToken,
 } from '../api-token';
@@ -3063,6 +3064,98 @@ describe('API Token', () => {
 
       expect(deleteByIdsMock).not.toHaveBeenCalled();
       expect(updateMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('syncApiTokenPermissionsForAllUsers', () => {
+    const buildStrapi = ({
+      tokens,
+      findUser = jest.fn(async ({ where }) => ({
+        id: where.id,
+        roles: [{ code: 'strapi-editor' }],
+      })),
+    }: {
+      tokens: object[];
+      findUser?: jest.Mock;
+    }) => {
+      // The first query lists every admin token, the per-owner ones return none
+      const findTokens = jest.fn().mockResolvedValueOnce(tokens).mockResolvedValue([]);
+      const findUserPermissions = jest.fn().mockResolvedValue([]);
+      const warnMock = jest.fn();
+
+      global.strapi = {
+        db: {
+          query: jest.fn((model: string) => {
+            if (model === 'admin::user') {
+              return { findOne: findUser };
+            }
+            if (model === 'admin::api-token') {
+              return { findMany: findTokens };
+            }
+            return {};
+          }),
+        },
+        log: { warn: warnMock },
+        admin: {
+          services: {
+            permission: { findUserPermissions, deleteByIds: jest.fn() },
+          },
+        },
+      } as any;
+
+      return { findTokens, findUser, findUserPermissions, warnMock };
+    };
+
+    test('Re-clamps each owner of a permissioned admin token once', async () => {
+      const { findTokens, findUser } = buildStrapi({
+        tokens: [
+          { id: 10, adminUserOwner: { id: 1 }, adminPermissions: [{ id: 101 }] },
+          { id: 11, adminUserOwner: { id: 2 }, adminPermissions: [{ id: 102 }] },
+          { id: 12, adminUserOwner: { id: 1 }, adminPermissions: [{ id: 103 }] },
+          { id: 13, adminUserOwner: { id: 3 }, adminPermissions: [] },
+          { id: 14, adminUserOwner: null, adminPermissions: [{ id: 104 }] },
+        ],
+      });
+
+      await syncApiTokenPermissionsForAllUsers();
+
+      expect(findTokens).toHaveBeenNthCalledWith(1, {
+        where: { kind: 'admin' },
+        populate: { adminUserOwner: { select: ['id'] }, adminPermissions: { select: ['id'] } },
+      });
+      expect(findUser.mock.calls.map(([{ where }]) => where.id)).toEqual([1, 2]);
+    });
+
+    test('Queries nothing else when there is no admin token', async () => {
+      const { findTokens, findUser, findUserPermissions } = buildStrapi({ tokens: [] });
+
+      await syncApiTokenPermissionsForAllUsers();
+
+      expect(findTokens).toHaveBeenCalledTimes(1);
+      expect(findUser).not.toHaveBeenCalled();
+      expect(findUserPermissions).not.toHaveBeenCalled();
+    });
+
+    test('Logs an owner that fails and carries on with the next one', async () => {
+      const findUser = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('connection lost'))
+        .mockResolvedValue({ id: 2, roles: [{ code: 'strapi-editor' }] });
+      const { warnMock, findUserPermissions } = buildStrapi({
+        tokens: [
+          { id: 10, adminUserOwner: { id: 1 }, adminPermissions: [{ id: 101 }] },
+          { id: 11, adminUserOwner: { id: 2 }, adminPermissions: [{ id: 102 }] },
+        ],
+        findUser,
+      });
+
+      await expect(syncApiTokenPermissionsForAllUsers()).resolves.toBeUndefined();
+
+      expect(warnMock).toHaveBeenCalledTimes(1);
+      expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('user 1'));
+      expect(warnMock).toHaveBeenCalledWith(expect.stringContaining('connection lost'));
+      expect(findUser).toHaveBeenCalledTimes(2);
+      expect(findUserPermissions).toHaveBeenCalledTimes(1);
     });
   });
 

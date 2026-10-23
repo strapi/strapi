@@ -638,4 +638,86 @@ describe('Admin Token Role Sync (api)', () => {
       }
     });
   });
+
+  /**
+   * Token permissions stored under an earlier rule, or edited while the server was down, are
+   * re-clamped to the owner's ceiling when the server starts, without a role or user change.
+   * Kept last: it replaces the Strapi instance the request helpers above were created against.
+   */
+  describe('T4 — Server start', () => {
+    test('T4-1 Re-clamps existing admin token permissions on startup', async () => {
+      const utils = createUtils(strapi);
+
+      // `title` and `body` are held under different conditions, so no single condition covers both
+      await utils.assignPermissionsToRole(roleA.id, [
+        {
+          action: SYNC_ACTION,
+          subject: SYNC_SUBJECT,
+          conditions: ['admin::is-creator'],
+          properties: { fields: ['title'] },
+        },
+        {
+          action: SYNC_ACTION,
+          subject: SYNC_SUBJECT,
+          conditions: ['admin::has-same-role-as-creator'],
+          properties: { fields: ['body'] },
+        },
+        { action: SYNC_ACTION_2, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+        ...ADMIN_TOKEN_PERMS,
+      ]);
+
+      // Start from an empty token so the role sync above does not pre-empt the startup pass
+      await strapi.db.query('admin::permission').deleteMany({ where: { apiToken: tokenA.id } });
+
+      const forge = (permission: {
+        action: string;
+        properties: Record<string, unknown>;
+        conditions: string[];
+      }) =>
+        strapi.db.query('admin::permission').create({
+          data: { ...permission, subject: SYNC_SUBJECT, actionParameters: {}, apiToken: tokenA.id },
+        });
+
+      // Recombined: no owner condition covers both fields
+      const recombined = await forge({
+        action: SYNC_ACTION,
+        properties: { fields: ['title', 'body'] },
+        conditions: [],
+      });
+      // Drifted: the owner holds it unconditionally, so it inherits no condition
+      const drifted = await forge({
+        action: SYNC_ACTION_2,
+        properties: {},
+        conditions: ['admin::is-creator'],
+      });
+      // Held as is by the owner
+      const held = await forge({
+        action: SYNC_ACTION,
+        properties: { fields: ['title'] },
+        conditions: ['admin::is-creator'],
+      });
+
+      expect(await getAdminPermissionsFromDB(tokenA.id)).toHaveLength(3);
+
+      await strapi.destroy();
+      strapi = await createStrapiInstance();
+      strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key');
+
+      const findPermission = (id: number) =>
+        strapi.db.query('admin::permission').findOne({ where: { id } });
+
+      expect(await findPermission(recombined.id)).toBeNull();
+      expect(await findPermission(drifted.id)).toMatchObject({
+        action: SYNC_ACTION_2,
+        properties: {},
+        conditions: [],
+      });
+      expect(await findPermission(held.id)).toMatchObject({
+        action: SYNC_ACTION,
+        properties: { fields: ['title'] },
+        conditions: ['admin::is-creator'],
+      });
+      expect(await getAdminPermissionsFromDB(tokenA.id)).toHaveLength(2);
+    });
+  });
 });

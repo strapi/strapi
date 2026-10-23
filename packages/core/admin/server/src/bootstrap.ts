@@ -207,6 +207,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   await syncAuthSettings();
   await syncAPITokensPermissions();
+  await getService('api-token-admin').syncPermissionsForAllUsers();
 
   await getService('metrics').sendUpdateProjectInformation(strapi);
   getService('metrics').startCron(strapi);
