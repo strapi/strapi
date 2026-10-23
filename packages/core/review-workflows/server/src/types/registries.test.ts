@@ -5,7 +5,9 @@ import type {
   AssigneesService,
   DocumentServiceMiddlewaresService,
   HomepageService,
+  PopulatedStageRow,
   StagePermissionsService,
+  StagesService,
   ValidationService,
   WorkflowMetricsService,
   WorkflowWeeklyMetricsService,
@@ -164,3 +166,35 @@ strapi.service('plugin::review-workflows.homepage')?.getRecentDocuments();
   // @ts-expect-error The factory is checked against the registered contract.
   updateEntityAssignee: () => Promise.resolve(true),
 })) satisfies Core.ServiceFactory<'plugin::review-workflows.assignees'>;
+
+strapi.service('plugin::review-workflows.stages') satisfies StagesService | undefined;
+const stages = strapi.plugin('review-workflows').service('stages');
+stages?.findById(1, {
+  workflowId: '2',
+  populate: { permissions: { populate: ['role'] } },
+}) satisfies Promise<PopulatedStageRow | null> | undefined;
+stages
+  ?.createMany([{ name: 'Draft', fromPermissions: [{ role: 1, action: 'transition' }] }])
+  .then((created) => created.map((stage) => stage.name));
+stages?.replaceStages([], [{ name: 'Draft' }], ['api::article.article']);
+stages?.updateEntitiesStage('api::article.article', { fromStageId: null, toStageId: 1 });
+stages?.createMany([{ name: 'Draft' }], { fields: ['id'] }).then((created) =>
+  created.map(
+    (stage) =>
+      // @ts-expect-error Only the selected fields are resolved.
+      stage.name
+  )
+);
+// @ts-expect-error Content type UIDs are checked against the service contract.
+stages?.deleteAllEntitiesStage('article');
+// @ts-expect-error Stages to create are checked against the service contract.
+stages?.createMany([{ title: 'Draft' }]);
+// @ts-expect-error Registered services have no arbitrary members.
+strapi.service('plugin::review-workflows.stages')?.findAll();
+
+declare const stagesContract: StagesService;
+(() => ({
+  ...stagesContract,
+  // @ts-expect-error The factory is checked against the registered contract.
+  count: () => Promise.resolve('1'),
+})) satisfies Core.ServiceFactory<'plugin::review-workflows.stages'>;
