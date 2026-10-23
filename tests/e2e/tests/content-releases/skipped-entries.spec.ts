@@ -41,6 +41,8 @@ describeOnCondition(edition === 'EE')('Release page - skipped entries', () => {
     }
     await expect(drawer.entry(PUBLISHED)).toHaveCount(0);
     await expect(drawer.nameInput).toHaveValue(`${RELEASE_NAME} – skipped entries`);
+    // A partial release released what was ready, so the retry does too
+    await expect(drawer.releaseMode('Release all ready items')).toBeChecked();
 
     await drawer.noScheduleCheckbox.click();
     await drawer.createRelease();

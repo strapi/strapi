@@ -42,8 +42,12 @@ export class SkippedEntriesDrawer {
     await expect(this.entry(name)).toHaveCount(0);
   }
 
+  releaseMode(label: string): Locator {
+    return this.root.getByRole('radio', { name: label });
+  }
+
   async chooseReleaseMode(label: string) {
-    await this.root.getByRole('radio', { name: label }).click();
+    await this.releaseMode(label).click();
   }
 
   /**

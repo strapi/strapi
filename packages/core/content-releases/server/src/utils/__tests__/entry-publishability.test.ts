@@ -294,21 +294,41 @@ describe('getPublishabilityForActions', () => {
     expect(publishedVersion).toEqual({ id: 7, documentId: 'a' });
   });
 
-  test("a MySQL deadlock stops every check: the caller's transaction is gone", async () => {
+  describe('a MySQL deadlock', () => {
     const deadlock = Object.assign(new Error('Deadlock found when trying to get lock'), {
       code: 'ER_LOCK_DEADLOCK',
     });
-    const strapi = buildStrapi({
-      findOne: jest.fn().mockRejectedValue(deadlock),
-      populateBuilder: jest.fn(() => ({ populateDeep: () => ({ build: async () => ({}) }) })),
+    const deadlockedStrapi = () =>
+      buildStrapi({
+        findOne: jest.fn().mockRejectedValue(deadlock),
+        populateBuilder: jest.fn(() => ({ populateDeep: () => ({ build: async () => ({}) }) })),
+      });
+    const action = {
+      id: 1,
+      type: 'publish' as const,
+      contentType: contentTypeUid,
+      entryDocumentId: 'a',
+    };
+
+    test("stops every check in a transaction: the caller's transaction is gone", async () => {
+      const strapi = deadlockedStrapi();
+      const inTransaction = {
+        ...strapi,
+        db: { inTransaction: () => true, savepoint: (cb: () => unknown) => cb() },
+      } as unknown as Core.Strapi;
+
+      await expect(getPublishabilityForActions([action], { strapi: inTransaction })).rejects.toBe(
+        deadlock
+      );
     });
 
-    await expect(
-      getPublishabilityForActions(
-        [{ id: 1, type: 'publish' as const, contentType: contentTypeUid, entryDocumentId: 'a' }],
-        { strapi }
-      )
-    ).rejects.toBe(deadlock);
+    test('fails only its own check outside a transaction', async () => {
+      const results = await getPublishabilityForActions([action], {
+        strapi: deadlockedStrapi(),
+      });
+
+      expect(results.get(action.id)).toBe(deadlock);
+    });
   });
 });
 

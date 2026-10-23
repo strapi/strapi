@@ -43,10 +43,10 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     // Create a release
     const newReleaseName = 'The Diamond Dogs';
-    await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
-    // Uncheck default scheduling of a release and save
-    await page.getByRole('checkbox', { name: 'Schedule release' }).uncheck();
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('textbox', { name: 'Release name' }).fill(newReleaseName);
+    // Create it without a date
+    await page.getByRole('checkbox', { name: "I don't have a release date yet" }).check();
+    await page.getByRole('button', { name: 'Create release' }).click();
     // Wait for client side redirect to created release
     await page.waitForURL('/admin/plugins/content-releases/*');
     await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
@@ -68,7 +68,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     // Create a release
     const newReleaseName = 'The Diamond Dogs';
-    await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
+    await page.getByRole('textbox', { name: 'Release name' }).fill(newReleaseName);
 
     // Select valid date and time
     await page
@@ -92,7 +92,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await page.getByRole('option', { name: '08:00' }).click();
 
-    await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Create release' }));
 
     // Wait for client side redirect to created release
     await page.waitForURL('/admin/plugins/content-releases/*');
@@ -112,10 +112,10 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
       // Create a new release
       const newReleaseName = 'The Diamond Dogs';
-      await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
-      // Uncheck default scheduling of a release and save
-      await page.getByRole('checkbox', { name: 'Schedule release' }).uncheck();
-      await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
+      await page.getByRole('textbox', { name: 'Release name' }).fill(newReleaseName);
+      // Create it without a date
+      await page.getByRole('checkbox', { name: "I don't have a release date yet" }).check();
+      await clickAndWait(page, page.getByRole('button', { name: 'Create release' }));
       // Wait for client side redirect to created release
       await page.waitForURL('/admin/plugins/content-releases/*');
       await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();

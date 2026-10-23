@@ -58,17 +58,18 @@ const captureCreateRequest = () => {
   return requestBody;
 };
 
-const renderDrawer = () =>
-  render(
-    <CreateReleaseFromSkippedDrawer
-      release={{ id: 1, name: 'Autumn campaign' }}
-      open
-      onClose={jest.fn()}
-    />
-  );
+const partialRelease = {
+  id: 1,
+  name: 'Autumn campaign',
+  releaseCondition: 'allow_partial',
+} as const;
+
+const renderDrawer = (
+  release: React.ComponentProps<typeof CreateReleaseFromSkippedDrawer>['release'] = partialRelease
+) => render(<CreateReleaseFromSkippedDrawer release={release} open onClose={jest.fn()} />);
 
 describe('CreateReleaseFromSkippedDrawer', () => {
-  it('lists the skipped entries and defaults to requiring every entry to be ready', async () => {
+  it('lists the skipped entries and defaults to the release mode of the release', async () => {
     mockSkippedEntries([
       skippedAction(1, 'Spring sale'),
       skippedAction(2, 'Summer sale', 'unpublish'),
@@ -82,6 +83,15 @@ describe('CreateReleaseFromSkippedDrawer', () => {
     expect(screen.getByRole('textbox', { name: 'Release name' })).toHaveValue(
       'Autumn campaign – skipped entries'
     );
+    expect(screen.getByRole('radio', { name: 'Release all ready items' })).toBeChecked();
+  });
+
+  it('keeps requiring every entry to be ready when the release did', async () => {
+    mockSkippedEntries([skippedAction(1, 'Spring sale')]);
+
+    renderDrawer({ ...partialRelease, releaseCondition: 'all_or_nothing' });
+
+    await screen.findByText('1 entry carried over');
     expect(screen.getByRole('radio', { name: 'Require every entry to be ready' })).toBeChecked();
   });
 
@@ -118,7 +128,7 @@ describe('CreateReleaseFromSkippedDrawer', () => {
       name: 'Autumn campaign – skipped entries',
       scheduledAt: null,
       timezone: null,
-      releaseCondition: 'all_or_nothing',
+      releaseCondition: 'allow_partial',
     });
   });
 
@@ -133,12 +143,12 @@ describe('CreateReleaseFromSkippedDrawer', () => {
     expect(screen.getByText('1 entry carried over')).toBeInTheDocument();
 
     await user.click(screen.getByRole('checkbox', { name: "I don't have a release date yet" }));
-    await user.click(screen.getByRole('radio', { name: 'Release all ready items' }));
+    await user.click(screen.getByRole('radio', { name: 'Require every entry to be ready' }));
     fireEvent.click(screen.getByRole('button', { name: 'Create release' }));
 
     await waitFor(() => expect(requestBody).toHaveBeenCalled());
     expect(requestBody).toHaveBeenCalledWith(
-      expect.objectContaining({ actionIds: [2], releaseCondition: 'allow_partial' })
+      expect.objectContaining({ actionIds: [2], releaseCondition: 'all_or_nothing' })
     );
   });
 
@@ -155,7 +165,7 @@ describe('CreateReleaseFromSkippedDrawer', () => {
             Open panel
           </button>
           <CreateReleaseFromSkippedDrawer
-            release={{ id: 1, name: 'Autumn campaign' }}
+            release={partialRelease}
             open={open}
             onClose={() => setOpen(false)}
           />

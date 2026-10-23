@@ -1,63 +1,43 @@
 import * as React from 'react';
 
 import { isFetchError, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  Button,
-  Checkbox,
-  DatePicker,
-  Field,
-  Flex,
-  IconButton,
-  Loader,
-  Radio,
-  TextButton,
-  TextInput,
-  TimePicker,
-  Typography,
-} from '@strapi/design-system';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@strapi/design-system/next';
-import { CaretDown, CaretUp, Cross, Download, Trash, Upload } from '@strapi/icons';
-import { format, formatISO } from 'date-fns';
-import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
-import { Form, Formik } from 'formik';
-import { useIntl, type MessageDescriptor } from 'react-intl';
+import { Box, Flex, IconButton, Loader, TextButton, Typography } from '@strapi/design-system';
+import { CaretDown, CaretUp, Download, Trash, Upload } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import { styled } from 'styled-components';
 
-import { DEFAULT_RELEASE_CONDITION, RELEASE_CONDITIONS } from '../../../shared/constants';
 import {
   useCreateReleaseFromSkippedEntriesMutation,
   useGetReleaseActionsQuery,
   useGetReleaseSettingsQuery,
 } from '../services/release';
-import { getTimezones } from '../utils/time';
-import { RELEASE_SCHEMA } from '../validation/schemas';
 
-import { TimezoneComponent, type FormValues } from './ReleaseModal';
+import { ReleaseDrawer, type ReleaseDrawerValues } from './ReleaseDrawer';
 
 import type { FormattedReleaseAction } from '../../../shared/contracts/release-actions';
-import type { Release, ReleaseCondition } from '../../../shared/contracts/releases';
+import type { Release } from '../../../shared/contracts/releases';
 
-const SKIPPED_ENTRIES_PAGE_SIZE = 100;
 export const COLLAPSED_ENTRIES_COUNT = 10;
-const DRAWER_STYLE = {
-  '--drawer-inset': '1.6rem',
-  '--drawer-content-width': '50rem',
-} as React.CSSProperties;
 
-interface DrawerFormValues extends FormValues {
-  releaseCondition: ReleaseCondition;
-}
+/**
+ * The query for the skipped entries the panel lists. The details page sends the same one, so
+ * opening the panel reads them from the cache.
+ */
+export const getSkippedEntriesQuery = (releaseId: Release['id'] | string) => ({
+  releaseId: releaseId.toString(),
+  filter: 'skipped' as const,
+  page: 1,
+  pageSize: 100,
+});
+
+// The run won't carry over entries deleted after the release froze, so don't list them
+export const getExistingEntries = (actions: Record<string, FormattedReleaseAction[]>) =>
+  Object.values(actions)
+    .flat()
+    .filter((action) => action.entry !== null);
 
 interface CreateReleaseFromSkippedDrawerProps {
-  release: Pick<Release, 'id' | 'name'>;
+  release: Pick<Release, 'id' | 'name' | 'releaseCondition'>;
   open: boolean;
   onClose: () => void;
 }
@@ -72,16 +52,11 @@ export const CreateReleaseFromSkippedDrawer = ({
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [createRelease, { isLoading: isSubmitting }] = useCreateReleaseFromSkippedEntriesMutation();
-  const { data: settings } = useGetReleaseSettingsQuery();
   const { data: skippedData, isLoading: isLoadingEntries } = useGetReleaseActionsQuery(
-    {
-      releaseId: release.id.toString(),
-      filter: 'skipped',
-      page: 1,
-      pageSize: SKIPPED_ENTRIES_PAGE_SIZE,
-    },
+    getSkippedEntriesQuery(release.id),
     { skip: !open }
   );
+  const { data: settings } = useGetReleaseSettingsQuery(undefined, { skip: !open });
   const [removedIds, setRemovedIds] = React.useState<Set<FormattedReleaseAction['id']>>(new Set());
   const [isExpanded, setIsExpanded] = React.useState(false);
 
@@ -92,10 +67,7 @@ export const CreateReleaseFromSkippedDrawer = ({
     onClose();
   };
 
-  // The run won't carry over entries deleted after the release froze, so don't list them
-  const skippedEntries = Object.values(skippedData?.data ?? {})
-    .flat()
-    .filter((action) => action.entry !== null);
+  const skippedEntries = getExistingEntries(skippedData?.data ?? {});
   const carriedOverEntries = skippedEntries.filter((action) => !removedIds.has(action.id));
   const visibleEntries = isExpanded
     ? carriedOverEntries
@@ -109,26 +81,10 @@ export const CreateReleaseFromSkippedDrawer = ({
     ? carriedOverEntries.length
     : (skippedData?.meta.pagination.total ?? 0);
 
-  const { timezoneList, systemTimezone = { value: 'UTC+00:00-Africa/Abidjan ' } } = getTimezones(
-    new Date()
-  );
-  const defaultTimezone =
-    timezoneList.find((timezone) => timezone.value.split('&')[1] === settings?.data.defaultTimezone)
-      ?.value ?? systemTimezone.value;
-
-  const handleSubmit = async (values: DrawerFormValues) => {
-    const timezone = values.isScheduled ? values.timezone!.split('&')[1] : null;
-    const scheduledAt =
-      values.isScheduled && values.date && values.time && timezone
-        ? zonedTimeToUtc(`${values.date} ${values.time}`, timezone)
-        : null;
-
+  const handleSubmit = async (values: ReleaseDrawerValues) => {
     const response = await createRelease({
       id: release.id,
-      name: values.name,
-      scheduledAt,
-      timezone,
-      releaseCondition: values.releaseCondition,
+      ...values,
       ...(removedIds.size > 0 && { actionIds: carriedOverEntries.map((action) => action.id) }),
     });
 
@@ -153,282 +109,86 @@ export const CreateReleaseFromSkippedDrawer = ({
   };
 
   return (
-    <Drawer
+    <ReleaseDrawer
       open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) close();
+      onClose={close}
+      onSubmit={handleSubmit}
+      title={formatMessage({
+        id: 'content-releases.skipped-drawer.title',
+        defaultMessage: 'Create new release from skipped entries',
+      })}
+      submitLabel={formatMessage({
+        id: 'content-releases.release-drawer.form.submit.create',
+        defaultMessage: 'Create release',
+      })}
+      initialValues={{
+        name: formatMessage(
+          {
+            id: 'content-releases.skipped-drawer.form.name.default',
+            defaultMessage: '{name} – skipped entries',
+          },
+          { name: release.name }
+        ),
+        isScheduled: true,
+        scheduledAt: null,
+        timezone: null,
+        // Retry the entries the way the release tried them
+        releaseCondition: release.releaseCondition,
       }}
-      swipeDirection="right"
+      defaultTimezone={settings?.data.defaultTimezone}
+      isSubmitting={isSubmitting}
+      isSubmitDisabled={isLoadingEntries || carriedOverEntries.length === 0}
     >
-      <DrawerContent style={DRAWER_STYLE}>
-        <Formik<DrawerFormValues>
-          onSubmit={handleSubmit}
-          initialValues={{
-            name: formatMessage(
+      <Box background="neutral100" padding={4}>
+        <Flex justifyContent="space-between" alignItems="center" paddingBottom={3}>
+          <Typography variant="delta" tag="h3">
+            {formatMessage(
               {
-                id: 'content-releases.skipped-drawer.form.name.default',
-                defaultMessage: '{name} – skipped entries',
+                id: 'content-releases.skipped-drawer.entries.title',
+                defaultMessage:
+                  '{count, plural, one {# entry carried over} other {# entries carried over}}',
               },
-              { name: release.name }
-            ),
-            date: format(new Date(), 'yyyy-MM-dd'),
-            time: '',
-            isScheduled: true,
-            scheduledAt: null,
-            timezone: defaultTimezone,
-            releaseCondition: DEFAULT_RELEASE_CONDITION,
-          }}
-          validationSchema={RELEASE_SCHEMA}
-          validateOnChange={false}
-          enableReinitialize
-        >
-          {({ values, errors, handleChange, setFieldValue }) => (
-            <DrawerForm>
-              <DrawerHeader>
-                <Flex justifyContent="space-between" alignItems="center" gap={2}>
-                  <DrawerTitle>
-                    <Typography variant="omega" fontWeight="bold">
-                      {formatMessage({
-                        id: 'content-releases.skipped-drawer.title',
-                        defaultMessage: 'Create new release from skipped entries',
-                      })}
-                    </Typography>
-                  </DrawerTitle>
-                  <IconButton
-                    variant="ghost"
-                    onClick={close}
-                    label={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
-                  >
-                    <Cross />
-                  </IconButton>
-                </Flex>
-              </DrawerHeader>
-              <ScrollArea>
-                <Box background="neutral100" padding={4}>
-                  <Flex justifyContent="space-between" alignItems="center" paddingBottom={3}>
-                    <Typography variant="delta" tag="h3">
-                      {formatMessage(
-                        {
-                          id: 'content-releases.skipped-drawer.entries.title',
-                          defaultMessage:
-                            '{count, plural, one {# entry carried over} other {# entries carried over}}',
-                        },
-                        { count: carriedOverCount }
-                      )}
-                    </Typography>
-                    {carriedOverEntries.length > COLLAPSED_ENTRIES_COUNT && (
-                      <TextButton
-                        onClick={() => setIsExpanded((prev) => !prev)}
-                        endIcon={isExpanded ? <CaretUp /> : <CaretDown />}
-                      >
-                        {isExpanded
-                          ? formatMessage({
-                              id: 'content-releases.skipped-drawer.entries.show-less',
-                              defaultMessage: 'Show less',
-                            })
-                          : formatMessage({
-                              id: 'content-releases.skipped-drawer.entries.show-more',
-                              defaultMessage: 'Show more',
-                            })}
-                      </TextButton>
-                    )}
-                  </Flex>
-                  {isLoadingEntries ? (
-                    <Flex justifyContent="center" padding={4}>
-                      <Loader small />
-                    </Flex>
-                  ) : (
-                    <Flex tag="ul" direction="column" alignItems="stretch" gap={2}>
-                      {visibleEntries.map((action) => (
-                        <CarriedOverEntry
-                          key={action.id}
-                          action={action}
-                          onRemove={
-                            canRemoveEntries && carriedOverEntries.length > 1
-                              ? () => setRemovedIds((prev) => new Set(prev).add(action.id))
-                              : undefined
-                          }
-                        />
-                      ))}
-                    </Flex>
-                  )}
-                </Box>
-                <Flex direction="column" alignItems="stretch" gap={4} padding={4}>
-                  <Typography variant="delta" tag="h3">
-                    {formatMessage({
-                      id: 'content-releases.skipped-drawer.release-info.title',
-                      defaultMessage: 'Release info',
-                    })}
-                  </Typography>
-                  <Field.Root
-                    name="name"
-                    error={
-                      errors.name && formatMessage({ id: errors.name, defaultMessage: errors.name })
-                    }
-                    required
-                  >
-                    <Field.Label>
-                      {formatMessage({
-                        id: 'content-releases.skipped-drawer.form.name.label',
-                        defaultMessage: 'Release name',
-                      })}
-                    </Field.Label>
-                    <TextInput type="text" value={values.name} onChange={handleChange} />
-                    <Field.Error />
-                  </Field.Root>
-                  <Flex direction="column" alignItems="stretch" gap={2}>
-                    <Typography variant="pi" fontWeight="bold" textColor="neutral800">
-                      {formatMessage({
-                        id: 'content-releases.skipped-drawer.form.schedule.label',
-                        defaultMessage: 'Schedule',
-                      })}
-                    </Typography>
-                    {values.isScheduled && (
-                      <>
-                        <Flex gap={2} alignItems="start">
-                          <Box flex={1}>
-                            <Field.Root
-                              name="date"
-                              error={
-                                errors.date &&
-                                formatMessage({ id: errors.date, defaultMessage: errors.date })
-                              }
-                              required
-                            >
-                              <DatePicker
-                                aria-label={formatMessage({
-                                  id: 'content-releases.modal.form.input.label.date',
-                                  defaultMessage: 'Date',
-                                })}
-                                onChange={(date) => {
-                                  setFieldValue(
-                                    'date',
-                                    date ? formatISO(date, { representation: 'date' }) : null
-                                  );
-                                }}
-                                clearLabel={formatMessage({
-                                  id: 'content-releases.modal.form.input.clearLabel',
-                                  defaultMessage: 'Clear',
-                                })}
-                                onClear={() => setFieldValue('date', null)}
-                                value={values.date ? new Date(values.date) : new Date()}
-                                minDate={utcToZonedTime(
-                                  new Date(),
-                                  (values.timezone ?? defaultTimezone).split('&')[1]
-                                )}
-                              />
-                              <Field.Error />
-                            </Field.Root>
-                          </Box>
-                          <Box flex={1}>
-                            <Field.Root
-                              name="time"
-                              error={
-                                errors.time &&
-                                formatMessage({ id: errors.time, defaultMessage: errors.time })
-                              }
-                              required
-                            >
-                              <TimePicker
-                                aria-label={formatMessage({
-                                  id: 'content-releases.modal.form.input.label.time',
-                                  defaultMessage: 'Time',
-                                })}
-                                onChange={(time) => setFieldValue('time', time)}
-                                clearLabel={formatMessage({
-                                  id: 'content-releases.modal.form.input.clearLabel',
-                                  defaultMessage: 'Clear',
-                                })}
-                                onClear={() => setFieldValue('time', '')}
-                                value={values.time || undefined}
-                              />
-                              <Field.Error />
-                            </Field.Root>
-                          </Box>
-                        </Flex>
-                        <TimezoneComponent timezoneOptions={timezoneList} />
-                      </>
-                    )}
-                    <Checkbox
-                      name="isScheduled"
-                      checked={!values.isScheduled}
-                      onCheckedChange={(checked) => {
-                        setFieldValue('isScheduled', !checked);
-                        if (checked) {
-                          setFieldValue('date', null);
-                          setFieldValue('time', '');
-                          setFieldValue('timezone', null);
-                        } else {
-                          setFieldValue('date', format(new Date(), 'yyyy-MM-dd'));
-                          setFieldValue('timezone', defaultTimezone);
-                        }
-                      }}
-                    >
-                      {formatMessage({
-                        id: 'content-releases.skipped-drawer.form.no-schedule',
-                        defaultMessage: "I don't have a release date yet",
-                      })}
-                    </Checkbox>
-                  </Flex>
-                </Flex>
-                <Box borderColor="neutral150" borderStyle="solid" borderWidth="1px 0 0 0" />
-                <Flex direction="column" alignItems="stretch" gap={4} padding={4}>
-                  <Typography variant="delta" tag="h3" id="release-condition-label">
-                    {formatMessage({
-                      id: 'content-releases.skipped-drawer.release-mode.title',
-                      defaultMessage: 'Release mode',
-                    })}
-                  </Typography>
-                  <Radio.Group
-                    aria-labelledby="release-condition-label"
-                    value={values.releaseCondition}
-                    onValueChange={(value) => setFieldValue('releaseCondition', value)}
-                  >
-                    <Flex direction="column" alignItems="stretch" gap={4}>
-                      {RELEASE_CONDITIONS.map((condition) => (
-                        <Flex key={condition} direction="column" alignItems="stretch" gap={1}>
-                          <Radio.Item value={condition}>
-                            {formatMessage(RELEASE_CONDITION_MESSAGES[condition].label)}
-                          </Radio.Item>
-                          <Box paddingLeft={6}>
-                            <Typography variant="pi" textColor="neutral600">
-                              {formatMessage(RELEASE_CONDITION_MESSAGES[condition].description)}
-                            </Typography>
-                          </Box>
-                        </Flex>
-                      ))}
-                    </Flex>
-                  </Radio.Group>
-                </Flex>
-              </ScrollArea>
-              <DrawerFooter>
-                <Flex
-                  justifyContent="space-between"
-                  paddingTop={4}
-                  borderColor="neutral150"
-                  borderStyle="solid"
-                  borderWidth="1px 0 0 0"
-                >
-                  <Button variant="tertiary" onClick={close}>
-                    {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-                  </Button>
-                  <Button
-                    type="submit"
-                    loading={isSubmitting}
-                    disabled={isLoadingEntries || carriedOverEntries.length === 0}
-                  >
-                    {formatMessage({
-                      id: 'content-releases.skipped-drawer.form.submit',
-                      defaultMessage: 'Create release',
-                    })}
-                  </Button>
-                </Flex>
-              </DrawerFooter>
-            </DrawerForm>
+              { count: carriedOverCount }
+            )}
+          </Typography>
+          {carriedOverEntries.length > COLLAPSED_ENTRIES_COUNT && (
+            <TextButton
+              onClick={() => setIsExpanded((prev) => !prev)}
+              endIcon={isExpanded ? <CaretUp /> : <CaretDown />}
+            >
+              {isExpanded
+                ? formatMessage({
+                    id: 'content-releases.skipped-drawer.entries.show-less',
+                    defaultMessage: 'Show less',
+                  })
+                : formatMessage({
+                    id: 'content-releases.skipped-drawer.entries.show-more',
+                    defaultMessage: 'Show more',
+                  })}
+            </TextButton>
           )}
-        </Formik>
-      </DrawerContent>
-    </Drawer>
+        </Flex>
+        {isLoadingEntries ? (
+          <Flex justifyContent="center" padding={4}>
+            <Loader small />
+          </Flex>
+        ) : (
+          <Flex tag="ul" direction="column" alignItems="stretch" gap={2}>
+            {visibleEntries.map((action) => (
+              <CarriedOverEntry
+                key={action.id}
+                action={action}
+                onRemove={
+                  canRemoveEntries && carriedOverEntries.length > 1
+                    ? () => setRemovedIds((prev) => new Set(prev).add(action.id))
+                    : undefined
+                }
+              />
+            ))}
+          </Flex>
+        )}
+      </Box>
+    </ReleaseDrawer>
   );
 };
 
@@ -498,39 +258,3 @@ const CarriedOverEntry = ({ action, onRemove }: CarriedOverEntryProps) => {
     </Flex>
   );
 };
-
-const RELEASE_CONDITION_MESSAGES = {
-  allow_partial: {
-    label: {
-      id: 'content-releases.release-condition.allow_partial.label',
-      defaultMessage: 'Release all ready items',
-    },
-    description: {
-      id: 'content-releases.release-condition.allow_partial.description',
-      defaultMessage: 'Releases entries that are ready and skips the rest at the scheduled time.',
-    },
-  },
-  all_or_nothing: {
-    label: {
-      id: 'content-releases.release-condition.all_or_nothing.label',
-      defaultMessage: 'Require every entry to be ready',
-    },
-    description: {
-      id: 'content-releases.release-condition.all_or_nothing.description',
-      defaultMessage: 'Nothing is released unless every entry is ready at the scheduled time.',
-    },
-  },
-} satisfies Record<ReleaseCondition, Record<'label' | 'description', MessageDescriptor>>;
-
-const DrawerForm = styled(Form)`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-`;
-
-const ScrollArea = styled(Box)`
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-`;

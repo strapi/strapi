@@ -33,18 +33,20 @@ import {
 } from '@strapi/design-system';
 import { More, Pencil, Trash } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import format from 'date-fns/format';
-import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { CreateReleaseFromSkippedDrawer } from '../components/CreateReleaseFromSkippedDrawer';
+import {
+  CreateReleaseFromSkippedDrawer,
+  getExistingEntries,
+  getSkippedEntriesQuery,
+} from '../components/CreateReleaseFromSkippedDrawer';
 import { EntryValidationPopover } from '../components/EntryValidationPopover';
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
-import { ReleaseModal, FormValues } from '../components/ReleaseModal';
+import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
 import { PERMISSIONS } from '../constants';
 import {
   GetReleaseActionsQueryParams,
@@ -111,6 +113,17 @@ const ReleaseDetailsLayout = ({
   const [isSkippedDrawerOpen, setIsSkippedDrawerOpen] = React.useState(false);
 
   const release = data?.data;
+  // The new release is created with actions, so it takes both permissions, as the route does.
+  // Not after a run that failed before the upgrade: nothing recorded which entries it released.
+  const mayCreateFromSkipped =
+    Boolean(release?.releasedAt) &&
+    (release?.status === 'partial' || release?.status === 'failed') &&
+    release?.failureReason !== 'failed_before_upgrade' &&
+    canCreate &&
+    canCreateAction;
+  const { data: skippedData } = useGetReleaseActionsQuery(getSkippedEntriesQuery(releaseId!), {
+    skip: !mayCreateFromSkipped,
+  });
 
   const handlePublishRelease = (id: string) => async () => {
     const response = await publishRelease({ id });
@@ -196,12 +209,13 @@ const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  // The new release is created with actions, so it takes both permissions, as the route does
+  // Hide the button when every skipped entry has been deleted since the run. If some weren't
+  // loaded, they may still exist.
   const canCreateFromSkipped =
-    Boolean(release.releasedAt) &&
-    (release.status === 'partial' || release.status === 'failed') &&
-    canCreate &&
-    canCreateAction;
+    mayCreateFromSkipped &&
+    skippedData !== undefined &&
+    (getExistingEntries(skippedData.data).length > 0 ||
+      Object.values(skippedData.data).flat().length < skippedData.meta.pagination.total);
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
   const isScheduled = release.scheduledAt && release.timezone;
@@ -755,23 +769,12 @@ const ReleaseDetailsPage = () => {
       skip: !releaseId,
     }
   );
-  const { data: dataTimezone, isLoading: isLoadingTimezone } = useGetReleaseSettingsQuery();
+  const { data: settings, isLoading: isLoadingTimezone } = useGetReleaseSettingsQuery();
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
   const [deleteRelease] = useDeleteReleaseMutation();
 
   const toggleEditReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
-  };
-
-  const getTimezoneValue = () => {
-    if (releaseData?.timezone) {
-      return releaseData.timezone;
-    } else {
-      if (dataTimezone?.data.defaultTimezone) {
-        return dataTimezone.data.defaultTimezone;
-      }
-      return null;
-    }
   };
 
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
@@ -793,21 +796,8 @@ const ReleaseDetailsPage = () => {
 
   const releaseData = (isSuccessDetails && data?.data) || null;
 
-  const title = releaseData?.name || '';
-  const timezone = getTimezoneValue();
-  const scheduledAt =
-    releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
-  // Just get the date and time to display without considering updated timezone time
-  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : undefined;
-  const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
-
-  const handleEditRelease = async (values: FormValues) => {
-    const response = await updateRelease({
-      id: releaseId,
-      name: values.name,
-      scheduledAt: values.scheduledAt,
-      timezone: values.timezone,
-    });
+  const handleEditRelease = async (values: ReleaseDrawerValues) => {
+    const response = await updateRelease({ id: releaseId, ...values });
 
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
@@ -862,20 +852,30 @@ const ReleaseDetailsPage = () => {
       toggleWarningSubmit={toggleWarningSubmit}
     >
       <ReleaseDetailsBody releaseId={releaseId} />
-      <ReleaseModal
-        open={releaseModalShown}
-        handleClose={toggleEditReleaseModal}
-        handleSubmit={handleEditRelease}
-        isLoading={isLoadingDetails || isSubmittingForm}
-        initialValues={{
-          name: title || '',
-          scheduledAt,
-          date,
-          time,
-          isScheduled: Boolean(scheduledAt),
-          timezone,
-        }}
-      />
+      {releaseData && (
+        <ReleaseDrawer
+          open={releaseModalShown}
+          onClose={toggleEditReleaseModal}
+          onSubmit={handleEditRelease}
+          title={formatMessage({
+            id: 'content-releases.release-drawer.edit.title',
+            defaultMessage: 'Edit release',
+          })}
+          submitLabel={formatMessage({
+            id: 'content-releases.release-drawer.form.submit.save',
+            defaultMessage: 'Save',
+          })}
+          isSubmitting={isSubmittingForm}
+          initialValues={{
+            name: releaseData.name,
+            isScheduled: Boolean(releaseData.scheduledAt && releaseData.timezone),
+            scheduledAt: releaseData.scheduledAt,
+            timezone: releaseData.timezone,
+            releaseCondition: releaseData.releaseCondition,
+          }}
+          defaultTimezone={settings?.data.defaultTimezone}
+        />
+      )}
       <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
         <ConfirmDialog onConfirm={handleDeleteRelease}>
           {formatMessage({

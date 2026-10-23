@@ -120,14 +120,15 @@ const readCheck = async (
   readPublishability: () => Promise<EntryPublishability>,
   { strapi }: { strapi: Core.Strapi }
 ): Promise<EntryPublishability | Error> => {
+  const inTransaction = strapi.db.inTransaction();
+
   try {
     // `savepoint` throws outside a transaction
-    return await (strapi.db.inTransaction()
-      ? strapi.db.savepoint(readPublishability)
-      : readPublishability());
+    return await (inTransaction ? strapi.db.savepoint(readPublishability) : readPublishability());
   } catch (error) {
-    // The transaction is gone: no other check, nor what the caller records, can be kept
-    if (isMySqlDeadlock(error)) {
+    // In a transaction, a deadlock rolled it all back: no other check, nor what the caller
+    // records, can be kept. Outside one, it only undid this read, so it's a failed check.
+    if (inTransaction && isMySqlDeadlock(error)) {
       throw error;
     }
     return toError(error);
