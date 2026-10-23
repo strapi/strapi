@@ -370,14 +370,26 @@ describe('Content Type Builder - Content types', () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',
-        body: {},
+        body: {
+          contentType: {
+            displayName: 'Native error',
+            singularName: 'native-error',
+            pluralName: 'native-errors',
+            attributes: {
+              title: {
+                type: 'string',
+                regex: '(',
+              },
+            },
+          },
+        },
       });
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
         error: {
-          name: 'TypeError',
-          message: expect.stringContaining('singularName'),
+          name: 'SyntaxError',
+          message: expect.stringContaining('Invalid regular expression'),
           details: {},
         },
       });
