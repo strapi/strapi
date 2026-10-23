@@ -198,6 +198,21 @@ describe('promptChecklist', () => {
     await prompt.cancel();
   });
 
+  it('never splits an emoji in two when it splits a long word', async () => {
+    const prompt = startPrompt(choices, 25, {
+      ...lockedGroup,
+      heading: `Not in your license. ${'😀'.repeat(30)}`,
+    });
+
+    const emojiLines = prompt
+      .screen()
+      .split('\n')
+      .filter((line) => line.includes('😀'));
+    expect(emojiLines).toEqual([`  ${'😀'.repeat(22)}`, `  ${'😀'.repeat(8)}`]);
+    expect(prompt.screen()).not.toMatch(/\uFFFD/);
+    await prompt.cancel();
+  });
+
   it('shows the heading alone, with no trailing space, when there is no message', async () => {
     const prompt = startPrompt(choices, 120, { ...lockedGroup, heading: 'Not in your license.' });
 

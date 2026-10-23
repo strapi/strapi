@@ -30,7 +30,7 @@ const wrapWords = (text: string, width: number): string[] =>
     if (lastLine !== undefined && lastLine.length + word.length + 1 <= width) {
       lines[lines.length - 1] = `${lastLine} ${word}`;
     } else {
-      lines.push(...(word.match(new RegExp(`.{1,${width}}`, 'g')) ?? [word]));
+      lines.push(...(word.match(new RegExp(`.{1,${width}}`, 'gu')) ?? [word]));
     }
 
     return lines;

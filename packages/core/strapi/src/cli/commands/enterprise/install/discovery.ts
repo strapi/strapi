@@ -100,7 +100,7 @@ export const describeEnterprisePlugin = (
       toPrintableText(strapiMetadata.description) ??
       toPrintableText(latestManifest?.description) ??
       '',
-    kind: strapiMetadata.kind,
+    kind: toPrintableText(strapiMetadata.kind),
   };
 };
 
@@ -169,7 +169,7 @@ const describeCandidatePlugins = async ({
   fetchImplementation: typeof fetch;
   packageNames: string[];
 }): Promise<DiscoveredPlugin[]> => {
-  const candidatePackageNames = [...new Set(packageNames)].filter(isEnterprisePackage);
+  const candidatePackageNames = [...new Set(packageNames)].filter(isValidPackageName);
 
   const lookupFailures: string[] = [];
 

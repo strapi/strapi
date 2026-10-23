@@ -73,6 +73,21 @@ const discover = async (appDir: string, fetchImplementation: typeof fetch) =>
   });
 
 describe('discoverEnterprisePlugins', () => {
+  it('leaves out a search result with an invalid name, without asking for its metadata', async () => {
+    const invalidName = '@strapi-enterprise/plugin\u001B[2J';
+    const fetchImplementation = createRegistryFetch({
+      searchResult: [AI_BYOK, invalidName],
+      packuments: { [AI_BYOK]: aiByokPackument, [invalidName]: aiByokPackument },
+    });
+
+    const { plugins } = await discover(await createTemporaryDirectory(), fetchImplementation);
+
+    expect(plugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
+    expect(fetchImplementation.mock.calls.map(([input]) => String(input))).not.toContainEqual(
+      expect.stringContaining('plugin%1B')
+    );
+  });
+
   it('lists the plugins the registry search returns, and skips libraries', async () => {
     const fetchImplementation = createRegistryFetch({
       searchResult: [AI_BYOK, NEW_PLUGIN, AI_WORKFLOWS],
@@ -473,7 +488,7 @@ describe('describeEnterprisePlugin', () => {
             strapi: {
               displayName: '\u001B[31mAI\u001B[0m\u202E BYOK',
               description: 'Bring\r\nyour own\u200B key.\u0007',
-              kind: 'plugin',
+              kind: 'provider\u001B]8;;https://example.com\u0007',
             },
           },
         ],
@@ -481,7 +496,11 @@ describe('describeEnterprisePlugin', () => {
       ),
     });
 
-    expect(entry).toMatchObject({ displayName: 'AI BYOK', summary: 'Bring your own key.' });
+    expect(entry).toMatchObject({
+      displayName: 'AI BYOK',
+      summary: 'Bring your own key.',
+      kind: 'provider',
+    });
   });
 
   it('is undefined for a library, which declares no kind', () => {
