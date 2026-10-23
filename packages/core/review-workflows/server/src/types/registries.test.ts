@@ -7,10 +7,13 @@ import type {
   HomepageService,
   PopulatedStageRow,
   StagePermissionsService,
+  StageRow,
   StagesService,
   ValidationService,
   WorkflowMetricsService,
+  WorkflowRow,
   WorkflowWeeklyMetricsService,
+  WorkflowsService,
 } from './services';
 
 declare const context: Parameters<Core.ControllerHandler>[0];
@@ -198,3 +201,50 @@ declare const stagesContract: StagesService;
   // @ts-expect-error The factory is checked against the registered contract.
   count: () => Promise.resolve('1'),
 })) satisfies Core.ServiceFactory<'plugin::review-workflows.stages'>;
+
+strapi.service('plugin::review-workflows.workflows') satisfies WorkflowsService | undefined;
+const workflows = strapi.plugin('review-workflows').service('workflows');
+// Without `populate`, a read populates the stages and the stage required to publish.
+workflows
+  ?.findById('1')
+  .then((workflow) =>
+    workflow?.stages.map((stage) => stage.permissions ?? workflow.stageRequiredToPublish)
+  );
+workflows?.find({ populate: 'stages', sort: 'name' }).then((rows) => rows.map((row) => row.stages));
+workflows?.getAssignedWorkflow('api::article.article', {
+  populate: 'stageRequiredToPublish',
+}) satisfies
+  Promise<(WorkflowRow & { stageRequiredToPublish: StageRow | null }) | null> | undefined;
+workflows
+  ?.getAssignedWorkflow('api::article.article', {
+    populate: { stages: { populate: { permissions: { populate: ['role'] } } } },
+  })
+  .then((workflow) => workflow?.stages.length);
+workflows
+  ?.create({
+    data: { name: 'Editorial', stages: [{ name: 'Draft' }], stageRequiredToPublishName: 'Draft' },
+  })
+  .then((workflow) => workflow.stages.map((stage) => stage.permissions));
+declare const workflowRow: WorkflowRow;
+workflows?.delete({ ...workflowRow, stages: [] }, { populate: 'stages' }) satisfies
+  Promise<WorkflowRow | null> | undefined;
+workflows?.getAssignedWorkflow('api::article.article', { populate: 'stageRequiredToPublish' }).then(
+  (workflow) =>
+    // @ts-expect-error A relation that the read does not populate can be missing.
+    workflow?.stages.length
+);
+// @ts-expect-error A workflow to update is read with its stages.
+workflows?.update(workflowRow, { data: { name: 'Editorial' } });
+// @ts-expect-error Content type UIDs are checked against the service contract.
+workflows?.getAssignedWorkflow('article');
+// @ts-expect-error Workflows to create are checked against the service contract.
+workflows?.create({ data: { name: 'Editorial', stages: [{ title: 'Draft' }] } });
+// @ts-expect-error Registered services have no arbitrary members.
+strapi.service('plugin::review-workflows.workflows')?.findAll();
+
+declare const workflowsContract: WorkflowsService;
+(() => ({
+  ...workflowsContract,
+  // @ts-expect-error The factory is checked against the registered contract.
+  count: () => Promise.resolve('1'),
+})) satisfies Core.ServiceFactory<'plugin::review-workflows.workflows'>;
