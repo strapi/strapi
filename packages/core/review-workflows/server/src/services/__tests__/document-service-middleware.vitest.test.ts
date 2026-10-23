@@ -25,8 +25,22 @@ const createUpdateContext = (stageId: number) => ({
   params: { documentId: 'doc-1', data: { [ENTITY_STAGE_ATTRIBUTE]: stageId } },
 });
 
+const createAssignStageStrapiMock = (existingEntry: { id: number } | null) => {
+  const findOne = vi.fn().mockResolvedValue(existingEntry);
+  const getAssignedWorkflow = vi.fn().mockResolvedValue({ ...workflow, stages: [draftStage] });
+
+  return {
+    findOne,
+    getAssignedWorkflow,
+    strapi: {
+      documents: vi.fn(() => ({ findOne })),
+      plugin: vi.fn(() => ({ service: vi.fn(() => ({ getAssignedWorkflow })) })),
+    },
+  };
+};
+
 describe('review-workflows document service middleware', () => {
-  const { handleStageOnUpdate } = documentServiceMiddlewareFactory();
+  const { assignStageOnCreate, handleStageOnUpdate } = documentServiceMiddlewareFactory();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -34,6 +48,58 @@ describe('review-workflows document service middleware', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  describe('assignStageOnCreate', () => {
+    test('assigns the first stage of the workflow when an entry is created', async () => {
+      const mock = createAssignStageStrapiMock(null);
+      vi.stubGlobal('strapi', mock.strapi);
+
+      const ctx = { action: 'create', contentType: { uid: UID }, params: { data: {} } };
+      const next = vi.fn();
+
+      await assignStageOnCreate(ctx as any, next);
+
+      expect(ctx.params.data).toEqual({ [ENTITY_STAGE_ATTRIBUTE]: { id: draftStage.id } });
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    test('assigns the first stage of the workflow when an update creates a new locale', async () => {
+      const mock = createAssignStageStrapiMock(null);
+      vi.stubGlobal('strapi', mock.strapi);
+
+      const ctx = {
+        action: 'update',
+        contentType: { uid: UID },
+        params: { documentId: 'doc-1', locale: 'fr', data: {} },
+      };
+      const next = vi.fn();
+
+      await assignStageOnCreate(ctx as any, next);
+
+      expect(mock.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({ documentId: 'doc-1', locale: 'fr', status: 'draft' })
+      );
+      expect(ctx.params.data).toEqual({ [ENTITY_STAGE_ATTRIBUTE]: { id: draftStage.id } });
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not change the stage when an update targets an existing locale', async () => {
+      const mock = createAssignStageStrapiMock({ id: 1 });
+      vi.stubGlobal('strapi', mock.strapi);
+
+      const ctx = {
+        action: 'update',
+        contentType: { uid: UID },
+        params: { documentId: 'doc-1', locale: 'en', data: {} },
+      };
+      const next = vi.fn();
+
+      await assignStageOnCreate(ctx as any, next);
+
+      expect(ctx.params.data).toEqual({});
+      expect(next).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('handleStageOnUpdate', () => {
