@@ -2,11 +2,14 @@ import type { Core } from '@strapi/strapi';
 import type {
   AIMetadataJobRow,
   AIMetadataJobsService,
+  File,
+  FileFormat,
   FilesQuery,
   Folder,
   FolderService,
   FolderStructureNode,
   MetricsService,
+  ProviderService,
   UploadService,
 } from '@strapi/upload/strapi-server';
 
@@ -74,6 +77,24 @@ app.service('plugin::upload.upload').findMany({ sort: 'name:asc', start: 0, limi
 app.plugin('upload').service('upload').findOne(1, ['folder']);
 // @ts-expect-error `findPage` pages from flat `page` and `pageSize`.
 app.service('plugin::upload.upload').findPage({ pagination: { page: 1 } });
+const foundFile = uploadService.findOne(1);
+foundFile satisfies Promise<File | null>;
+// @ts-expect-error No file may have this ID.
+app.plugin('upload').service('upload').findOne(1) satisfies Promise<File>;
+const files = app.service('plugin::upload.upload').findMany();
+files satisfies Promise<File[]>;
+const filesPage = uploadService.findAndCountPage(filesQuery);
+filesPage satisfies Promise<{ results: File[] }>;
+declare const fileRow: File;
+const removed = uploadService.remove(fileRow);
+removed satisfies Promise<File | null>;
+const deletedFiles = app.service('plugin::upload.file').deleteByIds([1]);
+deletedFiles satisfies Promise<File[]>;
+const provider = app.plugin('upload').service('provider');
+provider satisfies ProviderService;
+declare const fileFormat: FileFormat;
+declare const newFile: Parameters<ProviderService['replace']>[0];
+provider.replace(newFile, fileFormat);
 
 app.plugin('upload').controller('admin-file').findOne(context, next);
 app.controller('plugin::upload.admin-upload').bulkUpdateFileInfo(context, next);
