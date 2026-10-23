@@ -46,20 +46,114 @@ const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
-/**
- * Queue a provider operation for a later `Promise.all`, with a rejection handler
- * attached in the same turn so a fast failure is never an unhandled rejection.
- *
- * `Promise.resolve` first — a provider may hand back a plain value, which
- * `Promise.all` accepts but `.catch` would throw on.
- */
-const queueConcurrentOperation = <T>(queue: Promise<T>[], operation: Promise<T>) => {
-  Promise.resolve(operation).catch(() => undefined);
-  queue.push(operation);
+type StorageOperation = {
+  name: string;
+  file: Pick<File, 'hash' | 'ext'>;
+  run: () => unknown | Promise<unknown>;
 };
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const fileService = getService('file');
+
+  const settleStorageOperations = async (operations: StorageOperation[]) => {
+    const results = await Promise.allSettled(
+      operations.map(({ run }) => Promise.resolve().then(run))
+    );
+
+    return operations.map((operation, index) => ({ operation, result: results[index] }));
+  };
+
+  const logStorageOperationFailure = (
+    message: string,
+    phase: string,
+    outcomes: Awaited<ReturnType<typeof settleStorageOperations>>,
+    context: Record<string, unknown> = {}
+  ) => {
+    strapi.log.error(message, {
+      phase,
+      ...context,
+      operations: outcomes.map(({ operation, result }) => ({
+        name: operation.name,
+        file: {
+          hash: operation.file.hash,
+          ext: operation.file.ext,
+        },
+        status: result.status,
+        ...(result.status === 'rejected'
+          ? {
+              error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+            }
+          : {}),
+      })),
+    });
+  };
+
+  const getFailedStorageOperations = (
+    outcomes: Awaited<ReturnType<typeof settleStorageOperations>>
+  ) => outcomes.filter(({ result }) => result.status === 'rejected');
+
+  const throwFirstStorageOperationError = (
+    failures: ReturnType<typeof getFailedStorageOperations>
+  ): never => {
+    const [firstFailure] = failures;
+    const reason =
+      firstFailure.result.status === 'rejected' ? firstFailure.result.reason : undefined;
+
+    if (reason instanceof Error) {
+      throw reason;
+    }
+
+    throw new Error(String(reason));
+  };
+
+  // TODO(upload-atomicity): This process-local cleanup is best-effort. It cannot recover after a
+  // crash or resolve an ambiguous database commit; persistent operation tracking, reconciliation,
+  // or provider-level atomic batches are required for those guarantees.
+  const cleanupStorageFiles = async (
+    files: Array<Pick<File, 'hash' | 'ext'>>,
+    phase: string,
+    context: Record<string, unknown> = {}
+  ) => {
+    if (files.length === 0) {
+      return;
+    }
+
+    const outcomes = await settleStorageOperations(
+      files.map((file, index) => ({
+        name: `delete:${index}`,
+        file,
+        run: () => strapi.plugin('upload').provider.delete(file),
+      }))
+    );
+
+    if (getFailedStorageOperations(outcomes).length > 0) {
+      logStorageOperationFailure(
+        'Failed to clean up one or more upload provider objects',
+        phase,
+        outcomes,
+        context
+      );
+    }
+  };
+
+  const uploadPreparedFiles = async (files: UploadableFile[]) => {
+    const outcomes = await settleStorageOperations(
+      files.map((file, index) => ({
+        name: index === 0 ? 'upload:original' : `upload:format:${index}`,
+        file,
+        run: () => getService('provider').upload(file),
+      }))
+    );
+    const failures = getFailedStorageOperations(outcomes);
+
+    if (failures.length > 0) {
+      logStorageOperationFailure('One or more upload provider writes failed', 'upload', outcomes);
+      await cleanupStorageFiles(files, 'upload-rollback');
+      throwFirstStorageOperationError(failures);
+    }
+
+    return files;
+  };
 
   const sendMediaMetrics = async (data: Pick<File, 'caption' | 'alternativeText'>) => {
     if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
@@ -296,7 +390,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    *
    * @param {*} fileData
    */
-  async function uploadImage(fileData: UploadableFile) {
+  async function uploadImage(fileData: UploadableFile): Promise<UploadableFile[]> {
     const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
       getService('image-manipulation');
 
@@ -310,29 +404,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       height,
     });
 
-    // For performance reasons, all uploads are wrapped in a single Promise.all
-    const uploadThumbnail = async (thumbnailFile: UploadableFile) => {
-      await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
-    };
+    const preparedFormats: Array<{ key: string; file: UploadableFile }> = [];
 
-    // Generate thumbnail and responsive formats
-    const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
-      const { key, file } = format;
-      await getService('provider').upload(file);
-      _.set(fileData, ['formats', key], file);
-    };
-
-    const uploadPromises: Promise<void>[] = [];
-
-    // Upload image
-    queueConcurrentOperation(uploadPromises, getService('provider').upload(fileData));
-
-    // Generate & Upload thumbnail and responsive formats
+    // Finish every transformation before the first provider write. A Sharp failure must not leave
+    // the original file in storage without formats or a database record.
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
-        queueConcurrentOperation(uploadPromises, uploadThumbnail(thumbnailFile));
+        preparedFormats.push({ key: 'thumbnail', file: thumbnailFile });
       }
 
       const formats = await generateResponsiveFormats(fileData);
@@ -340,21 +419,29 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         for (const format of formats) {
           // eslint-disable-next-line no-continue
           if (!format) continue;
-          queueConcurrentOperation(uploadPromises, uploadResponsiveFormat(format));
+          preparedFormats.push(format);
         }
       }
     }
-    // Wait for all uploads to finish
-    await Promise.all(uploadPromises);
+
+    const files = [fileData, ...preparedFormats.map(({ file }) => file)];
+    await uploadPreparedFiles(files);
+
+    for (const { key, file } of preparedFormats) {
+      _.set(fileData, ['formats', key], file);
+    }
+
+    return files;
   }
 
   /**
    * Like uploadImage, but pairs the main file and each format with its old
    * counterpart and routes through provider.replace so providers that implement
-   * an atomic replace can use it. Formats that no longer exist on the new image
-   * are deleted; formats that didn't exist on the old image are uploaded fresh.
+   * an atomic replace can use it. Formats that didn't exist on the old image are
+   * uploaded fresh. Obsolete formats are returned to the caller so it can delete
+   * them only after the database update commits.
    */
-  async function replaceImage(fileData: UploadableFile, oldFile: File) {
+  async function replaceImage(fileData: UploadableFile, oldFile: File): Promise<File[]> {
     const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
       getService('image-manipulation');
 
@@ -365,28 +452,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       height,
     });
 
-    const replaceFormat = async (key: string, newFormat: UploadableFile) => {
-      const oldFormat = oldFile.formats?.[key] as File | undefined;
-      if (oldFormat) {
-        await getService('provider').replace(newFormat, oldFormat);
-      } else {
-        await getService('provider').upload(newFormat);
-      }
-      _.set(fileData, ['formats', key], newFormat);
-    };
-
-    const promises: Promise<unknown>[] = [];
-
-    // Replace the main file
-    queueConcurrentOperation(promises, getService('provider').replace(fileData, oldFile));
-
+    const preparedFormats: Array<{ key: string; file: UploadableFile }> = [];
     const newFormatKeys = new Set<string>();
 
+    // As with create, prepare every variant before changing any stored object.
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
         newFormatKeys.add('thumbnail');
-        queueConcurrentOperation(promises, replaceFormat('thumbnail', thumbnailFile));
+        preparedFormats.push({ key: 'thumbnail', file: thumbnailFile });
       }
 
       const formats = await generateResponsiveFormats(fileData);
@@ -395,25 +469,55 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           // eslint-disable-next-line no-continue
           if (!format) continue;
           newFormatKeys.add(format.key);
-          queueConcurrentOperation(promises, replaceFormat(format.key, format.file));
+          preparedFormats.push(format);
         }
       }
     }
 
-    // Delete any formats that existed on the old file but are not present on the new one
-    if (
-      oldFile.formats &&
-      oldFile.provider === strapi.config.get<Config>('plugin::upload').provider
-    ) {
-      for (const oldKey of Object.keys(oldFile.formats)) {
-        if (!newFormatKeys.has(oldKey)) {
-          const oldFormat = oldFile.formats[oldKey] as File;
-          queueConcurrentOperation(promises, strapi.plugin('upload').provider.delete(oldFormat));
+    const operations: StorageOperation[] = [
+      {
+        name: 'replace:original',
+        file: fileData,
+        run: () => getService('provider').replace(fileData, oldFile),
+      },
+      ...preparedFormats.map(({ key, file }) => {
+        const oldFormat = oldFile.formats?.[key] as File | undefined;
+
+        return {
+          name: oldFormat ? `replace:format:${key}` : `upload:format:${key}`,
+          file,
+          run: () =>
+            oldFormat
+              ? getService('provider').replace(file, oldFormat)
+              : getService('provider').upload(file),
+        };
+      }),
+    ];
+    const outcomes = await settleStorageOperations(operations);
+    const failures = getFailedStorageOperations(outcomes);
+
+    if (failures.length > 0) {
+      // TODO(upload-atomicity): Same-key replacements cannot be rolled back without a
+      // provider-level atomic replace capability or versioned object keys. Keep every outcome
+      // observable in the meantime.
+      logStorageOperationFailure(
+        'One or more upload provider replacements failed',
+        'replace',
+        outcomes,
+        {
+          assetId: oldFile.id,
         }
-      }
+      );
+      throwFirstStorageOperationError(failures);
     }
 
-    await Promise.all(promises);
+    for (const { key, file } of preparedFormats) {
+      _.set(fileData, ['formats', key], file);
+    }
+
+    return Object.entries(oldFile.formats ?? {})
+      .filter(([key]) => !newFormatKeys.has(key))
+      .map(([, file]) => file as File);
   }
 
   /**
@@ -428,16 +532,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     await getService('provider').checkFileSize(fileData);
 
-    if (await isImage(fileData)) {
-      await uploadImage(fileData);
-    } else {
-      await getService('provider').upload(fileData);
-    }
+    const uploadedFiles = (await isImage(fileData))
+      ? await uploadImage(fileData)
+      : await uploadPreparedFiles([fileData]);
 
     _.set(fileData, 'provider', config.provider);
 
-    // Persist file(s)
-    return add(fileData, { user });
+    let persistedFile: File;
+    try {
+      persistedFile = await add(fileData, { user });
+    } catch (error) {
+      await cleanupStorageFiles(uploadedFiles, 'database-create-rollback');
+      throw error;
+    }
+
+    // The database record now owns the stored objects. A post-commit event failure must not remove
+    // them, otherwise the committed record would point at missing files.
+    await emitEvent(MEDIA_CREATE, persistedFile);
+
+    return persistedFile;
   }
 
   async function updateFileInfo(
@@ -490,6 +603,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(file);
 
     let fileData: UploadableFile;
+    let obsoleteFormats: File[] = [];
 
     try {
       // `refId` / `ref` / `field` are dropped rather than forwarded: `formatFileInfo` turns
@@ -522,18 +636,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (dbFile.provider === config.provider) {
         if (await isImage(fileData)) {
-          await replaceImage(fileData, dbFile);
+          obsoleteFormats = await replaceImage(fileData, dbFile);
         } else {
           // The new file is not an image, so it has no formats. Replace the main
           // file, then delete any formats the old image left behind — otherwise
           // they're orphaned in storage since the DB record no longer tracks them.
           await getService('provider').replace(fileData, dbFile);
           if (dbFile.formats) {
-            await Promise.all(
-              Object.keys(dbFile.formats).map((key) =>
-                strapi.plugin('upload').provider.delete(dbFile.formats![key] as File)
-              )
-            );
+            obsoleteFormats = Object.values(dbFile.formats) as File[];
           }
         }
       } else if (await isImage(fileData)) {
@@ -549,7 +659,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await fse.remove(tmpWorkingDirectory);
     }
 
-    return update(id, fileData, { user });
+    const updatedFile = await update(id, fileData, { user });
+
+    // Once the database no longer references obsolete formats, cleanup failures only leave
+    // unreferenced provider objects. They must not make a committed replacement look unsuccessful.
+    await cleanupStorageFiles(obsoleteFormats, 'post-commit-obsolete-format-cleanup', {
+      assetId: dbFile.id,
+      provider: dbFile.provider,
+      databaseCommitted: true,
+    });
+
+    return updatedFile;
   }
 
   async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
@@ -584,11 +704,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     await sendMediaMetrics(fileValues);
 
-    const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
-
-    await emitEvent(MEDIA_CREATE, res);
-
-    return res;
+    return strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
   }
 
   async function findOne(id: ID, populate = {}) {
@@ -720,19 +836,55 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   async function remove(file: File) {
     const config = strapi.config.get<Config>('plugin::upload');
 
-    // execute delete function of the provider
+    // TODO(upload-atomicity): True delete atomicity needs a persisted operation/tombstone and
+    // reconciliation; arbitrary providers and the database cannot participate in one shared
+    // transaction.
     if (file.provider === config.provider) {
-      await strapi.plugin('upload').provider.delete(file);
+      const mainFileOutcomes = await settleStorageOperations([
+        {
+          name: 'delete:original',
+          file,
+          run: () => strapi.plugin('upload').provider.delete(file),
+        },
+      ]);
+      const mainFileFailures = getFailedStorageOperations(mainFileOutcomes);
+
+      if (mainFileFailures.length > 0) {
+        logStorageOperationFailure(
+          'Failed to delete the original media object; formats and database record were retained',
+          'delete-original',
+          mainFileOutcomes,
+          { assetId: file.id, provider: file.provider, databaseDeleted: false }
+        );
+        throwFirstStorageOperationError(mainFileFailures);
+      }
 
       if (file.formats) {
-        const keys = Object.keys(file.formats);
-
-        await Promise.all(
-          keys.map((key) => {
-            return strapi.plugin('upload').provider.delete(file.formats![key]);
-          })
+        const formatOutcomes = await settleStorageOperations(
+          Object.entries(file.formats).map(([key, format]) => ({
+            name: `delete:format:${key}`,
+            file: format as File,
+            run: () => strapi.plugin('upload').provider.delete(format),
+          }))
         );
+        const formatFailures = getFailedStorageOperations(formatOutcomes);
+
+        if (formatFailures.length > 0) {
+          logStorageOperationFailure(
+            'Media deletion partially completed; the original and some formats were deleted but the database record was retained',
+            'delete-formats',
+            formatOutcomes,
+            { assetId: file.id, provider: file.provider, databaseDeleted: false }
+          );
+          throwFirstStorageOperationError(formatFailures);
+        }
       }
+    } else {
+      strapi.log.warn('Skipped media storage deletion because its provider is not active', {
+        assetId: file.id,
+        fileProvider: file.provider,
+        activeProvider: config.provider,
+      });
     }
 
     const media = await strapi.db.query(FILE_MODEL_UID).findOne({
@@ -797,6 +949,5 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      */
     _uploadImage: uploadImage,
     _replaceImage: replaceImage,
-    _queueConcurrentOperation: queueConcurrentOperation,
   };
 };
