@@ -1,6 +1,5 @@
 import type { Context } from 'koa';
 import type { Core, Data, Schema, Struct } from '@strapi/types';
-import type { createHistoryVersionController } from '../history/controllers/history-version';
 
 /** Actions exposed by the Content Manager collection type controller. */
 export type CollectionTypesController = {
@@ -93,7 +92,10 @@ export type UIDController = {
 };
 
 /** History version actions. Only registered when the `cms-content-history` feature is enabled. */
-export type HistoryVersionController = ReturnType<typeof createHistoryVersionController>;
+export type HistoryVersionController = {
+  findMany: Core.ControllerHandler;
+  restoreVersion: Core.ControllerHandler;
+};
 
 /** Homepage widget actions: recent and counted documents. */
 export type HomepageController = {
@@ -114,4 +116,12 @@ export type RegisteredControllers = {
       ? TName
       : never
   ]: Strapi.Registries.PackageControllers[TUID];
+};
+
+/**
+ * {@link RegisteredControllers} without the `undefined` of feature controllers, for the route checks of a
+ * feature: its routes are only mounted with its controllers.
+ */
+export type RouteControllers = {
+  [TName in keyof RegisteredControllers]-?: NonNullable<RegisteredControllers[TName]>;
 };

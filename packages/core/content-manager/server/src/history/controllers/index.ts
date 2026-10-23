@@ -1,4 +1,4 @@
-import type { Plugin } from '@strapi/types';
+import type { Core, Plugin } from '@strapi/types';
 import { createHistoryVersionController } from './history-version';
 
 export const controllers = {
@@ -7,4 +7,6 @@ export const controllers = {
    * Casting is needed because the types aren't aware that Strapi supports
    * passing a controller factory as the value, instead of a controller object directly
    */
+} satisfies {
+  'history-version': Core.ControllerFactory<'plugin::content-manager.history-version'>;
 } as unknown as Plugin.LoadedPlugin['controllers'];
