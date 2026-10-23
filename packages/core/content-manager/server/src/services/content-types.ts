@@ -42,6 +42,8 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     );
   },
 
+  // TODO @Nico the controller passes the kind itself (or `undefined`), as the registered contract
+  // declares; a `{ kind }` object matches no content type. Fix this parameter type on develop.
   findContentTypesByKind(kind: { kind: Struct.ContentTypeKind | undefined }) {
     if (!kind) {
       return this.findAllContentTypes();
@@ -69,6 +71,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     return this.findConfiguration(contentType);
   },
 
+  /** @internal */
   findComponentsConfigurations(contentType: Struct.ContentTypeSchema) {
     // delegate to componentService
     return getService('components').findComponentsConfigurations(contentType);
