@@ -1,5 +1,6 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Ability } from '@casl/ability';
+import type { Context } from 'koa';
 import type { Core, Modules, Schema, Struct, UID } from '@strapi/types';
 import type { RelationResult } from '../../../shared/contracts/relations';
 import type { RegisteredControllers } from './controllers';
@@ -149,6 +150,32 @@ strapi.controller('plugin::content-manager.history-version')?.findMany satisfies
   Core.ControllerHandler | undefined;
 // @ts-expect-error Registered feature controllers have no arbitrary actions.
 strapi.controller('plugin::content-manager.preview').missing();
+strapi.controller('plugin::content-manager.homepage')
+  .getCountDocuments satisfies Core.ControllerHandler;
+strapi.controller('plugin::content-manager.preview')
+  .getPreviewScript satisfies Core.ControllerHandler;
+// @ts-expect-error The homepage contract is hand-written: no arbitrary actions.
+strapi.controller('plugin::content-manager.homepage').getRecentDocument satisfies unknown;
+({
+  type: 'admin',
+  routes: [
+    { method: 'GET', path: '/homepage/count-documents', handler: 'homepage.getCountDocuments' },
+    { method: 'GET', path: '/preview/script', handler: 'preview.getPreviewScript' },
+  ],
+}) satisfies Core.RouterInputFor<RegisteredControllers, 'plugin::content-manager'>;
+({
+  type: 'admin',
+  // @ts-expect-error Feature routes are checked against the feature controller contracts.
+  routes: [{ method: 'GET', path: '/', handler: 'preview.getPreviewScripts' }],
+}) satisfies Core.RouterInputFor<RegisteredControllers, 'plugin::content-manager'>;
+
+declare const ctx: Context;
+const requestInfo = strapi
+  .controller('plugin::content-manager.relations')
+  .extractAndValidateRequestInfo(ctx, 'document');
+requestInfo satisfies Promise<{ mainField: string; fieldsToSelect: string[] } | undefined>;
+// @ts-expect-error The info is `undefined` once the 403 response is set.
+requestInfo satisfies Promise<{ mainField: string }>;
 // History services only exist with the `cms-content-history` feature.
 // @ts-expect-error The service may be undefined.
 strapi.plugin('content-manager').service('history').findVersionsPage satisfies unknown;
