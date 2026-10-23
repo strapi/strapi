@@ -7,6 +7,7 @@ app.plugin('content-manager').service('uid').checkUIDAvailability({ value: 3 });
 app.service('plugin::content-manager.document-manager').missing();
 app.plugin('content-manager').service('document-metadata').getMetadata('anything', null);
 app.service('plugin::content-manager.populate-builder').custom();
+app.plugin('content-manager').service('content-types').findContentTypesByKind({ kind: 'nope' });
 app.plugin('content-manager').controller('collection-types').custom satisfies
   Core.ControllerHandler | undefined;
 

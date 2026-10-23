@@ -1,4 +1,4 @@
-import type { Core, Modules } from '@strapi/strapi';
+import type { Core, Modules, Schema } from '@strapi/strapi';
 import type { Controllers, Services } from '@strapi/content-manager/strapi-server';
 import type {} from '@strapi/admin/strapi-server';
 
@@ -42,6 +42,30 @@ fields.setFieldSize('string', 12);
 const metrics = app.plugin('content-manager').service('metrics');
 // @ts-expect-error A configuration event requires its content type and configuration.
 metrics.sendDidConfigureListView();
+
+const contentTypes = app.plugin('content-manager').service('content-types');
+contentTypes
+  .findConfiguration({ uid: 'api::article.article' })
+  .then((configuration) => configuration.settings.mainField) satisfies Promise<string>;
+contentTypes.updateConfiguration(
+  { uid: 'api::article.article' },
+  { options: {} }
+) satisfies Promise<Services.ContentTypeConfiguration>;
+contentTypes.findContentTypesByKind('collectionType');
+// @ts-expect-error The kind is passed as is, not wrapped in an object.
+contentTypes.findContentTypesByKind({ kind: 'collectionType' });
+app
+  .service('plugin::content-manager.components')
+  .findAllComponents()
+  .flatMap((component) => Object.values(component.attributes))
+  .map((attribute) => attribute.type) satisfies Schema.Attribute.Kind[];
+const seo = app.plugin('content-manager').service('components').findConfiguration({
+  uid: 'shared.seo',
+  category: 'shared',
+});
+seo satisfies Promise<Services.ComponentModelConfiguration>;
+// @ts-expect-error Component configurations are not content type configurations.
+seo satisfies Promise<Services.ContentTypeConfiguration>;
 
 const builder = app.service('plugin::content-manager.populate-builder')('api::article.article');
 builder
