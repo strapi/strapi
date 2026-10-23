@@ -1,4 +1,4 @@
-import { omit, pick } from 'lodash';
+import { isPlainObject, omit, pick } from 'lodash';
 import type { Core, UID, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
@@ -11,6 +11,50 @@ const symbols = {
 } as const;
 
 type WithStrapiCallback<T> = T | (<S extends { strapi: Core.Strapi }>(params: S) => T);
+
+/**
+ * Names of the methods along the prototype chain of `value`, e.g. the methods of its class.
+ */
+const getPrototypeMethodNames = (value: object): string[] => {
+  const names = new Set<string>();
+
+  let proto = Object.getPrototypeOf(value);
+  while (proto && proto !== Object.prototype) {
+    for (const [name, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(proto))) {
+      // Skip accessors: reading them off the prototype would run them without an instance
+      if (name !== 'constructor' && typeof descriptor.value === 'function') {
+        names.add(name);
+      }
+    }
+    proto = Object.getPrototypeOf(proto);
+  }
+
+  return [...names];
+};
+
+/**
+ * Adds the methods of `base` that `instance` does not have, bound to `base`.
+ *
+ * `cfg` can return a class instance. Its methods live on its class prototype, so it cannot get
+ * `base` as its prototype like an object literal does: that would drop them.
+ */
+const addMissingMethods = (
+  instance: any,
+  base: any,
+  names: string[],
+  { enumerable }: { enumerable: boolean }
+) => {
+  for (const name of names) {
+    if (instance[name] === undefined) {
+      Object.defineProperty(instance, name, {
+        value: base[name].bind(base),
+        enumerable,
+        writable: true,
+        configurable: true,
+      });
+    }
+  }
+};
 
 const createCoreController = <
   TUID extends UID.ContentType,
@@ -30,13 +74,36 @@ const createCoreController = <
 
     const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : (cfg ?? ({} as any));
 
-    for (const methodName of Object.keys(baseController) as Array<keyof typeof baseController>) {
-      if (userCtrl[methodName] === undefined) {
-        userCtrl[methodName] = baseController[methodName];
+    if (isPlainObject(userCtrl)) {
+      for (const methodName of Object.keys(baseController) as Array<keyof typeof baseController>) {
+        if (userCtrl[methodName] === undefined) {
+          userCtrl[methodName] = baseController[methodName];
+        }
       }
-    }
 
-    Object.setPrototypeOf(userCtrl, baseController);
+      Object.setPrototypeOf(userCtrl, baseController);
+    } else {
+      // Route and permission discovery (e.g. users-permissions) read the actions from the
+      // controller's own keys, so the class methods must become own keys
+      for (const methodName of getPrototypeMethodNames(userCtrl)) {
+        if (!Object.hasOwn(userCtrl, methodName)) {
+          Object.defineProperty(userCtrl, methodName, {
+            value: userCtrl[methodName],
+            enumerable: true,
+            writable: true,
+            configurable: true,
+          });
+        }
+      }
+
+      addMissingMethods(userCtrl, baseController, Object.keys(baseController), {
+        enumerable: true,
+      });
+      // The helpers (sanitizeQuery, transformResponse, …) are not actions
+      addMissingMethods(userCtrl, baseController, getPrototypeMethodNames(baseController), {
+        enumerable: false,
+      });
+    }
 
     const isCustom = typeof cfg !== 'undefined';
     if (isCustom) {
@@ -67,13 +134,20 @@ function createCoreService<
 
     const userService = typeof cfg === 'function' ? cfg({ strapi }) : (cfg ?? ({} as any));
 
-    for (const methodName of Object.keys(baseService) as Array<keyof typeof baseService>) {
-      if (userService[methodName] === undefined) {
-        userService[methodName] = baseService[methodName];
+    if (isPlainObject(userService)) {
+      for (const methodName of Object.keys(baseService) as Array<keyof typeof baseService>) {
+        if (userService[methodName] === undefined) {
+          userService[methodName] = baseService[methodName];
+        }
       }
+
+      Object.setPrototypeOf(userService, baseService);
+    } else {
+      addMissingMethods(userService, baseService, getPrototypeMethodNames(baseService), {
+        enumerable: false,
+      });
     }
 
-    Object.setPrototypeOf(userService, baseService);
     return userService;
   };
 }
