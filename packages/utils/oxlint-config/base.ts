@@ -48,6 +48,14 @@ export const base = {
               'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
           },
         ],
+        paths: [
+          {
+            name: 'lodash',
+            importNames: ['isArray', 'forEach', 'each'],
+            message:
+              'Use native Array.isArray, Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
+        ],
       },
     ],
     // Oxlint 1.72's native rule does not check require() or import() calls.
