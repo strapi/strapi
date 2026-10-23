@@ -210,6 +210,16 @@ describe('content type mutation compensation', () => {
     expect(files.groups).toBe('before');
   });
 
+  it('emits the update event when a kind switch succeeds', async () => {
+    await editContentType(contentType.uid, {
+      contentType: { ...contentType, kind: 'singleType', attributes: {} },
+    });
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', {
+      contentType: { uid: contentType.uid, schema: { ...contentType, kind: 'singleType' } },
+    });
+  });
+
   it('rejects a crafted protected plugin deletion before it mutates schema or API files', async () => {
     await expect(deleteContentType(pluginContentType.uid)).rejects.toThrow(/not managed by CTB/);
 
