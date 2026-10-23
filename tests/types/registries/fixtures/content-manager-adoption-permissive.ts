@@ -9,6 +9,8 @@ app.service('plugin::content-manager.document-manager').countDraftRelations('any
 app.plugin('content-manager').service('document-metadata').getMetadata('anything', null);
 app.plugin('content-manager').service('document-metadata').getManyAvailableStatus('anything', [{}]);
 app.service('plugin::content-manager.populate-builder').custom();
+app.plugin('content-manager').service('preview').getPreviewUrl('anything', {});
+app.service('plugin::content-manager.permission').canConfigureContentType({ userAbility: {} });
 app.plugin('content-manager').service('content-types').findContentTypesByKind({ kind: 'nope' });
 app.plugin('content-manager').controller('collection-types').custom satisfies
   Core.ControllerHandler | undefined;

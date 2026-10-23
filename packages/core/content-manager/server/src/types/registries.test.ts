@@ -1,5 +1,6 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
-import type { Core, Modules, Schema, UID } from '@strapi/types';
+import type { Ability } from '@casl/ability';
+import type { Core, Modules, Schema, Struct, UID } from '@strapi/types';
 import type { RelationResult } from '../../../shared/contracts/relations';
 import type { RegisteredControllers } from './controllers';
 
@@ -102,6 +103,30 @@ components.findConfiguration({ uid: 'shared.seo', category: 'shared' }) satisfie
 }>;
 // @ts-expect-error A component configuration is read by UID and category.
 components.findConfiguration({ uid: 'shared.seo' });
+
+getService('field-sizes').hasFieldSize(undefined) satisfies boolean;
+// @ts-expect-error Field types are strings.
+getService('field-sizes').hasFieldSize(1);
+
+declare const ability: Ability;
+declare const contentType: Struct.ContentTypeSchema;
+getService('permission').canConfigureContentType({
+  userAbility: ability,
+  contentType,
+}) satisfies boolean;
+// @ts-expect-error The user ability is a CASL ability, not `any`.
+getService('permission').canConfigureContentType({ userAbility: {}, contentType });
+
+getService('preview').getPreviewUrl('api::article.article', {
+  documentId: 'document',
+  locale: null,
+  status: 'draft',
+}) satisfies Promise<string | null | undefined>;
+getService('preview').getPreviewUrl('api::article.article', {
+  documentId: 'document',
+  // @ts-expect-error The status is a publication status.
+  status: 'modified',
+});
 
 // @ts-expect-error Unregistered helper lookups resolve to `never` with strict types enabled.
 getService('unregistered').custom();
