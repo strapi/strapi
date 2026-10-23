@@ -1,7 +1,12 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
-import type { DocumentServiceMiddlewaresService, ValidationService } from './services';
+import type {
+  DocumentServiceMiddlewaresService,
+  ValidationService,
+  WorkflowMetricsService,
+  WorkflowWeeklyMetricsService,
+} from './services';
 
 declare const context: Parameters<Core.ControllerHandler>[0];
 declare const next: Parameters<Core.ControllerHandler>[1];
@@ -81,3 +86,31 @@ strapi.service('plugin::review-workflows.document-service-middlewares')?.missing
   // @ts-expect-error The factory is checked against the registered contract.
   validateWorkflowCount: () => true,
 })) satisfies Core.ServiceFactory<'plugin::review-workflows.validation'>;
+
+strapi.service('plugin::review-workflows.workflow-metrics') satisfies
+  WorkflowMetricsService | undefined;
+const workflowMetrics = strapi.plugin('review-workflows').service('workflow-metrics');
+workflowMetrics?.sendDidCreateWorkflow(1, false);
+workflowMetrics?.sendDidEditWorkflow('1', true);
+workflowMetrics?.sendDidEditAssignee(null, 2);
+const weeklyMetrics = strapi.service('plugin::review-workflows.workflow-weekly-metrics');
+weeklyMetrics satisfies WorkflowWeeklyMetricsService | undefined;
+weeklyMetrics?.ensureWeeklyStoredCronSchedule() satisfies Promise<string> | undefined;
+// @ts-expect-error Assignee IDs are checked against the service contract.
+workflowMetrics?.sendDidEditAssignee(undefined, 2);
+// @ts-expect-error Registered services have no arbitrary members.
+weeklyMetrics?.sendWeeklyMetrics();
+
+(() => ({
+  computeMetrics: () =>
+    Promise.resolve({
+      numberOfActiveWorkflows: 0,
+      avgStagesCount: 0,
+      maxStagesCount: undefined,
+      activatedContentTypes: 0,
+    }),
+  sendMetrics: () => Promise.resolve(),
+  registerCron: () => Promise.resolve(),
+  // @ts-expect-error The factory is checked against the registered contract.
+  ensureWeeklyStoredCronSchedule: () => Promise.resolve(undefined),
+})) satisfies Core.ServiceFactory<'plugin::review-workflows.workflow-weekly-metrics'>;
