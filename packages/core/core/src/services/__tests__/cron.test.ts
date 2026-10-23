@@ -313,6 +313,31 @@ describe('Cron service', () => {
     );
   });
 
+  it('logs job failures via the captured logger after global.strapi was deleted', async () => {
+    cron.add({
+      boom: {
+        async task() {
+          throw new Error('cron-boom');
+        },
+        options: '0 0 1 1 *',
+      },
+    });
+
+    const logError = global.strapi.log.error;
+    // Strapi.destroy() deletes global.strapi; a job that was in-flight may
+    // reject afterwards. The handler must still log instead of throwing.
+    // @ts-expect-error: intentionally delete the global like Strapi.destroy() does
+    delete global.strapi;
+
+    try {
+      await cron.jobs[0].job.trigger();
+
+      expect(logError).toHaveBeenCalledWith('Cron job "boom" failed', expect.any(Error));
+    } finally {
+      global.strapi = { log: { error: logError } };
+    }
+  });
+
   it('accepts 5-field and 6-field cron strings', () => {
     cron.start();
     cron.add({
