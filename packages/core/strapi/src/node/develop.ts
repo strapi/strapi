@@ -16,7 +16,6 @@ const lazy = <T>(spec: string): (() => T) => {
   let cached: T | undefined;
   return (): T => {
     if (cached === undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       cached = require(spec);
     }
     return cached as T;

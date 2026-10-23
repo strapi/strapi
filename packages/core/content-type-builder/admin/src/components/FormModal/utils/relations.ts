@@ -1,5 +1,3 @@
-/* eslint-disable no-confusing-arrow */
-
 import type { Schema } from '@strapi/types';
 
 const shouldPluralizeName = (nature?: Schema.Attribute.RelationKind.Any) =>

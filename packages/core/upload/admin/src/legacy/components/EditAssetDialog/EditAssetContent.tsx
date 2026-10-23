@@ -176,7 +176,6 @@ export const EditAssetContent = ({
   const formDisabled = !canUpdate || isCropping || isFocalPointMode;
 
   const handleConfirmClose = () => {
-    // eslint-disable-next-line no-alert
     const confirm = window.confirm(
       formatMessage({
         id: 'window.confirm.close-modal.file',

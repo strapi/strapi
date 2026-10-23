@@ -684,7 +684,6 @@ describe('Replace media placement', () => {
 
     // The server pins the replacement to the old extension, so a cross-type pick
     // would leave the bytes and the URL disagreeing.
-    // eslint-disable-next-line testing-library/no-node-access
     expect(document.querySelector('input[type="file"]')).toHaveAttribute(
       'accept',
       'application/pdf'

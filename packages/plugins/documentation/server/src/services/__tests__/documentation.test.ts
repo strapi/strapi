@@ -1,7 +1,6 @@
 import path from 'path';
 import _ from 'lodash';
 import fse from 'fs-extra';
-// eslint-disable-next-line node/no-unpublished-import
 import SwaggerParser from '@apidevtools/swagger-parser';
 import { apis, plugins, components, contentTypes } from '../__mocks__/mock-strapi-data';
 import documentation from '../documentation';

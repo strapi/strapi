@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import _, { defaults } from 'lodash';
 
 import { arrays, errors, emitAudit } from '@strapi/utils';
@@ -20,7 +19,6 @@ import type {
   SanitizedAdminUser,
   SanitizedAdminRole,
   AdminUserUpdatePayload,
-  // eslint-disable-next-line node/no-unpublished-import
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';

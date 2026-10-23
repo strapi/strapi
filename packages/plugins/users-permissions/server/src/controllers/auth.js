@@ -6,7 +6,6 @@
  * @description: A set of functions called "actions" for managing `Auth`.
  */
 
-/* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
 const utils = require('@strapi/utils');

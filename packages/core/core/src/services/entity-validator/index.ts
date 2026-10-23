@@ -665,9 +665,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
             break;
           }
 
-          const target =
-            // eslint-disable-next-line no-nested-ternary
-            attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
+          const target = attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
           // As there are multiple formats supported for associating relations
           // with an entity, the value here can be an: array, object or number.
           let source: RelationSource[];

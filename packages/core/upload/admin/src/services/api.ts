@@ -369,7 +369,6 @@ const runUploadPool = async ({
         break;
       }
 
-      // eslint-disable-next-line no-await-in-loop
       await uploadOne(index);
     }
   };
@@ -548,7 +547,6 @@ const processSSEStream = async ({
     const lastDoubleNewline = buffer.lastIndexOf('\n\n');
     if (lastDoubleNewline === -1) {
       // No complete events yet, keep buffering
-      // eslint-disable-next-line no-continue
       continue;
     }
 

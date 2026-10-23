@@ -6,7 +6,6 @@ import type { Logger } from './logger';
 let lazyTs: typeof ts | undefined;
 const tsLib = (): typeof ts => {
   if (!lazyTs) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     lazyTs = require('typescript');
   }
   return lazyTs as typeof ts;

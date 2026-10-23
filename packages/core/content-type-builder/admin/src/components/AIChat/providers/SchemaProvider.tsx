@@ -98,7 +98,6 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
           }
         }
 
-        // eslint-disable-next-line no-await-in-loop
         const applied = await applyChange({
           action: TYPE_TO_ACTION[change.type]!,
           schema: newSchema,

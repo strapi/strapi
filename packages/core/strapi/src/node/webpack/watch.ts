@@ -51,7 +51,6 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
           {
             // @ts-expect-error ignored
             end(content) {
-              // eslint-disable-next-line no-param-reassign
               context.body = content;
               resolve(true);
             },
