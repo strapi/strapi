@@ -22,8 +22,10 @@ export default {
   stages,
   'stage-permissions': stagePermissions,
   assignees,
-  validation: reviewWorkflowsValidation,
-  'document-service-middlewares': documentServiceMiddleware,
+  validation:
+    reviewWorkflowsValidation satisfies Core.ServiceFactory<'plugin::review-workflows.validation'>,
+  'document-service-middlewares':
+    documentServiceMiddleware satisfies Core.ServiceFactory<'plugin::review-workflows.document-service-middlewares'>,
   'workflow-metrics': reviewWorkflowsMetrics,
   'workflow-weekly-metrics': reviewWorkflowsWeeklyMetrics,
   ...homepage.services,
