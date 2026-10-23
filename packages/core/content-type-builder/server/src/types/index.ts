@@ -1,14 +1,15 @@
-import type * as ComponentsService from '../services/components';
-import type * as SchemaService from '../services/schema';
 import type { ContentTypeBuilderConfig } from '../config';
-import type { SchemaHandler } from '../services/schema-builder/schema-handler';
 import type { Controllers } from './controllers';
 import type {
   ApiHandlerService,
   BuilderService,
   ComponentCategoriesService,
+  ComponentHandler,
+  ComponentsService,
   ContentStructureService,
+  ContentTypeHandler,
   ContentTypesService,
+  SchemaService,
 } from './services';
 
 export type * from './controllers';
@@ -19,10 +20,10 @@ export type Services = {
   'api-handler': ApiHandlerService;
   builder: BuilderService;
   'component-categories': ComponentCategoriesService;
-  components: typeof ComponentsService;
+  components: ComponentsService;
   'content-structure': ContentStructureService;
   'content-types': ContentTypesService;
-  schema: typeof SchemaService;
+  schema: SchemaService;
 };
 
 /** Default contracts loaded with the Content-Type Builder server types. */
@@ -33,16 +34,16 @@ declare global {
     namespace Registries {
       /**
        * Schema changes the Content-Type Builder emits on the event hub, once the files are written.
-       * The payload holds the builder's schema handler of the content type or component (its `uid`,
-       * `schema`, …), not a plain schema.
+       * The payload holds the content type or component as the builder wrote, created or deleted it
+       * (its `uid`, `schema` as in its JSON file, …), not a loaded schema.
        */
       interface Events {
-        'content-type.create': [{ contentType: SchemaHandler }];
-        'content-type.update': [{ contentType: SchemaHandler }];
-        'content-type.delete': [{ contentType: SchemaHandler }];
-        'component.create': [{ component: SchemaHandler }];
-        'component.update': [{ component: SchemaHandler }];
-        'component.delete': [{ component: SchemaHandler }];
+        'content-type.create': [{ contentType: ContentTypeHandler }];
+        'content-type.update': [{ contentType: ContentTypeHandler }];
+        'content-type.delete': [{ contentType: ContentTypeHandler }];
+        'component.create': [{ component: ComponentHandler }];
+        'component.update': [{ component: ComponentHandler }];
+        'component.delete': [{ component: ComponentHandler }];
       }
 
       /** The plugin config merged with its defaults. */

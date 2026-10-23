@@ -1,4 +1,6 @@
-import type { Schema, Struct, UID } from '@strapi/types';
+import type { Modules, Schema, Struct, UID } from '@strapi/types';
+import type { AttributeRenameMigrationMode } from '../config';
+import type { Schema as UpdateSchemaInput } from '../controllers/validation/schema';
 
 /** The `api-handler` service: backs up, restores and removes the API folders of content types. */
 export type ApiHandlerService = {
@@ -379,4 +381,158 @@ export type ContentTypesService = {
    * @returns The deleted content type.
    */
   deleteContentType(uid: UID.ContentType): Promise<ContentTypeHandler>;
+};
+
+/** A component as the Content-Type Builder admin reads it. */
+export type FormattedComponent = {
+  uid: UID.Component;
+  category: string;
+  /** The model name of the component. */
+  apiId: string;
+  /** The `info` fields and visible attributes of the component. */
+  schema: {
+    displayName: string;
+    /** An empty string when the component has no description. */
+    description: string;
+    icon: string | undefined;
+    /** A legacy key read from the component as is: `undefined` unless its schema sets one. */
+    connection: unknown;
+    collectionName: string | undefined;
+    pluginOptions: Struct.SchemaPluginOptions | undefined;
+    attributes: Record<string, FormattedAttribute>;
+  };
+};
+
+/** The payload that creates a component, with the components it creates or updates. */
+export type CreateComponentPayload = {
+  component: ComponentInput;
+  components?: NestedComponentInput[] | undefined;
+};
+
+/**
+ * The payload that updates a component, with the components it creates or updates. It sends the
+ * whole component: `attributes` replaces the configurable attributes, and `icon`, `description` and
+ * `pluginOptions` left out are removed. A new `category` moves the component and changes its uid.
+ */
+export type EditComponentPayload = CreateComponentPayload;
+
+/** The `components` service: formats components for the admin and creates, updates and deletes them. */
+export type ComponentsService = {
+  /**
+   * Formats a loaded component for the Content-Type Builder admin.
+   *
+   * @internal
+   */
+  formatComponent(component: Struct.ComponentSchema): FormattedComponent;
+  /**
+   * Creates a component with the components sent with it, writes the schema files and emits
+   * `component.create`. Rejects with an `ApplicationError` when the component already exists.
+   */
+  createComponent(payload: CreateComponentPayload): Promise<ComponentHandler>;
+  /**
+   * Updates an existing component and the components sent with it, writes the schema files and
+   * emits `component.update`. Rejects with an `ApplicationError` when the component does not exist,
+   * or when its new category already holds a component with the same name.
+   *
+   * @returns The updated component, with its new uid when the category changed.
+   */
+  editComponent(uid: UID.Component, payload: EditComponentPayload): Promise<ComponentHandler>;
+  /**
+   * Deletes a component and its references in other schemas, writes the schema files and emits
+   * `component.delete`. Rejects with an `ApplicationError` when the component does not exist.
+   *
+   * @returns The deleted component.
+   */
+  deleteComponent(uid: UID.Component): Promise<ComponentHandler>;
+};
+
+/** A content type as the Content-Type Builder admin lists it in the schema. */
+export type SchemaContentType = {
+  uid: UID.ContentType;
+  /** The singular name of the content type. */
+  modelName: string;
+  kind: Struct.ContentTypeKind;
+  globalId: string;
+  options: Struct.SchemaOptions | undefined;
+  pluginOptions: Struct.SchemaPluginOptions | undefined;
+  /** The plugin of a plugin content type, else `undefined`. */
+  plugin: string | undefined;
+  collectionName: string | undefined;
+  info: Struct.ContentTypeSchemaInfo;
+  modelType: 'contentType';
+  /** The visible attributes, each with its name. */
+  attributes: Array<FormattedAttribute & { name: string }>;
+  /** `false` when the `content-type-builder` plugin options hide the content type. */
+  visible: boolean;
+  /** The relations other content types may create to this one, or `null` for any relation. */
+  restrictRelationsTo: string[] | null;
+};
+
+/** A component as the Content-Type Builder admin lists it in the schema. */
+export type SchemaComponent = {
+  uid: UID.Component;
+  modelName: string;
+  globalId: string;
+  modelType: 'component';
+  collectionName: string | undefined;
+  category: string;
+  info: Struct.SchemaInfo;
+  /** The visible attributes, each with its name. */
+  attributes: Array<FormattedAttribute & { name: string }>;
+};
+
+/** The schema the Content-Type Builder admin reads: every loaded content type and component. */
+export type ContentTypeBuilderSchema = {
+  /** The stored content-type groups, or `null` when there is none. */
+  contentStructure: Modules.ContentStructure.ContentStructureFile | null;
+  contentTypes: Record<string, SchemaContentType>;
+  components: Record<string, SchemaComponent>;
+  settings: { renameMigrations: { attributes: AttributeRenameMigrationMode } };
+};
+
+/**
+ * The validated body of a schema update (`POST /update-schema`): the components and content types
+ * to create, update or delete, and the content-type groups. Validation fills in the defaults of
+ * `options`, `pluginOptions` and `config`.
+ */
+export type UpdateSchemaPayload = UpdateSchemaInput;
+
+/**
+ * The `schema` service: reads the schema for the admin, applies schema updates and renames
+ * attributes.
+ */
+export type SchemaService = {
+  /**
+   * Returns every loaded content type and component with its visible attributes, the stored
+   * content-type groups and the rename migration setting.
+   *
+   * @internal
+   */
+  getSchema(): Promise<ContentTypeBuilderSchema>;
+  /**
+   * Applies a validated schema update: writes the schema files, the API folders, the rename
+   * migration and the content-type groups, then emits a `content-type.*` or `component.*` event for
+   * each change. Rejects with an `ApplicationError`, before any change, when it deletes a content
+   * type that is not an application content type; restores the files when a later step fails.
+   *
+   * @internal
+   */
+  updateSchema(schema: UpdateSchemaPayload): Promise<void>;
+  /**
+   * Formats an attribute for the Content-Type Builder admin: relations also carry the name of their
+   * inverse attribute, or `null` for a one-way relation.
+   *
+   * @internal
+   */
+  formatAttribute(attribute: Schema.Attribute.AnyAttribute): FormattedAttribute;
+  /**
+   * Renames an attribute of a content type or component and writes the migration that moves its
+   * data, as `strapi rename:field` does. Rejects with an `ApplicationError`, before any change, when
+   * the names are missing or equal, rename migrations are disabled, the uid or the old name is
+   * unknown, the new name is taken, or the rename cannot be migrated. It then validates and applies
+   * the update as {@link SchemaService.updateSchema} does.
+   *
+   * @param uid - A content type or component uid.
+   */
+  renameAttribute(uid: string, oldName: string, newName: string): Promise<void>;
 };

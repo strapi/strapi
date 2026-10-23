@@ -17,11 +17,16 @@ type RegisteredNames = keyof Core.RegisteredFor<
 
 export default {
   'content-types': contentTypes satisfies Services['content-types'],
-  components,
+  // `createComponent` and `editComponent` keep their published develop types (see `./components`),
+  // so the check leaves them out.
+  components: components satisfies Omit<
+    Services['components'],
+    'createComponent' | 'editComponent'
+  >,
   'component-categories': componentCategories satisfies Services['component-categories'],
   builder: builder satisfies Services['builder'],
   'api-handler': apiHandler satisfies Services['api-handler'],
-  schema,
+  schema: schema satisfies Services['schema'],
   'content-structure': (({ strapi }: { strapi: Core.Strapi }) =>
     createContentStructureService(
       strapi
