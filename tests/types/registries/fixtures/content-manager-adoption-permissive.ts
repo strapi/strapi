@@ -14,6 +14,8 @@ app.service('plugin::content-manager.permission').canConfigureContentType({ user
 app.plugin('content-manager').service('content-types').findContentTypesByKind({ kind: 'nope' });
 app.plugin('content-manager').controller('collection-types').custom satisfies
   Core.ControllerHandler | undefined;
+app.controller('plugin::content-manager.homepage').custom satisfies
+  Core.ControllerHandler | undefined;
 
 ({
   type: 'admin',
@@ -26,5 +28,6 @@ app.plugin('content-manager').controller('collection-types').custom satisfies
         policies: [{ name: 'hasPermissions', config: { hasAtLeastOne: 'yes' } }, 'custom'],
       },
     },
+    { method: 'GET', path: '/preview/script', handler: 'preview.getPreviewScript' },
   ],
 }) satisfies Core.RouterInputFor<Controllers.RegisteredControllers, 'plugin::content-manager'>;

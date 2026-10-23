@@ -121,6 +121,12 @@ app.controller('plugin::content-manager.relations').findExisting satisfies Core.
 app.controller('plugin::content-manager.single-types')
   .createOrUpdate satisfies Core.ControllerHandler;
 app.controller('plugin::content-manager.uid').generateUID satisfies Core.ControllerHandler;
+app.controller('plugin::content-manager.homepage')
+  .getCountDocuments satisfies Core.ControllerHandler;
+app.plugin('content-manager').controller('preview')
+  .getPreviewScript satisfies Core.ControllerHandler;
+// @ts-expect-error Feature controller contracts are hand-written: no arbitrary actions.
+app.controller('plugin::content-manager.homepage').getRecentDocument satisfies unknown;
 // @ts-expect-error Registered controller actions reject typos.
 app.plugin('content-manager').controller('collection-types').findOn satisfies unknown;
 
@@ -143,6 +149,11 @@ app.plugin('content-manager').controller('collection-types').findOn satisfies un
       },
     },
   ],
+}) satisfies Core.RouterInputFor<Controllers.RegisteredControllers, 'plugin::content-manager'>;
+({
+  type: 'admin',
+  // @ts-expect-error Feature routes are checked against the feature controller contracts.
+  routes: [{ method: 'GET', path: '/', handler: 'homepage.getRecentDocument' }],
 }) satisfies Core.RouterInputFor<Controllers.RegisteredControllers, 'plugin::content-manager'>;
 ({
   // @ts-expect-error Relative policy references enforce the registered boolean option.
