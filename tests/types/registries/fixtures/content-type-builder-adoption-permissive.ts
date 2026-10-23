@@ -10,6 +10,8 @@ app.service('plugin::content-type-builder.builder').missing();
 app.plugin('content-type-builder').service('component-categories').editCategory(1).anything();
 app.service('plugin::content-type-builder.content-structure').commitFromUpdate([]).anything();
 app.plugin('content-type-builder').service('content-types').deleteContentType(1, 2).anything();
+app.plugin('content-type-builder').service('components').editComponent(1).anything();
+app.service('plugin::content-type-builder.schema').renameAttribute(1).anything();
 app
   .plugin('content-type-builder')
   .controller('schema')
