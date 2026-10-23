@@ -7,6 +7,9 @@ import type createStagesService from '../services/stages';
 import type createValidationService from '../services/validation';
 import type createWorkflowsService from '../services/workflows';
 import type { createHomepageService } from '../homepage/services/homepage';
+import type { Controllers } from './controllers';
+
+export type * from './controllers';
 
 /** A stage in the `review-workflows.updateEntryStage` event. */
 type StageEvent = { id: number | string; name: string };
@@ -80,6 +83,14 @@ declare global {
         'plugin::review-workflows.workflow-weekly-metrics':
           Services['workflow-weekly-metrics'] | undefined;
         'plugin::review-workflows.workflows': Services['workflows'] | undefined;
+      }
+
+      // Registered with the services, under the same feature.
+      interface PackageControllers {
+        'plugin::review-workflows.assignees': Controllers['assignees'] | undefined;
+        'plugin::review-workflows.homepage': Controllers['homepage'] | undefined;
+        'plugin::review-workflows.stages': Controllers['stages'] | undefined;
+        'plugin::review-workflows.workflows': Controllers['workflows'] | undefined;
       }
     }
   }
