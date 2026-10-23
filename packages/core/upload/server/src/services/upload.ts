@@ -16,9 +16,9 @@ import {
 
 import type { Core, UID } from '@strapi/types';
 
-import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
+import { FILE_MODEL_UID, FOLDER_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
-import { AUDITED_EVENTS, getUploadSettingsChanges } from '../audit-logs';
+import { AUDITED_EVENTS, getUploadSettingsChanges, toAuditedFile } from '../audit-logs';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
@@ -554,6 +554,34 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return update(id, fileData, { user });
   }
 
+  type FolderRef = { id: number; name: string } | null;
+
+  async function getFolderAfterUpdate(
+    values: Partial<File>,
+    previous: { folder?: FolderRef } | null
+  ): Promise<FolderRef> {
+    const previousFolder = previous?.folder ?? null;
+
+    if (values.folder === undefined) {
+      return previousFolder;
+    }
+
+    const value = values.folder as number | { id: number } | null;
+    const folderId = value !== null && typeof value === 'object' ? value.id : value;
+
+    if (folderId == null) {
+      return null;
+    }
+
+    if (previousFolder && Number(previousFolder.id) === Number(folderId)) {
+      return previousFolder;
+    }
+
+    return strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id: folderId }, select: ['id', 'name'] });
+  }
+
   async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
     const { user } = opts ?? {};
 
@@ -566,9 +594,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     await sendMediaMetrics(fileValues);
 
+    const previous = await strapi.db
+      .query(FILE_MODEL_UID)
+      .findOne({ where: { id }, populate: { folder: { select: ['id', 'name'] } } });
+
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
     await emitEvent(MEDIA_UPDATE, res);
+
+    // The webhook event above carries no folder (a private field) and not the file as it was
+    if (res && previous) {
+      const folder = await getFolderAfterUpdate(values, previous);
+      strapi.eventHub.emit(AUDITED_EVENTS.MEDIA_UPDATE_AUDIT, {
+        file: toAuditedFile({ ...res, folder }),
+        previous: toAuditedFile(previous),
+      });
+    }
 
     return res;
   }

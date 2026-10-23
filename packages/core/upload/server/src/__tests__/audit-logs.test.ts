@@ -2,6 +2,8 @@ import { emitAudit } from '@strapi/utils';
 
 import {
   emitMediaMoves,
+  getFolderChanges,
+  getMediaChanges,
   getUploadSettingsChanges,
   readMediaMoves,
   registerAuditEvents,
@@ -12,17 +14,25 @@ jest.mock('@strapi/utils', () => ({
   emitAudit: jest.fn(),
 }));
 
-const getTransformers = () => {
-  const transformers: Record<string, (...args: any[]) => any> = {};
+const getRegistrations = () => {
+  const registrations: Record<
+    string,
+    { transform: (...args: any[]) => any; options?: Record<string, any> }
+  > = {};
 
   registerAuditEvents({
-    registerEvent(name: string, transform: any) {
-      transformers[name] = transform;
+    registerEvent(name: string, transform: any, options?: Record<string, any>) {
+      registrations[name] = { transform, options };
     },
   });
 
-  return transformers;
+  return registrations;
 };
+
+const getTransformers = () =>
+  Object.fromEntries(
+    Object.entries(getRegistrations()).map(([name, { transform }]) => [name, transform])
+  );
 
 const settings = {
   sizeOptimization: true,
@@ -33,7 +43,16 @@ const settings = {
 
 describe('Upload audit events', () => {
   test('registers the upload events', () => {
-    expect(Object.keys(getTransformers())).toEqual(['upload-settings.update', 'media.move']);
+    expect(Object.keys(getTransformers())).toEqual([
+      'upload-settings.update',
+      'media.create',
+      'media.update.audit',
+      'media.delete',
+      'media-folder.create',
+      'media-folder.update',
+      'media-folder.delete.audit',
+      'media.move',
+    ]);
   });
 
   test('upload-settings.update has a resource with no id and carries the changes', () => {
@@ -82,6 +101,129 @@ describe('Upload audit events', () => {
 
     test('ignores keys outside the four options', () => {
       expect(getUploadSettingsChanges(settings, { ...settings, extra: 1 } as any)).toEqual({});
+    });
+  });
+
+  describe('media files', () => {
+    const file = {
+      id: 12,
+      name: 'hero.png',
+      mime: 'image/png',
+      size: 10.5,
+      hash: 'hero_abc',
+      url: '/uploads/hero_abc.png',
+      alternativeText: null,
+      caption: null,
+      focalPoint: null,
+      folder: { id: 7, name: 'Blog' },
+    };
+
+    test('media.create has the file as resource, and its type and size as details', () => {
+      expect(getTransformers()['media.create']({ media: file })).toEqual({
+        resource: { type: 'media', id: 12, name: 'hero.png' },
+        details: { mime: 'image/png', size: 10.5 },
+      });
+    });
+
+    test('media.delete has the file as resource and no details', () => {
+      expect(getTransformers()['media.delete']({ media: file })).toEqual({
+        resource: { type: 'media', id: 12, name: 'hero.png' },
+      });
+    });
+
+    test('media.update is recorded from its audit event, under the media.update action', () => {
+      expect(getRegistrations()['media.update.audit'].options).toMatchObject({
+        action: 'media.update',
+      });
+    });
+
+    test('media.update records the changed fields only', () => {
+      const updated = { ...file, name: 'cover.png', alternativeText: 'A cover' };
+
+      expect(getTransformers()['media.update.audit']({ file: updated, previous: file })).toEqual({
+        resource: { type: 'media', id: 12, name: 'cover.png' },
+        details: {
+          changes: {
+            name: { before: 'hero.png', after: 'cover.png' },
+            alternativeText: { before: null, after: 'A cover' },
+          },
+        },
+      });
+    });
+
+    test('media.update records a folder change and a moved-to-root file', () => {
+      expect(getMediaChanges({ file: { ...file, folder: null }, previous: file })).toEqual({
+        folder: { before: { id: 7, name: 'Blog' }, after: null },
+      });
+    });
+
+    test('media.update records a replaced file without its hash or url', () => {
+      const replaced = { ...file, hash: 'hero_def', mime: 'image/jpeg', size: 20 };
+
+      const changes = getMediaChanges({ file: replaced, previous: file });
+
+      expect(changes).toEqual({
+        file: {
+          before: { name: 'hero.png', mime: 'image/png', size: 10.5 },
+          after: { name: 'hero.png', mime: 'image/jpeg', size: 20 },
+        },
+      });
+      expect(JSON.stringify(changes)).not.toMatch(/hero_|uploads/);
+    });
+
+    test('media.update is recorded only when something changed', () => {
+      const { shouldRecord } = getRegistrations()['media.update.audit'].options!;
+
+      expect(shouldRecord({ file, previous: { ...file } })).toBe(false);
+      expect(shouldRecord({ file: { ...file, caption: 'New' }, previous: file })).toBe(true);
+    });
+  });
+
+  describe('media folders', () => {
+    const folder = { id: 3, name: 'Old', parent: { id: 7, name: 'Blog' } };
+
+    test('are recorded under the media actions', () => {
+      const registrations = getRegistrations();
+
+      expect(registrations['media-folder.create'].options).toEqual({ action: 'media.create' });
+      expect(registrations['media-folder.update'].options).toMatchObject({
+        action: 'media.update',
+      });
+      expect(registrations['media-folder.delete.audit'].options).toEqual({
+        action: 'media.delete',
+      });
+    });
+
+    test('create and delete have the folder as resource', () => {
+      const transformers = getTransformers();
+      const resource = { type: 'media-folder', id: 3, name: 'Old' };
+
+      expect(transformers['media-folder.create']({ folder })).toEqual({ resource });
+      expect(transformers['media-folder.delete.audit']({ folder })).toEqual({ resource });
+    });
+
+    test('update records a rename and a new parent', () => {
+      expect(
+        getTransformers()['media-folder.update']({
+          folder: { ...folder, name: 'Archive', parent: null },
+          previous: folder,
+        })
+      ).toEqual({
+        resource: { type: 'media-folder', id: 3, name: 'Archive' },
+        details: {
+          changes: {
+            name: { before: 'Old', after: 'Archive' },
+            parent: { before: { id: 7, name: 'Blog' }, after: null },
+          },
+        },
+      });
+    });
+
+    test('update is recorded only when something changed', () => {
+      const { shouldRecord } = getRegistrations()['media-folder.update'].options!;
+
+      expect(shouldRecord({ folder, previous: { ...folder } })).toBe(false);
+      expect(getFolderChanges({ folder })).toEqual({});
     });
   });
 
