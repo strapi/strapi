@@ -358,6 +358,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     'email',
     'documentation',
     'upload',
+    'content-type-builder',
   ]) {
     test(`${resolution}: ${provider} contracts reach application consumers`, () => {
       assertClean(
@@ -848,6 +849,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       ['settings.d.ts', 'email-adoption.ts'],
       ['settings.d.ts', 'documentation-adoption.ts'],
       ['settings.d.ts', 'upload-adoption.ts'],
+      ['settings.d.ts', 'content-type-builder-adoption.ts'],
       ['settings.d.ts', 'config-defaults.ts'],
       ['strapi-strict.d.ts', 'middlewares.ts'],
       ['strapi-strict.d.ts', 'policy-namespaces.ts'],
