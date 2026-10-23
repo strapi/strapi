@@ -1,4 +1,3 @@
-import type createWorkflowsService from '../services/workflows';
 import type { Controllers } from './controllers';
 import type {
   AssigneesService,
@@ -9,6 +8,7 @@ import type {
   ValidationService,
   WorkflowMetricsService,
   WorkflowWeeklyMetricsService,
+  WorkflowsService,
 } from './services';
 
 export type * from './controllers';
@@ -27,7 +27,7 @@ export type Services = {
   validation: ValidationService;
   'workflow-metrics': WorkflowMetricsService;
   'workflow-weekly-metrics': WorkflowWeeklyMetricsService;
-  workflows: ReturnType<typeof createWorkflowsService>;
+  workflows: WorkflowsService;
 };
 
 /**

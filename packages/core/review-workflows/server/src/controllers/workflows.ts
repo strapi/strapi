@@ -2,11 +2,11 @@ import type { Context } from 'koa';
 
 import type { Core } from '@strapi/types';
 import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
-import { async } from '@strapi/utils';
+import { async, type queryParams } from '@strapi/utils';
 
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
-import type { Services } from '../types';
+import type { Services, WorkflowPopulate } from '../types';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 
@@ -58,7 +58,9 @@ interface PopulatedStage {
   [key: string]: unknown;
 }
 
-function formatWorkflowToAdmin(workflow: { stages?: PopulatedStage[]; [key: string]: unknown }) {
+function formatWorkflowToAdmin(
+  workflow: { stages?: PopulatedStage[]; [key: string]: unknown } | null
+) {
   if (!workflow) return;
   if (!workflow.stages) return workflow;
 
@@ -173,7 +175,8 @@ export default {
     }
 
     const deletedWorkflow = await workflowService
-      .delete(workflow, { populate })
+      // The sanitized query types each parameter as `unknown`.
+      .delete(workflow, { populate: populate as WorkflowPopulate })
       .then(formatWorkflowToAdmin);
 
     ctx.body = {
@@ -195,7 +198,12 @@ export default {
 
     const [workflows, workflowCount] = await Promise.all([
       workflowService
-        .find({ populate, filters, sort })
+        // The sanitized query types each parameter as `unknown`.
+        .find({
+          populate: populate as WorkflowPopulate,
+          filters,
+          sort: sort as queryParams.Params['sort'],
+        })
         .then((workflows: Parameters<typeof formatWorkflowToAdmin>[0][]) =>
           workflows.map((workflow) => formatWorkflowToAdmin(workflow))
         ),

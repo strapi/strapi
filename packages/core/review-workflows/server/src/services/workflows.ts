@@ -171,6 +171,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           });
         }
 
+        // TODO @Nico `name` is `unique` in the schema, but the query engine does not enforce it:
+        // `create` and `update` accept a name that another workflow already has.
         // Create Workflow
         const createdWorkflow = await strapi.db
           .query(WORKFLOW_MODEL_UID)
@@ -242,6 +244,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
 
         if (opts.data.stageRequiredToPublishName !== undefined) {
+          // TODO @Nico `updatedStages` starts as `[]`, so without `stages` in the data a name is
+          // searched in no stage and always rejected.
           const stages = updatedStages ?? workflow.stages;
 
           if (opts.data.stageRequiredToPublishName === null) {

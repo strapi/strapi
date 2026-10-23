@@ -496,3 +496,207 @@ export type StagesService = {
    */
   deleteAllEntitiesStage(contentTypeUID: UID.ContentType): Promise<number>;
 };
+
+/**
+ * A reference to the admin user who created or last updated a row, present when the read
+ * populates `createdBy` or `updatedBy`.
+ */
+export type CreatorReference = { id: number };
+
+/** A transition permission of a workflow stage, with the fields that the read selected. */
+export type WorkflowStagePermission = Pick<
+  StagePermissionRow,
+  'id' | 'documentId' | 'action' | 'actionParameters'
+> &
+  Partial<
+    Omit<StagePermissionRow, 'id' | 'documentId' | 'action' | 'actionParameters' | 'role'>
+  > & {
+    role: Pick<NonNullable<StagePermissionRow['role']>, 'id' | 'documentId' | 'name'> &
+      Partial<NonNullable<StagePermissionRow['role']>>;
+  };
+
+/** A stage of a workflow, with its transition permissions when the read populates them. */
+export type WorkflowStage = StageRow & { permissions?: WorkflowStagePermission[] };
+
+/** A workflow row as the database returns it. Each relation is present when the read populates it. */
+export type WorkflowRow = {
+  id: number;
+  documentId: string;
+  name: string;
+  /** The content types assigned to the workflow. */
+  contentTypes: UID.ContentType[];
+  /** Workflows are not localized. */
+  locale: null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  /** The stages, in order. */
+  stages?: WorkflowStage[];
+  /** The stage that entries must be at to be published, `null` when there is none. */
+  stageRequiredToPublish?: StageRow | null;
+  /** `null` for a workflow created by the plugin. */
+  createdBy?: CreatorReference | null;
+  /** `null` for a workflow updated by the plugin. */
+  updatedBy?: CreatorReference | null;
+};
+
+/** The populate of a workflow read. */
+export type WorkflowPopulate = queryParams.Params['populate'];
+
+type WorkflowRelation = 'stages' | 'stageRequiredToPublish' | 'createdBy' | 'updatedBy';
+
+/**
+ * The relations that a workflow read with `TPopulate` populates. Without `populate`, the read
+ * populates the stages, their permissions and the stage required to publish.
+ */
+type PopulatedRelation<TPopulate> = 0 extends 1 & TPopulate
+  ? never
+  : [TPopulate] extends [undefined]
+    ? 'stages' | 'stageRequiredToPublish'
+    : [TPopulate] extends ['*']
+      ? WorkflowRelation
+      : [TPopulate] extends [string]
+        ? Extract<TPopulate, WorkflowRelation>
+        : [TPopulate] extends [readonly (infer TName)[]]
+          ? Extract<TName, WorkflowRelation>
+          : Extract<
+              {
+                [TKey in keyof TPopulate]: TPopulate[TKey] extends false ? never : TKey;
+              }[keyof TPopulate],
+              WorkflowRelation
+            >;
+
+/** A workflow row with the relations that `TPopulate` populates. */
+export type PopulatedWorkflow<TPopulate extends WorkflowPopulate | undefined = undefined> =
+  WorkflowRow & Required<Pick<WorkflowRow, PopulatedRelation<TPopulate>>>;
+
+/** A workflow read with its stages, their permissions and the stage required to publish. */
+export type StoredWorkflow = WorkflowRow & {
+  stages: (StageRow & { permissions: WorkflowStagePermission[] })[];
+  stageRequiredToPublish: StageRow | null;
+};
+
+/**
+ * The query of a workflow read. A `contentTypes` filter that is a string matches the workflows
+ * assigned to that content type.
+ */
+export type WorkflowQuery<TPopulate extends WorkflowPopulate | undefined> = Omit<
+  queryParams.Params,
+  'populate'
+> & { populate?: TPopulate };
+
+/** A workflow to create, as the workflow routes receive it. */
+export type WorkflowCreateInput = {
+  name: string;
+  stages: StageInput[];
+  contentTypes?: UID.ContentType[];
+  /** The name of one of `stages`. */
+  stageRequiredToPublishName?: string | null;
+};
+
+/** The changes to a workflow, as the workflow routes receive them. */
+export type WorkflowUpdateInput = {
+  name?: string;
+  /** The stages that replace the stored ones. A stage without `id` is created. */
+  stages?: (StageInput & { id?: number })[];
+  /** The content types that replace the assigned ones. */
+  contentTypes?: UID.ContentType[];
+  /** The name of one of the stages, `null` to require none. */
+  stageRequiredToPublishName?: string | null;
+};
+
+/**
+ * The `workflows` service: the review workflows, the content types assigned to them, and their
+ * stages.
+ */
+export type WorkflowsService = {
+  /**
+   * Resolves the workflows that match the query.
+   *
+   * @internal
+   */
+  find<TPopulate extends WorkflowPopulate | undefined = undefined>(
+    opts?: WorkflowQuery<TPopulate>
+  ): Promise<PopulatedWorkflow<TPopulate>[]>;
+  /**
+   * Resolves the workflow with this ID, `null` when there is none.
+   *
+   * @internal
+   */
+  findById<TPopulate extends WorkflowPopulate | undefined = undefined>(
+    id: Data.ID,
+    opts?: { populate?: TPopulate }
+  ): Promise<PopulatedWorkflow<TPopulate> | null>;
+  /**
+   * Creates the workflow and its stages, and assigns the `contentTypes` to it: their entries move
+   * to its first stage, and the content types leave their previous workflow. Rejects with a
+   * `ValidationError` when the stages are missing, over the limit or share a name, or when the
+   * workflows are at the limit, and with an `ApplicationError` when `stageRequiredToPublishName`
+   * names none of the stages.
+   *
+   * @internal
+   */
+  create(opts: { data: WorkflowCreateInput }): Promise<StoredWorkflow>;
+  /**
+   * Updates the workflow, read with its stages. `stages` replace the stored stages, and
+   * `contentTypes` the assigned content types. Rejects with a `ValidationError` when the stages
+   * are empty, over the limit or share a name, and with an `ApplicationError` when a stage belongs
+   * to another workflow or when `stageRequiredToPublishName` names none of the stages.
+   *
+   * @internal
+   */
+  update(
+    workflow: PopulatedWorkflow<'stages'>,
+    opts: { data: WorkflowUpdateInput }
+  ): Promise<StoredWorkflow>;
+  /**
+   * Deletes the workflow, read with its stages, and its stages, and removes the stage of the
+   * entries of its content types. Rejects with an `ApplicationError` for the last workflow.
+   * Resolves the deleted row, `null` when it does not exist.
+   *
+   * @internal
+   */
+  delete(
+    workflow: PopulatedWorkflow<'stages'>,
+    opts: { populate?: WorkflowPopulate }
+  ): Promise<WorkflowRow | null>;
+  /**
+   * Counts the workflows.
+   *
+   * @internal
+   */
+  count(): Promise<number>;
+  /**
+   * Resolves the workflow assigned to the content type, `null` when there is none.
+   */
+  getAssignedWorkflow<TPopulate extends WorkflowPopulate | undefined = undefined>(
+    uid: UID.ContentType,
+    opts?: Omit<WorkflowQuery<TPopulate>, 'filters'>
+  ): Promise<PopulatedWorkflow<TPopulate> | null>;
+  /**
+   * Resolves the workflows assigned to the content type. A content type normally has one workflow.
+   *
+   * @internal
+   */
+  _getAssignedWorkflows<TPopulate extends WorkflowPopulate | undefined = undefined>(
+    uid: UID.ContentType,
+    opts?: Omit<WorkflowQuery<TPopulate>, 'filters'>
+  ): Promise<PopulatedWorkflow<TPopulate>[]>;
+  /**
+   * Resolves the workflow assigned to the content type, with its stages. Rejects with an
+   * `ApplicationError` when there is none.
+   *
+   * @internal
+   */
+  assertContentTypeBelongsToWorkflow(uid: UID.ContentType): Promise<PopulatedWorkflow<'stages'>>;
+  /**
+   * Throws an `ApplicationError` when the stage is not one of the workflow's stages. Does nothing
+   * without `stageId`.
+   *
+   * @internal
+   */
+  assertStageBelongsToWorkflow(
+    stageId: number | undefined,
+    workflow: { name: string; stages: { id: number }[] }
+  ): void;
+};
