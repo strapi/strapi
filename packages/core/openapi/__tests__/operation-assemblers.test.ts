@@ -24,6 +24,7 @@ type ResolvedQueryParamEntry = {
   schema: z.ZodType;
   matchRoute?: (r: Core.Route) => boolean;
 };
+
 /** Resolved entry shape (param + schema + matchRoute) mirroring the real content-api service storage. */
 type ResolvedInputParamEntry = {
   param: string;
@@ -244,7 +245,6 @@ describe('OpenAPI operation assemblers – params added via addQueryParams / add
       contentAPI.addInputParams({
         clientMutationId: { schema: z.string().max(100).optional() },
       });
-
       const route = contentAPI.mergeInputParamsIntoRoute(
         contentAPIRoute({ method: 'POST', handler: 'api::article.article.create' })
       );
@@ -257,13 +257,45 @@ describe('OpenAPI operation assemblers – params added via addQueryParams / add
       expect(requestBody?.content?.['application/json']?.schema).toBeDefined();
     });
 
+    it('does not mark optional body fields as required in the OpenAPI schema', () => {
+      const route = contentAPIRoute({
+        method: 'POST',
+        request: {
+          body: {
+            'application/json': z.object({
+              data: z.object({
+                title: z.string(),
+                content: z.array(z.any()).optional(),
+              }),
+            }),
+          },
+        },
+      });
+
+      const assembler = new BodyAssembler();
+      const context = createOperationContext();
+      assembler.assemble(context, route);
+
+      const schema = context.output.data.requestBody?.content?.['application/json']?.schema as {
+        properties?: {
+          data?: {
+            required?: string[];
+          };
+        };
+      };
+
+      expect(schema.properties?.data?.required).toContain('title');
+      expect(schema.properties?.data?.required).not.toContain('content');
+    });
     it('does not set requestBody when route has no request.body', () => {
       const assembler = new BodyAssembler();
       const context = createOperationContext();
+
       assembler.assemble(
         context,
         contentAPIRoute({ method: 'POST', handler: 'api::article.article.create' })
       );
+
       expect(context.output.data.requestBody).toBeUndefined();
     });
   });

@@ -420,9 +420,12 @@ export const bigIntegerToInputSchema = (attribute: Schema.Attribute.BigInteger) 
  * Converts a blocks attribute to a Zod schema for input validation.
  * @returns A Zod schema for input validation of the blocks field.
  */
-export const blocksToInputSchema = () => {
-  // TODO: better support blocks data structure
-  return z.array(z.any()).describe('A blocks field');
+export const blocksToInputSchema = (attribute: Schema.Attribute.Blocks) => {
+  const { required } = attribute;
+
+  const schema = augmentSchema(z.array(z.any()), [maybeRequired(required)]);
+
+  return schema.describe('A blocks field');
 };
 
 /**
