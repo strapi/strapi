@@ -1,15 +1,15 @@
 import type createAssigneesService from '../services/assignees';
-import type createDocumentServiceMiddlewaresService from '../services/document-service-middleware';
 import type MetricsService from '../services/metrics';
 import type createWeeklyMetricsService from '../services/metrics/weekly-metrics';
 import type createStagePermissionsService from '../services/stage-permissions';
 import type createStagesService from '../services/stages';
-import type createValidationService from '../services/validation';
 import type createWorkflowsService from '../services/workflows';
 import type { createHomepageService } from '../homepage/services/homepage';
 import type { Controllers } from './controllers';
+import type { DocumentServiceMiddlewaresService, ValidationService } from './services';
 
 export type * from './controllers';
+export type * from './services';
 
 /** A stage in the `review-workflows.updateEntryStage` event. */
 type StageEvent = { id: number | string; name: string };
@@ -17,11 +17,11 @@ type StageEvent = { id: number | string; name: string };
 /** Review Workflows services by name, as registered by the plugin. */
 export type Services = {
   assignees: ReturnType<typeof createAssigneesService>;
-  'document-service-middlewares': ReturnType<typeof createDocumentServiceMiddlewaresService>;
+  'document-service-middlewares': DocumentServiceMiddlewaresService;
   homepage: ReturnType<typeof createHomepageService>;
   'stage-permissions': ReturnType<typeof createStagePermissionsService>;
   stages: ReturnType<typeof createStagesService>;
-  validation: ReturnType<typeof createValidationService>;
+  validation: ValidationService;
   'workflow-metrics': typeof MetricsService;
   'workflow-weekly-metrics': ReturnType<typeof createWeeklyMetricsService>;
   workflows: ReturnType<typeof createWorkflowsService>;
