@@ -1,5 +1,5 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, Schema, UID } from '@strapi/types';
 import type { RelationResult } from '../../../shared/contracts/relations';
 import type { RegisteredControllers } from './controllers';
 
@@ -45,6 +45,32 @@ status satisfies 'draft' | 'published' | 'modified';
 ({ documentId: 'document', id: 1, status }) satisfies RelationResult;
 // @ts-expect-error Metadata version input cannot be missing.
 getService('document-metadata').getMetadata('api::article.article', null);
+
+const contentTypes = getService('content-types');
+contentTypes.findConfiguration({ uid: 'api::article.article' }) satisfies Promise<{
+  uid: UID.ContentType;
+  settings: { mainField: string; pageSize: number };
+}>;
+// @ts-expect-error Configuration results are typed, not `any`.
+contentTypes.findConfiguration({ uid: 'api::article.article' }) satisfies Promise<{ uid: number }>;
+contentTypes.updateConfiguration({ uid: 'api::article.article' }, { options: {} });
+contentTypes.findContentTypesByKind('singleType');
+contentTypes.findContentTypesByKind(undefined);
+// @ts-expect-error The kind is passed as is, not wrapped in an object.
+contentTypes.findContentTypesByKind({ kind: 'singleType' });
+const article = contentTypes.findContentType('api::article.article');
+article?.attributes.author?.relationType satisfies Schema.Attribute.RelationKind.Any | undefined;
+// @ts-expect-error Model attributes are attribute definitions, not `any`.
+article?.attributes.title?.missing satisfies unknown;
+
+const components = getService('components');
+components.findConfiguration({ uid: 'shared.seo', category: 'shared' }) satisfies Promise<{
+  uid: UID.Component;
+  category: string;
+  isComponent: boolean;
+}>;
+// @ts-expect-error A component configuration is read by UID and category.
+components.findConfiguration({ uid: 'shared.seo' });
 
 // @ts-expect-error Unregistered helper lookups resolve to `never` with strict types enabled.
 getService('unregistered').custom();
