@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { useContentTypes } from '../../../../../../hooks/useContentTypes';
-import { WebhookForm } from '../WebhookForm';
+import { WebhookForm, parseWebhookBody } from '../WebhookForm';
 
 jest.mock('../../../../../../hooks/useContentTypes');
 
@@ -82,6 +82,15 @@ describe('WebhookForm', () => {
 
     expect(screen.getByRole('button', { name: 'Create new header' })).toBeInTheDocument();
 
+    expect(screen.getByText('Request body')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Leave empty to send the default payload. Insert event data with {{ entry.title }}.'
+      )
+    ).toBeInTheDocument();
+    // The body mode only matters once there is a body
+    expect(screen.queryByRole('combobox', { name: 'Default payload' })).not.toBeInTheDocument();
+
     expect(screen.getByRole('grid', { name: 'Events' })).toBeInTheDocument();
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
@@ -115,9 +124,86 @@ describe('WebhookForm', () => {
       events: ['entry.create'],
       contentTypeEvents: {},
       headers: [{ key: '', value: '' }],
+      body: '',
+      bodyMode: 'merge',
     });
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+  });
+
+  describe('body template', () => {
+    // The JSON editor (CodeMirror) splits its text into highlighted spans
+    const getEditorText = (container: HTMLElement) =>
+      container.querySelector('.cm-content')?.textContent ?? '';
+
+    const webhook = {
+      id: '1',
+      name: 'Deploy',
+      url: 'https://example.com',
+      headers: {},
+      events: [],
+      body: { ref: 'main' },
+      bodyMode: 'merge' as const,
+      isEnabled: true,
+    };
+
+    it('shows the saved body template and its mode', () => {
+      const { container } = render(
+        <WebhookForm
+          data={{ ...webhook, bodyMode: 'replace' }}
+          handleSubmit={jest.fn()}
+          isCreating={false}
+          isTriggering={false}
+          triggerWebhook={jest.fn()}
+        />
+      );
+
+      expect(getEditorText(container)).toContain('"ref": "main"');
+      expect(screen.getByRole('combobox', { name: 'Default payload' })).toHaveTextContent(
+        'Replace it with the request body'
+      );
+    });
+
+    it('adds the body to the default payload by default', () => {
+      render(
+        <WebhookForm
+          data={{ ...webhook, bodyMode: undefined }}
+          handleSubmit={jest.fn()}
+          isCreating={false}
+          isTriggering={false}
+          triggerWebhook={jest.fn()}
+        />
+      );
+
+      expect(screen.getByRole('combobox', { name: 'Default payload' })).toHaveTextContent(
+        'Add the request body to it'
+      );
+    });
+
+    it('switches the body mode and submits it with the body template', async () => {
+      const handleSubmit = jest.fn();
+
+      const { user } = render(
+        <WebhookForm
+          data={webhook}
+          handleSubmit={handleSubmit}
+          isCreating={false}
+          isTriggering={false}
+          triggerWebhook={jest.fn()}
+        />
+      );
+
+      await user.click(screen.getByRole('combobox', { name: 'Default payload' }));
+      await user.click(screen.getByRole('option', { name: 'Replace it with the request body' }));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => expect(handleSubmit).toHaveBeenCalledTimes(1));
+      expect(handleSubmit.mock.calls[0][0]).toMatchObject({
+        body: JSON.stringify({ ref: 'main' }, null, 2),
+        bodyMode: 'replace',
+      });
+    });
   });
 
   describe('content type events', () => {
@@ -249,5 +335,28 @@ describe('WebhookForm', () => {
 
       expect(await submit()).toMatchObject({ contentTypeEvents: {} });
     });
+  });
+});
+
+describe('parseWebhookBody', () => {
+  it('returns null for an empty text', () => {
+    expect(parseWebhookBody('')).toBeNull();
+    expect(parseWebhookBody('  \n')).toBeNull();
+  });
+
+  it('returns the parsed JSON object', () => {
+    expect(
+      parseWebhookBody('{ "ref": "main", "inputs": { "title": "{{ entry.title }}" } }')
+    ).toEqual({
+      ref: 'main',
+      inputs: { title: '{{ entry.title }}' },
+    });
+  });
+
+  it('throws for invalid JSON and for JSON that is not an object', () => {
+    expect(() => parseWebhookBody('{ ref: main }')).toThrow();
+    expect(() => parseWebhookBody('["ref"]')).toThrow('The body must be a JSON object');
+    expect(() => parseWebhookBody('"ref"')).toThrow('The body must be a JSON object');
+    expect(() => parseWebhookBody('null')).toThrow('The body must be a JSON object');
   });
 });
