@@ -13,8 +13,9 @@ const dbFile = {
   provider: 'local',
 };
 
-const update = jest.fn().mockImplementation(({ data }) => data);
+const update = jest.fn().mockImplementation(({ where, data }) => ({ id: where.id, ...data }));
 const dbFindOne = jest.fn().mockResolvedValue(dbFile);
+const folderFindOne = jest.fn().mockResolvedValue({ id: 42, name: 'Blog' });
 
 const getFolderPath = jest
   .fn()
@@ -38,10 +39,13 @@ global.strapi = {
   },
   plugin: (name: string) => global.strapi.plugins[name],
   db: {
-    query: () => ({
-      findOne: dbFindOne,
-      update,
-    }),
+    query: (uid: string) =>
+      uid === 'plugin::upload.folder'
+        ? { findOne: folderFindOne }
+        : {
+            findOne: dbFindOne,
+            update,
+          },
   },
   get: () => ({
     transform: (_uid: string, query: unknown) => query,
@@ -59,6 +63,8 @@ describe('updateFileInfo', () => {
     update.mockClear();
     dbFindOne.mockResolvedValue(dbFile);
     getFolderPath.mockClear();
+    folderFindOne.mockClear();
+    (global.strapi.eventHub.emit as jest.Mock).mockClear();
   });
 
   test('preserves existing folderPath when folder is not provided (regression for #21904)', async () => {
@@ -86,6 +92,31 @@ describe('updateFileInfo', () => {
       folderPath: '/42',
     });
     expect(getFolderPath).toHaveBeenCalledWith(42);
+  });
+
+  test('emits media.update for webhooks unchanged, and the audit event with the file as it was', async () => {
+    const emit = global.strapi.eventHub.emit as jest.Mock;
+
+    await uploadService.updateFileInfo(1, { alternativeText: 'new alt' });
+
+    const events = Object.fromEntries(emit.mock.calls);
+    expect(Object.keys(events)).toEqual(['media.update', 'media.update.audit']);
+    expect(Object.keys(events['media.update'])).toEqual(['media']);
+    expect(events['media.update.audit']).toMatchObject({
+      file: { id: 1, alternativeText: 'new alt', folder: { id: 2, name: null } },
+      previous: { id: 1, alternativeText: 'existing alt', folder: { id: 2, name: null } },
+    });
+    expect(folderFindOne).not.toHaveBeenCalled();
+  });
+
+  test('reads the new folder when the file moves', async () => {
+    const emit = global.strapi.eventHub.emit as jest.Mock;
+
+    await uploadService.updateFileInfo(1, { folder: 42 });
+
+    expect(folderFindOne).toHaveBeenCalledWith({ where: { id: 42 }, select: ['id', 'name'] });
+    const audit = emit.mock.calls.find(([event]) => event === 'media.update.audit');
+    expect(audit[1].file.folder).toEqual({ id: 42, name: 'Blog' });
   });
 
   test('moves the file to the root when folder is explicitly null', async () => {

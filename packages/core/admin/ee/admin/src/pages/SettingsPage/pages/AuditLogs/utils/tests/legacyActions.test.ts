@@ -1,12 +1,22 @@
 import { expandLegacyActionFilters, isLegacyAction } from '../legacyActions';
 
 describe('legacyActions', () => {
-  it('marks the three legacy keys and nothing else', () => {
+  it('marks the legacy keys and nothing else', () => {
     expect(isLegacyAction('user.create')).toBe(true);
     expect(isLegacyAction('user.update')).toBe(true);
     expect(isLegacyAction('user.delete')).toBe(true);
+    expect(isLegacyAction('media-folder.create')).toBe(true);
+    expect(isLegacyAction('media-folder.update')).toBe(true);
+    expect(isLegacyAction('media-folder.delete')).toBe(true);
     expect(isLegacyAction('admin-user.create')).toBe(false);
+    expect(isLegacyAction('media.create')).toBe(false);
     expect(isLegacyAction('entry.create')).toBe(false);
+  });
+
+  it('finds old folder rows under the matching media action', () => {
+    expect(expandLegacyActionFilters({ $and: [{ action: { $eq: 'media.delete' } }] })).toEqual({
+      $and: [{ action: { $in: ['media.delete', 'media-folder.delete'] } }],
+    });
   });
 
   it('expands an equality on a new key into $in over both keys', () => {
