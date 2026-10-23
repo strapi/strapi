@@ -32,9 +32,9 @@ export const setGuidedTourLocalStorage = async (
   page: Page,
   guidedTourState: typeof STRAPI_GUIDED_TOUR_CONFIG
 ) => {
-  // Use a path so Playwright resolves `baseURL` from project config (e2e apps use 8000+, not 1337).
-
-  await page.goto('/admin');
+  // Seed storage on the same origin without mounting the admin app: its
+  // hydration can otherwise overwrite this fixture before the next navigation.
+  await page.goto('/admin/init');
 
   await page.evaluate((config) => {
     localStorage.setItem('STRAPI_GUIDED_TOUR', JSON.stringify(config));
