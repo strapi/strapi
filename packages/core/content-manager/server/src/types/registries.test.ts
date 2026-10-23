@@ -129,6 +129,21 @@ getService('permission').canConfigureContentType({
 // @ts-expect-error The user ability is a CASL ability, not `any`.
 getService('permission').canConfigureContentType({ userAbility: {}, contentType });
 
+const checker = getService('permission-checker').create({
+  userAbility: ability,
+  model: 'api::article.article',
+});
+declare const entry: { documentId: string; title: string } | null;
+checker.sanitizeOutput(entry) satisfies Promise<{ documentId: string; title: string } | null>;
+// @ts-expect-error Sanitized output keeps the type of its input, not `any`.
+checker.sanitizeOutput(entry) satisfies Promise<{ title: number }>;
+checker.sanitizeCreateInput({ title: 'Article' }) satisfies Promise<{ title: string }>;
+// @ts-expect-error Sanitized create input keeps the type of its input, not `any`.
+checker.sanitizeCreateInput({ title: 'Article' }) satisfies Promise<{ title: number }>;
+checker.sanitizeUpdateInput(entry)({ title: 'Article' }) satisfies Promise<{ title: string }>;
+// @ts-expect-error Sanitized update input keeps the type of its input, not `any`.
+checker.sanitizeUpdateInput(entry)({ title: 'Article' }) satisfies Promise<{ title: number }>;
+
 getService('preview').getPreviewUrl('api::article.article', {
   documentId: 'document',
   locale: null,
