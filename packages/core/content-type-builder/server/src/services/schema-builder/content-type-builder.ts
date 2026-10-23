@@ -379,7 +379,11 @@ export default function createComponentBuilder() {
         .set(['info', 'description'], infos.description)
         .set('options', {
           ...infos.options,
-          draftAndPublish: infos.draftAndPublish,
+          // A payload that does not set draftAndPublish keeps the stored value
+          draftAndPublish:
+            infos.draftAndPublish ??
+            infos.options?.draftAndPublish ??
+            contentType.schema.options?.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
