@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import type {} from '../types';
+import type { Services } from '../types';
 
 import * as contentTypes from './content-types';
 import * as components from './components';
@@ -18,10 +18,12 @@ type RegisteredNames = keyof Core.RegisteredFor<
 export default {
   'content-types': contentTypes,
   components,
-  'component-categories': componentCategories,
-  builder,
-  'api-handler': apiHandler,
+  'component-categories': componentCategories satisfies Services['component-categories'],
+  builder: builder satisfies Services['builder'],
+  'api-handler': apiHandler satisfies Services['api-handler'],
   schema,
-  'content-structure': ({ strapi }: { strapi: Core.Strapi }) =>
-    createContentStructureService(strapi),
+  'content-structure': (({ strapi }: { strapi: Core.Strapi }) =>
+    createContentStructureService(
+      strapi
+    )) satisfies Core.ServiceFactory<'plugin::content-type-builder.content-structure'>,
 } satisfies Record<RegisteredNames, unknown>;
