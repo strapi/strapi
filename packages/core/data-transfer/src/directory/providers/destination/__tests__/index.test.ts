@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 
 import fs from 'fs-extra';
 import { tmpdir } from 'os';
@@ -77,5 +78,57 @@ describe('Directory destination provider', () => {
     };
     expect(nested?.details?.details?.error).toBeInstanceOf(Error);
     expect(nested?.details?.details?.error?.message).toBe('mock EACCES');
+  });
+
+  test('close waits until the last JSONL file is fully written', async () => {
+    const linkCount = 100_000;
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-links-'));
+    const provider = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: {},
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const links = Readable.from(
+      (function* generateLinks() {
+        for (let index = 0; index < linkCount; index += 1) {
+          yield {
+            kind: 'relation.basic',
+            relation: 'manyToOne',
+            left: { type: 'api::foo.foo', ref: index, field: 'bar' },
+            right: { type: 'api::bar.bar', ref: index },
+          };
+        }
+      })()
+    );
+
+    // Mirrors the engine: await the stage pipeline, then close the provider, then the CLI exits
+    await pipeline(links, provider.createLinksWriteStream());
+    await provider.close();
+
+    const content = await fs.readFile(path.join(dir, 'links', 'links_00001.jsonl'), 'utf8');
+    const lines = content.split('\n').filter(Boolean);
+
+    expect(lines).toHaveLength(linkCount);
+    expect(JSON.parse(lines[lines.length - 1]).left.ref).toBe(linkCount - 1);
+  });
+
+  test('close does not hang when a stage stream is destroyed without being used', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-skip-'));
+    const provider = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: {},
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    // Mirrors the engine's skip path in transferStage()
+    const stream = provider.createConfigurationWriteStream();
+    await new Promise((resolve, reject) => {
+      stream.on('close', resolve).on('error', reject).destroy();
+    });
+
+    await expect(provider.close()).resolves.toBeUndefined();
   });
 });
