@@ -518,6 +518,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         _.assign(fileData, { folderPath: dbFile.folderPath });
       }
 
+      // TODO @Nico A non-image that replaces an image keeps the image's `width` and `height`, and
+      // stores `formats: {}` instead of `null`: `update` writes only the keys set here.
       // clear old formats — replaceImage / replace will set new ones
       _.set(fileData, 'formats', {});
 
