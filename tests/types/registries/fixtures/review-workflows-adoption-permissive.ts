@@ -9,6 +9,12 @@ app.plugin('review-workflows').service('validation').validateWorkflowStages('Dra
 app.service('plugin::review-workflows.document-service-middlewares').missing();
 app
   .plugin('review-workflows')
+  .service('workflow-metrics')
+  .sendDidCreateWorkflow({ id: 1 })
+  .anything();
+app.service('plugin::review-workflows.workflow-weekly-metrics').missing();
+app
+  .plugin('review-workflows')
   .controller('stages')
   .unknownAction?.({} as never, async () => {});
 app.controller('plugin::review-workflows.workflows').unknownAction?.({} as never, async () => {});
