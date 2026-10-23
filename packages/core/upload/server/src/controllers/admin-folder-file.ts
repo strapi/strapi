@@ -64,6 +64,7 @@ export default {
       if (!(await canDeleteFiles(selectedFiles))) {
         throw new errors.ForbiddenError();
       }
+      await getService('upload').validateNoFileRelations(selectedFiles);
     }
 
     const {
