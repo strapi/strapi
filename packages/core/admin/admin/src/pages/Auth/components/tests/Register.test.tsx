@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/react';
 import { render } from '@tests/utils';
 
 import { Register, formatValidationMessage } from '../Register';
@@ -54,6 +55,18 @@ describe('Register', () => {
     FIELD_LABELS.forEach((label) => {
       expect(getByLabelText(new RegExp(`^${label}`, 'i'))).toBeEnabled();
     });
+  });
+
+  it('shows a max length error when the firstname is longer than 255 characters', async () => {
+    const { getByLabelText, getByRole, findByText, user } = render(<Register />, {
+      initialEntries: ['/auth/register-admin'],
+    });
+
+    await user.click(getByLabelText(/^Firstname/i));
+    await user.paste('a'.repeat(256));
+    fireEvent.click(getByRole('button', { name: /let's start/i }));
+
+    expect(await findByText('The value is too long (max: 255).')).toBeInTheDocument();
   });
 
   describe('formatValidationMessage', () => {

@@ -5,6 +5,7 @@ import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
 import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from './common-functions';
 import actions from '../domain/action/index';
+import constants from '../services/constants';
 
 const { actionFields } = actions;
 
@@ -12,13 +13,13 @@ const getActionFromProvider = (actionId: string) => {
   return getService('permission').actionProvider.get(actionId);
 };
 
-export const email = yup.string().email().lowercase();
+export const email = yup.string().email().lowercase().max(constants.USER_TEXT_MAX_LENGTH);
 
-export const firstname = yup.string().trim().min(1);
+export const firstname = yup.string().trim().min(1).max(constants.USER_TEXT_MAX_LENGTH);
 
-export const lastname = yup.string();
+export const lastname = yup.string().max(constants.USER_TEXT_MAX_LENGTH);
 
-export const username = yup.string().min(1);
+export const username = yup.string().min(1).max(constants.USER_TEXT_MAX_LENGTH);
 
 export const password = yup
   .string()

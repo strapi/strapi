@@ -16,6 +16,10 @@ const constants = {
   PUBLISH_ACTION: 'plugin::content-manager.explorer.publish',
   // API, admin and transfer token `name` and `description` are `string` attributes, stored as varchar(255)
   TOKEN_TEXT_MAX_LENGTH: 255,
+  // Admin user `email`, `firstname`, `lastname` and `username` are `string` attributes, stored as varchar(255)
+  USER_TEXT_MAX_LENGTH: 255,
+  // Webhook `name` is a `string` attribute, stored as varchar(255)
+  WEBHOOK_NAME_MAX_LENGTH: 255,
   API_TOKEN_TYPE: {
     READ_ONLY: 'read-only',
     FULL_ACCESS: 'full-access',
