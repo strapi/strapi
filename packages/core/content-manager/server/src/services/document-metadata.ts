@@ -421,10 +421,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return {
       data: {
         ...document,
-        // Add status to the document only if draft and publish is enabled
-        status: hasDraftAndPublish
-          ? this.getStatus(document, meta.availableStatus as any)
-          : undefined,
+        // Add status to the document only if draft and publish is enabled,
+        // otherwise `status` may be a regular attribute that must be preserved
+        ...(hasDraftAndPublish && {
+          status: this.getStatus(document, meta.availableStatus as any),
+        }),
       },
       meta,
     };

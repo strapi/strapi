@@ -122,6 +122,11 @@ export const createCollectionListHandler =
       : new Map();
 
     const setStatus = (document: any) => {
+      // Without Draft & Publish, `status` may be a regular attribute that must be preserved
+      if (!hasDraftAndPublish) {
+        return document;
+      }
+
       const availableStatuses = statusByDocumentId.get(document.documentId) || [];
       document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
