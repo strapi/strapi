@@ -1,11 +1,19 @@
-import { Form } from '@strapi/admin/strapi-admin';
+import { useState } from 'react';
+
+import { adminApi, Form } from '@strapi/admin/strapi-admin';
+import { within } from '@testing-library/react';
 import { render, screen, waitFor, fireEvent, act } from '@tests/utils';
 
+import {
+  uploadFileViaXHR,
+  UploadAbortedError,
+  UploadFileError,
+} from '../../../services/uploadFileViaXHR';
+import { uploadProgressReducer } from '../../../store/uploadProgress';
 import { MediaLibraryInput } from '../MediaLibraryInput';
 
 import type { File as AssetFile } from '../../../../../shared/contracts/files';
 
-const mockUploadFiles = jest.fn();
 const mockUploadFromUrls = jest.fn();
 
 jest.mock('../../../services/api', () => {
@@ -13,10 +21,16 @@ jest.mock('../../../services/api', () => {
 
   return {
     ...actual,
-    useUploadFilesMutation: () => [mockUploadFiles],
     useUploadFromUrlsMutation: () => [mockUploadFromUrls],
   };
 });
+
+jest.mock('../../../services/uploadFileViaXHR', () => ({
+  ...jest.requireActual('../../../services/uploadFileViaXHR'),
+  uploadFileViaXHR: jest.fn(),
+}));
+
+const mockUploadFileViaXHR = uploadFileViaXHR as jest.MockedFunction<typeof uploadFileViaXHR>;
 
 const mockPermissions = {
   isLoading: false,
@@ -32,10 +46,16 @@ jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
 }));
 
 /**
- * The picker still opens the legacy dialog until the Content Manager gets its
- * own. It pulls in cropperjs, which jsdom cannot parse.
+ * Editing an asset still opens the legacy details dialog, which pulls in
+ * cropperjs, and jsdom cannot parse its stylesheet.
  */
 jest.mock('cropperjs/dist/cropper.css?raw', () => '', { virtual: true });
+
+jest.mock('../../../pages/Assets/hooks/useInfiniteScrollSentinel', () => {
+  const { useRef } = jest.requireActual('react');
+
+  return { useInfiniteScrollSentinel: () => useRef(null) };
+});
 
 const asset = (id: number, name: string): AssetFile =>
   ({
@@ -51,20 +71,66 @@ const asset = (id: number, name: string): AssetFile =>
     updatedAt: '2026-01-01T00:00:00.000Z',
   }) as AssetFile;
 
-/** Like the mutation: each file reaches `onFileUploaded` once it has uploaded. */
-const mockUploadResolving = (files: AssetFile[]) =>
-  mockUploadFiles.mockImplementation(({ onFileUploaded }) => ({
-    unwrap: async () => {
-      files.forEach((file) => onFileUploaded(file));
-      return files;
-    },
-  }));
+const image = (name: string) => new File(['x'], name, { type: 'image/png' });
+
+interface PendingRequest {
+  name: string;
+  fileInfo: Record<string, unknown>;
+  signal: AbortSignal;
+  resolve: (file: AssetFile) => void;
+  reject: (error: Error) => void;
+}
+
+/**
+ * Every request the upload pool sends, held until the test settles it. Each
+ * one rejects on its own when its signal aborts, as the real XHR helper does.
+ */
+let requests: PendingRequest[] = [];
+
+const nextId = (() => {
+  let id = 100;
+  return () => {
+    id += 1;
+    return id;
+  };
+})();
+
+const request = (name: string) => {
+  const found = requests.find((pending) => pending.name === name);
+
+  if (!found) {
+    throw new Error(`No upload request for ${name}`);
+  }
+
+  return found;
+};
+
+const settle = async (name: string, outcome: 'complete' | 'fail' = 'complete') => {
+  await act(async () => {
+    if (outcome === 'complete') {
+      request(name).resolve(asset(nextId(), name));
+    } else {
+      request(name).reject(new UploadFileError('Server error'));
+    }
+  });
+};
+
+// The harness store has no `uploadProgress` slice (the plugin registers it at
+// runtime), and overriding `reducer` replaces the whole map.
+const storeConfig = {
+  reducer: {
+    [adminApi.reducerPath]: adminApi.reducer,
+    admin_app: (state = { token: 'test-token' }) => state,
+    uploadProgress: uploadProgressReducer,
+  },
+};
 
 const renderInput = (
   props: Partial<React.ComponentProps<typeof MediaLibraryInput>> = {},
   initialValues: Record<string, unknown> = {}
 ) =>
   render(<MediaLibraryInput name="cover" label="Cover" {...props} />, {
+    providerOptions: { storeConfig },
     renderOptions: {
       wrapper: ({ children }) => (
         <Form onSubmit={jest.fn()} method="POST" initialValues={initialValues}>
@@ -74,273 +140,236 @@ const renderInput = (
     },
   });
 
-const dropFiles = (files: globalThis.File[]) => {
-  const dropZone = screen.getByRole('button', {
-    name: /click to add an asset or drag and drop one in this area/i,
-  });
+const getDropZone = () => screen.getByText('Drag & drop an asset here');
 
-  fireEvent.drop(dropZone, {
+const dropFiles = (files: globalThis.File[]) => {
+  fireEvent.drop(getDropZone(), {
     dataTransfer: { files, types: ['Files'] },
   });
 };
 
 describe('<MediaLibraryInput /> (Content Manager)', () => {
+  // jsdom has no object URLs; uploads preview the picked file through them.
+  const { createObjectURL, revokeObjectURL } = URL;
+  const { matchMedia } = window;
+
+  /** jsdom matches no media query, which reads as the narrowest phone. */
+  const setViewportWidth = (viewportWidth: number) => {
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: viewportWidth >= Number(/min-width:\s*(\d+)px/.exec(query)?.[1] ?? 0),
+      media: query,
+      onchange: null,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }));
+  };
+
+  beforeAll(() => {
+    URL.createObjectURL = jest.fn(() => 'blob:preview');
+    URL.revokeObjectURL = jest.fn();
+  });
+
+  afterAll(() => {
+    URL.createObjectURL = createObjectURL;
+    URL.revokeObjectURL = revokeObjectURL;
+    window.matchMedia = matchMedia;
+  });
+
   beforeEach(() => {
-    mockUploadFiles.mockReset();
+    setViewportWidth(1440);
+    requests = [];
     mockUploadFromUrls.mockReset();
     Object.assign(mockPermissions, { isLoading: false, canRead: true, canCreate: true });
-  });
 
-  it('renders the drop zone and one row per asset already on the field', () => {
-    renderInput(
-      { attribute: { multiple: true } },
-      { cover: [asset(1, 'one.png'), asset(2, 'two.png')] }
+    mockUploadFileViaXHR.mockReset();
+    mockUploadFileViaXHR.mockImplementation(
+      (_url, _token, formData, signal) =>
+        new Promise((resolve, reject) => {
+          const file = formData.get('files') as globalThis.File;
+          signal.addEventListener('abort', () => reject(new UploadAbortedError()));
+          requests.push({
+            name: file.name,
+            fileInfo: JSON.parse(formData.get('fileInfo') as string),
+            signal,
+            resolve: resolve as (file: AssetFile) => void,
+            reject,
+          });
+        })
     );
-
-    expect(
-      screen.getByRole('button', {
-        name: /click to add an asset or drag and drop one in this area/i,
-      })
-    ).toBeInTheDocument();
-    expect(screen.getByText('one.png')).toBeInTheDocument();
-    expect(screen.getByText('two.png')).toBeInTheDocument();
   });
 
-  it('uploads a dropped file to the Media Library root and adds it to the field', async () => {
-    mockUploadResolving([asset(9, 'dropped.png')]);
+  describe('single field', () => {
+    it('shows only the drop zone while empty', () => {
+      renderInput();
 
-    renderInput({ attribute: { multiple: true } });
-
-    dropFiles([new File(['x'], 'dropped.png', { type: 'image/png' })]);
-
-    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
-
-    const { formData, totalFiles } = mockUploadFiles.mock.calls[0][0];
-    expect(totalFiles).toBe(1);
-
-    const fileInfo = JSON.parse(formData.get('fileInfo') as string);
-    // No current folder in an entry form: uploads land at the root.
-    expect(fileInfo).toEqual([
-      { name: 'dropped.png', caption: null, alternativeText: null, folder: null },
-    ]);
-
-    expect(await screen.findByText('dropped.png')).toBeInTheDocument();
-  });
-
-  it('keeps the assets already on the field when another one is uploaded', async () => {
-    mockUploadResolving([asset(9, 'dropped.png')]);
-
-    renderInput({ attribute: { multiple: true } }, { cover: [asset(1, 'one.png')] });
-
-    dropFiles([new File(['x'], 'dropped.png', { type: 'image/png' })]);
-
-    expect(await screen.findByText('dropped.png')).toBeInTheDocument();
-    expect(screen.getByText('one.png')).toBeInTheDocument();
-  });
-
-  it('refuses a file the field does not allow, and uploads nothing', async () => {
-    renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
-
-    dropFiles([new File(['x'], 'notes.pdf', { type: 'application/pdf' })]);
-
-    expect(await screen.findByText(/You can't upload this type of file/)).toBeInTheDocument();
-    expect(mockUploadFiles).not.toHaveBeenCalled();
-  });
-
-  it('uploads the allowed files of a mixed drop and warns about the rest', async () => {
-    mockUploadResolving([asset(9, 'photo.png')]);
-
-    renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
-
-    dropFiles([
-      new File(['x'], 'photo.png', { type: 'image/png' }),
-      new File(['x'], 'notes.pdf', { type: 'application/pdf' }),
-    ]);
-
-    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
-
-    const fileInfo = JSON.parse(
-      mockUploadFiles.mock.calls[0][0].formData.get('fileInfo') as string
-    );
-    expect(fileInfo).toHaveLength(1);
-    expect(fileInfo[0].name).toBe('photo.png');
-
-    expect(await screen.findByText(/You can't upload this type of file/)).toBeInTheDocument();
-  });
-
-  it('keeps both batches when a second drop lands while the first is still uploading', async () => {
-    mockUploadFiles.mockReturnValue({ unwrap: () => new Promise(() => {}) });
-
-    renderInput({ attribute: { multiple: true } });
-
-    dropFiles([new File(['x'], 'first.png', { type: 'image/png' })]);
-    dropFiles([new File(['x'], 'second.png', { type: 'image/png' })]);
-
-    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(2));
-
-    const [[firstCall], [secondCall]] = mockUploadFiles.mock.calls;
-    await act(async () => {
-      firstCall.onFileUploaded(asset(1, 'first.png'));
-    });
-    await act(async () => {
-      secondCall.onFileUploaded(asset(2, 'second.png'));
+      expect(getDropZone()).toBeInTheDocument();
     });
 
-    expect(await screen.findByText('second.png')).toBeInTheDocument();
-    expect(screen.getByText('first.png')).toBeInTheDocument();
-  });
+    it('shows the asset it holds, with no drop zone', () => {
+      renderInput({}, { cover: asset(1, 'one.png') });
 
-  it('keeps every file when several finish before the field re-renders', async () => {
-    mockUploadFiles.mockReturnValue({ unwrap: () => new Promise(() => {}) });
-
-    renderInput({ attribute: { multiple: true } });
-
-    dropFiles([
-      new File(['x'], 'one.png', { type: 'image/png' }),
-      new File(['x'], 'two.png', { type: 'image/png' }),
-    ]);
-
-    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
-
-    const { onFileUploaded } = mockUploadFiles.mock.calls[0][0];
-    await act(async () => {
-      onFileUploaded(asset(1, 'one.png'));
-      onFileUploaded(asset(2, 'two.png'));
+      expect(screen.getByText('one.png')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Copy link to one.png' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remove one.png' })).toBeInTheDocument();
+      expect(screen.queryByText('Drag & drop an asset here')).not.toBeInTheDocument();
     });
 
-    expect(await screen.findByText('two.png')).toBeInTheDocument();
-    expect(screen.getByText('one.png')).toBeInTheDocument();
-  });
+    it('shows the upload in progress, then the uploaded asset', async () => {
+      renderInput();
 
-  it('adds files a retry uploads after the upload call has resolved', async () => {
-    // Cancel all: the call resolves with only the file that finished before it.
-    mockUploadResolving([asset(1, 'a.png')]);
+      dropFiles([image('photo.png')]);
 
-    renderInput({ attribute: { multiple: true } });
+      await waitFor(() => expect(requests).toHaveLength(1));
+      expect(screen.getByText('photo.png')).toBeInTheDocument();
+      expect(screen.getByText('Uploading...')).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
 
-    dropFiles([
-      new File(['x'], 'a.png', { type: 'image/png' }),
-      new File(['x'], 'b.png', { type: 'image/png' }),
-      new File(['x'], 'c.png', { type: 'image/png' }),
-    ]);
+      await settle('photo.png');
 
-    expect(await screen.findByText('a.png')).toBeInTheDocument();
-
-    // Retry, from the progress dialog, uploads the cancelled files later.
-    const { onFileUploaded } = mockUploadFiles.mock.calls[0][0];
-    await act(async () => {
-      onFileUploaded(asset(2, 'b.png'));
-      onFileUploaded(asset(3, 'c.png'));
+      expect(screen.queryByText('Uploading...')).not.toBeInTheDocument();
+      expect(screen.getByText('photo.png')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remove photo.png' })).toBeInTheDocument();
     });
 
-    expect(await screen.findByText('c.png')).toBeInTheDocument();
-    expect(screen.getByText('b.png')).toBeInTheDocument();
-    expect(screen.getByText('a.png')).toBeInTheDocument();
-  });
+    it('uploads to the Media Library root', async () => {
+      renderInput();
 
-  it('adds nothing when the upload resolves with no file', async () => {
-    mockUploadResolving([]);
+      dropFiles([image('photo.png')]);
 
-    renderInput({ attribute: { multiple: true } });
+      await waitFor(() => expect(requests).toHaveLength(1));
+      // No current folder in an entry form: uploads land at the root.
+      expect(request('photo.png').fileInfo).toEqual({
+        name: 'photo.png',
+        caption: null,
+        alternativeText: null,
+        folder: null,
+      });
+    });
 
-    dropFiles([new File(['x'], 'cancelled.png', { type: 'image/png' })]);
+    it('replaces the asset it held', async () => {
+      renderInput({}, { cover: asset(1, 'old.png') });
 
-    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
-    expect(screen.queryByText('cancelled.png')).not.toBeInTheDocument();
-  });
+      // The drop zone is gone once the field holds an asset; the device picker
+      // is the way to replace it.
+      // eslint-disable-next-line testing-library/no-node-access
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      fireEvent.change(input, { target: { files: [image('new.png')] } });
 
-  it('refuses a multi-file drop on a single-value field, and uploads nothing', async () => {
-    renderInput({ attribute: { multiple: false } });
+      await waitFor(() => expect(requests).toHaveLength(1));
+      await settle('new.png');
 
-    dropFiles([
-      new File(['x'], 'one.png', { type: 'image/png' }),
-      new File(['x'], 'two.png', { type: 'image/png' }),
-    ]);
+      expect(screen.getByText('new.png')).toBeInTheDocument();
+      expect(screen.queryByText('old.png')).not.toBeInTheDocument();
+    });
 
-    expect(await screen.findByText('This field accepts only one file.')).toBeInTheDocument();
-    expect(mockUploadFiles).not.toHaveBeenCalled();
-  });
+    it('refuses a multi-file drop, and uploads nothing', async () => {
+      renderInput();
 
-  it('still uploads a single-file drop on a single-value field', async () => {
-    mockUploadResolving([asset(9, 'only.png')]);
+      dropFiles([image('one.png'), image('two.png')]);
 
-    renderInput({ attribute: { multiple: false } });
+      expect(await screen.findByText('This field accepts only one file.')).toBeInTheDocument();
+      expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
+    });
 
-    dropFiles([new File(['x'], 'only.png', { type: 'image/png' })]);
+    it('cancels an upload from its row', async () => {
+      const { user } = renderInput();
 
-    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText('only.png')).toBeInTheDocument();
-  });
+      dropFiles([image('photo.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
 
-  it('allows a multi-file drop on a multiple field', async () => {
-    mockUploadResolving([asset(1, 'one.png'), asset(2, 'two.png')]);
+      await user.click(screen.getByRole('button', { name: 'Cancel upload of photo.png' }));
 
-    renderInput({ attribute: { multiple: true } });
+      expect(request('photo.png').signal.aborted).toBe(true);
+      expect(screen.queryByText('photo.png')).not.toBeInTheDocument();
+      expect(getDropZone()).toBeInTheDocument();
+    });
 
-    dropFiles([
-      new File(['x'], 'one.png', { type: 'image/png' }),
-      new File(['x'], 'two.png', { type: 'image/png' }),
-    ]);
+    it('keeps a failed upload on the field until it is removed', async () => {
+      const { user } = renderInput();
 
-    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
-    expect(screen.queryByText('This field accepts only one file.')).not.toBeInTheDocument();
-  });
+      dropFiles([image('photo.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+      await settle('photo.png', 'fail');
 
-  it('replaces the asset on a single-value field', async () => {
-    mockUploadResolving([asset(9, 'new.png')]);
+      expect(screen.getByText('photo.png')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
 
-    renderInput({ attribute: { multiple: false } }, { cover: asset(1, 'old.png') });
+      await user.click(screen.getByRole('button', { name: 'Remove' }));
 
-    dropFiles([new File(['x'], 'new.png', { type: 'image/png' })]);
+      expect(screen.queryByText('photo.png')).not.toBeInTheDocument();
+      expect(getDropZone()).toBeInTheDocument();
+    });
 
-    expect(await screen.findByText('new.png')).toBeInTheDocument();
-    expect(screen.queryByText('old.png')).not.toBeInTheDocument();
-  });
+    it('retries a failed upload and adds it once it lands', async () => {
+      const { user } = renderInput();
 
-  it('removes an asset from the field', async () => {
-    const { user } = renderInput(
-      { attribute: { multiple: true } },
-      { cover: [asset(1, 'one.png'), asset(2, 'two.png')] }
-    );
+      dropFiles([image('photo.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+      await settle('photo.png', 'fail');
 
-    await user.click(screen.getByRole('button', { name: 'Remove one.png' }));
+      requests = [];
+      await user.click(screen.getByRole('button', { name: 'Retry' }));
 
-    expect(screen.queryByText('one.png')).not.toBeInTheDocument();
-    expect(screen.getByText('two.png')).toBeInTheDocument();
-  });
+      await waitFor(() => expect(requests).toHaveLength(1));
+      expect(screen.getByText('Uploading...')).toBeInTheDocument();
 
-  it('copies the link to an asset', async () => {
-    const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+      await settle('photo.png');
 
-    await user.click(screen.getByRole('button', { name: 'Copy link to one.png' }));
+      expect(screen.getByRole('button', { name: 'Remove photo.png' })).toBeInTheDocument();
+    });
 
-    expect(await screen.findByText('Link copied.')).toBeInTheDocument();
-    expect(await navigator.clipboard.readText()).toMatch(/\/uploads\/one\.png$/);
-  });
+    it('copies the link of the asset', async () => {
+      const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+      const writeText = jest.spyOn(navigator.clipboard, 'writeText');
 
-  it('opens the asset details when editing an asset', async () => {
-    const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+      await user.click(screen.getByRole('button', { name: 'Copy link to one.png' }));
 
-    await user.click(screen.getByRole('button', { name: 'Edit one.png' }));
+      expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/uploads/one.png'));
+      expect(await screen.findByText('Link copied.')).toBeInTheDocument();
+    });
 
-    expect(await screen.findByRole('dialog')).toBeInTheDocument();
-  });
+    it('opens the asset details when editing the asset', async () => {
+      const { user } = renderInput({}, { cover: asset(1, 'one.png') });
 
-  it('does not allow editing or removing an asset when the field is disabled', () => {
-    renderInput({ disabled: true }, { cover: asset(1, 'one.png') });
+      await user.click(screen.getByRole('button', { name: 'Edit one.png' }));
 
-    expect(screen.getByRole('button', { name: 'Edit one.png' })).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
-    expect(screen.getByRole('button', { name: 'Remove one.png' })).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
-    expect(screen.getByRole('button', { name: 'Copy link to one.png' })).not.toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
+      expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('does not allow editing or removing the asset when the field is disabled', () => {
+      renderInput({ disabled: true }, { cover: asset(1, 'one.png') });
+
+      expect(screen.getByRole('button', { name: 'Edit one.png' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByRole('button', { name: 'Remove one.png' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+
+    it('keeps the disabled actions as bare icons, not grey plates', () => {
+      renderInput({ disabled: true }, { cover: asset(1, 'one.png') });
+
+      for (const name of ['Edit one.png', 'Remove one.png']) {
+        const style = window.getComputedStyle(screen.getByRole('button', { name }));
+        expect(style.backgroundColor).toBe('transparent');
+        expect(style.borderColor).toBe('transparent');
+      }
+    });
+
+    it('removes the asset', async () => {
+      const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+
+      await user.click(screen.getByRole('button', { name: 'Remove one.png' }));
+
+      expect(screen.queryByText('one.png')).not.toBeInTheDocument();
+      expect(getDropZone()).toBeInTheDocument();
+    });
   });
 
   describe('without read access to the Media Library', () => {
@@ -348,81 +377,334 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       mockPermissions.canRead = false;
     });
 
-    it('does not offer to edit an asset', () => {
+    it('does not offer to edit the asset of a single field', () => {
       renderInput({}, { cover: asset(1, 'one.png') });
 
       expect(screen.queryByRole('button', { name: 'Edit one.png' })).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Remove one.png' })).toBeInTheDocument();
     });
 
-    it('opens the device picker instead of the library when the drop zone is clicked', async () => {
-      const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
-      const { user } = renderInput();
-
-      await user.click(
-        screen.getByRole('button', {
-          name: /click to add an asset or drag and drop one in this area/i,
-        })
+    it('does not offer to edit an asset from its menu', async () => {
+      const { user } = renderInput(
+        { attribute: { multiple: true } },
+        { cover: [asset(1, 'one.png')] }
       );
 
-      expect(click).toHaveBeenCalledTimes(1);
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      click.mockRestore();
-    });
+      await user.click(screen.getByRole('button', { name: 'More actions for one.png' }));
 
-    it('explains the missing access on click without upload access either', async () => {
-      mockPermissions.canCreate = false;
-      const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
-      const { user } = renderInput();
-
-      await user.click(
-        screen.getByRole('button', {
-          name: /click to add an asset or drag and drop one in this area/i,
-        })
-      );
-
-      expect(click).not.toHaveBeenCalled();
-      expect(await screen.findByRole('dialog')).toHaveTextContent(
-        "You don't have the permissions to access that content"
-      );
-
-      await user.click(screen.getByRole('button', { name: 'Cancel' }));
-
-      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-      click.mockRestore();
+      expect(await screen.findByRole('menuitem', { name: 'Remove' })).toBeInTheDocument();
+      expect(screen.queryByRole('menuitem', { name: 'Edit' })).not.toBeInTheDocument();
     });
   });
 
-  it('uploads the files chosen from the hidden picker', async () => {
-    mockUploadResolving([asset(9, 'picked.png')]);
+  it('opens nothing when the drop zone is clicked', async () => {
+    const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
+    const { user } = renderInput();
 
-    renderInput({ attribute: { multiple: true } });
+    await user.click(getDropZone());
 
-    // eslint-disable-next-line testing-library/no-node-access
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const file = new File(['x'], 'picked.png', { type: 'image/png' });
+    expect(click).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    click.mockRestore();
+  });
 
-    // jsdom's `files` is a plain stub, so a naive one would not reproduce the
-    // browser: there, `files` is live and assigning `value` empties it in place.
-    // Wiring the setter to clear the list is what makes this test able to fail.
-    const fileList: globalThis.File[] = [file];
-    Object.defineProperty(input, 'files', {
-      configurable: true,
-      get: () => fileList,
+  describe('multiple field', () => {
+    const multiple = { attribute: { multiple: true } };
+
+    it('shows only the drop zone while empty', () => {
+      renderInput(multiple);
+
+      expect(getDropZone()).toBeInTheDocument();
     });
-    Object.defineProperty(input, 'value', {
-      configurable: true,
-      get: () => (fileList.length > 0 ? 'C:\\fakepath\\picked.png' : ''),
-      // Emptied in place, as the browser does: a handler that kept a reference
-      // to the list before the reset now sees it drained.
-      set: () => {
-        fileList.length = 0;
-      },
-    });
-    fireEvent.change(input);
 
-    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText('picked.png')).toBeInTheDocument();
+    it('shows one card per asset, followed by the drop zone', () => {
+      renderInput(multiple, { cover: [asset(1, 'one.png'), asset(2, 'two.png')] });
+
+      expect(screen.getByText('one.png')).toBeInTheDocument();
+      expect(screen.getByText('two.png')).toBeInTheDocument();
+      expect(getDropZone()).toBeInTheDocument();
+    });
+
+    it('adds each file as it lands, keeping the assets already there', async () => {
+      const { user } = renderInput(multiple, { cover: [asset(1, 'one.png')] });
+
+      dropFiles([image('first.png'), image('second.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+
+      await settle('first.png');
+      await waitFor(() => expect(requests).toHaveLength(2));
+
+      expect(
+        screen.getByRole('button', { name: 'More actions for first.png' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Cancel upload of second.png' })
+      ).toBeInTheDocument();
+
+      await settle('second.png');
+
+      // The row scrolls to the newest card; the asset already there is one page back.
+      expect(
+        screen.getByRole('button', { name: 'More actions for second.png' })
+      ).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Previous slide' }));
+      expect(screen.getByRole('button', { name: 'More actions for one.png' })).toBeInTheDocument();
+    });
+
+    it('keeps both batches when a second drop lands while the first is still uploading', async () => {
+      renderInput(multiple);
+
+      dropFiles([image('first.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+      dropFiles([image('second.png')]);
+
+      await settle('first.png');
+      await waitFor(() => expect(requests).toHaveLength(2));
+      await settle('second.png');
+
+      expect(
+        screen.getByRole('button', { name: 'More actions for first.png' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'More actions for second.png' })
+      ).toBeInTheDocument();
+    });
+
+    it('attaches an upload that completes after the input remounts', async () => {
+      // A repeatable component collapsed mid-upload unmounts its fields.
+      const CollapsibleInput = () => {
+        const [isOpen, setIsOpen] = useState(true);
+
+        return (
+          <>
+            <button type="button" onClick={() => setIsOpen((open) => !open)}>
+              Toggle
+            </button>
+            {isOpen && <MediaLibraryInput name="cover" label="Cover" {...multiple} />}
+          </>
+        );
+      };
+
+      const { user } = render(<CollapsibleInput />, {
+        providerOptions: { storeConfig },
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Form onSubmit={jest.fn()} method="POST" initialValues={{}}>
+              {children}
+            </Form>
+          ),
+        },
+      });
+
+      dropFiles([image('first.png'), image('second.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+
+      await user.click(screen.getByRole('button', { name: 'Toggle' }));
+      await settle('first.png');
+      await waitFor(() => expect(requests).toHaveLength(2));
+      await user.click(screen.getByRole('button', { name: 'Toggle' }));
+
+      expect(
+        screen.getByRole('button', { name: 'More actions for first.png' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Cancel upload of second.png' })
+      ).toBeInTheDocument();
+
+      await settle('second.png');
+
+      expect(
+        screen.getByRole('button', { name: 'More actions for second.png' })
+      ).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: /^More actions for/ })).toHaveLength(2);
+    });
+
+    it('cancels one upload without stopping the others', async () => {
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      dropFiles([image('first.png'), image('second.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+
+      await user.click(screen.getByRole('button', { name: 'Cancel upload of first.png' }));
+
+      expect(request('first.png').signal.aborted).toBe(true);
+      await waitFor(() => expect(requests).toHaveLength(2));
+      await settle('second.png');
+
+      expect(screen.queryByText('first.png')).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'More actions for second.png' })
+      ).toBeInTheDocument();
+    });
+
+    it('shows a failed upload with retry and remove', async () => {
+      renderInput(multiple);
+
+      dropFiles([image('photo.png')]);
+      await waitFor(() => expect(requests).toHaveLength(1));
+      await settle('photo.png', 'fail');
+
+      expect(screen.getByRole('button', { name: 'Retry uploading photo.png' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remove photo.png' })).toBeInTheDocument();
+    });
+
+    it('refuses a file the field does not allow, and uploads nothing', async () => {
+      renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
+
+      dropFiles([new File(['x'], 'notes.pdf', { type: 'application/pdf' })]);
+
+      expect(await screen.findByText(/You can't upload this type of file/)).toBeInTheDocument();
+      expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
+    });
+
+    it('uploads the allowed files of a mixed drop and warns about the rest', async () => {
+      renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
+
+      dropFiles([image('photo.png'), new File(['x'], 'notes.pdf', { type: 'application/pdf' })]);
+
+      await waitFor(() => expect(requests).toHaveLength(1));
+      expect(requests[0].name).toBe('photo.png');
+      expect(await screen.findByText(/You can't upload this type of file/)).toBeInTheDocument();
+    });
+
+    it('removes an asset from its menu', async () => {
+      const { user } = renderInput(multiple, {
+        cover: [asset(1, 'one.png'), asset(2, 'two.png')],
+      });
+
+      await user.click(screen.getByRole('button', { name: 'More actions for one.png' }));
+      await user.click(await screen.findByRole('menuitem', { name: 'Remove' }));
+
+      expect(screen.queryByText('one.png')).not.toBeInTheDocument();
+      expect(screen.getByText('two.png')).toBeInTheDocument();
+    });
+
+    it('opens the asset details from its menu', async () => {
+      const { user } = renderInput(multiple, { cover: [asset(1, 'one.png')] });
+
+      await user.click(screen.getByRole('button', { name: 'More actions for one.png' }));
+      await user.click(await screen.findByRole('menuitem', { name: 'Edit' }));
+
+      expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('pages through the assets when they do not fit on one row', async () => {
+      const assets = [1, 2, 3].map((id) => asset(id, `asset-${id}.png`));
+      const { user } = renderInput(multiple, { cover: assets });
+
+      // Two cards at most, whatever the width.
+      expect(screen.getByText('asset-1.png')).toBeInTheDocument();
+      expect(screen.getByText('asset-2.png')).toBeInTheDocument();
+      expect(screen.queryByText('asset-3.png')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Previous slide' })).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Next slide' }));
+
+      expect(screen.queryByText('asset-1.png')).not.toBeInTheDocument();
+      expect(screen.getByText('asset-3.png')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Next slide' })).not.toBeInTheDocument();
+      expect(getDropZone()).toBeInTheDocument();
+    });
+
+    it.each([
+      [4, 1],
+      [6, 1],
+      [8, 1],
+      [12, 2],
+    ])('shows as many cards as a %i/12 field allows (%i)', (layoutSize, visible) => {
+      const assets = [1, 2, 3].map((id) => asset(id, `asset-${id}.png`));
+      renderInput({ ...multiple, layoutSize }, { cover: assets });
+
+      expect(screen.getAllByRole('button', { name: /^More actions for/ })).toHaveLength(visible);
+      expect(getDropZone()).toBeInTheDocument();
+    });
+
+    it.each([
+      ['a tablet-sized', 600],
+      ['a phone-sized', 400],
+    ])('shows one card at a time on %s screen', (_, viewportWidth) => {
+      setViewportWidth(viewportWidth);
+      const assets = [1, 2, 3].map((id) => asset(id, `asset-${id}.png`));
+      renderInput({ ...multiple, layoutSize: 12 }, { cover: assets });
+
+      expect(screen.getAllByRole('button', { name: /^More actions for/ })).toHaveLength(1);
+      expect(getDropZone()).toBeInTheDocument();
+    });
+
+    describe('on a narrow field', () => {
+      const { ResizeObserver: OriginalResizeObserver } = window;
+
+      beforeAll(() => {
+        // A third of the form: room for one card, not for a card and the tile.
+        window.ResizeObserver = class {
+          callback: ResizeObserverCallback;
+
+          constructor(callback: ResizeObserverCallback) {
+            this.callback = callback;
+          }
+
+          observe() {
+            this.callback(
+              [{ contentRect: { width: 197 } } as ResizeObserverEntry],
+              this as unknown as ResizeObserver
+            );
+          }
+
+          unobserve() {}
+
+          disconnect() {}
+        };
+      });
+
+      afterAll(() => {
+        window.ResizeObserver = OriginalResizeObserver;
+      });
+
+      it('shows one card at a time, with the drop zone below', async () => {
+        const { user } = renderInput(multiple, {
+          cover: [asset(1, 'one.png'), asset(2, 'two.png')],
+        });
+
+        expect(screen.getByText('one.png')).toBeInTheDocument();
+        expect(screen.queryByText('two.png')).not.toBeInTheDocument();
+        expect(getDropZone()).toBeInTheDocument();
+
+        await user.click(screen.getByRole('button', { name: 'Next slide' }));
+
+        expect(screen.getByText('two.png')).toBeInTheDocument();
+        expect(screen.queryByText('one.png')).not.toBeInTheDocument();
+      });
+    });
+
+    it('uploads the files chosen from the hidden picker', async () => {
+      renderInput(multiple);
+
+      // eslint-disable-next-line testing-library/no-node-access
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const file = image('picked.png');
+
+      // jsdom's `files` is a plain stub, so a naive one would not reproduce the
+      // browser: there, `files` is live and assigning `value` empties it in place.
+      // Wiring the setter to clear the list is what makes this test able to fail.
+      const fileList: globalThis.File[] = [file];
+      Object.defineProperty(input, 'files', {
+        configurable: true,
+        get: () => fileList,
+      });
+      Object.defineProperty(input, 'value', {
+        configurable: true,
+        get: () => (fileList.length > 0 ? 'C:\\fakepath\\picked.png' : ''),
+        // Emptied in place, as the browser does: a handler that kept a reference
+        // to the list before the reset now sees it drained.
+        set: () => {
+          fileList.length = 0;
+        },
+      });
+      fireEvent.change(input);
+
+      await waitFor(() => expect(requests).toHaveLength(1));
+      expect(screen.getByText('picked.png')).toBeInTheDocument();
+    });
   });
 
   describe('Add asset menu', () => {
@@ -438,6 +720,16 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(await screen.findByRole('menuitem', { name: 'Browse library' })).toBeInTheDocument();
       expect(screen.getByRole('menuitem', { name: 'Upload from device' })).toBeInTheDocument();
       expect(screen.getByRole('menuitem', { name: 'Upload from URL' })).toBeInTheDocument();
+    });
+
+    it('opens the asset picker from "Browse library"', async () => {
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+      await user.click(await screen.findByRole('menuitem', { name: 'Browse library' }));
+
+      const dialog = await screen.findByRole('dialog', { name: 'Add asset for Cover' });
+      expect(within(dialog).getByRole('tab', { name: 'Browse assets' })).toBeInTheDocument();
     });
 
     it('offers browse only when the user cannot create', async () => {
@@ -484,10 +776,10 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
 
       for (const name of ['Browse library', 'Upload from device', 'Upload from URL']) {
         // eslint-disable-next-line no-await-in-loop
-        expect(await screen.findByRole('menuitem', { name })).toHaveAttribute(
-          'aria-disabled',
-          'true'
-        );
+        const item = await screen.findByRole('menuitem', { name });
+        expect(item).toHaveAttribute('aria-disabled', 'true');
+        // neutral500: the label greys out along with its icon.
+        expect(window.getComputedStyle(item).color).toBe('rgb(142, 142, 169)');
       }
     });
 
@@ -518,10 +810,9 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       fireEvent.change(urlField, { target: { value: 'https://example.com/from-url.png' } });
       expect(urlField).toHaveValue('https://example.com/from-url.png');
 
-      const form = screen.getByRole('button', { name: 'Upload' }).closest('form')!;
-      // jsdom does not perform implicit form submission from a submit button, so
-      // the event the dialog listens for has to be raised directly.
-      fireEvent.submit(form);
+      // Not `user.click`: user-event submits through `form.requestSubmit(submitter)`,
+      // which jsdom does not implement, so the form would never submit.
+      fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
 
       await waitFor(() => expect(mockUploadFromUrls).toHaveBeenCalledTimes(1));
       expect(mockUploadFromUrls.mock.calls[0][0]).toMatchObject({
@@ -540,13 +831,14 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       // The design system paints button icons with its own per-variant
       // "svg path { fill }", so the chevron needs the fill set explicitly or it
       // stays the default grey while the label turns primary.
+      // eslint-disable-next-line testing-library/no-node-access
       const chevron = trigger.querySelector('svg path');
       expect(chevron).not.toBeNull();
       // primary600
       expect(window.getComputedStyle(chevron!).fill).toBe('#4945ff');
 
-      const label = trigger.querySelector('span');
-      expect(window.getComputedStyle(label!).fontWeight).toBe('400');
+      const label = within(trigger).getByText('Add asset');
+      expect(window.getComputedStyle(label).fontWeight).toBe('400');
     });
 
     it('disables the trigger on a disabled field', () => {
@@ -577,7 +869,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       fireEvent.change(await screen.findByRole('textbox'), {
         target: { value: 'https://example.com/photo.png\nhttps://example.com/notes.pdf' },
       });
-      fireEvent.submit(screen.getByRole('button', { name: 'Upload' }).closest('form')!);
+      fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
 
       expect(
         await screen.findByText(
@@ -592,8 +884,38 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   it('does not upload when the field is disabled', () => {
     renderInput({ disabled: true, attribute: { multiple: true } });
 
-    dropFiles([new File(['x'], 'dropped.png', { type: 'image/png' })]);
+    dropFiles([image('dropped.png')]);
 
-    expect(mockUploadFiles).not.toHaveBeenCalled();
+    expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
+  });
+
+  describe.each([
+    ['without upload access', { canCreate: false }],
+    ['while permissions are still loading', { isLoading: true, canCreate: false }],
+  ])('%s', (_, permissions) => {
+    beforeEach(() => {
+      Object.assign(mockPermissions, permissions);
+    });
+
+    it('refuses a drop, and uploads nothing', () => {
+      renderInput({ attribute: { multiple: true } });
+
+      const dataTransfer = { files: [image('dropped.png')], types: ['Files'], dropEffect: '' };
+      fireEvent.dragOver(getDropZone(), { dataTransfer });
+      dropFiles([image('dropped.png')]);
+
+      // The no-drop cursor, and no `drop` from a real browser.
+      expect(dataTransfer.dropEffect).toBe('none');
+      expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
+    });
+  });
+
+  it('accepts a drop once the user can upload', () => {
+    renderInput({ attribute: { multiple: true } });
+
+    const dataTransfer = { files: [image('dropped.png')], types: ['Files'], dropEffect: '' };
+    fireEvent.dragOver(getDropZone(), { dataTransfer });
+
+    expect(dataTransfer.dropEffect).toBe('copy');
   });
 });

@@ -119,7 +119,7 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
     });
   }
 
-  return next();
+  return result;
 };
 
 /**

@@ -73,7 +73,7 @@ describe('createEventManager', () => {
           run({ onCommit: (fn) => commitCallbacks.push(fn) })
         ),
       },
-      eventHub: { emit: jest.fn() },
+      eventHub: { emit: jest.fn(), hasListeners: jest.fn(() => true) },
       log: { error: jest.fn() },
     };
 
@@ -119,6 +119,37 @@ describe('createEventManager', () => {
     expect(strapi.log.error).toHaveBeenCalledWith(
       `Could not emit entry.delete for ${uid}: hub down`
     );
+  });
+
+  it('reads the entry again with the deep populate and emits it when something listens', async () => {
+    const populated = { id: 1, title: 'Populated' };
+    const { strapi, commitCallbacks } = setup(jest.fn().mockResolvedValue(populated));
+
+    createEventManager(strapi as any, uid).emitEvent('entry.update', { id: 1 } as any);
+    await discardCommitCallbacks(commitCallbacks);
+
+    expect(strapi.eventHub.hasListeners).toHaveBeenCalledWith('entry.update');
+    expect(strapi.db.query).toHaveBeenCalledWith(uid);
+    expect(strapi.db.query(uid).findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: {} });
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('entry.update', {
+      model: 'article',
+      uid,
+      entry: { id: 1 },
+    });
+  });
+
+  it('neither reads the entry again nor emits when nothing listens to the event', async () => {
+    const findOne = jest.fn().mockResolvedValue({ id: 1 });
+    const { strapi, commitCallbacks } = setup(findOne);
+    strapi.eventHub.hasListeners.mockReturnValue(false);
+
+    createEventManager(strapi as any, uid).emitEvent('entry.update', { id: 1 } as any);
+    const rejections = await discardCommitCallbacks(commitCallbacks);
+
+    expect(rejections).toEqual([]);
+    expect(findOne).not.toHaveBeenCalled();
+    expect(strapi.eventHub.emit).not.toHaveBeenCalled();
+    expect(strapi.log.error).not.toHaveBeenCalled();
   });
 });
 
