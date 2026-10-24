@@ -88,7 +88,8 @@ export const EditFolderContent = ({
   const handleKeyDown =
     (handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void) =>
     (event: React.KeyboardEvent<HTMLFormElement>) => {
-      if (event.key === 'Enter') {
+      // Do not save the folder when Enter confirms an IME composition.
+      if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
         if (event.target instanceof HTMLInputElement) {
           handleSubmit(event);
           event.preventDefault();
