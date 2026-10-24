@@ -24,6 +24,9 @@
   <a href="https://github.com/strapi/strapi/actions/workflows/nightly.yml">
     <img src="https://github.com/strapi/strapi/actions/workflows/nightly.yml/badge.svg" alt="Strapi Nightly Release Build Status" />
   </a>
+  <a href="https://app.codspeed.io/strapi/strapi?utm_source=badge">
+    <img src="https://img.shields.io/endpoint?url=https://codspeed.io/badge.json" alt="CodSpeed" />
+  </a>
 </p>
 
 <br>

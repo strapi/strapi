@@ -31,6 +31,7 @@
     "scripts/*"
   ],
   "scripts": {
+    "bench": "vitest bench --run",
     "build": "nx run-many --targets build:code,build:types --nx-ignore-cycles",
     "build:code": "nx run-many --target=build:code --nx-ignore-cycles",
     "build:types": "nx run-many --target=build:types --nx-ignore-cycles",
