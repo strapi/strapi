@@ -8,6 +8,12 @@ module.exports = {
   attributes: {
     text: {
       type: 'string',
+      // Required leaf: lets component-replacement.test.api.ts assert that an id-less
+      // component on update is a create (which must supply `text`) rather than a patch.
+      required: true,
+    },
+    note: {
+      type: 'string',
     },
   },
 };
