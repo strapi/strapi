@@ -62,3 +62,7 @@ export const expandLegacyActionFilters = <T>(filters: T): T => {
 
   return expanded as T;
 };
+
+/** Expands the action filters of a list query, leaving pagination and sort as they are. */
+export const expandLegacyActionQuery = <T extends { filters?: unknown }>(query: T): T =>
+  query?.filters ? { ...query, filters: expandLegacyActionFilters(query.filters) } : query;

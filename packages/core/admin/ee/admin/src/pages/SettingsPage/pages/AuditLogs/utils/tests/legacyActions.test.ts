@@ -1,4 +1,8 @@
-import { expandLegacyActionFilters, isLegacyAction } from '../legacyActions';
+import {
+  expandLegacyActionFilters,
+  expandLegacyActionQuery,
+  isLegacyAction,
+} from '../legacyActions';
 
 describe('legacyActions', () => {
   it('marks the legacy keys and nothing else', () => {
@@ -57,6 +61,24 @@ describe('legacyActions', () => {
         { $not: { action: { $in: ['admin-user.delete', 'user.delete'] } } },
       ],
     });
+  });
+
+  it('expands the filters of a list query and keeps the rest', () => {
+    expect(
+      expandLegacyActionQuery({
+        page: 1,
+        pageSize: 10,
+        sort: 'date:DESC',
+        filters: { $and: [{ action: { $eq: 'media.create' } }] },
+      })
+    ).toEqual({
+      page: 1,
+      pageSize: 10,
+      sort: 'date:DESC',
+      filters: { $and: [{ action: { $in: ['media.create', 'media-folder.create'] } }] },
+    });
+    const withoutFilters: { page: number; filters?: unknown } = { page: 2 };
+    expect(expandLegacyActionQuery(withoutFilters)).toEqual({ page: 2 });
   });
 
   it('returns undefined and scalars as is', () => {
