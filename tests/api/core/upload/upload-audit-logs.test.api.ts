@@ -440,6 +440,16 @@ describeOnCondition(edition === 'EE')('Media library in audit logs (api)', () =>
           }
         )
       );
+      // The folder the file was in comes from the read made before the update
+      const back = await updateFileInfo(updated.id, { folder: null });
+      expect(back.statusCode).toBe(200);
+
+      const rows = await rowsFor('media.update', 'media', updated.id, 2);
+      expect(rows[1].payload.details).toEqual({
+        changes: {
+          folder: { before: { id: destination.id, name: destination.name }, after: null },
+        },
+      });
     });
 
     test('writes no media.update row when nothing changed', async () => {

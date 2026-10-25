@@ -181,6 +181,15 @@ describe('Upload audit events', () => {
       expect(getMediaChanges({ file: { ...file, size: 20 }, previous: file })).toEqual({});
     });
 
+    test('media.update treats an empty text as the null the field held', () => {
+      expect(
+        getMediaChanges({ file: { ...file, alternativeText: '', caption: '' }, previous: file })
+      ).toEqual({});
+      expect(
+        getMediaChanges({ file: { ...file, caption: 'New' }, previous: { ...file, caption: '' } })
+      ).toEqual({ caption: { before: '', after: 'New' } });
+    });
+
     test('media.update records a focal point change', () => {
       expect(
         getMediaChanges({ file: { ...file, focalPoint: { x: 10, y: 20 } }, previous: file })

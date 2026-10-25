@@ -45,6 +45,9 @@ type Metas = {
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 
+// The audit log records the folder of an updated file
+const FOLDER_REF_POPULATE = { folder: { fields: ['id', 'name'] } };
+
 const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
@@ -456,7 +459,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   ) {
     const { user } = opts ?? {};
 
-    const dbFile = await findOne(id);
+    const dbFile = await findOne(id, FOLDER_REF_POPULATE);
 
     if (!dbFile) {
       throw new NotFoundError();
@@ -470,13 +473,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
       focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
-      folder: _.isUndefined(folder) ? dbFile.folder : folder,
+      ...(_.isUndefined(folder) ? {} : { folder }),
       folderPath: _.isUndefined(folder)
         ? dbFile.folderPath
         : await fileService.getFolderPath(folder),
     };
 
-    return update(id, newInfos, { user });
+    return update(id, newInfos, { user }, { previous: dbFile });
   }
 
   async function replace(
@@ -490,7 +493,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const { isImage } = getService('image-manipulation');
 
-    const dbFile = await findOne(id);
+    const dbFile = await findOne(id, FOLDER_REF_POPULATE);
     if (!dbFile) {
       throw new NotFoundError();
     }
@@ -560,7 +563,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await fse.remove(tmpWorkingDirectory);
     }
 
-    return update(id, fileData, { user }, { replaced: true });
+    return update(id, fileData, { user }, { replaced: true, previous: dbFile });
   }
 
   type FolderRef = { id: number; name: string } | null;
@@ -595,7 +598,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     id: ID,
     values: Partial<UploadableFile>,
     opts?: CommonOptions,
-    { replaced = false }: { replaced?: boolean } = {}
+    {
+      replaced = false,
+      previous: knownPrevious,
+    }: { replaced?: boolean; previous?: Record<string, any> } = {}
   ) {
     const { user } = opts ?? {};
 
@@ -608,9 +614,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     await sendMediaMetrics(fileValues);
 
-    const previous = await strapi.db
-      .query(FILE_MODEL_UID)
-      .findOne({ where: { id }, populate: { folder: { select: ['id', 'name'] } } });
+    // Callers that already read the file pass it, with its folder
+    const previous =
+      knownPrevious ??
+      (await strapi.db
+        .query(FILE_MODEL_UID)
+        .findOne({ where: { id }, populate: { folder: { select: ['id', 'name'] } } }));
 
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 

@@ -139,10 +139,12 @@ export const getMediaChanges = ({
     changes.name = { before: previous.name, after: media.name };
   }
 
+  // The admin sends '' for an empty field that is stored as null
+  const blankAsNull = (value: string | null | undefined) => value || null;
   for (const field of ['alternativeText', 'caption'] as const) {
     const before = previous[field] ?? null;
     const after = media[field] ?? null;
-    if (before !== after) {
+    if (blankAsNull(before) !== blankAsNull(after)) {
       changes[field] = { before, after };
     }
   }
@@ -364,7 +366,6 @@ export const registerAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
     resource: fileResource(media),
   }));
 
-  // Folders are recorded under the media.* actions: the resource type tells them apart
   auditLogsLifecycle.registerEvent(
     AUDITED_EVENTS.FOLDER_CREATE,
     ({ folder }: FolderEvent) => ({ resource: folderResource(folder) }),

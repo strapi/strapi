@@ -61,6 +61,7 @@ const uploadService = createUploadService({ strapi: global.strapi } as any);
 describe('updateFileInfo', () => {
   beforeEach(() => {
     update.mockClear();
+    dbFindOne.mockClear();
     dbFindOne.mockResolvedValue(dbFile);
     getFolderPath.mockClear();
     folderFindOne.mockClear();
@@ -77,9 +78,10 @@ describe('updateFileInfo', () => {
     const [{ data }] = update.mock.calls[0];
     expect(data).toMatchObject({
       alternativeText: 'new alt',
-      folder: dbFile.folder,
       folderPath: dbFile.folderPath,
     });
+    // The folder relation is left as it is
+    expect(data).not.toHaveProperty('folder');
     expect(getFolderPath).not.toHaveBeenCalled();
   });
 
@@ -107,6 +109,8 @@ describe('updateFileInfo', () => {
       previous: { id: 1, alternativeText: 'existing alt', folder: { id: 2, name: null } },
     });
     expect(folderFindOne).not.toHaveBeenCalled();
+    // The file read by updateFileInfo is the one the audit event compares against
+    expect(dbFindOne).toHaveBeenCalledTimes(1);
   });
 
   test('reads the new folder when the file moves', async () => {

@@ -4,7 +4,6 @@
  * one option covers the whole history.
  *
  * Admin accounts: remove together with the deprecated `user.*` event hub events.
- * Media folders: now recorded as `media.*` with `resource.type: "media-folder"`.
  */
 export const LEGACY_ACTIONS: Record<string, string> = {
   'admin-user.create': 'user.create',
