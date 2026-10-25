@@ -126,9 +126,9 @@ These fire automatically — you usually do not add them in feature code:
 | Event                                  | When                                        | Notes                                                        |
 | -------------------------------------- | ------------------------------------------- | ------------------------------------------------------------ |
 | `didInitializeAdministration`          | First load with uuid + telemetry properties | Anonymous (`userId: ''`); uses raw `fetch`, not `trackUsage` |
-| `didAccessAuthenticatedAdministration` | Authenticated layout mount                  | Includes `registeredWidgets`, `projectId`                    |
+| `didAccessAuthenticatedAdministration` | Once per authenticated load                 | `registeredWidgets`, `projectId`; after version is ready     |
 
-`didAccessAuthenticatedAdministration` is sent from `packages/core/admin/admin/src/layouts/AuthenticatedLayout.tsx` when `projectId` becomes available.
+`didAccessAuthenticatedAdministration` is sent from `packages/core/admin/admin/src/layouts/useAuthenticatedAccessTracking.ts` (called by `AuthenticatedLayout`) once the information request has returned `projectId` and the telemetry-properties request has succeeded or failed. If the information request fails, the event is not sent because `projectId` comes from that response. If the telemetry-properties request fails, the event is still sent without telemetry properties.
 
 ---
 
@@ -231,7 +231,10 @@ window.strapi = browserStrapi;
 returns `Growth` when `planPriceId` contains `growth` and `Enterprise` for other licensed
 plans.
 
-Typed in `packages/core/admin/admin/custom.d.ts`.
+Typed as `Window['strapi']` in `packages/core/types/src/globals-admin.ts`, loaded from admin
+tsconfigs as `@strapi/types/globals-admin`. The shape is not exported from the `@strapi/types`
+root, and both the interface and the `window.strapi` declaration are marked `@internal`:
+first-party plumbing, not plugin API.
 
 ---
 

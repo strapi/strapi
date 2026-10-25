@@ -184,15 +184,23 @@ export const buildFiltersSchema = (
     return z.never();
   }
 
-  // Lazy reference for recursion ($and / $or / $not)
+  // Lazy reference for recursion ($and / $or / $not).
+  // The getter is memoized: zod's JSON Schema conversion calls `def.getter()` directly for every
+  // node that reaches the lazy, bypassing zod's own cache, so an unmemoized getter rebuilds the
+  // whole object (fields x operators) many times per conversion.
+  let resolvedFiltersObject: z.ZodTypeAny | undefined;
   const filtersSchema: z.ZodTypeAny = z.lazy(() => {
+    if (resolvedFiltersObject !== undefined) {
+      return resolvedFiltersObject;
+    }
+
     const fieldShapes: Record<string, z.ZodTypeAny> = { ...nestedShapes };
 
     for (const key of scalarKeys) {
       fieldShapes[key] = buildScalarFieldFilter(attributes[key]).optional();
     }
 
-    return z
+    resolvedFiltersObject = z
       .object({
         $and: z.array(filtersSchema).optional(),
         $or: z.array(filtersSchema).optional(),
@@ -200,6 +208,8 @@ export const buildFiltersSchema = (
         ...fieldShapes,
       })
       .strict();
+
+    return resolvedFiltersObject;
   });
 
   const fieldList = [...scalarKeys, ...nestedKeys].join(', ');

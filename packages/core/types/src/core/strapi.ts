@@ -186,6 +186,9 @@ export interface Strapi extends Container {
     : TSchemaUID extends UID.Component
       ? Schema.Component<TSchemaUID>
       : never;
+  /**
+   * @deprecated Use {@link Database.query | strapi.db.query} instead, or the Document Service (`strapi.documents`) for most content operations. Will be removed in the next major version.
+   */
   query(uid: UID.Schema): ReturnType<Database['query']>;
 }
 

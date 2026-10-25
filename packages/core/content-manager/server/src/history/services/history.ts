@@ -99,7 +99,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                       return null;
                     }
 
-                    return strapi.query('admin::user').findOne({
+                    return strapi.db.query('admin::user').findOne({
                       where: {
                         ...(userToPopulate.id ? { id: userToPopulate.id } : {}),
                         ...(userToPopulate.documentId
