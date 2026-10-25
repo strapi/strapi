@@ -157,10 +157,10 @@ describe('Upload audit events', () => {
       });
     });
 
-    test('media.update records a replaced file without its hash or url', () => {
-      const replaced = { ...file, hash: 'hero_def', mime: 'image/jpeg', size: 20 };
+    test('media.update records a replaced file, which keeps its hash and url', () => {
+      const replaced = { ...file, mime: 'image/jpeg', size: 20 };
 
-      const changes = getMediaChanges({ file: replaced, previous: file });
+      const changes = getMediaChanges({ file: replaced, previous: file, replaced: true });
 
       expect(changes).toEqual({
         file: {
@@ -169,6 +169,22 @@ describe('Upload audit events', () => {
         },
       });
       expect(JSON.stringify(changes)).not.toMatch(/hero_|uploads/);
+    });
+
+    test('media.update records a replace even when the new file has the same type and size', () => {
+      expect(getMediaChanges({ file: { ...file }, previous: file, replaced: true })).toHaveProperty(
+        'file'
+      );
+    });
+
+    test('media.update records no file change when the file was not replaced', () => {
+      expect(getMediaChanges({ file: { ...file, size: 20 }, previous: file })).toEqual({});
+    });
+
+    test('media.update records a focal point change', () => {
+      expect(
+        getMediaChanges({ file: { ...file, focalPoint: { x: 10, y: 20 } }, previous: file })
+      ).toEqual({ focalPoint: { before: null, after: { x: 10, y: 20 } } });
     });
 
     test('media.update is recorded only when something changed', () => {

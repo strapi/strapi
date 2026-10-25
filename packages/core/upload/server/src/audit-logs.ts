@@ -77,7 +77,6 @@ interface MediaFile {
   name: string;
   mime?: string;
   size?: number;
-  hash?: string;
   alternativeText?: string | null;
   caption?: string | null;
   focalPoint?: { x: number; y: number } | null;
@@ -92,15 +91,16 @@ export interface MediaEvent {
 export interface MediaUpdateEvent {
   file: MediaFile;
   previous: MediaFile;
+  /** The file's content was replaced. It keeps its hash and url, so no field shows it. */
+  replaced?: boolean;
 }
 
-/** Picks the fields the audit log compares; `hash` tells a replaced file and is not recorded. */
+/** Picks the fields the audit log compares. */
 export const toAuditedFile = (file: Record<string, any>): MediaFile => ({
   id: Number(file.id),
   name: file.name,
   mime: file.mime,
   size: file.size,
-  hash: file.hash,
   alternativeText: file.alternativeText ?? null,
   caption: file.caption ?? null,
   focalPoint: file.focalPoint ?? null,
@@ -128,7 +128,11 @@ const summarizeFile = (file: MediaFile): FileSummary => ({
   size: file.size ?? null,
 });
 
-export const getMediaChanges = ({ file: media, previous }: MediaUpdateEvent): MediaChanges => {
+export const getMediaChanges = ({
+  file: media,
+  previous,
+  replaced,
+}: MediaUpdateEvent): MediaChanges => {
   const changes: MediaChanges = {};
 
   if (previous.name !== media.name) {
@@ -155,8 +159,7 @@ export const getMediaChanges = ({ file: media, previous }: MediaUpdateEvent): Me
     changes.folder = { before: folderBefore, after: folderAfter };
   }
 
-  // A replaced file gets a new hash; the hash itself is not recorded
-  if (previous.hash !== media.hash) {
+  if (replaced) {
     changes.file = { before: summarizeFile(previous), after: summarizeFile(media) };
   }
 

@@ -518,6 +518,67 @@ describeOnCondition(edition === 'EE')('Media library in audit logs (api)', () =>
       expect(await findLogs('media-folder.update')).toHaveLength(0);
     });
 
+    test('records a replaced file, which keeps its name and url', async () => {
+      const replaced = await file(null);
+      await clearAuditLogs();
+
+      const res = await rq({
+        method: 'POST',
+        url: `/upload?id=${replaced.id}`,
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, 'utils/strapi.png')),
+          fileInfo: JSON.stringify({ name: replaced.name }),
+        },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [replaceRow] = await rowsFor('media.update', 'media', replaced.id);
+      expect(replaceRow.payload).toEqual(
+        row(
+          'media.update',
+          { type: 'media', id: replaced.id, name: replaced.name },
+          {
+            changes: {
+              file: {
+                before: { name: replaced.name, mime: 'image/jpeg', size: expect.any(Number) },
+                after: { name: replaced.name, mime: 'image/png', size: expect.any(Number) },
+              },
+            },
+          }
+        )
+      );
+      expect(JSON.stringify(replaceRow.payload)).not.toMatch(/uploads|"hash"/);
+    });
+
+    test('records a deleted folder but not its subfolders, and each file inside', async () => {
+      const outer = await folder('audit-delete-outer');
+      const inner = await folder('audit-delete-inner', outer.id);
+      const inside = await createFile(inner.id);
+      await clearAuditLogs();
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: { fileIds: [], folderIds: [outer.id] },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [outerRow] = await rowsFor('media.delete', 'media-folder', outer.id);
+      expect(outerRow.payload).toEqual(
+        row('media.delete', { type: 'media-folder', id: outer.id, name: outer.name })
+      );
+      const [fileRow] = await rowsFor('media.delete', 'media', inside.id);
+      expect(fileRow.payload.resource).toEqual({ type: 'media', id: inside.id, name: inside.name });
+
+      // A later row proves every delete event was processed
+      const marker = await folder('audit-delete-marker');
+      await rowsFor('media.create', 'media-folder', marker.id);
+      const folderRows = (await findLogs('media.delete')).filter(
+        (log) => log.payload.resource.type === 'media-folder'
+      );
+      expect(folderRows.map((log) => log.payload.resource.id)).toEqual([outer.id]);
+    });
+
     test('records each deleted folder and the files inside it as media.delete', async () => {
       const first = await folder('audit-delete-first');
       const second = await folder('audit-delete-second');
