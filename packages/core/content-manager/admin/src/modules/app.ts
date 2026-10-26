@@ -65,11 +65,7 @@ const appSlice = createSlice({
     },
   },
   extraReducers(builder) {
-    builder.addMatcher(
-      (action): action is { type: string } =>
-        action.type === `${adminApi.reducerPath}/resetApiState`,
-      () => initialState
-    );
+    builder.addMatcher(adminApi.util.resetApiState.match, () => initialState);
   },
 });
 
