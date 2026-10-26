@@ -236,7 +236,11 @@ const selectPlugins = async ({
       logger.warn(`${row.entry.packageName} is installed but is not included in your license.`)
     );
 
-  if (!isAnyPluginLicensed && !rows.some((row) => row.state === 'not-licensed')) {
+  if (
+    !isAnyPluginLicensed &&
+    !rows.some((row) => row.state === 'not-licensed') &&
+    lockedPlugins.length === 0
+  ) {
     throw new EnterpriseInstallError('Your license does not include any Enterprise plugins.');
   }
 
@@ -256,7 +260,9 @@ const selectPlugins = async ({
       }
     });
 
-    if (
+    if (!isAnyPluginLicensed) {
+      logger.info('Your license does not include any Enterprise plugins yet.');
+    } else if (
       visibleRows.every(
         (row) => row.state === 'installed' || row.state === 'not-licensed' || row.state === 'locked'
       )

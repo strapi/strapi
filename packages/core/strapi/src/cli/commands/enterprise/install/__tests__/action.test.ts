@@ -651,24 +651,33 @@ describe('runInstall with the checklist', () => {
     );
   });
 
-  it('says so when the license includes no plugin, even when the catalog lists others', async () => {
+  it('lists the locked plugins when the license includes no plugin', async () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
         searchResult: [],
         packuments: {},
         catalog: {
-          plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
+          plugins: [{ name: LOCKED_PLUGIN, displayName: 'Locked', licensed: false }],
           notLicensedMessage: NOT_LICENSED_MESSAGE,
         },
       }),
     });
     const logger = createTestLogger();
 
-    await expect(
-      runInstall({ appDir: await createApp(), packageArguments: [], logger, dependencies })
-    ).rejects.toThrow('Your license does not include any Enterprise plugins.');
+    await runInstall({ appDir: await createApp(), packageArguments: [], logger, dependencies });
+
     expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
+    expect(dependencies.installPackages).not.toHaveBeenCalled();
+    expect(logger.info.mock.calls.slice(-3)).toEqual([
+      ['Your license does not include any Enterprise plugins yet.'],
+      [
+        [`Not in your license. ${NOT_LICENSED_MESSAGE}`, `  ✕ Locked (${LOCKED_PLUGIN})`].join(
+          '\n'
+        ),
+      ],
+      ['Nothing to install.'],
+    ]);
     expect(loggedText(logger)).not.toContain('Try again later');
   });
 
