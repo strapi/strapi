@@ -1,5 +1,5 @@
 import path from 'path';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import fse from 'fs-extra';
 // eslint-disable-next-line node/no-unpublished-import
 import SwaggerParser from '@apidevtools/swagger-parser';

@@ -101,6 +101,22 @@ const renderPage = (search = '') =>
 
 const findHeading = () => screen.findByRole('heading', { level: 1 });
 
+/**
+ * The context menu stays shut until `useRBAC` commits `assets.create`. That
+ * commit is the effect's promise continuation, so yield once and then read
+ * the header button. A one-second `findBy` can expire while the coverage run
+ * is still inside that continuation.
+ */
+const waitForCreatePermission = async () => {
+  await act(async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  });
+
+  expect(screen.getByRole('button', { name: 'New' })).toBeInTheDocument();
+};
+
 describe('AssetsPage search', () => {
   beforeEach(() => {
     respondWithAssets([createAsset(1, 'image.png')]);
@@ -129,12 +145,19 @@ describe('AssetsPage search', () => {
 
       await findHeading();
 
-      await waitFor(() => expect(requests.length).toBeGreaterThan(0));
-      const last = decodeURIComponent(requests[requests.length - 1]);
+      // The folder item count fetches /upload/files too (pageSize=1), and request
+      // order between the two is not part of the contract — pick the list page.
+      const findListRequest = () =>
+        requests
+          .map((request) => decodeURIComponent(request))
+          .find((request) => request.includes('pageSize=20'));
+
+      await waitFor(() => expect(findListRequest()).toBeDefined());
+      const listRequest = findListRequest()!;
       // Both facets on the wire: global search + mime clause, no folder scope.
-      expect(last).toContain('_q=kitten');
-      expect(last).toContain('[mime][$contains]=image');
-      expect(last).not.toContain('[folder]');
+      expect(listRequest).toContain('_q=kitten');
+      expect(listRequest).toContain('[mime][$contains]=image');
+      expect(listRequest).not.toContain('[folder]');
     });
 
     it('shows the filter badge and the search results title together', async () => {
@@ -629,12 +652,6 @@ describe('AssetsPage main-area context menu', () => {
     fireEvent.contextMenu(column, { clientX: 200, clientY: 300 });
   };
 
-  /**
-   * The menu is gated on `assets.create`, which is `false` until the RBAC check
-   * settles — the "New" menu appearing is the signal that it has.
-   */
-  const waitForCreatePermission = () => screen.findByRole('button', { name: 'New' });
-
   it('offers the same creation actions as the New menu', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
@@ -1003,8 +1020,7 @@ describe('AssetsPage RBAC gating', () => {
 
     renderPage();
     await findHeading();
-
-    expect(await screen.findByRole('button', { name: 'New' })).toBeInTheDocument();
+    await waitForCreatePermission();
   });
 
   it('hides the New menu without assets.create', async () => {

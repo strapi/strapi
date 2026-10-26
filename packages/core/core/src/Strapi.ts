@@ -1,7 +1,6 @@
 import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
-import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
@@ -13,6 +12,7 @@ import { warnDeprecatedServerConfig } from './configuration/server-config';
 import * as factories from './factories';
 
 import * as utils from './utils';
+import { detectCustomizations } from './utils/detect-customizations';
 import { Container } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
@@ -314,6 +314,7 @@ class Strapi extends Container implements Core.Strapi {
         return new Database(
           _.merge(this.config.get('database'), {
             logger,
+            getPhase: () => (this.isLoaded ? 'runtime' : 'boot'),
             settings: {
               migrations: {
                 dir: path.join(projectDir, 'database/migrations'),
@@ -349,6 +350,10 @@ class Strapi extends Container implements Core.Strapi {
         },
       })
       .catch(this.log.error);
+  }
+
+  getCustomizations() {
+    return detectCustomizations(this);
   }
 
   async openAdmin({ isInitialized }: { isInitialized: boolean }) {
@@ -588,7 +593,7 @@ class Strapi extends Container implements Core.Strapi {
   async runUserLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // user
     const userLifecycleFunction = this.app && this.app[lifecycleName];
-    if (isFunction(userLifecycleFunction)) {
+    if (typeof userLifecycleFunction === 'function') {
       await userLifecycleFunction({ strapi: this });
     }
   }

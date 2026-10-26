@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash/fp';
+import { isEqual } from 'lodash';
 import type { Core, Data, Modules, UID } from '@strapi/types';
 
 import { WORKFLOW_MODEL_UID } from './constants/workflows';

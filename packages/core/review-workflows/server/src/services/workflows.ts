@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { set, isString, map, get } from 'lodash/fp';
+import { isString, map } from 'lodash';
 import { errors, emitAudit } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 import {
@@ -8,9 +8,13 @@ import {
   toWorkflowEvent,
   toWorkflowSnapshot,
 } from '../audit-logs';
+import type { Stage } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
 import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
 import workflowsContentTypesFactory, { type ContentTypeTransfer } from './workflow-content-types';
+
+// `replaceStages` returns the input stages with their ids filled in, not full stage entities
+type ReplacedStage = Pick<Stage, 'id' | 'name'>;
 
 const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {
   const processedFilters = { ...filters };
@@ -90,7 +94,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Creates a new workflow.
      * @param {object} opts - Options for creating the new workflow.
-     * @returns {Promise<object>} - Workflow object that was just created.
+     * @returns {Promise<object>} - Workflow object that was just created, populated with `WORKFLOW_POPULATE`.
      * @throws {ValidationError} - If the workflow has no stages.
      */
     async create(opts: { data: any }) {
@@ -104,9 +108,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const createdWorkflow = await strapi.db.transaction(async () => {
         // Create stages
         const stages = await getService('stages', { strapi }).createMany(opts.data.stages);
-        const mapIds = map(get('id'));
-
-        createOpts = set('data.stages', mapIds(stages), createOpts);
+        createOpts = { ...createOpts, data: { ...createOpts.data, stages: map(stages, 'id') } };
 
         if (opts.data.stageRequiredToPublishName) {
           const stageRequiredToPublish = stages.find(
@@ -116,7 +118,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             throw new errors.ApplicationError('Stage required to publish does not exist');
           }
 
-          createOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, createOpts);
+          createOpts = {
+            ...createOpts,
+            data: { ...createOpts.data, stageRequiredToPublish: stageRequiredToPublish.id },
+          };
         }
 
         // Update (un)assigned Content Types
@@ -160,13 +165,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Updates an existing workflow.
      * @param {object} workflow - The existing workflow to update.
      * @param {object} opts - Options for updating the workflow.
-     * @returns {Promise<object>} - Workflow object that was just updated.
+     * @returns {Promise<object>} - Workflow object that was just updated, populated with `WORKFLOW_POPULATE`.
      * @throws {ApplicationError} - If the supplied stage ID does not belong to the workflow.
      */
-    async update(workflow: any, opts: any) {
+    async update(workflow: any, opts: { data: any }) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
-      let updatedStages: any = [];
+      let updatedStages: ReplacedStage[] | undefined;
       let updatedStageIds: any;
 
       await workflowValidator.validateWorkflowCount();
@@ -181,21 +186,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
 
-          updatedStages = await stageService.replaceStages(
+          const replacedStages: ReplacedStage[] = await stageService.replaceStages(
             workflow.stages,
             opts.data.stages,
             workflow.contentTypes
           );
-          updatedStageIds = updatedStages.map((stage: any) => stage.id);
+          updatedStages = replacedStages;
+          updatedStageIds = replacedStages.map((stage) => stage.id);
 
-          updateOpts = set('data.stages', updatedStageIds, updateOpts);
+          updateOpts = { ...updateOpts, data: { ...updateOpts.data, stages: updatedStageIds } };
         }
 
         if (opts.data.stageRequiredToPublishName !== undefined) {
           const stages = updatedStages ?? workflow.stages;
 
           if (opts.data.stageRequiredToPublishName === null) {
-            updateOpts = set('data.stageRequiredToPublish', null, updateOpts);
+            updateOpts = {
+              ...updateOpts,
+              data: { ...updateOpts.data, stageRequiredToPublish: null },
+            };
           } else {
             const stageRequiredToPublish = stages.find(
               (stage: any) => stage.name === opts.data.stageRequiredToPublishName
@@ -205,7 +214,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
               throw new errors.ApplicationError('Stage required to publish does not exist');
             }
 
-            updateOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, updateOpts);
+            updateOpts = {
+              ...updateOpts,
+              data: { ...updateOpts.data, stageRequiredToPublish: stageRequiredToPublish.id },
+            };
           }
         }
 
