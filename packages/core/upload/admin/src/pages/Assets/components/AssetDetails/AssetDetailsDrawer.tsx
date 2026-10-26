@@ -121,7 +121,7 @@ const useAssetOperation = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * useAssetDetailsParam - sync drawer visibility with URL ?{ASSET_DETAILS_URL_PARAM}={id}
+ * useAssetDetailsParam - read and write the open asset in URL ?{ASSET_DETAILS_URL_PARAM}={id}
  * -----------------------------------------------------------------------------------------------*/
 
 export const useAssetDetailsParam = () => {
@@ -131,33 +131,9 @@ export const useAssetDetailsParam = () => {
   }>();
 
   const assetId = parseAssetDetailsId(query?.[ASSET_DETAILS_URL_PARAM]);
-  const hasValidId = assetId !== null;
 
   // Closing is driven by removing the URL param (a navigation), so navigation
-  // guards like <Blocker> can intercept it. `isMounted` keeps the drawer in the
-  // tree through the slide-out: it stays true once opened and only flips false
-  // when the close animation actually ends (see onCloseAnimationEnd), so the
-  // close duration lives entirely in CSS — no JS timer.
-  const [isMounted, setIsMounted] = React.useState(hasValidId);
-  const displayAssetId = React.useRef<number | null>(null);
-
-  React.useEffect(() => {
-    if (hasValidId) {
-      displayAssetId.current = assetId;
-      setIsMounted(true);
-    }
-  }, [hasValidId, assetId]);
-
-  const onCloseAnimationEnd = React.useCallback(
-    (event: React.AnimationEvent) => {
-      // Ignore animations bubbling up from descendants, and the slide-in.
-      if (event.target === event.currentTarget && !hasValidId) {
-        setIsMounted(false);
-      }
-    },
-    [hasValidId]
-  );
-
+  // guards like <Blocker> can intercept it.
   const openDetails = React.useCallback(
     (id: number) => {
       setQuery(
@@ -173,13 +149,45 @@ export const useAssetDetailsParam = () => {
     setQuery(withEncodedUserParams(query, { [ASSET_DETAILS_URL_PARAM]: undefined }), 'push', true);
   }, [query, setQuery]);
 
+  return { assetId, openDetails, closeDetails };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * useDrawerPresence - keep the drawer mounted through its slide-out
+ * -----------------------------------------------------------------------------------------------*/
+
+const useDrawerPresence = (assetId: number | null) => {
+  const isVisible = assetId !== null;
+
+  // `isMounted` stays true once opened and only flips false when the close
+  // animation actually ends (see onCloseAnimationEnd), so the close duration
+  // lives entirely in CSS — no JS timer. The last id is kept so the content
+  // doesn't go blank mid-slide.
+  const [isMounted, setIsMounted] = React.useState(isVisible);
+  const displayAssetId = React.useRef<number | null>(assetId);
+
+  React.useEffect(() => {
+    if (assetId !== null) {
+      displayAssetId.current = assetId;
+      setIsMounted(true);
+    }
+  }, [assetId]);
+
+  const onCloseAnimationEnd = React.useCallback(
+    (event: React.AnimationEvent) => {
+      // Ignore animations bubbling up from descendants, and the slide-in.
+      if (event.target === event.currentTarget && !isVisible) {
+        setIsMounted(false);
+      }
+    },
+    [isVisible]
+  );
+
   return {
-    assetId: hasValidId ? assetId : displayAssetId.current,
-    isVisible: hasValidId,
-    shouldRenderDrawer: isMounted,
+    displayAssetId: isVisible ? assetId : displayAssetId.current,
+    isVisible,
+    shouldRender: isMounted,
     onCloseAnimationEnd,
-    openDetails,
-    closeDetails,
   };
 };
 
@@ -1321,17 +1329,23 @@ const shouldKeepDrawerOpen = (
   );
 };
 
-export const AssetDetailsDrawer = () => {
-  const { formatMessage } = useIntl();
-  const { assetId, isVisible, shouldRenderDrawer, onCloseAnimationEnd, closeDetails } =
-    useAssetDetailsParam();
+interface AssetDetailsDrawerProps {
+  /** The asset to show, or `null` to close the drawer. */
+  assetId: number | null;
+  onClose: () => void;
+}
 
-  if (!shouldRenderDrawer || assetId === null) {
+export const AssetDetailsDrawer = ({ assetId, onClose }: AssetDetailsDrawerProps) => {
+  const { formatMessage } = useIntl();
+  const { displayAssetId, isVisible, shouldRender, onCloseAnimationEnd } =
+    useDrawerPresence(assetId);
+
+  if (!shouldRender || displayAssetId === null) {
     return null;
   }
 
   return (
-    <Drawer.Root isVisible={isVisible} onClose={closeDetails}>
+    <Drawer.Root isVisible={isVisible} onClose={onClose}>
       {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
           VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
       <div>
@@ -1359,16 +1373,26 @@ export const AssetDetailsDrawer = () => {
         // off-screen. dvh tracks the actual visible height.
         height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
-        // Opt in to dismiss-on-outside-click; `closeDetails` is the same path
-        // as the header's close button, so unsaved edits are still guarded.
+        // Opt in to dismiss-on-outside-click; `onClose` is the same path as the
+        // header's close button, so unsaved edits are still guarded.
         onPointerDownOutside={(event) => {
           if (shouldKeepDrawerOpen(event, isVisible)) {
             event.preventDefault();
           }
         }}
       >
-        <DrawerContent assetId={assetId} closeDetails={closeDetails} />
+        <DrawerContent assetId={displayAssetId} closeDetails={onClose} />
       </Drawer.Body>
     </Drawer.Root>
   );
+};
+
+/**
+ * The drawer bound to the URL's `?assetId=`, as the Media Library page uses it:
+ * linkable, survives a refresh, and closing is a navigation.
+ */
+export const AssetDetailsDrawerFromUrl = () => {
+  const { assetId, closeDetails } = useAssetDetailsParam();
+
+  return <AssetDetailsDrawer assetId={assetId} onClose={closeDetails} />;
 };

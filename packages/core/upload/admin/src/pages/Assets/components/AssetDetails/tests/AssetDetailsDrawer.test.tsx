@@ -2,7 +2,12 @@ import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../../../constants';
-import { AssetDetails, AssetDetailsDrawer, getBusyMessage } from '../AssetDetailsDrawer';
+import {
+  AssetDetails,
+  AssetDetailsDrawer,
+  AssetDetailsDrawerFromUrl,
+  getBusyMessage,
+} from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
 
@@ -732,6 +737,75 @@ describe('icon button tooltips', () => {
 });
 
 /* -------------------------------------------------------------------------------------------------
+ * Controlled drawer
+ * -----------------------------------------------------------------------------------------------*/
+
+describe('AssetDetailsDrawer (controlled)', () => {
+  beforeEach(() => {
+    server.use(
+      buildFoldersHandler(),
+      buildSettingsHandler(),
+      http.get('/upload/files/:id', ({ params }) =>
+        HttpResponse.json(
+          params.id === '2'
+            ? { ...baseAsset, id: 2, name: 'other.png', url: '/uploads/other.png' }
+            : baseAsset
+        )
+      )
+    );
+  });
+
+  it('renders nothing while no asset is given', () => {
+    render(<AssetDetailsDrawer assetId={null} onClose={jest.fn()} />);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  // No `?assetId=` in the URL: the prop alone drives it.
+  it('opens on the given asset', async () => {
+    render(<AssetDetailsDrawer assetId={1} onClose={jest.fn()} />);
+
+    expect(await screen.findByRole('dialog')).toHaveAttribute('data-state', 'open');
+    expect(await screen.findByRole('heading', { name: 'photo.png' })).toBeInTheDocument();
+  });
+
+  // Closing belongs to the parent: the drawer asks, and stays open until told.
+  it('asks the parent to close from the close button', async () => {
+    const onClose = jest.fn();
+    const { user } = render(<AssetDetailsDrawer assetId={1} onClose={onClose} />);
+
+    await screen.findByRole('heading', { name: 'photo.png' });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
+  });
+
+  // jsdom never runs the slide-out animation, so "closed" is read off the
+  // state attribute rather than the element disappearing.
+  it('closes once the parent clears the asset', async () => {
+    const { rerender } = render(<AssetDetailsDrawer assetId={1} onClose={jest.fn()} />);
+
+    const drawer = await screen.findByRole('dialog');
+
+    rerender(<AssetDetailsDrawer assetId={null} onClose={jest.fn()} />);
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+  });
+
+  it('switches to another asset when the parent changes it', async () => {
+    const { rerender } = render(<AssetDetailsDrawer assetId={1} onClose={jest.fn()} />);
+
+    await screen.findByRole('heading', { name: 'photo.png' });
+
+    rerender(<AssetDetailsDrawer assetId={2} onClose={jest.fn()} />);
+
+    expect(await screen.findByRole('heading', { name: 'other.png' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
  * Outside-click dismissal
  * -----------------------------------------------------------------------------------------------*/
 
@@ -776,7 +850,7 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
         <div role="menuitem" data-testid="menu-option">
           Name (A to Z)
         </div>
-        <AssetDetailsDrawer />
+        <AssetDetailsDrawerFromUrl />
       </>,
       { initialEntries: ['/?assetId=1'] }
     );
