@@ -1,5 +1,10 @@
 import { fetchPackument, fetchPluginCatalog, searchPackageNames } from '../registry';
-import { createFetchResponse, createPackument, NOT_LICENSED_MESSAGE } from './test-helpers';
+import {
+  createFetchResponse,
+  createPackument,
+  NOT_LICENSED_MESSAGE,
+  REGISTRY_URL,
+} from './test-helpers';
 
 const packageName = '@strapi-enterprise/plugin-ai-byok';
 
@@ -18,6 +23,7 @@ describe('searchPackageNames', () => {
     await expect(
       searchPackageNames({
         text: '@strapi-enterprise',
+        registryUrl: REGISTRY_URL,
         license: 'the-license',
         fetchImplementation,
       })
@@ -38,6 +44,7 @@ describe('searchPackageNames', () => {
     await expect(
       searchPackageNames({
         text: '@strapi-enterprise',
+        registryUrl: REGISTRY_URL,
         license: 'the-license',
         fetchImplementation,
       })
@@ -48,6 +55,7 @@ describe('searchPackageNames', () => {
     await expect(
       searchPackageNames({
         text: '@strapi-enterprise',
+        registryUrl: REGISTRY_URL,
         license: 'the-license',
         fetchImplementation: jest.fn().mockResolvedValue(createFetchResponse(401)),
       })
@@ -65,6 +73,7 @@ describe('fetchPackument', () => {
 
     const lookup = await fetchPackument({
       packageName,
+      registryUrl: REGISTRY_URL,
       license: 'the-license',
       fetchImplementation,
     });
@@ -85,7 +94,12 @@ describe('fetchPackument', () => {
     const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(status));
 
     await expect(
-      fetchPackument({ packageName, license: 'the-license', fetchImplementation })
+      fetchPackument({
+        packageName,
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation,
+      })
     ).resolves.toEqual({ status: expectedStatus });
   });
 
@@ -93,7 +107,12 @@ describe('fetchPackument', () => {
     const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(401));
 
     await expect(
-      fetchPackument({ packageName, license: 'the-license', fetchImplementation })
+      fetchPackument({
+        packageName,
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation,
+      })
     ).resolves.toEqual({
       status: 'license-rejected',
       message: expect.stringContaining('https://packages.strapi.io rejected this Strapi license.'),
@@ -104,7 +123,12 @@ describe('fetchPackument', () => {
     const fetchImplementation = jest.fn().mockRejectedValue(new TypeError('fetch failed'));
 
     await expect(
-      fetchPackument({ packageName, license: 'the-license', fetchImplementation })
+      fetchPackument({
+        packageName,
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation,
+      })
     ).resolves.toEqual({
       status: 'unavailable',
       message: expect.stringContaining('Could not reach https://packages.strapi.io.'),
@@ -115,7 +139,12 @@ describe('fetchPackument', () => {
     const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(500));
 
     await expect(
-      fetchPackument({ packageName, license: 'the-license', fetchImplementation })
+      fetchPackument({
+        packageName,
+        registryUrl: REGISTRY_URL,
+        license: 'the-license',
+        fetchImplementation,
+      })
     ).resolves.toEqual({
       status: 'unavailable',
       message: expect.stringContaining('https://packages.strapi.io answered HTTP 500'),
@@ -136,6 +165,7 @@ describe('fetchPackument with invalid data', () => {
     await expect(
       fetchPackument({
         packageName: '@strapi-enterprise/plugin-ai-byok',
+        registryUrl: REGISTRY_URL,
         license: 'the-license',
         fetchImplementation: jest.fn().mockResolvedValue(invalidResponse),
       })
@@ -149,7 +179,7 @@ describe('fetchPackument with invalid data', () => {
 
 describe('fetchPluginCatalog', () => {
   const fetchCatalog = (fetchImplementation: typeof fetch) =>
-    fetchPluginCatalog({ license: 'the-license', fetchImplementation });
+    fetchPluginCatalog({ registryUrl: REGISTRY_URL, license: 'the-license', fetchImplementation });
 
   it('lists the plugins with whether the license includes them, and the message', async () => {
     const fetchImplementation = jest.fn().mockResolvedValue(

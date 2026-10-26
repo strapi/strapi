@@ -2,7 +2,7 @@ import path from 'node:path';
 import fse from 'fs-extra';
 
 import type { Logger } from '../../../utils/logger';
-import { ENTERPRISE_REGISTRY_URL, ENTERPRISE_SCOPE } from './constants';
+import { ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
 import { listAncestorDirectories } from './directories';
 import type { ResolvedLicense } from './license';
@@ -388,6 +388,7 @@ export interface RegistryAccess {
 }
 
 export const prepareRegistryAccess = async ({
+  registryUrl,
   appDir,
   packageManager,
   license,
@@ -396,6 +397,7 @@ export const prepareRegistryAccess = async ({
   env,
   homeDir,
 }: {
+  registryUrl: string;
   appDir: string;
   packageManager: DetectedPackageManager;
   license: string;
@@ -404,7 +406,7 @@ export const prepareRegistryAccess = async ({
   env: NodeJS.ProcessEnv;
   homeDir: string;
 }): Promise<RegistryAccess> => {
-  const registry = describeRegistry(ENTERPRISE_REGISTRY_URL);
+  const registry = describeRegistry(registryUrl);
   const usesYarnrcYml = readsYarnrcYml(packageManager);
   const userConfigPath = usesYarnrcYml
     ? getUserYarnrcPath(homeDir)

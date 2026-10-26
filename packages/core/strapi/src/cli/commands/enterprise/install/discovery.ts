@@ -1,5 +1,5 @@
 import type { Logger } from '../../../utils/logger';
-import { ENTERPRISE_REGISTRY_URL, ENTERPRISE_SCOPE } from './constants';
+import { ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
 import {
   fetchPackument,
@@ -118,17 +118,20 @@ const describeCatalogPlugin = ({
 });
 
 const searchCandidatePackageNames = async ({
+  registryUrl,
   license,
   logger,
   fetchImplementation,
   installedPluginNames,
 }: {
+  registryUrl: string;
   license: string;
   logger: Logger;
   fetchImplementation: typeof fetch;
   installedPluginNames: string[];
 }): Promise<string[]> => {
   const searchResult = await searchPackageNames({
+    registryUrl,
     text: ENTERPRISE_SCOPE,
     license,
     fetchImplementation,
@@ -139,7 +142,7 @@ const searchCandidatePackageNames = async ({
   }
 
   if (searchResult.status === 'unavailable') {
-    const registryHost = new URL(ENTERPRISE_REGISTRY_URL).host;
+    const registryHost = new URL(registryUrl).host;
 
     if (installedPluginNames.length === 0) {
       throw new EnterpriseInstallError(
@@ -158,12 +161,14 @@ const searchCandidatePackageNames = async ({
 };
 
 const describeCandidatePlugins = async ({
+  registryUrl,
   appDir,
   license,
   logger,
   fetchImplementation,
   packageNames,
 }: {
+  registryUrl: string;
   appDir: string;
   license: string;
   logger: Logger;
@@ -177,7 +182,7 @@ const describeCandidatePlugins = async ({
   const discoveredPlugins = await Promise.all(
     candidatePackageNames.map(async (packageName): Promise<DiscoveredPlugin | undefined> => {
       const [lookup, installedVersion] = await Promise.all([
-        fetchPackument({ packageName, license, fetchImplementation }),
+        fetchPackument({ registryUrl, packageName, license, fetchImplementation }),
         readAppDependencyVersion(appDir, packageName),
       ]);
 
@@ -206,18 +211,20 @@ const describeCandidatePlugins = async ({
 };
 
 export const discoverEnterprisePlugins = async ({
+  registryUrl,
   appDir,
   license,
   logger,
   fetchImplementation,
 }: {
+  registryUrl: string;
   appDir: string;
   license: string;
   logger: Logger;
   fetchImplementation: typeof fetch;
 }): Promise<DiscoveryResult> => {
   const [catalogResult, installedPluginNames] = await Promise.all([
-    fetchPluginCatalog({ license, fetchImplementation }),
+    fetchPluginCatalog({ registryUrl, license, fetchImplementation }),
     listInstalledEnterprisePlugins(appDir),
   ]);
 
@@ -227,6 +234,7 @@ export const discoverEnterprisePlugins = async ({
 
   if (catalogResult.status === 'unavailable') {
     const searchedPackageNames = await searchCandidatePackageNames({
+      registryUrl,
       license,
       logger,
       fetchImplementation,
@@ -235,6 +243,7 @@ export const discoverEnterprisePlugins = async ({
 
     return {
       plugins: await describeCandidatePlugins({
+        registryUrl,
         appDir,
         license,
         logger,
@@ -267,6 +276,7 @@ export const discoverEnterprisePlugins = async ({
 
   return {
     plugins: await describeCandidatePlugins({
+      registryUrl,
       appDir,
       license,
       logger,

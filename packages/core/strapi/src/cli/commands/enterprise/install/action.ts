@@ -11,6 +11,7 @@ import { detectPackageManager } from './package-manager';
 import { resolvePluginStatus } from './plugin-status';
 import { prepareRegistryAccess } from './registry-access';
 import { fetchPackument, fetchPluginCatalog } from './registry';
+import { resolveRegistryUrl } from './registry-url';
 import {
   buildPluginRow,
   describeLockedRows,
@@ -50,6 +51,7 @@ const describeStrapiMismatch = (
   `${packageName} requires Strapi ${requiredStrapiRange} and this app uses ${strapiVersion}. Upgrade Strapi first.`;
 
 interface InstallContext {
+  registryUrl: string;
   appDir: string;
   license: string;
   strapiVersion?: string;
@@ -59,9 +61,10 @@ interface InstallContext {
 
 const describeNotLicensed = async (
   packageName: string,
-  { license, dependencies }: InstallContext
+  { registryUrl, license, dependencies }: InstallContext
 ): Promise<string> => {
   const catalogResult = await fetchPluginCatalog({
+    registryUrl,
     license,
     fetchImplementation: dependencies.fetchImplementation,
   });
@@ -113,11 +116,12 @@ const resolveNamedPackages = async (
   requestedPackages: RequestedPackage[],
   context: InstallContext
 ): Promise<string[]> => {
-  const { appDir, license, strapiVersion, logger, dependencies } = context;
+  const { registryUrl, appDir, license, strapiVersion, logger, dependencies } = context;
   const installSpecs: string[] = [];
 
   for (const { packageName, requestedVersion } of requestedPackages) {
     const lookup = await fetchPackument({
+      registryUrl,
       packageName,
       license,
       fetchImplementation: dependencies.fetchImplementation,
@@ -205,6 +209,7 @@ const resolveNamedPackages = async (
 };
 
 const selectPlugins = async ({
+  registryUrl,
   appDir,
   license,
   strapiVersion,
@@ -217,6 +222,7 @@ const selectPlugins = async ({
     installedOutsideLicense,
     notLicensedMessage,
   } = await discoverEnterprisePlugins({
+    registryUrl,
     appDir,
     license,
     logger,
@@ -320,6 +326,7 @@ export const runInstall = async ({
     );
   }
 
+  const registryUrl = resolveRegistryUrl({ env: dependencies.env, logger });
   const packageManager = await detectPackageManager(appDir);
 
   const { license, source: licenseSource } = await resolveLicense({
@@ -331,6 +338,7 @@ export const runInstall = async ({
   });
 
   const registryAccess = await prepareRegistryAccess({
+    registryUrl,
     appDir,
     packageManager,
     license,
@@ -343,7 +351,14 @@ export const runInstall = async ({
   const strapiVersion = await readInstalledVersion(appDir, STRAPI_PACKAGE_NAME);
   warnWhenCompatibilityIsUnknown(strapiVersion, logger);
 
-  const context: InstallContext = { appDir, license, strapiVersion, logger, dependencies };
+  const context: InstallContext = {
+    registryUrl,
+    appDir,
+    license,
+    strapiVersion,
+    logger,
+    dependencies,
+  };
   const installSpecs =
     requestedPackages.length > 0
       ? await resolveNamedPackages(requestedPackages, context)

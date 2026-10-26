@@ -13,6 +13,7 @@ import {
   createTestLogger,
   installFakePackage,
   NOT_LICENSED_MESSAGE,
+  REGISTRY_URL,
 } from './test-helpers';
 
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
@@ -67,6 +68,7 @@ const catalogPlugin = (name: string, licensed: boolean) => ({
 const discover = async (appDir: string, fetchImplementation: typeof fetch) =>
   discoverEnterprisePlugins({
     appDir,
+    registryUrl: REGISTRY_URL,
     license: 'the-license',
     logger: createTestLogger(),
     fetchImplementation,
@@ -140,6 +142,7 @@ describe('discoverEnterprisePlugins', () => {
 
     const { plugins: discoveredPlugins } = await discoverEnterprisePlugins({
       appDir: await createTemporaryDirectory(),
+      registryUrl: REGISTRY_URL,
       license: 'the-license',
       logger,
       fetchImplementation: createRegistryFetch({
@@ -195,6 +198,7 @@ describe('discoverEnterprisePlugins', () => {
 
     const { plugins: discoveredPlugins } = await discoverEnterprisePlugins({
       appDir,
+      registryUrl: REGISTRY_URL,
       license: 'the-license',
       logger,
       fetchImplementation: createRegistryFetch({

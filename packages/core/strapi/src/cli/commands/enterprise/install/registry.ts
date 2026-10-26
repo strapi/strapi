@@ -1,6 +1,6 @@
 import { stripVTControlCharacters } from 'node:util';
 
-import { BILLING_URL, ENTERPRISE_REGISTRY_URL } from './constants';
+import { BILLING_URL } from './constants';
 
 const REQUEST_TIMEOUT_MS = 15 * 1000;
 const CATALOG_TIMEOUT_MS = 5 * 1000;
@@ -34,8 +34,6 @@ export type PackumentLookup =
   | { status: 'not-found' }
   | { status: 'unavailable'; message: string };
 
-const REGISTRY_URL = ENTERPRISE_REGISTRY_URL.replace(/\/+$/, '');
-
 const authorizationHeader = (license: string) => ({ Authorization: `Bearer ${license}` });
 
 const describeRejectedLicense = (registryUrl: string) =>
@@ -48,15 +46,16 @@ export type SearchResult =
   | { status: 'unavailable' };
 
 export const searchPackageNames = async ({
+  registryUrl,
   text,
   license,
   fetchImplementation,
 }: {
+  registryUrl: string;
   text: string;
   license: string;
   fetchImplementation: typeof fetch;
 }): Promise<SearchResult> => {
-  const registryUrl = REGISTRY_URL;
   const searchUrl = `${registryUrl}/-/v1/search?text=${encodeURIComponent(text)}&size=${SEARCH_PAGE_SIZE}`;
 
   try {
@@ -88,15 +87,16 @@ export const searchPackageNames = async ({
 };
 
 export const fetchPackument = async ({
+  registryUrl,
   packageName,
   license,
   fetchImplementation,
 }: {
+  registryUrl: string;
   packageName: string;
   license: string;
   fetchImplementation: typeof fetch;
 }): Promise<PackumentLookup> => {
-  const registryUrl = REGISTRY_URL;
   let response: Response;
 
   try {
@@ -201,14 +201,14 @@ const parseCatalogPlugin = (plugin: unknown): CatalogPlugin | undefined => {
 };
 
 export const fetchPluginCatalog = async ({
+  registryUrl,
   license,
   fetchImplementation,
 }: {
+  registryUrl: string;
   license: string;
   fetchImplementation: typeof fetch;
 }): Promise<CatalogResult> => {
-  const registryUrl = REGISTRY_URL;
-
   try {
     const response = await fetchImplementation(`${registryUrl}/-/strapi/plugins`, {
       headers: { ...authorizationHeader(license), Accept: 'application/json' },

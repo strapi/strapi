@@ -895,6 +895,109 @@ describe('runInstall with the checklist', () => {
   });
 });
 
+describe('runInstall with STRAPI_ENTERPRISE_REGISTRY_URL', () => {
+  const LOCAL_REGISTRY = 'http://localhost:4873';
+  const requestedUrls = (dependencies: jest.Mocked<InstallDependencies>) =>
+    (dependencies.fetchImplementation as jest.Mock).mock.calls.map(([input]) => String(input));
+
+  it('sends every request to the Strapi registry when the variable is unset', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({ appDir: await createApp(), packageArguments: [], logger, dependencies });
+
+    expect(requestedUrls(dependencies)).toEqual(
+      expect.arrayContaining([
+        'https://packages.strapi.io/-/strapi/plugins',
+        expect.stringMatching(/^https:\/\/packages\.strapi\.io\/-\/v1\/search\?/),
+        `https://packages.strapi.io/${AI_BYOK}`,
+      ])
+    );
+    expect(
+      requestedUrls(dependencies).every((url) => url.startsWith('https://packages.strapi.io/'))
+    ).toBe(true);
+    expect(loggedText(logger)).not.toContain('STRAPI_ENTERPRISE_REGISTRY_URL');
+  });
+
+  it('sends every request to that registry, and sets it up in ~/.npmrc', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      env: { STRAPI_LICENSE: LICENSE, STRAPI_ENTERPRISE_REGISTRY_URL: `${LOCAL_REGISTRY}/` },
+      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({ appDir: await createApp(), packageArguments: [], logger, dependencies });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Using the Enterprise registry at ${LOCAL_REGISTRY} (STRAPI_ENTERPRISE_REGISTRY_URL).`
+    );
+    expect(requestedUrls(dependencies)).toEqual(
+      expect.arrayContaining([
+        `${LOCAL_REGISTRY}/-/strapi/plugins`,
+        expect.stringMatching(new RegExp(`^${LOCAL_REGISTRY}/-/v1/search\\?`)),
+        `${LOCAL_REGISTRY}/${AI_BYOK}`,
+      ])
+    );
+    expect(requestedUrls(dependencies).every((url) => url.startsWith(`${LOCAL_REGISTRY}/`))).toBe(
+      true
+    );
+    expect(await fse.readFile(path.join(dependencies.homeDir, '.npmrc'), 'utf8')).toBe(
+      `@strapi-enterprise:registry=${LOCAL_REGISTRY}/\n//localhost:4873/:_authToken=${LICENSE}\n`
+    );
+  });
+
+  it('asks that registry about a named plugin outside the license', async () => {
+    const dependencies = await createDependencies({
+      env: { STRAPI_LICENSE: LICENSE, STRAPI_ENTERPRISE_REGISTRY_URL: LOCAL_REGISTRY },
+      fetchImplementation: createRegistryFetch({
+        searchResult: [],
+        packuments: { [LOCKED_PLUGIN]: 403 },
+        catalog: {
+          plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      }),
+    });
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-locked'],
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(NOT_LICENSED_MESSAGE);
+    expect(requestedUrls(dependencies)).toEqual([
+      `${LOCAL_REGISTRY}/${LOCKED_PLUGIN}`,
+      `${LOCAL_REGISTRY}/-/strapi/plugins`,
+    ]);
+  });
+
+  it('stops before any request or write when the value is not allowed', async () => {
+    const dependencies = await createDependencies({
+      env: {
+        STRAPI_LICENSE: LICENSE,
+        STRAPI_ENTERPRISE_REGISTRY_URL: 'http://registry.example.com',
+      },
+    });
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-ai-byok'],
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow('STRAPI_ENTERPRISE_REGISTRY_URL must use https');
+    expect(dependencies.fetchImplementation).not.toHaveBeenCalled();
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+  });
+});
+
 describe('runInstall checks that need no license', () => {
   it('rejects a package outside the Enterprise scope before asking for a license', async () => {
     const appDir = await createApp();
