@@ -31,7 +31,7 @@ declare global {
     namespace Strapi {
         namespace Registries {
             interface AppServices {
-                'api::article.article': ServiceInstance<typeof import('../../src/api/article/services/article')>;
+                'api::article.article': ServiceInstance<typeof import('../../src/api/article/services/article.js')>;
                 'api::article.legacy': unknown;
             }
             interface InferredServices {
@@ -98,13 +98,13 @@ describe('generateServicesDefinitions', () => {
     expect(normalized).not.toContain('declare module');
 
     expect(normalized).toContain(
-      "'api::article.article': ServiceInstance<typeof import('../../src/api/article/services/article')>"
+      "'api::article.article': ServiceInstance<typeof import('../../src/api/article/services/article.js')>"
     );
     expect(normalized).toContain(
-      "'api::article.random-article-generator': ServiceInstance<typeof import('../../src/api/article/services/randomArticleGenerator')>"
+      "'api::article.random-article-generator': ServiceInstance<typeof import('../../src/api/article/services/randomArticleGenerator.js')>"
     );
     expect(normalized).toContain(
-      "'api::category.category': ServiceInstance<typeof import('../../src/api/category/services/category')>"
+      "'api::category.category': ServiceInstance<typeof import('../../src/api/category/services/category.js')>"
     );
   });
 
@@ -162,7 +162,7 @@ describe('generateServicesDefinitions', () => {
       ['api::article.article']
     );
 
-    expect(output).toContain("typeof import('../../src/api/article/services/article')");
+    expect(output).toContain("typeof import('../../src/api/article/services/article.js')");
     expect(output.match(/'api::article\.article': ServiceInstance</g)).toHaveLength(1);
     expect(logger.warnings).toBe(1);
   });
@@ -274,16 +274,16 @@ describe('generateServicesDefinitions', () => {
     );
 
     expect(normalized).toContain(
-      "'api::article.article': ServiceContractOf<import('../../src/api/article/services/article').ServiceContract>"
+      "'api::article.article': ServiceContractOf<import('../../src/api/article/services/article.js').ServiceContract>"
     );
     // Without a contract export, a service keeps the type it exports
     expect(normalized).toContain(
-      "'api::article.inferred': ServiceInstance<typeof import('../../src/api/article/services/inferred')>"
+      "'api::article.inferred': ServiceInstance<typeof import('../../src/api/article/services/inferred.js')>"
     );
     expect(normalized).toContain("'api::article.legacy': unknown");
     // A controller contract is not read in a services file
     expect(normalized).toContain(
-      "'api::article.other': ServiceInstance<typeof import('../../src/api/article/services/other')>"
+      "'api::article.other': ServiceInstance<typeof import('../../src/api/article/services/other.js')>"
     );
     expect(normalized).toContain(
       'type ServiceContractOf<TContract> = 0 extends 1 & TContract ? unknown : TContract'

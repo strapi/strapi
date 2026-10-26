@@ -74,10 +74,10 @@ describe('generatePoliciesDefinitions', () => {
 
     // Global policy names are not normalized by the loader, api policy names are kebab-cased
     expect(normalized).toContain(
-      "'global::isOwner': PolicyConfig<typeof import('../../src/policies/isOwner')>"
+      "'global::isOwner': PolicyConfig<typeof import('../../src/policies/isOwner.js')>"
     );
     expect(normalized).toContain(
-      "'api::article.has-role': PolicyConfig<typeof import('../../src/api/article/policies/hasRole')>"
+      "'api::article.has-role': PolicyConfig<typeof import('../../src/api/article/policies/hasRole.js')>"
     );
     // The import of a JS policy does not resolve without `allowJs`
     expect(normalized).toContain("'api::blog-post.is-author': unknown");
@@ -240,9 +240,9 @@ describe('generatePoliciesDefinitions', () => {
       ['global::isOwner', 'api::article.has-role']
     );
 
-    expect(output).toContain("typeof import('../../src/policies/isOwner')");
+    expect(output).toContain("typeof import('../../src/policies/isOwner.js')");
     expect(output.match(/'global::isOwner'/g)).toHaveLength(1);
-    expect(output).toContain("typeof import('../../src/api/article/policies/hasRole')");
+    expect(output).toContain("typeof import('../../src/api/article/policies/hasRole.js')");
     expect(output.match(/'api::article\.has-role'/g)).toHaveLength(1);
     expect(logger.warnings).toBe(2);
   });

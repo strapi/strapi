@@ -31,7 +31,7 @@ declare global {
     namespace Strapi {
         namespace Registries {
             interface AppControllers {
-                'api::article.article': ControllerInstance<typeof import('../../src/api/article/controllers/article')>;
+                'api::article.article': ControllerInstance<typeof import('../../src/api/article/controllers/article.js')>;
                 'api::article.legacy': unknown;
             }
             interface InferredControllers {
@@ -98,13 +98,13 @@ describe('generateControllersDefinitions', () => {
     expect(normalized).not.toContain('declare module');
 
     expect(normalized).toContain(
-      "'api::article.article': ControllerInstance<typeof import('../../src/api/article/controllers/article')>"
+      "'api::article.article': ControllerInstance<typeof import('../../src/api/article/controllers/article.js')>"
     );
     expect(normalized).toContain(
-      "'api::article.random-article-exporter': ControllerInstance<typeof import('../../src/api/article/controllers/randomArticleExporter')>"
+      "'api::article.random-article-exporter': ControllerInstance<typeof import('../../src/api/article/controllers/randomArticleExporter.js')>"
     );
     expect(normalized).toContain(
-      "'api::category.category': ControllerInstance<typeof import('../../src/api/category/controllers/category')>"
+      "'api::category.category': ControllerInstance<typeof import('../../src/api/category/controllers/category.js')>"
     );
   });
 
@@ -174,7 +174,7 @@ describe('generateControllersDefinitions', () => {
       ['api::article.article']
     );
 
-    expect(output).toContain("typeof import('../../src/api/article/controllers/article')");
+    expect(output).toContain("typeof import('../../src/api/article/controllers/article.js')");
     expect(output.match(/'api::article\.article': ControllerInstance</g)).toHaveLength(1);
     expect(logger.warnings).toBe(1);
   });
@@ -219,16 +219,16 @@ describe('generateControllersDefinitions', () => {
     );
 
     expect(normalized).toContain(
-      "'api::article.article': ControllerContractOf<import('../../src/api/article/controllers/article').ControllerContract>"
+      "'api::article.article': ControllerContractOf<import('../../src/api/article/controllers/article.js').ControllerContract>"
     );
     // Without a contract export, a controller keeps the type it exports
     expect(normalized).toContain(
-      "'api::article.inferred': ControllerInstance<typeof import('../../src/api/article/controllers/inferred')>"
+      "'api::article.inferred': ControllerInstance<typeof import('../../src/api/article/controllers/inferred.js')>"
     );
     expect(normalized).toContain("'api::article.legacy': unknown");
     // A service contract is not read in a controllers file
     expect(normalized).toContain(
-      "'api::article.other': ControllerInstance<typeof import('../../src/api/article/controllers/other')>"
+      "'api::article.other': ControllerInstance<typeof import('../../src/api/article/controllers/other.js')>"
     );
     expect(normalized).toContain(
       'type ControllerContractOf<TContract> = 0 extends 1 & TContract ? unknown : TContract'

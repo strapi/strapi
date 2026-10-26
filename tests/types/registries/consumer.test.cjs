@@ -922,6 +922,92 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   });
 }
 
+// The generated application modules import their sources with relative paths. An ECMAScript module
+// (`"type": "module"`) resolved with NodeNext needs the extension of each one (TS2835).
+const moduleSetups = {
+  'CommonJS, Node': { type: 'commonjs', ...resolutions.Node },
+  'CommonJS, Bundler': { type: 'commonjs', ...resolutions.Bundler },
+  'CommonJS, NodeNext': { type: 'commonjs', ...resolutions.NodeNext },
+  'ESM, NodeNext': { type: 'module', ...resolutions.NodeNext },
+};
+
+for (const [setup, { type, ...resolutionOptions }] of Object.entries(moduleSetups)) {
+  test(`${setup}: generated application modules resolve their sources in strict mode`, async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const registered = (uids, value) => Object.fromEntries(uids.map((uid) => [uid, value]));
+    const artifacts = ['services', 'controllers', 'policies', 'middlewares'];
+
+    try {
+      // The sources and the generated files share the application's module format.
+      fs.writeFileSync(path.join(appDir, 'package.json'), JSON.stringify({ type }));
+      const src = path.join(appDir, 'src');
+      fs.cpSync(fixture('app/src'), src, { recursive: true });
+      await generators.generate({
+        strapi: {
+          dirs: {
+            app: {
+              api: path.join(src, 'api'),
+              policies: path.join(src, 'policies'),
+              middlewares: path.join(src, 'middlewares'),
+            },
+          },
+          services: registered(
+            ['api::article.article', 'api::article.stats', 'api::article.legacy'],
+            {}
+          ),
+          controllers: registered(
+            [
+              'api::article.article',
+              'api::article.report',
+              'api::article.helpers',
+              'api::article.stats',
+            ],
+            {}
+          ),
+          policies: registered(
+            ['global::isOwner', 'global::isPublic', 'global::legacy', 'api::article.has-role'],
+            () => true
+          ),
+          middlewares: registered(
+            [
+              'global::rateLimit',
+              'global::timer',
+              'global::legacy',
+              'global::koaHandler',
+              'global::ctxHandler',
+              'api::article.audit-log',
+            ],
+            () => undefined
+          ),
+        },
+        pwd: appDir,
+        artifacts: Object.fromEntries(artifacts.map((artifact) => [artifact, true])),
+        logger: { silent: true },
+      });
+      const generated = artifacts.map((artifact) =>
+        path.join(appDir, `types/generated/${artifact}.ts`)
+      );
+      assertClean(
+        compiler({ ...baseOptions, ...resolutionOptions })([
+          ...generated,
+          'settings.d.ts',
+          'generated-strict.d.ts',
+          'strapi-strict.d.ts',
+          'contracts.ts',
+          'controllers.ts',
+          'app-policies.ts',
+          'app-middlewares.ts',
+        ]),
+        `${setup}, generated application modules`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+}
+
 // Strict-off parity fixtures (`parity-<surface>.ts`) compile against develop too: their expected
 // errors are develop's. `*.isolated.ts` fixtures augment registries that affect every file, so each
 // gets its own program. Fixtures starting with `// @parity-settings: strict` expect diagnostics that

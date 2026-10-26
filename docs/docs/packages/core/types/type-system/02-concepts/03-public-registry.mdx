@@ -295,6 +295,7 @@ These four files are sources, not declaration files, so `skipLibCheck` does not 
 - `strapi build` compiles without generating types, so it fails on stale committed generated files until `strapi develop` or `strapi ts:generate-types` regenerates them.
 - Each file starts with `/* eslint-disable */` and `/* oxlint-disable */`, and declares a helper (`ServiceInstance`, `ServiceContractOf`, ...) only when an entry reads it, so `noUnusedLocals` stays clean.
 - Writing one of them removes the `.d.ts` file an earlier version generated under the same name.
+- They import each TypeScript source by the path of its compiled file, such as `import('../../src/api/article/services/article.js')`. An ECMAScript module application (`"type": "module"`) resolved with `NodeNext` requires that extension, and the other module resolutions map it back to the `.ts` source.
 
 ```ts title="my-app/types/generated/services.ts"
 /* eslint-disable */
@@ -312,7 +313,7 @@ declare global {
     namespace Registries {
       interface AppServices {
         'api::article.article': ServiceInstance<
-          typeof import('../../src/api/article/services/article')
+          typeof import('../../src/api/article/services/article.js')
         >;
       }
       interface InferredServices {
@@ -352,10 +353,10 @@ declare global {
     namespace Registries {
       interface AppServices {
         'api::article.article': ServiceContractOf<
-          import('../../src/api/article/services/article').ServiceContract
+          import('../../src/api/article/services/article.js').ServiceContract
         >;
         'api::legacy.legacy': ServiceInstance<
-          typeof import('../../src/api/legacy/services/legacy')
+          typeof import('../../src/api/legacy/services/legacy.js')
         >;
       }
       interface InferredServices {
