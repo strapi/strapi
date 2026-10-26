@@ -560,7 +560,11 @@ const RelationsInput = ({
   const targetModel = props.attribute.targetModel;
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
-  const [searchForTrigger, { data, isLoading, isError }] = useLazySearchRelationsQuery();
+  const [searchForTrigger, { data, isLoading, isFetching, isError, error: searchError }] =
+    useLazySearchRelationsQuery();
+  // Refetching a failed search reports `isError: false` and `isLoading: true` until it settles.
+  // Keep showing the previous error meanwhile instead of flashing the loading state.
+  const isRetryingFailedSearch = isFetching && !isError && searchError !== undefined;
 
   /**
    * Because we're using a lazy query, we need to trigger the search
@@ -691,8 +695,8 @@ const RelationsInput = ({
           placeholder={placeholder}
           hasNextPage={hasNextPage}
           isLoadingPermissions={isLoadingPermissions}
-          isLoadingSearchRelations={isLoading}
-          isSearchRelationsError={isError}
+          isLoadingSearchRelations={isLoading && !isRetryingFailedSearch}
+          isSearchRelationsError={isError || isRetryingFailedSearch}
           handleChange={handleChange}
           setSearchParams={setSearchParams}
           data={data}
@@ -776,9 +780,7 @@ const RelationModalWithContext = ({
   }, [fieldValue]);
 
   const handleSearch = async (search: string) => {
-    // Keep the same state object when nothing changes. A new object would trigger an identical
-    // request after the debounce, and while it is pending a previous error is replaced by loading.
-    setSearchParams((s) => (s._q === search && s.page === 1 ? s : { ...s, _q: search, page: 1 }));
+    setSearchParams((s) => ({ ...s, _q: search, page: 1 }));
   };
   return (
     <RelationModalRenderer>

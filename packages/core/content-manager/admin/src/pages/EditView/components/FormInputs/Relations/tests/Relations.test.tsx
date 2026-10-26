@@ -496,26 +496,45 @@ describe('Relations', () => {
     expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
   });
 
-  it('does not repeat an unchanged relation search when the dropdown opens', async () => {
+  it('keeps the error visible while opening the dropdown retries a failed search', async () => {
     let searchRequests = 0;
+    let releaseRetry = () => {};
+    const retryGate = new Promise<void>((resolve) => {
+      releaseRetry = resolve;
+    });
 
     server.use(
-      http.get('/content-manager/relations/:model/:fieldName', () => {
+      http.get('/content-manager/relations/:model/:fieldName', async () => {
         searchRequests += 1;
 
-        return HttpResponse.json(
-          {
-            data: null,
-            error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
-          },
-          { status: 500 }
-        );
+        if (searchRequests === 1) {
+          return HttpResponse.json(
+            {
+              data: null,
+              error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+            },
+            { status: 500 }
+          );
+        }
+
+        await retryGate;
+
+        return HttpResponse.json({
+          results: [
+            {
+              id: 1,
+              documentId: 'category-1',
+              locale: 'en',
+              status: 'published',
+              name: 'Category 1',
+            },
+          ],
+          pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+        });
       })
     );
 
     const { user } = render({});
-
-    await waitFor(() => expect(searchRequests).toBe(1));
 
     await user.click(await screen.findByRole('combobox', { name: /relations/i }));
 
@@ -523,13 +542,20 @@ describe('Relations', () => {
       await screen.findByText('Whoops! Something went wrong. Please, try again.')
     ).toBeInTheDocument();
 
-    // Wait past the 300ms search debounce so a repeated request would have been sent.
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await waitFor(() => expect(searchRequests).toBe(2));
 
-    expect(searchRequests).toBe(1);
     expect(
       screen.getByText('Whoops! Something went wrong. Please, try again.')
     ).toBeInTheDocument();
+    expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+    expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+
+    releaseRetry();
+
+    expect(await screen.findByRole('option', { name: /Category 1/ })).toBeInTheDocument();
+    expect(
+      screen.queryByText('Whoops! Something went wrong. Please, try again.')
+    ).not.toBeInTheDocument();
   });
 
   describe('reopening the dropdown after selecting a relation', () => {
