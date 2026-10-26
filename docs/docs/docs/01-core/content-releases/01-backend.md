@@ -24,7 +24,7 @@ The `Release` content type stores all the information about a release and its as
 packages/core/content-releases/server/src/content-types/release/schema.ts
 ```
 
-`releasedAt` is when the release ran, whatever the outcome: a release with `releasedAt` set is frozen (it can't be edited, deleted or published again, and it no longer counts as pending). On a "Failed" release, nothing went live.
+`releasedAt` is when the release ran, or when the overdue sweep froze it without running (see [Overdue releases](#overdue-releases)). A release with `releasedAt` set is frozen: it can't be edited, deleted or published again, and it no longer counts as pending. On a "Failed" release nothing went live, except on one that failed before the upgrade, which may have released some entries.
 
 ### Release Action
 
@@ -72,9 +72,9 @@ packages/core/content-releases/server/src/routes/release.ts
 - params:
   ```ts
   {
-    contentTypeUid: string;
+    contentType: string;
     locale?: string;
-    documentId?: string;
+    entryDocumentId?: string;
     hasEntryAttached?: boolean;
   }
   ```
@@ -92,8 +92,8 @@ packages/core/content-releases/server/src/routes/release.ts
   ```ts
   {
     name: string;
-    scheduledAt: string | null; // ISO date
-    timezone: string | null; // required when scheduledAt is set
+    scheduledAt?: string | null; // ISO date
+    timezone?: string | null; // required when scheduledAt is set
     releaseCondition?: 'all_or_nothing' | 'allow_partial'; // all_or_nothing if omitted
   }
   ```
@@ -107,7 +107,7 @@ packages/core/content-releases/server/src/routes/release.ts
   {
     name: string;
     scheduledAt?: string | null; // null or omitted unschedules the release
-    timezone?: string | null; // required when scheduledAt is set
+    timezone?: string | null; // required when scheduledAt is set; null or omitted clears it
     releaseCondition?: 'all_or_nothing' | 'allow_partial';
   }
   ```
@@ -132,10 +132,10 @@ packages/core/content-releases/server/src/routes/release.ts
   ```ts
   {
     name: string;
-    scheduledAt: string | null; // ISO date
-    timezone: string | null; // required when scheduledAt is set
+    scheduledAt?: string | null; // ISO date
+    timezone?: string | null; // required when scheduledAt is set
     releaseCondition?: 'all_or_nothing' | 'allow_partial';
-    actionIds?: number[]; // skipped entries to carry over; all of them if omitted
+    actionIds?: number[]; // skipped entries to carry over; all of them if omitted, an empty array is a 400
   }
   ```
 
@@ -243,14 +243,14 @@ packages/core/content-releases/server/src/services/scheduling.ts
 
 #### Overdue releases
 
-`syncFromDatabase` only arms future dates, so a release whose scheduled run didn't happen would stay in Pending with a past date. `freezeOverdueReleases` runs at bootstrap, before `syncFromDatabase`, then every minute, and freezes as "Failed" (`releasedAt` set, nothing published):
+`syncFromDatabase` only arms future dates, so a release whose scheduled run didn't happen would stay in Pending with a past date. `freezeOverdueReleases` runs at bootstrap, before `syncFromDatabase`, then every minute, and freezes these releases (`releasedAt` set) without running anything:
 
 - a release whose `scheduledAt` is older than the grace period (`OVERDUE_GRACE_PERIOD_MS`, 5 minutes): the server was down, or the run was rolled back by a database error. `failureReason` is `missed_schedule`. It sends the `releases.publish` webhook (`isPublished: false`, an error named `MissedSchedule`) and a `release.trigger` audit failure attributed to the scheduler. A release with no entries missed nothing: it ends "Done" instead (totals all 0, `failureReason` `null`), with the success webhook and audit event its scheduled run would have sent.
-- a release that failed before the upgrade: before failed runs were frozen, they left `status: failed` without `releasedAt`. It's frozen whatever its schedule, its job never armed. `failureReason` is `failed_before_upgrade`, and nothing is sent: it reported its failure then.
+- a release that failed before the upgrade: before failed runs were frozen, they left `status: failed` without `releasedAt`. It's frozen whatever its schedule, its job never armed. `failureReason` is `failed_before_upgrade`, and nothing is sent: it reported its failure then. It stays "Failed" even with no entries.
 
 Every entry gets the outcome `skipped_missed` and keeps the validity last checked (nothing is checked at freeze time). The totals are 0 published, 0 unpublished, every entry skipped, so "Create release from skipped entries" carries over every entry. For `failed_before_upgrade` they don't say what went out: the old run stopped at its first error and kept the entries released before it, and nothing recorded which. Read them as unknown, not as skipped: the API returns `skipped_missed` and these totals, with only `failureReason` telling the two apart. The admin hides "Create release from skipped entries" for such a release, so it doesn't publish entries again, but otherwise shows it like one that missed its schedule. The route itself doesn't refuse it.
 
-Each release is frozen in its own transaction, under a run's row lock, and checked again under it: a run in progress, or a reschedule to a later date, wins. It reads no entry, so it can't deadlock with a run. It throws inside another transaction, which would hold every lock until that one ends. A sweep that starts during another joins it; on a cluster, the lock lets one node freeze and report each release. A release that fails to freeze is left for the next sweep. On MySQL, a run still going 5 minutes after its date can make the sweep's lock wait time out (`innodb_lock_wait_timeout`): that's logged every minute until the run commits. `failureReason` is `null` on every release that ran, and on an empty one the sweep froze as done.
+Each release is frozen in its own transaction, under a run's row lock, and checked again under it: a run in progress, or a reschedule to a later date, wins. It reads no entry, so it can't deadlock with a run. It throws inside another transaction, which would hold every lock until that one ends. A sweep that starts during another joins it; on a cluster, the lock lets one node freeze and report each release. A release that fails to freeze is left for the next sweep. On MySQL, a run still going 5 minutes after its date can make the sweep's lock wait time out (`innodb_lock_wait_timeout`): that's logged every minute until the run commits. `failureReason` is `null` on every release that ran, and on an empty release that missed its schedule, which the sweep froze as done; an empty `failed_before_upgrade` release keeps its `failureReason` and is frozen as failed.
 
 ### Release status update triggers:
 
@@ -275,7 +275,7 @@ The releases list and the single release response return `actions.meta.notReadyC
 
 A release is planned (Empty, Ready, Blocked) until it runs. After it runs, it is frozen with one of these statuses, which nothing changes afterwards:
 
-- **Done**: every entry was published or unpublished. A release with no entries ends done.
+- **Done**: every entry was published or unpublished. A release with no entries ends done when it runs or misses its schedule; an empty release that failed before the upgrade ends failed.
 - **Partial**: some entries were released and some were not.
 - **Failed**: no entry was released.
 
@@ -291,7 +291,7 @@ A release that ran can't change, so its skipped entries are released again throu
 
 - An entry is skipped when its outcome is neither `published` nor `unpublished`.
 - Only a `partial` or `failed` release that ran is accepted. A release that hasn't run is rejected with `Release not published yet`, a `done` one with `Release has no skipped entries` (both 400). An unknown `:id` is a 404.
-- The new release's fields are validated like any new release. `actionIds` restricts the entries to those actions; an id that isn't a skipped entry of the release is a 400.
+- The new release's fields are validated like any new release. `actionIds` restricts the entries to those actions; it must hold at least one id (an empty array is a 400, omit it to carry over every skipped entry), and an id that isn't a skipped entry of the release is a 400.
 - Each entry keeps its type and locale, in the order it was added. Its validity is read from the entry as it is now, and the new release's status follows from it.
 - Entries deleted since the run (in their locale, for a localized content type), or whose content type was deleted or lost Draft and Publish, are left out. If nothing is left, the request is rejected with a 400: `Release has no skipped entries`, or `The requested entries can no longer be released` when `actionIds` was given.
 - The release, its entries and its status are written in one transaction. The source release isn't changed.
@@ -314,15 +314,15 @@ Whenever a release is updated, its status is recalculated, so switching the rele
 
 #### Publishing a release:
 
-A publish is either manual (the publish button or the API) or scheduled (the scheduler, at the release date). Under the release row lock, the run first reads every publish entry's current draft and checks whether it is publishable, before writing anything. Only a validation error makes an entry invalid. An entry whose check throws anything else (e.g. its draft can't be read) is recorded as `skipped_error` and, like an invalid one, isn't publishable. Entries are then handled one at a time: content types in relation dependency order, publishes before unpublishes, each in the order they were added. They share the lock transaction, and are written in savepoints (`strapi.db.savepoint`), so a failure rolls back exactly what it should.
+A publish is either manual (the publish button or the API) or scheduled (the scheduler, at the release date). Under the release row lock, the run first reads every publish entry's current draft and checks whether it is publishable, before writing anything. A check that throws, whatever the error (e.g. its draft can't be read), isn't an entry validation result: the entry is recorded as `skipped_error` with `isEntryValid: false`, and isn't publishable. Entries are then handled one at a time: content types in relation dependency order, publishes before unpublishes, each in the order they were added. They share the lock transaction, and are written in savepoints (`strapi.db.savepoint`), so a failure rolls back exactly what it should.
 
 - `allow_partial`: entries that aren't publishable are skipped without being written. Each other entry is published or unpublished in its own savepoint: if that throws, only that entry is rolled back and skipped, and the run moves on. The check can pass an entry that still fails when written, for example when an earlier entry of the same run takes its unique value: since a publish removes the entry's published version before it validates the new one, the savepoint is what keeps that version online.
 - `all_or_nothing`: if any entry isn't publishable, no entry is written. Otherwise every entry is published or unpublished in one savepoint, and the first error rolls them all back.
 
 The run decides from this check, not from the stored status: a release that reads "Blocked" only because a background revalidation hasn't caught up with a fixed entry yet is published. When the check finds that a run would release nothing (`all_or_nothing`: any entry not publishable; `allow_partial`: no entry publishable; never for a release with no entries):
 
-- A manual publish is rejected (400) with the first such entry's validation error, in run order. When only checks that threw block it, the error is `An entry couldn't be checked (<error name>)`, never the thrown message. Nothing is published, the check's result is stored on the release actions (`isEntryValid`), and the status is recalculated, so the release stays planned and reads "Blocked" even if the stored values had gone out of date. No webhook or audit event is sent.
-- A scheduled run fails: the release is frozen as "Failed", with the first entry's error for `all_or_nothing` and `No entries were published` for `allow_partial`.
+- A manual publish is rejected (400) with the first not-publishable entry's own error, in run order. When only checks that threw block it, the error is `An entry couldn't be checked (<error name>)`, never the thrown message. Nothing is published, the check's result is stored on the release actions (`isEntryValid`), and the status is recalculated, so the release stays planned and reads "Blocked" even if the stored values had gone out of date. No webhook or audit event is sent.
+- A scheduled run fails: the release is frozen as "Failed". For `all_or_nothing`, it records the first not-publishable entry's own error, or else the first thrown check's error; for `allow_partial`, `No entries were published`.
 
 Database caveats:
 
@@ -345,9 +345,9 @@ Each entry of the run records what happened to it on its release action, returne
 | `unpublished`          | the entry was unpublished, also when it had no published version                                                                                                                   | `null`                                                                                                                             |
 | `skipped_invalid`      | the draft failed publish validation, whether or not it was also at the wrong stage, or publishing it raised a validation error (e.g. a unique clash with another entry of the run) | `validation.errors`: field `path` and `message`, without the error's `value`; a type-mismatch message loses the value it ends with |
 | `skipped_not_approved` | the entry wasn't at the stage required to publish                                                                                                                                  | `stage`: the entry's stage and the required one                                                                                    |
-| `skipped_error`        | publishing or unpublishing the entry, or checking it, threw an error other than a validation error                                                                                 | `error.name`, never its message                                                                                                    |
+| `skipped_error`        | publishing or unpublishing the entry threw an error other than a validation error, or checking it threw any error                                                                  | `error.name`, never its message                                                                                                    |
 | `skipped_held`         | the entry was publishable, but an `all_or_nothing` run released nothing (at the check or after an error)                                                                           | `null`                                                                                                                             |
-| `skipped_missed`       | the release froze without running: its scheduled run never happened, or it failed before the upgrade (frozen by the overdue sweep, see Scheduling)                                 | unchanged: the last check before the date                                                                                          |
+| `skipped_missed`       | the release froze without running: its scheduled run never happened, or it failed before the upgrade (frozen by the overdue sweep, see Scheduling)                                 | unchanged: the validity last stored                                                                                                |
 
 An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status, with the validity the run found: `isEntryValid` is `false` for `skipped_invalid` and `skipped_not_approved`, and `true` for every other outcome except a `skipped_error` entry whose check threw, so it never contradicts the outcome. A release runs once: its outcomes are never rewritten afterwards, a `failed` release included. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
 
@@ -367,7 +367,7 @@ The audit counts are the release's totals, `failed` being `totalSkippedEntries`:
 
 When an entry is updated, its draft is discarded or it is deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity. Only releases that haven't run are affected: an update or a discarded draft rewrites `isEntryValid` and `reason` (a discarded draft is replaced by the published version, for each locale it was discarded in) and a deletion removes the entry's actions only there. A release that ran keeps the actions of deleted entries, with what the run recorded; `GET /content-releases/:releaseId/actions` returns them with a `null` `entry` and `status`.
 
-This work isn't awaited by the entry's request (`runAfterCommit`) and runs outside its transaction, so the request responds before the releases' `isEntryValid`, `reason` and status change: a client that shows them after a save re-reads them until they do. It starts once that transaction commits (right away without one). It reads the committed entry, can't undo the request's writes, and doesn't run for a change that was rolled back. Each affected release is then changed in a transaction of its own, under its lock. Failures are logged.
+This work isn't awaited by the entry's request (`runAfterCommit`) and runs outside its transaction, so the request responds before the releases' `isEntryValid`, `reason` and status change: a client that shows them right after a save must re-read them until they do. It starts once that transaction commits (right away without one). It reads the committed entry, can't undo the request's writes, and doesn't run for a change that was rolled back. Each affected release is then changed in a transaction of its own, under its lock. Failures are logged.
 
 ## Migrations
 
@@ -381,7 +381,7 @@ These run on every content type sync. The revalidation passes aren't awaited by 
   - `migrateIsValidAndStatusReleases`: releases from before statuses existed get one.
   - `addReasonsToInvalidActions`: see above.
   - `migrateReleaseConditionReleases`: releases from before the condition existed get `all_or_nothing`.
-  - `addOutcomesToReleasedReleases`: a release that ran before outcomes existed released every entry (a failed run left it planned), so each action gets `published` or `unpublished` and the release its totals. A release a since-removed migration froze as `failed_before_upgrade`, without totals, gets every entry `skipped_missed` and all-skipped totals, as the sweep writes.
+  - `addOutcomesToReleasedReleases`: a release that ran before outcomes existed released every entry (a failed run left it planned), so each action gets `published` or `unpublished` and the release its totals and the status `done` (an entry change used to recalculate a released release's status as if it were planned). A release a since-removed migration froze as `failed_before_upgrade`, without totals, gets every entry `skipped_missed` and all-skipped totals, as the sweep writes.
 
 Releases that failed before the upgrade are frozen by the overdue sweep at bootstrap (see Scheduling).
 

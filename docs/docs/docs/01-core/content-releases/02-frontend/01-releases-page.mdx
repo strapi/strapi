@@ -7,11 +7,11 @@ tags:
 
 ### Overview
 
-The releases page provides a comprehensive display of all available content releases. Content is organized into two tabs: 'pending' (releases not yet published) and 'done' (releases already published).
+The releases page lists every release in one paginated table, sorted by last update (most recent first). Its columns are name, status, schedule, entries and release mode; clicking a row opens the release details page. The header subtitle shows the total number of releases.
 
 #### New Release Creation:
 
-If a user has the `plugin::content-releases.update` permissions, a 'New release' button will be visible in the header. Clicking the button opens a form requiring a name. The name of a pending release must be unique.
+If a user has the `plugin::content-releases.create` permission, a 'New release' button will be visible in the header. Clicking the button opens a side panel with the release name, its schedule (date, time and timezone, or "I don't have a release date yet") and its release mode. The name of a pending release must be unique. Once created, the user is taken to the new release.
 
 #### License limits
 

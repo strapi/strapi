@@ -1,5 +1,5 @@
 import { describeOnCondition } from '../../../utils/shared';
-import { test, expect } from './fixtures';
+import { testLoggedIn as test, expect } from './fixtures';
 import { createReleaseOfMatches } from './release-api';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -42,7 +42,7 @@ describeOnCondition(edition === 'EE')('Release page - skipped entries', () => {
     await expect(drawer.nameInput).toHaveValue(`${RELEASE_NAME} - skipped entries`);
     await expect(drawer.releaseMode('Release all ready items')).toBeChecked();
 
-    await drawer.noScheduleCheckbox.click();
+    await drawer.noScheduleCheckbox.check();
     await drawer.createRelease();
 
     await expect(details.heading(`${RELEASE_NAME} - skipped entries`)).toBeVisible();
@@ -64,8 +64,7 @@ describeOnCondition(edition === 'EE')('Release page - skipped entries', () => {
     await expect(drawer.carriedOverHeading(1)).toBeVisible();
 
     await drawer.nameInput.fill('Matchday rematch');
-    await drawer.chooseReleaseMode('Release all ready items');
-    await drawer.noScheduleCheckbox.click();
+    await drawer.noScheduleCheckbox.check();
     await drawer.createRelease();
 
     await expect(details.heading('Matchday rematch')).toBeVisible();

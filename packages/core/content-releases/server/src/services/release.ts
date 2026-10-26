@@ -319,8 +319,13 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const updatedRelease = await strapi.db.query(RELEASE_MODEL_UID).update({
           where: { id },
-          // An omitted schedule unschedules the release, as for its job below
-          data: { ...releaseWithCreatorFields, scheduledAt: releaseData.scheduledAt ?? null },
+          // The schedule is replaced as a whole: an omitted date or timezone is cleared, and an
+          // omitted date unschedules the release, as for its job below
+          data: {
+            ...releaseWithCreatorFields,
+            scheduledAt: releaseData.scheduledAt ?? null,
+            timezone: releaseData.timezone ?? null,
+          },
         });
 
         if (!updatedRelease) {

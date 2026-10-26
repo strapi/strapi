@@ -138,7 +138,19 @@ export const ReleaseDrawer = ({
   return (
     <Drawer
       open={open}
-      onOpenChange={(isOpen) => {
+      onOpenChange={(isOpen, eventDetails) => {
+        // Legacy DS pickers (e.g. the DatePicker calendar) unmount their portal on pointerdown, so
+        // Firefox dispatches the click that follows on <body>. base-ui counts a click on any
+        // ancestor of the drawer as an outside press, which would close the drawer mid-edit. Real
+        // outside presses land on the drawer's full-screen viewport, never on <body>.
+        if (
+          eventDetails.reason === 'outside-press' &&
+          eventDetails.event.target === document.body
+        ) {
+          eventDetails.cancel();
+          return;
+        }
+
         if (!isOpen) onClose();
       }}
       swipeDirection="right"
@@ -149,7 +161,6 @@ export const ReleaseDrawer = ({
           initialValues={formInitialValues}
           validationSchema={RELEASE_SCHEMA}
           validateOnChange={false}
-          enableReinitialize
         >
           {({ values, errors, handleChange }) => (
             <DrawerForm>
@@ -298,7 +309,8 @@ const ScheduleFields = ({
                   value={values.date ? new Date(values.date) : new Date()}
                   minDate={utcToZonedTime(
                     new Date(),
-                    getTimezoneName(values.timezone ?? defaultTimezone)
+                    // A cleared timezone is '': fall back to the default
+                    getTimezoneName(values.timezone || defaultTimezone)
                   )}
                 />
                 <Field.Error />
@@ -333,7 +345,6 @@ const ScheduleFields = ({
         </>
       )}
       <Checkbox
-        name="isScheduled"
         checked={!values.isScheduled}
         onCheckedChange={(checked) => handleNoScheduleChange(checked === true)}
       >

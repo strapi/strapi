@@ -1,4 +1,3 @@
-import { test, expect } from '@playwright/test';
 import {
   clickAndWait,
   describeOnCondition,
@@ -8,8 +7,26 @@ import {
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
 import { sharedSetup } from '../../../utils/setup';
+import { testWithPageObjects as test, expect, releaseName as PENDING_RELEASE } from './fixtures';
+import { createReleaseOfMatches, publishRelease, waitForScheduledRun } from './release-api';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
+// Seeded by the `with-admin` import: released, and the least recently updated release
+const OLDEST_RELEASE = 'Nate: A wonder kid';
+
+const READY_MATCH = { kit_man: 'Will Kitman', opponent: 'West Ham' };
+// Publishing a match requires its opponent
+const NOT_READY_MATCHES = [{ kit_man: 'Nathan Shelley' }, { kit_man: 'Roy Kent' }];
+
+// The browser's zone, set by `timezoneId` in the Playwright config
+const BROWSER_TIMEZONE = 'Europe/Paris';
+
+/**
+ * The absolute date and time of the schedule column, as the list formats it in the given zone
+ */
+const formatScheduleTime = (date: Date, timeZone: string) =>
+  `${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hourCycle: 'h23', timeZone })}`;
 
 describeOnCondition(edition === 'EE')('Releases page', () => {
   test.beforeEach(async ({ page }) => {
@@ -25,122 +42,192 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await resetFiles();
   });
 
-  test('A user should be able to create a release without scheduling it and view their pending and done releases', async ({
+  test('a pending release shows how many of its entries are ready, and its release mode decides its status', async ({
     page,
+    releases,
   }) => {
-    // Navigate to the releases page
-    await navToHeader(page, ['Releases'], 'Releases');
-
-    await expect(page.getByRole('link', { name: `Trent Crimm: The Independent` })).toBeVisible();
-
-    // Open the 'Done' tab panel
-    await page.getByRole('tab', { name: 'Done' }).click();
-    await expect(page.getByRole('link', { name: `Nate: A wonder kid` })).toBeVisible();
-
-    // Open the create release dialog
-    await page.getByRole('button', { name: 'New release' }).click();
-    await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
-
-    // Create a release
-    const newReleaseName = 'The Diamond Dogs';
-    await page.getByRole('textbox', { name: 'Release name' }).fill(newReleaseName);
-    await page.getByRole('checkbox', { name: "I don't have a release date yet" }).check();
-    await page.getByRole('button', { name: 'Create release' }).click();
-    // Wait for client side redirect to created release
-    await page.waitForURL('/admin/plugins/content-releases/*');
-    await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
-
-    // Navigate back to the release page to see the newly created release
-    await navToHeader(page, ['Releases'], 'Releases');
-    await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
-  });
-
-  test('A user should be able to create a release with scheduling info and view their pending and done releases', async ({
-    page,
-  }) => {
-    // Navigate to the releases page
-    await navToHeader(page, ['Releases'], 'Releases');
-
-    // Open the create release dialog
-    await clickAndWait(page, page.getByRole('button', { name: 'New release' }));
-    await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
-
-    // Create a release
-    const newReleaseName = 'The Diamond Dogs';
-    await page.getByRole('textbox', { name: 'Release name' }).fill(newReleaseName);
-
-    // Select valid date and time
-    await page
-      .getByRole('combobox', {
-        name: 'Date',
-      })
-      .click();
-
-    const date = new Date();
-    date.setDate(date.getDate() + 1);
-    const formattedDate = date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
+    await createReleaseOfMatches(page, {
+      name: 'Derby day',
+      releaseCondition: 'all_or_nothing',
+      matches: [READY_MATCH, ...NOT_READY_MATCHES],
+    });
+    await createReleaseOfMatches(page, {
+      name: 'Charity match',
+      releaseCondition: 'allow_partial',
+      matches: [READY_MATCH, ...NOT_READY_MATCHES],
     });
 
-    await page.getByLabel(formattedDate).click();
+    await releases.goto();
 
-    await page.getByRole('combobox', { name: /^time$/i }).click();
+    // Nothing goes out unless every entry is ready
+    const allRequired = releases.row('Derby day');
+    await expect(allRequired).toContainText('Blocked');
+    await expect(allRequired).toContainText('All required');
+    await expect(allRequired).toContainText(/3\s+entries/);
+    await expect(allRequired).toContainText(/1\s+of\s+3\s+ready/);
+    await expect(allRequired).toContainText('Not scheduled');
 
-    await page.getByRole('option', { name: '08:00' }).click();
-
-    await clickAndWait(page, page.getByRole('button', { name: 'Create release' }));
-
-    // Wait for client side redirect to created release
-    await page.waitForURL('/admin/plugins/content-releases/*');
-
-    await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
-
-    // Navigate back to the release page to see the newly created release
-    await navToHeader(page, ['Releases'], 'Releases');
-    await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
+    // The ready entry can go out on its own
+    const partial = releases.row('Charity match');
+    await expect(partial).toContainText('Ready');
+    await expect(partial).toContainText('Allow partial');
+    await expect(partial).toContainText(/1\s+of\s+3\s+ready/);
   });
 
-  test('A user should be able to perform bulk release on entries', async ({ page }) => {
-    await test.step('bulk release', async () => {
-      // Navigate to the releases page
-      await navToHeader(page, ['Releases'], 'Releases');
-      await page.getByRole('button', { name: 'New release' }).click();
-      await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
-      // Create a new release
-      const newReleaseName = 'The Diamond Dogs';
-      await page.getByRole('textbox', { name: 'Release name' }).fill(newReleaseName);
-      await page.getByRole('checkbox', { name: "I don't have a release date yet" }).check();
-      await clickAndWait(page, page.getByRole('button', { name: 'Create release' }));
-      // Wait for client side redirect to created release
-      await page.waitForURL('/admin/plugins/content-releases/*');
-      await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
+  test('a release that ran shows its outcome and when it ran, not its readiness', async ({
+    page,
+    releases,
+  }) => {
+    const partialId = await createReleaseOfMatches(page, {
+      name: 'Cup final',
+      releaseCondition: 'allow_partial',
+      matches: [READY_MATCH, ...NOT_READY_MATCHES],
+    });
+    const partialRanAt = await publishRelease(page, partialId);
+    const doneId = await createReleaseOfMatches(page, {
+      name: 'League opener',
+      releaseCondition: 'all_or_nothing',
+      matches: [READY_MATCH],
+    });
+    const doneRanAt = await publishRelease(page, doneId);
 
-      // Navigate to the content manager
+    await releases.goto();
+
+    const partial = releases.row('Cup final');
+    await expect(partial).toContainText('Partial');
+    await expect(partial).toContainText(/3\s+entries/);
+    await expect(partial).toContainText(formatScheduleTime(partialRanAt, BROWSER_TIMEZONE));
+    await expect(partial).not.toContainText(/of\s+\d+\s+ready/);
+
+    const done = releases.row('League opener');
+    await expect(done).toContainText('Done');
+    await expect(done).toContainText(/1\s+entry/);
+    await expect(done).toContainText(formatScheduleTime(doneRanAt, BROWSER_TIMEZONE));
+  });
+
+  test('a scheduled release that could not go out shows as failed', async ({ page, releases }) => {
+    // Due seconds after it's set up, with entries that can't be published: nothing goes out then
+    const releaseId = await createReleaseOfMatches(page, {
+      name: 'Away game',
+      releaseCondition: 'all_or_nothing',
+      matches: [READY_MATCH, ...NOT_READY_MATCHES],
+      schedule: { scheduledAt: () => new Date(Date.now() + 5_000), timezone: BROWSER_TIMEZONE },
+    });
+    const ranAt = await waitForScheduledRun(page, releaseId);
+
+    await releases.goto();
+
+    const row = releases.row('Away game');
+    await expect(row).toContainText('Failed');
+    await expect(row).toContainText('All required');
+    await expect(row).toContainText(/3\s+entries/);
+    await expect(row).toContainText(formatScheduleTime(ranAt, BROWSER_TIMEZONE));
+    await expect(row).not.toContainText(/of\s+\d+\s+ready/);
+  });
+
+  test('a scheduled release shows its date and time in its own timezone', async ({
+    page,
+    releases,
+  }) => {
+    // 23:30 UTC is 08:30 the next morning in Tokyo, and past midnight in the browser's zone
+    const scheduledAt = new Date();
+    scheduledAt.setUTCDate(scheduledAt.getUTCDate() + 1);
+    scheduledAt.setUTCHours(23, 30, 0, 0);
+    await createReleaseOfMatches(page, {
+      name: 'Tokyo launch',
+      releaseCondition: 'all_or_nothing',
+      matches: [READY_MATCH],
+      schedule: { scheduledAt, timezone: 'Asia/Tokyo' },
+    });
+
+    await releases.goto();
+
+    const row = releases.row('Tokyo launch');
+    const tokyoTime = `${formatScheduleTime(scheduledAt, 'Asia/Tokyo')} UTC+09:00`;
+    await expect(row).toContainText(tokyoTime);
+    // Hovering the relative time tells the same time, not the browser's
+    await expect(row.locator('time')).toHaveAttribute('title', tokyoTime);
+  });
+
+  test('pending and released releases are paginated together, most recently updated first', async ({
+    page,
+    releases,
+  }) => {
+    // With the 2 seeded releases, one more than the 16 of a page
+    for (let index = 1; index <= 15; index++) {
+      await createReleaseOfMatches(page, {
+        name: `Sprint ${index}`,
+        releaseCondition: 'allow_partial',
+        matches: [],
+      });
+    }
+
+    await releases.goto();
+
+    await expect(releases.releaseCount(17)).toBeVisible();
+    await expect(releases.rows).toHaveCount(16);
+    await expect(releases.rows.first()).toContainText('Sprint 15');
+
+    await releases.goToNextPage();
+
+    await expect(releases.rows).toHaveCount(1);
+    await expect(releases.row(OLDEST_RELEASE)).toBeVisible();
+    await expect(releases.releaseCount(17)).toBeVisible();
+  });
+
+  test('a user can open a release from anywhere on its row', async ({
+    page,
+    releases,
+    details,
+  }) => {
+    await releases.goto();
+
+    await releases.row(PENDING_RELEASE).getByText('Not scheduled').click();
+
+    await page.waitForURL('/admin/plugins/content-releases/*');
+    await expect(details.heading(PENDING_RELEASE)).toBeVisible();
+  });
+
+  test('A user should be able to create a release without scheduling it and see it first in the list', async ({
+    releases,
+  }) => {
+    await releases.goto();
+    await releases.createRelease('The Diamond Dogs');
+
+    await releases.goto();
+    await expect(releases.rows.first()).toContainText('The Diamond Dogs');
+    await expect(releases.row('The Diamond Dogs')).toContainText('Not scheduled');
+  });
+
+  test('A user should be able to create a release with scheduling info and see it first in the list', async ({
+    releases,
+  }) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    await releases.goto();
+    await releases.createRelease('The Diamond Dogs', { date: tomorrow, time: '08:00' });
+
+    await releases.goto();
+    await expect(releases.rows.first()).toContainText('The Diamond Dogs');
+    await expect(releases.row('The Diamond Dogs')).not.toContainText('Not scheduled');
+  });
+
+  test('A user should be able to perform bulk release on entries', async ({
+    page,
+    releases,
+    cm,
+  }) => {
+    await test.step('bulk release', async () => {
+      await releases.goto();
+      await releases.createRelease('The Diamond Dogs');
+
+      // The empty release links to the content manager
       await clickAndWait(page, page.getByRole('link', { name: 'Open the Content Manager' }));
       await page.waitForURL('/admin/content-manager/collection-types/*');
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
 
-      // Select all entries to release
-      await page.getByRole('checkbox', { name: 'Select all entries' }).check();
-      await clickAndWait(page, page.getByRole('button', { name: 'add to release' }));
-
-      // Wait for the add to release dialog to appear
-      await page
-        .getByRole('combobox', {
-          name: 'Select a release',
-        })
-        .click();
-
-      await page.getByRole('option', { name: 'The Diamond Dogs' }).click();
-      await page.getByText('unpublish', { exact: true }).click();
-      await clickAndWait(page, page.getByText('continue'));
-      await page.getByText(/Successfully added to release./).waitFor({
-        state: 'visible',
-        timeout: 5000,
-      });
+      await cm.addAllEntriesToRelease('The Diamond Dogs', 'unpublish');
     });
 
     await test.step('releases should be updated in the release column of list view', async () => {

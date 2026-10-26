@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { isFetchError, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
+import { useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
 import { Box, Flex, IconButton, Loader, TextButton, Typography } from '@strapi/design-system';
 import { CaretDown, CaretUp, Download, Trash, Upload } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -11,6 +11,7 @@ import {
   useGetReleaseActionsQuery,
   useGetReleaseSettingsQuery,
 } from '../services/release';
+import { isBaseQueryError } from '../utils/api';
 
 import { ReleaseDrawer, type ReleaseDrawerValues } from './ReleaseDrawer';
 
@@ -58,15 +59,18 @@ export const CreateReleaseFromSkippedDrawer = ({
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [createRelease, { isLoading: isSubmitting }] = useCreateReleaseFromSkippedEntriesMutation();
-  const { data: skippedData, isLoading: isLoadingEntries } = useGetReleaseActionsQuery(
-    getSkippedEntriesQuery(release.id),
-    { skip: !open }
-  );
+  const {
+    data: skippedData,
+    isLoading: isLoadingEntries,
+    isError: isEntriesError,
+    error: entriesError,
+  } = useGetReleaseActionsQuery(getSkippedEntriesQuery(release.id), { skip: !open });
   const { data: settings } = useGetReleaseSettingsQuery(undefined, { skip: !open });
   const [removedIds, setRemovedIds] = React.useState<Set<FormattedReleaseAction['id']>>(new Set());
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const entriesListId = React.useId();
 
   // The panel stays mounted while closed: start the next opening from every skipped entry
   const close = () => {
@@ -99,12 +103,12 @@ export const CreateReleaseFromSkippedDrawer = ({
         type: 'success',
         message: formatMessage({
           id: 'content-releases.modal.release-created-notification-success',
-          defaultMessage: 'Release created.',
+          defaultMessage: 'Release created',
         }),
       });
       close();
       navigate(`../${response.data.data.id}`, { relative: 'path' });
-    } else if (isFetchError(response.error)) {
+    } else if (isBaseQueryError(response.error)) {
       toggleNotification({ type: 'danger', message: formatAPIError(response.error) });
     } else {
       toggleNotification({
@@ -146,52 +150,62 @@ export const CreateReleaseFromSkippedDrawer = ({
       isSubmitDisabled={isLoadingEntries || carriedOverEntries.length === 0}
     >
       <Box background="neutral100" padding={4}>
-        <Flex justifyContent="space-between" alignItems="center" paddingBottom={3}>
-          <Typography variant="delta" tag="h3">
-            {formatMessage(
-              {
-                id: 'content-releases.skipped-drawer.entries.title',
-                defaultMessage:
-                  '{count, plural, one {# entry carried over} other {# entries carried over}}',
-              },
-              { count: carriedOverCount }
-            )}
+        {isEntriesError ? (
+          <Typography tag="p" variant="omega" textColor="danger600" role="alert">
+            {isBaseQueryError(entriesError)
+              ? formatAPIError(entriesError)
+              : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' })}
           </Typography>
-          {carriedOverEntries.length > COLLAPSED_ENTRIES_COUNT && (
-            <TextButton
-              onClick={() => setIsExpanded((prev) => !prev)}
-              endIcon={isExpanded ? <CaretUp /> : <CaretDown />}
-            >
-              {isExpanded
-                ? formatMessage({
-                    id: 'content-releases.skipped-drawer.entries.show-less',
-                    defaultMessage: 'Show less',
-                  })
-                : formatMessage({
-                    id: 'content-releases.skipped-drawer.entries.show-more',
-                    defaultMessage: 'Show more',
-                  })}
-            </TextButton>
-          )}
-        </Flex>
-        {isLoadingEntries ? (
+        ) : isLoadingEntries ? (
           <Flex justifyContent="center" padding={4}>
             <Loader small />
           </Flex>
         ) : (
-          <Flex tag="ul" direction="column" alignItems="stretch" gap={2}>
-            {visibleEntries.map((action) => (
-              <CarriedOverEntry
-                key={action.id}
-                action={action}
-                onRemove={
-                  canRemoveEntries && carriedOverEntries.length > 1
-                    ? () => setRemovedIds((prev) => new Set(prev).add(action.id))
-                    : undefined
-                }
-              />
-            ))}
-          </Flex>
+          <>
+            <Flex justifyContent="space-between" alignItems="center" paddingBottom={3}>
+              <Typography variant="delta" tag="h3">
+                {formatMessage(
+                  {
+                    id: 'content-releases.skipped-drawer.entries.title',
+                    defaultMessage:
+                      '{count, plural, one {# entry carried over} other {# entries carried over}}',
+                  },
+                  { count: carriedOverCount }
+                )}
+              </Typography>
+              {carriedOverEntries.length > COLLAPSED_ENTRIES_COUNT && (
+                <TextButton
+                  onClick={() => setIsExpanded((prev) => !prev)}
+                  endIcon={isExpanded ? <CaretUp /> : <CaretDown />}
+                  aria-expanded={isExpanded}
+                  aria-controls={entriesListId}
+                >
+                  {isExpanded
+                    ? formatMessage({
+                        id: 'content-releases.skipped-drawer.entries.show-less',
+                        defaultMessage: 'Show less',
+                      })
+                    : formatMessage({
+                        id: 'content-releases.skipped-drawer.entries.show-more',
+                        defaultMessage: 'Show more',
+                      })}
+                </TextButton>
+              )}
+            </Flex>
+            <Flex tag="ul" id={entriesListId} direction="column" alignItems="stretch" gap={2}>
+              {visibleEntries.map((action) => (
+                <CarriedOverEntry
+                  key={action.id}
+                  action={action}
+                  onRemove={
+                    canRemoveEntries && carriedOverEntries.length > 1
+                      ? () => setRemovedIds((prev) => new Set(prev).add(action.id))
+                      : undefined
+                  }
+                />
+              ))}
+            </Flex>
+          </>
         )}
       </Box>
     </ReleaseDrawer>

@@ -174,7 +174,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   // Publishing one of these documents waits for its pause first, through the same middleware
   const publishPauses = new Map<string, () => Promise<void>>();
   // The next release-action query of this kind fails in the database
-  const failNextActionQuery: { kind: 'findMany' | 'update' | 'updateMany' | 'count' | null } = {
+  const failNextActionQuery: { kind: 'findMany' | 'updateMany' | 'count' | null } = {
     kind: null,
   };
   let unsubscribeFailingActionQueries: () => void;
@@ -396,7 +396,6 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     unsubscribeFailingActionQueries = strapi.db.lifecycles.subscribe({
       models: ['plugin::content-releases.release-action'],
       beforeFindMany: () => failIfArmed('findMany'),
-      beforeUpdate: () => failIfArmed('update'),
       beforeUpdateMany: () => failIfArmed('updateMany'),
       beforeCount: () => failIfArmed('count'),
     });
@@ -900,11 +899,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         });
       });
 
-      test('narrows further with a filter on the actions', async () => {
+      test('combines the outcome filter with a filter on the actions', async () => {
+        const validId = await createProduct({ valid: true });
         const invalidId = await createProduct({ valid: false });
         const failingId = await createProduct({ valid: true });
         const release = await createReleaseWithActions('allow_partial', [
-          { documentId: await createProduct({ valid: true }) },
+          { documentId: validId },
           { documentId: invalidId },
           { documentId: failingId },
         ]);
@@ -918,7 +918,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         const res = await rq({
           method: 'GET',
           url: `/content-releases/${release.id}/actions`,
-          qs: { filter: 'skipped', filters: { outcome: 'skipped_invalid' } },
+          // Alone, `filter` matches the invalid and failing entries, `filters` the valid and invalid
+          // ones: only the invalid entry matches both
+          qs: { filter: 'skipped', filters: { entryDocumentId: { $in: [validId, invalidId] } } },
         });
 
         expect(res.statusCode).toBe(200);
@@ -1196,7 +1198,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.data.scheduledAt).toBeNull();
+      expect(res.body.data).toMatchObject({ scheduledAt: null, timezone: null });
       expect(
         strapi.plugin('content-releases').service('scheduling').getAll().has(String(release.id))
       ).toBe(false);
@@ -2077,7 +2079,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     describe('a database error outside the entries rolls the whole run back', () => {
       const publishWithFailure = async (
         releaseId,
-        kind: 'findMany' | 'update' | 'updateMany'
+        kind: 'findMany' | 'updateMany'
       ): Promise<{ statusCode: number; publishEvents: unknown[] }> => {
         const onPublishEvent = jest.fn();
         const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
@@ -2173,7 +2175,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         ]);
         expect((await getRelease(release.id)).status).toBe('blocked');
 
-        const { statusCode, publishEvents } = await publishWithFailure(release.id, 'update');
+        const { statusCode, publishEvents } = await publishWithFailure(release.id, 'updateMany');
 
         expect(statusCode).toBe(500);
         expect(await getRelease(release.id)).toMatchObject({ status: 'blocked', releasedAt: null });
@@ -2209,6 +2211,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       test('is left out of the entry pickers and the homepage widget', async () => {
         const { release, invalidId } = await createFailedRelease();
+        const unattachedId = await createProduct({ valid: true });
 
         const [attached, notAttached, mapped, upcoming] = await Promise.all([
           rq({
@@ -2219,7 +2222,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
           rq({
             method: 'GET',
             url: '/content-releases/getByDocumentAttached',
-            qs: { contentType: productUID, entryDocumentId: invalidId, hasEntryAttached: false },
+            qs: {
+              contentType: productUID,
+              entryDocumentId: unattachedId,
+              hasEntryAttached: false,
+            },
           }),
           rq({
             method: 'GET',
@@ -2864,7 +2871,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body.error.message).toBe("An entry couldn't be checked (Error)");
-      expect((await getRelease(release.id)).releasedAt).toBeNull();
+      expect(await getRelease(release.id)).toMatchObject({ releasedAt: null, status: 'blocked' });
+      expect((await getActionsByEntry(release.id))[uncheckableId]).toMatchObject({
+        isEntryValid: false,
+        reason: { error: { name: 'Error' } },
+        outcome: null,
+      });
     });
 
     test('a scheduled allow_partial run with no publishable entry records each entry with its own skip reason', async () => {
@@ -4250,16 +4262,19 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test.each([
-      ['overdue', { scheduledAt: minutesFromNow(-10) }],
-      ['scheduled in the future', { scheduledAt: minutesFromNow(60) }],
-      ['not scheduled', {}],
+      ['overdue', -10],
+      ['scheduled in the future', 60],
+      ['not scheduled', null],
     ])(
       'a release that failed before the upgrade (%s) is frozen by the sweep, without a webhook',
-      async (_, state) => {
+      async (_, offset) => {
         const release = await createReleaseWithActions('all_or_nothing', [
           { documentId: await createProduct({ valid: false }) },
         ]);
-        await setReleaseState(release.id, { status: 'failed', ...state });
+        await setReleaseState(release.id, {
+          status: 'failed',
+          ...(offset === null ? {} : { scheduledAt: minutesFromNow(offset) }),
+        });
 
         const webhooks = await sweepListeningToWebhooks(release.id);
 
@@ -4279,14 +4294,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     );
 
     test.each([
-      ['overdue by less than the grace period', { scheduledAt: minutesFromNow(-2) }],
-      ['scheduled in the future', { scheduledAt: minutesFromNow(60) }],
-      ['not scheduled', {}],
-    ])('a planned release %s is left as it is', async (_, state) => {
+      ['overdue by less than the grace period', -2],
+      ['scheduled in the future', 60],
+      ['not scheduled', null],
+    ])('a planned release %s is left as it is', async (_, offset) => {
       const release = await createReleaseWithActions('all_or_nothing', [
         { documentId: await createProduct({ valid: true }) },
       ]);
-      await setReleaseState(release.id, state);
+      await setReleaseState(
+        release.id,
+        offset === null ? {} : { scheduledAt: minutesFromNow(offset) }
+      );
 
       await sweep();
 

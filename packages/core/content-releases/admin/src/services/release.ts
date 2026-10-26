@@ -28,6 +28,7 @@ import type { EndpointDefinitions } from '@reduxjs/toolkit/query';
 export interface GetReleasesQueryParams {
   page?: number;
   pageSize?: number;
+  sort?: NonNullable<GetReleases.Request['query']>['sort'];
   filters?: {
     releasedAt?: {
       // TODO: this should be a boolean, find a way to avoid strings
@@ -41,12 +42,6 @@ export interface GetReleaseActionsQueryParams {
   pageSize?: number;
   groupBy?: ReleaseActionGroupBy;
 }
-
-type GetReleasesTabResponse = GetReleases.Response & {
-  meta: {
-    activeTab: 'pending' | 'done';
-  };
-};
 
 type AnyEndpointDefinition = EndpointDefinitions[string];
 
@@ -157,17 +152,10 @@ const releaseApi = adminApi
                 ]
               : [],
         }),
-        getReleases: build.query<GetReleasesTabResponse, GetReleasesQueryParams | void>({
+        getReleases: build.query<GetReleases.Response, GetReleasesQueryParams | void>({
+          // Without arguments only pending releases are returned, e.g. for the release pickers
           query(
-            { page, pageSize, filters } = {
-              page: 1,
-              pageSize: 16,
-              filters: {
-                releasedAt: {
-                  $notNull: false,
-                },
-              },
-            }
+            { page, pageSize, sort, filters } = { filters: { releasedAt: { $notNull: false } } }
           ) {
             return {
               url: '/content-releases',
@@ -176,27 +164,11 @@ const releaseApi = adminApi
                 params: {
                   page: page || 1,
                   pageSize: pageSize || 16,
-                  filters: filters || {
-                    releasedAt: {
-                      $notNull: false,
-                    },
-                  },
+                  sort,
+                  filters,
                 },
               },
             };
-          },
-          transformResponse(response: GetReleasesTabResponse, meta, arg) {
-            const releasedAtValue = arg?.filters?.releasedAt?.$notNull;
-            const isActiveDoneTab = releasedAtValue === 'true';
-            const newResponse: GetReleasesTabResponse = {
-              ...response,
-              meta: {
-                ...response.meta,
-                activeTab: isActiveDoneTab ? 'done' : 'pending',
-              },
-            };
-
-            return newResponse;
           },
           providesTags: (result) =>
             result

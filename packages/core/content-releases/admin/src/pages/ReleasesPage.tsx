@@ -11,33 +11,20 @@ import {
   isFetchError,
   Layouts,
   GradientBadge,
+  Table,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import {
-  Alert,
-  Badge,
-  type BadgeProps,
-  Box,
-  Button,
-  Divider,
-  EmptyStateLayout,
-  Flex,
-  Grid,
-  Main,
-  Tabs,
-  Typography,
-  Link,
-} from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
+import { Alert, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
+import { Calendar, ChartCircle, Clock, Plus, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { DEFAULT_RELEASE_CONDITION } from '../../../shared/constants';
-import { GetReleases, type Release } from '../../../shared/contracts/releases';
+import { GetReleases } from '../../../shared/contracts/releases';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
+import { ReleaseStatusBadge } from '../components/ReleaseStatusBadge';
 import { PERMISSIONS } from '../constants';
 import {
   useGetReleasesQuery,
@@ -45,19 +32,15 @@ import {
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
+import { getTimezoneOffset } from '../utils/time';
+
+import type { MessageDescriptor } from 'react-intl';
+
+type ReleaseRow = GetReleases.Response['data'][number];
 
 /* -------------------------------------------------------------------------------------------------
- * ReleasesGrid
+ * ReleasesTable
  * -----------------------------------------------------------------------------------------------*/
-interface ReleasesGridProps {
-  sectionTitle: 'pending' | 'done';
-  releases?: GetReleases.Response['data'];
-  isError?: boolean;
-}
-
-const LinkCard = styled(Link)`
-  display: block;
-`;
 
 const RelativeTime = styled(BaseRelativeTime)`
   display: inline-block;
@@ -66,88 +49,211 @@ const RelativeTime = styled(BaseRelativeTime)`
   }
 `;
 
-// `satisfies` makes a status without a color a compile error instead of a silent default
-const BADGE_COLOR_BY_STATUS = {
-  ready: 'success',
-  blocked: 'warning',
-  failed: 'danger',
-  done: 'primary',
-  partial: 'alternative',
-  empty: 'neutral',
-} satisfies Record<Release['status'], NonNullable<BadgeProps['variant']>>;
+const RELEASE_CONDITION_BADGES = {
+  allow_partial: {
+    icon: ChartCircle,
+    message: {
+      id: 'content-releases.pages.Releases.release-condition.allow_partial',
+      defaultMessage: 'Allow partial',
+    },
+  },
+  all_or_nothing: {
+    icon: Clock,
+    message: {
+      id: 'content-releases.pages.Releases.release-condition.all_or_nothing',
+      defaultMessage: 'All required',
+    },
+  },
+} satisfies Record<
+  ReleaseRow['releaseCondition'],
+  { icon: React.ComponentType; message: MessageDescriptor }
+>;
 
-const getBadgeProps = (status: Release['status']) => {
-  const color = BADGE_COLOR_BY_STATUS[status];
+const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
+  const { formatMessage, formatDate, formatTime } = useIntl();
+  const isFrozen = Boolean(release.releasedAt);
+  const date = release.releasedAt ?? release.scheduledAt;
 
-  return {
-    textColor: `${color}600`,
-    backgroundColor: `${color}100`,
-    borderColor: `${color}200`,
-  };
-};
-
-const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
-  const { formatMessage } = useIntl();
-
-  if (isError) {
-    return <Page.Error />;
-  }
-
-  if (releases?.length === 0) {
+  if (!date) {
     return (
-      <EmptyStateLayout
-        content={formatMessage(
-          {
-            id: 'content-releases.page.Releases.tab.emptyEntries',
-            defaultMessage: 'No releases',
-          },
-          {
-            target: sectionTitle,
-          }
-        )}
-        icon={<EmptyDocuments width="16rem" />}
-      />
+      <Typography textColor="neutral600">
+        {formatMessage({
+          id: 'content-releases.pages.Releases.not-scheduled',
+          defaultMessage: 'Not scheduled',
+        })}
+      </Typography>
     );
   }
 
+  const timestamp = new Date(date);
+  const timeZone = release.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const Icon = isFrozen ? Calendar : Clock;
+  const absoluteTime = `${formatDate(timestamp, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(timestamp, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, timestamp)}`;
+
   return (
-    <Grid.Root gap={4}>
-      {releases.map(({ id, name, scheduledAt, status }) => (
-        <Grid.Item col={3} s={6} xs={12} key={id} direction="column" alignItems="stretch">
-          <LinkCard tag={NavLink} to={`${id}`} isExternal={false}>
-            <Flex
-              direction="column"
-              justifyContent="space-between"
-              padding={4}
-              hasRadius
-              background="neutral0"
-              shadow="tableShadow"
-              height="100%"
-              width="100%"
-              alignItems="start"
-              gap={4}
-            >
-              <Flex direction="column" alignItems="start" gap={1}>
-                <Typography textColor="neutral800" tag="h3" variant="delta" fontWeight="bold">
-                  {name}
-                </Typography>
-                <Typography variant="pi" textColor="neutral600">
-                  {scheduledAt ? (
-                    <RelativeTime timestamp={new Date(scheduledAt)} />
-                  ) : (
-                    formatMessage({
-                      id: 'content-releases.pages.Releases.not-scheduled',
-                      defaultMessage: 'Not scheduled',
-                    })
-                  )}
-                </Typography>
-              </Flex>
-              <Badge {...getBadgeProps(status)}>{status}</Badge>
-            </Flex>
-          </LinkCard>
-        </Grid.Item>
-      ))}
-    </Grid.Root>
+    <Flex gap={2} alignItems="flex-start">
+      <Flex paddingTop={1} color="neutral500">
+        <Icon width="1.2rem" height="1.2rem" aria-hidden />
+      </Flex>
+      <Flex direction="column" alignItems="flex-start">
+        <Typography textColor={isFrozen ? 'neutral600' : 'neutral800'}>
+          {/* The browser-zone default title would contradict the release-zone line below */}
+          <RelativeTime timestamp={timestamp} title={absoluteTime} />
+        </Typography>
+        <Typography variant="pi" textColor="neutral600">
+          {absoluteTime}
+        </Typography>
+      </Flex>
+    </Flex>
+  );
+};
+
+const EntriesCell = ({ release }: { release: ReleaseRow }) => {
+  const { formatMessage } = useIntl();
+  const isFrozen = Boolean(release.releasedAt);
+  const { count, notReadyCount = 0 } = release.actions.meta;
+
+  return (
+    <Flex direction="column" alignItems="flex-start">
+      <Typography textColor={isFrozen ? 'neutral600' : 'neutral800'}>
+        {formatMessage(
+          {
+            id: 'content-releases.pages.Releases.table.entries',
+            defaultMessage: '{number, plural, one {# entry} other {# entries}}',
+          },
+          { number: count }
+        )}
+      </Typography>
+      {!isFrozen && notReadyCount > 0 && (
+        <Flex gap={1} color="warning600">
+          <WarningCircle width="1.2rem" height="1.2rem" aria-hidden />
+          <Typography variant="pi" textColor="warning600">
+            {formatMessage(
+              {
+                id: 'content-releases.pages.Releases.table.entries-ready',
+                defaultMessage: '{ready} of {total} ready',
+              },
+              { ready: count - notReadyCount, total: count }
+            )}
+          </Typography>
+        </Flex>
+      )}
+    </Flex>
+  );
+};
+
+const ReleaseConditionBadge = ({
+  releaseCondition,
+}: {
+  releaseCondition: ReleaseRow['releaseCondition'];
+}) => {
+  const { formatMessage } = useIntl();
+  const { icon: Icon, message } = RELEASE_CONDITION_BADGES[releaseCondition];
+
+  return (
+    <Flex gap={1} color="neutral800">
+      <Icon width="1.2rem" height="1.2rem" aria-hidden />
+      <Typography variant="pi" fontWeight="semiBold">
+        {formatMessage(message)}
+      </Typography>
+    </Flex>
+  );
+};
+
+interface ReleasesTableProps {
+  releases?: GetReleases.Response['data'];
+  isLoading?: boolean;
+}
+
+const ReleasesTable = ({ releases = [], isLoading = false }: ReleasesTableProps) => {
+  const { formatMessage } = useIntl();
+  const navigate = useNavigate();
+
+  const headers = [
+    {
+      name: 'name',
+      label: formatMessage({
+        id: 'content-releases.pages.Releases.table.header.name',
+        defaultMessage: 'name',
+      }),
+    },
+    {
+      name: 'status',
+      label: formatMessage({
+        id: 'content-releases.pages.Releases.table.header.status',
+        defaultMessage: 'status',
+      }),
+    },
+    {
+      name: 'schedule',
+      label: formatMessage({
+        id: 'content-releases.pages.Releases.table.header.schedule',
+        defaultMessage: 'schedule',
+      }),
+    },
+    {
+      name: 'entries',
+      label: formatMessage({
+        id: 'content-releases.pages.Releases.table.header.entries',
+        defaultMessage: 'entries',
+      }),
+    },
+    {
+      name: 'releaseCondition',
+      label: formatMessage({
+        id: 'content-releases.pages.Releases.table.header.release-mode',
+        defaultMessage: 'release mode',
+      }),
+    },
+  ];
+
+  return (
+    <Table.Root rows={releases} headers={headers} isLoading={isLoading}>
+      <Table.Content>
+        <Table.Head>
+          {headers.map(({ label, name }) => (
+            <Table.HeaderCell key={name} label={label} name={name} />
+          ))}
+        </Table.Head>
+        <Table.Empty
+          content={formatMessage({
+            id: 'content-releases.page.Releases.tab.emptyEntries',
+            defaultMessage: 'No releases',
+          })}
+        />
+        <Table.Loading />
+        <Table.Body>
+          {releases.map((release) => (
+            <Table.Row key={release.id} cursor="pointer" onClick={() => navigate(`${release.id}`)}>
+              <Table.Cell width="30%" maxWidth="30rem">
+                <Link
+                  tag={NavLink}
+                  to={`${release.id}`}
+                  isExternal={false}
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                >
+                  <Typography textColor="neutral800" ellipsis>
+                    {release.name}
+                  </Typography>
+                </Link>
+              </Table.Cell>
+              <Table.Cell>
+                <ReleaseStatusBadge status={release.status} />
+              </Table.Cell>
+              <Table.Cell>
+                <ScheduleCell release={release} />
+              </Table.Cell>
+              <Table.Cell>
+                <EntriesCell release={release} />
+              </Table.Cell>
+              <Table.Cell>
+                <ReleaseConditionBadge releaseCondition={release.releaseCondition} />
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table.Content>
+    </Table.Root>
   );
 };
 
@@ -171,8 +277,10 @@ const ReleasesPage = () => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { formatAPIError } = useAPIErrorHandler();
-  const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
-  const response = useGetReleasesQuery(query);
+  const [{ query }] = useQueryParams<GetReleasesQueryParams>();
+  // Only the params the page controls: old links can still carry the filters of the removed tabs
+  const { page, pageSize, sort = 'updatedAt:desc' } = query;
+  const response = useGetReleasesQuery({ page, pageSize, sort });
   const { data: settings, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
@@ -184,8 +292,9 @@ const ReleasesPage = () => {
     allowedActions: { canCreate },
   } = useRBAC(PERMISSIONS);
 
-  const { isLoading: isLoadingReleases, isSuccess, isError } = response;
-  const activeTab = response?.currentData?.meta?.activeTab || 'pending';
+  const { isLoading: isLoadingReleases, isFetching, isError } = response;
+  // `currentData` is cleared while another page loads; the last result keeps the header steady
+  const meta = response.data?.meta;
 
   // Check if we have some errors and show a notification to the user to explain the error
   React.useEffect(() => {
@@ -213,20 +322,8 @@ const ReleasesPage = () => {
     return <Page.Loading />;
   }
 
-  const totalPendingReleases = (isSuccess && response.currentData?.meta?.pendingReleasesCount) || 0;
+  const totalPendingReleases = meta?.pendingReleasesCount ?? 0;
   const hasReachedMaximumPendingReleases = totalPendingReleases >= maximumReleases;
-
-  const handleTabChange = (tabValue: string) => {
-    setQuery({
-      page: 1,
-      pageSize: response?.currentData?.meta?.pagination?.pageSize || 16,
-      filters: {
-        releasedAt: {
-          $notNull: tabValue !== 'pending',
-        },
-      },
-    });
-  };
 
   const handleAddRelease = async (values: ReleaseDrawerValues) => {
     const response = await createRelease(values);
@@ -273,10 +370,18 @@ const ReleasesPage = () => {
               })}
             />
           }
-          subtitle={formatMessage({
-            id: 'content-releases.pages.Releases.header-subtitle',
-            defaultMessage: 'Create and manage content updates',
-          })}
+          subtitle={
+            // The count would read "0 releases" next to the error
+            !isError && meta
+              ? formatMessage(
+                  {
+                    id: 'content-releases.pages.Releases.header-subtitle.count',
+                    defaultMessage: '{number, plural, one {# release} other {# releases}}',
+                  },
+                  { number: meta.pagination?.total ?? 0 }
+                )
+              : undefined
+          }
           primaryAction={
             canCreate ? (
               <Button
@@ -323,58 +428,21 @@ const ReleasesPage = () => {
                 })}
               </StyledAlert>
             )}
-            <Tabs.Root variant="simple" onValueChange={handleTabChange} value={activeTab}>
-              <Box paddingBottom={8}>
-                <Tabs.List
-                  aria-label={formatMessage({
-                    id: 'content-releases.pages.Releases.tab-group.label',
-                    defaultMessage: 'Releases list',
-                  })}
-                >
-                  <Tabs.Trigger value="pending">
-                    {formatMessage(
-                      {
-                        id: 'content-releases.pages.Releases.tab.pending',
-                        defaultMessage: 'Pending ({count})',
-                      },
-                      {
-                        count: totalPendingReleases,
-                      }
-                    )}
-                  </Tabs.Trigger>
-                  <Tabs.Trigger value="done">
-                    {formatMessage({
-                      id: 'content-releases.pages.Releases.tab.done',
-                      defaultMessage: 'Done',
-                    })}
-                  </Tabs.Trigger>
-                </Tabs.List>
-                <Divider />
-              </Box>
-              {/* Pending releases */}
-              <Tabs.Content value="pending">
-                <ReleasesGrid
-                  sectionTitle="pending"
-                  releases={response?.currentData?.data}
-                  isError={isError}
+            {isError ? (
+              <Page.Error />
+            ) : (
+              <Flex direction="column" alignItems="stretch" gap={4}>
+                <ReleasesTable
+                  releases={response.currentData?.data}
+                  // Background refetches keep `currentData`: only blank the table while it's missing
+                  isLoading={isFetching && !response.currentData}
                 />
-              </Tabs.Content>
-              {/* Done releases */}
-              <Tabs.Content value="done">
-                <ReleasesGrid
-                  sectionTitle="done"
-                  releases={response?.currentData?.data}
-                  isError={isError}
-                />
-              </Tabs.Content>
-            </Tabs.Root>
-            <Pagination.Root
-              {...response?.currentData?.meta?.pagination}
-              defaultPageSize={response?.currentData?.meta?.pagination?.pageSize}
-            >
-              <Pagination.PageSize options={['8', '16', '32', '64']} />
-              <Pagination.Links />
-            </Pagination.Root>
+                <Pagination.Root {...meta?.pagination} defaultPageSize={meta?.pagination?.pageSize}>
+                  <Pagination.PageSize options={['8', '16', '32', '64']} />
+                  <Pagination.Links />
+                </Pagination.Root>
+              </Flex>
+            )}
           </>
         </Layouts.Content>
         <ReleaseDrawer
@@ -404,4 +472,4 @@ const ReleasesPage = () => {
   );
 };
 
-export { ReleasesPage, getBadgeProps };
+export { ReleasesPage };

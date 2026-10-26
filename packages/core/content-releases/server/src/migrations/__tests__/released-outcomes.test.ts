@@ -37,7 +37,7 @@ describe('addOutcomesToReleasedReleases', () => {
         releasedAt: { $notNull: true },
         totalSkippedEntries: null,
         $or: [
-          { status: 'done' },
+          { status: { $in: ['done', 'ready', 'blocked', 'empty'] } },
           { status: null },
           { status: 'failed', failureReason: 'failed_before_upgrade' },
         ],
@@ -62,7 +62,12 @@ describe('addOutcomesToReleasedReleases', () => {
     ]);
     expect(releaseUpdate).toHaveBeenCalledWith({
       where: { id: 10 },
-      data: { totalPublishedEntries: 2, totalUnpublishedEntries: 1, totalSkippedEntries: 0 },
+      data: {
+        status: 'done',
+        totalPublishedEntries: 2,
+        totalUnpublishedEntries: 1,
+        totalSkippedEntries: 0,
+      },
     });
   });
 
@@ -97,7 +102,8 @@ describe('addOutcomesToReleasedReleases', () => {
   it('logs a release that fails and still migrates the others', async () => {
     releaseFindMany.mockResolvedValue([
       { id: 10, status: 'done' },
-      { id: 20, status: null },
+      // An entry change recalculated it as if it were planned
+      { id: 20, status: 'ready' },
     ]);
     actionUpdateMany.mockRejectedValueOnce(new Error('write failed'));
 
@@ -111,7 +117,12 @@ describe('addOutcomesToReleasedReleases', () => {
       [
         {
           where: { id: 20 },
-          data: { totalPublishedEntries: 2, totalUnpublishedEntries: 1, totalSkippedEntries: 0 },
+          data: {
+            status: 'done',
+            totalPublishedEntries: 2,
+            totalUnpublishedEntries: 1,
+            totalSkippedEntries: 0,
+          },
         },
       ],
     ]);

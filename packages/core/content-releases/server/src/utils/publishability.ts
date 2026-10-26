@@ -59,7 +59,7 @@ const STAGE_ERROR_MESSAGE = 'Entry is not at the required stage to publish';
 const SUBMITTED_VALUE_SUFFIX = /, but the final value was: [\s\S]*$/;
 
 // Only the field paths and messages: the details also carry the submitted values
-export const getValidationErrors = (error: Error) => {
+const getValidationErrors = (error: Error) => {
   const details: unknown = error instanceof errors.ValidationError ? error.details : null;
   const detailErrors: unknown[] =
     typeof details === 'object' &&
@@ -115,7 +115,8 @@ export const toEntryValidity = (check: EntryPublishability | Error): EntryValidi
 };
 
 // A check's result, or the error that stopped it. In a transaction, each check reads in its own
-// savepoint: on Postgres a failed read aborts the transaction, and every other check with it.
+// savepoint: without one, on Postgres a failed read would abort the transaction, and every other
+// check with it.
 const readCheck = async (
   readPublishability: () => Promise<EntryPublishability>,
   { strapi }: { strapi: Core.Strapi }
@@ -298,7 +299,8 @@ export const getPublishabilityForActions = <TAction extends PublishActionRef>(
 
 /**
  * The validity to store on each publish action, by action id. A draft that can't be read is
- * stored as not publishable and doesn't stop the others.
+ * stored as not publishable and doesn't stop the others, except in a transaction a MySQL deadlock,
+ * which is rethrown (it rolled the transaction back).
  */
 export const getValidityForActions = <TAction extends PublishActionRef>(
   actions: readonly TAction[],
