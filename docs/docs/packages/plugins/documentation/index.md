@@ -38,6 +38,17 @@ The `override` service lets other plugins document their own routes. `registerOv
 
 `register` adds a route for the Swagger UI static files at `/plugins/documentation/(.*)`. The plugin routes serve the UI at `/documentation` and `/documentation/v<major>.<minor>.<patch>`. The `index` controller reads the JSON file and fills the `public/index.html` template. When the `restrictedAccess` setting is `true`, the `restrict-access` middleware redirects to `/documentation/login` unless `ctx.session.documentation.logged` is set. The login controller compares the password with a bcrypt hash in the plugin store. When no hash is stored or no password is submitted, the login controller redirects with `?error=password`, the same as for a wrong password. The routes `getInfos`, `regenerateDoc` and `updateSettings` use the `admin::hasPermissions` policy. The route `deleteDoc` sets an empty `policies` list.
 
+### Typed contracts
+
+With strict types, lookups of the plugin resolve to the contracts it registers in `server/src/types/`. Read [TypeScript](../../../contributing/05-typescript.md) for the registries.
+
+- The `plugin::documentation.documentation` service keeps its inferred type. Its members are tagged `@internal`: only the plugin calls them.
+- The `plugin::documentation.override` service is `OverrideService`. `registerOverride` accepts an OpenAPI part or its YAML or JSON text, and `pluginOrigin` is optional. `registeredOverrides`, `excludedFromGeneration` and `isEnabled` are tagged `@internal`.
+- The `plugin::documentation.documentation` controller is `DocumentationController`, with the seven actions of the routes. The routes are checked against it with `Core.RouteInputFor`.
+- The `plugin::documentation` config is the plugin config merged with its defaults, and the `plugin_documentation_config` store row holds the access settings.
+
+The plugin is not bundled with `@strapi/strapi`, so `@strapi/strapi/strict-types` does not load its contracts. Applications load them through the generated `types/generated/plugins.d.ts`. Without strict types, the lookups keep their previous types.
+
 ### Admin
 
 `admin/src/index.ts` adds a menu link (`plugins/documentation`) in `register` and a `global` settings link in `bootstrap`. The main page lists versions with open, regenerate and delete actions. The settings page edits `restrictedAccess` and the password. The `PERMISSIONS` constants in `admin/src/constants.ts` map to the four RBAC actions.
