@@ -7,3 +7,4 @@ export const PERMISSIONS = {
 };
 
 export const MAX_COMPONENT_DEPTH = 6;
+export const MAX_DZ_DEPTH = 1;
