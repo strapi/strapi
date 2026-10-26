@@ -29,8 +29,8 @@ const normalizeAgentName = (raw: string) => {
 };
 
 const getExplicitAgent = (agentFlag?: string) => {
-  // `--agent` wins over `STRAPI_AGENT`. An empty value does not count as an opt-in.
-  const value = (agentFlag ?? process.env.STRAPI_AGENT ?? '').trim();
+  // `--agent` wins over `STRAPI_AGENT`. An empty or whitespace value does not count as an opt-in.
+  const value = agentFlag?.trim() || process.env.STRAPI_AGENT?.trim() || '';
 
   return value === '' ? null : normalizeAgentName(value);
 };
