@@ -50,7 +50,7 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
       model: model.modelName,
       uid: model.uid,
       // The sanitized output of a document row keeps its `id` and `documentId`.
-      // TODO @Nico an entry deleted between the commit and this fetch may be emitted as `null`.
+      // An entry deleted between the commit and this fetch may be emitted as `null`.
       entry: sanitizedEntry as Modules.Documents.AnyDocument,
     });
   };

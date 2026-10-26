@@ -138,8 +138,8 @@ const buildRouteConfig = (config: ResolvedEndpointConfig): Record<string, unknow
 };
 
 const resolveOpenAPIConfig = (strapi: Core.Strapi) => {
-  // TODO @Nico The loader always defines `server.openapi` (`ResolvedConfig.Server`), so the `{}`
-  // fallback is dead outside partial mocks. Drop it with a runtime change; the cast keeps runtime as is.
+  // The loader always defines `server.openapi` (`ResolvedConfig.Server`), so the `{}` fallback is
+  // dead outside partial mocks. Dropping it is a runtime change; the cast keeps runtime as is.
   const rawConfig: OpenAPIConfig = strapi.config.get(
     'server.openapi',
     {} as ResolvedConfig.Server['openapi']

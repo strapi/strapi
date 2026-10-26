@@ -8,7 +8,7 @@ import type { Core } from '@strapi/types';
  * `settings.migrations` into the config when it creates the database; this contract does not
  * describe that copy.
  *
- * TODO @Nico Without `config/database.*`, `get('database')` returns `undefined` at runtime, but
- * Strapi cannot start without it. Kept non-optional like the input type.
+ * Without `config/database.*`, `get('database')` returns `undefined` at runtime, but Strapi cannot
+ * start without it, so this contract stays non-optional like the input type.
  */
 export type Database = Core.Config.Database;
