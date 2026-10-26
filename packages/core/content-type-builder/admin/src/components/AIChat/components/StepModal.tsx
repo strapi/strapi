@@ -11,6 +11,7 @@ import {
   useMemo,
 } from 'react';
 
+import { UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import { Modal, Box, Button, Typography } from '@strapi/design-system';
 
 /* -------------------------------------------------------------------------------------------------
@@ -182,7 +183,7 @@ const StepModal = ({
   return (
     <StepModalContext.Provider value={contextValue}>
       {open && (
-        <Modal.Root open onOpenChange={handleCancel}>
+        <UnsavedChangesModal open onOpenChange={handleCancel}>
           <Modal.Content>
             <Modal.Header>
               <Typography variant="omega" fontWeight="bold">
@@ -209,9 +210,11 @@ const StepModal = ({
 
               <Modal.Footer>
                 {isFirstStep ? (
-                  <Button variant="tertiary" onClick={handleCancel} type="button">
-                    {currentChild?.cancelLabel || 'Cancel'}
-                  </Button>
+                  <Modal.Close>
+                    <Button variant="tertiary" type="button">
+                      {currentChild?.cancelLabel || 'Cancel'}
+                    </Button>
+                  </Modal.Close>
                 ) : (
                   <Button variant="tertiary" onClick={handleBack} type="button">
                     {currentChild?.backLabel || 'Back'}
@@ -229,7 +232,7 @@ const StepModal = ({
               </Modal.Footer>
             </form>
           </Modal.Content>
-        </Modal.Root>
+        </UnsavedChangesModal>
       )}
     </StepModalContext.Provider>
   );

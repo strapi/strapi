@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
+import { useUnsavedChangesModalDirty } from '@strapi/admin/strapi-admin';
 import { Flex, Typography, Box, TextInput, Grid, Button, Link } from '@strapi/design-system'; // Added Link
 
 import { ImagePreview } from './components/ImagePreview';
@@ -77,6 +78,8 @@ const FigmaUrlInputStep = ({ figmaUrl, setFigmaUrl }: FigmaUrlInputStepProps) =>
   const { t } = useTranslations();
   const { isLoading } = useStepModal();
   const [showingTokenInput, setShowingTokenInput] = useState(!hasFigmaToken());
+
+  useUnsavedChangesModalDirty(figmaUrl !== '');
   const [figmaToken, setFigmaToken] = useState<string>(getFigmaToken);
 
   // Handle saving token and returning to URL input
