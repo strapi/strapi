@@ -478,12 +478,27 @@ describe('runInstall with package names', () => {
         logger: createTestLogger(),
         dependencies,
       })
-    ).rejects.toThrow(
-      new EnterpriseInstallError(
-        `Your license does not include ${LOCKED_PLUGIN}. ${NOT_LICENSED_MESSAGE}`
-      )
-    );
+    ).rejects.toThrow(new EnterpriseInstallError(`${LOCKED_PLUGIN}: ${NOT_LICENSED_MESSAGE}`));
     expect(dependencies.installPackages).not.toHaveBeenCalled();
+  });
+
+  it('says the license does not include a plugin the catalog lists, when the server sends no message', async () => {
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-locked'],
+        logger: createTestLogger(),
+        dependencies: await createDependencies({
+          fetchImplementation: createRegistryFetch({
+            searchResult: [],
+            packuments: { [LOCKED_PLUGIN]: 403 },
+            catalog: { plugins: [{ name: LOCKED_PLUGIN, licensed: false }] },
+          }),
+        }),
+      })
+    ).rejects.toThrow(
+      new EnterpriseInstallError(`Your license does not include ${LOCKED_PLUGIN}.`)
+    );
   });
 
   it('keeps the general message when the catalog does not list the plugin', async () => {

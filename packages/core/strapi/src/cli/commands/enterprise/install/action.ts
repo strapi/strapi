@@ -76,7 +76,7 @@ const describeNotLicensed = async (
   const { notLicensedMessage } = catalogResult;
 
   return notLicensedMessage
-    ? `Your license does not include ${packageName}. ${notLicensedMessage}`
+    ? `${packageName}: ${notLicensedMessage}`
     : `Your license does not include ${packageName}.`;
 };
 
