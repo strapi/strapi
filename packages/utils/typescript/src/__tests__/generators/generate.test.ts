@@ -225,6 +225,33 @@ describe('generate', () => {
     expect(await fs.readFile(generated('services.ts'), 'utf8')).toBe('// keep');
   });
 
+  test('logs the error and stops removing disabled artifacts when a removal fails', async () => {
+    const { root, strapi, generated } = await createApp({ 'controllers.ts': '// stale' });
+    // A directory at the artifact path makes the non-recursive removal fail
+    await fs.mkdir(generated('services.ts'), { recursive: true });
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleInfo = jest.spyOn(console, 'info').mockImplementation(() => {});
+
+    try {
+      await generate({
+        strapi,
+        pwd: root,
+        artifacts: { services: false, controllers: false },
+        logger: { silent: false },
+      });
+
+      expect(consoleError).toHaveBeenCalledTimes(1);
+      expect(consoleError.mock.calls[0].join(' ')).toMatch(
+        /An error occurred while removing .*services.* types from the filesystem: .+\. Exiting/
+      );
+      // The generation exits before it reaches the next disabled artifact
+      expect(await fs.readFile(generated('controllers.ts'), 'utf8')).toBe('// stale');
+    } finally {
+      consoleError.mockRestore();
+      consoleInfo.mockRestore();
+    }
+  });
+
   test('disabling an artifact that was never generated is a no-op', async () => {
     const { root, strapi } = await createApp();
 

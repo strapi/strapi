@@ -375,4 +375,57 @@ describe('Plugin declaration generation', () => {
     write('tsconfig.json', { compilerOptions: { moduleResolution: 'invalid-mode' } });
     await expect(generatePlugins()).rejects.toThrow('moduleResolution');
   });
+
+  it('reports a tsconfig that cannot be parsed', async () => {
+    write('tsconfig.json', '{ "compilerOptions": ');
+    await expect(generatePlugins()).rejects.toThrow(/expected/i);
+  });
+
+  it('resolves with CommonJS Node10 options when the app has no tsconfig', async () => {
+    fs.rmSync(path.join(appDir, 'tsconfig.json'));
+    install('exported', '@vendor/exports-only', { legacy: false });
+
+    // Node10 ignores package exports, so the declaration is referenced by its path
+    const { output } = await generatePlugins();
+    expect(output).toBe(
+      "import type {} from '../../node_modules/@vendor/exports-only/dist/server/index.d.ts';\n"
+    );
+  });
+
+  it('defaults the app and output directories to the working directory', async () => {
+    install('local', '@vendor/local', { directory: 'src/plugins/local', legacy: false });
+    dependencies = {};
+    const cwd = jest.spyOn(process, 'cwd').mockReturnValue(appDir);
+
+    try {
+      const { output } = await generatePluginDefinitions({
+        strapi: strapi(),
+        logger: createLogger({ silent: true }),
+      });
+
+      // Imported relative to `<cwd>/plugins.d.ts`
+      expect(output).toBe("import type {} from './src/plugins/local/dist/server/index.d.ts';\n");
+    } finally {
+      cwd.mockRestore();
+    }
+  });
+
+  it('skips an unscoped bundled plugin identified by its info package name', async () => {
+    write('node_modules/@strapi/strapi/package.json', {
+      name: '@strapi/strapi',
+      exports: { './strict-types': { types: './strict-types.d.ts' } },
+      typesVersions: { '*': { 'strict-types': ['strict-types.d.ts'] } },
+    });
+    write(
+      'node_modules/@strapi/strapi/strict-types.d.ts',
+      '/// <reference types="bundled-plugin/strapi-server" preserve="true" />\nexport {};\n'
+    );
+    dependencies['@strapi/strapi'] = '1.0.0';
+    const bundled: { packageInfo?: unknown } = install('bundled', 'bundled-plugin');
+    delete bundled.packageInfo;
+
+    const { output, stats } = await generatePlugins();
+    expect(output).toBe('export {};\n');
+    expect(stats.plugins).toBe(0);
+  });
 });
