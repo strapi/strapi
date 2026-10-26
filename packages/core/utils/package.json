@@ -1,6 +1,7 @@
 {
   "name": "@strapi/utils",
   "version": "5.59.0",
+  "type": "commonjs",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
