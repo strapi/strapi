@@ -46,6 +46,17 @@ When CTB creates a content type, `content-types.generateAPI` calls `@strapi/gene
 
 The `content-structure` service writes the folder groups that the admin navigation shows. The file is `src/content-structure/groups.json`. It is application source, not content data. Read [Content structure file](./01-content-structure.md).
 
+### Typed contracts
+
+With strict types, lookups of the plugin resolve to the contracts it registers in `server/src/types/`. Read [TypeScript](../../../contributing/05-typescript.md) for the registries.
+
+- The seven services (`api-handler`, `builder`, `component-categories`, `components`, `content-structure`, `content-types`, `schema`) have hand-written contracts in `types/services.ts`. Members that only CTB calls are tagged `@internal`. `schema.renameAttribute`, which the `strapi` CLI calls, is not.
+- The five controllers (`builder`, `component-categories`, `components`, `content-types`, `schema`) have contracts in `types/controllers.ts`. The admin and Content API routes are checked against them with `Core.RouterInputFor`. The `schema` controller is a factory, checked with `Core.ControllerFactory`.
+- The `content-type.*` and `component.*` events carry a read-only `ContentTypeHandler` or `ComponentHandler`: the schema as the builder wrote it, not the loaded schema.
+- The `plugin::content-type-builder` config and the `isDevelopmentMode` middleware are registered too.
+
+Without strict types, the lookups keep their previous types.
+
 ### Admin editor
 
 The admin part registers a menu link and the plugin API `forms`, which other plugins use to add fields and validation to the CTB modals. `DataManagerProvider` keeps the working copy of the schema in a Redux slice with undo and redo (`undoRedo.ts`). Modals in `components/FormModal` edit attributes and types. The read permission is `plugin::content-type-builder.read`, which `bootstrap` registers.
