@@ -38,6 +38,23 @@ export const base = {
             group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
             message: 'Use regular lodash methods or a focused helper instead.',
           },
+          {
+            group: ['lodash/isArray', 'lodash/isArray.js'],
+            message: 'Use native Array.isArray instead.',
+          },
+          {
+            group: ['lodash/forEach', 'lodash/forEach.js', 'lodash/each', 'lodash/each.js'],
+            message:
+              'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
+        ],
+        paths: [
+          {
+            name: 'lodash',
+            importNames: ['isArray', 'forEach', 'each'],
+            message:
+              'Use native Array.isArray, Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
         ],
       },
     ],
