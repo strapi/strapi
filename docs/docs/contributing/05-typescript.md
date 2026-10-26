@@ -110,6 +110,72 @@ declare global {
 - EE code that merges members into admin services passes the EE shape, `EnterpriseServices`, as an
   explicit type argument. The registered contract is the CE shape with the EE-only members
   optional.
+- A package whose services and controllers exist only with an EE feature registers each entry as
+  `Contract | undefined`, e.g. `plugin::review-workflows.workflows`. A CE application, or a license
+  without the feature, does not register them. Strict callers check the lookup result.
+
+### Service contracts
+
+A service contract is a `type` in `server/src/types/`. Write the members that applications and
+other packages call by hand, with the JSDoc that explains the runtime behavior. Two shapes exist:
+
+- A hand-written type with every member, e.g. `EmailService`
+  (`packages/core/email/server/src/types/services.ts`).
+- The inferred implementation with the members that need a stricter type replaced:
+  `Omit<Implementation, 'upload' | …> & { upload(…): Promise<File[]>; … }`, e.g. `UploadService`.
+  Use it when most members already infer the right type. The published implementation keeps its
+  own signatures, so the types without strict mode do not change.
+
+Contracts type every member of a registered service, including members that only the package
+itself calls. Tag those members `@internal` in their JSDoc, as well as controller actions that no
+route references. The tag is documentation only: no build
+sets `stripInternal`, so the declarations keep the members and strict callers still see their
+types. Other packages and applications must not rely on them.
+
+### Controller contracts and typed routes
+
+A package registers every controller it ships in `PackageControllers`. The contracts sit in
+`server/src/types/controllers.ts`, next to a `Controllers` map keyed like the runtime controllers
+map:
+
+```ts
+// packages/core/email/server/src/types/controllers.ts
+export type EmailController = {
+  send: Core.ControllerHandler;
+  test: Core.ControllerHandler;
+  getSettings: Core.ControllerHandler;
+  verify: Core.ControllerHandler;
+};
+
+export type Controllers = {
+  email: EmailController;
+};
+
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface PackageControllers {
+        'plugin::email.email': Controllers['email'];
+      }
+    }
+  }
+}
+```
+
+- Check the runtime map with `satisfies Controllers`. A missing action fails with TS2741. An
+  action the implementation has outside the contract is not reported.
+- A controller factory (`({ strapi }) => ({ … })`) is checked in its own module with
+  `satisfies Core.ControllerFactory<uid>`. The map check leaves it out, e.g.
+  `satisfies Omit<Controllers, 'schema'> & { schema: unknown }`.
+- Check routes against the map: `satisfies Core.RouterInputFor<Controllers, 'plugin::email'>` for a
+  router, `satisfies Core.RouteInputFor<Controllers, 'plugin::documentation'>[]` for an array of
+  routes. A string handler must name an action of a contract, and policies and middlewares are
+  checked as described in [Policy and middleware contracts](#policy-and-middleware-contracts).
+- Keep the published route type. `satisfies` on an unannotated literal keeps its literal types,
+  which changes the emitted declaration. Annotate the variable with the widened type that develop
+  infers, then add `satisfies`.
+- Check routes against the hand-written `Controllers` map, not against the registry. A
+  `| undefined` entry has no actions to reference.
 
 ### Config contracts
 
@@ -266,3 +332,17 @@ Build changed packages before running `yarn test:ts`, because consumers use emit
 Node, and NodeNext resolution, both switch states, declaration order, application overrides,
 editor completions, and accidental publication of strict activation. CI runs these checks
 after the monorepo build.
+
+Each package that registers contracts checks them in two places:
+
+- `server/src/types/registries.test.ts` holds compile-only assertions. The server `tsconfig.json`
+  includes it, so `yarn test:ts` checks it in strict mode. `tsconfig.build.json` excludes
+  `**/*.test.ts`. Its `@ts-expect-error` lines are the negative controls.
+- `tests/types/registries/fixtures/<package>-adoption.ts` checks the same lookups from an
+  application, with strict mode on. `<package>-adoption-permissive.ts` checks that loading the
+  contracts without strict mode keeps develop's permissive lookups.
+  `tests/types/registries/consumer.test.cjs` compiles both.
+
+Applications get typed `strapi.service(uid)` and `strapi.controller(uid)` lookups from type
+generation with `typescript.strictTypes`. Read
+[Strict service contracts](../packages/core/types/type-system/02-concepts/03-public-registry.mdx#strict-service-contracts-typescriptstricttypes).
