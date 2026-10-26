@@ -10307,6 +10307,38 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/plugin-provenance@workspace:packages/plugins/provenance":
+  version: 0.0.0-use.local
+  resolution: "@strapi/plugin-provenance@workspace:packages/plugins/provenance"
+  dependencies:
+    "@strapi/admin": "npm:5.59.0"
+    "@strapi/content-manager": "npm:5.59.0"
+    "@strapi/design-system": "npm:2.2.4"
+    "@strapi/icons": "npm:2.2.4"
+    "@strapi/strapi": "npm:5.59.0"
+    "@strapi/types": "npm:5.59.0"
+    "@strapi/utils": "npm:5.59.0"
+    "@types/node": "npm:20.19.41"
+    koa: "npm:2.16.4"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-intl: "npm:6.6.2"
+    react-router-dom: "npm:6.30.6"
+    styled-components: "npm:6.4.1"
+    typescript: "npm:5.9.3"
+    vitest: "catalog:"
+    vitest-config: "npm:5.59.0"
+  peerDependencies:
+    "@strapi/admin": ^5.0.0
+    "@strapi/content-manager": ^5.0.0
+    "@strapi/strapi": ^5.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
+    react-router-dom: ^6.30.3
+    styled-components: ^6.0.0
+  languageName: unknown
+  linkType: soft
+
 "@strapi/plugin-sentry@workspace:*, @strapi/plugin-sentry@workspace:packages/plugins/sentry":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-sentry@workspace:packages/plugins/sentry"
