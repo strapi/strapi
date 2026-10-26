@@ -32,6 +32,7 @@ const createTestDatabase = (options?: { runMigrations?: boolean; migrationsDir?:
     getConnection: (tableName?: string) => (tableName ? sqlite(tableName) : sqlite),
     transaction: (fn: (params: { trx: knex.Knex.Transaction }) => Promise<void>) =>
       sqlite.transaction((trx) => fn({ trx })),
+    runInPhase: (_phase: string, fn: () => Promise<unknown>) => fn(),
     logger,
     config: {
       settings: {
@@ -246,7 +247,9 @@ describe('migration providers', () => {
       expect(logger.info).toHaveBeenCalledWith(
         expect.objectContaining({
           level: 'info',
-          message: '[internal migration]: migrated test-internal',
+          message: expect.stringMatching(
+            /^\[internal migration\]: migrated test-internal \(\d+\.\d{3}s\)$/
+          ),
         })
       );
       expect(logger.debug).not.toHaveBeenCalled();
@@ -371,6 +374,21 @@ describe('migration providers', () => {
 
       expect(await sqlite.schema.hasTable('strapi_migrations')).toBe(true);
       expect(await sqlite.schema.hasTable('strapi_migrations_internal')).toBe(true);
+
+      await sqlite.destroy();
+    });
+
+    it('exposes createFileBuilder and forwards down to pending providers', async () => {
+      const { db, sqlite } = createTestDatabase({ migrationsDir: tempDir });
+      const provider = createMigrationsProvider(db);
+
+      expect(provider.createFileBuilder().hasChanges()).toBe(false);
+
+      const internalDown = jest.spyOn(provider.providers.internal, 'down').mockResolvedValue();
+      jest.spyOn(provider.providers.internal, 'shouldRun').mockResolvedValue(true);
+
+      await provider.down();
+      expect(internalDown).toHaveBeenCalledTimes(1);
 
       await sqlite.destroy();
     });

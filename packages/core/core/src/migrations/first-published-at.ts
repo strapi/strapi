@@ -52,7 +52,7 @@ const enableFirstPublishedAt = async ({ oldContentTypes, contentTypes }: Input) 
           continue;
         }
 
-        const publishedContent = items.filter((item) => item.publishedAt != null).at(0);
+        const publishedContent = items.find((item) => item.publishedAt != null);
         if (!publishedContent) {
           continue;
         }

@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import qs from 'qs';
 import { Ability } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
@@ -119,9 +119,10 @@ const newEngine = (params: EngineParams): Engine => {
     const resolveConditions = (ids: string[]): (Condition | undefined)[] =>
       ids.map((id) => providers.condition.get(id) as Condition | undefined);
 
-    const removeInvalidConditions = (conditions: (Condition | undefined)[]): Condition[] =>
+    const removeInvalidConditions = (conditions: (Condition | undefined)[]) =>
       conditions.filter(
-        (condition): condition is Condition => condition != null && _.isFunction(condition.handler)
+        (condition): condition is Condition =>
+          condition != null && typeof condition.handler === 'function'
       );
 
     const evaluateConditions = (conditions: Condition[]) => {
@@ -129,13 +130,13 @@ const newEngine = (params: EngineParams): Engine => {
         conditions.map(async (condition) => ({
           condition,
           result: await condition.handler(
-            _.merge(options, { permission: _.cloneDeep(permission) })
+            _.merge({}, options, { permission: _.cloneDeep(permission) })
           ),
         }))
       );
     };
 
-    const removeInvalidResults = <T extends { result: unknown }>(results: T[]): T[] =>
+    const removeInvalidResults = (results: Awaited<ReturnType<typeof evaluateConditions>>) =>
       results.filter(({ result }) => _.isBoolean(result) || _.isObject(result));
 
     const evaluatedConditions = await Promise.resolve(conditions)
@@ -144,18 +145,20 @@ const newEngine = (params: EngineParams): Engine => {
       .then(evaluateConditions)
       .then(removeInvalidResults);
 
-    const resultPropEq = _.propEq('result');
-    const pickResults = _.map(_.prop('result'));
-
-    if (evaluatedConditions.every(resultPropEq(false))) {
+    if (evaluatedConditions.every(({ result }) => result === false)) {
       return;
     }
 
-    if (_.isEmpty(evaluatedConditions) || evaluatedConditions.some(resultPropEq(true))) {
+    if (
+      _.isEmpty(evaluatedConditions) ||
+      evaluatedConditions.some(({ result }) => result === true)
+    ) {
       return register({ action, subject, properties });
     }
 
-    const results = pickResults(evaluatedConditions).filter(_.isObject);
+    const results = evaluatedConditions
+      .map(({ result }) => result)
+      .filter((result) => _.isObject(result));
 
     if (_.isEmpty(results)) {
       return register({ action, subject, properties });

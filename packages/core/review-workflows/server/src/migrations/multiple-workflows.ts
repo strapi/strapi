@@ -1,4 +1,4 @@
-import { get, pickBy, pipe } from 'lodash/fp';
+import { get, pickBy } from 'lodash';
 import { WORKFLOW_MODEL_UID } from '../constants/workflows';
 
 async function migrateWorkflowsContentTypes({ oldContentTypes, contentTypes }: any) {
@@ -12,8 +12,8 @@ async function migrateWorkflowsContentTypes({ oldContentTypes, contentTypes }: a
     await strapi.db.query(WORKFLOW_MODEL_UID).updateMany({ data: { contentTypes: [] } });
 
     // Find Content Types which were using Review Workflow before
-    const contentTypes = pipe([pickBy(get('options.reviewWorkflows')), Object.keys])(
-      oldContentTypes
+    const contentTypes = Object.keys(
+      pickBy(oldContentTypes, (contentType) => get(contentType, 'options.reviewWorkflows'))
     );
 
     if (contentTypes.length) {

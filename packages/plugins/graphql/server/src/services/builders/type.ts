@@ -1,4 +1,4 @@
-import { isString, isUndefined, constant } from 'lodash/fp';
+import { constant, isString } from 'lodash';
 import { nonNull, list, objectType } from 'nexus';
 import { contentTypes } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
@@ -206,7 +206,7 @@ export default (context: Context) => {
     });
 
     // If there is no specific target specified, then use the GenericMorph type
-    if (isUndefined(target)) {
+    if (target === undefined) {
       builder.field(attributeName, {
         type: GENERIC_MORPH_TYPENAME,
         resolve,

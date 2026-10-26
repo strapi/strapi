@@ -32,9 +32,12 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useControllableState } from '../hooks/useControllableState';
-import { useQueryParams } from '../hooks/useQueryParams';
+import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
+
+const EMPTY_HEADERS: [] = [];
+const EMPTY_ROWS: [] = [];
 
 /* -------------------------------------------------------------------------------------------------
  * Root
@@ -55,8 +58,10 @@ interface TableHeader<TData = object, THeader = object> {
   sortable?: boolean;
 }
 
-interface TableContextValue<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
-  extends Pick<TableProps, 'footer'> {
+interface TableContextValue<
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+> extends Pick<TableProps, 'footer'> {
   colCount: number;
   hasHeaderCheckbox: boolean;
   headers: THeader[];
@@ -80,13 +85,15 @@ const GenericTableProvider = TableProvider as <
   props: TableContextValue<TRow, THeader> & { children?: React.ReactNode }
 ) => React.ReactElement;
 
-interface RootProps<TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>
-  extends Partial<
-    Pick<
-      TableContextValue<TRow, THeader>,
-      'footer' | 'headers' | 'isLoading' | 'rows' | 'selectedRows'
-    >
-  > {
+interface RootProps<
+  TRow extends BaseRow,
+  THeader extends TableHeader<TRow, THeader>,
+> extends Partial<
+  Pick<
+    TableContextValue<TRow, THeader>,
+    'footer' | 'headers' | 'isLoading' | 'rows' | 'selectedRows'
+  >
+> {
   children?: React.ReactNode;
   defaultSelectedRows?: TRow[];
   onSelectedRowsChange?: (selectedRows: TRow[]) => void;
@@ -96,10 +103,10 @@ const Root = <TRow extends BaseRow, THeader extends TableHeader<TRow, THeader>>(
   children,
   defaultSelectedRows,
   footer,
-  headers = [],
+  headers = EMPTY_HEADERS,
   isLoading = false,
   onSelectedRowsChange,
-  rows = [],
+  rows = EMPTY_ROWS,
   selectedRows: selectedRowsProps,
 }: RootProps<TRow, THeader>) => {
   const [selectedRows = [], setSelectedRows] = useControllableState({
@@ -182,7 +189,11 @@ const Head = ({ children }: Table.HeadProps) => {
  * be passed to your data-fetching function.
  */
 const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, THead>) => {
-  const [{ query }, setQuery] = useQueryParams<{ sort?: `${string}:${'ASC' | 'DESC'}` }>();
+  const [{ query }, setQuery] = useQueryParams<{
+    sort?: `${string}:${'ASC' | 'DESC'}`;
+    filters?: unknown;
+    _q?: unknown;
+  }>();
   const sort = query?.sort ?? '';
   const [sortBy, sortOrder] = sort.split(':');
   const { formatMessage } = useIntl();
@@ -199,9 +210,9 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
   const handleClickSort = () => {
     if (sortable) {
       setQuery(
-        {
+        withEncodedUserParams(query, {
           sort: `${name}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
-        },
+        }),
         'push',
         true
       );

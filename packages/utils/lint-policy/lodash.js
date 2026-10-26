@@ -59,9 +59,9 @@ const banned = (name, replacement, note) => ({
  * native equivalent is banned whether or not it has a call site today, so the next one is caught by
  * the linter rather than by review. Members whose lodash semantics differ from the closest native
  * API are left out on purpose — `assignIn` copies inherited properties, `lowerCase` splits words
- * rather than lowercasing, `min`/`max` return `undefined` for an empty array where `Math.min`/
- * `Math.max` return infinities, and the `isMap`/`isRegExp` family survives cross-realm values that
- * `instanceof` does not.
+ * rather than lowercasing, `trimStart` takes the characters to strip, `min`/`max` return
+ * `undefined` for an empty array where `Math.min`/`Math.max` return infinities, and the
+ * `isMap`/`isRegExp` family survives cross-realm values that `instanceof` does not.
  */
 const BANNED_MEMBERS = [
   // Array
@@ -108,7 +108,6 @@ const BANNED_MEMBERS = [
   banned('endsWith', '`String.prototype.endsWith`'),
   banned('repeat', '`String.prototype.repeat`'),
   banned('padStart', '`String.prototype.padStart`'),
-  banned('trimStart', '`String.prototype.trimStart`'),
   banned('parseInt', '`Number.parseInt`'),
 
   // Number
@@ -174,17 +173,18 @@ const restrictedSyntax = BANNED_MEMBERS.flatMap(({ name, message }) => [
 
 /**
  * Builds the `no-restricted-imports` value, appending the lodash patterns to any consumer-specific
- * paths.
+ * paths and patterns.
  *
  * The concrete tuple return type matters: ESLint's `Linter.RuleEntry` makes the options element
  * optional, which OxLint's stricter `no-restricted-imports` type rejects.
  *
  * @param {RestrictedImportPath[]} [paths]
+ * @param {RestrictedImportPattern[]} [patterns]
  * @returns {['error', { paths: RestrictedImportPath[]; patterns: RestrictedImportPattern[] }]}
  */
-const noRestrictedImports = (paths = []) => [
+const noRestrictedImports = (paths = [], patterns = []) => [
   'error',
-  { paths, patterns: restrictedImportPatterns },
+  { paths, patterns: [...patterns, ...restrictedImportPatterns] },
 ];
 
 /**

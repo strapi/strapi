@@ -1,4 +1,4 @@
-import { isNil, isString, toPath } from 'lodash/fp';
+import { isString, toPath } from 'lodash';
 import type { Visitor } from '../../traverse/factory';
 
 export default (allowedFields: string[] | null = null): Visitor =>
@@ -15,7 +15,7 @@ export default (allowedFields: string[] | null = null): Visitor =>
       );
     }
 
-    if (isNil(path)) {
+    if (path == null) {
       return;
     }
 

@@ -1,5 +1,6 @@
-import { curry, isString, eq, trim, constant } from 'lodash/fp';
+import { isString, eq, constant } from 'lodash';
 
+import { curry } from '../curry';
 import traverseFactory from './factory';
 
 const isStringArray = (value: unknown): value is string[] => {
@@ -26,7 +27,7 @@ const fields = traverseFactory()
   // Since we're parsing strings only, each value should be an attribute name (and it's value, undefined),
   // thus it shouldn't be possible to set a new value, and get should return the whole data if key === data
   .parse(isString, () => ({
-    transform: trim,
+    transform: (value) => value.trim(),
 
     remove(key, data) {
       return data === key ? undefined : data;

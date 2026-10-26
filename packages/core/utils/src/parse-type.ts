@@ -1,7 +1,7 @@
-import * as _ from 'lodash';
+import { padEnd, toNumber } from 'lodash';
 import * as dates from 'date-fns';
 
-const timeRegex = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$/;
+const timeRegex = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]{1,3})?$/;
 
 const isDate = (v: unknown): v is Date => {
   return dates.isDate(v);
@@ -22,7 +22,7 @@ const parseTime = (value: unknown): string => {
   }
 
   const [, hours, minutes, seconds, fraction = '.000'] = result;
-  const fractionPart = _.padEnd(fraction.slice(1), 3, '0');
+  const fractionPart = padEnd(fraction.slice(1), 3, '0');
 
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };
@@ -93,8 +93,8 @@ export interface ParseTypeOptions<T extends keyof TypeMap> {
  * made those two throwaway allocations one of the largest single sources of GC pressure
  * in a read: 4.3% of on-CPU time in a profiled LaunchPad run.
  */
-const TRUTHY_INPUTS: ReadonlyArray<string | number> = ['true', 't', '1', 1];
-const FALSY_INPUTS: ReadonlyArray<string | number> = ['false', 'f', '0', 0];
+const TRUTHY_INPUTS = new Set<string | number>(['true', 't', '1', 1]);
+const FALSY_INPUTS = new Set<string | number>(['false', 'f', '0', 0]);
 
 /**
  * Whether `parseBoolean` would accept this value without `forceCast`.
@@ -113,7 +113,7 @@ const isBooleanLike = (value: unknown): boolean => {
   }
 
   if (typeof value === 'string' || typeof value === 'number') {
-    return TRUTHY_INPUTS.includes(value) || FALSY_INPUTS.includes(value);
+    return TRUTHY_INPUTS.has(value) || FALSY_INPUTS.has(value);
   }
 
   return false;
@@ -127,11 +127,11 @@ const parseBoolean = (value: unknown, options: { forceCast?: boolean }): boolean
   }
 
   if (typeof value === 'string' || typeof value === 'number') {
-    if (TRUTHY_INPUTS.includes(value)) {
+    if (TRUTHY_INPUTS.has(value)) {
       return true;
     }
 
-    if (FALSY_INPUTS.includes(value)) {
+    if (FALSY_INPUTS.has(value)) {
       return false;
     }
   }
@@ -156,7 +156,7 @@ const parseType = <Type extends keyof TypeMap>(options: ParseTypeOptions<Type>):
     case 'biginteger':
     case 'float':
     case 'decimal': {
-      return _.toNumber(value) as TypeMap[Type];
+      return toNumber(value) as TypeMap[Type];
     }
     case 'time': {
       return parseTime(value) as TypeMap[Type];

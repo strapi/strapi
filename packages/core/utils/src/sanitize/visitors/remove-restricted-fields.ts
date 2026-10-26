@@ -1,4 +1,4 @@
-import { isString } from 'lodash/fp';
+import { isString } from 'lodash';
 import type { Visitor } from '../../traverse/factory';
 
 export default (restrictedFields: string[] | null = null): Visitor =>

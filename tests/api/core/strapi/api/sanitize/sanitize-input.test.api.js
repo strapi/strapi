@@ -11,11 +11,11 @@ describe('Core API - Sanitize Input', () => {
   let strapi;
 
   const addSchemas = () => {
-    for (const component of Object.values(schemas.components)) {
+    for (const component of Object.values(schemas.components ?? {})) {
       builder.addComponent(component);
     }
 
-    builder.addContentTypes(Object.values(schemas['content-types']));
+    builder.addContentTypes(Object.values(schemas['content-types'] ?? {}));
   };
 
   const addFixtures = () => {

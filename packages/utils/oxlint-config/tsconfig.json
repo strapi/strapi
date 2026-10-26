@@ -5,6 +5,6 @@
     "allowImportingTsExtensions": true,
     "allowJs": true
   },
-  "include": ["*.ts"],
+  "include": ["*.ts", "__tests__"],
   "exclude": ["node_modules"]
 }

@@ -24,11 +24,11 @@ export type BuilderResources = {
 };
 
 const addSchemasToBuilder = (schemas, builder) => {
-  for (const component of Object.values(schemas.components)) {
+  for (const component of Object.values(schemas.components ?? {})) {
     builder.addComponent(component);
   }
 
-  builder.addContentTypes(Object.values(schemas['content-types']));
+  builder.addContentTypes(Object.values(schemas['content-types'] ?? {}));
 };
 
 const bootstrapBuilder = ({ fixtures, schemas, locales }: BuilderResources, builder: Builder) => {

@@ -1,5 +1,6 @@
-import { curry, isObject, isEmpty, isNil, cloneDeep, omit } from 'lodash/fp';
+import { isObject, isEmpty, cloneDeep, omit } from 'lodash';
 
+import { curry } from '../curry';
 import { isScalarAttribute } from '../content-types';
 import { isOperator } from '../operators';
 import traverseFactory, { type Parent } from './factory';
@@ -42,7 +43,7 @@ const filters = traverseFactory()
     transform: cloneDeep,
 
     remove(key, data) {
-      return omit(key, data);
+      return omit(data, key);
     },
 
     set(key, value, data) {
@@ -58,10 +59,10 @@ const filters = traverseFactory()
     },
   }))
   // Ignore null or undefined values
-  .ignore(({ value }) => isNil(value))
+  .ignore(({ value }) => value == null)
   // Recursion on operators (non attributes)
   .on(
-    ({ attribute }) => isNil(attribute),
+    ({ attribute }) => attribute == null,
     async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
       const parent: Parent = { key, path, schema, attribute };
 

@@ -1,5 +1,6 @@
-import { clone, isObject, isNil, curry } from 'lodash/fp';
+import { clone, isObject } from 'lodash';
 
+import { curry } from './curry';
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
@@ -132,7 +133,7 @@ const traverseEntity = async (
     // created inline inside a dynamic zone component can leave a null item).
     // Reading `__component` on it crashed traversal; pass nil entries through
     // untouched, consistent with how `traverseEntity` ends recursion on nil. (#24303)
-    if (isNil(entry)) {
+    if (entry == null) {
       return entry;
     }
 
@@ -149,7 +150,7 @@ const traverseEntity = async (
   };
 
   // End recursion
-  if (!isObject(entity) || isNil(schema)) {
+  if (!isObject(entity) || schema == null) {
     return entity;
   }
 
@@ -166,11 +167,11 @@ const traverseEntity = async (
 
     const newPath = { ...path };
 
-    newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
-    newPath.rawWithIndices = isNil(path.rawWithIndices) ? key : `${path.rawWithIndices}.${key}`;
+    newPath.raw = path.raw == null ? key : `${path.raw}.${key}`;
+    newPath.rawWithIndices = path.rawWithIndices == null ? key : `${path.rawWithIndices}.${key}`;
 
-    if (!isNil(attribute)) {
-      newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+    if (attribute != null) {
+      newPath.attribute = path.attribute == null ? key : `${path.attribute}.${key}`;
     }
 
     // Visit the current attribute
@@ -201,7 +202,7 @@ const traverseEntity = async (
     const value = copy[key];
 
     // Ignore Nil values or attributes
-    if (isNil(value) || isNil(attribute)) {
+    if (value == null || attribute == null) {
       continue;
     }
 
@@ -219,9 +220,8 @@ const traverseEntity = async (
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return method(visitor, arrayPath, item);
           })
@@ -242,9 +242,8 @@ const traverseEntity = async (
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return traverseMediaTarget(visitor, arrayPath, item);
           })
@@ -266,9 +265,8 @@ const traverseEntity = async (
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return traverseComponent(visitor, arrayPath, targetSchema, item);
           })
@@ -288,9 +286,8 @@ const traverseEntity = async (
         value.map((item, i) => {
           const arrayPath = {
             ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
+            rawWithIndices:
+              newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
           };
           return visitDynamicZoneEntry(visitor, arrayPath, item);
         })

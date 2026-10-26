@@ -21,26 +21,47 @@ import { noRestrictedImports, noRestrictedSyntax } from 'lint-policy/lodash';
  */
 export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
-  // ESLint's own rule implementations, for rules OxLint has no native equivalent of.
-  jsPlugins: [{ name: 'eslint-js', specifier: 'oxlint-plugin-eslint' }],
+  jsPlugins: [
+    './no-lodash-fp.js',
+    // ESLint's own rule implementations, for rules OxLint has no native equivalent of.
+    { name: 'eslint-js', specifier: 'oxlint-plugin-eslint' },
+  ],
   categories: {
-    // Phase 1: correctness only (definitely-wrong code, lowest noise).
-    // TODO @Nico Phase 2 — port the ESLint/Airbnb policy surface here
-    // (suspicious/style/restriction) once the rule matrix is agreed. Goal is
-    // to reproduce what ESLint covers today, preferring over- to under-coverage.
+    // Blocking bar: correctness plus extra-policy `perf`.
+    // Later categories (suspicious/pedantic/style) are not extra policy yet.
+    // The category enable also accepts any new `perf` rule that a future oxlint
+    // release adds. oxlint is pinned exactly, so such a rule breaks the blocking
+    // gate on the version bump PR and not on a code merge.
     correctness: 'error',
+    perf: 'error',
   },
   rules: {
+    // Lodash policy shared verbatim with ESLint — see lint-policy/lodash.js. The lodash/fp ban
+    // is OxLint-only and rides along as an extra pattern.
+    'no-restricted-imports': noRestrictedImports(
+      [],
+      [
+        {
+          group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
+          message: 'Use regular lodash methods or a focused helper instead.',
+        },
+      ]
+    ),
+    // `no-restricted-syntax` is not native to OxLint; it comes from the `eslint-js` JS plugin
+    // declared above, which is why this key carries the plugin prefix.
+    'eslint-js/no-restricted-syntax': noRestrictedSyntax(),
+    // Oxlint 1.72's native rule does not check require() or import() calls.
+    'strapi/no-lodash-fp-calls': 'error',
     // Yup `.when({ then, otherwise })` objects are not Promise thenables; the
     // rule cannot distinguish DSL keys from real thenable misuse.
     'unicorn/no-thenable': 'off',
     // Behavioral / intentional deps; revisit when enabling broader react-hooks.
     'react/exhaustive-deps': 'off',
-    // Lodash policy shared verbatim with ESLint — see lint-policy/lodash.js.
-    // `no-restricted-syntax` is not native to OxLint; it comes from the `eslint-js`
-    // JS plugin declared above, which is why this key carries the plugin prefix.
-    'no-restricted-imports': noRestrictedImports(),
-    'eslint-js/no-restricted-syntax': noRestrictedSyntax(),
+    // Backend ESLint turns this off on purpose (sequential await is allowed).
+    // ESLint only errors it on a 62-file frontend JS surface (2 projects).
+    // A category enable would expand that ban onto the backend (~495 of the
+    // Aug 20 +685 perf delta). Frontend JS stays covered by ESLint.
+    'eslint/no-await-in-loop': 'off',
   },
   ignorePatterns: [
     '**/dist/**',
@@ -62,5 +83,7 @@ export const base = {
     // .github/actions/check-pr-status has an Nx lint target; these paths do not.
     '.github/scripts/**',
     '.github/actions/community-pr-triage/**',
+    // Parser TS(1016) on can/cannot cannot be suppressed locally; restore via CMS-1692.
+    'packages/core/content-manager/server/src/services/permission-checker.ts',
   ],
 } satisfies Partial<OxlintConfig>;

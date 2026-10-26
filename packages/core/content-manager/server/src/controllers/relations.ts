@@ -1,4 +1,4 @@
-import { prop, uniq, uniqBy, flow, isEmpty } from 'lodash/fp';
+import { property, uniq, uniqBy, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -17,6 +17,11 @@ interface RelationEntity {
   publishedAt?: string | Date;
   [key: string]: unknown;
 }
+
+/**
+ * Fields every relation returned by findExisting carries, whatever the user's permissions.
+ */
+const RELATION_BASE_FIELDS = ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt'];
 
 const addFiltersClause = (params: any, filtersClause: any) => {
   params.filters = params.filters || {};
@@ -73,7 +78,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
     publishedAt: firstRelation.publishedAt !== null ? { $null: true } : { $notNull: true },
   };
 
-  const availableStatus = await strapi.query(targetUid).findMany({
+  const availableStatus = await strapi.db.query(targetUid).findMany({
     select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
     filters,
   });
@@ -111,9 +116,9 @@ const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, local
   const sourceModel = strapi.getModel(sourceUid);
   const targetModel = strapi.getModel(targetUid);
 
-  const isLocalized = strapi.plugin('i18n').service('content-types').isLocalizedContentType;
-  const isSourceLocalized = isLocalized(sourceModel);
-  const isTargetLocalized = isLocalized(targetModel);
+  // Without a localization provider, neither side is localized
+  const isSourceLocalized = strapi.localization.isLocalizedContentType(sourceModel);
+  const isTargetLocalized = strapi.localization.isLocalizedContentType(targetModel);
 
   return {
     locale,
@@ -239,17 +244,14 @@ export default {
     const targetSchema = strapi.getModel(targetUid);
 
     const mainField = flow(
-      prop(`metadatas.${targetField}.edit.mainField`),
+      property(`metadatas.${targetField}.edit.mainField`),
       (mainField) => mainField || 'id',
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq([
-      mainField,
-      PUBLISHED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-      'documentId',
-    ]);
+    const fieldsToSelect = [
+      ...new Set([mainField, PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE, 'documentId']),
+    ];
 
     if (isTargetLocalized) {
       fieldsToSelect.push('locale');
@@ -352,6 +354,11 @@ export default {
        */
       if (sourceModelType === 'contentType') {
         where.document_id = id;
+
+        const sourcePublishedAt = getPublishedAtClause(status, sourceUid);
+        if (!isEmpty(sourcePublishedAt)) {
+          where.published_at = sourcePublishedAt;
+        }
       } else {
         where.id = id;
       }
@@ -403,7 +410,7 @@ export default {
     if (idsToOmit?.length > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
-        id: { $notIn: uniq(idsToOmit) },
+        id: { $notIn: [...new Set(idsToOmit)] },
       });
     }
 
@@ -473,6 +480,38 @@ export default {
       filters.publishedAt = { $null: true };
     }
 
+    const pageParams = {
+      page: ctx.request.query.page,
+      pageSize: ctx.request.query.pageSize,
+    };
+
+    const defaultPagination = (total: number) => ({ page: 1, pageCount: 1, pageSize: 10, total });
+
+    /**
+     * The permission query only carries row-level conditions when the user's read permission on
+     * the target has conditions (e.g. "only entries I created"). Without them it only restricts
+     * the fields, so a single load returns exactly what the two-step flow below would: the
+     * relations of the page with the fields the user is allowed to read.
+     */
+    if (isEmpty(permissionQuery.filters)) {
+      const { select } = strapi.get('query-params').transform(targetUid, permissionQuery);
+      const permittedFields = Array.isArray(select) ? select : [];
+
+      const res = await loadRelations({ id: entryId }, targetField, {
+        select: uniq([...RELATION_BASE_FIELDS, ...permittedFields]),
+        ordering: 'desc',
+        ...pageParams,
+        filters,
+      });
+
+      ctx.body = {
+        pagination: res.pagination || defaultPagination(res.results.length),
+        results: await addStatusToRelations(targetUid, res.results),
+      };
+
+      return;
+    }
+
     /**
      * If user does not have access to specific relations (custom conditions),
      * only the ids of the relations are returned.
@@ -483,10 +522,9 @@ export default {
      * The response contains the union of the two queries.
      */
     const res = await loadRelations({ id: entryId }, targetField, {
-      select: ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt'],
+      select: RELATION_BASE_FIELDS,
       ordering: 'desc',
-      page: ctx.request.query.page,
-      pageSize: ctx.request.query.pageSize,
+      ...pageParams,
       filters,
     });
 
@@ -509,15 +547,10 @@ export default {
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy('id', [...sanitizedRes.results, ...res.results]);
+    const relationsUnion = uniqBy([...sanitizedRes.results, ...res.results], 'id');
 
     ctx.body = {
-      pagination: res.pagination || {
-        page: 1,
-        pageCount: 1,
-        pageSize: 10,
-        total: relationsUnion.length,
-      },
+      pagination: res.pagination || defaultPagination(relationsUnion.length),
       results: await addStatusToRelations(targetUid, relationsUnion),
     };
   },

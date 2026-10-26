@@ -1,6 +1,7 @@
 import type { Ability } from '@casl/ability';
 import { async } from '@strapi/utils';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash';
+
 import type { Core, UID, Modules } from '@strapi/types';
 
 export const ACTIONS = {
@@ -34,9 +35,7 @@ const createPermissionChecker =
       return entity ? permissionsManager.toSubject(entity, model) : model;
     };
 
-    // @ts-expect-error preserve the parameter order
-    // eslint-disable-next-line @typescript-eslint/default-param-last
-    const can = (action: string, entity?: Entity, field: string) => {
+    const can = (action: string, entity: Entity | undefined, field: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
@@ -48,9 +47,7 @@ const createPermissionChecker =
       );
     };
 
-    // @ts-expect-error preserve the parameter order
-    // eslint-disable-next-line @typescript-eslint/default-param-last
-    const cannot = (action: string, entity?: Entity, field: string) => {
+    const cannot = (action: string, entity: Entity | undefined, field: string) => {
       const subject = toSubject(entity);
       const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
