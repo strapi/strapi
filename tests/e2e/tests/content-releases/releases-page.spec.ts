@@ -44,7 +44,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     // Create a release
     const newReleaseName = 'The Diamond Dogs';
     await page.getByRole('textbox', { name: 'Release name' }).fill(newReleaseName);
-    // Create it without a date
     await page.getByRole('checkbox', { name: "I don't have a release date yet" }).check();
     await page.getByRole('button', { name: 'Create release' }).click();
     // Wait for client side redirect to created release
@@ -113,7 +112,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       // Create a new release
       const newReleaseName = 'The Diamond Dogs';
       await page.getByRole('textbox', { name: 'Release name' }).fill(newReleaseName);
-      // Create it without a date
       await page.getByRole('checkbox', { name: "I don't have a release date yet" }).check();
       await clickAndWait(page, page.getByRole('button', { name: 'Create release' }));
       // Wait for client side redirect to created release

@@ -14,7 +14,10 @@ import {
 
 import { ReleaseDrawer, type ReleaseDrawerValues } from './ReleaseDrawer';
 
-import type { FormattedReleaseAction } from '../../../shared/contracts/release-actions';
+import type {
+  FormattedReleaseAction,
+  GetReleaseActions,
+} from '../../../shared/contracts/release-actions';
 import type { Release } from '../../../shared/contracts/releases';
 
 export const COLLAPSED_ENTRIES_COUNT = 10;
@@ -30,14 +33,19 @@ export const getSkippedEntriesQuery = (releaseId: Release['id'] | string) => ({
   pageSize: 100,
 });
 
+type SkippedEntries = GetReleaseActions.Response;
+
 // The run won't carry over entries deleted after the release froze, so don't list them
-export const getExistingEntries = (actions: Record<string, FormattedReleaseAction[]>) =>
-  Object.values(actions)
+export const getExistingEntries = (skippedEntries: SkippedEntries) =>
+  Object.values(skippedEntries.data)
     .flat()
     .filter((action) => action.entry !== null);
 
+export const hasLoadedEveryEntry = (skippedEntries: SkippedEntries) =>
+  Object.values(skippedEntries.data).flat().length === skippedEntries.meta.pagination.total;
+
 interface CreateReleaseFromSkippedDrawerProps {
-  release: Pick<Release, 'id' | 'name' | 'releaseCondition'>;
+  release: Pick<Release, 'id' | 'name'>;
   open: boolean;
   onClose: () => void;
 }
@@ -67,15 +75,13 @@ export const CreateReleaseFromSkippedDrawer = ({
     onClose();
   };
 
-  const skippedEntries = getExistingEntries(skippedData?.data ?? {});
+  const skippedEntries = skippedData ? getExistingEntries(skippedData) : [];
   const carriedOverEntries = skippedEntries.filter((action) => !removedIds.has(action.id));
   const visibleEntries = isExpanded
     ? carriedOverEntries
     : carriedOverEntries.slice(0, COLLAPSED_ENTRIES_COUNT);
-  // Only send the ids to keep when every skipped entry is loaded, or the rest would be dropped
-  const canRemoveEntries =
-    skippedData !== undefined &&
-    Object.values(skippedData.data).flat().length === skippedData.meta.pagination.total;
+  // Removing sends the ids to keep, so it needs every skipped entry, or the unloaded ones are dropped
+  const canRemoveEntries = skippedData !== undefined && hasLoadedEveryEntry(skippedData);
 
   const carriedOverCount = canRemoveEntries
     ? carriedOverEntries.length
@@ -125,15 +131,15 @@ export const CreateReleaseFromSkippedDrawer = ({
         name: formatMessage(
           {
             id: 'content-releases.skipped-drawer.form.name.default',
-            defaultMessage: '{name} – skipped entries',
+            defaultMessage: '{name} - skipped entries',
           },
           { name: release.name }
         ),
         isScheduled: true,
         scheduledAt: null,
         timezone: null,
-        // Retry the entries the way the release tried them
-        releaseCondition: release.releaseCondition,
+        // Some skipped entries may still not be ready: don't let them block the others
+        releaseCondition: 'allow_partial',
       }}
       defaultTimezone={settings?.data.defaultTimezone}
       isSubmitting={isSubmitting}

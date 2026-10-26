@@ -123,7 +123,6 @@ const readCheck = async (
   const inTransaction = strapi.db.inTransaction();
 
   try {
-    // `savepoint` throws outside a transaction
     return await (inTransaction ? strapi.db.savepoint(readPublishability) : readPublishability());
   } catch (error) {
     // In a transaction, a deadlock rolled it all back: no other check, nor what the caller

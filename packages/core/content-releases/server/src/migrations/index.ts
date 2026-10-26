@@ -106,10 +106,11 @@ export async function addReasonsToInvalidActions({ strapi }: { strapi: Core.Stra
   );
 }
 
-// A release that ran before outcomes and totals existed released every entry (a run that failed
-// left the release planned): each action gets its released outcome, and the release its totals.
-// A release a since removed migration froze as failed before upgrade gets what recording its
-// missed run writes: every entry skipped.
+// Backfills outcomes and totals for releases that ran before they were recorded:
+// - a release that ran then released every entry (a failed run left it planned), so each action
+//   is marked released
+// - a release frozen as `failed_before_upgrade` (by a migration since removed) gets what a missed
+//   run records: every entry skipped
 export async function addOutcomesToReleasedReleases({ strapi }: { strapi: Core.Strapi }) {
   let releases: Pick<Release, 'id' | 'status'>[];
 

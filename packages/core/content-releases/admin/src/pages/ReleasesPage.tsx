@@ -166,7 +166,7 @@ const StyledAlert = styled(Alert)`
 
 const ReleasesPage = () => {
   const location = useLocation();
-  const [releaseModalShown, setReleaseModalShown] = React.useState(false);
+  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = React.useState(false);
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -205,8 +205,8 @@ const ReleasesPage = () => {
     }
   }, [formatMessage, location?.state?.errors, navigate, toggleNotification]);
 
-  const toggleAddReleaseModal = () => {
-    setReleaseModalShown((prev) => !prev);
+  const toggleCreateDrawer = () => {
+    setIsCreateDrawerOpen((prev) => !prev);
   };
 
   if (isLoadingReleases || isLoadingSettings) {
@@ -281,7 +281,7 @@ const ReleasesPage = () => {
             canCreate ? (
               <Button
                 startIcon={<Plus />}
-                onClick={toggleAddReleaseModal}
+                onClick={toggleCreateDrawer}
                 disabled={hasReachedMaximumPendingReleases}
                 fullWidth
               >
@@ -378,8 +378,8 @@ const ReleasesPage = () => {
           </>
         </Layouts.Content>
         <ReleaseDrawer
-          open={releaseModalShown}
-          onClose={toggleAddReleaseModal}
+          open={isCreateDrawerOpen}
+          onClose={toggleCreateDrawer}
           onSubmit={handleAddRelease}
           title={formatMessage({
             id: 'content-releases.release-drawer.create.title',

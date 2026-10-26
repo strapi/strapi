@@ -116,7 +116,7 @@
   "skipped-drawer.entries.publish": "Publish",
   "skipped-drawer.entries.unpublish": "Unpublish",
   "skipped-drawer.entries.remove": "Remove {entry}",
-  "skipped-drawer.form.name.default": "{name} – skipped entries",
+  "skipped-drawer.form.name.default": "{name} - skipped entries",
   "release-condition.allow_partial.label": "Release all ready items",
   "release-condition.allow_partial.description": "Releases entries that are ready and skips the rest at the scheduled time.",
   "release-condition.all_or_nothing.label": "Require every entry to be ready",

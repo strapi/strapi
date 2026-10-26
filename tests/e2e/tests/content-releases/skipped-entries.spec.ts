@@ -33,22 +33,19 @@ describeOnCondition(edition === 'EE')('Release page - skipped entries', () => {
   }) => {
     const drawer = await details.openSkippedEntriesDrawer();
 
-    // Only the skipped entries are carried over, not the one the run published
     await expect(drawer.carriedOverHeading(2)).toBeVisible();
     await expect(drawer.entries).toHaveCount(2);
     for (const name of SKIPPED) {
       await expect(drawer.entry(name)).toBeVisible();
     }
     await expect(drawer.entry(PUBLISHED)).toHaveCount(0);
-    await expect(drawer.nameInput).toHaveValue(`${RELEASE_NAME} – skipped entries`);
-    // A partial release released what was ready, so the retry does too
+    await expect(drawer.nameInput).toHaveValue(`${RELEASE_NAME} - skipped entries`);
     await expect(drawer.releaseMode('Release all ready items')).toBeChecked();
 
     await drawer.noScheduleCheckbox.click();
     await drawer.createRelease();
 
-    // The new release is open, with every skipped entry and nothing else
-    await expect(details.heading(`${RELEASE_NAME} – skipped entries`)).toBeVisible();
+    await expect(details.heading(`${RELEASE_NAME} - skipped entries`)).toBeVisible();
     for (const name of SKIPPED) {
       await expect(details.entryCell(name)).toBeVisible();
     }

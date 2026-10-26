@@ -40,6 +40,7 @@ import { styled } from 'styled-components';
 import {
   CreateReleaseFromSkippedDrawer,
   getExistingEntries,
+  hasLoadedEveryEntry,
   getSkippedEntriesQuery,
 } from '../components/CreateReleaseFromSkippedDrawer';
 import { EntryValidationPopover } from '../components/EntryValidationPopover';
@@ -81,13 +82,13 @@ const ReleaseInfoWrapper = styled(Flex)`
 `;
 
 interface ReleaseDetailsLayoutProps {
-  toggleEditReleaseModal: () => void;
+  toggleEditDrawer: () => void;
   toggleWarningSubmit: () => void;
   children: React.ReactNode;
 }
 
 const ReleaseDetailsLayout = ({
-  toggleEditReleaseModal,
+  toggleEditDrawer,
   toggleWarningSubmit,
   children,
 }: ReleaseDetailsLayoutProps) => {
@@ -113,16 +114,16 @@ const ReleaseDetailsLayout = ({
   const [isSkippedDrawerOpen, setIsSkippedDrawerOpen] = React.useState(false);
 
   const release = data?.data;
-  // The new release is created with actions, so it takes both permissions, as the route does.
-  // Not after a run that failed before the upgrade: nothing recorded which entries it released.
-  const mayCreateFromSkipped =
+  // Creating the release adds its actions, so it takes both permissions, as the route does.
+  // A run that failed before the upgrade recorded no outcomes, so there's nothing to carry over.
+  const canCreateFromSkipped =
     Boolean(release?.releasedAt) &&
     (release?.status === 'partial' || release?.status === 'failed') &&
     release?.failureReason !== 'failed_before_upgrade' &&
     canCreate &&
     canCreateAction;
   const { data: skippedData } = useGetReleaseActionsQuery(getSkippedEntriesQuery(releaseId!), {
-    skip: !mayCreateFromSkipped,
+    skip: !canCreateFromSkipped,
   });
 
   const handlePublishRelease = (id: string) => async () => {
@@ -209,13 +210,11 @@ const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  // Hide the button when every skipped entry has been deleted since the run. If some weren't
-  // loaded, they may still exist.
-  const canCreateFromSkipped =
-    mayCreateFromSkipped &&
+  // Entries deleted since the run can't be carried over. Unloaded ones may still exist.
+  const hasSkippedEntriesToCarryOver =
     skippedData !== undefined &&
-    (getExistingEntries(skippedData.data).length > 0 ||
-      Object.values(skippedData.data).flat().length < skippedData.meta.pagination.total);
+    (getExistingEntries(skippedData).length > 0 || !hasLoadedEveryEntry(skippedData));
+  const showCreateFromSkipped = canCreateFromSkipped && hasSkippedEntriesToCarryOver;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
   const isScheduled = release.scheduledAt && release.timezone;
@@ -265,7 +264,7 @@ const ReleaseDetailsLayout = ({
           navigationAction={<BackButton fallback=".." />}
           primaryAction={
             release.releasedAt ? (
-              canCreateFromSkipped && (
+              showCreateFromSkipped && (
                 <Button size="S" variant="default" onClick={() => setIsSkippedDrawerOpen(true)}>
                   {formatMessage({
                     id: 'content-releases.header.actions.create-from-skipped',
@@ -289,7 +288,7 @@ const ReleaseDetailsLayout = ({
                 >
                   <Menu.Item
                     disabled={!canUpdate}
-                    onSelect={toggleEditReleaseModal}
+                    onSelect={toggleEditDrawer}
                     startIcon={<Pencil />}
                   >
                     {formatMessage({
@@ -359,7 +358,7 @@ const ReleaseDetailsLayout = ({
           }
         />
         {children}
-        {canCreateFromSkipped && (
+        {showCreateFromSkipped && (
           <CreateReleaseFromSkippedDrawer
             release={release}
             open={isSkippedDrawerOpen}
@@ -756,7 +755,7 @@ const ReleaseDetailsPage = () => {
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const [releaseModalShown, setReleaseModalShown] = React.useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
   const {
@@ -769,20 +768,20 @@ const ReleaseDetailsPage = () => {
       skip: !releaseId,
     }
   );
-  const { data: settings, isLoading: isLoadingTimezone } = useGetReleaseSettingsQuery();
+  const { data: settings, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
   const [deleteRelease] = useDeleteReleaseMutation();
 
-  const toggleEditReleaseModal = () => {
-    setReleaseModalShown((prev) => !prev);
+  const toggleEditDrawer = () => {
+    setIsEditDrawerOpen((prev) => !prev);
   };
 
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
-  if (isLoadingDetails || isLoadingTimezone) {
+  if (isLoadingDetails || isLoadingSettings) {
     return (
       <ReleaseDetailsLayout
-        toggleEditReleaseModal={toggleEditReleaseModal}
+        toggleEditDrawer={toggleEditDrawer}
         toggleWarningSubmit={toggleWarningSubmit}
       >
         <Page.Loading />
@@ -808,7 +807,7 @@ const ReleaseDetailsPage = () => {
           defaultMessage: 'Release updated.',
         }),
       });
-      toggleEditReleaseModal();
+      toggleEditDrawer();
     } else if (isFetchError(response.error)) {
       // When the response returns an object with 'error', handle fetch error
       toggleNotification({
@@ -848,14 +847,14 @@ const ReleaseDetailsPage = () => {
 
   return (
     <ReleaseDetailsLayout
-      toggleEditReleaseModal={toggleEditReleaseModal}
+      toggleEditDrawer={toggleEditDrawer}
       toggleWarningSubmit={toggleWarningSubmit}
     >
       <ReleaseDetailsBody releaseId={releaseId} />
       {releaseData && (
         <ReleaseDrawer
-          open={releaseModalShown}
-          onClose={toggleEditReleaseModal}
+          open={isEditDrawerOpen}
+          onClose={toggleEditDrawer}
           onSubmit={handleEditRelease}
           title={formatMessage({
             id: 'content-releases.release-drawer.edit.title',

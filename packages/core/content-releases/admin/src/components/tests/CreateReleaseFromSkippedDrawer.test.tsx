@@ -51,25 +51,24 @@ const captureCreateRequest = () => {
     http.post('/content-releases/:releaseId/create-from-skipped-entries', async ({ request }) => {
       requestBody(await request.json());
 
-      return HttpResponse.json({ data: { id: 42, name: 'Autumn campaign – skipped entries' } });
+      return HttpResponse.json({ data: { id: 42, name: 'Autumn campaign - skipped entries' } });
     })
   );
 
   return requestBody;
 };
 
-const partialRelease = {
-  id: 1,
-  name: 'Autumn campaign',
-  releaseCondition: 'allow_partial',
-} as const;
-
-const renderDrawer = (
-  release: React.ComponentProps<typeof CreateReleaseFromSkippedDrawer>['release'] = partialRelease
-) => render(<CreateReleaseFromSkippedDrawer release={release} open onClose={jest.fn()} />);
+const renderDrawer = () =>
+  render(
+    <CreateReleaseFromSkippedDrawer
+      release={{ id: 1, name: 'Autumn campaign' }}
+      open
+      onClose={jest.fn()}
+    />
+  );
 
 describe('CreateReleaseFromSkippedDrawer', () => {
-  it('lists the skipped entries and defaults to the release mode of the release', async () => {
+  it('lists the skipped entries and defaults to releasing the ready ones', async () => {
     mockSkippedEntries([
       skippedAction(1, 'Spring sale'),
       skippedAction(2, 'Summer sale', 'unpublish'),
@@ -81,22 +80,12 @@ describe('CreateReleaseFromSkippedDrawer', () => {
     expect(screen.getByText('Spring sale')).toBeInTheDocument();
     expect(screen.getByText('Unpublish')).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Release name' })).toHaveValue(
-      'Autumn campaign – skipped entries'
+      'Autumn campaign - skipped entries'
     );
     expect(screen.getByRole('radio', { name: 'Release all ready items' })).toBeChecked();
   });
 
-  it('keeps requiring every entry to be ready when the release did', async () => {
-    mockSkippedEntries([skippedAction(1, 'Spring sale')]);
-
-    renderDrawer({ ...partialRelease, releaseCondition: 'all_or_nothing' });
-
-    await screen.findByText('1 entry carried over');
-    expect(screen.getByRole('radio', { name: 'Require every entry to be ready' })).toBeChecked();
-  });
-
   it('collapses long lists behind "Show more"', async () => {
-    // One more than the collapsed list shows
     const count = COLLAPSED_ENTRIES_COUNT + 1;
     mockSkippedEntries(
       Array.from({ length: count }, (_, index) => skippedAction(index + 1, `Entry ${index + 1}`))
@@ -125,7 +114,7 @@ describe('CreateReleaseFromSkippedDrawer', () => {
 
     await waitFor(() => expect(requestBody).toHaveBeenCalled());
     expect(requestBody).toHaveBeenCalledWith({
-      name: 'Autumn campaign – skipped entries',
+      name: 'Autumn campaign - skipped entries',
       scheduledAt: null,
       timezone: null,
       releaseCondition: 'allow_partial',
@@ -165,7 +154,7 @@ describe('CreateReleaseFromSkippedDrawer', () => {
             Open panel
           </button>
           <CreateReleaseFromSkippedDrawer
-            release={partialRelease}
+            release={{ id: 1, name: 'Autumn campaign' }}
             open={open}
             onClose={() => setOpen(false)}
           />
