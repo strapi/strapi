@@ -72,7 +72,6 @@ type IsArrayKind<TAttribute> = TAttribute extends { type: 'dynamiczone' }
  * never in draft mode (`entity-validator/index.ts:377-380`, `:408-411`). The types do not read that
  * setting, so required relations and media stay optional and nullable.
  */
-// TODO @Nico follow `strictRelations` through a setting emitted by type generation (plan phase 4)
 type IsRelational<TAttribute> = TAttribute extends { type: 'relation' | 'media' } ? true : false;
 
 /**
@@ -144,8 +143,6 @@ type AcceptsNull<TAttribute, TMode extends Status> =
  * updates that component in place with the given keys; a value without one creates a new component
  * (`document-service/components.ts:411-427`), so it follows the create rules.
  */
-// TODO @Nico the validator checks a new component of an update with update rules (inner required
-// keys may be missing). The types follow the create rules; the runtime gap is tracked separately.
 type ComponentWrite<
   TComponentUID extends UID.Component,
   TMode extends Status,
