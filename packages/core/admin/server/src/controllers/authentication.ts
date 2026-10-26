@@ -275,8 +275,7 @@ export default {
     const input = ctx.request.body as ForgotPassword.Request['body'];
 
     await validateForgotPasswordInput(input);
-    // The request can finish before the service promise settles. Capture the logger while
-    // Strapi is still available because the API test teardown removes global.strapi.
+    // The promise below can settle after Strapi is destroyed, so capture the logger now.
     const logger = strapi.log;
 
     // Not awaited: the response must not reveal whether the email exists. The call runs

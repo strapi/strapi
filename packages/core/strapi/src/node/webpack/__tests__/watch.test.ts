@@ -4,14 +4,21 @@ import os from 'node:os';
 import path from 'node:path';
 
 import Koa from 'koa';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-import { webpack } from 'webpack';
+import type { Compiler, Configuration } from 'webpack';
+
+import { resolveDevelopmentConfig } from '../config';
+import { watch, type WebpackWatcher } from '../watch';
+
+import type { BuildContext } from '../../create-build-context';
+
+jest.mock('../config', () => ({
+  resolveDevelopmentConfig: jest.fn(),
+  mergeConfigWithUserConfig: jest.fn(async (config: unknown) => config),
+}));
 
 const ENTRY_MARKER = 'webpack-dev-middleware-koa';
-
-type WebpackKoaMiddleware = ReturnType<typeof webpackDevMiddleware.koaWrapper> & {
-  devMiddleware: ReturnType<typeof webpackDevMiddleware>;
-};
+const INDEX_MARKER = 'admin-index-html';
+const SECRET_MARKER = 'outside-the-webpack-output';
 
 const request = (
   port: number,
@@ -37,28 +44,40 @@ const request = (
     req.end();
   });
 
-const listen = (app: Koa) =>
-  new Promise<{ server: http.Server; port: number }>((resolve) => {
-    const server = http.createServer(app.callback());
-    server.listen(0, '127.0.0.1', () => {
-      const { port } = server.address() as { port: number };
-      resolve({ server, port });
+const emitIndexHtml = {
+  apply(compiler: Compiler) {
+    compiler.hooks.thisCompilation.tap('EmitIndexHtml', (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: 'EmitIndexHtml',
+          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+        },
+        () => {
+          compilation.emitAsset(
+            'index.html',
+            new compiler.webpack.sources.RawSource(`<html>${INDEX_MARKER}</html>`)
+          );
+        }
+      );
     });
-  });
+  },
+};
 
-describe('webpack dev middleware', () => {
+describe('webpack watch', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-wdm-'));
+  const app = new Koa();
   let server: http.Server;
-  let devMiddleware: WebpackKoaMiddleware['devMiddleware'];
-  let compiler: ReturnType<typeof webpack>;
+  let port: number;
+  let watcher: WebpackWatcher;
 
   beforeAll(async () => {
     fs.writeFileSync(
       path.join(directory, 'index.js'),
       `console.log(${JSON.stringify(ENTRY_MARKER)});\n`
     );
+    fs.writeFileSync(path.join(directory, 'secret.txt'), SECRET_MARKER);
 
-    compiler = webpack({
+    const config: Configuration = {
       mode: 'development',
       entry: path.join(directory, 'index.js'),
       output: {
@@ -66,53 +85,49 @@ describe('webpack dev middleware', () => {
         filename: 'main.js',
         publicPath: '/admin/',
       },
+      plugins: [emitIndexHtml],
       infrastructureLogging: { level: 'none' },
       stats: 'none',
-    });
+    };
+    jest.mocked(resolveDevelopmentConfig).mockResolvedValue(config);
 
-    const koaDevMiddleware = webpackDevMiddleware.koaWrapper(compiler) as WebpackKoaMiddleware;
-    devMiddleware = koaDevMiddleware.devMiddleware;
+    const ctx = {
+      adminPath: '/admin',
+      logger: { debug: jest.fn() },
+      strapi: {
+        server: {
+          app,
+          routes(routes: Array<{ path: string; handler: Koa.Middleware }>) {
+            routes.forEach((route) => {
+              const prefix = route.path.replace('/:path*', '');
+              app.use((context, next) =>
+                context.path.startsWith(prefix) ? route.handler(context, next) : next()
+              );
+            });
+          },
+        },
+      },
+    } as unknown as BuildContext;
 
-    const app = new Koa();
-    app.use(async (ctx, next) => {
-      await new Promise<void>((resolve) => {
-        devMiddleware.waitUntilValid(() => {
-          resolve();
-        });
-      });
-      await koaDevMiddleware(ctx, next);
-    });
-    app.use(async (ctx) => {
-      if (ctx.body == null && ctx.status === 404) {
-        ctx.body = 'spa-fallback';
-      }
-    });
+    watcher = await watch(ctx);
 
-    ({ server } = await listen(app));
+    server = http.createServer(app.callback());
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', () => resolve());
+    });
+    ({ port } = server.address() as { port: number });
   }, 30000);
 
   afterAll(async () => {
-    await new Promise<void>((resolve, reject) => {
-      devMiddleware.close((error?: Error | null) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        compiler.close((closeError) => {
-          if (closeError) {
-            reject(closeError);
-            return;
-          }
-          server.closeAllConnections();
-          server.close(() => resolve());
-        });
-      });
+    await watcher.close();
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
     });
     fs.rmSync(directory, { recursive: true, force: true });
   });
 
   it('serves a compiled asset', async () => {
-    const { port } = server.address() as { port: number };
     const response = await request(port, 'GET', '/admin/main.js');
 
     expect(response.status).toBe(200);
@@ -120,7 +135,6 @@ describe('webpack dev middleware', () => {
   });
 
   it('keeps status 200 for HEAD', async () => {
-    const { port } = server.address() as { port: number };
     const response = await request(port, 'HEAD', '/admin/main.js');
 
     expect(response.status).toBe(200);
@@ -128,18 +142,29 @@ describe('webpack dev middleware', () => {
   });
 
   it('serves a byte range', async () => {
-    const { port } = server.address() as { port: number };
     const response = await request(port, 'GET', '/admin/main.js', { Range: 'bytes=0-3' });
 
     expect(response.status).toBe(206);
     expect(response.body).toHaveLength(4);
   });
 
-  it('falls through when the asset is not in the compilation', async () => {
-    const { port } = server.address() as { port: number };
-    const response = await request(port, 'GET', '/admin/missing.js');
+  it('serves the admin index for routes that are not in the compilation', async () => {
+    const response = await request(port, 'GET', '/admin/content-manager/collection-types');
 
     expect(response.status).toBe(200);
-    expect(response.body).toBe('spa-fallback');
+    expect(response.body).toContain(INDEX_MARKER);
+  });
+
+  it.each([
+    '/admin/..%2fsecret.txt',
+    '/admin/%2e%2e/secret.txt',
+    '/admin/%2e%2e%2fsecret.txt',
+    '/admin/..%5csecret.txt',
+  ])('does not serve files outside the webpack output for %s', async (requestPath) => {
+    const response = await request(port, 'GET', requestPath);
+
+    expect(response.status).toBe(403);
+    expect(response.body).not.toContain(SECRET_MARKER);
+    expect(response.body).not.toContain(INDEX_MARKER);
   });
 });
