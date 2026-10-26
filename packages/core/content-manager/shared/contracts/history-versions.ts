@@ -1,6 +1,12 @@
 import type { Data, Modules, Struct, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
+export type HistoryVersionActor =
+  | { type: 'admin-user' }
+  | { type: 'api-token'; token: { id: Data.ID; name: string } }
+  | { type: 'end-user'; user: { id: Data.ID; username: string } }
+  | { type: 'unknown' };
+
 /**
  * Unlike other Content Manager contracts, history versions can't be created via
  * a dedicated API endpoint, but only by the history service listening to other actions.
@@ -14,6 +20,7 @@ export interface CreateHistoryVersion {
   data: Modules.Documents.AnyDocument;
   schema: Struct.SchemaAttributes;
   componentsSchemas: Record<`${string}.${string}`, Struct.SchemaAttributes>;
+  actor?: HistoryVersionActor | null;
 }
 
 export interface Locale {
