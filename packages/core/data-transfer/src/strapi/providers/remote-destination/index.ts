@@ -25,10 +25,8 @@ import {
   transferAssetStreamChunkByteLength,
 } from '../../../utils/transfer-asset-chunk';
 
-export interface IRemoteStrapiDestinationProviderOptions extends Pick<
-  ILocalStrapiDestinationProviderOptions,
-  'restore' | 'strategy' | 'onTransferPhase'
-> {
+export interface IRemoteStrapiDestinationProviderOptions
+  extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy' | 'onTransferPhase'> {
   url: URL; // the url of the remote Strapi admin
   auth?: Auth.ITransferTokenAuth;
   retryMessageOptions?: {

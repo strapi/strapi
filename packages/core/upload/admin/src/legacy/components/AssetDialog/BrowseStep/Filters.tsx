@@ -16,7 +16,10 @@ type StringFilter = {
 
 type MimeFilter = {
   [key: string]:
-    string | NumberKeyedObject | Record<string, string | NumberKeyedObject> | undefined;
+    | string
+    | NumberKeyedObject
+    | Record<string, string | NumberKeyedObject>
+    | undefined;
 };
 
 export type FilterStructure = {
@@ -27,7 +30,9 @@ export type Filter = {
   [key in 'mime' | 'createdAt' | 'updatedAt']?:
     | {
         [key in '$contains' | '$notContains' | '$eq' | '$not']?:
-          string[] | string | { $contains: string[] };
+          | string[]
+          | string
+          | { $contains: string[] };
       }
     | undefined;
 };

@@ -1073,7 +1073,8 @@ export const applyPostCloneRelationUpdates = async (
       const cloneComponent = ownerComponentUid(get(clonedData, update.ownerPath!));
       const cloneAttribute = cloneComponent
         ? (strapi.db.metadata.get(cloneComponent).attributes[attributeName] as
-            CloneRelationAttribute | undefined)
+            | CloneRelationAttribute
+            | undefined)
         : undefined;
 
       // The submitted operation belongs to the new block. Do not apply it with the
@@ -1086,7 +1087,8 @@ export const applyPostCloneRelationUpdates = async (
     }
 
     const attribute = strapi.db.metadata.get(schemaUid).attributes[attributeName] as
-      CloneRelationAttribute | undefined;
+      | CloneRelationAttribute
+      | undefined;
 
     if (!attribute || attribute.type !== 'relation') {
       throw new Error(

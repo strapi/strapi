@@ -45,7 +45,9 @@ type Connection<TClient extends Database.ClientKind> = {
 type SharedDatabaseConnection<TClient extends Database.ClientKind> = {
   client: TClient;
   connection:
-    Connection<TClient> | (() => Promise<Connection<TClient>>) | (() => Connection<TClient>);
+    | Connection<TClient>
+    | (() => Promise<Connection<TClient>>)
+    | (() => Connection<TClient>);
   debug?: boolean;
   pool?: PoolConfig;
   acquireConnectionTimeout?: number;

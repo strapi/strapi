@@ -34,8 +34,7 @@ const EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY: NonNullable<
 > = {};
 
 interface DynamicComponentProps
-  extends
-    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
+  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
     Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
   componentUid?: string;
   disabled?: boolean;

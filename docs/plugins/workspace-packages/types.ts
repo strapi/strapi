@@ -4,7 +4,13 @@
  */
 
 export type PackageGroupId =
-  'core' | 'plugins' | 'providers' | 'utils' | 'cli' | 'generators' | 'other';
+  | 'core'
+  | 'plugins'
+  | 'providers'
+  | 'utils'
+  | 'cli'
+  | 'generators'
+  | 'other';
 
 export type PackageGroup = {
   id: PackageGroupId;

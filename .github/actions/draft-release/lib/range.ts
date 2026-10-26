@@ -90,7 +90,9 @@ export function createGitAdapter(exec: GitExec): GitAdapter {
   }
 
   type RemoteHead =
-    { state: 'found'; sha: string } | { state: 'missing' } | { state: 'unknown'; error: string };
+    | { state: 'found'; sha: string }
+    | { state: 'missing' }
+    | { state: 'unknown'; error: string };
 
   /**
    * Reads one exact branch ref after a push fails, so the journal records the observed remote state

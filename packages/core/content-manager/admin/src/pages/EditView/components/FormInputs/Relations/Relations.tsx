@@ -146,8 +146,7 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
 }
 
 interface RelationsFieldProps
-  extends
-    Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
+  extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {}
 
 export interface RelationsFormValue {
@@ -709,10 +708,8 @@ const RelationsInput = ({
 
 const MemoizedRelationsComboboxInput = React.memo(RelationsInput);
 
-interface RelationModalWithContextProps extends Omit<
-  RelationsInputProps,
-  'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'
-> {
+interface RelationModalWithContextProps
+  extends Omit<RelationsInputProps, 'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'> {
   relation: DocumentMeta;
   hasNextPage: boolean;
   isLoadingSearchRelations: boolean;

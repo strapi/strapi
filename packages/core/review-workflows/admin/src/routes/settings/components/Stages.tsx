@@ -41,10 +41,8 @@ import { useDragAndDrop } from '../hooks/useDragAndDrop';
 
 import { AddStage } from './AddStage';
 
-interface WorkflowStage extends Pick<
-  IStage,
-  'id' | 'name' | 'fromPermissions' | 'toPermissions' | 'color'
-> {
+interface WorkflowStage
+  extends Pick<IStage, 'id' | 'name' | 'fromPermissions' | 'toPermissions' | 'color'> {
   __temp_key__: string;
 }
 
@@ -451,10 +449,8 @@ const InputRenderer = (props: InputRendererProps) => {
  * ColorSelector
  * -----------------------------------------------------------------------------------------------*/
 
-interface ColorSelectorProps extends Omit<
-  Extract<InputProps, { type: 'enumeration' }>,
-  'type' | 'options'
-> {
+interface ColorSelectorProps
+  extends Omit<Extract<InputProps, { type: 'enumeration' }>, 'type' | 'options'> {
   type: 'color';
 }
 
@@ -529,10 +525,8 @@ const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) 
 /* -------------------------------------------------------------------------------------------------
  * PermissionsField
  * -----------------------------------------------------------------------------------------------*/
-interface PermissionsFieldProps extends Omit<
-  Extract<InputProps, { type: 'enumeration' }>,
-  'type' | 'options'
-> {
+interface PermissionsFieldProps
+  extends Omit<Extract<InputProps, { type: 'enumeration' }>, 'type' | 'options'> {
   type: 'permissions';
 }
 

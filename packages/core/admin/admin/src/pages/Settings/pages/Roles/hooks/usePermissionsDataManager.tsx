@@ -42,10 +42,8 @@ const [PermissionsDataManagerProviderRaw, usePermissionsDataManagerContext] =
 export const usePermissionsDataManager = () =>
   usePermissionsDataManagerContext('usePermissionsDataManager');
 
-interface PermissionsDataManagerProviderProps extends Omit<
-  PermissionsDataManagerContextValue,
-  'checkUserHasPermission'
-> {
+interface PermissionsDataManagerProviderProps
+  extends Omit<PermissionsDataManagerContextValue, 'checkUserHasPermission'> {
   children: React.ReactNode;
 }
 

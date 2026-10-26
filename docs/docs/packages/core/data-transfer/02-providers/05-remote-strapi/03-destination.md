@@ -19,10 +19,8 @@ interface ITransferTokenAuth {
   token: string; // the transfer token
 }
 
-export interface IRemoteStrapiDestinationProviderOptions extends Pick<
-  ILocalStrapiDestinationProviderOptions,
-  'restore' | 'strategy'
-> {
+export interface IRemoteStrapiDestinationProviderOptions
+  extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL; // the url of the remote Strapi admin
   auth?: ITransferTokenAuth;
   retryMessageOptions?: {

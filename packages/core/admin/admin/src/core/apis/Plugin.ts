@@ -3,9 +3,8 @@ import * as React from 'react';
 
 import { immerable } from 'immer';
 
-export interface PluginConfig extends Partial<
-  Pick<Plugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady'>
-> {
+export interface PluginConfig
+  extends Partial<Pick<Plugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady'>> {
   name: string;
   id: string;
 }

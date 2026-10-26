@@ -72,10 +72,8 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
  * ConfirmDialogPublishAll
  * -----------------------------------------------------------------------------------------------*/
 
-interface ConfirmDialogPublishAllProps extends Pick<
-  ConfirmBulkActionDialogProps,
-  'isOpen' | 'onToggleDialog'
-> {
+interface ConfirmDialogPublishAllProps
+  extends Pick<ConfirmBulkActionDialogProps, 'isOpen' | 'onToggleDialog'> {
   isConfirmButtonLoading?: boolean;
   onConfirm: () => void;
 }

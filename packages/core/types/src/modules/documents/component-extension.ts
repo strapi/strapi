@@ -46,12 +46,10 @@ type ComponentBody<
 > = Utils.If<
   Utils.Constants.AreSchemaRegistriesExtended,
   {
-    [
-      TAttributeName in Extract<
-        Schema.AttributeNamesByType<TSchemaUID, 'component' | 'dynamiczone'>,
-        TComponentLikeKeys
-      >
-    ]: AttributeUtils.GetValue<Schema.AttributeByName<TSchemaUID, TAttributeName>>;
+    [TAttributeName in Extract<
+      Schema.AttributeNamesByType<TSchemaUID, 'component' | 'dynamiczone'>,
+      TComponentLikeKeys
+    >]: AttributeUtils.GetValue<Schema.AttributeByName<TSchemaUID, TAttributeName>>;
   },
   {
     [key: string]: AttributeUtils.GetValue<

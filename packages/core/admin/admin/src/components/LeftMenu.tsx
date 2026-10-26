@@ -47,10 +47,11 @@ const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
   }
 `;
 
-interface LeftMenuProps extends Pick<
-  Menu,
-  'generalSectionLinks' | 'pluginsSectionLinks' | 'topMobileNavigation' | 'burgerMobileNavigation'
-> {}
+interface LeftMenuProps
+  extends Pick<
+    Menu,
+    'generalSectionLinks' | 'pluginsSectionLinks' | 'topMobileNavigation' | 'burgerMobileNavigation'
+  > {}
 
 const MenuDetails = styled(Flex)`
   flex: 1;

@@ -19,7 +19,8 @@ export const resolveStorageType = (attribute: AttributeLike): string | undefined
 
   try {
     const customField = strapi.get('custom-fields').get(attribute.customField) as
-      { type?: string } | undefined;
+      | { type?: string }
+      | undefined;
     return customField?.type;
   } catch {
     return undefined;

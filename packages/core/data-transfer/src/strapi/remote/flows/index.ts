@@ -1,7 +1,8 @@
 import type { TransferStage } from '../../../types';
 
 export type Step =
-  { kind: 'action'; action: string } | { kind: 'transfer'; stage: TransferStage; locked?: boolean };
+  | { kind: 'action'; action: string }
+  | { kind: 'transfer'; stage: TransferStage; locked?: boolean };
 
 export { default as DEFAULT_TRANSFER_FLOW } from './default';
 

@@ -23,4 +23,5 @@ export type InternalRelationAttribute = Schema.Attribute.Relation & {
  * Internal attribute type that can be any attribute or a relation with dominant property
  */
 export type InternalAttribute =
-  Exclude<Schema.Attribute.AnyAttribute, Schema.Attribute.Relation> | InternalRelationAttribute;
+  | Exclude<Schema.Attribute.AnyAttribute, Schema.Attribute.Relation>
+  | InternalRelationAttribute;

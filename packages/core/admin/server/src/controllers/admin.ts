@@ -138,7 +138,8 @@ export default {
     const getNumberOfFolders = async (): Promise<number> => {
       try {
         const contentStructure = strapi.get('content-structure') as
-          { countGroups?: () => Promise<number> } | undefined;
+          | { countGroups?: () => Promise<number> }
+          | undefined;
 
         return (await contentStructure?.countGroups?.()) ?? 0;
       } catch {

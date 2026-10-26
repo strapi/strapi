@@ -30,7 +30,8 @@ export type InsertTarget = {
 };
 
 export type DropTarget =
-  { kind: 'nest'; folderId: string; depth: number } | ({ kind: 'insert' } & InsertTarget);
+  | { kind: 'nest'; folderId: string; depth: number }
+  | ({ kind: 'insert' } & InsertTarget);
 
 /**
  * Locates the position for the line indicator given that root-level re-ordering is currently

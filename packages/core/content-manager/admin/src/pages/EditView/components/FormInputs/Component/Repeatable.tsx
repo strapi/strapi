@@ -349,10 +349,8 @@ const TextButtonCustom = styled(TextButton)`
   }
 `;
 
-interface RepeatableComponentFieldsProps extends Pick<
-  RepeatableComponentProps,
-  'children' | 'layout'
-> {
+interface RepeatableComponentFieldsProps
+  extends Pick<RepeatableComponentProps, 'children' | 'layout'> {
   attributeComponent: string;
   nameWithIndex: string;
 }
@@ -413,8 +411,7 @@ RepeatableComponentFields.displayName = 'RepeatableComponentFields';
  * -----------------------------------------------------------------------------------------------*/
 
 interface ComponentProps
-  extends
-    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
+  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField' | 'layout'> {
   attributeComponent: string;
   disabled?: boolean;

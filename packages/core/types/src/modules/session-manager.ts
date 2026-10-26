@@ -1,5 +1,6 @@
 export type ValidateRefreshTokenResult =
-  { isValid: true; userId: string; sessionId: string } | { isValid: false };
+  | { isValid: true; userId: string; sessionId: string }
+  | { isValid: false };
 
 export interface SessionEntry {
   id?: string;

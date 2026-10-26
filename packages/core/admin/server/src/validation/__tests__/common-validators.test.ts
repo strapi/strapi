@@ -17,7 +17,9 @@
 import { permission } from '../common-validators';
 
 type ProviderResult =
-  { actionId: string; subjects?: unknown; options?: unknown } | undefined | null;
+  | { actionId: string; subjects?: unknown; options?: unknown }
+  | undefined
+  | null;
 
 const stubActionProvider = (get: (actionId: string) => ProviderResult) => {
   (global as any).strapi = {

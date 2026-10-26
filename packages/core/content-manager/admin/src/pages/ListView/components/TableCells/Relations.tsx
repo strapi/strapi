@@ -35,10 +35,8 @@ const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
  * RelationMultiple
  * -----------------------------------------------------------------------------------------------*/
 
-interface RelationMultipleProps extends Pick<
-  CellContentProps,
-  'mainField' | 'content' | 'name' | 'rowId'
-> {}
+interface RelationMultipleProps
+  extends Pick<CellContentProps, 'mainField' | 'content' | 'name' | 'rowId'> {}
 
 const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleProps) => {
   const { model } = useDoc();

@@ -1,52 +1,81 @@
-import { z } from '@strapi/utils';
+/**
+ * Unit tests for the nested-filter capability added to buildFiltersSchema.
+ * Top-level scalar filtering is covered via the derive-content-type test suite; here we
+ * focus on component nested field filters (gated behind the optional getModel) and
+ * backward compatibility when no resolver is supplied.
+ *
+ * Relation targets are intentionally NOT expanded into nested filters: filtering on a
+ * related entry's fields would let a caller probe fields/entries of the target type
+ * that their own read permission on the source type does not grant (the permission
+ * checker only sanitizes against the source type's fields, not the target's).
+ */
 import type { Struct } from '@strapi/types';
+
 import { buildFiltersSchema } from '../filters-schema';
 
-const attributes = {
+const rootAttributes = {
   title: { type: 'string' },
-  rank: { type: 'integer' },
-  featured: { type: 'boolean' },
+  count: { type: 'integer' },
+  author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+  reviewer: { type: 'relation', relation: 'oneToOne', target: 'admin::user' },
+  seo: { type: 'component', component: 'shared.seo' },
 } as unknown as Struct.SchemaAttributes;
 
-/**
- * Counts how many times the schema builder reads attribute definitions, which happens once per
- * construction of the recursive filters object.
- */
-const withReadCounter = (source: Struct.SchemaAttributes) => {
-  const counter = { reads: 0 };
-  const proxy = new Proxy(source, {
-    get(target, key, receiver) {
-      if (typeof key === 'string' && key in target) {
-        counter.reads += 1;
-      }
-      return Reflect.get(target, key, receiver);
-    },
-  });
-  return { attributes: proxy, counter };
+const models: Record<string, { attributes: Struct.SchemaAttributes }> = {
+  'api::author.author': {
+    attributes: {
+      name: { type: 'string' },
+      age: { type: 'integer' },
+      posts: { type: 'relation', relation: 'oneToMany', target: 'api::post.post' },
+    } as unknown as Struct.SchemaAttributes,
+  },
+  'shared.seo': {
+    attributes: {
+      metaTitle: { type: 'string' },
+    } as unknown as Struct.SchemaAttributes,
+  },
 };
 
-describe('buildFiltersSchema', () => {
-  test('accepts field operators and logical operators', () => {
-    const schema = buildFiltersSchema(attributes);
+const getModel = (uid: string) => models[uid];
 
-    expect(schema.safeParse({ title: { $contains: 'a' } }).success).toBe(true);
-    expect(schema.safeParse({ $or: [{ rank: { $gt: 1 } }, { featured: true }] }).success).toBe(
-      true
-    );
-    expect(schema.safeParse({ $not: { title: 'a' } }).success).toBe(true);
-    expect(schema.safeParse({ unknown: 'a' }).success).toBe(false);
+describe('buildFiltersSchema — nested filters (with getModel)', () => {
+  const schema = buildFiltersSchema(rootAttributes, null, getModel);
+
+  it('still accepts top-level scalar filters', () => {
+    expect(schema.safeParse({ title: { $eq: 'x' } }).success).toBe(true);
+    expect(schema.safeParse({ count: { $gt: 3 } }).success).toBe(true);
   });
 
-  test('builds the recursive filters object once, however often it is traversed', () => {
-    const counted = withReadCounter(attributes);
-    const schema = buildFiltersSchema(counted.attributes);
-    counted.counter.reads = 0;
+  it('accepts a nested component field filter', () => {
+    expect(schema.safeParse({ seo: { metaTitle: { $eq: 'Home' } } }).success).toBe(true);
+  });
 
-    z.toJSONSchema(schema, { io: 'input' });
-    z.toJSONSchema(schema, { io: 'input' });
-    schema.safeParse({ $and: [{ $or: [{ title: 'a' }] }] });
+  it('does not expand relation targets into nested filters', () => {
+    expect(schema.safeParse({ author: { name: { $contains: 'a' } } }).success).toBe(false);
+    expect(schema.safeParse({ author: { age: { $gte: 18 } } }).success).toBe(false);
+  });
 
-    // One read per scalar field: the lazy object is constructed a single time.
-    expect(counted.counter.reads).toBe(Object.keys(attributes).length);
+  it('does not expose admin::user relation targets for nested filtering', () => {
+    expect(schema.safeParse({ reviewer: { firstname: { $eq: 'x' } } }).success).toBe(false);
+  });
+
+  it('still supports logical operators combining nested (component) filters', () => {
+    expect(
+      schema.safeParse({
+        $and: [{ title: { $eq: 'x' } }, { seo: { metaTitle: { $eq: 'Home' } } }],
+      }).success
+    ).toBe(true);
+  });
+});
+
+describe('buildFiltersSchema — backward compatibility (no getModel)', () => {
+  const schema = buildFiltersSchema(rootAttributes, null);
+
+  it('accepts top-level scalar filters', () => {
+    expect(schema.safeParse({ title: { $eq: 'x' } }).success).toBe(true);
+  });
+
+  it('does NOT accept nested relation filters when no resolver is supplied', () => {
+    expect(schema.safeParse({ author: { name: { $eq: 'x' } } }).success).toBe(false);
   });
 });

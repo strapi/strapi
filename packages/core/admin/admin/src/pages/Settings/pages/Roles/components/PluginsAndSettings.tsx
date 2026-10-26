@@ -74,7 +74,8 @@ const PluginsAndSettingsPermissions = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface RowProps
-  extends Pick<Layout[number], 'childrenForm'>, Pick<Accordion.HeaderProps, 'variant'> {
+  extends Pick<Layout[number], 'childrenForm'>,
+    Pick<Accordion.HeaderProps, 'variant'> {
   kind: Exclude<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
   name: string;
   isFormDisabled?: boolean;

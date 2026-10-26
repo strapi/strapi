@@ -414,7 +414,9 @@ interface DidUsePresetPromptEvent {
   name: 'didUsePresetPrompt';
   properties: {
     promptType:
-      'generate-product-schema' | 'tell-me-about-the-content-type-builder' | 'tell-me-about-strapi';
+      | 'generate-product-schema'
+      | 'tell-me-about-the-content-type-builder'
+      | 'tell-me-about-strapi';
   };
 }
 

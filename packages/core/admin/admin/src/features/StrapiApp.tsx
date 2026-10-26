@@ -8,8 +8,7 @@ import type { StrapiApp } from '../StrapiApp';
  * StrapiApp
  * -----------------------------------------------------------------------------------------------*/
 interface StrapiAppContextValue
-  extends
-    Pick<
+  extends Pick<
       StrapiApp,
       | 'customFields'
       | 'getPlugin'

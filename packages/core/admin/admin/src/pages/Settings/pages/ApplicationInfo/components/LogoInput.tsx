@@ -54,7 +54,8 @@ const [LogoInputContextProvider, useLogoInputContext] =
  * -----------------------------------------------------------------------------------------------*/
 
 interface LogoInputProps
-  extends Pick<PendingLogoDialogProps, 'onChangeLogo'>, Pick<CarouselInputProps, 'label' | 'hint'> {
+  extends Pick<PendingLogoDialogProps, 'onChangeLogo'>,
+    Pick<CarouselInputProps, 'label' | 'hint'> {
   canUpdate: boolean;
   customLogo?: ConfigurationContextValue['logos']['auth']['custom'];
   defaultLogo: string;

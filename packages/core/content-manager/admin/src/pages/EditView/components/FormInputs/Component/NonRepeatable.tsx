@@ -47,10 +47,8 @@ const NonRepeatableComponent = ({
   );
 };
 
-interface NonRepeatableComponentFieldsProps extends Pick<
-  NonRepeatableComponentProps,
-  'attribute' | 'children' | 'layout' | 'name'
-> {}
+interface NonRepeatableComponentFieldsProps
+  extends Pick<NonRepeatableComponentProps, 'attribute' | 'children' | 'layout' | 'name'> {}
 
 const NonRepeatableComponentFields = React.memo(
   ({ attribute, children, layout, name }: NonRepeatableComponentFieldsProps) => {

@@ -81,7 +81,8 @@ const contentTypesBase = ({
     (uid) =>
       (
         allContentTypes[uid as string]?.pluginOptions?.['content-manager'] as
-          { visible?: boolean } | undefined
+          | { visible?: boolean }
+          | undefined
       )?.visible !== false
   );
 

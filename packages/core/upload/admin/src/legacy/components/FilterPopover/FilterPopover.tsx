@@ -24,7 +24,9 @@ type Filter = {
   [key in 'mime' | 'createdAt' | 'updatedAt']?:
     | {
         [key in '$contains' | '$notContains' | '$eq' | '$not']?:
-          string[] | string | { $contains: string[] };
+          | string[]
+          | string
+          | { $contains: string[] };
       }
     | undefined;
 };
@@ -227,7 +229,13 @@ export const FilterPopover = ({
       const hasFilter =
         filters.find((filter) => {
           const modifiedDataName = modifiedData.name as
-            'mime' | 'createdAt' | 'updatedAt' | '$contains' | '$notContains' | '$eq' | '$not';
+            | 'mime'
+            | 'createdAt'
+            | 'updatedAt'
+            | '$contains'
+            | '$notContains'
+            | '$eq'
+            | '$not';
           return (
             filter[modifiedDataName as 'mime' | 'createdAt' | 'updatedAt'] &&
             filter[modifiedDataName as 'mime' | 'createdAt' | 'updatedAt']?.[

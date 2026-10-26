@@ -40,7 +40,8 @@ interface LayoutSettings extends Settings {
 }
 
 interface ListFieldLayout
-  extends Table.Header<Document, ListFieldLayout>, Pick<Filters.Filter, 'mainField'> {
+  extends Table.Header<Document, ListFieldLayout>,
+    Pick<Filters.Filter, 'mainField'> {
   attribute: SchemaUtils.Attribute.AnyAttribute | { type: 'custom' };
 }
 
@@ -54,7 +55,8 @@ interface ListLayout {
   settings: LayoutSettings;
 }
 interface EditFieldSharedProps
-  extends Omit<InputProps, 'hint' | 'label' | 'type'>, Pick<Filters.Filter, 'mainField'> {
+  extends Omit<InputProps, 'hint' | 'label' | 'type'>,
+    Pick<Filters.Filter, 'mainField'> {
   hint?: string;
   label: string;
   size: number;

@@ -107,7 +107,9 @@ const PlanCard = () => {
 
     let active = true;
 
-    import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/LicenseInfo')
+    import(
+      '../../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/LicenseInfo'
+    )
       .then((mod) => {
         if (active) {
           setLicenseBody(() => mod.LicenseInfoEE);

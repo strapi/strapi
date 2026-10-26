@@ -27,7 +27,10 @@ const shouldReferenceLicense = (
 ): boolean => licenseSource === 'environment' && Boolean(env.CI) && env.CI !== 'false';
 
 type ConfiguredStatus =
-  'already-configured' | 'uses-environment-variable' | 'different-license' | 'manual-edit-needed';
+  | 'already-configured'
+  | 'uses-environment-variable'
+  | 'different-license'
+  | 'manual-edit-needed';
 
 export type RegistryAccessOutcome = {
   filePath: string;

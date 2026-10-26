@@ -36,8 +36,10 @@ export const ConfigureTheView = ({ config }: ConfigureTheViewProps) => {
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
-  const [reducerState, dispatch] = React.useReducer(reducer, initialState, (): InitialState =>
-    init(config)
+  const [reducerState, dispatch] = React.useReducer(
+    reducer,
+    initialState,
+    (): InitialState => init(config)
   );
   const typedDispatch: React.Dispatch<Action> = dispatch;
   const { initialData, modifiedData } = reducerState;

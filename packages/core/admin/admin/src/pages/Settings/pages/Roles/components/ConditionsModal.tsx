@@ -408,10 +408,9 @@ const getNewStateFromChangedValues = (
 ) =>
   options
     .flatMap(([, values]) => values)
-    .reduce<Record<string, boolean>>(
-      (acc, curr) => ({ [curr.id]: changedValues.includes(curr.id), ...acc }),
-      {}
-    );
+    .reduce<
+      Record<string, boolean>
+    >((acc, curr) => ({ [curr.id]: changedValues.includes(curr.id), ...acc }), {});
 
 export { ConditionsModal };
 export type { ConditionsModalProps };
