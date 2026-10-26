@@ -19,8 +19,6 @@ import {
 } from './constants';
 import { ok } from '../utils';
 
-// TODO @Nico `sanitizeMediaAsset` takes a `Record<string, unknown>`, which the `File` interface is
-// not assignable to (no index signature). Widening its parameter to `File` changes its declaration.
 type RawMediaAsset = Parameters<typeof sanitizeMediaAsset>[0];
 
 // Type-level only: the MCP SDK validates `args` against the tool's strict Zod input schema

@@ -10,8 +10,6 @@ import { sanitizeMediaAsset, sanitizeMediaFolderTree } from '../sanitizers/sanit
 import { MCP_NOT_FOUND_ASSET } from './constants';
 import { ok } from '../utils';
 
-// TODO @Nico `sanitizeMediaAsset` takes a `Record<string, unknown>`, which the `File` interface is
-// not assignable to (no index signature). Widening its parameter to `File` changes its declaration.
 type RawMediaAsset = Parameters<typeof sanitizeMediaAsset>[0];
 
 const DEFAULT_SORT = 'createdAt:DESC';
