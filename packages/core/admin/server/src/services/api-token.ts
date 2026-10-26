@@ -25,6 +25,7 @@ import constants from './constants';
 import { getService } from '../utils';
 import permissionDomain from '../domain/permission';
 import { validatePermissionsExist } from '../validation/permission';
+import { toEnforcedCeilingPermissions } from './permission/enforced-permissions';
 import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
 import {
   AUDITED_EVENTS,
@@ -275,10 +276,12 @@ const describeCeilingRejection = (
  *
  * Each requested permission follows the same per-permission rule as roles (`ceiling.ts`): every
  * combination of a requested field and locale must be covered by one user permission, and
- * omitting `fields` or `locales` against a user restricted on it is rejected. A request that
- * only several user permissions together would cover (`title` on `fr` from `title` on `en` plus
- * `body` on `fr`) is rejected. Conditions are inherited from the user, never taken from the
- * request (`getInheritedConditions`).
+ * omitting `fields` against a user restricted on it is rejected. Both sides are read as the
+ * engine enforces them: an omitted `locales` on a localized subject is no locale, so it needs
+ * nothing to cover it, and a user permission without `locales` there holds no locale. A
+ * request that only several user permissions together would cover (`title` on `fr` from `title`
+ * on `en` plus `body` on `fr`) is rejected. Conditions are inherited from the user, never taken
+ * from the request (`getInheritedConditions`).
  *
  * Returns the permissions with their inherited conditions.
  * Throws ValidationError if any permission exceeds the user's ceiling.
@@ -310,23 +313,34 @@ const enforceAdminPermissionsCeiling = async (
     });
   }
 
-  const userPermissions: Permission[] = await getService('permission').findUserPermissions(user);
+  const userPermissions = await toEnforcedCeilingPermissions(
+    await getService('permission').findUserPermissions(user),
+    { holderIsSuperAdmin: false }
+  );
+
+  // Only compared: the stored permission keeps the requested shape, which the engine enforces
+  const enforcedRequested = await toEnforcedCeilingPermissions(requestedPermissions, {
+    holderIsSuperAdmin: false,
+  });
 
   const exceeding: string[] = [];
+  const enforcedClamped: PermissionInput[] = [];
 
-  const clamped = requestedPermissions.map((requested) => {
+  const clamped = requestedPermissions.map((requested, index) => {
     const requestedSubject = requested.subject || null;
     const label =
       requestedSubject !== null ? `${requested.action} on ${requestedSubject}` : requested.action;
 
-    const conditions = permissionDomain.ceiling.getInheritedConditions(requested, userPermissions);
+    const enforced = enforcedRequested[index];
+    const conditions = permissionDomain.ceiling.getInheritedConditions(enforced, userPermissions);
 
     if (conditions === null) {
-      const reason = describeCeilingRejection(requested, userPermissions);
+      const reason = describeCeilingRejection(enforced, userPermissions);
       exceeding.push(reason === null ? label : `${label} (${reason})`);
       return requested;
     }
 
+    enforcedClamped.push({ ...enforced, conditions });
     return { ...requested, conditions };
   });
 
@@ -339,7 +353,7 @@ const enforceAdminPermissionsCeiling = async (
 
   // The inherited conditions must keep every permission inside the ceiling. A failure here is a
   // bug in getInheritedConditions, so refuse to store the permission rather than widen the token.
-  const outsideCeiling = clamped.filter(
+  const outsideCeiling = enforcedClamped.filter(
     (permission) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, userPermissions)
   );
 
@@ -523,8 +537,10 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
   if (user === null || user === undefined) return;
   if (isSuperAdmin(user as AdminUser)) return;
 
-  const userEffectivePermissions: Permission[] = await getService('permission').findUserPermissions(
-    user as AdminUser
+  // Both sides as the engine enforces them. Only compared: deletes and updates use the ids
+  const userEffectivePermissions = await toEnforcedCeilingPermissions(
+    await getService('permission').findUserPermissions(user as AdminUser),
+    { holderIsSuperAdmin: false }
   );
 
   const tokens = await strapi.db.query('admin::api-token').findMany({
@@ -542,7 +558,7 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
 
     const { toDelete, toUpdate } = reconcileTokenPermissionsToUserCeiling(
       userEffectivePermissions,
-      tokenPermissions
+      await toEnforcedCeilingPermissions(tokenPermissions, { holderIsSuperAdmin: false })
     );
 
     const tokenLabel = `Admin token ${token.id} (${token.name}) of user ${userId}`;

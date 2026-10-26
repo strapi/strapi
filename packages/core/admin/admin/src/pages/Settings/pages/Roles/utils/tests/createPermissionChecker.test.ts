@@ -11,9 +11,11 @@ import {
   isPermissionHeld,
   isPermissionWithinCeiling,
   isValueSelected,
+  toEnforcedPermissions,
 } from '../createPermissionChecker';
 import { updateValuesWithPermissions } from '../updateValues';
 
+import type * as PermissionContracts from '../../../../../../../../shared/contracts/permissions';
 import type { Permission as AuthPermission } from '../../../../../../features/Auth';
 
 const READ = 'plugin::content-manager.explorer.read';
@@ -310,6 +312,59 @@ describe('createPermissionChecker', () => {
       expect(isPermissionWithinCeiling([titleAlways], read({ fields: ['title', 'body'] }))).toBe(
         false
       );
+    });
+  });
+
+  describe('toEnforcedPermissions', () => {
+    const USER = 'plugin::users-permissions.user';
+
+    // Articles are localized (their layout lists `locales`), users are not
+    const layout = {
+      conditions: [],
+      sections: {
+        collectionTypes: {
+          actions: [],
+          subjects: [
+            {
+              uid: SUBJECT,
+              label: 'Article',
+              properties: [
+                { label: 'Fields', value: 'fields' },
+                { label: 'Locales', value: 'locales' },
+              ],
+            },
+            { uid: USER, label: 'User', properties: [{ label: 'Fields', value: 'fields' }] },
+          ],
+        },
+        singleTypes: { actions: [], subjects: [] },
+        plugins: [],
+        settings: [],
+      },
+    } as PermissionContracts.GetAll.Response['data'];
+
+    it('reads a missing locales key on a localized subject as no locale', () => {
+      const held = toEnforcedPermissions([read({ fields: ['title'] })], layout);
+
+      expect(held).toEqual([read({ fields: ['title'], locales: [] })]);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: null }))).toBe(
+        false
+      );
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['fr'] }))).toBe(
+        false
+      );
+      expect(canTick(held, READ, SUBJECT, selection({}), 'locales', 'fr')).toBe(false);
+      expect(canTick(held, READ, SUBJECT, selection({}), 'fields', 'title')).toBe(true);
+    });
+
+    it('keeps every locale, listed locales, and subjects that are not localized', () => {
+      const permissions = [
+        read({ fields: ['title'], locales: null }),
+        read({ fields: ['title'], locales: ['en'] }),
+        permission(READ, USER, { fields: ['username'] }),
+        permission('plugin::upload.read', null),
+      ];
+
+      expect(toEnforcedPermissions(permissions, layout)).toEqual(permissions);
     });
   });
 

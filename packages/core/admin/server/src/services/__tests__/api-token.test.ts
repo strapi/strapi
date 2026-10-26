@@ -36,6 +36,26 @@ const getActionProvider = (actions = []) => {
   };
 };
 
+/**
+ * What the permission ceiling reads from the permission service: the subjects whose `locales`
+ * i18n enforces (none by default), and the registered conditions (all of them by default).
+ */
+const ceilingProviders = ({
+  localizedSubjects = [],
+  conditions,
+}: { localizedSubjects?: string[]; conditions?: string[] } = {}) => ({
+  actionProvider: {
+    has: () => true,
+    appliesToProperty: jest.fn(
+      async (property: string, _action: string, subject?: string | null) =>
+        property === 'locales' && !!subject && localizedSubjects.includes(subject)
+    ),
+  },
+  conditionProvider: {
+    has: jest.fn((condition: string) => conditions === undefined || conditions.includes(condition)),
+  },
+});
+
 describe('API Token', () => {
   const mockedApiToken = {
     randomBytes: 'api-token_test-random-bytes',
@@ -2104,7 +2124,9 @@ describe('API Token', () => {
             user: { findOne: jest.fn().mockResolvedValue(ownerUser) },
             permission: {
               findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
+              ...ceilingProviders(),
               actionProvider: {
+                ...ceilingProviders().actionProvider,
                 keys: jest.fn().mockReturnValue(validActions),
                 values: jest
                   .fn()
@@ -2867,11 +2889,15 @@ describe('API Token', () => {
       userPermissions,
       tokens,
       dbQueryMocks = {},
+      localizedSubjects,
+      conditions,
     }: {
       user: object | null;
       userPermissions: object[];
       tokens: object[];
       dbQueryMocks?: Record<string, jest.Mock>;
+      localizedSubjects?: string[];
+      conditions?: string[];
     }) => {
       const updateMock = jest.fn().mockResolvedValue({});
       const deleteByIdsMock = jest.fn().mockResolvedValue({});
@@ -2899,6 +2925,7 @@ describe('API Token', () => {
             permission: {
               findUserPermissions: jest.fn().mockResolvedValue(userPermissions),
               deleteByIds: deleteByIdsMock,
+              ...ceilingProviders({ localizedSubjects, conditions }),
             },
           },
         },
@@ -3065,6 +3092,47 @@ describe('API Token', () => {
       expect(deleteByIdsMock).not.toHaveBeenCalled();
       expect(updateMock).not.toHaveBeenCalled();
     });
+    test('Reads an owner permission with no locales key as no locale', async () => {
+      const ARTICLE = 'api::article.article';
+      const user = { id: 1, roles: [{ code: 'strapi-editor' }] };
+      // Stored without a `locales` key: on a localized subject the engine enforces no locale
+      const userPermissions = [
+        {
+          action: 'plugin::cm.read',
+          subject: ARTICLE,
+          conditions: [],
+          properties: { fields: ['title'] },
+        },
+      ];
+      const tokenPermission = (id: number, properties: Record<string, unknown>) => ({
+        id,
+        action: 'plugin::cm.read',
+        subject: ARTICLE,
+        conditions: [],
+        properties,
+      });
+      const tokens = [
+        {
+          id: 10,
+          adminPermissions: [
+            tokenPermission(101, { fields: ['title'], locales: null }),
+            tokenPermission(102, { fields: ['title'] }),
+          ],
+        },
+      ];
+
+      const { deleteByIdsMock, updateMock } = buildStrapi({
+        user,
+        userPermissions,
+        tokens,
+        localizedSubjects: [ARTICLE],
+      });
+
+      await syncApiTokenPermissionsForUser(1);
+
+      expect(deleteByIdsMock).toHaveBeenCalledWith([101]);
+      expect(updateMock).not.toHaveBeenCalled();
+    });
   });
 
   describe('syncApiTokenPermissionsForAllUsers', () => {
@@ -3098,7 +3166,7 @@ describe('API Token', () => {
         log: { warn: warnMock },
         admin: {
           services: {
-            permission: { findUserPermissions, deleteByIds: jest.fn() },
+            permission: { findUserPermissions, deleteByIds: jest.fn(), ...ceilingProviders() },
           },
         },
       } as any;
@@ -3256,6 +3324,7 @@ describe('API Token', () => {
           services: {
             permission: {
               findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
+              ...ceilingProviders(),
             },
           },
         },
@@ -3300,6 +3369,7 @@ describe('API Token', () => {
           services: {
             permission: {
               findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
+              ...ceilingProviders(),
             },
           },
         },
@@ -3324,7 +3394,7 @@ describe('API Token', () => {
       ).rejects.toThrow('fields, locales and conditions are not held together');
     });
 
-    test('Rejects omitted locales against a locale-restricted owner', async () => {
+    test('Rejects omitted locales against a locale-restricted owner on a subject that is not localized', async () => {
       await expect(
         enforceAdminPermissionsCeiling(ownerUser, [read({ fields: ['title'] })] as any)
       ).rejects.toThrow('locales are required due to owner locale restrictions');
@@ -3339,6 +3409,64 @@ describe('API Token', () => {
       ).resolves.toEqual([
         read({ fields: ['body'], locales: ['fr'] }, ['admin::is-creator']),
         read({ fields: ['title'], locales: ['en'] }, []),
+      ]);
+    });
+  });
+
+  describe('enforceAdminPermissionsCeiling — owner permission with no locales key', () => {
+    const READ = 'plugin::content-manager.explorer.read';
+    const ARTICLE = 'api::article.article';
+    const ownerUser = { id: 42, roles: [{ code: 'strapi-editor' }] } as any;
+
+    const setupOwner = (ownerPermissions: object[]) => {
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
+              ...ceilingProviders({ localizedSubjects: [ARTICLE] }),
+            },
+          },
+        },
+      } as any;
+    };
+
+    test('Rejects every locale when the owner holds no locales key', async () => {
+      setupOwner([{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(ownerUser, [
+          { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: null } },
+        ] as any)
+      ).rejects.toThrow(
+        `Exceeding: ${READ} on ${ARTICLE} (locales are required due to owner locale restrictions)`
+      );
+    });
+
+    test('Accepts and keeps a request with no locales key when the owner holds none', async () => {
+      setupOwner([{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }]);
+
+      const result = await enforceAdminPermissionsCeiling(ownerUser, [
+        { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+      ] as any);
+
+      expect(result).toEqual([
+        { action: READ, subject: ARTICLE, properties: { fields: ['title'] }, conditions: [] },
+      ]);
+    });
+
+    test('Accepts a request with no locales key against a locale-restricted owner', async () => {
+      // The engine enforces the request as no locale, so it needs nothing to cover it
+      setupOwner([
+        { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['en'] } },
+      ]);
+
+      const result = await enforceAdminPermissionsCeiling(ownerUser, [
+        { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+      ] as any);
+
+      expect(result).toEqual([
+        { action: READ, subject: ARTICLE, properties: { fields: ['title'] }, conditions: [] },
       ]);
     });
   });

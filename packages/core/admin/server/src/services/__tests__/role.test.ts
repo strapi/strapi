@@ -1096,17 +1096,26 @@ describe('Role', () => {
     const setupStrapi = ({
       userPermissions = [],
       rolePermissions = [],
+      localizedSubjects = [],
     }: {
       userPermissions?: any[];
       rolePermissions?: any[];
+      localizedSubjects?: string[];
     } = {}) => {
       const findUserPermissions = jest.fn(() => Promise.resolve(toPermission(userPermissions)));
       const findMany = jest.fn(() => Promise.resolve(toPermission(rolePermissions)));
+      const actionProvider = {
+        has: () => true,
+        appliesToProperty: jest.fn(
+          async (property: string, _action: string, subject?: string | null) =>
+            property === 'locales' && !!subject && localizedSubjects.includes(subject)
+        ),
+      };
 
       global.strapi = {
         admin: {
           services: {
-            permission: { findUserPermissions, findMany },
+            permission: { findUserPermissions, findMany, actionProvider },
           },
         },
       } as any;
@@ -1196,6 +1205,65 @@ describe('Role', () => {
           },
         ]
       );
+    });
+
+    describe('a held permission with no locales key', () => {
+      // Stored without a `locales` key, as `assignPermissions` can leave it
+      const heldTitle = { action: READ, subject: ARTICLE, properties: { fields: ['title'] } };
+      const requestTitle = (locales: string[] | null) => ({
+        action: READ,
+        subject: ARTICLE,
+        properties: { fields: ['title'], locales },
+      });
+      const rejected = (locales: string[] | null) => ({ ...requestTitle(locales), conditions: [] });
+
+      test('Holds no locale on a localized subject, as i18n enforces it', async () => {
+        setupStrapi({ userPermissions: [heldTitle], localizedSubjects: [ARTICLE] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [requestTitle(null)]), [
+          rejected(null),
+        ]);
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [requestTitle(['fr'])]), [
+          rejected(['fr']),
+        ]);
+      });
+
+      test('Ignores locales on a subject that is not localized', async () => {
+        setupStrapi({ userPermissions: [heldTitle] });
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [requestTitle(['fr'])])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Holds every locale on a token whose owner is a super admin', async () => {
+        // Regression guard: i18n does not restrict a super admin, so this already passes
+        setupStrapi({ localizedSubjects: [ARTICLE] });
+
+        await expect(
+          checkPermissionsCeiling(
+            { tokenPermissions: toPermission([heldTitle]), owner: superAdminUser },
+            ROLE_ID,
+            [requestTitle(['fr'])]
+          )
+        ).resolves.toBeUndefined();
+      });
+
+      test('Holds no locale on a token whose owner is not a super admin', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, properties: { locales: null } }],
+          localizedSubjects: [ARTICLE],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling(
+            { tokenPermissions: toPermission([heldTitle]), owner: user },
+            ROLE_ID,
+            [requestTitle(['fr'])]
+          ),
+          [rejected(['fr'])]
+        );
+      });
     });
 
     describe('admin token requesters', () => {

@@ -6,6 +6,7 @@ import {
   getInheritedConditions,
   getRestrictedProperties,
   isPermissionWithinCeiling,
+  toEnforcedPermissions,
 } from '../ceiling';
 
 const READ = 'plugin::content-manager.explorer.read';
@@ -16,6 +17,112 @@ const IS_CREATOR = 'admin::is-creator';
 const SAME_ROLE = 'admin::has-same-role-as-creator';
 
 describe('Permission ceiling', () => {
+  describe('toEnforcedPermissions', () => {
+    // Articles are localized, authors are not
+    const enforceLocales = (localizedSubjects: string[] = [ARTICLE]) => ({
+      isLocalesEnforced: (permission: { subject?: string | null }) =>
+        !!permission.subject && localizedSubjects.includes(permission.subject),
+      isConditionRegistered: () => true,
+    });
+
+    describe('locales', () => {
+      test('Reads a missing locales key as no locale where locales are enforced', () => {
+        expect(
+          toEnforcedPermissions(
+            [
+              { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+              { action: READ, subject: ARTICLE, properties: null },
+              { action: READ, subject: ARTICLE },
+            ],
+            enforceLocales()
+          )
+        ).toEqual([
+          { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: [] } },
+          { action: READ, subject: ARTICLE, properties: { locales: [] } },
+          { action: READ, subject: ARTICLE, properties: { locales: [] } },
+        ]);
+      });
+
+      test('Keeps every locale (null) and listed locales', () => {
+        const permissions = [
+          { action: READ, subject: ARTICLE, properties: { locales: null } },
+          { action: READ, subject: ARTICLE, properties: { locales: ['en'] } },
+          { action: READ, subject: ARTICLE, properties: { locales: [] } },
+        ];
+
+        expect(toEnforcedPermissions(permissions, enforceLocales())).toEqual(permissions);
+      });
+
+      test('Leaves permissions where locales are not enforced as they are', () => {
+        const permissions = [
+          { action: READ, subject: AUTHOR, properties: { fields: ['name'] } },
+          { action: 'admin::roles.read' },
+        ];
+
+        expect(toEnforcedPermissions(permissions, enforceLocales())).toEqual(permissions);
+        // A super admin holder: the caller reports nothing as enforced
+        expect(
+          toEnforcedPermissions([{ action: READ, subject: ARTICLE }], enforceLocales([]))
+        ).toEqual([{ action: READ, subject: ARTICLE }]);
+      });
+
+      test('Does not mutate its input', () => {
+        const permission = { action: READ, subject: ARTICLE, properties: { fields: ['title'] } };
+
+        toEnforcedPermissions([permission], enforceLocales());
+
+        expect(permission).toEqual({
+          action: READ,
+          subject: ARTICLE,
+          properties: { fields: ['title'] },
+        });
+      });
+
+      describe('in the ceiling', () => {
+        const held = toEnforcedPermissions(
+          [{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }],
+          enforceLocales()
+        );
+        const request = (properties: Record<string, unknown>) => ({
+          action: READ,
+          subject: ARTICLE,
+          properties,
+        });
+
+        test('A held permission with no locales key covers no locale', () => {
+          expect(
+            isPermissionWithinCeiling(request({ fields: ['title'], locales: null }), held)
+          ).toBe(false);
+          expect(
+            isPermissionWithinCeiling(request({ fields: ['title'], locales: ['fr'] }), held)
+          ).toBe(false);
+        });
+
+        test('Still checks the fields of a request for no locale', () => {
+          expect(isPermissionWithinCeiling(request({ fields: ['title'], locales: [] }), held)).toBe(
+            true
+          );
+          expect(isPermissionWithinCeiling(request({ fields: ['body'], locales: [] }), held)).toBe(
+            false
+          );
+        });
+
+        test('Inherits nothing for every locale, and no condition for no locale', () => {
+          expect(getInheritedConditions(request({ fields: ['title'], locales: null }), held)).toBe(
+            null
+          );
+
+          const [noLocale] = toEnforcedPermissions(
+            [request({ fields: ['title'] })],
+            enforceLocales()
+          );
+
+          expect(getInheritedConditions(noLocale, held)).toEqual([]);
+        });
+      });
+    });
+  });
+
   describe('findMatchingPermissions', () => {
     test('Matches on action and subject, treating null and undefined subjects alike', () => {
       const held = [

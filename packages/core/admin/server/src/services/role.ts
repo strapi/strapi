@@ -21,6 +21,7 @@ import type { CeilingPermission } from '../domain/permission/ceiling';
 import { validatePermissionsExist } from '../validation/permission';
 import roleConstants from './constants';
 import { getService } from '../utils';
+import { toEnforcedCeilingPermissions } from './permission/enforced-permissions';
 
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION, ROLE_TEXT_MAX_LENGTH } = roleConstants;
 
@@ -429,28 +430,39 @@ export type CeilingRequester =
   { user: AdminUser } | { tokenPermissions: CeilingPermission[]; owner: AdminUser };
 
 /**
- * The permission sets a granted permission must stay within, all of them. Empty when the
- * requester is not limited (a super admin).
+ * The permission sets a granted permission must stay within, all of them, as the engine
+ * enforces them. Empty when the requester is not limited (a super admin).
  */
 const findRequesterCeilings = async (
   requester: CeilingRequester
 ): Promise<CeilingPermission[][]> => {
   if ('tokenPermissions' in requester) {
+    // The engine enforces a token's permissions as its owner's
+    const ownerIsSuperAdmin = hasSuperAdminRole(requester.owner);
+    const tokenPermissions = await toEnforcedCeilingPermissions(requester.tokenPermissions, {
+      holderIsSuperAdmin: ownerIsSuperAdmin,
+    });
+
     // A token can carry permissions its owner lost since it was written
-    if (hasSuperAdminRole(requester.owner)) {
-      return [requester.tokenPermissions];
+    if (ownerIsSuperAdmin) {
+      return [tokenPermissions];
     }
 
     const ownerPermissions = await getService('permission').findUserPermissions(requester.owner);
 
-    return [requester.tokenPermissions, ownerPermissions];
+    return [
+      tokenPermissions,
+      await toEnforcedCeilingPermissions(ownerPermissions, { holderIsSuperAdmin: false }),
+    ];
   }
 
   if (hasSuperAdminRole(requester.user)) {
     return [];
   }
 
-  return [await getService('permission').findUserPermissions(requester.user)];
+  const userPermissions = await getService('permission').findUserPermissions(requester.user);
+
+  return [await toEnforcedCeilingPermissions(userPermissions, { holderIsSuperAdmin: false })];
 };
 
 /**
@@ -481,6 +493,8 @@ const checkPermissionsCeiling = async (
     where: { role: { id: roleId } },
   });
 
+  // The requested locales need no rewrite: i18n's `willValidateUpdatePermissions` hook has already
+  // turned a missing or empty `locales` on a localized subject into the default locale
   const newPermissions = differenceWith(
     permissions.map((permission) => permissionDomain.create(permission)),
     existingPermissions,

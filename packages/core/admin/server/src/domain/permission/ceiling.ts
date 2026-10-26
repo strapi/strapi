@@ -19,6 +19,10 @@
  * instead of chosen: `getInheritedConditions` computes them, and a token permission it returns
  * `null` for is rejected (`enforceAdminPermissionsCeiling` in `services/api-token.ts`) or
  * removed (`reconcileTokenPermissionsToUserCeiling`).
+ *
+ * Held and requested permissions are read the way the engine enforces them
+ * (`toEnforcedPermissions`): on a localized subject, a missing `locales` key is no locale, the
+ * same as `locales: []`, because i18n's engine hook enforces it as `locale $in []`.
  */
 import { uniq } from 'lodash';
 
@@ -38,6 +42,34 @@ export interface PermissionAtom {
   properties: Record<string, string | null>;
   condition: string | null;
 }
+
+/**
+ * What the permission engine enforces, for `toEnforcedPermissions`.
+ */
+export interface EnforcementContext {
+  /** Whether the engine enforces `locales` here (localized subject, holder not a super admin) */
+  isLocalesEnforced: (permission: CeilingPermission) => boolean;
+  /** Whether the condition provider knows this condition id */
+  isConditionRegistered: (condition: string) => boolean;
+}
+
+/**
+ * The permissions as the engine enforces them. Where `locales` is enforced, a missing key (or
+ * missing `properties`) becomes `locales: []`: i18n's engine hook restricts such a permission
+ * to `locale $in []`, so it grants no locale. `locales: null` (every locale) and lists are kept.
+ * The input is not mutated.
+ */
+export const toEnforcedPermissions = <T extends CeilingPermission>(
+  permissions: T[],
+  context: EnforcementContext
+): T[] =>
+  permissions.map((permission) => {
+    if (!context.isLocalesEnforced(permission) || permission.properties?.locales !== undefined) {
+      return permission;
+    }
+
+    return { ...permission, properties: { ...(permission.properties ?? {}), locales: [] } };
+  });
 
 /**
  * The permission engine drops permissions with an empty `fields` list (access to no field),
@@ -290,6 +322,7 @@ export const getInheritedConditions = (
 };
 
 export default {
+  toEnforcedPermissions,
   hasNoFields,
   findMatchingPermissions,
   isPropertyValueAllowed,

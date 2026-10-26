@@ -15,6 +15,7 @@
 
 import { isObject } from '../../../../../utils/objects';
 
+import type * as PermissionContracts from '../../../../../../../shared/contracts/permissions';
 import type { Permission as AuthPermission } from '../../../../../features/Auth';
 
 /**
@@ -53,6 +54,39 @@ export interface CeilingPermission {
 /* -------------------------------------------------------------------------------------------------
  * Rules shared with the server ceiling
  * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * The held permissions as the engine enforces them, the same as `toEnforcedPermissions` in
+ * `server/src/domain/permission/ceiling.ts`. On a localized subject (one whose layout lists a
+ * `locales` property, which the server adds only where i18n enforces it) a missing `locales` key
+ * is no locale, the same as `locales: []`.
+ *
+ * i18n does not restrict a super admin, so on the server a token owned by a super admin holds
+ * every locale where the key is missing. The form does not know the owner's role and reads the
+ * key as no locale there too: stricter than the server, never wider.
+ */
+export const toEnforcedPermissions = <T extends CeilingPermission>(
+  userPermissions: T[],
+  layout: PermissionContracts.GetAll.Response['data']
+): T[] => {
+  const localizedSubjects = new Set(
+    [...layout.sections.collectionTypes.subjects, ...layout.sections.singleTypes.subjects]
+      .filter((subject) => subject.properties.some((property) => property.value === 'locales'))
+      .map((subject) => subject.uid)
+  );
+
+  return userPermissions.map((permission) => {
+    if (
+      !permission.subject ||
+      !localizedSubjects.has(permission.subject) ||
+      permission.properties?.locales !== undefined
+    ) {
+      return permission;
+    }
+
+    return { ...permission, properties: { ...(permission.properties ?? {}), locales: [] } };
+  });
+};
 
 const hasNoFields = (permission: CeilingPermission): boolean => {
   const fields = permission.properties?.fields;

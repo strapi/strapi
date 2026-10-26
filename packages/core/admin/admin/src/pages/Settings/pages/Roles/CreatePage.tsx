@@ -38,7 +38,7 @@ import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
-import { isPermissionWithinCeiling } from './utils/createPermissionChecker';
+import { isPermissionWithinCeiling, toEnforcedPermissions } from './utils/createPermissionChecker';
 
 /* -------------------------------------------------------------------------------------------------
  * CreatePage
@@ -112,15 +112,22 @@ const CreatePage = () => {
    * yet, so nothing is exempt from the ceiling, and the server rejects the whole update when one
    * copied permission is outside it. Permissions outside it are left unticked.
    */
-  const permissionsToCopy = React.useMemo(
-    () =>
-      userPermissions === undefined
-        ? rolePermissions
-        : rolePermissions?.filter((permission) =>
-            isPermissionWithinCeiling(userPermissions, permission)
-          ),
-    [rolePermissions, userPermissions]
-  );
+  const permissionsToCopy = React.useMemo(() => {
+    if (userPermissions === undefined) {
+      return rolePermissions;
+    }
+
+    // The form is not shown before the layout loads
+    if (permissionsLayout === undefined) {
+      return undefined;
+    }
+
+    const heldPermissions = toEnforcedPermissions(userPermissions, permissionsLayout);
+
+    return rolePermissions?.filter((permission) =>
+      isPermissionWithinCeiling(heldPermissions, permission)
+    );
+  }, [permissionsLayout, rolePermissions, userPermissions]);
 
   const [createRole] = useCreateRoleMutation();
   const [updateRolePermissions] = useUpdateRolePermissionsMutation();

@@ -22,6 +22,7 @@ import {
   createSubjectBulkPermissionChecker,
   getActionSelection,
   getAllowedConditions,
+  toEnforcedPermissions,
 } from '../utils/createPermissionChecker';
 import { difference } from '../utils/difference';
 import {
@@ -103,11 +104,16 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
       isFormDisabled,
       onLocaleValidationChange,
       permissions = EMPTY_PERMISSIONS,
-      userPermissions,
+      userPermissions: heldPermissions,
       inheritConditions = false,
     },
     api
   ) => {
+    // Read once as the engine enforces them, for every check below
+    const userPermissions = React.useMemo(
+      () => heldPermissions && toEnforcedPermissions(heldPermissions, layout),
+      [heldPermissions, layout]
+    );
     const [{ initialData, layouts, modifiedData }, dispatch] = React.useReducer(
       reducer,
       initialState,
