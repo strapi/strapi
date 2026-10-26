@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 import { styled, DefaultTheme } from 'styled-components';
 
 import { Action, Subject } from '../../../../../../../shared/contracts/permissions';
+import { UnsavedChangesModal } from '../../../../../components/UnsavedChangesModal';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -286,12 +287,7 @@ const Collapse = ({
         </Flex>
       </Wrapper>
       <Box bottom="10px" right="9px" position="absolute">
-        <Modal.Root
-          open={isConditionModalOpen}
-          onOpenChange={() => {
-            setIsConditionModalOpen((prev) => !prev);
-          }}
-        >
+        <UnsavedChangesModal open={isConditionModalOpen} onOpenChange={setIsConditionModalOpen}>
           <Modal.Trigger>
             <ConditionsButton hasConditions={doesConditionButtonHasConditions} />
           </Modal.Trigger>
@@ -304,7 +300,7 @@ const Collapse = ({
               setIsConditionModalOpen(false);
             }}
           />
-        </Modal.Root>
+        </UnsavedChangesModal>
       </Box>
     </BoxWrapper>
   );
