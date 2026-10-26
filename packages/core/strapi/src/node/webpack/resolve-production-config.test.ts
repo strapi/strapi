@@ -1,5 +1,10 @@
+import fs from 'node:fs';
 import http from 'node:http';
+import os from 'node:os';
 import path from 'node:path';
+import vm from 'node:vm';
+
+import { webpack, type DefinePlugin, type Stats } from 'webpack';
 
 import { resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
@@ -97,4 +102,49 @@ describe('Webpack admin configuration', () => {
       NODE_ENV: 'production',
     });
   });
+
+  // The Content-Type Builder bundles micromatch, whose picomatch reads `process.platform` on load.
+  it('bundles micromatch so it runs without a `process` global', async () => {
+    const config = await resolveProductionConfig(createContext({ minify: true, sourcemap: false }));
+    const definePlugin = config.plugins?.find(
+      (plugin) => plugin?.constructor.name === 'DefinePlugin'
+    ) as DefinePlugin;
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-webpack-micromatch-'));
+
+    try {
+      fs.writeFileSync(
+        path.join(directory, 'index.js'),
+        "globalThis.result = require('micromatch').isMatch('src/index.js', ['**/*.js']);\n"
+      );
+
+      const stats = await new Promise<Stats | undefined>((resolve, reject) => {
+        webpack(
+          {
+            mode: 'none',
+            target: 'web',
+            context: directory,
+            entry: './index.js',
+            output: { path: path.join(directory, 'dist'), filename: 'main.js' },
+            resolve: {
+              fallback: config.resolve?.fallback,
+              modules: ['node_modules', path.dirname(path.dirname(require.resolve('micromatch')))],
+            },
+            plugins: [definePlugin],
+          },
+          (error, result) => (error ? reject(error) : resolve(result))
+        );
+      });
+
+      expect(stats?.hasErrors()).toBe(false);
+
+      const sandbox: { result?: boolean } = {};
+      vm.runInNewContext(fs.readFileSync(path.join(directory, 'dist', 'main.js'), 'utf8'), {
+        globalThis: sandbox,
+      });
+
+      expect(sandbox.result).toBe(true);
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  }, 30000);
 });

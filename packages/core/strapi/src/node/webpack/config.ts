@@ -138,6 +138,9 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
         // Unlisted `process.env.*` reads (optional flags) must resolve to undefined
         // in the browser instead of throwing `process is not defined`.
         'process.env': JSON.stringify(bundledEnv),
+        // Browser builds of Node-oriented deps (picomatch via micromatch) read these on load.
+        'process.platform': JSON.stringify('browser'),
+        'process.version': JSON.stringify(''),
       }),
       ctx.tsconfig &&
         new ForkTsCheckerPlugin({
