@@ -517,8 +517,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         _.assign(fileData, { folderPath: dbFile.folderPath });
       }
 
-      // clear old formats — replaceImage / replace will set new ones
-      _.set(fileData, 'formats', {});
+      // `update` only writes the keys it gets, so clear the old image values. A new
+      // image gets its own from replaceImage / uploadImage; a non-image keeps null,
+      // like a fresh upload of the same file.
+      _.assign(fileData, { width: null, height: null, formats: null });
 
       if (dbFile.provider === config.provider) {
         if (await isImage(fileData)) {

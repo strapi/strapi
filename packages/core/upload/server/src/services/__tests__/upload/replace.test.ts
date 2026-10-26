@@ -25,6 +25,10 @@ const imageManipulationMock = {
   isOptimizableImage: jest.fn(async () => false),
   optimize: jest.fn(),
   generateFileName: jest.fn((name: string) => name),
+  getDimensions: jest.fn(async () => ({ width: 640, height: 480 })),
+  isResizableImage: jest.fn(async () => false),
+  generateThumbnail: jest.fn(async () => null),
+  generateResponsiveFormats: jest.fn(async () => []),
 };
 
 const fileServiceMock = {
@@ -89,6 +93,7 @@ describe('Upload service - replace()', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    imageManipulationMock.isImage.mockImplementation(async () => false);
   });
 
   test('replacing an image with a non-image deletes the old generated formats', async () => {
@@ -115,6 +120,86 @@ describe('Upload service - replace()', () => {
     expect(providerMethods.delete).toHaveBeenCalledTimes(2);
     const deletedHashes = providerMethods.delete.mock.calls.map((c: any[]) => c[0].hash).sort();
     expect(deletedHashes).toEqual(['large_document_abc123', 'thumbnail_document_abc123']);
+  });
+
+  test('replacing an image with a non-image clears the image dimensions and formats', async () => {
+    currentDbFile = {
+      id: 10,
+      hash: 'document_stu',
+      ext: '.png',
+      provider: PROVIDER,
+      width: 640,
+      height: 480,
+      formats: {
+        thumbnail: { hash: 'thumbnail_document_stu', ext: '.png' },
+      },
+    };
+
+    await uploadService.replace(10, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    // `update` only writes the keys it receives, so the old image values stay
+    // unless they are reset explicitly. A non-image file has no dimensions or formats.
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({
+      width: null,
+      height: null,
+      formats: null,
+    });
+  });
+
+  test('replacing an image with a non-image on another provider clears the image dimensions and formats', async () => {
+    currentDbFile = {
+      id: 11,
+      hash: 'document_vwx',
+      ext: '.png',
+      provider: 'aws-s3',
+      width: 640,
+      height: 480,
+      formats: {
+        thumbnail: { hash: 'thumbnail_document_vwx', ext: '.png' },
+      },
+    };
+
+    await uploadService.replace(11, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.upload).toHaveBeenCalledTimes(1);
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({
+      width: null,
+      height: null,
+      formats: null,
+    });
+  });
+
+  test('replacing a non-image with an image sets the new image dimensions', async () => {
+    currentDbFile = {
+      id: 12,
+      hash: 'document_yza',
+      ext: '.pdf',
+      provider: PROVIDER,
+      width: null,
+      height: null,
+      formats: null,
+    };
+
+    imageManipulationMock.isImage.mockImplementation(async () => true);
+
+    await uploadService.replace(12, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace).toHaveBeenCalledTimes(1);
+    // The new image is too small for any format, so formats stay null like a fresh upload.
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({
+      width: 640,
+      height: 480,
+      formats: null,
+    });
   });
 
   test('replacing a formatless file with a non-image deletes nothing', async () => {
