@@ -109,5 +109,68 @@ describe('wrapResolvers', () => {
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler.mock.calls[0]![0]).toBe(koaContext);
     });
+
+    it('passes the options to the handler created by the registered middleware', async () => {
+      const seen: unknown[] = [];
+      const factory = vi.fn(
+        (config: { prefix: string }) => async (_ctx: unknown, next: () => Promise<unknown>) => {
+          seen.push(config.prefix);
+          await next();
+        }
+      );
+      const strapi = createStrapi({ 'global::prefix': factory });
+
+      const { result } = await executeHello(
+        [{ name: 'global::prefix', options: { prefix: 'custom' } }],
+        strapi
+      );
+
+      expect(result.errors).toBeUndefined();
+      expect(result.data).toEqual({ hello: 'world' });
+      expect(seen).toEqual(['custom']);
+    });
+
+    it('resolves the field to null when a registered middleware does not call next', async () => {
+      const factory = vi.fn(() => async () => {});
+      const strapi = createStrapi({ 'global::block': factory });
+
+      const { result } = await executeHello(['global::block'], strapi);
+
+      expect(result.errors).toBeUndefined();
+      expect(result.data).toEqual({ hello: null });
+    });
+
+    it('creates the registered middleware handler once, not on each request', async () => {
+      const { factory, handler } = createRegisteredMiddleware();
+      const strapi = createStrapi({ 'global::logger': factory });
+
+      const schema = wrapResolvers({
+        schema: createSchema(),
+        strapi,
+        extension: {
+          resolversConfig: { 'Query.hello': { auth: false, middlewares: ['global::logger'] } },
+        },
+      });
+
+      await graphql({ schema, source: '{ hello }', contextValue: { koaContext: {} } });
+      await graphql({ schema, source: '{ hello }', contextValue: { koaContext: {} } });
+
+      expect(factory).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws when a referenced middleware is not registered', () => {
+      const strapi = createStrapi({});
+
+      expect(() =>
+        wrapResolvers({
+          schema: createSchema(),
+          strapi,
+          extension: {
+            resolversConfig: { 'Query.hello': { middlewares: ['global::unknown'] } },
+          },
+        })
+      ).toThrow('Middleware global::unknown not found.');
+    });
   });
 });
