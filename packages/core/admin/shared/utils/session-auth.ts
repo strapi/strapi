@@ -24,9 +24,101 @@ export const getAccessCookieName = (): string => {
   return resolveAuthCookieName(configured, warnViaStrapiLog);
 };
 
+// The admin API routes are mounted under `/admin` whatever `admin.url` is.
+const ADMIN_API_PREFIX = '/admin';
+
+const getConfiguredCookiePath = (): string | undefined => {
+  const configured: unknown = strapi.config.get('admin.auth.cookie.path');
+  return typeof configured === 'string' && configured.trim() !== '' ? configured : undefined;
+};
+
+/**
+ * Path the browser sees for one of the resolved absolute URLs, so it includes
+ * a `server.url` subpath (`admin.path` does not). No trailing slash, except
+ * for the root.
+ */
+const getBrowserPath = (key: 'admin.absoluteUrl' | 'server.absoluteUrl'): string | undefined => {
+  const absoluteUrl: unknown = strapi.config.get(key);
+  if (typeof absoluteUrl !== 'string' || absoluteUrl === '') {
+    return undefined;
+  }
+
+  try {
+    return new URL(absoluteUrl).pathname.replace(/\/+$/, '') || '/';
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Path the browser uses for the admin API (`/admin/access-token`,
+ * `/admin/login`, `/admin/logout`): `/admin` behind any `server.url` subpath.
+ */
+const getAdminApiPath = (): string => {
+  const serverPath = getBrowserPath('server.absoluteUrl');
+  const apiPath =
+    serverPath && serverPath !== '/' ? `${serverPath}${ADMIN_API_PREFIX}` : ADMIN_API_PREFIX;
+  return resolveAuthCookiePath(apiPath, warnViaStrapiLog);
+};
+
+// RFC 6265 section 5.1.4: whether the browser attaches a cookie scoped to
+// `cookiePath` to a request for `requestPath`.
+const cookiePathMatches = (cookiePath: string, requestPath: string): boolean => {
+  if (requestPath === cookiePath) {
+    return true;
+  }
+
+  return (
+    requestPath.startsWith(cookiePath) &&
+    (cookiePath.endsWith('/') || requestPath.charAt(cookiePath.length) === '/')
+  );
+};
+
+/**
+ * Path of the non-httpOnly access cookie. Only the admin panel reads it,
+ * through `document.cookie`, which exposes a cookie only on pages its path
+ * matches. So when `admin.auth.cookie.path` is unset it follows the path the
+ * browser loads the panel from (`admin.url`, behind any `server.url` subpath).
+ * The admin build resolves the same value (create-build-context.ts).
+ */
 export const getAccessCookiePath = (): string => {
-  const configured: string | undefined = strapi.config.get('admin.auth.cookie.path');
-  return resolveAuthCookiePath(configured, warnViaStrapiLog);
+  return resolveAuthCookiePath(
+    getConfiguredCookiePath() ?? getBrowserPath('admin.absoluteUrl'),
+    warnViaStrapiLog
+  );
+};
+
+const warnedRefreshCookiePaths = new Set<string>();
+
+/**
+ * Path of the httpOnly refresh cookie (and every other cookie built from
+ * `getRefreshCookieOptions`). Only the admin API reads it, and the API does not
+ * move with `admin.url`, so it follows the API path instead of the panel.
+ * `admin.auth.cookie.path` is kept when it covers the API path. Otherwise the
+ * browser would never send the cookie to `/admin/access-token` and every
+ * session would end when its access token expires, so the API path is used.
+ */
+export const getRefreshCookiePath = (): string => {
+  const apiPath = getAdminApiPath();
+  const configured = getConfiguredCookiePath();
+
+  if (!configured) {
+    return apiPath;
+  }
+
+  const configuredPath = resolveAuthCookiePath(configured, warnViaStrapiLog);
+  if (cookiePathMatches(configuredPath, apiPath)) {
+    return configuredPath;
+  }
+
+  if (!warnedRefreshCookiePaths.has(configuredPath)) {
+    warnedRefreshCookiePaths.add(configuredPath);
+    strapi.log.warn(
+      `admin.auth.cookie.path "${configuredPath}" does not cover the admin API at "${apiPath}", so the browser would not send the refresh cookie to "${apiPath}/access-token". Using "${apiPath}" for the refresh cookie. The access cookie keeps "${configuredPath}".`
+    );
+  }
+
+  return apiPath;
 };
 
 export const getAccessCookieDomain = (): string | undefined => {
@@ -45,7 +137,7 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
   const isProduction = process.env.NODE_ENV === 'production';
 
   const domain = getAccessCookieDomain();
-  const path = getAccessCookiePath();
+  const path = getRefreshCookiePath();
 
   const sameSite: boolean | 'lax' | 'strict' | 'none' =
     strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
