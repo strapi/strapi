@@ -24,7 +24,7 @@ The default config uses the `sendmail` provider and a `defaultFrom` address. The
 
 ### Email service
 
-The `email` service has three functions: `send`, `sendTemplatedEmail` and `getProviderSettings`. `send` passes the options to the provider. `sendTemplatedEmail` fills `subject`, `text` and `html` with a lodash template, and allows only the variables that exist in the data object. Other code calls it as `strapi.plugin('email').service('email')`. See [`services/email.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/services/email.ts).
+The `email` service has three functions: `send`, `sendTemplatedEmail` and `getProviderSettings`. `send` passes the options to the provider. `sendTemplatedEmail` fills `subject`, `text` and `html` with a lodash template, and allows only the variables that exist in the data object. The template must have `subject` and `text`; `html` is optional. Other code calls it as `strapi.plugin('email').service('email')`. See [`services/email.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/email/server/src/services/email.ts).
 
 ### Routes
 
