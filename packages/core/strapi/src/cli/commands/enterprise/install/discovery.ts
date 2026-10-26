@@ -32,6 +32,7 @@ export interface DiscoveredPlugin {
 interface DiscoveryResult {
   plugins: DiscoveredPlugin[];
   lockedPlugins: EnterprisePluginEntry[];
+  installedOutsideLicense: string[];
   notLicensedMessage?: string;
 }
 
@@ -241,6 +242,7 @@ export const discoverEnterprisePlugins = async ({
         packageNames: [...searchedPackageNames, ...installedPluginNames],
       }),
       lockedPlugins: [],
+      installedOutsideLicense: [],
     };
   }
 
@@ -250,15 +252,18 @@ export const discoverEnterprisePlugins = async ({
   const licensedPackageNames = [
     ...new Set(enterpriseCatalogPlugins.filter(({ licensed }) => licensed).map(({ name }) => name)),
   ];
+  const catalogPluginsOutsideLicense = enterpriseCatalogPlugins.filter(
+    ({ name, licensed }) => !licensed && !licensedPackageNames.includes(name)
+  );
   const lockedCatalogPlugins = new Map(
-    enterpriseCatalogPlugins
-      .filter(
-        ({ name, licensed }) =>
-          !licensed && !licensedPackageNames.includes(name) && !installedPluginNames.includes(name)
-      )
+    catalogPluginsOutsideLicense
+      .filter(({ name }) => !installedPluginNames.includes(name))
       .map((plugin) => [plugin.name, plugin])
   );
   const lockedPlugins = [...lockedCatalogPlugins.values()].map(describeCatalogPlugin);
+  const installedOutsideLicense = installedPluginNames.filter((packageName) =>
+    catalogPluginsOutsideLicense.some(({ name }) => name === packageName)
+  );
 
   return {
     plugins: await describeCandidatePlugins({
@@ -269,6 +274,10 @@ export const discoverEnterprisePlugins = async ({
       packageNames: [...licensedPackageNames, ...installedPluginNames],
     }),
     lockedPlugins,
-    notLicensedMessage: lockedPlugins.length > 0 ? catalogResult.notLicensedMessage : undefined,
+    installedOutsideLicense,
+    notLicensedMessage:
+      lockedPlugins.length > 0 || installedOutsideLicense.length > 0
+        ? catalogResult.notLicensedMessage
+        : undefined,
   };
 };

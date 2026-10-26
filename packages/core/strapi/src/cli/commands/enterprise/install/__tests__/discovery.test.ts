@@ -293,7 +293,7 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
     const appDir = await createTemporaryDirectory();
     await installFakePackage(appDir, NEW_PLUGIN, { version: '2.0.0', strapi: { kind: 'plugin' } });
 
-    const { plugins, lockedPlugins } = await discover(
+    const { plugins, lockedPlugins, installedOutsideLicense, notLicensedMessage } = await discover(
       appDir,
       createRegistryFetch({
         searchResult: [],
@@ -309,6 +309,8 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
       { entry: { packageName: NEW_PLUGIN }, lookup: { status: 'not-licensed' } },
     ]);
     expect(lockedPlugins).toEqual([]);
+    expect(installedOutsideLicense).toEqual([NEW_PLUGIN]);
+    expect(notLicensedMessage).toBe(NOT_LICENSED_MESSAGE);
   });
 
   it('drops the message when every plugin is in the license', async () => {
@@ -324,7 +326,11 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
       })
     );
 
-    expect(result).toMatchObject({ lockedPlugins: [], notLicensedMessage: undefined });
+    expect(result).toMatchObject({
+      lockedPlugins: [],
+      installedOutsideLicense: [],
+      notLicensedMessage: undefined,
+    });
   });
 
   it('leaves out a package outside the Enterprise scope, or with an invalid name', async () => {

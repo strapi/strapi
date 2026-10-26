@@ -666,6 +666,63 @@ describe('runInstall with the checklist', () => {
     );
   });
 
+  it('warns with the server message when an installed plugin is outside the license', async () => {
+    const appDir = await createApp({ installedPackages: { [LOCKED_PLUGIN]: '1.0.0' } });
+    await fse.outputJson(path.join(appDir, 'node_modules', LOCKED_PLUGIN, 'package.json'), {
+      version: '1.0.0',
+      strapi: { kind: 'plugin' },
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir,
+      packageArguments: [],
+      logger,
+      dependencies: await createDependencies({
+        isInteractive: true,
+        fetchImplementation: createRegistryFetch({
+          searchResult: [],
+          packuments: { [LOCKED_PLUGIN]: 403 },
+          catalog: {
+            plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
+            notLicensedMessage: NOT_LICENSED_MESSAGE,
+          },
+        }),
+      }),
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `${LOCKED_PLUGIN} (installed): ${NOT_LICENSED_MESSAGE}`
+    );
+  });
+
+  it('keeps the general warning when the catalog does not list the installed plugin', async () => {
+    const appDir = await createApp({ installedPackages: { [LOCKED_PLUGIN]: '1.0.0' } });
+    await fse.outputJson(path.join(appDir, 'node_modules', LOCKED_PLUGIN, 'package.json'), {
+      version: '1.0.0',
+      strapi: { kind: 'plugin' },
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir,
+      packageArguments: [],
+      logger,
+      dependencies: await createDependencies({
+        isInteractive: true,
+        fetchImplementation: createRegistryFetch({
+          searchResult: [],
+          packuments: { [LOCKED_PLUGIN]: 403 },
+          catalog: { plugins: [], notLicensedMessage: NOT_LICENSED_MESSAGE },
+        }),
+      }),
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `${LOCKED_PLUGIN} is installed but is not included in your license.`
+    );
+  });
+
   it('lists the locked plugins when the license includes no plugin', async () => {
     const dependencies = await createDependencies({
       isInteractive: true,

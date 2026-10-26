@@ -214,6 +214,7 @@ const selectPlugins = async ({
   const {
     plugins: discoveredPlugins,
     lockedPlugins,
+    installedOutsideLicense,
     notLicensedMessage,
   } = await discoverEnterprisePlugins({
     appDir,
@@ -232,8 +233,12 @@ const selectPlugins = async ({
 
   rows
     .filter((row) => row.state === 'not-licensed')
-    .forEach((row) =>
-      logger.warn(`${row.entry.packageName} is installed but is not included in your license.`)
+    .forEach(({ entry: { packageName } }) =>
+      logger.warn(
+        notLicensedMessage && installedOutsideLicense.includes(packageName)
+          ? `${packageName} (installed): ${notLicensedMessage}`
+          : `${packageName} is installed but is not included in your license.`
+      )
     );
 
   if (
