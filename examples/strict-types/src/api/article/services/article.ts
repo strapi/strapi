@@ -14,8 +14,6 @@ export default factories.createCoreService('api::article.article', ({ strapi }) 
       .documents('api::article.article')
       .findMany({ status: 'published', fields: ['title'] });
 
-    // TODO @Nico `title` is required, but reads type it `string | null` whatever the status: the
-    // Document Service does not narrow published reads yet.
     return articles
       .map((article) => article.title)
       .filter((title): title is string => title !== null);
