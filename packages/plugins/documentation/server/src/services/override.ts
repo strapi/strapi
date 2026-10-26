@@ -1,3 +1,4 @@
+import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { getPluginsThatNeedDocumentation } from './utils/get-plugins-that-need-documentation';
@@ -42,18 +43,28 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Don't apply the override if the plugin is not in the list of plugins that need documentation
       if (pluginOrigin && !pluginsThatNeedDocumentation.includes(pluginOrigin)) return;
 
-      if (excludeFromGeneration.length) {
-        this.excludeFromGeneration(excludeFromGeneration);
-      }
-
-      let overrideToRegister = override;
+      let overrideToRegister: unknown = override;
       // Parse yaml if we receive a string
       if (typeof override === 'string') {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        overrideToRegister = require('yaml').parse(overrideToRegister);
+        overrideToRegister = require('yaml').parse(override);
       }
-      // receive an object we can register it directly
-      registeredOverrides.push(overrideToRegister);
+
+      // Only an object can hold OpenAPI parts, YAML can also parse to a scalar, an array or null
+      if (
+        typeof overrideToRegister !== 'object' ||
+        overrideToRegister === null ||
+        Array.isArray(overrideToRegister) === true
+      ) {
+        throw new errors.ApplicationError('The documentation override must be an object');
+      }
+
+      // Exclude apis only once the override is valid, so a rejected override changes nothing
+      if (excludeFromGeneration.length > 0) {
+        this.excludeFromGeneration(excludeFromGeneration);
+      }
+
+      registeredOverrides.push(overrideToRegister as Partial<PluginConfig>);
     },
   };
 };
