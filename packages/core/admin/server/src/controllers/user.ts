@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 
-import * as _ from 'lodash';
+import { get, has, pick } from 'lodash';
 import { errors } from '@strapi/utils';
 import {
   validateUserCreationInput,
@@ -52,11 +52,11 @@ const withMfaState = <T extends object>(
 export default {
   async create(ctx: Context) {
     const { body } = ctx.request as Create.Request;
-    const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
+    const cleanData = { ...body, email: get(body, `email`, ``).toLowerCase() };
 
     await validateUserCreationInput(cleanData);
 
-    const attributes = _.pick(cleanData, [
+    const attributes = pick(cleanData, [
       'firstname',
       'lastname',
       'email',
@@ -137,7 +137,7 @@ export default {
 
     await validateUserUpdateInput(data);
 
-    if (_.has(data, 'email')) {
+    if (has(data, 'email')) {
       const uniqueEmailCheck = await getService('user').exists({
         id: { $ne: id },
         email: data.email,

@@ -311,6 +311,7 @@
   "Settings.permissions.auditLogs.role.create": "Create role",
   "Settings.permissions.auditLogs.role.delete": "Delete role",
   "Settings.permissions.auditLogs.role.update": "Update role",
+  "Settings.permissions.auditLogs.sso-settings.update": "Update SSO settings",
   "Settings.permissions.auditLogs.token.create": "Create token",
   "Settings.permissions.auditLogs.token.delete": "Delete token",
   "Settings.permissions.auditLogs.token.regenerate": "Regenerate token",

@@ -552,7 +552,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return update(id, fileData, { user });
   }
 
-  async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
+  async function update(id: ID, values: Partial<UploadableFile>, opts?: CommonOptions) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };

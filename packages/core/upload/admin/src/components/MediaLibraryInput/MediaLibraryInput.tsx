@@ -1,21 +1,17 @@
 import { useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 
-import { useClipboard, useField, useNotification } from '@strapi/admin/strapi-admin';
+import { useClipboard, useField, useForm, useNotification } from '@strapi/admin/strapi-admin';
 import { Field, Flex, VisuallyHidden } from '@strapi/design-system';
+import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../hooks/useTracking';
-// Temporary: the Content Manager's own asset picker is not built on this stack
-// yet, so browsing and editing the library still go through the legacy dialogs.
-// These imports go when that modal lands.
-import { AssetDialog } from '../../legacy/components/AssetDialog/AssetDialog';
 import {
   EditAssetDialog,
   type Asset as EditableAsset,
 } from '../../legacy/components/EditAssetDialog/EditAssetContent';
-import { EditFolderDialog } from '../../legacy/components/EditFolderDialog/EditFolderDialog';
 import { ImportFromUrlDialog } from '../../pages/Assets/components/ImportFromUrlDialog';
 import { useUploadFilesMutation, useUploadFromUrlsMutation } from '../../services/api';
 import { useGetUploadSettingsQuery } from '../../services/settings';
@@ -27,13 +23,26 @@ import {
 import { prefixFileUrlWithBackendUrl } from '../../utils/files';
 import { getTranslationKey } from '../../utils/translations';
 import { typeFromMime } from '../../utils/typeFromMime';
+import { AssetPickerDialog } from '../AssetPickerDialog/AssetPickerDialog';
 
 import { AddAssetMenu } from './AddAssetMenu';
-import { AssetDropZone } from './AssetDropZone';
-import { AssetRow } from './AssetRow';
-import { NoLibraryAccessDialog } from './NoLibraryAccessDialog';
+import { AssetCard, UploadCard } from './AssetCard';
+import { AssetCarousel } from './AssetCarousel';
+import { AssetDropZone, type ZoneVariant } from './AssetDropZone';
+import { AssetRow, UploadRow } from './AssetRow';
+import { useFieldUploads, type FieldUpload } from './useFieldUploads';
 
 import type { File } from '../../../../shared/contracts/files';
+
+/**
+ * What a field wrote that its form has not rendered yet, per form and field.
+ * `getValues()` only catches up on render, and two uploads can complete before
+ * the next one. Kept outside the input so it survives a remount.
+ */
+const unrenderedWrites = new WeakMap<object, Map<string, { seen: unknown; written: File[] }>>();
+
+const toAssets = (value: unknown): File[] =>
+  Array.isArray(value) ? value : value ? [value as File] : [];
 
 /**
  * `location` for every event this field fires. The standalone Media Library
@@ -49,7 +58,7 @@ const CONTENT_MANAGER_LOCATION = 'content-manager';
  */
 const UPLOAD_FOLDER_ID = null;
 
-type Step = 'browse' | 'create-folder' | 'no-access';
+type Step = 'browse';
 
 export interface MediaLibraryInputProps {
   name: string;
@@ -62,6 +71,8 @@ export interface MediaLibraryInputProps {
     allowedTypes?: AllowedMediaType[] | null;
     multiple?: boolean;
   };
+  /** The field's width in the edit layout, out of 12. Set by the Content Manager. */
+  layoutSize?: number;
 }
 
 const EMPTY_ATTRIBUTE: NonNullable<MediaLibraryInputProps['attribute']> = {};
@@ -85,6 +96,7 @@ export const MediaLibraryInput = ({
   required = false,
   disabled = false,
   attribute = EMPTY_ATTRIBUTE,
+  layoutSize,
 }: MediaLibraryInputProps) => {
   const { allowedTypes = null, multiple = false } = attribute;
   const { formatMessage } = useIntl();
@@ -92,9 +104,9 @@ export const MediaLibraryInput = ({
   const { toggleNotification } = useNotification();
   const { trackUsage } = useTracking();
   const { copy } = useClipboard();
+  const getValues = useForm('MediaLibraryInput', (state) => state.getValues);
 
   const [step, setStep] = useState<Step | undefined>(undefined);
-  const [folderId, setFolderId] = useState<number | null>(null);
   const [editedAsset, setEditedAsset] = useState<File | null>(null);
   const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -103,7 +115,11 @@ export const MediaLibraryInput = ({
   const [uploadFromUrls] = useUploadFromUrlsMutation();
   // Echoes the app config; a missing payload (still loading) falls back to
   // sequential rather than outpacing what the server asked for.
-  const { canRead, canCreate, canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
+  const { isLoading, canRead, canCreate, canUpdate, canCopyLink, canDownload } =
+    useMediaLibraryPermissions();
+  // Not while permissions load: `useRBAC` starts with every flag false, and an
+  // upload sent before it settles can end in a 403.
+  const canUpload = !isLoading && canCreate;
   const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   const isAiMetadataEnabled = useAIMetadataEnabled();
@@ -125,16 +141,26 @@ export const MediaLibraryInput = ({
     onChange(name, nextAssets[0] ?? null);
   };
 
-  const attachUploadedFile = (file: File) => {
-    const nextAssets = multiple ? [...assetsRef.current, file] : [file];
-    // Parallel uploads can finish before the next render refreshes the ref.
-    assetsRef.current = nextAssets;
-    setAssets(nextAssets);
-  };
-
   const handleRemove = (asset: File) => {
     setAssets(assets.filter((current) => current.id !== asset.id));
   };
+
+  // Bound to the form, not to this input: a component collapsed mid-upload
+  // unmounts the field, and the file must still land on the entry.
+  const attachUploadedFile = (file: File) => {
+    const writes = unrenderedWrites.get(getValues) ?? new Map();
+    unrenderedWrites.set(getValues, writes);
+
+    const value = get(getValues(), name);
+    const pending = writes.get(name);
+    const current = pending && pending.seen === value ? pending.written : toAssets(value);
+    const next = multiple ? [...current, file] : [file];
+
+    writes.set(name, { seen: value, written: next });
+    setAssets(next);
+  };
+
+  const { uploads, cancel, retry, dismiss } = useFieldUploads(name);
 
   const handleCopyLink = async (asset: File) => {
     const url = prefixFileUrlWithBackendUrl(asset.url);
@@ -185,7 +211,6 @@ export const MediaLibraryInput = ({
   const handleSelect = (selectedAssets: File[]) => {
     setAssets(selectedAssets);
     setStep(undefined);
-    setFolderId(null);
   };
 
   const notifyUnsupported = () => {
@@ -226,8 +251,8 @@ export const MediaLibraryInput = ({
     return true;
   };
 
-  const handleUpload = async (files: globalThis.File[]) => {
-    if (disabled || files.length === 0) {
+  const handleUpload = (files: globalThis.File[]) => {
+    if (disabled || !canUpload || files.length === 0) {
       return;
     }
 
@@ -261,6 +286,14 @@ export const MediaLibraryInput = ({
       ...assetsCountByType,
     });
 
+    startUpload(allowedFiles);
+  };
+
+  /**
+   * Hands the files to the shared upload pool. The field picks the results up
+   * from `onFileUploaded`, which also runs for retries of the same rows.
+   */
+  const startUpload = (allowedFiles: globalThis.File[]) => {
     const formData = new FormData();
     allowedFiles.forEach((file) => formData.append('files', file));
     formData.append(
@@ -275,31 +308,17 @@ export const MediaLibraryInput = ({
       )
     );
 
-    try {
-      // Attached per file rather than from the result: a Retry in the progress
-      // dialog uploads cancelled files after this call has already resolved.
-      await uploadFiles({
-        formData,
-        totalFiles: allowedFiles.length,
-        concurrency,
-        generateAiMetadata: Boolean(isAiMetadataEnabled),
-        onFileUploaded: attachUploadedFile,
-      }).unwrap();
-    } catch {
-      // Errors reach the user through the progress dialog, which the mutation
-      // populates itself.
-    }
+    uploadFiles({
+      formData,
+      totalFiles: allowedFiles.length,
+      concurrency,
+      generateAiMetadata: Boolean(isAiMetadataEnabled),
+      onFileUploaded: attachUploadedFile,
+      owner: name,
+    });
   };
 
-  const handleZoneClick = () => {
-    if (canRead) {
-      setStep('browse');
-    } else if (canCreate) {
-      fileInputRef.current?.click();
-    } else {
-      setStep('no-access');
-    }
-  };
+  const handleRetry = (upload: FieldUpload) => retry(upload, (file) => startUpload([file]));
 
   /**
    * The server fetches each URL and uploads what it finds, so the file's type
@@ -355,7 +374,7 @@ export const MediaLibraryInput = ({
     }
   };
 
-  const handleFileInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     // Copied before the reset, not after: `event.target.files` is the input's
     // live FileList, and clearing `value` empties it in place. Reading it
     // afterwards yields nothing and the upload never starts.
@@ -364,8 +383,72 @@ export const MediaLibraryInput = ({
     event.target.value = '';
 
     if (files.length > 0) {
-      await handleUpload(files);
+      handleUpload(files);
     }
+  };
+
+  const renderValue = () => {
+    const dropZone = (variant: ZoneVariant) => (
+      <AssetDropZone
+        variant={variant}
+        disabled={disabled || !canUpload}
+        onDropFiles={handleUpload}
+      />
+    );
+
+    if (assets.length === 0 && uploads.length === 0) {
+      return dropZone('bar');
+    }
+
+    const uploadHandlers = {
+      disabled,
+      onCancel: cancel,
+      onRetry: handleRetry,
+      onRemove: (upload: FieldUpload) => dismiss(upload.key),
+    };
+
+    if (!multiple) {
+      // A replacement in flight, or one that failed, stands in for the current
+      // asset until it lands or is removed.
+      if (uploads.length > 0) {
+        return (
+          <Flex direction="column" alignItems="stretch" gap={2}>
+            {uploads.map((upload) => (
+              <UploadRow key={upload.key} upload={upload} {...uploadHandlers} />
+            ))}
+          </Flex>
+        );
+      }
+
+      return (
+        <AssetRow
+          asset={assets[0]}
+          disabled={disabled}
+          onCopyLink={handleCopyLink}
+          // The details dialog needs the library's folder tree, which needs read access.
+          onEdit={canRead ? setEditedAsset : undefined}
+          onRemove={handleRemove}
+        />
+      );
+    }
+
+    return (
+      <AssetCarousel renderDropZone={dropZone} layoutSize={layoutSize}>
+        {assets.map((asset) => (
+          <AssetCard
+            key={asset.id}
+            asset={asset}
+            disabled={disabled}
+            onCopyLink={handleCopyLink}
+            onEdit={canRead ? setEditedAsset : undefined}
+            onRemove={handleRemove}
+          />
+        ))}
+        {uploads.map((upload) => (
+          <UploadCard key={upload.key} upload={upload} {...uploadHandlers} />
+        ))}
+      </AssetCarousel>
+    );
   };
 
   return (
@@ -380,21 +463,7 @@ export const MediaLibraryInput = ({
         />
       </Flex>
 
-      <Flex direction="column" alignItems="stretch" gap={1}>
-        {assets.map((asset) => (
-          <AssetRow
-            key={asset.id}
-            asset={asset}
-            disabled={disabled}
-            onCopyLink={handleCopyLink}
-            // The details dialog needs the library's folder tree, which needs read access.
-            onEdit={canRead ? setEditedAsset : undefined}
-            onRemove={handleRemove}
-          />
-        ))}
-
-        <AssetDropZone disabled={disabled} onClick={handleZoneClick} onDropFiles={handleUpload} />
-      </Flex>
+      {renderValue()}
 
       <Field.Error />
       <Field.Hint />
@@ -411,26 +480,20 @@ export const MediaLibraryInput = ({
       </VisuallyHidden>
 
       {step === 'browse' && (
-        <AssetDialog
+        <AssetPickerDialog
           open
+          title={formatMessage(
+            {
+              id: getTranslationKey('asset-picker.title'),
+              defaultMessage: 'Add asset for {fieldName}',
+            },
+            { fieldName: label ?? name }
+          )}
+          initialSelection={assets}
           multiple={multiple}
-          allowedTypes={allowedTypes ?? []}
-          initiallySelectedAssets={assets}
-          folderId={folderId}
-          trackedLocation={CONTENT_MANAGER_LOCATION}
-          onClose={() => {
-            setStep(undefined);
-            setFolderId(null);
-          }}
-          onValidate={handleSelect}
-          onAddFolder={() => setStep('create-folder')}
-          // The dialog's own upload button hands back to this field's upload
-          // path, so every route to an uploaded file opens the progress dialog.
-          onAddAsset={() => {
-            setStep(undefined);
-            fileInputRef.current?.click();
-          }}
-          onChangeFolder={(nextFolderId) => setFolderId(nextFolderId)}
+          allowedTypes={allowedTypes}
+          onClose={() => setStep(undefined)}
+          onConfirm={handleSelect}
         />
       )}
 
@@ -445,12 +508,6 @@ export const MediaLibraryInput = ({
           onClose={handleEditClose}
         />
       )}
-
-      {step === 'create-folder' && (
-        <EditFolderDialog open onClose={() => setStep('browse')} parentFolderId={folderId} />
-      )}
-
-      {step === 'no-access' && <NoLibraryAccessDialog onClose={() => setStep(undefined)} />}
 
       <ImportFromUrlDialog
         open={isUrlDialogOpen}
