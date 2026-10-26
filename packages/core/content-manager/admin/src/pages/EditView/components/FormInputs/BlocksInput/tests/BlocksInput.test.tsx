@@ -31,8 +31,9 @@ const setup = ({
   initialValues = {
     'blocks-editor': blocksData,
   },
+  initialErrors,
   ...props
-}: Partial<BlocksEditorProps> & { initialValues?: object } = {}) =>
+}: Partial<BlocksEditorProps> & { initialValues?: object; initialErrors?: object } = {}) =>
   render(
     <BlocksInput
       label="blocks type"
@@ -46,7 +47,12 @@ const setup = ({
     {
       renderOptions: {
         wrapper: ({ children }) => (
-          <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+          <Form
+            method="POST"
+            onSubmit={jest.fn()}
+            initialValues={initialValues}
+            initialErrors={initialErrors}
+          >
             {children}
           </Form>
         ),
@@ -72,6 +78,23 @@ describe('BlocksInput', () => {
   it.skip('should render blocks with error', () => {
     setup();
     expect(screen.getByText(/field is required/));
+  });
+
+  it('should show an error when a nested block node is invalid', async () => {
+    setup({
+      initialErrors: {
+        'blocks-editor': [{ children: [undefined, { url: 'Please specify a valid link.' }] }],
+      },
+    });
+
+    expect(await screen.findByText('Please specify a valid link.')).toBeInTheDocument();
+  });
+
+  it('should not show an error when there are no nested errors', async () => {
+    setup({ initialErrors: {} });
+
+    await screen.findByText('blocks type');
+    expect(screen.queryByText('Please specify a valid link.')).not.toBeInTheDocument();
   });
 
   it('should render blocks with data', () => {
