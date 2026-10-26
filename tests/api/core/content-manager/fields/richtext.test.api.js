@@ -51,9 +51,17 @@ describe('Test type richtext', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
     expect(Array.isArray(res.body.results)).toBe(true);
-    res.body.results.forEach((entry) => {
-      expect(entry.field).toEqual(expect.any(String));
-    });
+    // The list can't display rich text: the value is only returned when reading the entry
+    for (const entry of res.body.results) {
+      expect(entry).not.toHaveProperty('field');
+
+      const entryRes = await rq.get(
+        `/content-manager/collection-types/api::withrichtext.withrichtext/${entry.documentId}`
+      );
+
+      expect(entryRes.statusCode).toBe(200);
+      expect(entryRes.body.data.field).toEqual(expect.any(String));
+    }
   });
 
   test('Updating entry with JSON sets the right value and format', async () => {
