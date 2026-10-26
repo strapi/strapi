@@ -7,6 +7,8 @@ import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissio
 import { ActionsMenuContent } from '../../pages/Assets/components/ActionsMenuContent';
 import { getTranslationKey } from '../../utils/translations';
 
+import { FieldMenuItem } from './FieldControls';
+
 // The trigger reads as a link on the label row, not as a button: no padding, no
 // ghost background, primary text. `Menu.Trigger` takes no `textColor`, so the
 // colour is set here and forced past the design system's own span rule.
@@ -108,29 +110,33 @@ export const AddAssetMenu = ({
 
       <ActionsMenuContent popoverPlacement="bottom-end" zIndex={2} minWidth="22rem">
         {canBrowse && (
-          <Menu.Item startIcon={<Images />} disabled={isLoading} onSelect={onBrowseLibrary}>
+          <FieldMenuItem startIcon={<Images />} disabled={isLoading} onSelect={onBrowseLibrary}>
             {formatMessage({
               id: getTranslationKey('content-manager.input.add-asset.browse'),
               defaultMessage: 'Browse library',
             })}
-          </Menu.Item>
+          </FieldMenuItem>
         )}
 
         {canUpload && (
           <>
-            <Menu.Item startIcon={<Upload />} disabled={isLoading} onSelect={onUploadFromDevice}>
+            <FieldMenuItem
+              startIcon={<Upload />}
+              disabled={isLoading}
+              onSelect={onUploadFromDevice}
+            >
               {formatMessage({
                 id: getTranslationKey('content-manager.input.add-asset.device'),
                 defaultMessage: 'Upload from device',
               })}
-            </Menu.Item>
+            </FieldMenuItem>
 
-            <Menu.Item startIcon={<Link />} disabled={isLoading} onSelect={onUploadFromUrl}>
+            <FieldMenuItem startIcon={<Link />} disabled={isLoading} onSelect={onUploadFromUrl}>
               {formatMessage({
                 id: getTranslationKey('content-manager.input.add-asset.url'),
                 defaultMessage: 'Upload from URL',
               })}
-            </Menu.Item>
+            </FieldMenuItem>
           </>
         )}
       </ActionsMenuContent>
