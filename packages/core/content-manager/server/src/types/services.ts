@@ -22,8 +22,6 @@ type DocumentManagerImplementation = ReturnType<DocumentManagerFactory>;
 type FindLocalesOptions = Parameters<DocumentManagerImplementation['findLocales']>[2];
 type FindPageOptions = NonNullable<Parameters<DocumentManagerImplementation['findPage']>[0]>;
 
-// TODO @Nico type results and write data by content type UID, with `createdBy`/`updatedBy` as
-// minimal creator references; the methods take `UID.CollectionType`, not a generic UID.
 /**
  * Existing document operations, including nullable lookups and optional clone results.
  * `findLocales` takes the populate value itself; the implementation keeps its published develop
@@ -432,8 +430,6 @@ export type HistoryVersionResultData = {
  * A history version as `findVersionsPage` returns it. `createdBy` is `null` for a version
  * recorded without an admin user, and `locale` is `null` for a content type without i18n.
  */
-// TODO @Nico runtime bug: the history version model has no `componentsSchemas` attribute, so
-// `createVersion` drops it and versions are read without it, unlike `HistoryVersionDataResponse`.
 export type HistoryVersionResult = Omit<
   HistoryVersionDataResponse,
   'componentsSchemas' | 'createdBy' | 'data'
@@ -442,9 +438,6 @@ export type HistoryVersionResult = Omit<
   data: HistoryVersionResultData;
 };
 
-// TODO @Nico runtime bug: `restoreVersion` throws a `TypeError` for an unknown version id (HTTP
-// 500), and fails for a version whose component was replaced since, because it removes the root
-// `id` instead of the component `id`.
 /**
  * History versions. Only registered when the `cms-content-history` feature is enabled.
  * `createVersion` data and `restoreVersion` results keep the document service fallback,
@@ -471,8 +464,6 @@ export type LifecyclesService = ReturnType<typeof createLifecyclesService>;
  */
 type PreviewUrlParams = {
   documentId: string;
-  // TODO @Nico the configured handler's `PreviewHandlerParams.locale` (`@strapi/types`) is
-  // `string | undefined`, but a bare `locale` query parameter reaches it as `null`.
   locale?: string | null;
   status: 'published' | 'draft';
 };
