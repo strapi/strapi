@@ -79,6 +79,12 @@ describe('generateControllersDefinitions', () => {
     return { output, normalized: normalize(output), logger };
   };
 
+  test('rejects without the output directory that source imports are relative to', async () => {
+    await expect(generateControllersDefinitions()).rejects.toThrow(
+      'The controllers generator needs the output directory to resolve source imports'
+    );
+  });
+
   test('registers api controllers in the global AppControllers registry', async () => {
     const { normalized } = await generate(
       {

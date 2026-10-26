@@ -57,6 +57,12 @@ describe('generateMiddlewaresDefinitions', () => {
     return { output, normalized: normalize(output), logger };
   };
 
+  test('rejects without the output directory that source imports are relative to', async () => {
+    await expect(generateMiddlewaresDefinitions()).rejects.toThrow(
+      'The middlewares generator needs the output directory to resolve source imports'
+    );
+  });
+
   test('registers global and api middlewares in the global AppMiddlewares registry', async () => {
     const { normalized } = await generate(
       {

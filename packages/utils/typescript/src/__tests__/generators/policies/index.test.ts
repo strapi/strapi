@@ -54,6 +54,12 @@ describe('generatePoliciesDefinitions', () => {
     return { output, normalized: normalize(output), logger };
   };
 
+  test('rejects without the output directory that source imports are relative to', async () => {
+    await expect(generatePoliciesDefinitions()).rejects.toThrow(
+      'The policies generator needs the output directory to resolve source imports'
+    );
+  });
+
   test('registers global and api policies in the global AppPolicies registry', async () => {
     const { normalized } = await generate(
       {

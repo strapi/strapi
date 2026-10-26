@@ -79,6 +79,12 @@ describe('generateServicesDefinitions', () => {
     return { output, normalized: normalize(output), logger };
   };
 
+  test('rejects without the output directory that source imports are relative to', async () => {
+    await expect(generateServicesDefinitions()).rejects.toThrow(
+      'The services generator needs the output directory to resolve source imports'
+    );
+  });
+
   test('registers api services in the global AppServices registry', async () => {
     const { normalized } = await generate(
       {
