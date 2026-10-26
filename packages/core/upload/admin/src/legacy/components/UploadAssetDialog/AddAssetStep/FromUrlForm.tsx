@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { FormikUnsavedChangesRegistrar } from '@strapi/admin/strapi-admin';
 import { Box, Button, Field, Modal, Textarea } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
@@ -16,12 +17,11 @@ const isMessageDescriptor = (error: unknown): error is TranslationMessage =>
   typeof error === 'object' && error !== null && 'id' in error;
 
 interface FromUrlFormProps {
-  onClose: () => void;
   onAddAsset: (assets: FileWithRawFile[]) => void;
   trackedLocation?: string;
 }
 
-export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFormProps) => {
+export const FromUrlForm = ({ onAddAsset, trackedLocation }: FromUrlFormProps) => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const { formatMessage } = useIntl();
@@ -75,6 +75,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFor
     >
       {({ values, errors, handleChange }) => (
         <Form noValidate>
+          <FormikUnsavedChangesRegistrar />
           <Box paddingLeft={8} paddingRight={8} paddingBottom={6} paddingTop={6}>
             <Field.Root
               hint={formatMessage({
@@ -93,9 +94,11 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFor
           </Box>
 
           <Modal.Footer>
-            <Button onClick={onClose} variant="tertiary">
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
-            </Button>
+            <Modal.Close>
+              <Button variant="tertiary">
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
+              </Button>
+            </Modal.Close>
             <Button type="submit" loading={loading}>
               {formatMessage({
                 id: getTrad('button.next'),

@@ -14,7 +14,6 @@ describe('UploadAssetDialog', () => {
 
   beforeAll(() => {
     confirmSpy = jest.spyOn(window, 'confirm');
-    confirmSpy.mockImplementation(jest.fn(() => true));
   });
 
   afterAll(() => {
@@ -31,7 +30,7 @@ describe('UploadAssetDialog', () => {
       expect(onCloseSpy).toBeCalled();
     });
 
-    it('open confirm box when clicking on cancel on the pending asset step', async () => {
+    it('asks for confirmation when clicking on cancel on the pending asset step', async () => {
       const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
 
       const onCloseMock = jest.fn();
@@ -44,7 +43,11 @@ describe('UploadAssetDialog', () => {
 
       await user.click(getByRole('button', { name: 'cancel' }));
 
-      expect(window.confirm).toBeCalled();
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+        'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.'
+      );
+      expect(onCloseMock).not.toHaveBeenCalled();
+      expect(window.confirm).not.toHaveBeenCalled();
     });
 
     [

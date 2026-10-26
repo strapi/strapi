@@ -1,4 +1,4 @@
-import { DesignSystemProvider } from '@strapi/design-system';
+import { DesignSystemProvider, Modal } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -16,7 +16,9 @@ describe('FromComputerForm', () => {
     const { container } = renderTL(
       <IntlProvider locale="en" messages={{}}>
         <DesignSystemProvider>
-          <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
+          <Modal.Root open>
+            <FromComputerForm onAddAssets={jest.fn()} />
+          </Modal.Root>
         </DesignSystemProvider>
       </IntlProvider>
     );

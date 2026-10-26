@@ -58,7 +58,5 @@
   "sort.name_asc": "Susunan abjad (A hingga Z) ",
   "sort.name_desc": "Susunan abjad terbalik (Z hingga A) ",
   "sort.updated_at_asc": "Yang dikemas kini paling lama",
-  "sort.updated_at_desc": "Yang dikemas kini paling baru",
-  "window.confirm.close-modal.file": "Adakah anda pasti? Perubahan anda akan hilang.",
-  "window.confirm.close-modal.files": "Adakah anda pasti? Anda mempunyai beberapa fail yang belum dimuat naik."
+  "sort.updated_at_desc": "Yang dikemas kini paling baru"
 }
