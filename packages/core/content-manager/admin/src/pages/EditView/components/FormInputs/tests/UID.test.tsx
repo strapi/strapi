@@ -160,6 +160,44 @@ describe('UIDInput', () => {
     jest.useRealTimers();
   });
 
+  test('reserves space for availability feedback and truncates long UID values', async () => {
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
+    server.use(
+      http.post('/content-manager/uid/check-availability', () =>
+        HttpResponse.json({ isAvailable: false })
+      )
+    );
+
+    const { user } = render({
+      required: true,
+      initialValues: {
+        name: 'init',
+      },
+    });
+    await waitForInput();
+
+    const input = screen.getByRole('textbox');
+    await user.clear(input);
+    await user.type(input, 'this-is-a-very-long-uid-value-that-is-already-used');
+
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+
+    const availability = await screen.findByText(/^Unavailable$/);
+    const availabilityContainer = availability.parentElement;
+
+    if (!availabilityContainer) {
+      throw new Error('Expected availability feedback to have a container');
+    }
+
+    expect(window.getComputedStyle(availabilityContainer).position).not.toBe('absolute');
+    expect(window.getComputedStyle(input).textOverflow).toBe('ellipsis');
+
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
   test('Does not check availability when a changed value is cleared', async () => {
     // MSW v2 / undici use microtasks internally between request emission and handler
     // resolution. Faking `queueMicrotask` / `setImmediate` doesn't block completion but
