@@ -32,9 +32,23 @@ import { getOrCreateDeviceId } from '../../../utils/deviceId';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
+// Admin user `email`, `firstname` and `lastname` are stored as varchar(255)
+const USER_TEXT_MAX_LENGTH = 255;
+
+const maxLengthMessage = {
+  id: translatedErrors.maxLength.id,
+  defaultMessage: 'The value is too long (max: {max}).',
+  values: { max: USER_TEXT_MAX_LENGTH },
+};
+
 const REGISTER_USER_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required(translatedErrors.required).nullable(),
-  lastname: yup.string().nullable(),
+  firstname: yup
+    .string()
+    .trim()
+    .max(USER_TEXT_MAX_LENGTH, maxLengthMessage)
+    .required(translatedErrors.required)
+    .nullable(),
+  lastname: yup.string().max(USER_TEXT_MAX_LENGTH, maxLengthMessage).nullable(),
   password: yup
     .string()
     .min(8, {
@@ -120,12 +134,13 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
   firstname: yup
     .string()
     .trim()
+    .max(USER_TEXT_MAX_LENGTH, maxLengthMessage)
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Firstname is required',
     })
     .nullable(),
-  lastname: yup.string().nullable(),
+  lastname: yup.string().max(USER_TEXT_MAX_LENGTH, maxLengthMessage).nullable(),
   password: yup
     .string()
     .min(8, {
@@ -210,6 +225,7 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
       id: translatedErrors.lowercase.id,
       defaultMessage: 'Email must be lowercase',
     })
+    .max(USER_TEXT_MAX_LENGTH, maxLengthMessage)
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Email is required',

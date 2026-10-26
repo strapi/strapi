@@ -232,3 +232,42 @@ describe('Webhooks controller content type events', () => {
     expect(updateWebhook).not.toHaveBeenCalled();
   });
 });
+
+describe('Webhooks controller name length', () => {
+  // The webhook `name` is stored in a varchar(255) column
+  const tooLong = 'a'.repeat(256);
+
+  test('createWebhook rejects a name longer than 255 characters', async () => {
+    const createWebhook = jest.fn();
+    setStrapi({ createWebhook });
+    const ctx = createCtx({ body: { ...body, name: tooLong } });
+
+    await expect(webhooksController.createWebhook(ctx as any)).rejects.toMatchObject({
+      name: 'ValidationError',
+      details: { errors: [expect.objectContaining({ path: ['name'] })] },
+    });
+    expect(createWebhook).not.toHaveBeenCalled();
+  });
+
+  test('createWebhook accepts a name of 255 characters', async () => {
+    const created = { ...webhook, name: 'a'.repeat(255) };
+    setStrapi({ createWebhook: jest.fn(async () => created) });
+    const ctx = createCtx({ body: { ...body, name: created.name } });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(ctx.created).toHaveBeenCalledWith({ data: created });
+  });
+
+  test('updateWebhook rejects a name longer than 255 characters', async () => {
+    const updateWebhook = jest.fn();
+    setStrapi({ findWebhook: jest.fn(async () => webhook), updateWebhook });
+    const ctx = createCtx({ params: { id: '4' }, body: { ...body, name: tooLong } });
+
+    await expect(webhooksController.updateWebhook(ctx as any)).rejects.toMatchObject({
+      name: 'ValidationError',
+      details: { errors: [expect.objectContaining({ path: ['name'] })] },
+    });
+    expect(updateWebhook).not.toHaveBeenCalled();
+  });
+});
