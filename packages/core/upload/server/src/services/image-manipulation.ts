@@ -361,9 +361,8 @@ export default {
    */
   isImage,
   /**
-   * The width and height sharp reads from the image, `null` when it has none.
-   *
-   * @internal
+   * The width and height sharp reads from the image, `null` when it has none. The admin's project
+   * settings call it for the uploaded logos.
    */
   getDimensions,
   /**
