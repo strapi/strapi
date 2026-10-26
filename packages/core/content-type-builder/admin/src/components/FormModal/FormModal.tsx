@@ -202,21 +202,33 @@ export const FormModal = () => {
     return getRenameStorageChange(initialData, modifiedData, attributeRenameMigrationMode);
   };
 
-  const checkFieldNameChanges = (): AnyAttribute[] | false => {
-    // Only check when editing an attribute
+  /**
+   * Fields whose visibility condition depends on this field and references an
+   * enum value that this edit removes or changes. Renames are followed
+   * automatically, so only an enum value change can break a condition.
+   */
+  const getConditionsBrokenByEnumChange = (): AnyAttribute[] | false => {
     if (actionType !== 'edit' || modalType !== 'attribute') {
       return false;
     }
 
-    const oldName = initialData.name;
     const oldEnum = initialData.enum;
     const newEnum = modifiedData.enum;
 
-    // Get all attributes from the content type schema
+    if (!Array.isArray(oldEnum) || !Array.isArray(newEnum)) {
+      return false;
+    }
+
+    const removedValues = oldEnum.filter((value: string) => !newEnum.includes(value));
+
+    if (removedValues.length === 0) {
+      return false;
+    }
+
+    const fieldName = initialData.name;
     const contentTypeAttributes: AnyAttribute[] = type?.attributes ?? [];
 
-    // Find all fields that reference this field in their conditions
-    const referencedFields = contentTypeAttributes.filter((attr) => {
+    const brokenFields = contentTypeAttributes.filter((attr) => {
       const conditionEntry = getFirstVisibleConditionEntry(attr.conditions);
       if (conditionEntry === null) {
         return false;
@@ -224,28 +236,12 @@ export const FormModal = () => {
 
       const { fieldVar, value } = conditionEntry;
 
-      // Check if this condition references our field
-      if (fieldVar.var !== oldName) {
-        return false;
-      }
-
-      // If it's an enum field, also check if the value is being deleted/changed
-      if (oldEnum !== undefined && newEnum !== undefined) {
-        const deletedOrChangedValues = oldEnum.filter(
-          (oldValue: string) => !newEnum.includes(oldValue)
-        );
-        return typeof value === 'string' && deletedOrChangedValues.includes(value);
-      }
-
-      return true;
+      return (
+        fieldVar.var === fieldName && typeof value === 'string' && removedValues.includes(value)
+      );
     });
 
-    // If any fields reference this field, return them
-    if (referencedFields.length > 0) {
-      return referencedFields;
-    }
-
-    return false;
+    return brokenFields.length > 0 ? brokenFields : false;
   };
 
   React.useEffect(() => {
@@ -1086,9 +1082,9 @@ export const FormModal = () => {
   const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
     e.preventDefault();
 
-    // Check for field name changes when clicking Finish
-    const referencedFields = checkFieldNameChanges();
-    if (referencedFields) {
+    // Check for conditions broken by an enum value change when clicking Finish
+    const brokenFields = getConditionsBrokenByEnumChange();
+    if (brokenFields) {
       setPendingSubmit({ e, shouldContinue });
       setShowWarningDialog(true);
       return;
@@ -1291,55 +1287,31 @@ export const FormModal = () => {
             }}
           >
             {(() => {
-              const referencedFields = checkFieldNameChanges();
-              if (referencedFields === false) return null;
+              const brokenFields = getConditionsBrokenByEnumChange();
+              if (brokenFields === false) return null;
 
-              const fieldNames = referencedFields.map((field) => field.name).join(', ');
-              const oldEnum = initialData.enum;
-              const newEnum = modifiedData.enum;
-              const isEnum = Array.isArray(oldEnum) && Array.isArray(newEnum);
-
-              if (isEnum === true) {
-                const deletedOrChangedValues = oldEnum.filter(
-                  (value: string) => !newEnum.includes(value)
-                );
-
-                return (
-                  <Box>
-                    <Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning',
-                        defaultMessage:
-                          'The following fields have conditions that depend on this field: ',
-                      })}
-                      <Typography fontWeight="bold">{fieldNames}</Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning-values',
-                        defaultMessage: '. Changing or removing the enum values ',
-                      })}
-                      <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
-                      {formatMessage({
-                        id: 'form.attribute.condition.enum-change-warning-end',
-                        defaultMessage: ' will break these conditions. Do you want to proceed?',
-                      })}
-                    </Typography>
-                  </Box>
-                );
-              }
+              const fieldNames = brokenFields.map((field) => field.name).join(', ');
+              const oldEnum = initialData.enum ?? [];
+              const newEnum = modifiedData.enum ?? [];
+              const deletedOrChangedValues = oldEnum.filter((value) => !newEnum.includes(value));
 
               return (
                 <Box>
                   <Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning',
+                      id: 'form.attribute.condition.enum-change-warning',
                       defaultMessage:
                         'The following fields have conditions that depend on this field: ',
                     })}
                     <Typography fontWeight="bold">{fieldNames}</Typography>
                     {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning-end',
-                      defaultMessage:
-                        '. Renaming it will break these conditions. Do you want to proceed?',
+                      id: 'form.attribute.condition.enum-change-warning-values',
+                      defaultMessage: '. Changing or removing the enum values ',
+                    })}
+                    <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
+                    {formatMessage({
+                      id: 'form.attribute.condition.enum-change-warning-end',
+                      defaultMessage: ' will break these conditions. Do you want to proceed?',
                     })}
                   </Typography>
                 </Box>
