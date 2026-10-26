@@ -12,6 +12,13 @@ import { IntlProvider } from 'react-intl';
 
 import FormModal from '../index';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const messages = {};
 
 const makeApp = (layout = { forms: [], schema: {} }, isOpen = false) => {
