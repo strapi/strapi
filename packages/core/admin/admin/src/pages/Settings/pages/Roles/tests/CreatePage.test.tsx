@@ -10,21 +10,22 @@ import { CreatePage } from '../CreatePage';
 const EMAIL_SETTINGS = 'plugin::email.settings.read';
 const READ_LOCALES = 'plugin::i18n.locale.read';
 
-const settingsPermission = (id: number, action: string) => ({
+const settingsPermission = (id: number, action: string, conditions: string[] = []) => ({
   id,
   action,
   actionParameters: {},
   subject: null,
   properties: {},
-  conditions: [],
+  conditions,
 });
 
 /**
  * Logs in a user with the given role code who holds every permission except the email settings
  * one, and duplicates role 1, which has both the email settings and the read locales
  * permissions. Returns the permissions sent for the new role (`undefined` when none are sent).
+ * `readLocalesConditions` puts the read locales permission, held and copied, under conditions.
  */
-const renderDuplicatePage = (roleCode: string) => {
+const renderDuplicatePage = (roleCode: string, readLocalesConditions: string[] = []) => {
   const sent: { permissions?: unknown[] } = {};
   let createdRoles = 0;
 
@@ -44,9 +45,13 @@ const renderDuplicatePage = (roleCode: string) => {
     ),
     http.get('/admin/users/me/permissions', () =>
       HttpResponse.json({
-        data: fixtures.permissions.allPermissions.filter(
-          (permission) => permission.action !== EMAIL_SETTINGS
-        ),
+        data: fixtures.permissions.allPermissions
+          .filter((permission) => permission.action !== EMAIL_SETTINGS)
+          .map((permission) =>
+            permission.action === READ_LOCALES
+              ? { ...permission, conditions: readLocalesConditions }
+              : permission
+          ),
       })
     ),
     http.get('/admin/permissions', () =>
@@ -77,7 +82,10 @@ const renderDuplicatePage = (roleCode: string) => {
     ),
     http.get('/admin/roles/1/permissions', () =>
       HttpResponse.json({
-        data: [settingsPermission(1, EMAIL_SETTINGS), settingsPermission(2, READ_LOCALES)],
+        data: [
+          settingsPermission(1, EMAIL_SETTINGS),
+          settingsPermission(2, READ_LOCALES, readLocalesConditions),
+        ],
       })
     ),
     http.post('/admin/roles', () => {
@@ -144,6 +152,16 @@ describe('Roles | CreatePage', () => {
       expect(sent.permissions).toEqual([
         { action: READ_LOCALES, subject: null, properties: {}, conditions: [] },
       ]);
+    });
+
+    it('does not copy a permission the user holds only under an unregistered condition', async () => {
+      // The layout lists no condition, so `admin::does-not-exist` is not registered
+      const { user } = renderDuplicatePage('strapi-editor', ['admin::does-not-exist']);
+
+      await openEmailSettings(user);
+
+      expect(getReadLocalesCheckbox()).not.toBeChecked();
+      expect(getReadLocalesCheckbox()).toBeDisabled();
     });
 
     it('copies every permission for a super admin', async () => {

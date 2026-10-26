@@ -480,6 +480,45 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
     expect(sent?.properties).toEqual({ fields: ['name'], locales: ['en'] });
   });
 
+  it('reads a held permission with no locales key on a localized type as no locale', async () => {
+    // Stored without `locales`: i18n enforces it as no locale
+    const userPermissions = [
+      permission('plugin::content-manager.explorer.read', 'api::category.category', {
+        fields: ['name'],
+      }),
+    ];
+
+    const { user } = render(
+      <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Category' }));
+
+    expect(screen.getByRole('checkbox', { name: 'Select name Read permission' })).toBeEnabled();
+    expect(screen.getByRole('checkbox', { name: 'Select en Read permission' })).toBeDisabled();
+  });
+
+  it('does not count a permission held only under an unregistered condition', async () => {
+    const userPermissions = [
+      permission('plugin::content-manager.explorer.read', 'api::address.address', {}, [
+        'admin::does-not-exist',
+      ]),
+      permission('plugin::content-manager.explorer.create', 'api::address.address', {}, [
+        'admin::does-not-exist',
+        'admin::is-creator',
+      ]),
+    ];
+
+    render(
+      <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+    );
+
+    expect(screen.getByRole('checkbox', { name: 'Select Read address permission' })).toBeDisabled();
+    expect(
+      screen.getByRole('checkbox', { name: 'Select Create address permission' })
+    ).toBeEnabled();
+  });
+
   it('keeps the conditions modal editable', async () => {
     const userPermissions = [permission('plugin::i18n.locale.create')];
 

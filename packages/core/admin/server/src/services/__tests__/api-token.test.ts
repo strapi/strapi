@@ -3092,6 +3092,29 @@ describe('API Token', () => {
       expect(deleteByIdsMock).not.toHaveBeenCalled();
       expect(updateMock).not.toHaveBeenCalled();
     });
+    test('Keeps a token permission on a subject that is not localized despite owner locales', async () => {
+      // The engine ignores locales on a type that is not localized, e.g. after turning it off
+      const user = { id: 1, roles: [{ code: 'strapi-editor' }] };
+      const read = (properties: Record<string, unknown>, id?: number) => ({
+        ...(id === undefined ? {} : { id }),
+        action: 'plugin::cm.read',
+        subject: 'api::tag.tag',
+        conditions: [],
+        properties,
+      });
+
+      const { deleteByIdsMock, updateMock } = buildStrapi({
+        user,
+        userPermissions: [read({ fields: ['name'], locales: ['en'] })],
+        tokens: [{ id: 10, adminPermissions: [read({ fields: ['name'] }, 101)] }],
+      });
+
+      await syncApiTokenPermissionsForUser(1);
+
+      expect(deleteByIdsMock).not.toHaveBeenCalled();
+      expect(updateMock).not.toHaveBeenCalled();
+    });
+
     test('Keeps a token permission under a condition not registered yet', async () => {
       // At startup the re-clamp runs before the app's bootstrap() registers custom conditions
       const CUSTOM = 'api::is-in-team';
@@ -3394,7 +3417,7 @@ describe('API Token', () => {
           services: {
             permission: {
               findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
-              ...ceilingProviders(),
+              ...ceilingProviders({ localizedSubjects: [ARTICLE] }),
             },
           },
         },
@@ -3419,10 +3442,33 @@ describe('API Token', () => {
       ).rejects.toThrow('fields, locales and conditions are not held together');
     });
 
-    test('Rejects omitted locales against a locale-restricted owner on a subject that is not localized', async () => {
-      await expect(
-        enforceAdminPermissionsCeiling(ownerUser, [read({ fields: ['title'] })] as any)
-      ).rejects.toThrow('locales are required due to owner locale restrictions');
+    test('Ignores the owner locales on a subject that is not localized', async () => {
+      // Stale locales, e.g. left after the localization of the type was turned off: the engine
+      // ignores them there, so they restrict nothing
+      const AUTHOR = 'api::author.author';
+      const ownerPermissions = [
+        { action: READ, subject: AUTHOR, properties: { fields: ['name'], locales: ['en'] } },
+      ];
+
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
+              ...ceilingProviders({ localizedSubjects: [ARTICLE] }),
+            },
+          },
+        },
+      } as any;
+
+      const requested = [
+        { action: READ, subject: AUTHOR, properties: { fields: ['name'] } },
+        { action: READ, subject: AUTHOR, properties: { fields: ['name'], locales: ['fr'] } },
+      ];
+
+      await expect(enforceAdminPermissionsCeiling(ownerUser, requested as any)).resolves.toEqual(
+        requested.map((permission) => ({ ...permission, conditions: [] }))
+      );
     });
 
     test('Inherits the conditions of the owner permission covering the request', async () => {

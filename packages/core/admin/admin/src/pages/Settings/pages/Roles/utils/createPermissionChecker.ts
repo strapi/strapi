@@ -49,6 +49,7 @@ export interface CeilingPermission {
   subject?: string | null;
   properties?: Record<string, unknown> | null;
   conditions?: string[] | null;
+  actionParameters?: object | null;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -59,13 +60,10 @@ export interface CeilingPermission {
  * The held permissions as the engine enforces them, the same as `toEnforcedPermissions` in
  * `server/src/domain/permission/ceiling.ts`. On a localized subject (one whose layout lists a
  * `locales` property, which the server adds only where i18n enforces it) a missing `locales` key
- * is no locale, the same as `locales: []`. Conditions missing from `layout.conditions` (the
- * registered ones) are removed, and a permission whose conditions are all missing from it grants
- * nothing, so it is removed too.
- *
- * i18n does not restrict a super admin, so on the server a token owned by a super admin holds
- * every locale where the key is missing. The form does not know the owner's role and reads the
- * key as no locale there too: stricter than the server, never wider.
+ * is no locale, the same as `locales: []`; on any other subject `locales` is ignored, so it is
+ * removed. Conditions missing from `layout.conditions` (the registered ones) are removed, and a
+ * permission whose conditions are all missing from it grants nothing, so it is removed too, as
+ * is a permission with action parameters.
  */
 export const toEnforcedPermissions = <T extends CeilingPermission>(
   userPermissions: T[],
@@ -79,18 +77,26 @@ export const toEnforcedPermissions = <T extends CeilingPermission>(
   const registeredConditions = new Set(layout.conditions.map((condition) => condition.id));
 
   const toEnforcedLocales = (permission: T): T => {
-    if (
-      !permission.subject ||
-      !localizedSubjects.has(permission.subject) ||
-      permission.properties?.locales !== undefined
-    ) {
+    const { locales, ...otherProperties } = permission.properties ?? {};
+
+    if (!permission.subject || !localizedSubjects.has(permission.subject)) {
+      return permission.properties && 'locales' in permission.properties
+        ? { ...permission, properties: otherProperties }
+        : permission;
+    }
+
+    if (locales !== undefined) {
       return permission;
     }
 
-    return { ...permission, properties: { ...(permission.properties ?? {}), locales: [] } };
+    return { ...permission, properties: { ...otherProperties, locales: [] } };
   };
 
   return userPermissions.flatMap((permission) => {
+    if (permission.actionParameters && Object.keys(permission.actionParameters).length > 0) {
+      return [];
+    }
+
     const conditions = permission.conditions ?? [];
     const registered = conditions.filter((condition) => registeredConditions.has(condition));
 

@@ -1244,17 +1244,18 @@ describe('Role', () => {
         ).resolves.toBeUndefined();
       });
 
-      test('Holds every locale on a token whose owner is a super admin', async () => {
-        // Regression guard: i18n does not restrict a super admin, so this already passes
+      test('Holds no locale on a token whose owner is a super admin', async () => {
+        // i18n's super-admin skip reads `context.user`, which the engine never sets
         setupStrapi({ localizedSubjects: [ARTICLE] });
 
-        await expect(
+        await expectForbidden(
           checkPermissionsCeiling(
             { tokenPermissions: toPermission([heldTitle]), owner: superAdminUser },
             ROLE_ID,
             [requestTitle(['fr'])]
-          )
-        ).resolves.toBeUndefined();
+          ),
+          [rejected(['fr'])]
+        );
       });
 
       test('Holds no locale on a token whose owner is not a super admin', async () => {
@@ -1310,6 +1311,15 @@ describe('Role', () => {
         await expect(
           checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([IS_CREATOR, UNKNOWN])])
         ).resolves.toBeUndefined();
+      });
+
+      test('Does not count a held permission with action parameters', async () => {
+        // The engine registers it as `<action>?from=1`, which grants nothing on the plain action
+        setup({ userPermissions: [{ ...readTitle([]), actionParameters: { from: 1 } }] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([])]), [
+          readTitle([]),
+        ]);
       });
 
       test('Lets a permission the role already carries be resent as it is', async () => {

@@ -71,7 +71,12 @@ describe('Admin Token Role Sync (api)', () => {
         pluralName: 'sync-articles',
         displayName: 'SyncArticle',
         draftAndPublish: false,
-        attributes: { title: { type: 'string' }, body: { type: 'string' } },
+        // Localized so that locales are enforced (T1-6); they are ignored on other types
+        pluginOptions: { i18n: { localized: true } },
+        attributes: {
+          title: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+          body: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+        },
       })
       .build();
 
@@ -662,7 +667,14 @@ describe('Admin Token Role Sync (api)', () => {
           conditions: ['admin::has-same-role-as-creator'],
           properties: { fields: ['body'] },
         },
-        { action: SYNC_ACTION_2, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+        // With fields and locales: on a localized type, the startup cleanup removes role
+        // permissions that have neither
+        {
+          action: SYNC_ACTION_2,
+          subject: SYNC_SUBJECT,
+          conditions: [],
+          properties: { fields: ['title'], locales: null },
+        },
         ...ADMIN_TOKEN_PERMS,
       ]);
 
@@ -687,7 +699,7 @@ describe('Admin Token Role Sync (api)', () => {
       // Drifted: the owner holds it unconditionally, so it inherits no condition
       const drifted = await forge({
         action: SYNC_ACTION_2,
-        properties: {},
+        properties: { fields: ['title'], locales: null },
         conditions: ['admin::is-creator'],
       });
       // Held as is by the owner
@@ -709,7 +721,7 @@ describe('Admin Token Role Sync (api)', () => {
       expect(await findPermission(recombined.id)).toBeNull();
       expect(await findPermission(drifted.id)).toMatchObject({
         action: SYNC_ACTION_2,
-        properties: {},
+        properties: { fields: ['title'], locales: null },
         conditions: [],
       });
       expect(await findPermission(held.id)).toMatchObject({

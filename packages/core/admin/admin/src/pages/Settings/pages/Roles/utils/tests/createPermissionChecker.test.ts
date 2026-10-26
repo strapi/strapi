@@ -367,6 +367,18 @@ describe('createPermissionChecker', () => {
       expect(toEnforcedPermissions(permissions, layout)).toEqual(permissions);
     });
 
+    it('removes locales where they are not enforced, and permissions with action parameters', () => {
+      expect(
+        toEnforcedPermissions(
+          [
+            permission(READ, USER, { fields: ['username'], locales: ['en'] }),
+            { ...read({ fields: ['title'], locales: ['en'] }), actionParameters: { from: 1 } },
+          ],
+          layout
+        )
+      ).toEqual([permission(READ, USER, { fields: ['username'] })]);
+    });
+
     describe('conditions', () => {
       const UNKNOWN = 'admin::does-not-exist';
       const layoutWithConditions = {

@@ -22,16 +22,18 @@
  *
  * Held and requested permissions are read the way the engine enforces them
  * (`toEnforcedPermissions`): on a localized subject, a missing `locales` key is no locale, the
- * same as `locales: []`, because i18n's engine hook enforces it as `locale $in []`. A condition
- * the condition provider does not know is not held, since the engine skips it.
+ * same as `locales: []`, because i18n's engine hook enforces it as `locale $in []`, and where
+ * `locales` is not enforced it is ignored. A condition the condition provider does not know is not
+ * held, since the engine skips it.
  */
-import { uniq } from 'lodash';
+import { isEmpty, omit, uniq } from 'lodash';
 
 export interface CeilingPermission {
   action: string;
   subject?: string | null;
   properties?: Record<string, any> | null;
   conditions?: string[] | null;
+  actionParameters?: object | null;
 }
 
 /**
@@ -48,7 +50,7 @@ export interface PermissionAtom {
  * What the permission engine enforces, for `toEnforcedPermissions`.
  */
 export interface EnforcementContext {
-  /** Whether the engine enforces `locales` here (localized subject, holder not a super admin) */
+  /** Whether the engine enforces `locales` here (a localized subject) */
   isLocalesEnforced: (permission: CeilingPermission) => boolean;
   /** Whether the condition provider knows this condition id */
   isConditionRegistered: (condition: string) => boolean;
@@ -58,28 +60,44 @@ const toEnforcedLocales = <T extends CeilingPermission>(
   permission: T,
   context: EnforcementContext
 ): T => {
-  if (!context.isLocalesEnforced(permission) || permission.properties?.locales !== undefined) {
+  const properties = permission.properties ?? {};
+
+  if (!context.isLocalesEnforced(permission)) {
+    return 'locales' in properties
+      ? { ...permission, properties: omit(properties, 'locales') }
+      : permission;
+  }
+
+  if (properties.locales !== undefined) {
     return permission;
   }
 
-  return { ...permission, properties: { ...(permission.properties ?? {}), locales: [] } };
+  return { ...permission, properties: { ...properties, locales: [] } };
 };
 
 /**
  * The permissions as the engine enforces them. The input is not mutated.
  * - Locales: where `locales` is enforced, a missing key (or missing `properties`) becomes
  *   `locales: []`. i18n's engine hook restricts such a permission to `locale $in []`, so it
- *   grants no locale. `locales: null` (every locale) and lists are kept.
+ *   grants no locale. `locales: null` (every locale) and lists are kept. Where it is not
+ *   enforced (a subject that is not localized, for instance after its localization was turned
+ *   off) the key is removed: the engine ignores it, so it restricts nothing.
  * - Conditions: unregistered ids are removed. A permission whose conditions are all unregistered
  *   is removed too: the engine evaluates no condition for it and does not register it
  *   (`packages/core/permissions/src/engine/index.ts`), so it grants nothing. Keeping it with
  *   `conditions: []` would make it unconditional.
+ * - Action parameters: a permission with any is removed. The engine registers it as the action
+ *   `<action>?<parameters>`, which no check of the plain action matches, so it grants nothing.
  */
 export const toEnforcedPermissions = <T extends CeilingPermission>(
   permissions: T[],
   context: EnforcementContext
 ): T[] =>
   permissions.flatMap((permission) => {
+    if (!isEmpty(permission.actionParameters)) {
+      return [];
+    }
+
     const conditions = permission.conditions ?? [];
     const registered = conditions.filter((condition) => context.isConditionRegistered(condition));
 

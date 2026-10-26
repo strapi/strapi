@@ -437,23 +437,16 @@ const findRequesterCeilings = async (
   requester: CeilingRequester
 ): Promise<CeilingPermission[][]> => {
   if ('tokenPermissions' in requester) {
-    // The engine enforces a token's permissions as its owner's
-    const ownerIsSuperAdmin = hasSuperAdminRole(requester.owner);
-    const tokenPermissions = await toEnforcedCeilingPermissions(requester.tokenPermissions, {
-      holderIsSuperAdmin: ownerIsSuperAdmin,
-    });
+    const tokenPermissions = await toEnforcedCeilingPermissions(requester.tokenPermissions);
 
     // A token can carry permissions its owner lost since it was written
-    if (ownerIsSuperAdmin) {
+    if (hasSuperAdminRole(requester.owner)) {
       return [tokenPermissions];
     }
 
     const ownerPermissions = await getService('permission').findUserPermissions(requester.owner);
 
-    return [
-      tokenPermissions,
-      await toEnforcedCeilingPermissions(ownerPermissions, { holderIsSuperAdmin: false }),
-    ];
+    return [tokenPermissions, await toEnforcedCeilingPermissions(ownerPermissions)];
   }
 
   if (hasSuperAdminRole(requester.user)) {
@@ -462,7 +455,7 @@ const findRequesterCeilings = async (
 
   const userPermissions = await getService('permission').findUserPermissions(requester.user);
 
-  return [await toEnforcedCeilingPermissions(userPermissions, { holderIsSuperAdmin: false })];
+  return [await toEnforcedCeilingPermissions(userPermissions)];
 };
 
 /**

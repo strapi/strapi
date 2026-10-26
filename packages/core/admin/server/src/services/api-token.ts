@@ -314,16 +314,16 @@ const enforceAdminPermissionsCeiling = async (
   }
 
   const userPermissions = await toEnforcedCeilingPermissions(
-    await getService('permission').findUserPermissions(user),
-    { holderIsSuperAdmin: false }
+    await getService('permission').findUserPermissions(user)
   );
 
   // Only compared: the stored permission keeps the requested shape, which the engine enforces.
-  // The requested conditions are ignored (inherited instead), so none is dropped here.
-  const enforcedRequested = await toEnforcedCeilingPermissions(requestedPermissions, {
-    holderIsSuperAdmin: false,
-    conditions: false,
-  });
+  // The requested conditions are ignored (inherited instead) and the requested action parameters
+  // are checked as the plain action, the widest case, so no requested permission is dropped here.
+  const enforcedRequested = await toEnforcedCeilingPermissions(
+    requestedPermissions.map((permission) => omit(permission, 'actionParameters')),
+    { conditions: false }
+  );
 
   const exceeding: string[] = [];
   const enforcedClamped: PermissionInput[] = [];
@@ -544,7 +544,7 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
   // registers custom conditions. An unregistered id written back here is skipped by the engine.
   const userEffectivePermissions = await toEnforcedCeilingPermissions(
     await getService('permission').findUserPermissions(user as AdminUser),
-    { holderIsSuperAdmin: false, conditions: false }
+    { conditions: false }
   );
 
   const tokens = await strapi.db.query('admin::api-token').findMany({
@@ -562,10 +562,7 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
 
     const { toDelete, toUpdate } = reconcileTokenPermissionsToUserCeiling(
       userEffectivePermissions,
-      await toEnforcedCeilingPermissions(tokenPermissions, {
-        holderIsSuperAdmin: false,
-        conditions: false,
-      })
+      await toEnforcedCeilingPermissions(tokenPermissions, { conditions: false })
     );
 
     const tokenLabel = `Admin token ${token.id} (${token.name}) of user ${userId}`;

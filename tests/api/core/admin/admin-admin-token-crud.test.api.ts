@@ -902,44 +902,37 @@ describe('Admin Admin Token CRUD (api)', () => {
    * that rule. The owner holds `username` on `en` unconditionally and `email` on `fr` only for
    * entries they created.
    */
-  describe('D2 — Per-permission ceiling with fields and locales', () => {
+  describe('D2 — Owner locales on a type that is not localized', () => {
+    // Per-permission locale rules on a localized type: permission-ceiling-localized.test.api.ts
     const READ_ACTION = 'plugin::content-manager.explorer.read';
     const SUBJECT = 'plugin::users-permissions.user';
-    const NOT_HELD_TOGETHER = 'fields, locales and conditions are not held together';
 
     let localeRoleId: number;
     let localeUserId: number;
     let rqLocale: Awaited<ReturnType<typeof createAuthRequest>>;
 
-    const read = (properties: Record<string, unknown>, conditions: string[] = []) => ({
+    const read = (properties: Record<string, unknown>) => ({
       action: READ_ACTION,
       subject: SUBJECT,
       properties,
-      conditions,
+      conditions: [],
     });
-
-    const createLocaleToken = (name: string, adminPermissions: unknown[]) =>
-      rqLocale({
-        url: '/admin/admin-tokens',
-        method: 'POST',
-        body: { name, adminPermissions },
-      });
 
     beforeAll(async () => {
       const utils = createUtils(strapi);
 
+      // Stale locales, as left after the localization of a type is turned off: the engine
+      // ignores them on a type that is not localized
       const localeRole = await utils.createRole({
         name: 'token-locale-ceiling-test-role',
-        description: 'Holds content permissions split across fields, locales and conditions',
+        description: 'Holds locales on a type that is not localized',
       });
       localeRoleId = localeRole.id;
 
       await utils.assignPermissionsToRole(localeRole.id, [
         { action: 'admin::admin-tokens.create', subject: null, conditions: [], properties: {} },
         { action: 'admin::admin-tokens.read', subject: null, conditions: [], properties: {} },
-        { action: 'admin::admin-tokens.update', subject: null, conditions: [], properties: {} },
         read({ fields: ['username'], locales: ['en'] }),
-        read({ fields: ['email'], locales: ['fr'] }, ['admin::is-creator']),
       ]);
 
       const localeUser = await utils.createUser({
@@ -969,69 +962,31 @@ describe('Admin Admin Token CRUD (api)', () => {
         await strapi.db.query('admin::role').delete({ where: { id: localeRoleId } });
     });
 
-    test('A field on a locale only another permission holds → 400', async () => {
-      const res = await createLocaleToken('admin-token_d2-username-fr', [
-        read({ fields: ['username'], locales: ['fr'] }),
-      ]);
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toContain(NOT_HELD_TOGETHER);
-    });
-
-    test('Fields held by different permissions on one locale → 400', async () => {
-      const res = await createLocaleToken('admin-token_d2-both-en', [
-        read({ fields: ['username', 'email'], locales: ['en'] }),
-      ]);
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toContain(NOT_HELD_TOGETHER);
-    });
-
-    test('Omitted locales against a locale-restricted owner → 400', async () => {
-      const res = await createLocaleToken('admin-token_d2-no-locales', [
-        read({ fields: ['username'] }),
-      ]);
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toContain('locales are required');
-    });
-
-    test('A permission held under a condition → 201 with the condition inherited', async () => {
-      const res = await createLocaleToken('admin-token_d2-email-fr', [
-        read({ fields: ['email'], locales: ['fr'] }),
-      ]);
-
-      expect(res.statusCode).toBe(201);
-      expect(res.body.data.adminPermissions).toMatchObject([
-        read({ fields: ['email'], locales: ['fr'] }, ['admin::is-creator']),
-      ]);
-    });
-
-    test('A permission held unconditionally → 201 with no condition', async () => {
-      const res = await createLocaleToken('admin-token_d2-username-en', [
-        read({ fields: ['username'], locales: ['en'] }, ['admin::is-creator']),
-      ]);
-
-      expect(res.statusCode).toBe(201);
-      expect(res.body.data.adminPermissions).toMatchObject([
-        read({ fields: ['username'], locales: ['en'] }, []),
-      ]);
-    });
-
-    test('Updating a token to a field on a locale only another permission holds → 400', async () => {
-      const created = await createLocaleToken('admin-token_d2-update', [
-        read({ fields: ['username'], locales: ['en'] }),
-      ]);
-      expect(created.statusCode).toBe(201);
-
+    test('Omitted locales against owner locales the engine ignores → 201, kept as sent', async () => {
       const res = await rqLocale({
-        url: `/admin/admin-tokens/${created.body.data.id}`,
-        method: 'PUT',
-        body: { adminPermissions: [read({ fields: ['username'], locales: ['fr'] })] },
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_d2-no-locales',
+          adminPermissions: [read({ fields: ['username'] })],
+        },
       });
 
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toContain(NOT_HELD_TOGETHER);
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.adminPermissions).toMatchObject([read({ fields: ['username'] })]);
+      expect(res.body.data.adminPermissions[0].properties).not.toHaveProperty('locales');
+
+      // The owner's next re-clamp keeps it
+      await (
+        strapi.service('admin::api-token-admin') as {
+          syncPermissionsForUser(id: number): Promise<void>;
+        }
+      ).syncPermissionsForUser(localeUserId);
+
+      const rows = await strapi.db
+        .query('admin::permission')
+        .findMany({ where: { apiToken: { id: res.body.data.id } } });
+      expect(rows).toHaveLength(1);
     });
   });
 

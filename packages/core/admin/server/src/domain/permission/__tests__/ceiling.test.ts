@@ -60,10 +60,20 @@ describe('Permission ceiling', () => {
         ];
 
         expect(toEnforcedPermissions(permissions, enforceLocales())).toEqual(permissions);
-        // A super admin holder: the caller reports nothing as enforced
+        // Nothing enforced at all
         expect(
           toEnforcedPermissions([{ action: READ, subject: ARTICLE }], enforceLocales([]))
         ).toEqual([{ action: READ, subject: ARTICLE }]);
+      });
+
+      test('Removes locales where they are not enforced, since the engine ignores them', () => {
+        // Stale locales, e.g. left after the localization of the type was turned off
+        expect(
+          toEnforcedPermissions(
+            [{ action: READ, subject: AUTHOR, properties: { fields: ['name'], locales: ['en'] } }],
+            enforceLocales()
+          )
+        ).toEqual([{ action: READ, subject: AUTHOR, properties: { fields: ['name'] } }]);
       });
 
       test('Does not mutate its input', () => {
@@ -150,6 +160,19 @@ describe('Permission ceiling', () => {
         const permissions = [readTitle([]), readTitle()];
 
         expect(toEnforcedPermissions(permissions, knownConditions)).toEqual(permissions);
+      });
+
+      test('Removes a permission with action parameters, since it grants nothing', () => {
+        expect(
+          toEnforcedPermissions(
+            [
+              { ...readTitle(), actionParameters: { from: 1 } },
+              { ...readTitle(), actionParameters: {} },
+              readTitle(),
+            ],
+            knownConditions
+          )
+        ).toEqual([{ ...readTitle(), actionParameters: {} }, readTitle()]);
       });
 
       describe('in the ceiling', () => {

@@ -1259,6 +1259,18 @@ describe('Role CRUD End to End', () => {
           },
         });
 
+        // Inserted directly: the engine registers it as `<action>?from=1`, which grants nothing
+        await strapi.db.query('admin::permission').create({
+          data: {
+            action: READ_ACTION,
+            subject: SUBJECT,
+            properties: { fields: ['blocked'] },
+            conditions: [],
+            actionParameters: { from: 1 },
+            role: conditionRequesterRole.id,
+          },
+        });
+
         conditionTargetRole = await utils.createRole({
           name: 'ceiling-unknown-condition-target-role',
           description: 'Role edited by the requester',
@@ -1302,6 +1314,26 @@ describe('Role CRUD End to End', () => {
           subject: SUBJECT,
           properties: { fields: ['confirmed'] },
           conditions: [UNKNOWN_CONDITION],
+        };
+
+        const res = await rqConditionRequester({
+          url: `/admin/roles/${conditionTargetRole.id}/permissions`,
+          method: 'PUT',
+          body: { permissions: [permission] },
+        });
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error.details.permissions).toEqual([permission]);
+        expect(await findConditionTargetPermissions()).toEqual(before);
+      });
+
+      test('Cannot grant a permission held only with action parameters', async () => {
+        const before = await findConditionTargetPermissions();
+        const permission = {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['blocked'] },
+          conditions: [],
         };
 
         const res = await rqConditionRequester({
