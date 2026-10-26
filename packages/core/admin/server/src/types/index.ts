@@ -69,9 +69,6 @@ type RoleService<TService extends { findOne: (...args: never[]) => unknown }> = 
 /**
  * What an action provider receives in the registered contract. Settings actions have a category,
  * other sections may leave it out or pass `undefined`, also under `exactOptionalPropertyTypes`.
- * TODO @Nico The published `CreateActionPayload` and `Action` keep develop's required
- * `category: string`, although actions registered without one hold `undefined`: widening them
- * changes types applications see without strict types, so it waits for a major.
  */
 type ActionProviderInput = Omit<CreateActionPayload, 'category'> & {
   category?: string | undefined;
