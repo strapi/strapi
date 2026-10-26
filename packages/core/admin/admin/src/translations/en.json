@@ -865,6 +865,7 @@
   "global.profile": "Profile",
   "global.profile.settings": "Profile settings",
   "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost.",
+  "global.prompt.unsaved-modal": "You have unsaved changes. Are you sure you want to close? All your modifications will be lost.",
   "global.sessions.active-devices": "Active devices",
   "Settings.sessions.title": "Active Devices",
   "Settings.sessions.subtitle": "These are the devices and sessions currently signed in to your account.",

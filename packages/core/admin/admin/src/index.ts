@@ -15,6 +15,7 @@ export * from './components/Context';
 export * from './components/DescriptionComponentRenderer';
 export * from './components/Filters';
 export * from './components/Form';
+export * from './components/UnsavedChangesModal';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
 export { LazyOutlet, type LazyOutletProps } from './components/LazyOutlet';
