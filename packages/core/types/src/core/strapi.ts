@@ -460,8 +460,8 @@ export type ConfigDefaultValue =
 
 /**
  * `never` for paths inside a registered config namespace, so that they skip the legacy `get` overload.
- * TODO @Nico An unknown path inside a registered namespace, e.g. `'server.nope'`, also skips it, so
- * its default keeps a non-widening literal type. Rare, accepted for now.
+ * An unknown path inside a registered namespace, e.g. `'server.nope'`, also skips it, so its
+ * default keeps a non-widening literal type (rare, accepted).
  */
 type LegacyConfigPath<TPath> = TPath extends ConfigNamespace | `${ConfigNamespace}.${string}`
   ? never
@@ -478,7 +478,7 @@ type LegacyConfigGetter = {
 };
 
 /**
- * `get` with strict mode. TODO @Nico TypeScript relates overloads with erased generics, so assigned
+ * `get` with strict mode. TypeScript relates overloads with erased generics, so assigned
  * implementations such as `config.get = () => ({})` are not checked against `T` in strict mode.
  */
 type StrictConfigGetter = {

@@ -71,12 +71,6 @@ export type PaginatedResult<
 
 /**
  * Attribute.GetValues override with extended values
- *
- * TODO @Nico Make it recursive for populatable fields. A populated relation, component or dynamic
- * zone resolves to its full target entity, with every attribute, but the runtime returns the
- * target's scalars plus its own nested `populate` only. `Document` without `populate` also lists
- * every relation, which the runtime leaves out. Deferred to a later pass, with the strict result
- * model (required keys, `publishedAt` and `locale` by status and localization).
  */
 export type GetValues<
   TSchemaUID extends UID.Schema,

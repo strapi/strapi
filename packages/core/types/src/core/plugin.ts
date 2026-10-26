@@ -116,7 +116,7 @@ type PluginMiddlewareLookup<TPlugin extends string, TMiddlewareName, T> =
 
 /**
  * Any key when the plugin has no registered config contract, `never` otherwise.
- * TODO @Nico An unknown key of a registered plugin keeps a non-widening literal default. Rare, accepted.
+ * An unknown key of a registered plugin keeps a non-widening literal default (rare, accepted).
  */
 type LegacyPluginConfigPath<TName extends string> = [PluginConfigNamespace<TName>] extends [never]
   ? PropertyPath
