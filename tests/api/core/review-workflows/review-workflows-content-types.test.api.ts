@@ -373,6 +373,41 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
     });
   });
 
+  describe('Orphaned content type', () => {
+    // A stored UID can outlive its model, e.g. a workflow imported from another project
+    const orphanUID = 'api::missing.missing';
+
+    const createWorkflowWithOrphan = async () => {
+      const workflow = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
+
+      // Write the UID directly, as the API rejects unknown content types
+      await strapi.db.query(WORKFLOW_MODEL_UID).update({
+        where: { id: workflow.id },
+        data: { contentTypes: [orphanUID] },
+      });
+
+      return workflow;
+    };
+
+    test('It should unassign an orphaned content type', async () => {
+      const workflow = await createWorkflowWithOrphan();
+
+      const res = await updateWorkflow(workflow.id, { contentTypes: [] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toMatchObject({ contentTypes: [] });
+    });
+
+    test('It should delete a workflow with an orphaned content type', async () => {
+      const workflow = await createWorkflowWithOrphan();
+
+      const res = await deleteWorkflow(workflow.id);
+
+      expect(res.status).toBe(200);
+      expect(await getWorkflow(workflow.id)).toBeUndefined();
+    });
+  });
+
   describe('Creating entity assigned to a workflow', () => {
     let workflow;
     test('When content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {
