@@ -7,7 +7,7 @@ import type { StrapiPackageMetadata } from '../registry';
 
 export const CONTACT_SALES_URL = 'https://strapi.io/contact-sales';
 
-export const NOT_LICENSED_MESSAGE = `To get access, please contact Sales: ${CONTACT_SALES_URL}`;
+export const NOT_LICENSED_MESSAGE = `Not in your license. Available as an add-on. To get access, please contact Sales: ${CONTACT_SALES_URL}`;
 
 export const createTemporaryDirectory = (): Promise<string> =>
   fse.mkdtemp(path.join(os.tmpdir(), 'strapi-enterprise-install-'));

@@ -175,7 +175,7 @@ describe('promptChecklist', () => {
   it('wraps a long heading on words, so the link is never cut', async () => {
     const prompt = startPrompt(choices, 40, {
       ...lockedGroup,
-      heading: `Not in your license. ${NOT_LICENSED_MESSAGE}`,
+      heading: NOT_LICENSED_MESSAGE,
     });
 
     const lines = prompt.screen().split('\n');
@@ -187,7 +187,7 @@ describe('promptChecklist', () => {
   it('splits a word longer than a narrow terminal, so the link is never cut', async () => {
     const prompt = startPrompt(choices, 25, {
       ...lockedGroup,
-      heading: `Not in your license. ${NOT_LICENSED_MESSAGE}`,
+      heading: NOT_LICENSED_MESSAGE,
     });
 
     const lines = prompt.screen().split('\n');
@@ -210,13 +210,6 @@ describe('promptChecklist', () => {
       .filter((line) => line.includes('😀'));
     expect(emojiLines).toEqual([`  ${'😀'.repeat(22)}`, `  ${'😀'.repeat(8)}`]);
     expect(prompt.screen()).not.toMatch(/\uFFFD/);
-    await prompt.cancel();
-  });
-
-  it('shows the heading alone, with no trailing space, when there is no message', async () => {
-    const prompt = startPrompt(choices, 120, { ...lockedGroup, heading: 'Not in your license.' });
-
-    expect(prompt.screen().split('\n')).toContain('  Not in your license.');
     await prompt.cancel();
   });
 

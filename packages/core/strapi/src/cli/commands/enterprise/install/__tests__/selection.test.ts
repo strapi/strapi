@@ -188,11 +188,11 @@ describe('toCheckboxChoice for a locked row', () => {
 });
 
 describe('describeLockedGroup', () => {
-  it('adds the server message after the heading', () => {
-    expect(describeLockedGroup('Contact Sales.')).toBe('Not in your license. Contact Sales.');
+  it('is the server message', () => {
+    expect(describeLockedGroup('Available as an add-on.')).toBe('Available as an add-on.');
   });
 
-  it.each([undefined, ''])('is the heading alone, with no trailing space, for %j', (message) => {
+  it.each([undefined, ''])('is the default heading for %j', (message) => {
     expect(describeLockedGroup(message)).toBe('Not in your license.');
   });
 });
@@ -202,17 +202,17 @@ describe('describeLockedRows', () => {
     expect(
       describeLockedRows(
         [{ entry: aiByokEntry, state: 'locked' }, rowFor(threeVersions, '1.2.0')],
-        'Contact Sales.'
+        'Available as an add-on.'
       )
     ).toBe(
       [
-        'Not in your license. Contact Sales.',
+        'Available as an add-on.',
         `  ✕ AI BYOK (@strapi-enterprise/plugin-ai-byok)  ${aiByokEntry.summary}`,
       ].join('\n')
     );
   });
 
-  it('uses the heading alone when the server sends no message', () => {
+  it('uses the default heading when the server sends no message', () => {
     expect(describeLockedRows([{ entry: aiByokEntry, state: 'locked' }])).toMatch(
       /^Not in your license\.\n/
     );
@@ -244,21 +244,21 @@ describe('promptForPlugins', () => {
     expect(promptChecklistMock.mock.lastCall[0].lockedGroup).toBeUndefined();
   });
 
-  it('shows the locked rows apart, under the heading with the message', async () => {
+  it('shows the locked rows apart, under the server message', async () => {
     const promptChecklistMock = promptChecklist as jest.Mock;
     promptChecklistMock.mockResolvedValueOnce([]);
     const lockedEntry = { ...aiByokEntry, packageName: '@strapi-enterprise/plugin-locked' };
 
     await promptForPlugins(
       [{ entry: lockedEntry, state: 'locked' }, rowFor(threeVersions)],
-      'Contact Sales.'
+      'Available as an add-on.'
     );
 
     expect(promptChecklistMock).toHaveBeenCalledWith({
       message: 'Which Enterprise plugins do you want to install or upgrade?',
       choices: [expect.objectContaining({ value: '@strapi-enterprise/plugin-ai-byok@1.2.0' })],
       lockedGroup: {
-        heading: 'Not in your license. Contact Sales.',
+        heading: 'Available as an add-on.',
         choices: [
           expect.objectContaining({
             name: expect.stringContaining('@strapi-enterprise/plugin-locked'),
@@ -268,7 +268,7 @@ describe('promptForPlugins', () => {
     });
   });
 
-  it('shows the heading alone when the server sends no message', async () => {
+  it('shows the default heading when the server sends no message', async () => {
     const promptChecklistMock = promptChecklist as jest.Mock;
     promptChecklistMock.mockResolvedValueOnce([]);
 

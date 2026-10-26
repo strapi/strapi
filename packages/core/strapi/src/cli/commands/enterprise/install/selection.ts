@@ -157,7 +157,7 @@ export const orderVisibleRows = (rows: PluginRow[]): PluginRow[] =>
     .sort((left, right) => ROW_ORDER.indexOf(left.state) - ROW_ORDER.indexOf(right.state));
 
 export const describeLockedGroup = (notLicensedMessage?: string): string =>
-  notLicensedMessage ? `Not in your license. ${notLicensedMessage}` : 'Not in your license.';
+  notLicensedMessage || 'Not in your license.';
 
 const toLockedChoices = (rows: PluginRow[]): ChecklistChoice[] =>
   rows.filter((row) => row.state === 'locked').map(toCheckboxChoice);

@@ -671,11 +671,7 @@ describe('runInstall with the checklist', () => {
     expect(dependencies.installPackages).not.toHaveBeenCalled();
     expect(logger.info.mock.calls.slice(-3)).toEqual([
       ['Your license does not include any Enterprise plugins yet.'],
-      [
-        [`Not in your license. ${NOT_LICENSED_MESSAGE}`, `  ✕ Locked (${LOCKED_PLUGIN})`].join(
-          '\n'
-        ),
-      ],
+      [[NOT_LICENSED_MESSAGE, `  ✕ Locked (${LOCKED_PLUGIN})`].join('\n')],
       ['Nothing to install.'],
     ]);
     expect(loggedText(logger)).not.toContain('Try again later');
@@ -713,12 +709,7 @@ describe('runInstall with the checklist', () => {
     expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
     expect(logger.info.mock.calls.slice(-3)).toEqual([
       ['The Enterprise plugins in your license are installed and up to date.'],
-      [
-        [
-          `Not in your license. ${NOT_LICENSED_MESSAGE}`,
-          `  ✕ Locked (${LOCKED_PLUGIN})  Does locked things.`,
-        ].join('\n'),
-      ],
+      [[NOT_LICENSED_MESSAGE, `  ✕ Locked (${LOCKED_PLUGIN})  Does locked things.`].join('\n')],
       ['Nothing to install.'],
     ]);
   });
