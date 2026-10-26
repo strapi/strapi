@@ -341,11 +341,31 @@ const attributeHasCustomFieldProperty = (
 ): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
   'customField' in attribute && typeof attribute.customField === 'string';
 
+const hasCustomDescription = (hint: React.ReactNode): boolean => {
+  if (hint == null || typeof hint === 'boolean') {
+    return false;
+  }
+
+  if (typeof hint === 'string') {
+    return hint.trim().length > 0;
+  }
+
+  if (Array.isArray(hint)) {
+    return hint.some(hasCustomDescription);
+  }
+
+  return true;
+};
+
 const useFieldHint = (
   hint: React.ReactNode = undefined,
   attribute: Schema.Attribute.AnyAttribute
 ) => {
   const { formatMessage } = useIntl();
+
+  if (hasCustomDescription(hint)) {
+    return hint;
+  }
 
   const { maximum, minimum } = getMinMax(attribute);
 
