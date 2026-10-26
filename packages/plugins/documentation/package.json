@@ -105,7 +105,7 @@
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1",
     "vitest": "catalog:",
-    "vitest-config": "5.57.0"
+    "vitest-config": "5.59.0"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",
