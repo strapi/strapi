@@ -135,7 +135,10 @@ class Router {
     if (memory) {
       this.router = createMemoryRouter(routes, opts);
     } else {
-      this.router = createBrowserRouter(routes, opts);
+      this.router = createBrowserRouter(routes, {
+        ...opts,
+        future: { v7_relativeSplatPath: true, ...opts.future },
+      });
     }
 
     return this.router;
