@@ -547,7 +547,7 @@ export default {
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy([...sanitizedRes.results, ...res.results], 'id');
+    const relationsUnion = uniqBy([sanitizedRes.results, res.results].flat(), 'id');
 
     ctx.body = {
       pagination: res.pagination || defaultPagination(relationsUnion.length),
