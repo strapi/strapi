@@ -138,7 +138,8 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
         // Unlisted `process.env.*` reads (optional flags) must resolve to undefined
         // in the browser instead of throwing `process is not defined`.
         'process.env': JSON.stringify(bundledEnv),
-        // Browser builds of Node-oriented deps (picomatch via micromatch) read these on load.
+        // picomatch (via micromatch) reads `process.platform` on load and `process.version`
+        // for lookbehind patterns.
         'process.platform': JSON.stringify('browser'),
         'process.version': JSON.stringify(''),
       }),

@@ -564,7 +564,7 @@ const RelationsInput = ({
     useLazySearchRelationsQuery();
   // Refetching a failed search reports `isError: false` and `isLoading: true` until it settles.
   // Keep showing the previous error meanwhile instead of flashing the loading state.
-  const isRetryingFailedSearch = isFetching && !isError && searchError !== undefined;
+  const isRetryingFailedSearch = isFetching && searchError !== undefined;
 
   /**
    * Because we're using a lazy query, we need to trigger the search
