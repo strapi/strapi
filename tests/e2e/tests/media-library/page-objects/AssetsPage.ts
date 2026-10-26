@@ -782,6 +782,13 @@ export class AssetsPage {
     return this.folderTreeNav.getByRole('button', { name, exact: true });
   }
 
+  /**
+   * The "N parent folders" row that stands in for a deep branch's hidden folders.
+   */
+  getTreeHiddenAncestorsRow() {
+    return this.folderTreeNav.getByTestId('folder-tree-hidden-ancestors');
+  }
+
   getHomeTreeRow() {
     // The tree's own test id rather than the button name: "Home" is a partial match
     // and the rail carries more than one control containing it.
@@ -842,6 +849,26 @@ export class AssetsPage {
     itemType: 'file' | 'folder' = 'file',
     dwellMs = 650
   ) {
+    await this.springLoadOnto(
+      itemName,
+      this.getTreeFolderRow(treeFolderName),
+      view,
+      itemType,
+      dwellMs
+    );
+  }
+
+  /**
+   * Same as `springLoadFolder`, for any sidebar target — e.g. the hidden-ancestors row.
+   * Leaves the pointer over `target` with the mouse button held down.
+   */
+  async springLoadOnto(
+    itemName: string,
+    target: Locator,
+    view: 'grid' | 'table' = 'table',
+    itemType: 'file' | 'folder' = 'file',
+    dwellMs = 650
+  ) {
     const item =
       view === 'grid'
         ? itemType === 'folder'
@@ -850,15 +877,12 @@ export class AssetsPage {
         : itemType === 'folder'
           ? this.getFolderRow(itemName)
           : this.getAssetRow(itemName);
-    const target = this.getTreeFolderRow(treeFolderName);
 
     const itemBox = await item.boundingBox();
     const targetBox = await target.boundingBox();
 
     if (!itemBox || !targetBox) {
-      throw new Error(
-        `Could not resolve drag source "${itemName}" or tree folder "${treeFolderName}"`
-      );
+      throw new Error(`Could not resolve drag source "${itemName}" or spring-load target`);
     }
 
     const startX = itemBox.x + itemBox.width / 2;
