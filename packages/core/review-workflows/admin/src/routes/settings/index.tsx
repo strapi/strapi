@@ -31,7 +31,7 @@ export const ReviewWorkflowsListView = () => {
   );
   const {
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
 
   const limits = getFeature('review-workflows');
   const numberOfWorkflows = limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] as string;

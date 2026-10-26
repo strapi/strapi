@@ -72,10 +72,10 @@ const EditPage = () => {
   const {
     isLoading: isLoadingRBAC,
     allowedActions: { canUpdate },
-  } = useRBAC({
-    read: permissions.settings?.users.read ?? [],
-    update: permissions.settings?.users.update ?? [],
-  });
+  } = useRBAC([
+    ...(permissions.settings?.users.read ?? []),
+    ...(permissions.settings?.users.update ?? []),
+  ]);
 
   const [updateUser] = useUpdateUserMutation();
 

@@ -67,7 +67,7 @@ export const EditView = () => {
   const currentUser = useAuth('EditView', (state: AuthContextValue) => state.user);
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-  } = useRBAC(permissions.settings?.['admin-tokens']);
+  } = useRBAC(Object.values(permissions.settings?.['admin-tokens'] ?? {}).flat());
   const match = useMatch('/settings/admin-tokens/:id');
   const id = match?.params?.id;
   const isCreating = id === 'create';

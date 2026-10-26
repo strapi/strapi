@@ -170,7 +170,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
   collectionType,
 }: DocumentActionProps) => {
   const { formatMessage } = useIntl();
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(Object.values(PERMISSIONS).flat());
   const { canCreateAction } = allowedActions;
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
   const { toggleNotification } = useNotification();

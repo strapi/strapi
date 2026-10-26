@@ -44,7 +44,7 @@ const App = () => {
   const [deleteVersion] = useDeleteVersionMutation();
   const [showConfirmDelete, setShowConfirmDelete] = React.useState<boolean>(false);
   const [versionToDelete, setVersionToDelete] = React.useState<string>();
-  const { allowedActions, isLoading: isLoadingRBAC } = useRBAC(PERMISSIONS);
+  const { allowedActions, isLoading: isLoadingRBAC } = useRBAC(Object.values(PERMISSIONS).flat());
 
   const isLoading = isLoadingInfo || isLoadingRBAC;
 

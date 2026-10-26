@@ -54,7 +54,7 @@ type SettingsFormProps = {
 export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
   const { formatMessage } = useIntl();
   const [passwordShown, setPasswordShown] = React.useState(false);
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(Object.values(PERMISSIONS).flat());
 
   return (
     <Formik

@@ -57,7 +57,7 @@ export const EditView = () => {
   const { trackUsage } = useTracking();
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-  } = useRBAC(permissions.settings?.['api-tokens']);
+  } = useRBAC(Object.values(permissions.settings?.['api-tokens'] ?? {}).flat());
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const match = useMatch('/settings/api-tokens/:id');
   const id = match?.params?.id;

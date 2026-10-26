@@ -25,7 +25,7 @@ const Panel: PanelComponent = ({
   } = useDocumentLayout(model);
   const { formatMessage, formatDate, formatTime } = useIntl();
 
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(Object.values(PERMISSIONS).flat());
   const { canRead, canDeleteAction } = allowedActions;
 
   const response = useGetReleasesForEntryQuery(
