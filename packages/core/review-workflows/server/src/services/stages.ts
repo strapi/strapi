@@ -185,7 +185,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async deleteStagePermissions(stages: any) {
-      const permissions = stages.map((s: any) => s.permissions || []).flat();
+      const permissions = stages.flatMap((s: any) => s.permissions || []);
       await stagePermissionsService.unregister(permissions || []);
     },
 
@@ -463,6 +463,6 @@ function findNearestMatchingStage(stages: any, startIndex: any, condition: any) 
   // If no matching element is found before the startIndex,
   // search the remaining elements in the array
   const remainingArray = stages.slice(startIndex + 1);
-  const nearestObject = remainingArray.filter(condition)[0];
+  const nearestObject = remainingArray.find(condition);
   return nearestObject;
 }
