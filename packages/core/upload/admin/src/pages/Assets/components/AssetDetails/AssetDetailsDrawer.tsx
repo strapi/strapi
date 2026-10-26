@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   Blocker,
+  ConfirmDialog,
   Form,
   useClipboard,
   useField,
@@ -705,9 +706,37 @@ const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
  * AssetDetails
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Writes whether the form has unsaved edits into the drawer's ref. Only the
+ * drawer's close handlers read it, so a ref rather than state: toggling dirty
+ * doesn't re-render the drawer. A component, not a hook, because the form state
+ * is only reachable inside <Form>'s render prop.
+ */
+const ReportUnsavedEdits = ({
+  target,
+  hasUnsavedEdits,
+}: {
+  target: React.MutableRefObject<boolean>;
+  hasUnsavedEdits: boolean;
+}) => {
+  React.useLayoutEffect(() => {
+    target.current = hasUnsavedEdits;
+
+    return () => {
+      target.current = false;
+    };
+  }, [target, hasUnsavedEdits]);
+
+  return null;
+};
+
 interface AssetDetailsProps {
   asset: AssetWithPopulatedCreatedBy;
   closeDetails: () => void;
+  /** Receives whether the form has unsaved edits. */
+  hasUnsavedEditsRef?: React.MutableRefObject<boolean>;
+  /** Guard unsaved edits with <Blocker>, for a drawer whose closing is a navigation. */
+  guardNavigation?: boolean;
 }
 
 interface AssetFormState {
@@ -717,7 +746,12 @@ interface AssetFormState {
   folder: number | null;
 }
 
-export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
+export const AssetDetails = ({
+  asset,
+  closeDetails,
+  hasUnsavedEditsRef,
+  guardNavigation = false,
+}: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const getErrorMessage = useApiErrorMessage();
   const { canCreate, canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions();
@@ -957,11 +991,19 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
               const busyMessage = getBusyMessage({ isDeleting, isReplacing, isCropCopying });
               return (
                 <>
-                  {/* Guards every close path (X button, ESC, route change, browser
-                back) by intercepting the navigation when the form is dirty.
-                `onProceed` resets the form so the held navigation can complete.
-                Lives inside <Form> so it can read the form context. */}
-                  <Blocker onProceed={resetForm} />
+                  {/* With `guardNavigation`, every close path (X button, ESC, route
+                change, browser back) is a navigation, so <Blocker> intercepts it
+                when the form is dirty. `onProceed` resets the form so the held
+                navigation can complete. Lives inside <Form> so it can read the
+                form context. Without it, the drawer asks on its own close paths. */}
+                  {guardNavigation ? (
+                    <Blocker onProceed={resetForm} />
+                  ) : hasUnsavedEditsRef ? (
+                    <ReportUnsavedEdits
+                      target={hasUnsavedEditsRef}
+                      hasUnsavedEdits={modified && !isSubmitting}
+                    />
+                  ) : null}
                   {isCropOpen && isImage ? (
                     <AssetCropEditor
                       asset={asset}
@@ -1240,10 +1282,21 @@ const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
 
 interface DrawerContentProps {
   assetId: number;
+  /** Closes, asking first when there are unsaved edits. */
+  requestClose: () => void;
+  /** Closes unconditionally, for when the asset itself is gone. */
   closeDetails: () => void;
+  hasUnsavedEditsRef: React.MutableRefObject<boolean>;
+  guardNavigation: boolean;
 }
 
-const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
+const DrawerContent = ({
+  assetId,
+  requestClose,
+  closeDetails,
+  hasUnsavedEditsRef,
+  guardNavigation,
+}: DrawerContentProps) => {
   const { formatMessage } = useIntl();
   const {
     data: asset,
@@ -1269,7 +1322,7 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
         <Alert
           variant="danger"
           closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
-          onClose={closeDetails}
+          onClose={requestClose}
         >
           {formatMessage({
             id: getTranslationKey('asset-details.error'),
@@ -1282,8 +1335,13 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
   return (
     <>
-      <DrawerHeader asset={asset} closeDetails={closeDetails} />
-      <AssetDetails asset={asset} closeDetails={closeDetails} />
+      <DrawerHeader asset={asset} closeDetails={requestClose} />
+      <AssetDetails
+        asset={asset}
+        closeDetails={closeDetails}
+        hasUnsavedEditsRef={hasUnsavedEditsRef}
+        guardNavigation={guardNavigation}
+      />
     </>
   );
 };
@@ -1333,19 +1391,41 @@ interface AssetDetailsDrawerProps {
   /** The asset to show, or `null` to close the drawer. */
   assetId: number | null;
   onClose: () => void;
+  /**
+   * Guard unsaved edits with <Blocker> instead of the drawer's own confirmation.
+   * Only for a drawer whose closing is itself a navigation, which <Blocker> then
+   * covers along with route changes and browser history. Not for a host that
+   * has its own <Blocker>: react-router allows one per page.
+   */
+  guardNavigation?: boolean;
 }
 
-export const AssetDetailsDrawer = ({ assetId, onClose }: AssetDetailsDrawerProps) => {
+export const AssetDetailsDrawer = ({
+  assetId,
+  onClose,
+  guardNavigation = false,
+}: AssetDetailsDrawerProps) => {
   const { formatMessage } = useIntl();
   const { displayAssetId, isVisible, shouldRender, onCloseAnimationEnd } =
     useDrawerPresence(assetId);
+
+  const hasUnsavedEditsRef = React.useRef(false);
+  const [isConfirmingClose, setIsConfirmingClose] = React.useState(false);
+
+  const requestClose = React.useCallback(() => {
+    if (hasUnsavedEditsRef.current) {
+      setIsConfirmingClose(true);
+      return;
+    }
+    onClose();
+  }, [onClose]);
 
   if (!shouldRender || displayAssetId === null) {
     return null;
   }
 
   return (
-    <Drawer.Root isVisible={isVisible} onClose={onClose}>
+    <Drawer.Root isVisible={isVisible} onClose={requestClose}>
       {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
           VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
       <div>
@@ -1373,15 +1453,32 @@ export const AssetDetailsDrawer = ({ assetId, onClose }: AssetDetailsDrawerProps
         // off-screen. dvh tracks the actual visible height.
         height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
-        // Opt in to dismiss-on-outside-click; `onClose` is the same path as the
-        // header's close button, so unsaved edits are still guarded.
+        // Opt in to dismiss-on-outside-click; it goes through `requestClose`,
+        // like the header's close button, so unsaved edits are still guarded.
         onPointerDownOutside={(event) => {
           if (shouldKeepDrawerOpen(event, isVisible)) {
             event.preventDefault();
           }
         }}
       >
-        <DrawerContent assetId={displayAssetId} closeDetails={onClose} />
+        <DrawerContent
+          assetId={displayAssetId}
+          requestClose={requestClose}
+          closeDetails={onClose}
+          hasUnsavedEditsRef={hasUnsavedEditsRef}
+          guardNavigation={guardNavigation}
+        />
+        {/* Rendered from inside the panel so Radix counts presses on it as
+            inside, and the drawer stays put while it is open. The edits go
+            with the form, which unmounts once the drawer has closed. */}
+        <Dialog.Root open={isConfirmingClose} onOpenChange={setIsConfirmingClose}>
+          <ConfirmDialog onConfirm={onClose} variant="danger">
+            {formatMessage({
+              id: 'global.prompt.unsaved',
+              defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+            })}
+          </ConfirmDialog>
+        </Dialog.Root>
       </Drawer.Body>
     </Drawer.Root>
   );
@@ -1394,5 +1491,5 @@ export const AssetDetailsDrawer = ({ assetId, onClose }: AssetDetailsDrawerProps
 export const AssetDetailsDrawerFromUrl = () => {
   const { assetId, closeDetails } = useAssetDetailsParam();
 
-  return <AssetDetailsDrawer assetId={assetId} onClose={closeDetails} />;
+  return <AssetDetailsDrawer assetId={assetId} onClose={closeDetails} guardNavigation />;
 };

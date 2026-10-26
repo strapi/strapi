@@ -806,6 +806,123 @@ describe('AssetDetailsDrawer (controlled)', () => {
 });
 
 /* -------------------------------------------------------------------------------------------------
+ * Unsaved changes
+ * -----------------------------------------------------------------------------------------------*/
+
+describe('AssetDetailsDrawer unsaved changes', () => {
+  beforeEach(() => {
+    server.use(
+      buildFoldersHandler(),
+      buildSettingsHandler(),
+      http.get('/upload/files/:id', () => HttpResponse.json(baseAsset))
+    );
+  });
+
+  const renderDirtyDrawer = async (onClose = jest.fn()) => {
+    const result = render(
+      <>
+        <div data-testid="page-background">Background</div>
+        <AssetDetailsDrawer assetId={1} onClose={onClose} />
+      </>
+    );
+
+    const drawer = await screen.findByRole('dialog');
+    const caption = await screen.findByRole('textbox', { name: 'Caption' });
+    // The field starts disabled until the RBAC check resolves.
+    await waitFor(() => expect(caption).toBeEnabled());
+    await result.user.clear(caption);
+    await result.user.type(caption, 'Edited caption');
+
+    return { ...result, onClose, drawer, caption };
+  };
+
+  it('closes without asking when nothing was edited', async () => {
+    const onClose = jest.fn();
+    const { user } = render(<AssetDetailsDrawer assetId={1} onClose={onClose} />);
+
+    await screen.findByRole('textbox', { name: 'Caption' });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [
+      'the close button',
+      async ({ user }: { user: ReturnType<typeof render>['user'] }) => {
+        await user.click(screen.getByRole('button', { name: 'Close' }));
+      },
+    ],
+    [
+      'Escape',
+      async ({ user }: { user: ReturnType<typeof render>['user'] }) => {
+        await user.keyboard('{Escape}');
+      },
+    ],
+    [
+      'a press outside the panel',
+      async ({ user }: { user: ReturnType<typeof render>['user'] }) => {
+        await user.click(screen.getByTestId('page-background'));
+      },
+    ],
+  ])('asks before closing from %s with unsaved edits', async (_label, close) => {
+    const { user, onClose } = await renderDirtyDrawer();
+
+    await close({ user });
+
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent(/unsaved changes/i);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('keeps the drawer and the edits when the user cancels', async () => {
+    const { user, onClose, drawer, caption } = await renderDirtyDrawer();
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(await screen.findByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+    expect(onClose).not.toHaveBeenCalled();
+    expect(drawer).toHaveAttribute('data-state', 'open');
+    expect(caption).toHaveValue('Edited caption');
+  });
+
+  it('closes when the user confirms, and reopens without the discarded edits', async () => {
+    const { user, onClose, rerender } = await renderDirtyDrawer();
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+
+    rerender(<AssetDetailsDrawer assetId={null} onClose={onClose} />);
+    rerender(<AssetDetailsDrawer assetId={1} onClose={onClose} />);
+
+    expect(await screen.findByRole('textbox', { name: 'Caption' })).toHaveValue('A caption');
+  });
+
+  // With the URL wrapper every close path is a navigation, which <Blocker>
+  // guards: the drawer must not ask on top of it.
+  it('asks only once when closing the URL-driven drawer', async () => {
+    const { user } = render(<AssetDetailsDrawerFromUrl />, {
+      initialEntries: ['/?assetId=1'],
+    });
+
+    const drawer = await screen.findByRole('dialog');
+    const caption = await screen.findByRole('textbox', { name: 'Caption' });
+    await waitFor(() => expect(caption).toBeEnabled());
+    await user.clear(caption);
+    await user.type(caption, 'Edited caption');
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
  * Outside-click dismissal
  * -----------------------------------------------------------------------------------------------*/
 
