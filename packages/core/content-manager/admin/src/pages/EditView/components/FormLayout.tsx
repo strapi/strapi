@@ -59,6 +59,17 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
     });
   };
 
+  const getPlaceholder = (name: string, placeholder?: string) => {
+    if (!placeholder) {
+      return placeholder;
+    }
+
+    return formatMessage({
+      id: `content-manager.content-types.${modelUid}.${name}.placeholder`,
+      defaultMessage: placeholder,
+    });
+  };
+
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
       {layout.map((panel) => {
@@ -72,6 +83,7 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
                 <InputRenderer
                   {...field}
                   label={getLabel(field.name, field.label)}
+                  placeholder={getPlaceholder(field.name, field.placeholder)}
                   document={document}
                 />
               </Grid.Item>
@@ -105,6 +117,8 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
                             {...field}
                             size={size}
                             label={getLabel(field.name, field.label)}
+                            placeholder={getPlaceholder(field.name, field.placeholder)}
+                            placeholder={getPlaceholder(field.name, field.placeholder)}
                             document={document}
                           />
                         </ResponsiveGridItem>
