@@ -488,22 +488,35 @@ const checkPermissionsCeiling = async (
   }
 
   const permissionService = getService('permission');
+  const sanitizeConditions = permissionDomain.sanitizeConditions(
+    // @ts-expect-error - same Condition type mismatch as in `addPermissions`
+    permissionService.conditionProvider
+  );
 
   const existingPermissions = await permissionService.findMany({
     where: { role: { id: roleId } },
   });
 
-  // The requested locales need no rewrite: i18n's `willValidateUpdatePermissions` hook has already
-  // turned a missing or empty `locales` on a localized subject into the default locale
-  const newPermissions = differenceWith(
-    permissions.map((permission) => permissionDomain.create(permission)),
-    existingPermissions,
-    arePermissionsEqual
-  );
+  const isOnRole = (permission: Permission) =>
+    existingPermissions.some((existing) => arePermissionsEqual(permission, existing));
 
-  const rejectedPermissions = newPermissions.filter((permission) =>
-    ceilings.some((held) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, held))
-  );
+  // The requested locales need no rewrite: i18n's `willValidateUpdatePermissions` hook has already
+  // turned a missing or empty `locales` on a localized subject into the default locale.
+  // The requested conditions are checked as they will be stored, without the unregistered ones.
+  // A permission equal to a row of the role, as sent or as stored, leaves that row unchanged.
+  const rejectedPermissions = permissions
+    .map((permission) => permissionDomain.create(permission))
+    .filter((permission) => {
+      const stored = sanitizeConditions(permission);
+
+      if (isOnRole(permission) || isOnRole(stored)) {
+        return false;
+      }
+
+      return ceilings.some(
+        (held) => !permissionDomain.ceiling.isPermissionWithinCeiling(stored, held)
+      );
+    });
 
   if (rejectedPermissions.length > 0) {
     throw new ForbiddenError('You cannot grant permissions you do not hold yourself', {

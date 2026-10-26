@@ -59,7 +59,9 @@ export interface CeilingPermission {
  * The held permissions as the engine enforces them, the same as `toEnforcedPermissions` in
  * `server/src/domain/permission/ceiling.ts`. On a localized subject (one whose layout lists a
  * `locales` property, which the server adds only where i18n enforces it) a missing `locales` key
- * is no locale, the same as `locales: []`.
+ * is no locale, the same as `locales: []`. Conditions missing from `layout.conditions` (the
+ * registered ones) are removed, and a permission whose conditions are all missing from it grants
+ * nothing, so it is removed too.
  *
  * i18n does not restrict a super admin, so on the server a token owned by a super admin holds
  * every locale where the key is missing. The form does not know the owner's role and reads the
@@ -74,8 +76,9 @@ export const toEnforcedPermissions = <T extends CeilingPermission>(
       .filter((subject) => subject.properties.some((property) => property.value === 'locales'))
       .map((subject) => subject.uid)
   );
+  const registeredConditions = new Set(layout.conditions.map((condition) => condition.id));
 
-  return userPermissions.map((permission) => {
+  const toEnforcedLocales = (permission: T): T => {
     if (
       !permission.subject ||
       !localizedSubjects.has(permission.subject) ||
@@ -85,6 +88,22 @@ export const toEnforcedPermissions = <T extends CeilingPermission>(
     }
 
     return { ...permission, properties: { ...(permission.properties ?? {}), locales: [] } };
+  };
+
+  return userPermissions.flatMap((permission) => {
+    const conditions = permission.conditions ?? [];
+    const registered = conditions.filter((condition) => registeredConditions.has(condition));
+
+    if (conditions.length > 0 && registered.length === 0) {
+      return [];
+    }
+
+    const enforced =
+      registered.length === conditions.length
+        ? permission
+        : { ...permission, conditions: registered };
+
+    return [toEnforcedLocales(enforced)];
   });
 };
 

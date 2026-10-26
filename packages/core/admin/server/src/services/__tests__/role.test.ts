@@ -1097,10 +1097,13 @@ describe('Role', () => {
       userPermissions = [],
       rolePermissions = [],
       localizedSubjects = [],
+      registeredConditions,
     }: {
       userPermissions?: any[];
       rolePermissions?: any[];
       localizedSubjects?: string[];
+      /** Every condition is registered when not given */
+      registeredConditions?: string[];
     } = {}) => {
       const findUserPermissions = jest.fn(() => Promise.resolve(toPermission(userPermissions)));
       const findMany = jest.fn(() => Promise.resolve(toPermission(rolePermissions)));
@@ -1112,10 +1115,15 @@ describe('Role', () => {
         ),
       };
 
+      const conditionProvider = {
+        has: (condition: string) =>
+          registeredConditions === undefined || registeredConditions.includes(condition),
+      };
+
       global.strapi = {
         admin: {
           services: {
-            permission: { findUserPermissions, findMany, actionProvider },
+            permission: { findUserPermissions, findMany, actionProvider, conditionProvider },
           },
         },
       } as any;
@@ -1263,6 +1271,63 @@ describe('Role', () => {
           ),
           [rejected(['fr'])]
         );
+      });
+    });
+
+    describe('unregistered conditions', () => {
+      const UNKNOWN = 'admin::does-not-exist';
+      const IS_CREATOR = 'admin::is-creator';
+      const readTitle = (conditions: string[]) => ({
+        action: READ,
+        subject: ARTICLE,
+        properties: { fields: ['title'] },
+        conditions,
+      });
+
+      const setup = (options: { userPermissions?: any[]; rolePermissions?: any[] }) =>
+        setupStrapi({ ...options, registeredConditions: [IS_CREATOR] });
+
+      test('Does not count a held permission under an unregistered condition only', async () => {
+        setup({ userPermissions: [readTitle([UNKNOWN])] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([UNKNOWN])]), [
+          readTitle([UNKNOWN]),
+        ]);
+      });
+
+      test('Checks a requested unregistered condition as no condition', async () => {
+        // Regression guard: already rejected before, since the held condition differs
+        setup({ userPermissions: [readTitle([IS_CREATOR])] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([UNKNOWN])]), [
+          readTitle([UNKNOWN]),
+        ]);
+      });
+
+      test('Ignores a requested unregistered condition next to a held one', async () => {
+        setup({ userPermissions: [readTitle([IS_CREATOR])] });
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([IS_CREATOR, UNKNOWN])])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Lets a permission the role already carries be resent as it is', async () => {
+        // Regression guard: the row is left unchanged
+        setup({ rolePermissions: [readTitle([UNKNOWN])] });
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([UNKNOWN])])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Lets a permission be resent when it is stored as a row the role carries', async () => {
+        // Stored without the unregistered condition, so the row is deleted and re-added as it was
+        setup({ rolePermissions: [readTitle([IS_CREATOR])] });
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [readTitle([IS_CREATOR, UNKNOWN])])
+        ).resolves.toBeUndefined();
       });
     });
 

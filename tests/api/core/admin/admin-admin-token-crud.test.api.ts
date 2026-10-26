@@ -1035,6 +1035,102 @@ describe('Admin Admin Token CRUD (api)', () => {
     });
   });
 
+  describe('D3 — Owner permission under an unregistered condition', () => {
+    const READ_ACTION = 'plugin::content-manager.explorer.read';
+    const SUBJECT = 'plugin::users-permissions.user';
+    const TOKEN_NAME = 'admin-token_d3-unknown-condition';
+
+    let conditionRoleId: number;
+    let conditionUserId: number;
+    let rqCondition: Awaited<ReturnType<typeof createAuthRequest>>;
+
+    beforeAll(async () => {
+      const utils = createUtils(strapi);
+
+      // The owner's only read on SUBJECT is under a condition the engine does not know
+      const conditionRole = await utils.createRole({
+        name: 'token-unknown-condition-test-role',
+        description: 'Holds a permission only under an unregistered condition',
+      });
+      conditionRoleId = conditionRole.id;
+
+      await utils.assignPermissionsToRole(conditionRole.id, [
+        { action: 'admin::admin-tokens.create', subject: null, conditions: [], properties: {} },
+        { action: 'admin::admin-tokens.read', subject: null, conditions: [], properties: {} },
+      ]);
+
+      // Inserted directly: saving through the API strips unregistered conditions
+      await strapi.db.query('admin::permission').create({
+        data: {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'] },
+          conditions: ['admin::does-not-exist'],
+          actionParameters: {},
+          role: conditionRole.id,
+        },
+      });
+
+      const conditionUser = await utils.createUser({
+        email: 'token-unknown-condition@test.com',
+        firstname: 'Unknown',
+        lastname: 'Condition',
+        isActive: true,
+        roles: [conditionRole.id],
+      });
+      conditionUserId = conditionUser.id;
+
+      rqCondition = await createAuthRequest({
+        strapi,
+        userInfo: {
+          email: 'token-unknown-condition@test.com',
+          firstname: 'Unknown',
+          lastname: 'Condition',
+          password: 'Password123',
+        },
+      });
+    });
+
+    afterAll(async () => {
+      if (conditionUserId !== undefined)
+        await strapi.db.query('admin::user').delete({ where: { id: conditionUserId } });
+      if (conditionRoleId !== undefined) {
+        await strapi.db.query('admin::permission').deleteMany({
+          where: { role: { id: conditionRoleId } },
+        });
+        await strapi.db.query('admin::role').delete({ where: { id: conditionRoleId } });
+      }
+    });
+
+    test('A permission held only under an unregistered condition → 400, no token', async () => {
+      const res = await rqCondition({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: TOKEN_NAME,
+          adminPermissions: [
+            {
+              action: READ_ACTION,
+              subject: SUBJECT,
+              properties: { fields: ['username'] },
+              conditions: ['admin::does-not-exist'],
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain(
+        'Cannot assign admin permissions that exceed your own'
+      );
+
+      const tokens = await strapi.db
+        .query('admin::api-token')
+        .findMany({ where: { name: TOKEN_NAME } });
+      expect(tokens).toHaveLength(0);
+    });
+  });
+
   describe('G — Owner immutability', () => {
     test('Update with different adminUserOwner → 400 ValidationError', async () => {
       const token = await createValidSuperAdminAdminToken({

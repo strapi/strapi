@@ -318,9 +318,11 @@ const enforceAdminPermissionsCeiling = async (
     { holderIsSuperAdmin: false }
   );
 
-  // Only compared: the stored permission keeps the requested shape, which the engine enforces
+  // Only compared: the stored permission keeps the requested shape, which the engine enforces.
+  // The requested conditions are ignored (inherited instead), so none is dropped here.
   const enforcedRequested = await toEnforcedCeilingPermissions(requestedPermissions, {
     holderIsSuperAdmin: false,
+    conditions: false,
   });
 
   const exceeding: string[] = [];
@@ -537,10 +539,12 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
   if (user === null || user === undefined) return;
   if (isSuperAdmin(user as AdminUser)) return;
 
-  // Both sides as the engine enforces them. Only compared: deletes and updates use the ids
+  // Both sides as the engine enforces them. Only compared: deletes and updates use the ids.
+  // Unregistered conditions are kept: this also runs at startup, before the app's `bootstrap()`
+  // registers custom conditions. An unregistered id written back here is skipped by the engine.
   const userEffectivePermissions = await toEnforcedCeilingPermissions(
     await getService('permission').findUserPermissions(user as AdminUser),
-    { holderIsSuperAdmin: false }
+    { holderIsSuperAdmin: false, conditions: false }
   );
 
   const tokens = await strapi.db.query('admin::api-token').findMany({
@@ -558,7 +562,10 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
 
     const { toDelete, toUpdate } = reconcileTokenPermissionsToUserCeiling(
       userEffectivePermissions,
-      await toEnforcedCeilingPermissions(tokenPermissions, { holderIsSuperAdmin: false })
+      await toEnforcedCeilingPermissions(tokenPermissions, {
+        holderIsSuperAdmin: false,
+        conditions: false,
+      })
     );
 
     const tokenLabel = `Admin token ${token.id} (${token.name}) of user ${userId}`;

@@ -3092,6 +3092,31 @@ describe('API Token', () => {
       expect(deleteByIdsMock).not.toHaveBeenCalled();
       expect(updateMock).not.toHaveBeenCalled();
     });
+    test('Keeps a token permission under a condition not registered yet', async () => {
+      // At startup the re-clamp runs before the app's bootstrap() registers custom conditions
+      const CUSTOM = 'api::is-in-team';
+      const user = { id: 1, roles: [{ code: 'strapi-editor' }] };
+      const read = (conditions: string[], id?: number) => ({
+        ...(id === undefined ? {} : { id }),
+        action: 'plugin::cm.read',
+        subject: 'api::article.article',
+        conditions,
+        properties: {},
+      });
+
+      const { deleteByIdsMock, updateMock } = buildStrapi({
+        user,
+        userPermissions: [read([CUSTOM])],
+        tokens: [{ id: 10, adminPermissions: [read([CUSTOM], 101)] }],
+        conditions: ['admin::is-creator'],
+      });
+
+      await syncApiTokenPermissionsForUser(1);
+
+      expect(deleteByIdsMock).not.toHaveBeenCalled();
+      expect(updateMock).not.toHaveBeenCalled();
+    });
+
     test('Reads an owner permission with no locales key as no locale', async () => {
       const ARTICLE = 'api::article.article';
       const user = { id: 1, roles: [{ code: 'strapi-editor' }] };
@@ -3467,6 +3492,49 @@ describe('API Token', () => {
 
       expect(result).toEqual([
         { action: READ, subject: ARTICLE, properties: { fields: ['title'] }, conditions: [] },
+      ]);
+    });
+  });
+
+  describe('enforceAdminPermissionsCeiling — unregistered owner conditions', () => {
+    const READ = 'plugin::content-manager.explorer.read';
+    const ARTICLE = 'api::article.article';
+    const UNKNOWN = 'admin::does-not-exist';
+    const IS_CREATOR = 'admin::is-creator';
+    const ownerUser = { id: 42, roles: [{ code: 'strapi-editor' }] } as any;
+    const read = (conditions: string[]) => ({
+      action: READ,
+      subject: ARTICLE,
+      properties: { fields: ['title'] },
+      conditions,
+    });
+
+    const setupOwner = (ownerPermissions: object[]) => {
+      global.strapi = {
+        admin: {
+          services: {
+            permission: {
+              findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
+              ...ceilingProviders({ conditions: [IS_CREATOR] }),
+            },
+          },
+        },
+      } as any;
+    };
+
+    test('Rejects a permission the owner holds only under an unregistered condition', async () => {
+      setupOwner([read([UNKNOWN])]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(ownerUser, [read([UNKNOWN])] as any)
+      ).rejects.toThrow(`Exceeding: ${READ} on ${ARTICLE}`);
+    });
+
+    test('Inherits only the registered owner conditions', async () => {
+      setupOwner([read([IS_CREATOR, UNKNOWN])]);
+
+      await expect(enforceAdminPermissionsCeiling(ownerUser, [read([])] as any)).resolves.toEqual([
+        read([IS_CREATOR]),
       ]);
     });
   });

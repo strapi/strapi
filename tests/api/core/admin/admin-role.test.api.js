@@ -1221,5 +1221,99 @@ describe('Role CRUD End to End', () => {
         });
       });
     });
+    describe('Unregistered conditions', () => {
+      const UNKNOWN_CONDITION = 'admin::does-not-exist';
+
+      let conditionRequesterRole;
+      let conditionTargetRole;
+      let conditionRequester;
+      let rqConditionRequester;
+
+      const findConditionTargetPermissions = () =>
+        strapi.db.query('admin::permission').findMany({
+          where: { role: { id: conditionTargetRole.id } },
+          orderBy: { id: 'asc' },
+        });
+
+      beforeAll(async () => {
+        // `confirmed` is held only under a condition the engine does not know, so it grants nothing
+        conditionRequesterRole = await utils.createRole({
+          name: 'ceiling-unknown-condition-requester-role',
+          description: 'Holds a permission only under an unregistered condition',
+        });
+
+        await utils.assignPermissionsToRole(conditionRequesterRole.id, [
+          { action: 'admin::roles.read', subject: null, conditions: [], properties: {} },
+          { action: 'admin::roles.update', subject: null, conditions: [], properties: {} },
+        ]);
+
+        // Inserted directly: saving through the API strips unregistered conditions
+        await strapi.db.query('admin::permission').create({
+          data: {
+            action: READ_ACTION,
+            subject: SUBJECT,
+            properties: { fields: ['confirmed'] },
+            conditions: [UNKNOWN_CONDITION],
+            actionParameters: {},
+            role: conditionRequesterRole.id,
+          },
+        });
+
+        conditionTargetRole = await utils.createRole({
+          name: 'ceiling-unknown-condition-target-role',
+          description: 'Role edited by the requester',
+        });
+
+        await utils.assignPermissionsToRole(conditionTargetRole.id, [
+          {
+            action: READ_ACTION,
+            subject: SUBJECT,
+            conditions: ['admin::is-creator'],
+            properties: { fields: ['confirmed'] },
+          },
+        ]);
+
+        conditionRequester = await utils.createUser({
+          email: 'ceiling-unknown-condition@strapi.io',
+          firstname: 'Ceiling',
+          lastname: 'UnknownCondition',
+          isActive: true,
+          roles: [conditionRequesterRole.id],
+        });
+
+        rqConditionRequester = await createAuthRequest({
+          strapi,
+          userInfo: { email: conditionRequester.email },
+        });
+      });
+
+      afterAll(async () => {
+        await utils.deleteUserById(conditionRequester.id);
+        await utils.deleteRolesById([conditionTargetRole.id, conditionRequesterRole.id]);
+      });
+
+      test('Cannot grant a permission held only under an unregistered condition', async () => {
+        const before = await findConditionTargetPermissions();
+        expect(before).toHaveLength(1);
+        expect(before[0].conditions).toEqual(['admin::is-creator']);
+
+        const permission = {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['confirmed'] },
+          conditions: [UNKNOWN_CONDITION],
+        };
+
+        const res = await rqConditionRequester({
+          url: `/admin/roles/${conditionTargetRole.id}/permissions`,
+          method: 'PUT',
+          body: { permissions: [permission] },
+        });
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error.details.permissions).toEqual([permission]);
+        expect(await findConditionTargetPermissions()).toEqual(before);
+      });
+    });
   });
 });

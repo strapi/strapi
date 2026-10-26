@@ -121,6 +121,53 @@ describe('Permission ceiling', () => {
         });
       });
     });
+    describe('conditions', () => {
+      const UNKNOWN = 'x::unknown';
+      const knownConditions = {
+        isLocalesEnforced: () => false,
+        isConditionRegistered: (condition: string) => [IS_CREATOR, SAME_ROLE].includes(condition),
+      };
+      const readTitle = (conditions?: string[]) => ({
+        action: READ,
+        subject: ARTICLE,
+        properties: { fields: ['title'] },
+        ...(conditions === undefined ? {} : { conditions }),
+      });
+
+      test('Removes unregistered conditions', () => {
+        expect(toEnforcedPermissions([readTitle([IS_CREATOR, UNKNOWN])], knownConditions)).toEqual([
+          readTitle([IS_CREATOR]),
+        ]);
+      });
+
+      test('Removes a permission whose conditions are all unregistered', () => {
+        expect(
+          toEnforcedPermissions([readTitle([UNKNOWN]), readTitle([SAME_ROLE])], knownConditions)
+        ).toEqual([readTitle([SAME_ROLE])]);
+      });
+
+      test('Keeps unconditional permissions', () => {
+        const permissions = [readTitle([]), readTitle()];
+
+        expect(toEnforcedPermissions(permissions, knownConditions)).toEqual(permissions);
+      });
+
+      describe('in the ceiling', () => {
+        test('A permission held only under an unregistered condition is not held', () => {
+          const held = toEnforcedPermissions([readTitle([UNKNOWN])], knownConditions);
+
+          expect(isPermissionWithinCeiling(readTitle([UNKNOWN]), held)).toBe(false);
+          expect(isPermissionWithinCeiling(readTitle([]), held)).toBe(false);
+          expect(getInheritedConditions(readTitle(), held)).toBeNull();
+        });
+
+        test('Only registered held conditions are inherited', () => {
+          const held = toEnforcedPermissions([readTitle([IS_CREATOR, UNKNOWN])], knownConditions);
+
+          expect(getInheritedConditions(readTitle(), held)).toEqual([IS_CREATOR]);
+        });
+      });
+    });
   });
 
   describe('findMatchingPermissions', () => {

@@ -366,6 +366,35 @@ describe('createPermissionChecker', () => {
 
       expect(toEnforcedPermissions(permissions, layout)).toEqual(permissions);
     });
+
+    describe('conditions', () => {
+      const UNKNOWN = 'admin::does-not-exist';
+      const layoutWithConditions = {
+        ...layout,
+        conditions: [{ id: IS_CREATOR, displayName: 'Is creator', category: 'default' }],
+      };
+
+      it('does not count a permission held only under an unregistered condition', () => {
+        const held = toEnforcedPermissions(
+          [read({ fields: ['title'], locales: ['en'] }, [UNKNOWN])],
+          layoutWithConditions
+        );
+
+        expect(held).toEqual([]);
+        expect(canTick(held, READ, SUBJECT, selection({}), 'fields', 'title')).toBe(false);
+        expect(isPermissionHeld(held, READ, SUBJECT)).toBe(false);
+      });
+
+      it('offers only the registered conditions of a held permission', () => {
+        const held = toEnforcedPermissions(
+          [read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR, UNKNOWN])],
+          layoutWithConditions
+        );
+
+        expect(held).toEqual([read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR])]);
+        expect(getAllowedConditions(held, READ, SUBJECT)).toEqual([IS_CREATOR]);
+      });
+    });
   });
 
   describe('getActionSelection', () => {

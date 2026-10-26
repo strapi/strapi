@@ -22,7 +22,8 @@
  *
  * Held and requested permissions are read the way the engine enforces them
  * (`toEnforcedPermissions`): on a localized subject, a missing `locales` key is no locale, the
- * same as `locales: []`, because i18n's engine hook enforces it as `locale $in []`.
+ * same as `locales: []`, because i18n's engine hook enforces it as `locale $in []`. A condition
+ * the condition provider does not know is not held, since the engine skips it.
  */
 import { uniq } from 'lodash';
 
@@ -53,22 +54,45 @@ export interface EnforcementContext {
   isConditionRegistered: (condition: string) => boolean;
 }
 
+const toEnforcedLocales = <T extends CeilingPermission>(
+  permission: T,
+  context: EnforcementContext
+): T => {
+  if (!context.isLocalesEnforced(permission) || permission.properties?.locales !== undefined) {
+    return permission;
+  }
+
+  return { ...permission, properties: { ...(permission.properties ?? {}), locales: [] } };
+};
+
 /**
- * The permissions as the engine enforces them. Where `locales` is enforced, a missing key (or
- * missing `properties`) becomes `locales: []`: i18n's engine hook restricts such a permission
- * to `locale $in []`, so it grants no locale. `locales: null` (every locale) and lists are kept.
- * The input is not mutated.
+ * The permissions as the engine enforces them. The input is not mutated.
+ * - Locales: where `locales` is enforced, a missing key (or missing `properties`) becomes
+ *   `locales: []`. i18n's engine hook restricts such a permission to `locale $in []`, so it
+ *   grants no locale. `locales: null` (every locale) and lists are kept.
+ * - Conditions: unregistered ids are removed. A permission whose conditions are all unregistered
+ *   is removed too: the engine evaluates no condition for it and does not register it
+ *   (`packages/core/permissions/src/engine/index.ts`), so it grants nothing. Keeping it with
+ *   `conditions: []` would make it unconditional.
  */
 export const toEnforcedPermissions = <T extends CeilingPermission>(
   permissions: T[],
   context: EnforcementContext
 ): T[] =>
-  permissions.map((permission) => {
-    if (!context.isLocalesEnforced(permission) || permission.properties?.locales !== undefined) {
-      return permission;
+  permissions.flatMap((permission) => {
+    const conditions = permission.conditions ?? [];
+    const registered = conditions.filter((condition) => context.isConditionRegistered(condition));
+
+    if (conditions.length > 0 && registered.length === 0) {
+      return [];
     }
 
-    return { ...permission, properties: { ...(permission.properties ?? {}), locales: [] } };
+    const enforced =
+      registered.length === conditions.length
+        ? permission
+        : { ...permission, conditions: registered };
+
+    return [toEnforcedLocales(enforced, context)];
   });
 
 /**
