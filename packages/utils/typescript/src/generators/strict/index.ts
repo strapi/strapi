@@ -13,6 +13,6 @@ import type {} from '@strapi/strapi/strict-types';
  * through `@strapi/strapi` keeps the application free of direct dependencies on the plugins, which
  * it cannot resolve under a strict package manager layout.
  */
-export const generateStrictDefinitions = async () => {
-  return { output: STRICT_OPT_IN, stats: {} };
+export const generateStrictDefinitions = () => {
+  return Promise.resolve({ output: STRICT_OPT_IN, stats: {} });
 };

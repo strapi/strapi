@@ -348,7 +348,7 @@ export const instanceTypeOf =
       return factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
     }
 
-    if (contract !== undefined && contract.uids.has(source.uid) === true) {
+    if (contract?.uids.has(source.uid) === true) {
       logger.debug(`${source.uid} exports ${contract.exportName}, registering it`);
       return factory.createTypeReferenceNode(contract.helper, [
         importedType(source, contract.exportName),
