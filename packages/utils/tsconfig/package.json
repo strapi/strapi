@@ -1,8 +1,5 @@
 {
   "name": "tsconfig",
   "version": "5.59.0",
-  "private": true,
-  "devDependencies": {
-    "@tsconfig/node22": "22.0.5"
-  }
+  "private": true
 }
