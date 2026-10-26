@@ -216,7 +216,7 @@ export const getAttributeWriteRule = (
   // `*/` in a default value would end the comment
   const defaultRule =
     hasDefault === true
-      ? `Default: ${JSON.stringify(attribute.default).replaceAll('*/', '*\\/')}.`
+      ? `Default: ${JSON.stringify(attribute.default).replaceAll('*/', String.raw`*\/`)}.`
       : '';
 
   if (attribute.required !== true) {
