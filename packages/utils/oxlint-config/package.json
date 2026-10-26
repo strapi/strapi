@@ -15,9 +15,7 @@
     "./tests": "./tests.ts"
   },
   "devDependencies": {
-    "lint-policy": "5.59.0",
     "oxlint": "1.72.0",
-    "oxlint-plugin-eslint": "1.72.0",
     "tsconfig": "5.59.0",
     "vitest": "catalog:",
     "vitest-config": "5.59.0"

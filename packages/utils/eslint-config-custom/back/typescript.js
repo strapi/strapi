@@ -1,8 +1,6 @@
 // @ts-check
 
-/** @import { Linter } from 'eslint' */
-
-/** @type {Linter.Config} */
+/** @type {import('eslint').Linter.Config} */
 const config = {
   root: true,
   extends: [

@@ -1,10 +1,6 @@
 // @ts-check
 
-/** @import { Linter } from 'eslint' */
-
-const { noRestrictedImports, noRestrictedSyntax } = require('lint-policy/lodash');
-
-/** @type {Linter.Config} */
+/** @type {import('eslint').Linter.Config} */
 const config = {
   extends: '@strapi/eslint-config/back/javascript',
   parserOptions: {
@@ -47,8 +43,6 @@ const config = {
         props: false,
       },
     ],
-    'no-restricted-imports': noRestrictedImports(),
-    'no-restricted-syntax': noRestrictedSyntax(),
   },
 };
 

@@ -1,7 +1,5 @@
 import type { OxlintConfig } from 'oxlint';
 
-import { noRestrictedImports, noRestrictedSyntax } from 'lint-policy/lodash';
-
 /**
  * Shared baseline applied to every file in the monorepo.
  *
@@ -21,11 +19,7 @@ import { noRestrictedImports, noRestrictedSyntax } from 'lint-policy/lodash';
  */
 export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
-  jsPlugins: [
-    './no-lodash-fp.js',
-    // ESLint's own rule implementations, for rules OxLint has no native equivalent of.
-    { name: 'eslint-js', specifier: 'oxlint-plugin-eslint' },
-  ],
+  jsPlugins: ['./no-lodash-fp.js'],
   categories: {
     // Blocking bar: correctness plus extra-policy `perf`.
     // Later categories (suspicious/pedantic/style) are not extra policy yet.
@@ -36,20 +30,63 @@ export const base = {
     perf: 'error',
   },
   rules: {
-    // Lodash policy shared verbatim with ESLint — see lint-policy/lodash.js. The lodash/fp ban
-    // is OxLint-only and rides along as an extra pattern.
-    'no-restricted-imports': noRestrictedImports(
-      [],
-      [
-        {
-          group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
-          message: 'Use regular lodash methods or a focused helper instead.',
-        },
-      ]
-    ),
-    // `no-restricted-syntax` is not native to OxLint; it comes from the `eslint-js` JS plugin
-    // declared above, which is why this key carries the plugin prefix.
-    'eslint-js/no-restricted-syntax': noRestrictedSyntax(),
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
+            message: 'Use regular lodash methods or a focused helper instead.',
+          },
+          {
+            group: ['lodash/isArray', 'lodash/isArray.js'],
+            message: 'Use native Array.isArray instead.',
+          },
+          {
+            group: ['lodash/forEach', 'lodash/forEach.js', 'lodash/each', 'lodash/each.js'],
+            message:
+              'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
+          {
+            group: [
+              'lodash/keys',
+              'lodash/keys.js',
+              'lodash/values',
+              'lodash/values.js',
+              'lodash/entries',
+              'lodash/entries.js',
+            ],
+            message: 'Use native Object.keys / Object.values / Object.entries instead.',
+          },
+          {
+            group: [
+              'lodash/concat',
+              'lodash/concat.js',
+              'lodash/filter',
+              'lodash/filter.js',
+              'lodash/find',
+              'lodash/find.js',
+            ],
+            message:
+              'Use native Array.prototype.concat (or an array spread), filter or find instead.',
+          },
+        ],
+        paths: [
+          {
+            name: 'lodash',
+            importNames: ['isArray', 'forEach', 'each'],
+            message:
+              'Use native Array.isArray, Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
+          {
+            name: 'lodash',
+            importNames: ['keys', 'values', 'entries', 'concat', 'filter', 'find'],
+            message:
+              'Use native Object.keys / Object.values / Object.entries or Array.prototype.concat / filter / find instead.',
+          },
+        ],
+      },
+    ],
     // Oxlint 1.72's native rule does not check require() or import() calls.
     'strapi/no-lodash-fp-calls': 'error',
     // Yup `.when({ then, otherwise })` objects are not Promise thenables; the

@@ -17711,8 +17711,6 @@ __metadata:
 "eslint-config-custom@npm:5.59.0, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
-  dependencies:
-    lint-policy: "npm:5.59.0"
   languageName: unknown
   linkType: soft
 
@@ -22684,12 +22682,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lint-policy@npm:5.59.0, lint-policy@workspace:packages/utils/lint-policy":
-  version: 0.0.0-use.local
-  resolution: "lint-policy@workspace:packages/utils/lint-policy"
-  languageName: unknown
-  linkType: soft
-
 "lint-staged@npm:16.4.0":
   version: 16.4.0
   resolution: "lint-staged@npm:16.4.0"
@@ -25174,21 +25166,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "oxlint-config@workspace:packages/utils/oxlint-config"
   dependencies:
-    lint-policy: "npm:5.59.0"
     oxlint: "npm:1.72.0"
-    oxlint-plugin-eslint: "npm:1.72.0"
     tsconfig: "npm:5.59.0"
     vitest: "catalog:"
     vitest-config: "npm:5.59.0"
   languageName: unknown
   linkType: soft
-
-"oxlint-plugin-eslint@npm:1.72.0":
-  version: 1.72.0
-  resolution: "oxlint-plugin-eslint@npm:1.72.0"
-  checksum: 10c0/98eeb6f01285c7fd8617571a482b6fb744f166ac3ed0fef917a722fdcbe7e03e3438e67369ca1adbbe2186d78f37569f442922742e9a7b652661b4acc3caa9b1
-  languageName: node
-  linkType: hard
 
 "oxlint@npm:1.72.0":
   version: 1.72.0

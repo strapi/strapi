@@ -1,10 +1,6 @@
 // @ts-check
 
-/** @import { Linter } from 'eslint' */
-
-const { noRestrictedImports, noRestrictedSyntax } = require('lint-policy/lodash');
-
-/** @type {Linter.Config} */
+/** @type {import('eslint').Linter.Config} */
 const config = {
   parser: '@babel/eslint-parser',
   extends: ['@strapi/eslint-config/front/javascript'],
@@ -54,13 +50,17 @@ const config = {
         alphabetize: { order: 'asc', caseInsensitive: true },
       },
     ],
-    'no-restricted-imports': noRestrictedImports([
+    'no-restricted-imports': [
+      'error',
       {
-        name: 'lodash',
-        message: 'Please use import [method] from lodash/[method]',
+        paths: [
+          {
+            name: 'lodash',
+            message: 'Please use import [method] from lodash/[method]',
+          },
+        ],
       },
-    ]),
-    'no-restricted-syntax': noRestrictedSyntax(),
+    ],
     'no-restricted-globals': [
       'error',
       {
