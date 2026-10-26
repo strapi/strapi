@@ -20,8 +20,6 @@ type DeleteByIdsOptions = {
 };
 
 const setPathIdAndPath = async (folder: Pick<Folder, 'parent'>) => {
-  // TODO @Nico `create` also passes `name`, and the API upload folder passes it without `parent`.
-  // The `FolderService` contract accepts both; this parameter keeps its published type.
   const { max } = await strapi.db
     .queryBuilder(FOLDER_MODEL_UID)
     .max('pathId')
@@ -134,8 +132,6 @@ const update = async (
   },
   { user }: { user: { id: string | number } }
 ) => {
-  // TODO @Nico The admin controller passes the route's string ID and a body with only `parent`.
-  // The `FolderService` contract accepts both; these parameters keep their published types.
   // only name is updated
   if (parent === undefined) {
     const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
@@ -270,8 +266,6 @@ const exists = async (params = {}) => {
  * @returns {Promise<array>}
  */
 const getStructure = async () => {
-  // TODO @Nico The inferred result is `number[] & FolderNode[]`, because `Folder['children']` holds
-  // IDs. The `FolderService` contract types the tree; this result keeps its published type.
   // @ts-expect-error - no dynamic types
   const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
   const qb = strapi.db.queryBuilder(FOLDER_MODEL_UID);

@@ -269,9 +269,6 @@ const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions
 const isFaultyImage = async (file: UploadableFile) => {
   const options = getSharpOptions();
 
-  // TODO @Nico Without a `filepath`, a readable image resolves to its sharp stats (a truthy value)
-  // and an unreadable one rejects, instead of `false` and `true`. The plugin always passes a
-  // `filepath`, so only direct callers reach this branch.
   if (!file.filepath) {
     return new Promise<boolean>((resolve) => {
       const pipeline = options ? sharp(options) : sharp();

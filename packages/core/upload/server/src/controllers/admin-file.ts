@@ -38,9 +38,6 @@ export default {
       (q) => pm.addPermissionsQueryTo(q)
     )(ctx.query);
 
-    // TODO @Nico The pipe types the query as `unknown`. It is the validated and sanitized query
-    // string, so `sort[name]=desc` and `populate[folder]=true` arrive as strings, where
-    // `queryParams.Params` expects a sort order and a boolean.
     const { results: files, pagination } = await getService('upload').findPage(
       query as queryParams.Params
     );
