@@ -496,6 +496,42 @@ describe('Relations', () => {
     expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
   });
 
+  it('does not repeat an unchanged relation search when the dropdown opens', async () => {
+    let searchRequests = 0;
+
+    server.use(
+      http.get('/content-manager/relations/:model/:fieldName', () => {
+        searchRequests += 1;
+
+        return HttpResponse.json(
+          {
+            data: null,
+            error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+          },
+          { status: 500 }
+        );
+      })
+    );
+
+    const { user } = render({});
+
+    await waitFor(() => expect(searchRequests).toBe(1));
+
+    await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+    expect(
+      await screen.findByText('Whoops! Something went wrong. Please, try again.')
+    ).toBeInTheDocument();
+
+    // Wait past the 300ms search debounce so a repeated request would have been sent.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    expect(searchRequests).toBe(1);
+    expect(
+      screen.getByText('Whoops! Something went wrong. Please, try again.')
+    ).toBeInTheDocument();
+  });
+
   describe('reopening the dropdown after selecting a relation', () => {
     const mockCategorySearch = () => {
       const searchQueries: string[] = [];

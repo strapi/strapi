@@ -776,7 +776,9 @@ const RelationModalWithContext = ({
   }, [fieldValue]);
 
   const handleSearch = async (search: string) => {
-    setSearchParams((s) => ({ ...s, _q: search, page: 1 }));
+    // Keep the same state object when nothing changes. A new object would trigger an identical
+    // request after the debounce, and while it is pending a previous error is replaced by loading.
+    setSearchParams((s) => (s._q === search && s.page === 1 ? s : { ...s, _q: search, page: 1 }));
   };
   return (
     <RelationModalRenderer>
