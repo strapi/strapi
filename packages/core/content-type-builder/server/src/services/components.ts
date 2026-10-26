@@ -71,9 +71,6 @@ export const editComponent = async (
   uid: Internal.UID.Component,
   { component, components = [] }: ComponentToCreate
 ): Promise<SchemaHandler> => {
-  // TODO @Nico The payload is the flat builder payload (`EditComponentPayload`), not a
-  // `Struct.ComponentSchema`, and `SchemaHandler` types `uid` as a content type uid. Fixing the
-  // published signatures of `createComponent` and `editComponent` waits for a strict-off change.
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
