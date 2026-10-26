@@ -236,6 +236,41 @@ describe('history-version service', () => {
     expect(results.map((result) => result.id)).toEqual([2]);
   });
 
+  it('removes the component ids but keeps the document id when finding versions', async () => {
+    findPageMock.mockResolvedValueOnce({
+      results: [{ id: 1 }],
+      pagination: { page: 1, pageSize: 20, pageCount: 1, total: 1 },
+    });
+    findManyMock.mockResolvedValueOnce([
+      {
+        id: 1,
+        schema: {},
+        locale: null,
+        data: {
+          id: 10,
+          documentId: 'randomid',
+          title: 'My article',
+          component: { id: 20, title: 'My component' },
+        },
+      },
+    ]);
+
+    const { results } = await historyService.findVersionsPage({
+      query: {
+        contentType: 'api::article.article' as UID.ContentType,
+        documentId: 'randomid',
+      },
+      state: { userAbility: {} },
+    } as any);
+
+    expect(results[0].data).toEqual({
+      id: 10,
+      documentId: 'randomid',
+      title: 'My article',
+      component: { title: 'My component' },
+    });
+  });
+
   it('removes the component ids before restoring a version', async () => {
     const attributes = mockStrapi.getModel('api::article.article')!.attributes;
     findOneMock.mockResolvedValueOnce({
