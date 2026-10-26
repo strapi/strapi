@@ -13,7 +13,7 @@ export const isStrictTypesEnabled = (strapi: Core.Strapi): boolean => {
 
   if (rawStrictTypes !== undefined && rawStrictTypes !== false && rawStrictTypes !== true) {
     throw new errors.ValidationError(
-      `Invalid config.typescript.strictTypes value: "${rawStrictTypes}". Expected boolean (true or false).`
+      `Invalid config.typescript.strictTypes value: ${JSON.stringify(rawStrictTypes)}. Expected boolean (true or false).`
     );
   }
 
