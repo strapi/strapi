@@ -240,7 +240,7 @@ const getNonVisibleAttributes = (model: Model) => {
 };
 
 const getVisibleAttributes = (model: Model) => {
-  return _.difference(Object.keys(model.attributes), getNonVisibleAttributes(model));
+  return _.difference(Object.keys(model.attributes ?? {}), getNonVisibleAttributes(model));
 };
 
 const isVisibleAttribute = (model: Model, attributeName: string) => {

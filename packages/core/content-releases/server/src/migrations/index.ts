@@ -44,7 +44,7 @@ export async function deleteActionsOnDisableDraftAndPublish({
 
 export async function deleteActionsOnDeleteContentType({ oldContentTypes, contentTypes }: Input) {
   const deletedContentTypes =
-    difference(Object.keys(oldContentTypes), Object.keys(contentTypes)) ?? [];
+    difference(Object.keys(oldContentTypes ?? {}), Object.keys(contentTypes ?? {})) ?? [];
 
   if (deletedContentTypes.length) {
     await async.map(deletedContentTypes, async (deletedContentTypeUID: unknown) => {
