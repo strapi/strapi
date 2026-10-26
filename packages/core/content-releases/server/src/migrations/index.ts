@@ -8,6 +8,11 @@ import { getDraftEntryValidStatus, getService } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
 import { ReleaseAction } from '../../../shared/contracts/release-actions';
 
+// The core store saves content types as JSON: compare live attributes in that form, so values
+// JSON drops (e.g. the `publishedAt.default` function) do not count as a change
+const toPersistedForm = (attributes: Schema.ContentType['attributes'] | undefined) =>
+  JSON.parse(JSON.stringify(attributes ?? null));
+
 interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;
   contentTypes: Record<string, Schema.ContentType>;
@@ -139,7 +144,12 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
       const contentType = contentTypes[contentTypeUID];
 
       // If attributes have changed, we need to revalidate actions because maybe validations rules are different
-      if (!isEqual(oldContentType?.attributes, contentType?.attributes)) {
+      if (
+        !isEqual(
+          toPersistedForm(oldContentType?.attributes),
+          toPersistedForm(contentType?.attributes)
+        )
+      ) {
         const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
           where: {
             contentType: contentTypeUID,

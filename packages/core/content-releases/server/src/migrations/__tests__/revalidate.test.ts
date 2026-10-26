@@ -153,4 +153,25 @@ describe('revalidateChangedContentTypes', () => {
     expect(updateReleaseStatus).toHaveBeenCalledTimes(1);
     expect(updateReleaseStatus).toHaveBeenCalledWith(10);
   });
+
+  // Draft and publish adds `publishedAt` with a function default; the core store drops it
+  it('skips revalidation when attributes only differ by values JSON drops', async () => {
+    const { findMany, documents, updateReleaseStatus } = setupStrapi([
+      createPublishAction(1, UID, 10),
+    ]);
+    const liveAttributes = {
+      ...oldAttributes,
+      publishedAt: { type: 'datetime', default: () => new Date() },
+    } as unknown as Schema.ContentType['attributes'];
+    const savedAttributes = JSON.parse(JSON.stringify(liveAttributes));
+
+    await revalidateChangedContentTypes({
+      oldContentTypes: { [UID]: createContentType(UID, savedAttributes) },
+      contentTypes: { [UID]: createContentType(UID, liveAttributes) },
+    });
+
+    expect(findMany).not.toHaveBeenCalled();
+    expect(documents).not.toHaveBeenCalled();
+    expect(updateReleaseStatus).not.toHaveBeenCalled();
+  });
 });
