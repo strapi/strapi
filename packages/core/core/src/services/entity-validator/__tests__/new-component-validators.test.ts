@@ -25,6 +25,25 @@ describe('Entity validator - new component in an update', () => {
     },
   };
 
+  const outerComponent: Schema.Component = {
+    modelType: 'component',
+    uid: 'default.outer',
+    category: 'default',
+    modelName: 'outer',
+    globalId: 'ComponentDefaultOuter',
+    info: {
+      displayName: 'outer',
+    },
+    options: {},
+    attributes: {
+      items: {
+        type: 'component',
+        component: 'default.inner',
+        repeatable: true,
+      },
+    },
+  };
+
   const contentType: Schema.ContentType = {
     modelType: 'contentType',
     uid: 'api::test.test',
@@ -52,11 +71,17 @@ describe('Entity validator - new component in an update', () => {
         type: 'dynamiczone',
         components: ['default.inner'],
       },
+      outer: {
+        type: 'component',
+        component: 'default.outer',
+        repeatable: false,
+      },
     },
   };
 
   const models: Record<string, Schema.Schema> = {
     [component.uid]: component,
+    [outerComponent.uid]: outerComponent,
     [contentType.uid]: contentType,
   };
 
@@ -70,6 +95,7 @@ describe('Entity validator - new component in an update', () => {
       getModel: (uid: string) => models[uid],
       components: {
         [component.uid]: component,
+        [outerComponent.uid]: outerComponent,
       },
     } as any;
   });
@@ -151,6 +177,14 @@ describe('Entity validator - new component in an update', () => {
         repeatable: [{}],
         dz: [{ __component: 'default.inner' }],
       };
+
+      await expect(
+        entityValidator.validateEntityUpdate(contentType, input, { isDraft: true }, entity)
+      ).resolves.toEqual(input);
+    });
+
+    test('Accepts a new component that does not send a nested repeatable component', async () => {
+      const input = { outer: {} };
 
       await expect(
         entityValidator.validateEntityUpdate(contentType, input, { isDraft: true }, entity)

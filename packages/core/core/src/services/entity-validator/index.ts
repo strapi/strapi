@@ -137,6 +137,28 @@ const addDefault = (createOrUpdate: CreateOrUpdate) => {
 const preventCast = (validator: strapiUtils.yup.AnySchema) =>
   validator.transform((val, originalVal) => originalVal);
 
+/**
+ * On update, a component sent without an `id` is created, not updated (see
+ * `updateOrCreateComponent` in the document service). Its fields have no previous value to keep,
+ * so in a non-draft write they are validated as on creation.
+ */
+const getComponentCreateOrUpdate = (
+  createOrUpdate: CreateOrUpdate,
+  componentData: unknown,
+  options: ValidatorContext
+): CreateOrUpdate => {
+  if (
+    createOrUpdate === 'update' &&
+    options.isDraft !== true &&
+    isObject(componentData) &&
+    get(componentData, 'id') === undefined
+  ) {
+    return 'creation';
+  }
+
+  return createOrUpdate;
+};
+
 const createComponentValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
@@ -159,7 +181,7 @@ const createComponentValidator =
         .array()
         .of(
           yup.lazy((item) =>
-            createModelValidator(createOrUpdate)(
+            createModelValidator(getComponentCreateOrUpdate(createOrUpdate, item, options))(
               { componentContext, model, data: item },
               options
             ).notNull()
@@ -178,7 +200,9 @@ const createComponentValidator =
       return validator;
     }
 
-    let validator = createModelValidator(createOrUpdate)(
+    let validator = createModelValidator(
+      getComponentCreateOrUpdate(createOrUpdate, updatedAttribute.value, options)
+    )(
       {
         model,
         data: updatedAttribute.value,
@@ -215,7 +239,10 @@ const createDzValidator =
 
         return model
           ? schema.concat(
-              createModelValidator(createOrUpdate)({ model, data: item, componentContext }, options)
+              createModelValidator(getComponentCreateOrUpdate(createOrUpdate, item, options))(
+                { model, data: item, componentContext },
+                options
+              )
             )
           : schema;
       }) as any // FIXME: yup v1
