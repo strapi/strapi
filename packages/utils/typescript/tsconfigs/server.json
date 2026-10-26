@@ -1,3 +1,4 @@
+
 {
   "$schema": "https://json.schemastore.org/tsconfig",
 
@@ -13,9 +14,21 @@
 
     "tsBuildInfoFile": "./.tsbuildinfo",
     "incremental": true,
+
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "noEmitOnError": true,
-    "noImplicitThis": true
+    "noImplicitThis": true,
+
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    "sourceMap": true,
+    "outDir": "./dist"
   }
 }
