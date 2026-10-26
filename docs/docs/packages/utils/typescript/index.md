@@ -32,4 +32,6 @@ With `typescript.strictTypes`, the services generator (`src/generators/services/
 
 `findTypeExports` (`src/generators/common/sources.ts`) finds the export without a type checker. It parses each TypeScript source with `ts.createSourceFile` and reads only the top-level statements: `export type`, `export interface` and export specifiers. A program would need the application's tsconfig and its whole dependency graph, and type generation runs on every `strapi develop` start. The cost is that `export *` is not followed. JS sources are skipped. A source that cannot be read logs a warning and keeps its inferred type, so the generation does not stop.
 
+`toImportSpecifier` (same file) writes the import of each source relative to `types/generated`, with the extension of the compiled file (`.ts` → `.js`). ECMAScript module applications resolved with `NodeNext` need it (TS2835), and the other module resolutions map it back to the source. `yarn test:types:registries` compiles the four generated files in CommonJS applications with Node, Bundler and NodeNext resolution, and in an ECMAScript module application with NodeNext.
+
 ## Related

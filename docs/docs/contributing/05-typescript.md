@@ -330,7 +330,8 @@ current code and the previous release. `tests/types/registries/consumer.test.cjs
 Build changed packages before running `yarn test:ts`, because consumers use emitted declarations.
 `yarn test:types:registries` runs the published-contract tests separately. They check Bundler,
 Node, and NodeNext resolution, both switch states, declaration order, application overrides,
-editor completions, and accidental publication of strict activation. CI runs these checks
+editor completions, generated application modules in CommonJS and ECMAScript module
+applications, and accidental publication of strict activation. CI runs these checks
 after the monorepo build.
 
 Each package that registers contracts checks them in two places:

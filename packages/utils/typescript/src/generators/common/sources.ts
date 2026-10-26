@@ -25,7 +25,7 @@ const SOURCE_EXTENSIONS = ['.ts', '.js'];
 export type AppModuleSource = {
   uid: string;
   file: string;
-  // Extension-less path of the source file, relative to the generated directory
+  // Relative import of the source file from the generated directory (see `toImportSpecifier`)
   specifier: string;
 };
 
@@ -50,8 +50,32 @@ const isSourceFile = (fd: Dirent) =>
 const byExtensionPrecedence = (a: Dirent, b: Dirent) =>
   SOURCE_EXTENSIONS.indexOf(path.extname(a.name)) - SOURCE_EXTENSIONS.indexOf(path.extname(b.name));
 
-const toImportSpecifier = (from: string, to: string) => {
-  const specifier = path.relative(from, to).split(path.sep).join('/');
+/**
+ * Extension of the JavaScript file each source extension compiles to. A relative import names the
+ * compiled file: ECMAScript modules resolved with Node16 or NodeNext require the extension (TS2835),
+ * and every other module resolution maps it back to the source.
+ */
+const OUTPUT_EXTENSIONS: Record<string, string> = {
+  '.ts': '.js',
+  '.js': '.js',
+  '.mts': '.mjs',
+  '.cts': '.cjs',
+};
+
+/**
+ * Path of a source file relative to the generated directory, as a relative import names it: with
+ * POSIX separators, a leading `./` or `../`, and the extension of the compiled file
+ */
+export const toImportSpecifier = (from: string, file: string) => {
+  const extension = path.extname(file);
+  const outputExtension = OUTPUT_EXTENSIONS[extension];
+
+  if (outputExtension === undefined) {
+    throw new Error(`Cannot import ${file}: unsupported source extension`);
+  }
+
+  const relative = path.relative(from, file.slice(0, -extension.length) + outputExtension);
+  const specifier = relative.split(path.sep).join('/');
 
   return specifier.startsWith('.') ? specifier : `./${specifier}`;
 };
@@ -87,7 +111,7 @@ const collectDirectorySources = async (
     sources.set(uid, {
       uid,
       file,
-      specifier: toImportSpecifier(outDir, path.join(dir, basename)),
+      specifier: toImportSpecifier(outDir, file),
     });
   }
 };

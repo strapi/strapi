@@ -3,7 +3,11 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 
 import { compareCodeUnits } from '../../../generators/common/compare';
-import { filterRegisteredSources, findTypeExports } from '../../../generators/common/sources';
+import {
+  filterRegisteredSources,
+  findTypeExports,
+  toImportSpecifier,
+} from '../../../generators/common/sources';
 import { createLogger } from '../../../generators/utils';
 
 // Each pair orders one way by code units and the other way with localeCompare in common locales
@@ -21,6 +25,32 @@ describe('compareCodeUnits', () => {
 
   test('equal strings compare as 0', () => {
     expect(compareCodeUnits('global::cors', 'global::cors')).toBe(0);
+  });
+});
+
+describe('toImportSpecifier', () => {
+  const generated = path.join(path.sep, 'app', 'types', 'generated');
+
+  // NodeNext requires the extension in ECMAScript modules; every module resolution maps it back
+  test.each([
+    ['src/api/article/services/article.ts', '../../src/api/article/services/article.js'],
+    ['src/policies/legacy.js', '../../src/policies/legacy.js'],
+    ['src/middlewares/timer.mts', '../../src/middlewares/timer.mjs'],
+    ['src/middlewares/timer.cts', '../../src/middlewares/timer.cjs'],
+  ])('imports %s as %s', (file, specifier) => {
+    expect(toImportSpecifier(generated, path.join(path.sep, 'app', file))).toBe(specifier);
+  });
+
+  test('starts a path inside the generated directory with ./', () => {
+    expect(toImportSpecifier(generated, path.join(generated, 'nested', 'source.ts'))).toBe(
+      './nested/source.js'
+    );
+  });
+
+  test('rejects a file that does not compile to JavaScript', () => {
+    expect(() => toImportSpecifier(generated, path.join(path.sep, 'app', 'src', 'x.json'))).toThrow(
+      'unsupported source extension'
+    );
   });
 });
 

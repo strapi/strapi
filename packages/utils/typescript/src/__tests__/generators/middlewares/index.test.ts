@@ -77,10 +77,10 @@ describe('generateMiddlewaresDefinitions', () => {
 
     // Global middleware names are not normalized by the loader, api middleware names are kebab-cased
     expect(normalized).toContain(
-      "'global::rateLimit': MiddlewareConfig<typeof import('../../src/middlewares/rateLimit')>"
+      "'global::rateLimit': MiddlewareConfig<typeof import('../../src/middlewares/rateLimit.js')>"
     );
     expect(normalized).toContain(
-      "'api::article.audit-log': MiddlewareConfig<typeof import('../../src/api/article/middlewares/auditLog')>"
+      "'api::article.audit-log': MiddlewareConfig<typeof import('../../src/api/article/middlewares/auditLog.js')>"
     );
     // The import of a JS middleware does not resolve without `allowJs`
     expect(normalized).toContain("'api::blog-post.is-author': unknown");
@@ -268,9 +268,9 @@ describe('generateMiddlewaresDefinitions', () => {
       ['global::rateLimit', 'api::article.audit-log']
     );
 
-    expect(output).toContain("typeof import('../../src/middlewares/rateLimit')");
+    expect(output).toContain("typeof import('../../src/middlewares/rateLimit.js')");
     expect(output.match(/'global::rateLimit'/g)).toHaveLength(1);
-    expect(output).toContain("typeof import('../../src/api/article/middlewares/auditLog')");
+    expect(output).toContain("typeof import('../../src/api/article/middlewares/auditLog.js')");
     expect(output.match(/'api::article\.audit-log'/g)).toHaveLength(1);
     expect(logger.warnings).toBe(2);
   });
