@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { UnsavedChangesModal, useNotification } from '@strapi/admin/strapi-admin';
 import { Button, Field, Flex, Modal, TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -127,7 +127,11 @@ export const FolderFormDialog = (props: FolderFormDialogProps) => {
   };
 
   return (
-    <Modal.Root open={open} onOpenChange={onClose}>
+    <UnsavedChangesModal
+      open={open}
+      onOpenChange={onClose}
+      hasUnsavedChanges={name !== initialName}
+    >
       <StyledModalContent>
         <Modal.Header>
           <Modal.Title>
@@ -168,9 +172,11 @@ export const FolderFormDialog = (props: FolderFormDialogProps) => {
           </Modal.Body>
           <Modal.Footer>
             <Flex gap={2} justifyContent="space-between" width="100%">
-              <Button variant="tertiary" onClick={onClose} type="button">
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-              </Button>
+              <Modal.Close>
+                <Button variant="tertiary" type="button">
+                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+                </Button>
+              </Modal.Close>
               <Button
                 type="submit"
                 loading={isLoading}
@@ -190,6 +196,6 @@ export const FolderFormDialog = (props: FolderFormDialogProps) => {
           </Modal.Footer>
         </form>
       </StyledModalContent>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
