@@ -56,4 +56,21 @@ describe('useHashedAdminUserId', () => {
     });
     await waitFor(() => expect(result.current).toBe('hash-c'));
   });
+
+  it('keeps the id when the same admin is refetched as a new object', async () => {
+    jest.mocked(hashAdminUserEmail).mockImplementation(() => new Promise(() => {}));
+
+    const { result, rerender } = renderHook(
+      ({ admin }: { admin: AdminUser }) => useHashedAdminUserId(admin),
+      { initialProps: { admin: user('a@example.com') } }
+    );
+
+    jest.mocked(hashAdminUserEmail).mockResolvedValueOnce('hash-a');
+    rerender({ admin: user('a@example.com') });
+    await waitFor(() => expect(result.current).toBe('hash-a'));
+
+    jest.mocked(hashAdminUserEmail).mockImplementation(() => new Promise(() => {}));
+    rerender({ admin: user('a@example.com') });
+    expect(result.current).toBe('hash-a');
+  });
 });

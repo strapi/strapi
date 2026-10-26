@@ -11,7 +11,9 @@ const useHashedAdminUserId = (user: AdminUser) => {
   React.useEffect(() => {
     let current = true;
 
-    setHashedUser({ email });
+    // A refetch returns a new user object for the same email. Keep the hash
+    // already shown for that email until the next digest finishes.
+    setHashedUser((previous) => (previous.email === email ? previous : { email }));
 
     void hashAdminUserEmail(user).then((id) => {
       if (current && id) {
