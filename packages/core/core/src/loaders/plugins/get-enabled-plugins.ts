@@ -150,12 +150,12 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
     }
   }
 
-  const declaredPluginsResolves = Object.values(declaredPlugins).map(
-    (plugin) => plugin.pathToPlugin
+  const declaredPluginsResolves = new Set(
+    Object.values(declaredPlugins).map((plugin) => plugin.pathToPlugin)
   );
   const installedPluginsNotAlreadyUsed = pickBy(
     installedPlugins,
-    (p) => !declaredPluginsResolves.includes(p.pathToPlugin)
+    (p) => !declaredPluginsResolves.has(p.pathToPlugin)
   );
 
   const allPlugins = defaultsDeep(
