@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { FormikUnsavedChangesRegistrar, UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Modal,
@@ -77,7 +78,7 @@ export const ReleaseModal = ({
   };
 
   return (
-    <Modal.Root open={open} onOpenChange={handleClose}>
+    <UnsavedChangesModal open={open ?? false} onOpenChange={handleClose}>
       <Modal.Content>
         <Modal.Header>
           <Modal.Title>
@@ -109,6 +110,7 @@ export const ReleaseModal = ({
           {({ values, errors, handleChange, setFieldValue }) => {
             return (
               <Form>
+                <FormikUnsavedChangesRegistrar />
                 <Modal.Body>
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     <Field.Root
@@ -262,7 +264,7 @@ export const ReleaseModal = ({
           }}
         </Formik>
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 
