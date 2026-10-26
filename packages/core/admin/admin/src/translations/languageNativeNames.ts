@@ -38,4 +38,5 @@ export const languageNativeNames = {
   sa: 'संस्कृत',
   hi: 'हिन्दी',
   fi: 'Suomi',
+  is: 'Íslenska',
 } as const;
