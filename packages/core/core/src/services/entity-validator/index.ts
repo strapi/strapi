@@ -3,7 +3,7 @@
  * Module that will validate input data for entity creation or edition
  */
 
-import { uniqBy, castArray, isNil, isArray, mergeWith, get, has, isEmpty, isObject } from 'lodash';
+import { uniqBy, castArray, isNil, mergeWith, get, has, isEmpty, isObject } from 'lodash';
 import jsonLogic from 'json-logic-js';
 import * as strapiUtils from '@strapi/utils';
 import type { Modules, UID, Struct, Schema } from '@strapi/types';
@@ -709,7 +709,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
                 data: componentValue as Record<string, unknown>,
               }),
               (objValue, srcValue) => {
-                if (isArray(objValue)) {
+                if (Array.isArray(objValue)) {
                   return objValue.concat(srcValue);
                 }
               }
@@ -732,7 +732,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
                 data: value,
               }),
               (objValue, srcValue) => {
-                if (isArray(objValue)) {
+                if (Array.isArray(objValue)) {
                   return objValue.concat(srcValue);
                 }
               }
@@ -759,6 +759,12 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
+
+      // Relations sent with empty connect and disconnect lists leave nothing to look up
+      if (uniqueValues.length === 0) {
+        return;
+      }
+
       const count = await strapi.db.query(key as UID.Schema).count({
         where: {
           id: {
