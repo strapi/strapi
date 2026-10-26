@@ -119,11 +119,16 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Schema customization
   extendReviewWorkflowContentTypes({ strapi });
 
-  // License limits
-  const reviewWorkflowsOptions = defaultsDeep({}, strapi.ee.features.get('review-workflows'), {
-    numberOfWorkflows: MAX_WORKFLOWS,
-    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-  });
+  // License limits, stored under the feature `options` as the entitlements read them
+  const reviewWorkflowsFeature = strapi.ee.features.get('review-workflows');
+  const reviewWorkflowsOptions = defaultsDeep(
+    {},
+    typeof reviewWorkflowsFeature === 'object' ? reviewWorkflowsFeature.options : undefined,
+    {
+      numberOfWorkflows: MAX_WORKFLOWS,
+      stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
+    }
+  );
   const workflowsValidationService = getService('validation', { strapi });
   workflowsValidationService.register(reviewWorkflowsOptions);
 
