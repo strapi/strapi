@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { merge } from 'lodash';
 import { MFA_DEFAULTS, validateMfaConfig } from '../mfa';
 import * as config from '../index';
 
@@ -187,7 +187,7 @@ describe('validateMfaConfig', () => {
 
     // Get the exported config and mutate it via lodash merge (the real path)
     const exportedConfig = config.default;
-    _.merge(exportedConfig, {
+    merge(exportedConfig, {
       auth: {
         mfa: {
           digits: 8,
