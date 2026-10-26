@@ -72,6 +72,11 @@ const BANNED_MEMBERS = [
     'Iterate `Object.entries`/`Object.values` for objects.'
   ),
   banned(
+    'each',
+    '`for...of` or `Array.prototype.forEach`',
+    'Iterate `Object.entries`/`Object.values` for objects.'
+  ),
+  banned(
     'filter',
     '`Array.prototype.filter`',
     'Iterate `Object.entries`/`Object.values` for objects.'
@@ -134,12 +139,12 @@ const BANNED_MEMBERS = [
 ];
 
 /**
- * `no-restricted-imports` patterns: `import isArray from 'lodash/isArray'`.
+ * `no-restricted-imports` patterns: `import isArray from 'lodash/isArray'`, with or without `.js`.
  *
  * @type {RestrictedImportPattern[]}
  */
 const restrictedImportPatterns = BANNED_MEMBERS.map(({ name, message }) => ({
-  group: [`lodash/${name}`, `lodash/fp/${name}`],
+  group: [`lodash/${name}`, `lodash/${name}.js`, `lodash/fp/${name}`, `lodash/fp/${name}.js`],
   message,
 }));
 
@@ -165,8 +170,8 @@ const restrictedSyntax = BANNED_MEMBERS.flatMap(({ name, message }) => [
     message,
   },
   {
-    // `require('lodash/isArray')`
-    selector: `CallExpression[callee.name='require'][arguments.0.value=/^lodash(\\/fp)?\\/${name}$/]`,
+    // `require('lodash/isArray')` / `require('lodash/isArray.js')`
+    selector: `CallExpression[callee.name='require'][arguments.0.value=/^lodash(\\/fp)?\\/${name}(\\.js)?$/]`,
     message,
   },
 ]);
