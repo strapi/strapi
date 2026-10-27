@@ -155,37 +155,35 @@ const load = async (
       // self-relations. Publishing maps untouched targets to published counterparts and drops
       // draft-only targets; discarding maps untouched targets to draft counterparts. This avoids
       // restoring stale old rows that were removed from the copied state.
-      const [sourceDraftRelations, targetDraftRelations] = await Promise.all([
-        strapi.db
-          .getConnection()
-          .select('*')
-          .from(joinTable.name)
-          .whereIn(sourceColumnName, sourceIds)
-          .whereNotIn(targetColumnName, sourceIds)
-          .transacting(trx),
-        strapi.db
-          .getConnection()
-          .select('*')
-          .from(joinTable.name)
-          .whereIn(targetColumnName, sourceIds)
-          .whereNotIn(sourceColumnName, sourceIds)
-          .transacting(trx),
-      ]);
+      // One transaction is one connection. Overlapping selects on it make
+      // node-postgres warn, and pg 9 rejects the second query.
+      const sourceDraftRelations = await strapi.db
+        .getConnection()
+        .select('*')
+        .from(joinTable.name)
+        .whereIn(sourceColumnName, sourceIds)
+        .whereNotIn(targetColumnName, sourceIds)
+        .transacting(trx);
+      const targetDraftRelations = await strapi.db
+        .getConnection()
+        .select('*')
+        .from(joinTable.name)
+        .whereIn(targetColumnName, sourceIds)
+        .whereNotIn(sourceColumnName, sourceIds)
+        .transacting(trx);
 
-      const [targetCounterparts, sourceCounterparts] = await Promise.all([
-        getCounterparts(
-          trx,
-          dbModel.tableName,
-          sourceDraftRelations.map((relation) => relation[targetColumnName]),
-          targetStatus
-        ),
-        getCounterparts(
-          trx,
-          dbModel.tableName,
-          targetDraftRelations.map((relation) => relation[sourceColumnName]),
-          targetStatus
-        ),
-      ]);
+      const targetCounterparts = await getCounterparts(
+        trx,
+        dbModel.tableName,
+        sourceDraftRelations.map((relation) => relation[targetColumnName]),
+        targetStatus
+      );
+      const sourceCounterparts = await getCounterparts(
+        trx,
+        dbModel.tableName,
+        targetDraftRelations.map((relation) => relation[sourceColumnName]),
+        targetStatus
+      );
 
       if (sourceDraftRelations.length > 0) {
         const relations = sourceDraftRelations
@@ -312,26 +310,24 @@ const sync = async (
       const toUpdate = deduped.filter((r) => existingSet.has(pairKey(r)));
       const toInsert = deduped.filter((r) => !existingSet.has(pairKey(r)));
 
-      await Promise.all(
-        toUpdate.map((relation) => {
-          const sourceId = relation[sourceColumn];
-          const targetId = relation[targetColumn];
-          const dataToRestore = Object.fromEntries(
-            [joinTable.orderColumnName, joinTable.inverseOrderColumnName]
-              .filter((columnName): columnName is string => columnName != null)
-              .filter((columnName) => columnName in relation)
-              .map((columnName) => [columnName, relation[columnName]])
-          );
+      for (const relation of toUpdate) {
+        const sourceId = relation[sourceColumn];
+        const targetId = relation[targetColumn];
+        const dataToRestore = Object.fromEntries(
+          [joinTable.orderColumnName, joinTable.inverseOrderColumnName]
+            .filter((columnName): columnName is string => columnName != null)
+            .filter((columnName) => columnName in relation)
+            .map((columnName) => [columnName, relation[columnName]])
+        );
 
-          if (Object.keys(dataToRestore).length === 0) {
-            return Promise.resolve();
-          }
+        if (Object.keys(dataToRestore).length === 0) {
+          continue;
+        }
 
-          return trx(joinTable.name)
-            .where({ [sourceColumn]: sourceId, [targetColumn]: targetId })
-            .update(dataToRestore);
-        })
-      );
+        await trx(joinTable.name)
+          .where({ [sourceColumn]: sourceId, [targetColumn]: targetId })
+          .update(dataToRestore);
+      }
 
       if (toInsert.length > 0) {
         await trx.batchInsert(joinTable.name, toInsert as any[], batchSize);

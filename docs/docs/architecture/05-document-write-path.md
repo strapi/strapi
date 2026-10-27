@@ -7,6 +7,7 @@ review_notes:
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
   - 'Deadlock retry: the outermost transaction runs the handler up to 3 times. Commit callbacks are not awaited, and a hook failure does not retry the write.'
+  - 'update locks the document rows with FOR NO KEY UPDATE on Postgres and FOR UPDATE on MySQL. Shutdown waits 10 seconds for commit callbacks. Checked against repository.ts, query-builder.ts and transaction-context.ts.'
   - The webhook runner paragraph describes `contentTypeEvents`. That claim was checked against `webhook-runner.ts` and `webhook-store.ts`. The rest of this page was not re-verified.
 ---
 
@@ -91,7 +92,7 @@ Read methods use the same idea. `statusToLookup` and `localeToLookup` write cond
 
 **`create`** writes one row. On a D&P content type, this is always the draft. The repository schedules `entry.create`. If the caller passed `status: 'published'`, it then calls the inner `publish` function and returns the published row.
 
-**`update`** targets the draft row on a D&P content type. It looks for the row with the `documentId` and the requested locale.
+**`update`** locks every row with that `documentId`, then targets the draft row on a D&P content type. On Postgres the lock is `FOR NO KEY UPDATE`: a second update of the same document waits, and a relation insert can still check its foreign key. MySQL and MariaDB use `FOR UPDATE`. SQLite does not lock the row. It looks for the row with the `documentId` and the requested locale.
 
 - If the row exists, the entries service updates it, and the repository schedules `entry.update`.
 - If the row does not exist, but the document exists in another locale, the repository creates a row for the new locale. It copies the non-localized fields from an existing row. It schedules `entry.create`, not `entry.update`.
@@ -131,13 +132,13 @@ Database lifecycles run after the entity validator. Data that a `beforeCreate` o
 
 Each public repository method runs inside `strapi.db.transaction()`. The transaction context uses `AsyncLocalStorage`. A nested call reuses the open transaction and does not commit it. Only the outermost call commits or rolls back.
 
-Database lifecycles run inside the transaction. If the transaction rolls back later, a side effect in a lifecycle subscriber, such as an HTTP call, is not undone. A deadlock aborts the transaction and the outermost `strapi.db.transaction` runs the handler again, up to 3 times, so those subscribers can run again too.
+Database lifecycles run inside the transaction. If the transaction rolls back later, a side effect in a lifecycle subscriber, such as an HTTP call, is not undone. A deadlock aborts the transaction and the outermost `strapi.db.transaction` runs the handler again, up to 3 times, with a short wait between tries, so those subscribers can run again too.
 
 ## Events and webhooks
 
 The repository does not emit events directly. `emitEvent` calls `strapi.db.transaction(({ onCommit }) => ...)` and registers a callback. The callback runs only after the outermost transaction commits. It does not run on rollback.
 
-The transaction context starts those callbacks and does not await them. The Document Service call can resolve before the event reaches its listeners. A callback that throws or rejects is logged and does not fail the write.
+The transaction context starts those callbacks and does not await them. The Document Service call can resolve before the event reaches its listeners. A callback that throws or rejects is logged and does not fail the write. Shutdown waits up to 10 seconds for callbacks that are still running, then continues and logs a warning.
 
 When the callback runs, the event manager:
 

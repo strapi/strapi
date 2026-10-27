@@ -60,4 +60,21 @@ const readAutoIncrementStep = async (db: {
   return 1;
 };
 
-export { idsFromInsertResult, readAutoIncrementStep };
+/**
+ * Rows that already carry a primary key must keep those ids. MySQL reports
+ * one insert id for the whole statement, and expanding it invents the rest.
+ */
+const idsForInsertedRows = (
+  rows: Array<Record<string, unknown>>,
+  chunkResult: unknown,
+  useReturning: boolean,
+  increment = 1
+): ID[] => {
+  if (!useReturning && rows.length > 0 && rows.every((row) => row.id != null)) {
+    return rows.map((row) => row.id as ID);
+  }
+
+  return idsFromInsertResult(chunkResult, rows.length, useReturning, increment);
+};
+
+export { idsForInsertedRows, idsFromInsertResult, readAutoIncrementStep };

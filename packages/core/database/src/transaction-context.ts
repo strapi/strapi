@@ -20,10 +20,24 @@ export interface TransactionObject {
   rollback: () => Promise<void>;
   get: () => Knex.Transaction;
 }
+export interface CallbackLogger {
+  error: (message: string) => void;
+}
+
+/**
+ * One database instance owns this set. A process can boot several instances,
+ * and one shutdown must not wait on another's commit hooks.
+ */
+export interface CallbackTracker {
+  pending: Set<Promise<unknown>>;
+  logger?: CallbackLogger;
+}
+
 export interface Store {
   trx: Knex.Transaction | null;
   commitCallbacks: Callback[];
   rollbackCallbacks: Callback[];
+  tracker?: CallbackTracker;
 }
 
 const storage = new AsyncLocalStorage<Store>();
@@ -45,12 +59,17 @@ const isDeadlockError = (error: unknown) => {
       cause?: unknown;
     };
 
+    if (current.code === '40P01' || current.code === 'ER_LOCK_DEADLOCK' || current.errno === 1213) {
+      return true;
+    }
+
+    // A driver error often keeps the SQL text after the code is stripped.
+    // A plain Error whose message happens to mention a deadlock is not one.
+    const message = current.message ?? '';
+    const driverError = 'sql' in current || 'sqlState' in current || 'sqlMessage' in current;
     if (
-      current.code === '40P01' ||
-      current.code === 'ER_LOCK_DEADLOCK' ||
-      current.errno === 1213 ||
-      current.message?.includes('deadlock detected') ||
-      current.message?.includes('Deadlock found')
+      driverError &&
+      (message.includes('deadlock detected') || message.includes('Deadlock found'))
     ) {
       return true;
     }
@@ -61,6 +80,14 @@ const isDeadlockError = (error: unknown) => {
   return matches(error);
 };
 
+/** Short pause so two retried transactions do not collide again immediately. */
+const DEADLOCK_RETRY_DELAY_MS = 25;
+
+const waitForDeadlockRetry = (attempt: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, DEADLOCK_RETRY_DELAY_MS * attempt);
+  });
+
 /**
  * Commit and rollback hooks run after the transaction finishes, and the
  * caller does not wait for them. Hooks that return a promise (document
@@ -69,37 +96,69 @@ const isDeadlockError = (error: unknown) => {
  * Hooks registered synchronously while a batch runs are included. A rejection
  * is logged and does not change the transaction result: the data is already
  * committed, and failing the request would invite a retry of that write.
+ *
+ * Shutdown stops waiting after this long. A hook that never settles (a hung
+ * listener) must not block process exit.
  */
-const pendingCallbacks = new Set<Promise<unknown>>();
+const CALLBACK_DRAIN_TIMEOUT_MS = 10_000;
 
-const reportCallbackError = (error: unknown) => {
+const formatCallbackError = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  }
+
+  return String(error);
+};
+
+const reportCallbackError = (error: unknown, logger?: CallbackLogger) => {
+  const message = `Transaction callback failed: ${formatCallbackError(error)}`;
+
   try {
-    console.error('Transaction callback failed', error);
+    if (logger) {
+      logger.error(message);
+      return;
+    }
+
+    console.error(message);
   } catch {
     // A broken logger must not leave the hook in the pending set.
+    try {
+      console.error(message);
+    } catch {
+      // ignore
+    }
   }
 };
 
-const track = (promise: Promise<unknown>) => {
+const track = (
+  promise: Promise<unknown>,
+  pending: Set<Promise<unknown>> | undefined,
+  logger?: CallbackLogger
+) => {
   const settled = promise.then(
     () => undefined,
     (error: unknown) => {
-      reportCallbackError(error);
+      reportCallbackError(error, logger);
     }
   );
-  pendingCallbacks.add(settled);
+
+  if (!pending) {
+    return settled;
+  }
+
+  pending.add(settled);
   settled.then(
     () => {
-      pendingCallbacks.delete(settled);
+      pending.delete(settled);
     },
     () => {
-      pendingCallbacks.delete(settled);
+      pending.delete(settled);
     }
   );
   return settled;
 };
 
-const runCallbacks = (callbacks: Callback[] | undefined) => {
+const runCallbacks = (callbacks: Callback[] | undefined, tracker?: CallbackTracker) => {
   if (!callbacks) {
     return;
   }
@@ -110,25 +169,66 @@ const runCallbacks = (callbacks: Callback[] | undefined) => {
       try {
         const result = cb();
         if (result && typeof (result as Promise<unknown>).then === 'function') {
-          track(result as Promise<unknown>);
+          track(result as Promise<unknown>, tracker?.pending, tracker?.logger);
         }
       } catch (error) {
         // The transaction is already committed. A synchronous throw must not
         // be retried as a deadlock.
-        reportCallbackError(error);
+        reportCallbackError(error, tracker?.logger);
       }
     }
   }
 };
 
-const waitForPendingCallbacks = async () => {
-  while (pendingCallbacks.size > 0) {
-    await Promise.allSettled(pendingCallbacks);
+const waitForPendingCallbacks = async (
+  pending: Set<Promise<unknown>>,
+  options?: {
+    timeoutMs?: number;
+    onTimeout?: (pendingCount: number) => void;
+  }
+) => {
+  const timeoutMs = options?.timeoutMs ?? CALLBACK_DRAIN_TIMEOUT_MS;
+
+  if (pending.size === 0) {
+    return;
+  }
+
+  let timedOut = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const timeout = new Promise<void>((resolve) => {
+    timer = setTimeout(() => {
+      timedOut = true;
+      resolve();
+    }, timeoutMs);
+  });
+
+  const drain = async () => {
+    while (pending.size > 0 && !timedOut) {
+      // Snapshot so hooks that register more hooks are picked up on the next pass.
+      await Promise.allSettled(Array.from(pending));
+    }
+  };
+
+  try {
+    await Promise.race([drain(), timeout]);
+  } finally {
+    if (timer) {
+      clearTimeout(timer);
+    }
+  }
+
+  if (pending.size > 0) {
+    options?.onTimeout?.(pending.size);
   }
 };
 
 const transactionCtx = {
-  async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
+  async run<TCallback extends Callback>(
+    trx: Knex.Transaction,
+    cb: TCallback,
+    tracker?: CallbackTracker
+  ) {
     const store = storage.getStore();
     return storage.run<ReturnType<TCallback>, void[]>(
       {
@@ -136,6 +236,8 @@ const transactionCtx = {
         // Fill with existing callbacks if nesting transactions
         commitCallbacks: store?.commitCallbacks || [],
         rollbackCallbacks: store?.rollbackCallbacks || [],
+        // Nested work commits with the outermost transaction, so it shares that tracker.
+        tracker: store?.tracker ?? tracker,
       },
       cb
     );
@@ -163,7 +265,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    runCallbacks(store?.commitCallbacks);
+    runCallbacks(store?.commitCallbacks, store?.tracker);
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -183,7 +285,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    runCallbacks(store?.rollbackCallbacks);
+    runCallbacks(store?.rollbackCallbacks, store?.tracker);
   },
 
   onCommit(cb: Callback) {
@@ -201,4 +303,4 @@ const transactionCtx = {
   },
 };
 
-export { isDeadlockError, transactionCtx, waitForPendingCallbacks };
+export { isDeadlockError, transactionCtx, waitForDeadlockRetry, waitForPendingCallbacks };

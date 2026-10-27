@@ -12,9 +12,11 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import {
   Callback,
+  CallbackTracker,
   isDeadlockError,
   transactionCtx,
   TransactionObject,
+  waitForDeadlockRetry,
   waitForPendingCallbacks,
 } from './transaction-context';
 import { validateDatabase } from './validations';
@@ -110,6 +112,8 @@ class Database {
 
   logger: Logger;
 
+  private readonly callbackTracker: CallbackTracker;
+
   /** Set unless `settings.poolTimeoutDiagnostics` is false or the install failed. */
   private poolDiagnostics?: PoolDiagnostics;
 
@@ -126,6 +130,10 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+    this.callbackTracker = {
+      pending: new Set(),
+      logger: this.logger,
+    };
 
     this.dialect = getDialect(this);
 
@@ -271,6 +279,8 @@ class Database {
         if (nested || attempt === attempts || !isDeadlockError(error)) {
           throw error;
         }
+
+        await waitForDeadlockRetry(attempt);
       }
     }
 
@@ -301,23 +311,27 @@ class Database {
       return { commit, rollback, get: () => trx };
     }
 
-    return transactionCtx.run(trx, async () => {
-      try {
-        const callbackParams = {
-          trx,
-          commit,
-          rollback,
-          onCommit: transactionCtx.onCommit,
-          onRollback: transactionCtx.onRollback,
-        };
-        const res = await cb(callbackParams);
-        await commit();
-        return res;
-      } catch (error) {
-        await rollback();
-        throw error;
-      }
-    });
+    return transactionCtx.run(
+      trx,
+      async () => {
+        try {
+          const callbackParams = {
+            trx,
+            commit,
+            rollback,
+            onCommit: transactionCtx.onCommit,
+            onRollback: transactionCtx.onRollback,
+          };
+          const res = await cb(callbackParams);
+          await commit();
+          return res;
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      },
+      this.callbackTracker
+    );
   }
 
   getSchemaName(): string | undefined {
@@ -370,7 +384,11 @@ class Database {
   }
 
   async destroy() {
-    await waitForPendingCallbacks();
+    await waitForPendingCallbacks(this.callbackTracker.pending, {
+      onTimeout: (count) => {
+        this.logger.warn(`Continuing shutdown with ${count} transaction callback(s) still running`);
+      },
+    });
 
     try {
       await this.lifecycles.clear();

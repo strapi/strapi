@@ -542,8 +542,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     // Two requests can both observe "locale missing" and insert a second row.
     // Lock the document's rows so the loser updates the row the winner created.
+    // Postgres takes FOR NO KEY UPDATE: writers still serialize, and a relation
+    // insert can take the FOR KEY SHARE lock its foreign key needs. MySQL has
+    // no equivalent, so the query builder uses FOR UPDATE there.
     if (documentId) {
-      await strapi.db.queryBuilder(uid).select(['id']).where({ documentId }).forUpdate().execute();
+      await strapi.db
+        .queryBuilder(uid)
+        .select(['id'])
+        .where({ documentId })
+        .forNoKeyUpdate()
+        .execute();
     }
 
     const queryParams = await async.pipe(

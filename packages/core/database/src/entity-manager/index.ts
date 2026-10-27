@@ -38,8 +38,8 @@ import {
   deleteRelations,
   cleanOrderColumns,
 } from './regular-relations';
-import { idsFromInsertResult, readAutoIncrementStep } from './inserted-ids';
-import { isDeadlockError, transactionCtx } from '../transaction-context';
+import { idsForInsertedRows, readAutoIncrementStep } from './inserted-ids';
+import { isDeadlockError, transactionCtx, waitForDeadlockRetry } from '../transaction-context';
 import { relationsOrderer } from './relations-orderer';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
@@ -395,7 +395,9 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
 
       const batchSize = db.dialect.getBatchInsertSize();
-      const increment = db.dialect.useReturning() ? 1 : await readAutoIncrementStep(db);
+      const rowsProvideIds = dataToInsert.every((row) => row.id != null);
+      const increment =
+        db.dialect.useReturning() || rowsProvideIds ? 1 : await readAutoIncrementStep(db);
       const trx = await db.transaction();
       let createdEntries: Array<ID | { id: ID }> = [];
       try {
@@ -406,7 +408,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .transacting(trx.get())
             .execute<Array<ID | { id: ID }>>();
           createdEntries = createdEntries.concat(
-            idsFromInsertResult(chunkResult, chunk.length, db.dialect.useReturning(), increment)
+            idsForInsertedRows(chunk, chunkResult, db.dialect.useReturning(), increment)
           );
         }
         await trx.commit();
@@ -480,6 +482,8 @@ export const createEntityManager = (db: Database): EntityManager => {
           if (nested || attempt === maxAttempts || !isDeadlockError(e)) {
             break;
           }
+
+          await waitForDeadlockRetry(attempt);
         }
       }
 

@@ -1,4 +1,4 @@
-import { idsFromInsertResult } from '../inserted-ids';
+import { idsForInsertedRows, idsFromInsertResult } from '../inserted-ids';
 
 describe('idsFromInsertResult', () => {
   it('expands a MySQL first-insert-id into one id per inserted row', () => {
@@ -18,5 +18,13 @@ describe('idsFromInsertResult', () => {
 
   it('does not invent ids when the driver did not return an auto-increment id', () => {
     expect(idsFromInsertResult([0], 3, false)).toEqual([0]);
+  });
+
+  it('keeps explicit primary keys instead of expanding the MySQL insert id', () => {
+    expect(idsForInsertedRows([{ id: 5 }, { id: 9 }], [5], false)).toEqual([5, 9]);
+  });
+
+  it('expands generated MySQL ids when the rows omit a primary key', () => {
+    expect(idsForInsertedRows([{ title: 'a' }, { title: 'b' }], [8], false)).toEqual([8, 9]);
   });
 });

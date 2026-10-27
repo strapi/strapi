@@ -159,11 +159,16 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: DocServiceParams<'findMany'> & { locale?: string } = {}
     ) {
-      const deletedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(documentIds.map(async (id) => this.delete(id, uid, opts)));
+      const count = await strapi.db.transaction(async () => {
+        // One transaction has one connection. Deleting in parallel overlaps
+        // queries on that connection, and Postgres then warns or, on pg 9, errors.
+        for (const id of documentIds) {
+          await this.delete(id, uid, opts);
+        }
+        return documentIds.length;
       });
 
-      return { count: deletedEntries.length };
+      return { count };
     },
 
     async publish(

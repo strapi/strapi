@@ -595,6 +595,7 @@ class Strapi extends Container implements Core.Strapi {
 
     const logger = this.log;
     // Export destroys the instance inside the transfer, then sends telemetry.
+    // The sender already captured fetch. Re-registering telemetry is enough.
     const telemetry = this.has('telemetry') ? this.telemetry : undefined;
     this.app = undefined;
     this.isLoaded = false;
