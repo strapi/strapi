@@ -32,6 +32,10 @@ runs:
         # unknown artifacts are accepted, which is safe here: the cache is only saved from pushes.
         NX_DB_CACHE: 'false'
         NX_REJECT_UNKNOWN_LOCAL_CACHE: '0'
+    - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
+      name: 🔎 Check build outputs
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/check-build-outputs.js"
     - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' && (github.event_name == 'push' || github.head_ref == 'ci/test-speed-experiment') }}
       name: 💾 Save Nx cache
       uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
