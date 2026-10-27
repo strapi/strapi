@@ -249,6 +249,8 @@ const sanitizeUserRoles = (role: unknown) => _.pick(role, ['id', 'name', 'descri
  */
 const isLastSuperAdminUser = async (userId: unknown) => {
   const user = (await findOne(userId)) as any;
+  if (!user) return false;
+
   const superAdminRole: AdminRoleWithUsersCount | null =
     await getService('role').getSuperAdminWithUsersCount();
 
