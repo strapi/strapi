@@ -16,6 +16,13 @@ export const resetFiles = async () => {
     return;
   }
 
+  // Nothing changed since the baseline, so there is nothing to restore and no restart to wait for.
+  // `git status` lists exactly what `reset --hard` and `clean -fd` below would touch.
+  const { stdout: changes } = await execa('git', ['status', '--porcelain'], { cwd: testAppPath });
+  if (changes.trim() === '') {
+    return;
+  }
+
   console.log('Restoring filesystem');
   // HEAD is the single baseline commit created during e2e app setup (`commitE2eBaseline` in shared-setup).
   // Tracked files → match that commit; untracked (non-ignored) files/dirs → removed.
@@ -36,8 +43,26 @@ export const resetFiles = async () => {
   // wait for the server to restart after modifying files
   console.log('Waiting for Strapi to restart...');
 
-  // TODO:  This is both a waste of time and flaky.
-  //        We need to find a way to access the playwright server output and watch for the "up" log to appear
-  await delay(5); // give Strapi time to detect file changes and begin restart
-  await pollHealthCheck(); // give it time to come back up
+  // The file watcher restarts the server: wait until it goes down (it can't serve the old
+  // files anymore), then until it is back up. If it never goes down within the window, the
+  // restored files weren't watched and the server is already serving the baseline.
+  await waitForServerDown();
+  await pollHealthCheck(250);
+};
+
+const waitForServerDown = async (timeoutMs = 5000, intervalMs = 100) => {
+  const url = `http://127.0.0.1:${process.env.PORT?.trim()}/_health`;
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (!response.ok) {
+        return;
+      }
+    } catch {
+      return;
+    }
+    await delay(intervalMs / 1000);
+  }
 };
