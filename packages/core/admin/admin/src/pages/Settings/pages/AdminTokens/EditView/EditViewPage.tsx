@@ -28,6 +28,7 @@ import { AdminPermissions } from './components/AdminPermissions';
 
 import type { AdminApiToken, Get } from '../../../../../../../shared/contracts/admin-token';
 import type { ApiToken } from '../../../../../../../shared/contracts/api-token';
+import type { PluginValues } from '../../../../../../../shared/contracts/shared';
 import type { AuthContextValue } from '../../../../../features/Auth';
 import type { PermissionsAPI } from '../../Roles/components/Permissions';
 import type { Data } from '@strapi/types';
@@ -125,6 +126,7 @@ export const EditView = () => {
   interface FormValues extends Pick<Get.Response['data'], 'name' | 'description'> {
     lifespan: Get.Response['data']['lifespan'] | undefined;
     type: undefined;
+    plugins?: PluginValues;
   }
 
   const buildLifespan = (raw: FormValues['lifespan']): number | null =>
@@ -145,6 +147,7 @@ export const EditView = () => {
           description: body.description,
           lifespan: buildLifespan(body.lifespan),
           adminPermissions: adminPermissionsToSend,
+          plugins: body.plugins,
         });
 
         if ('error' in res) {

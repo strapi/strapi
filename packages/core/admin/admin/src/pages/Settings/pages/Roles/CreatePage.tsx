@@ -21,6 +21,7 @@ import * as yup from 'yup';
 
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
+import { FormikPluginFormFields } from '../../../../components/PluginFormFields';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
@@ -30,12 +31,15 @@ import {
   useCreateRoleMutation,
   useGetRolePermissionLayoutQuery,
   useGetRolePermissionsQuery,
+  useGetRolesQuery,
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
+
+import type { PluginValues } from '../../../../../../shared/contracts/shared';
 
 /* -------------------------------------------------------------------------------------------------
  * CreatePage
@@ -52,6 +56,7 @@ const CREATE_SCHEMA = yup.object().shape({
 interface CreateRoleFormValues {
   name: string;
   description: string;
+  plugins: PluginValues | undefined;
 }
 
 /**
@@ -92,6 +97,13 @@ const CreatePage = () => {
       skip: !id,
       refetchOnMountOrArgChange: true,
     }
+  );
+
+  // A duplicate starts with the plugin values of the source role. Formik reads them once, so the
+  // page waits for fresh data, not a cached copy
+  const { data: [sourceRole] = [], isFetching: isFetchingSourceRole } = useGetRolesQuery(
+    { id },
+    { skip: !id, refetchOnMountOrArgChange: true }
   );
 
   const [createRole] = useCreateRoleMutation();
@@ -164,7 +176,7 @@ const CreatePage = () => {
     }
   };
 
-  if ((isLoadingPermissionsLayout && isLoadingRole) || !permissionsLayout) {
+  if ((isLoadingPermissionsLayout && isLoadingRole) || isFetchingSourceRole || !permissionsLayout) {
     return <Page.Loading />;
   }
 
@@ -186,6 +198,7 @@ const CreatePage = () => {
               id: 'Settings.roles.form.created',
               defaultMessage: 'Created',
             })} ${format(new Date(), 'PPP')}`,
+            plugins: sourceRole?.plugins,
           } satisfies CreateRoleFormValues
         }
         onSubmit={handleCreateRoleSubmit}
@@ -305,6 +318,7 @@ const CreatePage = () => {
                             <Textarea onChange={handleChange} value={values.description} />
                           </Field.Root>
                         </Grid.Item>
+                        <FormikPluginFormFields form="role" />
                       </Grid.Root>
                     </Flex>
                   </Box>

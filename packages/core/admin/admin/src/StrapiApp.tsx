@@ -14,7 +14,7 @@ import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/adm
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { CustomFields } from './core/apis/CustomFields';
-import { registerListExtension } from './core/apis/extensions';
+import { registerFormFields, registerListExtension } from './core/apis/extensions';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
@@ -75,6 +75,7 @@ interface StrapiAppPlugin {
       | 'getPlugin'
       | 'registerHook'
       | 'registerListExtension'
+      | 'registerFormFields'
     >
   ) => void;
   register: (app: StrapiApp) => void;
@@ -218,6 +219,12 @@ class StrapiApp {
    */
   registerListExtension = registerListExtension;
 
+  /**
+   * Adds fields to a core form. The form sends their values in the request body under
+   * `plugins.<pluginId>`, and reads their initial values from the entity at the same path
+   */
+  registerFormFields = registerFormFields;
+
   addMenuLink = (link: Parameters<typeof this.router.addMenuLink>[0]) =>
     this.router.addMenuLink(link);
 
@@ -264,6 +271,7 @@ class StrapiApp {
           getPlugin: this.getPlugin,
           registerHook: this.registerHook,
           registerListExtension: this.registerListExtension,
+          registerFormFields: this.registerFormFields,
         });
       }
     });

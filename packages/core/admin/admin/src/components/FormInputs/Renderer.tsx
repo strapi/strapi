@@ -12,6 +12,7 @@ import { DateTimeInput } from './DateTime';
 import { EmailInput } from './Email';
 import { EnumerationInput } from './Enumeration';
 import { JsonInput } from './Json';
+import { MultiSelectInput } from './MultiSelect';
 import { NumberInput } from './Number';
 import { PasswordInput } from './Password';
 import { StringInput } from './String';
@@ -54,6 +55,8 @@ const InputRenderer = memo((props: InputProps) => {
       return <EmailInput {...props} />;
     case 'enumeration':
       return <EnumerationInput {...props} />;
+    case 'multi-select':
+      return <MultiSelectInput {...props} />;
     case 'password':
       return <PasswordInput {...props} />;
     case 'text':

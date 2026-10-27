@@ -1,6 +1,6 @@
 import type { Data, Modules } from '@strapi/types';
 import type { errors } from '@strapi/utils';
-import { AdminRole, Permission, SanitizedAdminRole } from './shared';
+import { AdminRole, Permission, PluginValues, SanitizedAdminRole } from './shared';
 
 export type SanitizedPermission = Pick<
   Permission,
@@ -86,6 +86,7 @@ export declare namespace Create {
     body: {
       name: string;
       description?: string;
+      plugins?: PluginValues;
     };
   }
 
@@ -105,6 +106,7 @@ export declare namespace Update {
     body: {
       name?: string;
       description?: string;
+      plugins?: PluginValues;
     };
   }
 

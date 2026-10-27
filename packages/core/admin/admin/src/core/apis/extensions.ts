@@ -1,4 +1,5 @@
 import type { Filters } from '../../components/Filters';
+import type { FormLayoutInputProps } from '../../types/forms';
 import type { MessageDescriptor } from 'react-intl';
 
 /* -------------------------------------------------------------------------------------------------
@@ -47,5 +48,34 @@ const useListExtensions = (list: ExtensibleList) => {
   };
 };
 
-export { registerListExtension, useListExtensions };
-export type { ListExtension };
+/* -------------------------------------------------------------------------------------------------
+ * Form fields
+ * -----------------------------------------------------------------------------------------------*/
+
+type ExtensibleForm = 'api-token' | 'admin-token' | 'role' | 'user-invite';
+
+interface FormFieldsExtension {
+  pluginId: string;
+  /**
+   * May call hooks. `entity` is the entity that the form edits, if any. `values` are the current
+   * values of this plugin's fields. The token forms show the fields when they create a token only
+   */
+  useFields: (args: {
+    entity?: unknown;
+    values: Record<string, unknown>;
+  }) => FormLayoutInputProps[];
+}
+
+const formFields: Record<ExtensibleForm, FormFieldsExtension[]> = {
+  'api-token': [],
+  'admin-token': [],
+  role: [],
+  'user-invite': [],
+};
+
+const registerFormFields = (form: ExtensibleForm, extension: FormFieldsExtension) => {
+  formFields[form].push(extension);
+};
+
+export { registerListExtension, useListExtensions, registerFormFields, formFields };
+export type { ListExtension, ExtensibleForm, FormFieldsExtension };

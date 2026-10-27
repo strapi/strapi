@@ -15,6 +15,7 @@ import * as yup from 'yup';
 
 import { Form, type FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { PluginFormFields } from '../../../../../components/PluginFormFields';
 import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
@@ -26,6 +27,7 @@ import { translatedErrors } from '../../../../../utils/translatedErrors';
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
+import type { PluginValues } from '../../../../../../../shared/contracts/shared';
 import type { Data } from '@strapi/types';
 
 interface ModalFormProps {
@@ -231,6 +233,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                               );
                             });
                           })}
+                          <PluginFormFields form="user-invite" disabled={isDisabled} />
                         </Grid.Root>
                       </Box>
                     </Box>
@@ -268,6 +271,7 @@ interface InitialData {
   email?: string;
   roles?: Data.ID[];
   useSSORegistration?: boolean;
+  plugins?: PluginValues;
 }
 
 const FORM_INITIAL_VALUES = {

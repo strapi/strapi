@@ -1,6 +1,8 @@
 import { errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
+import type { PluginValues } from './shared';
+
 export type ApiTokenBase = {
   accessKey?: string;
   encryptedKey?: string;
@@ -30,7 +32,7 @@ export type ContentApiApiTokenBody = Pick<ContentApiApiToken, 'name' | 'descript
  */
 export declare namespace Create {
   export interface Request {
-    body: ContentApiApiTokenBody;
+    body: ContentApiApiTokenBody & { plugins?: PluginValues };
     query: {};
   }
 

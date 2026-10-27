@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
-import type { AdminTokenOwner, Permission } from './shared';
+import type { AdminTokenOwner, Permission, PluginValues } from './shared';
 import type { ApiTokenBase } from './content-api-token';
 
 export type AdminApiToken = ApiTokenBase & {
@@ -22,6 +22,7 @@ export declare namespace Create {
   export interface Request {
     body: Pick<AdminApiToken, 'name' | 'description' | 'lifespan'> & {
       adminPermissions?: Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>[];
+      plugins?: PluginValues;
     };
     query: {};
   }

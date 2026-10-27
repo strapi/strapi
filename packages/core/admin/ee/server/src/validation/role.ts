@@ -5,6 +5,8 @@ const roleCreateSchema = yup
   .shape({
     name: yup.string().min(1).required(),
     description: yup.string().nullable(),
+    // Values of the fields that plugins add to the role form. Plugins read these values
+    plugins: yup.object(),
   })
   .noUnknown();
 

@@ -9,6 +9,8 @@ const userCreationSchema = yup
     lastname: validators.lastname,
     roles: validators.roles.min(1),
     preferedLanguage: yup.string().nullable(),
+    // Values of the fields that plugins add to the invite form. The plugins read them
+    plugins: yup.object(),
   })
   .noUnknown();
 

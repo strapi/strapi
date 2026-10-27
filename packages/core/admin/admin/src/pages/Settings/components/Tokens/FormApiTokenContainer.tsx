@@ -4,6 +4,7 @@ import { Box, Field, Flex, Grid, TextInput, Typography } from '@strapi/design-sy
 import { FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
 
+import { FormikPluginFormFields } from '../../../../components/PluginFormFields';
 import { useAuth } from '../../../../features/Auth';
 
 import { LifeSpanInput } from './LifeSpanInput';
@@ -183,6 +184,12 @@ export const FormApiTokenContainer = ({
                 />
               </Field.Root>
             </Grid.Item>
+          )}
+          {isCreating && (
+            <FormikPluginFormFields
+              form={kind === 'admin' ? 'admin-token' : 'api-token'}
+              disabled={!canEditInputs}
+            />
           )}
         </Grid.Root>
       </Flex>

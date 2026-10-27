@@ -32,6 +32,7 @@ import { Permissions } from './components/Permissions';
 import { initialState, reducer } from './reducer';
 
 import type { ContentApiApiToken, Get } from '../../../../../../../shared/contracts/api-token';
+import type { PluginValues } from '../../../../../../../shared/contracts/shared';
 
 /**
  * TODO: this could definitely be refactored to avoid using redux and instead just use the
@@ -185,6 +186,7 @@ export const EditView = () => {
   interface FormValues extends Pick<Get.Response['data'], 'name' | 'description'> {
     lifespan: Get.Response['data']['lifespan'] | undefined;
     type: ContentApiApiToken['type'] | undefined;
+    plugins?: PluginValues;
   }
 
   const buildLifespan = (raw: FormValues['lifespan']): number | null =>
@@ -203,6 +205,7 @@ export const EditView = () => {
           type: body.type!,
           lifespan: buildLifespan(body.lifespan),
           permissions: body.type === 'custom' ? state.selectedActions : null,
+          plugins: body.plugins,
         });
 
         if ('error' in res) {

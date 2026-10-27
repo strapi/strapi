@@ -27,6 +27,8 @@ import { translatedErrors } from '../../../../utils/translatedErrors';
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
 
+import type { PluginValues } from '../../../../../../shared/contracts/shared';
+
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required.id),
   description: yup.string().optional(),
@@ -38,6 +40,7 @@ const EDIT_ROLE_SCHEMA = yup.object().shape({
 interface EditRoleFormValues {
   name: string;
   description: string;
+  plugins: PluginValues | undefined;
 }
 
 const EditPage = () => {
@@ -185,6 +188,7 @@ const EditPage = () => {
           {
             name: role.name ?? '',
             description: role.description ?? '',
+            plugins: role.plugins,
           } satisfies EditRoleFormValues
         }
         onSubmit={handleEditRoleSubmit}

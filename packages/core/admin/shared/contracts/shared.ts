@@ -38,6 +38,7 @@ export type AdminUserCreationPayload = Omit<
   keyof Entity | 'roles' | 'isActive' | 'blocked'
 > & {
   roles: Data.ID[];
+  plugins?: PluginValues;
 };
 
 export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
@@ -61,6 +62,8 @@ export interface AdminRole extends Entity {
   description?: string;
   users: AdminUser[];
   permissions: Permission[];
+  /** Values that plugins keep for the role, by plugin id */
+  plugins?: PluginValues;
 }
 
 export type SanitizedAdminRole = Omit<
@@ -84,3 +87,8 @@ export interface FieldContentSourceMap {
   kind?: Struct.ContentTypeKind;
   fieldPath?: string;
 }
+
+/**
+ * Values of the fields that plugins add to a core form, by plugin id
+ */
+export type PluginValues = Record<string, Record<string, unknown>>;

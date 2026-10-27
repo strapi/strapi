@@ -7,6 +7,12 @@ interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
   type: 'enumeration';
 }
 
+/** Several values of a list. The value is an array of option values */
+interface MultiSelectProps extends Omit<InputProps, 'options' | 'type'> {
+  options: Array<{ label?: string; value: string }>;
+  type: 'multi-select';
+}
+
 interface StringProps
   extends Omit<InputProps, 'autoComplete' | 'type'>,
     Pick<ComponentPropsWithoutRef<'input'>, 'autoComplete'> {
@@ -47,4 +53,4 @@ interface InputProps {
     | 'checkbox';
 }
 
-export type { EnumerationProps, InputProps, StringProps };
+export type { EnumerationProps, InputProps, MultiSelectProps, StringProps };

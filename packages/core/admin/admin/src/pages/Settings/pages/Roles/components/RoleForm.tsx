@@ -11,6 +11,8 @@ import {
 import { FormikProps } from 'formik';
 import { useIntl } from 'react-intl';
 
+import { FormikPluginFormFields } from '../../../../../components/PluginFormFields';
+
 import type { AdminRole } from '../../../../../hooks/useAdminRoles';
 import type { EditRoleFormValues } from '../EditPage';
 
@@ -104,6 +106,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
               <Field.Error />
             </Field.Root>
           </Grid.Item>
+          <FormikPluginFormFields form="role" entity={role} disabled={disabled} />
         </Grid.Root>
       </Flex>
     </Box>

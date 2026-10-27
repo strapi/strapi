@@ -25,13 +25,14 @@ import type {
   InputProps as InputPropsImpl,
   StringProps,
   EnumerationProps,
+  MultiSelectProps,
 } from './FormInputs/types';
 import type * as Yup from 'yup';
 
 /* -------------------------------------------------------------------------------------------------
  * FormContext
  * -----------------------------------------------------------------------------------------------*/
-type InputProps = InputPropsImpl | StringProps | EnumerationProps;
+type InputProps = InputPropsImpl | StringProps | EnumerationProps | MultiSelectProps;
 
 interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
@@ -937,7 +938,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   return null;
 };
 
-export { Form, Blocker, useField, useForm, getYupValidationErrors };
+export { Form, FormProvider, Blocker, useField, useForm, getYupValidationErrors };
 export type {
   FormErrors,
   FormHelpers,
