@@ -106,11 +106,18 @@ const hasParentPnpmWorkspace = async (rootPath: string): Promise<boolean> => {
   return false;
 };
 
+// nub is pnpm-compatible and reads pnpm-workspace.yaml (allowBuilds + minimumReleaseAgeExclude),
+// so it uses the same scaffold. With a null version it formats the pnpm 11-style file.
+const PNPM_WORKSPACE_PACKAGE_MANAGERS: ReadonlyArray<Scope['packageManager']> = ['pnpm', 'nub'];
+
 export const writePnpmWorkspaceConfig = async (
   scope: Scope,
   pnpmVersion: string | null
 ): Promise<void> => {
-  if (scope.packageManager !== 'pnpm' || !shouldUsePnpmWorkspaceConfig(pnpmVersion)) {
+  if (
+    !PNPM_WORKSPACE_PACKAGE_MANAGERS.includes(scope.packageManager) ||
+    !shouldUsePnpmWorkspaceConfig(pnpmVersion)
+  ) {
     return;
   }
 
