@@ -1,6 +1,10 @@
-import type { Core, Modules, Schema, Struct, UID } from '../src';
+import type { Core, Modules, Public, Schema, Struct, UID, Utils } from '../src';
 import type * as Internal from '../src/internal';
 import type { IsStrict } from '../src/core/strictness';
+
+interface LegacyItemSchema extends Struct.CollectionTypeSchema {
+  attributes: { title: Schema.Attribute.String };
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -55,6 +59,9 @@ declare global {
       interface AppMiddlewares {
         'plugin::legacy.timer': { seconds: number };
       }
+      interface PackageContentTypeSchemas {
+        'plugin::legacy.item': LegacyItemSchema;
+      }
       interface AppContentTypeSchemas {
         'api::strict-only.page': Struct.SingleTypeSchema;
       }
@@ -103,6 +110,28 @@ declare const schemaChecks: [
   Expect<Equal<Schema.Component<'strict-only.seo'>, Struct.ComponentSchema>>,
 ];
 schemaChecks satisfies unknown;
+
+// Package content-type schemas are strict-only too: a declared UID keeps develop's generic types.
+declare const packageSchemaChecks: [
+  Expect<Equal<Schema.ContentTypes, Public.ContentTypeSchemas>>,
+  Expect<Equal<Schema.ContentType<'plugin::legacy.item'>, Struct.ContentTypeSchema>>,
+  Expect<
+    Equal<
+      Utils.Constants.IsSchemaRegistered<'plugin::legacy.item'>,
+      Utils.Constants.AreSchemaRegistriesExtended
+    >
+  >,
+  Expect<Equal<Utils.Constants.IsSchemaRegistered<'plugin::legacy.item'>, false>>,
+  Expect<Equal<Modules.Documents.Document<'plugin::legacy.item'>, Modules.Documents.AnyDocument>>,
+  Expect<Equal<Modules.Documents.Result<'plugin::legacy.item'>, Modules.Documents.AnyDocument>>,
+  Expect<
+    Equal<
+      Modules.Documents.Params.Data.PartialInput<'plugin::legacy.item'>,
+      Modules.Documents.Params.Data.Input<'plugin::legacy.item'>
+    >
+  >,
+];
+packageSchemaChecks satisfies unknown;
 
 // Plural accessors keep the legacy records, even for registered keys.
 declare const mapChecks: [

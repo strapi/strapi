@@ -25,7 +25,7 @@ export type Result<
   TSchemaUID extends UID.Schema,
   TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = If<
-  Constants.AreSchemaRegistriesExtended,
+  Constants.IsSchemaRegistered<TSchemaUID>,
   GetValues<
     TSchemaUID,
     Guard.Never<
@@ -41,7 +41,7 @@ export type Document<
   TSchemaUID extends UID.Schema,
   TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = If<
-  Constants.AreSchemaRegistriesExtended,
+  Constants.IsSchemaRegistered<TSchemaUID>,
   GetValues<
     TSchemaUID,
     Guard.Never<
@@ -79,7 +79,7 @@ export type GetValues<
   TPopulate extends Schema.AttributeNames<TSchemaUID> =
     Schema.PopulatableAttributeNames<TSchemaUID>,
 > = If<
-  Constants.AreSchemaRegistriesExtended,
+  Constants.IsSchemaRegistered<TSchemaUID>,
   Guard.Never<TFields | TPopulate, Schema.AttributeNames<TSchemaUID>> extends infer TKeys extends
     Schema.AttributeNames<TSchemaUID>
     ? Data.Entity<TSchemaUID, TKeys>
@@ -365,7 +365,7 @@ export type StrictResult<
   TDefaultStatus extends PublicationStatus,
   TUndefinedStatus extends PublicationStatus = TDefaultStatus,
 > = If<
-  Constants.AreSchemaRegistriesExtended,
+  Constants.IsSchemaRegistered<TSchemaUID>,
   StrictEntry<
     TSchemaUID,
     Guard.Never<

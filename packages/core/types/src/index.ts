@@ -212,9 +212,20 @@ declare global {
       interface Events {}
 
       /**
-       * Content-type schemas keyed by UID, read in strict mode instead of `Public.ContentTypeSchemas`.
-       * Type generation is the only producer: it writes `types/generated/contentTypes.d.ts`.
-       * Applications do not override schemas, so there is no `Package*` and `App*` pair.
+       * Content-type schemas declared by the package that owns them, keyed by UID (e.g.
+       * `'plugin::upload.file'`), read in strict mode instead of `Public.ContentTypeSchemas`.
+       * Written by hand next to the package's other contracts. Without generated entries, these
+       * UIDs are precise and every other content-type UID stays generic.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface PackageContentTypeSchemas {}
+
+      /**
+       * Application content-type schemas keyed by UID, read in strict mode instead of
+       * `Public.ContentTypeSchemas`. Type generation is the only producer: it writes every runtime
+       * UID, package ones included, to `types/generated/contentTypes.d.ts`. An entry replaces the
+       * package schema for that UID, since it holds what the application changed at runtime
+       * (extensions, attributes added by other plugins). Applications do not declare it by hand.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface AppContentTypeSchemas {}
@@ -222,7 +233,7 @@ declare global {
       /**
        * Component schemas keyed by UID, read in strict mode instead of `Public.ComponentSchemas`.
        * Type generation is the only producer: it writes `types/generated/components.d.ts`.
-       * Applications do not override schemas, so there is no `Package*` and `App*` pair.
+       * Packages cannot ship components, so there is no `Package*` and `App*` pair.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface ComponentSchemas {}
