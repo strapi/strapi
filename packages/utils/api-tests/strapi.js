@@ -31,6 +31,11 @@ const createStrapiInstance = async ({
    * third of a boot.
    */
   buildGraphqlSchema = true,
+  /**
+   * Load the registries without connecting to the database or running bootstrap. That is all
+   * the content-type-builder services need to write or delete schema files.
+   */
+  registerOnly = false,
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
@@ -107,6 +112,11 @@ const createStrapiInstance = async ({
   }
 
   profile.instrumentInstance(instance);
+
+  if (registerOnly) {
+    await profile.timed('boot.register-only', () => instance.register());
+    return instance;
+  }
 
   const bootStart = performance.now();
   await profile.timed('boot.load', () => instance.load());
