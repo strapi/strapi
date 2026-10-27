@@ -324,6 +324,30 @@ describe('prepareRegistryAccess', () => {
     );
   });
 
+  it('sets up an IPv6 loopback registry with the host npm and Yarn look up', async () => {
+    const homeDir = await createTemporaryDirectory();
+    const registryUrl = 'http://[::1]:4873';
+
+    await (await prepare({ homeDir, registryUrl })).apply();
+    await (
+      await prepare({ homeDir, registryUrl, packageManager: { name: 'yarn', majorVersion: 4 } })
+    ).apply();
+
+    expect(await fse.readFile(path.join(homeDir, '.npmrc'), 'utf8')).toBe(
+      `@strapi-enterprise:registry=http://[::1]:4873/\n//[::1]:4873/:_authToken=${LICENSE}\n`
+    );
+    expect(await fse.readFile(path.join(homeDir, '.yarnrc.yml'), 'utf8')).toBe(
+      [
+        'npmScopes:',
+        '  strapi-enterprise:',
+        "    npmRegistryServer: 'http://[::1]:4873/'",
+        '    npmAlwaysAuth: true',
+        `    npmAuthToken: '${LICENSE}'`,
+        '',
+      ].join('\n')
+    );
+  });
+
   it('stops when the user-level file holds another license, and leaves it as is', async () => {
     const homeDir = await createTemporaryDirectory();
     const npmrcPath = path.join(homeDir, '.npmrc');

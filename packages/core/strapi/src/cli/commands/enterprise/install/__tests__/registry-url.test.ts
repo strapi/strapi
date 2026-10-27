@@ -21,6 +21,8 @@ describe('resolveRegistryUrl', () => {
   it.each([
     ['http://localhost:4873/', 'http://localhost:4873'],
     ['http://127.0.0.1:4873', 'http://127.0.0.1:4873'],
+    ['http://[::1]:4873/', 'http://[::1]:4873'],
+    ['http://[0:0:0:0:0:0:0:1]:4873', 'http://[::1]:4873'],
     ['https://registry.example.com/npm/', 'https://registry.example.com/npm'],
     ['HTTP://LOCALHOST:4873/', 'http://localhost:4873'],
     ['  https://Registry.Example.com  ', 'https://registry.example.com'],
@@ -72,12 +74,14 @@ describe('resolveRegistryUrl', () => {
   it.each([
     'http://registry.example.com',
     'http://192.168.1.10:4873',
+    'http://[::2]:4873',
+    'http://[::ffff:127.0.0.1]:4873',
     'ftp://localhost',
     'localhost:4873',
   ])('stops on %s, since the license is sent to it', (registry) => {
     expect(() => resolve(registry)).toThrow(
       new EnterpriseInstallError(
-        '--registry must use https, or http on localhost or 127.0.0.1, because the license is sent to it.'
+        '--registry must use https, or http on localhost, 127.0.0.1 or [::1], because the license is sent to it.'
       )
     );
   });
