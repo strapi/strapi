@@ -1,14 +1,11 @@
 import { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { Data } from '@strapi/types';
 
 import { STAGE_COLOR_DEFAULT } from '../../../../constants';
 import { getStageColorByHex } from '../../../../utils/colors';
 import { getDisplayName } from '../../../../utils/users';
 
 interface StageColumnProps {
-  documentId?: string;
-  id?: Data.ID;
   strapi_stage?: {
     color?: string;
     name: string;
@@ -38,8 +35,6 @@ const StageColumn = (props: StageColumnProps) => {
 };
 
 interface AssigneeColumnProps {
-  documentId?: string;
-  id?: Data.ID;
   strapi_assignee?: Pick<
     SanitizedAdminUser,
     'firstname' | 'lastname' | 'username' | 'email'

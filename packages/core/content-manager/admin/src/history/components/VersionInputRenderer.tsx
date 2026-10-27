@@ -276,6 +276,8 @@ type VersionInputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
    * @default false
    */
   shouldIgnoreRBAC?: boolean;
+  /** Passed down by component and dynamic zone layouts; not used here. */
+  size?: number;
 };
 
 /**
@@ -356,6 +358,8 @@ const VersionInputRenderer = ({
   hint: providedHint,
   shouldIgnoreRBAC = false,
   labelAction,
+  // Not spread with the rest: design-system inputs have a `size` prop of their own.
+  size: _size,
   ...props
 }: VersionInputRendererProps) => {
   const customLabelAction = getLabelAction(labelAction);

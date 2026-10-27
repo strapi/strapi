@@ -270,9 +270,12 @@ const isFaultyImage = async (file: UploadableFile) => {
   const options = getSharpOptions();
 
   if (!file.filepath) {
-    return new Promise((resolve, reject) => {
+    return new Promise<boolean>((resolve) => {
       const pipeline = options ? sharp(options) : sharp();
-      pipeline.stats().then(resolve).catch(reject);
+      pipeline
+        .stats()
+        .then(() => resolve(false))
+        .catch(() => resolve(true));
       file.getStream().pipe(pipeline);
     });
   }

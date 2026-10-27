@@ -448,10 +448,15 @@ const DynamicComponentFields = React.memo(
                         {children ? (
                           children({
                             ...fieldWithTranslatedLabel,
+                            size,
                             name: fieldName,
                           })
                         ) : (
-                          <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                          <InputRenderer
+                            {...fieldWithTranslatedLabel}
+                            size={size}
+                            name={fieldName}
+                          />
                         )}
                       </ResponsiveGridItem>
                     );
