@@ -44,6 +44,33 @@ describe('Entity validator - new component in an update', () => {
     },
   };
 
+  // `extra` is required only when visible, and visible only when `kind` is not its default
+  const conditionalComponent: Schema.Component = {
+    modelType: 'component',
+    uid: 'default.conditional',
+    category: 'default',
+    modelName: 'conditional',
+    globalId: 'ComponentDefaultConditional',
+    info: {
+      displayName: 'conditional',
+    },
+    options: {},
+    attributes: {
+      kind: {
+        type: 'enumeration',
+        enum: ['a', 'b'],
+        default: 'a',
+      },
+      extra: {
+        type: 'string',
+        required: true,
+        conditions: {
+          visible: { '!=': [{ var: 'kind' }, 'a'] },
+        },
+      },
+    },
+  };
+
   const contentType: Schema.ContentType = {
     modelType: 'contentType',
     uid: 'api::test.test',
@@ -76,12 +103,18 @@ describe('Entity validator - new component in an update', () => {
         component: 'default.outer',
         repeatable: false,
       },
+      conditional: {
+        type: 'component',
+        component: 'default.conditional',
+        repeatable: false,
+      },
     },
   };
 
   const models: Record<string, Schema.Schema> = {
     [component.uid]: component,
     [outerComponent.uid]: outerComponent,
+    [conditionalComponent.uid]: conditionalComponent,
     [contentType.uid]: contentType,
   };
 
@@ -96,6 +129,7 @@ describe('Entity validator - new component in an update', () => {
       components: {
         [component.uid]: component,
         [outerComponent.uid]: outerComponent,
+        [conditionalComponent.uid]: conditionalComponent,
       },
     } as any;
   });
@@ -166,6 +200,38 @@ describe('Entity validator - new component in an update', () => {
       ).rejects.toMatchObject({
         name: 'ValidationError',
         message: 'single.title must be a `string` type, but the final value was: `null`.',
+      });
+    });
+  });
+
+  describe('Conditional visibility of a new component field', () => {
+    test('Accepts a new component hiding a required field through a default value on update', async () => {
+      const input = { conditional: {} };
+
+      await expect(
+        entityValidator.validateEntityUpdate(contentType, input, { isDraft: false }, entity)
+      ).resolves.toEqual({ conditional: { kind: 'a' } });
+    });
+
+    test('Accepts a new component hiding a required field through a default value on creation', async () => {
+      const input = { conditional: {} };
+
+      await expect(
+        entityValidator.validateEntityCreation(contentType, input, { isDraft: false })
+      ).resolves.toMatchObject({ conditional: { kind: 'a' } });
+    });
+
+    test('Throws when a new component shows a required field and misses it', async () => {
+      await expect(
+        entityValidator.validateEntityUpdate(
+          contentType,
+          { conditional: { kind: 'b' } },
+          { isDraft: false },
+          entity
+        )
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        message: 'conditional.extra must be defined.',
       });
     });
   });
