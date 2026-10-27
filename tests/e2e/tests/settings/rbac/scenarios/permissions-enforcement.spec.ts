@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../../../utils/login';
+import { login, loginWithApi } from '../../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../../utils/dts-import';
 import { clickAndWait, navToHeader, findAndClose } from '../../../../../utils/shared';
 import { AUTHOR_EMAIL_ADDRESS, AUTHOR_PASSWORD } from '../../../../constants';
@@ -7,8 +7,8 @@ import { AUTHOR_EMAIL_ADDRESS, AUTHOR_PASSWORD } from '../../../../constants';
 test.describe('RBAC - Permissions enforcement', { tag: ['@critical'] }, () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('a user without publish permission cannot publish content', async ({ page }) => {

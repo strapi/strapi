@@ -3,7 +3,7 @@ import path from 'path';
 
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
 import { resetFiles } from '../../../../utils/file-reset';
-import { login } from '../../../../utils/login';
+import { loginWithApi } from '../../../../utils/login';
 import { describeOnCondition, navToHeader } from '../../../../utils/shared';
 
 // The legacy Media Library renders only with `useLegacyMediaLibrary: true`, so this suite
@@ -12,8 +12,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'legacy')('Media Library',
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await resetFiles();
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   // Regression test for https://github.com/strapi/strapi/issues/25190

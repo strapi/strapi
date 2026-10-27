@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import {
   clickAndWait,
@@ -73,8 +73,8 @@ test.describe('Relations UI - manage relations to existing entries', { tag: ['@e
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   // Connect an existing author via the relation combobox. Options are labelled "<name> <status>"

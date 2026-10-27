@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { describeOnCondition } from '../../../utils/shared';
 
@@ -12,8 +12,8 @@ const FIXTURE_IMAGE_1 = path.join(__dirname, '../../data/uploads/test-image-1.jp
 describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')('Media Library - Filters', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('filters by type and hides folders for non-folder values', async ({ page }) => {
