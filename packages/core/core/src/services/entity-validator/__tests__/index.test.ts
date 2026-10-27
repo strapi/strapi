@@ -446,6 +446,186 @@ describe('Entity validator', () => {
         expect(data).toEqual({ title: null });
       });
 
+      test('Throws on omitted required repeatable component and dynamic zone (aggregates are not draft-exempt)', async () => {
+        // Aggregates are the carve-out from draft required-leniency: `createComponentValidator`
+        // (repeatable branch) and `createDzValidator` both pass a hard-coded `required: true` to
+        // `addRequiredValidation` regardless of `isDraft`, and `addDefault` only substitutes `[]`
+        // for aggregates that are *not* required. So the key must be present even on a draft.
+        const component: Schema.Component = {
+          modelType: 'component',
+          uid: 'default.seo',
+          modelName: 'seo',
+          globalId: 'ComponentDefaultSeo',
+          category: 'default',
+          info: { displayName: 'Seo' },
+          attributes: { label: { type: 'string' } },
+        };
+
+        global.strapi = {
+          errors: { badRequest: jest.fn() },
+          getModel: () => component,
+          components: { 'default.seo': component },
+        } as any;
+
+        const model: Schema.ContentType = {
+          ...modelBase,
+          attributes: {
+            links: {
+              type: 'component',
+              component: 'default.seo',
+              repeatable: true,
+              required: true,
+            },
+            sections: {
+              type: 'dynamiczone',
+              components: ['default.seo'],
+              required: true,
+            },
+          },
+        };
+
+        // Omitting either aggregate key throws, unlike the required scalar above.
+        await expect(
+          entityValidator.validateEntityCreation(model, { sections: [] }, { isDraft: true })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        await expect(
+          entityValidator.validateEntityCreation(model, { links: [] }, { isDraft: true })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        // Present-but-empty satisfies it — the validator wants the key, not the contents.
+        await expect(
+          entityValidator.validateEntityCreation(
+            model,
+            { links: [], sections: [] },
+            { isDraft: true }
+          )
+        ).resolves.toMatchObject({ links: [], sections: [] });
+      });
+
+      test('Accepts omitted required repeatable component and dynamic zone on update, but rejects explicit null', async () => {
+        // The update counterpart of the creation case above, and the reason the MCP schema can
+        // relax required aggregates on `update` while keeping them on `create`. Here
+        // `addRequiredValidation` applies `notNull()` rather than `notNil()`, and `addDefault`
+        // uses `default(undefined)`, so an absent key is a no-op patch — but an explicit `null`
+        // still fails. Pinning both halves means a future switch to `notNil()` breaks this test
+        // instead of silently invalidating the advertised MCP contract.
+        const component: Schema.Component = {
+          modelType: 'component',
+          uid: 'default.seo',
+          modelName: 'seo',
+          globalId: 'ComponentDefaultSeo',
+          category: 'default',
+          info: { displayName: 'Seo' },
+          attributes: { label: { type: 'string' } },
+        };
+
+        global.strapi = {
+          errors: { badRequest: jest.fn() },
+          getModel: () => component,
+          components: { 'default.seo': component },
+        } as any;
+
+        const model: Schema.ContentType = {
+          ...modelBase,
+          attributes: {
+            links: {
+              type: 'component',
+              component: 'default.seo',
+              repeatable: true,
+              required: true,
+            },
+            sections: {
+              type: 'dynamiczone',
+              components: ['default.seo'],
+              required: true,
+            },
+          },
+        };
+
+        // Omitting both aggregate keys is a valid partial update, unlike on creation.
+        await expect(
+          entityValidator.validateEntityUpdate(model, {}, { isDraft: true })
+        ).resolves.toEqual({});
+
+        // Omitting either one individually is equally fine.
+        await expect(
+          entityValidator.validateEntityUpdate(model, { links: [] }, { isDraft: true })
+        ).resolves.toMatchObject({ links: [] });
+
+        await expect(
+          entityValidator.validateEntityUpdate(model, { sections: [] }, { isDraft: true })
+        ).resolves.toMatchObject({ sections: [] });
+
+        // Explicit null is not an omission — `notNull()` rejects it on both aggregates.
+        await expect(
+          entityValidator.validateEntityUpdate(model, { links: null }, { isDraft: true })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        await expect(
+          entityValidator.validateEntityUpdate(model, { sections: null }, { isDraft: true })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+      });
+
+      test('Required non-repeatable component accepts explicit null on a draft, rejects it when published', async () => {
+        // The counterpart to the aggregate case above, and the reason the MCP schema makes
+        // draft-relaxed non-repeatable components nullable but keeps published ones non-nullable.
+        // The non-repeatable branch of `createComponentValidator` passes
+        // `required: !isDraft && attr.required`, which collapses to `false` on a draft — so
+        // `addRequiredValidation` takes its `.nullable()` else-branch and the clear is accepted.
+        // Without `isDraft` the real `required: true` survives and `notNull()` rejects it.
+        //
+        // Pinning both halves means a change to that projection breaks here rather than silently
+        // invalidating the advertised MCP contract, where an explicit `null` is the only way to
+        // clear a component on update (omission preserves the existing row).
+        const component: Schema.Component = {
+          modelType: 'component',
+          uid: 'default.seo',
+          modelName: 'seo',
+          globalId: 'ComponentDefaultSeo',
+          category: 'default',
+          info: { displayName: 'Seo' },
+          attributes: { label: { type: 'string' } },
+        };
+
+        global.strapi = {
+          errors: { badRequest: jest.fn() },
+          getModel: () => component,
+          components: { 'default.seo': component },
+        } as any;
+
+        const model: Schema.ContentType = {
+          ...modelBase,
+          attributes: {
+            seo: {
+              type: 'component',
+              component: 'default.seo',
+              repeatable: false,
+              required: true,
+            },
+          },
+        };
+
+        // Draft: the clear is accepted on both creation and update.
+        await expect(
+          entityValidator.validateEntityCreation(model, { seo: null }, { isDraft: true })
+        ).resolves.toMatchObject({ seo: null });
+
+        await expect(
+          entityValidator.validateEntityUpdate(model, { seo: null }, { isDraft: true })
+        ).resolves.toMatchObject({ seo: null });
+
+        // Published: the required component is not nullable, so the same payload fails.
+        await expect(
+          entityValidator.validateEntityUpdate(model, { seo: null }, { isDraft: false })
+        ).rejects.toMatchObject({ name: 'ValidationError' });
+
+        // Omission remains a valid partial update either way.
+        await expect(
+          entityValidator.validateEntityUpdate(model, {}, { isDraft: false })
+        ).resolves.toEqual({});
+      });
+
       it('Supports custom field types', async () => {
         const model: Schema.ContentType = {
           ...modelBase,
