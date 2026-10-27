@@ -19,6 +19,12 @@ const createStrapiMock = (previousStage: typeof draftStage) => {
   };
 };
 
+const localizedContentType = {
+  uid: UID,
+  attributes: { [ENTITY_STAGE_ATTRIBUTE]: {} },
+  pluginOptions: { i18n: { localized: true } },
+};
+
 const createUpdateContext = (stageId: number) => ({
   action: 'update',
   contentType: { uid: UID },
@@ -70,7 +76,7 @@ describe('review-workflows document service middleware', () => {
 
       const ctx = {
         action: 'update',
-        contentType: { uid: UID },
+        contentType: localizedContentType,
         params: { documentId: 'doc-1', locale: 'fr', data: {} },
       };
       const next = vi.fn();
@@ -90,13 +96,58 @@ describe('review-workflows document service middleware', () => {
 
       const ctx = {
         action: 'update',
-        contentType: { uid: UID },
+        contentType: localizedContentType,
         params: { documentId: 'doc-1', locale: 'en', data: {} },
       };
       const next = vi.fn();
 
       await assignStageOnCreate(ctx as any, next);
 
+      expect(ctx.params.data).toEqual({});
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+    test('keeps the stage sent by an update that creates a new locale', async () => {
+      const mock = createAssignStageStrapiMock(null);
+      vi.stubGlobal('strapi', mock.strapi);
+
+      const ctx = {
+        action: 'update',
+        contentType: localizedContentType,
+        params: { documentId: 'doc-1', locale: 'fr', data: { [ENTITY_STAGE_ATTRIBUTE]: 11 } },
+      };
+      const next = vi.fn();
+
+      await assignStageOnCreate(ctx as any, next);
+
+      expect(mock.findOne).not.toHaveBeenCalled();
+      expect(ctx.params.data).toEqual({ [ENTITY_STAGE_ATTRIBUTE]: 11 });
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    test.each([
+      [
+        'a non-localized type',
+        { uid: UID, attributes: { [ENTITY_STAGE_ATTRIBUTE]: {} }, pluginOptions: {} },
+      ],
+      [
+        'a type without a stage attribute',
+        { uid: UID, attributes: {}, pluginOptions: { i18n: { localized: true } } },
+      ],
+    ])('does not look up the locale on an update of %s', async (_, contentType) => {
+      const mock = createAssignStageStrapiMock(null);
+      vi.stubGlobal('strapi', mock.strapi);
+
+      const ctx = {
+        action: 'update',
+        contentType,
+        params: { documentId: 'doc-1', locale: 'fr', data: {} },
+      };
+      const next = vi.fn();
+
+      await assignStageOnCreate(ctx as any, next);
+
+      expect(mock.findOne).not.toHaveBeenCalled();
+      expect(mock.getAssignedWorkflow).not.toHaveBeenCalled();
       expect(ctx.params.data).toEqual({});
       expect(next).toHaveBeenCalledTimes(1);
     });
