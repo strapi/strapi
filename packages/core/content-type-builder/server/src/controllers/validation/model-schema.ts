@@ -22,7 +22,7 @@ export const createSchema = (
 ) => {
   const shape = {
     description: yup.string(),
-    options: yup.object(),
+    options: yup.object({ draftAndPublish: yup.boolean() }),
     pluginOptions: yup.object(),
     collectionName: yup.string().nullable().test(isValidCollectionName),
     attributes: createAttributesValidator({ types, relations, modelType }),
