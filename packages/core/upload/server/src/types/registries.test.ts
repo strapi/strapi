@@ -266,3 +266,19 @@ declare const handler: Core.ControllerHandler;
   // @ts-expect-error Route actions are checked against the controller contracts.
   { method: 'GET', path: '/files', handler: 'content-api.findMany' },
 ] satisfies Core.RouteInputFor<Controllers, 'plugin::upload'>[];
+
+// Upload declares its content-type schemas: the Document Service reads them without type generation.
+const uploadedFile = await strapi
+  .documents('plugin::upload.file')
+  .findFirst({ populate: ['folder'] });
+if (uploadedFile !== null) {
+  uploadedFile.name satisfies string | null;
+  uploadedFile.folder satisfies { path?: string | null } | null;
+  uploadedFile.createdAt satisfies string | null;
+  // @ts-expect-error Not an attribute of plugin::upload.file.
+  uploadedFile.missing satisfies unknown;
+}
+// @ts-expect-error Filters are checked against the declared schema.
+strapi.documents('plugin::upload.folder').findMany({ filters: { missing: { $eq: 1 } } });
+// Content types no package declares stay generic.
+strapi.documents('api::article.article').findMany({ filters: { anything: { $eq: 1 } } });
