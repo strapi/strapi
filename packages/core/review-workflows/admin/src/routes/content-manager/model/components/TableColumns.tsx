@@ -12,7 +12,7 @@ interface StageColumnProps {
   strapi_stage?: {
     color?: string;
     name: string;
-  };
+  } | null;
 }
 
 const StageColumn = (props: StageColumnProps) => {
