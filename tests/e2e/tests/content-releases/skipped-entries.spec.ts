@@ -28,6 +28,31 @@ describeOnCondition(edition === 'EE')('Release page - skipped entries', () => {
     await expect(details.publishButton).toBeHidden();
   });
 
+  test('the page shows what the run did to each entry', async ({ page, details }) => {
+    await expect(page.getByText('Released 1 of 3 entries')).toBeVisible();
+    await expect(page.getByText('2 skipped', { exact: true })).toBeVisible();
+    await expect(details.tab('All')).toContainText('3');
+    await expect(details.tab('Released')).toContainText('1');
+    await expect(details.tab('Skipped')).toContainText('2');
+
+    await expect(details.entryRow(PUBLISHED).getByText('Done', { exact: true })).toBeVisible();
+    for (const name of SKIPPED) {
+      await expect(details.entryRow(name).getByText('Skipped: Validation error')).toBeVisible();
+    }
+
+    await details.entryRow(SKIPPED[0]).getByRole('button', { name: 'Details' }).click();
+    await expect(page.getByText(/errors? on fields/)).toBeVisible();
+    await expect(page.getByRole('link', { name: 'See errors' })).toBeVisible();
+    await page.keyboard.press('Escape');
+
+    await details.tab('Skipped').click();
+    await expect(page).toHaveURL(/filter=skipped/);
+    for (const name of SKIPPED) {
+      await expect(details.entryCell(name)).toBeVisible();
+    }
+    await expect(details.entryCell(PUBLISHED)).toHaveCount(0);
+  });
+
   test('a user can create a new release from the entries a partial release skipped', async ({
     details,
   }) => {

@@ -389,6 +389,7 @@ const releaseApi = adminApi
           },
           invalidatesTags: (result, error, arg) => [
             { type: 'Release', id: arg.id },
+            { type: 'ReleaseAction', id: 'LIST' },
             { type: 'Document' },
             'UpcomingReleasesList',
           ],

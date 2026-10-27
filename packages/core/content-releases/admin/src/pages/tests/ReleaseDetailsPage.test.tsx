@@ -474,6 +474,45 @@ describe('Release details tabs, header and rows', () => {
     expect(await screen.findByRole('button', { name: 'Publish' })).toBeEnabled();
   });
 
+  it('shows what the run did to each entry right after publishing', async () => {
+    let hasRun = false;
+
+    server.use(
+      http.get('/content-releases/:releaseId', () =>
+        HttpResponse.json({
+          data: hasRun
+            ? { ...partialRelease, status: 'done', totalSkippedEntries: 0 }
+            : { ...plannedRelease, id: partialRelease.id, status: 'ready' },
+        })
+      ),
+      http.get('/content-releases/:releaseId/actions', () =>
+        HttpResponse.json({
+          data: { Article: [action(1, { outcome: hasRun ? 'published' : null })] },
+          meta: {
+            pagination: { page: 1, pageSize: 10, total: 1, pageCount: 1 },
+            contentTypes: {},
+            components: {},
+          },
+        })
+      ),
+      http.post('/content-releases/:releaseId/publish', () => {
+        hasRun = true;
+
+        return HttpResponse.json({
+          data: partialRelease,
+          meta: { totalEntries: 1, totalPublishedEntries: 1, totalUnpublishedEntries: 0 },
+        });
+      })
+    );
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Publish' }));
+
+    expect(await screen.findByText('Done')).toBeVisible();
+    expect(screen.queryByText('Unknown')).not.toBeInTheDocument();
+  });
+
   it('sums what a run released and skipped', async () => {
     const actionsRequest = mockRelease(partialRelease, [
       action(1, { outcome: 'published' }),

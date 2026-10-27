@@ -46,6 +46,20 @@ export class ReleaseDetailsPage {
   }
 
   /**
+   * A tab filtering the entries. Its name ends with the count, so it's matched by its start.
+   */
+  tab(label: string): Locator {
+    return this.page.getByRole('tab', { name: new RegExp(`^${label}`) });
+  }
+
+  /**
+   * The table row of an entry.
+   */
+  entryRow(name: string): Locator {
+    return this.page.getByRole('row').filter({ has: this.entryCell(name) });
+  }
+
+  /**
    * Publish the currently-open release.
    */
   async publish() {

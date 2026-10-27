@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
 import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
 import { test, expect, releaseName } from './fixtures';
+import { createReleaseOfMatches } from './release-api';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -184,4 +185,33 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       ).toBeHidden();
     }
   );
+
+  test('a release with an entry that is not ready is blocked and shows why', async ({
+    page,
+    details,
+  }) => {
+    const releaseId = await createReleaseOfMatches(page, {
+      name: 'Matchday',
+      releaseCondition: 'all_or_nothing',
+      matches: [{ kit_man: 'Will Kitman', opponent: 'West Ham' }, { kit_man: 'Roy Kent' }],
+    });
+
+    await details.goto(releaseId);
+
+    await expect(details.publishButton).toBeDisabled();
+    await expect(details.tab('All')).toContainText('2');
+    await expect(details.tab('Ready')).toContainText('1');
+    await expect(details.tab('Not ready')).toContainText('1');
+
+    await details.tab('Not ready').click();
+    await expect(page).toHaveURL(/filter=notReady/);
+    await expect(details.entryCell('Roy Kent')).toBeVisible();
+    await expect(details.entryCell('Will Kitman')).toHaveCount(0);
+
+    await details
+      .entryRow('Roy Kent')
+      .getByRole('button', { name: 'Not ready to publish' })
+      .click();
+    await expect(page.getByText(/errors? on fields/)).toBeVisible();
+  });
 });
