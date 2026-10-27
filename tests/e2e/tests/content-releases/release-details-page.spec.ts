@@ -55,8 +55,9 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     ).not.toBeVisible();
     await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
     await expect(
-      page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+      page.getByRole('gridcell', { name: 'Publish', exact: true }).first()
     ).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Done', exact: true }).first()).toBeVisible();
   });
 
   test('after publishing a release, the CM list view reflects the new status without a manual refresh', async ({
@@ -170,14 +171,16 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       await expect(page.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
       await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
       await expect(
-        page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+        page.getByRole('gridcell', { name: 'Publish', exact: true }).first()
       ).toBeVisible();
       await expect(
-        page.getByRole('gridcell', { name: 'This entry was unpublished.' }).first()
+        page.getByRole('gridcell', { name: 'Unpublish', exact: true }).first()
       ).toBeVisible();
+      await expect(page.getByRole('gridcell', { name: /^Skipped/ })).toHaveCount(0);
+      await expect(page.getByRole('tab', { name: /^Skipped/ })).toContainText('0');
       // Nothing was skipped, so there is nothing to carry over to a new release
       await expect(
-        page.getByRole('button', { name: 'Create release from skipped entries' })
+        page.getByRole('button', { name: 'Create release from skipped', exact: true })
       ).toBeHidden();
     }
   );

@@ -313,7 +313,7 @@ describe('Create release from skipped entries', () => {
     renderPage();
 
     expect(
-      await screen.findByRole('button', { name: 'Create release from skipped entries' })
+      await screen.findByRole('button', { name: 'Create release from skipped' })
     ).toBeInTheDocument();
   });
 
@@ -330,7 +330,7 @@ describe('Create release from skipped entries', () => {
     // Let the page render the response
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
     expect(
-      screen.queryByRole('button', { name: 'Create release from skipped entries' })
+      screen.queryByRole('button', { name: 'Create release from skipped' })
     ).not.toBeInTheDocument();
   });
 
@@ -340,7 +340,7 @@ describe('Create release from skipped entries', () => {
     renderPage();
 
     expect(
-      await screen.findByRole('button', { name: 'Create release from skipped entries' })
+      await screen.findByRole('button', { name: 'Create release from skipped' })
     ).toBeInTheDocument();
   });
 
@@ -361,7 +361,214 @@ describe('Create release from skipped entries', () => {
     await screen.findByText(partialRelease.data.name);
     expect(skippedRequest).not.toHaveBeenCalled();
     expect(
-      screen.queryByRole('button', { name: 'Create release from skipped entries' })
+      screen.queryByRole('button', { name: 'Create release from skipped' })
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('Release details tabs, header and rows', () => {
+  const plannedRelease = {
+    ...mockReleaseDetailsPageData.withActionsHeaderData.data,
+    status: 'blocked',
+    releaseCondition: 'all_or_nothing',
+    failureReason: null,
+    totalPublishedEntries: null,
+    totalUnpublishedEntries: null,
+    totalSkippedEntries: null,
+    actions: { meta: { count: 3, notReadyCount: 1 } },
+  };
+
+  const partialRelease = {
+    ...mockReleaseDetailsPageData.withActionsAndPublishedHeaderData.data,
+    status: 'partial',
+    releaseCondition: 'allow_partial',
+    failureReason: null,
+    totalPublishedEntries: 7,
+    totalUnpublishedEntries: 1,
+    totalSkippedEntries: 2,
+    actions: { meta: { count: 10 } },
+  };
+
+  const action = (id: number, overrides: Record<string, unknown> = {}) => ({
+    id,
+    type: 'publish',
+    entryDocumentId: `doc-${id}`,
+    entry: { id, documentId: `doc-${id}` },
+    contentType: {
+      uid: 'api::article.article',
+      displayName: 'Article',
+      mainFieldValue: `article ${id}`,
+    },
+    locale: null,
+    status: 'draft',
+    isEntryValid: true,
+    outcome: null,
+    reason: null,
+    ...overrides,
+  });
+
+  const mockRelease = (release: Record<string, unknown>, actions: unknown[]) => {
+    const actionsRequest = jest.fn();
+
+    server.use(
+      http.get('/content-releases/:releaseId', () => HttpResponse.json({ data: release })),
+      http.get('/content-releases/:releaseId/actions', ({ request }) => {
+        actionsRequest(new URL(request.url).searchParams.get('filter'));
+
+        return HttpResponse.json({
+          data: actions.length > 0 ? { Article: actions } : [],
+          meta: {
+            pagination: { page: 1, pageSize: 10, total: actions.length, pageCount: 1 },
+            contentTypes: {},
+            components: {},
+          },
+        });
+      })
+    );
+
+    return actionsRequest;
+  };
+
+  const renderPage = (search = '') =>
+    render(
+      <Routes>
+        <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+      </Routes>,
+      { initialEntries: [{ pathname: `/content-releases/3`, search }] }
+    );
+
+  beforeEach(() => {
+    jest.mocked(useRBAC).mockReturnValue({
+      isLoading: false,
+      allowedActions: { canUpdate: true, canDelete: true, canPublish: true },
+    } as unknown as ReturnType<typeof useRBAC>);
+  });
+
+  it('counts the entries of a planned release by readiness', async () => {
+    const actionsRequest = mockRelease(plannedRelease, [action(1)]);
+
+    const { user } = renderPage();
+
+    expect(await screen.findByRole('tab', { name: /^All/ })).toHaveTextContent('All3');
+    expect(screen.getByRole('tab', { name: /^Ready/ })).toHaveTextContent('Ready2');
+    expect(screen.getByRole('tab', { name: /^Not ready/ })).toHaveTextContent('Not ready1');
+
+    await user.click(screen.getByRole('tab', { name: /^Not ready/ }));
+
+    await waitFor(() => expect(actionsRequest).toHaveBeenLastCalledWith('notReady'));
+  });
+
+  it('disables Publish on a blocked release', async () => {
+    mockRelease(plannedRelease, [action(1)]);
+
+    renderPage();
+
+    expect(await screen.findByRole('button', { name: 'Publish' })).toBeDisabled();
+  });
+
+  it('enables Publish on a ready release', async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
+
+    renderPage();
+
+    expect(await screen.findByRole('button', { name: 'Publish' })).toBeEnabled();
+  });
+
+  it('sums what a run released and skipped', async () => {
+    const actionsRequest = mockRelease(partialRelease, [
+      action(1, { outcome: 'published' }),
+      action(2, { type: 'unpublish', outcome: 'unpublished' }),
+      action(3, { outcome: 'skipped_held' }),
+    ]);
+
+    const { user } = renderPage();
+
+    expect(await screen.findByText('Released 8 of 10 entries', { exact: false })).toBeVisible();
+    expect(screen.getByText('2 skipped')).toBeVisible();
+    expect(screen.getByRole('tab', { name: /^All/ })).toHaveTextContent('All10');
+    expect(screen.getByRole('tab', { name: /^Released/ })).toHaveTextContent('Released8');
+    expect(screen.getByRole('tab', { name: /^Skipped/ })).toHaveTextContent('Skipped2');
+    expect(screen.queryByRole('button', { name: 'Publish' })).not.toBeInTheDocument();
+
+    expect(screen.getAllByText('Done')).toHaveLength(2);
+    expect(screen.getByText('Skipped: Waiting on other entries')).toBeVisible();
+    expect(screen.getByRole('gridcell', { name: 'Unpublish' })).toBeVisible();
+
+    await user.click(screen.getByRole('tab', { name: /^Skipped/ }));
+
+    await waitFor(() => expect(actionsRequest).toHaveBeenLastCalledWith('skipped'));
+  });
+
+  it('ignores a filter the release has no tab for', async () => {
+    const actionsRequest = mockRelease(partialRelease, [action(1, { outcome: 'published' })]);
+
+    renderPage('?filter=notReady');
+
+    await screen.findByText('Released 8 of 10 entries', { exact: false });
+    expect(actionsRequest).toHaveBeenCalledWith(null);
+    expect(actionsRequest).not.toHaveBeenCalledWith('notReady');
+    expect(screen.getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('greys out an entry deleted since the run', async () => {
+    mockRelease(partialRelease, [
+      action(1, {
+        entry: null,
+        contentType: { uid: 'api::article.article', displayName: 'Article' },
+        status: null,
+        outcome: 'skipped_invalid',
+        reason: { validation: { errors: [{ path: ['title'], message: 'required' }] } },
+      }),
+    ]);
+
+    renderPage();
+
+    expect(await screen.findByText('Deleted entry')).toBeVisible();
+    expect(screen.getByText('Skipped: Validation error')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Details' })).toBeVisible();
+  });
+
+  it("doesn't count anything for a release that failed before the upgrade", async () => {
+    mockRelease(
+      {
+        ...partialRelease,
+        status: 'failed',
+        failureReason: 'failed_before_upgrade',
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 10,
+      },
+      [action(1, { outcome: 'skipped_missed' })]
+    );
+
+    renderPage();
+
+    expect(await screen.findByText('Unknown')).toBeVisible();
+    expect(screen.getAllByRole('tab')).toHaveLength(1);
+    expect(screen.getByRole('tab')).toHaveTextContent(/^All$/);
+    expect(screen.queryByText(/Released \d+ of/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/skipped$/)).not.toBeInTheDocument();
+  });
+
+  it('says when a release ran with no entries', async () => {
+    mockRelease(
+      {
+        ...partialRelease,
+        status: 'done',
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 0,
+        actions: { meta: { count: 0 } },
+      },
+      []
+    );
+
+    renderPage();
+
+    await waitFor(() =>
+      expect(screen.getAllByText('This release ran with no entries.')).toHaveLength(2)
+    );
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(screen.queryByText('Open the Content Manager')).not.toBeInTheDocument();
   });
 });

@@ -9,6 +9,7 @@ import {
 import type {
   GetReleaseActions,
   UpdateReleaseAction,
+  ReleaseActionFilter,
   ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import type {
@@ -40,6 +41,7 @@ export interface GetReleaseActionsQueryParams {
   page?: number;
   pageSize?: number;
   groupBy?: ReleaseActionGroupBy;
+  filter?: ReleaseActionFilter;
 }
 
 type GetReleasesTabResponse = GetReleases.Response & {

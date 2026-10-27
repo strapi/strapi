@@ -16,7 +16,8 @@ export class ReleaseDetailsPage {
     this.page = page;
     this.publishButton = page.getByRole('button', { name: 'Publish', exact: true });
     this.createFromSkippedButton = page.getByRole('button', {
-      name: 'Create release from skipped entries',
+      name: 'Create release from skipped',
+      exact: true,
     });
   }
 
