@@ -484,14 +484,24 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         await updateStage(productUID, entry.documentId, secondStage);
         await publishEntry(productUID, entry.documentId);
 
-        // Update the assignee of the entry
+        // Assign the entry, then remove the assignee
         const user = requests.admin.getLoggedUser();
-        await requests.admin.put(
+        const assignResponse = await requests.admin.put(
           `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/assignee`,
           {
-            body: { data: null },
+            body: { data: { id: user.id } },
           }
         );
+        expect(assignResponse.status).toBe(200);
+
+        const removeResponse = await requests.admin.put(
+          `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/assignee`,
+          {
+            body: { data: { id: null } },
+          }
+        );
+        expect(removeResponse.status).toBe(200);
+        expect(removeResponse.body.data[ENTITY_ASSIGNEE_ATTRIBUTE]).toBeNull();
 
         // Find entity and check its status
         const updatedEntry = await requests.admin.get(
