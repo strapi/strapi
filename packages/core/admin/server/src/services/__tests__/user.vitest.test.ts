@@ -693,6 +693,71 @@ describe('User', () => {
     });
   });
 
+  describe('Without a super admin role', () => {
+    const superAdminUser = { id: 2, email: 'test@strapi.io', roles: [{ code: SUPER_ADMIN_CODE }] };
+    const missingRoleMessage = "Cannot proceed because the super admin role doesn't exist.";
+
+    const setup = () => {
+      const findOne = vi.fn(() => Promise.resolve(superAdminUser));
+      const update = vi.fn(() => Promise.resolve(superAdminUser));
+      const count = vi.fn(() => Promise.resolve(0));
+      const deleteFn = vi.fn(() => Promise.resolve(superAdminUser));
+      const getSuperAdminWithUsersCount = vi.fn(() => Promise.resolve(null));
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: vi.fn() },
+        db: { query: () => ({ findOne, update, count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+      } as any;
+
+      return { update, count, deleteFn };
+    };
+
+    test('updateById rejects a roles update with a clear error', async () => {
+      const { update } = setup();
+
+      await expect(updateById(superAdminUser.id, { roles: [3] })).rejects.toMatchObject({
+        name: 'ApplicationError',
+        message: missingRoleMessage,
+      });
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    test('updateById can deactivate a user, who cannot be the last super admin', async () => {
+      const { update } = setup();
+
+      await updateById(superAdminUser.id, { isActive: false });
+
+      expect(update).toHaveBeenCalledWith({
+        where: { id: superAdminUser.id },
+        data: { isActive: false },
+        populate: ['roles'],
+      });
+    });
+
+    test('deleteById rejects with a clear error', async () => {
+      const { deleteFn } = setup();
+
+      await expect(deleteById(superAdminUser.id)).rejects.toMatchObject({
+        name: 'ApplicationError',
+        message: missingRoleMessage,
+      });
+      expect(deleteFn).not.toHaveBeenCalled();
+    });
+
+    test('deleteByIds rejects with a clear error', async () => {
+      const { count, deleteFn } = setup();
+
+      await expect(deleteByIds([superAdminUser.id])).rejects.toMatchObject({
+        name: 'ApplicationError',
+        message: missingRoleMessage,
+      });
+      expect(count).not.toHaveBeenCalled();
+      expect(deleteFn).not.toHaveBeenCalled();
+    });
+  });
+
   describe('exists', () => {
     test('Return true if the user already exists', async () => {
       const count = vi.fn(() => Promise.resolve(1));
