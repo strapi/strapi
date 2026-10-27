@@ -741,6 +741,8 @@ interface AssetDetailsProps {
   onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
   /** After the asset was deleted from the library. */
   onAssetDelete?: (id: number) => void;
+  /** `location` stamped on the tracking events, for analytics to tell hosts apart. */
+  trackedLocation?: string;
 }
 
 interface AssetFormState {
@@ -757,6 +759,7 @@ export const AssetDetails = ({
   guardNavigation = false,
   onAssetChange,
   onAssetDelete,
+  trackedLocation = MEDIA_LIBRARY_LOCATION,
 }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const getErrorMessage = useApiErrorMessage();
@@ -822,7 +825,7 @@ export const AssetDetails = ({
     onAssetChange?.(res.data);
 
     trackUsage('didEditMediaLibraryElements', {
-      location: MEDIA_LIBRARY_LOCATION,
+      location: trackedLocation,
       // Legacy sends the mime top-level type (image/video/audio/application…).
       type: asset.mime?.split('/')[0],
       changeLocation: values.folder !== initialValues.folder,
@@ -861,7 +864,7 @@ export const AssetDetails = ({
         return;
       }
       onAssetChange?.(res.data);
-      trackUsage('didReplaceMedia', { location: MEDIA_LIBRARY_LOCATION });
+      trackUsage('didReplaceMedia', { location: trackedLocation });
       notify({
         type: 'success',
         message: formatMessage({
@@ -878,6 +881,7 @@ export const AssetDetails = ({
       notify,
       onAssetChange,
       replaceMutation,
+      trackedLocation,
       trackUsage,
     ]
   );
@@ -951,7 +955,7 @@ export const AssetDetails = ({
       return;
     }
     onAssetChange?.(res.data);
-    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: false });
+    trackUsage('didCropFile', { location: trackedLocation, duplicatedFile: false });
     notify({
       type: 'success',
       message: formatMessage({
@@ -981,7 +985,7 @@ export const AssetDetails = ({
       notifyCropError(res.error);
       return;
     }
-    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: true });
+    trackUsage('didCropFile', { location: trackedLocation, duplicatedFile: true });
     notify({
       type: 'success',
       message: formatMessage({
@@ -1312,6 +1316,7 @@ interface DrawerContentProps {
   guardNavigation: boolean;
   onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
   onAssetDelete?: (id: number) => void;
+  trackedLocation?: string;
 }
 
 const DrawerContent = ({
@@ -1322,6 +1327,7 @@ const DrawerContent = ({
   guardNavigation,
   onAssetChange,
   onAssetDelete,
+  trackedLocation,
 }: DrawerContentProps) => {
   const { formatMessage } = useIntl();
   const {
@@ -1369,6 +1375,7 @@ const DrawerContent = ({
         guardNavigation={guardNavigation}
         onAssetChange={onAssetChange}
         onAssetDelete={onAssetDelete}
+        trackedLocation={trackedLocation}
       />
     </>
   );
@@ -1433,6 +1440,11 @@ interface AssetDetailsDrawerProps {
   onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
   /** After the asset was deleted from the library, just before the drawer closes. */
   onAssetDelete?: (id: number) => void;
+  /**
+   * `location` stamped on the tracking events, for analytics to tell hosts
+   * apart. Defaults to the Media Library page's.
+   */
+  trackedLocation?: string;
 }
 
 export const AssetDetailsDrawer = ({
@@ -1441,6 +1453,7 @@ export const AssetDetailsDrawer = ({
   guardNavigation = false,
   onAssetChange,
   onAssetDelete,
+  trackedLocation,
 }: AssetDetailsDrawerProps) => {
   const { formatMessage } = useIntl();
   const { displayAssetId, isVisible, shouldRender, onCloseAnimationEnd } =
@@ -1506,6 +1519,7 @@ export const AssetDetailsDrawer = ({
           guardNavigation={guardNavigation}
           onAssetChange={onAssetChange}
           onAssetDelete={onAssetDelete}
+          trackedLocation={trackedLocation}
         />
         {/* Rendered from inside the panel so Radix counts presses on it as
             inside, and the drawer stays put while it is open. The edits go
