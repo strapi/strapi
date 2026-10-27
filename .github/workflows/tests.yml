@@ -59,12 +59,27 @@ jobs:
 
   # Always run build in case an unrecognized file change could affect it
   # Build must complete before any other step that uses build, so that it gets cached here and doesn't build multiple times
+  # One build feeds every downstream job: the dist output does not depend on the Node version,
+  # so downstream jobs don't wait for the slowest of three builds. `build_compat` checks the others.
   build:
+    name: 'build (node: 24)'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+  build_compat:
     name: 'build (node: ${{ matrix.node }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     strategy:
       matrix:
-        node: [22, 24, 26]
+        node: [22, 26]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -72,8 +87,10 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      # Builds without the shared caches, so it checks this Node version instead of
+      # restoring the output of `build`.
       - name: Monorepo build
-        uses: ./.github/actions/run-build
+        run: yarn nx run-many --targets build --nx-ignore-cycles --skip-nx-cache
 
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
@@ -850,6 +867,7 @@ jobs:
         lint,
         lint_oxlint,
         build,
+        build_compat,
         docs_build,
         typescript,
         unit_back,
