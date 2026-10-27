@@ -306,7 +306,7 @@ describe('content-type-builder editContentType with renamed relations', () => {
   );
 });
 
-describe('content-type-builder editContentType draftAndPublish', () => {
+describe('content-type-builder editContentType options', () => {
   const articleUid = 'api::article.article';
 
   beforeEach(() => {
@@ -323,7 +323,7 @@ describe('content-type-builder editContentType draftAndPublish', () => {
             kind: 'collectionType',
             collectionName: 'articles',
             info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
-            options: { draftAndPublish: true },
+            options: { draftAndPublish: true, populateCreatorFields: true },
             attributes: { title: { type: 'string' } },
           },
         },
@@ -355,6 +355,38 @@ describe('content-type-builder editContentType draftAndPublish', () => {
   it('uses the top-level draftAndPublish when the payload sets it', () => {
     expect(edit({ draftAndPublish: false, options: { draftAndPublish: true } })).toMatchObject({
       draftAndPublish: false,
+    });
+  });
+
+  it('keeps the stored option keys when the payload does not send options', () => {
+    expect(edit({})).toEqual({ draftAndPublish: true, populateCreatorFields: true });
+  });
+
+  it('keeps the stored option keys the payload options do not set', () => {
+    expect(edit({ options: { custom: 'value' } })).toEqual({
+      draftAndPublish: true,
+      populateCreatorFields: true,
+      custom: 'value',
+    });
+  });
+
+  it('uses the payload value for an option key it sets', () => {
+    expect(edit({ options: { populateCreatorFields: false } })).toEqual({
+      draftAndPublish: true,
+      populateCreatorFields: false,
+    });
+  });
+
+  it('applies stored options, then payload options, then the resolved draftAndPublish', () => {
+    expect(
+      edit({
+        draftAndPublish: false,
+        options: { draftAndPublish: true, custom: 'value' },
+      })
+    ).toEqual({
+      draftAndPublish: false,
+      populateCreatorFields: true,
+      custom: 'value',
     });
   });
 });
