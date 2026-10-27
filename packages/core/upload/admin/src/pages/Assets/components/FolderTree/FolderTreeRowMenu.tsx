@@ -48,7 +48,7 @@ const MenuSlot = styled.div`
 `;
 
 interface FolderTreeRowMenuProps {
-  folder: { id: number; name: string };
+  folder: { id: number; name: string; readOnly?: boolean };
   /** Its parent's id, so a move validates against where it actually lives. */
   parentId: number | null;
   /** Set by the row's right-click; null when the menu is closed. */

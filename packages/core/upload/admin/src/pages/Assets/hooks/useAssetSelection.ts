@@ -172,3 +172,12 @@ export const useAssetSelection = () => {
 };
 
 export const useAssetSelectionOptional = () => useContext(AssetSelectionContext);
+
+const noop = () => {};
+
+/** For an item's own card or row: a read-only item cannot join the selection */
+export const useItemSelection = (item: { readOnly?: boolean }): AssetSelection => {
+  const selection = useAssetSelection();
+
+  return item.readOnly ? { ...selection, toggle: noop, selectRange: noop } : selection;
+};

@@ -23,11 +23,14 @@ export const buildRenderedKeys = ({
   /** The interleaved rows, when the table is in mixed mode. */
   mixedItems?: MixedItem[] | null;
 }): ItemKey[] =>
+  // Read-only items cannot be selected, so select-all and ranges skip them
   mixedItems
-    ? mixedItems.map((item) =>
-        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
-      )
+    ? mixedItems
+        .filter((item) => !(item.kind === 'folder' ? item.folder : item.asset).readOnly)
+        .map((item) =>
+          item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
+        )
     : [
-        ...folders.map((folder) => folderKey(folder.id)),
-        ...assets.map((asset) => assetKey(asset.id)),
+        ...folders.filter((folder) => !folder.readOnly).map((folder) => folderKey(folder.id)),
+        ...assets.filter((asset) => !asset.readOnly).map((asset) => assetKey(asset.id)),
       ];

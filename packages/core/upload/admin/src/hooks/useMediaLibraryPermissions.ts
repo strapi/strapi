@@ -20,14 +20,16 @@ const { main: _main, ...RBAC_PERMISSIONS } = PERMISSIONS;
  *   (single + bulk), AI metadata — the `assets.update` action covers
  *   "Update (crop, details, replace) + delete" by definition
  * - `canDownload` / `canCopyLink` — the matching drawer actions
+ *
+ * Pass an item to also gate `canUpdate` on its server-sent `readOnly` flag
  */
-export const useMediaLibraryPermissions = () => {
+export const useMediaLibraryPermissions = (item?: { readOnly?: boolean }) => {
   const { allowedActions, isLoading } = useRBAC(RBAC_PERMISSIONS);
 
   return {
     isLoading,
     canCreate: Boolean(allowedActions.canCreate),
-    canUpdate: Boolean(allowedActions.canUpdate),
+    canUpdate: Boolean(allowedActions.canUpdate) && !item?.readOnly,
     canDownload: Boolean(allowedActions.canDownload),
     canCopyLink: Boolean(allowedActions.canCopyLink),
   };

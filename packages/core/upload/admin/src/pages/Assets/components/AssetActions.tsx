@@ -104,11 +104,12 @@ export const AssetActions = ({ asset, dragData, permissions, children }: AssetAc
   // supplied an answer it resolved earlier.
   const ownPermissions = useMediaLibraryPermissions();
   const {
-    canUpdate,
+    canUpdate: canUpdateAny,
     canDownload,
     canCopyLink,
     isLoading: isLoadingPermissions,
   } = permissions ?? ownPermissions;
+  const canUpdate = canUpdateAny && !asset.readOnly;
   const [replaceAsset, { isLoading: isReplacing }] = useReplaceAssetMutation();
   const aiEnabled = useAIMetadataEnabled({ mime: asset.mime });
 

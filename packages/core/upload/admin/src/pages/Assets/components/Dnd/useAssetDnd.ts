@@ -13,6 +13,7 @@ export const useFileDraggable = (asset: {
   id: number;
   name: string;
   folder?: number | string | { id?: number } | null;
+  readOnly?: boolean;
 }) => {
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
 
@@ -29,7 +30,7 @@ export const useFileDraggable = (asset: {
   const draggable = useDraggable({
     id: toFileDraggableId(asset.id),
     data,
-    disabled: isMovePending,
+    disabled: isMovePending || Boolean(asset.readOnly),
   });
 
   // `dragData` is re-exposed (like `useFolderDraggableDroppable` does) so the
@@ -41,6 +42,7 @@ export const useFolderDraggableDroppable = (folder: {
   id: number;
   name: string;
   parent?: number | null | { id?: number };
+  readOnly?: boolean;
 }) => {
   const { isMovePending, isValidDropTarget } = useAssetsDndOptional() ?? {
     isMovePending: false,
@@ -72,13 +74,14 @@ export const useFolderDraggableDroppable = (folder: {
   const draggable = useDraggable({
     id: toFolderDraggableId(folder.id),
     data: dragData,
-    disabled: isMovePending,
+    disabled: isMovePending || Boolean(folder.readOnly),
   });
 
   const droppable = useDroppable({
     id: toFolderTargetId(folder.id),
     data: dropData,
-    disabled: isMovePending,
+    // Nothing moves into a read-only folder either
+    disabled: isMovePending || Boolean(folder.readOnly),
   });
 
   const isValidTarget = isValidDropTarget(folder.id);

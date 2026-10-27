@@ -712,7 +712,7 @@ interface AssetFormState {
 export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const getErrorMessage = useApiErrorMessage();
-  const { canCreate, canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions();
+  const { canCreate, canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions(asset);
   const { data: folders = [] } = useGetAllFoldersQuery();
   const { toggleNotification } = useNotification();
   const [updateAsset] = useUpdateAssetMutation();

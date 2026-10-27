@@ -6,7 +6,7 @@ import { HOME_TREE_TARGET_ID, toFolderTreeTargetId } from './dndIds';
 import type { FolderTreeTargetData } from '../../../../types/dnd';
 
 export const useFolderTreeDroppable = (
-  target: { id: number; name: string } | { id: null; name: string }
+  target: ({ id: number; name: string } | { id: null; name: string }) & { readOnly?: boolean }
 ) => {
   const { isMovePending, isValidDropTarget } = useAssetsDndOptional() ?? {
     isMovePending: false,
@@ -21,7 +21,12 @@ export const useFolderTreeDroppable = (
     name: target.name,
   };
 
-  const droppable = useDroppable({ id: dropId, data, disabled: isMovePending });
+  // Nothing moves into a read-only folder
+  const droppable = useDroppable({
+    id: dropId,
+    data,
+    disabled: isMovePending || Boolean(target.readOnly),
+  });
 
   const isValidTarget = isValidDropTarget(target.id);
   const isOver = droppable.isOver;

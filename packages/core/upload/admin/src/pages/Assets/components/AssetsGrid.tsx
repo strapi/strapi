@@ -11,7 +11,7 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../constants';
-import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useItemSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { buildRenderedKeys } from '../utils/renderedKeys';
@@ -161,8 +161,8 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { isSelected, toggle, selectRange } = useItemSelection(folder);
+  const { canUpdate } = useMediaLibraryPermissions(folder);
   const openContextMenu = useItemContextMenuTrigger();
   const {
     dragData,
@@ -425,8 +425,8 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
-  const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { isSelected, toggle, selectRange } = useItemSelection(asset);
+  const { canUpdate } = useMediaLibraryPermissions(asset);
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
   const openContextMenu = useItemContextMenuTrigger();
 

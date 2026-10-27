@@ -294,12 +294,14 @@ interface FolderTreeItemProps {
 interface FolderTreeItemInnerProps extends Omit<FolderTreeItemProps, 'node'> {
   id: number;
   name: string;
+  readOnly?: boolean;
   folderChildren: FolderNode[];
 }
 
 const FolderTreeItemInner = ({
   id,
   name,
+  readOnly,
   parentId,
   folderChildren,
   level,
@@ -324,7 +326,7 @@ const FolderTreeItemInner = ({
     isOver,
     showValidDropHighlight,
     showInvalidDropCursor,
-  } = useFolderTreeDroppable({ id, name });
+  } = useFolderTreeDroppable({ id, name, readOnly });
 
   const handleExpand = useCallback(() => onExpand(id), [id, onExpand]);
 
@@ -417,7 +419,7 @@ const FolderTreeItemInner = ({
         </Box>
 
         <FolderTreeRowMenu
-          folder={{ id, name }}
+          folder={{ id, name, readOnly }}
           parentId={parentId}
           menuPosition={menuPosition}
           returnFocusTo={rowButtonRef.current}
@@ -458,6 +460,7 @@ const FolderTreeItem = ({ node, ...props }: FolderTreeItemProps) => {
       {...props}
       id={node.id}
       name={node.name ?? ''}
+      readOnly={node.readOnly}
       folderChildren={node.children ?? []}
     />
   );

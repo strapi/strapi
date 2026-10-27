@@ -374,4 +374,14 @@ describe('FolderActionsMenu', () => {
       expect(mockDeselect).not.toHaveBeenCalled();
     });
   });
+
+  it('hides rename, move and delete on a read-only folder', async () => {
+    const { user } = setup({ folder: { ...folder, readOnly: true } });
+    await openMenu(user);
+
+    expect(
+      await screen.findByRole('menuitem', { name: 'Copy link to folder' })
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+  });
 });

@@ -107,7 +107,7 @@ interface ItemContextMenuProviderProps {
  *   items it doesn't
  */
 export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenuProviderProps) => {
-  const { isSelected, selectOnly, selectedKeys } = useAssetSelection();
+  const { isSelected, selectOnly, selectedKeys, clear } = useAssetSelection();
   // Resolved here, once, and handed to each menu as it opens. Mounted with the
   // list, so by the time anyone right-clicks the answer is in — a menu that
   // asked for itself would render empty for a tick.
@@ -138,11 +138,16 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
       }
 
       // Replace the selection *before* the menu renders, so the highlight has
-      // already moved by the time the user reads the menu.
-      selectOnly(key);
+      // already moved by the time the user reads the menu. A read-only item
+      // cannot be selected, so its menu acts on it alone
+      if ((payload.kind === 'asset' ? payload.asset : payload.folder).readOnly) {
+        clear();
+      } else {
+        selectOnly(key);
+      }
       setState({ id, position, returnFocusTo, payload });
     },
-    [isSelected, selectOnly, selectedKeys, permissions]
+    [isSelected, selectOnly, clear, selectedKeys, permissions]
   );
 
   // Only the menu that is still on screen may close it.

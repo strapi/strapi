@@ -26,6 +26,10 @@ export interface FolderDefinition extends Omit<Folder, 'children' | 'files' | 'p
 export interface Folder {
   id: number;
   name: string;
+  /**
+   * Set by the server when the user may not edit, delete or move this item
+   */
+  readOnly?: boolean;
   pathId?: number;
   /**
    * parent id

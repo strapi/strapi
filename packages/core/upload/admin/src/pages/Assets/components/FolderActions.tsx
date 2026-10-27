@@ -34,8 +34,8 @@ interface FolderActionsRender {
 }
 
 interface FolderActionsProps {
-  /** Only the id and name are read, so a tree node satisfies this too. */
-  folder: Pick<Folder, 'id' | 'name'>;
+  /** Only the id, name and `readOnly` are read, so a tree node satisfies this too */
+  folder: Pick<Folder, 'id' | 'name' | 'readOnly'>;
   /** Drag data for this folder, so the move dialog validates against its real parent. */
   dragData: DragFolderData;
   /**
@@ -111,9 +111,9 @@ export const FolderActions = ({
           defaultMessage: 'Copy link to folder',
         })}
       </Menu.Item>
-      <Menu.Separator />
+      {!folder.readOnly && <Menu.Separator />}
       {/* TODO: gate Rename, Move and Delete on `assets.canUpdate` CMS-387 */}
-      {showRename && (
+      {showRename && !folder.readOnly && (
         <Menu.Item startIcon={<Pencil />} onSelect={() => setIsRenameOpen(true)}>
           {formatMessage({
             id: getTranslationKey('list.folder.actions.rename'),
@@ -121,18 +121,22 @@ export const FolderActions = ({
           })}
         </Menu.Item>
       )}
-      <Menu.Item startIcon={<ArrowRight />} onSelect={() => setIsMoveOpen(true)}>
-        {formatMessage({
-          id: getTranslationKey('list.folder.actions.move'),
-          defaultMessage: 'Move to folder',
-        })}
-      </Menu.Item>
-      <Menu.Item startIcon={<Trash />} variant="danger" onSelect={() => setIsDeleteOpen(true)}>
-        {formatMessage({
-          id: getTranslationKey('list.folder.actions.delete'),
-          defaultMessage: 'Delete folder',
-        })}
-      </Menu.Item>
+      {!folder.readOnly && (
+        <>
+          <Menu.Item startIcon={<ArrowRight />} onSelect={() => setIsMoveOpen(true)}>
+            {formatMessage({
+              id: getTranslationKey('list.folder.actions.move'),
+              defaultMessage: 'Move to folder',
+            })}
+          </Menu.Item>
+          <Menu.Item startIcon={<Trash />} variant="danger" onSelect={() => setIsDeleteOpen(true)}>
+            {formatMessage({
+              id: getTranslationKey('list.folder.actions.delete'),
+              defaultMessage: 'Delete folder',
+            })}
+          </Menu.Item>
+        </>
+      )}
     </>
   );
 

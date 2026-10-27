@@ -64,6 +64,10 @@ export interface FocalPoint {
 export interface File {
   id: number;
   name: string;
+  /**
+   * Set by the server when the user may not edit, delete or move this item
+   */
+  readOnly?: boolean;
   alternativeText?: string | null;
   caption?: string | null;
   focalPoint?: FocalPoint | null;

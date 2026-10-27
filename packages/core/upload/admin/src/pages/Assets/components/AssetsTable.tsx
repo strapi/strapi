@@ -25,7 +25,7 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
 import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS, TABLE_HEADERS } from '../constants';
-import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useAssetSelection, useItemSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
@@ -251,8 +251,8 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
-  const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { isSelected, toggle, selectRange } = useItemSelection(asset);
+  const { canUpdate } = useMediaLibraryPermissions(asset);
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
   const openContextMenu = useItemContextMenuTrigger();
 
@@ -449,8 +449,8 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
   const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
-  const { isSelected, toggle, selectRange } = useAssetSelection();
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { isSelected, toggle, selectRange } = useItemSelection(folder);
+  const { canUpdate } = useMediaLibraryPermissions(folder);
   const openContextMenu = useItemContextMenuTrigger();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
