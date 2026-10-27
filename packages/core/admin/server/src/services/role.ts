@@ -180,7 +180,7 @@ const count = async (params = {} as any): Promise<number> => {
  * Check if the given roles id can be deleted safely, throw otherwise
  * @param ids
  */
-const checkRolesIdForDeletion = async (ids = [] as Data.ID[]) => {
+const checkRolesIdForDeletion = async (ids: Data.ID[] = []) => {
   const superAdminRole = await getSuperAdmin();
 
   if (superAdminRole && arrays.includesString(ids, superAdminRole.id)) {
@@ -199,7 +199,7 @@ const checkRolesIdForDeletion = async (ids = [] as Data.ID[]) => {
  * Delete roles in database if they have no user assigned
  * @param ids query params to find the roles
  */
-const deleteByIds = async (ids = [] as Data.ID[]): Promise<AdminRole[]> => {
+const deleteByIds = async (ids: Data.ID[] = []): Promise<AdminRole[]> => {
   await checkRolesIdForDeletion(ids);
 
   await getService('permission').deleteByRolesIds(ids);

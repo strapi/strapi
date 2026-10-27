@@ -3,7 +3,7 @@ import { async, contentTypes } from '@strapi/utils';
 
 import { isLocalizedContentType } from './relations/utils/i18n';
 
-const hasDraftAndPublish = (uid: UID.CollectionType) => {
+const hasDraftAndPublish = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);
   return contentTypes.hasDraftAndPublish(model);
 };
@@ -30,7 +30,7 @@ const encodeKey = (obj: any) => {
 };
 
 interface KeyFields {
-  uid: string;
+  uid: UID.Schema;
   documentId: Data.ID;
   locale?: string | null;
   status?: 'draft' | 'published';

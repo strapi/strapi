@@ -70,7 +70,7 @@ const collectDraftRelationLinks = (
             return collected;
           }
 
-          const targetModel = strapi.getModel(attribute.target as UID.Schema);
+          const targetModel = strapi.getModel(attribute.target);
           if (!targetModel || !hasDraftAndPublish(targetModel)) {
             return collected;
           }

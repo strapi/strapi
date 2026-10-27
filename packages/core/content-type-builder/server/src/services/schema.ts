@@ -1,7 +1,7 @@
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { mapValues } from 'lodash';
 
-import type { Schema } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 import createBuilder from './schema-builder';
 import { createMigrationBuilder } from './migration-builder';
@@ -616,7 +616,7 @@ export const updateSchema = async (schema: CTBSchema) => {
   const upsertedUids = new Map<string, ContentTypeKind>();
   const deletedUids = new Set<string>();
   const generatedApiNames: string[] = [];
-  const backedUpApiUids: string[] = [];
+  const backedUpApiUids: UID.ContentType[] = [];
   let schemaAlreadyRolledBack = false;
   let migrationFilePath: string | null = null;
   const APIsToDelete = contentTypes

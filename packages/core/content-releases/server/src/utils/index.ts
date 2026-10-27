@@ -71,7 +71,7 @@ export const getDraftEntryValidStatus = async (
 };
 
 export const isEntryValid = async (
-  contentTypeUid: string,
+  contentTypeUid: UID.ContentType,
   entry: any,
   { strapi }: { strapi: Core.Strapi }
 ) => {
@@ -88,7 +88,7 @@ export const isEntryValid = async (
 
     // @TODO: When documents service has validateEntityCreation method, use it instead
     await strapi.entityValidator.validateEntityCreation(
-      strapi.getModel(contentTypeUid as UID.ContentType),
+      strapi.getModel(contentTypeUid),
       entry,
       { isDraft: false, locale: entry?.locale, strictRelations },
       // @ts-expect-error - FIXME: entity here is unnecessary
@@ -171,26 +171,26 @@ export const getEntryStatus = async (contentType: UID.ContentType, entry: Data.C
  * Go through component and dynamic zone attributes to find nested relations.
  */
 const collectRelationTargets = (
-  modelUid: string,
+  modelUid: UID.Schema,
   strapi: Core.Strapi,
-  visited = new Set<string>()
-): Set<string> => {
-  const targets = new Set<string>();
+  visited = new Set<UID.Schema>()
+): Set<UID.ContentType> => {
+  const targets = new Set<UID.ContentType>();
   if (visited.has(modelUid)) {
     return targets;
   }
   visited.add(modelUid);
 
-  const model = strapi.getModel(modelUid as UID.Schema);
+  const model = strapi.getModel(modelUid);
   if (!model?.attributes) {
     return targets;
   }
 
   for (const attribute of Object.values(model.attributes) as Array<{
     type?: string;
-    target?: string;
-    component?: string;
-    components?: string[];
+    target?: UID.ContentType;
+    component?: UID.Component;
+    components?: UID.Component[];
   }>) {
     if (attribute?.type === 'relation' && attribute.target) {
       targets.add(attribute.target);
@@ -238,8 +238,7 @@ export const getPublishOrderForContentTypes = (
     if (model && contentTypesUtils.hasDraftAndPublish(model)) {
       const relationTargets = collectRelationTargets(uid, strapi);
 
-      for (const targetUid of relationTargets) {
-        const targetContentTypeUid = targetUid as UID.ContentType;
+      for (const targetContentTypeUid of relationTargets) {
         const isTargetInRelease =
           uidSet.has(targetContentTypeUid) && targetContentTypeUid in strapi.contentTypes;
         const targetModel = strapi.getModel(targetContentTypeUid);

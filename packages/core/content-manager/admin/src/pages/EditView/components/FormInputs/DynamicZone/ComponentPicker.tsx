@@ -6,6 +6,8 @@ import { getTranslation } from '../../../../../utils/translations';
 
 import { ComponentCategory, ComponentCategoryProps } from './ComponentCategory';
 
+import type { UID } from '@strapi/types';
+
 const EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY: NonNullable<
   ComponentPickerProps['dynamicComponentsByCategory']
 > = {};
@@ -13,7 +15,7 @@ const EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY: NonNullable<
 interface ComponentPickerProps {
   dynamicComponentsByCategory?: Record<string, NonNullable<ComponentCategoryProps['components']>>;
   isOpen?: boolean;
-  onClickAddComponent: (componentUid: string) => void;
+  onClickAddComponent: (componentUid: UID.Component) => void;
 }
 
 const ComponentPicker = ({
@@ -24,7 +26,7 @@ const ComponentPicker = ({
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
 
-  const handleAddComponentToDz = (componentUid: string) => () => {
+  const handleAddComponentToDz = (componentUid: UID.Component) => () => {
     onClickAddComponent(componentUid);
   };
 

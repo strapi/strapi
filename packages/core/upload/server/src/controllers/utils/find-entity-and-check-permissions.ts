@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { errors, contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { getService } from '../../utils';
 
 /**
@@ -18,7 +18,7 @@ import { getService } from '../../utils';
 const findEntityAndCheckPermissions = async (
   ability: unknown,
   action: string,
-  model: string,
+  model: UID.ContentType,
   id: string | number,
   strapiInstance: Core.Strapi = strapi
 ) => {

@@ -350,7 +350,7 @@ describe('Content Type Builder - Schema service', () => {
 
     it('rejects a crafted protected plugin delete before any schema or API mutation', async () => {
       const schema: CTBSchema = {
-        contentTypes: [{ action: 'delete', uid: 'plugin::example.article' as UID.ContentType }],
+        contentTypes: [{ action: 'delete', uid: 'plugin::example.article' }],
         components: [],
       };
 

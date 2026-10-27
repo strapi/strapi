@@ -1,11 +1,9 @@
-import type { UID } from '@strapi/types';
-
 const HISTORY_VERSIONS_MOCK_DATA = {
   data: [
     {
       id: 26,
       documentId: 'pcwmq3rlmp5w0be3cuplhnpr',
-      contentType: 'api::kitchensink.kitchensink' as UID.ContentType,
+      contentType: 'api::kitchensink.kitchensink',
       relatedDocumentId: 'b2t6guwt3z4cdfb4sufuswry',
       locale: null,
       status: 'draft' as const,
@@ -439,7 +437,7 @@ const HISTORY_VERSIONS_MOCK_DATA = {
     {
       id: 25,
       documentId: 'xsaucvmlbrc70th6oessklbe',
-      contentType: 'api::kitchensink.kitchensink' as UID.ContentType,
+      contentType: 'api::kitchensink.kitchensink',
       relatedDocumentId: 'b2t6guwt3z4cdfb4sufuswry',
       locale: null,
       status: 'draft' as const,

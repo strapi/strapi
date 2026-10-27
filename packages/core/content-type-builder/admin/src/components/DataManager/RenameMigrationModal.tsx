@@ -9,6 +9,7 @@ import { getTrad } from '../../utils/getTrad';
 import { groupRenameChains, type RenameChain, type RenamePair } from './utils/groupRenameChains';
 
 import type { RenameHop } from '../../types';
+import type { Internal } from '@strapi/types';
 
 export type AttributeRenameMigrationMode =
   'always' | 'never' | 'prompt-after-edit' | 'prompt-before-save';
@@ -41,7 +42,7 @@ export const shouldPromptForRenamesBeforeSave = (mode: AttributeRenameMigrationM
  */
 export interface PendingRename {
   key: string;
-  uid: string;
+  uid: Internal.UID.Schema;
   typeName: string;
   /** Net effect of the chain (`old -> new`); the raw hops for a pure swap-back. */
   pairs: RenamePair[];
@@ -202,12 +203,12 @@ const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationM
 
 export { RenameMigrationModal };
 
-const getTypeName = (entry: { displayName?: string; uid: string }): string =>
+const getTypeName = (entry: { displayName?: string; uid: Internal.UID.Schema }): string =>
   entry.displayName ?? entry.uid;
 
 type RenameAwareEntry = {
   action?: string;
-  uid: string;
+  uid: Internal.UID.Schema;
   displayName?: string;
   renames?: RenameHop[];
 };
@@ -220,7 +221,7 @@ type RenameAwareEntry = {
 export const toPendingRename = (
   chain: RenameChain,
   renames: RenameHop[],
-  { uid, typeName }: { uid: string; typeName: string }
+  { uid, typeName }: { uid: Internal.UID.Schema; typeName: string }
 ): PendingRename => {
   const isSwapBack = chain.pairs.length === 0;
 
@@ -269,7 +270,7 @@ export const collectPendingRenames = (requestData: {
  * as a whole, so the result can never be a truncated chain.
  */
 export const filterRenamesByAcceptedChains = (
-  uid: string,
+  uid: Internal.UID.Schema,
   renames: RenameHop[],
   acceptedChainIds: Set<string>
 ): RenameHop[] => {

@@ -1,4 +1,5 @@
 import type { UID } from '@strapi/types';
+import type { CreateHistoryVersion } from '../../../../../shared/contracts/history-versions';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createHistoryService } from '../history';
 
@@ -124,8 +125,8 @@ describe('history-version service', () => {
   it('creates a history version with the author', async () => {
     jest.useFakeTimers().setSystemTime(fakeDate);
 
-    const historyVersionData = {
-      contentType: 'api::article.article' as UID.ContentType,
+    const historyVersionData: CreateHistoryVersion = {
+      contentType: 'api::article.article',
       data: {
         documentId: '1234',
         id: 1,
@@ -155,8 +156,8 @@ describe('history-version service', () => {
   it('creates a history version without any author', async () => {
     jest.useFakeTimers().setSystemTime(fakeDate);
 
-    const historyVersionData = {
-      contentType: 'api::article.article' as UID.ContentType,
+    const historyVersionData: CreateHistoryVersion = {
+      contentType: 'api::article.article',
       data: {
         documentId: '1234',
         id: 1,
@@ -197,7 +198,7 @@ describe('history-version service', () => {
 
     const { results } = await historyService.findVersionsPage({
       query: {
-        contentType: 'api::article.article' as UID.ContentType,
+        contentType: 'api::article.article',
         documentId: 'randomid',
       },
       state: { userAbility: {} },
@@ -222,7 +223,7 @@ describe('history-version service', () => {
 
     const { results } = await historyService.findVersionsPage({
       query: {
-        contentType: 'api::article.article' as UID.ContentType,
+        contentType: 'api::article.article',
         documentId: 'randomid',
       },
       state: { userAbility: {} },

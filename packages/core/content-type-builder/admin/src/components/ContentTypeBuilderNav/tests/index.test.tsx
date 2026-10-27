@@ -12,7 +12,6 @@ import { ContentTypeBuilderNav } from '../ContentTypeBuilderNav';
 import { mockFlatSections, mockFolderSections } from './mockData';
 
 import type { DataManagerContextValue } from '../../DataManager/DataManagerContext';
-import type { UID } from '@strapi/types';
 
 const mockSearchOnChange = jest.fn(); // Spy function
 
@@ -587,7 +586,7 @@ describe('<ContentTypeBuilderNav />', () => {
           name: 'Blog',
           parent: null,
           status: 'UNCHANGED',
-          children: [{ type: 'contentType', uid: 'api::category.category' as UID.ContentType }],
+          children: [{ type: 'contentType', uid: 'api::category.category' }],
         },
       ];
 

@@ -1,6 +1,8 @@
+import type { UID } from '@strapi/types';
+
 export type InfoType = {
   args?: unknown;
-  resourceUID?: string;
+  resourceUID?: UID.ContentType;
 };
 
 export default () => ({

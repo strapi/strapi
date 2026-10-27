@@ -28,6 +28,7 @@ import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 
 import type { ComponentPickerProps } from './ComponentPicker';
+import type { UID } from '@strapi/types';
 
 const EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY: NonNullable<
   DynamicComponentProps['dynamicComponentsByCategory']
@@ -41,7 +42,7 @@ interface DynamicComponentProps
   disabled?: boolean;
   index: number;
   name: string;
-  onAddComponent: (componentUid: string, index: number) => void;
+  onAddComponent: (componentUid: UID.Component, index: number) => void;
   onRemoveComponentClick: (index: number) => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
   totalLength: number;

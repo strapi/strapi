@@ -379,8 +379,8 @@ describe('CTB content-structure service', () => {
     });
 
     it('persists and reloads a mixed folder deletion as a local delete with an ungrouped plugin', async () => {
-      const localUid = 'api::article.article' as UID.ContentType;
-      const pluginUid = 'plugin::example.article' as UID.ContentType;
+      const localUid: UID.ContentType = 'api::article.article';
+      const pluginUid: UID.ContentType = 'plugin::example.article';
       const initialContentStructure = {
         version: 1,
         sections: {

@@ -85,7 +85,7 @@ const getSchema = (strapi: Core.Strapi, uid: string, path: string): Schema => {
 };
 
 const getDatabaseSchema = (strapi: Core.Strapi, uid: string, path: string): Schema => {
-  const schema = strapi.db.metadata.get(uid as UID.Schema) as Schema | undefined;
+  const schema = strapi.db.metadata.get(uid) as Schema | undefined;
 
   if (!schema) {
     throw invalidPayloadError(path, `unknown database schema "${uid}"`);

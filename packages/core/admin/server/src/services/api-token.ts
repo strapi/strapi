@@ -434,7 +434,7 @@ const assignAdminPermissionsToToken = async (
 
   if (permissionsToDelete.length > 0) {
     await getService('permission').deleteByIds(
-      permissionsToDelete.map((permission) => permission?.id) as Data.ID[]
+      permissionsToDelete.map((permission) => permission?.id)
     );
   }
 
@@ -516,7 +516,7 @@ const reconcileTokenPermissionsToUserCeiling = (
       enforcedConditions.some((c) => !currentConditions.includes(c));
 
     if (conditionsChanged) {
-      toUpdate.push({ id: tokenPerm.id as Data.ID, conditions: enforcedConditions });
+      toUpdate.push({ id: tokenPerm.id, conditions: enforcedConditions });
     }
   });
 
@@ -562,7 +562,7 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
     );
 
     if (toDelete.length > 0) {
-      await getService('permission').deleteByIds(toDelete.map((p) => p.id as Data.ID));
+      await getService('permission').deleteByIds(toDelete.map((p) => p.id));
     }
 
     for (const { id, conditions } of toUpdate) {
@@ -581,7 +581,7 @@ const syncApiTokenPermissionsForRole = async (roleId: Data.ID): Promise<void> =>
     populate: ['roles'],
   });
 
-  await Promise.allSettled(users.map((user) => syncApiTokenPermissionsForUser(user.id as Data.ID)));
+  await Promise.allSettled(users.map((user) => syncApiTokenPermissionsForUser(user.id)));
 };
 
 /**
@@ -840,7 +840,7 @@ const create = async <K extends AnyApiToken['kind']>(
     if (callingUser === undefined || callingUser === null) {
       throw new ValidationError('Creating an admin token requires an authenticated admin user');
     }
-    ownerId = callingUser.id as Data.ID;
+    ownerId = callingUser.id;
   }
 
   const apiToken = await strapi.db.query('admin::api-token').create({

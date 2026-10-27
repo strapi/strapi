@@ -10,7 +10,7 @@ import type { ContentTypeLink } from '../lib/buildFolderTree';
 import type { FlatItem } from '../lib/flatModel';
 import type { UID } from '@strapi/types';
 
-const uid = (name: string) => `api::${name}.${name}` as UID.ContentType;
+const uid = (name: string): UID.ContentType => `api::${name}.${name}`;
 
 const link = (name: string): ContentTypeLink => ({
   uid: uid(name),

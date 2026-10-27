@@ -29,7 +29,7 @@ const refKey = (ref: number | string) => `${typeof ref}:${ref}`;
  */
 const loadExistingRefs = async (
   strapi: Core.Strapi,
-  uid: string,
+  uid: UID.Schema,
   refs: Array<number | string>
 ): Promise<Set<string>> => {
   const existing = new Set<string>();
@@ -45,7 +45,7 @@ const loadExistingRefs = async (
 
   for (let i = 0; i < numericIds.length; i += EXISTENCE_CHECK_CHUNK_SIZE) {
     const chunk = numericIds.slice(i, i + EXISTENCE_CHECK_CHUNK_SIZE);
-    const rows = await strapi.db.query(uid as UID.Schema).findMany({
+    const rows = await strapi.db.query(uid).findMany({
       select: ['id'],
       where: { id: { $in: chunk } },
     });
@@ -57,7 +57,7 @@ const loadExistingRefs = async (
 
   for (let i = 0; i < documentIds.length; i += EXISTENCE_CHECK_CHUNK_SIZE) {
     const chunk = documentIds.slice(i, i + EXISTENCE_CHECK_CHUNK_SIZE);
-    const rows = await strapi.db.query(uid as UID.Schema).findMany({
+    const rows = await strapi.db.query(uid).findMany({
       select: ['id', 'documentId'],
       where: { documentId: { $in: chunk } },
     });
@@ -83,7 +83,7 @@ const filterMorphLinksByTargetExistence = async function* filterMorphLinksByTarg
   links: ILink[],
   onOrphanedLink?: (link: ILink) => void
 ): AsyncGenerator<ILink> {
-  const refsByType = new Map<string, Array<number | string>>();
+  const refsByType = new Map<UID.Schema, Array<number | string>>();
 
   for (const link of links) {
     const { type, ref } = link.right;
@@ -91,9 +91,11 @@ const filterMorphLinksByTargetExistence = async function* filterMorphLinksByTarg
     if (ref == null || type == null) {
       onOrphanedLink?.(link);
     } else {
-      const bucket = refsByType.get(type) ?? [];
+      // The transfer payload carries the morph type as a plain string
+      const uid = type as UID.Schema;
+      const bucket = refsByType.get(uid) ?? [];
       bucket.push(ref);
-      refsByType.set(type, bucket);
+      refsByType.set(uid, bucket);
     }
   }
 
@@ -141,7 +143,10 @@ export const createLinkQuery = (
       return schemaName ? `${schemaName}.${tableName}` : tableName;
     };
 
-    async function* generateAllForAttribute(uid: string, fieldName: string): AsyncGenerator<ILink> {
+    async function* generateAllForAttribute(
+      uid: UID.Schema,
+      fieldName: string
+    ): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
 
       if (!metadata) {
@@ -464,7 +469,7 @@ export const createLinkQuery = (
       }
     }
 
-    async function* generateAll(uid: string): AsyncGenerator<ILink> {
+    async function* generateAll(uid: UID.Schema): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
 
       if (!metadata) {

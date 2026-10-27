@@ -1,4 +1,5 @@
 import type { RenameHop } from '../../../types';
+import type { Internal } from '@strapi/types';
 
 export interface RenamePair {
   oldName: string;
@@ -52,7 +53,11 @@ const union = (parent: Map<string, string>, a: string, b: string): void => {
   }
 };
 
-const buildChain = (uid: string, renames: RenameHop[], hopIndexes: number[]): RenameChain => {
+const buildChain = (
+  uid: Internal.UID.Schema,
+  renames: RenameHop[],
+  hopIndexes: number[]
+): RenameChain => {
   // current name -> original name, seeded lazily: a hop whose `oldName` is not
   // yet tracked starts from an original attribute.
   const originalOf = new Map<string, string>();
@@ -91,7 +96,10 @@ const buildChain = (uid: string, renames: RenameHop[], hopIndexes: number[]): Re
  * Groups a type's ordered `renames[]` into chains (see `RenameChain`). Chains
  * are ordered by their first hop; hops inside a chain keep their index order.
  */
-export const groupRenameChains = (uid: string, renames: RenameHop[]): RenameChain[] => {
+export const groupRenameChains = (
+  uid: Internal.UID.Schema,
+  renames: RenameHop[]
+): RenameChain[] => {
   const parent = new Map<string, string>();
   renames.forEach((hop) => union(parent, hop.oldName, hop.newName));
 
