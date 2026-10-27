@@ -70,9 +70,6 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
         overrideToRegister = require('yaml').parse(overrideToRegister);
       }
       // receive an object we can register it directly
-      // TODO @Nico text that parses to a scalar, an array or `null` is registered as is, so
-      // `registeredOverrides` can hold more than OpenAPI parts; the exclusions above are also
-      // applied before a parse error is thrown.
       registeredOverrides.push(overrideToRegister);
     },
   };
