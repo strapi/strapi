@@ -156,8 +156,6 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
-    // TODO @Nico an update that matches no document resolves to `null`, which the metadata helper
-    // returns as `data` with empty metadata. Its `document` type does not admit it.
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!);
   },
 
@@ -252,8 +250,6 @@ export default {
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    // TODO @Nico a publish that publishes no version resolves to `undefined`, which the metadata
-    // helper returns as `data` with empty metadata. Its `document` type does not admit it.
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!);
   },
 

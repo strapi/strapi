@@ -418,8 +418,6 @@ export type CreatorReference = { id: number };
  * read, and the number of entries that no longer exist.
  */
 export type HistoryVersionResultData = {
-  // TODO @Nico runtime bug: `findVersionsPage` removes the root `id` instead of the component `id`
-  // when it visits a component attribute, so `id` is absent from versions with components.
   id?: number;
   documentId: string;
   locale: string | null;
