@@ -289,8 +289,6 @@ export type AssigneesService = {
  * The `homepage` service: the data of the admin homepage widget.
  */
 export type HomepageService = {
-  // TODO @Nico `strapi_stage` is `null` for a document whose workflow was deleted, which
-  // `RecentDocument` does not allow. Widening it changes the shared contract and the controller.
   /**
    * Resolves the last documents assigned to the user of the current admin request. Rejects outside
    * an admin request.
