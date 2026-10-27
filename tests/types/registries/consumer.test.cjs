@@ -210,19 +210,21 @@ function bundledWorkspaces() {
   ].flatMap((name) => (workspaces.has(name) ? [[name, workspaces.get(name)]] : []));
 }
 
-// Whether a declaration file augments `Strapi.Registries.Settings`.
-function augmentsSettings(node, namespaces = []) {
+// Whether a declaration file augments the registry `Strapi.Registries.<registry>`.
+function augmentsRegistry(node, registry, namespaces = []) {
   const currentNamespaces = ts.isModuleDeclaration(node)
     ? [...namespaces, node.name.text]
     : namespaces;
   if (
     ts.isInterfaceDeclaration(node) &&
-    node.name.text === 'Settings' &&
+    node.name.text === registry &&
     currentNamespaces.slice(-2).join('.') === 'Strapi.Registries'
   ) {
     return true;
   }
-  return ts.forEachChild(node, (child) => augmentsSettings(child, currentNamespaces)) === true;
+  return (
+    ts.forEachChild(node, (child) => augmentsRegistry(child, registry, currentNamespaces)) === true
+  );
 }
 
 test('bundled package declarations neither opt in to strict types nor augment Settings', () => {
@@ -243,12 +245,36 @@ test('bundled package declarations neither opt in to strict types nor augment Se
       if (name === '@strapi/types') continue;
       const source = ts.createSourceFile(filename, contents, ts.ScriptTarget.Latest);
       assert.equal(
-        augmentsSettings(source),
+        augmentsRegistry(source, 'Settings'),
         false,
         `${filename} augments Strapi.Registries.Settings`
       );
     }
   }
+});
+
+// Only type generation writes the application's schemas. A package declares its own content types
+// in `PackageContentTypeSchemas`, which generated entries replace UID by UID.
+test('bundled package declarations declare content-type schemas only in PackageContentTypeSchemas', () => {
+  let packageSchemas = 0;
+  for (const [name, directory] of bundledWorkspaces()) {
+    // `@strapi/types` declares the base interfaces.
+    if (name === '@strapi/types') continue;
+    const dist = path.join(directory, 'dist');
+    if (fs.existsSync(dist) === false) continue;
+    for (const filename of declarations(dist)) {
+      const contents = fs.readFileSync(filename, 'utf8');
+      const source = ts.createSourceFile(filename, contents, ts.ScriptTarget.Latest);
+      assert.equal(
+        augmentsRegistry(source, 'AppContentTypeSchemas'),
+        false,
+        `${filename} augments Strapi.Registries.AppContentTypeSchemas, which only type generation writes`
+      );
+      if (augmentsRegistry(source, 'PackageContentTypeSchemas') === true) packageSchemas += 1;
+    }
+  }
+  // Upload declares its schemas: proves the walk reaches registry augmentations.
+  assert.notEqual(packageSchemas, 0, 'No bundled package declares PackageContentTypeSchemas');
 });
 
 // Source files of a workspace package that register contracts, tests excluded.
@@ -263,7 +289,7 @@ function registersContracts(directory) {
       }
       return (
         /\.tsx?$/.test(entry.name) &&
-        /interface (?:Package(?:Services|Controllers|Policies|Middlewares|Configs)|Hooks)\b/.test(
+        /interface (?:Package(?:Services|Controllers|Policies|Middlewares|Configs|ContentTypeSchemas)|Hooks)\b/.test(
           fs.readFileSync(filename, 'utf8')
         )
       );
