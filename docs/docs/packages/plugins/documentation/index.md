@@ -18,7 +18,7 @@ review_notes:
 
 ### Config is a base OpenAPI document
 
-The default config in `server/src/config/default-plugin-config.ts` is an OpenAPI document with empty `paths`. Users override it under `documentation.config` in `config/plugins`. The value `info.version` names the documentation version. The key `x-strapi-config` holds two plugin options. `plugins` lists the plugins to document, and `null` means the defaults `upload` and `users-permissions`. `mutateDocumentation` is a function that can change the final document before the plugin writes it.
+The default config in `server/src/config/default-plugin-config.ts` is an OpenAPI document with empty `paths`. Users override it under `documentation.config` in `config/plugins`. The value `info.version` names the documentation version. The key `x-strapi-config` holds two plugin options. `plugins` lists the plugins to document, and `null` means the defaults `upload` and `users-permissions` that are installed. `mutateDocumentation` is a function that can change the final document before the plugin writes it.
 
 ### Generation
 
