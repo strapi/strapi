@@ -784,8 +784,9 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
           ["policies: ['", ['admin::isAuthenticatedAdmin']],
           ["app.middleware('", ['admin::rateLimit', 'admin::data-transfer']],
           ["middlewares: ['", ['admin::rateLimit']],
-          // TODO @Nico With the switch on, `{ name: '` lists nothing: the inline handler member
-          // has `Function.name: string`, so editors narrow the object to the handler.
+          // With the switch on, editors list no name inside `{ name: '' }`: the inline handler
+          // member has `Function.name: string`, which matches any string being typed, so the object
+          // literal is typed as the handler. Bare names are listed.
           ...(strict ? [] : [["middlewares: [{ name: '", ['admin::rateLimit']]]),
           [
             "policies: [{ name: '",
