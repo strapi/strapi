@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import type { Modules } from '@strapi/types';
 
 import { createWebhookStore } from '../webhook-store';
@@ -9,14 +10,14 @@ const PAGE_UID = 'api::page.page';
 
 const createDb = () => {
   const query = {
-    findMany: jest.fn(),
-    findOne: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    findMany: vi.fn(),
+    findOne: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   };
 
-  const db = { query: jest.fn(() => query) };
+  const db = { query: vi.fn(() => query) };
 
   return { db, query };
 };

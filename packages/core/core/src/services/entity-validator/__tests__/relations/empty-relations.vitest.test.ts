@@ -1,10 +1,11 @@
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 import type { Common } from '@strapi/types';
 
 import entityValidator from '../..';
 import { models, existentIDs } from './utils/relations.testdata';
 
 describe('Entity validator | Relations | Empty connect and disconnect', () => {
-  const count = jest.fn(async ({ where }: any) => where.id.$in.length);
+  const count = vi.fn(async ({ where }: any) => where.id.$in.length);
 
   beforeAll(() => {
     global.strapi = {
@@ -17,7 +18,7 @@ describe('Entity validator | Relations | Empty connect and disconnect', () => {
         },
       },
       errors: {
-        badRequest: jest.fn(),
+        badRequest: vi.fn(),
       },
       getModel: (uid: string) => models.get(uid),
     } as any;

@@ -1,17 +1,18 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import adminProvider from '../admin';
 import loadAdmin from '../../loaders/admin';
 
-jest.mock('../../loaders/admin', () => jest.fn());
+vi.mock('../../loaders/admin', () => ({ default: vi.fn() }));
 
 const createMockStrapi = () => {
   const admin = {
-    register: jest.fn(),
-    bootstrap: jest.fn(),
-    destroy: jest.fn(),
+    register: vi.fn(),
+    bootstrap: vi.fn(),
+    destroy: vi.fn(),
   };
 
   const strapi = {
-    get: jest.fn((name: string) => (name === 'admin' ? admin : undefined)),
+    get: vi.fn((name: string) => (name === 'admin' ? admin : undefined)),
   } as any;
 
   return { strapi, admin };
@@ -19,7 +20,7 @@ const createMockStrapi = () => {
 
 describe('admin provider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('destroy', () => {

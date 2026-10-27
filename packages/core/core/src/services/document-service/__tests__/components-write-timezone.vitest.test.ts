@@ -1,10 +1,9 @@
 /**
  * The database layer reads and formats dates in local time: these cases only differ from UTC in a
- * timezone that is not UTC, which the environment below sets for this file.
- *
- * @jest-environment ../../../tests/setup/timezone-environment.js
- * @jest-environment-options {"strapi": {"tz": "Europe/Paris"}}
+ * timezone that is not UTC, which this file sets for its tests. Vitest runs the tests in the worker
+ * process itself, where Node applies a change of `process.env.TZ` at once.
  */
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { isComponentUnchanged } from '../components';
 
 const schema = {
@@ -19,6 +18,14 @@ const check = (stored: Record<string, unknown>, data: Record<string, unknown>) =
   isComponentUnchanged(schema, stored, data);
 
 describe('isComponentUnchanged on a server that is not in UTC', () => {
+  beforeAll(() => {
+    vi.stubEnv('TZ', 'Europe/Paris');
+  });
+
+  afterAll(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('runs in Europe/Paris', () => {
     expect(new Date(2024, 0, 1).toISOString()).toBe('2023-12-31T23:00:00.000Z');
   });

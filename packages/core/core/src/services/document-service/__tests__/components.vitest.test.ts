@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest';
 import {
   createComponentRelationFilter,
   findComponentParent,
@@ -67,7 +68,7 @@ const owns = (entityId: number, componentUid: string, componentId: number): Row 
 const createConnection = (tables: Record<string, Row[]>, failingTables: string[] = []) => {
   const queriedTables: string[] = [];
 
-  const getConnection = jest.fn((table: string) => {
+  const getConnection = vi.fn((table: string) => {
     queriedTables.push(table);
     let rows = tables[table] ?? [];
 
@@ -108,7 +109,7 @@ const setupStrapi = ({
   registeredTables?: string[];
 } = {}) => {
   const { getConnection, queriedTables } = createConnection(tables, failingTables);
-  const getSchemaConnection = jest.fn();
+  const getSchemaConnection = vi.fn();
 
   global.strapi = {
     contentTypes,

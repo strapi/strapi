@@ -1,3 +1,4 @@
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 import type { Schema } from '@strapi/types';
 import entityValidator from '..';
 
@@ -123,7 +124,7 @@ describe('Entity validator - new component in an update', () => {
   beforeEach(() => {
     global.strapi = {
       errors: {
-        badRequest: jest.fn(),
+        badRequest: vi.fn(),
       },
       getModel: (uid: string) => models[uid],
       components: {

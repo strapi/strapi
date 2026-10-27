@@ -267,9 +267,11 @@ describe('handlePost', () => {
     });
 
     const { NodeStreamableHTTPServerTransport } = vi.mocked(mcpNodeSdk) as any;
-    NodeStreamableHTTPServerTransport.mockImplementation(() => ({
-      handleRequest: vi.fn().mockResolvedValue(undefined),
-    }));
+    NodeStreamableHTTPServerTransport.mockImplementation(function MockTransport() {
+      return {
+        handleRequest: vi.fn().mockResolvedValue(undefined),
+      };
+    });
 
     const handler = createPostHandler({
       strapi: mockStrapi as Core.Strapi,

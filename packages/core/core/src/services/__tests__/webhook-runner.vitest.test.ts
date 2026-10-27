@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import type { Modules } from '@strapi/types';
 
 import createEventHub from '../event-hub';
@@ -28,8 +29,8 @@ const waitForQueue = () =>
 
 const setup = () => {
   const eventHub = createEventHub();
-  const fetch = jest.fn(async () => ({ ok: true, status: 200 }));
-  const logger = { error: jest.fn() };
+  const fetch = vi.fn(async () => ({ ok: true, status: 200 }));
+  const logger = { error: vi.fn() };
 
   const runner = createWebhookRunner({ eventHub, fetch: fetch as any, logger: logger as any });
 

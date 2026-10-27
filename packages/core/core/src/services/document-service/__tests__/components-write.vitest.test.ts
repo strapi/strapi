@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, type Mock } from 'vitest';
 import { updateComponents, deleteComponents, isComponentUnchanged } from '../components';
 
 const PAGE_UID = 'api::page.page';
@@ -58,45 +59,41 @@ const setup = (stored: Record<string, Stored>) => {
     Object.keys(models).map((uid) => [
       uid,
       {
-        load: jest.fn(
-          async (entity: { id: number }, attribute: string | string[], params?: any) => {
-            const read = (name: string) => {
-              const value = stored[uid]?.[entity.id]?.[name] ?? null;
+        load: vi.fn(async (entity: { id: number }, attribute: string | string[], params?: any) => {
+          const read = (name: string) => {
+            const value = stored[uid]?.[entity.id]?.[name] ?? null;
 
-              // like the DB layer, only the component types listed in `on` are returned
-              return params?.on && Array.isArray(value)
-                ? value.filter((row: any) => row.__component in params.on)
-                : value;
-            };
-            return Array.isArray(attribute)
-              ? Object.fromEntries(attribute.map((name) => [name, read(name)]))
-              : read(attribute);
-          }
-        ),
-        deleteMany: jest.fn(async () => ({ count: 1 })),
-        update: jest.fn(async ({ where }: { where: { id: number } }) => ({ id: where.id })),
-        create: jest.fn(async () => {
+            // like the DB layer, only the component types listed in `on` are returned
+            return params?.on && Array.isArray(value)
+              ? value.filter((row: any) => row.__component in params.on)
+              : value;
+          };
+          return Array.isArray(attribute)
+            ? Object.fromEntries(attribute.map((name) => [name, read(name)]))
+            : read(attribute);
+        }),
+        deleteMany: vi.fn(async () => ({ count: 1 })),
+        update: vi.fn(async ({ where }: { where: { id: number } }) => ({ id: where.id })),
+        create: vi.fn(async () => {
           nextId += 1;
           return { id: nextId - 1 };
         }),
-        delete: jest.fn(async () => ({})),
+        delete: vi.fn(async () => ({})),
       },
     ])
   );
 
   // `strapi.db.queryBuilder(uid).init(params).execute()` returns the stored rows asked for by id
-  const builders: Record<string, { init: jest.Mock; execute: jest.Mock }> = {};
-  const queryBuilder = jest.fn((uid: string) => {
+  const builders: Record<string, { init: Mock; execute: Mock }> = {};
+  const queryBuilder = vi.fn((uid: string) => {
     if (!builders[uid]) {
       let params: { where: { id: { $in: number[] } } };
       const builder = {
-        init: jest.fn((value: typeof params) => {
+        init: vi.fn((value: typeof params) => {
           params = value;
           return builder;
         }),
-        execute: jest.fn(async () =>
-          params.where.id.$in.map((id) => ({ id, ...stored[uid]?.[id] }))
-        ),
+        execute: vi.fn(async () => params.where.id.$in.map((id) => ({ id, ...stored[uid]?.[id] }))),
       };
       builders[uid] = builder;
     }
@@ -105,15 +102,15 @@ const setup = (stored: Record<string, Stored>) => {
   });
 
   const db = {
-    query: jest.fn((uid: string) => queries[uid]),
+    query: vi.fn((uid: string) => queries[uid]),
     queryBuilder,
-    transaction: jest.fn(async (run: (ctx: { trx: string }) => unknown) => run({ trx: 'trx' })),
-    entityManager: { deleteManyRelations: jest.fn(async () => undefined) },
-    lifecycles: { hasSubscribers: jest.fn(() => false) },
+    transaction: vi.fn(async (run: (ctx: { trx: string }) => unknown) => run({ trx: 'trx' })),
+    entityManager: { deleteManyRelations: vi.fn(async () => undefined) },
+    lifecycles: { hasSubscribers: vi.fn(() => false) },
   };
 
   global.strapi = {
-    getModel: jest.fn((uid: string) => models[uid]),
+    getModel: vi.fn((uid: string) => models[uid]),
     components: Object.fromEntries(
       Object.entries(models).filter(([, model]) => model.modelType === 'component')
     ),

@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import type { ErrorObject, SchemaObject } from 'ajv';
 import Ajv2020 from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
