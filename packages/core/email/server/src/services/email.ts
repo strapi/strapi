@@ -28,8 +28,6 @@ const sendTemplatedEmail = (
   emailTemplate: EmailTemplate,
   data: EmailTemplateData
 ) => {
-  // TODO @Nico `EmailTemplate` declares `html` optional, but a template without an `html` key
-  // throws here.
   const attributes = ['subject', 'text', 'html'];
   const missingAttributes = difference(attributes, Object.keys(emailTemplate));
 
