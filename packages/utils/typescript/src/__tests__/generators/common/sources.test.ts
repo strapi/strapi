@@ -6,6 +6,7 @@ import { compareCodeUnits } from '../../../generators/common/compare';
 import {
   filterRegisteredSources,
   findTypeExports,
+  scanSources,
   toImportSpecifier,
 } from '../../../generators/common/sources';
 import { createLogger } from '../../../generators/utils';
@@ -71,31 +72,126 @@ describe('filterRegisteredSources', () => {
   });
 });
 
-describe('findTypeExports', () => {
-  const roots: string[] = [];
+const roots: string[] = [];
 
-  afterEach(async () => {
-    await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true })));
+afterEach(async () => {
+  await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true })));
+});
+
+// One source per entry, named after its key: `<key>.ts`, or the key itself when it has an extension
+const writeSources = async (files: Record<string, string | null>) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-sources-'));
+  roots.push(root);
+
+  return Promise.all(
+    Object.entries(files).map(async ([key, content]) => {
+      const file = path.join(root, path.extname(key) === '' ? `${key}.ts` : key);
+      // `null` leaves the file out, so that reading it fails
+      if (content !== null) {
+        await fs.writeFile(file, content);
+      }
+      return { uid: `api::${key}.${key}`, file, specifier: `./${key}` };
+    })
+  );
+};
+
+describe('scanSources', () => {
+  const scanIn = async (files: Record<string, string | null>) => {
+    const logger = createLogger({ silent: true });
+
+    return { scanned: await scanSources(await writeSources(files), logger), logger };
+  };
+
+  const shapesOf = async (files: Record<string, string | null>) => {
+    const { scanned, logger } = await scanIn(files);
+
+    return {
+      shapes: Object.fromEntries(
+        scanned.map((source) => [source.uid.split('.')[1], source.module?.shape])
+      ),
+      logger,
+    };
+  };
+
+  test('reads the module shape of each TypeScript source', async () => {
+    const { shapes, logger } = await shapesOf({
+      expression: 'export default (config: unknown) => config;',
+      fn: 'export default function factory() {}',
+      klass: 'export default class Factory {}',
+      abstractClass: 'export default abstract class Factory {}',
+      renamed: 'const factory = () => 1;\nexport { factory as default };',
+      reexportDefault: "export { default } from './typed';",
+      namespaceDefault: "export * as default from './typed';",
+      exportEquals: 'const factory = () => 1;\nexport = factory;',
+      starOnly: "export * from './typed';",
+      namedOnly: 'export const helper = 1;',
+      typeOnly: 'export type Config = { max: number };',
+      defaultInterface: 'export default interface Config { max: number }',
+      typeSpecifier: 'type Config = { max: number };\nexport { type Config as default };',
+      typeOnlyExport: 'type Config = { max: number };\nexport type { Config as default };',
+      importOnly: "import './side-effect';",
+      commonjs: 'module.exports = (config: unknown) => config;',
+      commonjsWithImport:
+        "import { helper } from './helper';\nmodule.exports = (config: unknown) => helper(config);",
+      commonjsWithExport: 'export const helper = 1;\nmodule.exports = () => helper;',
+      noModuleSyntax: 'const helper = 1;',
+      empty: '',
+    });
+
+    expect(shapes).toEqual({
+      expression: 'default',
+      fn: 'default',
+      klass: 'default',
+      abstractClass: 'default',
+      renamed: 'default',
+      reexportDefault: 'default',
+      namespaceDefault: 'default',
+      exportEquals: 'export-equals',
+      // `export *` never re-exports `default`
+      starOnly: 'no-default',
+      namedOnly: 'no-default',
+      // A type has no runtime value
+      typeOnly: 'no-default',
+      defaultInterface: 'no-default',
+      typeSpecifier: 'no-default',
+      typeOnlyExport: 'no-default',
+      importOnly: 'no-default',
+      // The assignment replaces the exports of the compiled module, ECMAScript syntax or not
+      commonjs: 'commonjs',
+      commonjsWithImport: 'commonjs',
+      commonjsWithExport: 'commonjs',
+      noModuleSyntax: 'commonjs',
+      empty: 'commonjs',
+    });
+    expect(logger.warnings).toBe(0);
   });
 
-  // One source per entry, named after its key: `<key>.ts`, or the key itself when it has an extension
+  test('does not read JS sources', async () => {
+    const { scanned, logger } = await scanIn({
+      'legacy.js': 'export default () => 1;',
+      'missing.js': null,
+    });
+
+    expect(scanned.map((source) => source.module)).toEqual([undefined, undefined]);
+    expect(logger.warnings).toBe(0);
+  });
+
+  test('keeps a source that cannot be read unscanned, with a warning', async () => {
+    const { scanned, logger } = await scanIn({
+      missing: null,
+      typed: 'export default () => 1;',
+    });
+
+    expect(scanned.map((source) => source.module?.shape)).toEqual([undefined, 'default']);
+    expect(logger.warnings).toBe(1);
+  });
+});
+
+describe('findTypeExports', () => {
   const findIn = async (files: Record<string, string | null>, name = 'ServiceContract') => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-sources-'));
-    roots.push(root);
-
-    const sources = await Promise.all(
-      Object.entries(files).map(async ([key, content]) => {
-        const file = path.join(root, path.extname(key) === '' ? `${key}.ts` : key);
-        // `null` leaves the file out, so that reading it fails
-        if (content !== null) {
-          await fs.writeFile(file, content);
-        }
-        return { uid: `api::${key}.${key}`, file, specifier: `./${key}` };
-      })
-    );
-
     const logger = createLogger({ silent: true });
-    const found = await findTypeExports(sources, name, logger);
+    const scanned = await scanSources(await writeSources(files), logger);
+    const found = findTypeExports(scanned, name, logger);
 
     return { found: Array.from(found).sort(), logger };
   };

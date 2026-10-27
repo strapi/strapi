@@ -88,9 +88,9 @@ describe('generateServicesDefinitions', () => {
   test('registers api services in the global AppServices registry', async () => {
     const { normalized } = await generate(
       {
-        'src/api/article/services/article.ts': '',
-        'src/api/article/services/randomArticleGenerator.ts': '',
-        'src/api/category/services/category.ts': '',
+        'src/api/article/services/article.ts': 'export default {};',
+        'src/api/article/services/randomArticleGenerator.ts': 'export default {};',
+        'src/api/category/services/category.ts': 'export default {};',
       },
       ['api::article.article', 'api::article.random-article-generator', 'api::category.category']
     );
@@ -115,9 +115,10 @@ describe('generateServicesDefinitions', () => {
   });
 
   test('resolves the instance type from the default export, falling back to unknown', async () => {
-    const { normalized } = await generate({ 'src/api/article/services/article.ts': '' }, [
-      'api::article.article',
-    ]);
+    const { normalized } = await generate(
+      { 'src/api/article/services/article.ts': 'export default {};' },
+      ['api::article.article']
+    );
 
     expect(normalized).toContain(
       'type ServiceInstance<TModule> = TModule extends { default: infer TExport } ? 0 extends 1 & TExport ? unknown : TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown'
@@ -127,9 +128,9 @@ describe('generateServicesDefinitions', () => {
   test('only emits services registered at runtime', async () => {
     const { output } = await generate(
       {
-        'src/api/article/services/article.ts': '',
-        'src/api/article/services/excluded.ts': '',
-        'src/api/draft/services/draft.ts': '',
+        'src/api/article/services/article.ts': 'export default {};',
+        'src/api/article/services/excluded.ts': 'export default {};',
+        'src/api/draft/services/draft.ts': 'export default {};',
       },
       ['api::article.article', 'plugin::upload.upload', 'admin::user']
     );
@@ -144,11 +145,11 @@ describe('generateServicesDefinitions', () => {
   test('ignores declaration files, non source files and hidden directories', async () => {
     const { output } = await generate(
       {
-        'src/api/article/services/article.ts': '',
+        'src/api/article/services/article.ts': 'export default {};',
         'src/api/article/services/article.d.ts': '',
         'src/api/article/services/README.md': '',
         'src/api/article/services/schema.json': '{}',
-        'src/api/.hidden/services/hidden.ts': '',
+        'src/api/.hidden/services/hidden.ts': 'export default {};',
       },
       ['api::article.article', 'api::article.readme', 'api::article.schema', 'api::hidden.hidden']
     );
@@ -163,7 +164,7 @@ describe('generateServicesDefinitions', () => {
     const { output, logger } = await generate(
       {
         'src/api/article/services/article.js': '',
-        'src/api/article/services/article.ts': '',
+        'src/api/article/services/article.ts': 'export default {};',
       },
       ['api::article.article']
     );
@@ -176,7 +177,7 @@ describe('generateServicesDefinitions', () => {
   test('registers a JS source as unknown, without importing it', async () => {
     const { normalized } = await generate(
       {
-        'src/api/article/services/article.ts': '',
+        'src/api/article/services/article.ts': 'export default {};',
         'src/api/article/services/legacy.js': '',
       },
       ['api::article.article', 'api::article.legacy']
@@ -252,6 +253,91 @@ describe('generateServicesDefinitions', () => {
     // `unknown`: the generated file reports it, and `skipLibCheck` does not apply to a `.ts` file.
     expect(check(true)).toEqual(['services.ts TS2307']);
     expect(check(false)).toEqual(['services.ts TS2307']);
+  });
+
+  test('registers the value of an export = module, and a CommonJS-style source as unknown', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/api/article/services/assigned.ts':
+          'const service = () => ({ find: () => 1 });\nexport = service;',
+        // The import of a file without ECMAScript module syntax fails with TS2306
+        'src/api/article/services/commonjs.ts': 'module.exports = () => ({ find: () => 1 });',
+      },
+      ['api::article.assigned', 'api::article.commonjs']
+    );
+    roots.push(root);
+
+    const { output } = await generateServicesDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+
+    // `importDefault` wraps the assigned value, as `default`
+    expect(normalize(output)).toContain(
+      "'api::article.assigned': ServiceInstance<{ default: typeof import('../../src/api/article/services/assigned.js') }>"
+    );
+    expect(normalize(output)).toContain("'api::article.commonjs': unknown");
+    expect(output).not.toContain('src/api/article/services/commonjs');
+    // Only the `export =` source registers its inferred type
+    expect(normalize(output)).toContain(
+      `interface InferredServices { 'api::article.assigned': true }`
+    );
+
+    await outputFile(path.join(pwd, 'services.ts'), output);
+    await outputFile(
+      path.join(root, 'check.ts'),
+      'export declare const registry: Strapi.Registries.AppServices;'
+    );
+
+    // The template's compiler options (packages/cli/create-strapi-app/templates/vanilla/tsconfig.json)
+    const program = ts.createProgram({
+      rootNames: [path.join(pwd, 'services.ts'), path.join(root, 'check.ts')],
+      options: {
+        noEmit: true,
+        strict: true,
+        noUnusedLocals: true,
+        esModuleInterop: true,
+        types: [],
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
+      },
+    });
+    const diagnostics = ts
+      .getPreEmitDiagnostics(program)
+      .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+    expect(diagnostics).toEqual([]);
+
+    // Printed rather than checked with conditional types, which an error type would satisfy
+    const checker = program.getTypeChecker();
+    const check = program.getSourceFile(path.join(root, 'check.ts'))!;
+    const [declaration] = (check.statements[0] as ts.VariableStatement).declarationList
+      .declarations;
+    const registry = checker.getTypeAtLocation(declaration.name);
+    const values = Object.fromEntries(
+      checker
+        .getPropertiesOfType(registry)
+        .map((property) => [
+          property.name,
+          checker.typeToString(checker.getTypeOfSymbolAtLocation(property, check)),
+        ])
+    );
+
+    expect(values).toEqual({
+      'api::article.assigned': '{ find: () => number; }',
+      'api::article.commonjs': 'unknown',
+    });
+  });
+
+  test('emits no helper when every TypeScript source is CommonJS-style', async () => {
+    const { output } = await generate(
+      { 'src/api/article/services/commonjs.ts': 'module.exports = () => ({ find: () => 1 });' },
+      ['api::article.commonjs']
+    );
+
+    expect(normalize(output)).toContain("'api::article.commonjs': unknown");
+    // `noUnusedLocals` would report a helper that no entry reads
+    expect(output).not.toContain('ServiceInstance');
   });
 
   test('marks the uids of an application without contracts, without a contract helper', async () => {
@@ -444,8 +530,8 @@ describe('generateServicesDefinitions', () => {
   test('sorts the entries by uid', async () => {
     const { output } = await generate(
       {
-        'src/api/zebra/services/zebra.ts': '',
-        'src/api/article/services/article.ts': '',
+        'src/api/zebra/services/zebra.ts': 'export default {};',
+        'src/api/article/services/article.ts': 'export default {};',
       },
       ['api::zebra.zebra', 'api::article.article']
     );

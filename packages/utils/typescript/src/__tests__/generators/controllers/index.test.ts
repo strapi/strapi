@@ -88,9 +88,9 @@ describe('generateControllersDefinitions', () => {
   test('registers api controllers in the global AppControllers registry', async () => {
     const { normalized } = await generate(
       {
-        'src/api/article/controllers/article.ts': '',
-        'src/api/article/controllers/randomArticleExporter.ts': '',
-        'src/api/category/controllers/category.ts': '',
+        'src/api/article/controllers/article.ts': 'export default {};',
+        'src/api/article/controllers/randomArticleExporter.ts': 'export default {};',
+        'src/api/category/controllers/category.ts': 'export default {};',
       },
       ['api::article.article', 'api::article.random-article-exporter', 'api::category.category']
     );
@@ -115,9 +115,10 @@ describe('generateControllersDefinitions', () => {
   });
 
   test('resolves the instance type from the default export, falling back to unknown', async () => {
-    const { normalized } = await generate({ 'src/api/article/controllers/article.ts': '' }, [
-      'api::article.article',
-    ]);
+    const { normalized } = await generate(
+      { 'src/api/article/controllers/article.ts': 'export default {};' },
+      ['api::article.article']
+    );
 
     expect(normalized).toContain(
       'type ControllerInstance<TModule> = TModule extends { default: infer TExport } ? 0 extends 1 & TExport ? unknown : TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown'
@@ -127,9 +128,9 @@ describe('generateControllersDefinitions', () => {
   test('only emits controllers registered at runtime', async () => {
     const { output } = await generate(
       {
-        'src/api/article/controllers/article.ts': '',
-        'src/api/article/controllers/excluded.ts': '',
-        'src/api/draft/controllers/draft.ts': '',
+        'src/api/article/controllers/article.ts': 'export default {};',
+        'src/api/article/controllers/excluded.ts': 'export default {};',
+        'src/api/draft/controllers/draft.ts': 'export default {};',
       },
       ['api::article.article', 'plugin::upload.upload', 'admin::user']
     );
@@ -142,9 +143,10 @@ describe('generateControllersDefinitions', () => {
   });
 
   test('ignores api services, which register under the same uids', async () => {
-    const { root, strapi, pwd } = await createApp({ 'src/api/article/services/article.ts': '' }, [
-      'api::article.article',
-    ]);
+    const { root, strapi, pwd } = await createApp(
+      { 'src/api/article/services/article.ts': 'export default {};' },
+      ['api::article.article']
+    );
     roots.push(root);
 
     const logger = createLogger({ silent: true });
@@ -156,11 +158,11 @@ describe('generateControllersDefinitions', () => {
   test('ignores declaration files, non source files and hidden directories', async () => {
     const { output } = await generate(
       {
-        'src/api/article/controllers/article.ts': '',
+        'src/api/article/controllers/article.ts': 'export default {};',
         'src/api/article/controllers/article.d.ts': '',
         'src/api/article/controllers/README.md': '',
         'src/api/article/controllers/schema.json': '{}',
-        'src/api/.hidden/controllers/hidden.ts': '',
+        'src/api/.hidden/controllers/hidden.ts': 'export default {};',
       },
       ['api::article.article', 'api::article.readme', 'api::article.schema', 'api::hidden.hidden']
     );
@@ -175,7 +177,7 @@ describe('generateControllersDefinitions', () => {
     const { output, logger } = await generate(
       {
         'src/api/article/controllers/article.js': '',
-        'src/api/article/controllers/article.ts': '',
+        'src/api/article/controllers/article.ts': 'export default {};',
       },
       ['api::article.article']
     );
@@ -188,7 +190,7 @@ describe('generateControllersDefinitions', () => {
   test('registers a JS source as unknown, without importing it', async () => {
     const { normalized } = await generate(
       {
-        'src/api/article/controllers/article.ts': '',
+        'src/api/article/controllers/article.ts': 'export default {};',
         'src/api/article/controllers/legacy.js': '',
       },
       ['api::article.article', 'api::article.legacy']
@@ -196,6 +198,91 @@ describe('generateControllersDefinitions', () => {
 
     expect(normalized).toContain("'api::article.legacy': unknown");
     expect(normalized).not.toContain("legacy')");
+  });
+
+  test('registers the value of an export = module, and a CommonJS-style source as unknown', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/api/article/controllers/assigned.ts':
+          'const controller = () => ({ find: () => 1 });\nexport = controller;',
+        // The import of a file without ECMAScript module syntax fails with TS2306
+        'src/api/article/controllers/commonjs.ts': 'module.exports = () => ({ find: () => 1 });',
+      },
+      ['api::article.assigned', 'api::article.commonjs']
+    );
+    roots.push(root);
+
+    const { output } = await generateControllersDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+
+    // `importDefault` wraps the assigned value, as `default`
+    expect(normalize(output)).toContain(
+      "'api::article.assigned': ControllerInstance<{ default: typeof import('../../src/api/article/controllers/assigned.js') }>"
+    );
+    expect(normalize(output)).toContain("'api::article.commonjs': unknown");
+    expect(output).not.toContain('src/api/article/controllers/commonjs');
+    // Only the `export =` source registers its inferred type
+    expect(normalize(output)).toContain(
+      `interface InferredControllers { 'api::article.assigned': true }`
+    );
+
+    await outputFile(path.join(pwd, 'controllers.ts'), output);
+    await outputFile(
+      path.join(root, 'check.ts'),
+      'export declare const registry: Strapi.Registries.AppControllers;'
+    );
+
+    // The template's compiler options (packages/cli/create-strapi-app/templates/vanilla/tsconfig.json)
+    const program = ts.createProgram({
+      rootNames: [path.join(pwd, 'controllers.ts'), path.join(root, 'check.ts')],
+      options: {
+        noEmit: true,
+        strict: true,
+        noUnusedLocals: true,
+        esModuleInterop: true,
+        types: [],
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
+      },
+    });
+    const diagnostics = ts
+      .getPreEmitDiagnostics(program)
+      .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+    expect(diagnostics).toEqual([]);
+
+    // Printed rather than checked with conditional types, which an error type would satisfy
+    const checker = program.getTypeChecker();
+    const check = program.getSourceFile(path.join(root, 'check.ts'))!;
+    const [declaration] = (check.statements[0] as ts.VariableStatement).declarationList
+      .declarations;
+    const registry = checker.getTypeAtLocation(declaration.name);
+    const values = Object.fromEntries(
+      checker
+        .getPropertiesOfType(registry)
+        .map((property) => [
+          property.name,
+          checker.typeToString(checker.getTypeOfSymbolAtLocation(property, check)),
+        ])
+    );
+
+    expect(values).toEqual({
+      'api::article.assigned': '{ find: () => number; }',
+      'api::article.commonjs': 'unknown',
+    });
+  });
+
+  test('emits no helper when every TypeScript source is CommonJS-style', async () => {
+    const { output } = await generate(
+      { 'src/api/article/controllers/commonjs.ts': 'module.exports = () => ({ find: () => 1 });' },
+      ['api::article.commonjs']
+    );
+
+    expect(normalize(output)).toContain("'api::article.commonjs': unknown");
+    // `noUnusedLocals` would report a helper that no entry reads
+    expect(output).not.toContain('ControllerInstance');
   });
 
   test('marks the uids of an application without contracts, without a contract helper', async () => {
@@ -335,8 +422,8 @@ describe('generateControllersDefinitions', () => {
   test('sorts the entries by uid', async () => {
     const { output } = await generate(
       {
-        'src/api/zebra/controllers/zebra.ts': '',
-        'src/api/article/controllers/article.ts': '',
+        'src/api/zebra/controllers/zebra.ts': 'export default {};',
+        'src/api/article/controllers/article.ts': 'export default {};',
       },
       ['api::zebra.zebra', 'api::article.article']
     );

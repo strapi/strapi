@@ -63,8 +63,8 @@ describe('generatePoliciesDefinitions', () => {
   test('registers global and api policies in the global AppPolicies registry', async () => {
     const { normalized } = await generate(
       {
-        'src/policies/isOwner.ts': '',
-        'src/api/article/policies/hasRole.ts': '',
+        'src/policies/isOwner.ts': 'export default {};',
+        'src/api/article/policies/hasRole.ts': 'export default {};',
         'src/api/blog-post/policies/is-author.js': '',
       },
       ['global::isOwner', 'api::article.has-role', 'api::blog-post.is-author']
@@ -91,7 +91,9 @@ describe('generatePoliciesDefinitions', () => {
   });
 
   test('resolves the config from the handler of both runtime forms', async () => {
-    const { normalized } = await generate({ 'src/policies/isOwner.ts': '' }, ['global::isOwner']);
+    const { normalized } = await generate({ 'src/policies/isOwner.ts': 'export default {};' }, [
+      'global::isOwner',
+    ]);
 
     // A bare handler, or the handler of `{ handler, validator }`
     expect(normalized).toContain(
@@ -180,13 +182,98 @@ describe('generatePoliciesDefinitions', () => {
     });
   });
 
+  test('registers the value of an export = module, and a CommonJS-style source as unknown', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/policies/assigned.ts':
+          'const policy = (ctx: unknown, config: { scope: string }) => true;\nexport = policy;',
+        // The import of a file without ECMAScript module syntax fails with TS2306
+        'src/policies/commonjs.ts':
+          'module.exports = (ctx: unknown, config: { scope: string }) => true;',
+      },
+      ['global::assigned', 'global::commonjs']
+    );
+    roots.push(root);
+
+    const { output } = await generatePoliciesDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+
+    // `importDefault` wraps the assigned value, as `default`
+    expect(normalize(output)).toContain(
+      "'global::assigned': PolicyConfig<{ default: typeof import('../../src/policies/assigned.js') }>"
+    );
+    expect(normalize(output)).toContain("'global::commonjs': unknown");
+    expect(output).not.toContain('src/policies/commonjs');
+
+    await outputFile(path.join(pwd, 'policies.ts'), output);
+    await outputFile(
+      path.join(root, 'check.ts'),
+      'export declare const registry: Strapi.Registries.AppPolicies;'
+    );
+
+    // The template's compiler options (packages/cli/create-strapi-app/templates/vanilla/tsconfig.json)
+    const program = ts.createProgram({
+      rootNames: [path.join(pwd, 'policies.ts'), path.join(root, 'check.ts')],
+      options: {
+        noEmit: true,
+        strict: true,
+        noUnusedLocals: true,
+        esModuleInterop: true,
+        types: [],
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
+      },
+    });
+    const diagnostics = ts
+      .getPreEmitDiagnostics(program)
+      .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+    expect(diagnostics).toEqual([]);
+
+    // Printed rather than checked with conditional types, which an error type would satisfy
+    const checker = program.getTypeChecker();
+    const check = program.getSourceFile(path.join(root, 'check.ts'))!;
+    const [declaration] = (check.statements[0] as ts.VariableStatement).declarationList
+      .declarations;
+    const registry = checker.getTypeAtLocation(declaration.name);
+    const values = Object.fromEntries(
+      checker
+        .getPropertiesOfType(registry)
+        .map((property) => [
+          property.name,
+          checker.typeToString(checker.getTypeOfSymbolAtLocation(property, check)),
+        ])
+    );
+
+    expect(values).toEqual({
+      'global::assigned': '{ scope: string; }',
+      'global::commonjs': 'unknown',
+    });
+  });
+
+  test('emits no helper when every TypeScript source is CommonJS-style', async () => {
+    const { output } = await generate(
+      {
+        'src/policies/commonjs.ts':
+          'module.exports = (ctx: unknown, config: { scope: string }) => true;',
+      },
+      ['global::commonjs']
+    );
+
+    expect(normalize(output)).toContain("'global::commonjs': unknown");
+    // `noUnusedLocals` would report a helper that no entry reads
+    expect(output).not.toContain('PolicyConfig');
+  });
+
   test('only emits policies registered at runtime', async () => {
     const { output } = await generate(
       {
-        'src/policies/isOwner.ts': '',
-        'src/policies/excluded.ts': '',
-        'src/api/article/policies/hasRole.ts': '',
-        'src/api/draft/policies/draft.ts': '',
+        'src/policies/isOwner.ts': 'export default {};',
+        'src/policies/excluded.ts': 'export default {};',
+        'src/api/article/policies/hasRole.ts': 'export default {};',
+        'src/api/draft/policies/draft.ts': 'export default {};',
       },
       [
         'global::isOwner',
@@ -207,9 +294,9 @@ describe('generatePoliciesDefinitions', () => {
   test('ignores api controllers and middlewares, and policies of hidden api directories', async () => {
     const { output } = await generate(
       {
-        'src/api/article/controllers/article.ts': '',
-        'src/api/article/middlewares/article.ts': '',
-        'src/api/.hidden/policies/hidden.ts': '',
+        'src/api/article/controllers/article.ts': 'export default {};',
+        'src/api/article/middlewares/article.ts': 'export default {};',
+        'src/api/.hidden/policies/hidden.ts': 'export default {};',
       },
       ['api::article.article', 'api::hidden.hidden']
     );
@@ -220,10 +307,10 @@ describe('generatePoliciesDefinitions', () => {
   test('ignores declaration files and non source files', async () => {
     const { output } = await generate(
       {
-        'src/policies/isOwner.ts': '',
+        'src/policies/isOwner.ts': 'export default {};',
         'src/policies/isOwner.d.ts': '',
         'src/policies/README.md': '',
-        'src/api/article/policies/hasRole.ts': '',
+        'src/api/article/policies/hasRole.ts': 'export default {};',
         'src/api/article/policies/config.json': '{}',
       },
       ['global::isOwner', 'global::README', 'api::article.has-role', 'api::article.config']
@@ -239,9 +326,9 @@ describe('generatePoliciesDefinitions', () => {
     const { output, logger } = await generate(
       {
         'src/policies/isOwner.js': '',
-        'src/policies/isOwner.ts': '',
+        'src/policies/isOwner.ts': 'export default {};',
         'src/api/article/policies/has-role.js': '',
-        'src/api/article/policies/hasRole.ts': '',
+        'src/api/article/policies/hasRole.ts': 'export default {};',
       },
       ['global::isOwner', 'api::article.has-role']
     );
@@ -267,8 +354,8 @@ describe('generatePoliciesDefinitions', () => {
   test('sorts the entries by uid', async () => {
     const { output } = await generate(
       {
-        'src/policies/zebra.ts': '',
-        'src/api/article/policies/article.ts': '',
+        'src/policies/zebra.ts': 'export default {};',
+        'src/api/article/policies/article.ts': 'export default {};',
       },
       ['global::zebra', 'api::article.article']
     );
