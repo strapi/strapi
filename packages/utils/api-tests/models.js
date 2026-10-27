@@ -11,8 +11,16 @@ const toCompoUID = (name) => {
   return `default.${name}`;
 };
 
+/**
+ * Boots an instance for a helper. Helper instances only write schema files or rows and never
+ * serve GraphQL requests, so they skip building the GraphQL schema. The instance a test boots
+ * itself still builds it.
+ */
+const createHelperInstance = (options = {}) =>
+  createStrapiInstance({ buildGraphqlSchema: false, ...options });
+
 const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {}) => {
-  const strapi = strapiInstance || (await createStrapiInstance(options));
+  const strapi = strapiInstance || (await createHelperInstance(options));
   const contentTypeService = strapi.plugin('content-type-builder').service('content-types');
   const componentsService = strapi.plugin('content-type-builder').service('components');
 
@@ -250,6 +258,7 @@ async function getContentTypeSchema(modelName, { strapi: strapiIst } = {}) {
 
 module.exports = {
   toContentTypeUID,
+  createHelperInstance,
   // Create Content-Types
   createContentType,
   createContentTypes,
