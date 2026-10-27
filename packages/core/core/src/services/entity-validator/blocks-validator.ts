@@ -1,5 +1,75 @@
 import { yup } from '@strapi/utils';
 
+/**
+ * Registry for custom block-type validators.
+ *
+ * Plugins and user apps that register custom rich-text blocks on the admin side
+ * via `addRichTextBlocks` must also register a corresponding server-side yup
+ * validator here so the entity-validator accepts the new block type on publish.
+ *
+ * Usage (typically in a plugin or app `register()` phase):
+ *
+ * ```ts
+ * import { customBlockValidators } from '@strapi/core';
+ *
+ * customBlockValidators.add(
+ *   'callout',
+ *   yup.object().shape({
+ *     type: yup.string().equals(['callout']).required(),
+ *     children: yup.array().of(textNodeValidator).min(1).required(),
+ *   })
+ * );
+ * ```
+ */
+const customBlockValidatorsMap = new Map<string, yup.AnySchema>();
+
+export const customBlockValidators = {
+  /**
+   * Register a yup validator for a custom block type.
+   * @param type  The block `type` string (must match the Slate node type used in the admin).
+   * @param validator  A yup schema that validates the full block node shape.
+   */
+  add(type: string, validator: yup.AnySchema): void {
+    if (!type || typeof type !== 'string') {
+      throw new Error('Custom block validator requires a non-empty string `type`');
+    }
+    if (customBlockValidatorsMap.has(type)) {
+      throw new Error(`A custom block validator for type "${type}" has already been registered`);
+    }
+    customBlockValidatorsMap.set(type, validator);
+  },
+
+  /**
+   * Return the registered validator for a given block type, or `undefined`.
+   */
+  get(type: string): yup.AnySchema | undefined {
+    return customBlockValidatorsMap.get(type);
+  },
+
+  /**
+   * Check whether a validator is registered for the given block type.
+   */
+  has(type: string): boolean {
+    return customBlockValidatorsMap.has(type);
+  },
+
+  /**
+   * Remove the validator for a given block type.
+   * Returns `true` if the type was registered, `false` otherwise.
+   */
+  delete(type: string): boolean {
+    return customBlockValidatorsMap.delete(type);
+  },
+
+  /**
+   * Remove all registered custom block validators.
+   * Primarily useful for testing.
+   */
+  clear(): void {
+    customBlockValidatorsMap.clear();
+  },
+};
+
 const textNodeValidator = yup.object().shape({
   type: yup.string().equals(['text']).required(),
   text: yup
@@ -159,10 +229,15 @@ const blockNodeValidator: any = yup.lazy((value: { type: string }) => {
       return imageNodeValidator;
     case 'code':
       return codeBlockValidator;
-    default:
+    default: {
+      const customValidator = customBlockValidators.get(value.type);
+      if (customValidator) {
+        return customValidator;
+      }
       return yup.mixed().test('invalid-type', 'Block node is of invalid type', () => {
         return false;
       });
+    }
   }
 });
 

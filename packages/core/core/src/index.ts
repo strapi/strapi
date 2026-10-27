@@ -11,6 +11,7 @@ import type {
 export { default as compileStrapi } from './compile';
 export * as factories from './factories';
 export * as ai from './ai';
+export { customBlockValidators } from './services/entity-validator/blocks-validator';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
   const strapi = new Strapi({

@@ -1,7 +1,8 @@
 import * as strapiUtils from '@strapi/utils';
 import { Validators } from '../validators';
+import { customBlockValidators } from '../blocks-validator';
 
-const { errors } = strapiUtils;
+const { errors, yup } = strapiUtils;
 
 const validParagraph = [
   {
@@ -551,6 +552,214 @@ describe('Blocks validator', () => {
       expect(validator(mixed)).rejects.toThrow(errors.YupValidationError);
       // Bad version
       expect(validator(mixed)).rejects.toThrow(errors.YupValidationError);
+    });
+  });
+
+  describe('Custom block validators', () => {
+    afterEach(() => {
+      // Reset the global registry between tests
+      customBlockValidators.clear();
+    });
+
+    describe('Registry API', () => {
+      it('should register and retrieve a custom block validator', () => {
+        const calloutValidator = yup.object().shape({
+          type: yup.string().equals(['callout']).required(),
+          children: yup.array().required(),
+        });
+
+        customBlockValidators.add('callout', calloutValidator);
+        expect(customBlockValidators.has('callout')).toBe(true);
+        expect(customBlockValidators.get('callout')).toBe(calloutValidator);
+      });
+
+      it('should throw when registering a duplicate type', () => {
+        const validator = yup.object().shape({
+          type: yup.string().equals(['callout']).required(),
+        });
+        customBlockValidators.add('callout', validator);
+
+        expect(() => customBlockValidators.add('callout', validator)).toThrow(
+          'A custom block validator for type "callout" has already been registered'
+        );
+      });
+
+      it('should throw when registering with an empty string type', () => {
+        const validator = yup.object();
+        expect(() => customBlockValidators.add('', validator)).toThrow(
+          'Custom block validator requires a non-empty string `type`'
+        );
+      });
+
+      it('should delete a registered custom block validator', () => {
+        const validator = yup.object();
+        customBlockValidators.add('callout', validator);
+        expect(customBlockValidators.delete('callout')).toBe(true);
+        expect(customBlockValidators.has('callout')).toBe(false);
+      });
+
+      it('should return false when deleting a non-existent type', () => {
+        expect(customBlockValidators.delete('nonexistent')).toBe(false);
+      });
+
+      it('should clear all registered validators', () => {
+        customBlockValidators.add('callout', yup.object());
+        customBlockValidators.add('alert', yup.object());
+        customBlockValidators.clear();
+        expect(customBlockValidators.has('callout')).toBe(false);
+        expect(customBlockValidators.has('alert')).toBe(false);
+      });
+    });
+
+    describe('Validation', () => {
+      it('should accept a valid custom block when its validator is registered', async () => {
+        const calloutValidator = yup.object().shape({
+          type: yup.string().equals(['callout']).required(),
+          children: yup
+            .array()
+            .of(
+              yup.object().shape({
+                type: yup.string().equals(['text']).required(),
+                text: yup.string(),
+              })
+            )
+            .min(1)
+            .required(),
+        });
+        customBlockValidators.add('callout', calloutValidator);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.blocks(
+            {
+              attr: { type: 'blocks' },
+            },
+            { isDraft: false }
+          )
+        );
+
+        const input = [
+          {
+            type: 'callout',
+            children: [{ type: 'text', text: 'Important note' }],
+          },
+        ];
+
+        expect(await validator(input)).toEqual(input);
+      });
+
+      it('should accept custom blocks mixed with built-in blocks', async () => {
+        const calloutValidator = yup.object().shape({
+          type: yup.string().equals(['callout']).required(),
+          children: yup
+            .array()
+            .of(
+              yup.object().shape({
+                type: yup.string().equals(['text']).required(),
+                text: yup.string(),
+              })
+            )
+            .min(1)
+            .required(),
+        });
+        customBlockValidators.add('callout', calloutValidator);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.blocks(
+            {
+              attr: { type: 'blocks' },
+            },
+            { isDraft: false }
+          )
+        );
+
+        const input = [
+          ...validParagraph,
+          {
+            type: 'callout',
+            children: [{ type: 'text', text: 'Important note' }],
+          },
+        ];
+
+        expect(await validator(input)).toEqual(input);
+      });
+
+      it('should reject a custom block that does not match its registered schema', () => {
+        const calloutValidator = yup.object().shape({
+          type: yup.string().equals(['callout']).required(),
+          children: yup.array().min(1).required(),
+        });
+        customBlockValidators.add('callout', calloutValidator);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.blocks(
+            {
+              attr: { type: 'blocks' },
+            },
+            { isDraft: false }
+          )
+        );
+
+        // Missing required children
+        const input = [{ type: 'callout' }];
+        expect(validator(input)).rejects.toThrow(errors.YupValidationError);
+      });
+
+      it('should still reject a completely unknown block type', () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.blocks(
+            {
+              attr: { type: 'blocks' },
+            },
+            { isDraft: false }
+          )
+        );
+
+        const input = [
+          {
+            type: 'unknown-block',
+            children: [{ type: 'text', text: 'test' }],
+          },
+        ];
+
+        expect(validator(input)).rejects.toThrow(errors.YupValidationError);
+      });
+
+      it('should reject a custom block with invalid nested children', () => {
+        // Register a validator that requires children to be text nodes
+        const calloutValidator = yup.object().shape({
+          type: yup.string().equals(['callout']).required(),
+          children: yup
+            .array()
+            .of(
+              yup.object().shape({
+                type: yup.string().equals(['text']).required(),
+                text: yup.string().required(),
+              })
+            )
+            .min(1)
+            .required(),
+        });
+        customBlockValidators.add('callout', calloutValidator);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.blocks(
+            {
+              attr: { type: 'blocks' },
+            },
+            { isDraft: false }
+          )
+        );
+
+        // Children contain an invalid node type
+        const input = [
+          {
+            type: 'callout',
+            children: [{ type: 'invalid-child', value: 42 }],
+          },
+        ];
+
+        expect(validator(input)).rejects.toThrow(errors.YupValidationError);
+      });
     });
   });
 });
