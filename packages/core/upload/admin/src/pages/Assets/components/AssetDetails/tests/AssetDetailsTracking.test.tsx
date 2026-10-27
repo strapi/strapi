@@ -2,7 +2,7 @@ import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { uploadFileViaXHR } from '../../../../../services/uploadFileViaXHR';
-import { AssetDetails, AssetDetailsDrawer } from '../AssetDetailsDrawer';
+import { AssetDetails } from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
 
@@ -107,53 +107,45 @@ const cropThen = (action: 'Apply' | 'Save as copy') => async (user: User) => {
 };
 
 describe('AssetDetails tracking location', () => {
-  it('tags events with the Media Library location by default', async () => {
-    const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
-
-    await saveMetadata(user);
-
-    await waitFor(() =>
-      expect(mockTrackUsage).toHaveBeenCalledWith(
-        'didEditMediaLibraryElements',
-        expect.objectContaining({ location: 'upload' })
-      )
-    );
-  });
-
   it.each([
-    ['didEditMediaLibraryElements', {}, saveMetadata],
-    ['didReplaceMedia', {}, replaceFile],
-    ['didCropFile', { duplicatedFile: false }, cropThen('Apply')],
-    ['didCropFile', { duplicatedFile: true }, cropThen('Save as copy')],
-  ])('tags %s %o with the given location', async (event, properties, act) => {
-    const { user } = render(
-      <AssetDetails asset={baseAsset} closeDetails={jest.fn()} trackedLocation="content-manager" />
-    );
-    await screen.findByRole('combobox');
+    // No `trackedLocation`, as on the Media Library page: falls back to its 'upload'.
+    ['didEditMediaLibraryElements', {}, saveMetadata, undefined, 'upload'],
+    ['didEditMediaLibraryElements', {}, saveMetadata, 'content-manager', 'content-manager'],
+    ['didReplaceMedia', {}, replaceFile, 'content-manager', 'content-manager'],
+    [
+      'didCropFile',
+      { duplicatedFile: false },
+      cropThen('Apply'),
+      'content-manager',
+      'content-manager',
+    ],
+    [
+      'didCropFile',
+      { duplicatedFile: true },
+      cropThen('Save as copy'),
+      'content-manager',
+      'content-manager',
+    ],
+  ])(
+    'tags %s %o given location %s as %s',
+    async (event, properties, act, trackedLocation, location) => {
+      const { user } = render(
+        <AssetDetails
+          asset={baseAsset}
+          closeDetails={jest.fn()}
+          trackedLocation={trackedLocation}
+        />
+      );
+      await screen.findByRole('combobox');
 
-    await act(user);
+      await act(user);
 
-    await waitFor(() =>
-      expect(mockTrackUsage).toHaveBeenCalledWith(
-        event,
-        expect.objectContaining({ ...properties, location: 'content-manager' })
-      )
-    );
-  });
-});
-
-describe('AssetDetailsDrawer tracking location', () => {
-  it('passes the location through to the details', async () => {
-    const { user } = render(
-      <AssetDetailsDrawer assetId={1} onClose={jest.fn()} trackedLocation="content-manager" />
-    );
-
-    await replaceFile(user);
-
-    await waitFor(() =>
-      expect(mockTrackUsage).toHaveBeenCalledWith('didReplaceMedia', {
-        location: 'content-manager',
-      })
-    );
-  });
+      await waitFor(() =>
+        expect(mockTrackUsage).toHaveBeenCalledWith(
+          event,
+          expect.objectContaining({ ...properties, location })
+        )
+      );
+    }
+  );
 });

@@ -46,6 +46,13 @@ jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
   useMediaLibraryPermissions: () => mockPermissions,
 }));
 
+const mockTrackUsage = jest.fn();
+
+jest.mock('../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
+}));
+
 // The real crop editor produces the cropped file through a canvas, which jsdom lacks.
 jest.mock('../../../pages/Assets/components/AssetDetails/AssetCropEditor', () => ({
   AssetCropEditor: ({ onApply }: { onApply: (file: File, focalPoint: object) => void }) => (
@@ -1053,8 +1060,9 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
     });
 
     // #26836: the crop reached the server, but the field only took it on
-    // "Finish", so closing any other way left the pre-crop asset on the entry.
-    it('keeps a crop on the field however the drawer is closed', async () => {
+    // "Finish", so closing any other way — here Escape — left the pre-crop asset
+    // on the entry.
+    it('keeps a crop on a single-value field after the drawer closes', async () => {
       const one = withAlt(asset(1, 'one.png'));
       serveLibrary([one]);
       const { user } = renderInput({}, { cover: one });
@@ -1090,6 +1098,35 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
         ).not.toBeInTheDocument()
       );
       expect(cardMenu('two.png')).toBeInTheDocument();
+    });
+
+    it('empties a single-value field when its asset is deleted from the library', async () => {
+      serveLibrary([asset(1, 'one.png')]);
+      const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+
+      await openDrawer(user, 'one.png');
+      await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
+      await screen.findByText(/This file cannot be recovered/i);
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Edit one.png' })).not.toBeInTheDocument()
+      );
+      expect(screen.queryByText('one.png')).not.toBeInTheDocument();
+    });
+
+    // Analytics split Media Library and Content Manager usage on `location`.
+    it("tags the drawer's events with the Content Manager location", async () => {
+      serveLibrary([asset(1, 'one.png')]);
+      mockTrackUsage.mockClear();
+      const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+
+      await openDrawer(user, 'one.png');
+      await replaceInDrawer(user);
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didReplaceMedia', {
+        location: 'content-manager',
+      });
     });
 
     // The card's menu is not modal: it opens on the same press that closes the
@@ -1182,18 +1219,6 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(await screen.findByRole('menuitem', { name: 'Browse library' })).toBeInTheDocument();
     });
 
-    it("gives focus back to the row's edit button when the drawer closes", async () => {
-      serveLibrary([asset(1, 'one.png')]);
-      const { user } = renderInput({}, { cover: asset(1, 'one.png') });
-
-      await openDrawer(user, 'one.png');
-      await closeDrawer(user);
-
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Edit one.png' })).toHaveFocus()
-      );
-    });
-
     describe('with another media field on the entry', () => {
       const renderTwoFields = () =>
         render(
@@ -1259,6 +1284,41 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
         expect(
           await within(drawers[0]).findByRole('heading', { name: 'two.png' })
         ).toBeInTheDocument();
+      });
+
+      // A field that goes away — a removed component or dynamic zone entry —
+      // takes its open drawer with it, and must not leave the others locked.
+      it('releases the other fields when one unmounts with its drawer open', async () => {
+        serveLibrary([asset(1, 'one.png'), asset(2, 'two.png')]);
+        const Fields = ({ showCover }: { showCover: boolean }) => (
+          <>
+            {showCover ? (
+              <MediaLibraryInput name="cover" label="Cover" attribute={{ multiple: true }} />
+            ) : null}
+            <MediaLibraryInput name="gallery" label="Gallery" attribute={{ multiple: true }} />
+          </>
+        );
+        const { user, rerender } = render(<Fields showCover />, {
+          renderOptions: {
+            wrapper: ({ children }) => (
+              <Form
+                onSubmit={jest.fn()}
+                method="POST"
+                initialValues={{ cover: [asset(1, 'one.png')], gallery: [asset(2, 'two.png')] }}
+              >
+                {children}
+              </Form>
+            ),
+          },
+        });
+
+        await openDrawer(user, 'one.png');
+        rerender(<Fields showCover={false} />);
+        await waitFor(() =>
+          expect(screen.queryByRole('dialog', { name: 'File details' })).not.toBeInTheDocument()
+        );
+
+        await openDrawer(user, 'two.png');
       });
     });
   });

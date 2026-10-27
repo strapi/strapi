@@ -2,7 +2,7 @@ import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { uploadFileViaXHR } from '../../../../../services/uploadFileViaXHR';
-import { AssetDetails, AssetDetailsDrawer } from '../AssetDetailsDrawer';
+import { AssetDetails } from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
 
@@ -69,18 +69,16 @@ beforeEach(() => {
 
 const renderDetails = (props: Partial<React.ComponentProps<typeof AssetDetails>> = {}) => {
   const onAssetChange = jest.fn();
-  const onAssetDelete = jest.fn();
   const result = render(
     <AssetDetails
       asset={baseAsset}
       closeDetails={jest.fn()}
       onAssetChange={onAssetChange}
-      onAssetDelete={onAssetDelete}
       {...props}
     />
   );
 
-  return { ...result, onAssetChange, onAssetDelete };
+  return { ...result, onAssetChange };
 };
 
 describe('AssetDetails change callbacks', () => {
@@ -161,42 +159,5 @@ describe('AssetDetails change callbacks', () => {
 
     await screen.findByText('name must be unique');
     expect(onAssetChange).not.toHaveBeenCalled();
-  });
-
-  it('reports the deleted asset id, then closes', async () => {
-    server.use(
-      http.delete('/upload/files/:id', ({ params }) => HttpResponse.json({ id: Number(params.id) }))
-    );
-    const closeDetails = jest.fn();
-    const { user, onAssetDelete } = renderDetails({ closeDetails });
-    await screen.findByRole('combobox');
-
-    await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
-    await screen.findByText(/This file cannot be recovered/i);
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
-
-    await waitFor(() => expect(onAssetDelete).toHaveBeenCalledWith(1));
-    expect(closeDetails).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('AssetDetailsDrawer change callbacks', () => {
-  it('passes the callbacks through to the details', async () => {
-    server.use(
-      http.get('/upload/files/:id', () => HttpResponse.json(baseAsset)),
-      http.delete('/upload/files/:id', ({ params }) => HttpResponse.json({ id: Number(params.id) }))
-    );
-    const onAssetDelete = jest.fn();
-    const onClose = jest.fn();
-    const { user } = render(
-      <AssetDetailsDrawer assetId={1} onClose={onClose} onAssetDelete={onAssetDelete} />
-    );
-
-    await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
-    await screen.findByText(/This file cannot be recovered/i);
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
-
-    await waitFor(() => expect(onAssetDelete).toHaveBeenCalledWith(1));
-    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
