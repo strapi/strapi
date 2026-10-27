@@ -15,4 +15,4 @@ if [[ -n "${DOMAINS:-}" ]]; then
   domainArgs=(--domains ${DOMAINS})
 fi
 
-yarn test:e2e --setup --concurrency=1 "${domainArgs[@]}" -- "${jestOptions[@]}"
+yarn test:e2e --setup --concurrency=2 "${domainArgs[@]}" -- "${jestOptions[@]}"
