@@ -400,6 +400,30 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           expect(res.body.data).toBeUndefined();
         }
       });
+      test("It shouldn't return a stage that does not exist", async () => {
+        const res = await requests.admin.get(
+          `/review-workflows/workflows/${testWorkflow.id}/stages/123456789`
+        );
+
+        expect(res.status).toBe(404);
+      });
+      test("It shouldn't return a stage that belongs to another workflow", async () => {
+        const otherStage = await strapi.db.query(STAGE_MODEL_UID).create({
+          data: { name: 'Other stage' },
+        });
+        const otherWorkflow = await strapi.db.query(WORKFLOW_MODEL_UID).create({
+          data: { contentTypes: [], name: 'other workflow', stages: [otherStage.id] },
+        });
+
+        const res = await requests.admin.get(
+          `/review-workflows/workflows/${testWorkflow.id}/stages/${otherStage.id}`
+        );
+
+        await strapi.db.query(WORKFLOW_MODEL_UID).delete({ where: { id: otherWorkflow.id } });
+        await strapi.db.query(STAGE_MODEL_UID).delete({ where: { id: otherStage.id } });
+
+        expect(res.status).toBe(404);
+      });
     });
   });
 
