@@ -182,6 +182,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
+
+      if (version === null) {
+        throw new errors.NotFoundError('History version not found');
+      }
+
       const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
       const schemaDiff = serviceUtils.getSchemaAttributesDiff(
         version.schema,

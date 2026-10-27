@@ -1,4 +1,5 @@
 import type { UID } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createHistoryService } from '../history';
 
@@ -303,5 +304,13 @@ describe('history-version service', () => {
         component: { title: 'My component', relation: null, medias: null },
       },
     });
+  });
+
+  it('throws a not found error when restoring an unknown version', async () => {
+    findOneMock.mockResolvedValueOnce(null);
+
+    await expect(historyService.restoreVersion(999)).rejects.toThrow(
+      new errors.NotFoundError('History version not found')
+    );
   });
 });
