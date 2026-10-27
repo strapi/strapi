@@ -184,9 +184,16 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
   const locale = query.plugins?.i18n?.locale;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, onClose: () => void) => {
+    e.preventDefault();
+
     try {
-      await formik.handleSubmit(e);
-      onClose();
+      // `formik.handleSubmit` doesn't return the submit promise, so closing after it would reset
+      // the form while the submit is still reading its values.
+      const isAdded = await formik.submitForm();
+
+      if (isAdded) {
+        onClose();
+      }
     } catch (error) {
       if (isFetchError(error)) {
         // Handle axios error
@@ -235,7 +242,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
           }),
         });
 
-        return;
+        return true;
       }
 
       if ('error' in response) {
