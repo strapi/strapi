@@ -275,7 +275,7 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run tests
-        run: yarn nx affected --target=test:front --nx-ignore-cycles --parallel=2 -- --maxWorkers=2 --coverage
+        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand --coverage
 
       - name: Upload coverage artifacts
         if: matrix.node == 24 # Only upload from one node version to avoid conflicts
