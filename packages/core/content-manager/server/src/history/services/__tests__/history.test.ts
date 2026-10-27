@@ -141,7 +141,6 @@ describe('history-version service', () => {
           type: 'string' as const,
         },
       },
-      componentsSchemas: {},
       status: 'draft' as const,
     };
 
@@ -167,7 +166,6 @@ describe('history-version service', () => {
       },
       locale: 'en',
       relatedDocumentId: 'randomid',
-      componentsSchemas: {},
       schema: {
         title: {
           type: 'string' as const,
