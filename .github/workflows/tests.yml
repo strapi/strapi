@@ -290,6 +290,10 @@ jobs:
         with:
           runEE: false
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
+        env:
+          PIWI_DASHBOARD_URL: ${{ secrets.PIWI_DASHBOARD_URL }}
+          PIWI_API_KEY: ${{ secrets['PIWI_API_KEY'] }}
+          PIWI_RUN_LABEL: ${{ github.run_id }}-${{ github.run_attempt }}-ce-${{ matrix.project }}
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ steps.e2e.outcome == 'failure' }}
@@ -360,6 +364,10 @@ jobs:
           mediaLibrarySuite: current
           domains: media-library
           jestOptions: '--project=chromium'
+        env:
+          PIWI_DASHBOARD_URL: ${{ secrets.PIWI_DASHBOARD_URL }}
+          PIWI_API_KEY: ${{ secrets.PIWI_API_KEY }}
+          PIWI_RUN_LABEL: ${{ github.run_id }}-${{ github.run_attempt }}-ce-media-library
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ steps.e2e.outcome == 'failure' }}
@@ -415,6 +423,10 @@ jobs:
           mediaLibrarySuite: legacy
           domains: media-library
           jestOptions: '--project=chromium'
+        env:
+          PIWI_DASHBOARD_URL: ${{ secrets.PIWI_DASHBOARD_URL }}
+          PIWI_API_KEY: ${{ secrets.PIWI_API_KEY }}
+          PIWI_RUN_LABEL: ${{ github.run_id }}-${{ github.run_attempt }}-ce-media-library-legacy
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ steps.e2e.outcome == 'failure' }}
@@ -474,6 +486,10 @@ jobs:
         with:
           runEE: true
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
+        env:
+          PIWI_DASHBOARD_URL: ${{ secrets.PIWI_DASHBOARD_URL }}
+          PIWI_API_KEY: ${{ secrets.PIWI_API_KEY }}
+          PIWI_RUN_LABEL: ${{ github.run_id }}-${{ github.run_attempt }}-ee-${{ matrix.project }}
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ steps.e2e.outcome == 'failure' }}
