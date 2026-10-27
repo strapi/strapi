@@ -100,13 +100,6 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
   IsNotNever<TAttribute>,
   MatchFirst<
     [
-      // Relation
-      [
-        Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
-        TAttribute extends Schema.Attribute.RelationWithTarget
-          ? RelationInputValue<TAttribute['relation']>
-          : never,
-      ],
       // Media
       [
         Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
@@ -115,6 +108,13 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
           infer TMultiple
         >
           ? MediaInputValue<TMultiple>
+          : never,
+      ],
+      // Relation
+      [
+        Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
+        TAttribute extends Schema.Attribute.RelationWithTarget
+          ? RelationInputValue<TAttribute['relation']>
           : never,
       ],
       // DynamicZone
