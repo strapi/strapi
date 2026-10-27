@@ -85,6 +85,31 @@ export const delay = (seconds: number) => {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 };
 
+/**
+ * How long one health probe may take before it counts as "not up".
+ *
+ * `/_health` answers in milliseconds. A probe that reaches `strapi develop` while it replaces its
+ * worker on a restart can get no answer at all, and Node's fetch then waits for its default
+ * 300 s headers timeout (reproduced locally: 3 of ~900 probes across 10 restarts hung for 300 s).
+ * That one probe stalled resetFiles or waitForRestart for five minutes, past the 90 s hook timeout.
+ */
+const HEALTH_PROBE_TIMEOUT_MS = 2000;
+
+/**
+ * One `HEAD /_health` probe: true when Strapi answers OK within HEALTH_PROBE_TIMEOUT_MS.
+ */
+export const isServerHealthy = async (url: string) => {
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(HEALTH_PROBE_TIMEOUT_MS),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
 export const pollHealthCheck = async (interval = 1000, timeout = 30000) => {
   const port = process.env.PORT?.trim();
   if (!port) {
@@ -95,23 +120,17 @@ export const pollHealthCheck = async (interval = 1000, timeout = 30000) => {
   const url = `http://127.0.0.1:${port}/_health`;
   console.log(`Starting to poll: ${url}`);
 
-  let elapsed = 0;
+  // A deadline rather than a sum of intervals, so time spent inside a probe counts too.
+  const deadline = Date.now() + timeout;
 
-  while (elapsed < timeout) {
-    try {
-      const response = await fetch(url, { method: 'HEAD' });
-      if (response.ok) {
-        console.log('The service is up and running!');
-        return; // Exit if the service is up
-      }
-      // If the response is not okay, throw an error to catch it below
-      throw new Error('Service not ready');
-    } catch (error) {
-      console.log('Waiting for the service to come up...');
-      // Wait for the specified interval before trying again
-      await new Promise((resolve) => setTimeout(resolve, interval));
-      elapsed += interval; // Update the elapsed time
+  while (Date.now() < deadline) {
+    if (await isServerHealthy(url)) {
+      console.log('The service is up and running!');
+      return; // Exit if the service is up
     }
+    console.log('Waiting for the service to come up...');
+    // Wait for the specified interval before trying again
+    await new Promise((resolve) => setTimeout(resolve, interval));
   }
 
   // On timeout

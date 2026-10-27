@@ -1,6 +1,6 @@
 import execa from 'execa';
 
-import { delay, pollHealthCheck } from './restart';
+import { delay, isServerHealthy, pollHealthCheck } from './restart';
 
 const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
 
@@ -55,12 +55,8 @@ const waitForServerDown = async (timeoutMs = 5000, intervalMs = 100) => {
   const deadline = Date.now() + timeoutMs;
 
   while (Date.now() < deadline) {
-    try {
-      const response = await fetch(url, { method: 'HEAD' });
-      if (!response.ok) {
-        return;
-      }
-    } catch {
+    // Bounded probe: one that lands on the worker being replaced can otherwise hang for 300 s.
+    if (!(await isServerHealthy(url))) {
       return;
     }
     await delay(intervalMs / 1000);
