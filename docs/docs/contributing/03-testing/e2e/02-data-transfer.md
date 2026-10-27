@@ -99,3 +99,5 @@ test.describe('Strapi Application', () => {
   });
 });
 ```
+
+For the fixtures the test app knows (`with-admin` and `without-admin`), the helper asks the running app to restore them itself: `POST /api/config/reset-fixture` (loopback only, see `tests/app-template/src/api/config/utils/reset-fixture.js`) runs the same restore the DTS remote push runs, with the same local destination provider and options, but without the websocket round trips. Any other source (a `.tar`, an absolute path) still goes through the remote push.
