@@ -275,3 +275,20 @@ module.exports = {
   // Misc
   getContentTypeSchema,
 };
+
+const profile = require('./profile');
+
+if (profile.enabled) {
+  const modeOf = (args) => {
+    const options = args.find((arg) => arg && typeof arg === 'object' && !Array.isArray(arg)) ?? {};
+    if (options.strapi) return 'shared';
+    return options.registerOnly ? 'register-only' : 'boots';
+  };
+
+  for (const [name, fn] of Object.entries(module.exports)) {
+    if (typeof fn === 'function' && name !== 'toContentTypeUID') {
+      module.exports[name] = (...args) =>
+        profile.timed(`models.${name}`, () => fn(...args), { mode: modeOf(args) });
+    }
+  }
+}

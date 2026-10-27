@@ -5,6 +5,7 @@ const _ = require('lodash');
 const dotenv = require('dotenv');
 const { createStrapi } = require('../../core/strapi');
 const { createUtils } = require('./utils');
+const profile = require('./profile');
 
 const superAdminCredentials = {
   email: 'admin@strapi.io',
@@ -87,7 +88,10 @@ const createStrapiInstance = async ({
     };
   }
 
-  await instance.load();
+  profile.instrumentInstance(instance);
+
+  const bootStart = performance.now();
+  await profile.timed('boot.load', () => instance.load());
 
   instance.log.level = logLevel;
 
@@ -98,6 +102,8 @@ const createStrapiInstance = async ({
   if (ensureSuperAdmin) {
     await utils.createUserIfNotExists(superAdminCredentials);
   }
+
+  profile.record('boot.total', performance.now() - bootStart);
 
   return instance;
 };
