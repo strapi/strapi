@@ -42,5 +42,13 @@ module.exports = {
         auth: false,
       },
     },
+    {
+      method: 'POST',
+      path: '/config/reset-fixture',
+      handler: 'config.resetFixture',
+      config: {
+        auth: false,
+      },
+    },
   ],
 };
