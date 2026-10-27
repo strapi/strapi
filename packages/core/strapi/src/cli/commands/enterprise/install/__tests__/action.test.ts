@@ -62,10 +62,15 @@ const installLikeAPackageManager = async ({
 const createApp = async ({
   strapiVersion = '5.54.1',
   installedPackages = {},
-}: { strapiVersion?: string; installedPackages?: Record<string, string> } = {}) => {
+  packageManager = 'npm@10.9.0',
+}: {
+  strapiVersion?: string;
+  installedPackages?: Record<string, string>;
+  packageManager?: string;
+} = {}) => {
   const appDir = await createTemporaryDirectory();
   await fse.writeJson(path.join(appDir, 'package.json'), {
-    packageManager: 'npm@10.9.0',
+    packageManager,
     dependencies: installedPackages,
   });
   await fse.outputJson(path.join(appDir, 'node_modules', '@strapi', 'strapi', 'package.json'), {
@@ -895,12 +900,12 @@ describe('runInstall with the checklist', () => {
   });
 });
 
-describe('runInstall with STRAPI_ENTERPRISE_REGISTRY_URL', () => {
+describe('runInstall with --registry', () => {
   const LOCAL_REGISTRY = 'http://localhost:4873';
   const requestedUrls = (dependencies: jest.Mocked<InstallDependencies>) =>
     (dependencies.fetchImplementation as jest.Mock).mock.calls.map(([input]) => String(input));
 
-  it('sends every request to the Strapi registry when the variable is unset', async () => {
+  it('sends every request to the Strapi registry without the option', async () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
@@ -919,21 +924,48 @@ describe('runInstall with STRAPI_ENTERPRISE_REGISTRY_URL', () => {
     expect(
       requestedUrls(dependencies).every((url) => url.startsWith('https://packages.strapi.io/'))
     ).toBe(true);
-    expect(loggedText(logger)).not.toContain('STRAPI_ENTERPRISE_REGISTRY_URL');
+    expect(loggedText(logger)).not.toContain('--registry');
   });
 
-  it('sends every request to that registry, and sets it up in ~/.npmrc', async () => {
+  it('ignores STRAPI_ENTERPRISE_REGISTRY_URL, which the app .env can set', async () => {
     const dependencies = await createDependencies({
       isInteractive: true,
-      env: { STRAPI_LICENSE: LICENSE, STRAPI_ENTERPRISE_REGISTRY_URL: `${LOCAL_REGISTRY}/` },
+      env: { STRAPI_LICENSE: LICENSE, STRAPI_ENTERPRISE_REGISTRY_URL: LOCAL_REGISTRY },
       promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
     });
     const logger = createTestLogger();
 
     await runInstall({ appDir: await createApp(), packageArguments: [], logger, dependencies });
 
+    expect(requestedUrls(dependencies).length).toBeGreaterThan(0);
+    expect(
+      requestedUrls(dependencies).every((url) => url.startsWith('https://packages.strapi.io/'))
+    ).toBe(true);
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      expect.stringContaining('Using the Enterprise registry')
+    );
+    expect(await fse.readFile(path.join(dependencies.homeDir, '.npmrc'), 'utf8')).toBe(
+      `@strapi-enterprise:registry=https://packages.strapi.io/\n//packages.strapi.io/:_authToken=${LICENSE}\n`
+    );
+  });
+
+  it('sends every request to that registry, and sets it up in ~/.npmrc', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
+    });
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp(),
+      packageArguments: [],
+      registry: `${LOCAL_REGISTRY}/`,
+      logger,
+      dependencies,
+    });
+
     expect(logger.warn).toHaveBeenCalledWith(
-      `Using the Enterprise registry at ${LOCAL_REGISTRY} (STRAPI_ENTERPRISE_REGISTRY_URL).`
+      `Using the Enterprise registry at ${LOCAL_REGISTRY} (--registry).`
     );
     expect(requestedUrls(dependencies)).toEqual(
       expect.arrayContaining([
@@ -950,9 +982,27 @@ describe('runInstall with STRAPI_ENTERPRISE_REGISTRY_URL', () => {
     );
   });
 
+  it('sets that registry up in ~/.yarnrc.yml for Yarn 2 and later', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
+    });
+
+    await runInstall({
+      appDir: await createApp({ packageManager: 'yarn@4.5.0' }),
+      packageArguments: [],
+      registry: LOCAL_REGISTRY,
+      logger: createTestLogger(),
+      dependencies,
+    });
+
+    expect(await fse.readFile(path.join(dependencies.homeDir, '.yarnrc.yml'), 'utf8')).toBe(
+      `npmScopes:\n  strapi-enterprise:\n    npmRegistryServer: '${LOCAL_REGISTRY}/'\n    npmAlwaysAuth: true\n    npmAuthToken: '${LICENSE}'\n`
+    );
+  });
+
   it('asks that registry about a named plugin outside the license', async () => {
     const dependencies = await createDependencies({
-      env: { STRAPI_LICENSE: LICENSE, STRAPI_ENTERPRISE_REGISTRY_URL: LOCAL_REGISTRY },
       fetchImplementation: createRegistryFetch({
         searchResult: [],
         packuments: { [LOCKED_PLUGIN]: 403 },
@@ -967,6 +1017,7 @@ describe('runInstall with STRAPI_ENTERPRISE_REGISTRY_URL', () => {
       runInstall({
         appDir: await createApp(),
         packageArguments: ['plugin-locked'],
+        registry: LOCAL_REGISTRY,
         logger: createTestLogger(),
         dependencies,
       })
@@ -978,21 +1029,17 @@ describe('runInstall with STRAPI_ENTERPRISE_REGISTRY_URL', () => {
   });
 
   it('stops before any request or write when the value is not allowed', async () => {
-    const dependencies = await createDependencies({
-      env: {
-        STRAPI_LICENSE: LICENSE,
-        STRAPI_ENTERPRISE_REGISTRY_URL: 'http://registry.example.com',
-      },
-    });
+    const dependencies = await createDependencies();
 
     await expect(
       runInstall({
         appDir: await createApp(),
         packageArguments: ['plugin-ai-byok'],
+        registry: 'http://registry.example.com',
         logger: createTestLogger(),
         dependencies,
       })
-    ).rejects.toThrow('STRAPI_ENTERPRISE_REGISTRY_URL must use https');
+    ).rejects.toThrow('--registry must use https');
     expect(dependencies.fetchImplementation).not.toHaveBeenCalled();
     expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
   });

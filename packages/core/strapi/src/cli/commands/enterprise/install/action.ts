@@ -308,11 +308,13 @@ const warnWhenCompatibilityIsUnknown = (strapiVersion: string | undefined, logge
 export const runInstall = async ({
   appDir,
   packageArguments,
+  registry,
   logger,
   dependencies,
 }: {
   appDir: string;
   packageArguments: string[];
+  registry?: string;
   logger: Logger;
   dependencies: InstallDependencies;
 }): Promise<void> => {
@@ -326,7 +328,7 @@ export const runInstall = async ({
     );
   }
 
-  const registryUrl = resolveRegistryUrl({ env: dependencies.env, logger });
+  const registryUrl = resolveRegistryUrl({ registry, logger });
   const packageManager = await detectPackageManager(appDir);
 
   const { license, source: licenseSource } = await resolveLicense({
@@ -413,6 +415,7 @@ export const reportInstallError = (error: unknown, logger: Logger): number => {
 
 export const action = async (
   packageArguments: string[],
+  { registry }: { registry?: string },
   { logger }: { logger: Logger }
 ): Promise<void> => {
   const appDir = process.cwd();
@@ -424,6 +427,7 @@ export const action = async (
     await runInstall({
       appDir,
       packageArguments,
+      registry,
       logger,
       dependencies: {
         isInteractive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
