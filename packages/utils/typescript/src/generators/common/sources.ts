@@ -207,27 +207,99 @@ const isExportedTypeDeclarationNamed = (
 /**
  * Whether a type declaration can be referenced without type arguments, as the generated file does
  */
-const hasDefaultTypeArguments = (statement: ts.TypeAliasDeclaration | ts.InterfaceDeclaration) =>
-  (statement.typeParameters ?? []).every((parameter) => parameter.default !== undefined);
+const hasDefaultTypeArguments = (
+  statement: ts.TypeAliasDeclaration | ts.InterfaceDeclaration | ts.ClassDeclaration
+) => (statement.typeParameters ?? []).every((parameter) => parameter.default !== undefined);
 
 /**
- * Whether a top-level statement exports a type under `name`: `export type <name>`,
- * `export interface <name>`, or an export specifier named `<name>` (`export { <name> }`,
- * `export { type X as <name> }`, `export type { X as <name> } from './x'`).
+ * How a module exports a type under a name, from the statement that exports it:
+ * - `type`: the generated file can reference it;
+ * - `generic`: a generic with a type parameter that has no default, which the generated file
+ *   cannot reference without type arguments (TS2314);
+ * - `value`: a variable or a function, which the generated file cannot reference as a type (TS2694).
+ */
+type TypeExport = 'type' | 'generic' | 'value';
+
+/**
+ * Whether a binding name, destructured or not, binds `name`
+ */
+const bindsName = (binding: ts.BindingName, name: string): boolean =>
+  ts.isIdentifier(binding)
+    ? binding.text === name
+    : binding.elements.some(
+        (element) => ts.isBindingElement(element) && bindsName(element.name, name) === true
+      );
+
+/**
+ * Whether a top-level statement declares a value named `name`: a variable or a function
+ */
+const declaresValueNamed = (statement: ts.Statement, name: string) =>
+  (ts.isVariableStatement(statement) &&
+    statement.declarationList.declarations.some(
+      (declaration) => bindsName(declaration.name, name) === true
+    )) ||
+  (ts.isFunctionDeclaration(statement) && statement.name?.text === name);
+
+/**
+ * How a module exports the top-level declaration named `name` that an export specifier without
+ * `from` names (`export { <name> }`, `export { type <name> as X }`):
+ * - a type alias or an interface follows the rule of an exported declaration;
+ * - a class or an enum is a type as well as a value, and a generic class follows the same rule;
+ * - a variable or a function only is a value;
+ * - anything else, such as an imported binding, is not followed and counts as a type.
+ */
+const localTypeExportOf = (statements: ts.NodeArray<ts.Statement>, name: string): TypeExport => {
+  const types = statements.filter(
+    (
+      statement
+    ): statement is ts.TypeAliasDeclaration | ts.InterfaceDeclaration | ts.ClassDeclaration =>
+      (ts.isTypeAliasDeclaration(statement) ||
+        ts.isInterfaceDeclaration(statement) ||
+        ts.isClassDeclaration(statement)) &&
+      statement.name?.text === name
+  );
+
+  if (types.length > 0) {
+    return types.every(hasDefaultTypeArguments) === true ? 'type' : 'generic';
+  }
+
+  if (
+    statements.some(
+      (statement) => ts.isEnumDeclaration(statement) && statement.name.text === name
+    ) === true
+  ) {
+    return 'type';
+  }
+
+  if (statements.some((statement) => declaresValueNamed(statement, name)) === true) {
+    return 'value';
+  }
+
+  return 'type';
+};
+
+/**
+ * How a top-level statement exports a type under `name` (see `TypeExport`), or `undefined` when it
+ * does not: `export type <name>`, `export interface <name>`, or an export specifier named `<name>`
+ * (`export { <name> }`, `export { type X as <name> }`, `export type { X as <name> } from './x'`).
  *
  * A generic declaration only counts when each of its type parameters has a default: the generated
- * file references it without type arguments.
- *
- * A specifier may name a value rather than a type, or a generic without defaults: its reference in
- * the generated file does not resolve, and `tsc` reports it there.
- * TODO @Nico a specifier of a local declaration could be checked like the declaration itself
+ * file references it without type arguments. A specifier without `from` is checked against the
+ * top-level declaration it names (see `localTypeExportOf`). A re-export from another module is not
+ * followed: when it names a value, or a generic without defaults, its reference in the generated
+ * file does not resolve, and `tsc` reports it there.
  */
-const exportsTypeNamed = (statement: ts.Statement, name: string) => {
+const typeExportOf = (
+  statement: ts.Statement,
+  name: string,
+  statements: ts.NodeArray<ts.Statement>
+): TypeExport | undefined => {
   if (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) {
-    return (
-      isExportedTypeDeclarationNamed(statement, name) === true &&
-      hasDefaultTypeArguments(statement) === true
-    );
+    if (isExportedTypeDeclarationNamed(statement, name) === false) {
+      return undefined;
+    }
+
+    return hasDefaultTypeArguments(statement) === true ? 'type' : 'generic';
   }
 
   if (
@@ -235,10 +307,22 @@ const exportsTypeNamed = (statement: ts.Statement, name: string) => {
     statement.exportClause !== undefined &&
     ts.isNamedExports(statement.exportClause)
   ) {
-    return statement.exportClause.elements.some((element) => element.name.text === name);
+    const element = statement.exportClause.elements.find(
+      (specifier) => specifier.name.text === name
+    );
+
+    if (element === undefined) {
+      return undefined;
+    }
+
+    if (statement.moduleSpecifier !== undefined) {
+      return 'type';
+    }
+
+    return localTypeExportOf(statements, (element.propertyName ?? element.name).text);
   }
 
-  return false;
+  return undefined;
 };
 
 /**
@@ -391,7 +475,7 @@ export const scanSources = async (
  * The uids of the scanned sources whose module exports a type named `name`, such as a service's
  * `ServiceContract` (see `scanSources`).
  *
- * Only top-level declarations and export specifiers are read (see `exportsTypeNamed`). `export *` is
+ * Only top-level declarations and export specifiers are read (see `typeExportOf`). `export *` is
  * not followed, which keeps the type the source registers without a contract.
  */
 export const findTypeExports = (
@@ -407,21 +491,22 @@ export const findTypeExports = (
     }
 
     const { statements } = source.module;
+    const typeExports = statements.map((statement) => typeExportOf(statement, name, statements));
 
-    if (statements.some((statement) => exportsTypeNamed(statement, name)) === true) {
+    if (typeExports.includes('type') === true) {
       uids.add(source.uid);
       continue;
     }
 
-    if (
-      statements.some(
-        (statement) =>
-          isExportedTypeDeclarationNamed(statement, name) === true &&
-          hasDefaultTypeArguments(statement) === false
-      ) === true
-    ) {
+    if (typeExports.includes('generic') === true) {
       logger.warn(
         `${source.file} exports ${name} with type parameters that have no default, typing ${source.uid} without it`
+      );
+    }
+
+    if (typeExports.includes('value') === true) {
+      logger.warn(
+        `${source.file} exports ${name} as a value rather than a type, typing ${source.uid} without it`
       );
     }
 

@@ -387,6 +387,55 @@ describe('generateServicesDefinitions', () => {
     );
   });
 
+  test('registers a service without a contract its export specifier cannot provide', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/api/article/services/generic.ts':
+          'type ServiceContract<T> = { find(): T };\nexport { ServiceContract };\nexport default () => ({ find: () => 1 });',
+        'src/api/article/services/value.ts':
+          'const ServiceContract = { find: () => 1 };\nexport { ServiceContract };\nexport default () => ServiceContract;',
+        'src/api/article/services/local.ts':
+          'type Contract<T = number> = { find(): T };\nexport { Contract as ServiceContract };\nexport default () => ({ find: () => 1 });',
+      },
+      ['api::article.generic', 'api::article.value', 'api::article.local']
+    );
+    roots.push(root);
+
+    const logger = createLogger({ silent: true });
+    const { output } = await generateServicesDefinitions({ strapi, pwd, logger });
+
+    expect(normalize(output)).toContain(
+      "'api::article.generic': ServiceInstance<typeof import('../../src/api/article/services/generic.js')>"
+    );
+    expect(normalize(output)).toContain(
+      "'api::article.value': ServiceInstance<typeof import('../../src/api/article/services/value.js')>"
+    );
+    expect(normalize(output)).toContain(
+      "'api::article.local': ServiceContractOf<import('../../src/api/article/services/local.js').ServiceContract>"
+    );
+    expect(logger.warnings).toBe(2);
+
+    await outputFile(path.join(pwd, 'services.ts'), output);
+
+    // A reference to either contract would fail with TS2314 (generic) or TS2694 (value)
+    const diagnostics = ts
+      .getPreEmitDiagnostics(
+        ts.createProgram([path.join(pwd, 'services.ts')], {
+          noEmit: true,
+          strict: true,
+          noUnusedLocals: true,
+          types: [],
+          module: ts.ModuleKind.CommonJS,
+          moduleResolution: ts.ModuleResolutionKind.Node10,
+        })
+      )
+      .map(
+        (diagnostic) => `${path.basename(diagnostic.file?.fileName ?? '')} TS${diagnostic.code}`
+      );
+
+    expect(diagnostics).toEqual([]);
+  });
+
   test('emits no inferred marker when every source exports a contract or is JS', async () => {
     const { normalized } = await generate(
       {
