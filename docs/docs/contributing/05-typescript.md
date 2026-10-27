@@ -66,7 +66,8 @@ contracts through `@strapi/strapi/strict-types` or generated types.
 
 Keep contracts in the package that implements them, under `server/src/types/`, and declare them
 in the `Package*` registries: `PackageServices`, `PackageControllers`, `PackagePolicies`,
-`PackageMiddlewares`, and `PackageConfigs`. The `App*` registries belong to applications.
+`PackageMiddlewares`, and `PackageConfigs`. Content-type schemas go in
+`PackageContentTypeSchemas`, described below. The `App*` registries belong to applications.
 
 ```ts
 // server/src/types/index.ts
@@ -265,6 +266,58 @@ the union of every producer's payload, e.g. `'user.delete': [{ user } | { users 
   any payload.
 - Events emitted through `emitAudit` (`@strapi/utils`) are not registered: it takes any payload, so
   nothing would check their producers.
+
+### Content-type schemas
+
+A package declares the schemas of its own content types by hand, in
+`server/src/types/content-types.ts`, as type generation writes them for an application that does
+not extend them. Use one interface per content type, extending `Struct.CollectionTypeSchema` or
+`Struct.SingleTypeSchema`, and register it in `PackageContentTypeSchemas`:
+
+```ts
+// server/src/types/content-types.ts
+export interface FileSchema extends Struct.CollectionTypeSchema {
+  collectionName: 'files';
+  // info, options, pluginOptions as in `content-types/file.ts`
+  attributes: Struct.WithSystemAttributes<
+    'plugin::upload.file',
+    {
+      name: Schema.Attribute.String & Schema.Attribute.Required;
+      // ...
+    }
+  >;
+}
+
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface PackageContentTypeSchemas {
+        'plugin::upload.file': FileSchema;
+      }
+    }
+  }
+}
+```
+
+- Re-export the module from the server entry, as for the other contracts. Upload is the worked
+  example: `packages/core/upload/server/src/types/content-types.ts`.
+- `Struct.WithSystemAttributes<TUID, TAttributes>` adds the attributes Strapi adds to every content
+  type (`createdAt`, `updatedAt`, `publishedAt`, `createdBy`, `updatedBy`, `locale`,
+  `localizations`). An own attribute replaces the system attribute of the same name, e.g. `locale`
+  on a localized content type.
+- Never declare `AppContentTypeSchemas` in a package: only type generation writes it, and
+  `yarn test:types:registries` fails when a bundled package's declarations augment it. Packages
+  declare no component schemas, because they cannot ship components.
+- Type generation writes every runtime UID, package ones included, to `AppContentTypeSchemas`. Its
+  entry wins over the package entry for the same UID, because it carries what the application
+  changed at runtime (extensions in `src/extensions`, attributes added by other plugins). Without
+  generated schemas, as in a package compiled alone, the declared UIDs are precise and every other
+  UID stays generic.
+- `examples/strict-types/checks/package-schemas.ts` compares each declaration with the generated
+  schema, so a declaration that drifts from the runtime schema fails `yarn test:types:example`. It
+  checks the packages installed in that application: those bundled with `@strapi/strapi` load
+  through `@strapi/strapi/strict-types`, and another plugin needs to be added to the dependencies
+  of `examples/strict-types`, whose type generation then imports its `strapi-server` declarations.
 
 ### Document results
 
