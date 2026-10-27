@@ -12710,6 +12710,8 @@ This code is separated into several elements:
 
 This content type stores the workflow information and is responsible for holding all the information about stages and their order. In MVP, only one workflow is stored inside the Strapi database.
 
+The workflow `name` is unique. The `workflows` service checks it on create and on rename, because `db.query` does not enforce the `unique` attribute option.
+
 ##### strapi_workflows_stages
 
 This content type store the stage information such as its name.
@@ -12764,7 +12766,7 @@ This route returns a list of all stages associated with a specific workflow iden
 
 ##### GET `/review-workflows/workflows/:workflow_id/stages/:id`
 
-This route returns the details of a specific stage identified by the id parameter and associated with the workflow identified by the workflow_id parameter.
+This route returns the details of a specific stage identified by the id parameter and associated with the workflow identified by the workflow_id parameter. It returns a 404 when the stage does not exist or belongs to another workflow.
 
 ##### PUT `/review-workflows/workflows/:workflow_id/stages`
 
