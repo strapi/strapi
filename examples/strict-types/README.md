@@ -30,6 +30,11 @@ yarn workspace strict-types run test:ts
   (`export =`) registers the type its factory returns, and `commonjs-style.ts` (`module.exports`
   in a `.ts` file, without `import` or `export`) registers `unknown` without an import, which would
   fail with TS2306.
+- `src/policies/has-scope.js` and `src/middlewares/response-header.js`: edge cases kept on purpose
+  to test type generation. A JS policy and a JS middleware whose config is typed with JSDoc. The
+  tsconfig enables `allowJs`, so they compile into `dist`, which registers them, and type
+  generation reads their config from the JSDoc. `checks/js-sources.ts` checks the registered
+  configs and rejects a wrong config in a route reference.
 - `checks/contracts.ts`: type checks for the lookups, and `@ts-expect-error` cases that fail without
   the contracts. If type generation stopped registering a contract, these directives would be unused
   and `tsc` would fail.
