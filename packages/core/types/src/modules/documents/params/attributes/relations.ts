@@ -36,12 +36,17 @@ export type RelationInputValue<TRelationKind extends Schema.Attribute.RelationKi
 >;
 
 /**
- * Media attributes are relations to upload files, and accept the same input formats as relations
+ * Media attributes are relations to upload files, and accept the same input formats as relations.
+ *
+ * The previous loose values (`any` for single media, `any[]` for multiple media) stay accepted,
+ * so code that compiles today keeps compiling.
  */
+// TODO @Nico narrow to XOneInput / XManyInput behind strict types. It breaks code that compiles
+// today: arrays or connect on single media, mixed ID/object arrays, file literals with extra fields
 export type MediaInputValue<TMultiple extends Constants.BooleanValue = Constants.False> = If<
   TMultiple,
-  XManyInput,
-  XOneInput
+  XManyInput | any[],
+  any
 >;
 
 type RelationsKeysWithoutTarget<TSchemaUID extends UID.Schema> = Exclude<

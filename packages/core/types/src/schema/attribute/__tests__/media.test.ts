@@ -1,56 +1,47 @@
-import type * as Data from '../../../data';
 import type * as Documents from '../../../modules/documents';
 import type * as Attribute from '..';
 
 type Assert<T extends true> = T;
 type IsEqual<Left, Right> =
   (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right ? 1 : 2 ? true : false;
-
-type File = Data.ContentType<'plugin::upload.file'>;
+type IsAny<T> = 0 extends 1 & T ? true : false;
 
 type SingleMedia = Attribute.Media<'images'>;
 type MultipleMedia = Attribute.Media<'images' | 'files', true>;
 
-// Output: media values are upload file documents
+// Output: media values stay loose, narrowing them would break code that compiles today
 
-true satisfies Assert<IsEqual<Attribute.MediaFile, File>>;
-true satisfies Assert<IsEqual<Attribute.Value<SingleMedia>, File>>;
-true satisfies Assert<IsEqual<Attribute.Value<MultipleMedia>, File[]>>;
-true satisfies Assert<IsEqual<Attribute.Value<Attribute.Media>, File>>;
+true satisfies Assert<IsAny<Attribute.Value<SingleMedia>>>;
+true satisfies Assert<IsEqual<Attribute.Value<MultipleMedia>, any[]>>;
+true satisfies Assert<IsAny<Attribute.Value<Attribute.AnyAttribute>>>;
 
-// Output: media values are not any
+// Blocks image nodes store a snapshot of the file's fields, not a populated file document
 
-// @ts-expect-error A media value is not a string
-'file.png' satisfies Attribute.Value<SingleMedia>;
-// @ts-expect-error A single media value is not an array
-[] satisfies Attribute.Value<SingleMedia>;
+type ImageNode = Extract<Attribute.BlocksValue[number], { type: 'image' }>;
 
-// Input: media accepts the relation formats, by ID or document ID
+true satisfies Assert<IsAny<ImageNode['image']>>;
+
+// Input: single media keeps accepting any value
 
 type SingleMediaInput = Documents.Params.Attribute.GetValue<SingleMedia>;
-type MultipleMediaInput = Documents.Params.Attribute.GetValue<MultipleMedia>;
 
-12 satisfies SingleMediaInput;
-'abc123' satisfies SingleMediaInput;
-({ id: 12 }) satisfies SingleMediaInput;
-({ documentId: 'abc123' }) satisfies SingleMediaInput;
-null satisfies SingleMediaInput;
+true satisfies Assert<IsAny<SingleMediaInput>>;
+
+// Input: multiple media accepts the relation formats, on top of any array
+
+type MultipleMediaInput = Documents.Params.Attribute.GetValue<MultipleMedia>;
 
 [12, 13] satisfies MultipleMediaInput;
 ['abc123'] satisfies MultipleMediaInput;
-[{ id: 12 }, { id: 13 }] satisfies MultipleMediaInput;
+[{ id: 12 }, { documentId: 'abc123' }] satisfies MultipleMediaInput;
+[12, { id: 13 }] satisfies MultipleMediaInput;
 ({ set: [12] }) satisfies MultipleMediaInput;
 ({ connect: [{ documentId: 'abc123' }], disconnect: [13] }) satisfies MultipleMediaInput;
 null satisfies MultipleMediaInput;
 
-// @ts-expect-error A single media input is not an array
-[12] satisfies SingleMediaInput;
-// @ts-expect-error A media input is not a boolean
+// @ts-expect-error A multiple media input is not a single ID
+12 satisfies MultipleMediaInput;
+// @ts-expect-error A multiple media input is not a boolean
 true satisfies MultipleMediaInput;
-
-// Generic attributes and documents keep their values unchanged
-
-type IsAny<T> = 0 extends 1 & T ? true : false;
-
-true satisfies Assert<IsAny<Attribute.Value<Attribute.AnyAttribute>>>;
-true satisfies Assert<IsAny<Data.ContentType['someAttribute']>>;
+// @ts-expect-error Connect only accepts IDs or relation objects
+({ connect: [true] }) satisfies MultipleMediaInput;
