@@ -7,6 +7,8 @@ export class McpConfiguration {
 
   readonly requestTimeoutMs: number;
 
+  readonly maxToolInputElements: number;
+
   #strapi: Core.Strapi;
 
   constructor(strapi: Core.Strapi) {
@@ -14,6 +16,7 @@ export class McpConfiguration {
     this.path = '/mcp';
     this.connectTimeoutMs = strapi.config.get('server.mcp.connectTimeoutMs', 5 * 1000); // 5 seconds
     this.requestTimeoutMs = strapi.config.get('server.mcp.requestTimeoutMs', 60 * 1000); // 60 seconds
+    this.maxToolInputElements = strapi.config.get('server.mcp.maxToolInputElements', 10_000);
   }
 
   isEnabled(): boolean {

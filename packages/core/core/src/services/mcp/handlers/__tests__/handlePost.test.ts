@@ -239,6 +239,7 @@ describe('handlePost', () => {
       user: { id: 42 },
       // `initialize` lists and calls no tool, so no tool schema is needed.
       toolSchemaScope: new Set(),
+      maxToolInputElements: 10_000,
     });
     expect(NodeStreamableHTTPServerTransport).toHaveBeenCalledWith({
       sessionIdGenerator: undefined,

@@ -61,7 +61,8 @@ const createStrapi = () =>
 
 const connectClient = async (
   strapi: Core.Strapi,
-  definitions: Partial<Parameters<typeof createMcpServerWithRegistries>[0]['definitions']>
+  definitions: Partial<Parameters<typeof createMcpServerWithRegistries>[0]['definitions']>,
+  maxToolInputElements?: number
 ) => {
   const { mcpServer } = createMcpServerWithRegistries({
     strapi,
@@ -81,6 +82,7 @@ const connectClient = async (
     isDevMode: false,
     ability: { can: jest.fn(() => true) },
     user: { id: 1 },
+    maxToolInputElements,
   });
 
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -112,23 +114,23 @@ describe('MCP owned capability results', () => {
         : Object.fromEntries(
             Array.from({ length: count }, (_, index) => [`key-${index}`, 'value'])
           );
-    const { client, close } = await connectClient(createStrapi(), { tools });
+    const { client, close } = await connectClient(createStrapi(), { tools }, 100);
 
     try {
-      // The outer values key counts toward the 10,000-element limit.
+      // The outer values key counts toward the limit.
       const accepted = await client.callTool({
         name: 'bounded-input-tool',
-        arguments: { values: values(9_999) },
+        arguments: { values: values(99) },
       });
       expect(accepted.isError).not.toBe(true);
 
       const rejected = await client.callTool({
         name: 'bounded-input-tool',
-        arguments: { values: values(10_000) },
+        arguments: { values: values(100) },
       });
       expect(rejected.isError).toBe(true);
       expect(rejected.content).toEqual([
-        { type: 'text', text: expect.stringContaining('maximum of 10000 elements') },
+        { type: 'text', text: expect.stringContaining('maximum of 100 elements') },
       ]);
       expect(handler).toHaveBeenCalledTimes(1);
     } finally {

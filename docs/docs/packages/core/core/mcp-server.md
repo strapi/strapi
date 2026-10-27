@@ -55,11 +55,12 @@ Register tools, prompts, and resources from a plugin's `register()` phase (prefe
 
 ## Configuration
 
-| Key                           | Default | Notes                                                  |
-| ----------------------------- | ------- | ------------------------------------------------------ |
-| `server.mcp.enabled`          | `false` | Must be `true` to start the server                     |
-| `server.mcp.connectTimeoutMs` | `5000`  | Timeout for `mcpServer.connect(transport)` per request |
-| `server.mcp.requestTimeoutMs` | `60000` | Timeout for `transport.handleRequest(...)` per request |
+| Key                               | Default | Notes                                                                    |
+| --------------------------------- | ------- | ------------------------------------------------------------------------ |
+| `server.mcp.enabled`              | `false` | Must be `true` to start the server                                       |
+| `server.mcp.connectTimeoutMs`     | `5000`  | Timeout for `mcpServer.connect(transport)` per request                   |
+| `server.mcp.requestTimeoutMs`     | `60000` | Timeout for `transport.handleRequest(...)` per request                   |
+| `server.mcp.maxToolInputElements` | `10000` | Max array elements and object keys combined in one tool call's arguments |
 
 Implementation: `packages/core/core/src/services/mcp/internal/McpConfiguration.ts`. Type: `McpConfig` in `packages/core/types/src/core/config/server.ts`.
 
@@ -78,7 +79,7 @@ All five routes set `config: { auth: false }` — Strapi's own admin/content-API
 
 The transport is the MCP SDK's `NodeStreamableHTTPServerTransport` with `sessionIdGenerator: undefined`, i.e. **stateless**: a fresh `McpServer` instance is created and connected for every POST request, then closed in a `finally` block (`packages/core/core/src/services/mcp/handlers/handlePost.ts`).
 
-Each tool call permits at most 10,000 array elements and object keys combined in its arguments. The SDK rejects larger arguments before schema validation or handler execution.
+Each tool call permits at most `server.mcp.maxToolInputElements` (default 10,000) array elements and object keys combined in its arguments. The SDK rejects larger arguments before schema validation or handler execution.
 
 Every tool is registered on each per-request server, but only some tools resolve their Zod schemas, because `resolveInputSchema`/`resolveOutputSchema` is the main per-request cost. `resolveToolSchemaScope` (`internal/resolveToolSchemaScope.ts`) reads the JSON-RPC body before the server is built: `tools/list` needs every tool, `tools/call` needs only the called tool, and other messages (`initialize`, notifications) need none. A tool resolves its schemas only when it is in that scope **and** the token may use it (`canUseMcpCapability`). The other tools are registered without schemas and with a handler that only returns an error, so a call to a tool the token cannot use still gets the SDK's `Tool <name> disabled` error.
 

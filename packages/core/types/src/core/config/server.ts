@@ -88,6 +88,8 @@ export interface McpConfig {
   connectTimeoutMs?: number;
   /** Maximum time (ms) to wait for a single MCP request to complete. Defaults to 60 000. */
   requestTimeoutMs?: number;
+  /** Maximum array elements and object keys combined in one tool call's arguments. Defaults to 10 000. */
+  maxToolInputElements?: number;
 }
 
 export interface Server {

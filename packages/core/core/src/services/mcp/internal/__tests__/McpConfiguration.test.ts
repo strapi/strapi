@@ -22,6 +22,7 @@ describe('McpConfiguration', () => {
     expect(config.path).toBe('/mcp');
     expect(config.connectTimeoutMs).toBe(5 * 1000);
     expect(config.requestTimeoutMs).toBe(60 * 1000);
+    expect(config.maxToolInputElements).toBe(10_000);
   });
 
   test('should use custom connectTimeoutMs when provided', () => {
@@ -48,6 +49,19 @@ describe('McpConfiguration', () => {
     const config = new McpConfiguration(mockStrapi as Core.Strapi);
 
     expect(config.requestTimeoutMs).toBe(120 * 1000);
+  });
+
+  test('should use custom maxToolInputElements when provided', () => {
+    configGetSpy.mockImplementation((key, defaultValue) => {
+      const customConfig: Record<string, any> = {
+        'server.mcp.maxToolInputElements': 50_000,
+      };
+      return customConfig[key] ?? defaultValue;
+    });
+
+    const config = new McpConfiguration(mockStrapi as Core.Strapi);
+
+    expect(config.maxToolInputElements).toBe(50_000);
   });
 
   describe('isEnabled', () => {

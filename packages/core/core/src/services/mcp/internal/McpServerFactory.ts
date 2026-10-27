@@ -41,6 +41,8 @@ export type CreateMcpServerWithRegistriesParams = {
   user: Modules.MCP.McpHandlerContext['user'];
   /** Tools whose schemas the request needs. Defaults to `'all'`. */
   toolSchemaScope?: McpToolSchemaScope;
+  /** Passed to the SDK as `maxToolInputElements`. */
+  maxToolInputElements?: number;
 };
 
 export const createMcpServerWithRegistries = ({
@@ -50,6 +52,7 @@ export const createMcpServerWithRegistries = ({
   ability,
   user,
   toolSchemaScope = 'all',
+  maxToolInputElements,
 }: CreateMcpServerWithRegistriesParams): McpServerWithRegistries => {
   const capabilities: ServerCapabilities = {
     logging: {},
@@ -73,7 +76,7 @@ export const createMcpServerWithRegistries = ({
     },
     {
       capabilities,
-      maxToolInputElements: 10_000,
+      maxToolInputElements,
     }
   );
 
