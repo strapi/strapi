@@ -11,6 +11,7 @@ import {
   useQueryParams,
   withEncodedUserParams,
   getDisplayName,
+  type FormHelpers,
 } from '@strapi/admin/strapi-admin';
 import {
   Alert,
@@ -798,7 +799,10 @@ export const AssetDetails = ({
         : ((asset.folder as number | null | undefined) ?? null),
   };
 
-  const handleSubmit = async (values: AssetFormState) => {
+  const handleSubmit = async (
+    values: AssetFormState,
+    { resetForm }: FormHelpers<AssetFormState>
+  ) => {
     const fileInfo = {
       name: values.name,
       caption: values.caption,
@@ -822,6 +826,10 @@ export const AssetDetails = ({
       return;
     }
 
+    // What was saved is the new baseline. Otherwise the form stays "modified"
+    // until the refetched asset resets it, and closing in that gap asks about
+    // edits that are already saved.
+    resetForm(values);
     onAssetChange?.(res.data);
 
     trackUsage('didEditMediaLibraryElements', {
