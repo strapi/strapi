@@ -117,7 +117,11 @@ describe('generateMiddlewaresDefinitions', () => {
         'src/middlewares/optionalConfig.ts':
           'export default (config?: { soft: boolean }) => undefined;',
         'src/middlewares/untyped.ts': 'export default (config: any) => undefined;',
+        // No default export: registers `undefined` at runtime, left out
         'src/middlewares/noDefault.ts': 'export const helper = 1;',
+        'src/middlewares/typeOnly.ts': 'export type Config = { max: number };',
+        'src/middlewares/starOnly.ts': "export * from './typed';",
+        'src/middlewares/reexportDefault.ts': "export { default } from './typed';",
         'src/middlewares/strapiContext.ts':
           'export default (config: { a: 1 }, { strapi }: { strapi: { log: (message: string) => void } }) => undefined;',
         // Runtime calls a default export as a factory: a plain Koa handler breaks
@@ -141,6 +145,9 @@ describe('generateMiddlewaresDefinitions', () => {
         'global::optionalConfig',
         'global::untyped',
         'global::noDefault',
+        'global::typeOnly',
+        'global::starOnly',
+        'global::reexportDefault',
         'global::strapiContext',
         'global::koaHandler',
         'global::ctxHandler',
@@ -197,7 +204,7 @@ describe('generateMiddlewaresDefinitions', () => {
       'global::noConfig': 'undefined',
       'global::optionalConfig': '{ soft: boolean; } | undefined',
       'global::untyped': 'unknown',
-      'global::noDefault': 'unknown',
+      'global::reexportDefault': '{ max: number; }',
       'global::strapiContext': '{ a: 1; }',
       'global::koaHandler': 'never',
       'global::ctxHandler': 'never',
@@ -205,6 +212,8 @@ describe('generateMiddlewaresDefinitions', () => {
       'global::anyContext': 'unknown',
       'global::legacy': 'unknown',
     });
+    // One per module without a default export
+    expect(logger.warnings).toBe(3);
   });
 
   test('registers the value of an export = module, and a CommonJS-style source as unknown', async () => {
@@ -286,6 +295,41 @@ describe('generateMiddlewaresDefinitions', () => {
     expect(normalize(output)).toContain("'global::commonjs': unknown");
     // `noUnusedLocals` would report a helper that no entry reads
     expect(output).not.toContain('MiddlewareConfig');
+  });
+
+  test('leaves out a module without a default export, with one warning naming the file', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/middlewares/rateLimit.ts': 'export default (config: { max: number }) => undefined;',
+        'src/middlewares/helpers.ts': 'export const helper = 1;',
+        // Not registered at runtime: left out before, without a warning
+        'src/middlewares/unregistered.ts': 'export const helper = 1;',
+      },
+      ['global::rateLimit', 'global::helpers']
+    );
+    roots.push(root);
+
+    const logger = createLogger({ silent: true });
+    const warn = jest.spyOn(logger, 'warn');
+    const { output } = await generateMiddlewaresDefinitions({ strapi, pwd, logger });
+
+    expect(output).toContain("'global::rateLimit'");
+    expect(output).not.toContain('helpers');
+    expect(output).not.toContain('unregistered');
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(
+      `Skipped global::helpers in the generated middlewares types: ${path.join(root, 'src', 'middlewares', 'helpers.ts')} has no default export, so Strapi registers nothing under global::helpers and a route that references it fails at startup. Export the middleware with \`export default\`, or move the file out of the middlewares directory if it is not a middleware.`
+    );
+  });
+
+  test('emits a placeholder when the only middleware has no default export', async () => {
+    const { output, logger } = await generate(
+      { 'src/middlewares/helpers.ts': 'export const helper = 1;' },
+      ['global::helpers']
+    );
+
+    expect(output).toContain("The app doesn't have any middlewares yet.");
+    expect(logger.warnings).toBe(1);
   });
 
   test('only emits middlewares registered at runtime', async () => {

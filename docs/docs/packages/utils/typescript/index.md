@@ -34,7 +34,7 @@ With `typescript.strictTypes`, the services generator (`src/generators/services/
 
 The scan gives each source a module shape (`ModuleShape`), which decides how the services, controllers, policies and middlewares generators import it (`moduleTypeOf`):
 
-- `default`, an ECMAScript module with a default export, and `no-default`, one without: `typeof import('<source>')`. Services and controllers without a default export resolve to `unknown`, policies and middlewares too.
+- `default`, an ECMAScript module with a default export, and `no-default`, one without: `typeof import('<source>')`. Services and controllers without a default export resolve to `unknown`. Policies and middlewares without one are left out of their registry (`omitSourcesWithoutDefault`), with a warning that names the file: runtime registers `undefined` for them, so a reference fails at startup.
 - `export-equals`, a TypeScript `export =`: `{ default: typeof import('<source>') }`, the value `importDefault` (`@strapi/utils`) returns for the compiled module.
 - `commonjs`, a file without `import` or `export`, or one that assigns `module.exports`: `unknown`, without an import. TypeScript does not type `module.exports` in a `.ts` file, and importing a file without ECMAScript module syntax fails with TS2306 in the generated file, which stops the `strapi develop` compilation (`noEmitOnError`).
 
