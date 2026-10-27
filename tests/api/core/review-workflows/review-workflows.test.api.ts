@@ -894,6 +894,57 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         });
       });
 
+      test('When a stage with content is deleted, the content should keep a stage', async () => {
+        const { body } = await requests.admin.put(
+          `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+          {
+            body: { data: { stages: [defaultStage, secondStage, { name: 'Stage to delete' }] } },
+          }
+        );
+        const stageToDelete = body.data.stages.find((stage) => stage.name === 'Stage to delete');
+
+        const entries = await async.map([1, 2, 3], (index) =>
+          createEntry(productUID, { name: `Product in deleted stage ${index}` })
+        );
+
+        await async.map(entries, async (entry) => {
+          const { status } = await updateStage(productUID, entry.documentId, stageToDelete);
+          expect(status).toBe(200);
+        });
+
+        // Simulate a slow database: moving the entities takes some time
+        const stagesService = strapi.plugin('review-workflows').service('stages');
+        const updateEntitiesStage = stagesService.updateEntitiesStage;
+        const updateEntitiesStageSpy = jest
+          .spyOn(stagesService, 'updateEntitiesStage')
+          .mockImplementation(async (...args) => {
+            await new Promise((resolve) => {
+              setTimeout(resolve, 100);
+            });
+            return updateEntitiesStage.apply(stagesService, args);
+          });
+
+        // Delete the last stage, its content should be moved to the previous stage
+        const { status } = await requests.admin.put(
+          `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+          { body: { data: { stages: [defaultStage, secondStage] } } }
+        );
+
+        expect(status).toBe(200);
+        expect(updateEntitiesStageSpy).toHaveBeenCalled();
+        updateEntitiesStageSpy.mockRestore();
+
+        const entriesAfter = await strapi.db.query(productUID).findMany({
+          where: { documentId: { $in: entries.map((entry) => entry.documentId) } },
+          populate: [ENTITY_STAGE_ATTRIBUTE],
+        });
+
+        expect(entriesAfter).not.toHaveLength(0);
+        for (const entry of entriesAfter) {
+          expect(entry[ENTITY_STAGE_ATTRIBUTE]?.name).toEqual(secondStage.name);
+        }
+      });
+
       test('When content exists in a review stage and this stage is deleted, the content should be moved to the nearest available stage', async () => {
         const products = await findAll(productUID);
 
