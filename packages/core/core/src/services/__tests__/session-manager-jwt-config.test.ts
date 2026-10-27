@@ -43,6 +43,7 @@ describe('SessionManager JWT Configuration', () => {
 
     mockDb = {
       query: jest.fn().mockReturnValue(mockQuery),
+      transaction: jest.fn(async (fn: () => Promise<unknown>) => fn()),
     };
 
     // Mock database query to return valid session data
