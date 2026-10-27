@@ -43,15 +43,18 @@ export type AreSchemaRegistriesExtended = Or<
 /**
  * Whether the schema of `TSchemaUID` is declared by a package in
  * `Strapi.Registries.PackageContentTypeSchemas`. Always {@link False} without strict mode, which
- * ignores that registry. A union is declared when each member is.
+ * ignores that registry. A union is declared when each member is. An `any` UID, such as a value
+ * read from `ctx.params`, is not declared.
  */
 type IsPackageSchema<TSchemaUID> = IsStrict extends false
   ? False
   : [TSchemaUID] extends [never]
     ? False
-    : [TSchemaUID] extends [keyof Strapi.Registries.PackageContentTypeSchemas]
-      ? True
-      : False;
+    : 0 extends 1 & TSchemaUID
+      ? False
+      : [TSchemaUID] extends [keyof Strapi.Registries.PackageContentTypeSchemas]
+        ? True
+        : False;
 
 /**
  * Whether the schema of `TSchemaUID` is known precisely: the schema registries are extended

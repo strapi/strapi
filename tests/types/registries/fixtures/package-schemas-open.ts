@@ -13,6 +13,9 @@ const productFindFirst = () =>
   app.documents('plugin::catalog.product').findFirst({ populate: ['tags'] });
 declare const product: Awaited<ReturnType<typeof productFindFirst>>;
 const userFindFirst = () => app.documents('admin::user').findFirst();
+// An `any` UID, such as a value read from `ctx.params`, matches no declared schema.
+declare const anyUid: any;
+const anyFindFirst = () => app.documents(anyUid).findFirst();
 
 declare const checks: [
   Expect<Equal<Schema.ContentType<'plugin::catalog.product'>, Declared['plugin::catalog.product']>>,
@@ -23,6 +26,9 @@ declare const checks: [
   Expect<Equal<Utils.Constants.IsSchemaRegistered<'admin::user'>, false>>,
   Expect<Equal<Modules.Documents.Document<'admin::user'>, Modules.Documents.AnyDocument>>,
   Expect<Equal<Awaited<ReturnType<typeof userFindFirst>>, Modules.Documents.AnyDocument | null>>,
+  Expect<Equal<Utils.Constants.IsSchemaRegistered<any>, false>>,
+  Expect<Equal<Modules.Documents.Document<any>, Modules.Documents.AnyDocument>>,
+  Expect<Equal<Awaited<ReturnType<typeof anyFindFirst>>, Modules.Documents.AnyDocument | null>>,
 ];
 checks satisfies unknown;
 
