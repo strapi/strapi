@@ -2,7 +2,8 @@ import { useState } from 'react';
 
 import { adminApi, Form } from '@strapi/admin/strapi-admin';
 import { within } from '@testing-library/react';
-import { render, screen, waitFor, fireEvent, act } from '@tests/utils';
+import { render, screen, server, waitFor, fireEvent, act } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import {
   uploadFileViaXHR,
@@ -45,11 +46,19 @@ jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
   useMediaLibraryPermissions: () => mockPermissions,
 }));
 
-/**
- * Editing an asset still opens the legacy details dialog, which pulls in
- * cropperjs, and jsdom cannot parse its stylesheet.
- */
-jest.mock('cropperjs/dist/cropper.css?raw', () => '', { virtual: true });
+// The real crop editor produces the cropped file through a canvas, which jsdom lacks.
+jest.mock('../../../pages/Assets/components/AssetDetails/AssetCropEditor', () => ({
+  AssetCropEditor: ({ onApply }: { onApply: (file: File, focalPoint: object) => void }) => (
+    <button
+      type="button"
+      onClick={() =>
+        onApply(new File(['cropped'], 'cropped.png', { type: 'image/png' }), { x: 50, y: 50 })
+      }
+    >
+      Apply
+    </button>
+  ),
+}));
 
 jest.mock('../../../pages/Assets/hooks/useInfiniteScrollSentinel', () => {
   const { useRef } = jest.requireActual('react');
@@ -332,11 +341,13 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
     });
 
     it('opens the asset details when editing the asset', async () => {
+      server.use(http.get('/upload/files/:id', () => HttpResponse.json(asset(1, 'one.png'))));
       const { user } = renderInput({}, { cover: asset(1, 'one.png') });
 
       await user.click(screen.getByRole('button', { name: 'Edit one.png' }));
 
-      expect(await screen.findByRole('dialog')).toBeInTheDocument();
+      const drawer = await screen.findByRole('dialog', { name: 'File details' });
+      expect(await within(drawer).findByRole('heading', { name: 'one.png' })).toBeInTheDocument();
     });
 
     it('does not allow editing or removing the asset when the field is disabled', () => {
@@ -917,5 +928,326 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
     fireEvent.dragOver(getDropZone(), { dataTransfer });
 
     expect(dataTransfer.dropEffect).toBe('copy');
+  });
+  describe('asset details drawer', () => {
+    const REPLACED_AT = '2026-02-02T00:00:00.000Z';
+    const version = (updatedAt: string) => `v=${new Date(updatedAt).getTime()}`;
+
+    /**
+     * A small in-memory library, so what the drawer writes is what the field,
+     * the drawer and the picker read back.
+     */
+    const serveLibrary = (initial: AssetFile[]) => {
+      const library = new Map(initial.map((file) => [file.id, file]));
+      const replace = (id: number) => {
+        const replaced = { ...library.get(id)!, updatedAt: REPLACED_AT };
+        library.set(id, replaced);
+        return HttpResponse.json(replaced);
+      };
+
+      server.use(
+        http.get('*/upload/files', () =>
+          HttpResponse.json({
+            results: [...library.values()],
+            pagination: { page: 1, pageSize: 20, pageCount: 1, total: library.size },
+          })
+        ),
+        http.get('*/upload/files/:id', ({ params }) =>
+          HttpResponse.json(library.get(Number(params.id)))
+        ),
+        http.post('*/upload/files/:id/replace', ({ params }) => replace(Number(params.id))),
+        http.delete('*/upload/files/:id', ({ params }) => {
+          library.delete(Number(params.id));
+          return HttpResponse.json({ id: Number(params.id) });
+        }),
+        http.get('*/upload/folders', () => HttpResponse.json({ data: [] })),
+        http.get('*/upload/folder-structure', () => HttpResponse.json({ data: [] }))
+      );
+    };
+
+    const withAlt = (file: AssetFile) => ({ ...file, alternativeText: `${file.name} alt` });
+
+    type User = ReturnType<typeof renderInput>['user'];
+
+    const cardMenu = (name: string) =>
+      screen.getByRole('button', { name: `More actions for ${name}` });
+
+    /** A single field's row has an edit button; a multiple field's card has it in its menu. */
+    const openDrawer = async (user: User, name: string) => {
+      const editButton = screen.queryByRole('button', { name: `Edit ${name}` });
+      if (editButton) {
+        await user.click(editButton);
+      } else {
+        await user.click(cardMenu(name));
+        await user.click(await screen.findByRole('menuitem', { name: 'Edit' }));
+      }
+      const drawer = await screen.findByRole('dialog', { name: 'File details' });
+      await within(drawer).findByRole('heading', { name });
+      return drawer;
+    };
+
+    const replaceInDrawer = async (user: User) => {
+      await user.click(await screen.findByRole('button', { name: 'Replace this file' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
+      const drawer = screen.getByRole('dialog', { name: 'File details' });
+      // The native file picker can't be driven from jsdom: pick on the hidden input.
+      // eslint-disable-next-line testing-library/no-node-access
+      const fileInput = drawer.querySelector('input[type="file"]') as HTMLInputElement;
+      fireEvent.change(fileInput, {
+        target: { files: [new File(['new'], 'one.png', { type: 'image/png' })] },
+      });
+      await screen.findByText('File replaced.');
+    };
+
+    // jsdom runs no slide-out, so the closed drawer leaves the DOM at once.
+    const closeDrawer = async (user: User) => {
+      await user.keyboard('{Escape}');
+      await waitFor(() =>
+        expect(screen.queryByRole('dialog', { name: 'File details' })).not.toBeInTheDocument()
+      );
+    };
+
+    const rowThumbnail = (name: string) => screen.getAllByAltText(`${name} alt`)[0];
+
+    // The picker showed the pre-replace asset because the replace went through
+    // a cache the picker does not read (PR #28091 review).
+    it('shows a replaced asset on the field and in the picker', async () => {
+      const one = withAlt(asset(1, 'one.png'));
+      serveLibrary([one]);
+      const { user } = renderInput({ attribute: { multiple: true } }, { cover: [one] });
+
+      // Seed the picker's list cache with the pre-replace asset, as browsing would.
+      await user.click(screen.getByRole('button', { name: 'Add asset' }));
+      await user.click(await screen.findByRole('menuitem', { name: 'Browse library' }));
+      let picker = await screen.findByRole('dialog', { name: 'Add asset for Cover' });
+      await within(picker).findAllByAltText('one.png alt');
+      await user.click(within(picker).getByRole('button', { name: 'Cancel' }));
+
+      await openDrawer(user, 'one.png');
+      await replaceInDrawer(user);
+      await closeDrawer(user);
+
+      expect(rowThumbnail('one.png')).toHaveAttribute(
+        'src',
+        expect.stringContaining(version(REPLACED_AT))
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Add asset' }));
+      await user.click(await screen.findByRole('menuitem', { name: 'Browse library' }));
+      picker = await screen.findByRole('dialog', { name: 'Add asset for Cover' });
+
+      await waitFor(() =>
+        expect(within(picker).getAllByAltText('one.png alt')[0]).toHaveAttribute(
+          'src',
+          expect.stringContaining(version(REPLACED_AT))
+        )
+      );
+      fireEvent.mouseDown(within(picker).getByRole('tab', { name: /Selected assets/ }));
+      await waitFor(() =>
+        within(picker)
+          .getAllByAltText('one.png alt')
+          .forEach((thumbnail) =>
+            expect(thumbnail).toHaveAttribute('src', expect.stringContaining(version(REPLACED_AT)))
+          )
+      );
+    });
+
+    // #26836: the crop reached the server, but the field only took it on
+    // "Finish", so closing any other way left the pre-crop asset on the entry.
+    it('keeps a crop on the field however the drawer is closed', async () => {
+      const one = withAlt(asset(1, 'one.png'));
+      serveLibrary([one]);
+      const { user } = renderInput({}, { cover: one });
+
+      await openDrawer(user, 'one.png');
+      await user.click(await screen.findByRole('button', { name: 'Crop' }));
+      await user.click(await screen.findByRole('button', { name: 'Apply' }));
+      await screen.findByText('File updated');
+      await closeDrawer(user);
+
+      expect(rowThumbnail('one.png')).toHaveAttribute(
+        'src',
+        expect.stringContaining(version(REPLACED_AT))
+      );
+    });
+
+    it('takes an asset deleted from the library off the field', async () => {
+      const one = asset(1, 'one.png');
+      serveLibrary([one, asset(2, 'two.png')]);
+      const { user } = renderInput(
+        { attribute: { multiple: true } },
+        { cover: [one, asset(2, 'two.png')] }
+      );
+
+      await openDrawer(user, 'one.png');
+      await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
+      await screen.findByText(/This file cannot be recovered/i);
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole('button', { name: 'More actions for one.png' })
+        ).not.toBeInTheDocument()
+      );
+      expect(cardMenu('two.png')).toBeInTheDocument();
+    });
+
+    // The card's menu is not modal: it opens on the same press that closes the
+    // drawer without edits.
+    it("switches to another asset from that asset's card", async () => {
+      serveLibrary([asset(1, 'one.png'), asset(2, 'two.png')]);
+      const { user } = renderInput(
+        { attribute: { multiple: true } },
+        { cover: [asset(1, 'one.png'), asset(2, 'two.png')] }
+      );
+
+      await openDrawer(user, 'one.png');
+      await user.click(cardMenu('two.png'));
+      await user.click(await screen.findByRole('menuitem', { name: 'Edit' }));
+
+      const drawer = await screen.findByRole('dialog', { name: 'File details' });
+      expect(await within(drawer).findByRole('heading', { name: 'two.png' })).toBeInTheDocument();
+    });
+
+    // The menu press is a press outside the drawer, which asks first; nothing is
+    // left open behind that question.
+    it("keeps unsaved edits when another card's menu is pressed", async () => {
+      serveLibrary([asset(1, 'one.png'), asset(2, 'two.png')]);
+      const { user } = renderInput(
+        { attribute: { multiple: true } },
+        { cover: [asset(1, 'one.png'), asset(2, 'two.png')] }
+      );
+
+      const drawer = await openDrawer(user, 'one.png');
+      const caption = within(drawer).getByRole('textbox', { name: 'Caption' });
+      await waitFor(() => expect(caption).toBeEnabled());
+      await user.type(caption, 'Edited caption');
+
+      await user.click(cardMenu('two.png'));
+
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(/unsaved changes/i);
+      expect(screen.queryByRole('menu', { hidden: true })).not.toBeInTheDocument();
+      // The confirmation hides the rest of the page from assistive tech.
+      expect(
+        within(drawer).getByRole('heading', { name: 'one.png', hidden: true })
+      ).toBeInTheDocument();
+      expect(caption).toHaveValue('Edited caption');
+    });
+
+    const editCaption = async (user: User, drawer: HTMLElement) => {
+      const caption = within(drawer).getByRole('textbox', { name: 'Caption' });
+      await waitFor(() => expect(caption).toBeEnabled());
+      await user.type(caption, 'Edited caption');
+      return caption;
+    };
+
+    // Same rule as the row buttons, for the field's other ways to add assets.
+    it('keeps the Add asset menu closed over unsaved edits', async () => {
+      serveLibrary([asset(1, 'one.png')]);
+      const { user } = renderInput(
+        { attribute: { multiple: true } },
+        { cover: [asset(1, 'one.png')] }
+      );
+
+      const caption = await editCaption(user, await openDrawer(user, 'one.png'));
+      await user.click(screen.getByRole('button', { name: 'Add asset' }));
+
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(/unsaved changes/i);
+      expect(screen.queryByRole('menu', { hidden: true })).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+      expect(screen.queryByRole('menu', { hidden: true })).not.toBeInTheDocument();
+      expect(caption).toHaveValue('Edited caption');
+    });
+
+    it('closes a drawer without edits on the first Add asset press, and opens the menu on the next', async () => {
+      serveLibrary([asset(1, 'one.png')]);
+      const { user } = renderInput(
+        { attribute: { multiple: true } },
+        { cover: [asset(1, 'one.png')] }
+      );
+
+      await openDrawer(user, 'one.png');
+      await user.click(screen.getByRole('button', { name: 'Add asset' }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole('dialog', { name: 'File details' })).not.toBeInTheDocument()
+      );
+      expect(screen.queryByRole('menu', { hidden: true })).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Add asset' }));
+
+      expect(await screen.findByRole('menuitem', { name: 'Browse library' })).toBeInTheDocument();
+    });
+
+    describe('with another media field on the entry', () => {
+      const renderTwoFields = () =>
+        render(
+          <>
+            <MediaLibraryInput name="cover" label="Cover" attribute={{ multiple: true }} />
+            <MediaLibraryInput name="gallery" label="Gallery" attribute={{ multiple: true }} />
+          </>,
+          {
+            renderOptions: {
+              wrapper: ({ children }) => (
+                <Form
+                  onSubmit={jest.fn()}
+                  method="POST"
+                  initialValues={{ cover: [asset(1, 'one.png')], gallery: [asset(2, 'two.png')] }}
+                >
+                  {children}
+                </Form>
+              ),
+            },
+          }
+        );
+
+      const editCoverAsset = async (user: User) => {
+        const drawer = await openDrawer(user, 'one.png');
+        return editCaption(user, drawer);
+      };
+
+      it("keeps the other field's Add asset menu closed over unsaved edits", async () => {
+        serveLibrary([asset(1, 'one.png'), asset(2, 'two.png')]);
+        const { user } = renderTwoFields();
+
+        await editCoverAsset(user);
+        await user.click(screen.getAllByRole('button', { name: 'Add asset' })[1]);
+
+        expect(await screen.findByRole('alertdialog')).toHaveTextContent(/unsaved changes/i);
+        expect(screen.queryByRole('menu', { hidden: true })).not.toBeInTheDocument();
+      });
+
+      it("keeps the other field's card menu closed over unsaved edits", async () => {
+        serveLibrary([asset(1, 'one.png'), asset(2, 'two.png')]);
+        const { user } = renderTwoFields();
+
+        await editCoverAsset(user);
+        await user.click(cardMenu('two.png'));
+
+        expect(await screen.findByRole('alertdialog')).toHaveTextContent(/unsaved changes/i);
+        expect(screen.queryByRole('menu', { hidden: true })).not.toBeInTheDocument();
+        expect(screen.getAllByRole('dialog', { name: 'File details', hidden: true })).toHaveLength(
+          1
+        );
+      });
+
+      it("opens the other field's asset once the drawer closed cleanly", async () => {
+        serveLibrary([asset(1, 'one.png'), asset(2, 'two.png')]);
+        const { user } = renderTwoFields();
+
+        await openDrawer(user, 'one.png');
+        await user.click(cardMenu('two.png'));
+        await user.click(await screen.findByRole('menuitem', { name: 'Edit' }));
+
+        const drawers = await screen.findAllByRole('dialog', { name: 'File details' });
+        expect(drawers).toHaveLength(1);
+        expect(
+          await within(drawers[0]).findByRole('heading', { name: 'two.png' })
+        ).toBeInTheDocument();
+      });
+    });
   });
 });
