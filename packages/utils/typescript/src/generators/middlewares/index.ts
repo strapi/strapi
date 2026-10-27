@@ -6,6 +6,7 @@ import {
   filterRegisteredSources,
   hasModuleType,
   moduleTypeOf,
+  omitSourcesWithoutDefault,
   scanSources,
   withDocComment,
 } from '../common/sources';
@@ -47,8 +48,9 @@ export {};
  * Resolves the config a middleware accepts from the type of its module: the first parameter of the
  * factory it exports. A factory without parameters takes no config: `undefined`, as in
  * PackageMiddlewares. An optional parameter keeps `undefined` in the config, so typed routes accept
- * the name alone. An untyped (`any`) config and a module without a default export resolve to
- * `unknown`, as for policies.
+ * the name alone. An untyped (`any`) config resolves to `unknown`, as for policies. So does a module
+ * without a default export, which only a source that could not be read brings here (see
+ * `omitSourcesWithoutDefault`).
  * A plain Koa handler `(ctx, next)` is not a factory: runtime calls it with the config and
  * `{ strapi }`, which breaks. A function whose second parameter cannot take `{ strapi }`
  * (Core.MiddlewareFactory) registers `never`, so typed routes reject its name. `never` stands for
@@ -58,8 +60,6 @@ export {};
  * with the required members of a Koa context (`request`, `response`, `app`) registers `never` too.
  * TODO @Nico a handler whose context is `any` still registers as a factory with an untyped config
  * (`unknown`); an opt-in `defineMiddleware` brand (new factory helpers, D15) would tell them apart
- * TODO @Nico a module without a default export registers `undefined` at runtime (a reference to it
- * throws "Middleware <uid> not found"); `unknown` accepts any reference to it, like an untyped one
  */
 const generateConfigHelpersDefinition = () => {
   const args = factory.createTypeReferenceNode('TArgs');
@@ -204,7 +204,8 @@ const generateConfigHelpersDefinition = () => {
  *
  * Like JS and CommonJS-style TypeScript policies (see the policies generator), JS middlewares and
  * CommonJS-style TypeScript middlewares (`module.exports = …`) are registered as `unknown` without an
- * import.
+ * import. A TypeScript middleware without a default export is left out, with a warning (see
+ * `omitSourcesWithoutDefault`).
  * TODO @Nico with `allowJs`, a JSDoc-typed JS middleware could register its config like a TS one
  */
 export const generateMiddlewaresDefinitions = async (
@@ -224,8 +225,9 @@ export const generateMiddlewaresDefinitions = async (
     outDir,
     logger
   );
-  const middlewaresDefinitions = await scanSources(
-    filterRegisteredSources(sources, strapi.middlewares, logger),
+  const middlewaresDefinitions = omitSourcesWithoutDefault(
+    await scanSources(filterRegisteredSources(sources, strapi.middlewares, logger), logger),
+    'middlewares',
     logger
   );
 

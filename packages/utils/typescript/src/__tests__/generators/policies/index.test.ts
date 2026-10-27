@@ -116,7 +116,11 @@ describe('generatePoliciesDefinitions', () => {
         'src/policies/optionalConfig.ts':
           'export default (ctx: unknown, config?: { soft: boolean }) => true;',
         'src/policies/untyped.ts': 'export default (ctx: any, config: any) => true;',
+        // No default export: registers `undefined` at runtime, left out
         'src/policies/noDefault.ts': 'export const helper = 1;',
+        'src/policies/typeOnly.ts': 'export type Config = { role: string };',
+        'src/policies/starOnly.ts': "export * from './bare';",
+        'src/policies/reexportDefault.ts': "export { default } from './bare';",
         // Without `allowJs`, the import of a JS policy would not resolve
         'src/policies/legacy.js': 'module.exports = (ctx, config) => true;',
       },
@@ -127,6 +131,9 @@ describe('generatePoliciesDefinitions', () => {
         'global::optionalConfig',
         'global::untyped',
         'global::noDefault',
+        'global::typeOnly',
+        'global::starOnly',
+        'global::reexportDefault',
         'global::legacy',
       ]
     );
@@ -177,9 +184,11 @@ describe('generatePoliciesDefinitions', () => {
       'global::noConfig': 'undefined',
       'global::optionalConfig': '{ soft: boolean; } | undefined',
       'global::untyped': 'unknown',
-      'global::noDefault': 'unknown',
+      'global::reexportDefault': '{ role: string; }',
       'global::legacy': 'unknown',
     });
+    // One per module without a default export
+    expect(logger.warnings).toBe(3);
   });
 
   test('registers the value of an export = module, and a CommonJS-style source as unknown', async () => {
@@ -265,6 +274,42 @@ describe('generatePoliciesDefinitions', () => {
     expect(normalize(output)).toContain("'global::commonjs': unknown");
     // `noUnusedLocals` would report a helper that no entry reads
     expect(output).not.toContain('PolicyConfig');
+  });
+
+  test('leaves out a module without a default export, with one warning naming the file', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/policies/isOwner.ts':
+          'export default (ctx: unknown, config: { role: string }) => true;',
+        'src/policies/helpers.ts': 'export const helper = 1;',
+        // Not registered at runtime: left out before, without a warning
+        'src/policies/unregistered.ts': 'export const helper = 1;',
+      },
+      ['global::isOwner', 'global::helpers']
+    );
+    roots.push(root);
+
+    const logger = createLogger({ silent: true });
+    const warn = jest.spyOn(logger, 'warn');
+    const { output } = await generatePoliciesDefinitions({ strapi, pwd, logger });
+
+    expect(output).toContain("'global::isOwner'");
+    expect(output).not.toContain('helpers');
+    expect(output).not.toContain('unregistered');
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(
+      `Skipped global::helpers in the generated policies types: ${path.join(root, 'src', 'policies', 'helpers.ts')} has no default export, so Strapi registers nothing under global::helpers and a route that references it fails at startup. Export the policy with \`export default\`, or move the file out of the policies directory if it is not a policy.`
+    );
+  });
+
+  test('emits a placeholder when the only policy has no default export', async () => {
+    const { output, logger } = await generate(
+      { 'src/policies/helpers.ts': 'export const helper = 1;' },
+      ['global::helpers']
+    );
+
+    expect(output).toContain("The app doesn't have any policies yet.");
+    expect(logger.warnings).toBe(1);
   });
 
   test('only emits policies registered at runtime', async () => {

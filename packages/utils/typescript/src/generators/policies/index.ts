@@ -6,6 +6,7 @@ import {
   filterRegisteredSources,
   hasModuleType,
   moduleTypeOf,
+  omitSourcesWithoutDefault,
   scanSources,
   withDocComment,
 } from '../common/sources';
@@ -38,11 +39,10 @@ export {};
  *
  * Resolves the config a policy accepts from the type of its module: the second parameter of its
  * handler, for both runtime forms (a bare handler, or `{ handler, validator }`). A handler without
- * a config parameter takes none: `undefined`, as in PackagePolicies. An untyped (`any`) config and a
- * module without a default export resolve to `unknown`: one `any` entry would turn every policy
- * reference into `any`.
- * TODO @Nico a module without a default export registers nothing usable at runtime (resolving it
- * throws); `unknown` accepts any reference to it, like an untyped policy
+ * a config parameter takes none: `undefined`, as in PackagePolicies. An untyped (`any`) config
+ * resolves to `unknown`: one `any` entry would turn every policy reference into `any`. So does a
+ * module without a default export, which only a source that could not be read brings here (see
+ * `omitSourcesWithoutDefault`).
  */
 const generateConfigHelpersDefinition = () => {
   const args = factory.createTypeReferenceNode('TArgs');
@@ -163,7 +163,8 @@ const generateConfigHelpersDefinition = () => {
  * The import of a JS policy is an error type without `allowJs`, and one such entry turns every policy
  * reference into `any`. JS policies are registered as `unknown` without an import. So are
  * CommonJS-style TypeScript policies (`module.exports = …`), whose import fails (see
- * `moduleTypeOf`).
+ * `moduleTypeOf`). A TypeScript policy without a default export is left out, with a warning (see
+ * `omitSourcesWithoutDefault`).
  * TODO @Nico with `allowJs`, a JSDoc-typed JS policy could register its config like a TS one
  */
 export const generatePoliciesDefinitions = async (
@@ -181,8 +182,9 @@ export const generatePoliciesDefinitions = async (
     outDir,
     logger
   );
-  const policiesDefinitions = await scanSources(
-    filterRegisteredSources(sources, strapi.policies, logger),
+  const policiesDefinitions = omitSourcesWithoutDefault(
+    await scanSources(filterRegisteredSources(sources, strapi.policies, logger), logger),
+    'policies',
     logger
   );
 
