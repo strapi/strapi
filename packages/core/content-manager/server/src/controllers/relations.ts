@@ -98,7 +98,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
   });
 };
 
-const getPublishedAtClause = (status: string, uid: UID.Schema) => {
+const getPublishedAtClause = (status: string | undefined, uid: UID.Schema) => {
   const model = strapi.getModel(uid);
 
   /**
@@ -185,7 +185,7 @@ export default {
     const isComponent = sourceSchema.modelType === 'component';
     if (!isComponent) {
       if (permissionChecker.cannot.read(null, targetField)) {
-        return ctx.forbidden();
+        throw new errors.ForbiddenError();
       }
     }
 
