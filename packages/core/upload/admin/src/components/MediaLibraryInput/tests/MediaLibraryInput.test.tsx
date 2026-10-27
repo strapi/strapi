@@ -1182,6 +1182,18 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(await screen.findByRole('menuitem', { name: 'Browse library' })).toBeInTheDocument();
     });
 
+    it("gives focus back to the row's edit button when the drawer closes", async () => {
+      serveLibrary([asset(1, 'one.png')]);
+      const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+
+      await openDrawer(user, 'one.png');
+      await closeDrawer(user);
+
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Edit one.png' })).toHaveFocus()
+      );
+    });
+
     describe('with another media field on the entry', () => {
       const renderTwoFields = () =>
         render(

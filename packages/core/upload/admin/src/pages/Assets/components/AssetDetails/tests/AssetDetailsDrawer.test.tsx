@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -802,6 +804,81 @@ describe('AssetDetailsDrawer (controlled)', () => {
 
     expect(await screen.findByRole('heading', { name: 'other.png' })).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * Focus on close
+ * -----------------------------------------------------------------------------------------------*/
+
+describe('AssetDetailsDrawer focus on close', () => {
+  beforeEach(() => {
+    server.use(
+      buildFoldersHandler(),
+      buildSettingsHandler(),
+      http.get('/upload/files/:id', () => HttpResponse.json(baseAsset))
+    );
+  });
+
+  // Stands in for a host: a button that opens the drawer, as a card or a
+  // field's edit button does.
+  const Host = () => {
+    const [assetId, setAssetId] = React.useState<number | null>(null);
+
+    return (
+      <>
+        <button type="button" onClick={() => setAssetId(1)}>
+          Open details
+        </button>
+        <input aria-label="Elsewhere" />
+        <AssetDetailsDrawer assetId={assetId} onClose={() => setAssetId(null)} />
+      </>
+    );
+  };
+
+  const openFromButton = async () => {
+    const result = render(<Host />);
+    const opener = screen.getByRole('button', { name: 'Open details' });
+
+    await result.user.click(opener);
+    await screen.findByRole('heading', { name: 'photo.png' });
+
+    return { ...result, opener };
+  };
+
+  it.each([
+    [
+      'the close button',
+      async (user: ReturnType<typeof render>['user']) => {
+        await user.click(screen.getByRole('button', { name: 'Close' }));
+      },
+    ],
+    [
+      'Escape',
+      async (user: ReturnType<typeof render>['user']) => {
+        await user.keyboard('{Escape}');
+      },
+    ],
+  ])('gives focus back to what opened it when closed from %s', async (_label, close) => {
+    const { user, opener } = await openFromButton();
+
+    expect(opener).not.toHaveFocus();
+    await close(user);
+
+    await waitFor(() => expect(opener).toHaveFocus());
+  });
+
+  // Pressing another control is how the user dismissed it, and where they went.
+  it('leaves focus where the user moved it', async () => {
+    const { user } = await openFromButton();
+    const elsewhere = screen.getByRole('textbox', { name: 'Elsewhere' });
+
+    await user.click(elsewhere);
+
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { name: 'photo.png' })).not.toBeInTheDocument()
+    );
+    expect(elsewhere).toHaveFocus();
   });
 });
 

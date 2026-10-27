@@ -1461,6 +1461,9 @@ export const AssetDetailsDrawer = ({
 
   const hasUnsavedEditsRef = React.useRef(false);
   const [isConfirmingClose, setIsConfirmingClose] = React.useState(false);
+  // Where focus was when the drawer opened — the card or the field's edit
+  // button — so closing can hand it back instead of dropping it on <body>.
+  const returnFocusRef = React.useRef<HTMLElement | null>(null);
 
   const requestClose = React.useCallback(() => {
     if (hasUnsavedEditsRef.current) {
@@ -1503,6 +1506,22 @@ export const AssetDetailsDrawer = ({
         // off-screen. dvh tracks the actual visible height.
         height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
+        // Runs before focus moves in, so this is still the element that opened it.
+        onOpenAutoFocus={() => {
+          returnFocusRef.current =
+            document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        }}
+        // By now the panel is gone: focus is on <body> unless the user moved it
+        // somewhere — a press on another control dismissed the drawer — and that
+        // choice wins.
+        onCloseAutoFocus={(event) => {
+          const target = returnFocusRef.current;
+          const active = document.activeElement;
+          if (target?.isConnected && (active === null || active === document.body)) {
+            event.preventDefault();
+            target.focus();
+          }
+        }}
         // Opt in to dismiss-on-outside-click; it goes through `requestClose`,
         // like the header's close button, so unsaved edits are still guarded.
         onPointerDownOutside={(event) => {

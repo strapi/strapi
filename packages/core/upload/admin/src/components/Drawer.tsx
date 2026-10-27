@@ -171,6 +171,7 @@ const CloseIconButton = styled(IconButton)`
  * -----------------------------------------------------------------------------------------------*/
 
 type PointerDownOutsideHandler = NonNullable<Dialog.DialogContentProps['onPointerDownOutside']>;
+type AutoFocusHandler = NonNullable<Dialog.DialogContentProps['onOpenAutoFocus']>;
 
 /** Vetoes an outside interaction that would otherwise dismiss the drawer. */
 const keepOpen = (event: { preventDefault: () => void }) => event.preventDefault();
@@ -190,12 +191,28 @@ interface DrawerBodyProps extends Omit<FlexProps, 'width' | 'maxHeight'> {
    * never counts as outside — Radix reads the React tree, not the DOM.
    */
   onPointerDownOutside?: PointerDownOutsideHandler;
+  /** Radix's hook as focus moves into the panel on open. */
+  onOpenAutoFocus?: AutoFocusHandler;
+  /**
+   * Radix's hook as the panel gives focus back on close. Opened from state
+   * rather than a `Dialog.Trigger`, it has nowhere to send it unless this does.
+   */
+  onCloseAutoFocus?: AutoFocusHandler;
   children: React.ReactNode;
 }
 
 const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
   (
-    { animationDirection, width, maxHeight, onPointerDownOutside = keepOpen, children, ...props },
+    {
+      animationDirection,
+      width,
+      maxHeight,
+      onPointerDownOutside = keepOpen,
+      onOpenAutoFocus,
+      onCloseAutoFocus,
+      children,
+      ...props
+    },
     ref
   ) => (
     <Dialog.Content
@@ -203,6 +220,8 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
       forceMount
       asChild
       onPointerDownOutside={onPointerDownOutside}
+      onOpenAutoFocus={onOpenAutoFocus}
+      onCloseAutoFocus={onCloseAutoFocus}
       // Non-modal, so focus legitimately moves outside (tabbing past the last
       // field); only a pointer press should ever dismiss.
       onFocusOutside={keepOpen}
