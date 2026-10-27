@@ -134,6 +134,14 @@ Content API reads also accept `?provenance=true` on the core `find` and `findOne
 - The fields modal has "Download proof", which calls `export`.
 - Settings > Provenance holds the publish guard, the stages of each review workflow, and the API tokens (both kinds) with their profile. It refuses rules where either "move it to" stage is the approval stage; such rules saved earlier are ignored at runtime.
 
+## Testing
+
+- Domain and service logic: `yarn test:unit:vitest` in the package (`*.vitest.test.ts`).
+- Admin components: `yarn test:front` (Jest and Testing Library, `admin/src/**/tests/*.test.tsx`): label action, paste card, Publish wrapper, edit view hook, list summaries.
+- API: [`tests/api/plugins/provenance`](https://github.com/strapi/strapi/blob/develop/tests/api/plugins/provenance/provenance.test.api.ts). The test app does not depend on the plugin: the suite adds `@strapi/plugin-provenance` to `info.dependencies` in the `register` hook of its own instance, so other suites run without it. It deletes the tokens and the workflow it creates, since other suites count them.
+- There is no E2E domain: every E2E domain shares one app built from `tests/app-template`, and installing the plugin there would change every edit view and list. Check these by hand in a getstarted app before merging admin changes: a paste in the Markdown and Blocks editors (card, "AI?" next to the label, "AI on save", Save), "Mark as AI" on an unchanged and on an edited field, Publish disabled until Save, the publish guard error under the input, a stage change refreshing the panel, the "AI to review" toggle, Content History opening without error, a single type, the clone screen.
+- Concurrency only shows on Postgres, MySQL and MariaDB (SQLite serializes writes): run parallel reviews, saves and publishes on one document there after changing the middleware or the lock.
+
 ## Cost
 
 Reads through the Document Service are unchanged. Measured on SQLite with the getstarted `article` content type, without Review Workflows: create +1 SQL statement, update of one field +4, update with no change +1, publish +3, delete +1. The publish guard reads values only when the entry has AI rows.
