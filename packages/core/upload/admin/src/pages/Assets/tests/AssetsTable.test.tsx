@@ -14,10 +14,12 @@ const mockNavigateToFolder = jest.fn();
 const mockOnAssetItemClick = jest.fn();
 const mockToggleNotification = jest.fn();
 const mockTrackUsage = jest.fn();
+let mockListExtensions: { columns: unknown[]; filters: unknown[] } = { columns: [], filters: [] };
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
+  useListExtensions: () => mockListExtensions,
 }));
 
 jest.mock('../../../hooks/useTracking', () => ({
@@ -113,9 +115,23 @@ describe('AssetsTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockListExtensions = { columns: [], filters: [] };
   });
 
   describe('Table rendering', () => {
+    it('adds the columns that plugins give, read from each row', () => {
+      mockListExtensions = {
+        columns: [{ label: { id: 'space', defaultMessage: 'Space' }, field: 'space.name' }],
+        filters: [],
+      };
+      setup({
+        assets: [Object.assign(createMockAsset(1, 'image1.png'), { space: { name: 'Space A' } })],
+      });
+
+      expect(screen.getByRole('gridcell', { name: 'Space' })).toBeInTheDocument();
+      expect(screen.getByText('Space A')).toBeInTheDocument();
+    });
+
     it('renders a table element', () => {
       setup();
       expect(screen.getByRole('gridcell', { name: 'name' })).toBeInTheDocument();

@@ -78,6 +78,13 @@ describe('useListFilters codec', () => {
     it('rejects ranges with malformed dates', () => {
       expect(parseFiltersParam('created:rangeis:2024-01-01..sometime')).toEqual([]);
     });
+
+    it('keeps a plugin badge only when a plugin adds a filter of that name', () => {
+      expect(parseFiltersParam('space:is:a;color:is:red;space:not:b', ['space'])).toEqual([
+        { kind: 'plugin', name: 'space', value: 'a' },
+      ]);
+      expect(parseFiltersParam('space:is:a')).toEqual([]);
+    });
   });
 
   describe('serializeFilters', () => {
@@ -130,6 +137,13 @@ describe('useListFilters codec', () => {
       ];
 
       expect(parseFiltersParam(serializeFilters(filters))).toEqual(filters);
+    });
+
+    it('round-trips a plugin badge', () => {
+      const filters: ListFilter[] = [{ kind: 'plugin', name: 'space', value: 'a' }];
+
+      expect(serializeFilters(filters)).toBe('space:is:a');
+      expect(parseFiltersParam(serializeFilters(filters), ['space'])).toEqual(filters);
     });
   });
 });

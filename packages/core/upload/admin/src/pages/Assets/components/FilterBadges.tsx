@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useListExtensions } from '@strapi/admin/strapi-admin';
 import { Checkbox, Flex, Popover, Typography } from '@strapi/design-system';
 import { Check, Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -22,7 +23,13 @@ import {
 import { parseCalendarDate } from '../utils/buildAssetFilters';
 
 import { DateRangeCalendar } from './DateRangeCalendar';
-import { DATE_FIELD_LABELS, FILTER_PANEL_WIDTH, PRESET_LABELS, TYPE_LABELS } from './FilterMenu';
+import {
+  DATE_FIELD_LABELS,
+  FILTER_PANEL_WIDTH,
+  PRESET_LABELS,
+  TYPE_LABELS,
+  pluginFilterOptions,
+} from './FilterMenu';
 
 import type { MessageDescriptor } from 'react-intl';
 
@@ -319,11 +326,20 @@ const FilterBadge = ({
   onRemove: () => void;
 }) => {
   const { formatMessage } = useIntl();
+  const { filters: pluginFilters } = useListExtensions('media-library');
+  const pluginFilter =
+    filter.kind === 'plugin' ? pluginFilters.find(({ name }) => name === filter.name) : undefined;
 
-  const fieldLabel =
-    filter.kind === 'type'
-      ? formatMessage({ id: getTranslationKey('list.filters.field.type'), defaultMessage: 'Type' })
-      : formatMessage(DATE_FIELD_LABELS[filter.field]);
+  let fieldLabel = filter.kind === 'plugin' ? (pluginFilter?.label ?? filter.name) : '';
+
+  if (filter.kind === 'type') {
+    fieldLabel = formatMessage({
+      id: getTranslationKey('list.filters.field.type'),
+      defaultMessage: 'Type',
+    });
+  } else if (filter.kind === 'date') {
+    fieldLabel = formatMessage(DATE_FIELD_LABELS[filter.field]);
+  }
 
   return (
     <BadgePill alignItems="stretch" data-testid="filter-badge">
@@ -332,6 +348,24 @@ const FilterBadge = ({
           {fieldLabel}
         </Typography>
       </FieldSegment>
+
+      {/* A plugin filter is `is` one value: edited from the filter menu, not here */}
+      {filter.kind === 'plugin' && (
+        <>
+          <FieldSegment>
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage(TYPE_CONDITION_LABELS.is)}
+            </Typography>
+          </FieldSegment>
+          <FieldSegment>
+            <Typography variant="pi" textColor="neutral800">
+              {(pluginFilter ? pluginFilterOptions(pluginFilter) : []).find(
+                ({ value }) => value === filter.value
+              )?.label ?? filter.value}
+            </Typography>
+          </FieldSegment>
+        </>
+      )}
 
       {filter.kind === 'type' && (
         <>

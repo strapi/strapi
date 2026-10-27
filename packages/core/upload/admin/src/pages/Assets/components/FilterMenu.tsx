@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useIsMobile } from '@strapi/admin/strapi-admin';
+import { useIsMobile, useListExtensions, type Filters } from '@strapi/admin/strapi-admin';
 import { Badge, Box, Checkbox, Flex, Menu } from '@strapi/design-system';
 import { Check, ChevronDown, Filter as FilterIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -14,6 +14,7 @@ import {
   type DateField,
   type DatePreset,
   type ListFilters,
+  type PluginFilter,
   type TypeValue,
 } from '../hooks/useListFilters';
 
@@ -62,6 +63,14 @@ const FieldSubTrigger = styled(Menu.SubTrigger)`
   width: 100%;
   justify-content: space-between;
 `;
+
+/** The options of a plugin filter, as label and value */
+export const pluginFilterOptions = (filter: Filters.Filter) =>
+  (filter.options ?? []).map((option) =>
+    typeof option === 'string'
+      ? { label: option, value: option }
+      : { label: option.label ?? option.value, value: option.value }
+  );
 
 /** Every panel of the filter tree shares this fixed width (design). */
 export const FILTER_PANEL_WIDTH = '24.2rem';
@@ -148,6 +157,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
   const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = useState(false);
   const { filters, addFilter, updateFilter, removeFilter } = listFilters;
+  const { filters: pluginFilters } = useListExtensions('media-library');
 
   // Fired whenever a filter facet is turned on (not on removal). `filter` names
   // the facet, mirroring the legacy field-key payload.
@@ -211,6 +221,19 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
     addFilter({ kind: 'date', field, mode: 'preset', condition: 'withinLast', preset });
   };
 
+  // A plugin filter holds one value, like a date: picking replaces its badge in place
+  const pickPluginValue = (name: string, value: string) => {
+    trackFilter(name);
+
+    const index = filters.findIndex((f) => f.kind === 'plugin' && f.name === name);
+
+    if (index >= 0) {
+      updateFilter(index, { kind: 'plugin', name, value });
+    } else {
+      addFilter({ kind: 'plugin', name, value });
+    }
+  };
+
   const addRange = (from: string, to: string) => {
     trackFilter('createdAt');
     addFilter({ kind: 'date', field: 'createdAt', mode: 'range', condition: 'is', from, to });
@@ -221,7 +244,8 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
   const isMobile = useIsMobile();
   // Mobile accordion state: which field is expanded, and whether its date-range
   // calendar is open. Both reset when the whole menu closes.
-  const [openField, setOpenField] = useState<'type' | 'createdAt' | 'updatedAt' | null>(null);
+  // A plugin filter's field is its name
+  const [openField, setOpenField] = useState<string | null>(null);
   const [rangeOpen, setRangeOpen] = useState(false);
 
   const handleOpenChange = (next: boolean) => {
@@ -232,7 +256,7 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
     }
   };
 
-  const toggleField = (field: 'type' | 'createdAt' | 'updatedAt') => {
+  const toggleField = (field: string) => {
     setOpenField((current) => (current === field ? null : field));
     setRangeOpen(false);
   };
@@ -289,6 +313,28 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
         }
       >
         {formatMessage(PRESET_LABELS[preset])}
+      </Menu.Item>
+    ));
+  };
+
+  const pluginItems = (filter: Filters.Filter) => {
+    const selected = filters.find(
+      (f): f is PluginFilter => f.kind === 'plugin' && f.name === filter.name
+    )?.value;
+
+    return pluginFilterOptions(filter).map(({ label, value }) => (
+      <Menu.Item
+        key={value}
+        role="menuitemradio"
+        aria-checked={selected === value}
+        onSelect={() => pickPluginValue(filter.name, value)}
+        endIcon={
+          selected === value ? (
+            <Check aria-hidden width="1.6rem" height="1.6rem" fill="primary600" />
+          ) : null
+        }
+      >
+        {label}
       </Menu.Item>
     ));
   };
@@ -375,6 +421,22 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
                 )}
               </Box>
             ))}
+
+            {pluginFilters.map((filter) => (
+              <Box key={filter.name} width="100%">
+                <FieldToggle
+                  aria-expanded={openField === filter.name}
+                  onSelect={(e: Event) => {
+                    e.preventDefault();
+                    toggleField(filter.name);
+                  }}
+                  endIcon={<Chevron $open={openField === filter.name} aria-hidden />}
+                >
+                  {filter.label}
+                </FieldToggle>
+                {openField === filter.name && <OptionGroup>{pluginItems(filter)}</OptionGroup>}
+              </Box>
+            ))}
           </>
         ) : (
           <>
@@ -402,6 +464,15 @@ export const FilterMenu = ({ listFilters }: FilterMenuProps) => {
                       </SubPanel>
                     </Menu.SubRoot>
                   )}
+                </SubPanel>
+              </Menu.SubRoot>
+            ))}
+
+            {pluginFilters.map((filter) => (
+              <Menu.SubRoot key={filter.name}>
+                <FieldSubTrigger>{filter.label}</FieldSubTrigger>
+                <SubPanel zIndex={2} maxHeight={PANEL_MAX_HEIGHT} width={FILTER_PANEL_WIDTH}>
+                  {pluginItems(filter)}
                 </SubPanel>
               </Menu.SubRoot>
             ))}

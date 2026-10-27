@@ -299,6 +299,13 @@ describe('buildAssetFilters', () => {
     expect(built.showFolders).toBe(false);
   });
 
+  it('sends a plugin filter as `$eq` its value, to files and folders', () => {
+    const built = buildAssetFilters([{ kind: 'plugin', name: 'space', value: 'a' }], new Date());
+
+    expect(built.fileClauses).toEqual([{ space: { $eq: 'a' } }]);
+    expect(built.folderClauses).toEqual([{ space: { $eq: 'a' } }]);
+  });
+
   describe('parseCalendarDate', () => {
     it('parses YYYY-MM-DD as a LOCAL calendar date, never UTC midnight', () => {
       // `new Date('2024-01-01')` is UTC midnight — Dec 31 in every timezone

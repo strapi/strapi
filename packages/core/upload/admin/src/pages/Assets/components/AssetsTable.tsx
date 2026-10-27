@@ -1,4 +1,4 @@
-import { useIsDesktop } from '@strapi/admin/strapi-admin';
+import { useIsDesktop, useListExtensions, type ListExtension } from '@strapi/admin/strapi-admin';
 import {
   Checkbox,
   Flex,
@@ -40,6 +40,9 @@ import { useItemContextMenuTrigger } from './ItemContextMenu';
 
 import type { File } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
+import type { MessageDescriptor } from 'react-intl';
+
+type PluginColumn = NonNullable<ListExtension['column']>;
 
 const StyledTable = styled(RawTable)`
   width: 100%;
@@ -240,13 +243,34 @@ const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
   );
 };
 
+/** The cells of the columns that plugins add. `field` is a dot path in the row */
+const PluginCells = ({ row, columns }: { row: object; columns: PluginColumn[] }) =>
+  columns.map(({ field }) => {
+    const value = field
+      .split('.')
+      .reduce<unknown>(
+        (current, key) =>
+          current && typeof current === 'object' ? Reflect.get(current, key) : undefined,
+        row
+      );
+
+    return (
+      <HugTd key={field}>
+        <Typography textColor="neutral600">
+          {value === undefined || value === null || value === '' ? '-' : String(value)}
+        </Typography>
+      </HugTd>
+    );
+  });
+
 interface AssetRowProps {
   asset: File;
   orderedItemKeys: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
+  columns: PluginColumn[];
 }
 
-const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) => {
+const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick, columns }: AssetRowProps) => {
   const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
@@ -416,6 +440,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
               {asset.size ? formatBytes(asset.size, 1) : '-'}
             </Typography>
           </HugTd>
+          <PluginCells row={asset} columns={columns} />
         </>
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
@@ -443,9 +468,10 @@ const FolderTr = styled(StyledTr)`
 interface FolderRowProps {
   folder: Folder;
   orderedItemKeys: ItemKey[];
+  columns: PluginColumn[];
 }
 
-const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
+const FolderRow = ({ folder, orderedItemKeys, columns }: FolderRowProps) => {
   const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
@@ -598,6 +624,7 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
           <HugTd>
             <Typography textColor="neutral600">-</Typography>
           </HugTd>
+          <PluginCells row={folder} columns={columns} />
         </>
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
@@ -636,11 +663,17 @@ export const AssetsTable = ({
   const { selectedKeys, selectAll, clear } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
   const { trackUsage } = useTracking();
+  const { columns } = useListExtensions('media-library');
 
   // Below the desktop breakpoint only the name (and actions) column is kept —
   // the date/size columns don't fit; size moves under the name as a subtitle.
-  const visibleHeaders = isDesktop
-    ? TABLE_HEADERS
+  // Plugin columns go before the actions column
+  const visibleHeaders: Array<{ name: string; label: MessageDescriptor }> = isDesktop
+    ? [
+        ...TABLE_HEADERS.slice(0, -1),
+        ...columns.map(({ field, label }) => ({ name: field, label })),
+        ...TABLE_HEADERS.slice(-1),
+      ]
     : TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions');
 
   // The checkbox column is a dedicated structural column (not part of
@@ -725,6 +758,7 @@ export const AssetsTable = ({
               key={`folder-${item.folder.id}`}
               folder={item.folder}
               orderedItemKeys={orderedItemKeys}
+              columns={columns}
             />
           ) : (
             <AssetRow
@@ -732,6 +766,7 @@ export const AssetsTable = ({
               asset={item.asset}
               orderedItemKeys={orderedItemKeys}
               onAssetItemClick={onAssetItemClick}
+              columns={columns}
             />
           )
         )}
@@ -741,6 +776,7 @@ export const AssetsTable = ({
               key={`folder-${folder.id}`}
               folder={folder}
               orderedItemKeys={orderedItemKeys}
+              columns={columns}
             />
           ))}
         {!mixedItems &&
@@ -750,6 +786,7 @@ export const AssetsTable = ({
               asset={asset}
               orderedItemKeys={orderedItemKeys}
               onAssetItemClick={onAssetItemClick}
+              columns={columns}
             />
           ))}
       </RawTbody>

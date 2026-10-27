@@ -4,6 +4,21 @@ import { FilterBadges } from '../components/FilterBadges';
 
 import type { ListFilter, ListFilters } from '../hooks/useListFilters';
 
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useListExtensions: () => ({
+    columns: [],
+    filters: [
+      {
+        name: 'space',
+        label: 'Space',
+        type: 'enumeration',
+        options: [{ label: 'Space A', value: 'a' }],
+      },
+    ],
+  }),
+}));
+
 const makeListFilters = (filters: ListFilter[]): ListFilters => ({
   filters,
   serialized: '',
@@ -14,6 +29,16 @@ const makeListFilters = (filters: ListFilter[]): ListFilters => ({
 });
 
 describe('FilterBadges', () => {
+  it('names a plugin filter and its option with the labels the plugin gives', () => {
+    render(
+      <FilterBadges
+        listFilters={makeListFilters([{ kind: 'plugin', name: 'space', value: 'a' }])}
+      />
+    );
+
+    expect(screen.getByTestId('filter-badge')).toHaveTextContent('SpaceisSpace A');
+  });
+
   it('renders nothing without filters', () => {
     render(<FilterBadges listFilters={makeListFilters([])} />);
 

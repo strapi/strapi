@@ -1,4 +1,8 @@
-import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admin';
+import {
+  useListExtensions,
+  useQueryParams,
+  withEncodedUserParams,
+} from '@strapi/admin/strapi-admin';
 
 /**
  * Filter state for the assets list, backed by a single `?filters=` query param
@@ -10,6 +14,7 @@ import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admi
  * - `type:is:picture,audio` / `type:not:folder`
  * - `created:within:1week` / `updated:notwithin:3months` / `created:exact:1day`
  * - `created:rangeis:2024-01-01..2024-04-07` / `created:rangenot:...`
+ * - `<name>:is:<value>` for a filter that a plugin adds (see `useListExtensions`)
  *
  * Relative presets stay relative in the URL on purpose: the badge label
  * ("1 week ago") remains truthful forever and a shared link means "within the
@@ -66,7 +71,15 @@ export interface DateRangeFilter {
 }
 
 export type DateFilter = DatePresetFilter | DateRangeFilter;
-export type ListFilter = TypeFilter | DateFilter;
+
+/** A filter that a plugin adds, by its `name`. The list sends `{ [name]: { $eq: value } }` */
+export interface PluginFilter {
+  kind: 'plugin';
+  name: string;
+  value: string;
+}
+
+export type ListFilter = TypeFilter | DateFilter | PluginFilter;
 
 const FIELD_TOKENS: Record<string, DateField> = {
   created: 'createdAt',
@@ -105,7 +118,7 @@ const isTypeValue = (value: string): value is TypeValue =>
 const isDatePreset = (value: string): value is DatePreset =>
   (DATE_PRESETS as readonly string[]).includes(value);
 
-const parseBadge = (raw: string): ListFilter | null => {
+const parseBadge = (raw: string, pluginFilters: string[]): ListFilter | null => {
   const [field, condition, value] = raw.split(':');
 
   if (!field || !condition || !value) {
@@ -125,7 +138,10 @@ const parseBadge = (raw: string): ListFilter | null => {
 
   const dateField = FIELD_TOKENS[field];
   if (!dateField) {
-    return null;
+    // Only a filter that a plugin adds: a stale or edited link must not send an unknown field
+    return condition === 'is' && pluginFilters.includes(field)
+      ? { kind: 'plugin', name: field, value }
+      : null;
   }
 
   if (condition in PRESET_CONDITION_TOKENS) {
@@ -163,18 +179,22 @@ const parseBadge = (raw: string): ListFilter | null => {
  * shapes like `?filters[]=a&filters[]=b` into arrays — the guard is what
  * makes the caller's `?filters=` type an assertion rather than a crash.
  */
-export const parseFiltersParam = (raw: unknown): ListFilter[] => {
+export const parseFiltersParam = (raw: unknown, pluginFilters: string[] = []): ListFilter[] => {
   if (typeof raw !== 'string' || raw === '') {
     return [];
   }
 
   return raw
     .split(';')
-    .map(parseBadge)
+    .map((badge) => parseBadge(badge, pluginFilters))
     .filter((filter): filter is ListFilter => filter !== null);
 };
 
 const serializeBadge = (filter: ListFilter): string => {
+  if (filter.kind === 'plugin') {
+    return `${filter.name}:is:${filter.value}`;
+  }
+
   if (filter.kind === 'type') {
     return `type:${filter.condition === 'is' ? 'is' : 'not'}:${filter.values.join(',')}`;
   }
@@ -205,7 +225,11 @@ export interface ListFilters {
 export const useListFilters = (): ListFilters => {
   const [{ query }, setQuery] = useQueryParams<{ filters?: string; _q?: string }>();
 
-  const filters = parseFiltersParam(query?.filters);
+  const { filters: pluginFilters } = useListExtensions('media-library');
+  const filters = parseFiltersParam(
+    query?.filters,
+    pluginFilters.map(({ name }) => name)
+  );
 
   // `replace: true` on every write: filters are edited in rapid micro-steps
   // (each checkbox of the keep-open Type submenu, each badge segment edit), so

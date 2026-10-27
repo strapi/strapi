@@ -21,6 +21,7 @@ import {
  *   legacy catch-all (mime contains none of image/audio/video — audio
  *   included in the exclusion, fixing the legacy quirk).
  * - Dates apply to files and folders alike (folders have both timestamps).
+ * - A plugin filter applies to both too, as `$eq` its value.
  * - "is exactly <preset>" means the calendar day of `now - delta`.
  * - Ranges are inclusive on both ends (start-of-day .. end-of-day).
  */
@@ -176,6 +177,13 @@ export const buildAssetFilters = (filters: ListFilter[], now: Date): BuiltFilter
   let showFiles = true;
 
   for (const filter of filters) {
+    if (filter.kind === 'plugin') {
+      const clause = { [filter.name]: { $eq: filter.value } };
+      fileClauses.push(clause);
+      folderClauses.push(clause);
+      continue;
+    }
+
     if (filter.kind === 'date') {
       const clause = buildDateClause(filter, now);
       fileClauses.push(clause);

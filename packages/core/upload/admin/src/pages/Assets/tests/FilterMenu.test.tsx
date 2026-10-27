@@ -5,6 +5,12 @@ import { FilterMenu } from '../components/FilterMenu';
 import type { ListFilter, ListFilters } from '../hooks/useListFilters';
 
 const mockTrackUsage = jest.fn();
+let mockPluginFilters: unknown[] = [];
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useListExtensions: () => ({ columns: [], filters: mockPluginFilters }),
+}));
 
 jest.mock('../../../hooks/useTracking', () => ({
   ...jest.requireActual('../../../hooks/useTracking'),
@@ -27,6 +33,30 @@ const makeListFilters = (
 describe('FilterMenu', () => {
   beforeEach(() => {
     mockTrackUsage.mockClear();
+    mockPluginFilters = [];
+  });
+
+  it('adds a badge for the option of a filter that a plugin gives', async () => {
+    mockPluginFilters = [
+      {
+        name: 'space',
+        label: 'Space',
+        type: 'enumeration',
+        options: [{ label: 'Space A', value: 'a' }],
+      },
+    ];
+    const listFilters = makeListFilters();
+    const { user } = render(<FilterMenu listFilters={listFilters} />);
+
+    await user.click(screen.getByRole('button', { name: 'Filter' }));
+    await user.click(screen.getByText('Space'));
+    await user.click(await screen.findByRole('menuitemradio', { name: 'Space A' }));
+
+    expect(listFilters.addFilter).toHaveBeenCalledWith({
+      kind: 'plugin',
+      name: 'space',
+      value: 'a',
+    });
   });
 
   it('shows the three field submenus (file size stays out)', async () => {
