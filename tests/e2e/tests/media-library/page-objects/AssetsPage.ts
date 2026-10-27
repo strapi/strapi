@@ -552,6 +552,15 @@ export class AssetsPage {
   }
 
   /**
+   * Confirm the "You have unsaved changes" prompt shown when dismissing a dialog with typed changes
+   */
+  async confirmDiscardChanges() {
+    const confirm = this.page.getByRole('alertdialog');
+    await expect(confirm).toContainText('You have unsaved changes');
+    await confirm.getByRole('button', { name: 'Confirm' }).click();
+  }
+
+  /**
    * Full flow: open dialog, type name, submit
    */
   async createFolder(name: string) {
