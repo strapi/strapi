@@ -56,6 +56,12 @@ class Strapi extends Container implements Core.Strapi {
 
   isLoaded: boolean = false;
 
+  /**
+   * destroy() can run twice: a transfer provider closes the instance, then the
+   * CLI calls destroy() again. The second call must not touch released services.
+   */
+  private destroyed = false;
+
   internal_config: Record<string, unknown> = {};
 
   constructor(opts: StrapiOptions) {
@@ -562,6 +568,11 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async destroy() {
+    if (this.destroyed) {
+      return;
+    }
+
+    this.destroyed = true;
     this.log.info('Shutting down Strapi');
     await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
 
@@ -582,7 +593,21 @@ class Strapi extends Container implements Core.Strapi {
     // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
     delete global.strapi;
 
-    this.log.info('Strapi has been shut down');
+    const logger = this.log;
+    // Export destroys the instance inside the transfer, then sends telemetry.
+    // The sender already captured fetch. Re-registering telemetry is enough.
+    const telemetry = this.has('telemetry') ? this.telemetry : undefined;
+    this.app = undefined;
+    this.isLoaded = false;
+    // Callers such as API tests still hold this object. Release the service
+    // map or every booted app stays in memory until the process exits.
+    // In-flight audit listeners still log after the event hub is cleared.
+    this.release();
+    this.add('logger', logger);
+    if (telemetry) {
+      this.add('telemetry', telemetry);
+    }
+    logger.info('Strapi has been shut down');
   }
 
   async runPluginsLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {

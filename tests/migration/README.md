@@ -61,6 +61,8 @@ on **sqlite**, **postgres**, **mysql**, and **mariadb** (Node **20**). **`legacy
 
 Job **`migration_v5`** runs when the **`migrations`** path filter matches the PR/push diff. Exact globs are defined only in [`.github/filters.yaml`](../../.github/filters.yaml) (that file’s other groups, e.g. **`global:`**, are independent).
 
+The filter includes `packages/core/database/**`. The upgrade boots workspace database code, and this job is the only MariaDB run. A database change that does not touch `tests/migration` still runs the matrix.
+
 ## Implementation
 
 - Runner: [`scripts/run-migration-scenario.ts`](scripts/run-migration-scenario.ts)

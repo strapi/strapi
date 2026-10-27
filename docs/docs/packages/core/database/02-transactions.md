@@ -27,6 +27,8 @@ await strapi.db.transaction(async ({ trx, rollback, commit, onCommit, onRollback
 
 After the transaction handler is executed, the transaction is committed if all operations succeed. If any of the operations throws, the transaction is rolled back and the data is restored to its previous state.
 
+Postgres and MySQL abort a transaction on deadlock and require the caller to run it again. A top-level `strapi.db.transaction` does that up to 3 times, waiting briefly between tries. An error counts as a deadlock when its code is `40P01` or `ER_LOCK_DEADLOCK`, or its errno is 1213, including on a nested `original` or `cause`. A driver error that kept the SQL text and the deadlock message counts too. A plain error that only mentions a deadlock does not. The handler can therefore run more than once, and it must be safe to repeat: database work from the failed attempt has been rolled back, but other side effects (an email, an HTTP call) have not. Do that kind of work in `onCommit`, which runs only after a successful commit and is not retried. Nested `strapi.db.transaction` calls are not retried on their own; the outermost handler runs again. `onCommit` and `onRollback` callbacks are not awaited. A callback that throws or rejects is logged on the database logger. It does not fail the write and it does not cause another retry. `db.destroy()` waits up to 10 seconds for callbacks that are still running. If any are left, shutdown continues and a warning is logged. Each database instance tracks its own callbacks.
+
 :::note
 Every `strapi.db.query` operation performed in a transaction block will implicitly use the transaction.
 :::

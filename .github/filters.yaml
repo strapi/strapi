@@ -17,6 +17,12 @@ frontend:
 api:
   - 'tests/scripts/run-api-tests.js'
   - 'tests/scripts/generate-test-app.js'
+  - 'tests/scripts/database-config.js'
+  - 'tests/scripts/database-assurance.js'
+  - 'tests/scripts/verify-api-database-client.js'
+  - 'tests/scripts/__tests__/resolve-database-config.test.js'
+  - 'tests/scripts/__tests__/database-assurance.test.js'
+  - '.github/actions/run-api-tests/**'
   - 'tests/api/**'
 e2e:
   - 'tests/scripts/run-e2e-tests.js'
@@ -29,8 +35,10 @@ cli:
   - 'tests/cli/**'
 # Umzug migration sources + v4→v5 integration harness (fixture app at examples/complex; runner at tests/migration/)
 # Fixture paths may move under tests/migration/ later; keep both globs in sync until then (see tests/migration/README.md).
+# packages/core/database is included because the upgrade runs that code, and this job is the MariaDB leg.
 migrations:
   - 'packages/**/migrations/**'
+  - 'packages/core/database/**'
   - 'tests/migration/**'
   - 'examples/complex/docker-compose.dev.yml'
   - 'examples/complex/scripts/**'

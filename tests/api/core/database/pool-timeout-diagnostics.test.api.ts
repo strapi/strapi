@@ -68,6 +68,10 @@ describe('Pool timeout diagnostics', () => {
   let rq: any;
   let rqGraphql: any;
   let barrier: (() => Promise<void>) | undefined;
+  // The first timed-out query rolls its transaction back and frees a connection.
+  // Hold every connection until the other queries have timed out too, or one of
+  // them acquires that connection and the create succeeds.
+  let release: (() => Promise<void>) | undefined;
 
   beforeAll(async () => {
     await builder.addContentType(itemModel).build();
@@ -83,7 +87,13 @@ describe('Pool timeout diagnostics', () => {
             if (barrier) {
               // Wait until every request holds its transaction, then query outside it
               await barrier();
-              await rawQueryOutsideTransaction(s);
+              try {
+                await rawQueryOutsideTransaction(s);
+              } finally {
+                if (release) {
+                  await release();
+                }
+              }
             }
           },
         });
@@ -102,6 +112,7 @@ describe('Pool timeout diagnostics', () => {
 
   afterEach(() => {
     barrier = undefined;
+    release = undefined;
     jest.restoreAllMocks();
   });
 
@@ -110,6 +121,7 @@ describe('Pool timeout diagnostics', () => {
     const warnSpy = jest.spyOn(strapi.log, 'warn');
     const { max } = (strapi.db.connection.client as any).pool;
     barrier = createBarrier(max);
+    release = createBarrier(max);
 
     const responses = await Promise.all(
       Array.from({ length: max }, (_, index) =>
@@ -155,6 +167,7 @@ describe('Pool timeout diagnostics', () => {
     const errorSpy = jest.spyOn(strapi.log, 'error');
     const { max } = (strapi.db.connection.client as any).pool;
     barrier = createBarrier(max);
+    release = createBarrier(max);
 
     const responses = await Promise.all(
       Array.from({ length: max }, (_, index) =>

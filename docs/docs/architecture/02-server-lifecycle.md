@@ -5,6 +5,7 @@ status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - The statement that plugin modules and API modules have no guaranteed relative order comes from reading `loadApplicationContext` (`Promise.all`). No test confirms it.
+  - Destroy now releases the service container after keeping logger and telemetry, and a second destroy() returns immediately.
 ---
 
 This page describes the boot sequence of the server runtime in `@strapi/core`. Read it before you add code to an internal provider, a loader, or a `register` or `bootstrap` function.
@@ -143,11 +144,12 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 3. `strapi.app.destroy({ strapi })`, if the application defines it.
 4. `server.destroy()`.
 5. `eventHub.destroy()`, which removes all listeners and subscribers.
-6. `db.destroy()`.
+6. `db.destroy()`, which waits for commit and rollback hooks that are still running, then closes the pool.
 7. `process.removeAllListeners()`.
 8. `delete global.strapi`. This lets a test create a new instance.
+9. The service container is cleared so a test that keeps the instance does not retain every service. The logger is registered again. Telemetry is registered again when it was loaded, because `strapi export` sends an event after the transfer destroys the instance. Reading any other service after this throws.
 
-`destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
+A second `destroy()` returns immediately. `destroyOnSignal` calls `destroy()` on the first `SIGTERM` or `SIGINT` and then calls `process.exit()`. It ignores the next signals.
 
 `destroy()` can run on an instance that did not finish `load()`. For example, `strapi build` and `strapi develop --no-watch-admin` create an instance only to read the configuration, and a signal can arrive during `load()`. A provider `destroy` must not assume that its `register` ran.
 
