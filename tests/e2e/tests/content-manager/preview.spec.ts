@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import {
   clickAndWait,
@@ -38,8 +38,8 @@ test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resetFiles();
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
     await page.waitForURL('/admin');
   });
 
@@ -170,8 +170,8 @@ describeOnCondition(edition === 'EE')('Advanced Preview', () => {
       coreStore: false,
     });
     await resetFiles();
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
     await page.waitForURL('/admin');
   });
 

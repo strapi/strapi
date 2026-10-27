@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import {
   resetDatabaseAndImportDataFromPath,
   resyncSuperAdminPermissionsAfterImport,
@@ -17,8 +17,8 @@ test.describe('Bulk publish draft-relations warning', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resyncSuperAdminPermissionsAfterImport();
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('warns when bulk publishing non-i18n relation-lab entries linked to draft-only targets', async ({

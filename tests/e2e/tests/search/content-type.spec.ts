@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 
 const PRODUCT_EDIT_URL = /\/admin\/content-manager\/collection-types\/api::product\.product\/[^/]+/;
@@ -38,8 +38,8 @@ function createSearchTest(testFunction, description, searchTerm) {
 test.describe('Search', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
   });
 
