@@ -267,6 +267,8 @@
   "table.content.create-first-content-type.start-with-prompt": "Start with a prompt",
   "table.content.no-fields.collection-type": "Add your first field to this Collection-Type",
   "table.content.no-fields.component": "Add your first field to this component",
+  "table.content.no-fields.content-type.read-only": "This content type has no fields yet",
+  "table.content.no-fields.component.read-only": "This component has no fields yet",
   "IconPicker.search.placeholder.label": "Search for an icon",
   "IconPicker.search.clear.label": "Clear the icon search",
   "IconPicker.search.button.label": "Search icon button",

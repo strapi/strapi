@@ -166,30 +166,42 @@ export const List = ({
     onOpenModalAddField({ forTarget: type?.modelType, targetUid: type.uid });
   };
 
+  const isContentType = type?.modelType === 'contentType';
+  const addFieldMessage = isContentType
+    ? {
+        id: getTrad('table.content.no-fields.collection-type'),
+        defaultMessage: 'Add your first field to this Collection-Type',
+      }
+    : {
+        id: getTrad('table.content.no-fields.component'),
+        defaultMessage: 'Add your first field to this component',
+      };
+  const readOnlyMessage = isContentType
+    ? {
+        id: getTrad('table.content.no-fields.content-type.read-only'),
+        defaultMessage: 'This content type has no fields yet',
+      }
+    : {
+        id: getTrad('table.content.no-fields.component.read-only'),
+        defaultMessage: 'This component has no fields yet',
+      };
+
   if (type?.attributes.length === 0 && isMain) {
     return (
       <EmptyStateLayout
         action={
-          <tours.contentTypeBuilder.AddFields>
-            <Button onClick={onClickAddField} size="L" startIcon={<Plus />} variant="secondary">
-              {formatMessage({
-                id: getTrad('table.button.no-fields'),
-                defaultMessage: 'Add new field',
-              })}
-            </Button>
-          </tours.contentTypeBuilder.AddFields>
+          isInDevelopmentMode && (
+            <tours.contentTypeBuilder.AddFields>
+              <Button onClick={onClickAddField} size="L" startIcon={<Plus />} variant="secondary">
+                {formatMessage({
+                  id: getTrad('table.button.no-fields'),
+                  defaultMessage: 'Add new field',
+                })}
+              </Button>
+            </tours.contentTypeBuilder.AddFields>
+          )
         }
-        content={formatMessage(
-          type.modelType === 'contentType'
-            ? {
-                id: getTrad('table.content.no-fields.collection-type'),
-                defaultMessage: 'Add your first field to this Collection-Type',
-              }
-            : {
-                id: getTrad('table.content.no-fields.component'),
-                defaultMessage: 'Add your first field to this component',
-              }
-        )}
+        content={formatMessage(isInDevelopmentMode ? addFieldMessage : readOnlyMessage)}
         hasRadius
         icon={<EmptyDocuments width="16rem" />}
       />
