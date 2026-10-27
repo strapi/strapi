@@ -105,7 +105,13 @@ export default async function loadPlugins(strapi: Core.Strapi) {
   for (const pluginName of Object.keys(enabledPlugins)) {
     const enabledPlugin = enabledPlugins[pluginName];
 
-    let serverEntrypointPath;
+    // Enabled in config/plugins without `resolve`, and no installed plugin has this `strapi.name`
+    if (enabledPlugin.pathToPlugin === undefined) {
+      throw new Error(
+        `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove its configuration.`
+      );
+    }
+
     let resolvedExport = './strapi-server.js';
 
     try {
@@ -118,13 +124,7 @@ export default async function loadPlugins(strapi: Core.Strapi) {
       // no export map or missing strapi-server export => fallback to default
     }
 
-    try {
-      serverEntrypointPath = join(enabledPlugin.pathToPlugin, resolvedExport);
-    } catch {
-      throw new Error(
-        `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove its configuration.`
-      );
-    }
+    const serverEntrypointPath = join(enabledPlugin.pathToPlugin, resolvedExport);
 
     // only load plugins with a server entrypoint
     if (!(await fse.pathExists(serverEntrypointPath))) {

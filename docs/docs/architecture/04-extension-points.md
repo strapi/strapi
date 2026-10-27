@@ -26,7 +26,7 @@ The plugins loader builds the list of enabled plugins from three sources:
 
 Plugin names must be kebab-case. The loader throws otherwise.
 
-For each enabled plugin, the loader resolves the `strapi-server` export of the package. If the export is missing, it uses `./strapi-server.js`. It skips a plugin that has no server entry.
+For each enabled plugin, the loader resolves the `strapi-server` export of the package. If the export is missing, it uses `./strapi-server.js`. It skips a plugin that has no server entry. The entry is loaded with `require()`, so it can be `.js`, `.cjs` or `.mjs` (`.mjs` relies on Node's `require(esm)` and cannot use top-level `await`).
 
 ## Plugin config merge
 
