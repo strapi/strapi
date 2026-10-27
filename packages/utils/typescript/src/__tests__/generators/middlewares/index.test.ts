@@ -286,6 +286,114 @@ describe('generateMiddlewaresDefinitions', () => {
     });
   });
 
+  describe('JS middlewares', () => {
+    // The template's compiler options (packages/cli/create-strapi-app/templates/vanilla/tsconfig.json)
+    const compileConfigs = async (files: Record<string, string>, allowJs: boolean) => {
+      const { root, strapi, pwd } = await createApp(
+        files,
+        Object.keys(files)
+          .filter((file) => file.endsWith('.d.ts') === false)
+          .map((file) => `global::${path.basename(file, '.js')}`)
+      );
+      roots.push(root);
+
+      const { output } = await generateMiddlewaresDefinitions({
+        strapi,
+        pwd,
+        logger: createLogger({ silent: true }),
+        allowJs,
+      });
+      await outputFile(path.join(pwd, 'middlewares.ts'), output);
+      await outputFile(
+        path.join(root, 'check.ts'),
+        'export declare const registry: Strapi.Registries.AppMiddlewares;'
+      );
+
+      const program = ts.createProgram({
+        rootNames: [path.join(pwd, 'middlewares.ts'), path.join(root, 'check.ts')],
+        options: {
+          noEmit: true,
+          strict: true,
+          noUnusedLocals: true,
+          esModuleInterop: true,
+          allowJs,
+          types: [],
+          module: ts.ModuleKind.CommonJS,
+          moduleResolution: ts.ModuleResolutionKind.Node10,
+        },
+      });
+      const diagnostics = ts
+        .getPreEmitDiagnostics(program)
+        .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+
+      // Printed rather than checked with conditional types, which an error type would satisfy
+      const checker = program.getTypeChecker();
+      const check = program.getSourceFile(path.join(root, 'check.ts'))!;
+      const [declaration] = (check.statements[0] as ts.VariableStatement).declarationList
+        .declarations;
+      const registry = checker.getTypeAtLocation(declaration.name);
+      const configs = Object.fromEntries(
+        checker
+          .getPropertiesOfType(registry)
+          .map((property) => [
+            property.name,
+            checker.typeToString(checker.getTypeOfSymbolAtLocation(property, check)),
+          ])
+      );
+
+      return { output, diagnostics, configs };
+    };
+
+    test('registers the JSDoc config of a JS middleware with `allowJs`', async () => {
+      const { diagnostics, configs } = await compileConfigs(
+        {
+          'src/middlewares/commonjs.js':
+            '/** @param {{ level: number }} config */\nmodule.exports = (config, { strapi }) => async (ctx, next) => next();',
+          'src/middlewares/esm.js':
+            '/** @param {{ level: number }} config */\nexport default (config, { strapi }) => async (ctx, next) => next();',
+          'src/middlewares/untyped.js':
+            'module.exports = (config, { strapi }) => async (ctx, next) => next();',
+          // Runtime calls a default export as a factory: a plain Koa handler breaks
+          'src/middlewares/koaHandler.js':
+            '/**\n * @param {{ path: string }} ctx\n * @param {() => Promise<void>} next\n */\nmodule.exports = (ctx, next) => next();',
+          // Not a module for TypeScript, whose import would fail with TS2306
+          'src/middlewares/script.js': 'const helper = 1;',
+        },
+        true
+      );
+
+      expect(diagnostics).toEqual([]);
+      expect(configs).toEqual({
+        'global::commonjs': '{ level: number; }',
+        'global::esm': '{ level: number; }',
+        'global::untyped': 'unknown',
+        'global::koaHandler': 'never',
+        'global::script': 'unknown',
+      });
+    });
+
+    test('registers the config a sibling declaration file declares, without `allowJs`', async () => {
+      const { output, diagnostics, configs } = await compileConfigs(
+        {
+          'src/middlewares/declared.js': 'module.exports = (config, { strapi }) => undefined;',
+          'src/middlewares/declared.d.ts':
+            'declare const factory: (config: { fromDts: number }) => unknown;\nexport = factory;',
+          'src/middlewares/plain.js': 'module.exports = (config, { strapi }) => undefined;',
+        },
+        false
+      );
+
+      expect(normalize(output)).toContain(
+        "'global::declared': MiddlewareConfig<{ default: typeof import('../../src/middlewares/declared.js') }>"
+      );
+      expect(diagnostics).toEqual([]);
+      expect(configs).toEqual({
+        'global::declared': '{ fromDts: number; }',
+        'global::plain': 'unknown',
+      });
+    });
+  });
+
   test('emits no helper when every TypeScript source is CommonJS-style', async () => {
     const { output } = await generate(
       { 'src/middlewares/commonjs.ts': 'module.exports = (config: { max: number }) => undefined;' },

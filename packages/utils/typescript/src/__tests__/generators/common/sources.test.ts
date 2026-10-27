@@ -6,6 +6,7 @@ import { compareCodeUnits } from '../../../generators/common/compare';
 import {
   filterRegisteredSources,
   findTypeExports,
+  hasModuleType,
   scanSources,
   toImportSpecifier,
 } from '../../../generators/common/sources';
@@ -166,7 +167,7 @@ describe('scanSources', () => {
     expect(logger.warnings).toBe(0);
   });
 
-  test('does not read JS sources', async () => {
+  test('does not read JS sources without a sibling declaration file or `allowJs`', async () => {
     const { scanned, logger } = await scanIn({
       'legacy.js': 'export default () => 1;',
       'missing.js': null,
@@ -174,6 +175,164 @@ describe('scanSources', () => {
 
     expect(scanned.map((source) => source.module)).toEqual([undefined, undefined]);
     expect(logger.warnings).toBe(0);
+  });
+
+  describe('reads the file TypeScript reads for the import of each source', () => {
+    const scanApp = async (files: Record<string, string>, allowJs: boolean) => {
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-sources-'));
+      roots.push(root);
+      for (const [file, content] of Object.entries(files)) {
+        await fs.writeFile(path.join(root, file), content);
+      }
+      // Declaration files are not sources (see `collectAppSources`)
+      const sources = Object.keys(files)
+        .filter((file) => file.endsWith('.d.ts') === false)
+        .map((file) => ({
+          uid: `api::${file}.${file}`,
+          file: path.join(root, file),
+          specifier: '',
+        }));
+      const logger = createLogger({ silent: true });
+      const scanned = await scanSources(sources, logger, { allowJs });
+
+      return {
+        files: Object.fromEntries(
+          scanned.map((source) => [
+            path.basename(source.file),
+            source.module === undefined ? undefined : path.basename(source.module.file),
+          ])
+        ),
+        logger,
+      };
+    };
+
+    const files = {
+      'typed.ts': 'export default () => 1;',
+      // A declaration file next to a TypeScript source is not read: the import resolves to the source
+      'typed.d.ts': 'export default 1;',
+      'declared.js': 'module.exports = () => 1;',
+      'declared.d.ts': 'declare const factory: () => number;\nexport = factory;',
+      'plain.js': 'module.exports = () => 1;',
+    };
+
+    test.each([
+      [false, { 'typed.ts': 'typed.ts', 'declared.js': 'declared.d.ts', 'plain.js': undefined }],
+      [true, { 'typed.ts': 'typed.ts', 'declared.js': 'declared.d.ts', 'plain.js': 'plain.js' }],
+    ])('with allowJs %s', async (allowJs, expected) => {
+      const { files: read, logger } = await scanApp(files, allowJs);
+
+      expect(read).toEqual(expected);
+      expect(logger.warnings).toBe(0);
+    });
+
+    test('reads the module shape of a sibling declaration file', async () => {
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-sources-'));
+      roots.push(root);
+      const declarations = {
+        exportEquals: 'declare const factory: () => number;\nexport = factory;',
+        exportDefault: 'declare const factory: () => number;\nexport default factory;',
+        namedOnly: 'export declare const helper: number;',
+        // A declaration file without ECMAScript module syntax is not a module (TS2306)
+        script: 'declare const factory: () => number;',
+      };
+      for (const [name, content] of Object.entries(declarations)) {
+        await fs.writeFile(path.join(root, `${name}.js`), 'module.exports = () => 1;');
+        await fs.writeFile(path.join(root, `${name}.d.ts`), content);
+      }
+
+      const scanned = await scanSources(
+        Object.keys(declarations).map((name) => ({
+          uid: name,
+          file: path.join(root, `${name}.js`),
+          specifier: '',
+        })),
+        createLogger({ silent: true })
+      );
+
+      expect(
+        Object.fromEntries(
+          scanned.map((source) => [
+            source.uid,
+            [source.module?.shape, hasModuleType(source), source.module?.typedExports],
+          ])
+        )
+      ).toEqual({
+        exportEquals: ['export-equals', true, false],
+        exportDefault: ['default', true, false],
+        namedOnly: ['no-default', true, false],
+        script: ['commonjs', false, false],
+      });
+    });
+
+    test('warns and registers a JS source as unknown when its file cannot be read', async () => {
+      const { scanned, logger } = await (async () => {
+        const logger = createLogger({ silent: true });
+        const [source] = await writeSources({ 'missing.js': null });
+        return { scanned: await scanSources([source], logger, { allowJs: true }), logger };
+      })();
+
+      expect(scanned[0].module).toBeUndefined();
+      expect(hasModuleType(scanned[0])).toBe(false);
+      expect(logger.warnings).toBe(1);
+    });
+  });
+
+  test('reads the module shape of each JS source with `allowJs`', async () => {
+    const logger = createLogger({ silent: true });
+    const scanned = await scanSources(
+      await writeSources({
+        'esmDefault.js': 'export default () => 1;',
+        'esmNamed.js': 'export const helper = 1;',
+        'assigned.js': 'module.exports = () => 1;',
+        'exportsMember.js': 'exports.handler = () => true;',
+        'moduleExportsMember.js': 'module.exports.handler = () => true;',
+        // TypeScript reads the ECMAScript module syntax and ignores the assignment
+        'mixed.js': 'export const helper = 1;\nmodule.exports = () => helper;',
+        // Not a module for TypeScript: its import fails with TS2306
+        'script.js': 'const helper = 1;',
+        'requireOnly.js': "const path = require('path');",
+        // Only top-level assignments are read
+        'nested.js': 'if (true) {\n  module.exports = () => 1;\n}',
+      }),
+      logger,
+      { allowJs: true }
+    );
+
+    expect(
+      Object.fromEntries(
+        scanned.map((source) => [
+          path.basename(source.file),
+          [source.module?.shape, hasModuleType(source)],
+        ])
+      )
+    ).toEqual({
+      'esmDefault.js': ['default', true],
+      'esmNamed.js': ['no-default', true],
+      'assigned.js': ['commonjs', true],
+      'exportsMember.js': ['commonjs', true],
+      'moduleExportsMember.js': ['commonjs', true],
+      'mixed.js': ['commonjs', false],
+      'script.js': ['commonjs', false],
+      'requireOnly.js': ['commonjs', false],
+      'nested.js': ['commonjs', false],
+    });
+    expect(logger.warnings).toBe(0);
+  });
+
+  test('does not type the exports of a CommonJS-style TypeScript source', async () => {
+    const scanned = await scanSources(
+      await writeSources({
+        assigned: 'module.exports = () => 1;',
+        exportsMember: 'exports.handler = () => true;',
+      }),
+      createLogger({ silent: true }),
+      { allowJs: true }
+    );
+
+    expect(scanned.map((source) => [source.module?.shape, hasModuleType(source)])).toEqual([
+      ['commonjs', false],
+      ['commonjs', false],
+    ]);
   });
 
   test('keeps a source that cannot be read unscanned, with a warning', async () => {

@@ -154,23 +154,25 @@ const generateConfigHelpersDefinition = () => {
  *         'global::<policy>': PolicyConfig<typeof import('<relative path to the source>')>;
  *         'api::<api>.<policy>': PolicyConfig<typeof import('<relative path to the source>')>;
  *         'global::<export = policy>': PolicyConfig<{ default: typeof import('<relative path to the source>') }>;
- *         'global::<js or commonjs policy>': unknown;
+ *         'global::<js commonjs policy>': PolicyConfig<{ default: typeof import('<relative path to the source>') }>;
+ *         'global::<js policy without types, or commonjs policy>': unknown;
  *       }
  *     }
  *   }
  * }
  *
- * The import of a JS policy is an error type without `allowJs`, and one such entry turns every policy
- * reference into `any`. JS policies are registered as `unknown` without an import. So are
+ * A JS policy registers its config like a TypeScript one, read from its sibling `<name>.d.ts`, else
+ * from the JS file itself (JSDoc included) when the application's tsconfig enables `allowJs` (see
+ * `typesFileOf`). Without either, its import is an error type, and one such entry turns every policy
+ * reference into `any`: the policy is registered as `unknown` without an import. So are
  * CommonJS-style TypeScript policies (`module.exports = …`), whose import fails (see
- * `moduleTypeOf`). A TypeScript policy without a default export is left out, with a warning (see
+ * `moduleTypeOf`). A policy without a default export is left out, with a warning (see
  * `omitSourcesWithoutDefault`).
- * TODO @Nico with `allowJs`, a JSDoc-typed JS policy could register its config like a TS one
  */
 export const generatePoliciesDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
 ) => {
-  const { strapi, logger, pwd: outDir } = options;
+  const { strapi, logger, pwd: outDir, allowJs } = options;
 
   if (!outDir) {
     throw new Error('The policies generator needs the output directory to resolve source imports');
@@ -183,7 +185,9 @@ export const generatePoliciesDefinitions = async (
     logger
   );
   const policiesDefinitions = omitSourcesWithoutDefault(
-    await scanSources(filterRegisteredSources(sources, strapi.policies, logger), logger),
+    await scanSources(filterRegisteredSources(sources, strapi.policies, logger), logger, {
+      allowJs,
+    }),
     'policies',
     logger
   );

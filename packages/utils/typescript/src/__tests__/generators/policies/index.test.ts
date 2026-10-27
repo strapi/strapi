@@ -262,6 +262,125 @@ describe('generatePoliciesDefinitions', () => {
     });
   });
 
+  describe('JS policies', () => {
+    // The template's compiler options (packages/cli/create-strapi-app/templates/vanilla/tsconfig.json)
+    const compileConfigs = async (files: Record<string, string>, allowJs: boolean) => {
+      const { root, strapi, pwd } = await createApp(
+        files,
+        Object.keys(files)
+          .filter((file) => file.endsWith('.d.ts') === false)
+          .map((file) => `global::${path.basename(file, '.js')}`)
+      );
+      roots.push(root);
+
+      const { output } = await generatePoliciesDefinitions({
+        strapi,
+        pwd,
+        logger: createLogger({ silent: true }),
+        allowJs,
+      });
+      await outputFile(path.join(pwd, 'policies.ts'), output);
+      await outputFile(
+        path.join(root, 'check.ts'),
+        'export declare const registry: Strapi.Registries.AppPolicies;'
+      );
+
+      const program = ts.createProgram({
+        rootNames: [path.join(pwd, 'policies.ts'), path.join(root, 'check.ts')],
+        options: {
+          noEmit: true,
+          strict: true,
+          noUnusedLocals: true,
+          esModuleInterop: true,
+          allowJs,
+          types: [],
+          module: ts.ModuleKind.CommonJS,
+          moduleResolution: ts.ModuleResolutionKind.Node10,
+        },
+      });
+      const diagnostics = ts
+        .getPreEmitDiagnostics(program)
+        .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+
+      // Printed rather than checked with conditional types, which an error type would satisfy
+      const checker = program.getTypeChecker();
+      const check = program.getSourceFile(path.join(root, 'check.ts'))!;
+      const [declaration] = (check.statements[0] as ts.VariableStatement).declarationList
+        .declarations;
+      const registry = checker.getTypeAtLocation(declaration.name);
+      const configs = Object.fromEntries(
+        checker
+          .getPropertiesOfType(registry)
+          .map((property) => [
+            property.name,
+            checker.typeToString(checker.getTypeOfSymbolAtLocation(property, check)),
+          ])
+      );
+
+      return { output, diagnostics, configs };
+    };
+
+    test('registers the JSDoc config of a JS policy with `allowJs`', async () => {
+      const { diagnostics, configs } = await compileConfigs(
+        {
+          'src/policies/commonjs.js':
+            '/**\n * @param {unknown} policyContext\n * @param {{ scope: string }} config\n */\nmodule.exports = (policyContext, config, { strapi }) => true;',
+          'src/policies/esm.js':
+            '/**\n * @param {unknown} policyContext\n * @param {{ scope: string }} config\n */\nexport default (policyContext, config, { strapi }) => true;',
+          'src/policies/withValidator.js':
+            '/**\n * @param {unknown} policyContext\n * @param {{ scope: string }} config\n */\nconst handler = (policyContext, config) => true;\nmodule.exports = { handler, validator: () => true };',
+          'src/policies/exportsMember.js':
+            '/**\n * @param {unknown} policyContext\n * @param {{ scope: string }} config\n */\nexports.handler = (policyContext, config) => true;',
+          'src/policies/noConfig.js':
+            '/** @param {unknown} policyContext */\nmodule.exports = (policyContext) => true;',
+          'src/policies/untyped.js':
+            'module.exports = (policyContext, config, { strapi }) => true;',
+          // Not a module for TypeScript, whose import would fail with TS2306
+          'src/policies/script.js': 'const helper = 1;',
+          // Registers `undefined` at runtime: left out (see `omitSourcesWithoutDefault`)
+          'src/policies/esmNamed.js': 'export const helper = 1;',
+        },
+        true
+      );
+
+      expect(diagnostics).toEqual([]);
+      expect(configs).toEqual({
+        'global::commonjs': '{ scope: string; }',
+        'global::esm': '{ scope: string; }',
+        'global::withValidator': '{ scope: string; }',
+        'global::exportsMember': '{ scope: string; }',
+        'global::noConfig': 'undefined',
+        'global::untyped': 'unknown',
+        'global::script': 'unknown',
+      });
+    });
+
+    test('registers the config a sibling declaration file declares, without `allowJs`', async () => {
+      const { output, diagnostics, configs } = await compileConfigs(
+        {
+          'src/policies/declared.js': 'module.exports = (policyContext, config) => true;',
+          'src/policies/declared.d.ts':
+            'declare const policy: (policyContext: unknown, config: { fromDts: number }) => boolean;\nexport default policy;',
+          'src/policies/plain.js': 'module.exports = (policyContext, config) => true;',
+          // The JS module registers its exports object: kept, whatever the declaration file's shape
+          'src/policies/named.js': 'exports.handler = (policyContext, config) => true;',
+          'src/policies/named.d.ts': 'export declare const handler: () => boolean;',
+        },
+        false
+      );
+
+      expect(normalize(output)).toContain(
+        "'global::declared': PolicyConfig<typeof import('../../src/policies/declared.js')>"
+      );
+      expect(diagnostics).toEqual([]);
+      expect(configs).toEqual({
+        'global::declared': '{ fromDts: number; }',
+        'global::plain': 'unknown',
+        'global::named': 'unknown',
+      });
+    });
+  });
+
   test('emits no helper when every TypeScript source is CommonJS-style', async () => {
     const { output } = await generate(
       {

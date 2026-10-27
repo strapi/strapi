@@ -197,22 +197,23 @@ const generateConfigHelpersDefinition = () => {
  *         'global::<middleware>': MiddlewareConfig<typeof import('<relative path to the source>')>;
  *         'api::<api>.<middleware>': MiddlewareConfig<typeof import('<relative path to the source>')>;
  *         'global::<export = middleware>': MiddlewareConfig<{ default: typeof import('<relative path to the source>') }>;
- *         'global::<js or commonjs middleware>': unknown;
+ *         'global::<js commonjs middleware>': MiddlewareConfig<{ default: typeof import('<relative path to the source>') }>;
+ *         'global::<js middleware without types, or commonjs middleware>': unknown;
  *       }
  *     }
  *   }
  * }
  *
- * Like JS and CommonJS-style TypeScript policies (see the policies generator), JS middlewares and
- * CommonJS-style TypeScript middlewares (`module.exports = …`) are registered as `unknown` without an
- * import. A TypeScript middleware without a default export is left out, with a warning (see
- * `omitSourcesWithoutDefault`).
- * TODO @Nico with `allowJs`, a JSDoc-typed JS middleware could register its config like a TS one
+ * Like JS policies (see the policies generator), a JS middleware registers its config from its
+ * sibling `<name>.d.ts`, else from the JS file itself (JSDoc included) with `allowJs`. A JS middleware
+ * without either and a CommonJS-style TypeScript middleware (`module.exports = …`) are registered as
+ * `unknown` without an import. A middleware without a default export is left out, with a warning
+ * (see `omitSourcesWithoutDefault`).
  */
 export const generateMiddlewaresDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
 ) => {
-  const { strapi, logger, pwd: outDir } = options;
+  const { strapi, logger, pwd: outDir, allowJs } = options;
 
   if (!outDir) {
     throw new Error(
@@ -227,7 +228,9 @@ export const generateMiddlewaresDefinitions = async (
     logger
   );
   const middlewaresDefinitions = omitSourcesWithoutDefault(
-    await scanSources(filterRegisteredSources(sources, strapi.middlewares, logger), logger),
+    await scanSources(filterRegisteredSources(sources, strapi.middlewares, logger), logger, {
+      allowJs,
+    }),
     'middlewares',
     logger
   );

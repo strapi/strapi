@@ -37,7 +37,8 @@ export {};
  *         'api::<api>.<service>': ServiceInstance<typeof import('<relative path to the source>')>;
  *         'api::<api>.<service>': ServiceContractOf<import('<relative path to the source>').ServiceContract>;
  *         'api::<api>.<export = service>': ServiceInstance<{ default: typeof import('<relative path to the source>') }>;
- *         'api::<api>.<js or commonjs service>': unknown;
+ *         'api::<api>.<js commonjs service>': ServiceInstance<{ default: typeof import('<relative path to the source>') }>;
+ *         'api::<api>.<js service without types, or commonjs service>': unknown;
  *       }
  *       interface InferredServices {
  *         'api::<api>.<service>': true;
@@ -48,19 +49,19 @@ export {};
  *
  * A service whose module exports a `ServiceContract` type registers that contract; any other service
  * registers the type its default export provides, or the value it assigns with `export =`. A JS
- * source registers as `unknown` without an import: without `allowJs` its import is an error type. So
- * does a CommonJS-style TypeScript source (`module.exports = …`), whose import fails (see
- * `moduleTypeOf`). A service module, a default export and a contract typed `any` register `unknown`
- * too.
+ * source is read from its sibling `<name>.d.ts`, else from the JS file itself with `allowJs` (see
+ * `typesFileOf`). Without either, it registers as `unknown` without an import: its import is an
+ * error type. So does a CommonJS-style TypeScript source (`module.exports = …`), whose import fails
+ * (see `moduleTypeOf`). A service module, a default export and a contract typed `any` register
+ * `unknown` too.
  *
- * `InferredServices` lists the TypeScript services registered without a contract, whose type is read
- * from the factory itself: `Core.ServiceFactory` rejects their uid. It is not emitted when there are
- * none.
+ * `InferredServices` lists the services registered without a contract, whose type is read from the
+ * factory itself: `Core.ServiceFactory` rejects their uid. It is not emitted when there are none.
  */
 export const generateServicesDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
 ) => {
-  const { strapi, logger, pwd: outDir } = options;
+  const { strapi, logger, pwd: outDir, allowJs } = options;
 
   if (!outDir) {
     throw new Error('The services generator needs the output directory to resolve source imports');
@@ -69,7 +70,8 @@ export const generateServicesDefinitions = async (
   const sources = await collectAppSources('services', { api: strapi.dirs.app.api }, outDir, logger);
   const servicesDefinitions = await scanSources(
     filterRegisteredSources(sources, strapi.services, logger),
-    logger
+    logger,
+    { allowJs }
   );
 
   logger.debug(`Found ${servicesDefinitions.length} services.`);

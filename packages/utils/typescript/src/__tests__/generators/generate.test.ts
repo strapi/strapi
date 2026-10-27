@@ -265,4 +265,81 @@ describe('generate', () => {
     expect(reports).toEqual({});
     expect(await pathExists(path.join(root, 'types', 'generated'))).toBe(false);
   });
+
+  describe('reads `allowJs` from the application tsconfig', () => {
+    // A JS service is typed from the JS file itself only with `allowJs`
+    const generateWithTsconfig = async (tsconfig: string | undefined) => {
+      const { root, strapi, generated } = await createApp();
+      await outputFile(
+        path.join(root, 'src', 'api', 'legacy', 'services', 'legacy.js'),
+        'module.exports = () => ({ ping: () => "pong" });'
+      );
+      if (tsconfig !== undefined) {
+        await outputFile(path.join(root, 'tsconfig.json'), tsconfig);
+      }
+      strapi.services = { 'api::legacy.legacy': {} };
+
+      await generate({
+        strapi,
+        pwd: root,
+        artifacts: { services: true },
+        logger: { silent: true },
+      });
+
+      return fs.readFile(generated('services.ts'), 'utf8');
+    };
+
+    test('types a JS source from the JS file when the tsconfig enables it', async () => {
+      const output = await generateWithTsconfig(
+        JSON.stringify({ compilerOptions: { allowJs: true }, include: ['src'] })
+      );
+
+      expect(output.replace(/\s+/g, ' ').replace(/;/g, '')).toContain(
+        "'api::legacy.legacy': ServiceInstance<{ default: typeof import('../../src/api/legacy/services/legacy.js') }>"
+      );
+    });
+
+    test('also reads it from an extended tsconfig', async () => {
+      const { root, strapi, generated } = await createApp();
+      await outputFile(
+        path.join(root, 'src', 'api', 'legacy', 'services', 'legacy.js'),
+        'module.exports = () => ({ ping: () => "pong" });'
+      );
+      await outputFile(
+        path.join(root, 'tsconfig.base.json'),
+        JSON.stringify({ compilerOptions: { allowJs: true } })
+      );
+      await outputFile(
+        path.join(root, 'tsconfig.json'),
+        JSON.stringify({ extends: './tsconfig.base.json', include: ['src'] })
+      );
+      strapi.services = { 'api::legacy.legacy': {} };
+
+      await generate({
+        strapi,
+        pwd: root,
+        artifacts: { services: true },
+        logger: { silent: true },
+      });
+
+      expect(await fs.readFile(generated('services.ts'), 'utf8')).toContain(
+        "typeof import('../../src/api/legacy/services/legacy.js')"
+      );
+    });
+
+    test.each([
+      ['the tsconfig does not enable it', JSON.stringify({ include: ['src'] })],
+      ['there is no tsconfig', undefined],
+      ['the tsconfig cannot be parsed', '{ "compilerOptions": '],
+      [
+        'the tsconfig has errors',
+        JSON.stringify({ compilerOptions: { allowJs: true, module: 'unknown' }, include: ['src'] }),
+      ],
+    ])('registers a JS source as unknown when %s', async (_, tsconfig) => {
+      const output = await generateWithTsconfig(tsconfig);
+
+      expect(output).toContain("'api::legacy.legacy': unknown");
+      expect(output).not.toContain('legacy.js');
+    });
+  });
 });
