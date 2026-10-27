@@ -198,18 +198,46 @@ describe('promptChecklist', () => {
     await prompt.cancel();
   });
 
-  it('never splits an emoji in two when it splits a long word', async () => {
+  it.each(['😀', '中', '👩‍💻'])(
+    'splits a long word of %s, two columns wide each, on whole characters',
+    async (character) => {
+      const prompt = startPrompt(choices, 25, {
+        ...lockedGroup,
+        heading: `Not in your license. ${character.repeat(30)}`,
+      });
+
+      const wideLines = prompt
+        .screen()
+        .split('\n')
+        .filter((line) => line.includes(character));
+      expect(wideLines).toEqual([
+        `  ${character.repeat(11)}`,
+        `  ${character.repeat(11)}`,
+        `  ${character.repeat(8)}`,
+      ]);
+      expect(prompt.screen()).not.toMatch(/\uFFFD/);
+      await prompt.cancel();
+    }
+  );
+
+  it('wraps words of wide characters by the columns they take', async () => {
     const prompt = startPrompt(choices, 25, {
       ...lockedGroup,
-      heading: `Not in your license. ${'😀'.repeat(30)}`,
+      heading: `${'中'.repeat(6)} ${'中'.repeat(4)} ${'中'.repeat(6)}`,
     });
 
-    const emojiLines = prompt
+    const wideLines = prompt
       .screen()
       .split('\n')
-      .filter((line) => line.includes('😀'));
-    expect(emojiLines).toEqual([`  ${'😀'.repeat(22)}`, `  ${'😀'.repeat(8)}`]);
-    expect(prompt.screen()).not.toMatch(/\uFFFD/);
+      .filter((line) => line.includes('中'));
+    expect(wideLines).toEqual([`  ${'中'.repeat(6)} ${'中'.repeat(4)}`, `  ${'中'.repeat(6)}`]);
+    await prompt.cancel();
+  });
+
+  it('shortens a line of wide characters by the columns they take', async () => {
+    const prompt = startPrompt([{ name: '中'.repeat(50), value: 'a' }], 40);
+
+    expect(prompt.screen().split('\n')[2]).toBe(`❯ ◯ ${'中'.repeat(17)}…`);
     await prompt.cancel();
   });
 

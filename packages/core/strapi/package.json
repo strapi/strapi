@@ -162,6 +162,7 @@
     "resolve-from": "5.0.0",
     "resolve.exports": "2.0.2",
     "semver": "7.7.4",
+    "string-width": "4.2.3",
     "style-loader": "3.3.4",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",

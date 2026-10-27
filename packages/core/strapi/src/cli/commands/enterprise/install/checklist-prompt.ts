@@ -1,5 +1,6 @@
 import readline from 'node:readline';
 import chalk from 'chalk';
+import stringWidth from 'string-width';
 
 import { PromptCancelledError } from './errors';
 
@@ -18,8 +19,26 @@ export interface ChecklistLockedGroup {
 
 const SUBMIT_LABEL = 'Submit';
 
+const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
+const splitToWidth = (text: string, width: number): string[] =>
+  Array.from(graphemeSegmenter.segment(text), ({ segment }) => segment).reduce<string[]>(
+    (chunks, grapheme) => {
+      const lastChunk = chunks[chunks.length - 1];
+
+      if (lastChunk !== undefined && stringWidth(lastChunk + grapheme) <= width) {
+        chunks[chunks.length - 1] = lastChunk + grapheme;
+      } else {
+        chunks.push(grapheme);
+      }
+
+      return chunks;
+    },
+    []
+  );
+
 const fitWidth = (text: string, width: number): string =>
-  text.length <= width ? text : `${text.slice(0, Math.max(width - 1, 0))}…`;
+  stringWidth(text) <= width ? text : `${splitToWidth(text, width - 1)[0] ?? ''}…`;
 
 export const formatLockedChoice = (choice: ChecklistChoice): string => `  ✕ ${choice.name}`;
 
@@ -27,10 +46,10 @@ const wrapWords = (text: string, width: number): string[] =>
   text.split(' ').reduce<string[]>((lines, word) => {
     const lastLine = lines[lines.length - 1];
 
-    if (lastLine !== undefined && lastLine.length + word.length + 1 <= width) {
+    if (lastLine !== undefined && stringWidth(`${lastLine} ${word}`) <= width) {
       lines[lines.length - 1] = `${lastLine} ${word}`;
     } else {
-      lines.push(...(word.match(new RegExp(`.{1,${width}}`, 'gu')) ?? [word]));
+      lines.push(...splitToWidth(word, width));
     }
 
     return lines;
