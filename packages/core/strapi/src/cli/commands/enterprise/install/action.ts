@@ -60,6 +60,9 @@ interface InstallContext {
   dependencies: InstallDependencies;
 }
 
+const LIST_PLUGINS_HINT =
+  'Run strapi enterprise install without a name to see the plugins you can install.';
+
 const describeNotLicensed = async (
   packageName: string,
   { registryUrl, license, dependencies }: InstallContext
@@ -74,14 +77,14 @@ const describeNotLicensed = async (
     catalogResult.plugins.some(({ name, licensed }) => name === packageName && !licensed);
 
   if (!isListedOutsideLicense) {
-    return `Your license does not include ${packageName}, or it does not exist. Run strapi enterprise install without a name to see the plugins you can install.`;
+    return `Your license does not include ${packageName}, or it does not exist. ${LIST_PLUGINS_HINT}`;
   }
 
   const { notLicensedMessage } = catalogResult;
 
   return notLicensedMessage
     ? `${packageName}: ${notLicensedMessage}`
-    : `Your license does not include ${packageName}.`;
+    : `Your license does not include ${packageName}. ${LIST_PLUGINS_HINT}`;
 };
 
 interface RequestedPackage {
@@ -170,7 +173,7 @@ const resolveNamedPackages = async (
         throw new EnterpriseInstallError(await describeNotLicensed(packageName, context));
       case 'not-found':
         throw new EnterpriseInstallError(
-          `No Enterprise package named ${packageName}. Run strapi enterprise install without a name to see the plugins you can install.`
+          `No Enterprise package named ${packageName}. ${LIST_PLUGINS_HINT}`
         );
       case 'no-stable-release':
         throw new EnterpriseInstallError(describeNoStableRelease(packageName));

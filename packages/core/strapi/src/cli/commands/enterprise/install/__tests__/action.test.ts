@@ -502,8 +502,55 @@ describe('runInstall with package names', () => {
         }),
       })
     ).rejects.toThrow(
-      new EnterpriseInstallError(`Your license does not include ${LOCKED_PLUGIN}.`)
+      new EnterpriseInstallError(
+        `Your license does not include ${LOCKED_PLUGIN}. Run strapi enterprise install without a name to see the plugins you can install.`
+      )
     );
+  });
+
+  it('asks the catalog once, on the first plugin outside the license', async () => {
+    const dependencies = await createDependencies({
+      fetchImplementation: createRegistryFetch({
+        searchResult: [],
+        packuments: { [LOCKED_PLUGIN]: 403, [AI_BYOK]: 403 },
+        catalog: {
+          plugins: [
+            { name: LOCKED_PLUGIN, licensed: false },
+            { name: AI_BYOK, licensed: false },
+          ],
+          notLicensedMessage: NOT_LICENSED_MESSAGE,
+        },
+      }),
+    });
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-locked', 'plugin-ai-byok'],
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(`${LOCKED_PLUGIN}: ${NOT_LICENSED_MESSAGE}`);
+    expect(
+      (dependencies.fetchImplementation as jest.Mock).mock.calls.filter(([input]) =>
+        String(input).endsWith('/-/strapi/plugins')
+      )
+    ).toHaveLength(1);
+  });
+
+  it('does not ask the catalog when every named plugin is in the license', async () => {
+    const dependencies = await createDependencies();
+
+    await runInstall({
+      appDir: await createApp(),
+      packageArguments: ['plugin-ai-byok'],
+      logger: createTestLogger(),
+      dependencies,
+    });
+
+    expect(
+      (dependencies.fetchImplementation as jest.Mock).mock.calls.map(([input]) => String(input))
+    ).toEqual([`https://packages.strapi.io/${AI_BYOK}`]);
   });
 
   it('keeps the general message when the catalog does not list the plugin', async () => {
