@@ -15,6 +15,32 @@ const superAdminCredentials = {
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
 
+// ponytail: a pool that is quiet for 100 ms stands for "no detached work". Track the promises in core if it flakes
+const drainPool = async (strapi) => {
+  const pool = strapi.db?.connection?.client?.pool;
+
+  // SQLite passes without the drain, and the drain costs about 20 s there
+  if (!pool || strapi.db.dialect.client === 'sqlite') {
+    return;
+  }
+
+  const busy = () => pool.numUsed() + pool.numPendingAcquires() + pool.numPendingCreates() > 0;
+  const started = Date.now();
+  let quietSince = started;
+
+  while (Date.now() - started < 5000) {
+    if (busy()) {
+      quietSince = Date.now();
+    } else if (Date.now() - quietSince >= 100) {
+      return;
+    }
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
+  }
+};
+
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
   logLevel = 'warn',
@@ -88,6 +114,14 @@ const createStrapiInstance = async ({
   }
 
   await instance.load();
+
+  // Core saves history versions, audit logs and release updates after the response, unawaited.
+  // On a destroyed pool their acquires fail 60 s later, in whatever test runs then
+  const destroyInstance = instance.destroy.bind(instance);
+  instance.destroy = async () => {
+    await drainPool(instance);
+    return destroyInstance();
+  };
 
   instance.log.level = logLevel;
 
