@@ -297,7 +297,7 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
     const appDir = await createTemporaryDirectory();
     await installFakePackage(appDir, NEW_PLUGIN, { version: '2.0.0', strapi: { kind: 'plugin' } });
 
-    const { plugins, lockedPlugins, installedOutsideLicense, notLicensedMessage } = await discover(
+    const { plugins, lockedPlugins, notLicensedMessage } = await discover(
       appDir,
       createRegistryFetch({
         searchResult: [],
@@ -310,10 +310,13 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
     );
 
     expect(plugins).toMatchObject([
-      { entry: { packageName: NEW_PLUGIN }, lookup: { status: 'not-licensed' } },
+      {
+        entry: { packageName: NEW_PLUGIN },
+        lookup: { status: 'not-licensed' },
+        listedOutsideLicense: true,
+      },
     ]);
     expect(lockedPlugins).toEqual([]);
-    expect(installedOutsideLicense).toEqual([NEW_PLUGIN]);
     expect(notLicensedMessage).toBe(NOT_LICENSED_MESSAGE);
   });
 
@@ -331,8 +334,8 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
     );
 
     expect(result).toMatchObject({
+      plugins: [{ entry: { packageName: AI_BYOK }, listedOutsideLicense: false }],
       lockedPlugins: [],
-      installedOutsideLicense: [],
       notLicensedMessage: undefined,
     });
   });

@@ -28,12 +28,12 @@ export interface DiscoveredPlugin {
   entry: EnterprisePluginEntry;
   lookup: Exclude<PackumentLookup, { status: 'unavailable' }>;
   installedVersion?: string;
+  listedOutsideLicense?: boolean;
 }
 
 interface DiscoveryResult {
   plugins: DiscoveredPlugin[];
   lockedPlugins: EnterprisePluginEntry[];
-  installedOutsideLicense: string[];
   notLicensedMessage?: string;
 }
 
@@ -246,7 +246,6 @@ export const discoverEnterprisePlugins = async ({
         packageNames: [...searchedPackageNames, ...installedPluginNames],
       }),
       lockedPlugins: [],
-      installedOutsideLicense: [],
     };
   }
 
@@ -265,23 +264,26 @@ export const discoverEnterprisePlugins = async ({
       .map((plugin) => [plugin.name, plugin])
   );
   const lockedPlugins = [...lockedCatalogPlugins.values()].map(describeCatalogPlugin);
-  const installedOutsideLicense = installedPluginNames.filter((packageName) =>
-    catalogPluginsOutsideLicense.some(({ name }) => name === packageName)
-  );
+  const describedPlugins = await describeCandidatePlugins({
+    registryUrl,
+    appDir,
+    license,
+    logger,
+    fetchImplementation,
+    packageNames: [...licensedPackageNames, ...installedPluginNames],
+  });
+  const plugins = describedPlugins.map((plugin) => ({
+    ...plugin,
+    listedOutsideLicense: catalogPluginsOutsideLicense.some(
+      ({ name }) => name === plugin.entry.packageName
+    ),
+  }));
 
   return {
-    plugins: await describeCandidatePlugins({
-      registryUrl,
-      appDir,
-      license,
-      logger,
-      fetchImplementation,
-      packageNames: [...licensedPackageNames, ...installedPluginNames],
-    }),
+    plugins,
     lockedPlugins,
-    installedOutsideLicense,
     notLicensedMessage:
-      lockedPlugins.length > 0 || installedOutsideLicense.length > 0
+      lockedPlugins.length > 0 || plugins.some(({ listedOutsideLicense }) => listedOutsideLicense)
         ? catalogResult.notLicensedMessage
         : undefined,
   };

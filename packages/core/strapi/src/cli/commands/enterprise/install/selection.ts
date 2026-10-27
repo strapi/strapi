@@ -18,7 +18,7 @@ type PluginRowState =
   /** Installed and up to date for this Strapi version. */
   | { state: 'installed'; installedVersion: string; newerVersionNote?: string }
   /** Installed, but the license does not include it anymore. */
-  | { state: 'not-licensed'; installedVersion: string }
+  | { state: 'not-licensed'; installedVersion: string; listedOutsideLicense: boolean }
   /** Not installed, and no stable version fits this Strapi version. */
   | { state: 'no-compatible-version'; requiredStrapiRange: string }
   /** Not installed, and only prerelease versions exist. */
@@ -42,17 +42,19 @@ export const buildPluginRow = ({
   lookup,
   installedVersion,
   strapiVersion,
+  listedOutsideLicense = false,
 }: {
   entry: EnterprisePluginEntry;
   lookup: PackumentLookup;
   installedVersion?: string;
   strapiVersion?: string;
+  listedOutsideLicense?: boolean;
 }): PluginRow => {
   const status = resolvePluginStatus({ lookup, installedVersion, strapiVersion });
 
   if (status.state === 'not-licensed' || status.state === 'not-found') {
     return status.state === 'not-licensed' && installedVersion
-      ? { entry, state: 'not-licensed', installedVersion }
+      ? { entry, state: 'not-licensed', installedVersion, listedOutsideLicense }
       : { entry, state: 'hidden' };
   }
 

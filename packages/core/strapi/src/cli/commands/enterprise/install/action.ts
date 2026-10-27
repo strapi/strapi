@@ -220,7 +220,6 @@ const selectPlugins = async ({
   const {
     plugins: discoveredPlugins,
     lockedPlugins,
-    installedOutsideLicense,
     notLicensedMessage,
   } = await discoverEnterprisePlugins({
     registryUrl,
@@ -231,22 +230,26 @@ const selectPlugins = async ({
   });
 
   const rows: PluginRow[] = [
-    ...discoveredPlugins.map(({ entry, lookup, installedVersion }) =>
-      buildPluginRow({ entry, lookup, installedVersion, strapiVersion })
+    ...discoveredPlugins.map(({ entry, lookup, installedVersion, listedOutsideLicense }) =>
+      buildPluginRow({ entry, lookup, installedVersion, strapiVersion, listedOutsideLicense })
     ),
     ...lockedPlugins.map((entry): PluginRow => ({ entry, state: 'locked' })),
   ];
   const isAnyPluginLicensed = discoveredPlugins.some(({ lookup }) => lookup.status === 'available');
 
-  rows
-    .filter((row) => row.state === 'not-licensed')
-    .forEach(({ entry: { packageName } }) =>
-      logger.warn(
-        notLicensedMessage && installedOutsideLicense.includes(packageName)
-          ? `${packageName} (installed): ${notLicensedMessage}`
-          : `${packageName} is installed but is not included in your license.`
-      )
+  rows.forEach((row) => {
+    if (row.state !== 'not-licensed') {
+      return;
+    }
+
+    const { packageName } = row.entry;
+
+    logger.warn(
+      notLicensedMessage && row.listedOutsideLicense
+        ? `${packageName} (installed): ${notLicensedMessage}`
+        : `${packageName} is installed but is not included in your license.`
     );
+  });
 
   if (
     !isAnyPluginLicensed &&

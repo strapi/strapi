@@ -65,7 +65,23 @@ describe('buildPluginRow', () => {
   });
 
   it('flags an installed plugin that the license no longer includes', () => {
-    expect(rowFor({ status: 'not-licensed' }, '1.2.0')).toMatchObject({ state: 'not-licensed' });
+    expect(rowFor({ status: 'not-licensed' }, '1.2.0')).toEqual({
+      entry: aiByokEntry,
+      state: 'not-licensed',
+      installedVersion: '1.2.0',
+      listedOutsideLicense: false,
+    });
+  });
+
+  it('keeps that the catalog lists an installed plugin outside the license', () => {
+    expect(
+      buildPluginRow({
+        entry: aiByokEntry,
+        lookup: { status: 'not-licensed' },
+        installedVersion: '1.2.0',
+        listedOutsideLicense: true,
+      })
+    ).toMatchObject({ state: 'not-licensed', listedOutsideLicense: true });
   });
 
   it.each([[{ status: 'not-licensed' } as const], [{ status: 'not-found' } as const]])(
