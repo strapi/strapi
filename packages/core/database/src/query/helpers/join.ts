@@ -10,6 +10,8 @@ export interface Join {
   rootTable?: string;
   on?: Record<string, any>;
   orderBy?: Record<string, 'asc' | 'desc'>;
+  /** Adds conditions to the `ON` clause. Core never sets it: it is for plugins */
+  onKnex?: (inner: Knex.JoinClause) => void;
 }
 
 interface JoinOptions {
@@ -151,6 +153,7 @@ const applyJoin = (qb: Knex.QueryBuilder, join: Join) => {
     rootTable, // = qb.alias
     on,
     orderBy,
+    onKnex,
   } = join;
 
   qb[method](`${referencedTable} as ${alias}`, (inner) => {
@@ -161,6 +164,8 @@ const applyJoin = (qb: Knex.QueryBuilder, join: Join) => {
         inner.onVal(`${alias}.${key}`, on[key]);
       }
     }
+
+    onKnex?.(inner);
   });
 
   if (orderBy) {
