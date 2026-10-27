@@ -737,6 +737,10 @@ interface AssetDetailsProps {
   hasUnsavedEditsRef?: React.MutableRefObject<boolean>;
   /** Guard unsaved edits with <Blocker>, for a drawer whose closing is a navigation. */
   guardNavigation?: boolean;
+  /** After the asset was updated, replaced or cropped in place, with the server's copy. */
+  onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
+  /** After the asset was deleted from the library. */
+  onAssetDelete?: (id: number) => void;
 }
 
 interface AssetFormState {
@@ -751,6 +755,8 @@ export const AssetDetails = ({
   closeDetails,
   hasUnsavedEditsRef,
   guardNavigation = false,
+  onAssetChange,
+  onAssetDelete,
 }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const getErrorMessage = useApiErrorMessage();
@@ -813,6 +819,8 @@ export const AssetDetails = ({
       return;
     }
 
+    onAssetChange?.(res.data);
+
     trackUsage('didEditMediaLibraryElements', {
       location: MEDIA_LIBRARY_LOCATION,
       // Legacy sends the mime top-level type (image/video/audio/application…).
@@ -852,6 +860,7 @@ export const AssetDetails = ({
         });
         return;
       }
+      onAssetChange?.(res.data);
       trackUsage('didReplaceMedia', { location: MEDIA_LIBRARY_LOCATION });
       notify({
         type: 'success',
@@ -861,7 +870,16 @@ export const AssetDetails = ({
         }),
       });
     },
-    [asset.id, asset.name, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
+    [
+      asset.id,
+      asset.name,
+      formatMessage,
+      getErrorMessage,
+      notify,
+      onAssetChange,
+      replaceMutation,
+      trackUsage,
+    ]
   );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
@@ -891,6 +909,7 @@ export const AssetDetails = ({
         { folderName }
       ),
     });
+    onAssetDelete?.(asset.id);
     closeDetails();
   }, [
     asset.id,
@@ -900,6 +919,7 @@ export const AssetDetails = ({
     formatMessage,
     getErrorMessage,
     notify,
+    onAssetDelete,
     toggleNotification,
   ]);
 
@@ -930,6 +950,7 @@ export const AssetDetails = ({
       notifyCropError(res.error);
       return;
     }
+    onAssetChange?.(res.data);
     trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: false });
     notify({
       type: 'success',
@@ -941,6 +962,7 @@ export const AssetDetails = ({
   };
 
   // Save as copy: upload the cropped file as a new asset in the same folder.
+  // The original is untouched, so `onAssetChange` stays silent.
   const handleCropSaveAsCopy = async (file: globalThis.File, focalPoint: FocalPoint) => {
     setIsCropOpen(false);
     // Silent single-file upload (no global progress dialog). Carry over the
@@ -1288,6 +1310,8 @@ interface DrawerContentProps {
   closeDetails: () => void;
   hasUnsavedEditsRef: React.MutableRefObject<boolean>;
   guardNavigation: boolean;
+  onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
+  onAssetDelete?: (id: number) => void;
 }
 
 const DrawerContent = ({
@@ -1296,6 +1320,8 @@ const DrawerContent = ({
   closeDetails,
   hasUnsavedEditsRef,
   guardNavigation,
+  onAssetChange,
+  onAssetDelete,
 }: DrawerContentProps) => {
   const { formatMessage } = useIntl();
   const {
@@ -1341,6 +1367,8 @@ const DrawerContent = ({
         closeDetails={closeDetails}
         hasUnsavedEditsRef={hasUnsavedEditsRef}
         guardNavigation={guardNavigation}
+        onAssetChange={onAssetChange}
+        onAssetDelete={onAssetDelete}
       />
     </>
   );
@@ -1398,12 +1426,21 @@ interface AssetDetailsDrawerProps {
    * has its own <Blocker>: react-router allows one per page.
    */
   guardNavigation?: boolean;
+  /**
+   * After the asset was updated, replaced or cropped in place, with the server's
+   * copy, so a host holding the asset (e.g. a form field) can stay in sync.
+   */
+  onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
+  /** After the asset was deleted from the library, just before the drawer closes. */
+  onAssetDelete?: (id: number) => void;
 }
 
 export const AssetDetailsDrawer = ({
   assetId,
   onClose,
   guardNavigation = false,
+  onAssetChange,
+  onAssetDelete,
 }: AssetDetailsDrawerProps) => {
   const { formatMessage } = useIntl();
   const { displayAssetId, isVisible, shouldRender, onCloseAnimationEnd } =
@@ -1467,6 +1504,8 @@ export const AssetDetailsDrawer = ({
           closeDetails={onClose}
           hasUnsavedEditsRef={hasUnsavedEditsRef}
           guardNavigation={guardNavigation}
+          onAssetChange={onAssetChange}
+          onAssetDelete={onAssetDelete}
         />
         {/* Rendered from inside the panel so Radix counts presses on it as
             inside, and the drawer stays put while it is open. The edits go
