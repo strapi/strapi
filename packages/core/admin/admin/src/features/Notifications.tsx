@@ -35,6 +35,28 @@ const NotificationsContext = React.createContext<NotificationsContextValue>({
   toggleNotification: () => {},
 });
 
+/**
+ * Auth sits above this provider, so it cannot call `useNotification`.
+ * The provider installs the live toaster here for that one caller.
+ */
+let showAdminNotificationImpl: NotificationsContextValue['toggleNotification'] | null = null;
+
+const registerAdminNotification = (
+  show: NotificationsContextValue['toggleNotification']
+): (() => void) => {
+  showAdminNotificationImpl = show;
+
+  return () => {
+    if (showAdminNotificationImpl === show) {
+      showAdminNotificationImpl = null;
+    }
+  };
+};
+
+const showAdminNotification: NotificationsContextValue['toggleNotification'] = (config) => {
+  showAdminNotificationImpl?.(config);
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
@@ -70,6 +92,8 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const value = React.useMemo(() => ({ toggleNotification }), [toggleNotification]);
+
+  React.useEffect(() => registerAdminNotification(toggleNotification), [toggleNotification]);
 
   return (
     <>
@@ -152,5 +176,5 @@ const Notification = ({
  */
 const useNotification = () => React.useContext(NotificationsContext);
 
-export { NotificationsProvider, useNotification };
+export { NotificationsProvider, showAdminNotification, useNotification };
 export type { NotificationConfig, NotificationsContextValue };

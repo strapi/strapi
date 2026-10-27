@@ -28,6 +28,8 @@ jest.mock('../../hooks/useSessionKeepalive');
 
 const TOKEN_A = 'token-user-a';
 const TOKEN_B = 'token-user-b';
+const REPLACED_SESSION_NOTICE =
+  'You were signed in as another admin in a different tab. Unsaved changes were discarded.';
 
 const USER_A = {
   id: 1,
@@ -288,6 +290,7 @@ describe('AuthProvider session identity', () => {
   });
 
   afterEach(() => {
+    clearUnsavedChangesChecks();
     window.localStorage.clear();
     clearAuthCookie();
   });
@@ -581,6 +584,115 @@ describe('AuthProvider session identity', () => {
     });
 
     expect(meRequests - requestsAfterLoad).toBe(1);
+  });
+
+  it('says unsaved edits were discarded once the other tab is a different admin', async () => {
+    let releaseIdentity: () => void = () => {};
+    const identityGate = new Promise<void>((resolve) => {
+      releaseIdentity = resolve;
+    });
+
+    server.use(
+      http.get('/admin/users/me', async ({ request }) => {
+        const who = identityForAuthorization(request.headers.get('Authorization'));
+        if (who === 'b') {
+          await identityGate;
+        }
+
+        return HttpResponse.json({ data: who === 'a' ? USER_A : USER_B });
+      }),
+      http.get('/admin/users/me/permissions', async ({ request }) => {
+        const who = identityForAuthorization(request.headers.get('Authorization'));
+        if (who === 'b') {
+          await identityGate;
+        }
+
+        return HttpResponse.json({ data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B] });
+      })
+    );
+
+    registerUnsavedChangesCheck('form', () => true);
+    renderIdentity();
+    await waitForUserA();
+
+    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+    act(() => {
+      emitExternalSessionBroadcast();
+      emitExternalStorageSignal();
+    });
+
+    await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('true'));
+    expect(screen.queryByText(REPLACED_SESSION_NOTICE)).not.toBeInTheDocument();
+
+    releaseIdentity();
+    await waitForUserB();
+    expect(await screen.findByText(REPLACED_SESSION_NOTICE)).toBeInTheDocument();
+    expect(screen.getAllByText(REPLACED_SESSION_NOTICE)).toHaveLength(1);
+  });
+
+  it('stays quiet when another tab switches admins and nothing is unsaved', async () => {
+    renderIdentity();
+    await waitForUserA();
+
+    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+    act(() => {
+      emitExternalSessionBroadcast();
+    });
+
+    await waitForUserB();
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+    });
+    expect(screen.queryByText(REPLACED_SESSION_NOTICE)).not.toBeInTheDocument();
+  });
+
+  it('stays quiet when another tab refreshes the same admin', async () => {
+    registerUnsavedChangesCheck('form', () => true);
+    renderIdentity();
+    await waitForUserA();
+
+    window.localStorage.setItem('jwtToken', JSON.stringify('token-same-admin'));
+    act(() => {
+      emitExternalSessionBroadcast();
+    });
+
+    await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('false'));
+    expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_A.email);
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+    });
+    expect(screen.queryByText(REPLACED_SESSION_NOTICE)).not.toBeInTheDocument();
+  });
+
+  it('stays quiet when this tab signs in as another admin', async () => {
+    server.use(
+      http.post('/admin/login', () =>
+        HttpResponse.json({
+          data: {
+            token: TOKEN_B,
+            user: USER_B,
+          },
+        })
+      )
+    );
+
+    registerUnsavedChangesCheck('form', () => true);
+    const { user } = renderIdentity();
+    await waitForUserA();
+
+    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+
+    await waitForUserB();
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+    });
+    expect(screen.queryByText(REPLACED_SESSION_NOTICE)).not.toBeInTheDocument();
   });
 
   it('refetches identity under the new persisted token when another tab changes the session', async () => {

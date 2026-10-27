@@ -34,6 +34,8 @@ import {
 } from '../utils/getFetchClient';
 import { hasUnsavedChanges } from '../utils/unsavedChangesRegistry';
 
+import { showAdminNotification } from './Notifications';
+
 import type {
   Permission as PermissionContract,
   SanitizedAdminUser,
@@ -149,6 +151,12 @@ const LOGOUT_PROMPTS = {
     },
   },
 } satisfies Record<LogoutReason, { title?: MessageDescriptor; body: MessageDescriptor }>;
+
+const REPLACED_SESSION_UNSAVED = {
+  id: 'app.session.replaced.unsaved',
+  defaultMessage:
+    'You were signed in as another admin in a different tab. Unsaved changes were discarded.',
+} satisfies MessageDescriptor;
 
 const AuthProvider = ({
   children,
@@ -440,6 +448,10 @@ const AuthProvider = ({
    * Logout is handled by the `isLoggedIn` storage listener above.
    */
   const lastResetTokenRef = React.useRef<string | null>(null);
+  const adminUserIdRef = React.useRef<string | number | undefined>(undefined);
+  const discardedEditsAdminIdRef = React.useRef<string | number | undefined>(undefined);
+  const adminUserId = user?.id ?? user?.email;
+  adminUserIdRef.current = adminUserId;
 
   React.useEffect(() => {
     let disposed = false;
@@ -463,6 +475,12 @@ const AuthProvider = ({
       // Resetting again for the token just adopted only repeats identity fetches.
       if (lastResetTokenRef.current === nextToken && currentToken === nextToken) {
         return;
+      }
+
+      // The new token's admin is unknown until their profile loads. Remember
+      // unsaved edits so we can say they were discarded if the admin changes.
+      if (hasUnsavedChanges() && adminUserIdRef.current !== undefined) {
+        discardedEditsAdminIdRef.current = adminUserIdRef.current;
       }
 
       discardPendingLogout();
@@ -607,6 +625,21 @@ const AuthProvider = ({
 
   const isLoading =
     isLoadingUser || isLoadingPermissions || (Boolean(token) && !user && !isUserError);
+
+  React.useEffect(() => {
+    const previousAdminId = discardedEditsAdminIdRef.current;
+    if (previousAdminId === undefined || isLoading || adminUserId === undefined) {
+      return;
+    }
+
+    discardedEditsAdminIdRef.current = undefined;
+    if (previousAdminId !== adminUserId) {
+      showAdminNotification({
+        type: 'info',
+        message: formatMessage(REPLACED_SESSION_UNSAVED),
+      });
+    }
+  }, [adminUserId, formatMessage, isLoading]);
 
   return (
     <>
