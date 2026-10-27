@@ -25,6 +25,12 @@ const createStrapiInstance = async ({
   strapiOptions = {},
   /** When false (default), opts out of deprecated expiresIn so tests use new session config defaults. Set true to test legacy/deprecation behavior. */
   skipDefaultSessionConfig = false,
+  /**
+   * The model and builder helpers boot Strapi only to write schema files or rows. They never
+   * serve GraphQL, so they pass false to skip building the GraphQL schema, which is over a
+   * third of a boot.
+   */
+  buildGraphqlSchema = true,
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
@@ -85,6 +91,18 @@ const createStrapiInstance = async ({
     instance.register = async function () {
       await register({ strapi: instance });
       return originalRegister();
+    };
+  }
+
+  if (!buildGraphqlSchema) {
+    const modules = instance.get('modules');
+    const originalModulesBootstrap = modules.bootstrap;
+    modules.bootstrap = async () => {
+      const graphql = modules.get('plugin::graphql');
+      if (graphql) {
+        graphql.bootstrap = async () => {};
+      }
+      await originalModulesBootstrap();
     };
   }
 
