@@ -74,6 +74,14 @@ declare const inline: Core.MiddlewareHandler;
   // @ts-expect-error Rate limit options are checked.
   middlewares: [{ name: 'admin::rateLimit', config: { max: '3' } }],
 }) satisfies Core.RouteConfigFor;
+({
+  // @ts-expect-error Config keys are checked against the registered contract.
+  middlewares: [{ name: 'admin::rateLimit', config: { maxx: 3 } }],
+}) satisfies Core.RouteConfigFor;
+({
+  // @ts-expect-error Runtime resolves `name` and ignores `resolve`, so an entry takes one of them.
+  middlewares: [{ name: 'admin::rateLimit', resolve: './src/middlewares/custom' }],
+}) satisfies Core.RouteConfigFor;
 
 // `Core.RouteConfig` keeps develop's type: names are not checked.
 ({ middlewares: ['global::unregistered', inline] }) satisfies Core.RouteConfig;

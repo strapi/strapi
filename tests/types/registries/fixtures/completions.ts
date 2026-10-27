@@ -74,5 +74,11 @@ export const router: Core.RouterInputFor<typeof controllers, 'plugin::i18n'> = {
       handler: 'locales.listLocales',
       config: { middlewares: [{ name: '' }] },
     },
+    {
+      method: 'GET',
+      path: '/middleware-config',
+      handler: 'locales.listLocales',
+      config: { middlewares: [{ name: 'admin::rateLimit', config: {} }] },
+    },
   ],
 };
