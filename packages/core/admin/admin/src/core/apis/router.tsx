@@ -35,9 +35,17 @@ interface MenuItem {
   exact?: boolean;
   position?: number;
   licenseOnly?: boolean;
+  // Makes the link a menu of choices in the main navigation. With no options, it stays a link
+  menu?: {
+    useMenu: () => {
+      options: Array<{ value: string; label: string }>;
+      value: string | null;
+      onSelect: (value: string) => void;
+    };
+  };
 }
 
-interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount'> {
+interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount' | 'menu'> {
   id: string;
 }
 

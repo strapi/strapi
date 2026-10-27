@@ -563,6 +563,7 @@
   "app.components.LeftMenu.general": "General",
   "app.components.LeftMenu.logo.alt": "Application logo",
   "app.components.LeftMenu.logout": "Log out",
+  "app.components.LeftMenu.menu.current": "{label}: {current}",
   "app.components.LeftMenu.navbrand.title": "Strapi Dashboard",
   "app.components.LeftMenu.navbrand.workplace": "Workplace",
   "app.components.LeftMenu.plugins": "Plugins",

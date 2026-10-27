@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography } from '@strapi/design-system';
-import { Lightning } from '@strapi/icons';
+import { Box, Flex, Menu, Typography } from '@strapi/design-system';
+import { Check, Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { type To } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -45,6 +45,77 @@ const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode
     default:
       return children;
   }
+};
+
+const NavMenuTrigger = styled(Menu.Trigger)`
+  width: 100%;
+  height: auto;
+  padding: ${({ theme }) => theme.spaces[1]};
+  justify-content: center;
+`;
+
+// The tooltip shows the full label
+const NavMenuLabel = styled(Typography)`
+  max-width: ${({ theme }) => theme.spaces[8]};
+`;
+
+const NavMenu = ({
+  useMenu,
+  icon: LinkIcon,
+  label,
+  children,
+}: Pick<NonNullable<MenuItem['menu']>, 'useMenu'> & {
+  icon: React.ElementType;
+  label: string;
+  children: React.ReactNode;
+}) => {
+  const { options, value, onSelect } = useMenu();
+  const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
+
+  if (options.length === 0) {
+    return <>{children}</>;
+  }
+
+  const current = options.find((option) => option.value === value)?.label ?? label;
+
+  return (
+    <Flex tag="li">
+      <Menu.Root>
+        <NavLink.Tooltip position={isDesktop ? 'right' : 'bottom'} label={current}>
+          <NavMenuTrigger
+            endIcon={null}
+            variant="ghost"
+            aria-label={formatMessage(
+              { id: 'app.components.LeftMenu.menu.current', defaultMessage: '{label}: {current}' },
+              { label, current }
+            )}
+          >
+            <Flex direction="column" alignItems="center" gap={1}>
+              <LinkIcon width="20" height="20" fill="neutral500" aria-hidden />
+              <NavMenuLabel variant="pi" fontWeight="bold" ellipsis>
+                {current}
+              </NavMenuLabel>
+            </Flex>
+          </NavMenuTrigger>
+        </NavLink.Tooltip>
+        <Menu.Content popoverPlacement="right-start" zIndex={3}>
+          <Menu.Label>{label}</Menu.Label>
+          {options.map((option) => (
+            <Menu.Item
+              key={option.value}
+              role="menuitemradio"
+              aria-checked={option.value === value}
+              onSelect={() => option.value !== value && onSelect(option.value)}
+              endIcon={option.value === value ? <Check aria-hidden /> : undefined}
+            >
+              {option.label}
+            </Menu.Item>
+          ))}
+        </Menu.Content>
+      </Menu.Root>
+    </Flex>
+  );
 };
 
 const MainNavIcons = ({
@@ -104,7 +175,11 @@ const MainNavIcons = ({
           </NavLink.NavButton>
         );
 
-        return isDesktop || (!isDesktop && linkMobile) ? (
+        if (!isDesktop && !linkMobile) {
+          return null;
+        }
+
+        const item = (
           <Flex tag="li" key={link.to}>
             <GuidedTourTooltip to={link.to}>
               <NavLink.Tooltip position={isDesktop ? 'right' : 'bottom'} label={labelValue}>
@@ -112,7 +187,15 @@ const MainNavIcons = ({
               </NavLink.Tooltip>
             </GuidedTourTooltip>
           </Flex>
-        ) : null;
+        );
+
+        return link.menu ? (
+          <NavMenu key={link.to} useMenu={link.menu.useMenu} icon={link.icon} label={labelValue}>
+            {item}
+          </NavMenu>
+        ) : (
+          item
+        );
       })
     : null;
 };
