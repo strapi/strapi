@@ -5,6 +5,7 @@ const { get } = require('lodash');
 const modelsUtils = require('../models');
 const actionRegistry = require('./action-registry');
 const { createContext } = require('./context');
+const profile = require('../profile');
 
 const createTestBuilder = (options = {}) => {
   const { initialState } = options;
@@ -68,9 +69,11 @@ const createTestBuilder = (options = {}) => {
     },
 
     async build() {
-      for (const action of ctx.state.actions) {
-        await action.build(ctx);
-      }
+      await profile.timed('builder.build', async () => {
+        for (const action of ctx.state.actions) {
+          await action.build(ctx);
+        }
+      });
 
       return this;
     },
@@ -78,6 +81,7 @@ const createTestBuilder = (options = {}) => {
     async cleanup(options = {}) {
       const { enableTestDataAutoCleanup = true } = options;
       const { models, actions } = ctx.state;
+      const cleanupStart = performance.now();
 
       if (enableTestDataAutoCleanup) {
         for (const model of models.reverse()) {
@@ -89,6 +93,7 @@ const createTestBuilder = (options = {}) => {
         await action.cleanup(ctx);
       }
 
+      profile.record('builder.cleanup', performance.now() - cleanupStart);
       ctx.resetState();
 
       return this;
