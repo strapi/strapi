@@ -55,7 +55,7 @@ declare global {
       interface AppMiddlewares {
         'plugin::legacy.timer': { seconds: number };
       }
-      interface ContentTypeSchemas {
+      interface AppContentTypeSchemas {
         'api::strict-only.page': Struct.SingleTypeSchema;
       }
       interface ComponentSchemas {

@@ -61,7 +61,7 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface ContentTypeSchemas {
+      interface AppContentTypeSchemas {
         'api::article.article': ArticleSchema;
         'api::author.author': AuthorSchema;
         // A schema whose attributes are not known: the write inputs fall back to develop's input.

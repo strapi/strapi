@@ -404,7 +404,7 @@ Middlewares follow the same model in `Strapi.Registries.PackageMiddlewares` and 
 
 ###### Strict schema registries
 
-With `strictTypes: true`, `contentTypes.d.ts` and `components.d.ts` keep their names and their schema interfaces, but register the schemas in the global `Strapi.Registries.ContentTypeSchemas` and `Strapi.Registries.ComponentSchemas` instead of `Public`:
+With `strictTypes: true`, `contentTypes.d.ts` and `components.d.ts` keep their names and their schema interfaces, but register the schemas in the global `Strapi.Registries.AppContentTypeSchemas` and `Strapi.Registries.ComponentSchemas` instead of `Public`:
 
 ```ts title="my-app/types/generated/contentTypes.d.ts"
 import type { Struct } from '@strapi/strapi';
@@ -416,7 +416,7 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
 declare global {
   namespace Strapi {
     namespace Registries {
-      interface ContentTypeSchemas {
+      interface AppContentTypeSchemas {
         'api::article.article': ApiArticleArticle;
       }
     }
@@ -428,10 +428,10 @@ A global augmentation reaches the one declaration every package reads, whatever 
 
 Each schema registry is one interface, without a `Package*` and `App*` pair: type generation is the only producer, and applications do not override schemas.
 
-|                 | `UID.ContentType`, `Schema.ContentType`, … read                                                                   | No generated schema                               |
-| --------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Strict mode off | `Public.ContentTypeSchemas`, `Public.ComponentSchemas`. Global entries are ignored.                               | Generic UIDs and schemas                          |
-| Strict mode on  | `Strapi.Registries.ContentTypeSchemas`, `Strapi.Registries.ComponentSchemas`. `Public` augmentations are ignored. | Generic UIDs and schemas, as with strict mode off |
+|                 | `UID.ContentType`, `Schema.ContentType`, … read                                                                      | No generated schema                               |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Strict mode off | `Public.ContentTypeSchemas`, `Public.ComponentSchemas`. Global entries are ignored.                                  | Generic UIDs and schemas                          |
+| Strict mode on  | `Strapi.Registries.AppContentTypeSchemas`, `Strapi.Registries.ComponentSchemas`. `Public` augmentations are ignored. | Generic UIDs and schemas, as with strict mode off |
 
 Toggling the flag rewrites both files in the other form on the next generation. A hand-written `Public` schema augmentation has no effect in strict mode: move it to the global registry.
 

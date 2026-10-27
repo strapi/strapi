@@ -6,9 +6,9 @@ import type * as Public from '../public';
  * Generated content-type schemas in strict mode. Without generated entries, any content-type UID maps
  * to a generic schema, as without strict mode.
  */
-type StrictContentTypeSchemas = [keyof Strapi.Registries.ContentTypeSchemas] extends [never]
+type StrictContentTypeSchemas = [keyof Strapi.Registries.AppContentTypeSchemas] extends [never]
   ? Internal.Registry.GenericContentTypeSchemas
-  : Strapi.Registries.ContentTypeSchemas;
+  : Strapi.Registries.AppContentTypeSchemas;
 
 /**
  * Generated component schemas in strict mode. Without generated entries, any component UID maps
@@ -20,7 +20,7 @@ type StrictComponentSchemas = [keyof Strapi.Registries.ComponentSchemas] extends
 
 /**
  * Content-type schemas keyed by UID: `Public.ContentTypeSchemas` without strict mode,
- * `Strapi.Registries.ContentTypeSchemas` with it. Strict mode ignores `Public` augmentations.
+ * `Strapi.Registries.AppContentTypeSchemas` with it. Strict mode ignores `Public` augmentations.
  */
 export type ContentTypeSchemas = IsStrict extends false
   ? Public.ContentTypeSchemas

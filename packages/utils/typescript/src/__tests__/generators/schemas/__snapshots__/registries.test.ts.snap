@@ -104,7 +104,7 @@ export interface ApiHomepageHomepage extends Struct.SingleTypeSchema {
 declare global {
     namespace Strapi {
         namespace Registries {
-            interface ContentTypeSchemas {
+            interface AppContentTypeSchemas {
                 'admin::user': AdminUser;
                 'api::article.article': ApiArticleArticle;
                 'api::homepage.homepage': ApiHomepageHomepage;
@@ -266,7 +266,7 @@ export interface ApiRuleRule extends Struct.CollectionTypeSchema {
 declare global {
     namespace Strapi {
         namespace Registries {
-            interface ContentTypeSchemas {
+            interface AppContentTypeSchemas {
                 'api::rule.rule': ApiRuleRule;
             }
         }
@@ -318,7 +318,7 @@ export interface ApiRuleRule extends Struct.CollectionTypeSchema {
 declare global {
     namespace Strapi {
         namespace Registries {
-            interface ContentTypeSchemas {
+            interface AppContentTypeSchemas {
                 'api::rule.rule': ApiRuleRule;
             }
         }

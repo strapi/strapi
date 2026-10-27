@@ -20,7 +20,7 @@ export type Schemas = Registries.ContentTypeSchemas & Registries.ComponentSchema
  * Content-type schema definitions.
  *
  * @remark Schema definitions are pulled from the public content-type registries, or from
- * `Strapi.Registries.ContentTypeSchemas` in strict mode
+ * `Strapi.Registries.AppContentTypeSchemas` in strict mode
  */
 export type ContentTypes = Registries.ContentTypeSchemas;
 

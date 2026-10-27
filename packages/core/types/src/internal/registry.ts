@@ -15,7 +15,7 @@ export type Keys<TRegistry extends object, TIndexType extends string> = Extract<
 
 /**
  * Generic content-type schemas, a copy of the unaugmented `Public.ContentTypeSchemas`. Strict mode
- * uses it while `Strapi.Registries.ContentTypeSchemas` is empty. An interface, not a mapped type:
+ * uses it while `Strapi.Registries.AppContentTypeSchemas` is empty. An interface, not a mapped type:
  * lookups such as `Object.values` must resolve as they do without strict mode.
  */
 export interface GenericContentTypeSchemas {
