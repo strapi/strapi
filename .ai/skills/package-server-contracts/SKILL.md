@@ -25,6 +25,7 @@ declare global {
 - Declare in `PackageServices`, `PackageControllers`, `PackagePolicies`, `PackageMiddlewares`, or `PackageConfigs`. Policy and middleware registries are complete inventories: register every policy or middleware the package ships. `App*` registries belong to applications.
 - Re-export from the server entry with `export type * from './types'`, and map `strapi-server` in `typesVersions` when the package has an `exports` map.
 - Never augment `Strapi.Registries.Settings` in published source.
+- Content-type schemas: declare the package's own in `PackageContentTypeSchemas` (`server/src/types/content-types.ts`), attributes wrapped in `Struct.WithSystemAttributes<uid, {...}>`. Never declare `AppContentTypeSchemas`: type generation writes it and its entry wins per UID. `examples/strict-types/checks/package-schemas.ts` (`yarn test:types:example`) fails on drift.
 - Check the implementation against its contract with an annotation or `satisfies`.
 - One contract per UID. Conflicts fail with TS2717.
 - A bundled package that registers contracts must also be imported by `packages/core/strapi/strict-types.d.ts`.
