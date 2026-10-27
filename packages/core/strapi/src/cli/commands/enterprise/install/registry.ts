@@ -1,6 +1,5 @@
-import { stripVTControlCharacters } from 'node:util';
-
 import { BILLING_URL } from './constants';
+import { toPrintableText } from './printable-text';
 
 const REQUEST_TIMEOUT_MS = 15 * 1000;
 const CATALOG_TIMEOUT_MS = 5 * 1000;
@@ -162,23 +161,6 @@ type CatalogResult =
     }
   | { status: 'license-rejected'; message: string }
   | { status: 'unavailable' };
-
-const CONTROL_CHARACTERS = /\p{Cc}/gu;
-const FORMAT_CHARACTERS = /\p{Cf}/gu;
-
-export const toPrintableText = (text: unknown): string | undefined => {
-  if (typeof text !== 'string') {
-    return undefined;
-  }
-
-  const printableText = stripVTControlCharacters(text)
-    .replace(FORMAT_CHARACTERS, '')
-    .replace(CONTROL_CHARACTERS, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  return printableText || undefined;
-};
 
 const parseCatalogPlugin = (plugin: unknown): CatalogPlugin | undefined => {
   if (typeof plugin !== 'object' || plugin === null) {

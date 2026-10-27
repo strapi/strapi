@@ -252,19 +252,6 @@ describe('fetchPluginCatalog', () => {
     });
   });
 
-  it('removes format characters, such as a right-to-left override, without adding a space', async () => {
-    const fetchImplementation = jest.fn().mockResolvedValue(
-      createFetchResponse(200, {
-        plugins: [],
-        notLicensedMessage: 'Contact\u200B \u202Eselas\u202C https://strapi.io/con\u200Btact',
-      })
-    );
-
-    await expect(fetchCatalog(fetchImplementation)).resolves.toMatchObject({
-      notLicensedMessage: 'Contact selas https://strapi.io/contact',
-    });
-  });
-
   it('gives up on the catalog after 5 seconds, since the search can replace it', async () => {
     const timeoutSpy = jest.spyOn(AbortSignal, 'timeout');
     const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(404));

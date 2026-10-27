@@ -1,11 +1,12 @@
 import type { Logger } from '../../../utils/logger';
 import { ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
+import { isValidPackageName } from './package-name';
+import { toPrintableText } from './printable-text';
 import {
   fetchPackument,
   fetchPluginCatalog,
   searchPackageNames,
-  toPrintableText,
   type CatalogPlugin,
   type Packument,
   type PackumentLookup,
@@ -37,12 +38,6 @@ interface DiscoveryResult {
 }
 
 const isEnterprisePackage = (packageName: string) => packageName.startsWith(`${ENTERPRISE_SCOPE}/`);
-
-const ENTERPRISE_PACKAGE_NAME = new RegExp(`^${ENTERPRISE_SCOPE}/[a-z0-9-][a-z0-9._-]*$`);
-const MAX_PACKAGE_NAME_LENGTH = 214;
-
-export const isValidPackageName = (packageName: string) =>
-  packageName.length <= MAX_PACKAGE_NAME_LENGTH && ENTERPRISE_PACKAGE_NAME.test(packageName);
 
 export const declaresStrapiKind = (strapiKind: unknown): strapiKind is string =>
   typeof strapiKind === 'string' && strapiKind.length > 0;
