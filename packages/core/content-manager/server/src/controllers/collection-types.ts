@@ -539,8 +539,6 @@ export default {
     }
 
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
-    // TODO @Nico an update that matches no document resolves to `null`, which the metadata helper
-    // returns as `data` with empty metadata. Its `document` type does not admit it.
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion!);
   },
 
@@ -591,8 +589,6 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
-    // TODO @Nico a clone of a source that no longer exists resolves to `undefined`, which the
-    // metadata helper returns as `data` with empty metadata. Its `document` type does not admit it.
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument!, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
