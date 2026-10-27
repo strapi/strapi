@@ -1,4 +1,3 @@
-import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { getPluginsThatNeedDocumentation } from './utils/get-plugins-that-need-documentation';
@@ -32,7 +31,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     registerOverride(
-      override: Partial<PluginConfig>,
+      override: Partial<PluginConfig> | string,
       opts?: { pluginOrigin: string; excludeFromGeneration?: string[] }
     ) {
       const { pluginOrigin, excludeFromGeneration = [] } = opts ?? {};
@@ -50,16 +49,28 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
         overrideToRegister = require('yaml').parse(override);
       }
 
-      // Only an object can hold OpenAPI parts, YAML can also parse to a scalar, an array or null
+      // Only an object can hold OpenAPI parts, YAML can also parse to a scalar, an array or null.
+      // Warn and skip instead of throwing, as this runs during register and must not prevent boot
       if (
         typeof overrideToRegister !== 'object' ||
         overrideToRegister === null ||
         Array.isArray(overrideToRegister) === true
       ) {
-        throw new errors.ApplicationError('The documentation override must be an object');
+        let receivedType: string = typeof overrideToRegister;
+        if (overrideToRegister === null) {
+          receivedType = 'null';
+        } else if (Array.isArray(overrideToRegister) === true) {
+          receivedType = 'array';
+        }
+
+        strapi.log.warn(
+          `[documentation] Ignoring override from "${pluginOrigin ?? 'app'}": expected an object, received ${receivedType}`
+        );
+
+        return;
       }
 
-      // Exclude apis only once the override is valid, so a rejected override changes nothing
+      // Exclude apis only once the override is valid, so a skipped override changes nothing
       if (excludeFromGeneration.length > 0) {
         this.excludeFromGeneration(excludeFromGeneration);
       }

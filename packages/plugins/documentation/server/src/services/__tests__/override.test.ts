@@ -1,6 +1,9 @@
 import override from '../override';
 
 const strapiMock = {
+  log: {
+    warn: jest.fn(),
+  },
   config: {
     get: () => ({
       'x-strapi-config': {
@@ -15,6 +18,7 @@ describe('Documentation plugin | Override service', () => {
   afterEach(() => {
     // Reset strapi after each test
     strapi = strapiMock;
+    jest.clearAllMocks();
   });
 
   it('should register an override', () => {
@@ -24,7 +28,7 @@ describe('Documentation plugin | Override service', () => {
         title: 'My API',
         version: '1.0.0',
       },
-    } as any;
+    };
 
     const overrideService = override({ strapi });
     overrideService.registerOverride(mockOverride);
@@ -39,7 +43,7 @@ describe('Documentation plugin | Override service', () => {
         title: 'My API',
         version: '1.0.0',
       },
-    } as any;
+    };
 
     const overrideService = override({ strapi });
     overrideService.registerOverride(mockOverride, { pluginOrigin: 'test' });
@@ -54,7 +58,7 @@ describe('Documentation plugin | Override service', () => {
         title: 'My API',
         version: '1.0.0',
       },
-    } as any;
+    };
 
     strapi.config.get = () => ({
       'x-strapi-config': {
@@ -87,7 +91,7 @@ describe('Documentation plugin | Override service', () => {
 
   it('should register an override from a YAML string', () => {
     const overrideService = override({ strapi });
-    overrideService.registerOverride('info:\n  title: My API\n' as any);
+    overrideService.registerOverride('info:\n  title: My API\n');
 
     expect(overrideService.registeredOverrides).toEqual([{ info: { title: 'My API' } }]);
   });
@@ -96,14 +100,45 @@ describe('Documentation plugin | Override service', () => {
     ['null', ''],
     ['a scalar', 'my-api'],
     ['an array', '- my-api'],
-  ])('should reject a YAML string that parses to %s', (_kind, yaml) => {
+  ])('should warn and skip a YAML string that parses to %s', (_kind, yaml) => {
     const overrideService = override({ strapi });
 
-    expect(() => overrideService.registerOverride(yaml as any)).toThrow(
-      'The documentation override must be an object'
-    );
+    expect(() => overrideService.registerOverride(yaml)).not.toThrow();
     expect(overrideService.registeredOverrides).toEqual([]);
+    expect(strapi.log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring override from "app"')
+    );
   });
+
+  it.each([
+    ['null', null],
+    ['undefined', undefined],
+    ['a scalar', 42],
+    ['an array', [{ info: { title: 'My API' } }]],
+  ])(
+    'should warn and skip a plugin override that is %s without excluding its apis',
+    (_kind, value) => {
+      strapi.config.get = () => ({
+        'x-strapi-config': {
+          plugins: ['test'],
+        },
+      });
+
+      const overrideService = override({ strapi });
+
+      expect(() =>
+        overrideService.registerOverride(value as any, {
+          pluginOrigin: 'test',
+          excludeFromGeneration: ['my-api'],
+        })
+      ).not.toThrow();
+      expect(overrideService.registeredOverrides).toEqual([]);
+      expect(overrideService.excludedFromGeneration).toEqual([]);
+      expect(strapi.log.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Ignoring override from "test"')
+      );
+    }
+  );
 
   it('should not exclude apis from generation when the YAML string is not valid', () => {
     strapi.config.get = () => ({
@@ -115,7 +150,7 @@ describe('Documentation plugin | Override service', () => {
     const overrideService = override({ strapi });
 
     expect(() =>
-      overrideService.registerOverride('info: [' as any, {
+      overrideService.registerOverride('info: [', {
         pluginOrigin: 'test',
         excludeFromGeneration: ['my-api'],
       })
