@@ -11,7 +11,7 @@ import { useDocumentRBAC } from '@strapi/content-manager/strapi-admin';
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { isAiSource, PLUGIN_ID } from '../constants';
+import { isAiSource, isGovernanceEnabled, PLUGIN_ID } from '../constants';
 import { usePasteDetection } from '../hooks/usePasteDetection';
 import { fieldsStore } from '../store/fields';
 import { containsPaste } from '../utils/paste';
@@ -420,6 +420,7 @@ const ProvenancePanelContent = ({
         isSubmitting={isSubmitting}
         onDeclareAi={markAsAi}
         onQualifyPaste={(field, decision) => qualifyPaste([field], decision)}
+        canExport={isGovernanceEnabled()}
         onExport={exportProof}
         onReviewAll={() =>
           submit(() =>

@@ -74,9 +74,17 @@ Writes to the same document therefore wait for each other (about 1 s for 30 para
 
 The content write and its provenance share one transaction. A failure to record provenance rolls the write back.
 
+### Editions
+
+Recording and labelling are available to every edition: sources and signals, token profiles, the admin panel, label actions and paste detection, the "AI content" list column, reviews and declarations, and the Content API provenance.
+
+The governance part is Enterprise, behind the license feature `cms-ai-governance` (`GOVERNANCE_FEATURE` in `server/src/constants.ts` and `admin/src/constants.ts`): the publish guard, the Review Workflows rules, the "AI to review" list filter and the proof export. The settings service checks it on every use (`isGovernanceEnabled`, `requiresReview`, `getRules` returns `null` without it), so a license change applies without a restart and rules saved earlier stay inactive. Saving the guard or a rule without the feature returns a `ForbiddenError`, and the settings page shows those sections disabled with a notice. The admin reads the feature with `window.strapi.features.isEnabled`.
+
+No license includes `cms-ai-governance` yet: the API test switches the plugin's gate (`isGovernanceEnabled` on its settings service) rather than the license.
+
 ### Review rules
 
-Settings > Provenance stores the rules in the plugin store (`plugin_provenance_settings`), read through a 30 second cache.
+Settings > Provenance (Enterprise, see Editions) stores the rules in the plugin store (`plugin_provenance_settings`), read through a 30 second cache.
 
 - **Publish guard** (`requireReviewBeforePublish`): `publish`, and `create`/`update` with `status: 'published'`, fail with a `ValidationError` while an AI-generated or AI-assisted field of the draft has no valid review. The error `details` map each field to a message, so the Content Manager shows it under the input. Content API writes publish by default, so an agent token must write drafts (`?status=draft`) while the guard is on.
 - **Review Workflows** (Enterprise Edition, [`server/src/domain/workflow.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/provenance/server/src/domain/workflow.ts)): each workflow can name three stages, all optional.

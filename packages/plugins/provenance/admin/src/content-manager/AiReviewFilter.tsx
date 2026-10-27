@@ -4,6 +4,7 @@ import { Sparkle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
+import { isGovernanceEnabled } from '../constants';
 import { getTranslation } from '../utils/translations';
 
 type Query = { page?: number; plugins?: Record<string, unknown> };
@@ -17,7 +18,7 @@ export const AiReviewFilter = () => {
   const { slug = '' } = useParams<{ slug: string }>();
   const [{ query }, setQuery] = useQueryParams<Query>();
 
-  if (!slug.startsWith('api::')) {
+  if (!slug.startsWith('api::') || !isGovernanceEnabled()) {
     return null;
   }
 

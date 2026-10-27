@@ -70,5 +70,6 @@
   "field.pasted": "Pasted text: mark it as AI",
   "field.pasted.short": "AI?",
   "paste.dismiss": "Dismiss",
-  "publish.pending": "Save first: AI declarations are recorded when you save"
+  "publish.pending": "Save first: AI declarations are recorded when you save",
+  "settings.governance.unavailable": "Available with the AI governance feature of an Enterprise license. Labels, reviews and the AI content column work without it."
 }

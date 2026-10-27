@@ -139,6 +139,7 @@ export const FieldsModal = ({
   isSubmitting,
   onDeclareAi,
   onQualifyPaste,
+  canExport,
   onExport,
   onReviewAll,
 }: {
@@ -150,6 +151,8 @@ export const FieldsModal = ({
   isSubmitting: boolean;
   onDeclareAi: (field: string) => void;
   onQualifyPaste: (field: string, decision: 'ai' | 'other' | 'undo') => void;
+  /** The proof export is part of the governance license feature */
+  canExport: boolean;
   onExport: () => void;
   onReviewAll: () => void;
 }) => {
@@ -220,7 +223,7 @@ export const FieldsModal = ({
             </Button>
           </Modal.Close>
           <Flex gap={2}>
-            {fields.length > 0 ? (
+            {canExport && fields.length > 0 ? (
               <Button
                 variant="secondary"
                 startIcon={<Download />}

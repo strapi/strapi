@@ -57,16 +57,20 @@ const RULES: Array<{ key: keyof WorkflowRules; label: string; hint: string }> = 
 type SettingsResponse = {
   settings: Settings;
   reviewWorkflowsEnabled: boolean;
+  /** The license includes the governance features */
+  governanceEnabled: boolean;
   workflows: WorkflowSummary[];
 };
 
 const Section = ({
   title,
   subtitle,
+  notice,
   children,
 }: {
   title: string;
   subtitle: string;
+  notice?: React.ReactNode;
   children: React.ReactNode;
 }) => (
   <Box background="neutral0" hasRadius shadow="filterShadow" padding={6}>
@@ -79,6 +83,7 @@ const Section = ({
           {subtitle}
         </Typography>
       </Flex>
+      {notice}
       {children}
     </Flex>
   </Box>
@@ -201,6 +206,19 @@ const SettingsPage = () => {
     }
   };
 
+  // Saved rules stay inactive without the license feature: say so rather than hide them
+  const governanceNotice = response.governanceEnabled ? null : (
+    <Box background="primary100" borderColor="primary200" hasRadius padding={3}>
+      <Typography variant="pi" textColor="primary700">
+        {formatMessage({
+          id: getTranslation('settings.governance.unavailable'),
+          defaultMessage:
+            'Available with the AI governance feature of an Enterprise license. Labels, reviews and the AI content column work without it.',
+        })}
+      </Typography>
+    </Box>
+  );
+
   return (
     <Page.Main>
       <Page.Title>
@@ -223,6 +241,7 @@ const SettingsPage = () => {
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={6}>
           <Section
+            notice={governanceNotice}
             title={formatMessage({
               id: getTranslation('settings.publishing'),
               defaultMessage: 'Publishing',
@@ -249,7 +268,7 @@ const SettingsPage = () => {
               <Box width="20rem">
                 <Toggle
                   checked={settings.requireReviewBeforePublish}
-                  disabled={!canUpdate}
+                  disabled={!canUpdate || !response.governanceEnabled}
                   offLabel={formatMessage({
                     id: 'app.components.ToggleCheckbox.disabled-label',
                     defaultMessage: 'Disabled',
@@ -268,6 +287,7 @@ const SettingsPage = () => {
           </Section>
 
           <Section
+            notice={governanceNotice}
             title={formatMessage({
               id: getTranslation('settings.workflows'),
               defaultMessage: 'Review Workflows',
@@ -299,7 +319,7 @@ const SettingsPage = () => {
                     key={workflow.id}
                     workflow={workflow}
                     rules={settings.workflows[workflow.id] ?? NO_RULES}
-                    disabled={!canUpdate}
+                    disabled={!canUpdate || !response.governanceEnabled}
                     onChange={(rules) =>
                       setSettings({
                         ...settings,

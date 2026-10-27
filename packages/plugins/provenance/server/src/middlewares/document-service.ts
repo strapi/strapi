@@ -85,7 +85,7 @@ export const createDocumentServiceMiddleware = ({
       documentId: string,
       locales: Array<string | null>
     ) => {
-      if (!hasDraftAndPublish || !(await settings.get()).requireReviewBeforePublish) {
+      if (!hasDraftAndPublish || !(await settings.requiresReview())) {
         return;
       }
 
@@ -465,7 +465,7 @@ export const createDocumentServiceMiddleware = ({
             params.documentId &&
             !Array.isArray(params.locale) &&
             params.locale !== '*' &&
-            (await settings.get()).requireReviewBeforePublish
+            (await settings.requiresReview())
           ) {
             // Only the locale it resolves to
             const draft = await values.read(
@@ -526,7 +526,7 @@ export const createDocumentServiceMiddleware = ({
 
       case 'findMany':
       case 'count': {
-        if (!request.isAiReviewListing(uid)) {
+        if (!request.isAiReviewListing(uid) || !settings.isGovernanceEnabled()) {
           return next();
         }
 

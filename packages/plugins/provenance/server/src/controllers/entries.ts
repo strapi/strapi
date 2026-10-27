@@ -251,8 +251,7 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
             { ...field, digitalSourceType: toDigitalSourceType(field.source) },
           ])
         ),
-        publishRequiresReview: (await getService(strapi, 'settings').get())
-          .requireReviewBeforePublish,
+        publishRequiresReview: await getService(strapi, 'settings').requiresReview(),
       },
     };
   },
@@ -376,6 +375,12 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
    */
   async export(ctx: Context) {
     const { uid, documentId } = ctx.params;
+
+    if (!getService(strapi, 'settings').isGovernanceEnabled()) {
+      throw new errors.ForbiddenError(
+        'The proof export requires the AI governance license feature'
+      );
+    }
 
     const checker = getPermissionChecker(strapi, ctx, uid);
     const { target, tracked, entry } = await loadEntry(strapi, {

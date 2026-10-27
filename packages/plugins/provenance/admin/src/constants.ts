@@ -61,3 +61,12 @@ export interface TokenWithProfile {
 }
 
 export const isAiSource = (source: Source) => source === 'ai-generated' || source === 'ai-assisted';
+
+/**
+ * License feature of the governance part (Enterprise): publish guard, Review Workflows rules,
+ * "AI to review" filter and proof export.
+ */
+export const GOVERNANCE_FEATURE = 'cms-ai-governance';
+
+export const isGovernanceEnabled = () =>
+  window.strapi?.features?.isEnabled(GOVERNANCE_FEATURE) === true;

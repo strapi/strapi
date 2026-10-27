@@ -4,6 +4,13 @@ export const FIELD_PROVENANCE_UID = 'plugin::provenance.field-provenance';
 export const TOKEN_PROFILE_UID = 'plugin::provenance.token-profile';
 export const DOCUMENT_LOCK_UID = 'plugin::provenance.document-lock';
 
+/**
+ * License feature of the governance part (Enterprise): the publish guard, the Review Workflows
+ * rules, the "AI to review" filter and the proof export. Recording, labels and reviews are
+ * available to every edition.
+ */
+export const GOVERNANCE_FEATURE = 'cms-ai-governance';
+
 export const PROVENANCE_HEADER = 'strapi-provenance';
 
 /**

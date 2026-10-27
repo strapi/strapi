@@ -50,6 +50,8 @@ describe('Provenance plugin', () => {
   let agentApi;
   let plainApi;
   let plainToken;
+  // No license includes the AI governance feature yet: the suite switches the plugin's own gate
+  let governance = true;
   const tokenIds: string[] = [];
 
   const createToken = async (name: string) => {
@@ -91,6 +93,7 @@ describe('Provenance plugin', () => {
 
     strapi = await createStrapiInstance({ bypassAuth: false, register: enableProvenance });
     admin = await createAuthRequest({ strapi });
+    strapi.plugin('provenance').service('settings').isGovernanceEnabled = () => governance;
 
     const agent = await createToken('provenance agent');
     plainToken = await createToken('provenance plain');
@@ -211,6 +214,45 @@ describe('Provenance plugin', () => {
     expect(Array.isArray(body.meta.provenance)).toBe(true);
     expect(body.meta.provenance).toHaveLength(body.data.length);
     body.meta.provenance.forEach((fields) => expect(fields).not.toHaveProperty('secret'));
+  });
+
+  describe('without the AI governance license feature', () => {
+    beforeAll(() => {
+      governance = false;
+    });
+
+    afterAll(() => {
+      governance = true;
+    });
+
+    test('refuses to save the publish guard', async () => {
+      const { status } = await admin.put('/provenance/settings', {
+        body: { requireReviewBeforePublish: true, workflows: {} },
+      });
+
+      expect(status).toBe(403);
+    });
+
+    test('lets AI content be published and keeps labelling it', async () => {
+      const documentId = await agentCreate({ title: 'Community edition' });
+
+      const published = await admin.post(
+        `/content-manager/collection-types/${UID}/${documentId}/actions/publish`
+      );
+
+      expect(published.status).toBe(200);
+      expect((await getProvenance(documentId, 'published')).title.source).toBe('ai-generated');
+    });
+
+    test('does not export the proof', async () => {
+      const documentId = await agentCreate({ title: 'No export' });
+
+      const { status } = await admin.get(`/provenance/entries/${UID}/${documentId}/export`, {
+        qs: { status: 'draft' },
+      });
+
+      expect(status).toBe(403);
+    });
   });
 
   test('takes the content type and document from the route only', async () => {

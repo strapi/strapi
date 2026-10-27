@@ -14,6 +14,7 @@ export const createSettingsController = ({ strapi }: { strapi: Core.Strapi }) =>
     ctx.body = {
       data: {
         settings: await getService(strapi, 'settings').get(),
+        governanceEnabled: getService(strapi, 'settings').isGovernanceEnabled(),
         reviewWorkflowsEnabled: reviewWorkflows.isEnabled(),
         workflows: await reviewWorkflows.listWorkflows(),
       },
@@ -52,6 +53,20 @@ export const createSettingsController = ({ strapi }: { strapi: Core.Strapi }) =>
     }
 
     const settings = normalizeSettings(body);
+
+    // Saving them is refused rather than silently ignored: the page would show rules that
+    // never apply
+    if (
+      !getService(strapi, 'settings').isGovernanceEnabled() &&
+      (settings.requireReviewBeforePublish ||
+        Object.values(settings.workflows).some((rules) =>
+          Object.values(rules).some((stageId) => stageId !== null)
+        ))
+    ) {
+      throw new errors.ForbiddenError(
+        'The publish guard and the review workflow rules require the AI governance license feature'
+      );
+    }
     const saved = await getService(strapi, 'settings').get();
     const workflows = await getService(strapi, 'reviewWorkflows').listWorkflows();
     const existingStageIds = new Set(workflows.flatMap((item) => item.stages.map(({ id }) => id)));

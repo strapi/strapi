@@ -1,5 +1,6 @@
 import type { Core } from '@strapi/types';
 
+import { GOVERNANCE_FEATURE } from '../constants';
 import { NO_RULES, parseStageId, type WorkflowRules } from '../domain/workflow';
 
 // Settings are read on every write; other instances pick up a change within this delay
@@ -62,10 +63,31 @@ export const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
-     * Rules saved before conflicts were validated may reuse the approval stage: those rules
-     * are ignored rather than refusing every AI write.
+     * Whether the license includes the governance features. Read on every use, so a license
+     * change applies without a restart.
      */
-    async getRules(workflowId: string | number): Promise<WorkflowRules> {
+    isGovernanceEnabled() {
+      return strapi.ee?.features?.isEnabled(GOVERNANCE_FEATURE) === true;
+    },
+
+    /**
+     * Whether publishing waits for a human review of AI content. Saved settings stay inactive
+     * without the license feature.
+     */
+    async requiresReview() {
+      return this.isGovernanceEnabled() && (await this.get()).requireReviewBeforePublish;
+    },
+
+    /**
+     * The rules of a workflow, or `null` without the license feature. Rules saved before
+     * conflicts were validated may reuse the approval stage: those rules are ignored rather
+     * than refusing every AI write.
+     */
+    async getRules(workflowId: string | number): Promise<WorkflowRules | null> {
+      if (!this.isGovernanceEnabled()) {
+        return null;
+      }
+
       const rules = (await this.get()).workflows[String(workflowId)] ?? NO_RULES;
       const { approvalStageId } = rules;
 
