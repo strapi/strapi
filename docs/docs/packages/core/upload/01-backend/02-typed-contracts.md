@@ -1,6 +1,6 @@
 ---
 title: Typed contracts
-description: 'The service, controller, config, store and event contracts that the Upload plugin registers for strict types.'
+description: 'The service, controller, content-type schema, config, store and event contracts that the Upload plugin registers for strict types.'
 tags:
   - typescript
   - backend
@@ -28,6 +28,10 @@ The `upload` service contract, `UploadService`, is the inferred implementation w
 - The admin, Content API and view configuration routes are checked against them with `Core.RouterInputFor`.
 - `content-api` is a factory, checked with `Core.ControllerFactory`.
 - Actions that no route references, because `upload` delegates to them (`uploadFiles`, and the Content API `updateFileInfo` and `replaceFile`), are tagged `@internal`.
+
+## Content-type schemas
+
+`types/content-types.ts` declares the schemas of `plugin::upload.file` (`FileSchema`) and `plugin::upload.folder` (`FolderSchema`) in `PackageContentTypeSchemas`, as type generation writes them for an application that does not extend them. Plugin code compiled without type generation then reads these two content types precisely through the Document Service; in an application, the generated schemas replace them. Keep the declarations in sync with `content-types/file.ts` and `content-types/folder.ts`: the drift check of `examples/strict-types` fails when they differ.
 
 ## Config, stores and events
 
