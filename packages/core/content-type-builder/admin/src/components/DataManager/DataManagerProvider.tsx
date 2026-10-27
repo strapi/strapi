@@ -6,6 +6,7 @@ import {
   useAppInfo,
   useFetchClient,
   useAuth,
+  useRBAC,
   adminApi,
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
@@ -19,6 +20,7 @@ import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils/getTrad';
 import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
 import { useCTBTracking } from '../CTBSession/ctbSession';
@@ -172,7 +174,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const fetchClient = useFetchClient();
 
-  const isInDevelopmentMode = autoReload;
+  const {
+    allowedActions: { canUpdate },
+  } = useRBAC({ update: PERMISSIONS.update });
+  // Without the update action the CTB is read-only, as when auto-reload is off
+  const isInDevelopmentMode = autoReload && canUpdate;
 
   const getDataRef = React.useRef<() => Promise<void>>(async () => undefined);
 

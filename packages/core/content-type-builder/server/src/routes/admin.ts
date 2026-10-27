@@ -50,7 +50,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],
@@ -64,7 +64,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],
@@ -78,7 +78,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],
@@ -118,7 +118,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],
@@ -132,7 +132,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],
@@ -146,7 +146,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],
@@ -160,7 +160,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],
@@ -174,7 +174,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],
@@ -201,7 +201,7 @@ export default {
         policies: [
           {
             name: 'admin::hasPermissions',
-            config: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.update'] },
           },
         ],
         middlewares: [isDevelopmentMode],

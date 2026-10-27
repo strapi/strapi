@@ -8,6 +8,12 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       uid: 'read',
       pluginName: 'content-type-builder',
     },
+    {
+      section: 'plugins',
+      displayName: 'Update',
+      uid: 'update',
+      pluginName: 'content-type-builder',
+    },
   ];
 
   await strapi.service('admin::permission').actionProvider.registerMany(actions);

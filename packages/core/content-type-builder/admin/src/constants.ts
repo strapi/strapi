@@ -4,6 +4,7 @@ export const PERMISSIONS = {
   // And also if the plugin is accessible. This use case is found when a user types the url of the
   // plugin directly in the browser
   main: [{ action: 'plugin::content-type-builder.read', subject: null }],
+  update: [{ action: 'plugin::content-type-builder.update', subject: null }],
 };
 
 export const MAX_COMPONENT_DEPTH = 6;
