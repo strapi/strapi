@@ -140,6 +140,37 @@ describe('wrapResolvers', () => {
       expect(result.data).toEqual({ hello: null });
     });
 
+    it('runs the resolver once and rejects when a registered middleware calls next twice', async () => {
+      const schema = buildSchema('type Mutation { create: String } type Query { hello: String }');
+      const resolve = vi.fn(() => 'created');
+      schema.getMutationType()!.getFields().create!.resolve = resolve;
+
+      let secondCall: Promise<unknown> | undefined;
+      const factory = vi.fn(() => async (_ctx: unknown, next: () => Promise<unknown>) => {
+        await next();
+        secondCall = next();
+        await secondCall.catch(() => {});
+      });
+      const strapi = createStrapi({ 'global::retry': factory });
+
+      const wrappedSchema = wrapResolvers({
+        schema,
+        strapi,
+        extension: {
+          resolversConfig: { 'Mutation.create': { auth: false, middlewares: ['global::retry'] } },
+        },
+      });
+
+      await graphql({
+        schema: wrappedSchema,
+        source: 'mutation { create }',
+        contextValue: { koaContext: {} },
+      });
+
+      expect(resolve).toHaveBeenCalledTimes(1);
+      await expect(secondCall).rejects.toThrow('next() called multiple times');
+    });
+
     it('creates the registered middleware handler once, not on each request', async () => {
       const { factory, handler } = createRegisteredMiddleware();
       const strapi = createStrapi({ 'global::logger': factory });

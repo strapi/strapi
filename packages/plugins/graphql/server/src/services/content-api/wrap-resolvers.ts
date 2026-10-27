@@ -54,8 +54,15 @@ const createRegisteredMiddleware = (
 
     const { koaContext } = context as { koaContext: Parameters<Core.MiddlewareHandler>[0] };
     let result: unknown = null;
+    let isNextCalled = false;
 
+    // Same guard as koa-compose for REST routes: the chain must not run twice
     await handler(koaContext, async () => {
+      if (isNextCalled === true) {
+        throw new Error('next() called multiple times');
+      }
+
+      isNextCalled = true;
       result = await resolve(parent, args, context, info);
     });
 
