@@ -11,6 +11,7 @@ describe('McpConfiguration', () => {
       config: {
         get: configGetSpy,
       } as any,
+      log: { warn: jest.fn() } as any,
     };
   });
 
@@ -62,6 +63,27 @@ describe('McpConfiguration', () => {
     const config = new McpConfiguration(mockStrapi as Core.Strapi);
 
     expect(config.maxToolInputElements).toBe(50_000);
+  });
+
+  test.each([
+    [0, 10_000],
+    [-1, 10_000],
+    [null, 10_000],
+    [NaN, 10_000],
+    [1.5, 10_000],
+    ['5000', 5000],
+    ['abc', 10_000],
+    ['', 10_000],
+    [Infinity, Infinity],
+  ])('should resolve maxToolInputElements %p to %p', (value, expected) => {
+    configGetSpy.mockImplementation((key, defaultValue) =>
+      key === 'server.mcp.maxToolInputElements' ? value : defaultValue
+    );
+
+    const config = new McpConfiguration(mockStrapi as Core.Strapi);
+
+    expect(config.maxToolInputElements).toBe(expected);
+    expect(mockStrapi.log!.warn).toHaveBeenCalledTimes(expected === 10_000 ? 1 : 0);
   });
 
   describe('isEnabled', () => {

@@ -55,12 +55,12 @@ Register tools, prompts, and resources from a plugin's `register()` phase (prefe
 
 ## Configuration
 
-| Key                               | Default | Notes                                                                    |
-| --------------------------------- | ------- | ------------------------------------------------------------------------ |
-| `server.mcp.enabled`              | `false` | Must be `true` to start the server                                       |
-| `server.mcp.connectTimeoutMs`     | `5000`  | Timeout for `mcpServer.connect(transport)` per request                   |
-| `server.mcp.requestTimeoutMs`     | `60000` | Timeout for `transport.handleRequest(...)` per request                   |
-| `server.mcp.maxToolInputElements` | `10000` | Max array elements and object keys combined in one tool call's arguments |
+| Key                               | Default | Notes                                                                                                                                               |
+| --------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server.mcp.enabled`              | `false` | Must be `true` to start the server                                                                                                                  |
+| `server.mcp.connectTimeoutMs`     | `5000`  | Timeout for `mcpServer.connect(transport)` per request                                                                                              |
+| `server.mcp.requestTimeoutMs`     | `60000` | Timeout for `transport.handleRequest(...)` per request                                                                                              |
+| `server.mcp.maxToolInputElements` | `10000` | Max array elements and object keys combined in one tool call's arguments. Must be an integer >= 1. Set to `Infinity` to disable (JS/TS config only) |
 
 Implementation: `packages/core/core/src/services/mcp/internal/McpConfiguration.ts`. Type: `McpConfig` in `packages/core/types/src/core/config/server.ts`.
 
