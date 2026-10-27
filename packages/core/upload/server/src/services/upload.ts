@@ -290,6 +290,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return uploadedFiles;
   }
 
+  // `_.set(fileData, ['formats', key], ...)` reads an all-digit key (a `breakpoints`
+  // entry like `{ 100: 100 }`) as an array index and builds an array when formats is
+  // unset, so build the object explicitly.
+  function setFormat(fileData: UploadableFile, key: string, format: UploadableFile) {
+    fileData.formats = { ...fileData.formats, [key]: format };
+  }
+
   /**
    * When uploading an image, an additional thumbnail is generated.
    * Also, if there are responsive formats defined, another set of images will be generated too.
@@ -313,14 +320,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // For performance reasons, all uploads are wrapped in a single Promise.all
     const uploadThumbnail = async (thumbnailFile: UploadableFile) => {
       await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
+      setFormat(fileData, 'thumbnail', thumbnailFile);
     };
 
     // Generate thumbnail and responsive formats
     const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
       const { key, file } = format;
       await getService('provider').upload(file);
-      _.set(fileData, ['formats', key], file);
+      setFormat(fileData, key, file);
     };
 
     const uploadPromises: Promise<void>[] = [];
@@ -372,7 +379,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       } else {
         await getService('provider').upload(newFormat);
       }
-      _.set(fileData, ['formats', key], newFormat);
+      setFormat(fileData, key, newFormat);
     };
 
     const promises: Promise<unknown>[] = [];

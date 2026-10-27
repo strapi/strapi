@@ -202,6 +202,44 @@ describe('Upload service - replace()', () => {
     });
   });
 
+  test.each([
+    ['the same provider', PROVIDER],
+    ['another provider', 'aws-s3'],
+  ])(
+    'replacing an image on %s with a numeric breakpoint key stores formats as an object',
+    async (_label, provider) => {
+      currentDbFile = {
+        id: 13,
+        hash: 'image_bcd',
+        ext: '.png',
+        provider,
+        width: 640,
+        height: 480,
+        formats: {
+          100: { hash: '100_image_bcd', ext: '.png' },
+        },
+      };
+
+      // A `breakpoints` config like `{ 100: 100 }` produces a format keyed '100'.
+      const format = { hash: '100_image_bcd', ext: '.png' };
+      imageManipulationMock.isImage.mockImplementation(async () => true);
+      imageManipulationMock.isResizableImage.mockImplementationOnce(async () => true);
+      imageManipulationMock.generateResponsiveFormats.mockImplementationOnce(async () => [
+        { key: '100', file: format },
+      ]);
+
+      await uploadService.replace(13, {
+        data: { fileInfo: {} as any },
+        file: inputFile() as any,
+      });
+
+      // lodash `_.set` reads '100' as an array index and would build an array.
+      const { formats } = dbUpdate.mock.calls[0][0].data;
+      expect(Array.isArray(formats)).toBe(false);
+      expect(formats).toEqual({ 100: format });
+    }
+  );
+
   test('replacing a formatless file with a non-image deletes nothing', async () => {
     currentDbFile = {
       id: 2,
