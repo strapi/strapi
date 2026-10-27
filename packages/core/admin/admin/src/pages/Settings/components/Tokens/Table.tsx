@@ -22,8 +22,10 @@ import { RelativeTime } from '../../../../components/RelativeTime';
 import { Table as TableImpl } from '../../../../components/Table';
 import { useTracking } from '../../../../features/Tracking';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
+import { getIn } from '../../../../utils/objects';
 
 import type { AdminTokenOwner } from '../../../../../../shared/contracts/shared';
+import type { ListExtension } from '../../../../core/apis/extensions';
 import type { Data } from '@strapi/types';
 
 const formatAdminUserName = (
@@ -48,6 +50,8 @@ interface TableProps
   tokens: SanitizedTransferToken[] | ApiToken[];
   tokenType: 'api-token' | 'transfer-token';
   showOwner?: boolean;
+  /** Columns that plugins add to the list */
+  columns?: NonNullable<ListExtension['column']>[];
 }
 
 const Table = ({
@@ -58,6 +62,7 @@ const Table = ({
   onConfirmDelete,
   tokenType,
   showOwner = false,
+  columns = [],
 }: TableProps) => {
   const [{ query }] = useQueryParams<{ sort?: string }>();
   const { formatMessage, locale } = useIntl();
@@ -74,6 +79,15 @@ const Table = ({
 
   const { canDelete, canUpdate, canRead } = permissions;
 
+  const allHeaders = [
+    ...headers,
+    ...columns.map(({ field, label }) => ({
+      name: field,
+      label: formatMessage(label),
+      sortable: false,
+    })),
+  ];
+
   const handleRowClick = (id: Data.ID) => () => {
     if (canRead) {
       trackUsage('willEditTokenFromList', {
@@ -84,10 +98,10 @@ const Table = ({
   };
 
   return (
-    <TableImpl.Root headers={headers} rows={sortedTokens} isLoading={isLoading}>
+    <TableImpl.Root headers={allHeaders} rows={sortedTokens} isLoading={isLoading}>
       <TableImpl.Content>
         <TableImpl.Head>
-          {headers.map((header) => (
+          {allHeaders.map((header) => (
             <TableImpl.HeaderCell key={header.name} {...header} />
           ))}
         </TableImpl.Head>
@@ -150,6 +164,19 @@ const Table = ({
                       </TableImpl.Cell>
                     );
                   })()}
+                {columns.map(({ field }) => {
+                  const value = getIn(token, field);
+
+                  return (
+                    <TableImpl.Cell key={field} maxWidth="20rem">
+                      <Typography textColor="neutral800" ellipsis>
+                        {value === undefined || value === null || value === ''
+                          ? '-'
+                          : String(value)}
+                      </Typography>
+                    </TableImpl.Cell>
+                  );
+                })}
                 {canUpdate || canRead || canDelete ? (
                   <TableImpl.Cell>
                     <Flex justifyContent="end">

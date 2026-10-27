@@ -7,14 +7,17 @@ import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { Filters } from '../../../../components/Filters';
 import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
+import { useListExtensions } from '../../../../core/apis/extensions';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useOnce } from '../../../../hooks/useOnce';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';
@@ -70,6 +73,8 @@ export const ListView = () => {
   const { trackUsage } = useTracking();
 
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const { columns, filters } = useListExtensions('api-tokens');
+  const [{ query }] = useQueryParams<{ filters?: Record<string, unknown> }>();
 
   React.useEffect(() => {
     navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) }, { replace: true });
@@ -86,7 +91,13 @@ export const ListView = () => {
     });
   });
 
-  const { data: apiTokens = [], isLoading, error } = useGetAPITokensQuery({ kind: 'content-api' });
+  const {
+    data: apiTokens = [],
+    isLoading,
+    error,
+  } = useGetAPITokensQuery({
+    filters: query.filters,
+  });
 
   React.useEffect(() => {
     if (error) {
@@ -166,6 +177,17 @@ export const ListView = () => {
           )
         }
       />
+      {filters.length > 0 && (
+        <Layouts.Action
+          startActions={
+            <Filters.Root options={filters}>
+              <Filters.Trigger />
+              <Filters.Popover zIndex={499} />
+              <Filters.List />
+            </Filters.Root>
+          }
+        />
+      )}
       {!canRead ? (
         <Page.NoPermissions />
       ) : (
@@ -178,6 +200,7 @@ export const ListView = () => {
                 isLoading={isLoading}
                 onConfirmDelete={handleDelete}
                 tokens={apiTokens}
+                columns={columns}
                 tokenType={API_TOKEN_TYPE}
               />
             )}

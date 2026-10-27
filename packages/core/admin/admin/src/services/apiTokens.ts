@@ -13,9 +13,10 @@ const apiTokensService = adminApi
         ApiToken.List.Response['data'],
         ApiToken.List.Request['query'] | void
       >({
-        query: () => ({
+        query: (params) => ({
           url: '/admin/api-tokens',
           method: 'GET',
+          config: { params },
         }),
         transformResponse: (response: ApiToken.List.Response) => response.data,
         providesTags: (res, _err) => [
@@ -73,10 +74,14 @@ const apiTokensService = adminApi
         query: (id) => `/admin/admin-tokens/${id}/owner-permissions`,
         transformResponse: (response: AdminToken.GetOwnerPermissions.Response) => response.data,
       }),
-      getAdminTokens: builder.query<AdminToken.List.Response['data'], void>({
-        query: () => ({
+      getAdminTokens: builder.query<
+        AdminToken.List.Response['data'],
+        AdminToken.List.Request['query'] | void
+      >({
+        query: (params) => ({
           url: '/admin/admin-tokens',
           method: 'GET',
+          config: { params },
         }),
         transformResponse: (response: AdminToken.List.Response) => response.data,
         providesTags: (res, _err) => [

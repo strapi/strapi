@@ -17,6 +17,7 @@ export * from './components/Filters';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/InfoItems';
+export { useListExtensions, type ListExtension } from './core/apis/extensions';
 export * from './components/PageHelpers';
 export { LazyOutlet, type LazyOutletProps } from './components/LazyOutlet';
 export * from './components/WidgetHelpers';

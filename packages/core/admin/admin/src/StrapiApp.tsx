@@ -14,6 +14,7 @@ import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/adm
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { CustomFields } from './core/apis/CustomFields';
+import { registerListExtension } from './core/apis/extensions';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
@@ -67,7 +68,14 @@ type Translations = Array<Translation>;
 
 interface StrapiAppPlugin {
   bootstrap?: (
-    args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
+    args: Pick<
+      StrapiApp,
+      | 'addSettingsLink'
+      | 'addSettingsLinks'
+      | 'getPlugin'
+      | 'registerHook'
+      | 'registerListExtension'
+    >
   ) => void;
   register: (app: StrapiApp) => void;
   registerTrads?: (args: { locales: string[] }) => Promise<Translations>;
@@ -205,6 +213,11 @@ class StrapiApp {
     });
   };
 
+  /**
+   * Adds a column and a filter to a core list that has no extension point of its own
+   */
+  registerListExtension = registerListExtension;
+
   addMenuLink = (link: Parameters<typeof this.router.addMenuLink>[0]) =>
     this.router.addMenuLink(link);
 
@@ -250,6 +263,7 @@ class StrapiApp {
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
           registerHook: this.registerHook,
+          registerListExtension: this.registerListExtension,
         });
       }
     });

@@ -9,12 +9,14 @@ import { Layouts } from '../../../../../../../admin/src/components/Layouts/Layou
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
 import { Table } from '../../../../../../../admin/src/components/Table';
+import { useListExtensions } from '../../../../../../../admin/src/core/apis/extensions';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import {
   useQueryParams,
   withEncodedUserParams,
 } from '../../../../../../../admin/src/hooks/useQueryParams';
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
+import { getIn } from '../../../../../../../admin/src/utils/objects';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
 
 import { ExportCard } from './components/ExportCard';
@@ -78,6 +80,7 @@ const ListPage = () => {
   };
 
   const formatTimeStamp = useFormatTimeStamp();
+  const { columns, filters } = useListExtensions('audit-logs');
 
   const displayedFilters = getDisplayedFilters({
     formatMessage,
@@ -116,6 +119,11 @@ const ListPage = () => {
       // System actions, such as a scheduled release publish, have no user
       cellFormatter: ({ user }) => (user ? user.displayName : '-'),
     },
+    ...columns.map(({ field, label }) => ({
+      name: field,
+      label: formatMessage(label),
+      sortable: false,
+    })),
   ];
 
   if (hasError) {
@@ -167,7 +175,7 @@ const ListPage = () => {
       />
       <Layouts.Action
         startActions={
-          <Filters.Root options={displayedFilters}>
+          <Filters.Root options={[...displayedFilters, ...filters]}>
             <Filters.Trigger />
             <Filters.Popover zIndex={499} />
             <Filters.List />
@@ -226,7 +234,7 @@ const ListPage = () => {
                         return (
                           <Table.Cell key={name}>
                             <Typography textColor="neutral800">
-                              {(log[name as keyof AuditLog] as string) || '-'}
+                              {String(getIn(log, name) ?? '') || '-'}
                             </Typography>
                           </Table.Cell>
                         );

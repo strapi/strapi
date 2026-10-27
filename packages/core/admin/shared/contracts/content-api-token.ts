@@ -46,7 +46,7 @@ export declare namespace Create {
 export declare namespace List {
   export interface Request {
     body: {};
-    query: {};
+    query: { filters?: Record<string, unknown> };
   }
 
   export interface Response {
