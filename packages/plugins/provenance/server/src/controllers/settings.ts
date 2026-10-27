@@ -82,9 +82,9 @@ export const createSettingsController = ({ strapi }: { strapi: Core.Strapi }) =>
         }
       });
 
-      const stageIds = workflow.stages.map((stage) => stage.id);
+      const stageIds = new Set(workflow.stages.map((stage) => stage.id));
       const invalid = Object.entries(rules).filter(
-        ([, stageId]) => stageId !== null && !stageIds.includes(stageId)
+        ([, stageId]) => stageId !== null && !stageIds.has(stageId)
       );
 
       if (invalid.length > 0) {

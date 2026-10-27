@@ -145,10 +145,25 @@ export const createDocumentServiceMiddleware = ({
         const publishes = hasDraftAndPublish && params.status === 'published';
 
         if (fields.length === 0 && !touchesStage && !publishes) {
+          // Still waits for a review or a publish of this document in progress, for
+          // instance the update the Content Manager runs before publishing
+          if (action === 'update' && params.documentId && strapi.db.dialect.client !== 'sqlite') {
+            return strapi.db.transaction(async () => {
+              await provenance.lockDocument(uid, params.documentId);
+
+              return next();
+            });
+          }
+
           return next();
         }
 
         return strapi.db.transaction(async () => {
+          // Concurrent requests on this document wait here: what is read below stays current
+          if (action === 'update' && params.documentId) {
+            await provenance.lockDocument(uid, params.documentId);
+          }
+
           const snapshot = await request.getSnapshot();
           const base = resolveBaseDeclaration(snapshot);
 
@@ -222,6 +237,11 @@ export const createDocumentServiceMiddleware = ({
             locale: (result.locale as string | undefined) ?? null,
             status: writeStatus,
           };
+
+          // A new document gets its lock row now, while nothing else can contend for it
+          if (action === 'create') {
+            await provenance.lockDocument(uid, target.documentId);
+          }
 
           let stageAfter = stageBefore;
 
@@ -431,6 +451,10 @@ export const createDocumentServiceMiddleware = ({
       case 'unpublish':
       case 'delete': {
         return strapi.db.transaction(async () => {
+          if (params.documentId) {
+            await provenance.lockDocument(uid, params.documentId);
+          }
+
           // Checked before publishing: Content Releases run publishes in a transaction that
           // commits even when one of them throws. Several locales are checked after instead.
           let checkedLocale: string | null | undefined;
@@ -516,7 +540,11 @@ export const createDocumentServiceMiddleware = ({
           pendingIds = provenance.findDocumentsToReview({
             uid,
             status: hasDraftAndPublish && params.status !== 'published' ? 'draft' : 'published',
-            locale: params.locale,
+            // Content types without i18n store rows without a locale, whatever the request says
+            locale: (contentType as { pluginOptions?: { i18n?: { localized?: boolean } } })
+              .pluginOptions?.i18n?.localized
+              ? params.locale
+              : undefined,
             limit: MAX_FILTERED_DOCUMENTS,
           });
           cache.set(cacheKey, pendingIds);

@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { FIELD_PROVENANCE_UID } from '../constants';
+import { DOCUMENT_LOCK_UID, FIELD_PROVENANCE_UID } from '../constants';
 import {
   claimForField,
   resolveBaseDeclaration,
@@ -170,8 +170,29 @@ const fromData = (data: Record<string, any>): ProvenanceRow => ({
 export const createProvenanceService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = () => strapi.db.query(FIELD_PROVENANCE_UID);
 
+  /**
+   * Reads provenance rows, oldest first. Outside SQLite the read locks them: a locking read
+   * returns the latest committed rows even when the transaction's snapshot is older (MySQL
+   * REPEATABLE READ, where the Content Manager reads before the plugin takes its lock).
+   */
+  const readRows = async (where: Record<string, unknown>): Promise<Array<Record<string, any>>> => {
+    const client = strapi.db.dialect?.client;
+
+    if (client === undefined || client === 'sqlite') {
+      return query().findMany({ where, orderBy: { id: 'asc' } });
+    }
+
+    return strapi.db.entityManager
+      .createQueryBuilder(FIELD_PROVENANCE_UID)
+      .where(where)
+      .orderBy({ id: 'asc' })
+      .forUpdate()
+      .execute();
+  };
+
   const findRows = async (target: Target) => {
-    const rows = await query().findMany({ where: whereTarget(target) });
+    // Oldest first: if a field ever has two rows, the latest one wins
+    const rows = await readRows(whereTarget(target));
 
     return new Map<string, ProvenanceRow>(
       rows.map((row: Record<string, any>) => [row.fieldPath, fromData(row)])
@@ -299,7 +320,7 @@ export const createProvenanceService = ({ strapi }: { strapi: Core.Strapi }) => 
      */
     async copyRows({ from, to, fields }: { from: Target; to: Target; fields?: string[] }) {
       const onFields = fields !== undefined ? { fieldPath: { $in: fields } } : {};
-      const rows = await query().findMany({ where: { ...whereTarget(from), ...onFields } });
+      const rows = await readRows({ ...whereTarget(from), ...onFields });
 
       await query().deleteMany({ where: { ...whereTarget(to), ...onFields } });
 
@@ -430,7 +451,15 @@ export const createProvenanceService = ({ strapi }: { strapi: Core.Strapi }) => 
       fields?: string[];
     }) {
       const rows = await query().findMany({
-        select: ['targetDocumentId', 'valueHash', 'reviewedHash', 'reviewedById'],
+        select: [
+          'targetDocumentId',
+          'targetLocale',
+          'fieldPath',
+          'valueHash',
+          'reviewedHash',
+          'reviewedById',
+        ],
+        orderBy: { id: 'asc' },
         where: {
           targetUid: uid,
           targetStatus: status,
@@ -441,8 +470,16 @@ export const createProvenanceService = ({ strapi }: { strapi: Core.Strapi }) => 
         },
       });
 
-      return rows.reduce(
-        (acc: Record<string, { ai: number; toReview: number }>, row: Record<string, any>) => {
+      // One count per field, even if a field ever has two rows
+      const latest = new Map<string, Record<string, any>>(
+        rows.map((row: Record<string, any>) => [
+          `${row.targetDocumentId}|${row.targetLocale}|${row.fieldPath}`,
+          row,
+        ])
+      );
+
+      return [...latest.values()].reduce(
+        (acc: Record<string, { ai: number; toReview: number }>, row) => {
           const summary = acc[row.targetDocumentId] ?? { ai: 0, toReview: 0 };
           const reviewed = row.reviewedById !== null && row.reviewedHash === row.valueHash;
 
@@ -510,6 +547,86 @@ export const createProvenanceService = ({ strapi }: { strapi: Core.Strapi }) => 
       return [...rows.values()].filter((row) => isAiSource(row.source)).map((row) => row.fieldPath);
     },
 
+    /**
+     * Locks a document until the current transaction ends, so that concurrent writes,
+     * reviews and declarations on it run one after the other: each one reads values, stage
+     * and rows only once the previous one committed. Call it first in the transaction.
+     */
+    async lockDocument(uid: string, documentId: string) {
+      // SQLite has a single writer: transactions never overlap
+      if (strapi.db.dialect.client === 'sqlite') {
+        return;
+      }
+
+      const { tableName, attributes } = strapi.db.metadata.get(DOCUMENT_LOCK_UID);
+      const column = (name: string) =>
+        (attributes[name] as { columnName?: string } | undefined)?.columnName ?? name;
+      const key = { [column('targetUid')]: uid, [column('targetDocumentId')]: documentId };
+
+      await strapi.db.transaction(async ({ trx }) => {
+        const table = () => strapi.db.getConnection(tableName).transacting(trx);
+        // An existing row, found by the unique key: MySQL locks the record only, no gap
+        const locked = await table().where(key).forUpdate().select('id');
+
+        if (locked.length === 0) {
+          // Documents get their row on create, and existing ones at bootstrap: this only
+          // covers a document written while the plugin was disabled
+          await table()
+            .insert(key)
+            .onConflict([column('targetUid'), column('targetDocumentId')])
+            .merge([column('targetUid')]);
+        }
+      });
+    },
+
+    /**
+     * Gives every existing document of the tracked content types its lock row, once per
+     * content type, so writes lock an existing row instead of inserting one under load.
+     */
+    async createMissingLocks() {
+      if (strapi.db.dialect.client === 'sqlite') {
+        return;
+      }
+
+      const store = strapi.store({ type: 'plugin', name: 'provenance', key: 'locks' });
+      const done = new Set<string>(((await store.get({})) as string[] | null) ?? []);
+      const lock = strapi.db.metadata.get(DOCUMENT_LOCK_UID);
+      const lockColumn = (name: string) =>
+        (lock.attributes[name] as { columnName?: string } | undefined)?.columnName ?? name;
+      const schema = strapi.db.getSchemaName();
+      const qualify = (table: string) => (schema ? `${schema}.${table}` : table);
+      const ignore = strapi.db.dialect.client === 'postgres' ? '' : 'IGNORE';
+      const onConflict =
+        strapi.db.dialect.client === 'postgres'
+          ? ` ON CONFLICT (${lockColumn('targetUid')}, ${lockColumn('targetDocumentId')}) DO NOTHING`
+          : '';
+
+      for (const uid of Object.keys(strapi.contentTypes).filter(
+        (name) => name.startsWith('api::') && !done.has(name)
+      )) {
+        const { tableName, attributes } = strapi.db.metadata.get(uid as any);
+        const documentIdColumn =
+          (attributes.documentId as { columnName?: string } | undefined)?.columnName ??
+          'document_id';
+
+        await strapi.db.connection.raw(
+          `INSERT ${ignore} INTO ?? (??, ??) SELECT DISTINCT ?, ?? FROM ?? WHERE ?? IS NOT NULL${onConflict}`,
+          [
+            qualify(lock.tableName),
+            lockColumn('targetUid'),
+            lockColumn('targetDocumentId'),
+            uid,
+            documentIdColumn,
+            qualify(tableName),
+            documentIdColumn,
+          ]
+        );
+        done.add(uid);
+      }
+
+      await store.set({ value: [...done] });
+    },
+
     async getForEntry(target: Target, current: Values): Promise<Record<string, FieldView>> {
       const contentType = strapi.contentType(target.uid as any);
       const fields = getTrackedFields(contentType as any);
@@ -571,11 +688,20 @@ export const createProvenanceService = ({ strapi }: { strapi: Core.Strapi }) => 
      * Tracked fields whose current value comes from an AI and has no valid human review.
      */
     async findUnreviewedAi(target: Target, current: Values) {
-      const fields = await this.getForEntry(target, current);
+      const tracked = getTrackedFields(strapi.contentType(target.uid as any) as any);
+      const rows = await findRows(target);
 
-      return Object.entries(fields)
-        .filter(([, field]) => isAiSource(field.source) && field.review === null)
-        .map(([name]) => name);
+      // Fails closed: a row recorded as AI stays AI even if its value no longer matches the
+      // hash (written outside the Document Service, or read from an older snapshot). Only a
+      // review of the current value lets it through.
+      return [...rows.values()]
+        .filter(
+          (row) =>
+            tracked.includes(row.fieldPath) &&
+            isAiSource(row.source) &&
+            !(row.reviewedById !== null && row.reviewedHash === hashValue(current[row.fieldPath]))
+        )
+        .map((row) => row.fieldPath);
     },
 
     /**

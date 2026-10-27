@@ -103,7 +103,7 @@ const ProvenancePanelContent = ({
         params: { locale, status },
       });
       setProvenance(data.data);
-    } catch (error) {
+    } catch {
       setProvenance(null);
     } finally {
       setIsLoading(false);

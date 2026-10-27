@@ -43,11 +43,13 @@ export default {
     },
     // experimental feature, see upload's folder content type
     indexes: [
+      // MySQL limits an index to 3072 bytes: three varchar(255) utf8mb4 columns at most.
+      // The status is left out, it only tells apart two rows per field.
       {
         name: 'provenance_fields_target_index',
-        columns: ['target_uid', 'target_document_id', 'target_locale', 'target_status'],
+        columns: ['target_document_id', 'target_locale', 'target_uid'],
       },
-      // The list filter and the summary look up AI rows of a content type
+      // The list filter and the summary look up AI rows of a content type (3 × 1020 bytes)
       {
         name: 'provenance_fields_source_index',
         columns: ['target_uid', 'target_status', 'source'],

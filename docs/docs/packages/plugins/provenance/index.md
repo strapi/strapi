@@ -49,7 +49,19 @@ A client claim can only declare AI or add details. It never turns a write into `
 
 Provenance lives in its own table, `provenance_fields` (content type `plugin::provenance.field-provenance`), one row per entry (document, locale, status) and field. Token profiles live in `provenance_token_profiles`. Content tables are not changed.
 
-Each row stores the hash of the value it describes. When a value changes outside the Document Service (raw query, script), the hashes no longer match and the field reads as `unattributed` with `drifted: true`.
+Each row stores the hash of the value it describes. When a value changes outside the Document Service (raw query, script), the hashes no longer match and the field reads as `unattributed` with `drifted: true`. The publish guard still treats such a row as AI until someone reviews the current value: it fails closed.
+
+The indexes stay under MySQL's 3072-byte key limit (three `varchar(255)` utf8mb4 columns at most).
+
+### Concurrency
+
+On Postgres, MySQL and MariaDB, requests on the same document run in parallel, and the plugin reads values, stage and rows before it writes. Without serialization this produced duplicate rows, lost AI lineage, approvals of unreviewed AI content and publish-guard bypasses. So every update, publish, discardDraft, unpublish, delete, review and declare of a document first locks that document (`lockDocument` in [`server/src/services/provenance.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/provenance/server/src/services/provenance.ts)), including updates without a tracked field (the Content Manager runs one before publishing):
+
+- The lock is a row of `provenance_document_locks` (one per content type and documentId, unique index), locked with `SELECT … FOR UPDATE` on the transaction's own connection. Content rows cannot serve as the lock: publishing deletes and recreates them while others wait, which deadlocked. Locking a missing row takes a gap lock on MySQL, so the row is created on document create and, for existing documents, once per content type at bootstrap (a plugin store flag remembers it); an upsert covers the rare missing row. Creating the row from a second connection exhausted the connection pool under load.
+- Provenance rows are read with `FOR UPDATE`: on MySQL REPEATABLE READ, the Content Manager takes its snapshot before the plugin locks, and a locking read still returns the latest committed rows.
+- SQLite has a single writer and skips all of this.
+
+Writes to the same document therefore wait for each other (about 1 s for 30 parallel writes on one entry in the tests); writes to different documents do not.
 
 ### Document Service middleware
 
@@ -134,7 +146,9 @@ Components and dynamic zones cost more: each is read before and after the write,
 - Writes that bypass the Document Service are invisible: Review Workflows move entries with raw queries when a stage is deleted or a content type changes workflow, so AI entries can land in the approval stage without a review. Values changed this way read as `unattributed` (drift).
 - Restoring a Content History version is a write by the restoring user: the restored values are recorded as theirs (`ai-assisted` if the field was AI).
 - The Content API turns the plugin's `ForbiddenError` messages into a plain "Forbidden".
-- There is no unique key on a row (content type, document, locale, status, field): a unique index would fail the schema sync of a database that already holds a duplicate, and would not cover content types without i18n (`NULL` locales are distinct). Concurrent writes on Postgres or MySQL could in theory duplicate a row.
+- There is no unique key on a provenance row: a unique index would fail the schema sync of a database that already holds a duplicate, and would not cover content types without i18n (`NULL` locales are distinct). The document lock prevents duplicates; readers keep the latest row if one exists.
+- Lock rows are never deleted: one small row per document ever written.
+- On MariaDB 11.6+ (`innodb_snapshot_isolation=ON`), concurrent Content Manager publishes or Review Workflows stage changes of the same document can fail with error 1020: those routes read in their own transaction before the plugin takes its lock. The same storm fails without the plugin; data stays consistent.
 - A clone gets the stage rules of a write: an AI clone goes to the AI review stage and cannot start in the approval stage.
 - Pastes on the create screen are not detected: the panel only shows on existing entries. A pending paste is lost if the editor leaves the page before saving.
 - Provenance is stored per field, not per paragraph. A partial AI rewrite of a rich text field shows as one source for the whole field.

@@ -2,6 +2,7 @@ export const PLUGIN_ID = 'provenance';
 
 export const FIELD_PROVENANCE_UID = 'plugin::provenance.field-provenance';
 export const TOKEN_PROFILE_UID = 'plugin::provenance.token-profile';
+export const DOCUMENT_LOCK_UID = 'plugin::provenance.document-lock';
 
 export const PROVENANCE_HEADER = 'strapi-provenance';
 

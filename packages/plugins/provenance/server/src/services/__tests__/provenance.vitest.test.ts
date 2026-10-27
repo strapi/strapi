@@ -236,6 +236,29 @@ describe('provenance service', () => {
     expect(second.title.source).toBe('unattributed');
   });
 
+  it('keeps AI content unreviewed when its value no longer matches the record', async () => {
+    await service.recordWrite({
+      target,
+      fields: ['title'],
+      before: null,
+      after: { title: 'Generated' },
+      snapshot: agentToken,
+    });
+
+    // Changed outside the Document Service: the view says unattributed, the guard still blocks
+    expect((await view({ title: 'Edited in SQL' })).title.source).toBe('unattributed');
+    expect(await service.findUnreviewedAi(target, { title: 'Edited in SQL' })).toEqual(['title']);
+
+    await service.markReviewed({
+      target,
+      fields: ['title'],
+      current: { title: 'Edited in SQL' },
+      userId: 1,
+    });
+
+    expect(await service.findUnreviewedAi(target, { title: 'Edited in SQL' })).toEqual([]);
+  });
+
   it('does not review empty fields nobody wrote', async () => {
     await service.markReviewed({
       target,

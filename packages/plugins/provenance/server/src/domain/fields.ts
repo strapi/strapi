@@ -15,7 +15,7 @@ export type GetComponent = (uid: string) => Schema | undefined;
 
 type Values = Record<string, unknown>;
 
-const SYSTEM_FIELDS = [
+const SYSTEM_FIELDS = new Set([
   'id',
   'documentId',
   'locale',
@@ -26,7 +26,7 @@ const SYSTEM_FIELDS = [
   'createdBy',
   'updatedBy',
   'localizations',
-];
+]);
 
 // Components cannot nest deeper than this in the Content-Type Builder
 const MAX_DEPTH = 10;
@@ -38,7 +38,7 @@ export const getTrackedFields = (contentType: Schema) => {
   return Object.entries(contentType.attributes)
     .filter(([name, attribute]) => {
       return (
-        !SYSTEM_FIELDS.includes(name) &&
+        !SYSTEM_FIELDS.has(name) &&
         !name.startsWith('strapi_') &&
         attribute.type !== 'password' &&
         (TRACKED_ATTRIBUTE_TYPES as readonly string[]).includes(attribute.type)

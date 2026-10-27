@@ -6,7 +6,7 @@ import { parseBodyClaims, parseProvenanceHeader } from '../domain/header';
 import type { RequestSnapshot } from '../domain/declaration';
 import type { TokenProfileService } from './token-profiles';
 
-const TOKEN_STRATEGIES = ['admin-token', 'content-api-token'];
+const TOKEN_STRATEGIES = new Set(['admin-token', 'content-api-token']);
 const SNAPSHOT_STATE_KEY = 'provenanceSnapshot';
 
 /**
@@ -64,7 +64,7 @@ export const createRequestService = ({
 
     const strategy: string | undefined = state.auth?.strategy?.name;
     const credentials = state.auth?.credentials;
-    const isTokenRequest = strategy !== undefined && TOKEN_STRATEGIES.includes(strategy);
+    const isTokenRequest = strategy !== undefined && TOKEN_STRATEGIES.has(strategy);
 
     let userId: string | number | undefined;
 

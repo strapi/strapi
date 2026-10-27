@@ -118,7 +118,7 @@ export const parseBodyClaims = (value: unknown): Record<string, ClientClaim> => 
   return claims;
 };
 
-const AI_SOURCES = ['ai', 'ai-generated', 'ai-assisted'];
+const AI_SOURCES = new Set(['ai', 'ai-generated', 'ai-assisted']);
 
 /**
  * A claim only counts when it declares AI. Anything else (`human`, `import`, typos) cannot
@@ -126,7 +126,7 @@ const AI_SOURCES = ['ai', 'ai-generated', 'ai-assisted'];
  * accepted too.
  */
 export const claimsAi = (claim: ClientClaim | null | undefined) => {
-  return AI_SOURCES.includes(claim?.source?.toLowerCase() ?? '');
+  return AI_SOURCES.has(claim?.source?.toLowerCase() ?? '');
 };
 
 /**

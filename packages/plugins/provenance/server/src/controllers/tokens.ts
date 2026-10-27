@@ -53,7 +53,8 @@ export const createTokensController = ({ strapi }: { strapi: Core.Strapi }) => (
 
     const tokenProfiles = getService(strapi, 'tokenProfiles');
 
-    const token = await tokenProfiles.find(id);
+    // Token ids are integers: anything else would be a database error on Postgres
+    const token = /^[1-9]\d{0,9}$/.test(String(id)) ? await tokenProfiles.find(id) : null;
 
     if (token === null) {
       throw new errors.NotFoundError('API token not found');

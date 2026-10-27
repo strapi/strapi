@@ -93,7 +93,8 @@ const loadEntry = async (
 
   const target: Target = {
     uid,
-    documentId,
+    // As stored: a case-insensitive database also finds the entry with another case
+    documentId: entry.documentId as string,
     locale: (entry.locale as string | undefined) ?? null,
     status: resolvedStatus,
   };
@@ -266,22 +267,32 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
     const checker = getPermissionChecker(strapi, ctx, uid);
     await assertHumanSession(strapi);
 
-    const { target, tracked, entry } = await loadEntry(strapi, {
-      uid,
-      documentId,
-      locale: body.locale,
-      status: parseWriteStatus(body.status),
-    });
-    const fields = parseFields(
-      body.fields,
-      permittedFields(strapi, uid, checker, 'update', entry, tracked)
-    );
+    const provenance = getService(strapi, 'provenance');
 
-    await strapi.db.transaction(async () => {
-      const provenance = getService(strapi, 'provenance');
+    // The review must be of the value as committed: lock, then read, then write
+    const fields = await strapi.db.transaction(async () => {
+      await provenance.lockDocument(uid, documentId);
 
-      await provenance.markReviewed({ target, fields, current: entry, userId: ctx.state.user.id });
-      await provenance.syncAcrossLocales(target, fields);
+      const { target, tracked, entry } = await loadEntry(strapi, {
+        uid,
+        documentId,
+        locale: body.locale,
+        status: parseWriteStatus(body.status),
+      });
+      const reviewed = parseFields(
+        body.fields,
+        permittedFields(strapi, uid, checker, 'update', entry, tracked)
+      );
+
+      await provenance.markReviewed({
+        target,
+        fields: reviewed,
+        current: entry,
+        userId: ctx.state.user.id,
+      });
+      await provenance.syncAcrossLocales(target, reviewed);
+
+      return reviewed;
     });
 
     ctx.body = { data: { reviewed: fields } };
@@ -439,23 +450,26 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
     const checker = getPermissionChecker(strapi, ctx, uid);
     await assertHumanSession(strapi);
 
-    const { target, tracked, entry } = await loadEntry(strapi, {
-      uid,
-      documentId,
-      locale: body.locale,
-      status: parseWriteStatus(body.status),
-    });
-    const fields = parseFields(
-      body.fields,
-      permittedFields(strapi, uid, checker, 'update', entry, tracked)
-    );
+    const provenance = getService(strapi, 'provenance');
 
-    await strapi.db.transaction(async () => {
-      const provenance = getService(strapi, 'provenance');
+    // Lock, then read, then write: the declaration describes the value as committed
+    const fields = await strapi.db.transaction(async () => {
+      await provenance.lockDocument(uid, documentId);
+
+      const { target, tracked, entry } = await loadEntry(strapi, {
+        uid,
+        documentId,
+        locale: body.locale,
+        status: parseWriteStatus(body.status),
+      });
+      const declared = parseFields(
+        body.fields,
+        permittedFields(strapi, uid, checker, 'update', entry, tracked)
+      );
 
       await provenance.declareAi({
         target,
-        fields,
+        fields: declared,
         current: entry,
         userId: ctx.state.user.id,
         edited: body.edited === true,
@@ -464,7 +478,9 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
             ? body.model.slice(0, 200)
             : undefined,
       });
-      await provenance.syncAcrossLocales(target, fields);
+      await provenance.syncAcrossLocales(target, declared);
+
+      return declared;
     });
 
     ctx.body = { data: { declared: fields } };

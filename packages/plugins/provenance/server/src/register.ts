@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { FIELD_PROVENANCE_UID, TOKEN_PROFILE_UID } from './constants';
+import { DOCUMENT_LOCK_UID, FIELD_PROVENANCE_UID, TOKEN_PROFILE_UID } from './constants';
 import { createDocumentServiceMiddleware } from './middlewares/document-service';
 import { isProvenanceReadRoute, QUERY_PARAM } from './middlewares/query-provenance';
 import { getService } from './utils';
@@ -26,6 +26,7 @@ export const register = ({ strapi }: { strapi: Core.Strapi }) => {
 
     extension.shadowCRUD(FIELD_PROVENANCE_UID).disable();
     extension.shadowCRUD(TOKEN_PROFILE_UID).disable();
+    extension.shadowCRUD(DOCUMENT_LOCK_UID).disable();
   }
 
   // `?provenance=true` on Content API reads; the Content API rejects unknown query params
