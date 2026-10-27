@@ -2,9 +2,11 @@ import execa from 'execa';
 
 import type { Page } from '@playwright/test';
 
+const RESTART_OVERLAY = 'text="Waiting for restart..."';
+
 // Function to check modal visibility
 const isModalVisible = async (page: Page) => {
-  return page.isVisible('text="Waiting for restart..."');
+  return page.isVisible(RESTART_OVERLAY);
 };
 
 /**
@@ -13,13 +15,11 @@ const isModalVisible = async (page: Page) => {
  */
 export const waitForRestart = async (page, timeout = 60000) => {
   const initialWaitForModal = 5000; // Time to wait for the modal to initially appear
-  let elapsedTime = 0;
-  const checkInterval = 1000; // Check every 1 second
   const reloadTimeout = 15000; // 15 seconds before trying to reload
 
   // Initially wait for the modal to become visible
   try {
-    await page.waitForSelector('text="Waiting for restart..."', {
+    await page.waitForSelector(RESTART_OVERLAY, {
       state: 'visible',
       timeout: initialWaitForModal,
     });
@@ -28,13 +28,14 @@ export const waitForRestart = async (page, timeout = 60000) => {
     throw error; // Or handle this scenario as appropriate
   }
 
-  // Now wait until the modal is not visible or until the reloadTimeout
-  let modalVisible = await isModalVisible(page);
-  while (modalVisible && elapsedTime < reloadTimeout) {
-    await new Promise((r) => setTimeout(r, checkInterval));
-    elapsedTime += checkInterval;
-    modalVisible = await isModalVisible(page);
-  }
+  // Now wait until the modal is hidden, for at most reloadTimeout. This returns as soon as the
+  // overlay goes away, where checking once a second added half a second per restart on average.
+  const modalVisible = await page
+    .waitForSelector(RESTART_OVERLAY, { state: 'hidden', timeout: reloadTimeout })
+    .then(
+      () => false,
+      () => true
+    );
 
   // If modal is still visible after reloadTimeout, reload the page and wait again
   if (modalVisible) {
