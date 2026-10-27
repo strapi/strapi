@@ -41,7 +41,7 @@ describe('generateSharedExtensionDefinition', () => {
 
   test('emits a global Strapi.Registries augmentation with strict types', () => {
     const node = generateSharedExtensionDefinition(
-      'ContentTypeSchemas',
+      'AppContentTypeSchemas',
       [makeDefinition('api::foo.foo', 'ApiFooFoo')],
       { strict: true }
     );
@@ -49,7 +49,7 @@ describe('generateSharedExtensionDefinition', () => {
     const output = emitDefinitions([node]);
 
     expect(output).toMatch(
-      /^declare global {\s*namespace Strapi {\s*namespace Registries {\s*interface ContentTypeSchemas {/
+      /^declare global {\s*namespace Strapi {\s*namespace Registries {\s*interface AppContentTypeSchemas {/
     );
     expect(output).toContain("'api::foo.foo': ApiFooFoo");
     expect(output).not.toContain('@strapi/strapi');

@@ -217,7 +217,7 @@ declare global {
        * Applications do not override schemas, so there is no `Package*` and `App*` pair.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
-      interface ContentTypeSchemas {}
+      interface AppContentTypeSchemas {}
 
       /**
        * Component schemas keyed by UID, read in strict mode instead of `Public.ComponentSchemas`.

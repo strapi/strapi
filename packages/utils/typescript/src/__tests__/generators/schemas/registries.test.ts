@@ -52,12 +52,23 @@ const components = {
   },
 };
 
+// The registry each generator writes: [without strict types, with strict types]
 const generators = [
-  ['content types', generateContentTypesDefinitions, { contentTypes }],
-  ['components', generateComponentsDefinitions, { components }],
+  [
+    'content types',
+    generateContentTypesDefinitions,
+    { contentTypes },
+    ['ContentTypeSchemas', 'AppContentTypeSchemas'],
+  ],
+  [
+    'components',
+    generateComponentsDefinitions,
+    { components },
+    ['ComponentSchemas', 'ComponentSchemas'],
+  ],
 ] as const;
 
-describe.each(generators)('%s generator', (_, generator, strapi) => {
+describe.each(generators)('%s generator', (_, generator, strapi, [legacyRegistry, registry]) => {
   const logger = createLogger({ silent: true });
 
   test('without strict types, output equals the develop output', async () => {
@@ -88,6 +99,14 @@ describe.each(generators)('%s generator', (_, generator, strapi) => {
       content.slice(0, content.indexOf('declare ')).replace(/^ *\/\*\*.*\*\/\n/gm, '');
     expect(body(output)).toBe(body(legacy));
     expect(legacy).not.toContain('/**');
+  });
+
+  test('with strict types, schemas fill the registry strict mode reads', async () => {
+    const { output } = await generator({ strapi, logger, strict: true });
+    const { output: legacy } = await generator({ strapi, logger, strict: false });
+
+    expect(output).toMatch(new RegExp(`namespace Registries\\s*{\\s*interface ${registry} {`));
+    expect(legacy).toMatch(new RegExp(`export interface ${legacyRegistry} {`));
   });
 
   test('with strict types and no schemas, output is the placeholder', async () => {

@@ -21,7 +21,7 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface ContentTypeSchemas {
+      interface AppContentTypeSchemas {
         'api::article.article': ArticleSchema;
         'api::homepage.homepage': HomepageSchema;
       }

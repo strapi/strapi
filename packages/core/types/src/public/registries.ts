@@ -19,9 +19,9 @@ import type { ComponentSchema, ContentTypeSchema } from '../struct';
  * }
  * ```
  *
- * Strict mode ignores this registry and reads `Strapi.Registries.ContentTypeSchemas`.
+ * Strict mode ignores this registry and reads `Strapi.Registries.AppContentTypeSchemas`.
  *
- * @deprecated With `typescript.strictTypes`, declare `Strapi.Registries.ContentTypeSchemas` instead. `Public` registries will be
+ * @deprecated With `typescript.strictTypes`, declare `Strapi.Registries.AppContentTypeSchemas` instead. `Public` registries will be
  * removed in the next major version.
  */
 export interface ContentTypeSchemas {

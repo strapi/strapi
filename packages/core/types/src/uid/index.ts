@@ -56,7 +56,7 @@ export type Schema = ContentType | Component;
  * // Now you can pass the unique identifier for a content type to fetch its schema
  * fetchSchema('api::foo.foo');
  * ```
- * In strict mode, it reads `Strapi.Registries.ContentTypeSchemas` and ignores the public registry.
+ * In strict mode, it reads `Strapi.Registries.AppContentTypeSchemas` and ignores the public registry.
  *
  * @see {@link Public.ContentTypeSchemas} Content-type public registry.
  * @see {@link UID.ContentType} ContentType UID format definition.

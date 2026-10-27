@@ -4,7 +4,7 @@ import type { Struct } from '@strapi/strapi';
 declare global {
   namespace Strapi {
     namespace Registries {
-      interface ContentTypeSchemas {
+      interface AppContentTypeSchemas {
         'api::article.article': Struct.CollectionTypeSchema;
       }
     }

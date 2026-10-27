@@ -66,8 +66,12 @@ export const generateContentTypesDefinitions = async (
     // Schemas
     ...formattedSchemasDefinitions,
 
-    // Global
-    generateSharedExtensionDefinition('ContentTypeSchemas', contentTypesDefinitions, { strict }),
+    // Global: strict mode reads the application's registry, which replaces package declarations
+    generateSharedExtensionDefinition(
+      strict === true ? 'AppContentTypeSchemas' : 'ContentTypeSchemas',
+      contentTypesDefinitions,
+      { strict }
+    ),
   ];
 
   const output = emitDefinitions(allDefinitions);
