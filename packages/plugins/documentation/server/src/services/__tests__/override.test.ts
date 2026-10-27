@@ -4,6 +4,7 @@ const strapiMock = {
   log: {
     warn: jest.fn(),
   },
+  plugin: () => ({}),
   config: {
     get: () => ({
       'x-strapi-config': {
