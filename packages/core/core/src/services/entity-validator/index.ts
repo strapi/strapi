@@ -555,6 +555,37 @@ const createAttributeValidator =
     return validator;
   };
 
+/**
+ * Conditional visibility is evaluated against the written data. On creation, an attribute
+ * missing from the payload is stored with its schema default, so the condition must see that
+ * default. On update, a missing attribute keeps its stored value, which is not known here.
+ * Only used to evaluate conditions: the validated payload is left untouched.
+ */
+const getVisibilityData = (
+  createOrUpdate: CreateOrUpdate,
+  model: Struct.Schema,
+  data: Record<string, unknown>
+): Record<string, unknown> => {
+  if (createOrUpdate !== 'creation' || isObject(data) === false) {
+    return data;
+  }
+
+  return Object.entries(model.attributes).reduce((visibilityData, [attributeName, attribute]) => {
+    if (
+      visibilityData[attributeName] !== undefined ||
+      'default' in attribute === false ||
+      attribute.default === undefined
+    ) {
+      return visibilityData;
+    }
+
+    const defaultValue =
+      typeof attribute.default === 'function' ? attribute.default() : attribute.default;
+
+    return { ...visibilityData, [attributeName]: defaultValue };
+  }, data);
+};
+
 const createModelValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
@@ -562,13 +593,14 @@ const createModelValidator =
     options: ValidatorContext
   ): strapiUtils.yup.AnyObjectSchema => {
     const writableAttributes = model ? getWritableAttributes(model as any) : [];
+    const visibilityData = model ? getVisibilityData(createOrUpdate, model, data) : data;
 
     const schema = writableAttributes.reduce(
       (validators, attributeName) => {
         const metas = {
           attr: model.attributes[attributeName],
           updatedAttribute: { name: attributeName, value: get(data, attributeName) },
-          data,
+          data: visibilityData,
           model,
           entity,
           componentContext,
