@@ -113,8 +113,9 @@ type ResolvedMiddlewareReference = { resolve: string; config?: unknown };
  * With strict types enabled, a `{ resolve, config }` entry takes no `name`, so `{ name, config }` is
  * checked against the registered config alone and editors list its keys.
  *
- * TODO @Nico With strict types enabled, editors list no name inside `{ name: '' }`: the handler member
- * has `Function.name: string`, so the object literal narrows to it. Bare names are listed.
+ * With strict types enabled, editors list no name inside `{ name: '' }`: the inline handler member
+ * has `Function.name: string`, which matches any string being typed, so the object literal is typed
+ * as the handler. Bare names are listed.
  */
 export type MiddlewareReference = IsStrict extends false
   ? | SuggestedMiddlewareName
