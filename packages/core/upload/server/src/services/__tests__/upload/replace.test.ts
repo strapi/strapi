@@ -28,7 +28,9 @@ const imageManipulationMock = {
   getDimensions: jest.fn(async () => ({ width: 640, height: 480 })),
   isResizableImage: jest.fn(async () => false),
   generateThumbnail: jest.fn(async () => null),
-  generateResponsiveFormats: jest.fn(async () => []),
+  generateResponsiveFormats: jest.fn(
+    async (): Promise<Array<{ key: string; file: Record<string, unknown> }>> => []
+  ),
 };
 
 const fileServiceMock = {
