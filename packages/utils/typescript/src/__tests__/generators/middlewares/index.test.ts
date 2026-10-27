@@ -66,8 +66,8 @@ describe('generateMiddlewaresDefinitions', () => {
   test('registers global and api middlewares in the global AppMiddlewares registry', async () => {
     const { normalized } = await generate(
       {
-        'src/middlewares/rateLimit.ts': '',
-        'src/api/article/middlewares/auditLog.ts': '',
+        'src/middlewares/rateLimit.ts': 'export default {};',
+        'src/api/article/middlewares/auditLog.ts': 'export default {};',
         'src/api/blog-post/middlewares/is-author.js': '',
       },
       ['global::rateLimit', 'api::article.audit-log', 'api::blog-post.is-author']
@@ -94,9 +94,10 @@ describe('generateMiddlewaresDefinitions', () => {
   });
 
   test('resolves the config from the first parameter of the exported factory', async () => {
-    const { normalized } = await generate({ 'src/middlewares/rateLimit.ts': '' }, [
-      'global::rateLimit',
-    ]);
+    const { normalized } = await generate(
+      { 'src/middlewares/rateLimit.ts': 'export default {};' },
+      ['global::rateLimit']
+    );
 
     expect(normalized).toContain(
       'type MiddlewareConfig<TModule> = TModule extends { default: infer TExport } ? MiddlewareFactoryConfig<TExport> : unknown'
@@ -206,13 +207,94 @@ describe('generateMiddlewaresDefinitions', () => {
     });
   });
 
+  test('registers the value of an export = module, and a CommonJS-style source as unknown', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/middlewares/assigned.ts':
+          'const middleware = (config: { max: number }) => undefined;\nexport = middleware;',
+        // The import of a file without ECMAScript module syntax fails with TS2306
+        'src/middlewares/commonjs.ts': 'module.exports = (config: { max: number }) => undefined;',
+      },
+      ['global::assigned', 'global::commonjs']
+    );
+    roots.push(root);
+
+    const { output } = await generateMiddlewaresDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+
+    // `importDefault` wraps the assigned value, as `default`
+    expect(normalize(output)).toContain(
+      "'global::assigned': MiddlewareConfig<{ default: typeof import('../../src/middlewares/assigned.js') }>"
+    );
+    expect(normalize(output)).toContain("'global::commonjs': unknown");
+    expect(output).not.toContain('src/middlewares/commonjs');
+
+    await outputFile(path.join(pwd, 'middlewares.ts'), output);
+    await outputFile(
+      path.join(root, 'check.ts'),
+      'export declare const registry: Strapi.Registries.AppMiddlewares;'
+    );
+
+    // The template's compiler options (packages/cli/create-strapi-app/templates/vanilla/tsconfig.json)
+    const program = ts.createProgram({
+      rootNames: [path.join(pwd, 'middlewares.ts'), path.join(root, 'check.ts')],
+      options: {
+        noEmit: true,
+        strict: true,
+        noUnusedLocals: true,
+        esModuleInterop: true,
+        types: [],
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
+      },
+    });
+    const diagnostics = ts
+      .getPreEmitDiagnostics(program)
+      .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+    expect(diagnostics).toEqual([]);
+
+    // Printed rather than checked with conditional types, which an error type would satisfy
+    const checker = program.getTypeChecker();
+    const check = program.getSourceFile(path.join(root, 'check.ts'))!;
+    const [declaration] = (check.statements[0] as ts.VariableStatement).declarationList
+      .declarations;
+    const registry = checker.getTypeAtLocation(declaration.name);
+    const values = Object.fromEntries(
+      checker
+        .getPropertiesOfType(registry)
+        .map((property) => [
+          property.name,
+          checker.typeToString(checker.getTypeOfSymbolAtLocation(property, check)),
+        ])
+    );
+
+    expect(values).toEqual({
+      'global::assigned': '{ max: number; }',
+      'global::commonjs': 'unknown',
+    });
+  });
+
+  test('emits no helper when every TypeScript source is CommonJS-style', async () => {
+    const { output } = await generate(
+      { 'src/middlewares/commonjs.ts': 'module.exports = (config: { max: number }) => undefined;' },
+      ['global::commonjs']
+    );
+
+    expect(normalize(output)).toContain("'global::commonjs': unknown");
+    // `noUnusedLocals` would report a helper that no entry reads
+    expect(output).not.toContain('MiddlewareConfig');
+  });
+
   test('only emits middlewares registered at runtime', async () => {
     const { output } = await generate(
       {
-        'src/middlewares/rateLimit.ts': '',
-        'src/middlewares/excluded.ts': '',
-        'src/api/article/middlewares/auditLog.ts': '',
-        'src/api/draft/middlewares/draft.ts': '',
+        'src/middlewares/rateLimit.ts': 'export default {};',
+        'src/middlewares/excluded.ts': 'export default {};',
+        'src/api/article/middlewares/auditLog.ts': 'export default {};',
+        'src/api/draft/middlewares/draft.ts': 'export default {};',
       },
       [
         'global::rateLimit',
@@ -235,9 +317,9 @@ describe('generateMiddlewaresDefinitions', () => {
   test('ignores api controllers and policies, and middlewares of hidden api directories', async () => {
     const { output } = await generate(
       {
-        'src/api/article/controllers/article.ts': '',
-        'src/api/article/policies/article.ts': '',
-        'src/api/.hidden/middlewares/hidden.ts': '',
+        'src/api/article/controllers/article.ts': 'export default {};',
+        'src/api/article/policies/article.ts': 'export default {};',
+        'src/api/.hidden/middlewares/hidden.ts': 'export default {};',
       },
       ['api::article.article', 'api::hidden.hidden']
     );
@@ -248,10 +330,10 @@ describe('generateMiddlewaresDefinitions', () => {
   test('ignores declaration files and non source files', async () => {
     const { output } = await generate(
       {
-        'src/middlewares/rateLimit.ts': '',
+        'src/middlewares/rateLimit.ts': 'export default {};',
         'src/middlewares/rateLimit.d.ts': '',
         'src/middlewares/README.md': '',
-        'src/api/article/middlewares/auditLog.ts': '',
+        'src/api/article/middlewares/auditLog.ts': 'export default {};',
         'src/api/article/middlewares/config.json': '{}',
       },
       ['global::rateLimit', 'global::README', 'api::article.audit-log', 'api::article.config']
@@ -267,9 +349,9 @@ describe('generateMiddlewaresDefinitions', () => {
     const { output, logger } = await generate(
       {
         'src/middlewares/rateLimit.js': '',
-        'src/middlewares/rateLimit.ts': '',
+        'src/middlewares/rateLimit.ts': 'export default {};',
         'src/api/article/middlewares/audit-log.js': '',
-        'src/api/article/middlewares/auditLog.ts': '',
+        'src/api/article/middlewares/auditLog.ts': 'export default {};',
       },
       ['global::rateLimit', 'api::article.audit-log']
     );
@@ -295,8 +377,8 @@ describe('generateMiddlewaresDefinitions', () => {
   test('sorts the entries by uid', async () => {
     const { output } = await generate(
       {
-        'src/middlewares/zebra.ts': '',
-        'src/api/article/middlewares/article.ts': '',
+        'src/middlewares/zebra.ts': 'export default {};',
+        'src/api/article/middlewares/article.ts': 'export default {};',
       },
       ['global::zebra', 'api::article.article']
     );

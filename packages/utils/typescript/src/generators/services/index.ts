@@ -7,6 +7,7 @@ import {
   generateInstanceHelperDefinition,
   instanceTypeOf,
   isInferredSource,
+  scanSources,
 } from '../common/sources';
 import type { GeneratorOptions } from '../utils';
 
@@ -35,6 +36,8 @@ export {};
  *       interface AppServices {
  *         'api::<api>.<service>': ServiceInstance<typeof import('<relative path to the source>')>;
  *         'api::<api>.<service>': ServiceContractOf<import('<relative path to the source>').ServiceContract>;
+ *         'api::<api>.<export = service>': ServiceInstance<{ default: typeof import('<relative path to the source>') }>;
+ *         'api::<api>.<js or commonjs service>': unknown;
  *       }
  *       interface InferredServices {
  *         'api::<api>.<service>': true;
@@ -44,9 +47,11 @@ export {};
  * }
  *
  * A service whose module exports a `ServiceContract` type registers that contract; any other service
- * registers the type its default export provides. A JS source registers as `unknown`: without
- * `allowJs` its import is an error type. So do a service module, a default export and a contract
- * typed `any`.
+ * registers the type its default export provides, or the value it assigns with `export =`. A JS
+ * source registers as `unknown` without an import: without `allowJs` its import is an error type. So
+ * does a CommonJS-style TypeScript source (`module.exports = …`), whose import fails (see
+ * `moduleTypeOf`). A service module, a default export and a contract typed `any` register `unknown`
+ * too.
  *
  * `InferredServices` lists the TypeScript services registered without a contract, whose type is read
  * from the factory itself: `Core.ServiceFactory` rejects their uid. It is not emitted when there are
@@ -62,14 +67,17 @@ export const generateServicesDefinitions = async (
   }
 
   const sources = await collectAppSources('services', { api: strapi.dirs.app.api }, outDir, logger);
-  const servicesDefinitions = filterRegisteredSources(sources, strapi.services, logger);
+  const servicesDefinitions = await scanSources(
+    filterRegisteredSources(sources, strapi.services, logger),
+    logger
+  );
 
   logger.debug(`Found ${servicesDefinitions.length} services.`);
 
   const contract = {
     exportName: CONTRACT_EXPORT,
     helper: CONTRACT_HELPER,
-    uids: await findTypeExports(servicesDefinitions, CONTRACT_EXPORT, logger),
+    uids: findTypeExports(servicesDefinitions, CONTRACT_EXPORT, logger),
   };
 
   if (servicesDefinitions.length === 0) {

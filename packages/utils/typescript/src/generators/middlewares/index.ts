@@ -4,8 +4,9 @@ import {
   collectAppSources,
   emitRegistryDefinitions,
   filterRegisteredSources,
-  isTypedSource,
-  typeofImport,
+  hasModuleType,
+  moduleTypeOf,
+  scanSources,
   withDocComment,
 } from '../common/sources';
 import type { GeneratorOptions } from '../utils';
@@ -40,8 +41,8 @@ export {};
  *   ? MiddlewareFactoryConfig<TExport>
  *   : unknown;
  *
- * Emitted in the file so that middlewares.ts stands alone, and only when a TypeScript middleware
- * reads them, like the policies helpers.
+ * Emitted in the file so that middlewares.ts stands alone, and only when a middleware registers the
+ * type of its module (see `hasModuleType`), like the policies helpers.
  *
  * Resolves the config a middleware accepts from the type of its module: the first parameter of the
  * factory it exports. A factory without parameters takes no config: `undefined`, as in
@@ -194,14 +195,16 @@ const generateConfigHelpersDefinition = () => {
  *       interface AppMiddlewares {
  *         'global::<middleware>': MiddlewareConfig<typeof import('<relative path to the source>')>;
  *         'api::<api>.<middleware>': MiddlewareConfig<typeof import('<relative path to the source>')>;
- *         'global::<js middleware>': unknown;
+ *         'global::<export = middleware>': MiddlewareConfig<{ default: typeof import('<relative path to the source>') }>;
+ *         'global::<js or commonjs middleware>': unknown;
  *       }
  *     }
  *   }
  * }
  *
- * Like JS policies (see the policies generator), JS middlewares are registered as `unknown` without
- * an import.
+ * Like JS and CommonJS-style TypeScript policies (see the policies generator), JS middlewares and
+ * CommonJS-style TypeScript middlewares (`module.exports = …`) are registered as `unknown` without an
+ * import.
  * TODO @Nico with `allowJs`, a JSDoc-typed JS middleware could register its config like a TS one
  */
 export const generateMiddlewaresDefinitions = async (
@@ -221,7 +224,10 @@ export const generateMiddlewaresDefinitions = async (
     outDir,
     logger
   );
-  const middlewaresDefinitions = filterRegisteredSources(sources, strapi.middlewares, logger);
+  const middlewaresDefinitions = await scanSources(
+    filterRegisteredSources(sources, strapi.middlewares, logger),
+    logger
+  );
 
   logger.debug(`Found ${middlewaresDefinitions.length} middlewares.`);
 
@@ -232,12 +238,15 @@ export const generateMiddlewaresDefinitions = async (
   // The helpers are only emitted when an entry reads them: `noUnusedLocals` reports unused ones
   const output = await emitRegistryDefinitions(
     REGISTRY,
-    middlewaresDefinitions.some(isTypedSource) === true ? generateConfigHelpersDefinition() : [],
+    middlewaresDefinitions.some(hasModuleType) === true ? generateConfigHelpersDefinition() : [],
     middlewaresDefinitions,
-    (source) =>
-      isTypedSource(source)
-        ? factory.createTypeReferenceNode(CONFIG_HELPER, [typeofImport(source)])
-        : factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+    (source) => {
+      const moduleType = moduleTypeOf(source);
+
+      return moduleType === undefined
+        ? factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+        : factory.createTypeReferenceNode(CONFIG_HELPER, [moduleType]);
+    }
   );
 
   return { output, stats: {} };

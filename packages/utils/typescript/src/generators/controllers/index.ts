@@ -7,6 +7,7 @@ import {
   generateInstanceHelperDefinition,
   instanceTypeOf,
   isInferredSource,
+  scanSources,
 } from '../common/sources';
 import type { GeneratorOptions } from '../utils';
 
@@ -36,6 +37,8 @@ export {};
  *       interface AppControllers {
  *         'api::<api>.<controller>': ControllerInstance<typeof import('<relative path to the source>')>;
  *         'api::<api>.<controller>': ControllerContractOf<import('<relative path to the source>').ControllerContract>;
+ *         'api::<api>.<export = controller>': ControllerInstance<{ default: typeof import('<relative path to the source>') }>;
+ *         'api::<api>.<js or commonjs controller>': unknown;
  *       }
  *       interface InferredControllers {
  *         'api::<api>.<controller>': true;
@@ -45,9 +48,11 @@ export {};
  * }
  *
  * A controller whose module exports a `ControllerContract` type registers that contract; any other
- * controller registers the type its default export provides. A JS source registers as `unknown`:
- * without `allowJs` its import is an error type. So do a controller module, a default export and a
- * contract typed `any`.
+ * controller registers the type its default export provides, or the value it assigns with
+ * `export =`. A JS source registers as `unknown` without an import: without `allowJs` its import is
+ * an error type. So does a CommonJS-style TypeScript source (`module.exports = …`), whose import
+ * fails (see `moduleTypeOf`). A controller module, a default export and a contract typed `any`
+ * register `unknown` too.
  *
  * `InferredControllers` lists the TypeScript controllers registered without a contract, whose type
  * is read from the factory itself: `Core.ControllerFactory` rejects their uid. It is not emitted when
@@ -70,14 +75,17 @@ export const generateControllersDefinitions = async (
     outDir,
     logger
   );
-  const controllersDefinitions = filterRegisteredSources(sources, strapi.controllers, logger);
+  const controllersDefinitions = await scanSources(
+    filterRegisteredSources(sources, strapi.controllers, logger),
+    logger
+  );
 
   logger.debug(`Found ${controllersDefinitions.length} controllers.`);
 
   const contract = {
     exportName: CONTRACT_EXPORT,
     helper: CONTRACT_HELPER,
-    uids: await findTypeExports(controllersDefinitions, CONTRACT_EXPORT, logger),
+    uids: findTypeExports(controllersDefinitions, CONTRACT_EXPORT, logger),
   };
 
   if (controllersDefinitions.length === 0) {

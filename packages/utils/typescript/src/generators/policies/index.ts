@@ -4,8 +4,9 @@ import {
   collectAppSources,
   emitRegistryDefinitions,
   filterRegisteredSources,
-  isTypedSource,
-  typeofImport,
+  hasModuleType,
+  moduleTypeOf,
+  scanSources,
   withDocComment,
 } from '../common/sources';
 import type { GeneratorOptions } from '../utils';
@@ -33,7 +34,7 @@ export {};
  *   : unknown;
  *
  * Emitted in the file so that policies.ts stands alone, like the services and controllers helpers,
- * and only when a TypeScript policy reads them.
+ * and only when a policy registers the type of its module (see `hasModuleType`).
  *
  * Resolves the config a policy accepts from the type of its module: the second parameter of its
  * handler, for both runtime forms (a bare handler, or `{ handler, validator }`). A handler without
@@ -152,14 +153,17 @@ const generateConfigHelpersDefinition = () => {
  *       interface AppPolicies {
  *         'global::<policy>': PolicyConfig<typeof import('<relative path to the source>')>;
  *         'api::<api>.<policy>': PolicyConfig<typeof import('<relative path to the source>')>;
- *         'global::<js policy>': unknown;
+ *         'global::<export = policy>': PolicyConfig<{ default: typeof import('<relative path to the source>') }>;
+ *         'global::<js or commonjs policy>': unknown;
  *       }
  *     }
  *   }
  * }
  *
  * The import of a JS policy is an error type without `allowJs`, and one such entry turns every policy
- * reference into `any`. JS policies are registered as `unknown` without an import.
+ * reference into `any`. JS policies are registered as `unknown` without an import. So are
+ * CommonJS-style TypeScript policies (`module.exports = …`), whose import fails (see
+ * `moduleTypeOf`).
  * TODO @Nico with `allowJs`, a JSDoc-typed JS policy could register its config like a TS one
  */
 export const generatePoliciesDefinitions = async (
@@ -177,7 +181,10 @@ export const generatePoliciesDefinitions = async (
     outDir,
     logger
   );
-  const policiesDefinitions = filterRegisteredSources(sources, strapi.policies, logger);
+  const policiesDefinitions = await scanSources(
+    filterRegisteredSources(sources, strapi.policies, logger),
+    logger
+  );
 
   logger.debug(`Found ${policiesDefinitions.length} policies.`);
 
@@ -188,12 +195,15 @@ export const generatePoliciesDefinitions = async (
   // The helpers are only emitted when an entry reads them: `noUnusedLocals` reports unused ones
   const output = await emitRegistryDefinitions(
     REGISTRY,
-    policiesDefinitions.some(isTypedSource) === true ? generateConfigHelpersDefinition() : [],
+    policiesDefinitions.some(hasModuleType) === true ? generateConfigHelpersDefinition() : [],
     policiesDefinitions,
-    (source) =>
-      isTypedSource(source)
-        ? factory.createTypeReferenceNode(CONFIG_HELPER, [typeofImport(source)])
-        : factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+    (source) => {
+      const moduleType = moduleTypeOf(source);
+
+      return moduleType === undefined
+        ? factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+        : factory.createTypeReferenceNode(CONFIG_HELPER, [moduleType]);
+    }
   );
 
   return { output, stats: {} };
