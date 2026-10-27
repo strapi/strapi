@@ -12,7 +12,11 @@ const {
   getCurrentTestApps,
   setupTestEnvironment,
 } = require('../utils/runners/shared-setup');
-const { buildAdmin, runPlaywright } = require('../utils/runners/browser-runner');
+const {
+  buildAdmin,
+  countRunnableTests,
+  runPlaywright,
+} = require('../utils/runners/browser-runner');
 const { extractShardArgs, planShard } = require('../utils/runners/shard-plan');
 const {
   loadDomainConfigs,
@@ -273,6 +277,21 @@ module.exports = config
                 `;
 
             await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
+
+            // Playwright starts the web server before it applies the shard, so a domain
+            // with nothing to run in this shard would still boot Strapi for nothing.
+            const runnableTests = await countRunnableTests({
+              configPath: pathToPlaywrightConfig,
+              cwd,
+              port,
+              testAppPath,
+              testArgs,
+            });
+
+            if (runnableTests === 0) {
+              console.log(`Skipping ${domain} e2e tests: none to run with these arguments`);
+              return;
+            }
 
             console.log(`Running ${domain} e2e tests`);
 
