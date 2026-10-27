@@ -12,6 +12,9 @@
     "resolveJsonModule": true,
     "noEmitOnError": true,
     "noImplicitThis": true,
+    // Compiles the JS policy and middleware into dist, which registers them, and lets type generation
+    // read their JSDoc. They are edge cases kept on purpose to test type generation.
+    "allowJs": true,
     "outDir": "dist",
     "rootDir": "."
   },
