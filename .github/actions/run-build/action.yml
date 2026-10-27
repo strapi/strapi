@@ -11,7 +11,24 @@ runs:
       with:
         path: packages/**/dist
         key: yarn-build-cache-${{ github.sha }}
+    # Nx task cache from the latest develop build: a PR only rebuilds the packages its changes
+    # affect, and Nx restores the rest. Saved from pushes only (see below), so PR runs don't
+    # add one cache entry per commit and evict the install caches.
+    - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
+      name: ♻️ Restore Nx cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .nx/cache
+        key: nx-build-cache-${{ runner.os }}-${{ github.sha }}
+        restore-keys: |
+          nx-build-cache-${{ runner.os }}-
     - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
       name: 📥 Run build
       shell: bash
-      run: yarn nx run-many --targets build --nx-ignore-cycles --skip-nx-cache
+      run: yarn nx run-many --targets build --nx-ignore-cycles
+    - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' && github.event_name == 'push' }}
+      name: 💾 Save Nx cache
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .nx/cache
+        key: nx-build-cache-${{ runner.os }}-${{ github.sha }}
