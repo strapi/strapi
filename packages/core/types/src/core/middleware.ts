@@ -110,6 +110,9 @@ type ResolvedMiddlewareReference = { resolve: string; config?: unknown };
  * checked, as for policy references. Without registered middlewares, no name is
  * accepted.
  *
+ * With strict types enabled, a `{ resolve, config }` entry takes no `name`, so `{ name, config }` is
+ * checked against the registered config alone and editors list its keys.
+ *
  * TODO @Nico With strict types enabled, editors list no name inside `{ name: '' }`: the handler member
  * has `Function.name: string`, so the object literal narrows to it. Bare names are listed.
  */
@@ -119,7 +122,7 @@ export type MiddlewareReference = IsStrict extends false
     | { name: SuggestedMiddlewareName; config?: unknown }
     | ResolvedMiddlewareReference
   : | MiddlewareHandler
-    | ResolvedMiddlewareReference
+    | (ResolvedMiddlewareReference & { name?: never })
     | {
         [TName in RegisteredMiddlewareName]: RegisteredMiddlewareReference<TName>;
       }[RegisteredMiddlewareName];

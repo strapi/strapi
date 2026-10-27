@@ -815,6 +815,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
                 ["app.services['", ['plugin::i18n.locales', 'admin::auth']],
                 ['app.plugins.', ['i18n', 'sentry']],
                 ["hasPermissions', config: {", ['actions', 'hasAtLeastOne']],
+                ["admin::rateLimit', config: {", ['max', 'interval']],
               ]
             : []),
         ];
