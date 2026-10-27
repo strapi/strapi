@@ -154,7 +154,7 @@ npm-debug.log
 # Playwright
 ############################
 playwright-report
-tests/e2e/playwright-storage-state.json
+tests/e2e/playwright-storage-state*.json
 test-results
 
 ############################
