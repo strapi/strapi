@@ -26,6 +26,10 @@ yarn workspace strict-types run test:ts
   factory returns, and `stats` uses it. It also lists the UID in
   `Strapi.Registries.InferredServices`, so `Core.ServiceFactory<'api::legacy.legacy'>` rejects it
   (TS2344): the check would read the type it defines.
+  Two more services are edge cases kept on purpose to test type generation: `export-equals.ts`
+  (`export =`) registers the type its factory returns, and `commonjs-style.ts` (`module.exports`
+  in a `.ts` file, without `import` or `export`) registers `unknown` without an import, which would
+  fail with TS2306.
 - `checks/contracts.ts`: type checks for the lookups, and `@ts-expect-error` cases that fail without
   the contracts. If type generation stopped registering a contract, these directives would be unused
   and `tsc` would fail.
