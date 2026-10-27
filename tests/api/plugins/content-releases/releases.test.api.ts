@@ -3479,19 +3479,27 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('filters by status, release condition and schedule', async () => {
+      const DAY = 24 * 60 * 60 * 1000;
+      // Three pending releases at most: the default license caps them there
       const blocked = await createReleaseWithActions('all_or_nothing', [
         { documentId: await createProduct({ valid: false }) },
       ]);
-      const empty = (await createRelease({ releaseCondition: 'allow_partial' })).body.data;
-      const scheduled = (
-        await createRelease({
-          releaseCondition: 'allow_partial',
-          scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          timezone: 'Europe/Paris',
-        })
-      ).body.data;
-      // Releases from earlier tests stay listed: only read these three
-      const ids = [blocked.id, empty.id, scheduled.id];
+      const scheduledRes = await createRelease({
+        releaseCondition: 'allow_partial',
+        scheduledAt: new Date(Date.now() + DAY),
+        timezone: 'Europe/Paris',
+      });
+      const laterRes = await createRelease({
+        releaseCondition: 'all_or_nothing',
+        scheduledAt: new Date(Date.now() + 3 * DAY),
+        timezone: 'Europe/Paris',
+      });
+      expect(scheduledRes.statusCode).toBe(201);
+      expect(laterRes.statusCode).toBe(201);
+      const scheduled = scheduledRes.body.data;
+      const later = laterRes.body.data;
+      // Only read these three releases
+      const ids = [blocked.id, scheduled.id, later.id];
       const findIds = async (filters: Record<string, unknown>) => {
         const res = await rq({
           method: 'GET',
@@ -3504,12 +3512,28 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       };
 
       expect(await findIds({ status: { $in: ['blocked'] } })).toEqual([blocked.id]);
-      expect(await findIds({ releaseCondition: 'allow_partial' })).toEqual(
-        [empty.id, scheduled.id].sort()
-      );
-      expect(await findIds({ scheduledAt: { $null: true } })).toEqual(
-        [blocked.id, empty.id].sort()
-      );
+      expect(await findIds({ releaseCondition: 'allow_partial' })).toEqual([scheduled.id]);
+      expect(await findIds({ scheduledAt: { $null: true } })).toEqual([blocked.id]);
+
+      // As the releases page sends them: combined, with "is not" and a date range
+      expect(await findIds({ $and: [{ status: { $ne: 'empty' } }] })).toEqual([blocked.id]);
+      expect(
+        await findIds({
+          $and: [{ status: { $ne: 'blocked' } }, { releaseCondition: { $eq: 'all_or_nothing' } }],
+        })
+      ).toEqual([later.id]);
+      const now = Date.now();
+      const start = new Date(now).toISOString();
+      const end = new Date(now + 2 * DAY).toISOString();
+      expect(await findIds({ $and: [{ scheduledAt: { $gte: start, $lt: end } }] })).toEqual([
+        scheduled.id,
+      ]);
+      // "is not" on a date: outside its bounds. Releases without a date don't match, as with $ne
+      expect(
+        await findIds({
+          $and: [{ $or: [{ scheduledAt: { $lt: start } }, { scheduledAt: { $gte: end } }] }],
+        })
+      ).toEqual([later.id]);
     });
 
     test('Find many releases with an entry attached', async () => {

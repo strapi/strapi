@@ -34,6 +34,8 @@ export interface GetReleasesQueryParams {
       // TODO: this should be a boolean, find a way to avoid strings
       $notNull?: boolean | 'true' | 'false';
     };
+    // The releases page filters, with its date filters turned into bounds
+    $and?: Array<Record<string, unknown>>;
   };
 }
 

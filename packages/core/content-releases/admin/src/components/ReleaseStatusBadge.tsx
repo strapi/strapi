@@ -39,4 +39,4 @@ const ReleaseStatusBadge = ({ status }: { status: Release['status'] }) => {
   return <Badge {...getBadgeProps(status)}>{formatMessage(STATUS_MESSAGES[status])}</Badge>;
 };
 
-export { ReleaseStatusBadge };
+export { ReleaseStatusBadge, STATUS_MESSAGES };

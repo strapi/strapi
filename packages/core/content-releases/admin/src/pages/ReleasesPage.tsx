@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  Filters,
   Page,
   Pagination,
   useTracking,
@@ -12,19 +13,37 @@ import {
   Layouts,
   GradientBadge,
   Table,
+  useField,
+  withEncodedUserParams,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Alert, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
+import {
+  Alert,
+  Button,
+  Flex,
+  Main,
+  MenuItem,
+  SimpleMenu,
+  SingleSelect,
+  SingleSelectOption,
+  Typography,
+  Link,
+} from '@strapi/design-system';
 import { Calendar, ChartCircle, Clock, Plus, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { DEFAULT_RELEASE_CONDITION } from '../../../shared/constants';
+import {
+  DEFAULT_RELEASE_CONDITION,
+  RELEASE_CONDITIONS,
+  RELEASE_STATUSES,
+} from '../../../shared/constants';
 import { GetReleases } from '../../../shared/contracts/releases';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
-import { ReleaseStatusBadge } from '../components/ReleaseStatusBadge';
+import { ReleaseStatusBadge, STATUS_MESSAGES } from '../components/ReleaseStatusBadge';
+import { ScheduleFilterInput } from '../components/ScheduleFilterInput';
 import { PERMISSIONS } from '../constants';
 import {
   useGetReleasesQuery,
@@ -32,6 +51,7 @@ import {
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
+import { splitScheduleFilterValue, toReleasesApiFilters } from '../utils/scheduleFilters';
 import { getTimezoneOffset } from '../utils/time';
 
 import type { MessageDescriptor } from 'react-intl';
@@ -160,12 +180,227 @@ const ReleaseConditionBadge = ({
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * ReleasesFilters
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * The value input of the status and release mode filters. The default enumeration input would
+ * offer an empty "Choose here" option, but these fields always have a value. Being a custom
+ * input with options, its tag also shows the option's label rather than the stored value.
+ */
+const OptionFilterInput = ({ name, options = [], ...props }: Filters.ValueInputProps) => {
+  const field = useField<string>(name);
+
+  return (
+    <SingleSelect
+      aria-label={props['aria-label']}
+      value={field.value}
+      onChange={(value) => field.onChange(name, String(value))}
+    >
+      {options.map((option) =>
+        typeof option === 'string' ? (
+          <SingleSelectOption key={option} value={option}>
+            {option}
+          </SingleSelectOption>
+        ) : (
+          <SingleSelectOption key={option.value} value={option.value}>
+            {option.label ?? option.value}
+          </SingleSelectOption>
+        )
+      )}
+    </SingleSelect>
+  );
+};
+
+const useReleasesFilterOptions = (): Filters.Filter[] => {
+  const { formatMessage, formatDate } = useIntl();
+
+  return React.useMemo(() => {
+    // A date alone matches the day, a date and time the minute: the tag says which
+    const formatScheduleValue = (value: string) => {
+      const { date, time } = splitScheduleFilterValue(value);
+      if (!date) {
+        return value;
+      }
+
+      return time
+        ? formatDate(new Date(value), { dateStyle: 'medium', timeStyle: 'short' })
+        : formatDate(date, { dateStyle: 'medium' });
+    };
+
+    // Status and release mode are always set: only "is" and "is not" make sense
+    const enumerationOperators = [
+      {
+        label: formatMessage({
+          id: 'components.FilterOptions.FILTER_TYPES.$eq',
+          defaultMessage: 'is',
+        }),
+        value: '$eq',
+      },
+      {
+        label: formatMessage({
+          id: 'components.FilterOptions.FILTER_TYPES.$ne',
+          defaultMessage: 'is not',
+        }),
+        value: '$ne',
+      },
+    ];
+
+    return [
+      {
+        name: 'status',
+        label: formatMessage({
+          id: 'content-releases.pages.Releases.filters.status',
+          defaultMessage: 'Status',
+        }),
+        type: 'enumeration',
+        input: OptionFilterInput,
+        operators: enumerationOperators,
+        options: RELEASE_STATUSES.map((status) => ({
+          label: formatMessage(STATUS_MESSAGES[status]),
+          value: status,
+        })),
+      },
+      {
+        name: 'releaseCondition',
+        label: formatMessage({
+          id: 'content-releases.pages.Releases.filters.release-mode',
+          defaultMessage: 'Release mode',
+        }),
+        type: 'enumeration',
+        input: OptionFilterInput,
+        operators: enumerationOperators,
+        options: RELEASE_CONDITIONS.map((releaseCondition) => ({
+          label: formatMessage(RELEASE_CONDITION_BADGES[releaseCondition].message),
+          value: releaseCondition,
+        })),
+      },
+      {
+        // "Not scheduled" is "is null"
+        name: 'scheduledAt',
+        label: formatMessage({
+          id: 'content-releases.pages.Releases.filters.scheduled-for',
+          defaultMessage: 'Scheduled for',
+        }),
+        type: 'datetime',
+        input: ScheduleFilterInput,
+        formatValue: formatScheduleValue,
+      },
+      {
+        // "Not released yet" is "is null"
+        name: 'releasedAt',
+        label: formatMessage({
+          id: 'content-releases.pages.Releases.filters.released-on',
+          defaultMessage: 'Released on',
+        }),
+        type: 'datetime',
+        input: ScheduleFilterInput,
+        formatValue: formatScheduleValue,
+      },
+    ];
+  }, [formatMessage, formatDate]);
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ReleasesSort
+ * -----------------------------------------------------------------------------------------------*/
+
+const DEFAULT_SORT = 'updatedAt:desc';
+
+// No schedule sort: releases without a date land first or last depending on the database
+const SORT_OPTIONS = [
+  {
+    value: 'updatedAt:desc',
+    message: {
+      id: 'content-releases.pages.Releases.sort.updated-at-desc',
+      defaultMessage: 'Most recent updates',
+    },
+  },
+  {
+    value: 'updatedAt:asc',
+    message: {
+      id: 'content-releases.pages.Releases.sort.updated-at-asc',
+      defaultMessage: 'Oldest updates',
+    },
+  },
+  {
+    value: 'createdAt:desc',
+    message: {
+      id: 'content-releases.pages.Releases.sort.created-at-desc',
+      defaultMessage: 'Most recently created',
+    },
+  },
+  {
+    value: 'name:asc',
+    message: {
+      id: 'content-releases.pages.Releases.sort.name-asc',
+      defaultMessage: 'Name (A to Z)',
+    },
+  },
+  {
+    value: 'name:desc',
+    message: {
+      id: 'content-releases.pages.Releases.sort.name-desc',
+      defaultMessage: 'Name (Z to A)',
+    },
+  },
+] satisfies Array<{ value: string; message: MessageDescriptor }>;
+
+interface ReleasesSortProps {
+  value: string;
+  onChange: (sort: string) => void;
+}
+
+const ReleasesSort = ({ value, onChange }: ReleasesSortProps) => {
+  const { formatMessage } = useIntl();
+  const selected = SORT_OPTIONS.find((option) => option.value === value);
+
+  return (
+    <SimpleMenu
+      popoverPlacement="bottom-end"
+      label={
+        // A sort typed in the URL still applies, it just has no label
+        selected
+          ? formatMessage(
+              {
+                id: 'content-releases.pages.Releases.sort.label',
+                defaultMessage: 'Sort: {sort}',
+              },
+              { sort: formatMessage(selected.message) }
+            )
+          : formatMessage({
+              id: 'content-releases.pages.Releases.sort.placeholder',
+              defaultMessage: 'Sort',
+            })
+      }
+    >
+      {SORT_OPTIONS.map((option) => (
+        <MenuItem key={option.value} onSelect={() => onChange(option.value)}>
+          {formatMessage(option.message)}
+        </MenuItem>
+      ))}
+    </SimpleMenu>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ReleasesTable
+ * -----------------------------------------------------------------------------------------------*/
+
 interface ReleasesTableProps {
   releases?: GetReleases.Response['data'];
   isLoading?: boolean;
+  hasFilters?: boolean;
+  onClearFilters?: () => void;
 }
 
-const ReleasesTable = ({ releases = [], isLoading = false }: ReleasesTableProps) => {
+const ReleasesTable = ({
+  releases = [],
+  isLoading = false,
+  hasFilters = false,
+  onClearFilters,
+}: ReleasesTableProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
 
@@ -215,12 +450,29 @@ const ReleasesTable = ({ releases = [], isLoading = false }: ReleasesTableProps)
             <Table.HeaderCell key={name} label={label} name={name} />
           ))}
         </Table.Head>
-        <Table.Empty
-          content={formatMessage({
-            id: 'content-releases.page.Releases.tab.emptyEntries',
-            defaultMessage: 'No releases',
-          })}
-        />
+        {hasFilters ? (
+          <Table.Empty
+            content={formatMessage({
+              id: 'content-releases.pages.Releases.filters.empty',
+              defaultMessage: 'No releases match these filters',
+            })}
+            action={
+              <Button variant="secondary" onClick={onClearFilters}>
+                {formatMessage({
+                  id: 'content-releases.pages.Releases.filters.clear',
+                  defaultMessage: 'Clear filters',
+                })}
+              </Button>
+            }
+          />
+        ) : (
+          <Table.Empty
+            content={formatMessage({
+              id: 'content-releases.page.Releases.tab.emptyEntries',
+              defaultMessage: 'No releases',
+            })}
+          />
+        )}
         <Table.Loading />
         <Table.Body>
           {releases.map((release) => (
@@ -277,10 +529,19 @@ const ReleasesPage = () => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { formatAPIError } = useAPIErrorHandler();
-  const [{ query }] = useQueryParams<GetReleasesQueryParams>();
-  // Only the params the page controls: old links can still carry the filters of the removed tabs
-  const { page, pageSize, sort = 'updatedAt:desc' } = query;
-  const response = useGetReleasesQuery({ page, pageSize, sort });
+  const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams & Filters.Query>();
+  // Only the filters the page controls: old links can still carry the filters of the removed tabs
+  const { page, pageSize, sort = DEFAULT_SORT } = query;
+  // A hand-edited URL can make `$and` a string or an object
+  const appliedFilters = Array.isArray(query.filters?.$and) ? query.filters.$and : [];
+  const hasFilters = appliedFilters.length > 0;
+  const response = useGetReleasesQuery({
+    page,
+    pageSize,
+    sort,
+    filters: hasFilters ? { $and: toReleasesApiFilters(appliedFilters) } : undefined,
+  });
+  const filterOptions = useReleasesFilterOptions();
   const { data: settings, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
@@ -313,6 +574,15 @@ const ReleasesPage = () => {
       navigate('', { replace: true, state: null });
     }
   }, [formatMessage, location?.state?.errors, navigate, toggleNotification]);
+
+  const changeSort = (nextSort: string) => {
+    // The applied filters stay: their values are written back to the URL encoded
+    setQuery(withEncodedUserParams(query, { sort: nextSort, page: 1 }));
+  };
+
+  const clearFilters = () => {
+    setQuery({ filters: undefined, page: 1 });
+  };
 
   const toggleCreateDrawer = () => {
     setIsCreateDrawerOpen((prev) => !prev);
@@ -398,6 +668,26 @@ const ReleasesPage = () => {
             ) : null
           }
         />
+        <Filters.Root options={filterOptions}>
+          <Layouts.Action
+            startActions={
+              <>
+                <Filters.Trigger />
+                <Filters.List />
+                {hasFilters && (
+                  <Button variant="ghost" size="S" onClick={clearFilters}>
+                    {formatMessage({
+                      id: 'content-releases.pages.Releases.filters.clear-all',
+                      defaultMessage: 'Clear all',
+                    })}
+                  </Button>
+                )}
+              </>
+            }
+            endActions={<ReleasesSort value={String(sort)} onChange={changeSort} />}
+          />
+          <Filters.Popover />
+        </Filters.Root>
         <Layouts.Content>
           <>
             {hasReachedMaximumPendingReleases && (
@@ -436,6 +726,8 @@ const ReleasesPage = () => {
                   releases={response.currentData?.data}
                   // Background refetches keep `currentData`: only blank the table while it's missing
                   isLoading={isFetching && !response.currentData}
+                  hasFilters={hasFilters}
+                  onClearFilters={clearFilters}
                 />
                 <Pagination.Root {...meta?.pagination} defaultPageSize={meta?.pagination?.pageSize}>
                   <Pagination.PageSize options={['8', '16', '32', '64']} />
