@@ -258,6 +258,45 @@ describe('findTypeExports', () => {
     expect(logger.warnings).toBe(2);
   });
 
+  test('checks an export specifier against the local declaration it names', async () => {
+    const { found, logger } = await findIn({
+      defaults:
+        'type Contract<T = number> = { find(): T };\nexport { Contract as ServiceContract };',
+      klass: 'class Contract { find() { return 1; } }\nexport { Contract as ServiceContract };',
+      enumeration: 'enum ServiceContract { Find }\nexport { ServiceContract };',
+      // The type of a name that is both a type and a value is what the generated file reads
+      merged:
+        'const ServiceContract = 1;\ntype ServiceContract = { find(): number };\nexport { ServiceContract };',
+      imported: "import { Contract } from './contract';\nexport { Contract as ServiceContract };",
+      importedType:
+        "import type { Contract } from './contract';\nexport type { Contract as ServiceContract };",
+      notDeclared: 'export { ServiceContract };',
+    });
+
+    expect(found).toEqual(
+      ['defaults', 'enumeration', 'imported', 'importedType', 'klass', 'merged', 'notDeclared'].map(
+        (key) => `api::${key}.${key}`
+      )
+    );
+    expect(logger.warnings).toBe(0);
+  });
+
+  test('ignores a specifier of a local generic without defaults or of a value, with a warning', async () => {
+    const { found, logger } = await findIn({
+      alias: 'type ServiceContract<T> = { find(): T };\nexport { ServiceContract };',
+      iface: 'interface Contract<T> { find(): T }\nexport { type Contract as ServiceContract };',
+      klass: 'declare class Contract<T> { find(): T }\nexport { Contract as ServiceContract };',
+      constant: 'const ServiceContract = { find: () => 1 };\nexport { ServiceContract };',
+      destructured:
+        'const { ServiceContract } = { ServiceContract: { find: () => 1 } };\nexport { ServiceContract };',
+      fn: 'function contract() {}\nexport type { contract as ServiceContract };',
+    });
+
+    // The generated file would fail with TS2314 for a generic, TS2694 for a value
+    expect(found).toEqual([]);
+    expect(logger.warnings).toBe(6);
+  });
+
   test('looks for the requested name', async () => {
     const { found } = await findIn(
       {
