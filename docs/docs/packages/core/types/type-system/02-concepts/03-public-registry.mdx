@@ -426,14 +426,16 @@ declare global {
 
 A global augmentation reaches the one declaration every package reads, whatever module the application resolves and in whatever order declaration files load. Augmenting `Public` through `@strapi/strapi` and through `@strapi/types` creates two copies, and the load order decides which one wins.
 
-Each schema registry is one interface, without a `Package*` and `App*` pair: type generation is the only producer, and applications do not override schemas.
+Content-type schemas have a `Package*` and `App*` pair. A package declares the schemas of its own content types by hand in `Strapi.Registries.PackageContentTypeSchemas`. Type generation writes every runtime UID, package ones included, to `AppContentTypeSchemas`, and a generated entry replaces the package entry for the same UID: it carries what the application changed at runtime (extensions in `src/extensions`, attributes added by other plugins). The two interfaces never share a property, so they do not conflict (no TS2717) in any load order. `ComponentSchemas` is a single generated interface: packages cannot ship components.
 
-|                 | `UID.ContentType`, `Schema.ContentType`, … read                                                                      | No generated schema                               |
-| --------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Strict mode off | `Public.ContentTypeSchemas`, `Public.ComponentSchemas`. Global entries are ignored.                                  | Generic UIDs and schemas                          |
-| Strict mode on  | `Strapi.Registries.AppContentTypeSchemas`, `Strapi.Registries.ComponentSchemas`. `Public` augmentations are ignored. | Generic UIDs and schemas, as with strict mode off |
+The Document Service switches to precise types per UID (`Constants.IsSchemaRegistered<TSchemaUID>`): a UID is precise once generated schemas exist or when a package declares it. Without generated schemas, the declared package UIDs are precise and every other UID stays generic, so plugin code compiled alone still accepts other content types.
 
-Toggling the flag rewrites both files in the other form on the next generation. A hand-written `Public` schema augmentation has no effect in strict mode: move it to the global registry.
+|                 | `UID.ContentType`, `Schema.ContentType`, … read                                                                                                                         | No generated schema                                           |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Strict mode off | `Public.ContentTypeSchemas`, `Public.ComponentSchemas`. Global entries are ignored.                                                                                     | Generic UIDs and schemas                                      |
+| Strict mode on  | `Strapi.Registries.AppContentTypeSchemas` over `Strapi.Registries.PackageContentTypeSchemas`, `Strapi.Registries.ComponentSchemas`. `Public` augmentations are ignored. | Package-declared UIDs precise, other UIDs and schemas generic |
+
+Toggling the flag rewrites both files in the other form on the next generation. A hand-written `Public` schema augmentation has no effect in strict mode: an application runs type generation instead of declaring its schemas by hand.
 
 Unset or `false` keeps the previous behavior — content-type, component and plugin declarations are still generated — and removes `strict.d.ts`, `services.ts`, `controllers.ts`, `policies.ts` and `middlewares.ts` (and an older `.d.ts` of the last four) if a previous run generated them, so the program leaves strict mode when the flag is turned off. Any other value is rejected. TypeScript templates of `create-strapi-app` ship `config/typescript.ts` with `strictTypes: true`.
 

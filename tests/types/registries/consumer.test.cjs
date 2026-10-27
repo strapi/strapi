@@ -59,8 +59,8 @@ function permutations(values) {
 
 // Type generation writes `Public` schemas with the switch off and global schemas with it on.
 const generatedSchemas = (strict) => (strict ? 'generated-strict.d.ts' : 'generated.d.ts');
-const orders = (strict) =>
-  permutations([generatedSchemas(strict), 'i18n.d.ts', 'sentry.d.ts', 'overrides.d.ts']);
+const orders = (strict, schemas = [generatedSchemas(strict)]) =>
+  permutations([...schemas, 'i18n.d.ts', 'sentry.d.ts', 'overrides.d.ts']);
 
 function declarations(directory) {
   assert.ok(fs.existsSync(directory), `Missing ${directory}. Build the packages before this test.`);
@@ -862,6 +862,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       ['strapi-strict.d.ts', 'action-provider.ts'],
       ['settings.d.ts', 'schemas.ts'],
       ['settings.d.ts', 'document-write.ts'],
+      ['settings.d.ts', 'package-schemas.d.ts', 'package-schemas-open.ts'],
+      [
+        'settings.d.ts',
+        'package-schemas.d.ts',
+        'package-schemas-generated.d.ts',
+        'package-schemas-app.ts',
+      ],
       ['strapi-strict.d.ts', 'generated-strict.d.ts', 'common.ts', 'bundled-providers.ts'],
       [
         generatedSchemas(true),
@@ -915,6 +922,25 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     assertClean(
       compile(['settings.d.ts', 'document-write.ts']),
       `${resolution}, Document Service write inputs`
+    );
+  });
+
+  test(`${resolution}: package schemas are precise without generated schemas, other UIDs stay generic`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'package-schemas.d.ts', 'package-schemas-open.ts']),
+      `${resolution}, package schemas without generated schemas`
+    );
+  });
+
+  test(`${resolution}: generated schemas replace package schemas for the same UID`, () => {
+    assertClean(
+      compile([
+        'settings.d.ts',
+        'package-schemas.d.ts',
+        'package-schemas-generated.d.ts',
+        'package-schemas-app.ts',
+      ]),
+      `${resolution}, package and generated schemas`
     );
   });
 
@@ -1073,6 +1099,41 @@ test('conflicting declaration files need one contract per UID, even with the swi
       `Conflicting contracts must report TS2717 with strict ${strict ? 'on' : 'off'}`
     );
     assertClean(compile(files), 'skipLibCheck suppresses declaration conflicts');
+  }
+});
+
+const packageSchemas = ['package-schemas.d.ts', 'package-schemas-generated.d.ts'];
+
+test('generated schemas win over package schemas in all 120 declaration orders', () => {
+  const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+  for (const order of orders(true, packageSchemas)) {
+    assertClean(
+      compile([...order, 'settings.d.ts', 'package-schemas-app.ts']),
+      `generated over package schemas, ${order.join(' > ')}`
+    );
+  }
+});
+
+// Only the two schema files declare content-type schemas, so their relative order is the one that
+// can raise TS2717. `skipLibCheck: false` also reports errors of dependency declarations that exist
+// without package schemas (`@casl`, `koa`, `@strapi/types` dist): the package declaration adds none.
+test('package and generated schemas of the same UID do not conflict with skipLibCheck: false', () => {
+  const compile = compiler({ ...baseOptions, ...resolutions.Bundler, skipLibCheck: false });
+  const isFixture = (diagnostic) => diagnostic.file?.fileName.startsWith(fixture('')) === true;
+  const describe = (diagnostic) =>
+    `${path.relative(repository, diagnostic.file?.fileName ?? '')} TS${diagnostic.code}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
+  const libDiagnostics = (program) =>
+    diagnostics(program)
+      .filter((diagnostic) => isFixture(diagnostic) === false)
+      .map(describe)
+      .sort();
+  const baseline = libDiagnostics(compile(['package-schemas-generated.d.ts', 'settings.d.ts']));
+
+  for (const order of permutations(packageSchemas)) {
+    const program = compile([...order, 'settings.d.ts', 'package-schemas-app.ts']);
+    const description = order.join(' > ');
+    assert.deepEqual(diagnostics(program).filter(isFixture).map(describe), [], description);
+    assert.deepEqual(libDiagnostics(program), baseline, description);
   }
 });
 
