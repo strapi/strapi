@@ -1,3 +1,4 @@
+import nodeFs from 'fs';
 import { Readable } from 'stream';
 
 import fs from 'fs-extra';
@@ -37,6 +38,48 @@ describe('Directory destination provider', () => {
     await provider.close();
 
     expect(await fs.pathExists(dir)).toBe(false);
+  });
+
+  test('close waits for pending JSONL file writes before resolving', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-flush-'));
+    const provider = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: {},
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    // Simulate a slow disk: the stream's final flush outlives the pipeline's `finish`
+    const realWriteFile = nodeFs.promises.writeFile;
+    let writeDone = false;
+    const writeFileSpy = jest
+      .spyOn(nodeFs.promises, 'writeFile')
+      .mockImplementation(async (...args: Parameters<typeof realWriteFile>) => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50);
+        });
+        await realWriteFile(...args);
+        writeDone = true;
+      });
+
+    const stream = provider.createConfigurationWriteStream();
+    await new Promise((resolve, reject) => {
+      stream.on('finish', resolve).on('error', reject);
+      stream.end({ type: 'core-store', value: { key: 'k', value: 'v' } });
+    });
+
+    await provider.close();
+    writeFileSpy.mockRestore();
+
+    expect(writeDone).toBe(true);
+    const written = await fs.readFile(
+      path.join(dir, 'configuration', 'configuration_00001.jsonl'),
+      'utf8'
+    );
+    expect(JSON.parse(written.trim())).toEqual({
+      type: 'core-store',
+      value: { key: 'k', value: 'v' },
+    });
   });
 
   test('createAssetsWriteStream surfaces sync fs errors as ProviderTransferError (engine-reportable)', async () => {
