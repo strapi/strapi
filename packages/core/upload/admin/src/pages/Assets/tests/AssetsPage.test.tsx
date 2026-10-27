@@ -3,10 +3,23 @@ import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { createMediaLibraryApis } from '../../../MediaLibraryExtensions';
 import { useDeleteAssetMutation } from '../../../services/assets';
 import { AssetsPage } from '../AssetsPage';
 
 import type { File } from '../../../../../shared/contracts/files';
+import type { MediaLibraryApis } from '../../../MediaLibraryExtensions';
+
+let mockMediaLibraryApis: MediaLibraryApis;
+
+jest.mock('../../../MediaLibraryExtensions', () => ({
+  ...jest.requireActual('../../../MediaLibraryExtensions'),
+  useMediaLibraryApis: () => mockMediaLibraryApis,
+}));
+
+beforeEach(() => {
+  mockMediaLibraryApis = createMediaLibraryApis();
+});
 
 /**
  * Infinite scroll is driven by an IntersectionObserver, which the shared test
@@ -116,6 +129,16 @@ const waitForCreatePermission = async () => {
 
   expect(screen.getByRole('button', { name: 'New' })).toBeInTheDocument();
 };
+
+describe('AssetsPage folder header', () => {
+  it('renders the info items that plugins register for the open folder', async () => {
+    mockMediaLibraryApis.addFolderInfo([({ folder }) => ({ label: `Shared ${folder.name}` })]);
+
+    renderPage('?folder=1');
+
+    expect(await screen.findByText('Shared test')).toBeInTheDocument();
+  });
+});
 
 describe('AssetsPage search', () => {
   beforeEach(() => {

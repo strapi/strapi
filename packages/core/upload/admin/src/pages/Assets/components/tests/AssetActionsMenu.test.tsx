@@ -10,12 +10,25 @@ const mockToggleNotification = jest.fn();
 const mockCopy = jest.fn();
 const mockDeselect = jest.fn();
 const mockDownloadFile = jest.fn();
+let mockAssetActions: unknown[] = [];
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
   useClipboard: () => ({ copy: mockCopy }),
 }));
+
+jest.mock('../../../../MediaLibraryExtensions', () => {
+  const actual = jest.requireActual('../../../../MediaLibraryExtensions');
+
+  return {
+    ...actual,
+    useMediaLibraryApis: () => ({
+      ...actual.createMediaLibraryApis(),
+      getAssetActions: () => mockAssetActions,
+    }),
+  };
+});
 
 jest.mock('../../hooks/useAssetSelection', () => ({
   useAssetSelection: () => ({
@@ -79,8 +92,26 @@ const openMenu = async (user: ReturnType<typeof setup>['user']) => {
 describe('AssetActionsMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAssetActions = [];
     mockCopy.mockResolvedValue(true);
     mockDownloadFile.mockResolvedValue(undefined);
+  });
+
+  it('adds a plugin action that gets the asset, and opens its modal', async () => {
+    mockAssetActions = [
+      ({ asset: target }: { asset: File }) => ({
+        label: `Share ${target.name}`,
+        dialog: { type: 'modal', title: 'Share dialog', content: 'Pick the spaces' },
+      }),
+    ];
+
+    const { user } = setup();
+    await openMenu(user);
+    await user.click(await screen.findByRole('menuitem', { name: 'Share photo.png' }));
+
+    expect(screen.getByRole('dialog', { name: 'Share dialog' })).toHaveTextContent(
+      'Pick the spaces'
+    );
   });
 
   // Radix's default `modal` menu marks the rest of the document `aria-hidden`

@@ -1,7 +1,13 @@
 import { useRef, useCallback, useMemo, useState, useEffect, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { Layouts, Page, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
+import {
+  InfoItems,
+  Layouts,
+  Page,
+  useElementOnScreen,
+  usePersistentState,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -25,6 +31,7 @@ import { styled, css } from 'styled-components';
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../hooks/useTracking';
+import { useMediaLibraryApis } from '../../MediaLibraryExtensions';
 import { useUploadFromUrlsMutation, useUploadFilesMutation } from '../../services/api';
 import { useGetFolderQuery, useGetFoldersQuery } from '../../services/folders';
 import { useGetUploadSettingsQuery } from '../../services/settings';
@@ -481,7 +488,8 @@ export const AssetsPage = () => {
   const { currentFolderId, navigateToFolderId, navigateToRoot } = useFolderNavigation();
   // Deleted or missing folders (404) need a fetch — handled here, not in
   // `useFolderNavigation` (which only strips malformed ?folder= values).
-  const { error: currentFolderError } = useGetFolderQuery(
+  const { getFolderInfo } = useMediaLibraryApis();
+  const { data: currentFolder, error: currentFolderError } = useGetFolderQuery(
     { id: currentFolderId! },
     { skip: currentFolderId === null }
   );
@@ -751,9 +759,17 @@ export const AssetsPage = () => {
                     />
                     <StickyHeader $compact={isHeaderCompact}>
                       <TitleRow>
-                        <Typography variant="alpha" tag="h1">
-                          {pageHeaderTitle}
-                        </Typography>
+                        <Flex gap={3} alignItems="center" minWidth={0}>
+                          <Typography variant="alpha" tag="h1">
+                            {pageHeaderTitle}
+                          </Typography>
+                          {currentFolderId !== null && currentFolder && (
+                            <InfoItems
+                              props={{ folder: currentFolder }}
+                              descriptions={getFolderInfo()}
+                            />
+                          )}
+                        </Flex>
                         {canCreate && (
                           <SimpleMenu
                             popoverPlacement="bottom-end"

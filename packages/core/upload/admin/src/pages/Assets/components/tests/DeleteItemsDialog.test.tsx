@@ -5,11 +5,24 @@ import { IntlProvider } from 'react-intl';
 import { DeleteItemsDialog } from '../DeleteItemsDialog';
 
 const mockToggleNotification = jest.fn();
+let mockDeleteInfo: unknown[] = [];
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
 }));
+
+jest.mock('../../../../MediaLibraryExtensions', () => {
+  const actual = jest.requireActual('../../../../MediaLibraryExtensions');
+
+  return {
+    ...actual,
+    useMediaLibraryApis: () => ({
+      ...actual.createMediaLibraryApis(),
+      getDeleteInfo: () => mockDeleteInfo,
+    }),
+  };
+});
 
 const defaultProps = {
   open: true,
@@ -23,6 +36,18 @@ const setup = (props: Partial<React.ComponentProps<typeof DeleteItemsDialog>> = 
 describe('DeleteItemsDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeleteInfo = [];
+  });
+
+  it('shows the info items that plugins give for the target', async () => {
+    mockDeleteInfo = [
+      ({ items }: { items: { fileIds: number[]; folderIds: number[] } }) => ({
+        label: `Used by ${items.fileIds.length + items.folderIds.length} items`,
+      }),
+    ];
+    setup();
+
+    expect(await screen.findByText('Used by 3 items')).toBeInTheDocument();
   });
 
   it('counts assets and folders together in the title', () => {

@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   Blocker,
   Form,
+  InfoItems,
   useClipboard,
   useField,
   useForm,
@@ -46,6 +47,7 @@ import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
 import { useApiErrorMessage } from '../../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../../hooks/useTracking';
+import { useMediaLibraryApis } from '../../../../MediaLibraryExtensions';
 import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
   useDeleteAssetMutation,
@@ -713,6 +715,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const getErrorMessage = useApiErrorMessage();
   const { canCreate, canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions(asset);
+  const { getAssetInfo } = useMediaLibraryApis();
   const { data: folders = [] } = useGetAllFoldersQuery();
   const { toggleNotification } = useNotification();
   const [updateAsset] = useUpdateAssetMutation();
@@ -999,6 +1002,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                           defaultMessage: 'File info',
                         })}
                       </Typography>
+                      <InfoItems props={{ asset }} descriptions={getAssetInfo()} />
                       <Flex
                         wrap="wrap"
                         gap={4}

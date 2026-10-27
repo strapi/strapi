@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { useClipboard, useNotification } from '@strapi/admin/strapi-admin';
+import {
+  DescriptionComponentRenderer,
+  useClipboard,
+  useNotification,
+} from '@strapi/admin/strapi-admin';
 import { Button, Dialog, Flex, Menu, Typography, VisuallyHidden } from '@strapi/design-system';
 import { ArrowRight, ArrowsCounterClockwise, Download, Link, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -9,6 +13,11 @@ import { useIntl } from 'react-intl';
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
 import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import {
+  ActionDialogs,
+  ActionMenuItems,
+  useMediaLibraryApis,
+} from '../../../MediaLibraryExtensions';
 import { useReplaceAssetMutation } from '../../../services/assets';
 import { downloadFile } from '../../../utils/downloadFile';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
@@ -21,6 +30,7 @@ import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
 
 import type { File } from '../../../../../shared/contracts/files';
+import type { MediaActionDescription } from '../../../MediaLibraryExtensions';
 import type { DragFileData } from '../../../types/dnd';
 
 interface AssetActionsRender {
@@ -118,6 +128,8 @@ export const AssetActions = ({ asset, dragData, permissions, children }: AssetAc
   const [isMoveOpen, setIsMoveOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const { getAssetActions } = useMediaLibraryApis();
+  const [openAction, setOpenAction] = useState<string | null>(null);
   // The native picker is not a React thing: nothing re-renders while it is up.
   // A cursor-anchored caller is mounted only while it has something on screen,
   // and without this the input it owns would be unmounted the moment the
@@ -260,7 +272,7 @@ export const AssetActions = ({ asset, dragData, permissions, children }: AssetAc
   const hasBottomGroup = canUpdate;
   const showSeparator = (canCopyLink || canDownload) && hasBottomGroup;
 
-  const items = (
+  const renderItems = (actions: Array<MediaActionDescription & { id: string }>) => (
     <>
       {canUpdate && (
         <Menu.Item
@@ -290,7 +302,8 @@ export const AssetActions = ({ asset, dragData, permissions, children }: AssetAc
           })}
         </Menu.Item>
       )}
-      {showSeparator && <Menu.Separator />}
+      <ActionMenuItems actions={actions} onOpen={setOpenAction} />
+      {(showSeparator || (actions.length > 0 && hasBottomGroup)) && <Menu.Separator />}
       {canUpdate && (
         <>
           <Menu.Item startIcon={<ArrowRight />} onSelect={() => setIsMoveOpen(true)}>
@@ -310,7 +323,7 @@ export const AssetActions = ({ asset, dragData, permissions, children }: AssetAc
     </>
   );
 
-  const dialogs = (
+  const renderDialogs = (actions: Array<MediaActionDescription & { id: string }>) => (
     <>
       <VisuallyHidden>
         <input
@@ -390,19 +403,25 @@ export const AssetActions = ({ asset, dragData, permissions, children }: AssetAc
           onSuccess={() => deselect(assetKey(asset.id))}
         />
       )}
+      <ActionDialogs actions={actions} openId={openAction} onClose={() => setOpenAction(null)} />
     </>
   );
 
   return (
-    <>
-      {children({
-        items,
-        dialogs,
-        // Every flag is `false` until the RBAC check settles, so wait for it —
-        // otherwise the trigger unmounts and remounts on first paint for everyone.
-        hasActions: isLoadingPermissions || hasTopGroup || hasBottomGroup,
-        isBusy: isReplaceOpen || isMoveOpen || isDeleteOpen || isAwaitingFile,
-      })}
-    </>
+    // Plugin actions are resolved out here, not in the menu: the menu unmounts on close, and an
+    // action's dialog has to outlive it
+    <DescriptionComponentRenderer props={{ asset }} descriptions={getAssetActions()}>
+      {(actions) =>
+        children({
+          items: renderItems(actions),
+          dialogs: renderDialogs(actions),
+          // Every flag is `false` until the RBAC check settles, so wait for it —
+          // otherwise the trigger unmounts and remounts on first paint for everyone.
+          hasActions: isLoadingPermissions || hasTopGroup || hasBottomGroup || actions.length > 0,
+          isBusy:
+            isReplaceOpen || isMoveOpen || isDeleteOpen || isAwaitingFile || openAction !== null,
+        })
+      }
+    </DescriptionComponentRenderer>
   );
 };

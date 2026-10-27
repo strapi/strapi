@@ -1,10 +1,19 @@
 import { useMemo, useState, type ReactNode } from 'react';
 
-import { useClipboard, useNotification } from '@strapi/admin/strapi-admin';
+import {
+  DescriptionComponentRenderer,
+  useClipboard,
+  useNotification,
+} from '@strapi/admin/strapi-admin';
 import { Menu } from '@strapi/design-system';
 import { ArrowRight, Link, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import {
+  ActionDialogs,
+  ActionMenuItems,
+  useMediaLibraryApis,
+} from '../../../MediaLibraryExtensions';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelectionOptional } from '../hooks/useAssetSelection';
 import { folderKey } from '../utils/selection';
@@ -14,6 +23,7 @@ import { DeleteItemsDialog } from './DeleteItemsDialog';
 import { FolderFormDialog } from './FolderFormDialog';
 
 import type { Folder } from '../../../../../shared/contracts/folders';
+import type { MediaActionDescription } from '../../../MediaLibraryExtensions';
 import type { DragFolderData } from '../../../types/dnd';
 
 interface FolderActionsRender {
@@ -76,6 +86,8 @@ export const FolderActions = ({
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isMoveOpen, setIsMoveOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { getFolderActions } = useMediaLibraryApis();
+  const [openAction, setOpenAction] = useState<string | null>(null);
 
   // Stable identity: the move dialog memoizes its destination walk on it.
   const moveItems = useMemo(() => [dragData], [dragData]);
@@ -103,7 +115,7 @@ export const FolderActions = ({
     });
   };
 
-  const items = (
+  const renderItems = (actions: Array<MediaActionDescription & { id: string }>) => (
     <>
       <Menu.Item startIcon={<Link />} onSelect={handleCopyLink}>
         {formatMessage({
@@ -111,6 +123,7 @@ export const FolderActions = ({
           defaultMessage: 'Copy link to folder',
         })}
       </Menu.Item>
+      <ActionMenuItems actions={actions} onOpen={setOpenAction} />
       {!folder.readOnly && <Menu.Separator />}
       {/* TODO: gate Rename, Move and Delete on `assets.canUpdate` CMS-387 */}
       {showRename && !folder.readOnly && (
@@ -140,7 +153,7 @@ export const FolderActions = ({
     </>
   );
 
-  const dialogs = (
+  const renderDialogs = (actions: Array<MediaActionDescription & { id: string }>) => (
     <>
       {/* These dialogs live inside the row, so a background refetch that drops
           the row would take an open dialog with it. Nothing invalidates until
@@ -172,8 +185,21 @@ export const FolderActions = ({
           onSuccess={() => deselect?.(folderKey(folder.id))}
         />
       )}
+      <ActionDialogs actions={actions} openId={openAction} onClose={() => setOpenAction(null)} />
     </>
   );
 
-  return <>{children({ items, dialogs, isBusy: isRenameOpen || isMoveOpen || isDeleteOpen })}</>;
+  return (
+    // Plugin actions are resolved out here, not in the menu: the menu unmounts on close, and an
+    // action's dialog has to outlive it
+    <DescriptionComponentRenderer props={{ folder }} descriptions={getFolderActions()}>
+      {(actions) =>
+        children({
+          items: renderItems(actions),
+          dialogs: renderDialogs(actions),
+          isBusy: isRenameOpen || isMoveOpen || isDeleteOpen || openAction !== null,
+        })
+      }
+    </DescriptionComponentRenderer>
+  );
 };

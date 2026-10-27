@@ -1,11 +1,12 @@
 import { useEffect, type MouseEvent } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
-import { Button, Dialog, Typography } from '@strapi/design-system';
+import { InfoItems, useNotification } from '@strapi/admin/strapi-admin';
+import { Button, Dialog, Flex, Typography } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
+import { useMediaLibraryApis } from '../../../MediaLibraryExtensions';
 import { useBulkDeleteItemsMutation } from '../../../services/assets';
 import { getTranslationKey } from '../../../utils/translations';
 
@@ -43,6 +44,7 @@ export const DeleteItemsDialog = ({
   const { toggleNotification } = useNotification();
   const getErrorMessage = useApiErrorMessage();
   const [bulkDeleteItems, { isLoading: isDeleting }] = useBulkDeleteItemsMutation();
+  const { getDeleteInfo } = useMediaLibraryApis();
 
   const count = target.fileIds.length + target.folderIds.length;
 
@@ -119,13 +121,16 @@ export const DeleteItemsDialog = ({
           icon={<WarningCircle width="24px" height="24px" fill="danger600" />}
           textAlign="center"
         >
-          <Typography>
-            {formatMessage({
-              id: getTranslationKey('list.bulk-actions.delete.confirm.description.are-you-sure'),
-              defaultMessage:
-                'These items cannot be recovered once deleted, and deleting a folder also deletes everything inside it. If they are currently in use, linked content will break and image containers will be empty.',
-            })}
-          </Typography>
+          <Flex direction="column" alignItems="center" gap={3}>
+            <Typography>
+              {formatMessage({
+                id: getTranslationKey('list.bulk-actions.delete.confirm.description.are-you-sure'),
+                defaultMessage:
+                  'These items cannot be recovered once deleted, and deleting a folder also deletes everything inside it. If they are currently in use, linked content will break and image containers will be empty.',
+              })}
+            </Typography>
+            <InfoItems descriptions={getDeleteInfo()} props={{ items: target }} />
+          </Flex>
         </Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>

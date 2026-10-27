@@ -9,6 +9,7 @@ import type { DragFolderData } from '../../../../types/dnd';
 const mockToggleNotification = jest.fn();
 const mockCopy = jest.fn();
 const mockDeselect = jest.fn();
+let mockFolderActions: unknown[] = [];
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -20,6 +21,18 @@ const mockSelection = () => ({
   deselect: mockDeselect,
   selectedIds: new Set<number>([9, 10]),
   selectedFolderIds: new Set<number>([8]),
+});
+
+jest.mock('../../../../MediaLibraryExtensions', () => {
+  const actual = jest.requireActual('../../../../MediaLibraryExtensions');
+
+  return {
+    ...actual,
+    useMediaLibraryApis: () => ({
+      ...actual.createMediaLibraryApis(),
+      getFolderActions: () => mockFolderActions,
+    }),
+  };
 });
 
 jest.mock('../../hooks/useAssetSelection', () => ({
@@ -45,6 +58,7 @@ const openMenu = async (user: ReturnType<typeof setup>['user']) => {
 describe('FolderActionsMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFolderActions = [];
     mockCopy.mockResolvedValue(true);
   });
 
@@ -383,5 +397,31 @@ describe('FolderActionsMenu', () => {
       await screen.findByRole('menuitem', { name: 'Copy link to folder' })
     ).toBeInTheDocument();
     expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+  });
+
+  it('adds a plugin action that gets the folder, and keeps its modal open after the menu closes', async () => {
+    mockFolderActions = [
+      ({ folder: target }: { folder: Folder }) => ({
+        label: `Share ${target.name}`,
+        dialog: {
+          type: 'modal',
+          title: 'Share dialog',
+          content: ({ onClose }: { onClose: () => void }) => (
+            <button onClick={onClose}>Done</button>
+          ),
+        },
+      }),
+    ];
+
+    const { user } = setup();
+    await openMenu(user);
+    await user.click(await screen.findByRole('menuitem', { name: 'Share Photos' }));
+
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Share dialog' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+
+    expect(screen.queryByRole('dialog', { name: 'Share dialog' })).not.toBeInTheDocument();
   });
 });

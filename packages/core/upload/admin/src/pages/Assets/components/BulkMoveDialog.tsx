@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { InfoItems, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Field,
@@ -14,6 +14,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
+import { useMediaLibraryApis } from '../../../MediaLibraryExtensions';
 import {
   useBulkMoveMutation,
   useGetFolderQuery,
@@ -64,6 +65,7 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
     isError: isStructureError,
   } = useGetFolderStructureQuery(undefined, { skip: !open });
   const [bulkMove, { isLoading: isMoving }] = useBulkMoveMutation();
+  const { getMoveInfo } = useMediaLibraryApis();
 
   const fileIds = useMemo(
     () => items.filter((item) => item.kind === 'file').map((item) => item.id),
@@ -265,7 +267,12 @@ export const BulkMoveDialog = ({ open, onClose, items, onSuccess }: BulkMoveDial
             })}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>{renderBody()}</Modal.Body>
+        <Modal.Body>
+          <Flex direction="column" alignItems="stretch" gap={4}>
+            {renderBody()}
+            <InfoItems descriptions={getMoveInfo()} props={{ items: { fileIds, folderIds } }} />
+          </Flex>
+        </Modal.Body>
         <Modal.Footer>
           <Flex gap={2} justifyContent="space-between" width="100%">
             <Button variant="tertiary" onClick={onClose} disabled={isMoving} type="button">

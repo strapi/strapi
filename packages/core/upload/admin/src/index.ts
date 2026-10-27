@@ -7,6 +7,7 @@ import { PERMISSIONS } from './constants';
 import { MediaLibraryDialog } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
 import { MediaLibraryInput } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
 import { prefixPluginTranslations } from './legacy/utils/prefixPluginTranslations';
+import { createMediaLibraryApis } from './MediaLibraryExtensions';
 import { pluginId } from './pluginId';
 import { uploadProgressReducer } from './store/uploadProgress';
 import { getTranslationKey } from './utils/translations';
@@ -88,6 +89,7 @@ const admin: Plugin.Config.AdminInput = {
     app.registerPlugin({
       id: pluginId,
       name,
+      apis: createMediaLibraryApis(),
     });
   },
   async registerTrads({ locales }: { locales: string[] }) {
@@ -112,6 +114,8 @@ const admin: Plugin.Config.AdminInput = {
     return Promise.resolve(importedTrads);
   },
 };
+
+export type { MediaItems, MediaLibraryApis } from './MediaLibraryExtensions';
 
 // eslint-disable-next-line import/no-default-export
 export default admin;

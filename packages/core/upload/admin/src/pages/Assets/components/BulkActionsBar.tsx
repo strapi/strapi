@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { DescriptionComponentRenderer, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -18,6 +18,7 @@ import { AI_METADATA_MAX_FILES, isAIMetadataSupportedMime } from '../../../../..
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../../hooks/useTracking';
+import { ActionDialogs, useMediaLibraryApis } from '../../../MediaLibraryExtensions';
 import { useGenerateAiMetadataMutation } from '../../../services/assets';
 import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
 import { emptyItemLocations, type ItemLocations } from '../../../utils/itemLocations';
@@ -179,6 +180,8 @@ export const BulkActionsBar = ({
   const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
+  const { getBulkActions } = useMediaLibraryApis();
+  const [openAction, setOpenAction] = useState<string | null>(null);
   // The delete request lives in DeleteItemsDialog; the bar mirrors its pending
   // state so the rest of the controls stay disabled for the duration.
   const [isDeleting, setIsDeleting] = useState(false);
@@ -224,6 +227,10 @@ export const BulkActionsBar = ({
     selectAll(renderedKeys);
   };
   const isBusy = isDeleting || isGeneratingMetadata;
+  const items = useMemo(
+    () => ({ fileIds: Array.from(selectedIds), folderIds: Array.from(selectedFolderIds) }),
+    [selectedIds, selectedFolderIds]
+  );
 
   // Stable identity: the move dialog memoizes its destination walk on it. Each
   // item's real location comes from `locations`, so a selection made under a
@@ -430,6 +437,35 @@ export const BulkActionsBar = ({
             </Tooltip>
           )}
 
+          <DescriptionComponentRenderer props={{ items }} descriptions={getBulkActions()}>
+            {(actions) => (
+              <>
+                {actions.map((action) => (
+                  <Button
+                    key={action.id}
+                    size="S"
+                    variant={action.variant === 'danger' ? 'danger-light' : 'tertiary'}
+                    startIcon={action.icon}
+                    disabled={isBusy || action.disabled}
+                    onClick={() => {
+                      action.onClick?.();
+                      if (action.dialog) {
+                        setOpenAction(action.id);
+                      }
+                    }}
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+                <ActionDialogs
+                  actions={actions}
+                  openId={openAction}
+                  onClose={() => setOpenAction(null)}
+                />
+              </>
+            )}
+          </DescriptionComponentRenderer>
+
           <IconButton
             variant="tertiary"
             disabled={isBusy}
@@ -462,10 +498,7 @@ export const BulkActionsBar = ({
           <DeleteItemsDialog
             open={isDeleteDialogOpen}
             onClose={() => setIsDeleteDialogOpen(false)}
-            target={{
-              fileIds: Array.from(selectedIds),
-              folderIds: Array.from(selectedFolderIds),
-            }}
+            target={items}
             onSuccess={clear}
             onPendingChange={setIsDeleting}
           />

@@ -6,11 +6,24 @@ import { BulkMoveDialog } from '../BulkMoveDialog';
 import type { DragItemData } from '../../../../types/dnd';
 
 const mockToggleNotification = jest.fn();
+let mockMoveInfo: unknown[] = [];
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
 }));
+
+jest.mock('../../../../MediaLibraryExtensions', () => {
+  const actual = jest.requireActual('../../../../MediaLibraryExtensions');
+
+  return {
+    ...actual,
+    useMediaLibraryApis: () => ({
+      ...actual.createMediaLibraryApis(),
+      getMoveInfo: () => mockMoveInfo,
+    }),
+  };
+});
 
 const folderStructure = [
   {
@@ -33,6 +46,23 @@ const setup = (items: DragItemData[], onSuccess = jest.fn()) => ({
 describe('BulkMoveDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockMoveInfo = [];
+  });
+
+  it('shows the info items that plugins give for the moved items', async () => {
+    useFolderStructure();
+    mockMoveInfo = [
+      ({ items }: { items: { fileIds: number[]; folderIds: number[] } }) => ({
+        label: 'Visible in:',
+        value: `${items.fileIds.join()} / ${items.folderIds.join()}`,
+      }),
+    ];
+    setup([
+      { kind: 'file', id: 11, name: 'a.png', folderId: null },
+      { kind: 'folder', id: 7, name: 'Photos', parentId: null },
+    ]);
+
+    expect(await screen.findByText('11 / 7')).toBeInTheDocument();
   });
 
   it('derives the request payload from the items, not from the selection', async () => {

@@ -10,6 +10,19 @@ import type { File } from '../../../../../../shared/contracts/files';
 const mockToggleNotification = jest.fn();
 const mockTrackUsage = jest.fn();
 let mockAiMetadataEnabled = false;
+let mockBulkActions: unknown[] = [];
+
+jest.mock('../../../../MediaLibraryExtensions', () => {
+  const actual = jest.requireActual('../../../../MediaLibraryExtensions');
+
+  return {
+    ...actual,
+    useMediaLibraryApis: () => ({
+      ...actual.createMediaLibraryApis(),
+      getBulkActions: () => mockBulkActions,
+    }),
+  };
+});
 
 jest.mock('../../../../hooks/useAIMetadataEnabled', () => ({
   ...jest.requireActual('../../../../hooks/useAIMetadataEnabled'),
@@ -83,6 +96,23 @@ describe('BulkActionsBar', () => {
     jest.clearAllMocks();
     mockAiMetadataEnabled = false;
     mockIsGeneratingMetadata = false;
+    mockBulkActions = [];
+  });
+
+  it('adds a plugin action that gets the selected files and folders', async () => {
+    mockBulkActions = [
+      ({ items }: { items: { fileIds: number[]; folderIds: number[] } }) => ({
+        label: `Share ${items.fileIds.join()} and ${items.folderIds.join()}`,
+        dialog: { type: 'modal', title: 'Share dialog', content: 'Pick the spaces' },
+      }),
+    ];
+    const { user } = setup();
+
+    await user.click(screen.getByRole('button', { name: 'Toggle asset 1' }));
+    await user.click(screen.getByRole('button', { name: 'Toggle folder 9' }));
+    await user.click(await screen.findByRole('button', { name: 'Share 1 and 9' }));
+
+    expect(screen.getByRole('dialog', { name: 'Share dialog' })).toBeInTheDocument();
   });
 
   it('is visible with a selection and no details param', async () => {
