@@ -12,7 +12,7 @@ const {
   getCurrentTestApps,
   setupTestEnvironment,
 } = require('../utils/runners/shared-setup');
-const { runPlaywright } = require('../utils/runners/browser-runner');
+const { buildAdmin, runPlaywright } = require('../utils/runners/browser-runner');
 const {
   loadDomainConfigs,
   calculateTestAppsRequired,
@@ -180,6 +180,10 @@ yargs
           // Git baseline: single commit during `setupTestApps` when apps are generated (`commitE2eBaseline`).
           // Between tests, `resetFiles` → `git reset --hard` + `git clean -fd` only. No commits here.
           const testAppsToSpawn = testAppPaths.length;
+
+          // Every domain starts its app with `--no-build-admin`, so build the panel once here,
+          // with the same environment (edition, feature flags) the app will run with.
+          await Promise.all(testAppPaths.map((testAppPath) => buildAdmin({ testAppPath })));
 
           // Now chunk domains and run tests
           const chunkedDomains = selectedDomains.reduce((acc, _, i) => {
