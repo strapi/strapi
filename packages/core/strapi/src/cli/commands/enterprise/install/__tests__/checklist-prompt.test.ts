@@ -1,10 +1,6 @@
 import { PassThrough } from 'node:stream';
 
-import {
-  promptChecklist,
-  type ChecklistChoice,
-  type ChecklistLockedGroup,
-} from '../checklist-prompt';
+import { promptChecklist, type ChecklistChoice, type ChecklistFooter } from '../checklist-prompt';
 import { PromptCancelledError } from '../errors';
 import { CONTACT_SALES_URL, NOT_LICENSED_MESSAGE } from './test-helpers';
 
@@ -25,15 +21,15 @@ const choices: ChecklistChoice[] = [
   },
 ];
 
-const lockedGroup: ChecklistLockedGroup = {
+const footer: ChecklistFooter = {
   heading: 'Not in your license. Contact Sales.',
-  choices: [{ name: 'Plugin D  Does things.', disabled: 'not in your license' }],
+  lines: ['  ✕ Plugin D  Does things.'],
 };
 
 const startPrompt = (
   promptChoices: ChecklistChoice[] = choices,
   columns = 120,
-  promptLockedGroup?: ChecklistLockedGroup
+  promptFooter?: ChecklistFooter
 ) => {
   const input = new PassThrough() as unknown as NodeJS.ReadStream;
   const output = new PassThrough() as unknown as NodeJS.WriteStream;
@@ -46,7 +42,7 @@ const startPrompt = (
   const answer = promptChecklist({
     message: 'Which plugins?',
     choices: promptChoices,
-    lockedGroup: promptLockedGroup,
+    footer: promptFooter,
     input,
     output,
   });
@@ -135,8 +131,8 @@ describe('promptChecklist', () => {
     await prompt.cancel();
   });
 
-  it('shows the locked group under its heading, after the choices and before Submit', async () => {
-    const prompt = startPrompt(choices, 120, lockedGroup);
+  it('shows the footer under its heading, after the choices and before Submit', async () => {
+    const prompt = startPrompt(choices, 120, footer);
 
     expect(prompt.screen()).toBe(
       [
@@ -156,8 +152,8 @@ describe('promptChecklist', () => {
     await prompt.cancel();
   });
 
-  it('never lands on a locked row, and never returns one', async () => {
-    const prompt = startPrompt(choices, 120, lockedGroup);
+  it('never lands on a footer line', async () => {
+    const prompt = startPrompt(choices, 120, footer);
 
     prompt.press(KEYS.down, KEYS.down);
     expect(prompt.screen()).toContain('❯ Submit');
@@ -174,7 +170,7 @@ describe('promptChecklist', () => {
 
   it('wraps a long heading on words, so the link is never cut', async () => {
     const prompt = startPrompt(choices, 40, {
-      ...lockedGroup,
+      ...footer,
       heading: NOT_LICENSED_MESSAGE,
     });
 
@@ -186,7 +182,7 @@ describe('promptChecklist', () => {
 
   it('splits a word longer than a narrow terminal, so the link is never cut', async () => {
     const prompt = startPrompt(choices, 25, {
-      ...lockedGroup,
+      ...footer,
       heading: NOT_LICENSED_MESSAGE,
     });
 
@@ -202,7 +198,7 @@ describe('promptChecklist', () => {
     'splits a long word of %s, two columns wide each, on whole characters',
     async (character) => {
       const prompt = startPrompt(choices, 25, {
-        ...lockedGroup,
+        ...footer,
         heading: `Not in your license. ${character.repeat(30)}`,
       });
 
@@ -222,7 +218,7 @@ describe('promptChecklist', () => {
 
   it('wraps words of wide characters by the columns they take', async () => {
     const prompt = startPrompt(choices, 25, {
-      ...lockedGroup,
+      ...footer,
       heading: `${'中'.repeat(6)} ${'中'.repeat(4)} ${'中'.repeat(6)}`,
     });
 

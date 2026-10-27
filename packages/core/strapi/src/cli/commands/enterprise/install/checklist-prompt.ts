@@ -12,9 +12,9 @@ export interface ChecklistChoice {
   disabled?: string;
 }
 
-export interface ChecklistLockedGroup {
+export interface ChecklistFooter {
   heading: string;
-  choices: ChecklistChoice[];
+  lines: string[];
 }
 
 const SUBMIT_LABEL = 'Submit';
@@ -40,8 +40,6 @@ const splitToWidth = (text: string, width: number): string[] =>
 const fitWidth = (text: string, width: number): string =>
   stringWidth(text) <= width ? text : `${splitToWidth(text, width - 1)[0] ?? ''}…`;
 
-export const formatLockedChoice = (choice: ChecklistChoice): string => `  ✕ ${choice.name}`;
-
 const wrapWords = (text: string, width: number): string[] =>
   text.split(' ').reduce<string[]>((lines, word) => {
     const lastLine = lines[lines.length - 1];
@@ -58,13 +56,13 @@ const wrapWords = (text: string, width: number): string[] =>
 export const promptChecklist = ({
   message,
   choices,
-  lockedGroup,
+  footer,
   input = process.stdin,
   output = process.stdout,
 }: {
   message: string;
   choices: ChecklistChoice[];
-  lockedGroup?: ChecklistLockedGroup;
+  footer?: ChecklistFooter;
   input?: NodeJS.ReadStream;
   output?: NodeJS.WriteStream;
 }): Promise<string[]> =>
@@ -92,14 +90,12 @@ export const promptChecklist = ({
       return isActive ? `${chalk.cyan('❯')} ${box} ${chalk.cyan(name)}` : `  ${box} ${name}`;
     };
 
-    const renderLockedGroup = (): string[] =>
-      lockedGroup
+    const renderFooter = (): string[] =>
+      footer
         ? [
             '',
-            ...wrapWords(lockedGroup.heading, width() - 2).map((line) => `  ${line}`),
-            ...lockedGroup.choices.map((choice) =>
-              chalk.dim(fitWidth(formatLockedChoice(choice), width()))
-            ),
+            ...wrapWords(footer.heading, width() - 2).map((line) => `  ${line}`),
+            ...footer.lines.map((line) => chalk.dim(fitWidth(line, width()))),
           ]
         : [];
 
@@ -121,7 +117,7 @@ export const promptChecklist = ({
 
     const question = chalk.bold(message);
     const render = () =>
-      draw([question, ...choices.map(renderChoice), ...renderLockedGroup(), '', renderSubmit()]);
+      draw([question, ...choices.map(renderChoice), ...renderFooter(), '', renderSubmit()]);
 
     const stop = () => {
       input.removeListener('keypress', onKeypress);

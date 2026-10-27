@@ -1,5 +1,5 @@
 import type { EnterprisePluginEntry } from './discovery';
-import { formatLockedChoice, promptChecklist, type ChecklistChoice } from './checklist-prompt';
+import { promptChecklist, type ChecklistChoice, type ChecklistFooter } from './checklist-prompt';
 import { resolvePluginStatus } from './plugin-status';
 import type { PackumentLookup } from './registry';
 import { isPrerelease } from './versions';
@@ -31,6 +31,11 @@ type PluginRowState =
 export type PluginRow = { entry: EnterprisePluginEntry } & PluginRowState;
 
 export type SelectableRow = Extract<PluginRow, { state: 'upgrade' | 'install' }>;
+
+type ChecklistRow = Exclude<PluginRow, { state: 'locked' | 'hidden' }>;
+
+const isChecklistRow = (row: PluginRow): row is ChecklistRow =>
+  row.state !== 'locked' && row.state !== 'hidden';
 
 export const buildPluginRow = ({
   entry,
@@ -104,10 +109,15 @@ const describeUpgrade = (row: Extract<PluginRow, { state: 'upgrade' }>): string 
   return row.isMajorUpgrade ? '[major upgrade]' : '[upgrade]';
 };
 
-export const toCheckboxChoice = (row: PluginRow): ChecklistChoice => {
-  const { displayName, packageName, kind } = row.entry;
+const describeLabel = ({ displayName, packageName, kind }: EnterprisePluginEntry): string => {
   const kindTag = kind && kind !== 'plugin' ? ` [${kind}]` : '';
-  const label = `${displayName} (${packageName})${kindTag}`;
+
+  return `${displayName} (${packageName})${kindTag}`;
+};
+
+export const toCheckboxChoice = (row: ChecklistRow): ChecklistChoice => {
+  const { displayName } = row.entry;
+  const label = describeLabel(row.entry);
   // The note is a sentence of its own, such as "1.3.0 is available but requires Strapi ^5.56.0."
   const noteSuffix = (note?: string) => (note ? `  ${note}` : '');
 
@@ -140,13 +150,11 @@ export const toCheckboxChoice = (row: PluginRow): ChecklistChoice => {
       return { name: label, disabled: `requires Strapi ${row.requiredStrapiRange}` };
     case 'no-stable-release':
       return { name: label, disabled: 'no stable release yet' };
-    case 'locked':
-      return {
-        name: row.entry.summary ? `${label}  ${row.entry.summary}` : label,
-        disabled: 'not in your license',
-      };
-    default:
-      return { name: label, disabled: 'unavailable' };
+    default: {
+      const unexpectedRow: never = row;
+
+      return unexpectedRow;
+    }
   }
 };
 
@@ -159,18 +167,24 @@ export const orderVisibleRows = (rows: PluginRow[]): PluginRow[] =>
 export const describeLockedGroup = (notLicensedMessage?: string): string =>
   notLicensedMessage || 'Not in your license.';
 
-const toLockedChoices = (rows: PluginRow[]): ChecklistChoice[] =>
-  rows.filter((row) => row.state === 'locked').map(toCheckboxChoice);
+const toLockedFooter = (
+  rows: PluginRow[],
+  notLicensedMessage?: string
+): ChecklistFooter | undefined => {
+  const lines = rows
+    .filter((row) => row.state === 'locked')
+    .map(({ entry }) => `  ✕ ${describeLabel(entry)}${entry.summary ? `  ${entry.summary}` : ''}`);
+
+  return lines.length > 0 ? { heading: describeLockedGroup(notLicensedMessage), lines } : undefined;
+};
 
 export const describeLockedRows = (
   rows: PluginRow[],
   notLicensedMessage?: string
 ): string | undefined => {
-  const lockedChoices = toLockedChoices(rows);
+  const footer = toLockedFooter(rows, notLicensedMessage);
 
-  return lockedChoices.length > 0
-    ? [describeLockedGroup(notLicensedMessage), ...lockedChoices.map(formatLockedChoice)].join('\n')
-    : undefined;
+  return footer && [footer.heading, ...footer.lines].join('\n');
 };
 
 export const promptForPlugins = (
@@ -178,14 +192,10 @@ export const promptForPlugins = (
   notLicensedMessage?: string
 ): Promise<string[]> => {
   const visibleRows = orderVisibleRows(rows);
-  const lockedChoices = toLockedChoices(visibleRows);
 
   return promptChecklist({
     message: 'Which Enterprise plugins do you want to install or upgrade?',
-    choices: visibleRows.filter((row) => row.state !== 'locked').map(toCheckboxChoice),
-    lockedGroup:
-      lockedChoices.length > 0
-        ? { heading: describeLockedGroup(notLicensedMessage), choices: lockedChoices }
-        : undefined,
+    choices: visibleRows.filter(isChecklistRow).map(toCheckboxChoice),
+    footer: toLockedFooter(visibleRows, notLicensedMessage),
   });
 };
