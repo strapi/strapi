@@ -329,6 +329,85 @@ describe('generateServicesDefinitions', () => {
     });
   });
 
+  test('types a JS source from its sibling declaration file, or from the JS file with `allowJs`', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/api/article/services/contract.js': 'module.exports = () => ({ find: () => 1 });',
+        'src/api/article/services/contract.d.ts':
+          'export type ServiceContract = { find(): number };\ndeclare const service: () => ServiceContract;\nexport default service;',
+        'src/api/article/services/declared.js': 'module.exports = () => ({ find: () => 1 });',
+        'src/api/article/services/declared.d.ts':
+          'declare const service: () => { find(): string };\nexport = service;',
+        'src/api/article/services/inferred.js':
+          'module.exports = () => ({ find: () => /** @type {const} */ ("found") });',
+      },
+      ['api::article.contract', 'api::article.declared', 'api::article.inferred']
+    );
+    roots.push(root);
+
+    const { output } = await generateServicesDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+      allowJs: true,
+    });
+
+    expect(normalize(output)).toContain(
+      "'api::article.contract': ServiceContractOf<import('../../src/api/article/services/contract.js').ServiceContract>"
+    );
+    // The sources registered without a contract are inferred, JS ones included
+    expect(normalize(output)).toContain(
+      `interface InferredServices { 'api::article.declared': true 'api::article.inferred': true }`
+    );
+
+    await outputFile(path.join(pwd, 'services.ts'), output);
+    await outputFile(
+      path.join(root, 'check.ts'),
+      'export declare const registry: Strapi.Registries.AppServices;'
+    );
+
+    // The template's compiler options (packages/cli/create-strapi-app/templates/vanilla/tsconfig.json)
+    const program = ts.createProgram({
+      rootNames: [path.join(pwd, 'services.ts'), path.join(root, 'check.ts')],
+      options: {
+        noEmit: true,
+        strict: true,
+        noUnusedLocals: true,
+        esModuleInterop: true,
+        allowJs: true,
+        types: [],
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
+      },
+    });
+    const diagnostics = ts
+      .getPreEmitDiagnostics(program)
+      .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+    expect(diagnostics).toEqual([]);
+
+    // Printed rather than checked with conditional types, which an error type would satisfy
+    const checker = program.getTypeChecker();
+    const check = program.getSourceFile(path.join(root, 'check.ts'))!;
+    const [declaration] = (check.statements[0] as ts.VariableStatement).declarationList
+      .declarations;
+    const registry = checker.getTypeAtLocation(declaration.name);
+    const values = Object.fromEntries(
+      checker
+        .getPropertiesOfType(registry)
+        .map((property) => [
+          property.name,
+          checker.typeToString(checker.getTypeOfSymbolAtLocation(property, check)),
+        ])
+    );
+
+    // The declaration file wins over the JS file
+    expect(values).toEqual({
+      'api::article.contract': 'ServiceContract',
+      'api::article.declared': '{ find(): string; }',
+      'api::article.inferred': '{ find: () => "found"; }',
+    });
+  });
+
   test('emits no helper when every TypeScript source is CommonJS-style', async () => {
     const { output } = await generate(
       { 'src/api/article/services/commonjs.ts': 'module.exports = () => ({ find: () => 1 });' },

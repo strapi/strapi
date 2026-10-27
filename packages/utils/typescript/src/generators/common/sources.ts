@@ -183,10 +183,37 @@ export const filterRegisteredSources = (
 };
 
 /**
- * Application tsconfigs do not enable `allowJs`, so the import of a JS source does not resolve and is
- * an error type. Unlike `any`, conditional types cannot map it to `unknown`.
+ * Whether a source is a TypeScript file, which its import resolves to. The import of a JS source
+ * resolves to the file `typesFileOf` finds, if any.
  */
 export const isTypedSource = (source: AppModuleSource) => path.extname(source.file) === '.ts';
+
+/**
+ * The file TypeScript reads for the import of a source, or `undefined` when there is none:
+ * - a TypeScript source itself;
+ * - for a JS source, a sibling `<name>.d.ts`, which the import resolves to first, with or without
+ *   `allowJs`;
+ * - else the JS source itself when the application's tsconfig enables `allowJs`: TypeScript infers
+ *   the type of its module, JSDoc included.
+ *
+ * Without either, the import of a JS source does not resolve: an error type, which no conditional
+ * type maps to `unknown`. In a TypeScript application, a JS source only reaches the compiled
+ * application, and so the registries, with `allowJs`; a JavaScript application loads it from `src`
+ * and has no tsconfig.
+ */
+const typesFileOf = async (source: AppModuleSource, allowJs: boolean) => {
+  if (isTypedSource(source) === true) {
+    return source.file;
+  }
+
+  const declarationFile = `${source.file.slice(0, -path.extname(source.file).length)}.d.ts`;
+
+  if ((await pathExists(declarationFile)) === true) {
+    return declarationFile;
+  }
+
+  return allowJs === true ? source.file : undefined;
+};
 
 const hasModifier = (statement: ts.Statement, kind: ts.ModifierSyntaxKind) =>
   ts.canHaveModifiers(statement) &&
@@ -341,21 +368,83 @@ export type ModuleShape = 'default' | 'export-equals' | 'commonjs' | 'no-default
  * A source with its top-level statements and module shape (see `scanSources`)
  */
 export type ScannedAppModuleSource = AppModuleSource & {
-  // Undefined when the source is not read: a JS source, or a file that cannot be read
-  module?: { shape: ModuleShape; statements: ts.NodeArray<ts.Statement> };
+  // Undefined when the source is not read: a JS source without a types file, or a file that cannot
+  // be read
+  module?: {
+    // The file TypeScript reads for the source's import (see `typesFileOf`)
+    file: string;
+    shape: ModuleShape;
+    statements: ts.NodeArray<ts.Statement>;
+    // Whether TypeScript types the `module.exports` of a `commonjs` module (see
+    // `typesCommonJsExports`)
+    typedExports: boolean;
+  };
 };
+
+/**
+ * Whether an expression is `module.exports`
+ */
+const isModuleExports = (expression: ts.Expression) =>
+  ts.isPropertyAccessExpression(expression) &&
+  ts.isIdentifier(expression.expression) &&
+  expression.expression.text === 'module' &&
+  expression.name.text === 'exports';
+
+/**
+ * The target of a top-level assignment statement `<target> = <value>`, if the statement is one
+ */
+const assignmentTargetOf = (statement: ts.Statement) =>
+  ts.isExpressionStatement(statement) &&
+  ts.isBinaryExpression(statement.expression) &&
+  statement.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken
+    ? statement.expression.left
+    : undefined;
 
 /**
  * Whether a top-level statement is `module.exports = <value>`
  */
-const isModuleExportsAssignment = (statement: ts.Statement) =>
-  ts.isExpressionStatement(statement) &&
-  ts.isBinaryExpression(statement.expression) &&
-  statement.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
-  ts.isPropertyAccessExpression(statement.expression.left) &&
-  ts.isIdentifier(statement.expression.left.expression) &&
-  statement.expression.left.expression.text === 'module' &&
-  statement.expression.left.name.text === 'exports';
+const isModuleExportsAssignment = (statement: ts.Statement) => {
+  const target = assignmentTargetOf(statement);
+
+  return target !== undefined && isModuleExports(target) === true;
+};
+
+/**
+ * Whether a top-level statement assigns CommonJS exports: `module.exports = <value>`,
+ * `module.exports.<name> = <value>` or `exports.<name> = <value>`
+ */
+const isCommonJsExportAssignment = (statement: ts.Statement) => {
+  const target = assignmentTargetOf(statement);
+
+  if (target === undefined) {
+    return false;
+  }
+
+  if (isModuleExports(target) === true) {
+    return true;
+  }
+
+  return (
+    ts.isPropertyAccessExpression(target) &&
+    (isModuleExports(target.expression) === true ||
+      (ts.isIdentifier(target.expression) && target.expression.text === 'exports'))
+  );
+};
+
+/**
+ * Whether TypeScript types the `module.exports` of a parsed `commonjs` module, which the loaders
+ * register: only in a JS file without ECMAScript module syntax, which TypeScript reads as a
+ * CommonJS module once it assigns exports. TypeScript does not type `module.exports` in a TypeScript
+ * file, ignores it next to ECMAScript module syntax, and the import of a JS file without exports
+ * fails with TS2306.
+ *
+ * Only top-level assignments are read: a file that assigns its exports in a nested block registers
+ * `unknown`.
+ */
+const typesCommonJsExports = (sourceFile: ts.SourceFile) =>
+  path.extname(sourceFile.fileName) === '.js' &&
+  ts.isExternalModule(sourceFile) === false &&
+  sourceFile.statements.some(isCommonJsExportAssignment) === true;
 
 /**
  * Whether a top-level statement exports a runtime value as `default`: `export default <expression>`,
@@ -420,53 +509,70 @@ const moduleShapeOf = (sourceFile: ts.SourceFile): ModuleShape => {
   return statements.some(exportsDefaultValue) === true ? 'default' : 'no-default';
 };
 
+export type ScanOptions = {
+  // Whether the application's tsconfig enables `allowJs` (see `typesFileOf`)
+  allowJs?: boolean;
+};
+
 /**
- * Parse each TypeScript source once, on its own, to read its module shape (see `moduleTypeOf`) and
- * its type exports (see `findTypeExports`) from its top-level statements.
+ * Parse the file TypeScript reads for each source's import once (see `typesFileOf`), on its own, to
+ * read its module shape (see `moduleTypeOf`) and its type exports (see `findTypeExports`) from its
+ * top-level statements. A JS source is read from its sibling `<name>.d.ts`, or from the JS file
+ * itself with `allowJs`.
  *
  * No program is built: type generation runs on every `strapi develop` start, before the
  * compilation, and a program would need the application's tsconfig and its whole dependency graph.
  *
- * JS sources are not read: their import does not resolve without `allowJs` (see `isTypedSource`). A
- * source that cannot be read is kept unread with a warning: it registers the type its import
- * provides, without a contract, rather than stopping the generation.
+ * A JS source without a types file is not read: its import does not resolve. A source that cannot
+ * be read is kept unread with a warning: a TypeScript source registers the type its import
+ * provides, without a contract, rather than stopping the generation; a JS source registers
+ * `unknown`.
  */
 export const scanSources = async (
   sources: AppModuleSource[],
-  logger: Logger
+  logger: Logger,
+  { allowJs = false }: ScanOptions = {}
 ): Promise<ScannedAppModuleSource[]> =>
   Promise.all(
     sources.map(async (source): Promise<ScannedAppModuleSource> => {
-      // TODO @Nico A JS source could get a contract from a sibling `<name>.d.ts` that exports it:
-      // the extension-less import of the source resolves to that file without `allowJs`.
-      if (isTypedSource(source) === false) {
+      const file = await typesFileOf(source, allowJs);
+
+      if (file === undefined) {
+        logger.debug(
+          `${source.uid}: ${source.file} has no sibling declaration file and \`allowJs\` is off, its import does not resolve`
+        );
         return source;
       }
 
       let content: string;
 
       try {
-        content = await fs.promises.readFile(source.file, 'utf8');
+        content = await fs.promises.readFile(file, 'utf8');
       } catch (error) {
         logger.warn(
-          `Could not read ${source.file} to find its module shape and type exports, registering ${source.uid} from its import: ${
-            error instanceof Error ? error.message : String(error)
-          }`
+          `Could not read ${file} to find its module shape and type exports, registering ${source.uid} ${
+            isTypedSource(source) === true ? 'from its import' : 'as unknown'
+          }: ${error instanceof Error ? error.message : String(error)}`
         );
         return source;
       }
 
       const sourceFile = ts.createSourceFile(
-        source.file,
+        file,
         content,
         ts.ScriptTarget.Latest,
         false,
-        ts.ScriptKind.TS
+        path.extname(file) === '.js' ? ts.ScriptKind.JS : ts.ScriptKind.TS
       );
 
       return {
         ...source,
-        module: { shape: moduleShapeOf(sourceFile), statements: sourceFile.statements },
+        module: {
+          file,
+          shape: moduleShapeOf(sourceFile),
+          statements: sourceFile.statements,
+          typedExports: typesCommonJsExports(sourceFile),
+        },
       };
     })
   );
@@ -537,19 +643,27 @@ export type AppModuleContract = {
 
 /**
  * Whether the generated file can import a source to read the type of its module (see
- * `moduleTypeOf`): a TypeScript source, unless it is CommonJS-style.
+ * `moduleTypeOf`): a source with a types file (see `typesFileOf`), unless it is a `commonjs` module
+ * whose exports TypeScript does not type (see `typesCommonJsExports`), and a TypeScript source that
+ * could not be read.
  */
-export const hasModuleType = (source: ScannedAppModuleSource) =>
-  isTypedSource(source) === true && source.module?.shape !== 'commonjs';
+export const hasModuleType = (source: ScannedAppModuleSource) => {
+  if (source.module === undefined) {
+    return isTypedSource(source);
+  }
+
+  return source.module.shape !== 'commonjs' || source.module.typedExports === true;
+};
 
 /**
  * The type of a source's module as `importDefault` returns it, which the generated helpers read
  * through its `default` member, or `undefined` when the generated file cannot import it:
- * - `typeof import('<source>')` for an ECMAScript module, and for a source that could not be read;
- * - `{ default: typeof import('<source>') }` for `export =`: the type of such a module is its
- *   assigned value, which `importDefault` wraps;
- * - `undefined` for a JS source, whose import is an error type without `allowJs` (see
- *   `isTypedSource`), and for a CommonJS-style TypeScript source: TypeScript does not type
+ * - `typeof import('<source>')` for an ECMAScript module, and for a TypeScript source that could not
+ *   be read;
+ * - `{ default: typeof import('<source>') }` for `export =`, and for a JS CommonJS module: the type
+ *   of such a module is its assigned value, or its exports object, which `importDefault` wraps;
+ * - `undefined` for a JS source without a types file, whose import is an error type (see
+ *   `typesFileOf`), and for a CommonJS-style TypeScript source: TypeScript does not type
  *   `module.exports` in a `.ts` file, and importing a file without ECMAScript module syntax fails
  *   with TS2306 in the generated file, which stops the `strapi develop` compilation.
  *
@@ -560,7 +674,7 @@ export const moduleTypeOf = (source: ScannedAppModuleSource): ts.TypeNode | unde
     return undefined;
   }
 
-  if (source.module?.shape === 'export-equals') {
+  if (source.module?.shape === 'export-equals' || source.module?.shape === 'commonjs') {
     return factory.createTypeLiteralNode([
       factory.createPropertySignature(undefined, 'default', undefined, typeofImport(source)),
     ]);
@@ -573,7 +687,8 @@ export const moduleTypeOf = (source: ScannedAppModuleSource): ts.TypeNode | unde
  * The type a service or controller source registers:
  * - `<contract helper><import('<source>').<contract export>>` when the module exports the contract;
  * - `<helper><module type>` otherwise (see `moduleTypeOf`), which infers it from the default export;
- * - `unknown` for a source without a module type: a JS or a CommonJS-style source.
+ * - `unknown` for a source without a module type: a JS source without a types file, or a
+ *   CommonJS-style TypeScript source.
  *
  * The contract does not depend on the default export, so the factory can be checked against its own
  * uid (`Core.ServiceFactory<uid>`). The inferred type does: the generators list those uids in a
@@ -870,6 +985,10 @@ export const emitRegistryDefinitions = async <TSource extends AppModuleSource>(
  *
  * Services and controllers keep such sources: their helpers resolve them to `unknown`, which a lookup
  * of an unregistered uid resolves to as well.
+ *
+ * A JS source typed from its sibling declaration file is kept: the shape of the declaration file
+ * does not tell what the JS module registers (a CommonJS module registers its exports object). Its
+ * helpers resolve it to `unknown` when the declaration file has no default export.
  */
 export const omitSourcesWithoutDefault = <TSource extends ScannedAppModuleSource>(
   sources: TSource[],
@@ -877,7 +996,7 @@ export const omitSourcesWithoutDefault = <TSource extends ScannedAppModuleSource
   logger: Logger
 ): TSource[] =>
   sources.filter((source) => {
-    if (source.module?.shape !== 'no-default') {
+    if (source.module?.shape !== 'no-default' || source.module.file !== source.file) {
       return true;
     }
 

@@ -285,4 +285,9 @@ export interface GeneratorOptions {
    * global `Strapi.Registries` form instead of the `Public` form.
    */
   strict?: boolean;
+  /**
+   * Whether the application's tsconfig enables `allowJs`. The generators of application modules then
+   * type a JS source without a sibling declaration file from the JS file itself.
+   */
+  allowJs?: boolean;
 }

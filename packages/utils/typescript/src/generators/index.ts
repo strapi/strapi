@@ -1,9 +1,12 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import chalk from 'chalk';
+import * as ts from 'typescript';
 
 import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
 import { saveDefinitionToFileSystem, createLogger, timer, pathExists } from './utils';
+import type { Logger } from './utils';
+import { getConfigPath } from '../utils';
 import { generateContentTypesDefinitions } from './content-types';
 import { generateComponentsDefinitions } from './components';
 import { generatePluginDefinitions } from './plugins';
@@ -38,6 +41,33 @@ const SOURCE_ARTIFACTS = new Set(['services', 'controllers', 'policies', 'middle
 const LINT_DISABLE_HEADER = '/* eslint-disable */\n/* oxlint-disable */\n';
 
 const isSourceArtifact = (artifact: string) => SOURCE_ARTIFACTS.has(artifact);
+
+/**
+ * Whether the application's tsconfig enables `allowJs`, which lets the generators of application
+ * modules type a JS source from the JS file itself. `false` without a tsconfig (a JavaScript
+ * application) and when the tsconfig has errors, which the compilation reports.
+ *
+ * Not `resolveConfigOptions`, which exits the process on tsconfig errors.
+ */
+const readAllowJs = (appDir: string, logger: Logger) => {
+  const configPath = getConfigPath(appDir);
+
+  if (configPath === undefined) {
+    return false;
+  }
+
+  const parsed = ts.getParsedCommandLineOfConfigFile(configPath, undefined, {
+    ...ts.sys,
+    onUnRecoverableConfigFileDiagnostic: () => undefined,
+  });
+
+  if (parsed === undefined || parsed.errors.length > 0) {
+    logger.debug(`Could not read ${configPath}, typing JS sources without \`allowJs\``);
+    return false;
+  }
+
+  return parsed.options.allowJs === true;
+};
 
 const filenameOf = (artifact: string) =>
   isSourceArtifact(artifact) === true ? `${artifact}.ts` : `${artifact}.d.ts`;
@@ -87,7 +117,18 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
   const registryPwd = path.join(pwd, rootDir, GENERATED_OUT_DIR);
   // Strict mode reads only the global schema registries, so schemas use that form with the opt-in.
   const strict = artifacts.strict === true;
-  const generatorConfig = { strapi, pwd: registryPwd, appDir: pwd, logger, strict };
+
+  const enabledArtifacts = Object.keys(artifacts).filter(
+    (p) => (artifacts as Record<string, boolean>)[p] === true
+  );
+  const disabledArtifacts = Object.keys(artifacts).filter(
+    (p) => (artifacts as Record<string, boolean>)[p] === false && p in GENERATORS
+  );
+
+  // Only the generators of application modules read it
+  const allowJs =
+    enabledArtifacts.some(isSourceArtifact) === true ? readAllowJs(pwd, logger) : false;
+  const generatorConfig = { strapi, pwd: registryPwd, appDir: pwd, logger, strict, allowJs };
 
   const returnWithMessage = () => {
     const nbWarnings = chalk.yellow(`${logger.warnings} warning(s)`);
@@ -101,13 +142,6 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
 
     return reports;
   };
-
-  const enabledArtifacts = Object.keys(artifacts).filter(
-    (p) => (artifacts as Record<string, boolean>)[p] === true
-  );
-  const disabledArtifacts = Object.keys(artifacts).filter(
-    (p) => (artifacts as Record<string, boolean>)[p] === false && p in GENERATORS
-  );
 
   logger.info('Starting the type generation process');
   logger.debug(`Enabled artifacts: ${enabledArtifacts.join(', ')}`);

@@ -38,7 +38,8 @@ export {};
  *         'api::<api>.<controller>': ControllerInstance<typeof import('<relative path to the source>')>;
  *         'api::<api>.<controller>': ControllerContractOf<import('<relative path to the source>').ControllerContract>;
  *         'api::<api>.<export = controller>': ControllerInstance<{ default: typeof import('<relative path to the source>') }>;
- *         'api::<api>.<js or commonjs controller>': unknown;
+ *         'api::<api>.<js commonjs controller>': ControllerInstance<{ default: typeof import('<relative path to the source>') }>;
+ *         'api::<api>.<js controller without types, or commonjs controller>': unknown;
  *       }
  *       interface InferredControllers {
  *         'api::<api>.<controller>': true;
@@ -49,19 +50,20 @@ export {};
  *
  * A controller whose module exports a `ControllerContract` type registers that contract; any other
  * controller registers the type its default export provides, or the value it assigns with
- * `export =`. A JS source registers as `unknown` without an import: without `allowJs` its import is
- * an error type. So does a CommonJS-style TypeScript source (`module.exports = …`), whose import
- * fails (see `moduleTypeOf`). A controller module, a default export and a contract typed `any`
- * register `unknown` too.
+ * `export =`. A JS source is read from its sibling `<name>.d.ts`, else from the JS file itself with
+ * `allowJs` (see `typesFileOf`). Without either, it registers as `unknown` without an import: its
+ * import is an error type. So does a CommonJS-style TypeScript source (`module.exports = …`), whose
+ * import fails (see `moduleTypeOf`). A controller module, a default export and a contract typed
+ * `any` register `unknown` too.
  *
- * `InferredControllers` lists the TypeScript controllers registered without a contract, whose type
- * is read from the factory itself: `Core.ControllerFactory` rejects their uid. It is not emitted when
- * there are none.
+ * `InferredControllers` lists the controllers registered without a contract, whose type is read from
+ * the factory itself: `Core.ControllerFactory` rejects their uid. It is not emitted when there are
+ * none.
  */
 export const generateControllersDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
 ) => {
-  const { strapi, logger, pwd: outDir } = options;
+  const { strapi, logger, pwd: outDir, allowJs } = options;
 
   if (!outDir) {
     throw new Error(
@@ -77,7 +79,8 @@ export const generateControllersDefinitions = async (
   );
   const controllersDefinitions = await scanSources(
     filterRegisteredSources(sources, strapi.controllers, logger),
-    logger
+    logger,
+    { allowJs }
   );
 
   logger.debug(`Found ${controllersDefinitions.length} controllers.`);
