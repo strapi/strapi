@@ -1,7 +1,14 @@
 import * as React from 'react';
 
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
-import { Dialog, IconButton } from '@strapi/design-system';
+import {
+  ConfirmDialog,
+  InfoItems,
+  useAPIErrorHandler,
+  useNotification,
+  type DescriptionComponent,
+  type InfoItemDescription,
+} from '@strapi/admin/strapi-admin';
+import { Dialog, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -11,12 +18,25 @@ import { getTranslation } from '../utils/getTranslation';
 import type { Locale } from '../../../shared/contracts/locales';
 
 /* -------------------------------------------------------------------------------------------------
+ * Info items, added with `app.getPlugin('i18n').apis.addDeleteLocaleInfo([...])` in `bootstrap`
+ * -----------------------------------------------------------------------------------------------*/
+
+type DeleteLocaleInfo = DescriptionComponent<
+  { locale: Pick<Locale, 'id' | 'code' | 'name'> },
+  InfoItemDescription
+>;
+
+const deleteLocaleInfo: DeleteLocaleInfo[] = [];
+
+const addDeleteLocaleInfo = (items: DeleteLocaleInfo[]) => void deleteLocaleInfo.push(...items);
+
+/* -------------------------------------------------------------------------------------------------
  * DeleteLocale
  * -----------------------------------------------------------------------------------------------*/
 
 interface DeleteLocaleProps extends Locale {}
 
-const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
+const DeleteLocale = ({ id, code, name }: DeleteLocaleProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -73,9 +93,16 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
           <Trash />
         </IconButton>
       </Dialog.Trigger>
-      <ConfirmDialog onConfirm={handleConfirm} />
+      <ConfirmDialog onConfirm={handleConfirm}>
+        <Flex direction="column" gap={3}>
+          <Typography>
+            {formatMessage({ id: 'app.confirm.body', defaultMessage: 'Are you sure?' })}
+          </Typography>
+          <InfoItems descriptions={deleteLocaleInfo} props={{ locale: { id, code, name } }} />
+        </Flex>
+      </ConfirmDialog>
     </Dialog.Root>
   );
 };
 
-export { DeleteLocale };
+export { addDeleteLocaleInfo, DeleteLocale };

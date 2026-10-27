@@ -15,6 +15,7 @@ import {
   PublishModalAdditionalInfo,
   UnpublishModalAdditionalInfo,
 } from './components/CMListViewModalsAdditionalInformation';
+import { addDeleteLocaleInfo } from './components/DeleteLocale';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
@@ -77,6 +78,7 @@ export default {
     app.registerPlugin({
       id: pluginId,
       name: pluginId,
+      apis: { addDeleteLocaleInfo },
     });
   },
   bootstrap(app: StrapiApp) {

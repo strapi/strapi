@@ -2,7 +2,7 @@ import { errors } from '@strapi/utils';
 import { render, screen, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { DeleteLocale } from '../DeleteLocale';
+import { addDeleteLocaleInfo, DeleteLocale } from '../DeleteLocale';
 
 import type { Locale } from '../../../../shared/contracts/locales';
 
@@ -65,5 +65,15 @@ describe('DeleteLocale', () => {
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(await screen.findByText('Could not delete locale')).toBeInTheDocument();
+  });
+
+  // Last: the info items stay registered for the rest of the file
+  it('shows the info items that plugins give for the locale', async () => {
+    addDeleteLocaleInfo([({ locale }) => ({ label: `Entries deleted in ${locale.code}` })]);
+    const { user } = render(<DeleteLocale {...LOCALE} />);
+
+    await user.click(screen.getByRole('button', { name: 'Delete English locale' }));
+
+    expect(await screen.findByText('Entries deleted in en')).toBeInTheDocument();
   });
 });
