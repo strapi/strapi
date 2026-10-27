@@ -358,3 +358,42 @@ describe('content-type-builder editContentType draftAndPublish', () => {
     });
   });
 });
+
+describe('content-type-builder createContentType draftAndPublish', () => {
+  beforeEach(() => {
+    (global as any).strapi = {
+      dirs: { app: { api: '/app/src/api', components: '/app/src/components' } },
+      components: {},
+      contentTypes: {},
+    };
+  });
+
+  const create = (infos: Record<string, unknown>) => {
+    const builder = createBuilder();
+    const contentType = builder.createContentType({
+      kind: 'collectionType',
+      singularName: 'article',
+      pluralName: 'articles',
+      displayName: 'Article',
+      attributes: { title: { type: 'string' } },
+      ...infos,
+    });
+    return contentType.schema.options;
+  };
+
+  it('does not set draftAndPublish when the payload does not set it', () => {
+    expect(create({}).draftAndPublish).toBeUndefined();
+  });
+
+  it('uses draftAndPublish from the payload options when the top-level value is not set', () => {
+    expect(create({ options: { draftAndPublish: true } })).toMatchObject({
+      draftAndPublish: true,
+    });
+  });
+
+  it('uses the top-level draftAndPublish when the payload sets it', () => {
+    expect(create({ draftAndPublish: false, options: { draftAndPublish: true } })).toMatchObject({
+      draftAndPublish: false,
+    });
+  });
+});
