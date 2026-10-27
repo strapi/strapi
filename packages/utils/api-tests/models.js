@@ -279,8 +279,10 @@ module.exports = {
 const profile = require('./profile');
 
 if (profile.enabled) {
+  // Every helper takes its options last.
   const modeOf = (args) => {
-    const options = args.find((arg) => arg && typeof arg === 'object' && !Array.isArray(arg)) ?? {};
+    const last = args[args.length - 1];
+    const options = last && typeof last === 'object' && !Array.isArray(last) ? last : {};
     if (options.strapi) return 'shared';
     return options.registerOnly ? 'register-only' : 'boots';
   };
