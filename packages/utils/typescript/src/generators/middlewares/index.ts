@@ -58,8 +58,9 @@ export {};
  * accepts it.
  * A handler with one parameter `(ctx)`, or an untyped `next`, takes `{ strapi }`: a first parameter
  * with the required members of a Koa context (`request`, `response`, `app`) registers `never` too.
- * TODO @Nico a handler whose context is `any` still registers as a factory with an untyped config
- * (`unknown`); an opt-in `defineMiddleware` brand (new factory helpers, D15) would tell them apart
+ * A handler whose context is typed `any` cannot be told apart from a factory with an untyped config:
+ * it registers `unknown`. Exporting the factory typed as `Core.MiddlewareFactory<TConfig>` registers
+ * `TConfig`.
  */
 const generateConfigHelpersDefinition = () => {
   const args = factory.createTypeReferenceNode('TArgs');
