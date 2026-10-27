@@ -48,3 +48,13 @@ coreController satisfies Core.ControllerFactory<'api::article.article'>;
 
 // @ts-expect-error A typo in the UID is not a registered service.
 (() => ({})) satisfies Core.ServiceFactory<'api::articles.article'>;
+
+// Edge cases kept on purpose to test type generation (see the comment of each module).
+// An `export =` service registers the type its factory returns.
+strapi.service('api::legacy.export-equals').ping() satisfies 'pong';
+// @ts-expect-error The inferred service has no other member.
+strapi.service('api::legacy.export-equals').missing();
+// A CommonJS-style `.ts` service registers `unknown`, without an import of its file.
+strapi.service('api::legacy.commonjs-style') satisfies unknown;
+// @ts-expect-error `unknown` has no member.
+strapi.service('api::legacy.commonjs-style').ping();
