@@ -329,6 +329,15 @@ jobs:
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
+      # Per-test timings, to balance the shards by duration instead of by file count.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: ce-e2e-junit-${{ matrix.project }}-${{ strategy.job-index }}
+          path: test-apps/junit-reports/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
+
         # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         id: trunk
@@ -514,6 +523,15 @@ jobs:
           name: ee-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
+
+      # Per-test timings, to balance the shards by duration instead of by file count.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: ee-e2e-junit-${{ matrix.project }}-${{ strategy.job-index }}
+          path: test-apps/junit-reports/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
 
       # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
