@@ -339,7 +339,10 @@ declare global {
         'admin::data-transfer': undefined;
       }
 
-      /** The CE actions, registered at bootstrap (`config/admin-actions.ts`). */
+      /**
+       * The CE actions, registered at bootstrap (`config/admin-actions.ts`), and the EE actions
+       * (`ee/server/src/config/admin-actions.ts`), registered only when their EE feature is enabled.
+       */
       interface PermissionActions {
         'admin::marketplace.read': true;
         'admin::webhooks.create': true;
@@ -375,6 +378,20 @@ declare global {
         'admin::transfer.tokens.update': true;
         'admin::transfer.tokens.regenerate': true;
         'admin::transfer.tokens.delete': true;
+        /** EE: registered only when the `sso` feature is enabled. */
+        'admin::provider-login.read': true;
+        /** EE: registered only when the `sso` feature is enabled. */
+        'admin::provider-login.update': true;
+        /**
+         * EE: registered only when the `audit-logs` feature is enabled. A planned fix will also
+         * require `admin.auditLogs.enabled`, as the audit logs routes already do.
+         */
+        'admin::audit-logs.read': true;
+        /**
+         * EE: registered only when the `audit-logs` feature is enabled. A planned fix will also
+         * require `admin.auditLogs.enabled`, as the audit logs routes already do.
+         */
+        'admin::audit-logs.export': true;
       }
     }
   }

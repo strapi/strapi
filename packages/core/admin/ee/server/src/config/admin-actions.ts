@@ -35,4 +35,4 @@ export default {
       subCategory: 'options',
     },
   ],
-};
+} as const;
