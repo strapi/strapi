@@ -208,7 +208,7 @@ export default function createComponentBuilder() {
         })
         .set('options', {
           ...infos.options,
-          draftAndPublish: infos.draftAndPublish,
+          draftAndPublish: infos.draftAndPublish ?? infos.options?.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config);
@@ -378,6 +378,8 @@ export default function createComponentBuilder() {
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
         .set('options', {
+          // Payloads may omit options keys the CTB does not edit (e.g. populateCreatorFields)
+          ...contentType.schema.options,
           ...infos.options,
           // A payload that does not set draftAndPublish keeps the stored value
           draftAndPublish:
