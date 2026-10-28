@@ -178,7 +178,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
         page.getByRole('gridcell', { name: 'Unpublish', exact: true }).first()
       ).toBeVisible();
       await expect(page.getByRole('gridcell', { name: /^Skipped/ })).toHaveCount(0);
-      await expect(page.getByRole('tab', { name: /^Skipped/ })).toContainText('0');
+      await expect(page.getByRole('tab', { name: 'Skipped (0)', exact: true })).toBeVisible();
       // Nothing was skipped, so there is nothing to carry over to a new release
       await expect(
         page.getByRole('button', { name: 'Create release from skipped', exact: true })
@@ -186,7 +186,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     }
   );
 
-  test('a release with an entry that is not ready is blocked and shows why', async ({
+  test('a release with an entry that is not ready is blocked, shows why and refuses to publish', async ({
     page,
     details,
   }) => {
@@ -198,11 +198,10 @@ describeOnCondition(edition === 'EE')('Release page', () => {
 
     await details.goto(releaseId);
 
-    // Stays clickable: the run re-checks the entries and refuses if any is still not ready
-    await expect(details.publishButton).toBeEnabled();
-    await expect(details.tab('All')).toContainText('2');
-    await expect(details.tab('Ready')).toContainText('1');
-    await expect(details.tab('Not ready')).toContainText('1');
+    await expect(page.getByText('blocked', { exact: true })).toBeVisible();
+    await expect(details.tab('All', 2)).toBeVisible();
+    await expect(details.tab('Ready', 1)).toBeVisible();
+    await expect(details.tab('Not ready', 1)).toBeVisible();
 
     await details.tab('Not ready').click();
     await expect(page).toHaveURL(/filter=notReady/);
@@ -211,8 +210,18 @@ describeOnCondition(edition === 'EE')('Release page', () => {
 
     await details
       .entryRow('Roy Kent')
-      .getByRole('button', { name: 'Not ready to publish' })
+      .getByRole('button', { name: 'Why Roy Kent isn’t ready' })
       .click();
-    await expect(page.getByText(/errors? on fields/)).toBeVisible();
+    const reason = page.getByRole('dialog');
+    await expect(reason.getByText('Not ready: Validation error')).toBeVisible();
+    await expect(reason.getByText('Opponent', { exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(reason).toBeHidden();
+
+    await expect(details.publishButton).toBeEnabled();
+    await details.publishButton.click();
+    await expect(page.locator('[role="alert"]').first()).toBeVisible();
+    await expect(page.getByText('blocked', { exact: true })).toBeVisible();
+    await expect(details.publishButton).toBeVisible();
   });
 });

@@ -449,9 +449,9 @@ describe('Release details tabs, header and rows', () => {
 
     const { user } = renderPage();
 
-    expect(await screen.findByRole('tab', { name: /^All/ })).toHaveTextContent('All3');
-    expect(screen.getByRole('tab', { name: /^Ready/ })).toHaveTextContent('Ready2');
-    expect(screen.getByRole('tab', { name: /^Not ready/ })).toHaveTextContent('Not ready1');
+    expect(await screen.findByRole('tab', { name: 'All (3)' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Ready (2)' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Not ready (1)' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('tab', { name: /^Not ready/ }));
 
@@ -532,13 +532,13 @@ describe('Release details tabs, header and rows', () => {
 
     expect(await screen.findByText('Released 8 of 10 entries', { exact: false })).toBeVisible();
     expect(screen.getByText('2 skipped')).toBeVisible();
-    expect(screen.getByRole('tab', { name: /^All/ })).toHaveTextContent('All10');
-    expect(screen.getByRole('tab', { name: /^Released/ })).toHaveTextContent('Released8');
-    expect(screen.getByRole('tab', { name: /^Skipped/ })).toHaveTextContent('Skipped2');
+    expect(screen.getByRole('tab', { name: 'All (10)' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Released (8)' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Skipped (2)' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Publish' })).not.toBeInTheDocument();
 
     expect(screen.getAllByText('Done')).toHaveLength(2);
-    expect(screen.getByText('Skipped: Waiting on other entries')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Why article 3 was skipped' })).toBeVisible();
     expect(screen.getByRole('gridcell', { name: 'Unpublish' })).toBeVisible();
 
     await user.click(screen.getByRole('tab', { name: /^Skipped/ }));
@@ -552,7 +552,7 @@ describe('Release details tabs, header and rows', () => {
     renderPage('?filter=notReady');
 
     await screen.findByText('Released 8 of 10 entries', { exact: false });
-    expect(actionsRequest).toHaveBeenCalledWith(null);
+    await waitFor(() => expect(actionsRequest).toHaveBeenCalledWith(null));
     expect(actionsRequest).not.toHaveBeenCalledWith('notReady');
     expect(screen.getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true');
   });
@@ -571,8 +571,51 @@ describe('Release details tabs, header and rows', () => {
     renderPage();
 
     expect(await screen.findByText('Deleted entry')).toBeVisible();
-    expect(screen.getByText('Skipped: Validation error')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Details' })).toBeVisible();
+    expect(
+      screen.getByRole('button', {
+        name: 'Why Deleted entry was skipped',
+      })
+    ).toBeVisible();
+  });
+
+  it('opens why an entry isn’t ready from its badge, and steps to the next one', async () => {
+    mockRelease(plannedRelease, [
+      action(1, {
+        isEntryValid: false,
+        reason: {
+          validation: { errors: [{ path: ['title'], message: 'title must be defined.' }] },
+        },
+      }),
+      action(2),
+      action(3, { isEntryValid: false, reason: null }),
+    ]);
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Why article 1 isn’t ready' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('1 of 2 entries not ready')).toBeInTheDocument();
+    expect(within(dialog).getByText('article 1')).toBeInTheDocument();
+    expect(within(dialog).getByText('Title')).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Next' }));
+
+    expect(await within(dialog).findByText('article 3')).toBeInTheDocument();
+    expect(within(dialog).getByText('The entry couldn’t be validated')).toBeInTheDocument();
+  });
+
+  it('names an entry with an empty main field "Untitled", not by its id', async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [
+      action(76, {
+        contentType: { uid: 'api::article.article', displayName: 'Article', mainFieldValue: null },
+      }),
+    ]);
+
+    renderPage();
+
+    expect(await screen.findByText('Untitled')).toBeVisible();
+    expect(screen.queryByRole('gridcell', { name: '76' })).not.toBeInTheDocument();
   });
 
   it("doesn't count anything for a release that failed before the upgrade", async () => {

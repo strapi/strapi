@@ -28,9 +28,14 @@ If the user has the `plugin::content-releases.delete` permissions, a "three dot"
 
 #### View Entry Status
 
-Each entry within a release is assigned a status, indicating its readiness for actions such as Publish/Unpublish or any validation errors present. If the entry has validation errors, a user can use the entry's "three dots" menu to access the "Edit entry" link which navigates directly to the entry in the content manager.
+Each entry within a release shows a status badge (`components/ReleaseActionStatus.tsx`):
 
-Within the CM edit view, users can resolve any identified errors. Upon completion, clicking the "Refresh" button on the release details page updates the status of each entry to reflect any changes made.
+- In a planned release, "Ready" or "Not ready". An unpublish is always ready: nothing is checked.
+- In a release that ran, "Done", "Skipped", or "Unknown" for a release that failed before the upgrade.
+
+"Not ready" and "Skipped" open the reason drawer (`components/EntryReasonDrawer.tsx`). It shows the reason stored with the action (`reason`): each field that failed, by a name built from its path and what's wrong in plain words (`utils/fieldErrors.ts`), the review stage the entry is missing, or the name of the error a run failed on. Previous and Next step through the entries that have a reason, in the table's order. "Go to entry" opens the entry in the Content Manager with its validation errors shown, for a user allowed to read it.
+
+In a planned release, the entry's "three dots" menu also has an "Edit entry" link. In a release that ran, the row's edit icon opens the entry, as there's nothing to remove. Within the CM edit view, users can resolve any identified errors. Upon completion, clicking the "Refresh" button on the release details page updates the status of each entry to reflect any changes made.
 
 #### Publish a release:
 

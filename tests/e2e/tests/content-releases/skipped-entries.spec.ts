@@ -31,19 +31,31 @@ describeOnCondition(edition === 'EE')('Release page - skipped entries', () => {
   test('the page shows what the run did to each entry', async ({ page, details }) => {
     await expect(page.getByText('Released 1 of 3 entries')).toBeVisible();
     await expect(page.getByText('2 skipped', { exact: true })).toBeVisible();
-    await expect(details.tab('All')).toContainText('3');
-    await expect(details.tab('Released')).toContainText('1');
-    await expect(details.tab('Skipped')).toContainText('2');
+    await expect(details.tab('All', 3)).toBeVisible();
+    await expect(details.tab('Released', 1)).toBeVisible();
+    await expect(details.tab('Skipped', 2)).toBeVisible();
 
     await expect(details.entryRow(PUBLISHED).getByText('Done', { exact: true })).toBeVisible();
     for (const name of SKIPPED) {
-      await expect(details.entryRow(name).getByText('Skipped: Validation error')).toBeVisible();
+      await expect(
+        details.entryRow(name).getByRole('button', { name: `Why ${name} was skipped` })
+      ).toBeVisible();
     }
 
-    await details.entryRow(SKIPPED[0]).getByRole('button', { name: 'Details' }).click();
-    await expect(page.getByText(/errors? on fields/)).toBeVisible();
-    await expect(page.getByRole('link', { name: 'See errors' })).toBeVisible();
+    await expect(
+      details.entryRow(SKIPPED[0]).getByRole('link', { name: 'Open entry' })
+    ).toBeVisible();
+
+    await details
+      .entryRow(SKIPPED[0])
+      .getByRole('button', { name: `Why ${SKIPPED[0]} was skipped` })
+      .click();
+    const reason = page.getByRole('dialog');
+    await expect(reason.getByText('Skipped: Validation error')).toBeVisible();
+    await expect(reason.getByText('Opponent', { exact: true })).toBeVisible();
+    await expect(reason.getByRole('link', { name: 'Go to entry' })).toBeVisible();
     await page.keyboard.press('Escape');
+    await expect(reason).toBeHidden();
 
     await details.tab('Skipped').click();
     await expect(page).toHaveURL(/filter=skipped/);

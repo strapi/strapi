@@ -45,13 +45,12 @@ import {
   hasLoadedEveryEntry,
   getSkippedEntriesQuery,
 } from '../components/CreateReleaseFromSkippedDrawer';
-import {
-  EntryValidationPopover,
-  ReleaseActionOutcomeStatus,
-} from '../components/EntryValidationPopover';
+import { EntryLinkButton } from '../components/EntryLinkButton';
+import { EntryReasonDrawer, type EntryReasonDetails } from '../components/EntryReasonDrawer';
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
+import { PlannedActionStatus, ReleasedActionStatus } from '../components/ReleaseActionStatus';
 import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
 import { PERMISSIONS } from '../constants';
 import {
@@ -485,7 +484,7 @@ const RunSummary = ({ release, scheduledText, numberOfEntriesText }: RunSummaryP
 
     if (totals.total === 0) {
       return formatMessage({
-        id: 'content-releases.pages.ReleaseDetails.header-subtitle.ran-empty',
+        id: 'content-releases.pages.ReleaseDetails.ran-empty',
         defaultMessage: 'This release ran with no entries.',
       });
     }
@@ -570,6 +569,8 @@ interface ReleaseDetailsBodyProps {
 
 const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const { formatMessage } = useIntl();
+  // The row whose reason the drawer shows
+  const [reasonActionId, setReasonActionId] = React.useState<ReleaseAction['id'] | null>(null);
   const [{ query }, setQuery] = useQueryParams<GetReleaseActionsQueryParams>();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -614,7 +615,6 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   const {
     isLoading,
-    isUninitialized,
     isFetching,
     isError,
     data,
@@ -663,7 +663,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     }
   };
 
-  if (isLoading || isReleaseLoading || (release && isUninitialized)) {
+  if (isLoading || isReleaseLoading) {
     return <Page.Loading />;
   }
 
@@ -705,7 +705,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         <EmptyStateLayout
           icon={<EmptyDocuments width="16rem" />}
           content={formatMessage({
-            id: 'content-releases.pages.Details.tab.ranEmpty',
+            id: 'content-releases.pages.ReleaseDetails.ran-empty',
             defaultMessage: 'This release ran with no entries.',
           })}
         />
@@ -779,6 +779,70 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   const isOutcomeUnknown = release.failureReason === 'failed_before_upgrade';
 
+  type RowAction = (typeof releaseActions)[string][number];
+
+  const getRowNaming = ({ entry, contentType }: Pick<RowAction, 'entry' | 'contentType'>) => {
+    const isDeleted = Boolean(release.releasedAt) && !entry;
+    const isUntitled = !isDeleted && !contentType.mainFieldValue;
+
+    if (isDeleted) {
+      return {
+        isDeleted,
+        isUntitled,
+        entryName: formatMessage({
+          id: 'content-releases.pages.ReleaseDetails.table.deleted-entry',
+          defaultMessage: 'Deleted entry',
+        }),
+      };
+    }
+
+    if (isUntitled) {
+      return {
+        isDeleted,
+        isUntitled,
+        entryName: formatMessage({
+          id: 'content-releases.pages.ReleaseDetails.table.untitled',
+          defaultMessage: 'Untitled',
+        }),
+      };
+    }
+
+    return { isDeleted, isUntitled, entryName: `${contentType.mainFieldValue}` };
+  };
+
+  const hasReason = ({ type, outcome, isEntryValid }: RowAction) =>
+    release.releasedAt
+      ? !isOutcomeUnknown &&
+        outcome !== null &&
+        outcome !== 'published' &&
+        outcome !== 'unpublished'
+      : type === 'publish' && isEntryValid !== true;
+
+  const reasonItems: EntryReasonDetails[] = Object.values(releaseActions)
+    .flat()
+    .filter(hasReason)
+    .map((action) => ({
+      id: action.id,
+      ...getRowNaming(action),
+      contentTypeName: action.contentType.displayName,
+      localeCode: hasI18nEnabled ? action.locale?.code : undefined,
+      action: action.type,
+      outcome: release.releasedAt ? action.outcome : null,
+      reason: action.reason,
+      isUnchecked:
+        !release.releasedAt &&
+        action.type === 'publish' &&
+        action.isEntryValid !== true &&
+        !action.reason,
+      location: {
+        contentTypeUid: action.contentType.uid,
+        kind: contentTypes?.[action.contentType.uid]?.kind,
+        documentId: action.entryDocumentId,
+        locale: action.locale?.code,
+        showErrors: (action.reason?.validation?.errors.length ?? 0) > 0,
+      },
+    }));
+
   return (
     <Layouts.Content>
       <Flex gap={4} direction="column" alignItems="stretch">
@@ -799,7 +863,21 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             })}
           >
             {tabs.map(({ value, label, count }) => (
-              <Tabs.Trigger key={value} value={value}>
+              <Tabs.Trigger
+                key={value}
+                value={value}
+                aria-label={
+                  count !== undefined
+                    ? formatMessage(
+                        {
+                          id: 'content-releases.pages.ReleaseDetails.tab.label-with-count',
+                          defaultMessage: '{label} ({count})',
+                        },
+                        { label: formatMessage(label), count }
+                      )
+                    : undefined
+                }
+              >
                 <Flex gap={2}>
                   {formatMessage(label)}
                   {count !== undefined &&
@@ -875,108 +953,124 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                         type,
                         entry,
                         entryDocumentId,
-                        status,
                         isEntryValid,
                         outcome,
                         reason,
                       },
                       actionIndex
                     ) => {
-                      const isDeleted = Boolean(release.releasedAt) && !entry;
+                      const { isDeleted, isUntitled, entryName } = getRowNaming({
+                        entry,
+                        contentType,
+                      });
                       const textColor = isDeleted ? 'neutral500' : undefined;
+                      const openReason = () => setReasonActionId(id);
+                      const entryLink = !isDeleted && (
+                        <EntryLinkButton
+                          contentTypeUid={contentType.uid}
+                          kind={contentTypes?.[contentType.uid]?.kind}
+                          documentId={entryDocumentId}
+                          locale={locale?.code}
+                          showErrors={(reason?.validation?.errors.length ?? 0) > 0}
+                        />
+                      );
 
                       return (
-                        <DeletableTr key={id} $isDeleted={isDeleted}>
-                          <Td width="25%" maxWidth="200px">
-                            {isDeleted ? (
-                              <Typography ellipsis textColor="neutral500">
-                                {formatMessage({
-                                  id: 'content-releases.pages.ReleaseDetails.table.deleted-entry',
-                                  defaultMessage: 'Deleted entry',
-                                })}
-                              </Typography>
-                            ) : (
-                              <Typography ellipsis>{`${
-                                contentType.mainFieldValue || entry?.id || entryDocumentId
-                              }`}</Typography>
-                            )}
-                          </Td>
-                          {hasI18nEnabled && (
-                            <Td width="10%">
-                              <Typography
-                                textColor={textColor}
-                              >{`${locale?.name ? locale.name : '-'}`}</Typography>
+                        <React.Fragment key={id}>
+                          <Tr>
+                            <Td width="25%" maxWidth="200px">
+                              {isDeleted || isUntitled ? (
+                                <ItalicName
+                                  ellipsis
+                                  textColor={isDeleted ? 'neutral500' : undefined}
+                                >
+                                  {entryName}
+                                </ItalicName>
+                              ) : (
+                                <Typography ellipsis>{entryName}</Typography>
+                              )}
                             </Td>
-                          )}
+                            {hasI18nEnabled && (
+                              <Td width="10%">
+                                <Typography
+                                  textColor={textColor}
+                                >{`${locale?.name ? locale.name : '-'}`}</Typography>
+                              </Td>
+                            )}
 
-                          <Td width="10%">
-                            <Typography textColor={textColor}>
-                              {contentType.displayName || ''}
-                            </Typography>
-                          </Td>
-                          <Td width="20%">
-                            {release.releasedAt ? (
+                            <Td width="10%">
                               <Typography textColor={textColor}>
-                                {formatMessage(
-                                  {
-                                    id: 'content-releases.pages.ReleaseDetails.table.action-type',
-                                    defaultMessage:
-                                      '{isPublish, select, true {Publish} other {Unpublish}}',
-                                  },
-                                  { isPublish: type === 'publish' }
-                                )}
+                                {contentType.displayName || ''}
                               </Typography>
-                            ) : (
-                              <ReleaseActionOptions
-                                selected={type}
-                                handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
-                                name={`release-action-${id}-type`}
-                                disabled={!canUpdate}
-                              />
-                            )}
-                          </Td>
-                          {release.releasedAt ? (
-                            <Td width="20%" minWidth="200px">
-                              <ReleaseActionOutcomeStatus
-                                outcome={outcome}
-                                reason={reason}
-                                schema={contentTypes?.[contentType.uid]}
-                                entry={entry}
-                                isOutcomeUnknown={isOutcomeUnknown}
-                              />
                             </Td>
-                          ) : (
-                            <>
-                              <Td width="20%" minWidth="200px">
-                                {entry && (
-                                  <EntryValidationPopover
-                                    action={type}
-                                    schema={contentTypes?.[contentType.uid]}
-                                    entry={entry}
-                                    status={status}
-                                    isEntryValid={isEntryValid}
-                                    reason={reason}
+                            <Td width="20%">
+                              {release.releasedAt ? (
+                                <Typography textColor={textColor}>
+                                  {formatMessage(
+                                    {
+                                      id: 'content-releases.pages.ReleaseDetails.table.action-type',
+                                      defaultMessage:
+                                        '{isPublish, select, true {Publish} other {Unpublish}}',
+                                    },
+                                    { isPublish: type === 'publish' }
+                                  )}
+                                </Typography>
+                              ) : (
+                                <ReleaseActionOptions
+                                  selected={type}
+                                  handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
+                                  name={`release-action-${id}-type`}
+                                  disabled={!canUpdate}
+                                />
+                              )}
+                            </Td>
+                            {release.releasedAt ? (
+                              <>
+                                <Td width="20%" minWidth="200px">
+                                  <ReleasedActionStatus
+                                    outcome={outcome}
+                                    isOutcomeUnknown={isOutcomeUnknown}
+                                    entryName={entryName}
+                                    onOpenReason={openReason}
                                   />
-                                )}
-                              </Td>
-                              <Td>
-                                <Flex justifyContent="flex-end">
-                                  <ReleaseActionMenu.Root>
-                                    <ReleaseActionMenu.ReleaseActionEntryLinkItem
-                                      contentTypeUid={contentType.uid}
-                                      documentId={entryDocumentId}
-                                      locale={locale?.code}
+                                </Td>
+                                <Td>
+                                  {/* A ran release has nothing to remove: the pencil is its only action */}
+                                  <Flex justifyContent="flex-end">{entryLink}</Flex>
+                                </Td>
+                              </>
+                            ) : (
+                              <>
+                                <Td width="20%" minWidth="200px">
+                                  {entry && (
+                                    <PlannedActionStatus
+                                      action={type}
+                                      isEntryValid={isEntryValid}
+                                      entryName={entryName}
+                                      onOpenReason={openReason}
                                     />
-                                    <ReleaseActionMenu.DeleteReleaseActionItem
-                                      releaseId={release.id}
-                                      actionId={id}
-                                    />
-                                  </ReleaseActionMenu.Root>
-                                </Flex>
-                              </Td>
-                            </>
-                          )}
-                        </DeletableTr>
+                                  )}
+                                </Td>
+                                <Td>
+                                  {/* The menu's "Edit entry" opens the entry: no pencil next to it */}
+                                  <Flex justifyContent="flex-end">
+                                    <ReleaseActionMenu.Root>
+                                      <ReleaseActionMenu.ReleaseActionEntryLinkItem
+                                        contentTypeUid={contentType.uid}
+                                        documentId={entryDocumentId}
+                                        locale={locale?.code}
+                                      />
+                                      <ReleaseActionMenu.DeleteReleaseActionItem
+                                        releaseId={release.id}
+                                        actionId={id}
+                                      />
+                                    </ReleaseActionMenu.Root>
+                                  </Flex>
+                                </Td>
+                              </>
+                            )}
+                          </Tr>
+                        </React.Fragment>
                       );
                     }
                   )}
@@ -995,12 +1089,19 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           </Pagination.Root>
         )}
       </Flex>
+      <EntryReasonDrawer
+        items={reasonItems}
+        selectedId={reasonActionId}
+        onSelect={setReasonActionId}
+        onClose={() => setReasonActionId(null)}
+        releasedAt={release.releasedAt}
+      />
     </Layouts.Content>
   );
 };
 
-const DeletableTr = styled(Tr)<{ $isDeleted: boolean }>`
-  background: ${({ theme, $isDeleted }) => ($isDeleted ? theme.colors.neutral100 : undefined)};
+const ItalicName = styled(Typography)`
+  font-style: italic;
 `;
 
 /* -------------------------------------------------------------------------------------------------

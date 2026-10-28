@@ -46,10 +46,17 @@ export class ReleaseDetailsPage {
   }
 
   /**
-   * A tab filtering the entries. Its name ends with the count, so it's matched by its start.
+   * A tab filtering the entries, named "Label (count)" when it shows a count. With `count`, only
+   * the tab showing exactly that count matches.
    */
-  tab(label: string): Locator {
-    return this.page.getByRole('tab', { name: new RegExp(`^${label}`) });
+  tab(label: string, count?: number): Locator {
+    if (count !== undefined) {
+      return this.page.getByRole('tab', { name: `${label} (${count})`, exact: true });
+    }
+
+    const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    return this.page.getByRole('tab', { name: new RegExp(`^${escapedLabel}( \\(\\d+\\))?$`) });
   }
 
   /**
