@@ -5,10 +5,17 @@ import { traverseEntity, async } from '@strapi/utils';
 
 import { Relation } from './types';
 
+/**
+ * Whether a shorthand relation value is a numeric entry id (as opposed to a documentId).
+ *
+ * A string only counts as numeric when it is made of digits *entirely*. `parseInt` must not be
+ * used here: it stops at the first non-digit character, so a documentId that happens to start
+ * with a digit (e.g. `'3d52c864df72fcc68ab62ebe'` -> `3`) would be misclassified as an id.
+ */
 const isNumeric = (value: any): value is number => {
-  if (Array.isArray(value)) return false; // Handle [1, 'docId'] case
-  const parsed = parseInt(value, 10);
-  return !Number.isNaN(parsed);
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (typeof value === 'string') return /^\d+$/.test(value);
+  return false; // Arrays (e.g. [1, 'docId']), objects, etc.
 };
 
 const toArray = (value: any) => {
