@@ -273,6 +273,8 @@ declare global {
   The check is compile-only and fails in both modes, with `{ unregistered, unimplemented }`
   naming the IDs on each side. Filter on the prefix of the IDs the list registers: review
   workflows registers `admin::review-workflows.*`, so admin's own check excludes that prefix.
+  A package with several lists compares their union: admin's check covers its CE list and its EE
+  lists (`ee/server/src/config/admin-actions.ts`).
 
 - Pass the `as const` list straight to `registerMany`. With strict types, `register` and
   `registerMany` check the computed ID of each action (`Core.PermissionActionCheck`). An
@@ -294,8 +296,8 @@ declare global {
 - The IDs of content releases (`cms-content-releases`) and review workflows (`review-workflows`)
   exist only when their EE feature is enabled. Their packages declare them with a JSDoc line that
   names the feature. A route that names one works on every license: without the feature, the
-  policy denies, as for any permission the user lacks. The admin SSO and audit-log IDs are not
-  declared yet.
+  policy denies, as for any permission the user lacks. Admin declares its EE IDs the same way:
+  `admin::provider-login.*` (`sso`) and `admin::audit-logs.*` (`audit-logs`).
 - Users-permissions is JavaScript and declares no ID. An application that names its actions
   (`plugin::users-permissions.*`) in a typed config declares them in `PermissionActions`.
 - Inside admin, `getService('permission')` returns the registered contract with strict types.
