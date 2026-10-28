@@ -318,6 +318,7 @@ class Strapi extends Container implements Core.Strapi {
             settings: {
               migrations: {
                 dir: path.join(projectDir, 'database/migrations'),
+                postDir: path.join(projectDir, 'database/migrations-post'),
               },
             },
           })
@@ -509,6 +510,10 @@ class Strapi extends Container implements Core.Strapi {
 
     if (this.EE) {
       await utils.ee.checkLicense({ strapi: this });
+    }
+
+    if (await this.db.migrations.providers.postSync.shouldRun()) {
+      await this.db.migrations.providers.postSync.up();
     }
 
     await this.hook('strapi::content-types.afterSync').call({

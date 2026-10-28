@@ -73,3 +73,21 @@ await db.schema.applyAttributeRenames(knex, {
 ```
 
 `@strapi/database` only dispatches it: `applyAttributeRenames` calls every handler registered with `db.schema.registerAttributeRenameHandler(handler)`, in registration order, with the migration's transaction. Handlers must be registered during the register phase, because user migrations run during schema sync, before any plugin bootstrap. The admin registers one that rewrites permission field paths (including paths through components, so a parent rename and a rename inside its component compose) before its bootstrap cleanup runs. Other stores keyed by attribute name, such as Content Manager layouts, can register on the same hook. With no handler registered, the step is a logged no-op. The step is written even when every hop of the save was refused, since the logical field is the same field even when its data could not be carried.
+
+## Post-sync migrations
+
+Post-sync migrations live in the application's `database/migrations-post` directory (or `<outDir>/database/migrations-post` when `useTypescriptMigrations` is enabled, same as user migrations). They run on boot **after** schema sync and the post-sync repairs, but before the `strapi::content-types.afterSync` hook, so columns Strapi just created from content-type changes in the same deploy already exist. Use them to backfill data into those columns; use pre-sync user migrations for DDL that schema sync does not manage.
+
+They share the user migration runner: same discovery and file-name ordering, one transaction per file, gated by `database.settings.runMigrations`, and tracked in their own `strapi_migrations_post` table (reserved, so schema sync never drops it). They are roll-forward only: `down` is never called.
+
+```ts
+export default {
+  async up(knex) {
+    await knex('articles')
+      .whereNull('slug')
+      .update({ slug: knex.raw("LOWER(REPLACE(title, ' ', '-'))") });
+  },
+};
+```
+
+`strapi generate migration` asks for the phase and writes post-sync files to `database/migrations-post`.
