@@ -3,9 +3,6 @@ title: Overview
 description: 'Overview of local Strapi instance data transfer provider.'
 tags:
   - providers
-status: needs-review
-review_notes:
-  - Mentions the Entity Service; the providers use `strapi.db.query`.
 ---
 
 # Local Strapi Providers

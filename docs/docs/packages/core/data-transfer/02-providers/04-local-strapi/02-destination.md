@@ -5,7 +5,7 @@ tags:
   - providers
 status: needs-review
 review_notes:
-  - Mentions the Entity Service; the providers use `strapi.db.query`.
+  - Rollbacks says failed asset imports restore `uploads_backup_*`; `rollback()` only rolls back the DB transaction and the backup is removed when the assets stage finishes.
 ---
 
 # Local Strapi Destination Provider
@@ -21,6 +21,7 @@ The accepted options are defined in `ILocalStrapiDestinationProviderOptions`.
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
   restore?: restore.IRestoreOptions; // the options to use when strategy is 'restore'
   strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
+  onTransferPhase?: (message: string) => void; // human-readable progress messages during restore preparation
 ```
 
 `strategy` defines the conflict management strategy used. Currently, only `"restore"` is available as an option.
@@ -31,7 +32,7 @@ A conflict management strategy of "restore" deletes all existing Strapi data bef
 
 The following restore options are available:
 
-```typecript
+```typescript
 export interface IRestoreOptions {
   assets?: boolean; // delete media library files before transfer
   configuration?: {

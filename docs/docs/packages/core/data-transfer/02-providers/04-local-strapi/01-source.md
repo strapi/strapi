@@ -3,9 +3,6 @@ title: Source
 description: 'Guide to using local Strapi instance as a data source.'
 tags:
   - providers
-status: needs-review
-review_notes:
-  - Mentions the Entity Service; the providers use `strapi.db.query`.
 ---
 
 # Local Strapi Source Provider
