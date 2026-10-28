@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import _ from 'lodash';
-import { defaults } from 'lodash/fp';
+import _, { defaults } from 'lodash';
+
 import { arrays, errors, emitAudit } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
@@ -25,12 +25,29 @@ import type {
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
 import constants from './constants';
+import type { AdminRoleWithUsersCount } from './role';
 
 const { SUPER_ADMIN_CODE } = constants;
 
 const { ApplicationError, ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
+
+/**
+ * Get the super admin role with its users count.
+ * Throws when the role doesn't exist, as the operation depends on it.
+ */
+const getSuperAdminRoleOrThrow = async (): Promise<AdminRoleWithUsersCount> => {
+  // The role lookup resolves to null when the role doesn't exist
+  const superAdminRole: AdminRoleWithUsersCount | null =
+    await getService('role').getSuperAdminWithUsersCount();
+
+  if (superAdminRole === null) {
+    throw new ApplicationError("Cannot proceed because the super admin role doesn't exist.");
+  }
+
+  return superAdminRole;
+};
 
 const getSessionManager = () => {
   const manager = strapi.sessionManager;
@@ -150,7 +167,7 @@ const updateById = async (
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
-    const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
+    const superAdminRole = await getSuperAdminRoleOrThrow();
     const willRemoveSuperAdminRole = !arrays.includesString(attributes.roles!, superAdminRole.id);
 
     if (lastAdminUser && willRemoveSuperAdminRole) {
@@ -237,7 +254,13 @@ const isLastSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
   const user = (await findOne(userId)) as AdminUser | null;
   if (!user) return false;
 
-  const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
+  const superAdminRole: AdminRoleWithUsersCount | null =
+    await getService('role').getSuperAdminWithUsersCount();
+
+  // Without a super admin role, no user can be the last super admin
+  if (superAdminRole === null) {
+    return false;
+  }
 
   return superAdminRole.usersCount === 1 && hasSuperAdminRole(user);
 };
@@ -352,7 +375,7 @@ const findOneByEmail = async (email: string, populate = []) => {
 const findPage = async (params = {}): Promise<unknown> => {
   const query = strapi
     .get('query-params')
-    .transform('admin::user', defaults({ populate: ['roles'] }, params));
+    .transform('admin::user', defaults({}, params, { populate: ['roles'] }));
 
   return strapi.db.query('admin::user').findPage(query);
 };
@@ -373,7 +396,7 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
 
   if (userToDelete) {
     if (userToDelete.roles.some((r) => r.code === SUPER_ADMIN_CODE)) {
-      const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
+      const superAdminRole = await getSuperAdminRoleOrThrow();
       if (superAdminRole.usersCount === 1) {
         throw new ValidationError('You must have at least one user with super admin role.');
       }
@@ -401,7 +424,7 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
  */
 const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
   // Check at least one super admin remains
-  const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
+  const superAdminRole = await getSuperAdminRoleOrThrow();
   const nbOfSuperAdminToDelete = await strapi.db.query('admin::user').count({
     where: {
       id: ids,

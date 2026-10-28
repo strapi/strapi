@@ -1,6 +1,7 @@
 // TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
+import { isAbortError } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton } from '@strapi/design-system';
 import { Crop as Resize, Download as DownloadIcon, Trash, PinMap } from '@strapi/icons';
 import cropperjscss from 'cropperjs/dist/cropper.css?raw';
@@ -8,6 +9,7 @@ import { useIntl } from 'react-intl';
 import { createGlobalStyle } from 'styled-components';
 
 import { ASSET_TYPES } from '../../../../enums';
+import { UploadAbortedError } from '../../../../services/uploadFileViaXHR';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useTracking } from '../../../hooks/useTracking';
@@ -160,7 +162,17 @@ export const PreviewBox = ({
 
       trackUsage('didCropFile', { duplicatedFile: null, location: trackedLocation! });
     } else {
-      const updatedAsset = await editAsset(nextAsset, file);
+      let updatedAsset;
+
+      try {
+        updatedAsset = await editAsset(nextAsset, file);
+      } catch (error) {
+        // The user cancelled the edit: nothing to report.
+        if (isAbortError(error)) return;
+
+        throw error;
+      }
+
       optimizedCachingImage = createAssetUrl(updatedAsset, false);
       optimizedCachingThumbnailImage = createAssetUrl(updatedAsset, true);
 
@@ -182,7 +194,14 @@ export const PreviewBox = ({
       nextAsset.updatedAt!
     )) as RawFile;
 
-    await upload({ name: file.name, rawFile: file }, asset.folder?.id ? asset.folder.id : null);
+    try {
+      await upload({ name: file.name, rawFile: file }, asset.folder?.id ? asset.folder.id : null);
+    } catch (error) {
+      // The user cancelled the upload: nothing to report.
+      if (error instanceof UploadAbortedError) return;
+
+      throw error;
+    }
 
     trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation! });
 

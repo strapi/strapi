@@ -51,6 +51,56 @@ export const resolveCornerResize = ({
   return { x, y, width, height };
 };
 
+export type Rotation = 0 | 90 | 180 | 270;
+
+/**
+ * Remap a crop rect through a quarter-turn. `size` is the image size *before* the
+ * turn, so the returned rect is expressed against the swapped size for 90/270.
+ * Pure: the caller swaps `naturalSize` to match.
+ */
+export const rotateCropRect = (
+  crop: CropRect,
+  direction: 'left' | 'right',
+  size: NaturalSize
+): CropRect =>
+  direction === 'right'
+    ? {
+        x: size.height - (crop.y + crop.height),
+        y: crop.x,
+        width: crop.height,
+        height: crop.width,
+      }
+    : {
+        x: crop.y,
+        y: size.width - (crop.x + crop.width),
+        width: crop.height,
+        height: crop.width,
+      };
+
+/**
+ * The crop rect expressed against the *unrotated* source, by undoing each quarter-turn
+ * already applied. `produceFile` needs it to know which source pixels to sample.
+ */
+export const sourceCropRect = (
+  crop: CropRect,
+  rotation: Rotation,
+  rotatedSize: NaturalSize
+): CropRect => {
+  let rect = crop;
+  let size = rotatedSize;
+
+  for (let turn = 0; turn < rotation / 90; turn += 1) {
+    rect = rotateCropRect(rect, 'left', size);
+    size = { width: size.height, height: size.width };
+  }
+
+  return rect;
+};
+
+/** Advance a rotation by one quarter-turn, wrapping at 360. */
+export const nextRotation = (current: Rotation, direction: 'left' | 'right'): Rotation =>
+  ((current + (direction === 'right' ? 90 : 270)) % 360) as Rotation;
+
 /**
  * Custom crop state + file producer. Replaces a cropperjs-based version: the
  * crop rectangle is stored in natural-image pixels (so it stays locked across
@@ -62,6 +112,7 @@ export const useCropImg = () => {
   const [naturalSize, setNaturalSize] = React.useState<NaturalSize>({ width: 0, height: 0 });
   const [crop, setCrop] = React.useState<CropRect>({ x: 0, y: 0, width: 0, height: 0 });
   const [aspectRatio, setAspectRatioState] = React.useState<number | null>(null);
+  const [rotation, setRotation] = React.useState<Rotation>(0);
   const imageRef = React.useRef<HTMLImageElement | null>(null);
 
   /**
@@ -73,7 +124,25 @@ export const useCropImg = () => {
     const next: NaturalSize = { width: image.naturalWidth, height: image.naturalHeight };
     setNaturalSize(next);
     setCrop({ x: 0, y: 0, width: next.width, height: next.height });
+    setRotation(0);
   }, []);
+
+  /**
+   * Turn the image a quarter-turn. `naturalSize` swaps and the crop rect is remapped
+   * so the same pixels stay selected; nothing is reset.
+   */
+  const rotate = React.useCallback(
+    (direction: 'left' | 'right') => {
+      setCrop((prev) => rotateCropRect(prev, direction, naturalSize));
+      setNaturalSize((prev) => ({ width: prev.height, height: prev.width }));
+      setRotation((prev) => nextRotation(prev, direction));
+      // A locked ratio describes the orientation it was locked in, so a quarter
+      // turn inverts it. Without this it keeps enforcing the pre-rotation shape
+      // and fights every later resize.
+      setAspectRatioState((prev) => (prev ? 1 / prev : prev));
+    },
+    [naturalSize]
+  );
 
   const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -163,16 +232,20 @@ export const useCropImg = () => {
           reject(new Error('Could not get a 2D canvas context to crop the image.'));
           return;
         }
+        const source = sourceCropRect(crop, rotation, naturalSize);
+
+        context.translate(canvas.width / 2, canvas.height / 2);
+        context.rotate((rotation * Math.PI) / 180);
         context.drawImage(
           image,
-          crop.x,
-          crop.y,
-          crop.width,
-          crop.height,
-          0,
-          0,
-          canvas.width,
-          canvas.height
+          source.x,
+          source.y,
+          source.width,
+          source.height,
+          -source.width / 2,
+          -source.height / 2,
+          source.width,
+          source.height
         );
         canvas.toBlob(
           (blob) => {
@@ -191,13 +264,15 @@ export const useCropImg = () => {
           QUALITY
         );
       }),
-    [crop.x, crop.y, crop.width, crop.height]
+    [crop, rotation, naturalSize]
   );
 
   return {
     init,
     crop,
     naturalSize,
+    rotation,
+    rotate,
     aspectRatio,
     setCropSize,
     setCropPosition,

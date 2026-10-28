@@ -83,8 +83,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             const contentType = strapi.contentTypes[subject as keyof typeof strapi.contentTypes];
             const contentTypeOptions = contentType?.pluginOptions?.['content-manager'] as
-              | { visible?: boolean }
-              | undefined;
+              { visible?: boolean } | undefined;
 
             return contentTypeOptions?.visible !== false;
           })

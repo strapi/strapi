@@ -1,5 +1,6 @@
 import type { Struct } from '@strapi/types';
 
+import { createLocalizationService } from '../../localization';
 import { createEntriesService } from '../entries';
 
 jest.mock('../transform/id-transform', () => ({
@@ -54,6 +55,7 @@ describe('Document Service: entries', () => {
     global.strapi = {
       contentType: jest.fn(() => contentType),
       plugins: {},
+      localization: createLocalizationService(),
       config: { get: jest.fn(() => undefined) },
       db: {
         query: jest.fn(() => ({ create: dbCreate, update: dbUpdate, findOne: dbFindOne })),

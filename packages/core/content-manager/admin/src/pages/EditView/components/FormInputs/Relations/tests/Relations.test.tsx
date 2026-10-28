@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Form } from '@strapi/admin/strapi-admin';
 import {
   RenderOptions,
@@ -443,6 +445,137 @@ describe('Relations', () => {
     });
   });
 
+  it('shows an error when the saved relations fail to load', async () => {
+    server.use(
+      http.get('/content-manager/relations/:model/:id/:fieldName', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+          },
+          { status: 500 }
+        )
+      )
+    );
+
+    render({});
+
+    expect(
+      await screen.findByText(
+        'Whoops! Something went wrong. Please, try again.',
+        {},
+        { timeout: 3000 }
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('shows an error instead of "No relations available" when the relation search fails', async () => {
+    server.use(
+      http.get('/content-manager/relations/:model/:fieldName', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+          },
+          { status: 500 }
+        )
+      )
+    );
+
+    const { user } = render({});
+
+    await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+    expect(
+      await screen.findByText(
+        'Whoops! Something went wrong. Please, try again.',
+        {},
+        { timeout: 3000 }
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+  });
+
+  describe('reopening the dropdown after selecting a relation', () => {
+    const mockCategorySearch = () => {
+      const searchQueries: string[] = [];
+
+      server.use(
+        http.get('/content-manager/relations/:model/:fieldName', ({ request }) => {
+          const params = new URL(request.url).searchParams;
+          const search = params.get('_q') ?? '';
+          const idsToOmit = new Set(
+            [...params.entries()]
+              .filter(([key]) => key.startsWith('idsToOmit'))
+              .map(([, value]) => value)
+          );
+
+          searchQueries.push(search);
+
+          const results = [1, 2, 3]
+            .map((id) => ({
+              id,
+              documentId: `category-${id}`,
+              locale: 'en',
+              status: 'published',
+              name: `Category ${id}`,
+            }))
+            .filter((relation) => relation.name.includes(search))
+            .filter((relation) => !idsToOmit.has(relation.id.toString()));
+
+          return HttpResponse.json({
+            results,
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: results.length },
+          });
+        })
+      );
+
+      return searchQueries;
+    };
+
+    // Waits past the search debounce, as a user would between two actions.
+    const waitForSearchDebounce = () => new Promise((resolve) => setTimeout(resolve, 500));
+
+    it('keeps the available relations', async () => {
+      const searchQueries = mockCategorySearch();
+      const { user } = render({
+        initialValues: { relations: { connect: [], disconnect: [] } },
+      });
+
+      const combobox = await screen.findByRole('combobox', { name: /relations/i });
+
+      await user.click(combobox);
+      await user.click(await screen.findByRole('option', { name: /Category 1/ }));
+
+      await waitForSearchDebounce();
+      await user.click(combobox);
+
+      expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+      expect(await screen.findByRole('option', { name: /Category 2/ })).toBeInTheDocument();
+      expect(searchQueries).not.toContain('Category 1');
+    });
+
+    it('keeps the available relations when the relation was found by searching', async () => {
+      mockCategorySearch();
+      const { user } = render({
+        initialValues: { relations: { connect: [], disconnect: [] } },
+      });
+
+      const combobox = await screen.findByRole('combobox', { name: /relations/i });
+
+      await user.click(combobox);
+      await user.type(combobox, 'Category 1');
+      await waitForSearchDebounce();
+      await user.click(await screen.findByRole('option', { name: /Category 1/ }));
+
+      await waitForSearchDebounce();
+      await user.click(combobox);
+
+      expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+      expect(await screen.findByRole('option', { name: /Category 2/ })).toBeInTheDocument();
+    });
+  });
+
   it('preserves the active locale when opening a non-localized nested relation in full page', async () => {
     const { user } = renderRelationNavigation({
       documentId: 'non-localized-intermediate',
@@ -471,6 +604,118 @@ describe('Relations', () => {
     expect(screen.getByTestId('location')).toHaveTextContent(
       '/content-manager/collection-types/api::category.category/localized-intermediate?plugins[i18n][locale]=fr'
     );
+  });
+
+  describe('Load More', () => {
+    const fieldProps: RelationsFieldProps = {
+      attribute: {
+        type: 'relation',
+        relation: 'manyToMany',
+        target: 'api::category.category',
+        inversedBy: 'relation_locales',
+        // @ts-expect-error – this is what the API returns
+        targetModel: 'api::category.category',
+        relationType: 'manyToMany',
+      },
+      label: 'relations',
+      mainField: { name: 'name', type: 'string' },
+      name: 'relations',
+      type: 'relation',
+    };
+
+    /**
+     * 12 relations served in pages of 5, i.e. a document with more relations
+     * than the field displays by default. Returns the pages requested so far.
+     */
+    const usePaginatedRelations = () => {
+      const requestedPages: number[] = [];
+
+      server.use(
+        http.get('/content-manager/relations/:model/:id/:fieldName', ({ request }) => {
+          const page = Number(new URL(request.url).searchParams.get('page') ?? 1);
+          requestedPages.push(page);
+
+          const ids = Array.from({ length: 12 }, (_, index) => index + 1).slice(
+            (page - 1) * 5,
+            page * 5
+          );
+
+          return HttpResponse.json({
+            results: ids.map((id) => ({
+              id,
+              documentId: `relation-${id}`,
+              locale: 'en',
+              status: 'draft',
+              name: `Relation entity ${id}`,
+            })),
+            pagination: { page, pageCount: 3, pageSize: 5, total: 12 },
+          });
+        })
+      );
+
+      return requestedPages;
+    };
+
+    it('loads the next page of relations', async () => {
+      const requestedPages = usePaginatedRelations();
+      const { user } = render({});
+
+      await screen.findByRole('button', { name: 'Relation entity 1' });
+      expect(screen.queryByRole('button', { name: 'Relation entity 6' })).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Load More' }));
+
+      await screen.findByRole('button', { name: 'Relation entity 6' });
+      expect(requestedPages).toEqual([1, 2]);
+    });
+
+    it('requests the page following the shared cache when the same field is mounted again', async () => {
+      const requestedPages = usePaginatedRelations();
+
+      /**
+       * Mounting the same field a second time (e.g. the current document opened again in the
+       * relation modal) requests page 1 and resets the cache shared by both instances.
+       */
+      const Fields = () => {
+        const [isMountedAgain, setIsMountedAgain] = React.useState(false);
+
+        return (
+          <>
+            <RelationsInput {...fieldProps} />
+            <button type="button" onClick={() => setIsMountedAgain(true)}>
+              Mount again
+            </button>
+            {isMountedAgain ? <RelationsInput {...fieldProps} /> : null}
+          </>
+        );
+      };
+
+      const { user } = renderRTL(<Fields />, {
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Routes>
+              <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
+            </Routes>
+          ),
+        },
+        initialEntries: ['/content-manager/collection-types/api::address.address/12345'],
+      });
+
+      await user.click(await screen.findByRole('button', { name: 'Load More' }));
+      await screen.findByRole('button', { name: 'Relation entity 6' });
+
+      await user.click(screen.getByRole('button', { name: 'Mount again' }));
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: 'Relation entity 6' })).not.toBeInTheDocument();
+      });
+
+      // Load More on the first instance must request page 2 again, not page 3
+      await user.click(screen.getAllByRole('button', { name: 'Load More' })[0]);
+
+      expect(await screen.findAllByRole('button', { name: 'Relation entity 6' })).toHaveLength(2);
+      expect(requestedPages).not.toContain(3);
+      expect(requestedPages.at(-1)).toBe(2);
+    });
   });
 
   describe.skip('Accessibility', () => {

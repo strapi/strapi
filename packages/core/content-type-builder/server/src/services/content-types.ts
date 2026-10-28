@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { getOr } from 'lodash/fp';
+import _, { get } from 'lodash';
+
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
@@ -24,7 +24,7 @@ const pruneFolderReferences = (uids: UID.ContentType[]) => {
 };
 
 export const isContentTypeVisible = (model: Struct.ContentTypeSchema) =>
-  getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
+  get(model, 'pluginOptions.content-type-builder.visible', true) === true;
 
 export const getRestrictRelationsTo = (contentType: Struct.ContentTypeSchema) => {
   const { uid } = contentType;
@@ -229,6 +229,23 @@ export const generateAPI = ({
 };
 
 /**
+ * A document can span several rows (draft and published versions, one per locale),
+ * so compare documentIds instead of counting rows.
+ */
+const hasMultipleDocuments = async (uid: UID.ContentType) => {
+  const firstEntry = await strapi.db.query(uid).findOne({ select: ['documentId'] });
+  if (firstEntry === null) {
+    return false;
+  }
+
+  const otherDocumentsCount = await strapi.db.query(uid).count({
+    where: { documentId: { $ne: firstEntry.documentId } },
+  });
+
+  return otherDocumentsCount > 0;
+};
+
+/**
  * Edits a contentType and handle the nested contentTypes sent with it
  */
 export const editContentType = async (
@@ -236,6 +253,10 @@ export const editContentType = async (
   { contentType, components = [] }: any
 ) => {
   const builder = createBuilder();
+
+  if (builder.contentTypes.has(uid) === false) {
+    throw new ApplicationError('contentType.notFound');
+  }
 
   const previousSchema = builder.contentTypes.get(uid).schema;
   const isPluginContentType = Boolean(builder.contentTypes.get(uid).plugin);
@@ -256,8 +277,7 @@ export const editContentType = async (
   contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
 
   if (newKind !== previousKind && newKind === 'singleType') {
-    const entryCount = await strapi.db.query(uid).count();
-    if (entryCount > 1) {
+    if ((await hasMultipleDocuments(uid)) === true) {
       throw new ApplicationError(
         'You cannot convert a collectionType to a singleType when having multiple entries in DB'
       );

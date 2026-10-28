@@ -63,10 +63,7 @@ export interface ScalarAttribute extends Attribute {
 }
 
 export type AnyAttribute =
-  | ScalarAttribute
-  | RelationalAttribute
-  | ComponentAttribute
-  | DynamicZoneAttribute;
+  ScalarAttribute | RelationalAttribute | ComponentAttribute | DynamicZoneAttribute;
 
 export type Kind = 'singleType' | 'collectionType';
 

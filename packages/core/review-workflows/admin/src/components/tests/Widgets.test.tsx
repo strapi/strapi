@@ -41,6 +41,20 @@ describe('AssignedWidget', () => {
     expect(editLink).toHaveAttribute('href', expect.stringContaining(mockDocuments[0].documentId));
   });
 
+  it('renders a dash for a document without a stage', () => {
+    (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
+      data: [{ ...mockDocuments[0], strapi_stage: null }],
+      isLoading: false,
+      error: null,
+    });
+
+    render(<AssignedWidget />);
+    expect(screen.getByText('Test Document')).toBeInTheDocument();
+
+    const stageCell = screen.getAllByRole('gridcell')[4];
+    expect(stageCell).toHaveTextContent('-');
+  });
+
   it('shows loading state', () => {
     (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
       data: undefined,
