@@ -39,15 +39,9 @@ type ActionIds = Core.Assert<
     Extract<Core.RegisteredPermissionAction, `plugin::documentation.${string}`>
   >
 >;
-// `as const` makes the list readonly, and the action provider takes a mutable array.
-type ActionInputs = Parameters<
-  Core.ServiceFor<'admin::permission'>['actionProvider']['registerMany']
->[0];
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
-  await strapi
-    .service('admin::permission')
-    .actionProvider.registerMany(RBAC_ACTIONS as unknown as ActionInputs);
+  await strapi.service('admin::permission').actionProvider.registerMany(RBAC_ACTIONS);
 
   const pluginStore = strapi.store!({
     environment: '',

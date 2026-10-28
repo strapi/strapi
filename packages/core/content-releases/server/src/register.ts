@@ -21,18 +21,11 @@ type GraphQLExtensionService = {
   shadowCRUD(uid: string): { disable(): void };
 };
 
-type ActionInputs = Parameters<
-  Core.ServiceFor<'admin::permission'>['actionProvider']['registerMany']
->[0];
-
 export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
   registerReleasesEntitlements(strapi);
 
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
-    // `as const` makes the list readonly, and the action provider takes a mutable array.
-    await strapi
-      .service('admin::permission')
-      .actionProvider.registerMany(ACTIONS as unknown as ActionInputs);
+    await strapi.service('admin::permission').actionProvider.registerMany(ACTIONS);
 
     strapi.db.migrations.providers.internal.register(addEntryDocumentToReleaseActions);
 
