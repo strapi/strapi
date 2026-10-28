@@ -56,19 +56,18 @@ describe('watchServerRestart', () => {
     await assertion;
   });
 
-  test('aborts the request in flight when the caller aborts', async () => {
+  test('aborts the request in flight and sends no more once the caller aborts', async () => {
     const caller = new AbortController();
-    const get = vi
-      .fn()
-      .mockImplementationOnce(unanswered)
-      .mockImplementationOnce(() => status(false));
+    const get = vi.fn(unanswered);
 
     const watching = watchServerRestart(get, { signal: caller.signal });
+    const assertion = expect(watching).rejects.toThrow('timeout');
     await vi.advanceTimersByTimeAsync(0);
     caller.abort();
-    await vi.advanceTimersByTimeAsync(200);
+    await vi.advanceTimersByTimeAsync(40 * 1000);
 
-    await expect(watching).resolves.toBeUndefined();
+    await assertion;
+    expect(get).toHaveBeenCalledTimes(1);
     expect(get.mock.calls[0][1].signal.aborted).toBe(true);
   });
 });

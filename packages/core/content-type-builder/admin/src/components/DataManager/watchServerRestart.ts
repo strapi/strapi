@@ -35,6 +35,12 @@ export const watchServerRestart = async (
   const startTime = initTime ?? Date.now();
 
   const isUpdating = async () => {
+    // The caller unmounted: send no more requests. Each request gets a signal of its own, so an
+    // aborted caller signal would not stop the next one.
+    if (signal?.aborted) {
+      return true;
+    }
+
     const request = new AbortController();
     const abort = () => request.abort();
     const timer = setTimeout(abort, requestTimeout);
