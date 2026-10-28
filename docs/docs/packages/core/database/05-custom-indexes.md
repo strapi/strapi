@@ -2,9 +2,7 @@
 title: Custom indexes
 description: How to add a database index on an attribute
 tags:
-  - database
-  - schema
-  - content-type-builder
+  - backend
 ---
 
 You can add a **database index** on a column to speed up queries. In the Content-Type Builder (when the future flag is enabled), use the **Add database index** checkbox on an attribute. In the schema, add an entry to the content type’s `indexes` array.
@@ -32,7 +30,7 @@ Each entry with `type: "index"` (or no `type`) creates a non-unique index on the
 
 - **Schema → model**: `packages/core/core/src/utils/transform-content-types-to-models.ts` — indexes are built from the content type’s `indexes` array (non-unique only; `type: "unique"` is ignored).
 - **Database**: `packages/core/database` — schema builder creates/drops indexes during migrations.
-- **Content-Type Builder**: The **Add database index** checkbox is gated by the future flag `unstableContentTypeBuilderIndexing`. See [Future flags](/docs/06-future-flags).
+- **Content-Type Builder**: The **Add database index** checkbox is gated by the future flag `unstableContentTypeBuilderIndexing`. See [Future flags](../../../architecture/10-future-flags.md).
 
 ## Future flag
 
