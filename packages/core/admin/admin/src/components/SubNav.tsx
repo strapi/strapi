@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, useMemo } from 'react';
+import { Children, useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import {
   Badge,
@@ -192,9 +192,9 @@ const Sections = ({
       maxWidth={{ initial: '100%', medium: WIDTH_SIDE_NAVIGATION }}
     >
       <Flex tag="ul" gap={6} direction="column" alignItems="stretch" {...props}>
-        {children.map((child, index) => {
-          return <li key={index}>{child}</li>;
-        })}
+        {Children.map(children, (child) => (
+          <li>{child}</li>
+        ))}
       </Flex>
     </Box>
   );
@@ -364,9 +364,9 @@ const Section = ({
           large: 2,
         }}
       >
-        {children.map((child, index) => {
-          return <li key={index}>{child}</li>;
-        })}
+        {Children.map(children, (child) => (
+          <li>{child}</li>
+        ))}
       </Flex>
     </Flex>
   );
@@ -445,9 +445,9 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
           transition: 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
         }}
       >
-        {children.map((child, index) => {
-          return <SubSectionLinkWrapper key={index}>{child}</SubSectionLinkWrapper>;
-        })}
+        {Children.map(children, (child) => (
+          <SubSectionLinkWrapper>{child}</SubSectionLinkWrapper>
+        ))}
       </Flex>
     </Box>
   );

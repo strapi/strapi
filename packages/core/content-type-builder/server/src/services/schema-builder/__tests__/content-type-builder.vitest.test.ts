@@ -305,3 +305,56 @@ describe('content-type-builder editContentType with renamed relations', () => {
     }
   );
 });
+
+describe('content-type-builder editContentType draftAndPublish', () => {
+  const articleUid = 'api::article.article';
+
+  beforeEach(() => {
+    (global as any).strapi = {
+      dirs: { app: { api: '/app/src/api', components: '/app/src/components' } },
+      components: {},
+      contentTypes: {
+        [articleUid]: {
+          uid: articleUid,
+          apiName: 'article',
+          modelName: 'article',
+          info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+          __schema__: {
+            kind: 'collectionType',
+            collectionName: 'articles',
+            info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+            options: { draftAndPublish: true },
+            attributes: { title: { type: 'string' } },
+          },
+        },
+      },
+    };
+  });
+
+  const edit = (infos: Record<string, unknown>) => {
+    const builder = createBuilder();
+    builder.editContentType({
+      uid: articleUid,
+      displayName: 'Article',
+      attributes: { title: { type: 'string' } },
+      ...infos,
+    });
+    return builder.contentTypes.get(articleUid).schema.options;
+  };
+
+  it('keeps the stored draftAndPublish when the payload does not set it', () => {
+    expect(edit({})).toMatchObject({ draftAndPublish: true });
+  });
+
+  it('uses draftAndPublish from the payload options when the top-level value is not set', () => {
+    expect(edit({ options: { draftAndPublish: false } })).toMatchObject({
+      draftAndPublish: false,
+    });
+  });
+
+  it('uses the top-level draftAndPublish when the payload sets it', () => {
+    expect(edit({ draftAndPublish: false, options: { draftAndPublish: true } })).toMatchObject({
+      draftAndPublish: false,
+    });
+  });
+});
