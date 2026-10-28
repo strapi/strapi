@@ -164,10 +164,18 @@ declare global {
 ```
 
 - Check the runtime map with `satisfies Controllers`. A missing action fails with TS2741. An
-  action the implementation has outside the contract is not reported.
+  action the implementation has outside the contract is not reported, because the map's values
+  are imported objects, not literals. Compare the action names of each controller with
+  `Core.Assert<Core.SameNames<…>>` in a compile-only test to catch it, e.g. admin's
+  `server/src/types/__tests__/controller-contracts.test.ts`.
 - A controller factory (`({ strapi }) => ({ … })`) is checked in its own module with
   `satisfies Core.ControllerFactory<uid>`. The map check leaves it out, e.g.
   `satisfies Omit<Controllers, 'schema'> & { schema: unknown }`.
+- A controller whose action names are built at runtime is left out of the map check the same way.
+  Check its sources instead. Admin's `transfer` controller prefixes the actions of `runner.ts` and
+  `token.ts` with `mapKeys` (`runner-push`, `token-list`, …), so each source
+  `satisfies PrefixedActions<Controllers['transfer'], 'runner'>`, a mapped type that strips the
+  prefix from the contract's names. Typing the built map instead would change its published type.
 - Check routes against the map: `satisfies Core.RouterInputFor<Controllers, 'plugin::email'>` for a
   router, `satisfies Core.RouteInputFor<Controllers, 'plugin::documentation'>[]` for an array of
   routes. A string handler must name an action of a contract, and policies and middlewares are
@@ -177,6 +185,16 @@ declare global {
   infers, then add `satisfies`.
 - Check routes against the hand-written `Controllers` map, not against the registry. A
   `| undefined` entry has no actions to reference.
+- A helper that builds routes widens its literals before the route array is checked. Type its
+  handler parameter as `Core.ControllerActionReference<Controllers>`, and add
+  `satisfies Core.RouteConfigFor` to the `config` it returns so that policy names stay literal, as
+  `authenticatedAdminRoute` in admin's `routes/users.ts` does.
+- A route that names a policy or middleware of a package this package cannot load is checked
+  against a local type that leaves those names unchecked, with a comment naming the reason. Admin's
+  forgot-password route uses `plugin::email.rateLimit`, and email peer-depends on admin, so
+  importing email's contracts would be a cycle. `ForgotPasswordRoute` in
+  `routes/authentication.ts` keeps `middlewares` as `string[]` for that handler only. Applications
+  load both packages and check the name.
 
 ### Config contracts
 
@@ -213,6 +231,83 @@ names. A package that registers policies or middlewares registers all of them.
 - `@strapi/core` registers the `strapi::*` middlewares in `packages/core/core/src/types/index.ts`.
   Type generation registers application middlewares (`global::*`, `api::*`) in `AppMiddlewares`
   (`types/generated/middlewares.ts`).
+
+### Permission action contracts
+
+`Strapi.Registries.PermissionActions` lists the admin permission action IDs. A key is the ID the
+admin action provider computes from the `uid` and `pluginName` of a registered action
+(`computeActionId`): `api::<uid>` without a plugin name, `admin::<uid>` for `'admin'`, and
+`plugin::<pluginName>.<uid>` otherwise. Values are not read: declare each ID as `true`.
+
+```ts
+// packages/core/content-type-builder/server/src/types/index.ts
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      /** Registered at bootstrap (`bootstrap.ts`). */
+      interface PermissionActions {
+        'plugin::content-type-builder.read': true;
+      }
+    }
+  }
+}
+```
+
+- It is additive, with no `Package*` and `App*` pair. Keys are runtime IDs, not ownership: two
+  declarations of an ID describe the same action, so they never conflict. The package that
+  registers an action declares its ID, in the file that holds its other registry declarations.
+  Applications declare the actions they register.
+- Check that the declared IDs equal the registered ones. Write the action list `as const` and
+  compare its computed IDs with the declared IDs of the package's namespace:
+
+  ```ts
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  type ActionIds = Core.Assert<
+    Core.SameNames<
+      Core.PermissionActionId<(typeof actions)[number]>,
+      Extract<Core.RegisteredPermissionAction, `plugin::content-type-builder.${string}`>
+    >
+  >;
+  ```
+
+  The check is compile-only and fails in both modes, with `{ unregistered, unimplemented }`
+  naming the IDs on each side. Filter on the prefix of the IDs the list registers: review
+  workflows registers `admin::review-workflows.*`, so admin's own check excludes that prefix.
+
+- Pass the `as const` list straight to `registerMany`. With strict types, `register` and
+  `registerMany` check the computed ID of each action (`Core.PermissionActionCheck`). An
+  unregistered ID fails on the `uid`, with a message that names it, e.g.
+  `'Unregistered permission action: plugin::i18n.locale.raed'`. Only literal fields are checked:
+  a list typed with a wide `uid: string`, as in most application code, passes.
+- Action provider reads (`get`, `has`, `appliesToProperty`, `unstable_aliases`) accept any runtime
+  ID, such as `string` or a template literal, and reject an unregistered literal with TS2345.
+- The `actions` of `admin::hasPermissions` (in its string, tuple and object forms) and of
+  `plugin::content-manager.hasPermissions` take `Core.PermissionActionReference`. With strict
+  types, once any ID is declared, they accept declared IDs only, and a typo fails with TS2820
+  "Did you mean". Without any declared ID they accept any string, unlike policies, where an empty
+  inventory accepts no name.
+- A package program sees the IDs of the packages it loads (`registries.ts`), as for the other
+  registries. Applications load every bundled package.
+- Name action IDs in route configs as literals. A constant read from an object without `as const`
+  is a `string` and fails the check. Adding `as const` to a published constant changes its
+  declaration, so prefer the literal, as upload's `routes/view-configuration.ts` does.
+- The IDs of content releases (`cms-content-releases`) and review workflows (`review-workflows`)
+  exist only when their EE feature is enabled. Their packages declare them with a JSDoc line that
+  names the feature. A route that names one works on every license: without the feature, the
+  policy denies, as for any permission the user lacks. The admin SSO and audit-log IDs are not
+  declared yet.
+- Users-permissions is JavaScript and declares no ID. An application that names its actions
+  (`plugin::users-permissions.*`) in a typed config declares them in `PermissionActions`.
+- Inside admin, `getService('permission')` returns the registered contract with strict types.
+  The strict-off build checks the same code against the implementation, whose `registerMany`
+  takes a mutable array, so admin's bootstrap casts the lookup result to
+  `Core.ServiceFor<'admin::permission'>` before it passes its `as const` list.
+- Register actions in a plugin's `register` or `bootstrap`, or in an application's `register`, not
+  in an application's `bootstrap`. Admin's bootstrap runs after the plugins' and before the
+  application's, and removes the stored permissions of every unregistered action. The second
+  registration of an ID throws at boot, and the second registrant may be the owner.
+- Without strict types, `Core.PermissionActionReference` is any string, with the declared IDs
+  listed for completion, and the action provider keeps develop's signatures.
 
 ### Hook contracts
 
