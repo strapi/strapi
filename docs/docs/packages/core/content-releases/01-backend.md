@@ -173,7 +173,7 @@ Handles requests to interact with the Release Action content type
 
 ### Contracts
 
-The controller contracts are in `server/src/types/controllers.ts`. The plugin returns its controllers, services and routes only when the `cms-content-releases` EE feature is enabled, so each one is registered as `Core.Licensed<'cms-content-releases', Contract>`: `Contract` in an application that lists the feature in `licensedFeatures`, `undefined` in one that does not, `Contract | undefined` in package and plugin programs. The routes are checked against the `Controllers` map of that file. See [Controller contracts and typed routes](../../../contributing/05-typescript.md#controller-contracts-and-typed-routes).
+The controller contracts are in `server/src/types/controllers.ts`. The plugin returns its controllers, services and routes only when the `cms-content-releases` EE feature is enabled, so each one is registered as `Core.Licensed<'cms-content-releases', Contract>`: `Contract` in an application that lists the feature in `licensedFeatures`, `undefined` in one that does not, `Contract | undefined` in package and plugin programs. Read [License-gated contracts](../../../contributing/05-typescript.md#license-gated-contracts). The routes are checked against the `Controllers` map of that file. See [Controller contracts and typed routes](../../../contributing/05-typescript.md#controller-contracts-and-typed-routes).
 
 ## Permissions
 
