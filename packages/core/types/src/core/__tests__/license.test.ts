@@ -83,3 +83,15 @@ strapi.ee.features.isEnabled(runtimeName) satisfies boolean;
 strapi.ee.features.isEnabled('ssso');
 // @ts-expect-error A literal feature name is a feature of the inventory.
 strapi.ee.features.get('cms-content-release');
+
+// A feature module registers the limits of a feature of the inventory.
+strapi.ee.entitlements.register({
+  feature: 'review-workflows',
+  limits: [{ key: 'numberOfWorkflows', unit: 'count', get: () => 200 }],
+});
+strapi.ee.entitlements.register({ feature: runtimeName, limits: [] });
+strapi.ee.entitlements.register({
+  // @ts-expect-error A literal feature name is a feature of the inventory.
+  feature: 'review-workflow',
+  limits: [],
+});
