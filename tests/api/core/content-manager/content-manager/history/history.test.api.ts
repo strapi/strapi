@@ -581,6 +581,25 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
+    test.each(['abc', '0', '-1'])(
+      'Falls back to the first page when the page param is %s',
+      async (page) => {
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=${page}&pageSize=1&locale=en`,
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.meta.pagination).toEqual({
+          page: 1,
+          pageSize: 1,
+          pageCount: 2,
+          total: 2,
+        });
+      }
+    );
+
     test('Finds many versions with sensitive data', async () => {
       const collectionType = await rq({
         method: 'GET',
@@ -669,6 +688,28 @@ describeOnCondition(edition === 'EE')('History API', () => {
         },
       });
     });
+
+    test.each(['999999', 'abc'])(
+      'Throws not found when the version id is %s',
+      async (versionId) => {
+        const res = await rq({
+          method: 'PUT',
+          url: `/content-manager/history-versions/${versionId}/restore`,
+          body: {
+            contentType: collectionTypeUid,
+          },
+        });
+
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            status: 404,
+            name: 'NotFoundError',
+          },
+        });
+      }
+    );
 
     test('Restores a history version in the default locale', async () => {
       const versions = await rq({

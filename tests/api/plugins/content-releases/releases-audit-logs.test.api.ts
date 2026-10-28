@@ -711,6 +711,12 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
   });
 
   describe('release settings', () => {
+    beforeAll(async () => {
+      // Other suites can leave settings behind, and the first test expects none
+      const store = await strapi.store({ type: 'core', name: 'content-releases' });
+      await store.set({ key: 'settings', value: null });
+    });
+
     it('records a settings change with its previous value', async () => {
       const res = await rq({
         url: '/content-releases/settings',

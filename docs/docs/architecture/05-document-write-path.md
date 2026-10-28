@@ -124,7 +124,7 @@ When a row goes away, through `delete`, `unpublish`, `discardDraft` or the repla
 
 ## Validation
 
-The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. For drafts, it skips `required`, `min`, `minLength` and `regex` checks. When `api.documents.strictRelations` is `true`, it also enforces required relations and media on non-draft writes.
+The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. For drafts, it skips `required`, `min`, `minLength` and `regex` checks. When `api.documents.strictRelations` is `true`, it also enforces required relations and media on non-draft writes. On a non-draft update, a missing required field is accepted because the stored value is kept, but a required field set to `null` is rejected. A component sent without an `id` in a non-draft update is validated as on create, because the entries service creates it.
 
 Database lifecycles run after the entity validator. Data that a `beforeCreate` or `beforeUpdate` subscriber adds is not validated.
 
