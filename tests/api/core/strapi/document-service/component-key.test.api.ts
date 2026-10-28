@@ -252,6 +252,82 @@ describe('Document Service — componentKey', () => {
     expect(stillPublished.blocks.find((b) => b.componentKey === targetKey).name).toBe('one');
   });
 
+  test('echoing published id + componentKey updates the draft block', async () => {
+    const created = await strapi.documents(UID).create({
+      data: {
+        title: 'echo',
+        blocks: [{ name: 'one' }, { name: 'two' }],
+      },
+      populate: ['blocks'],
+    });
+
+    await strapi.documents(UID).publish({ documentId: created.documentId });
+
+    const published = await strapi.documents(UID).findOne({
+      documentId: created.documentId,
+      status: 'published',
+      populate: ['blocks'],
+    });
+
+    const updated = await strapi.documents(UID).update({
+      documentId: created.documentId,
+      data: {
+        blocks: [{ ...published.blocks[0], name: 'one-updated' }, { ...published.blocks[1] }],
+      },
+      populate: ['blocks'],
+    });
+
+    expect(updated.blocks.map((b) => b.componentKey)).toEqual(
+      published.blocks.map((b) => b.componentKey)
+    );
+    expect(updated.blocks.map((b) => b.id)).toEqual(created.blocks.map((b) => b.id));
+    expect(updated.blocks[0].name).toBe('one-updated');
+  });
+
+  test('create ignores client componentKeys and mints distinct ones', async () => {
+    const created = await strapi.documents(UID).create({
+      data: {
+        title: 'client-keys',
+        blocks: [
+          { componentKey: 'client-key', name: 'a' },
+          { componentKey: 'client-key', name: 'b' },
+        ],
+      },
+      populate: ['blocks'],
+    });
+
+    const keys = created.blocks.map((b) => b.componentKey);
+    expect(keys).not.toContain('client-key');
+    expect(new Set(keys).size).toBe(2);
+  });
+
+  test('a componentKey repeated in one field creates a new block', async () => {
+    const created = await strapi.documents(UID).create({
+      data: {
+        title: 'copied-block',
+        blocks: [{ name: 'original' }],
+      },
+      populate: ['blocks'],
+    });
+    const [original] = created.blocks;
+
+    const updated = await strapi.documents(UID).update({
+      documentId: created.documentId,
+      data: {
+        blocks: [
+          { id: original.id, componentKey: original.componentKey, name: 'original' },
+          { componentKey: original.componentKey, name: 'copy' },
+        ],
+      },
+      populate: ['blocks'],
+    });
+
+    expect(updated.blocks.map((b) => b.name)).toEqual(['original', 'copy']);
+    expect(updated.blocks[0].id).toBe(original.id);
+    expect(updated.blocks[0].componentKey).toBe(original.componentKey);
+    expect(updated.blocks[1].componentKey).not.toBe(original.componentKey);
+  });
+
   test('omit-id full replace still works (non-breaking)', async () => {
     const created = await strapi.documents(UID).create({
       data: {

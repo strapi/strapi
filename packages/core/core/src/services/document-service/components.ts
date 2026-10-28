@@ -188,7 +188,8 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
       const componentValue = resolveComponentIdentities(
         attributeName,
         loadedValue,
-        rawComponentValue
+        rawComponentValue,
+        componentUID
       );
 
       const previousValue = await deleteOldComponents(
@@ -337,65 +338,106 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
 };
 
 /**
- * Map payload entries that carry `componentKey` (without a usable row `id`) onto the
- * matching component row already linked to this parent entity.
+ * Map payload entries that carry `componentKey` onto the matching component row already
+ * linked to this parent entity.
  *
- * Fail closed: unknown keys throw the same relation error as invalid ids.
- * Entries without id/key are creates. Existing `id` wins and is left unchanged.
+ * - An `id` that belongs to this parent wins and is left unchanged.
+ * - An `id` that does not belong to this parent (e.g. the published row echoed back while the
+ *   draft is updated) is replaced by the row matching `componentKey`, when there is one.
+ * - Each row is claimed once: a key repeated in the same field (copied block) becomes a new
+ *   component with a fresh key instead of updating the block it was copied from.
+ *
+ * Fail closed: unknown keys without an id throw the same relation error as invalid ids.
+ * Entries without id/key are creates.
  */
 const resolveComponentIdentities = <T extends ComponentValue | DynamicZoneValue>(
   attributeName: string,
   previousValue: T | null | undefined,
-  componentValue: T
+  componentValue: T,
+  componentUID?: UID.Component
 ): T => {
   if (componentValue == null) {
     return componentValue;
   }
 
-  const previous = _.castArray(previousValue || []).filter(Boolean) as Array<{
+  type Entry = {
     id?: Modules.EntityService.Params.Attribute.ID;
-    componentKey?: string;
+    componentKey?: string | null;
     __component?: string;
-  }>;
+  };
 
-  const resolveOne = (value: any) => {
+  const previous = _.castArray(previousValue || []).filter(Boolean) as Entry[];
+  const values = _.castArray(componentValue) as Entry[];
+
+  // Dynamic zones: ids and keys are only unique within the same __component uid
+  const sameType = (a: Entry, b: Entry) =>
+    !a.__component || !b.__component || a.__component === b.__component;
+
+  const ownedRow = (value: Entry) =>
+    isNil(value.id)
+      ? undefined
+      : previous.find(
+          (entry) =>
+            !isNil(entry.id) && String(entry.id) === String(value.id) && sameType(entry, value)
+        );
+
+  const hasKey = (value: Entry) => typeof value.componentKey === 'string';
+
+  const claimed = new Set<Entry>();
+  values.forEach((value) => {
+    const row = value && typeof value === 'object' ? ownedRow(value) : undefined;
+    if (row) {
+      claimed.add(row);
+    }
+  });
+
+  const asNewComponent = (value: Entry) => {
+    const uid = (value.__component ?? componentUID) as UID.Component | undefined;
+    const data = omit(value, ['id', 'componentKey']);
+    return uid ? stripComponentKeys(strapi.getModel(uid), data) : data;
+  };
+
+  const resolveOne = (value: Entry) => {
     if (value == null || typeof value !== 'object') {
       return value;
     }
 
-    if (typeof value.id !== 'undefined') {
+    if (ownedRow(value)) {
       return value;
     }
 
-    if (typeof value.componentKey === 'undefined' || value.componentKey === null) {
-      return value;
+    if (!hasKey(value)) {
+      return isNil(value.id) ? asNewComponent(value) : value;
     }
 
-    const match = previous.find((entry) => {
-      if (entry.componentKey !== value.componentKey) {
-        return false;
-      }
-      // Dynamic zones: keys are only unique within the same __component uid
-      if (value.__component && entry.__component && value.__component !== entry.__component) {
-        return false;
-      }
-      return true;
-    });
+    const match = previous.find(
+      (entry) => entry.componentKey === value.componentKey && sameType(entry, value)
+    );
+
+    if (match && claimed.has(match)) {
+      return asNewComponent(value);
+    }
 
     if (!match?.id) {
+      if (!isNil(value.id)) {
+        // Foreign id and unknown key: let the id check reject it as before
+        return value;
+      }
+
       throw new errors.ApplicationError(
         `Some of the provided components in ${attributeName} are not related to the entity`
       );
     }
 
+    claimed.add(match);
     return { ...value, id: match.id };
   };
 
   if (Array.isArray(componentValue)) {
-    return componentValue.map(resolveOne) as T;
+    return values.map(resolveOne) as T;
   }
 
-  return resolveOne(componentValue) as T;
+  return resolveOne(componentValue as Entry) as T;
 };
 
 const pickStringifiedId = ({
@@ -1328,23 +1370,31 @@ const createComponentRelationFilter = () => {
 };
 
 /**
- * Remove `componentKey` from nested component / dynamic-zone payloads (in place).
- * Used by document clone so createComponent mints new keys for the duplicate document.
+ * Return a copy of `data` without `componentKey` in nested component / dynamic-zone payloads,
+ * so createComponent mints new keys (client creates, document clone, copied blocks).
  * Publish/discard must NOT call this — they intentionally preserve keys across status rows.
  */
-const stripComponentKeys = <T extends Record<string, unknown>>(
-  schema: Schema.Schema,
-  data: T
-): T => {
-  if (data == null || typeof data !== 'object') {
+const stripComponentKeys = <T>(schema: Schema.Schema | undefined, data: T): T => {
+  if (data == null || typeof data !== 'object' || !schema) {
     return data;
   }
 
   const { attributes = {} } = schema;
+  const result: Record<string, unknown> = { ...(data as Record<string, unknown>) };
+
+  const stripOne = (componentSchema: Schema.Schema | undefined, entry: unknown) => {
+    if (entry == null || typeof entry !== 'object') {
+      return entry;
+    }
+    return stripComponentKeys(
+      componentSchema,
+      omit(entry as Record<string, unknown>, 'componentKey')
+    );
+  };
 
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
-    const value = data[attributeName as keyof T];
+    const value = result[attributeName];
 
     if (value == null) {
       continue;
@@ -1353,31 +1403,17 @@ const stripComponentKeys = <T extends Record<string, unknown>>(
     if (attribute.type === 'component') {
       const componentSchema = strapi.getModel(attribute.component);
 
-      const stripOne = (entry: any) => {
-        if (entry == null || typeof entry !== 'object') {
-          return;
-        }
-        delete entry.componentKey;
-        stripComponentKeys(componentSchema, entry);
-      };
-
-      if (attribute.repeatable && Array.isArray(value)) {
-        value.forEach(stripOne);
-      } else {
-        stripOne(value);
-      }
+      result[attributeName] = Array.isArray(value)
+        ? value.map((entry) => stripOne(componentSchema, entry))
+        : stripOne(componentSchema, value);
     } else if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
-      value.forEach((entry: any) => {
-        if (entry == null || typeof entry !== 'object' || !entry.__component) {
-          return;
-        }
-        delete entry.componentKey;
-        stripComponentKeys(strapi.getModel(entry.__component), entry);
-      });
+      result[attributeName] = value.map((entry: any) =>
+        entry?.__component ? stripOne(strapi.getModel(entry.__component), entry) : entry
+      );
     }
   }
 
-  return data;
+  return result as T;
 };
 
 export {
