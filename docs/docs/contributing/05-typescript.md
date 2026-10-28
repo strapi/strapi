@@ -315,6 +315,12 @@ declare global {
   changed at runtime (extensions in `src/extensions`, attributes added by other plugins). Without
   generated schemas, as in a package compiled alone, the declared UIDs are precise and every other
   UID stays generic.
+- In strict mode, each declared UID is a required key of `strapi.contentTypes`, as generated UIDs
+  are in an application. A plain record such as `Record<UID.ContentType, any>` no longer fits
+  `Core.Strapi['contentTypes']`, so type a content-type record parameter as
+  `Partial<Core.Strapi['contentTypes']>`. Code that maps over `strapi.contentTypes` and infers the
+  result can exceed the type size TypeScript serializes (TS7056): annotate the source as
+  `Internal.Registry.GenericContentTypeSchemas`, as `getSchema` in the content-type builder does.
 - `examples/strict-types/checks/package-schemas.ts` compares each declaration with the generated
   schema, so a declaration that drifts from the runtime schema fails `yarn test:types:example`. It
   checks the packages installed in that application: those bundled with `@strapi/strapi` load
