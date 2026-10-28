@@ -105,6 +105,32 @@ type StrictContainer = Omit<Container, 'get'> & {
 
 type StrapiContainer = IsStrict extends false ? Container : StrictContainer;
 
+/** License feature reads without strict mode: develop's signatures. */
+type LegacyLicenseFeatureReads = {
+  isEnabled: (feature: string) => boolean;
+  list: () => { name: string; [key: string]: any }[];
+  get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
+};
+
+/**
+ * License feature reads with strict types: a literal name must be a feature of the inventory, and
+ * `get` returns the feature with the options of its inventory entry. A name known only at runtime
+ * is accepted.
+ */
+type StrictLicenseFeatureReads = {
+  isEnabled: <TName extends Core.LicenseFeatureLookupName>(
+    feature: Core.LicenseFeatureLookup<TName>
+  ) => boolean;
+  list: () => { name: string; [key: string]: any }[];
+  get: <TName extends Core.LicenseFeatureLookupName>(
+    feature: Core.LicenseFeatureLookup<TName>
+  ) => Core.LicenseFeatureEntry<TName> | undefined;
+};
+
+type LicenseFeatureReads = IsStrict extends false
+  ? LegacyLicenseFeatureReads
+  : StrictLicenseFeatureReads;
+
 export interface Strapi extends StrapiContainer, Lookups {
   server: Modules.Server.Server;
   log: Logger;
@@ -178,11 +204,7 @@ export interface Strapi extends StrapiContainer, Lookups {
     }: {
       strapi: Core.Strapi;
     }) => Promise<{ trialEndsAt: string } | null>;
-    features: {
-      isEnabled: (feature: string) => boolean;
-      list: () => { name: string; [key: string]: any }[];
-      get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
-    };
+    features: LicenseFeatureReads;
     entitlements: {
       register: (input: {
         feature: string;

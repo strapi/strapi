@@ -59,3 +59,21 @@ adminChecks satisfies unknown;
 // @ts-expect-error The service may be missing.
 void app.service('admin::seat-enforcement').getDisabledUserList();
 void app.service('admin::role').ssoCheckRolesIdForDeletion?.([]);
+
+// License feature reads, in any license scope: a literal name is a feature of the inventory, and
+// `get` types the options of its entry.
+declare const runtimeName: string;
+const releases = app.ee.features.get('cms-content-releases');
+declare const featureChecks: [
+  Core.Assert<
+    Equal<
+      NonNullable<typeof releases>['options'],
+      Strapi.Registries.LicenseFeatures['cms-content-releases'] | undefined
+    >
+  >,
+  Core.Assert<Equal<NonNullable<typeof releases>['name'], 'cms-content-releases'>>,
+];
+featureChecks satisfies unknown;
+app.ee.features.isEnabled(runtimeName) satisfies boolean;
+// @ts-expect-error A literal feature name is a feature of the inventory.
+app.ee.features.isEnabled('cms-content-release');

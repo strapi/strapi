@@ -54,3 +54,32 @@ export const misspelled: Core.Config.TypeScript = {
   // @ts-expect-error An application lists features of the license inventory.
   licensedFeatures: ['reveiw-workflows'],
 };
+
+// License feature reads take a feature of the inventory, or a name known only at runtime.
+declare const strapi: Core.Strapi;
+declare const runtimeName: string;
+const workflows = strapi.ee.features.get('review-workflows');
+const runtimeFeature = strapi.ee.features.get(runtimeName);
+declare const featureChecks: [
+  Core.Assert<Equal<typeof workflows, Core.LicenseFeatureEntry<'review-workflows'> | undefined>>,
+  Core.Assert<
+    Equal<
+      NonNullable<typeof workflows>['options'],
+      Strapi.Registries.LicenseFeatures['review-workflows'] | undefined
+    >
+  >,
+  Core.Assert<Equal<NonNullable<typeof workflows>['name'], 'review-workflows'>>,
+  Core.Assert<Equal<NonNullable<typeof runtimeFeature>['name'], string>>,
+  Core.Assert<
+    Equal<NonNullable<typeof runtimeFeature>['options'], Record<string, unknown> | undefined>
+  >,
+  Core.Assert<Equal<Core.LicenseFeatureLookup<'reveiw-workflows'>, Core.LicenseFeatureName>>,
+];
+featureChecks satisfies unknown;
+
+strapi.ee.features.isEnabled('sso') satisfies boolean;
+strapi.ee.features.isEnabled(runtimeName) satisfies boolean;
+// @ts-expect-error A literal feature name is a feature of the inventory.
+strapi.ee.features.isEnabled('ssso');
+// @ts-expect-error A literal feature name is a feature of the inventory.
+strapi.ee.features.get('cms-content-release');

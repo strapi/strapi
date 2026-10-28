@@ -647,3 +647,20 @@ type LicenseChecks = [
 ];
 declare const licenseChecks: LicenseChecks;
 licenseChecks satisfies unknown;
+
+// License feature reads keep develop's types: any name, and `get` may return a string.
+type LicenseFeatureReadChecks = [
+  Expect<
+    Equal<
+      Core.Strapi['ee']['features'],
+      {
+        isEnabled: (feature: string) => boolean;
+        list: () => { name: string; [key: string]: any }[];
+        get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
+      }
+    >
+  >,
+  Expect<Equal<Core.LicenseFeatureLookup<'reveiw-workflows'>, 'reveiw-workflows'>>,
+];
+declare const licenseFeatureReadChecks: LicenseFeatureReadChecks;
+licenseFeatureReadChecks satisfies unknown;

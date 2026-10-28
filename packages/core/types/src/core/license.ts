@@ -1,3 +1,6 @@
+import type { SuggestedString } from '../utils/string';
+import type { IsDynamicName, IsStrict } from './strictness';
+
 /** A feature of the license inventory, `Strapi.Registries.LicenseFeatures`. */
 export type LicenseFeatureName = Extract<keyof Strapi.Registries.LicenseFeatures, string>;
 
@@ -68,3 +71,42 @@ export type LicensedExtension<TCE, TEE> =
     : LicenseState<'licensed'> extends 'off'
       ? TCE
       : TCE & Partial<Omit<TEE, keyof TCE>>;
+
+/**
+ * The names a license feature read accepts (`strapi.ee.features.isEnabled` and `get`): any string,
+ * with the inventory names listed for completion. Use it as the constraint of the name's type
+ * parameter, and {@link LicenseFeatureLookup} as the parameter type.
+ */
+export type LicenseFeatureLookupName = SuggestedString<LicenseFeatureName>;
+
+/**
+ * The feature name a license feature read accepts. A name known only at runtime, such as `string`,
+ * is always accepted: the read finds nothing for a name the license does not list. With strict
+ * types enabled, a literal name must be a name of the inventory.
+ *
+ * @example
+ * ```ts
+ * declare function isEnabled<TName extends Core.LicenseFeatureLookupName>(
+ *   feature: Core.LicenseFeatureLookup<TName>
+ * ): boolean;
+ * ```
+ */
+export type LicenseFeatureLookup<TName extends string> = IsStrict extends false
+  ? TName
+  : IsDynamicName<TName> extends true
+    ? TName
+    : [TName] extends [LicenseFeatureName]
+      ? TName
+      : LicenseFeatureName;
+
+/**
+ * A feature as the license lists it, read by name: its options are those of the inventory entry, or
+ * any object for a name known only at runtime.
+ */
+export type LicenseFeatureEntry<TName extends string> = {
+  name: TName;
+  options?: TName extends LicenseFeatureName
+    ? Strapi.Registries.LicenseFeatures[TName]
+    : Record<string, unknown>;
+  [key: string]: unknown;
+};

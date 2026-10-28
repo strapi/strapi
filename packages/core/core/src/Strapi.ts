@@ -83,7 +83,11 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   get ee(): Core.Strapi['ee'] {
-    return utils.ee;
+    // With strict types, `features.get` returns the feature named by its argument, which
+    // `list().find()` cannot express: only the feature reads take the contract's types.
+    return utils.ee as Omit<typeof utils.ee, 'features'> & {
+      features: Core.Strapi['ee']['features'];
+    };
   }
 
   get dirs(): Core.StrapiDirectories {
