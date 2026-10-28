@@ -56,7 +56,9 @@ Examples: `admin::audit-logs.read`, `plugin::content-manager.explorer.create`
 
 ### Register an action
 
-An action can be registered in the backend during the `bootstrap` phase of the app.
+An action can be registered in the backend during the `register` or `bootstrap` phase of the app or of a plugin. Once Strapi is loaded, `register` throws.
+
+Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions whose action is not registered. It does this in the `strapi::app.afterBootstrap` hook, so actions registered in the app `bootstrap` keep their permissions across restarts.
 
 Example:
 
