@@ -1,0 +1,114 @@
+// Artifact relationships describe construction, not network calls at runtime.
+model {
+  plugin_package = code_package 'Plugin package' {
+    summary 'Optional server and Admin entrypoints in one package.'
+    description 'A package may export a server entrypoint, an Admin entrypoint, or both. The build and server loaders consume them separately; a plugin is not an independently deployed service.'
+
+    server_entry = code_package 'Server entrypoint' {
+      summary 'Exports routes, services, schemas and lifecycle hooks.'
+      technology 'strapi-server export'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/loaders/plugins/index.ts 'Plugin loader'
+    }
+    admin_entry = code_package 'Admin entrypoint' {
+      summary 'Registers pages, fields and other Admin extensions.'
+      technology 'strapi-admin export'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/strapi/src/node/core/plugins.ts 'Admin plugin discovery'
+    }
+    content_types = source_document 'Plugin content types' {
+      summary 'Schema objects exported by the server entrypoint.'
+      technology 'JavaScript / TypeScript'
+      description 'Installed plugin schemas are loaded from the plugin server export, not from the application src/api schema directory.'
+    }
+  }
+
+  media_storage = external_system 'External media storage' {
+    summary 'Optional remote storage selected through an upload provider.'
+    description 'An external storage service such as S3 or Cloudinary. This overview treats the service as an integration; a deployment-specific model can show the application bucket as a data-store container. Local uploads are a different configuration.'
+  }
+  email_service = external_system 'Email delivery service' {
+    summary 'Delivers messages through the configured email provider.'
+  }
+
+  extend strapi.application_source {
+    plugin_overrides = source_document 'Application plugin overrides' {
+      summary 'Application-specific changes to installed plugin schemas and code.'
+      technology 'src/extensions'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/loaders/plugins/index.ts 'Application extension loading'
+    }
+  }
+
+  extend strapi.cli_tooling {
+    admin_build = component 'Admin build' {
+      summary 'Bundles the Admin and enabled plugin UI for the browser.'
+      technology 'Vite'
+      link https://github.com/strapi/strapi/tree/develop/packages/core/strapi/src/node 'Build tooling'
+    }
+    development_supervisor = component 'Development supervisor' {
+      summary 'Restarts the development server when autoReload is enabled.'
+      technology 'strapi develop / Node.js'
+      description 'Development-only parent process. Schema mutations request a reload; the restarted application loads the updated files. This is not a production migration or replica-coordination mechanism.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/reloader.ts 'Reload request'
+      link https://github.com/strapi/strapi/tree/develop/packages/core/strapi/src/node 'Development process'
+    }
+  }
+
+  extend strapi.server_runtime {
+    application_lifecycle = component 'Application lifecycle' {
+      summary 'Loads modules, registers extensions and bootstraps the server.'
+      technology 'Strapi class'
+      description 'start() loads the application if needed. load() runs register() then bootstrap(); the server listens afterward. This groups lifecycle orchestration, not every individual loader.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/Strapi.ts 'Lifecycle implementation'
+
+    }
+    upload_service = component 'Media upload service' {
+      summary 'Manages media and delegates file storage to a provider.'
+      technology '@strapi/upload'
+      link https://github.com/strapi/strapi/tree/develop/packages/core/upload/server/src 'Upload implementation'
+    }
+    upload_provider = component 'Upload provider adapter' {
+      summary 'Stores files locally or calls a configured remote service.'
+      technology 'Provider interface'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/upload/server/src/services/provider.ts 'Provider calls'
+    }
+    email_provider = component 'Email provider adapter' {
+      summary 'Delegates message delivery to the configured service.'
+      technology '@strapi/email'
+      link https://github.com/strapi/strapi/tree/develop/packages/core/email/server/src 'Email implementation'
+    }
+    webhook_delivery = component 'Webhook delivery' {
+      summary 'Posts subscribed events to configured external endpoints.'
+      description 'The webhook runner listens to the local event hub and uses an in-memory worker queue. It sends HTTP requests with a timeout; the queue does not persist delivery state or automatically retry failed delivery.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/worker-queue.ts 'In-memory worker queue'
+      technology 'HTTP(S)'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/webhook-runner.ts 'Webhook runner'
+    }
+  }
+
+  strapi.server_runtime.plugin_system -> plugin_package.server_entry 'loads server export'
+  plugin_package.server_entry -> plugin_package.content_types 'exports schema objects'
+  strapi.server_runtime.plugin_system -> strapi.application_source.plugin_overrides 'applies application overrides'
+  strapi.cli_tooling.admin_build -> plugin_package.admin_entry 'imports enabled UI exports'
+  strapi.cli_tooling.admin_build -> strapi.admin_web_app.plugin_admin_extensions 'bundles plugin UI'
+  strapi.admin_web_app.plugin_admin_extensions -> strapi.server_runtime.plugin_modules 'calls plugin endpoints when needed' 'HTTP(S)'
+  strapi.server_runtime.plugin_modules -> strapi.server_runtime.route_registration 'contributes route definitions'
+  strapi.server_runtime.application_lifecycle -> strapi.server_runtime.plugin_system 'loads enabled plugins'
+  strapi.server_runtime.application_lifecycle -> strapi.server_runtime.api_module_loader 'loads application APIs'
+  strapi.server_runtime.application_lifecycle -> strapi.server_runtime.schema_loader 'collects content definitions'
+  strapi.server_runtime.application_lifecycle -> strapi.server_runtime.schema_sync 'synchronizes schema during bootstrap'
+  strapi.server_runtime.application_lifecycle -> strapi.server_runtime.route_registration 'registers routes during bootstrap'
+  strapi.server_runtime.application_lifecycle -> strapi.server_runtime.http_server 'starts listening after load'
+  strapi.cli_tooling.development_supervisor -> strapi.server_runtime.application_lifecycle 'starts a fresh runtime after reload'
+  strapi.server_runtime.upload_service -> strapi.server_runtime.upload_provider 'delegates file operations'
+  strapi.server_runtime.upload_provider -> media_storage 'uploads and deletes files when configured' 'Provider API'
+  strapi.server_runtime.email_provider -> email_service 'sends messages' 'Provider API'
+  strapi.server_runtime.webhook_delivery -> external_system 'posts subscribed events' 'HTTP(S)'
+
+  extend strapi {
+    local_media = database 'Local media files' {
+      summary 'Uploaded files retained on persistent disk.'
+      technology 'Filesystem / local upload provider'
+      description 'Used only with the local upload provider. Remote upload providers replace this storage path; database persistence alone does not retain local media.'
+    }
+  }
+  strapi.server_runtime.upload_provider -> strapi.local_media 'Stores local uploads' 'Filesystem' { #runtime_boundary }
+}

@@ -1,4 +1,5 @@
-import { isNil, mapValues } from 'lodash/fp';
+import { mapValues } from 'lodash';
+
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { UID, Struct, Core } from '@strapi/types';
@@ -15,7 +16,7 @@ const configurationService = createConfigurationService({
   getModels() {
     const { toContentManagerModel } = getService('data-mapper');
 
-    return mapValues(toContentManagerModel, strapi.contentTypes);
+    return mapValues(strapi.contentTypes, (value) => toContentManagerModel(value));
   },
 });
 
@@ -31,7 +32,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const contentType = strapi.contentTypes[uid];
 
-    return isNil(contentType) ? contentType : toContentManagerModel(contentType);
+    return contentType == null ? contentType : toContentManagerModel(contentType);
   },
 
   findDisplayedContentTypes() {
@@ -42,12 +43,12 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     );
   },
 
-  findContentTypesByKind(kind: { kind: Struct.ContentTypeKind | undefined }) {
-    if (!kind) {
+  findContentTypesByKind(kind: Struct.ContentTypeKind | null | undefined) {
+    if (kind === undefined || kind === null) {
       return this.findAllContentTypes();
     }
 
-    // @ts-expect-error TODO when adding types
+    // @ts-expect-error should be resolved from data-mapper types
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 

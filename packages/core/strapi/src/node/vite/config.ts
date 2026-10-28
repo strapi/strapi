@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
@@ -31,6 +33,12 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   // https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated
   const { default: react } = await import('@vitejs/plugin-react-swc');
 
+  // Imported dynamically so a flag-off build never loads the native oxide and lightningcss binaries
+  // Make it a static import again when the flag goes
+  const tailwindPlugins = ctx.nextDesignSystem
+    ? [(await import('@tailwindcss/vite')).default()]
+    : [];
+
   return {
     root: ctx.cwd,
     base: ctx.basePath,
@@ -61,7 +69,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // - The admin entry host (@strapi/strapi) MUST NOT be in optimizeDeps.exclude.
       // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
       // so changes are reflected without clearing node_modules/.strapi/vite cache.
-      // Also skip pre-built ESM plugin UI libraries with React peers (see collectAdminOptimizeDepsExclude).
+      // Also skip allowlisted / opt-in pre-built ESM plugin UI kits (see collectAdminOptimizeDepsExclude).
       ...(optimizeDepsExclude.length > 0 && { exclude: optimizeDepsExclude }),
       include: [
         // pre-bundle React dependencies to avoid React duplicates,
@@ -117,7 +125,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'date-fns/formatISO',
               'highlight.js',
               'lodash/capitalize',
-              'lodash/fp',
               'lodash/groupBy',
               'lodash/has',
               'lodash/isNil',
@@ -171,13 +178,13 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'node:path': getModulePath('path-browserify'),
       },
     },
-    plugins: [react(), browserCompatShimsPlugin(), buildFilesPlugin(ctx)],
+    plugins: [...tailwindPlugins, react(), browserCompatShimsPlugin(), buildFilesPlugin(ctx)],
   };
 };
 
 const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const {
-    options: { minify, sourcemaps },
+    options: { minify, sourcemap },
   } = ctx;
 
   const baseConfig = await resolveBaseConfig(ctx);
@@ -190,12 +197,12 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       ...baseConfig.build,
       assetsDir: '',
       minify,
-      sourcemap: sourcemaps,
+      sourcemap,
       // Vite 8 bundles with Rolldown; `rollupOptions` is a deprecated alias kept
       // only for back-compat. Use the non-deprecated key directly.
       rolldownOptions: {
         input: {
-          strapi: ctx.entry,
+          strapi: ctx.nextDesignSystem ? path.join(ctx.runtimeDir, 'index.html') : ctx.entry,
         },
       },
     },

@@ -315,7 +315,17 @@ describe('Auth controller - sessions', () => {
           return 'refresh';
         }
         if (path === 'plugin::users-permissions.sessions') {
-          return { httpOnly: true, cookie: { name: 'custom_refresh' } };
+          return {
+            httpOnly: true,
+            cookie: {
+              name: 'custom_refresh',
+              path: '/custom-path',
+              domain: 'example.com',
+              sameSite: 'strict',
+              secure: true,
+              maxAge: 3600000,
+            },
+          };
         }
         return defaultValue;
       });
@@ -332,8 +342,15 @@ describe('Auth controller - sessions', () => {
       expect(ctx.cookies.set).toHaveBeenCalledWith(
         'custom_refresh',
         '',
-        expect.objectContaining({ expires: expect.any(Date) })
+        expect.objectContaining({
+          path: '/custom-path',
+          domain: 'example.com',
+          sameSite: 'strict',
+          secure: true,
+          expires: expect.any(Date),
+        })
       );
+      expect(ctx.cookies.set.mock.calls[0][2]).not.toHaveProperty('maxAge');
     });
   });
 });

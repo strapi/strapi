@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "O tamanho do arquivo excede o máximo permitido.",
+  "apiError.FileTooBig": "O arquivo é muito grande para ser enviado. Ele excede o tamanho máximo de requisição permitido pelo servidor.",
   "upload.generic-error": "Ocorreu um erro ao enviar o arquivo.",
   "bulk.select.label": "Selecionar todos os ativos",
   "button.next": "Próximo",
