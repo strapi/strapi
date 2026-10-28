@@ -9,8 +9,6 @@ const config = {
     'rollup.config.mjs',
     'coverage/',
     'lint-staged.config.mjs',
-    // shared has no TS eslint project; back/CJS config can't parse these.
-    'shared/**/*',
   ],
   overrides: [
     {
