@@ -41,6 +41,16 @@ interface AuthorSchema extends Struct.CollectionTypeSchema {
   };
 }
 
+interface HomepageSchema extends Struct.SingleTypeSchema {
+  collectionName: 'write_homepages';
+  info: { singularName: 'homepage'; pluralName: 'homepages'; displayName: 'Homepage' };
+  options: { draftAndPublish: true };
+  attributes: {
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    layout: Schema.Attribute.Enumeration<['grid', 'list']>;
+  };
+}
+
 interface SeoSchema extends Struct.ComponentSchema {
   collectionName: 'components_shared_seos';
   info: { displayName: 'Seo' };
@@ -64,6 +74,7 @@ declare global {
       interface AppContentTypeSchemas {
         'api::article.article': ArticleSchema;
         'api::author.author': AuthorSchema;
+        'api::homepage.homepage': HomepageSchema;
         // A schema whose attributes are not known: the write inputs fall back to develop's input.
         'api::loose.loose': Struct.CollectionTypeSchema;
       }
@@ -220,6 +231,29 @@ void articleService.create({ data: published });
 void articleService.create({ status: 'draft', data: { tags: [], blocks: [] } });
 // @ts-expect-error the core service publishes by default: `title` and `seo` are required
 void articleService.create({ data: { tags: [], blocks: [] } });
+
+// The core service's `update` follows the update rules: published unless the params pass
+// `status: 'draft'`.
+void articleService.update('d', { data: { subtitle: 'x' } }); // partial update
+void articleService.update('d', { status: 'draft', data: { title: null } }); // draft mode
+// @ts-expect-error the core service publishes by default: `title` does not accept `null` (probe U2)
+void articleService.update('d', { data: { title: null } });
+// @ts-expect-error unknown attribute
+void articleService.update('d', { data: { titel: 'x' } });
+// @ts-expect-error not a value of the enumeration
+void articleService.update('d', { data: { kind: 'nope' } });
+
+// `createOrUpdate` takes the update input too; on an empty single type its first call creates the
+// entry with the create rules, which the types do not check.
+declare const homepageService: Core.CoreAPI.Service.ContentType<'api::homepage.homepage'>;
+void homepageService.createOrUpdate({ data: { layout: 'grid' } }); // partial update
+void homepageService.createOrUpdate({ status: 'draft', data: { title: null } }); // draft mode
+// @ts-expect-error the core service publishes by default: `title` does not accept `null`
+void homepageService.createOrUpdate({ data: { title: null } });
+// @ts-expect-error unknown attribute
+void homepageService.createOrUpdate({ data: { titel: 'x' } });
+// @ts-expect-error not a value of the enumeration
+void homepageService.createOrUpdate({ data: { layout: 'nope' } });
 
 // Generic callers forward params or data typed by the same UID.
 export function forwardCreate<TUID extends UID.ContentType>(

@@ -228,6 +228,24 @@ declare const writeParamChecks: [
       { data: Record<string, unknown>; [key: string]: unknown }
     >
   >,
+  // So do its `update` and `createOrUpdate`: their typed input is strict-only, and a registered UID
+  // does not reach the strict services.
+  Expect<Equal<Core.CoreAPI.Service.ContentType<'plugin::legacy.item'>, Core.CoreAPI.Service.Base>>,
+  Expect<
+    Equal<Core.CoreAPI.Service.ContentType<'api::strict-only.page'>, Core.CoreAPI.Service.Base>
+  >,
+  Expect<
+    Equal<
+      Parameters<Core.CoreAPI.Service.CollectionType['update']>[1],
+      { data: Record<string, unknown>; [key: string]: unknown }
+    >
+  >,
+  Expect<
+    Equal<
+      Parameters<Core.CoreAPI.Service.SingleType['createOrUpdate']>[0],
+      { data: Record<string, unknown>; [key: string]: unknown }
+    >
+  >,
 ];
 writeParamChecks satisfies unknown;
 
