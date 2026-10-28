@@ -601,15 +601,14 @@ describe('Content Type Builder - Schema', () => {
         },
       };
 
-      // try to run them in // so it blocks on of the 2 requests
+      // Either request may acquire the lock first; the invariant is one success and one conflict.
       const [resA, resB] = await Promise.all([rq(reqBody), rq(reqBody)]);
+      const responses = [resA, resB];
 
-      // check the other request is not blocked
-      expect(resA.statusCode).toBe(200);
+      expect(responses.map((res) => res.statusCode).sort()).toEqual([200, 409]);
 
-      // check one of the requests is blocked
-      expect(resB.statusCode).toBe(409);
-      expect(resB.body).toMatchObject({
+      const blocked = responses.find((res) => res.statusCode === 409);
+      expect(blocked.body).toMatchObject({
         error: {
           message: 'Schema update is already in progress.',
           name: 'ConflictError',

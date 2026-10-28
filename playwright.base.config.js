@@ -116,7 +116,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
         : 'off',
 
       /* Use the storage state with localStorage set globally */
-      storageState: './tests/e2e/playwright-storage-state.json',
+      storageState: `./tests/e2e/playwright-storage-state-${port}.json`,
     },
 
     /* Configure projects for major browsers.
@@ -152,7 +152,8 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
     /* Run your local dev server before starting the tests */
     webServer: [
       {
-        command: `cd ${appDir} && npm run develop -- --no-watch-admin`,
+        // The admin is built once per run by tests/scripts/run-tests.js.
+        command: `cd ${appDir} && npm run develop -- --no-watch-admin --no-build-admin`,
         url: `http://127.0.0.1:${port}`,
         // Strapi reads PORT/HOST from env (see tests/app-template/config/server.js). Without this,
         // `yarn playwright test --config test-apps/e2e/test-app-0/playwright.config.js` leaves PORT

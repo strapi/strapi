@@ -1,3 +1,5 @@
+import profile from 'api-tests/profile';
+
 /* -------------------------------------------------------------------------------------------------
  * setupDatabaseReset
  * -----------------------------------------------------------------------------------------------*/
@@ -6,6 +8,36 @@
 let initialTestData = {};
 let isTestDataCaptured = false;
 let allTableNames = [];
+
+/**
+ * Tables that SQL run since the last reset may have written to.
+ *
+ * Every query knex runs, in a transaction or not, emits a `query` event, and a write names its
+ * table right after its verb. A statement that is neither a read nor a write whose table this
+ * can read marks every table dirty, so SQL this does not understand costs a full reset, not a
+ * leak into the next test.
+ */
+const READ_ONLY_STATEMENT =
+  /^\s*(select|pragma|begin|commit|rollback|savepoint|release|show|explain)\b/i;
+const WRITE_STATEMENT =
+  /^\s*(?:insert(?:\s+or\s+\w+)?\s+into|update|delete\s+from|replace\s+into)\s+(?:[`"]?\w+[`"]?\.)?[`"]?(\w+)[`"]?/i;
+
+const dirtyTables = new Set<string>();
+let everyTableDirty = false;
+
+const trackWrites = ({ sql }: { sql?: unknown }) => {
+  if (typeof sql !== 'string' || READ_ONLY_STATEMENT.test(sql)) {
+    return;
+  }
+
+  const match = WRITE_STATEMENT.exec(sql);
+
+  if (match) {
+    dirtyTables.add(match[1]);
+  } else {
+    everyTableDirty = true;
+  }
+};
 
 /**
  * Capture the initial state of all database tables for later restoration
@@ -28,15 +60,53 @@ async function captureInitialTestData() {
     }
   }
 
+  strapi.db.connection.on('query', trackWrites);
   isTestDataCaptured = true;
 }
 
+/**
+ * mysql2 parses JSON columns into arrays and objects. Knex then renders a JS
+ * array as an empty SQL slot (`values (, ...)`), so the INSERT is rejected
+ * after the table was cleared. Postgres and SQLite accept those values.
+ */
+const rowsForMysqlInsert = (rows: Record<string, unknown>[]) =>
+  rows.map((row) => {
+    const copy: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(row)) {
+      const isJson =
+        Array.isArray(value) ||
+        (typeof value === 'object' &&
+          value !== null &&
+          !(value instanceof Date) &&
+          !Buffer.isBuffer(value));
+
+      copy[key] = isJson ? JSON.stringify(value) : value;
+    }
+
+    return copy;
+  });
+
+/**
+ * Restores the tables written to since the last reset. Restoring every table took about 1.4 s
+ * on SQLite, most of it re-inserting rows no test had touched.
+ */
 async function resetTestDatabase() {
+  const tablesToReset = everyTableDirty
+    ? allTableNames
+    : allTableNames.filter((tableName) => dirtyTables.has(tableName));
+
+  if (tablesToReset.length === 0) {
+    return;
+  }
+
   // Use Strapi's built-in schema update mechanism to disable constraints (e.g. foreign key constraints)
   await strapi.db.dialect.startSchemaUpdate();
+  const client = strapi.db.connection.client.config.client;
+  const isMysql = client === 'mysql' || client === 'mysql2';
 
   try {
-    for (const tableName of allTableNames) {
+    for (const tableName of tablesToReset) {
       try {
         // Clear the table
         await strapi.db.connection(tableName).del();
@@ -44,7 +114,8 @@ async function resetTestDatabase() {
         // Restore initial data if any
         const initialData = initialTestData[tableName];
         if (initialData && initialData.length > 0) {
-          await strapi.db.connection(tableName).insert(initialData);
+          const rows = isMysql ? rowsForMysqlInsert(initialData) : initialData;
+          await strapi.db.connection(tableName).insert(rows);
         }
       } catch (error) {
         console.warn(`Could not reset table ${tableName}:`, error.message);
@@ -53,6 +124,9 @@ async function resetTestDatabase() {
   } finally {
     // Always re-enable constraints
     await strapi.db.dialect.endSchemaUpdate();
+    // The reset's own writes leave every table as captured.
+    dirtyTables.clear();
+    everyTableDirty = false;
   }
 }
 
@@ -68,14 +142,14 @@ export function setupDatabaseReset() {
 
   beforeEach(async () => {
     if (!isDataCaptured) {
-      await captureInitialTestData();
+      await profile.timed('reset.capture', () => captureInitialTestData());
       isDataCaptured = true;
     }
   });
 
   afterEach(async () => {
     if (isDataCaptured) {
-      await resetTestDatabase();
+      await profile.timed('reset.restore', () => resetTestDatabase());
     }
   });
 }

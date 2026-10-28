@@ -10,7 +10,15 @@ import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
-import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import {
+  Callback,
+  CallbackTracker,
+  isDeadlockError,
+  transactionCtx,
+  TransactionObject,
+  waitForDeadlockRetry,
+  waitForPendingCallbacks,
+} from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
@@ -104,6 +112,8 @@ class Database {
 
   logger: Logger;
 
+  private readonly callbackTracker: CallbackTracker;
+
   /** Set unless `settings.poolTimeoutDiagnostics` is false or the install failed. */
   private poolDiagnostics?: PoolDiagnostics;
 
@@ -120,6 +130,10 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
+    this.callbackTracker = {
+      pending: new Set(),
+      logger: this.logger,
+    };
 
     this.dialect = getDialect(this);
 
@@ -249,6 +263,33 @@ class Database {
   async transaction<TCallback extends Callback>(
     cb?: TCallback
   ): Promise<ReturnType<TCallback> | TransactionObject> {
+    // Postgres and MySQL abort one transaction when two of them deadlock, and
+    // the caller has to run it again. Nested work is not retried on its own:
+    // the outer transaction is already aborted, so the outermost callback
+    // runs again. Commit hooks are not part of this loop.
+    const nested = !!transactionCtx.get();
+    const attempts = nested ? 1 : 3;
+
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        return await this.runTransaction(cb);
+      } catch (error) {
+        lastError = error;
+        if (nested || attempt === attempts || !isDeadlockError(error)) {
+          throw error;
+        }
+
+        await waitForDeadlockRetry(attempt);
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async runTransaction<TCallback extends Callback>(
+    cb?: TCallback
+  ): Promise<ReturnType<TCallback> | TransactionObject> {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction
       ? await this.connection.transaction()
@@ -270,23 +311,27 @@ class Database {
       return { commit, rollback, get: () => trx };
     }
 
-    return transactionCtx.run(trx, async () => {
-      try {
-        const callbackParams = {
-          trx,
-          commit,
-          rollback,
-          onCommit: transactionCtx.onCommit,
-          onRollback: transactionCtx.onRollback,
-        };
-        const res = await cb(callbackParams);
-        await commit();
-        return res;
-      } catch (error) {
-        await rollback();
-        throw error;
-      }
-    });
+    return transactionCtx.run(
+      trx,
+      async () => {
+        try {
+          const callbackParams = {
+            trx,
+            commit,
+            rollback,
+            onCommit: transactionCtx.onCommit,
+            onRollback: transactionCtx.onRollback,
+          };
+          const res = await cb(callbackParams);
+          await commit();
+          return res;
+        } catch (error) {
+          await rollback();
+          throw error;
+        }
+      },
+      this.callbackTracker
+    );
   }
 
   getSchemaName(): string | undefined {
@@ -339,6 +384,12 @@ class Database {
   }
 
   async destroy() {
+    await waitForPendingCallbacks(this.callbackTracker.pending, {
+      onTimeout: (count) => {
+        this.logger.warn(`Continuing shutdown with ${count} transaction callback(s) still running`);
+      },
+    });
+
     try {
       await this.lifecycles.clear();
     } finally {

@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { findAndClose, clickAndWait } from '../../../utils/shared';
 
@@ -17,8 +17,8 @@ test.describe('Uniqueness', () => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
     await resetDatabaseAndImportDataFromPath('with-admin');
 
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
 
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Unique' }));

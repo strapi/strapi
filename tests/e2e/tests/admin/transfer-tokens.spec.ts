@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { navToHeader } from '../../../utils/shared';
 
@@ -25,8 +25,8 @@ const createTransferToken = async (page, tokenName, duration, type) => {
 test.describe('Transfer Tokens', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   // Test token creation

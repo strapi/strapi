@@ -105,7 +105,8 @@ describeOnCondition(edition === 'EE')('Content releases settings', () => {
     rqEditor = await createUserRequest(
       {
         user: { firstname: 'Bob', lastname: 'Bar', email: 'bob.bar@test.com' },
-        role: { name: 'editor' },
+        // MySQL's default collation matches this to the built-in Editor role.
+        role: { name: 'release-editor' },
         permissions: [
           { action: 'plugin::content-releases.settings.read' },
           { action: 'plugin::content-releases.settings.update' },

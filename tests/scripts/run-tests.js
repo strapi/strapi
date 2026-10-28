@@ -12,7 +12,12 @@ const {
   getCurrentTestApps,
   setupTestEnvironment,
 } = require('../utils/runners/shared-setup');
-const { runPlaywright } = require('../utils/runners/browser-runner');
+const {
+  buildAdmin,
+  countRunnableTests,
+  runPlaywright,
+} = require('../utils/runners/browser-runner');
+const { extractShardArgs, planShard } = require('../utils/runners/shard-plan');
 const {
   loadDomainConfigs,
   calculateTestAppsRequired,
@@ -21,7 +26,65 @@ const {
 } = require('../utils/runners/cli-runner');
 const { createConfig } = require('../../playwright.base.config');
 
+/**
+ * Rough share of e2e time per domain, measured on CI (Oct 2026). Only the order matters:
+ * starting the heaviest domains first keeps parallel test apps finishing close together.
+ * Unknown domains go last.
+ */
+const DOMAIN_WEIGHTS = {
+  'content-manager': 102,
+  'content-type-builder': 71,
+  admin: 32,
+  i18n: 31,
+  'media-library': 16,
+  settings: 15,
+  'content-releases': 13,
+  'review-workflows': 12,
+  search: 9,
+};
+
+const sortDomainsByExpectedDuration = (domains) =>
+  [...domains].sort((a, b) => (DOMAIN_WEIGHTS[b] ?? 0) - (DOMAIN_WEIGHTS[a] ?? 0));
+
+/**
+ * Measured seconds per `<domain>/<spec file>` for this edition and browser, from
+ * tests/e2e/shard-weights.json (rebuilt with tests/scripts/e2e-shard-weights.js). Null when
+ * there are no measurements, which falls back to Playwright's own --shard.
+ */
+const loadShardWeights = ({ edition, project }) => {
+  try {
+    const all = require('../e2e/shard-weights.json');
+    const weights = all[String(edition ?? '').toLowerCase()]?.[project];
+    return weights && Object.keys(weights).length > 0 ? weights : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Every spec file of the given domains, as paths relative to the domain folder. */
+const listSpecFiles = async (testDomainRoot, domains) => {
+  const units = [];
+  for (const domain of domains) {
+    const entries = await fs.readdir(path.join(testDomainRoot, domain), { recursive: true });
+    for (const file of entries) {
+      if (file.endsWith('.spec.ts')) {
+        units.push({ domain, file: file.split(path.sep).join('/') });
+      }
+    }
+  }
+  return units;
+};
+
+/** Playwright reads file arguments as regular expressions: match this exact file only. */
+const toFileFilter = (filePath) => `${filePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`;
+
 const cwd = path.resolve(__dirname, '../..');
+
+/**
+ * Test app `j` listens on `E2E_PORT_BASE + j` (default 8000). Set another base to run two e2e
+ * runs on one machine, for example from two worktrees.
+ */
+const E2E_PORT_BASE = Number.parseInt(process.env.E2E_PORT_BASE ?? '8000', 10);
 
 const pathExists = async (filePath) => {
   try {
@@ -181,59 +244,126 @@ yargs
           // Between tests, `resetFiles` → `git reset --hard` + `git clean -fd` only. No commits here.
           const testAppsToSpawn = testAppPaths.length;
 
-          // Now chunk domains and run tests
-          const chunkedDomains = selectedDomains.reduce((acc, _, i) => {
-            if (i % testAppsToSpawn === 0) acc.push(selectedDomains.slice(i, i + testAppsToSpawn));
-            return acc;
-          }, []);
+          // Every domain starts its app with `--no-build-admin`, so build the panel once here,
+          // with the same environment (edition, feature flags) the app will run with.
+          await Promise.all(testAppPaths.map((testAppPath) => buildAdmin({ testAppPath })));
 
-          // eslint-disable-next-line no-plusplus
-          for (let i = 0; i < chunkedDomains.length; i++) {
-            const domainBatch = chunkedDomains[i];
+          const failedDomains = [];
 
-            await Promise.all(
-              domainBatch.map(async (domain, j) => {
-                const testAppPath = testAppPaths[j];
-                const port = 8000 + j;
-                const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
+          const runDomain = async ({ domain, testAppPath, port, testArgs }) => {
+            const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
-                console.log(
-                  `Creating playwright config for domain: ${domain}, at path: ${testAppPath}`
-                );
+            console.log(
+              `Creating playwright config for domain: ${domain}, at path: ${testAppPath}`
+            );
 
-                const config = createConfig({
-                  testDir: path.join(testDomainRoot, domain),
-                  port,
-                  appDir: testAppPath,
-                  reportFileName: `playwright-${domain}-${port}.xml`,
-                  domain,
-                });
+            const config = createConfig({
+              testDir: path.join(testDomainRoot, domain),
+              port,
+              appDir: testAppPath,
+              reportFileName: `playwright-${domain}-${port}.xml`,
+              domain,
+            });
 
-                // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
-                // canonical port is `8000 + j` above — same as baseURL / webServer; helpers read PORT.
-                // `port` is always a safe integer here (never user-controlled). `JSON.stringify(port)`
-                // embeds a numeric literal; Node coerces env values to strings on read.
-                const configFileTemplate = `
+            // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
+            // canonical port is `E2E_PORT_BASE + j` below, the same as baseURL / webServer;
+            // helpers read PORT.
+            // `port` is always a safe integer here (never user-controlled). `JSON.stringify(port)`
+            // embeds a numeric literal; Node coerces env values to strings on read.
+            const configFileTemplate = `
 process.env.PORT = ${JSON.stringify(port)};
 const config = ${JSON.stringify(config)}
 
 module.exports = config
                 `;
 
-                await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
+            await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
-                console.log(`Running ${domain} e2e tests`);
+            // Playwright starts the web server before it applies the shard, so a domain
+            // with nothing to run in this shard would still boot Strapi for nothing.
+            const runnableTests = await countRunnableTests({
+              configPath: pathToPlaywrightConfig,
+              cwd,
+              port,
+              testAppPath,
+              testArgs,
+            });
 
-                // Run Playwright - this is the only line that differs!
-                await runPlaywright({
-                  configPath: pathToPlaywrightConfig,
-                  cwd,
-                  port,
-                  testAppPath,
-                  testArgs: forwardedRunnerArgs,
-                });
+            if (runnableTests === 0) {
+              console.log(`Skipping ${domain} e2e tests: none to run with these arguments`);
+              return;
+            }
+
+            console.log(`Running ${domain} e2e tests`);
+
+            try {
+              await runPlaywright({
+                configPath: pathToPlaywrightConfig,
+                cwd,
+                port,
+                testAppPath,
+                testArgs,
+              });
+            } catch (err) {
+              console.error(`${domain} e2e tests failed`);
+              failedDomains.push(domain);
+            }
+          };
+
+          // With measured durations and a --shard, split the spec files by duration across the
+          // shards and the test apps of this shard (see tests/utils/runners/shard-plan.js).
+          // Otherwise each test app takes the next whole domain as soon as it is free, heaviest
+          // first. Either way a failing domain doesn't stop the others: every domain runs and the
+          // run fails at the end, like the CLI runner.
+          const { shard, project, rest: argsWithoutShard } = extractShardArgs(forwardedRunnerArgs);
+          const weights = shard
+            ? loadShardWeights({ edition: process.env.STRAPI_E2E_EDITION, project })
+            : null;
+
+          if (shard && weights) {
+            const lanePlans = planShard({
+              weights,
+              units: await listSpecFiles(testDomainRoot, selectedDomains),
+              shard,
+              lanes: testAppPaths.length,
+            });
+
+            await Promise.all(
+              testAppPaths.map(async (testAppPath, j) => {
+                for (const run of lanePlans[j]) {
+                  await runDomain({
+                    domain: run.domain,
+                    testAppPath,
+                    port: E2E_PORT_BASE + j,
+                    testArgs: [
+                      ...argsWithoutShard,
+                      ...run.files.map((file) =>
+                        toFileFilter(path.join(testDomainRoot, run.domain, file))
+                      ),
+                    ],
+                  });
+                }
               })
             );
+          } else {
+            const pendingDomains = sortDomainsByExpectedDuration(selectedDomains);
+
+            await Promise.all(
+              testAppPaths.map(async (testAppPath, j) => {
+                while (pendingDomains.length > 0) {
+                  await runDomain({
+                    domain: pendingDomains.shift(),
+                    testAppPath,
+                    port: E2E_PORT_BASE + j,
+                    testArgs: forwardedRunnerArgs,
+                  });
+                }
+              })
+            );
+          }
+
+          if (failedDomains.length > 0) {
+            throw new Error(`e2e tests failed for: ${failedDomains.join(', ')}`);
           }
         } else {
           // CLI orchestration: batch domains, assign test apps, then run tests

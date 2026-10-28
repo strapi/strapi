@@ -306,4 +306,43 @@ describe('metrics', () => {
 
     fetch.mockClear();
   });
+
+  test('sends after the fetch service has been released', async () => {
+    const fetch = jest.fn(() => Promise.resolve({ ok: true }));
+    const strapi = {
+      config: {
+        get(path: string | string[]) {
+          return get(this, path);
+        },
+        uuid: 'test',
+        environment: 'dev',
+        info: {
+          strapi: '0.0.0',
+        },
+      },
+      server: {
+        use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+      cron: {
+        add: jest.fn(),
+      },
+      fetch,
+    };
+
+    const { send } = metrics(strapi as any);
+
+    Object.defineProperty(strapi, 'fetch', {
+      get() {
+        throw new Error('Could not resolve service fetch');
+      },
+    });
+
+    await expect(send('didDEITSProcessFinish')).resolves.toBe(true);
+    expect(fetch).toHaveBeenCalled();
+  });
 });

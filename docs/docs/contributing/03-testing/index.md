@@ -44,7 +44,10 @@ yarn test:api                 # SQLite
 yarn test:api --db=postgres
 yarn test:api --db=mysql
 yarn test:api -u              # update snapshots
+yarn test:api --workers=4     # SQLite only: 4 Jest workers, each with its own copy of the app
 ```
+
+Set `API_TEST_PROFILE` to a file path to get one JSON line per timed step (each boot, builder step and database reset). Set `API_TEST_SNAPSHOT` to record, for each instance a test boots itself, the schema files, SQLite schema and row counts it starts from, so that two runs of a helper change can be compared.
 
 [CONTRIBUTING.md](https://github.com/strapi/strapi/blob/develop/CONTRIBUTING.md) describes how to generate the app for each database and how to run the suite for the Enterprise Edition with `STRAPI_LICENSE`.
 

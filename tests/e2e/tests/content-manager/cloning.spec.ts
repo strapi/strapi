@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
 const EDIT_URL_AUTHOR =
@@ -18,8 +18,8 @@ const CREATE_URL_TEAM = /\/admin\/content-manager\/collection-types\/api::team.t
 test.describe('Cloning', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('As a user I want to auto-clone a document', async ({ page }) => {

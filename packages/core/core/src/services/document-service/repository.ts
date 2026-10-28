@@ -540,6 +540,20 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function update(opts = {} as any) {
     const { documentId, ...params } = opts;
 
+    // Two requests can both observe "locale missing" and insert a second row.
+    // Lock the document's rows so the loser updates the row the winner created.
+    // Postgres takes FOR NO KEY UPDATE: writers still serialize, and a relation
+    // insert can take the FOR KEY SHARE lock its foreign key needs. MySQL has
+    // no equivalent, so the query builder uses FOR UPDATE there.
+    if (documentId) {
+      await strapi.db
+        .queryBuilder(uid)
+        .select(['id'])
+        .where({ documentId })
+        .forNoKeyUpdate()
+        .execute();
+    }
+
     const queryParams = await async.pipe(
       validateParams,
       DP.filterDataPublishedAt,
@@ -621,25 +635,25 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [draftsToPublish, oldPublishedVersions] = await Promise.all([
-      strapi.db.query(uid).findMany({
-        where: {
-          ...queryParams?.lookup,
-          documentId,
-          publishedAt: null, // Ignore lookup
-        },
-        // Populate relations, media, compos and dz
-        populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
-      }),
-      strapi.db.query(uid).findMany({
-        where: {
-          ...queryParams?.lookup,
-          documentId,
-          publishedAt: { $ne: null },
-        },
-        select: ['id', 'locale'],
-      }),
-    ]);
+    // Deep populate issues its own queries. Run it before the published-row
+    // lookup so both stay on this transaction's single connection.
+    const draftsToPublish = await strapi.db.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        publishedAt: null, // Ignore lookup
+      },
+      // Populate relations, media, compos and dz
+      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
+    });
+    const oldPublishedVersions = await strapi.db.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        publishedAt: { $ne: null },
+      },
+      select: ['id', 'locale'],
+    });
 
     // Load any unidirectional relation targetting the old published entries
     const relationsToSync = await unidirectionalRelations.load(
@@ -664,18 +678,23 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       'published'
     );
 
-    // Delete old published versions
-    await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
+    // Delete old published versions. Each delete loads and removes components,
+    // so they cannot share this transaction's connection concurrently.
+    for (const entry of oldPublishedVersions) {
+      await entries.delete(entry.id);
+    }
 
     // Add firstPublishedAt to draft if it doesn't exist
-    const updatedDraft = await async.map(draftsToPublish, (draft: any) =>
-      addFirstPublishedAtToDraft(draft, entries.update, contentType)
-    );
+    const updatedDraft: any[] = [];
+    for (const draft of draftsToPublish) {
+      updatedDraft.push(await addFirstPublishedAtToDraft(draft, entries.update, contentType));
+    }
 
     // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(updatedDraft, (draft: any) =>
-      entries.publish(draft, queryParams)
-    );
+    const publishedEntries: any[] = [];
+    for (const draft of updatedDraft) {
+      publishedEntries.push(await entries.publish(draft, queryParams));
+    }
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(
@@ -714,9 +733,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => ({ ...query, where: { ...query.where, documentId, publishedAt: { $ne: null } } })
     )(params);
 
-    // Delete all published versions
+    // Delete all published versions. Component cleanup shares this connection.
     const versionsToDelete = await strapi.db.query(uid).findMany(query);
-    await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
+    for (const entry of versionsToDelete) {
+      await entries.delete(entry.id);
+    }
 
     versionsToDelete.forEach(emitEvent('entry.unpublish'));
     return { documentId, entries: versionsToDelete };
@@ -732,25 +753,23 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [versionsToDraft, oldDrafts] = await Promise.all([
-      strapi.db.query(uid).findMany({
-        where: {
-          ...queryParams?.lookup,
-          documentId,
-          publishedAt: { $ne: null },
-        },
-        // Populate relations, media, compos and dz
-        populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
-      }),
-      strapi.db.query(uid).findMany({
-        where: {
-          ...queryParams?.lookup,
-          documentId,
-          publishedAt: null,
-        },
-        select: ['id', 'locale'],
-      }),
-    ]);
+    const versionsToDraft = await strapi.db.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        publishedAt: { $ne: null },
+      },
+      // Populate relations, media, compos and dz
+      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
+    });
+    const oldDrafts = await strapi.db.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        publishedAt: null,
+      },
+      select: ['id', 'locale'],
+    });
 
     // Load any unidirectional relation targeting the old drafts
     const relationsToSync = await unidirectionalRelations.load(
@@ -771,13 +790,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft, 'draft');
 
-    // Delete old drafts
-    await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
+    // Delete old drafts one at a time; component cleanup queries share this connection.
+    for (const entry of oldDrafts) {
+      await entries.delete(entry.id);
+    }
 
     // Transform published entry data and create draft versions
-    const draftEntries = await async.map(versionsToDraft, (entry: any) =>
-      entries.discardDraft(entry, queryParams)
-    );
+    const draftEntries: any[] = [];
+    for (const entry of versionsToDraft) {
+      draftEntries.push(await entries.discardDraft(entry, queryParams));
+    }
 
     // Sync unidirectional relations with the new draft entries
     await unidirectionalRelations.sync(

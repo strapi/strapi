@@ -34,10 +34,12 @@ describe('SessionManager Factory', () => {
       findMany: jest.fn(),
       delete: jest.fn(),
       deleteMany: jest.fn(),
+      updateMany: jest.fn(),
     };
 
     mockDb = {
       query: jest.fn().mockReturnValue(mockQuery),
+      transaction: jest.fn(async (fn: () => Promise<unknown>) => fn()),
     };
 
     config = {
@@ -757,6 +759,61 @@ describe('SessionManager Factory', () => {
       expect(result).toEqual({ error: 'invalid_refresh_token' });
       expect(mockQuery.findOne).toHaveBeenCalledTimes(1);
       expect(mockJwt.sign).not.toHaveBeenCalled();
+    });
+
+    it('should reject a concurrent rotation that loses the active-session claim', async () => {
+      mockJwt.verify.mockReturnValue({
+        userId: 'user123',
+        sessionId: 'parent-session',
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      } as any);
+      mockQuery.findOne.mockResolvedValue({
+        userId: 'user123',
+        sessionId: 'parent-session',
+        origin: 'admin',
+        status: 'active',
+        childId: null,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        absoluteExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+      });
+      mockQuery.updateMany.mockResolvedValue({ count: 0 });
+
+      const result = await sessionManager('admin').rotateRefreshToken('parent-refresh-token');
+
+      expect(result).toEqual({ error: 'invalid_refresh_token' });
+      expect(mockQuery.create).not.toHaveBeenCalled();
+    });
+
+    it('puts the claim and the child insert in one transaction', async () => {
+      mockJwt.verify.mockReturnValue({
+        userId: 'user123',
+        sessionId: 'parent-session',
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      } as any);
+      mockQuery.findOne.mockResolvedValue({
+        userId: 'user123',
+        sessionId: 'parent-session',
+        origin: 'admin',
+        status: 'active',
+        childId: null,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        absoluteExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+      });
+      mockQuery.updateMany.mockResolvedValue({ count: 1 });
+      mockQuery.create.mockRejectedValue(new Error('insert failed'));
+
+      const result = await sessionManager('admin').rotateRefreshToken('parent-refresh-token');
+
+      expect(result).toEqual({ error: 'invalid_refresh_token' });
+      expect(mockDb.transaction).toHaveBeenCalledTimes(1);
+      expect(mockQuery.updateMany).toHaveBeenCalled();
+      expect(mockQuery.create).toHaveBeenCalled();
     });
   });
 

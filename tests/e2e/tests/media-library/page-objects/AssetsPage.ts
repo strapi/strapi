@@ -40,6 +40,9 @@ export class AssetsPage {
   }
 
   async goto() {
+    // A full navigation can cancel an in-flight login request, particularly in WebKit.
+    await expect(this.page.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
+
     // Deliberately no wait for `New` here: a role without `assets.create` never gets it,
     // so a spec covering a read-only user would hang rather than fail. A spec that acts
     // on a create affordance as its first move waits for it itself.
@@ -57,6 +60,15 @@ export class AssetsPage {
    * Open the New menu dropdown
    */
   async openNewMenu() {
+    // `New` is only rendered once RBAC has resolved, and the page paints before that. A spec
+    // that lands on the library — or reloads it — and opens this menu as its next move races
+    // the permission check, and loses on a loaded machine: the click burns the whole action
+    // timeout waiting for a button that is still a few hundred milliseconds away.
+    //
+    // `goto()` deliberately does not wait for it, so that a spec covering a role without
+    // `assets.create` fails fast instead of hanging. This is the caller that genuinely needs
+    // the affordance, so it is the one that waits.
+    await this.newButton.waitFor({ state: 'visible' });
     await this.newButton.click();
   }
 
@@ -527,6 +539,8 @@ export class AssetsPage {
   async openCropEditor() {
     await this.assetDetailsDrawer.getByRole('button', { name: 'Crop' }).click();
     await expect(this.page.getByRole('button', { name: 'Apply' })).toBeVisible();
+    // Crop dimensions are initialized only after the image has loaded.
+    await expect(this.page.getByRole('button', { name: 'Apply' })).toBeEnabled();
   }
 
   /**

@@ -14,6 +14,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   let utils: ReturnType<typeof createUtils>;
   let actingAdminId: number;
   let superAdminRoleId: number;
+  let sendEmail: jest.SpyInstance;
 
   const actingAdmin = {
     email: 'accounts-audit-actor@test.com',
@@ -67,6 +68,20 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
     return findLogs(action);
   };
 
+  // The email is the last step of that unawaited work: once it reaches the provider,
+  // nothing from the request is left running when the suite tears Strapi down
+  const waitForResetEmail = async (to: string, attempts = 30) => {
+    for (let i = 0; i < attempts; i += 1) {
+      if (sendEmail.mock.calls.some(([mail]) => mail.to === to)) {
+        return;
+      }
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
+    }
+    expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({ to }));
+  };
+
   const expectNoSecret = (log: { payload: unknown }, ...values: string[]) => {
     const serialized = JSON.stringify(log.payload);
     // Secret fields as JSON keys, and a bcrypt hash by its prefix. The word "password"
@@ -102,6 +117,10 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   beforeAll(async () => {
     strapi = await createStrapiInstance();
 
+    // The real sendmail provider resolves MX records for accounts-audit.test. That lookup
+    // can fail after strapi.destroy(), and its error then fails the next suite in the shard.
+    sendEmail = jest.spyOn(strapi.plugin('email').provider, 'send').mockResolvedValue(undefined);
+
     // Requests run as an admin of our own: with only the default super admin in the
     // database, asserting the actor would prove nothing.
     utils = createUtils(strapi);
@@ -123,6 +142,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   });
 
   beforeEach(async () => {
+    sendEmail.mockClear();
     await deleteTestUsers();
     await clearAuditLogs();
   });
@@ -410,6 +430,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
       expect(res.statusCode).toBe(204);
 
       const logs = await waitForLog('admin-user.password-reset.create');
+      await waitForResetEmail('leo@accounts-audit.test');
       expect(logs).toHaveLength(1);
       const [log] = logs;
       expect(log.user).toBeNull();
@@ -448,6 +469,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
     const requestReset = async (email: string, id: number) => {
       await publicRq({ url: '/admin/forgot-password', method: 'POST', body: { email } });
       await waitForLog('admin-user.password-reset.create');
+      await waitForResetEmail(email);
       return (await getUserRow(id)).resetPasswordToken as string;
     };
 

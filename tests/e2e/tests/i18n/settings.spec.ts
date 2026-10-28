@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { prunePermissions } from '../../../utils/scripts/endpoints';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
@@ -10,8 +10,8 @@ test.describe('Settings', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await prunePermissions(page);
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   const LOCALES = ['English (en)', 'French (fr)', 'German (de)', 'Spanish (es)'];

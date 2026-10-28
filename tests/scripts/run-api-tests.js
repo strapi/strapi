@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
@@ -42,9 +43,37 @@ const databases = {
   },
 };
 
-const jestCmd = 'jest --config jest.config.api.js --runInBand --forceExit'.split(' ');
+const jestCmd = 'jest --config jest.config.api.js --forceExit'.split(' ');
 
-const runAllTests = async (args) => {
+const workerAppPath = (id) => `${appPath}-worker-${id}`;
+
+/**
+ * Gives each Jest worker its own copy of the test app. The builders write schema files into the
+ * app, and SQLite keeps its database in a file inside it, so two workers cannot share one.
+ * tests/setup/jest-api.setup.js points each worker at its copy.
+ */
+const prepareWorkerApps = (workers) => {
+  const source = path.resolve(__dirname, '../..', appPath);
+
+  for (let id = 1; id <= workers; id += 1) {
+    const target = path.resolve(__dirname, '../..', workerAppPath(id));
+
+    fs.rmSync(target, { recursive: true, force: true });
+    // Leave the database file behind, so every worker starts from an empty database.
+    fs.cpSync(source, target, {
+      recursive: true,
+      filter: (file) => path.relative(source, file) !== 'tmp',
+    });
+
+    // Jest's haste map rejects two packages with the same name.
+    const packageJsonPath = path.join(target, 'package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    packageJson.name = `${packageJson.name}-worker-${id}`;
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+  }
+};
+
+const runAllTests = async (args, { workers }) => {
   // Required for Jest: code run under Jest (including app code loaded by tests) can execute in a context
   // where Node treats dynamic import() as VM-bound; supported Node versions require this flag.
   // ESM-only deps (e.g. file-type in upload) use dynamic import(); without the flag we get
@@ -54,10 +83,13 @@ const runAllTests = async (args) => {
     .filter(Boolean)
     .join(' ');
 
-  return execa('yarn', [...jestCmd, ...args], {
+  const parallelism = workers > 1 ? [`--maxWorkers=${workers}`] : ['--runInBand'];
+
+  return execa('yarn', [...jestCmd, ...parallelism, ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '../..'),
     env: {
+      API_TESTS_WORKER_APPS: workers > 1 ? path.resolve(__dirname, '../..', appPath) : '',
       STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
       FORCE_COLOR: 1,
       ENV_PATH: process.env.ENV_PATH,
@@ -68,14 +100,22 @@ const runAllTests = async (args) => {
   });
 };
 
-const main = async ({ database, generateApp }, args) => {
+const main = async ({ database, generateApp, workers }, args) => {
   try {
     if (generateApp) {
       await cleanTestApp(appPath);
       await generateTestApp({ appPath, database });
     }
 
-    await runAllTests(args).catch(() => {
+    if (workers > 1) {
+      if (database.client !== 'sqlite') {
+        throw new Error('--workers needs SQLite: the workers would share one database');
+      }
+
+      prepareWorkerApps(workers);
+    }
+
+    await runAllTests(args, { workers }).catch(() => {
       process.exit(1);
     });
   } catch (error) {
@@ -100,11 +140,17 @@ yargs
       });
 
       yarg.boolean('generate-app');
+
+      yarg.option('workers', {
+        describe: 'run the test files in this many Jest workers, each with its own app copy',
+        type: 'number',
+        default: 1,
+      });
     },
     (argv) => {
-      const { database, generateApp = true } = argv;
+      const { database, generateApp = true, workers } = argv;
 
-      main({ generateApp, database: databases[database] }, argv._);
+      main({ generateApp, database: databases[database], workers }, argv._);
     }
   )
   .help()

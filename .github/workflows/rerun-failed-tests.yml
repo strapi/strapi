@@ -1,0 +1,37 @@
+name: 'Re-run failed tests'
+
+# Re-runs the failed jobs of a PR's Tests run once, as soon as the first attempt fails.
+# Most first-attempt failures are infrastructure stalls or known flakes, and a person
+# noticing and clicking "Re-run failed jobs" usually takes hours. A failure that is
+# still there on the second attempt is left for the author.
+#
+# Release PRs are left alone: the releaser reviews a red check there before anything is re-run.
+#
+# workflow_run only fires for workflow files on the default branch, so this has no effect
+# until it is merged there.
+
+on:
+  workflow_run:
+    workflows: ['Tests']
+    types: [completed]
+
+permissions:
+  actions: write # to re-run jobs
+
+jobs:
+  rerun:
+    if: >-
+      github.event.workflow_run.event == 'pull_request'
+      && github.event.workflow_run.conclusion == 'failure'
+      && github.event.workflow_run.run_attempt == 1
+      && !startsWith(github.event.workflow_run.head_branch, 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Re-run failed jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
+          echo "Re-ran the failed jobs of $RUN_URL once." >> "$GITHUB_STEP_SUMMARY"
