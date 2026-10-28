@@ -215,9 +215,12 @@ export const createAutosaveLogoutMiddleware = (): Middleware => () => (next) => 
  * create flow is browser-only until the first save.
  */
 export const AUTOSAVE_CREATE_PREFIX = 'create:';
+const AUTOSAVE_SINGLE_TYPE_PREFIX = 'single:';
 
 export const supportsServerAutosave = (documentId: string) =>
-  Boolean(documentId) && !documentId.startsWith(AUTOSAVE_CREATE_PREFIX);
+  Boolean(documentId) &&
+  !documentId.startsWith(AUTOSAVE_CREATE_PREFIX) &&
+  !documentId.startsWith(AUTOSAVE_SINGLE_TYPE_PREFIX);
 
 export const createAutosaveKey = ({
   instanceId,
@@ -283,7 +286,7 @@ export const getAutosaveDocumentId = ({
     return `${AUTOSAVE_CREATE_PREFIX}${getOrCreateAutosaveSessionId(model, locale)}`;
   }
 
-  return isSingleType ? `single:${model}` : '';
+  return isSingleType ? `${AUTOSAVE_SINGLE_TYPE_PREFIX}${model}` : '';
 };
 
 export const isAutosaveEnabled = ({

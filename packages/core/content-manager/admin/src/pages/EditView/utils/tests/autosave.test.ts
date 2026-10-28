@@ -10,6 +10,7 @@ import {
   evictAutosavesOverQuota,
   registerAutosaveOwner,
   setAutosave,
+  supportsServerAutosave,
   type AutosaveRecord,
 } from '../autosave';
 
@@ -295,6 +296,13 @@ describe('autosave storage', () => {
         model: 'api::article.article',
       })
     ).toBe('');
+  });
+
+  it('keeps backups of documents that do not exist yet in the browser only', () => {
+    expect(supportsServerAutosave('document')).toBe(true);
+    expect(supportsServerAutosave('create:session')).toBe(false);
+    expect(supportsServerAutosave('single:api::homepage.homepage')).toBe(false);
+    expect(supportsServerAutosave('')).toBe(false);
   });
 
   it('enables autosave only for an identified draft-and-publish draft', () => {
