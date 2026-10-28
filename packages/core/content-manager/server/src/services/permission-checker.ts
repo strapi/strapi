@@ -111,13 +111,13 @@ const createPermissionChecker =
     const sanitizeUpdateInput = (entity: Entity) => (data: any) =>
       sanitizeInput(ACTIONS.update, data, entity);
 
-    const buildPermissionQuery = (query: Query, action: { action?: string } = {}) => {
+    const buildPermissionQuery = (query: Query, action: string) => {
       return permissionsManager.addPermissionsQueryTo(query, action);
     };
 
-    const sanitizedQuery = (query: Query, action: { action?: string } = {}) => {
+    const sanitizedQuery = (query: Query, { action = ACTIONS.read }: { action?: string } = {}) => {
       return async.pipe(
-        (q: Query) => sanitizeQuery(q, action),
+        (q: Query) => sanitizeQuery(q, { action }),
         (q: Query) => buildPermissionQuery(q, action)
       )(query);
     };
@@ -125,7 +125,7 @@ const createPermissionChecker =
     // Sanitized queries shortcuts
     Object.keys(ACTIONS).forEach((action) => {
       // @ts-expect-error TODO
-      sanitizedQuery[action] = (query: Query) => sanitizedQuery(query, ACTIONS[action]);
+      sanitizedQuery[action] = (query: Query) => sanitizedQuery(query, { action: ACTIONS[action] });
     });
 
     // Permission utils shortcuts
