@@ -27,6 +27,39 @@ const toDate = (v: unknown): Date => {
   return new Date(String(v));
 };
 
+const UNIQUE_CONSTRAINT_ERROR_CODES = new Set([
+  '23505',
+  'ER_DUP_ENTRY',
+  'SQLITE_CONSTRAINT_UNIQUE',
+]);
+
+/**
+ * Detects vendor-specific unique-constraint violations so a losing `create()` in the
+ * `set()` race below (two requests both miss the `findOne` and both try to insert the
+ * same `(namespace, key)`) can be handled instead of failing the caller's request.
+ */
+const isUniqueConstraintError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const code = (error as { code?: unknown; originalError?: { code?: unknown } }).code;
+  if (typeof code === 'string' && UNIQUE_CONSTRAINT_ERROR_CODES.has(code)) {
+    return true;
+  }
+
+  const message = (error as { message?: unknown }).message;
+  if (typeof message === 'string') {
+    return (
+      message.includes('UNIQUE constraint failed') ||
+      message.includes('duplicate key value violates unique constraint') ||
+      message.includes('Duplicate entry')
+    );
+  }
+
+  return false;
+};
+
 export const createDatabaseCacheProvider = (strapi: CacheProviderStrapiContext): CacheProvider => {
   const query = () => strapi.db.query(UID);
 
@@ -78,7 +111,10 @@ export const createDatabaseCacheProvider = (strapi: CacheProviderStrapiContext):
             updatedAt: now,
           },
         });
-      } else {
+        return;
+      }
+
+      try {
         await query().create({
           data: {
             namespace,
@@ -86,6 +122,25 @@ export const createDatabaseCacheProvider = (strapi: CacheProviderStrapiContext):
             value,
             expiresAt,
             createdAt: now,
+            updatedAt: now,
+          },
+        });
+      } catch (error) {
+        if (!isUniqueConstraintError(error)) {
+          throw error;
+        }
+
+        // Lost a race with a concurrent set() for the same (namespace, key): the unique
+        // index on (namespace, key) rejected our insert because another request's row
+        // already won. Apply this write as an update on the winning row instead of
+        // failing the caller's request; last write wins, same as the non-racing path
+        // above. If that row already holds the value we were about to write (e.g. a
+        // retried call), this update is a no-op in effect.
+        await query().update({
+          where: { namespace, key },
+          data: {
+            value,
+            expiresAt,
             updatedAt: now,
           },
         });

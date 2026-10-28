@@ -105,6 +105,50 @@ describe('createDatabaseCacheProvider', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  it('applies the write as an update when a concurrent set() wins the unique index race', async () => {
+    // Both callers' findOne misses because neither row exists yet; this call's create()
+    // loses the race to the unique (namespace, key) index.
+    findOne.mockResolvedValueOnce(null);
+    const uniqueViolation = Object.assign(new Error('UNIQUE constraint failed: namespace, key'), {
+      code: 'SQLITE_CONSTRAINT_UNIQUE',
+    });
+    create.mockRejectedValueOnce(uniqueViolation);
+    update.mockResolvedValue({});
+
+    await expect(provider.set('ns', 'k', { z: 'losing-write' })).resolves.toBeUndefined();
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith({
+      where: { namespace: 'ns', key: 'k' },
+      data: expect.objectContaining({ value: { z: 'losing-write' } }),
+    });
+  });
+
+  it.each([
+    { code: '23505', message: 'duplicate key value violates unique constraint "x"' },
+    { code: 'ER_DUP_ENTRY', message: "Duplicate entry 'ns\u0000k' for key 'x'" },
+    { code: undefined, message: 'UNIQUE constraint failed: strapi_cache_entries.namespace' },
+  ])('recovers from unique violations across dialects (%s)', async ({ code, message }) => {
+    findOne.mockResolvedValueOnce(null);
+    const error = code ? Object.assign(new Error(message), { code }) : new Error(message);
+    create.mockRejectedValueOnce(error);
+    update.mockResolvedValue({});
+
+    await expect(provider.set('ns', 'k', 1)).resolves.toBeUndefined();
+    expect(update).toHaveBeenCalledWith({
+      where: { namespace: 'ns', key: 'k' },
+      data: expect.objectContaining({ value: 1 }),
+    });
+  });
+
+  it('re-throws non-unique-constraint errors from create', async () => {
+    findOne.mockResolvedValueOnce(null);
+    create.mockRejectedValueOnce(new Error('connection refused'));
+
+    await expect(provider.set('ns', 'k', 1)).rejects.toThrow('connection refused');
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it('delete removes row when present', async () => {
     findOne.mockResolvedValueOnce({ id: 7 }).mockResolvedValueOnce(null);
 
