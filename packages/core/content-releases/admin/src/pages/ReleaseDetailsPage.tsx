@@ -48,6 +48,7 @@ import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
+import { ReleaseStatusBadge } from '../components/ReleaseStatusBadge';
 import { PERMISSIONS } from '../constants';
 import {
   GetReleaseActionsQueryParams,
@@ -63,8 +64,6 @@ import {
 import { useTypedDispatch } from '../store/hooks';
 import { isBaseQueryError } from '../utils/api';
 import { getTimezoneOffset } from '../utils/time';
-
-import { getBadgeProps } from './ReleasesPage';
 
 import type {
   ReleaseAction,
@@ -115,7 +114,8 @@ const ReleaseDetailsLayout = ({
 
   const release = data?.data;
   // Creating the release adds its actions, so it takes both permissions, as the route does.
-  // A run that failed before the upgrade recorded no outcomes, so there's nothing to carry over.
+  // A run that failed before the upgrade may have released some entries without recording which,
+  // so the page doesn't offer to release them again.
   const canCreateFromSkipped =
     Boolean(release?.releasedAt) &&
     (release?.status === 'partial' || release?.status === 'failed') &&
@@ -258,7 +258,7 @@ const ReleaseDetailsLayout = ({
               <Typography textColor="neutral600" variant="epsilon">
                 {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
               </Typography>
-              <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+              <ReleaseStatusBadge status={release.status} />
             </Flex>
           }
           navigationAction={<BackButton fallback=".." />}

@@ -36,6 +36,7 @@ export const getReleaseActionsWhere = (
     case 'released':
       return { release: releaseId, outcome: { $in: [...RELEASED_OUTCOMES] } };
     case 'skipped':
+      // NOT IN leaves NULL outcomes out: a planned action (no outcome) never counts as skipped
       return { release: releaseId, outcome: { $notIn: [...RELEASED_OUTCOMES] } };
     default:
       return { release: releaseId };

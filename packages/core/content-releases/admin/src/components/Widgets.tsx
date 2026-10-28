@@ -1,15 +1,15 @@
 import { useTracking, Widget } from '@strapi/admin/strapi-admin';
-import { Badge, Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { Release } from '../../../shared/contracts/releases';
-import { getBadgeProps } from '../pages/ReleasesPage';
 import { useGetUpcomingReleasesQuery } from '../services/homepage';
 
 import { RelativeTime } from './RelativeTime';
+import { ReleaseStatusBadge } from './ReleaseStatusBadge';
 
 const CellTypography = styled(Typography)`
   display: block;
@@ -47,7 +47,7 @@ const ReleasesTable = ({ items }: { items: Release[] }) => {
             <Td>
               <Box display="inline-block">
                 {item.status ? (
-                  <Badge {...getBadgeProps(item.status)}>{item.status}</Badge>
+                  <ReleaseStatusBadge status={item.status} />
                 ) : (
                   <Typography textColor="neutral600" aria-hidden>
                     -

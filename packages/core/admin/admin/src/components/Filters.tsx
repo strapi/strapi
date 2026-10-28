@@ -225,7 +225,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
           : operatorValuePairing,
     };
 
-    const existingFilters = query.filters?.$and ?? [];
+    const existingFilters = getAppliedFilters(query);
 
     const newFilterQuery = editingFilter
       ? {
@@ -282,6 +282,8 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                       defaultMessage: 'Select field',
                     }),
                     type: 'enumeration' as const,
+                    // A filter always has a field: the placeholder isn't an option to pick
+                    required: true,
                   },
                   {
                     ['aria-label']: formatMessage({
@@ -300,6 +302,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                       defaultMessage: 'Select filter',
                     }),
                     type: 'enumeration' as const,
+                    required: true,
                   },
                 ].map((field) => (
                   <InputRenderer key={field.name} {...field} />
@@ -308,7 +311,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                 formValues.filter &&
                 !FILTERS_WITH_NO_VALUE.includes(formValues.filter) ? (
                   <Input
-                    {...filter}
+                    {...toValueInputProps(filter)}
                     label={null}
                     aria-label={filter.label}
                     name="value"
@@ -339,6 +342,20 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
     </Popover.Content>
   );
 };
+
+// The tag and the popover read these: the value inputs would pass them on to the DOM
+const toValueInputProps = ({
+  formatValue: _formatValue,
+  input: _input,
+  operators: _operators,
+  ...filter
+}: Filters.Filter): Omit<Filters.ValueInputProps, 'aria-label'> => filter;
+
+/**
+ * The `$and` array of the URL, or nothing: a hand-edited URL can make it a string or an object
+ */
+const getAppliedFilters = (query: Filters.Query | undefined) =>
+  Array.isArray(query?.filters?.$and) ? query.filters.$and : [];
 
 /**
  * Depending on the selected field find the possible filters to apply
@@ -394,13 +411,14 @@ const List = () => {
   const [{ query }, setQuery] = useQueryParams<Filters.Query>();
 
   const options = useFilters('List', ({ options }) => options);
+  const appliedFilters = getAppliedFilters(query);
 
   /**
    * Removed by position: identical filters are a legal query, so matching on
    * `(name, operator, value)` would drop every copy at once.
    */
   const handleRemove = (index: number) => {
-    const nextFilters = (query?.filters?.$and ?? []).filter((_, i) => i !== index);
+    const nextFilters = appliedFilters.filter((_, i) => i !== index);
 
     setQuery(
       withEncodedUserParams(query, {
@@ -410,13 +428,13 @@ const List = () => {
     );
   };
 
-  if (!query?.filters?.$and?.length) {
+  if (!appliedFilters.length) {
     return null;
   }
 
   return (
     <>
-      {query?.filters?.$and?.map((queryFilter, index) => {
+      {appliedFilters.map((queryFilter, index) => {
         const details = getFilterDetails(queryFilter, options);
         if (!details || typeof details.value === 'object') {
           return null;
@@ -458,6 +476,7 @@ interface AttributeTagProps extends Filters.Filter {
 }
 
 const AttributeTag = ({
+  formatValue,
   index,
   input,
   label,
@@ -488,10 +507,12 @@ const AttributeTag = ({
   };
 
   const type = mainField?.type ? mainField.type : filter.type;
+  const hasValue = !FILTERS_WITH_NO_VALUE.includes(operator);
 
   let formattedValue: string = value;
 
-  switch (type) {
+  // "is null" stores `true` as its value: formatting it as a date logs an error
+  switch (hasValue && !formatValue ? type : undefined) {
     case 'date':
       formattedValue = formatDate(value, { dateStyle: 'full' });
       break;
@@ -517,6 +538,10 @@ const AttributeTag = ({
       break;
   }
 
+  if (hasValue && formatValue) {
+    formattedValue = formatValue(value);
+  }
+
   // Handle custom input
   if (input && options) {
     // If the custom input has an options array, find the option with a customValue matching the query value
@@ -528,7 +553,9 @@ const AttributeTag = ({
       ? typeof selectedOption === 'string'
         ? selectedOption
         : (selectedOption.label ?? selectedOption.value)
-      : value;
+      : formatValue
+        ? formattedValue
+        : value;
   }
 
   const operatorLabel = formatMessage({
@@ -536,9 +563,9 @@ const AttributeTag = ({
     defaultMessage: operator,
   });
 
-  const content = FILTERS_WITH_NO_VALUE.includes(operator)
-    ? `${label} ${operatorLabel}`
-    : `${label} ${operatorLabel} ${formattedValue}`;
+  const content = hasValue
+    ? `${label} ${operatorLabel} ${formattedValue}`
+    : `${label} ${operatorLabel}`;
 
   return (
     <Tag padding={1} onClick={handleRemove} icon={<Cross />} label={content}>
@@ -568,6 +595,13 @@ interface MainField {
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace Filters {
   export interface Filter {
+    /**
+     * How the filter tag shows the value, when the type's default doesn't fit
+     * e.g. a custom input storing values the type can't format.
+     * With `input` and `options`, the label of the matching option still wins.
+     * Only the tag reads it: value inputs don't receive it.
+     */
+    formatValue?: (value: string) => string;
     input?: React.ComponentType<ValueInputProps>;
     label: string;
     /**
@@ -585,7 +619,12 @@ namespace Filters {
     type: InputProps['type'] | 'relation' | 'custom';
   }
 
-  export interface ValueInputProps extends Omit<Filter, 'label'> {
+  /**
+   * What a custom `input` receives: the filter's description of its value,
+   * without what only the popover and the tag read
+   */
+  export interface ValueInputProps
+    extends Omit<Filter, 'label' | 'formatValue' | 'input' | 'operators'> {
     ['aria-label']: string;
   }
 

@@ -42,6 +42,28 @@ describe('ReleaseDrawer', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('closes on a press outside the drawer', async () => {
+    const onClose = jest.fn();
+    renderDrawer({ onClose });
+    const drawer = await screen.findByRole('dialog', { name: 'Edit release' });
+
+    // Outside presses land on the drawer's full-screen viewport
+    fireEvent.click(drawer.parentElement as HTMLElement);
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('stays open when a click is dispatched on the body', async () => {
+    const onClose = jest.fn();
+    renderDrawer({ onClose });
+    await screen.findByRole('dialog', { name: 'Edit release' });
+
+    // Firefox fires this click after a legacy DS picker unmounts its portal on pointerdown
+    fireEvent.click(document.body);
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("shows the release's schedule and release mode", async () => {
     renderDrawer();
 
@@ -122,6 +144,23 @@ describe('ReleaseDrawer', () => {
     await waitFor(() =>
       expect(screen.getByRole('combobox', { name: 'Time' })).toHaveAttribute('aria-invalid', 'true')
     );
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('rejects a timezone that is not one of the options', async () => {
+    const onSubmit = jest.fn();
+    const { user } = renderDrawer({ onSubmit });
+
+    const timezone = screen.getByRole('combobox', { name: 'Timezone' });
+    await user.clear(timezone);
+    await user.type(timezone, 'Paris');
+    // The listbox is still open, which hides the rest of the drawer from the accessibility tree
+    fireEvent.click(screen.getByRole('button', { name: 'Save', hidden: true }));
+
+    await waitFor(() => expect(timezone).toHaveAttribute('aria-invalid', 'true'));
+    expect(
+      screen.getByText('components.Input.error.validation.combobox.invalid')
+    ).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });

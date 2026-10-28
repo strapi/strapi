@@ -107,8 +107,8 @@ export async function addReasonsToInvalidActions({ strapi }: { strapi: Core.Stra
 }
 
 // Backfills outcomes and totals for releases that ran before they were recorded:
-// - a release that ran then released every entry (a failed run left it planned), so each action
-//   is marked released
+// - a release that ran released every entry (a failed run left it planned): each action is marked
+//   released and the release done
 // - a release frozen as `failed_before_upgrade` (by a migration since removed) gets what a missed
 //   run records: every entry skipped
 export async function addOutcomesToReleasedReleases({ strapi }: { strapi: Core.Strapi }) {
@@ -121,7 +121,8 @@ export async function addOutcomesToReleasedReleases({ strapi }: { strapi: Core.S
         releasedAt: { $notNull: true },
         totalSkippedEntries: null,
         $or: [
-          { status: 'done' },
+          // Entry changes used to recalculate a released release's status as if it were planned
+          { status: { $in: ['done', 'ready', 'blocked', 'empty'] } },
           { status: null },
           { status: 'failed', failureReason: 'failed_before_upgrade' },
         ],
@@ -144,9 +145,11 @@ export async function addOutcomesToReleasedReleases({ strapi }: { strapi: Core.S
       });
     }
 
+    // Done, also when an entry change recalculated its status after it ran
     await strapi.db.query(RELEASE_MODEL_UID).update({
       where: { id },
       data: {
+        status: 'done',
         totalPublishedEntries: await countOutcome(id, 'published'),
         totalUnpublishedEntries: await countOutcome(id, 'unpublished'),
         totalSkippedEntries: 0,

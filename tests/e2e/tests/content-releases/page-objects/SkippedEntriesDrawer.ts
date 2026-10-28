@@ -46,12 +46,8 @@ export class SkippedEntriesDrawer {
     return this.root.getByRole('radio', { name: label });
   }
 
-  async chooseReleaseMode(label: string) {
-    await this.releaseMode(label).click();
-  }
-
   /**
-   * Submit, then wait for the new release's details page the panel navigates to.
+   * Submit, then wait for the success toast and the panel to close.
    */
   async createRelease() {
     await this.createButton.click();

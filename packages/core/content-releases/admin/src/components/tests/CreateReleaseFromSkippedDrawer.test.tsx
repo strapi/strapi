@@ -186,4 +186,24 @@ describe('CreateReleaseFromSkippedDrawer', () => {
       'true'
     );
   });
+
+  it("explains that the skipped entries couldn't be loaded", async () => {
+    server.use(
+      http.get('/content-releases/:releaseId/actions', () =>
+        HttpResponse.json(
+          { data: null, error: { status: 500, name: 'ApplicationError', message: 'Server error' } },
+          { status: 500 }
+        )
+      ),
+      http.get('/content-releases/settings', () =>
+        HttpResponse.json({ data: { defaultTimezone: null } })
+      )
+    );
+
+    renderDrawer();
+
+    expect(await screen.findByText('Server error')).toBeInTheDocument();
+    expect(screen.queryByText(/carried over/)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create release' })).toBeDisabled();
+  });
 });
