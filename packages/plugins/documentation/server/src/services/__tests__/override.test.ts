@@ -1,6 +1,7 @@
 import override from '../override';
 
 const strapiMock = {
+  plugin: () => ({}),
   config: {
     get: () => ({
       'x-strapi-config': {

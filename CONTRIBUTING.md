@@ -14,7 +14,11 @@ Larger chunks of changes to Strapi that might affect many users require a thorou
 
 The Request For Comments process will help us create consensus among the core team and include as much feedback as possible from the community for these upcoming changes.
 
-A Request For Comments has to be created on the [strapi/rfcs](https://github.com/strapi/rfcs) repository.
+Requests For Comments are held in the [RFCs category of GitHub Discussions](https://github.com/strapi/strapi/discussions/categories/rfcs). Open a new discussion there describing the problem, the motivation and your proposed design. Listing the specific questions you'd like feedback on at the top helps reviewers focus.
+
+Please do not open a pull request containing an RFC document. The [discussion](https://github.com/strapi/strapi/discussions/categories/rfcs) stays the record of the design decision once the RFC has been discussed and approved.
+
+The [strapi/rfcs](https://github.com/strapi/rfcs) repository is no longer used for new proposals.
 
 ## Code of Conduct
 
@@ -65,8 +69,8 @@ The Strapi core team will review your pull request and either merge it, request 
   - `yarn test:unit`
   - `yarn test:front`
   - `yarn test:e2e --setup --concurrency=1`
-    - you **_may_** need to install Playwright browsers first: `yarn playwright install`
-    - Enterprise (EE) e2e: set `STRAPI_LICENSE` in **`tests/e2e/.env`** (see [`docs/docs/guides/e2e/00-setup.md`](docs/docs/guides/e2e/00-setup.md))
+    - you **_may_** need to install Playwright browsers first: `yarn playwright install chromium webkit`
+    - Enterprise (EE) e2e: set `STRAPI_LICENSE` in **`tests/e2e/.env`** (see [`docs/docs/contributing/03-testing/e2e/00-setup.md`](docs/docs/contributing/03-testing/e2e/00-setup.md))
 - Make sure your code lints by running `yarn lint`.
 - If your contribution fixes an existing issue, please make sure to link it in your pull request.
 

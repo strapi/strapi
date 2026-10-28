@@ -1,4 +1,5 @@
-import { merge } from 'lodash/fp';
+import { merge } from 'lodash';
+
 import { toPermission } from '../../domain/permission';
 import {
   getNestedFields,
@@ -356,7 +357,7 @@ describe('Content-Type', () => {
 
   describe('cleanPermissionFields', () => {
     beforeAll(() => {
-      global.strapi = merge(global.strapi, {
+      global.strapi = merge({}, global.strapi, {
         admin: {
           services: {
             permission: {

@@ -1,6 +1,6 @@
 'use strict';
 
-const { propEq, omit } = require('lodash/fp');
+const { matchesProperty, omit } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -239,9 +239,9 @@ describe('Populate filters', () => {
         expect(Array.isArray(entity.third)).toBe(true);
 
         entity.third.forEach((thirdItem) => {
-          const expected = data.a.find(propEq('id', thirdItem.id));
+          const expected = data.a.find(matchesProperty('id', thirdItem.id));
 
-          expect(thirdItem).toMatchObject(omit('id', expected));
+          expect(thirdItem).toMatchObject(omit(expected, 'id'));
         });
       });
     });
@@ -352,7 +352,7 @@ describe('Populate filters', () => {
         expect(dz).toHaveLength(fixture.dz.length);
         expect(dz).toMatchObject(
           fixture.dz.map((component) => ({
-            ...omit('field', component),
+            ...omit(component, 'field'),
             id: expect.any(Number),
           }))
         );
@@ -419,7 +419,7 @@ describe('Populate filters', () => {
             return false;
           })
           .map((component) => ({
-            ...(component.__component === 'default.foo' ? component : omit('field', component)),
+            ...(component.__component === 'default.foo' ? component : omit(component, 'field')),
             id: expect.any(Number),
           }));
 

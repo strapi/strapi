@@ -5,6 +5,7 @@
 const bcrypt = require('bcryptjs');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createContentAPIRequest } = require('api-tests/request');
+const { createAuthenticatedUser } = require('../utils');
 
 let strapi;
 let rq;
@@ -260,5 +261,204 @@ describe('Users API', () => {
     });
 
     expect(res.statusCode).toBe(200);
+  });
+});
+
+describe('Users API private query params', () => {
+  let authenticatedStrapi;
+  let authenticatedRq;
+  let victimUser;
+
+  const enableUserReadForAuthenticatedRole = async (instance) => {
+    const role = await instance.db
+      .query('plugin::users-permissions.role')
+      .findOne({ where: { type: 'authenticated' } });
+    const roleService = instance.service('plugin::users-permissions.role');
+    const roleDetails = await roleService.findOne(role.id);
+
+    roleDetails.permissions['plugin::users-permissions'] = roleDetails.permissions[
+      'plugin::users-permissions'
+    ] || { controllers: {} };
+
+    const controllers = roleDetails.permissions['plugin::users-permissions'].controllers || {};
+    const userController = controllers.user || {};
+    userController.find = { enabled: true, policy: '' };
+    userController.findOne = { enabled: true, policy: '' };
+    userController.count = { enabled: true, policy: '' };
+
+    roleDetails.permissions['plugin::users-permissions'].controllers = {
+      ...controllers,
+      user: userController,
+    };
+
+    await roleService.updateRole(role.id, { permissions: roleDetails.permissions });
+  };
+
+  beforeAll(async () => {
+    authenticatedStrapi = await createStrapiInstance({ bypassAuth: false });
+    await enableUserReadForAuthenticatedRole(authenticatedStrapi);
+
+    const authenticatedRole = await authenticatedStrapi.db
+      .query('plugin::users-permissions.role')
+      .findOne({ where: { type: 'authenticated' } });
+
+    victimUser = await authenticatedStrapi.db.query('plugin::users-permissions.user').create({
+      data: {
+        username: 'victim',
+        email: 'victim@strapi.io',
+        password: 'Test1234',
+        provider: 'local',
+        confirmed: true,
+        resetPasswordToken: 'private-reset-token',
+        role: authenticatedRole.id,
+      },
+    });
+
+    const { jwt } = await createAuthenticatedUser({
+      strapi: authenticatedStrapi,
+      userInfo: {
+        username: 'attacker',
+        email: 'attacker@strapi.io',
+        password: 'Test1234',
+        confirmed: true,
+        provider: 'local',
+      },
+    });
+
+    authenticatedRq = createContentAPIRequest({
+      strapi: authenticatedStrapi,
+      auth: { token: jwt },
+    });
+  });
+
+  afterAll(async () => {
+    await authenticatedStrapi.db.query('plugin::users-permissions.user').deleteMany();
+    await authenticatedStrapi.destroy();
+  });
+
+  test('does not allow top-level where to filter users by private reset password token', async () => {
+    const baselineRes = await authenticatedRq({
+      method: 'GET',
+      url: '/users',
+    });
+
+    expect(baselineRes.statusCode).toBe(200);
+    expect(baselineRes.body).toHaveLength(2);
+
+    const oracleRes = await authenticatedRq({
+      method: 'GET',
+      url: '/users',
+      qs: {
+        where: {
+          resetPasswordToken: {
+            $startsWith: 'private-reset',
+          },
+        },
+      },
+    });
+
+    expect(oracleRes.statusCode).toBe(200);
+    expect(oracleRes.body).toEqual(baselineRes.body);
+  });
+
+  test('does not allow top-level private attribute to filter users by reset password token', async () => {
+    const baselineRes = await authenticatedRq({
+      method: 'GET',
+      url: '/users',
+    });
+
+    expect(baselineRes.statusCode).toBe(200);
+    expect(baselineRes.body).toHaveLength(2);
+
+    const oracleRes = await authenticatedRq({
+      method: 'GET',
+      url: '/users',
+      qs: {
+        resetPasswordToken: {
+          $startsWith: 'private-reset',
+        },
+      },
+    });
+
+    expect(oracleRes.statusCode).toBe(200);
+    expect(oracleRes.body).toEqual(baselineRes.body);
+  });
+
+  test('does not allow top-level where to hide a user by private reset password token', async () => {
+    const baselineRes = await authenticatedRq({
+      method: 'GET',
+      url: `/users/${victimUser.id}`,
+    });
+
+    expect(baselineRes.statusCode).toBe(200);
+    expect(baselineRes.body).toMatchObject({
+      id: victimUser.id,
+      email: 'victim@strapi.io',
+    });
+
+    const oracleRes = await authenticatedRq({
+      method: 'GET',
+      url: `/users/${victimUser.id}`,
+      qs: {
+        where: {
+          resetPasswordToken: {
+            $startsWith: 'does-not-match',
+          },
+        },
+      },
+    });
+
+    expect(oracleRes.statusCode).toBe(200);
+    expect(oracleRes.body).toEqual(baselineRes.body);
+  });
+
+  test('does not allow top-level where to hide the authenticated user by private reset password token', async () => {
+    const baselineRes = await authenticatedRq({
+      method: 'GET',
+      url: '/users/me',
+    });
+
+    expect(baselineRes.statusCode).toBe(200);
+    expect(baselineRes.body).toMatchObject({
+      email: 'attacker@strapi.io',
+    });
+
+    const oracleRes = await authenticatedRq({
+      method: 'GET',
+      url: '/users/me',
+      qs: {
+        where: {
+          resetPasswordToken: {
+            $startsWith: 'private-reset',
+          },
+        },
+      },
+    });
+
+    expect(oracleRes.statusCode).toBe(200);
+    expect(oracleRes.body).toEqual(baselineRes.body);
+  });
+
+  test('does not allow top-level private attribute to change the users count', async () => {
+    const baselineRes = await authenticatedRq({
+      method: 'GET',
+      url: '/users/count',
+    });
+
+    expect(baselineRes.statusCode).toBe(200);
+    expect(baselineRes.body).toBe(2);
+
+    const oracleRes = await authenticatedRq({
+      method: 'GET',
+      url: '/users/count',
+      qs: {
+        resetPasswordToken: {
+          $startsWith: 'private-reset',
+        },
+      },
+    });
+
+    expect(oracleRes.statusCode).toBe(200);
+    expect(oracleRes.body).toBe(baselineRes.body);
   });
 });

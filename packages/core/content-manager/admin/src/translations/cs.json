@@ -180,6 +180,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "Nakonfigurujte nastavení pro všechny své Collection Types a skupiny",
   "containers.SettingsView.list.subtitle": "Nakonfigurujte rozložení a zobrazení svých Collection Types a skupin",
   "containers.SettingsView.list.title": "Zobrazit nastavení",
+  "containers.empty-label": "Bez názvu",
   "containers.untitled": "Bez názvu",
   "dnd.cancel-item": "{item}, puštěno. Změna pořadí zrušena.",
   "dnd.drop-item": "{item}, puštěno. Konečná pozice v seznamu: {position}.",
