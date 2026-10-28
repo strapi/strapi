@@ -130,7 +130,7 @@ const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, local
 const validateStatus = (
   sourceUid: UID.Schema,
   status?: Modules.Documents.Params.PublicationStatus.Kind
-) => {
+): { status: Modules.Documents.Params.PublicationStatus.Kind | undefined } => {
   const sourceModel = strapi.getModel(sourceUid);
 
   const isDP = contentTypes.hasDraftAndPublish;
@@ -175,7 +175,8 @@ export default {
     }
 
     const sourceUid = model;
-    const targetUid = attribute.target;
+    // A relation targets a content type
+    const targetUid: UID.ContentType = attribute.target;
 
     const { locale, isSourceLocalized, isTargetLocalized } = validateLocale(
       sourceUid,
