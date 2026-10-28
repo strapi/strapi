@@ -6,8 +6,12 @@ const findMany = jest.fn();
 const create = jest.fn();
 const update = jest.fn();
 const deleteMany = jest.fn();
+const configGet = jest.fn();
 
 const strapi = {
+  config: {
+    get: configGet,
+  },
   db: {
     query(uid: string) {
       if (uid !== AUTOSAVE_UID) {
@@ -32,6 +36,7 @@ describe('autosave service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    configGet.mockReturnValue(undefined);
   });
 
   it('reads the backup belonging to the requesting user only', async () => {
@@ -139,6 +144,41 @@ describe('autosave service', () => {
 
     expect(deleteMany).toHaveBeenCalledWith({ where: { id: { $in: [8, 9] } } });
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 7 } }));
+  });
+
+  it('deletes the current admin user backups older than 30 days when retention is not configured', async () => {
+    const now = new Date('2026-06-15T00:00:00.000Z');
+    jest.useFakeTimers({ now });
+
+    try {
+      findMany.mockResolvedValue([]);
+      create.mockImplementation(({ data }: any) => data);
+
+      await service.save(scope, { data: { title: 'Draft' } as any });
+
+      expect(configGet).toHaveBeenCalledWith('admin.autosave.retentionDays');
+      expect(create).toHaveBeenCalled();
+      expect(deleteMany).toHaveBeenCalledWith({
+        where: {
+          user_id: 1,
+          updatedAt: { $lt: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('does not write a server backup when retentionDays is 0', async () => {
+    configGet.mockReturnValue(0);
+
+    await expect(service.save(scope, { data: { title: 'Draft' } as any })).resolves.toBeNull();
+
+    expect(configGet).toHaveBeenCalledWith('admin.autosave.retentionDays');
+    expect(findMany).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(deleteMany).not.toHaveBeenCalled();
   });
 
   it('removes only the deleted locale backups when a localized document version is deleted', async () => {

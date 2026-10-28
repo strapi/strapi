@@ -47,6 +47,13 @@ const autosave: Model = {
       type: 'datetime',
       default: () => new Date(),
     },
+    /**
+     * Stamped on every server write. Retention deletes this user's rows once it falls outside
+     * `admin.autosave.retentionDays`.
+     */
+    updatedAt: {
+      type: 'datetime',
+    },
     // FIXME: joinTable should be optional
     // @ts-expect-error database model is not yet updated to support useJoinTable
     user: {

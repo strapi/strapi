@@ -85,7 +85,7 @@ export declare namespace SaveAutosave {
 
   export type Response =
     | {
-        data: AutosaveEntry;
+        data: AutosaveEntry | null;
         error?: never;
       }
     | ErrorResponse;

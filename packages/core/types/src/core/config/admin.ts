@@ -63,6 +63,14 @@ export interface History {
   retentionDays?: number;
 }
 
+export interface Autosave {
+  /**
+   * How long this admin user's server backups are kept.
+   * Absent means 30 days. `0` disables server backups.
+   */
+  retentionDays?: number;
+}
+
 export interface ForgotPassword {
   emailTemplate?: string;
   from?: string;
@@ -167,6 +175,7 @@ export interface Admin {
   secrets?: Secrets;
   auditLogs?: AuditLogs;
   history?: History;
+  autosave?: Autosave;
   preview?: Preview;
   ai?: Ai;
   forgotPassword?: ForgotPassword;

@@ -149,16 +149,20 @@ const createAutosaveController = ({ strapi }: { strapi: Core.Strapi }) => {
         locale:
           scope.locale ?? (typeof document.locale === 'string' ? document.locale : scope.locale),
       };
-      const { schema: _schema, ...entry } = await getService(strapi, 'autosave').save(
-        autosaveScope,
-        {
-          data,
-          // Recorded alongside the payload so a later Content-Type Builder change can be detected
-          // when the backup is read back.
-          schema: omit(strapi.getModel(scope.contentType).attributes, FIELDS_TO_IGNORE),
-          baseVersion: body.baseVersion,
-        }
-      );
+      const saved = await getService(strapi, 'autosave').save(autosaveScope, {
+        data,
+        // Recorded alongside the payload so a later Content-Type Builder change can be detected
+        // when the backup is read back.
+        schema: omit(strapi.getModel(scope.contentType).attributes, FIELDS_TO_IGNORE),
+        baseVersion: body.baseVersion,
+      });
+
+      // retentionDays 0: nothing was stored. The browser copy is the only backup.
+      if (!saved) {
+        return { data: null } satisfies Autosave.SaveAutosave.Response;
+      }
+
+      const { schema: _schema, ...entry } = saved;
 
       return { data: entry } satisfies Autosave.SaveAutosave.Response;
     },

@@ -25,6 +25,27 @@ interface AutosaveSnapshot extends Autosave.AutosaveEntry {
   schema: Struct.SchemaAttributes | null;
 }
 
+const DEFAULT_AUTOSAVE_RETENTION_DAYS = 30;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Days to keep this admin user's server backups. An absent setting is 30 days.
+ * `0` turns server backups off; the browser copy is unchanged.
+ */
+const getAutosaveRetentionDays = (configured: unknown): number => {
+  if (configured === undefined || configured === null || configured === '') {
+    return DEFAULT_AUTOSAVE_RETENTION_DAYS;
+  }
+
+  const days = typeof configured === 'number' ? configured : Number(configured);
+
+  if (!Number.isFinite(days) || days < 0) {
+    return DEFAULT_AUTOSAVE_RETENTION_DAYS;
+  }
+
+  return days;
+};
+
 const toEntry = ({
   contentType,
   documentId,
@@ -74,7 +95,17 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
         schema?: Struct.SchemaAttributes;
         baseVersion?: string;
       }
-    ): Promise<AutosaveSnapshot> {
+    ): Promise<AutosaveSnapshot | null> {
+      const retentionDays = getAutosaveRetentionDays(
+        strapi.config.get('admin.autosave.retentionDays')
+      );
+
+      // `0` leaves the backup in the browser only. Do not write, and do not sweep existing rows:
+      // cleanup runs on a server write, and there is no write.
+      if (retentionDays === 0) {
+        return null;
+      }
+
       const where = scopeWhere(scope);
       const savedAt = new Date();
 
@@ -91,7 +122,13 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
         const row: AutosaveRow = current
           ? await query.update({
               where: { id: current.id },
-              data: { data, schema: schema ?? null, baseVersion: baseVersion ?? null, savedAt },
+              data: {
+                data,
+                schema: schema ?? null,
+                baseVersion: baseVersion ?? null,
+                savedAt,
+                updatedAt: savedAt,
+              },
             })
           : await query.create({
               data: {
@@ -102,9 +139,20 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
                 schema: schema ?? null,
                 baseVersion: baseVersion ?? null,
                 savedAt,
+                updatedAt: savedAt,
                 user: scope.userId,
               },
             });
+
+        // This user's other backups only. No cron and no cross-instance lock: the write that just
+        // landed is the sweep.
+        const cutoff = new Date(savedAt.getTime() - retentionDays * MS_PER_DAY);
+        await query.deleteMany({
+          where: {
+            user_id: scope.userId,
+            updatedAt: { $lt: cutoff },
+          },
+        });
 
         return toEntry(row);
       });
