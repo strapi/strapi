@@ -11,6 +11,9 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
         useGetRecentDocumentsQuery: jest.fn(),
       })),
     })),
+    util: {
+      resetApiState: { match: jest.fn(() => false) },
+    },
   },
   Widget: {
     Loading: () => <div>Loading widget content...</div>,
