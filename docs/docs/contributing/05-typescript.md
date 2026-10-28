@@ -395,6 +395,25 @@ editor completions, generated application modules in CommonJS and ECMAScript mod
 applications, and accidental publication of strict activation. CI runs these checks
 after the monorepo build.
 
+`yarn test:types:strict-off` runs the strict-off parity helper (`tests/types/strict-off-parity`)
+on this checkout alone, and CI runs it after the published-contract tests. Its fixture application
+has no `typescript.strictTypes`. The helper generates the application's types and checks that:
+
+- `types/generated/*` equals the committed copy in `tests/types/strict-off-parity/snapshot/`;
+- the application, and the types it declares equivalent in `app/equivalence`, compile without
+  errors.
+
+When type generation output changes on purpose, for example after a rebase on a develop that
+changed the generators, or after a fixture change, refresh the copy with
+`yarn test:types:strict-off --update` and commit it with the change. Review the snapshot diff as
+part of the change: an unexplained difference means strict-off type generation moved.
+
+The snapshot does not cover the exported types themselves. `packages/core/types/tests/strict-off.ts`
+pins them with `Equal` assertions that `yarn workspace @strapi/types test:ts` compiles without
+strict mode: add one for each new type that `IsStrict` gates. The full comparison with develop,
+`node tests/types/strict-off-parity/run.cjs --baseline <develop checkout>`, also diffs every type
+an application reaches. It needs a second built checkout, so it runs by hand at each rebase.
+
 Each package that registers contracts checks them in two places:
 
 - `server/src/types/registries.test.ts` holds compile-only assertions. The server `tsconfig.json`
