@@ -66,4 +66,21 @@ describe('Documentation plugin | Documentation controller', () => {
       expect(ctx.redirect).toHaveBeenCalledWith(`${SERVER_URL}/documentation?error=password`);
     });
   });
+
+  describe('index', () => {
+    test.each([
+      { major: '..', minor: '1', patch: '0' },
+      { major: '1', minor: '../../secret', patch: '0' },
+      { major: '1', minor: '0', patch: 'x' },
+    ])('returns 404 for non-numeric version params %o', async (params) => {
+      const ctx = {
+        params,
+        notFound: jest.fn(),
+      } as unknown as Koa.Context & { notFound: jest.Mock };
+
+      await documentation.index(ctx, jest.fn());
+
+      expect(ctx.notFound).toHaveBeenCalled();
+    });
+  });
 });
