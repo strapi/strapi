@@ -2,9 +2,9 @@ import type { Codemod } from '../codemod';
 
 import type { Runner as RunnerInterface, RunnerConfiguration, RunnerFunction } from './types';
 
-export abstract class AbstractRunner<TConfig extends RunnerConfiguration>
-  implements RunnerInterface<TConfig>
-{
+export abstract class AbstractRunner<
+  TConfig extends RunnerConfiguration,
+> implements RunnerInterface<TConfig> {
   abstract runner: RunnerFunction<TConfig>;
 
   paths: string[];

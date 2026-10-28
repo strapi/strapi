@@ -3,7 +3,14 @@ import semver from 'semver';
 import execa from 'execa';
 import { packageManager } from '@strapi/utils';
 
-import { ProxyAgent } from 'undici';
+// Import undici's dispatchers from their own files: loading undici's main entry replaces the
+// dispatcher of Node's built-in fetch (https://github.com/nodejs/undici/issues/5500)
+/* eslint-disable import/extensions -- required by the ESM build: undici has no exports map */
+import ProxyAgent from 'undici/lib/dispatcher/proxy-agent.js';
+import Dispatcher1Wrapper from 'undici/lib/dispatcher/dispatcher1-wrapper.js';
+import Dispatcher from 'undici/lib/dispatcher/dispatcher.js';
+import connect from 'undici/lib/api/api-connect.js';
+/* eslint-enable import/extensions */
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
@@ -11,8 +18,13 @@ import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from 
 import type { Version } from '../version';
 import { Logger } from '../logger';
 
+// undici's main entry adds connect() to every dispatcher. ProxyAgent needs it to open the CONNECT
+// tunnel used for https targets such as the npm registry, so add it here since the entry is skipped.
+Dispatcher.prototype.connect ??= connect;
+
 const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
-const agent = proxyUrl ? new ProxyAgent(proxyUrl) : undefined;
+// Wrapped so Node's built-in fetch (bundling its own undici) can use an undici 8 dispatcher
+const agent = proxyUrl ? new Dispatcher1Wrapper(new ProxyAgent(proxyUrl)) : undefined;
 
 export class Package implements PackageInterface {
   name: string;
@@ -141,7 +153,8 @@ export class Package implements PackageInterface {
     const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
 
     const response = await fetch(packageURL, {
-      dispatcher: agent,
+      // The global RequestInit types its dispatcher with Node's bundled undici types
+      dispatcher: agent as unknown as RequestInit['dispatcher'],
     });
 
     // TODO: Use a validation library to make sure the response structure is correct

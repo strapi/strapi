@@ -1,8 +1,6 @@
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
-import { set } from 'lodash/fp';
-
 /**
  * A Strapi middleware function that adds support for review workflows.
  *
@@ -25,7 +23,10 @@ export function contentTypeMiddleware(strapi: Core.Strapi) {
     const { reviewWorkflows, ...contentType } = ctx.request.body.contentType;
 
     if (typeof reviewWorkflows === 'boolean') {
-      ctx.request.body.contentType = set('options.reviewWorkflows', reviewWorkflows, contentType);
+      ctx.request.body.contentType = {
+        ...contentType,
+        options: { ...contentType.options, reviewWorkflows },
+      };
     }
   };
   strapi.server.router.use('/content-type-builder/content-types/:uid?', (ctx, next) => {

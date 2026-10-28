@@ -1,7 +1,7 @@
 import jsonLogic from 'json-logic-js';
-import { z } from 'zod';
+import * as z from 'zod/v4';
 
-export const ConditionSchema = z.object({
+const ConditionSchema = z.object({
   dependsOn: z.string().min(1),
   operator: z.enum(['is', 'isNot']),
   value: z.union([z.string(), z.number(), z.boolean()]),

@@ -30,10 +30,39 @@ test.each(action.BLOCKING_LABELS)('Test blocking labels %s', async (label) => {
   setFailed.mockRestore();
 });
 
-test('Test needs-qa blocks PR without QA completion label', async () => {
+test('Test missing QA label blocks PR', async () => {
   github.context = {
     payload: {
       pull_request: {
+        base: {
+          ref: 'main',
+        },
+        author_association: 'MEMBER',
+        labels: [{ name: 'pr: enhancement' }, { name: 'source: core' }],
+      },
+    },
+  };
+
+  const setFailed = jest.spyOn(core, 'setFailed');
+
+  await action();
+
+  expect(setFailed).toHaveBeenCalled();
+  expect(setFailed.mock.calls[0][0]).toBe(
+    `The PR must have one of the following QA labels: qa-done, qa-skipped.`
+  );
+
+  setFailed.mockRestore();
+});
+
+test('Test needs-qa alone does not satisfy the QA gate', async () => {
+  github.context = {
+    payload: {
+      pull_request: {
+        base: {
+          ref: 'main',
+        },
+        author_association: 'MEMBER',
         labels: [{ name: 'needs-qa' }, { name: 'pr: enhancement' }, { name: 'source: core' }],
       },
     },
@@ -45,13 +74,13 @@ test('Test needs-qa blocks PR without QA completion label', async () => {
 
   expect(setFailed).toHaveBeenCalled();
   expect(setFailed.mock.calls[0][0]).toBe(
-    `The PR has been labelled with 'needs-qa' and must be resolved with one of: qa-done, qa-skipped.`
+    `The PR must have one of the following QA labels: qa-done, qa-skipped.`
   );
 
   setFailed.mockRestore();
 });
 
-test.each(action.QA_COMPLETION_LABELS)('Test needs-qa allows PR with %s label', async (label) => {
+test.each(action.QA_COMPLETION_LABELS)('Test %s label allows PR', async (label) => {
   github.context = {
     payload: {
       pull_request: {
@@ -59,12 +88,7 @@ test.each(action.QA_COMPLETION_LABELS)('Test needs-qa allows PR with %s label', 
           ref: 'main',
         },
         author_association: 'MEMBER',
-        labels: [
-          { name: 'needs-qa' },
-          { name: label },
-          { name: 'pr: enhancement' },
-          { name: 'source: core' },
-        ],
+        labels: [{ name: label }, { name: 'pr: enhancement' }, { name: 'source: core' }],
       },
     },
   };
@@ -82,7 +106,7 @@ test('Test missing source label', async () => {
   github.context = {
     payload: {
       pull_request: {
-        labels: [{ name: 'pr: enhancement' }],
+        labels: [{ name: 'qa-done' }, { name: 'pr: enhancement' }],
       },
     },
   };
@@ -101,7 +125,12 @@ test('Test too many source label', async () => {
   github.context = {
     payload: {
       pull_request: {
-        labels: [{ name: 'source: a' }, { name: 'source: b' }, { name: 'pr: enhancement' }],
+        labels: [
+          { name: 'qa-done' },
+          { name: 'source: a' },
+          { name: 'source: b' },
+          { name: 'pr: enhancement' },
+        ],
       },
     },
   };
@@ -120,7 +149,7 @@ test('Test missing pr label', async () => {
   github.context = {
     payload: {
       pull_request: {
-        labels: [{ name: 'source: core' }],
+        labels: [{ name: 'qa-done' }, { name: 'source: core' }],
       },
     },
   };
@@ -139,7 +168,12 @@ test('Test too many pr label', async () => {
   github.context = {
     payload: {
       pull_request: {
-        labels: [{ name: 'pr: a' }, { name: 'pr: b' }, { name: 'source: core' }],
+        labels: [
+          { name: 'qa-done' },
+          { name: 'pr: a' },
+          { name: 'pr: b' },
+          { name: 'source: core' },
+        ],
       },
     },
   };
@@ -154,52 +188,6 @@ test('Test too many pr label', async () => {
   setFailed.mockRestore();
 });
 
-test('Test missing milestone for develop PR', async () => {
-  github.context = {
-    payload: {
-      pull_request: {
-        base: {
-          ref: 'develop',
-        },
-        labels: [{ name: 'pr: enhancement' }, { name: 'source: core' }],
-        milestone: null,
-      },
-    },
-  };
-
-  const setFailed = jest.spyOn(core, 'setFailed');
-
-  await action();
-
-  expect(setFailed).toHaveBeenCalled();
-  expect(setFailed.mock.calls[0][0]).toBe(`The PR must have a milestone.`);
-
-  setFailed.mockRestore();
-});
-
-test('Test missing milestone for non-develop PR', async () => {
-  github.context = {
-    payload: {
-      pull_request: {
-        base: {
-          ref: 'main',
-        },
-        author_association: 'MEMBER',
-        labels: [{ name: 'pr: enhancement' }, { name: 'source: core' }],
-        milestone: null,
-      },
-    },
-  };
-
-  const setFailed = jest.spyOn(core, 'setFailed');
-
-  await action();
-
-  expect(setFailed).not.toHaveBeenCalled();
-
-  setFailed.mockRestore();
-});
-
 test.each(['NONE', 'CONTRIBUTOR', 'FIRST_TIME_CONTRIBUTOR', 'COLLABORATOR'])(
   'Test community PR targeting main is blocked for %s author',
   async (authorAssociation) => {
@@ -210,7 +198,7 @@ test.each(['NONE', 'CONTRIBUTOR', 'FIRST_TIME_CONTRIBUTOR', 'COLLABORATOR'])(
             ref: 'main',
           },
           author_association: authorAssociation,
-          labels: [{ name: 'pr: enhancement' }, { name: 'source: core' }],
+          labels: [{ name: 'qa-done' }, { name: 'pr: enhancement' }, { name: 'source: core' }],
         },
       },
     };
@@ -241,8 +229,7 @@ test.each(action.STRAPI_ENGINEER_ASSOCIATIONS)(
             ref: 'main',
           },
           author_association: authorAssociation,
-          labels: [{ name: 'pr: enhancement' }, { name: 'source: core' }],
-          milestone: null,
+          labels: [{ name: 'qa-done' }, { name: 'pr: enhancement' }, { name: 'source: core' }],
         },
       },
     };
@@ -268,8 +255,7 @@ test('Test community PR may target a feature branch (stacked PR)', async () => {
           ref: 'feat/part-one',
         },
         author_association: 'FIRST_TIME_CONTRIBUTOR',
-        labels: [{ name: 'pr: enhancement' }, { name: 'source: core' }],
-        milestone: null,
+        labels: [{ name: 'qa-done' }, { name: 'pr: enhancement' }, { name: 'source: core' }],
       },
     },
   };
@@ -283,17 +269,15 @@ test('Test community PR may target a feature branch (stacked PR)', async () => {
   setFailed.mockRestore();
 });
 
-test('Test develop PR with milestone', async () => {
+test('Test develop PR without a milestone is allowed', async () => {
   github.context = {
     payload: {
       pull_request: {
         base: {
           ref: 'develop',
         },
-        labels: [{ name: 'pr: enhancement' }, { name: 'source: core' }],
-        milestone: {
-          title: '5.0.0',
-        },
+        labels: [{ name: 'qa-done' }, { name: 'pr: enhancement' }, { name: 'source: core' }],
+        milestone: null,
       },
     },
   };

@@ -1,4 +1,4 @@
-import { isEmpty, isNil, isObject, trim } from 'lodash/fp';
+import { isEmpty, isObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
 import {
@@ -17,7 +17,8 @@ import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations }
 import { isOperator } from '../operators';
 import { asyncCurry, throwInvalidKey } from './utils';
 import type { Attribute, Model } from '../types';
-import parseType from '../parse-type';
+import { isBooleanLike } from '../parse-type';
+import type { SHARED_QUERY_PARAM_KEYS } from '../content-api-constants';
 import type { Parent, Path } from '../traverse/factory';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
@@ -210,7 +211,7 @@ export const validateFields = asyncCurry(
             return;
           }
 
-          if (isNil(attribute) || !isScalarAttribute(attribute)) {
+          if (attribute == null || !isScalarAttribute(attribute)) {
             throwInvalidKey({ key, path: path.attribute });
           }
         }, ctx)
@@ -266,7 +267,7 @@ const flattenDotPopulatePaths = (populate: string | string[]) => {
   return items.flatMap((item) =>
     item
       .split(',')
-      .map((segment) => trim(segment))
+      .map((segment) => segment.trim())
       .filter(Boolean)
   );
 };
@@ -387,7 +388,7 @@ const validatePopulateDotPaths = (
   for (const path of flattenDotPopulatePaths(populate)) {
     const segments = path
       .split('.')
-      .map((segment) => trim(segment))
+      .map((segment) => segment.trim())
       .filter(Boolean);
 
     validatePopulateDotPathSegments(ctx, segments, '');
@@ -399,12 +400,20 @@ const validateMorphLikeNestedPopulate = (
   { path }: { path: string | null }
 ) => {
   // Keep in sync with convert-query-params polymorphic nested populate handling.
-  if (!isNil(populateValue) && populateValue !== '*') {
+  if (populateValue != null && populateValue !== '*') {
     throwInvalidKey({ key: 'populate', path });
   }
 };
 
 export const POPULATE_TRAVERSALS = ['nonAttributesOperators', 'private'];
+
+// Query params that only apply at the root of a query. They are inherited by populated
+// relations, so they are rejected inside `populate` with an explanation (see #21911).
+const ROOT_ONLY_QUERY_PARAMS: ReadonlyArray<(typeof SHARED_QUERY_PARAM_KEYS)[number]> = [
+  'status',
+  'publicationFilter',
+  'hasPublishedVersion',
+];
 
 export const validatePopulate = asyncCurry(
   async (
@@ -496,21 +505,21 @@ export const validatePopulate = asyncCurry(
 
           // Ensure count is a boolean
           if (key === 'count') {
-            try {
-              parseType({ type: 'boolean', value });
+            if (isBooleanLike(value)) {
               return;
-            } catch {
-              throwInvalidKey({ key, path: path.attribute });
             }
+
+            throwInvalidKey({ key, path: path.attribute });
           }
 
-          // Allowed boolean-like keywords should be ignored
-          try {
-            parseType({ type: 'boolean', value: key });
-            // Key is an allowed boolean-like keyword, skipping validation...
+          // Allowed boolean-like keywords should be ignored.
+          //
+          // Asked as a predicate rather than by catching `parseType`'s error: this runs
+          // once per populate key, and almost no key is boolean-like, so the previous
+          // try/catch built and threw away an Error — including a stack capture — on
+          // essentially every key of every populate tree of every request.
+          if (isBooleanLike(key)) {
             return;
-          } catch {
-            // Continue, because it's not a boolean-like
           }
 
           // Handle nested `sort` validation with custom or default traversals
@@ -581,7 +590,13 @@ export const validatePopulate = asyncCurry(
 
           // Throw an error if non-attribute operators are included in the populate array
           if (includes?.populate?.includes('nonAttributesOperators')) {
-            throwInvalidKey({ key, path: path.attribute });
+            throwInvalidKey({
+              key,
+              path: path.attribute,
+              reason: ROOT_ONLY_QUERY_PARAMS.some((param) => param === key)
+                ? `${key} is only accepted at the root of the query, and it also applies to populated relations`
+                : undefined,
+            });
           }
         },
         ctx
