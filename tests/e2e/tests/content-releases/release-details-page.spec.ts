@@ -198,7 +198,8 @@ describeOnCondition(edition === 'EE')('Release page', () => {
 
     await details.goto(releaseId);
 
-    await expect(details.publishButton).toBeDisabled();
+    // Stays clickable: the run re-checks the entries and refuses if any is still not ready
+    await expect(details.publishButton).toBeEnabled();
     await expect(details.tab('All')).toContainText('2');
     await expect(details.tab('Ready')).toContainText('1');
     await expect(details.tab('Not ready')).toContainText('1');

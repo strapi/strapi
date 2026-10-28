@@ -152,6 +152,31 @@ const FieldsValidation = ({ errorCount, entryLink }: FieldsValidationProps) => {
   const { formatMessage } = useIntl();
   const hasErrors = errorCount !== null;
 
+  const getMessage = () => {
+    if (errorCount === null) {
+      return formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.entry-validation.fields.success',
+        defaultMessage: 'All fields are filled correctly',
+      });
+    }
+
+    // The check failed without naming a field, e.g. the draft was missing when the release ran
+    if (errorCount === 0) {
+      return formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.entry-validation.fields.unchecked',
+        defaultMessage: 'The entry couldn’t be validated',
+      });
+    }
+
+    return formatMessage(
+      {
+        id: 'content-releases.pages.ReleaseDetails.entry-validation.fields.error',
+        defaultMessage: '{errors, plural, one {# error} other {# errors}} on fields',
+      },
+      { errors: errorCount }
+    );
+  };
+
   return (
     <Flex direction="column" gap={1} width="100%" padding={5}>
       <Flex gap={2} width="100%">
@@ -164,20 +189,9 @@ const FieldsValidation = ({ errorCount, entryLink }: FieldsValidationProps) => {
         {hasErrors ? <CrossCircle fill="danger600" /> : <CheckCircle fill="success600" />}
       </Flex>
       <Typography width="100%" textColor={hasErrors ? 'danger600' : 'neutral600'}>
-        {hasErrors
-          ? formatMessage(
-              {
-                id: 'content-releases.pages.ReleaseDetails.entry-validation.fields.error',
-                defaultMessage: '{errors, plural, one {# error} other {# errors}} on fields',
-              },
-              { errors: errorCount }
-            )
-          : formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.fields.success',
-              defaultMessage: 'All fields are filled correctly',
-            })}
+        {getMessage()}
       </Typography>
-      {hasErrors && entryLink && (
+      {errorCount !== null && errorCount > 0 && entryLink && (
         <LinkButton
           tag={Link}
           to={{

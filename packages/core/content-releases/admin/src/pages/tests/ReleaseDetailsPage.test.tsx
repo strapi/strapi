@@ -458,8 +458,16 @@ describe('Release details tabs, header and rows', () => {
     await waitFor(() => expect(actionsRequest).toHaveBeenLastCalledWith('notReady'));
   });
 
-  it('disables Publish on a blocked release', async () => {
+  it('keeps Publish enabled on a blocked release, since the run re-checks the entries', async () => {
     mockRelease(plannedRelease, [action(1)]);
+
+    renderPage();
+
+    expect(await screen.findByRole('button', { name: 'Publish' })).toBeEnabled();
+  });
+
+  it('disables Publish on an empty release', async () => {
+    mockRelease({ ...plannedRelease, status: 'empty', actions: { meta: { count: 0 } } }, []);
 
     renderPage();
 

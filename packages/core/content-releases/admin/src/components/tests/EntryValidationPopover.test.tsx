@@ -173,6 +173,24 @@ describe('ReleaseActionOutcomeStatus', () => {
     expect(screen.queryByRole('link', { name: 'See errors' })).not.toBeInTheDocument();
   });
 
+  it('says when the run found no draft to validate', async () => {
+    const { user } = render(
+      <ReleaseActionOutcomeStatus
+        {...defaultProps}
+        // @ts-expect-error - We only define schema props we are interested in
+        schema={schema}
+        outcome="skipped_invalid"
+        reason={{ validation: { errors: [] } }}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Details' }));
+
+    await screen.findByText('The entry couldn’t be validated');
+    expect(screen.queryByText(/errors? on fields/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'See errors' })).not.toBeInTheDocument();
+  });
+
   it('shows the error name for an entry the run failed on', async () => {
     const { user } = render(
       <ReleaseActionOutcomeStatus

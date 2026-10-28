@@ -441,7 +441,9 @@ const ReleaseDetailsLayout = ({
                     variant="default"
                     onClick={handlePublishRelease(release.id.toString())}
                     loading={isPublishing}
-                    disabled={release.status === 'blocked' || release.status === 'empty'}
+                    // A blocked release stays clickable: the stored status can be stale, and the
+                    // run re-checks every entry before refusing
+                    disabled={release.status === 'empty'}
                   >
                     {formatMessage({
                       id: 'content-releases.header.actions.publish',
