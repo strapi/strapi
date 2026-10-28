@@ -40,12 +40,16 @@ const getStaticString = (node) => {
   return null;
 };
 
-const resolveHelperCall = (node, translationHelpers) => {
-  if (!t.isCallExpression(node)) {
-    return null;
-  }
+const isTranslationHelperCall = (node, translationHelpers) => {
+  return (
+    t.isCallExpression(node) &&
+    t.isIdentifier(node.callee) &&
+    translationHelpers.includes(node.callee.name)
+  );
+};
 
-  if (!t.isIdentifier(node.callee) || !translationHelpers.includes(node.callee.name)) {
+const resolveHelperCall = (node, translationHelpers) => {
+  if (!isTranslationHelperCall(node, translationHelpers)) {
     return null;
   }
 
@@ -57,6 +61,44 @@ const resolveHelperCall = (node, translationHelpers) => {
   }
 
   return staticString;
+};
+
+const unwrapExpressionPath = (expressionPath) => {
+  let current = expressionPath;
+
+  while (
+    current.parentPath &&
+    (current.parentPath.isTSAsExpression() ||
+      current.parentPath.isTSTypeAssertion() ||
+      current.parentPath.isTSSatisfiesExpression() ||
+      current.parentPath.isParenthesizedExpression())
+  ) {
+    current = current.parentPath;
+  }
+
+  return current;
+};
+
+const isFormatMessageArgument = (objectPath) => {
+  const expressionPath = unwrapExpressionPath(objectPath);
+  const parent = expressionPath.parentPath;
+
+  if (!parent || !parent.isCallExpression() || parent.node.arguments[0] !== expressionPath.node) {
+    return false;
+  }
+
+  const { callee } = parent.node;
+
+  if (t.isIdentifier(callee)) {
+    return callee.name === 'formatMessage';
+  }
+
+  return (
+    t.isMemberExpression(callee) &&
+    !callee.computed &&
+    t.isIdentifier(callee.property) &&
+    callee.property.name === 'formatMessage'
+  );
 };
 
 const resolveIdNode = (node, translationHelpers) => {
@@ -152,6 +194,14 @@ const extractUsagesFromFile = (filePath, packageConfig) => {
             ? getStaticString(defaultMessageNode)
             : null;
           const line = objectPath.node.loc?.start.line;
+          const idIsHelper = isTranslationHelperCall(idNode, packageConfig.translationHelpers);
+          const hasDefaultMessage = Boolean(defaultMessageNode);
+          const parentIsFormatMessage = isFormatMessageArgument(objectPath);
+
+          // Objects like RTK cache tags (`{ id: 'LIST' }`) are not message descriptors.
+          if (!idIsHelper && !hasDefaultMessage && !parentIsFormatMessage) {
+            return;
+          }
 
           if (!resolvedId) {
             recordUsage({

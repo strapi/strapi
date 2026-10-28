@@ -1,6 +1,8 @@
 import { useIntl } from 'react-intl';
 
-import { getTranslation } from './utils/translations';
+import { getTranslation, getTranslationKey } from './utils/translations';
+
+export const cacheTag = { id: 'LIST', type: 'User' };
 
 export const SampleComponent = () => {
   const { formatMessage } = useIntl();
@@ -25,6 +27,10 @@ export const SampleComponent = () => {
       {formatMessage({
         id: getTranslation(`sample.dynamic.${'value'}`),
         defaultMessage: 'Dynamic',
+      })}
+      {formatMessage({
+        id: getTranslationKey('sample.alias'),
+        defaultMessage: 'Alias',
       })}
     </>
   );

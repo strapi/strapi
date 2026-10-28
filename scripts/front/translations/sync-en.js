@@ -24,6 +24,7 @@ const runTranslationsSyncEn = ({ write = false, verbose = false, packageConfigs 
   const configs = packageConfigs ?? getPackageConfigs();
   let totalAdds = 0;
   let totalUpdates = 0;
+  let blocked = false;
 
   console.log(
     chalk.cyan(
@@ -39,6 +40,7 @@ const runTranslationsSyncEn = ({ write = false, verbose = false, packageConfigs 
     const { issues } = analysis;
 
     if (issues.conflictingDefaultMessages.length > 0 || issues.parseErrors.length > 0) {
+      blocked = true;
       console.log(chalk.red(`✗ ${packageConfig.pluginId} has blocking issues; skipped`));
       issues.conflictingDefaultMessages.forEach(({ enKey }) => {
         console.log(chalk.red(`  conflicting defaultMessage: ${enKey}`));
@@ -110,14 +112,18 @@ const runTranslationsSyncEn = ({ write = false, verbose = false, packageConfigs 
     console.log(chalk.green(`Applied ${totalAdds} add(s) and ${totalUpdates} update(s).`));
   }
 
-  return { adds: totalAdds, updates: totalUpdates, write };
+  return { adds: totalAdds, updates: totalUpdates, write, blocked };
 };
 
 if (require.main === module) {
   const write = process.argv.includes('--write');
   const verbose = process.argv.includes('--verbose');
 
-  runTranslationsSyncEn({ write, verbose });
+  const result = runTranslationsSyncEn({ write, verbose });
+
+  if (result.blocked) {
+    process.exit(1);
+  }
 }
 
 module.exports = {

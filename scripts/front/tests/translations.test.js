@@ -10,7 +10,7 @@ const fixturePackageConfig = {
   packageDir: path.join(__dirname, 'fixtures/translations/sample-package'),
   pluginId: 'sample-plugin',
   prefix: 'sample-plugin.',
-  translationHelpers: ['getTranslation'],
+  translationHelpers: ['getTranslation', 'getTranslationKey'],
   enJsonPath: path.join(
     __dirname,
     'fixtures/translations/sample-package/admin/src/translations/en.json'
@@ -29,7 +29,11 @@ describe('translations tooling', () => {
         'sample.missing',
         'sample.mismatch',
         'plugin.name',
+        'sample.alias',
       ])
+    );
+    expect(usages.some((usage) => usage.enKey === 'LIST' || usage.runtimeId === 'LIST')).toBe(
+      false
     );
     expect(usages.some((usage) => usage.dynamic)).toBe(true);
   });
@@ -44,6 +48,7 @@ describe('translations tooling', () => {
     const analysis = analyzePackage(fixturePackageConfig);
 
     expect(analysis.issues.missingFromEn.map(({ enKey }) => enKey)).toContain('sample.missing');
+    expect(analysis.issues.missingFromEn.map(({ enKey }) => enKey)).not.toContain('LIST');
     expect(analysis.issues.valueMismatch.map(({ enKey }) => enKey)).toContain('sample.mismatch');
     expect(analysis.issues.missingDefaultMessage.map(({ enKey }) => enKey)).toContain(
       'plugin.name'

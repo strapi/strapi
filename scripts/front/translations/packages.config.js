@@ -23,7 +23,7 @@ const getPackageConfig = (packageDir) => {
     packageDir,
     pluginId,
     prefix: isAdminPackage ? '' : `${pluginId}.`,
-    translationHelpers: isAdminPackage ? [] : ['getTranslation', 'getTrad'],
+    translationHelpers: isAdminPackage ? [] : ['getTranslation', 'getTrad', 'getTranslationKey'],
     enJsonPath: join(packageDir, ...TRANSLATIONS_PATH),
     sourceDir: join(packageDir, ...SOURCE_PATH),
   };
