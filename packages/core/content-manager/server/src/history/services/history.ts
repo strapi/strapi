@@ -74,17 +74,18 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       const populateEntry = async (entry: HistoryVersionQueryResult) => {
         return traverseEntity(
           async (options, utils) => {
+            if (options.key === 'id' && options.schema.modelType === 'component') {
+              // Ids on components throw an error when restoring
+              utils.remove('id');
+              return;
+            }
+
             if (!options.attribute) return;
             if (!options.value) return;
 
             const currentValue: any[] = Array.isArray(options.value)
               ? options.value
               : [options.value];
-
-            if (options.attribute.type === 'component') {
-              // Ids on components throw an error when restoring
-              utils.remove('id');
-            }
 
             if (
               options.attribute.type === 'relation' &&
@@ -208,12 +209,15 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const dataWithoutMissingRelations = await traverseEntity(
         async (options, utils) => {
+          if (options.key === 'id' && options.schema.modelType === 'component') {
+            // Ids on components throw an error when restoring
+            utils.remove('id');
+            return;
+          }
+
           if (!options.attribute) return;
 
           if (options.attribute.type === 'component') {
-            // Ids on components throw an error when restoring
-            utils.remove('id');
-
             if (options.attribute.repeatable && options.value === null) {
               // Repeatable Components should always be an array
               utils.set(options.key, [] as any);
