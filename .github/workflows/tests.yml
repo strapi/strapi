@@ -29,6 +29,7 @@ jobs:
       pull-requests: read
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
+      unit_shared: ${{ steps.filter.outputs.unit_shared }}
       frontend: ${{ steps.filter.outputs.frontend }}
       api: ${{ steps.filter.outputs.api }}
       e2e: ${{ steps.filter.outputs.e2e }}
@@ -192,8 +193,17 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
+      # `nx affected` maps changed files to packages. The shared unit test setup belongs to none, so a
+      # change to it alone would run no unit tests: run them all instead.
       - name: Run tests
-        run: yarn nx affected --target=test:unit --nx-ignore-cycles -- --coverage
+        env:
+          UNIT_SHARED: ${{ needs.conditions.outputs.unit_shared }}
+        run: |
+          if [ "$UNIT_SHARED" = 'true' ]; then
+            yarn nx run-many --target=test:unit --nx-ignore-cycles -- --coverage
+          else
+            yarn nx affected --target=test:unit --nx-ignore-cycles -- --coverage
+          fi
 
       - name: Upload coverage artifacts
         if: matrix.node == 24 # Only upload from one node version to avoid conflicts
