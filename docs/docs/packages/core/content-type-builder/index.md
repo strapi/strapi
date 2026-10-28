@@ -32,7 +32,7 @@ After the files are written, CTB emits `content-type.create|update|delete` and `
 
 ### Reload after a write
 
-After a successful update, the `schema` controller sets `strapi.reload.isWatching` to `false` and calls `strapi.reload()` in a `setImmediate`. The reloader sends a `reload` message to the parent process of `strapi develop`, which restarts the server. The route `GET /update-schema-status` returns `isUpdating`. The admin polls it with `useServerRestartWatcher` until the server is back.
+After a successful update, the `schema` controller sets `strapi.reload.isWatching` to `false` and calls `strapi.reload()` in a `setImmediate`. The reloader sends a `reload` message to the parent process of `strapi develop`, which restarts the server. The route `GET /update-schema-status` returns `isUpdating`. The admin polls it with `useServerRestartWatcher` until the server is back. When the update throws, the server does not restart. The controller sets `isWatching` back to `true`, so file edits restart the server again, and sets `isUpdating` back to `false`.
 
 ### Development-only writes
 

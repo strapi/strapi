@@ -46,6 +46,11 @@ export default () => {
 
         ctx.body = {};
       } catch (error) {
+        // The server will not restart, so hand file changes back to the watcher
+        if (internals.isUpdating === true) {
+          strapi.reload.isWatching = true;
+        }
+
         internals.isUpdating = false;
         const errorMessage = error instanceof Error ? error.message : String(error);
         return ctx.send({ error: errorMessage }, 400);
