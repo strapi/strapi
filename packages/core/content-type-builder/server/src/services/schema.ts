@@ -18,6 +18,7 @@ import { validateUpdateSchema } from '../controllers/validation/schema';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import type { AttributeRenameMigrationMode } from '../config';
 import {
+  assertCanConvertToSingleType,
   assertCTBOwnedApplicationContentType,
   getRestrictRelationsTo,
   isContentTypeVisible,
@@ -607,6 +608,15 @@ export const updateSchema = async (schema: CTBSchema) => {
   contentTypes
     .filter((contentType) => contentType.action === 'delete')
     .forEach((contentType) => assertCTBOwnedApplicationContentType(contentType.uid));
+
+  // Same guard as the edit content-type route, run before anything is written.
+  for (const contentType of contentTypes) {
+    if (contentType.action === 'update' && contentType.kind === 'singleType') {
+      if (strapi.contentTypes[contentType.uid]?.kind === 'collectionType') {
+        await assertCanConvertToSingleType(contentType.uid);
+      }
+    }
+  }
 
   // pre-process data
   removeEmptyDefaultsOnUpdates(schema);
