@@ -205,6 +205,8 @@ names. A package that registers policies or middlewares registers all of them.
   `{}` when the config is omitted, so a config whose fields are all optional counts as optional.
 - `{ name, config }` checks `config` against the registered contract. Inline handlers and
   `{ resolve, config }` entries are not checked. `Core.RouteConfig` keeps its unchecked type.
+- `auth.strategies` accepts strategy names and strategy objects, as the runtime does (admin's
+  transfer routes pass the data-transfer strategy). `Core.RouteConfig` keeps names only.
 - `strapi.middleware(name)` resolves a registered name to `MiddlewareFactory<Config>`, and an
   unregistered or dynamic name to `unknown`. Code that resolves dynamic names passes the factory type
   explicitly: `strapi.middleware<Core.MiddlewareFactory>(name)`.

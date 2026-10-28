@@ -1,4 +1,6 @@
+import type { Context } from 'koa';
 import type { ControllerHandler } from '../controller';
+import type { RouteConfigFor } from '../route';
 import type { RouterInputFor } from '../router';
 
 const controllers = {
@@ -42,3 +44,15 @@ declare const middleware: ControllerHandler;
   // @ts-expect-error Without a namespace, only relative references are accepted.
   routes: [{ method: 'GET', path: '/items', handler: 'plugin::route-lab.items.list' }],
 }) satisfies RouterInputFor<typeof controllers>;
+
+// Auth strategies are referenced by name or passed as is, as admin's data-transfer routes do.
+declare const authenticate: (ctx: Context) => Promise<{ authenticated: boolean }>;
+declare const verify: (auth: unknown, config: unknown) => Promise<void>;
+const transferStrategy = { name: 'transfer-lab', authenticate, verify };
+
+({ auth: { strategies: ['admin', transferStrategy], scope: ['push'] } }) satisfies RouteConfigFor;
+
+({
+  // @ts-expect-error A strategy object needs `authenticate`.
+  auth: { strategies: [{ name: 'transfer-lab' }] },
+}) satisfies RouteConfigFor;
