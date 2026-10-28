@@ -2,8 +2,7 @@ import { Input } from './draft-publish';
 
 // if i18N enabled set default locale
 const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
-  const { isLocalizedContentType } = strapi.plugin('i18n')?.service('content-types') ?? {};
-  const { getDefaultLocale } = strapi.plugin('i18n')?.service('locales') ?? {};
+  const { isLocalizedContentType, getDefaultLocale } = strapi.localization;
 
   if (!oldContentTypes) {
     return;
@@ -29,8 +28,7 @@ const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
 };
 
 const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
-  const { isLocalizedContentType } = strapi.plugin('i18n')?.service('content-types') ?? {};
-  const { getDefaultLocale } = strapi.plugin('i18n')?.service('locales') ?? {};
+  const { isLocalizedContentType, getDefaultLocale } = strapi.localization;
 
   if (!oldContentTypes) {
     return;
@@ -47,6 +45,13 @@ const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     // if i18N is disabled remove non default locales before sync
     if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {
       const defaultLocale = await getDefaultLocale();
+
+      // `$ne: null` would match every localized row and delete them all
+      if (defaultLocale === null) {
+        throw new Error(
+          `Cannot disable localization for "${uid}": no default locale is set, so non-default rows cannot be identified.`
+        );
+      }
 
       await Promise.all([
         // Delete all entities that are not in the default locale

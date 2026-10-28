@@ -16,11 +16,13 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import { useQueryParams } from '../hooks/useQueryParams';
+import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 
 import type { Pagination as PaginationApi } from '../../../shared/contracts/shared';
+
+const DEFAULT_OPTIONS: NonNullable<Pagination.PageSizeProps['options']> = ['10', '20', '50', '100'];
 
 /* -------------------------------------------------------------------------------------------------
  * Root
@@ -91,15 +93,15 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(
     { children, defaultPageSize = 10, pageCount = 0, defaultPage = 1, onPageSizeChange, total = 0 },
     forwardedRef
   ) => {
-    const [{ query }, setQuery] = useQueryParams<Pick<PaginationContextValue, 'page' | 'pageSize'>>(
-      {
-        pageSize: defaultPageSize.toString(),
-        page: defaultPage.toString(),
-      }
-    );
+    const [{ query }, setQuery] = useQueryParams<
+      Pick<PaginationContextValue, 'page' | 'pageSize'> & { filters?: unknown; _q?: unknown }
+    >({
+      pageSize: defaultPageSize.toString(),
+      page: defaultPage.toString(),
+    });
 
     const setPageSize = (pageSize: string) => {
-      setQuery({ pageSize, page: '1' });
+      setQuery(withEncodedUserParams(query, { pageSize, page: '1' }));
 
       if (onPageSizeChange) {
         onPageSizeChange(pageSize);
@@ -138,7 +140,7 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(
  * the user to change the number of items displayed per page.
  * If the total number of items is less than the minimum option, this component will not render.
  */
-const PageSize = ({ options = ['10', '20', '50', '100'] }: Pagination.PageSizeProps) => {
+const PageSize = ({ options = DEFAULT_OPTIONS }: Pagination.PageSizeProps) => {
   const { formatMessage } = useIntl();
 
   const pageSize = usePagination('PageSize', (state) => state.pageSize);

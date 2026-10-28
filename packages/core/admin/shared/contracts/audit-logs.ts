@@ -75,4 +75,22 @@ namespace GetUsers {
       };
 }
 
-export { AuditLog, GetAll, Get, GetUsers };
+namespace Export {
+  export interface Request {
+    body: {};
+    query: {
+      cursor?: number;
+      pageSize?: number;
+      until?: number;
+      filters?: unknown;
+    };
+  }
+
+  export type Response =
+    | string
+    | {
+        error?: errors.ApplicationError;
+      };
+}
+
+export { AuditLog, GetAll, Get, GetUsers, Export };

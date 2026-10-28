@@ -6,23 +6,52 @@ import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
+import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
-import type { Event } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { Model, JoinTable } from './types';
-import type { Identifiers } from './utils/identifiers';
+import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
+import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
+import { withStrapiKnexLog } from './utils/knex-log';
 
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
+export { attributeNaming } from './metadata';
+export { createField } from './fields';
+export type { AttributeNaming, Meta } from './metadata';
+export type {
+  AttributeRenamesOperation,
+  Migration,
+  BuiltMigrationFile,
+  MigrationFileBuilder,
+  MigrationFileFormat,
+  MigrationFileOperation,
+} from './migrations';
+export type { Event } from './lifecycles';
+export type { Attribute, Model, JoinTable } from './types';
+export type { AttributeRenameHandler, AttributeRenames } from './schema';
+export type { Identifiers } from './utils/identifiers';
+export { POOL_TIMEOUT_CODE } from './pool-diagnostics';
+export type {
+  EventLoopDelay,
+  PoolDiagnostics,
+  PoolState,
+  PoolTimeoutDetails,
+} from './pool-diagnostics';
 
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
+  /**
+   * Describe the pool on knex connection pool timeouts (details on the error, a docs link, one
+   * warning block per 30 s). Defaults to true; false leaves knex's error untouched. Must be a
+   * boolean (for example `env.bool('DATABASE_POOL_TIMEOUT_DIAGNOSTICS', true)`): a string is not
+   * read as false.
+   */
+  poolTimeoutDiagnostics?: boolean;
   migrations: {
     dir: string;
     postDir?: string;
@@ -39,6 +68,8 @@ export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
   logger?: Logger;
+  /** Lifecycle phase of the host application, e.g. "boot" or "runtime", for pool timeout reports. */
+  getPhase?: () => string | undefined;
 }
 
 const afterCreate =
@@ -73,6 +104,11 @@ class Database {
   repair: RepairManager;
 
   logger: Logger;
+
+  /** Set unless `settings.poolTimeoutDiagnostics` is false or the install failed. */
+  private poolDiagnostics?: PoolDiagnostics;
+
+  private phase?: string;
 
   constructor(config: DatabaseConfig) {
     this.config = {
@@ -113,9 +149,22 @@ class Database {
 
     this.metadata = createMetadata([]);
 
-    this.connection = createConnection(knexConfig, {
+    this.connection = createConnection(withStrapiKnexLog(knexConfig, this.logger), {
       pool: { afterCreate: afterCreate(this) },
     });
+
+    if (this.config.settings.poolTimeoutDiagnostics !== false) {
+      try {
+        this.poolDiagnostics = installPoolDiagnostics(this.connection, {
+          logger: { warn: (message) => this.logger.warn(message) },
+          getPhase: () => this.phase ?? this.config.getPhase?.(),
+        });
+      } catch (error) {
+        // Diagnostics are optional: failing to install them must not stop the application booting
+        const reason = error instanceof Error ? error.message : String(error);
+        this.logger.debug(`[database] pool timeout diagnostics not installed: ${reason}`);
+      }
+    }
 
     this.schema = createSchemaProvider(this);
 
@@ -145,7 +194,9 @@ class Database {
       if (this.config.connection.client === 'sqlite') {
         await this.connection.raw('SELECT 1');
       } else {
-        await this.connection.client.acquireConnection();
+        // release it straight away, otherwise it holds a pool slot for the life of the process
+        const conn = await this.connection.client.acquireConnection();
+        await this.connection.client.releaseConnection(conn);
       }
     }
 
@@ -164,6 +215,27 @@ class Database {
 
   inTransaction() {
     return !!transactionCtx.get();
+  }
+
+  /**
+   * Labels pool timeout reports raised while `fn` runs, for example "schema sync". Nested calls
+   * restore the outer label. Calls that overlap without nesting can restore the wrong label; core
+   * only nests them (schema sync, then a migration).
+   *
+   * The label is process-wide, not per call: a call made at runtime relabels every concurrent
+   * timeout report until it returns. It is meant for boot-time work (schema sync, migrations).
+   *
+   * @internal
+   */
+  async runInPhase<T>(phase: string, fn: () => Promise<T>): Promise<T> {
+    const previous = this.phase;
+    this.phase = phase;
+
+    try {
+      return await fn();
+    } finally {
+      this.phase = previous;
+    }
   }
 
   /**
@@ -268,10 +340,14 @@ class Database {
   }
 
   async destroy() {
-    await this.lifecycles.clear();
+    try {
+      await this.lifecycles.clear();
+    } finally {
+      this.poolDiagnostics?.dispose();
+    }
+
     await this.connection.destroy();
   }
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration, Event };

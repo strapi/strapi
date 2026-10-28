@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/extensions
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
 import type { Core } from '@strapi/types';
 import {
   classifyMcpRequestFailure,
@@ -9,6 +8,7 @@ import {
 } from '../metrics/metrics';
 import { sendJsonRpcError } from '../utils/sendJsonRpcError';
 import { withTimeout } from '../utils/withTimeout';
+import { resolveToolSchemaScope } from '../internal/resolveToolSchemaScope';
 import type { McpHandlerDependencies } from './types';
 
 export const createPostHandler = (deps: McpHandlerDependencies): Core.MiddlewareHandler => {
@@ -45,15 +45,17 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
       ctx.state.user = authResult.user;
       ctx.state.auditSource = 'mcp';
 
+      const requestBody = ctx.request.body ?? null;
       const { mcpServer } = createServerWithRegistries({
         strapi,
         definitions: capabilityDefinitions,
         isDevMode: config.isDevMode(),
         ability: authResult.ability,
         user: authResult.user,
+        toolSchemaScope: resolveToolSchemaScope(requestBody),
       });
 
-      const transport = new StreamableHTTPServerTransport({
+      const transport = new NodeStreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
       });
 
@@ -64,7 +66,6 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
           'mcpServer.connect'
         );
 
-        const requestBody = ctx.request.body ?? null;
         await withTimeout(
           transport.handleRequest(req, res, requestBody),
           config.requestTimeoutMs,

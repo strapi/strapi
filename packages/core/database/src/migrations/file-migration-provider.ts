@@ -26,6 +26,7 @@ export const createFileMigrationProvider = (
 
   const runner = createMigrationRunner({
     storage: createStorage({ db, tableName }),
+    withPhase: (phase, fn) => db.runInPhase(phase, fn),
     logger: {
       info(message) {
         db.logger.info(transformLogMessage('info', message));

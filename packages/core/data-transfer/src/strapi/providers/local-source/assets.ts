@@ -141,7 +141,7 @@ export const createAssetsStream = (
       yield {
         metadata: file,
         filepath,
-        filename: file.hash + file.ext,
+        filename: `${file.hash}${file.ext ?? ''}`,
         stream,
         stats: { size: stats.size },
       };
@@ -175,7 +175,7 @@ export const createAssetsStream = (
           yield {
             metadata,
             filepath: fileFormatFilepath,
-            filename: fileFormat.hash + fileFormat.ext,
+            filename: `${fileFormat.hash}${fileFormat.ext ?? ''}`,
             stream: fileFormatStream,
             stats: { size: fileFormatStats.size },
           };

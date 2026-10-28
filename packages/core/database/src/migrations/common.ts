@@ -1,6 +1,7 @@
 import type { Knex } from 'knex';
 
 import type { Database } from '..';
+import type { MigrationFileBuilder } from './file-builder';
 
 export interface UserMigrationProvider {
   shouldRun(): Promise<boolean>;
@@ -19,6 +20,7 @@ export interface MigrationProvider {
     internal: InternalMigrationProvider;
     postSync: UserMigrationProvider;
   };
+  createFileBuilder(): MigrationFileBuilder;
   shouldRun(): Promise<boolean>;
   up(): Promise<void>;
   down(): Promise<void>;
