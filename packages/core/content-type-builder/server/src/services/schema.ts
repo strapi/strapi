@@ -13,6 +13,7 @@ import type {
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
 import { isValidUidTarget } from '../utils/uid-target';
+import { emitSchemaEvent } from '../utils/events';
 import { validateUpdateSchema } from '../controllers/validation/schema';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import type { AttributeRenameMigrationMode } from '../config';
@@ -788,19 +789,19 @@ export const updateSchema = async (schema: CTBSchema) => {
 
   for (const contentType of contentTypes) {
     if (contentType.action === 'delete') {
-      strapi.eventHub.emit('content-type.delete', {
+      await emitSchemaEvent('content-type.delete', {
         contentType: builder.contentTypes.get(contentType.uid),
       });
     }
 
     if (contentType.action === 'update') {
-      strapi.eventHub.emit('content-type.update', {
+      await emitSchemaEvent('content-type.update', {
         contentType: builder.contentTypes.get(contentType.uid),
       });
     }
 
     if (contentType.action === 'create') {
-      strapi.eventHub.emit('content-type.create', {
+      await emitSchemaEvent('content-type.create', {
         contentType: builder.contentTypes.get(contentType.uid),
       });
     }
@@ -808,19 +809,19 @@ export const updateSchema = async (schema: CTBSchema) => {
 
   for (const component of components) {
     if (component.action === 'delete') {
-      strapi.eventHub.emit('component.delete', {
+      await emitSchemaEvent('component.delete', {
         component: builder.components.get(component.uid),
       });
     }
 
     if (component.action === 'update') {
-      strapi.eventHub.emit('component.update', {
+      await emitSchemaEvent('component.update', {
         component: builder.components.get(component.uid),
       });
     }
 
     if (component.action === 'create') {
-      strapi.eventHub.emit('component.create', {
+      await emitSchemaEvent('component.create', {
         component: builder.components.get(component.uid),
       });
     }

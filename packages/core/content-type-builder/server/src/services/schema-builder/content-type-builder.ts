@@ -208,7 +208,7 @@ export default function createComponentBuilder() {
         })
         .set('options', {
           ...infos.options,
-          draftAndPublish: infos.draftAndPublish,
+          draftAndPublish: infos.draftAndPublish ?? infos.options?.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config);
