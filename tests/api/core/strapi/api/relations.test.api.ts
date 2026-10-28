@@ -1293,6 +1293,24 @@ describe('Relations', () => {
       expect(updatedShop.data).toMatchObject(expectedShop);
     });
 
+    test.each([
+      ['start', () => ({ start: true })],
+      ['before the first relation', () => ({ before: docid1 })],
+    ])('Move an existing relation to the start using %s', async (_, getPosition) => {
+      const shop = await createShop({
+        anyToManyRel: [{ documentId: docid1 }, { documentId: docid2 }],
+      });
+
+      const updatedShop = await updateShop(shop.data, {
+        anyToManyRel: [{ documentId: docid2, position: getPosition() }],
+      });
+
+      const expectedShop = shopFactory({
+        anyToManyRel: [{ documentId: docid2 }, { documentId: docid1 }],
+      });
+      expect(updatedShop.data).toMatchObject(expectedShop);
+    });
+
     test('Update polymorphic relations with different types using before and after', async () => {
       const shop = await createEntry('shops', {
         name: 'Cazotte Shop',
