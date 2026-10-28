@@ -37,7 +37,10 @@ export const loadConfigFile = (file: string) => {
   const ext = path.extname(file);
 
   switch (ext) {
+    // `.cjs` / `.mjs` pin the module format regardless of `"type"`; `.mjs` relies on Node's require(esm)
     case '.js':
+    case '.cjs':
+    case '.mjs':
       return loadJsFile(file);
     case '.json':
       return loadJSONFile(file);
