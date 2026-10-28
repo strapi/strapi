@@ -1,6 +1,6 @@
 import type { Core, Data, Modules, Schema } from '@strapi/types';
 import { errors, traverseEntity } from '@strapi/utils';
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -99,7 +99,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                       return null;
                     }
 
-                    return strapi.query('admin::user').findOne({
+                    return strapi.db.query('admin::user').findOne({
                       where: {
                         ...(userToPopulate.id ? { id: userToPopulate.id } : {}),
                         ...(userToPopulate.documentId
@@ -181,6 +181,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
+
+      if (version === null) {
+        throw new errors.NotFoundError('History version not found');
+      }
+
       const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
       const schemaDiff = serviceUtils.getSchemaAttributesDiff(
         version.schema,
@@ -199,7 +204,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Remove the schema attributes history should ignore
       const schema = structuredClone(version.schema);
-      schema.attributes = omit(FIELDS_TO_IGNORE, contentTypeSchemaAttributes);
+      schema.attributes = omit(contentTypeSchemaAttributes, FIELDS_TO_IGNORE);
 
       const dataWithoutMissingRelations = await traverseEntity(
         async (options, utils) => {
@@ -255,7 +260,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         dataWithoutAddedAttributes
       );
 
-      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
+      const data = omit(dataWithoutMissingRelations, ['id', ...Object.keys(schemaDiff.removed)]);
       const restoredDocument = await strapi.documents(version.contentType).update({
         documentId: version.relatedDocumentId,
         locale: version.locale,

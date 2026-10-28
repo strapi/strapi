@@ -489,4 +489,107 @@ describe('createMcpServerWithRegistries', () => {
 
     expect(mockAbility.can).toHaveBeenCalledWith('admin::read', 'api::article.article');
   });
+
+  describe('tool schema scope', () => {
+    const defineTool = (name: string, action: string) => {
+      const resolveInputSchema = jest.fn(() => z.object({ id: z.string() }));
+      const resolveOutputSchema = jest.fn(() => z.object({ ok: z.boolean() }));
+      toolDefinitions.define({
+        name,
+        title: name,
+        description: name,
+        auth: { policies: [{ action }] },
+        resolveInputSchema,
+        resolveOutputSchema,
+        createHandler: () => async () => ({ content: [], structuredContent: { ok: true } }),
+      });
+      return { resolveInputSchema, resolveOutputSchema };
+    };
+
+    const createServer = (toolSchemaScope?: 'all' | ReadonlySet<string>) =>
+      createMcpServerWithRegistries({
+        strapi: mockStrapi as Core.Strapi,
+        definitions: {
+          tools: toolDefinitions,
+          prompts: promptDefinitions,
+          resources: resourceDefinitions,
+        },
+        isDevMode: false,
+        ability: mockAbility,
+        user: mockUser,
+        toolSchemaScope,
+      });
+
+    test('resolves the schemas of every permitted tool by default', () => {
+      mockAbility.can.mockReturnValue(true);
+      const first = defineTool('first-tool', 'admin::read');
+      const second = defineTool('second-tool', 'admin::read');
+
+      const result = createServer();
+
+      expect(first.resolveInputSchema).toHaveBeenCalledTimes(1);
+      expect(first.resolveOutputSchema).toHaveBeenCalledTimes(1);
+      expect(second.resolveInputSchema).toHaveBeenCalledTimes(1);
+      expect(second.resolveOutputSchema).toHaveBeenCalledTimes(1);
+      expect(result.registries.tools.status('first-tool')).toBe('enabled');
+      expect(result.registries.tools.status('second-tool')).toBe('enabled');
+    });
+
+    test('skips schema resolution for tools outside the request scope', () => {
+      mockAbility.can.mockReturnValue(true);
+      const called = defineTool('called-tool', 'admin::read');
+      const other = defineTool('other-tool', 'admin::read');
+
+      const result = createServer(new Set(['called-tool']));
+
+      expect(called.resolveInputSchema).toHaveBeenCalledTimes(1);
+      expect(called.resolveOutputSchema).toHaveBeenCalledTimes(1);
+      expect(other.resolveInputSchema).not.toHaveBeenCalled();
+      expect(other.resolveOutputSchema).not.toHaveBeenCalled();
+      expect(result.registries.tools.status('called-tool')).toBe('enabled');
+    });
+
+    test('registers out-of-scope tools without schemas and with an error-only handler', async () => {
+      mockAbility.can.mockReturnValue(true);
+      defineTool('other-tool', 'admin::read');
+
+      createServer(new Set());
+
+      const { McpServer } = jest.requireMock('@modelcontextprotocol/server');
+      const [name, config, sdkHandler] =
+        McpServer.mock.results.at(-1).value.registerTool.mock.calls[0];
+
+      expect(name).toBe('other-tool');
+      expect(config).toEqual({ title: 'other-tool', description: 'other-tool' });
+      await expect(sdkHandler()).resolves.toEqual({
+        content: [{ type: 'text', text: 'Tool "other-tool" is not available in this request' }],
+        isError: true,
+      });
+    });
+
+    test('skips schema resolution for every tool when the request calls none', () => {
+      mockAbility.can.mockReturnValue(true);
+      const tool = defineTool('some-tool', 'admin::read');
+
+      createServer(new Set());
+
+      expect(tool.resolveInputSchema).not.toHaveBeenCalled();
+      expect(tool.resolveOutputSchema).not.toHaveBeenCalled();
+    });
+
+    test('skips schema resolution for tools the token may not use, and keeps them disabled', () => {
+      mockAbility.can.mockImplementation((action: string) => action === 'admin::read');
+      const allowed = defineTool('allowed-tool', 'admin::read');
+      const denied = defineTool('denied-tool', 'admin::delete');
+
+      const result = createServer('all');
+
+      expect(allowed.resolveInputSchema).toHaveBeenCalledTimes(1);
+      expect(denied.resolveInputSchema).not.toHaveBeenCalled();
+      expect(denied.resolveOutputSchema).not.toHaveBeenCalled();
+      expect(result.registries.tools.status('allowed-tool')).toBe('enabled');
+      // Still registered so the SDK answers `Tool <name> disabled`, not `not found`.
+      expect(result.registries.tools.status('denied-tool')).toBe('disabled');
+    });
+  });
 });

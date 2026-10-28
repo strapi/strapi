@@ -89,21 +89,9 @@ describe('Transform media data', () => {
   beforeAll(() => {
     global.strapi = {
       getModel: (uid: string) => models[uid],
-      plugins: {
-        i18n: {
-          services: {
-            'content-types': {
-              isLocalizedContentType() {
-                return false;
-              },
-            },
-            locales: {
-              getDefaultLocale() {
-                return 'en';
-              },
-            },
-          },
-        },
+      localization: {
+        isLocalizedContentType: () => false,
+        getDefaultLocale: async () => 'en',
       },
       db: {
         query: jest.fn(() => ({ findMany: findMedia })),

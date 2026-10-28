@@ -1,41 +1,25 @@
 import createCronService from '../cron';
 
-// Loaded CI runners can starve the event loop for several seconds at a time,
-// which these timer-driven tests have to ride out rather than fail on.
-jest.setTimeout(30_000);
+const FIXED_NOW = new Date('2026-09-14T12:34:56.000Z');
+const NEXT_MINUTE = new Date('2026-09-14T12:35:00.000Z');
 
-// Far enough out that a slow tick cannot push the due time into the past
-// before croner schedules the job, short enough to keep the suite quick.
-const ONE_SHOT_DELAY = 300;
+type CronJob = ReturnType<typeof createCronService>['jobs'][number]['job'];
 
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  });
-
-const waitFor = async (condition: () => boolean, timeout = 10_000) => {
-  const deadline = Date.now() + timeout;
-  while (!condition() && Date.now() < deadline) {
-    await sleep(25);
+const advanceToNextRun = async (job: CronJob) => {
+  const nextRun = job.nextRun();
+  if (!nextRun) {
+    throw new Error('Expected the cron job to have a next run');
   }
 
-  // A stall can carry us past the deadline with the job's timer already expired
-  // but not yet run, so let pending callbacks take their turn before giving up.
-  if (!condition()) {
-    await sleep(0);
-  }
-
-  if (!condition()) {
-    throw new Error(`Timed out after ${timeout}ms waiting for a condition to become true`);
-  }
+  await jest.advanceTimersByTimeAsync(nextRun.getTime() - Date.now());
 };
 
 describe('Cron service', () => {
   let cron: ReturnType<typeof createCronService>;
 
   beforeEach(() => {
+    jest.useFakeTimers({ now: FIXED_NOW });
+
     global.strapi = {
       log: {
         error: jest.fn(),
@@ -47,6 +31,8 @@ describe('Cron service', () => {
 
   afterEach(() => {
     cron.destroy();
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   it('exposes chainable lifecycle methods and named and unnamed job specs', () => {
@@ -116,26 +102,24 @@ describe('Cron service', () => {
 
   it('schedules a slightly-future Date exactly once after start', async () => {
     const task = jest.fn();
-    const scheduledAt = new Date(Date.now() + ONE_SHOT_DELAY);
 
     cron.start();
     cron.add({
       publishOnce: {
         task,
-        options: scheduledAt,
+        options: NEXT_MINUTE,
       },
     });
 
     expect(cron.jobs).toHaveLength(1);
     expect(cron.jobs[0].name).toBe('publishOnce');
 
-    await waitFor(() => task.mock.calls.length === 1);
+    await advanceToNextRun(cron.jobs[0].job);
 
     expect(task).toHaveBeenCalledTimes(1);
     expect(task).toHaveBeenCalledWith({ strapi: global.strapi }, expect.any(Date));
-    expect(task.mock.calls[0][1]).toEqual(scheduledAt);
-
-    await sleep(200);
+    expect(task.mock.calls[0][1]).toEqual(NEXT_MINUTE);
+    await jest.runOnlyPendingTimersAsync();
     expect(task).toHaveBeenCalledTimes(1);
   });
 
@@ -146,13 +130,13 @@ describe('Cron service', () => {
       '*/1 * * * * *': task,
     });
 
-    await sleep(1100);
+    await jest.runOnlyPendingTimersAsync();
     expect(task).not.toHaveBeenCalled();
 
     cron.start();
-    await waitFor(() => task.mock.calls.length > 0);
+    await advanceToNextRun(cron.jobs[0].job);
 
-    expect(task).toHaveBeenCalled();
+    expect(task).toHaveBeenCalledTimes(1);
   });
 
   it('runs jobs added after start', async () => {
@@ -162,11 +146,11 @@ describe('Cron service', () => {
     cron.add({
       runAfterStart: {
         task,
-        options: new Date(Date.now() + ONE_SHOT_DELAY),
+        options: NEXT_MINUTE,
       },
     });
 
-    await waitFor(() => task.mock.calls.length === 1);
+    await advanceToNextRun(cron.jobs[0].job);
 
     expect(task).toHaveBeenCalledTimes(1);
   });
@@ -177,7 +161,7 @@ describe('Cron service', () => {
     cron.add({
       runOnce: {
         task,
-        options: new Date(Date.now() + ONE_SHOT_DELAY),
+        options: NEXT_MINUTE,
       },
     });
 
@@ -185,13 +169,13 @@ describe('Cron service', () => {
     cron.stop();
     cron.start();
 
-    await waitFor(() => task.mock.calls.length === 1);
+    await advanceToNextRun(cron.jobs[0].job);
     expect(task).toHaveBeenCalledTimes(1);
 
     cron.stop();
     cron.start();
-    await sleep(200);
 
+    await jest.runOnlyPendingTimersAsync();
     expect(task).toHaveBeenCalledTimes(1);
   });
 
@@ -212,7 +196,7 @@ describe('Cron service', () => {
     expect(cron.jobs).toHaveLength(1);
     expect(cron.jobs[0].job.nextRun()).toBeNull();
 
-    await sleep(100);
+    await jest.runOnlyPendingTimersAsync();
     expect(task).not.toHaveBeenCalled();
   });
 
@@ -227,10 +211,13 @@ describe('Cron service', () => {
       },
     });
 
+    const { job } = cron.jobs[0];
     cron.remove('namedJob');
-    expect(cron.jobs).toHaveLength(0);
 
-    await sleep(1100);
+    expect(cron.jobs).toHaveLength(0);
+    expect(job.isStopped()).toBe(true);
+
+    await jest.runOnlyPendingTimersAsync();
     expect(task).not.toHaveBeenCalled();
   });
 
@@ -298,25 +285,27 @@ describe('Cron service', () => {
       },
     });
 
+    const { job } = cron.jobs[0];
     cron.destroy();
-    expect(cron.jobs).toHaveLength(0);
 
-    await sleep(1100);
+    expect(cron.jobs).toHaveLength(0);
+    expect(job.isStopped()).toBe(true);
+
+    await jest.runOnlyPendingTimersAsync();
     expect(task).not.toHaveBeenCalled();
   });
 
   it('logs errors thrown by job handlers', async () => {
-    cron.start();
     cron.add({
       boom: {
         async task() {
           throw new Error('cron-boom');
         },
-        options: new Date(Date.now() + ONE_SHOT_DELAY),
+        options: '0 0 1 1 *',
       },
     });
 
-    await waitFor(() => global.strapi.log.error.mock.calls.length === 1);
+    await cron.jobs[0].job.trigger();
 
     expect(global.strapi.log.error).toHaveBeenCalledWith(
       'Cron job "boom" failed',
@@ -505,12 +494,16 @@ describe('Cron service', () => {
     cron.add({
       cancelMe: {
         task,
-        options: new Date(Date.now() + ONE_SHOT_DELAY),
+        options: NEXT_MINUTE,
       },
     });
 
-    expect(cron.jobs[0].job.cancel()).toBe(true);
-    await sleep(ONE_SHOT_DELAY + 150);
+    const { job } = cron.jobs[0];
+
+    expect(job.cancel()).toBe(true);
+    expect(job.isStopped()).toBe(true);
+
+    await jest.runOnlyPendingTimersAsync();
     expect(task).not.toHaveBeenCalled();
   });
 
@@ -598,19 +591,19 @@ describe('Cron service', () => {
     cron.add({
       publishRelease_1: {
         task: first,
-        options: new Date(Date.now() + ONE_SHOT_DELAY),
+        options: NEXT_MINUTE,
       },
     });
     cron.remove('publishRelease_1');
     cron.add({
       publishRelease_1: {
         task: second,
-        options: new Date(Date.now() + ONE_SHOT_DELAY),
+        options: NEXT_MINUTE,
       },
     });
 
     expect(cron.jobs).toHaveLength(1);
-    await waitFor(() => second.mock.calls.length === 1);
+    await advanceToNextRun(cron.jobs[0].job);
 
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledTimes(1);
