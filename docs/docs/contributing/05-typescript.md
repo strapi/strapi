@@ -194,10 +194,16 @@ declare global {
   infers, then add `satisfies`.
 - Check routes against the hand-written `Controllers` map, not against the registry. A
   `| undefined` entry has no actions to reference.
+- Routes mounted only with controllers merged over another map check against both maps. Admin's
+  EE routes use `RouteControllers` (`ee/server/src/types/controllers.ts`), the CE `Controllers`
+  intersected with the EE ones: in the package program, the registered
+  `Core.LicensedExtension` entries make the EE-only actions optional.
 - A helper that builds routes widens its literals before the route array is checked. Type its
   handler parameter as `Core.ControllerActionReference<Controllers>`, and add
   `satisfies Core.RouteConfigFor` to the `config` it returns so that policy names stay literal, as
-  `authenticatedAdminRoute` in admin's `routes/users.ts` does.
+  `authenticatedAdminRoute` in admin's `routes/users.ts` does. A helper that takes permission action
+  IDs types them as `Core.PermissionActionReference[]`, as `getRouteConfig` in admin's EE
+  `audit-logs/routes/audit-logs.ts` does.
 - A route that names a policy or middleware of a package this package cannot load is checked
   against a local type that leaves those names unchecked, with a comment naming the reason. Admin's
   forgot-password route uses `plugin::email.rateLimit`, and email peer-depends on admin, so
