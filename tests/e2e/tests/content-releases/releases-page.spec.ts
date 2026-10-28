@@ -153,13 +153,15 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     page,
     releases,
   }) => {
-    // With the 2 seeded releases, one more than the 16 of a page
+    // With the 2 seeded releases, one more than the 16 of a page. Each is released as soon as it's
+    // created: the e2e license caps pending releases at 3, and the seed already holds one
     for (let index = 1; index <= 15; index++) {
-      await createReleaseOfMatches(page, {
+      const releaseId = await createReleaseOfMatches(page, {
         name: `Sprint ${index}`,
         releaseCondition: 'allow_partial',
         matches: [],
       });
+      await publishRelease(page, releaseId);
     }
 
     await releases.goto();
