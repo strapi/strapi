@@ -69,6 +69,26 @@ const getDimensions = async (file: UploadableFile): Promise<Dimensions> => {
   return { width, height };
 };
 
+/**
+ * Sharp's pixel-limit refusal must reject the upload. Treating it as "not an
+ * image" stores the original bytes, including EXIF and GPS.
+ */
+const rethrowPixelLimit = (error: unknown) => {
+  if (error instanceof Error && /pixel limit/i.test(error.message)) {
+    throw error;
+  }
+};
+
+const getFormat = async (file: UploadableFile) => {
+  try {
+    const metadata = await getMetadata(file);
+    return metadata.format;
+  } catch (error) {
+    rethrowPixelLimit(error);
+    return undefined;
+  }
+};
+
 const THUMBNAIL_RESIZE_OPTIONS = {
   width: 245,
   height: 156,
@@ -289,38 +309,18 @@ const isFaultyImage = async (file: UploadableFile) => {
 };
 
 const isOptimizableImage = async (file: UploadableFile) => {
-  let format;
-  try {
-    const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch {
-    // throw when the file is not a supported image
-    return false;
-  }
+  const format = await getFormat(file);
+  // Unsupported formats are not images; pixel-limit errors reject the upload.
   return format && FORMATS_TO_OPTIMIZE.has(format);
 };
 
 const isResizableImage = async (file: UploadableFile) => {
-  let format;
-  try {
-    const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch {
-    // throw when the file is not a supported image
-    return false;
-  }
+  const format = await getFormat(file);
   return format && FORMATS_TO_RESIZE.has(format);
 };
 
 const isImage = async (file: UploadableFile) => {
-  let format;
-  try {
-    const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch {
-    // throw when the file is not a supported image
-    return false;
-  }
+  const format = await getFormat(file);
   return format && FORMATS_TO_PROCESS.has(format);
 };
 

@@ -126,6 +126,12 @@ describe('Image manipulation - sharp instance options (limitInputPixels)', () =>
       await expect(imageManipulation.generateResponsiveFormats(file)).rejects.toThrow();
     });
 
+    test('isImage rejects when the image exceeds the pixel limit', async () => {
+      const file = makeFile(staticPngPath, '.png', 'image/png', 1500, 1000);
+
+      await expect(imageManipulation.isImage(file)).rejects.toThrow(/pixel limit/);
+    });
+
     test('isFaultyImage reports the image as faulty (file path input)', async () => {
       const file = makeFile(staticPngPath, '.png', 'image/png', 1500, 1000);
 

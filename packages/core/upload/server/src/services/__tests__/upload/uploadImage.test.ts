@@ -6,7 +6,12 @@ import _ from 'lodash';
 import createUploadService from '../../upload';
 import imageManipulation from '../../image-manipulation';
 
-const defaultConfig = {
+const defaultConfig: {
+  'plugin::upload': {
+    breakpoints: { large: number; medium: number };
+    sharp?: { limitInputPixels: number };
+  };
+} = {
   'plugin::upload': {
     breakpoints: {
       large: 1000,
@@ -93,5 +98,19 @@ describe('Upload image', () => {
     await uploadService._uploadImage(fileData);
     // 1 for the original image, 1 for thumbnail, 2 for the responsive formats
     expect(upload).toHaveBeenCalledTimes(4);
+  });
+
+  test('does not store the original when the image exceeds the pixel limit', async () => {
+    const fileData = getFileData(imageFilePath);
+    const upload = jest.fn();
+    mockUploadProvider(upload, { responsiveDimensions: true });
+    defaultConfig['plugin::upload'].sharp = { limitInputPixels: 1 };
+
+    try {
+      await expect(uploadService._uploadImage(fileData)).rejects.toThrow(/pixel limit/);
+      expect(upload).not.toHaveBeenCalled();
+    } finally {
+      delete defaultConfig['plugin::upload'].sharp;
+    }
   });
 });

@@ -229,5 +229,28 @@ describe('Image manipulation - animated images', () => {
       expect(result.width).toBeDefined();
       expect(result.height).toBeDefined();
     });
+
+    test('rejects when EXIF/metadata processing fails', async () => {
+      (global.strapi as any).plugins.upload.services.upload.getSettings = () => ({
+        sizeOptimization: false,
+        autoOrientation: true,
+      });
+
+      const corruptPath = path.join(tmpDir, 'corrupt-exif.jpg');
+      await fse.writeFile(corruptPath, Buffer.from('not-a-valid-image'));
+
+      const file = makeFile(corruptPath, '.jpg', 'image/jpeg', 800, 600);
+
+      await expect(imageManipulation.optimize(file)).rejects.toThrow();
+    });
+
+    test('getDimensions rejects when metadata cannot be read', async () => {
+      const corruptPath = path.join(tmpDir, 'corrupt-dimensions.jpg');
+      await fse.writeFile(corruptPath, Buffer.from('not-a-valid-image'));
+
+      const file = makeFile(corruptPath, '.jpg', 'image/jpeg', 640, 480);
+
+      await expect(imageManipulation.getDimensions(file)).rejects.toThrow();
+    });
   });
 });

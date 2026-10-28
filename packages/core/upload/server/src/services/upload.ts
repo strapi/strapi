@@ -233,6 +233,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ApplicationError('File is not a valid image');
       }
       if (await isOptimizableImage(currentFile)) {
+        // Sharp failures reject the upload. Do not fall back to the original bytes.
         return optimize(currentFile);
       }
     }
@@ -330,25 +331,32 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       setFormat(fileData, key, file);
     };
 
+    // Generate derivatives before any provider write. A sharp failure must reject
+    // the upload without persisting the original bytes.
+    let thumbnailFile: UploadableFile | null = null;
+    let formats: Array<{ key: string; file: UploadableFile } | null | undefined> = [];
+
+    if (await isResizableImage(fileData)) {
+      thumbnailFile = await generateThumbnail(fileData);
+      const generated = await generateResponsiveFormats(fileData);
+      if (Array.isArray(generated)) {
+        formats = generated;
+      }
+    }
+
     const uploadPromises: Promise<void>[] = [];
 
-    // Upload image
     queueConcurrentOperation(uploadPromises, getService('provider').upload(fileData));
 
-    // Generate & Upload thumbnail and responsive formats
-    if (await isResizableImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData);
-      if (thumbnailFile) {
-        queueConcurrentOperation(uploadPromises, uploadThumbnail(thumbnailFile));
-      }
+    if (thumbnailFile) {
+      queueConcurrentOperation(uploadPromises, uploadThumbnail(thumbnailFile));
+    }
 
-      const formats = await generateResponsiveFormats(fileData);
-      if (Array.isArray(formats) && formats.length > 0) {
-        for (const format of formats) {
-          // eslint-disable-next-line no-continue
-          if (!format) continue;
-          queueConcurrentOperation(uploadPromises, uploadResponsiveFormat(format));
-        }
+    if (formats.length > 0) {
+      for (const format of formats) {
+        // eslint-disable-next-line no-continue
+        if (!format) continue;
+        queueConcurrentOperation(uploadPromises, uploadResponsiveFormat(format));
       }
     }
     // Wait for all uploads to finish
@@ -382,6 +390,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       setFormat(fileData, key, newFormat);
     };
 
+    // Same as uploadImage: derivative generation happens before the provider
+    // replace, so a sharp failure cannot leave the new file stored.
+    let thumbnailFile: UploadableFile | null = null;
+    let formats: Array<{ key: string; file: UploadableFile } | null | undefined> = [];
+
+    if (await isResizableImage(fileData)) {
+      thumbnailFile = await generateThumbnail(fileData);
+      const generated = await generateResponsiveFormats(fileData);
+      if (Array.isArray(generated)) {
+        formats = generated;
+      }
+    }
+
     const promises: Promise<unknown>[] = [];
 
     // Replace the main file
@@ -389,21 +410,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const newFormatKeys = new Set<string>();
 
-    if (await isResizableImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData);
-      if (thumbnailFile) {
-        newFormatKeys.add('thumbnail');
-        queueConcurrentOperation(promises, replaceFormat('thumbnail', thumbnailFile));
-      }
+    if (thumbnailFile) {
+      newFormatKeys.add('thumbnail');
+      queueConcurrentOperation(promises, replaceFormat('thumbnail', thumbnailFile));
+    }
 
-      const formats = await generateResponsiveFormats(fileData);
-      if (Array.isArray(formats) && formats.length > 0) {
-        for (const format of formats) {
-          // eslint-disable-next-line no-continue
-          if (!format) continue;
-          newFormatKeys.add(format.key);
-          queueConcurrentOperation(promises, replaceFormat(format.key, format.file));
-        }
+    if (formats.length > 0) {
+      for (const format of formats) {
+        // eslint-disable-next-line no-continue
+        if (!format) continue;
+        newFormatKeys.add(format.key);
+        queueConcurrentOperation(promises, replaceFormat(format.key, format.file));
       }
     }
 

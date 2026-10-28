@@ -96,6 +96,61 @@ describe('Upload service - replace()', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     imageManipulationMock.isImage.mockImplementation(async () => false);
+    imageManipulationMock.isFaultyImage.mockImplementation(async () => false);
+    imageManipulationMock.isOptimizableImage.mockImplementation(async () => false);
+    imageManipulationMock.isResizableImage.mockImplementation(async () => false);
+    imageManipulationMock.generateThumbnail.mockImplementation(async () => null);
+    imageManipulationMock.optimize.mockReset();
+  });
+
+  test('does not store the original when optimize fails', async () => {
+    imageManipulationMock.isImage.mockImplementation(async () => true);
+    imageManipulationMock.isFaultyImage.mockImplementation(async () => false);
+    imageManipulationMock.isOptimizableImage.mockImplementation(async () => true);
+    imageManipulationMock.optimize.mockRejectedValueOnce(
+      new Error('Input image exceeds pixel limit')
+    );
+
+    await expect(
+      uploadService.upload({
+        data: { fileInfo: {} as any },
+        files: [inputFile() as any],
+      })
+    ).rejects.toThrow(/pixel limit/);
+
+    expect(providerMethods.upload).not.toHaveBeenCalled();
+    expect(providerMethods.replace).not.toHaveBeenCalled();
+    expect(dbUpdate).not.toHaveBeenCalled();
+  });
+
+  test('does not replace the file when thumbnail generation fails', async () => {
+    currentDbFile = {
+      id: 20,
+      hash: 'image_fail',
+      ext: '.png',
+      provider: PROVIDER,
+      formats: {
+        thumbnail: { hash: 'thumbnail_image_fail', ext: '.png' },
+      },
+    };
+
+    imageManipulationMock.isImage.mockImplementation(async () => true);
+    imageManipulationMock.isResizableImage.mockImplementationOnce(async () => true);
+    imageManipulationMock.generateThumbnail.mockImplementationOnce(async () => {
+      throw new Error('Input image exceeds pixel limit');
+    });
+
+    await expect(
+      uploadService.replace(20, {
+        data: { fileInfo: {} as any },
+        file: inputFile() as any,
+      })
+    ).rejects.toThrow(/pixel limit/);
+
+    expect(providerMethods.replace).not.toHaveBeenCalled();
+    expect(providerMethods.upload).not.toHaveBeenCalled();
+    expect(providerMethods.delete).not.toHaveBeenCalled();
+    expect(dbUpdate).not.toHaveBeenCalled();
   });
 
   test('replacing an image with a non-image deletes the old generated formats', async () => {
