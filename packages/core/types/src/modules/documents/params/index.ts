@@ -52,7 +52,7 @@ export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIn
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
     [HasMember<TKind, 'data'>, { data?: Data.Input<TSchemaUID> }],
-    [HasMember<TKind, 'data:partial'>, { data?: Partial<Data.Input<TSchemaUID>> }],
+    [HasMember<TKind, 'data:partial'>, { data?: Data.PartialInput<TSchemaUID> }],
     // Search
     [HasMember<TKind, '_q'>, { _q?: Search.Q }],
     // Look Up - For internal use only
