@@ -178,7 +178,7 @@ app.plugin('content-manager').controller('collection-types').findOn satisfies un
           'hasPermissions',
           {
             name: 'hasPermissions',
-            config: { actions: ['read'], hasAtLeastOne: true },
+            config: { actions: ['plugin::content-manager.explorer.read'], hasAtLeastOne: true },
           },
         ],
       },
