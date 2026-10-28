@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { shouldSkipCloudLogin } from '../should-skip-cloud-login';
 
 describe('shouldSkipCloudLogin', () => {
