@@ -597,20 +597,22 @@ export const findTypeExports = (
     }
 
     const { statements } = source.module;
-    const typeExports = statements.map((statement) => typeExportOf(statement, name, statements));
+    const typeExports = new Set(
+      statements.map((statement) => typeExportOf(statement, name, statements))
+    );
 
-    if (typeExports.includes('type') === true) {
+    if (typeExports.has('type') === true) {
       uids.add(source.uid);
       continue;
     }
 
-    if (typeExports.includes('generic') === true) {
+    if (typeExports.has('generic') === true) {
       logger.warn(
         `${source.file} exports ${name} with type parameters that have no default, typing ${source.uid} without it`
       );
     }
 
-    if (typeExports.includes('value') === true) {
+    if (typeExports.has('value') === true) {
       logger.warn(
         `${source.file} exports ${name} as a value rather than a type, typing ${source.uid} without it`
       );
