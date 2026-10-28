@@ -90,7 +90,7 @@ jest.mock('../../../../hooks/useDocumentActions', () => ({
 jest.mock('../../../../hooks/useDocument', () => ({
   useDoc: () => ({
     document: { updatedAt: '2026-01-01T00:00:00.000Z' },
-    schema: { options: { draftAndPublish: true } },
+    schema: currentDocumentSchema,
     getInitialFormValues: () => parentInitialFormValues,
   }),
   useDocument: () => ({
@@ -310,6 +310,7 @@ describe('autosave conflicts and backup cleanup', () => {
 
   afterEach(() => {
     mockIsRelationModalContext = true;
+    currentDocumentSchema = { options: { draftAndPublish: true } };
   });
 
   it('offers Reload and Overwrite when the saved version is stale', async () => {
@@ -321,9 +322,7 @@ describe('autosave conflicts and backup cleanup', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(
-      await screen.findByText('This document was updated by someone else')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('This document has changed')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Overwrite' })).toBeInTheDocument();
 
@@ -346,9 +345,7 @@ describe('autosave conflicts and backup cleanup', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     expect(screen.queryByText('Native form submitted')).not.toBeInTheDocument();
-    expect(
-      await screen.findByText('This document was updated by someone else')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('This document has changed')).toBeInTheDocument();
   });
 
   it('uses the recovered backup version when saving restored changes', async () => {
@@ -375,9 +372,7 @@ describe('autosave conflicts and backup cleanup', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(
-      await screen.findByText('This document was updated by someone else')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('This document has changed')).toBeInTheDocument();
   });
 
   it('uses the recovered backup version when publishing restored changes', async () => {
@@ -404,9 +399,7 @@ describe('autosave conflicts and backup cleanup', () => {
     const { user } = render(<ExistingPublishActionHarness />);
 
     await user.click(screen.getByRole('button', { name: 'Publish' }));
-    expect(
-      await screen.findByText('This document was updated by someone else')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('This document has changed')).toBeInTheDocument();
     expect(mockPublish).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ baseVersion: '2026-01-01T00:00:00.000Z' }),
@@ -420,6 +413,56 @@ describe('autosave conflicts and backup cleanup', () => {
       expect.not.objectContaining({ baseVersion: expect.anything() }),
       {}
     );
+  });
+
+  it('drops the backup before reload so the same draft is not offered again', async () => {
+    const reload = jest.fn();
+    const order: string[] = [];
+    mockClearAutosave.mockImplementation(async () => {
+      order.push('clear');
+    });
+    mockUpdateDocument.mockResolvedValueOnce({
+      error: conflictError,
+    });
+    const locationSpy = jest.spyOn(globalThis, 'location', 'get').mockReturnValue({
+      ...globalThis.location,
+      reload: () => {
+        order.push('reload');
+        reload();
+      },
+    } as Location);
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(await screen.findByRole('button', { name: 'Reload' }));
+
+    expect(order).toEqual(['clear', 'reload']);
+    expect(reload).toHaveBeenCalled();
+    locationSpy.mockRestore();
+  });
+
+  it('sends a version token when saving a draft and publish document', async () => {
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(mockUpdateDocument).toHaveBeenCalled());
+    expect(mockUpdateDocument).toHaveBeenCalledWith(
+      expect.objectContaining({ baseVersion: '2026-01-01T00:00:00.000Z' }),
+      {}
+    );
+  });
+
+  it('does not send a version token when saving a content type without draft and publish', async () => {
+    currentDocumentSchema = { options: { draftAndPublish: false } };
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(mockUpdateDocument).toHaveBeenCalled());
+    expect(mockUpdateDocument.mock.calls[0][0]).not.toHaveProperty('baseVersion');
   });
 
   it('clears the local backup after discarding server changes', async () => {

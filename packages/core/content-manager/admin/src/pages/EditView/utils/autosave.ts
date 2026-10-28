@@ -186,25 +186,56 @@ export const registerAutosaveOwner = (owner: AutosaveOwner) => {
   registeredOwners.add(createOwnerPrefix(owner));
 };
 
-export const purgeRegisteredAutosaves = async () => {
-  const prefixes = [...registeredOwners];
+/**
+ * Browser backup cadence. The server copy is much slower: a keystroke should not POST.
+ * Hiding the tab flushes the server copy even when the interval has not elapsed.
+ */
+export const BROWSER_BACKUP_DELAY_MS = 1000;
+export const SERVER_BACKUP_INTERVAL_MS = 30_000;
 
-  if (prefixes.length === 0) {
-    return;
+export const shouldSendServerBackup = ({
+  force,
+  now,
+  lastSentAt,
+  signature,
+  lastSignature,
+}: {
+  force: boolean;
+  now: number;
+  lastSentAt: number;
+  signature: string;
+  lastSignature: string;
+}) => {
+  if (signature === lastSignature) {
+    return false;
   }
 
-  await runCursorTransaction(({ key }) => prefixes.some((prefix) => key.startsWith(prefix)));
-  prefixes.forEach((prefix) => registeredOwners.delete(prefix));
+  if (force || lastSentAt === 0) {
+    return true;
+  }
+
+  return now - lastSentAt >= SERVER_BACKUP_INTERVAL_MS;
 };
 
+/**
+ * Forget every browser backup, including drafts of documents that were never created.
+ * Explicit logout (`admin/logout`) and a dead session (`admin/sessionExpired`) share this.
+ * Server rows in strapi_autosaves are left alone.
+ */
+export const clearBrowserAutosaves = async () => {
+  await runCursorTransaction(() => true);
+  registeredOwners.clear();
+};
+
+const isBrowserAutosaveWipe = (action: unknown): action is { type: string } =>
+  typeof action === 'object' &&
+  action !== null &&
+  'type' in action &&
+  (action.type === 'admin/logout' || action.type === 'admin/sessionExpired');
+
 export const createAutosaveLogoutMiddleware = (): Middleware => () => (next) => (action) => {
-  if (
-    typeof action === 'object' &&
-    action !== null &&
-    'type' in action &&
-    action.type === 'admin/logout'
-  ) {
-    purgeRegisteredAutosaves().catch(() => undefined);
+  if (isBrowserAutosaveWipe(action)) {
+    clearBrowserAutosaves().catch(() => undefined);
   }
 
   return next(action);

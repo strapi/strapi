@@ -15,6 +15,7 @@ import {
   getStoredToken,
   login as loginAction,
   logout as logoutAction,
+  sessionExpired as sessionExpiredAction,
   setLocale,
   setToken,
 } from '../reducer';
@@ -250,8 +251,11 @@ const AuthProvider = ({
   }, [dispatch, navigate]);
 
   const clearStateAndLogout = React.useCallback(() => {
+    // The session is already dead. Drop browser drafts before the warning dialog,
+    // so closing the tab from that dialog cannot leave them on this machine.
+    dispatch(sessionExpiredAction());
     runLogoutWithGuard(performGlobalLogout, 'session-dead');
-  }, [performGlobalLogout, runLogoutWithGuard]);
+  }, [dispatch, performGlobalLogout, runLogoutWithGuard]);
 
   const handleConfirmSessionLogout = React.useCallback(() => {
     logoutGuardOpenRef.current = false;

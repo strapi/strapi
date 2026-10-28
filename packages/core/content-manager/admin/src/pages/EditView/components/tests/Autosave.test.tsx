@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Form, useForm } from '@strapi/admin/strapi-admin';
 import { server } from '@strapi/admin/strapi-admin/test';
-import { render, screen, waitFor } from '@tests/utils';
+import { act, render, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import {
@@ -41,6 +41,21 @@ const ChangeTitle = () => {
     <button type="button" onClick={() => setValues({ title: 'Edited title' })}>
       Edit title
     </button>
+  );
+};
+
+const EditTwice = () => {
+  const setValues = useForm('EditTwice', (state) => state.setValues);
+
+  return (
+    <>
+      <button type="button" onClick={() => setValues({ title: 'First edit' })}>
+        First edit
+      </button>
+      <button type="button" onClick={() => setValues({ title: 'Second edit' })}>
+        Second edit
+      </button>
+    </>
   );
 };
 
@@ -210,6 +225,86 @@ describe('Autosave', () => {
       'autosave:instance-1:1:api::article.article:doc-1:en'
     );
     expect(screen.queryByText('We recovered unsaved changes')).not.toBeInTheDocument();
+  });
+
+  it('keeps both backups when the recovery dialog is dismissed', async () => {
+    const serverDeletes = jest.fn();
+    server.use(
+      http.delete(AUTOSAVE_URL, () => {
+        serverDeletes();
+        return HttpResponse.json({ data: null });
+      })
+    );
+    mockedGetAutosave.mockResolvedValue({
+      key: 'autosave:instance-1:1:api::article.article:doc-1:en',
+      data: { title: 'Recovered title' },
+      savedAt: '2026-01-01T00:01:00.000Z',
+    });
+
+    const dismissed = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="doc-1"
+          locale="en"
+        >
+          <CurrentTitle />
+        </Autosave>
+      </Form>
+    );
+
+    expect(await screen.findByText('We recovered unsaved changes')).toBeInTheDocument();
+    await dismissed.user.keyboard('{Escape}');
+
+    expect(screen.queryByText('We recovered unsaved changes')).not.toBeInTheDocument();
+    expect(mockedDeleteAutosave).not.toHaveBeenCalled();
+    expect(serverDeletes).not.toHaveBeenCalled();
+  });
+
+  it('posts a server backup about every 30 seconds and flushes it when the tab hides', async () => {
+    const serverWrites = jest.fn();
+    server.use(
+      http.put(AUTOSAVE_URL, () => {
+        serverWrites();
+        return HttpResponse.json({ data: null });
+      })
+    );
+    mockedGetAutosave.mockResolvedValue(undefined);
+
+    const { user } = render(
+      <Form initialValues={{ title: 'Server title' }} method="PUT">
+        <Autosave
+          enabled
+          instanceId="instance-1"
+          userId={1}
+          model="api::article.article"
+          documentId="doc-1"
+          locale="en"
+        >
+          <EditTwice />
+        </Autosave>
+      </Form>
+    );
+
+    await waitFor(() => expect(mockedGetAutosave).toHaveBeenCalled());
+    await user.click(screen.getByRole('button', { name: 'First edit' }));
+    await waitFor(() => expect(serverWrites).toHaveBeenCalledTimes(1), { timeout: 1500 });
+    expect(mockedSetAutosave).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole('button', { name: 'Second edit' }));
+    await waitFor(() => expect(mockedSetAutosave).toHaveBeenCalledTimes(2), { timeout: 1500 });
+    expect(serverWrites).toHaveBeenCalledTimes(1);
+
+    const visibility = jest.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    await waitFor(() => expect(serverWrites).toHaveBeenCalledTimes(2));
+    visibility.mockRestore();
   });
 
   it('debounces local backups for modified documents', async () => {

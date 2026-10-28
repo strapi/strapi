@@ -88,13 +88,28 @@ const adminSlice = createSlice({
       window.localStorage.removeItem(STORAGE_KEYS.TOKEN);
       window.localStorage.removeItem(STORAGE_KEYS.STATUS);
     },
+    /**
+     * The server has already rejected the session. This does not clear the token —
+     * logout does that — so an unsaved-changes warning can still render. Listeners
+     * use it to drop browser-only data that must not survive the dead session.
+     */
+    sessionExpired(state) {
+      return state;
+    },
   },
 });
 
 const reducer = adminSlice.reducer;
 
-export const { setAppTheme, setAvailableThemes, setLocale, setToken, logout, login } =
-  adminSlice.actions;
+export const {
+  setAppTheme,
+  setAvailableThemes,
+  setLocale,
+  setToken,
+  logout,
+  login,
+  sessionExpired,
+} = adminSlice.actions;
 
 export { reducer, THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY };
 export type { AppState, ThemeName };

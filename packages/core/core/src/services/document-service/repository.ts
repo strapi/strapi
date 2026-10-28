@@ -26,6 +26,7 @@ import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
+import { assertBaseVersionCurrent, prepareBaseVersionCheck } from './base-version';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
 import {
@@ -556,20 +557,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
-    if (baseVersion !== undefined) {
-      const parsedBaseVersion =
-        typeof baseVersion === 'string' && baseVersion.length > 0
-          ? new Date(baseVersion)
-          : undefined;
+    // Content types without draft & publish save in place. Checking baseVersion there would
+    // 409 an ordinary save, which those types never did. Draft & publish keeps the check.
+    const expectedBaseVersion = prepareBaseVersionCheck(hasDraftAndPublish, baseVersion);
 
-      if (
-        !parsedBaseVersion ||
-        Number.isNaN(parsedBaseVersion.getTime()) ||
-        parsedBaseVersion.toISOString() !== baseVersion
-      ) {
-        throw new errors.ValidationError('baseVersion must be a valid ISO timestamp');
-      }
-
+    if (expectedBaseVersion) {
       const lockedEntry = await strapi.db
         .queryBuilder(uid)
         .select(['id', 'updatedAt'])
@@ -578,25 +570,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .first()
         .execute<{ id: number; updatedAt: Date | string }>();
 
-      if (!lockedEntry) {
-        throw new errors.ConflictError('The document has changed since it was loaded', {
-          documentId,
-          locale: queryParams?.locale,
-          expected: baseVersion,
-          current: null,
-        });
-      }
-
-      const currentVersion = new Date(lockedEntry.updatedAt).toISOString();
-
-      if (currentVersion !== baseVersion) {
-        throw new errors.ConflictError('The document has changed since it was loaded', {
-          documentId,
-          locale: queryParams?.locale,
-          expected: baseVersion,
-          current: currentVersion,
-        });
-      }
+      assertBaseVersionCurrent({
+        expected: expectedBaseVersion,
+        currentUpdatedAt: lockedEntry?.updatedAt ?? null,
+        documentId,
+        locale: queryParams?.locale,
+      });
     }
 
     // Validation

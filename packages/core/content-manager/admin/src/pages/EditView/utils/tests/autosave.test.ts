@@ -1,4 +1,5 @@
 import {
+  BROWSER_BACKUP_DELAY_MS,
   createAutosaveKey,
   deleteAutosave,
   getAutosaveDocumentId,
@@ -8,8 +9,9 @@ import {
   isAutosaveEnabled,
   createAutosaveLogoutMiddleware,
   evictAutosavesOverQuota,
-  registerAutosaveOwner,
+  SERVER_BACKUP_INTERVAL_MS,
   setAutosave,
+  shouldSendServerBackup,
   supportsServerAutosave,
   type AutosaveRecord,
 } from '../autosave';
@@ -227,39 +229,92 @@ describe('autosave storage', () => {
     expect([...records.keys()]).toEqual(['large']);
   });
 
-  it('purges only the signed-out user on logout', async () => {
-    const owner = { instanceId: 'instance', userId: 1 };
-    records.set('owner', {
-      key: createAutosaveKey({
-        ...owner,
-        model: 'api::article.article',
-        documentId: 'one',
-      }),
-      data: {},
-      savedAt: new Date().toISOString(),
-    });
-    records.set('other-user', {
-      key: createAutosaveKey({
-        instanceId: 'instance',
-        userId: 2,
-        model: 'api::article.article',
-        documentId: 'two',
-      }),
-      data: {},
-      savedAt: new Date().toISOString(),
-    });
+  it.each(['admin/logout', 'admin/sessionExpired'])(
+    'wipes every browser backup, including never-saved drafts, on %s',
+    async (type) => {
+      records.set('never-saved', {
+        key: createAutosaveKey({
+          instanceId: 'instance',
+          userId: 1,
+          model: 'api::article.article',
+          documentId: 'create:session-1',
+        }),
+        data: { title: 'Not created yet' },
+        savedAt: '2026-01-01T00:00:00.000Z',
+      });
+      records.set('other-user', {
+        key: createAutosaveKey({
+          instanceId: 'instance',
+          userId: 2,
+          model: 'api::article.article',
+          documentId: 'two',
+        }),
+        data: {},
+        savedAt: '2026-01-02T00:00:00.000Z',
+      });
 
-    registerAutosaveOwner(owner);
-    const next = jest.fn();
-    const dispatch = createAutosaveLogoutMiddleware()({
-      dispatch: jest.fn(),
-      getState: jest.fn(),
-    })(next);
-    dispatch({ type: 'admin/logout' });
+      const next = jest.fn();
+      const dispatch = createAutosaveLogoutMiddleware()({
+        dispatch: jest.fn(),
+        getState: jest.fn(),
+      })(next);
+      dispatch({ type });
 
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    expect([...records.keys()]).toEqual(['other-user']);
-    expect(next).toHaveBeenCalledWith({ type: 'admin/logout' });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect([...records.keys()]).toEqual([]);
+      expect(next).toHaveBeenCalledWith({ type });
+    }
+  );
+
+  it('sends a server backup on the first edit, then at most every 30 seconds unless forced', () => {
+    expect(BROWSER_BACKUP_DELAY_MS).toBe(1000);
+    expect(SERVER_BACKUP_INTERVAL_MS).toBe(30_000);
+
+    const first = {
+      force: false,
+      now: 1_000,
+      lastSentAt: 0,
+      signature: 'a',
+      lastSignature: '',
+    };
+
+    expect(shouldSendServerBackup(first)).toBe(true);
+    expect(
+      shouldSendServerBackup({
+        ...first,
+        now: 2_000,
+        lastSentAt: 1_000,
+        signature: 'b',
+        lastSignature: 'a',
+      })
+    ).toBe(false);
+    expect(
+      shouldSendServerBackup({
+        ...first,
+        now: 31_000,
+        lastSentAt: 1_000,
+        signature: 'b',
+        lastSignature: 'a',
+      })
+    ).toBe(true);
+    expect(
+      shouldSendServerBackup({
+        force: true,
+        now: 2_000,
+        lastSentAt: 1_000,
+        signature: 'b',
+        lastSignature: 'a',
+      })
+    ).toBe(true);
+    expect(
+      shouldSendServerBackup({
+        force: true,
+        now: 2_000,
+        lastSentAt: 1_000,
+        signature: 'a',
+        lastSignature: 'a',
+      })
+    ).toBe(false);
   });
 
   it('selects a stable document ID for existing, create, and single-type forms', () => {

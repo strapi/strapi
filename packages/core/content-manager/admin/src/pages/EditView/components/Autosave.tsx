@@ -10,12 +10,14 @@ import {
   useSaveAutosaveMutation,
 } from '../../../services/autosave';
 import {
+  BROWSER_BACKUP_DELAY_MS,
   createAutosaveKey,
   deleteAutosave,
   evictAutosavesOverQuota,
   getAutosave,
   registerAutosaveOwner,
   setAutosave,
+  shouldSendServerBackup,
   supportsServerAutosave,
   type AutosaveRecord,
 } from '../utils/autosave';
@@ -67,6 +69,9 @@ const Autosave = ({
   const writeGeneration = React.useRef(0);
   const timeoutRef = React.useRef<number>();
   const pendingWrite = React.useRef<Promise<unknown>>();
+  const lastServerBackupAt = React.useRef(0);
+  const lastServerSignature = React.useRef('');
+  const dismissedRecoveryAt = React.useRef<string>();
 
   const [fetchServerAutosave] = useLazyGetAutosaveQuery();
   const [saveServerAutosave] = useSaveAutosaveMutation();
@@ -76,6 +81,14 @@ const Autosave = ({
     () => createAutosaveKey({ instanceId, userId, model, documentId, locale }),
     [documentId, instanceId, locale, model, userId]
   );
+  const backupScope = React.useRef(key);
+
+  if (backupScope.current !== key) {
+    backupScope.current = key;
+    lastServerBackupAt.current = 0;
+    lastServerSignature.current = '';
+    dismissedRecoveryAt.current = undefined;
+  }
 
   // The browser backup covers crashes and offline edits; the server backup covers a different
   // device or cleared site data. A document that does not exist yet only has the former.
@@ -131,7 +144,7 @@ const Autosave = ({
         .filter((record) => JSON.stringify(record.data) !== serialisedInitialValues)
         .sort((a, b) => b.savedAt.localeCompare(a.savedAt));
 
-      if (newest) {
+      if (newest && newest.savedAt !== dismissedRecoveryAt.current) {
         setRecovery(newest);
       }
     });
@@ -151,21 +164,32 @@ const Autosave = ({
     userId,
   ]);
 
-  React.useEffect(() => {
-    if (!enabled || loadedKey !== key || !modified || writesSuspended.current) {
-      return;
-    }
-
-    const generation = writeGeneration.current;
-    setStatus('saving');
-    timeoutRef.current = window.setTimeout(() => {
-      const nextSavedAt = new Date().toISOString();
-
-      if (generation !== writeGeneration.current) {
+  const writeBackup = React.useCallback(
+    (forceServer: boolean) => {
+      if (!enabled || loadedKey !== key || !modified || writesSuspended.current) {
         return;
       }
 
+      const generation = writeGeneration.current;
+      const nextSavedAt = new Date().toISOString();
       const effectiveBaseVersion = pendingBaseVersion ?? baseVersion;
+      const signature = `${effectiveBaseVersion ?? ''}:${JSON.stringify(values)}`;
+      const now = Date.now();
+      const sendServer =
+        onServer &&
+        shouldSendServerBackup({
+          force: forceServer,
+          now,
+          lastSentAt: lastServerBackupAt.current,
+          signature,
+          lastSignature: lastServerSignature.current,
+        });
+
+      if (sendServer) {
+        lastServerBackupAt.current = now;
+        lastServerSignature.current = signature;
+      }
+
       const writes: Promise<unknown>[] = [
         setAutosave({
           key,
@@ -179,12 +203,17 @@ const Autosave = ({
         ),
       ];
 
-      if (onServer) {
+      if (sendServer) {
         writes.push(
           saveServerAutosave({
             ...serverParams,
             data: { data: values, baseVersion: effectiveBaseVersion },
-          }).unwrap()
+          })
+            .unwrap()
+            .catch((error: unknown) => {
+              lastServerSignature.current = '';
+              throw error;
+            })
         );
       }
 
@@ -202,7 +231,38 @@ const Autosave = ({
           setStatus('error');
         }
       });
-    }, 1000);
+    },
+    [
+      baseVersion,
+      enabled,
+      key,
+      loadedKey,
+      modified,
+      onServer,
+      pendingBaseVersion,
+      saveServerAutosave,
+      serverParams,
+      values,
+    ]
+  );
+
+  const writeBackupRef = React.useRef(writeBackup);
+  writeBackupRef.current = writeBackup;
+
+  React.useEffect(() => {
+    if (!enabled || loadedKey !== key || !modified || writesSuspended.current) {
+      return;
+    }
+
+    const generation = writeGeneration.current;
+    setStatus('saving');
+    timeoutRef.current = window.setTimeout(() => {
+      if (generation !== writeGeneration.current) {
+        return;
+      }
+
+      writeBackupRef.current(false);
+    }, BROWSER_BACKUP_DELAY_MS);
 
     return () => {
       if (timeoutRef.current) {
@@ -210,18 +270,32 @@ const Autosave = ({
         timeoutRef.current = undefined;
       }
     };
-  }, [
-    baseVersion,
-    enabled,
-    key,
-    loadedKey,
-    modified,
-    onServer,
-    pendingBaseVersion,
-    saveServerAutosave,
-    serverParams,
-    values,
-  ]);
+  }, [baseVersion, enabled, key, loadedKey, modified, pendingBaseVersion, values]);
+
+  React.useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    const flushWhenHidden = () => {
+      if (document.visibilityState !== 'hidden') {
+        return;
+      }
+
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = undefined;
+      }
+
+      writeBackupRef.current(true);
+    };
+
+    document.addEventListener('visibilitychange', flushWhenHidden);
+
+    return () => {
+      document.removeEventListener('visibilitychange', flushWhenHidden);
+    };
+  }, [enabled]);
 
   const removeBackups = React.useCallback(async () => {
     // A leftover server backup is harmless — it only resurfaces when it differs from the saved
@@ -288,7 +362,16 @@ const Autosave = ({
     }
   };
 
+  const handleDismissRecovery = () => {
+    if (recovery) {
+      dismissedRecoveryAt.current = recovery.savedAt;
+    }
+
+    setRecovery(undefined);
+  };
+
   const handleDiscard = () => {
+    dismissedRecoveryAt.current = undefined;
     clear().catch(() => undefined);
   };
 
@@ -321,7 +404,14 @@ const Autosave = ({
                 : null}
             </Typography>
           </Box>
-          <Dialog.Root open={Boolean(recovery)} onOpenChange={(open) => !open && handleDiscard()}>
+          <Dialog.Root
+            open={Boolean(recovery)}
+            onOpenChange={(open) => {
+              if (!open) {
+                handleDismissRecovery();
+              }
+            }}
+          >
             <Dialog.Content>
               <Dialog.Header>
                 {formatMessage({

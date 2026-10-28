@@ -707,6 +707,35 @@ const transformData = (data: unknown): unknown => {
 
 const transformDocumentData = (data: object): AnyData => transformData(data) as AnyData;
 
+/**
+ * Reload shows the saved document. Drop the backup first, otherwise the recovery dialog offers
+ * that same draft again and restoring it conflicts immediately. Overwrite keeps the draft.
+ */
+const reloadLatestDocument = async (clearBackup: () => Promise<void>) => {
+  await clearBackup();
+  globalThis.location.reload();
+};
+
+const conflictDialogCopy = (formatMessage: ReturnType<typeof useIntl>['formatMessage']) => ({
+  title: formatMessage({
+    id: 'content-manager.autosave.conflict.title',
+    defaultMessage: 'This document has changed',
+  }),
+  content: formatMessage({
+    id: 'content-manager.autosave.conflict.body',
+    defaultMessage:
+      'It was saved in another session. Reload to review the latest version, or overwrite it with your changes.',
+  }),
+  cancelLabel: formatMessage({
+    id: 'content-manager.autosave.conflict.reload',
+    defaultMessage: 'Reload',
+  }),
+  confirmLabel: formatMessage({
+    id: 'content-manager.autosave.conflict.overwrite',
+    defaultMessage: 'Overwrite',
+  }),
+});
+
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
@@ -1183,24 +1212,8 @@ const PublishAction: DocumentActionComponent = ({
     dialog: hasPublishConflict
       ? {
           type: 'dialog',
-          title: formatMessage({
-            id: 'content-manager.autosave.conflict.title',
-            defaultMessage: 'This document was updated by someone else',
-          }),
-          content: formatMessage({
-            id: 'content-manager.autosave.conflict.body',
-            defaultMessage:
-              'Reload to review the latest saved document, or overwrite it with your changes.',
-          }),
-          cancelLabel: formatMessage({
-            id: 'content-manager.autosave.conflict.reload',
-            defaultMessage: 'Reload',
-          }),
-          confirmLabel: formatMessage({
-            id: 'content-manager.autosave.conflict.overwrite',
-            defaultMessage: 'Overwrite',
-          }),
-          onCancel: () => globalThis.location.reload(),
+          ...conflictDialogCopy(formatMessage),
+          onCancel: () => reloadLatestDocument(clearAutosave),
           onConfirm: () => performPublish({ overwrite: true }),
         }
       : supportsDraftRelationWarning
@@ -1430,16 +1443,18 @@ const UpdateAction: DocumentActionComponent = ({
           initialValues,
           components,
         });
+        const trackedBaseVersion = hasDraftAndPublished
+          ? (pendingBaseVersion ??
+            (typeof currentDocumentData?.updatedAt === 'string'
+              ? currentDocumentData.updatedAt
+              : undefined))
+          : undefined;
         const res = await update(
           {
             collectionType,
             model,
             documentId,
-            baseVersion:
-              pendingBaseVersion ??
-              (typeof currentDocumentData?.updatedAt === 'string'
-                ? currentDocumentData.updatedAt
-                : undefined),
+            ...(trackedBaseVersion ? { baseVersion: trackedBaseVersion } : {}),
             params: currentDocumentMeta.params,
           },
           data
@@ -1646,24 +1661,8 @@ const UpdateAction: DocumentActionComponent = ({
     onDialogClose: () => setHasUpdateConflict(false),
     dialog: {
       type: 'dialog',
-      title: formatMessage({
-        id: 'content-manager.autosave.conflict.title',
-        defaultMessage: 'This document was updated by someone else',
-      }),
-      content: formatMessage({
-        id: 'content-manager.autosave.conflict.body',
-        defaultMessage:
-          'Reload to review the latest saved document, or overwrite it with your changes.',
-      }),
-      cancelLabel: formatMessage({
-        id: 'content-manager.autosave.conflict.reload',
-        defaultMessage: 'Reload',
-      }),
-      confirmLabel: formatMessage({
-        id: 'content-manager.autosave.conflict.overwrite',
-        defaultMessage: 'Overwrite',
-      }),
-      onCancel: () => globalThis.location.reload(),
+      ...conflictDialogCopy(formatMessage),
+      onCancel: () => reloadLatestDocument(clearAutosave),
       onConfirm: overwriteConflict,
     },
   };
