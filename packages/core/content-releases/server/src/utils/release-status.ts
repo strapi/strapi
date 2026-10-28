@@ -15,5 +15,6 @@ export const isReleaseBlocked = (
 
 // A run that failed before failed runs froze the release left it planned, as `failed`, until the
 // overdue sweep freezes it
-export const isFailedBeforeUpgrade = (release: Pick<Release, 'status' | 'releasedAt'>) =>
-  !release.releasedAt && release.status === 'failed';
+export const isFailedBeforeUpgrade = (
+  release: Pick<Release, 'status'> & Partial<Pick<Release, 'releasedAt'>>
+) => !release.releasedAt && release.status === 'failed';

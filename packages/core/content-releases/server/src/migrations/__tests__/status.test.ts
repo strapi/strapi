@@ -1,7 +1,5 @@
 import { setImmediate } from 'node:timers/promises';
 
-import type { Core } from '@strapi/types';
-
 import { RELEASE_ACTION_MODEL_UID } from '../../constants';
 import { migrateIsValidAndStatusReleases } from '..';
 import type * as utils from '../../utils';
@@ -33,8 +31,6 @@ const actionUpdateMany = jest.fn();
 const updateReleaseStatus = jest.fn();
 const logError = jest.fn();
 
-let strapi: Core.Strapi;
-
 // The migration isn't awaited by startup: let it run
 const flush = async () => {
   for (let i = 0; i < 10; i += 1) {
@@ -54,7 +50,7 @@ const action = (id: number, type: 'publish' | 'unpublish') => ({
 describe('migrateIsValidAndStatusReleases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    strapi = {
+    global.strapi = {
       db: {
         inTransaction: () => false,
         query: jest.fn((uid: string) =>
@@ -63,9 +59,9 @@ describe('migrateIsValidAndStatusReleases', () => {
             : { findMany: releaseFindMany, updateMany: releaseUpdateMany }
         ),
       },
-      plugin: () => ({ service: () => ({ updateReleaseStatus }) }),
+      plugins: { 'content-releases': { services: { release: { updateReleaseStatus } } } },
       log: { error: logError },
-    } as unknown as Core.Strapi;
+    } as unknown as typeof global.strapi;
   });
 
   it('stores each action validity, without overwriting what a run recorded', async () => {

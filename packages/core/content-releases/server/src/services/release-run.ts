@@ -16,7 +16,6 @@ import {
   getPublishOrderForContentTypes,
   getPublishabilityForActions,
   isFailedBeforeUpgrade,
-  isMySqlDeadlock,
   isReleaseBlocked,
   toError,
   toErrorReason,
@@ -53,8 +52,7 @@ const getErrorOutcome = (error: unknown): RecordedOutcome =>
     ? { outcome: 'skipped_invalid', reason: toValidationReason(error) }
     : { outcome: 'skipped_error', reason: toErrorReason(error) };
 
-// The validity a run stores with each outcome, so the two never contradict each other (an
-// outcome may override it: an entry whose check threw is stored as not valid)
+// The validity a run stores with each outcome, so the two never contradict each other
 const IS_ENTRY_VALID_BY_OUTCOME: Record<PublishabilityOutcome, false> &
   Record<Exclude<RunOutcome, PublishabilityOutcome>, true> = {
   published: true,
@@ -144,12 +142,11 @@ export const createReleaseRun = ({
     }
   };
 
-  // Entries without a reason or validity override share one write per outcome; the others are
-  // written per entry
+  // Entries without a reason share one write per outcome; a reason is written per entry
   const recordOutcomes = async (outcomes: Outcomes) => {
     const idsByOutcome = new Map<RunOutcome, ReleaseAction['id'][]>();
     for (const [id, { outcome, reason, isEntryValid }] of outcomes) {
-      if (reason || isEntryValid !== undefined) {
+      if (reason) {
         await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
           where: { id },
           data: {
@@ -205,8 +202,7 @@ export const createReleaseRun = ({
   };
 
   // `allow_partial`: each entry in its own savepoint, so one that fails is skipped with its
-  // published version restored, and the others still go out. Not after a MySQL deadlock: it
-  // rolled back the whole run, so the run fails with it and records nothing.
+  // published version restored, and the others still go out
   const releaseEachEntry = async (
     releaseName: string,
     actions: ReleaseAction[],
@@ -218,9 +214,6 @@ export const createReleaseRun = ({
         await strapi.db.savepoint(() => releaseEntry(action));
         outcomes.set(action.id, getReleasedOutcome(action));
       } catch (actionError) {
-        if (isMySqlDeadlock(actionError)) {
-          throw actionError;
-        }
         outcomes.set(action.id, getErrorOutcome(actionError));
         strapi.log.warn(
           `[Content Releases] Release ${releaseName}: skipped an entry that failed to ${action.type} (${getErrorName(actionError)})`
@@ -230,7 +223,7 @@ export const createReleaseRun = ({
   };
 
   // `all_or_nothing`: one savepoint for every entry, so the first error rolls back the ones
-  // before it. Returns that error, unless it's a MySQL deadlock, which rolled back the whole run.
+  // before it. Returns that error.
   const releaseAllEntries = async (
     actions: ReleaseAction[],
     outcomes: Outcomes
@@ -241,13 +234,9 @@ export const createReleaseRun = ({
         for (const action of actions) {
           inFlight = action;
           await releaseEntry(action);
-          inFlight = undefined;
         }
       });
     } catch (error) {
-      if (isMySqlDeadlock(error)) {
-        throw error;
-      }
       if (inFlight) {
         outcomes.set(inFlight.id, getErrorOutcome(error));
       }
@@ -293,46 +282,47 @@ export const createReleaseRun = ({
     // Checked before anything is written: a publish that fails validation halfway can already
     // have removed the entry's published version
     const checks = await getPublishabilityForActions(actions, { strapi });
-    // Not publishable: invalid or not approved (the entry's own error), or its check threw (stored
-    // as not publishable, whatever the error class: a thrown check isn't a validation result)
-    const entryErrors: Error[] = [];
-    const checkErrors: Error[] = [];
+    // Not publishable: invalid, not approved, or its check threw (stored as not publishable)
+    const notPublishable: Error[] = [];
     for (const [id, check] of checks) {
       if (check instanceof Error) {
-        outcomes.set(id, {
-          outcome: 'skipped_error',
-          reason: toErrorReason(check),
-          isEntryValid: false,
-        });
-        checkErrors.push(check);
+        outcomes.set(id, { ...getErrorOutcome(check), isEntryValid: false });
+        notPublishable.push(check);
       } else if (!check.publishable) {
         outcomes.set(id, { outcome: check.outcome, reason: check.reason });
-        entryErrors.push(check.error);
+        notPublishable.push(check.error);
       }
     }
 
     if (
       isReleaseBlocked(release.releaseCondition, {
         total: actions.length,
-        notPublishable: entryErrors.length + checkErrors.length,
+        notPublishable: notPublishable.length,
       })
     ) {
+      // An entry's own error before one its check couldn't establish
+      const blockingError =
+        notPublishable.find((error) => error instanceof errors.ValidationError) ??
+        notPublishable[0];
+
       if (trigger === 'manual') {
         // Not a run: the check is stored so the release reads blocked, then the publish is refused
-        await getService('release-action', { strapi }).storePublishValidities(
-          new Map([...checks].map(([id, check]) => [id, toEntryValidity(check)] as const))
-        );
+        const releaseActionService = getService('release-action', { strapi });
+        for (const [id, check] of checks) {
+          await releaseActionService.storePublishValidity(id, toEntryValidity(check));
+        }
         await updateReleaseStatus(releaseId);
 
-        // Refused like any blocked release (400), on an entry's own error first. What stopped a
-        // check is named, never quoted: its message can carry row contents.
+        // Refused like any blocked release (400). What stopped a check is named, never quoted: its
+        // message can carry row contents.
         return {
           kind: 'rejected',
           error:
-            entryErrors[0] ??
-            new errors.ValidationError(
-              `An entry couldn't be checked (${getErrorName(checkErrors[0])})`
-            ),
+            blockingError instanceof errors.ValidationError
+              ? blockingError
+              : new errors.ValidationError(
+                  `An entry couldn't be checked (${getErrorName(blockingError)})`
+                ),
         };
       }
 
@@ -341,9 +331,7 @@ export const createReleaseRun = ({
       }
 
       return fail(
-        allowPartial
-          ? new errors.ValidationError('No entries were published')
-          : (entryErrors[0] ?? checkErrors[0])
+        allowPartial ? new errors.ValidationError('No entries were published') : blockingError
       );
     }
 

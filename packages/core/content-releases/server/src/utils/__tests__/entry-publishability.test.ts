@@ -23,17 +23,14 @@ const buildStrapi = ({
   config = { get: (_key: string, defaultValue: unknown) => defaultValue },
   validate = jest.fn().mockResolvedValue({}),
   workflowsService = { getAssignedWorkflow: jest.fn().mockResolvedValue(null) },
-  populateBuilder = jest.fn(() => ({ populateDeep: () => ({ build: async () => ({}) }) })),
+  populateBuilder = jest.fn(),
   findOne = jest.fn(),
-  // No entry has a published version
-  findPublished = jest.fn().mockResolvedValue(null),
 }: {
   config?: { get: (key: string, defaultValue: unknown) => unknown };
   validate?: jest.Mock;
   workflowsService?: { getAssignedWorkflow: jest.Mock } | undefined;
   populateBuilder?: jest.Mock;
   findOne?: jest.Mock;
-  findPublished?: jest.Mock;
 } = {}) =>
   ({
     config,
@@ -47,12 +44,11 @@ const buildStrapi = ({
         return undefined;
       },
     }),
+    // No entry has a published version
     documents: () => ({
       findOne: (params: { status?: string }) =>
-        params.status === 'published' ? findPublished(params) : findOne(params),
+        params.status === 'published' ? Promise.resolve(null) : findOne(params),
     }),
-    // Checks outside a transaction read without a savepoint
-    db: { inTransaction: () => false },
   }) as unknown as Core.Strapi;
 
 const requiringDone = () => ({
@@ -63,6 +59,10 @@ const requiringDone = () => ({
 const checkEntry = async (entry: Record<string, unknown>, strapi: Core.Strapi) => {
   const withDraft = {
     ...strapi,
+    plugin: (name: string) =>
+      name === 'content-manager'
+        ? { service: () => () => ({ populateDeep: () => ({ build: async () => ({}) }) }) }
+        : strapi.plugin(name),
     documents: () => ({
       findOne: async ({ status }: { status?: string }) => (status === 'published' ? null : entry),
     }),
@@ -259,71 +259,6 @@ describe('getPublishabilityForActions', () => {
       [3, null],
     ]);
   });
-
-  test("leaves the entry's published version out of its unique checks", async () => {
-    const validate = jest.fn().mockResolvedValue({});
-    const findPublished = jest.fn().mockResolvedValue({ id: 7, documentId: 'a' });
-    const strapi = buildStrapi({
-      validate,
-      findPublished,
-      findOne: jest.fn().mockResolvedValue({ id: 1, documentId: 'a', locale: 'en' }),
-    });
-
-    await getPublishabilityForActions(
-      [
-        {
-          id: 1,
-          type: 'publish' as const,
-          contentType: contentTypeUid,
-          entryDocumentId: 'a',
-          locale: 'en',
-        },
-      ],
-      { strapi }
-    );
-
-    expect(findPublished).toHaveBeenCalledWith(
-      expect.objectContaining({ documentId: 'a', locale: 'en', status: 'published' })
-    );
-    const [, , , publishedVersion] = validate.mock.calls[0];
-    expect(publishedVersion).toEqual({ id: 7, documentId: 'a' });
-  });
-
-  describe('a MySQL deadlock', () => {
-    const deadlock = Object.assign(new Error('Deadlock found when trying to get lock'), {
-      code: 'ER_LOCK_DEADLOCK',
-    });
-    const deadlockedStrapi = () =>
-      buildStrapi({
-        findOne: jest.fn().mockRejectedValue(deadlock),
-      });
-    const action = {
-      id: 1,
-      type: 'publish' as const,
-      contentType: contentTypeUid,
-      entryDocumentId: 'a',
-    };
-
-    test("stops every check in a transaction: the caller's transaction is gone", async () => {
-      const strapi = deadlockedStrapi();
-      const inTransaction = {
-        ...strapi,
-        db: { inTransaction: () => true, savepoint: (cb: () => unknown) => cb() },
-      } as unknown as Core.Strapi;
-
-      await expect(getPublishabilityForActions([action], { strapi: inTransaction })).rejects.toBe(
-        deadlock
-      );
-    });
-
-    test('fails only its own check outside a transaction', async () => {
-      const results = await getPublishabilityForActions([action], {
-        strapi: deadlockedStrapi(),
-      });
-
-      expect(results.get(action.id)).toBe(deadlock);
-    });
-  });
 });
 
 describe('an error that is not a validation error', () => {
@@ -331,6 +266,7 @@ describe('an error that is not a validation error', () => {
     buildStrapi({
       validate: jest.fn().mockRejectedValue(new TypeError('Cannot read properties of undefined')),
       findOne: jest.fn().mockResolvedValue({ documentId: 'a' }),
+      populateBuilder: jest.fn(() => ({ populateDeep: () => ({ build: async () => ({}) }) })),
     });
   const action = {
     id: 1,
@@ -357,6 +293,9 @@ describe('an error that is not a validation error', () => {
 
 describe('getValidityForActions', () => {
   test("stores a draft that can't be read as not publishable, without stopping the others", async () => {
+    const populateBuilder = jest.fn(() => ({
+      populateDeep: () => ({ build: jest.fn().mockResolvedValue({}) }),
+    }));
     const findOne = jest.fn(({ documentId }) =>
       documentId === 'unreadable'
         ? Promise.reject(new TypeError('connection lost'))
@@ -365,7 +304,7 @@ describe('getValidityForActions', () => {
             strapi_stage: documentId === 'approved' ? doneStage : reviewStage,
           })
     );
-    const strapi = buildStrapi({ workflowsService: requiringDone(), findOne });
+    const strapi = buildStrapi({ populateBuilder, workflowsService: requiringDone(), findOne });
 
     const result = await getValidityForActions(
       [
@@ -418,10 +357,13 @@ describe('getValidityForActions', () => {
   });
 
   test('reads the draft of an entry in several planned releases once', async () => {
+    const populateBuilder = jest.fn(() => ({
+      populateDeep: () => ({ build: jest.fn().mockResolvedValue({}) }),
+    }));
     const findOne = jest.fn(({ documentId }) =>
       Promise.resolve({ documentId, strapi_stage: doneStage })
     );
-    const strapi = buildStrapi({ workflowsService: requiringDone(), findOne });
+    const strapi = buildStrapi({ populateBuilder, workflowsService: requiringDone(), findOne });
 
     const result = await getValidityForActions(
       [
@@ -516,7 +458,6 @@ describe('getActionValidity', () => {
       documents: () => ({
         findOne: jest.fn().mockRejectedValue(new TypeError('connection lost: secret-value')),
       }),
-      db: { inTransaction: () => false },
     } as unknown as Core.Strapi; // only what the draft read touches
 
     const validity = await getActionValidity(

@@ -165,30 +165,11 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     return failedReleaseIds;
   };
 
-  // One write per distinct validity (most share `{ isEntryValid: true, reason: null }`). By type
-  // too: an action changed to unpublish since its draft was checked keeps its own validity
-  const storePublishValidities = async (validities: Map<ReleaseAction['id'], EntryValidity>) => {
-    const idsByValidity = new Map<
-      string,
-      { validity: EntryValidity; ids: ReleaseAction['id'][] }
-    >();
-
-    for (const [actionId, validity] of validities) {
-      const key = JSON.stringify(validity);
-      const group = idsByValidity.get(key);
-      if (group) {
-        group.ids.push(actionId);
-      } else {
-        idsByValidity.set(key, { validity, ids: [actionId] });
-      }
-    }
-
-    for (const { validity, ids } of idsByValidity.values()) {
-      await strapi.db
-        .query(RELEASE_ACTION_MODEL_UID)
-        .updateMany({ where: { id: { $in: ids }, type: 'publish' }, data: validity });
-    }
-  };
+  // By type too: an action changed to unpublish since its draft was checked keeps its own validity
+  const storePublishValidity = (actionId: ReleaseAction['id'], validity: EntryValidity) =>
+    strapi.db
+      .query(RELEASE_ACTION_MODEL_UID)
+      .update({ where: { id: actionId, type: 'publish' }, data: validity });
 
   /**
    * Stores the current validity of the planned actions matching `where` (an unpublish action
@@ -207,20 +188,17 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     const publishValidities = await getValidityForActions(actions, { strapi });
 
     await changePlannedActionsByRelease(actions, async (releaseActions) => {
-      const releaseValidities = new Map<ReleaseAction['id'], EntryValidity>();
       for (const action of releaseActions) {
         const validity = publishValidities.get(action.id);
 
         if (validity) {
-          releaseValidities.set(action.id, validity);
+          await storePublishValidity(action.id, validity);
         } else if (!action.isEntryValid) {
           await strapi.db
             .query(RELEASE_ACTION_MODEL_UID)
             .update({ where: { id: action.id, type: 'unpublish' }, data: UNPUBLISH_VALIDITY });
         }
       }
-
-      await storePublishValidities(releaseValidities);
     });
   };
 
@@ -310,9 +288,6 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
   const filterExistingEntries = async <TAction extends DraftRef>(actions: TAction[]) => {
     const existing = new Set<string>();
     const localizedTypes = new Set<string>();
-    // A localized action stored without a locale is run in the default locale, as the Document
-    // Service resolves a missing locale
-    let defaultLocale: string | null = null;
 
     for (const contentType of new Set(actions.map((action) => action.contentType))) {
       const model = strapi.contentType(contentType);
@@ -321,7 +296,6 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         const isLocalized = strapi.localization.isLocalizedContentType(model);
         if (isLocalized) {
           localizedTypes.add(contentType);
-          defaultLocale ??= await strapi.localization.getDefaultLocale();
         }
 
         const entries = await strapi.documents(contentType).findMany({
@@ -349,7 +323,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         getEntryKey(
           action.contentType,
           action.entryDocumentId,
-          localizedTypes.has(action.contentType) ? (action.locale ?? defaultLocale) : null
+          localizedTypes.has(action.contentType) ? action.locale : null
         )
       )
     );
@@ -710,7 +684,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     revalidatePlannedActions,
 
-    storePublishValidities,
+    storePublishValidity,
 
     // After a review workflow change: what "at the required stage" means may have changed. Not
     // awaited, and after the workflow's commit, so its writes never wait on a release lock.

@@ -192,8 +192,7 @@ export declare namespace UpdateRelease {
     };
     body: {
       name: string;
-      // The schedule is replaced as a whole: an omitted or null scheduledAt unschedules the
-      // release, and an omitted or null timezone is cleared
+      // When editing a release, scheduledAt always need to be explicitly sended, so it can be null to unschedule it
       scheduledAt?: Date | null;
       timezone?: string | null;
       releaseCondition?: ReleaseCondition;
@@ -246,10 +245,6 @@ export declare namespace PublishRelease {
       totalUnpublishedEntries: number;
       totalSkippedEntries: number;
     };
-    // A run that failed sends the release it froze, but only with a validation error (400): any
-    // other error is sent as is. A refused publish never ran, so it has no release.
-    error?:
-      | errors.ApplicationError
-      | errors.ValidationError<string, { release?: Omit<Release, 'actions'> }>;
+    error?: errors.ApplicationError | errors.ValidationError;
   }
 }

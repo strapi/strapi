@@ -1,4 +1,4 @@
-import { expect, type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 import { clickAndWait, findAndClose } from '../../../../utils/shared';
 
 /**
@@ -41,20 +41,6 @@ export class ContentManagerPage {
     await this.addToReleaseDialog.getByRole('button', { name: 'Continue' }).click();
 
     await findAndClose(this.page, 'Entry added to release');
-  }
-
-  /**
-   * From the list view, add every entry of the page to a release with the given action.
-   */
-  async addAllEntriesToRelease(releaseName: string, action: 'publish' | 'unpublish') {
-    await this.page.getByRole('checkbox', { name: 'Select all entries' }).check();
-    await clickAndWait(this.page, this.page.getByRole('button', { name: 'add to release' }));
-
-    await this.page.getByRole('combobox', { name: 'Select a release' }).click();
-    await this.page.getByRole('option', { name: releaseName }).click();
-    await this.page.getByText(action, { exact: true }).click();
-    await clickAndWait(this.page, this.page.getByText('continue'));
-    await expect(this.page.getByText(/Successfully added to release./)).toBeVisible();
   }
 
   // A list-view row identified by its entry text.

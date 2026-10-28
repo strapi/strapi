@@ -1,3 +1,4 @@
+import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import {
@@ -6,7 +7,6 @@ import {
   findAndClose,
   navToHeader,
 } from '../../../utils/shared';
-import { testWithPageObjects as test, expect } from './fixtures';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -17,7 +17,7 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     await login({ page });
   });
 
-  test('a user should see the list of upcoming releases', async ({ page, releases }) => {
+  test('a user should see the list of upcoming releases', async ({ page }) => {
     const upcomingReleasesWidget = page.getByLabel(/upcoming releases/i, { exact: true });
     await expect(upcomingReleasesWidget).toBeVisible();
 
@@ -30,12 +30,34 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     await expect(firstReleaseRow.getByRole('gridcell', { name: /not scheduled/i })).toBeVisible();
 
     // Create a new scheduled release in the future
+    await navToHeader(page, ['Releases'], 'Releases');
+
     const nextReleaseName = 'Next release';
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    await releases.goto();
+    await page.getByRole('button', { name: /new release/i }).click();
+    await page.getByRole('textbox', { name: /name/i }).fill(nextReleaseName);
+
+    await page
+      .getByRole('combobox', {
+        name: /date/i,
+      })
+      .click();
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    await page.getByLabel(formattedDate).click();
+
+    await page.getByRole('combobox', { name: /^time$/i }).click();
+    await page.getByRole('option', { name: '08:00' }).click();
+
+    await clickAndWait(page, page.getByRole('button', { name: /continue/i }));
     // Success navigates to the release details page; the toast is too brief to assert reliably in CI.
-    await releases.createRelease(nextReleaseName, { date: tomorrow, time: '08:00' });
+    await page.waitForURL('/admin/plugins/content-releases/*');
+    await expect(page.getByRole('heading', { name: nextReleaseName })).toBeVisible();
 
     // Go back to the homepage
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));

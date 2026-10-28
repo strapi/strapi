@@ -1,5 +1,3 @@
-import { OVERDUE_GRACE_PERIOD_MS } from '../../constants';
-import type { ReleaseFailureReason, ReleaseStatus } from '../../../../shared/constants';
 import createSchedulingService from '../scheduling';
 
 const NOW = new Date('2026-10-15T09:00:00.000Z');
@@ -10,27 +8,17 @@ type Row = {
   name: string;
   releasedAt: Date | null;
   scheduledAt: Date | null;
-  status: ReleaseStatus;
+  status: string;
 };
-
-// What `recordMissedRun` returns: null when the release ran meanwhile
-type MissedRun = {
-  id: number;
-  name: string;
-  status: ReleaseStatus;
-  failureReason: ReleaseFailureReason | null;
-} | null;
 
 const setup = ({ rows, locked = rows }: { rows: Row[]; locked?: Row[] }) => {
   const findMany = jest.fn().mockResolvedValue(rows.map(({ id }) => ({ id })));
-  const recordMissedRun = jest.fn(
-    async (id: number, failureReason: ReleaseFailureReason): Promise<MissedRun> => ({
-      id,
-      name: `Release ${id}`,
-      status: 'failed',
-      failureReason,
-    })
-  );
+  const recordMissedRun = jest.fn(async (id: number, failureReason: string | null) => ({
+    id,
+    name: `Release ${id}`,
+    status: 'failed',
+    failureReason,
+  }));
   const reportFailedRun = jest.fn();
   const reportReleasedRun = jest.fn();
   const logError = jest.fn();
@@ -100,23 +88,6 @@ describe('Scheduling service: freezeOverdueReleases', () => {
     jest.clearAllMocks();
   });
 
-  it('looks for unreleased releases overdue by more than the grace period, or failed', async () => {
-    const { service, findMany } = setup({ rows: [] });
-
-    await service.freezeOverdueReleases({ now: NOW });
-
-    expect(findMany).toHaveBeenCalledWith({
-      where: {
-        releasedAt: null,
-        $or: [
-          { scheduledAt: { $lt: new Date(NOW.getTime() - OVERDUE_GRACE_PERIOD_MS) } },
-          { status: 'failed' },
-        ],
-      },
-      select: ['id'],
-    });
-  });
-
   it.each([
     ['not scheduled', null],
     ['scheduled in the future', new Date(NOW.getTime() + 60_000)],
@@ -156,7 +127,7 @@ describe('Scheduling service: freezeOverdueReleases', () => {
     const { service, recordMissedRun, reportFailedRun, reportReleasedRun, strapi } = setup({
       rows: [release({ id: 1, status: 'empty', scheduledAt: minutesAgo(10) })],
     });
-    const done = { id: 1, name: 'Release 1', status: 'done' as const, failureReason: null };
+    const done = { id: 1, name: 'Release 1', status: 'done', failureReason: null };
     recordMissedRun.mockResolvedValueOnce(done);
 
     await service.freezeOverdueReleases({ now: NOW });
@@ -167,7 +138,7 @@ describe('Scheduling service: freezeOverdueReleases', () => {
   });
 
   it.each([
-    ['a run froze it meanwhile', { releasedAt: NOW, status: 'done' as const }],
+    ['a run froze it meanwhile', { releasedAt: NOW, status: 'done' }],
     [
       'it was rescheduled to the future meanwhile',
       { scheduledAt: new Date(NOW.getTime() + 60_000) },
@@ -251,7 +222,7 @@ describe('Scheduling service: freezeOverdueReleases', () => {
       rows: [release({ id: 1, scheduledAt: minutesAgo(10) })],
     });
     await service.set(1, minutesAgo(10));
-    recordMissedRun.mockResolvedValueOnce(null);
+    recordMissedRun.mockResolvedValueOnce(null as never);
 
     const frozen = await service.freezeOverdueReleases({ now: NOW });
 

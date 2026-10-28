@@ -26,9 +26,7 @@ export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
       .hook('strapi::content-types.beforeSync')
       .register((input: ContentTypesSyncInput) => disableContentTypeLocalized(input, { strapi }));
 
-    // After the sync: the removals recalculate statuses, which reads the current schema. Not a
-    // pipeline: `afterSync` is a parallel hook, so these handlers (and other plugins') run
-    // concurrently, and each must stay correct whatever order the others finish in.
+    // After the sync: the removals recalculate statuses, which reads the current schema
     strapi
       .hook('strapi::content-types.afterSync')
       .register((input: ContentTypesSyncInput) =>

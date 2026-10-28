@@ -791,17 +791,12 @@ describe('Release Action service', () => {
     ) => {
       const actionFindMany = jest.fn().mockResolvedValue(actions);
       const actionUpdate = jest.fn();
-      const actionUpdateMany = jest.fn();
       const strapiMock = {
         ...baseStrapiMock,
         log: { error: jest.fn() },
         db: {
           ...baseStrapiMock.db,
-          query: jest.fn().mockReturnValue({
-            findMany: actionFindMany,
-            update: actionUpdate,
-            updateMany: actionUpdateMany,
-          }),
+          query: jest.fn().mockReturnValue({ findMany: actionFindMany, update: actionUpdate }),
         },
       };
       mockGetValidityForActions.mockImplementationOnce(
@@ -816,11 +811,11 @@ describe('Release Action service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });
 
-      return { releaseActionService, actionFindMany, actionUpdate, actionUpdateMany, strapiMock };
+      return { releaseActionService, actionFindMany, actionUpdate, strapiMock };
     };
 
     it("stores each planned action's validity and recalculates each release once", async () => {
-      const { releaseActionService, actionUpdate, actionUpdateMany } = setup([
+      const { releaseActionService, actionUpdate } = setup([
         { id: 1, type: 'publish', release: { id: 10 } },
         { id: 2, type: 'publish', release: { id: 10 } },
         // Stored as invalid by an earlier version: unpublish actions are always publishable
@@ -830,19 +825,17 @@ describe('Release Action service', () => {
 
       await releaseActionService.revalidatePlannedActions({ contentType: 'api::a.a' });
 
-      // One write per release for its publish actions sharing a validity, by type too, so a type
-      // change committed since the read keeps its own validity
-      expect(actionUpdateMany.mock.calls).toStrictEqual([
-        [{ where: { id: { $in: [1, 2] }, type: 'publish' }, data: INVALID }],
-      ]);
+      // Written by type too, so a type change committed since the read keeps its own validity
       expect(actionUpdate.mock.calls).toStrictEqual([
+        [{ where: { id: 1, type: 'publish' }, data: INVALID }],
+        [{ where: { id: 2, type: 'publish' }, data: INVALID }],
         [{ where: { id: 3, type: 'unpublish' }, data: { isEntryValid: true, reason: null } }],
       ]);
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[10], [20]]);
     });
 
     it('leaves alone a release that ran or was deleted in between', async () => {
-      const { releaseActionService, actionUpdateMany, strapiMock } = setup([
+      const { releaseActionService, actionUpdate, strapiMock } = setup([
         { id: 1, type: 'publish', release: { id: 10 } },
         { id: 2, type: 'publish', release: { id: 20 } },
         { id: 3, type: 'publish', release: { id: 30 } },
@@ -854,18 +847,18 @@ describe('Release Action service', () => {
 
       await releaseActionService.revalidatePlannedActions({});
 
-      expect(actionUpdateMany.mock.calls).toStrictEqual([
-        [{ where: { id: { $in: [3] }, type: 'publish' }, data: INVALID }],
+      expect(actionUpdate.mock.calls).toStrictEqual([
+        [{ where: { id: 3, type: 'publish' }, data: INVALID }],
       ]);
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[30]]);
     });
 
     it('logs a release whose change fails and still changes the others', async () => {
-      const { releaseActionService, actionUpdateMany, strapiMock } = setup([
+      const { releaseActionService, actionUpdate, strapiMock } = setup([
         { id: 1, type: 'publish', release: { id: 10 } },
         { id: 2, type: 'publish', release: { id: 20 } },
       ]);
-      actionUpdateMany.mockRejectedValueOnce(new Error('write failed'));
+      actionUpdate.mockRejectedValueOnce(new Error('write failed'));
 
       await releaseActionService.revalidatePlannedActions({});
 
@@ -873,55 +866,11 @@ describe('Release Action service', () => {
         'Error while changing the actions of release 10',
         expect.objectContaining({ error: expect.any(Error) })
       );
-      expect(actionUpdateMany).toHaveBeenLastCalledWith({
-        where: { id: { $in: [2] }, type: 'publish' },
+      expect(actionUpdate).toHaveBeenLastCalledWith({
+        where: { id: 2, type: 'publish' },
         data: INVALID,
       });
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[20]]);
-    });
-  });
-
-  describe('storePublishValidities', () => {
-    const VALID = { isEntryValid: true, reason: null };
-    const INVALID = { isEntryValid: false, reason: { error: { name: 'TypeError' } } };
-
-    const setup = () => {
-      const updateMany = jest.fn();
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: { ...baseStrapiMock.db, query: jest.fn().mockReturnValue({ updateMany }) },
-      };
-
-      return {
-        // @ts-expect-error Ignore missing properties
-        releaseActionService: createReleaseActionService({ strapi: strapiMock }),
-        updateMany,
-      };
-    };
-
-    it('writes once per distinct validity, on publish actions only', async () => {
-      const { releaseActionService, updateMany } = setup();
-
-      await releaseActionService.storePublishValidities(
-        new Map<number, utils.EntryValidity>([
-          [1, VALID],
-          [2, INVALID],
-          [3, { ...VALID }],
-        ])
-      );
-
-      expect(updateMany.mock.calls).toStrictEqual([
-        [{ where: { id: { $in: [1, 3] }, type: 'publish' }, data: VALID }],
-        [{ where: { id: { $in: [2] }, type: 'publish' }, data: INVALID }],
-      ]);
-    });
-
-    it('writes nothing for no validities', async () => {
-      const { releaseActionService, updateMany } = setup();
-
-      await releaseActionService.storePublishValidities(new Map());
-
-      expect(updateMany).not.toHaveBeenCalled();
     });
   });
 
@@ -1121,7 +1070,6 @@ describe('Release Action service', () => {
         ),
         localization: {
           isLocalizedContentType: ({ uid }: { uid: string }) => uid === 'api::localized.localized',
-          getDefaultLocale: jest.fn().mockResolvedValue('en'),
         },
         documents: jest.fn((uid: string) => ({ findMany: () => entryFindMany(uid) })),
         db: {
@@ -1178,56 +1126,6 @@ describe('Release Action service', () => {
       expect(entryFindMany.mock.calls.map(([uid]) => uid)).toEqual([
         'api::kept.kept',
         'api::localized.localized',
-      ]);
-    });
-
-    it('matches a localized action stored without a locale to the default locale', async () => {
-      const action = (id: number, documentId: string) => ({
-        id,
-        type: 'unpublish',
-        contentType: 'api::localized.localized',
-        entryDocumentId: documentId,
-        locale: null,
-      });
-      const strapiMock = {
-        ...baseStrapiMock,
-        contentType: jest.fn((uid: string) => ({ uid, options: { draftAndPublish: true } })),
-        localization: {
-          isLocalizedContentType: () => true,
-          getDefaultLocale: jest.fn().mockResolvedValue('en'),
-        },
-        documents: jest.fn(() => ({
-          findMany: jest.fn().mockResolvedValue([
-            { documentId: 'doc-default', locale: 'en' },
-            { documentId: 'doc-other', locale: 'fr' },
-          ]),
-        })),
-        db: {
-          ...baseStrapiMock.db,
-          query: jest.fn().mockReturnValue({
-            findMany: jest
-              .fn()
-              .mockResolvedValue([action(1, 'doc-default'), action(2, 'doc-other')]),
-          }),
-        },
-      };
-      mockGetValidityForActions.mockResolvedValueOnce(new Map());
-
-      // @ts-expect-error Ignore missing properties
-      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
-      const prepared = await releaseActionService.prepareSkippedActions(1);
-
-      // Kept only when the entry exists in the default locale, where the run would release it
-      expect(prepared).toEqual([
-        {
-          action: {
-            type: 'unpublish',
-            contentType: 'api::localized.localized',
-            entryDocumentId: 'doc-default',
-            locale: null,
-          },
-          validity: { isEntryValid: true, reason: null },
-        },
       ]);
     });
   });

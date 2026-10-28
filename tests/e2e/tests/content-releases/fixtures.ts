@@ -5,23 +5,26 @@ import { ContentManagerPage } from './page-objects/ContentManagerPage';
 import { ReleasesPage } from './page-objects/ReleasesPage';
 import { ReleaseDetailsPage } from './page-objects/ReleaseDetailsPage';
 
-// The seeded release's name, imported by the specs that use it
+// Single source of truth for the seeded release name (imported by the spec too).
 export const releaseName = 'Trent Crimm: The Independent';
 
 /**
- * Page objects a test can request by name. Built lazily: only if a test names it.
+ * The custom fixtures this project's tests can request by name.
+ * - value fixtures (cm/releases/details): hand back a ready page object.
+ * - releasePageSetup: an `auto` fixture (runs for every test) that reproduces
+ *   the old `beforeEach`. It returns nothing, so its type is `void`.
  */
-type PageObjectFixtures = {
+type ReleaseFixtures = {
   cm: ContentManagerPage;
   releases: ReleasesPage;
   details: ReleaseDetailsPage;
+  releasePageSetup: void;
 };
 
-/**
- * Page objects only, for specs that run their own setup (e.g. the releases list, which resets
- * files because one test edits a content type).
- */
-export const testWithPageObjects = base.extend<PageObjectFixtures>({
+export const test = base.extend<ReleaseFixtures>({
+  // ── Value fixtures ──────────────────────────────────────────────────────
+  // Each depends on the built-in `page`, constructs one POM bound to it, and
+  // hands it to the test via `use`. Built lazily: only if a test names it.
   cm: async ({ page }, use) => {
     await use(new ContentManagerPage(page));
   },
@@ -31,32 +34,17 @@ export const testWithPageObjects = base.extend<PageObjectFixtures>({
   details: async ({ page }, use) => {
     await use(new ReleaseDetailsPage(page));
   },
-});
 
-/**
- * Page objects, and every test starts logged in on a freshly imported `with-admin` database.
- * `loggedInSetup` is an `auto` fixture: it runs for every test in files using this `test`, even
- * ones that don't name it.
- */
-export const testLoggedIn = testWithPageObjects.extend<{ loggedInSetup: void }>({
-  loggedInSetup: [
-    async ({ page }, use) => {
+  // ── Auto setup fixture ──────────────────────────────────────────────────
+  // `auto: true` → runs for EVERY test in files using this `test`, even ones
+  // that don't name it. Depends on `releases` so the navigation reuses the POM
+  // (fixture composition). Everything before `use()` is setup; there's no
+  // teardown here. This replaces the spec's `beforeEach` verbatim.
+  releasePageSetup: [
+    async ({ page, releases }, use) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
       await page.goto('/admin');
       await login({ page });
-      await use();
-    },
-    { auto: true },
-  ],
-});
-
-/**
- * Like `testLoggedIn`, and every test starts on the seeded release's details page.
- */
-export const test = testLoggedIn.extend<{ releasePageSetup: void }>({
-  releasePageSetup: [
-    // Naming `loggedInSetup` makes it run first: Playwright orders fixtures by dependency
-    async ({ loggedInSetup, releases }, use) => {
       await releases.goto();
       await releases.openRelease(releaseName);
       await use();

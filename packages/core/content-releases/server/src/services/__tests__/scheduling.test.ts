@@ -209,27 +209,7 @@ describe('Scheduling service', () => {
       expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
     });
 
-    it('does not arm a release that failed before the upgrade', async () => {
-      const findMany = jest.fn().mockReturnValue([]);
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: { query: jest.fn(() => ({ findMany })) },
-      };
-
-      // @ts-expect-error Ignore missing properties
-      const schedulingService = createSchedulingService({ strapi: strapiMock });
-      await schedulingService.syncFromDatabase();
-
-      expect(findMany).toHaveBeenCalledWith({
-        where: {
-          scheduledAt: { $gte: expect.any(Date) },
-          releasedAt: null,
-          $or: [{ status: { $ne: 'failed' } }, { status: null }],
-        },
-      });
-    });
-
-    it('silently skips a release deleted or frozen since the read, and arms the others', async () => {
+    it('logs a release deleted or frozen since the read, and still arms the others', async () => {
       const logError = jest.fn();
       const strapiMock = {
         ...baseStrapiMock,
@@ -251,42 +231,10 @@ describe('Scheduling service', () => {
       const scheduledJobs = await schedulingService.syncFromDatabase();
 
       expect([...scheduledJobs.keys()]).toEqual(['2']);
-      expect(logError).not.toHaveBeenCalled();
-    });
-
-    it('logs a release that could not be armed, and still arms the others', async () => {
-      const logError = jest.fn();
-      const failure = new Error('cron unavailable');
-      const strapiMock = {
-        ...baseStrapiMock,
-        cron: {
-          ...baseStrapiMock.cron,
-          add: jest.fn((jobs: Record<string, unknown>) => {
-            if ('publishRelease_1' in jobs) {
-              throw failure;
-            }
-          }),
-        },
-        log: { error: logError },
-        db: {
-          query: jest.fn(() => ({
-            findMany: jest.fn().mockReturnValue([
-              { id: 1, scheduledAt: new Date(), releasedAt: null },
-              { id: 2, scheduledAt: new Date(), releasedAt: null },
-            ]),
-            findOne: jest.fn(async ({ where }) => ({ id: where.id })),
-          })),
-        },
-      };
-
-      // @ts-expect-error Ignore missing properties
-      const schedulingService = createSchedulingService({ strapi: strapiMock });
-      const scheduledJobs = await schedulingService.syncFromDatabase();
-
-      expect([...scheduledJobs.keys()]).toEqual(['2']);
-      expect(logError).toHaveBeenCalledWith("[Content Releases] Couldn't schedule release 1", {
-        error: failure,
-      });
+      expect(logError).toHaveBeenCalledWith(
+        "[Content Releases] Couldn't schedule release 1",
+        expect.objectContaining({ error: expect.any(Error) })
+      );
     });
   });
 });
