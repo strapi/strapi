@@ -1,6 +1,6 @@
 'use strict';
 
-const { curry } = require('lodash/fp');
+const { curry } = require('lodash');
 const { traverseEntity, async } = require('@strapi/utils');
 
 const { removeUserRelationFromRoleEntities } = require('./visitors');

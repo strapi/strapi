@@ -88,12 +88,11 @@ const makeFieldRestrictedAbility = (
 const mockUser = { id: 42 };
 const mockContext = { userAbility: makeUserAbility(), user: mockUser };
 
-const mockExtra: HandlerParams['extra'] = {
-  signal: new AbortController().signal,
+const mockExtra = {
   requestId: 'test-request-id',
-  sendNotification: jest.fn(),
-  sendRequest: jest.fn(),
-};
+  signal: new AbortController().signal,
+  _meta: undefined,
+} satisfies HandlerParams['extra'];
 
 const makePermissionChecker = (overrides: Record<string, jest.Mock> = {}) => ({
   cannot: {
@@ -304,6 +303,11 @@ describe('slugifyUidForMcpToolName', () => {
     expect(slugifyUidForMcpToolName('api::article.article')).toBe('article');
   });
 
+  it('includes the content-type suffix so api models sharing an api name stay unique', () => {
+    expect(slugifyUidForMcpToolName('api::writer.writer')).toBe('writer');
+    expect(slugifyUidForMcpToolName('api::writer.editor')).toBe('writer_editor');
+  });
+
   it('maps plugin UIDs to namespace-model_content-type per documented format', () => {
     expect(slugifyUidForMcpToolName('plugin::i18n.locale')).toBe('plugin-i18n_locale');
   });
@@ -347,6 +351,28 @@ describe('deriveDisplayedContentTypeMcpToolDefinitions', () => {
         'write_plugin-cms-basics_settings',
       ])
     );
+  });
+
+  it('derives unique tool names for api content types that share an api name', () => {
+    const models = [
+      baseModel({
+        uid: 'api::writer.writer',
+        apiID: 'writer',
+        kind: 'collectionType',
+      }),
+      baseModel({
+        uid: 'api::writer.editor',
+        apiID: 'editor',
+        kind: 'collectionType',
+      }),
+    ];
+
+    const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, models);
+    const names = tools.map((tool) => tool.name);
+    const uniqueNames = new Set(names);
+
+    expect(uniqueNames.size).toBe(names.length);
+    expect(names).toEqual(expect.arrayContaining(['list_writer', 'list_writer_editor']));
   });
 
   it('emits list/get with explorer.read for a collection type', () => {
@@ -1116,6 +1142,32 @@ describe('buildDataSchema', () => {
     expect(schema.safeParse({ tags: { set: null } }).success).toBe(true);
   });
 
+  it('xMany relation rejects { set: [...] } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: ['abc'], connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: ['abc'], disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: ['abc'], connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
+  });
+
+  it('xMany relation rejects { set: null } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: null, connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: null, disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: null, connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
+  });
+
   it('xMany relation accepts empty object {}', () => {
     const schema = buildDataSchema(
       mockStrapi,
@@ -1694,7 +1746,7 @@ const makeLocaleRestrictedPermissionChecker = (permittedLocales: string[]) => {
 };
 
 /**
- * Builds a mock strapi instance that reports the given uid as localized (i18n).
+ * Builds a mock strapi instance whose localization provider reports the given uid as localized.
  */
 const makeLocalizedStrapi = (uid: string): Core.Strapi =>
   ({
@@ -1704,10 +1756,16 @@ const makeLocalizedStrapi = (uid: string): Core.Strapi =>
         pluginOptions: { i18n: { localized: true } },
       },
     },
+    localization: {
+      isLocalizedContentType: jest.fn(
+        (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+          model.pluginOptions?.i18n?.localized === true
+      ),
+    },
   }) as unknown as Core.Strapi;
 
 /**
- * Builds a mock strapi instance that reports the given uid as NOT localized.
+ * Builds a mock strapi instance whose localization provider reports the given uid as NOT localized.
  */
 const makeNonLocalizedStrapi = (uid: string): Core.Strapi =>
   ({
@@ -1716,6 +1774,12 @@ const makeNonLocalizedStrapi = (uid: string): Core.Strapi =>
       [uid]: {
         pluginOptions: {},
       },
+    },
+    localization: {
+      isLocalizedContentType: jest.fn(
+        (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+          model.pluginOptions?.i18n?.localized === true
+      ),
     },
   }) as unknown as Core.Strapi;
 

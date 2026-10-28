@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { WIDTH_SIDE_NAVIGATION, createContext } from '@strapi/admin/strapi-admin';
-import { Portal, Flex, Box, ScrollArea, IconButton } from '@strapi/design-system';
+import { Portal, Flex, Box, ScrollArea, IconButton, useMeasure } from '@strapi/design-system';
 import { CaretDown, CaretUp } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -25,6 +25,7 @@ interface ActionsDrawerContextValue {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   hasContent: boolean;
   hasSideNav: boolean;
+  headerRef: (element: HTMLDivElement) => void;
 }
 
 const [ActionsDrawerProvider, useActionsDrawer] = createContext<ActionsDrawerContextValue | null>(
@@ -114,6 +115,7 @@ interface RootProps {
 
 const Root = ({ children, hasContent = false, hasSideNav = false }: RootProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [headerRef, { height: headerHeight }] = useMeasure<HTMLDivElement>();
 
   // Close drawer when there's no content
   React.useEffect(() => {
@@ -128,7 +130,9 @@ const Root = ({ children, hasContent = false, hasSideNav = false }: RootProps) =
       setIsOpen={setIsOpen}
       hasContent={hasContent}
       hasSideNav={hasSideNav}
+      headerRef={headerRef}
     >
+      <Box height={`${headerHeight}px`} shrink={0} data-testid="actions-drawer-spacer" />
       <DrawerContainer $hasSideNav={hasSideNav} $isOpen={isOpen}>
         {children}
       </DrawerContainer>
@@ -174,6 +178,7 @@ const Header = ({ children }: HeaderProps) => {
   const isOpen = ctx?.isOpen ?? false;
   const hasContent = ctx?.hasContent ?? false;
   const setIsOpen = ctx?.setIsOpen;
+  const headerRef = ctx?.headerRef;
   const { formatMessage } = useIntl();
 
   const toggleOpen = () => {
@@ -181,7 +186,7 @@ const Header = ({ children }: HeaderProps) => {
   };
 
   return (
-    <DrawerContent background="neutral0">
+    <DrawerContent ref={headerRef} background="neutral0">
       <Flex
         paddingTop={3}
         paddingBottom={3}
