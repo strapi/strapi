@@ -30,7 +30,7 @@ The admin panel does not save one attribute at a time. It sends the whole change
 
 ### Reload after a write
 
-After a successful update, the `schema` controller sets `strapi.reload.isWatching` to `false` and calls `strapi.reload()` in a `setImmediate`. The reloader sends a `reload` message to the parent process of `strapi develop`, which restarts the server. The route `GET /update-schema-status` returns `isUpdating`. The admin polls it with `useServerRestartWatcher` until the server is back.
+After a successful update, the `schema` controller sets `strapi.reload.isWatching` to `false` and calls `strapi.reload()` in a `setImmediate`. The reloader sends a `reload` message to the parent process of `strapi develop`, which restarts the server. The route `GET /update-schema-status` returns `isUpdating`. The admin polls it with `useServerRestartWatcher` (logic in `watchServerRestart.ts`) every 200 ms until the server is back, for at most 30 s. Each request is aborted after 5 s: `strapi develop` restarts by replacing its cluster worker, and a request that reaches the server during the swap can be accepted and never answered.
 
 ### Development-only writes
 
