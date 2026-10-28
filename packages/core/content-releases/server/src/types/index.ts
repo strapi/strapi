@@ -53,15 +53,6 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      // Registered only when the `cms-content-releases` EE feature is enabled, so a CE application, or a
-      // license without the feature, resolves them to `undefined`.
-      // TODO @Nico Redesign as a real opt-in to licensed features, so applications that have the
-      // feature can drop `undefined`, instead of every application seeing it.
-      /**
-       * The releases settings, written by the settings service under the `core` type. A
-       * `defaultTimezone` left `undefined` is dropped by the JSON encoding, so the key may be
-       * missing. Stored whatever the license, so it is not `undefined` like the services.
-       */
       /**
        * The outcome of a release publish, emitted by the release service and forwarded to webhooks.
        * `isPublished` tells the two payloads apart: the published release, or the error that stopped
@@ -74,10 +65,19 @@ declare global {
         ];
       }
 
+      /**
+       * The releases settings, written by the settings service under the `core` type. A
+       * `defaultTimezone` left `undefined` is dropped by the JSON encoding, so the key may be
+       * missing. Stored whatever the license, so it is not `undefined` like the services.
+       */
       interface Stores {
         'core_content-releases_settings': { defaultTimezone?: string | null | undefined };
       }
 
+      // Registered only when the `cms-content-releases` EE feature is enabled, so a CE application, or a
+      // license without the feature, resolves them to `undefined`.
+      // TODO @Nico Redesign as a real opt-in to licensed features, so applications that have the
+      // feature can drop `undefined`, instead of every application seeing it.
       interface PackageServices {
         'plugin::content-releases.homepage': Services['homepage'] | undefined;
         'plugin::content-releases.release': Services['release'] | undefined;
