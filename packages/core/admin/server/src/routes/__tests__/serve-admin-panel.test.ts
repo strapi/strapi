@@ -17,7 +17,6 @@ jest.mock('koa-static', () => {
 
 jest.mock('fs-extra', () => ({
   ...jest.requireActual('fs-extra'),
-  pathExistsSync: jest.fn(() => true),
   createReadStream: jest.fn(() => 'index-html-stream'),
 }));
 
