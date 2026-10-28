@@ -302,8 +302,18 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        project: ['chromium', 'webkit']
+        project: ['chromium']
         shard: [1/4, 2/4, 3/4, 4/4]
+        # WebKit takes 1.7 to 1.9 times as long as Chromium for the same tests and sets the
+        # critical path, so it gets more shards. The shards are balanced by duration
+        # (tests/e2e/shard-weights.json).
+        include:
+          - { project: 'webkit', shard: 1/6 }
+          - { project: 'webkit', shard: 2/6 }
+          - { project: 'webkit', shard: 3/6 }
+          - { project: 'webkit', shard: 4/6 }
+          - { project: 'webkit', shard: 5/6 }
+          - { project: 'webkit', shard: 6/6 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -495,8 +505,18 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        project: ['chromium', 'webkit']
+        project: ['chromium']
         shard: [1/4, 2/4, 3/4, 4/4]
+        # WebKit takes 1.7 to 1.9 times as long as Chromium for the same tests and sets the
+        # critical path, so it gets more shards. The shards are balanced by duration
+        # (tests/e2e/shard-weights.json).
+        include:
+          - { project: 'webkit', shard: 1/6 }
+          - { project: 'webkit', shard: 2/6 }
+          - { project: 'webkit', shard: 3/6 }
+          - { project: 'webkit', shard: 4/6 }
+          - { project: 'webkit', shard: 5/6 }
+          - { project: 'webkit', shard: 6/6 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
