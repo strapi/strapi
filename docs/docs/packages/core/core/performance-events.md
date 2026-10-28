@@ -116,6 +116,10 @@ Slow-query and request summaries can be high volume if thresholds are low. Use *
 
 When **`database.performance.output`** is **`artifact`** or **`both`** and **`database.performance.artifactPath`** is set, core appends structured JSON Lines batches (one JSON object per line) that include DB perf rows and request timeline rows when emitted. Use **`database.performance.flushIntervalMs`** / **`database.performance.maxEvents`** to tune artifact batching.
 
+## OpenTelemetry
+
+`server.observability.tracing.enabled` and `server.observability.metrics.enabled` turn on spans and metric instruments in core. Core only depends on **`@opentelemetry/api`** and never registers a tracer provider, meter provider, propagator, or exporter. The app owns the SDK and must load it before Strapi starts (for example `NODE_OPTIONS="--require ./otel.js"` or its own instrumentation entry point). Without an SDK, the API no-ops. Metrics use `eventHub.on` for `performance.request.summary`, `performance.db.query.slow`, and `performance.db.query.error`, so they need the same perf config as the listeners above. The admin performance widgets read the live in-process window and artifact, not OpenTelemetry, so they work without an SDK. See `examples/otel-local/README.md` for a local collector setup.
+
 ## See also
 
 - [Event Hub](./event-hub.md)

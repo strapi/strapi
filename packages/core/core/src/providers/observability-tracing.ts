@@ -4,13 +4,13 @@ import { defineProvider } from './provider';
 import { attachBcryptjsTracing } from '../services/observability/opentelemetry-bcryptjs';
 import {
   attachKnexQueryTracing,
-  registerOpenTelemetryTracing,
+  configureOpenTelemetryTracing,
   shutdownOpenTelemetryTracing,
 } from '../services/observability/opentelemetry-tracing';
 
 export default defineProvider({
   async register(strapi: Core.Strapi) {
-    registerOpenTelemetryTracing(strapi);
+    configureOpenTelemetryTracing(strapi);
   },
 
   async bootstrap(strapi: Core.Strapi) {
@@ -18,7 +18,7 @@ export default defineProvider({
     attachBcryptjsTracing(strapi);
   },
 
-  destroy(strapi: Core.Strapi) {
-    return shutdownOpenTelemetryTracing(strapi);
+  destroy() {
+    return shutdownOpenTelemetryTracing();
   },
 });

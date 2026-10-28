@@ -18,9 +18,9 @@ export default defineProvider({
     disposeHub = attachPerformanceMetricsHubListeners(strapi);
   },
 
-  destroy(strapi: Core.Strapi) {
+  async destroy() {
     disposeHub?.();
     disposeHub = null;
-    return shutdownOpenTelemetryPerformanceMetrics(strapi);
+    shutdownOpenTelemetryPerformanceMetrics();
   },
 });

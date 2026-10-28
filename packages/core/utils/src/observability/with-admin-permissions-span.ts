@@ -39,7 +39,7 @@ function resolveRequestWorkParentContext(): OtelContext {
 }
 
 /**
- * Wired from `@strapi/core` when the OTLP metrics SDK initializes.
+ * Wired from `@strapi/core` when `server.observability.metrics.enabled` is true.
  * @internal Not part of the supported public API — only called from core observability bootstrap.
  */
 export function setAdminPermissionsPhaseMetricsRecorder(
@@ -99,7 +99,7 @@ async function runWithOptionalInternalSpan<T>(
 }
 
 /**
- * INTERNAL span when tracing is enabled; OTLP histogram via recorder registered by core
+ * INTERNAL span when tracing is enabled; histogram via recorder registered by core
  * (`strapi.admin.permissions.phase.duration_ms`). Used by the admin permissions manager.
  */
 export async function withAdminPermissionsSpan<T>(

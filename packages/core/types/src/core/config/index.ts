@@ -2,8 +2,8 @@ export type * as Shared from './shared';
 export type {
   Server,
   ServerObservability,
+  ServerObservabilityMetrics,
   ServerObservabilityTracing,
-  ServerObservabilityTracingOtlp,
 } from './server';
 export type { Admin } from './admin';
 export type { Api } from './api';

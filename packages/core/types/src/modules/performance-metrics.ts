@@ -5,7 +5,7 @@
  * keeps a bounded in-memory window (fixed-size latency histogram + capped route/SQL maps) and
  * recomputes a snapshot on demand. It reflects only the traffic served by THIS process since the
  * window opened; it is not cluster-wide or restart-surviving. For fleet-wide or historical data,
- * export via OTLP or read the optional performance artifact.
+ * register an OpenTelemetry SDK in the app or read the optional performance artifact.
  */
 
 /** One route bucket aggregated from `performance.request.summary` events in the live window. */

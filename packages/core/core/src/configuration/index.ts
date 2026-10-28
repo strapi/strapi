@@ -43,18 +43,9 @@ const defaultServerConfig = {
   observability: {
     tracing: {
       enabled: false,
-      serviceName: 'strapi',
-      consoleExporter: false,
-      otlp: {
-        enabled: false,
-      },
     },
     metrics: {
       enabled: false,
-      serviceName: 'strapi',
-      otlp: {
-        enabled: false,
-      },
     },
   },
   openapi: {

@@ -1,29 +1,14 @@
 import type { Core } from '@strapi/strapi';
 
 const serverConfig = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server => {
-  /** OTLP HTTP base (no trailing slash). Start collector: `cd examples/otel-local && docker compose up`. */
-  const otelEnabled = env.bool('STRAPI_OTEL_ENABLED', true);
-  const otelHttpBase = env('STRAPI_OTEL_HTTP_ENDPOINT', 'http://127.0.0.1:4318').replace(/\/$/, '');
-  const otelServiceName = env('STRAPI_OTEL_SERVICE_NAME', 'strapi-complex');
-
-  const observability = otelEnabled
+  /**
+   * Turns on Strapi's OpenTelemetry API instrumentation. Spans and metrics only leave the process
+   * when an SDK is preloaded (see `examples/otel-local/README.md`); otherwise the API no-ops.
+   */
+  const observability = env.bool('STRAPI_OTEL_ENABLED', false)
     ? {
-        tracing: {
-          enabled: true,
-          serviceName: otelServiceName,
-          otlp: {
-            enabled: true,
-            url: `${otelHttpBase}/v1/traces`,
-          },
-        },
-        metrics: {
-          enabled: true,
-          serviceName: otelServiceName,
-          otlp: {
-            enabled: true,
-            url: `${otelHttpBase}/v1/metrics`,
-          },
-        },
+        tracing: { enabled: true },
+        metrics: { enabled: true },
       }
     : undefined;
 

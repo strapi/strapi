@@ -106,53 +106,26 @@ export interface ServerPerformance {
   emitStageEvents?: boolean;
 }
 
-export interface ServerObservabilityTracingOtlp {
-  /** When true and `url` is set, exports spans to an OTLP/HTTP traces endpoint (e.g. collector). */
-  enabled?: boolean;
-  /** OTLP traces endpoint URL, typically `http://localhost:4318/v1/traces`. */
-  url?: string;
-  /** Optional exporter headers (e.g. `{ Authorization: 'Bearer …' }`). */
-  headers?: Record<string, string>;
-}
-
-export interface ServerObservabilityMetricsOtlp {
-  /** When true and `url` is set, exports Strapi performance metrics via OTLP/HTTP (e.g. collector `/v1/metrics`). */
-  enabled?: boolean;
-  /** OTLP metrics endpoint URL, typically `http://localhost:4318/v1/metrics`. */
-  url?: string;
-  /** Optional exporter headers (e.g. `{ Authorization: 'Bearer …' }`). */
-  headers?: Record<string, string>;
-}
-
 export interface ServerObservabilityMetrics {
   /**
-   * When true, records request-summary and slow-query counters/histograms for OTLP export.
-   * Independent of {@link ServerObservabilityTracing.enabled}; configure `otlp` to send data.
+   * When true, records request, slow-query, and phase histograms/counters on the global
+   * `@opentelemetry/api` meter. The app must register its own `MeterProvider` and exporter
+   * before Strapi starts; otherwise the API no-ops. Independent of
+   * {@link ServerObservabilityTracing.enabled}.
    */
   enabled?: boolean;
-  /** Resource `service.name`; defaults to tracing `serviceName` or `strapi`. */
-  serviceName?: string;
-  otlp?: ServerObservabilityMetricsOtlp;
 }
 
 export interface ServerObservabilityTracing {
   /**
-   * Enables OpenTelemetry tracing in core: HTTP server spans and Knex query child spans.
-   * Distinct from Strapi product telemetry and from `database.performance` query logging.
+   * Enables OpenTelemetry spans in core (HTTP server, Knex queries, startup phases) through
+   * `@opentelemetry/api`. Strapi does not register a tracer provider, sampler, propagator, or
+   * exporter: the app owns the SDK. Distinct from Strapi product telemetry and from
+   * `database.performance` query logging.
    */
   enabled?: boolean;
-  /** Resource attribute `service.name`; defaults to `strapi`. */
-  serviceName?: string;
-  /**
-   * Root sampling ratio in `[0, 1]`. `1` (default) keeps all traces; lower values randomly drop
-   * new root spans (child spans still follow active context when a trace is sampled in).
-   */
-  sampleRate?: number;
-  /** Log completed spans to the console (development / debugging only). */
-  consoleExporter?: boolean;
   /** When false, omit `strapi.http.route.*` stage spans (auth, policy, middleware, controller). */
   recordRouteHandlerStages?: boolean;
-  otlp?: ServerObservabilityTracingOtlp;
 }
 
 export interface ServerObservability {

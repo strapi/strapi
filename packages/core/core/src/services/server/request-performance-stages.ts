@@ -4,7 +4,7 @@ import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
 import {
-  isRouteHandlerStageTracingEnabled,
+  isRouteHandlerStageTracingConfigured,
   STRAPI_OTEL_KOA_HANDLER_CONTEXT,
 } from '../observability/opentelemetry-tracing';
 import type { PublicRequestPerfStage } from '../performance/event-payloads';
@@ -48,7 +48,7 @@ export function wrapPerfStagePreNext(
 ): Core.MiddlewareHandler {
   return async (ctx, next) => {
     const start = Date.now();
-    const tracingStages = isRouteHandlerStageTracingEnabled(strapi);
+    const tracingStages = isRouteHandlerStageTracingConfigured(strapi);
 
     const runInner = async () => {
       appendPerfStage(ctx, stage, Date.now() - start);
@@ -97,7 +97,7 @@ export function wrapPerfControllerChain(
 ): Core.MiddlewareHandler {
   return async (ctx, next) => {
     const start = Date.now();
-    const tracingStages = isRouteHandlerStageTracingEnabled(strapi);
+    const tracingStages = isRouteHandlerStageTracingConfigured(strapi);
 
     if (!tracingStages) {
       await chain(ctx, next);

@@ -5,7 +5,7 @@ import { withDocumentServiceObservation } from '../../observability/opentelemetr
 import type { Middleware } from './middleware-manager';
 
 /**
- * OTLP spans + histogram for every `strapi.documents(uid).{action}(…)` call (REST, admin, plugins).
+ * OpenTelemetry API spans + histogram for every `strapi.documents(uid).{action}(…)` call (REST, admin, plugins).
  */
 export const createDocumentServicePerformanceTelemetryMiddleware = (
   strapi: Core.Strapi

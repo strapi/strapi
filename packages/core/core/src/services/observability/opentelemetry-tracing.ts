@@ -13,17 +13,6 @@ import {
   type Context as OtelContext,
   type Span,
 } from '@opentelemetry/api';
-import { W3CTraceContextPropagator } from '@opentelemetry/core';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import {
-  BatchSpanProcessor,
-  ConsoleSpanExporter,
-  NodeTracerProvider,
-  ParentBasedSampler,
-  SimpleSpanProcessor,
-  TraceIdRatioBasedSampler,
-} from '@opentelemetry/sdk-trace-node';
 
 import {
   recordContentApiPhaseDuration,
@@ -32,7 +21,6 @@ import {
 import {
   inferDbOperation,
   mapDatabaseClientToDbSystem,
-  SERVICE_NAME_ATTR,
   truncateSql,
 } from './opentelemetry-tracing-utils';
 import { disposeBcryptjsTracing } from './opentelemetry-bcryptjs';
@@ -47,7 +35,7 @@ const MAX_INFLIGHT_DB_SPANS = 10_000;
 /**
  * Koa `ctx.state` entry: OpenTelemetry `Context` for the innermost traced HTTP handler
  * (server span, then route controller span). Used when `context.active()` no longer reflects
- * route work (e.g. DB driver callbacks) so spans still nest under the controller in Jaeger.
+ * route work (e.g. DB driver callbacks) so spans still nest under the controller.
  */
 export const STRAPI_OTEL_KOA_HANDLER_CONTEXT = Symbol.for('strapi.otel.koaHandlerContext');
 
@@ -113,7 +101,6 @@ interface KnexEmitter {
   off(event: string, listener: (...args: unknown[]) => void): unknown;
 }
 
-let nodeProvider: NodeTracerProvider | null = null;
 let disposeKnexListeners: (() => void) | null = null;
 
 const isTracingConfigEnabled = (strapi: Core.Strapi): boolean =>
@@ -121,9 +108,8 @@ const isTracingConfigEnabled = (strapi: Core.Strapi): boolean =>
 
 /**
  * Whether route-level tracing is turned on in config (`tracing.enabled` and
- * `recordRouteHandlerStages` not explicitly `false`). Does not depend on the Node
- * tracer provider — use this to decide that routes should use the perf/tracing
- * middleware stack so spans appear once the provider is registered.
+ * `recordRouteHandlerStages` not explicitly `false`). Spans go to the app-registered
+ * OpenTelemetry SDK, or are dropped by the API no-op tracer when none is registered.
  */
 export const isRouteHandlerStageTracingConfigured = (strapi: Core.Strapi): boolean => {
   if (!isTracingConfigEnabled(strapi)) {
@@ -132,15 +118,11 @@ export const isRouteHandlerStageTracingConfigured = (strapi: Core.Strapi): boole
   return strapi.config.get('server.observability.tracing.recordRouteHandlerStages') !== false;
 };
 
-/** When tracing is on and the Node provider exists, route handlers emit `strapi.http.route.*` spans. */
-export const isRouteHandlerStageTracingEnabled = (strapi: Core.Strapi): boolean =>
-  isRouteHandlerStageTracingConfigured(strapi) && nodeProvider != null;
-
 const STARTUP_TRACER_NAME = '@strapi/core.startup';
 
 /**
  * INTERNAL span for Strapi startup phases (`register`, `bootstrap`, `listen`).
- * Uses root spans when `root: true` so startup appears as its own trace in Jaeger.
+ * Uses root spans when `root: true` so startup appears as its own trace.
  */
 export async function withStartupSpan<T>(
   strapi: Core.Strapi,
@@ -148,7 +130,7 @@ export async function withStartupSpan<T>(
   fn: () => Promise<T>,
   options?: { root?: boolean }
 ): Promise<T> {
-  if (!isTracingConfigEnabled(strapi) || !nodeProvider) {
+  if (!isTracingConfigEnabled(strapi)) {
     return fn();
   }
 
@@ -185,7 +167,7 @@ export async function beginDeferredStartupRootSpan(
   strapi: Core.Strapi,
   fn: () => Promise<void>
 ): Promise<Span | undefined> {
-  if (!isTracingConfigEnabled(strapi) || !nodeProvider) {
+  if (!isTracingConfigEnabled(strapi)) {
     await fn();
     return undefined;
   }
@@ -223,7 +205,7 @@ export function endDeferredStartupRootSpan(span: Span | undefined): void {
 /**
  * Runs `fn` as a child of an explicit parent span (typically the deferred `strapi.startup` root
  * left open after `load()` until `start()`). Used by the develop CLI and any other code that
- * runs between load and listen so Jaeger shows where time goes.
+ * runs between load and listen so traces show where time goes.
  */
 export async function withStartupTraceChildPhase<T>(
   parentSpan: Span | undefined,
@@ -231,7 +213,7 @@ export async function withStartupTraceChildPhase<T>(
   spanName: string,
   fn: () => Promise<T>
 ): Promise<T> {
-  if (!parentSpan || !isTracingConfigEnabled(strapi) || !nodeProvider) {
+  if (!parentSpan || !isTracingConfigEnabled(strapi)) {
     return fn();
   }
 
@@ -239,65 +221,19 @@ export async function withStartupTraceChildPhase<T>(
   return context.with(ctx, () => withStartupSpan(strapi, spanName, fn));
 }
 
-/** Starts the Node SDK and wires `trace`/propagation globals. Call from provider `register`. */
-export function registerOpenTelemetryTracing(strapi: Core.Strapi): void {
-  if (!isTracingConfigEnabled(strapi)) {
-    setRequestWorkTraceParentContextResolver(undefined);
-    return;
-  }
-
-  if (nodeProvider) {
-    // Intentionally called from several bootstrap entry points (load/start/register and the
-    // observability-tracing provider) so startup spans are captured early; subsequent calls are
-    // a silent no-op rather than a warning.
-    return;
-  }
-
-  type TracingConfig = NonNullable<NonNullable<Core.Config.Server['observability']>['tracing']>;
-  const cfg = strapi.config.get('server.observability.tracing') as
-    Partial<TracingConfig> | undefined;
-
-  const serviceName = cfg?.serviceName ?? 'strapi';
-
-  let sampler: ParentBasedSampler | undefined;
-
-  const rate = cfg?.sampleRate;
-  if (typeof rate === 'number' && rate >= 0 && rate < 1) {
-    sampler = new ParentBasedSampler({ root: new TraceIdRatioBasedSampler(rate) });
-  }
-
-  const resource = new Resource({
-    [SERVICE_NAME_ATTR]: serviceName,
-  });
-
-  nodeProvider = new NodeTracerProvider({
-    resource,
-    ...(sampler ? { sampler } : {}),
-  });
-
-  if (cfg?.consoleExporter === true) {
-    nodeProvider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-  }
-
-  const otlp = cfg?.otlp;
-  if (otlp?.enabled === true && typeof otlp.url === 'string' && otlp.url.length > 0) {
-    const exporter = new OTLPTraceExporter({
-      url: otlp.url,
-      headers: otlp.headers,
-    });
-    nodeProvider.addSpanProcessor(new BatchSpanProcessor(exporter));
-  }
-
-  nodeProvider.register({
-    propagator: new W3CTraceContextPropagator(),
-  });
-
-  setRequestWorkTraceParentContextResolver(() => getTraceParentContextForHttpHandlerWork());
+/**
+ * Wires request-work parent context resolution. Strapi uses only `@opentelemetry/api`; the app
+ * must register its own SDK, propagator, and exporters before Strapi starts.
+ */
+export function configureOpenTelemetryTracing(strapi: Core.Strapi): void {
+  setRequestWorkTraceParentContextResolver(
+    isTracingConfigEnabled(strapi) ? () => getTraceParentContextForHttpHandlerWork() : undefined
+  );
 }
 
 /** Subscribes to Knex `query` lifecycle on `strapi.db.connection`. Call from provider `bootstrap`. */
 export function attachKnexQueryTracing(strapi: Core.Strapi): void {
-  if (!isTracingConfigEnabled(strapi) || !nodeProvider) {
+  if (!isTracingConfigEnabled(strapi)) {
     return;
   }
 
@@ -388,26 +324,14 @@ export function attachKnexQueryTracing(strapi: Core.Strapi): void {
   };
 }
 
-/** Flushes exporters and clears Knex subscriptions. Safe to call when tracing was disabled. */
-export async function shutdownOpenTelemetryTracing(strapi: Core.Strapi): Promise<void> {
+/** Clears Strapi tracing hooks. The app owns SDK and exporter shutdown. */
+export async function shutdownOpenTelemetryTracing(): Promise<void> {
   setRequestWorkTraceParentContextResolver(undefined);
 
   disposeKnexListeners?.();
   disposeKnexListeners = null;
 
   disposeBcryptjsTracing();
-
-  if (!nodeProvider) {
-    return;
-  }
-
-  try {
-    await nodeProvider.shutdown();
-  } catch (error) {
-    strapi.log.warn(`[observability.tracing] Failed to shutdown tracer provider cleanly: ${error}`);
-  }
-
-  nodeProvider = null;
 }
 
 /** HTTP span + trace context propagation; no-op unless `server.observability.tracing.enabled` is true. */
@@ -520,7 +444,7 @@ async function runWithOptionalInternalSpan<T>(
 
 /**
  * Runs `fn` inside an INTERNAL span when `server.observability.tracing.enabled` is true.
- * Records `strapi.content_api.phase.duration_ms` when observability metrics OTLP is active.
+ * Records `strapi.content_api.phase.duration_ms` when observability metrics are enabled.
  * Used for Content API validate/sanitize work nested under the HTTP route (controller) span.
  */
 export async function withContentApiSpan<T>(
@@ -552,7 +476,7 @@ export async function withContentApiSpan<T>(
 /**
  * Wraps `strapi.documents(uid).{operation}(…)` (document-service middleware).
  * INTERNAL span `strapi.documents.{operation}` when tracing is on; histogram
- * `strapi.document_service.operation.duration_ms` when metrics OTLP is on.
+ * `strapi.document_service.operation.duration_ms` when metrics are enabled.
  */
 export async function withDocumentServiceObservation<T>(
   strapi: Core.Strapi | undefined,

@@ -25,7 +25,7 @@ import {
   beginDeferredStartupRootSpan,
   continueDeferredStartupRootSpan,
   endDeferredStartupRootSpan,
-  registerOpenTelemetryTracing,
+  configureOpenTelemetryTracing,
   withStartupSpan,
   withStartupTraceChildPhase,
 } from './services/observability/opentelemetry-tracing';
@@ -291,7 +291,7 @@ class Strapi extends Container implements Core.Strapi {
 
   async start() {
     try {
-      registerOpenTelemetryTracing(this as Core.Strapi);
+      configureOpenTelemetryTracing(this as Core.Strapi);
 
       const deferred = this.deferredStartupRootSpan;
 
@@ -556,7 +556,7 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async load() {
-    registerOpenTelemetryTracing(this as Core.Strapi);
+    configureOpenTelemetryTracing(this as Core.Strapi);
 
     const span = await beginDeferredStartupRootSpan(this as Core.Strapi, () =>
       this.registerAndBootstrap()
@@ -581,7 +581,7 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async register() {
-    registerOpenTelemetryTracing(this as Core.Strapi);
+    configureOpenTelemetryTracing(this as Core.Strapi);
 
     await withStartupSpan(this as Core.Strapi, 'strapi.startup.register', async () => {
       // @ts-expect-error: init is internal

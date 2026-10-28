@@ -10,11 +10,9 @@
 
 ### OpenTelemetry
 
-`config/server.ts` enables **OTLP HTTP** export for **traces** and **metrics** when `STRAPI_OTEL_ENABLED` is true (default **true**). Env vars are documented in **`.env.example`**: `STRAPI_OTEL_HTTP_ENDPOINT` (default `http://127.0.0.1:4318`), `STRAPI_OTEL_SERVICE_NAME` (default `strapi-complex`).
+`config/server.ts` turns on Strapi's OpenTelemetry instrumentation (`server.observability.tracing` and `server.observability.metrics`) when `STRAPI_OTEL_ENABLED` is true (default **false**). Strapi only calls `@opentelemetry/api`; it never registers an SDK or exporter. To send data, preload an SDK in the Strapi process with `NODE_OPTIONS="--require ./otel.js"`.
 
-**Run order:** start the local collector + Jaeger stack, then Strapi (e.g. `yarn develop:postgres`). Full steps, Jaeger URL, how to read traces vs metrics, and what happens if the collector is down are in **[`examples/otel-local/README.md`](../otel-local/README.md)** — that file is the single “how to use OTel here” guide; this section only describes how **this** example is wired.
-
-Set **`STRAPI_OTEL_ENABLED=false`** when you are not running Docker so Strapi does not keep attempting OTLP exports (the app still works if the collector is missing; export is async and may log warnings).
+**Run order:** start the local collector + Jaeger stack, then Strapi with the SDK preloaded. Full steps, a sample `otel.js`, the Jaeger URL, and how to read traces vs metrics are in **[`examples/otel-local/README.md`](../otel-local/README.md)** — that file is the single “how to use OTel here” guide; this section only describes how **this** example is wired.
 
 ### REST API smoke seed
 
@@ -22,7 +20,7 @@ Set **`STRAPI_OTEL_ENABLED=false`** when you are not running Docker so Strapi do
 
 ### REST API stress (telemetry / load smoke)
 
-With Strapi **already running** (e.g. `yarn develop:postgres`) and the collector up if you use OTLP:
+With Strapi **already running** (e.g. `yarn develop:postgres`) and the collector up if you preload an OpenTelemetry SDK:
 
 1. Run **`yarn seed:rest`** once against this DB (grants Public permissions for all types in **`rest-stress-targets.json`**).
 2. From `examples/complex`: **`yarn stress:rest`** — same rotation as below, and **includes `--writes` by default** so Jaeger shows **POST** / **PUT** as well as **GET** (telemetry-friendly). Use **`yarn stress:rest:reads`** for **GET-only** (list + findOne; draft/publish uses **`status`**; i18n uses **`locale`** from the JSON or **`STRESS_REST_LOCALE`** / **`--locale`**).

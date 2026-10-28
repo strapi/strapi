@@ -1,7 +1,4 @@
 import { metrics, type Counter, type Histogram } from '@opentelemetry/api';
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import type { Core } from '@strapi/types';
 
 import { setAdminPermissionsPhaseMetricsRecorder } from '@strapi/utils';
@@ -11,13 +8,11 @@ import type {
   PublicRequestSummaryPayload,
 } from '../performance/event-payloads';
 import { PERFORMANCE_HUB_EVENT } from '../performance/hub-events';
-import { mapDatabaseClientToDbSystem, SERVICE_NAME_ATTR } from './opentelemetry-tracing-utils';
+import { mapDatabaseClientToDbSystem } from './opentelemetry-tracing-utils';
 
 const MAX_ATTR_LEN = 128;
 
-type MetricsObsConfig = NonNullable<NonNullable<Core.Config.Server['observability']>['metrics']>;
-
-let meterProvider: MeterProvider | null = null;
+let metricsRegistered = false;
 let requestDurationMs: Histogram | null = null;
 let requestDbTotalMs: Histogram | null = null;
 let dbSlowOrErrorCounter: Counter | null = null;
@@ -34,12 +29,6 @@ function clampAttr(value: string, max = MAX_ATTR_LEN): string {
 
 function isMetricsFeatureEnabled(strapi: Core.Strapi): boolean {
   return strapi.config.get('server.observability.metrics.enabled') === true;
-}
-
-function isOtlpConfigured(strapi: Core.Strapi): boolean {
-  const otlp = strapi.config.get('server.observability.metrics.otlp') as
-    Partial<{ enabled: boolean; url: string }> | undefined;
-  return otlp?.enabled === true && typeof otlp.url === 'string' && otlp.url.length > 0;
 }
 
 function recordRequestSummary(ev: PublicRequestSummaryPayload): void {
@@ -86,51 +75,18 @@ function recordStrapiLabeledHistogram(
   histogram.record(durationMs, attrs);
 }
 
-/** Installs a global `MeterProvider` when metrics + OTLP are enabled. Call from provider `register`. */
+/**
+ * Creates Strapi instruments on the global OpenTelemetry API meter. The app owns the
+ * `MeterProvider` and exporter, and must register them before Strapi starts. Without one,
+ * the API returns no-op instruments.
+ */
 export function registerOpenTelemetryPerformanceMetrics(strapi: Core.Strapi): void {
-  if (!isMetricsFeatureEnabled(strapi)) {
+  if (!isMetricsFeatureEnabled(strapi) || metricsRegistered) {
     return;
   }
 
-  if (!isOtlpConfigured(strapi)) {
-    strapi.log.warn(
-      '[observability.metrics] `server.observability.metrics.enabled` is true but OTLP is not enabled or `url` is missing; skipping metrics SDK init.'
-    );
-    return;
-  }
-
-  if (meterProvider) {
-    strapi.log.warn(
-      '[observability.metrics] OpenTelemetry meter provider already registered; skipping duplicate init.'
-    );
-    return;
-  }
-
-  const metricsCfg = strapi.config.get('server.observability.metrics') as
-    Partial<MetricsObsConfig> | undefined;
-  const tracingCfg = strapi.config.get('server.observability.tracing') as
-    { serviceName?: string } | undefined;
-  const serviceName = metricsCfg?.serviceName ?? tracingCfg?.serviceName ?? 'strapi';
-  const otlp = metricsCfg?.otlp;
-
-  const resource = new Resource({ [SERVICE_NAME_ATTR]: serviceName });
-  const exporter = new OTLPMetricExporter({
-    url: otlp!.url!,
-    headers: otlp?.headers,
-  });
-
-  const reader = new PeriodicExportingMetricReader({
-    exporter,
-    exportIntervalMillis: 60_000,
-  });
-
-  meterProvider = new MeterProvider({
-    resource,
-    readers: [reader],
-  });
-  metrics.setGlobalMeterProvider(meterProvider);
-
-  const meter = meterProvider.getMeter('strapi.performance', '1.0.0');
+  metricsRegistered = true;
+  const meter = metrics.getMeter('strapi.performance', '1.0.0');
   requestDurationMs = meter.createHistogram('strapi.http.server.request.duration_ms', {
     unit: 'ms',
     description: 'HTTP request duration from Strapi performance hub summaries',
@@ -168,7 +124,7 @@ export function registerOpenTelemetryPerformanceMetrics(strapi: Core.Strapi): vo
   });
 }
 
-/** OTLP histogram emit from `withContentApiSpan` when metrics SDK is initialized. */
+/** Histogram emit from `withContentApiSpan` when metrics are enabled. */
 export function recordContentApiPhaseDuration(
   strapi: Core.Strapi | undefined,
   contentTypeUid: string | undefined,
@@ -184,7 +140,7 @@ export function recordContentApiPhaseDuration(
   );
 }
 
-/** OTLP histogram emit from Core API document calls when metrics SDK is initialized. */
+/** Histogram emit from document service calls when metrics are enabled. */
 export function recordDocumentServiceOperationDuration(
   strapi: Core.Strapi | undefined,
   contentTypeUid: string | undefined,
@@ -200,7 +156,7 @@ export function recordDocumentServiceOperationDuration(
   );
 }
 
-/** OTLP histogram emit from `withAdminPermissionsSpan` when metrics SDK is initialized. */
+/** Histogram emit from `withAdminPermissionsSpan` when metrics are enabled. */
 export function recordAdminPermissionsPhaseDuration(
   strapi: Core.Strapi | undefined,
   contentTypeUid: string | undefined,
@@ -216,48 +172,45 @@ export function recordAdminPermissionsPhaseDuration(
   );
 }
 
-/** Subscribes to performance hub events. Call from provider `bootstrap`. */
+/** Listens to performance hub events. Call from provider `bootstrap`. */
 export function attachPerformanceMetricsHubListeners(strapi: Core.Strapi): () => void {
-  if (!meterProvider) {
+  if (!metricsRegistered) {
     return () => {
       /* no-op */
     };
   }
 
-  const subscriber = async (eventName: string, ...args: unknown[]) => {
-    try {
-      if (eventName === PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY) {
-        recordRequestSummary(args[0] as PublicRequestSummaryPayload);
-        return;
+  const unsubscribes = [
+    strapi.eventHub.on(PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY, async (event) => {
+      try {
+        recordRequestSummary(event as PublicRequestSummaryPayload);
+      } catch {
+        /* fail-open */
       }
-      if (
-        eventName === PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW ||
-        eventName === PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR
-      ) {
-        recordDbSlowOrError(args[0] as PublicDatabaseQueryPerformancePayload);
-      }
-    } catch {
-      /* fail-open */
-    }
-  };
+    }),
+    ...[PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW, PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR].map(
+      (eventName) =>
+        strapi.eventHub.on(eventName, async (event) => {
+          try {
+            recordDbSlowOrError(event as PublicDatabaseQueryPerformancePayload);
+          } catch {
+            /* fail-open */
+          }
+        })
+    ),
+  ];
 
-  return strapi.eventHub.subscribe(subscriber);
+  return () => unsubscribes.forEach((unsubscribe) => unsubscribe());
 }
 
-export async function shutdownOpenTelemetryPerformanceMetrics(strapi: Core.Strapi): Promise<void> {
-  if (!meterProvider) {
+export function shutdownOpenTelemetryPerformanceMetrics(): void {
+  if (!metricsRegistered) {
     return;
-  }
-
-  try {
-    await meterProvider.shutdown();
-  } catch (error) {
-    strapi.log.warn(`[observability.metrics] Failed to shutdown meter provider cleanly: ${error}`);
   }
 
   setAdminPermissionsPhaseMetricsRecorder(undefined);
 
-  meterProvider = null;
+  metricsRegistered = false;
   requestDurationMs = null;
   requestDbTotalMs = null;
   dbSlowOrErrorCounter = null;

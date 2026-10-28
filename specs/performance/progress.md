@@ -13,7 +13,7 @@ _Status verified against the repository (packages, docs, `.github`), not from in
 | 05 — API    | Public event contract for plugins    | [05-public-performance-event-api-for-plugins.md](./05-public-performance-event-api-for-plugins.md) | **Done**        |
 | 06 — Req    | Request timeline + DB correlation    | [06-core-request-timeline-events.md](./06-core-request-timeline-events.md)                         | **Partial**     |
 
-**Outside this table (implemented in core):** optional **OpenTelemetry tracing** via `server.observability.tracing` (`@strapi/core`: HTTP server spans + Knex query spans, console and/or OTLP HTTP exporter). This is **not** the spec **04** plugin/UI; it is framework-level tracing.
+**Outside this table (implemented in core):** optional **OpenTelemetry tracing** via `server.observability.tracing` (`@strapi/core`: HTTP server spans + Knex query spans through `@opentelemetry/api` only; the app registers its own SDK and exporters). This is **not** the spec **04** plugin/UI; it is framework-level tracing.
 
 ---
 
@@ -43,7 +43,7 @@ _Status verified against the repository (packages, docs, `.github`), not from in
 | Route template / flags / stats | [`koa-route-template.test.ts`](../../packages/core/core/src/utils/__tests__/koa-route-template.test.ts), [`server-performance-tracking.test.ts`](../../packages/core/core/src/utils/__tests__/server-performance-tracking.test.ts), [`perf-query-stats.test.ts`](../../packages/core/core/src/utils/__tests__/perf-query-stats.test.ts) |
 | OTel helpers only              | [`opentelemetry-tracing-utils.test.ts`](../../packages/core/core/src/services/observability/__tests__/opentelemetry-tracing-utils.test.ts)                                                                                                                                                                                              |
 
-**Not covered by automated tests:** representative **benchmark / regression** for SQL overhead (spec **01**); **full OTel** provider stack (integration-style); **`tests/api`** or E2E exercising perf config end-to-end.
+**Not covered by automated tests:** representative **benchmark / regression** for SQL overhead (spec **01**); **app-registered OTel SDK** end-to-end (integration-style); **`tests/api`** or E2E exercising perf config end-to-end.
 
 ---
 
@@ -68,7 +68,7 @@ _Status verified against the repository (packages, docs, `.github`), not from in
 ### [04](./04-optional-plugin-performance-insights.md)
 
 - **No** dedicated “Performance Insights” plugin package, aggregation UI, or plugin-scoped exporters.
-- **Note:** **`server.observability.tracing`** in core can export traces via OTLP HTTP — this satisfies **tracing** needs for some deployments but **not** the spec’s plugin/product shape.
+- **Note:** **`server.observability.tracing`** in core emits spans through `@opentelemetry/api` for an app-owned SDK to export — this satisfies **tracing** needs for some deployments but **not** the spec’s plugin/product shape.
 
 ### [05](./05-public-performance-event-api-for-plugins.md)
 

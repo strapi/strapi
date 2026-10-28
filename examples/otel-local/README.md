@@ -1,13 +1,17 @@
 # Local OpenTelemetry stack for Strapi
 
-Docker Compose runs an **OpenTelemetry Collector** plus **Jaeger** so Strapi can send OTLP from your machine.
+Docker Compose runs an **OpenTelemetry Collector** plus **Jaeger** so a Strapi app can send OTLP from your machine.
 
-**Strapi does not ship application log lines over OTLP** (no replacement for Winston / `strapiPerfLog`). OTLP carries **traces** and **metrics** only:
+**Strapi uses only `@opentelemetry/api`.** It never registers a tracer provider, meter provider, propagator, or exporter. The app owns the OpenTelemetry SDK and must load it before Strapi starts (for example with `NODE_OPTIONS="--require ./otel.js"`). Without an SDK, every Strapi span and metric is a no-op.
 
-| Signal  | Config path                    | OTLP HTTP URL (typical)            |
-| ------- | ------------------------------ | ---------------------------------- |
-| Traces  | `server.observability.tracing` | `http://127.0.0.1:4318/v1/traces`  |
-| Metrics | `server.observability.metrics` | `http://127.0.0.1:4318/v1/metrics` |
+Strapi config only decides which instrumentation runs:
+
+| Signal  | Config path                            | What Strapi records                                         |
+| ------- | -------------------------------------- | ----------------------------------------------------------- |
+| Traces  | `server.observability.tracing.enabled` | HTTP, route stage, Knex, bcryptjs, startup, and phase spans |
+| Metrics | `server.observability.metrics.enabled` | Request, slow/error query, and phase histograms/counters    |
+
+**Strapi does not ship application log lines over OTLP** (no replacement for Winston / `strapiPerfLog`).
 
 There is **no collector login or web UI** — the collector only receives and forwards telemetry.
 
@@ -33,11 +37,31 @@ Stop: `Ctrl+C` or `cd examples/otel-local && docker compose down`.
 
 ---
 
-## 2. Point Strapi at the collector
+## 2. Load an SDK in the Strapi app
 
-The **[complex example](../complex/README.md#opentelemetry)** is pre-wired via `config/server.ts` and env vars (`STRAPI_OTEL_*` in `.env.example`). Start Strapi after the stack above is running.
+Install the SDK in the **app** (not in Strapi packages), for example `@opentelemetry/sdk-node`, and add an `otel.js` next to `package.json`:
 
-For **any other app**, set `server.observability.tracing` and `server.observability.metrics` with `otlp.enabled` and `url` pointing at `http://127.0.0.1:4318/v1/traces` and `…/v1/metrics` respectively. **Metrics** need the performance hub signals (DB perf + request timeline); **tracing** only needs tracing enabled.
+```js
+// otel.js — loaded before Strapi via NODE_OPTIONS
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+
+new NodeSDK().start();
+```
+
+`NodeSDK` registers the async-hooks context manager (needed for nested spans), the W3C propagator, and OTLP exporters configured from `OTEL_*` env vars. Then start Strapi with the SDK preloaded:
+
+```bash
+OTEL_SERVICE_NAME=strapi-complex \
+OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318 \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_METRICS_EXPORTER=otlp \
+NODE_OPTIONS="--require ./otel.js" \
+yarn develop
+```
+
+The SDK must be registered before Strapi loads: the metrics API binds instruments to the provider that exists when Strapi starts.
+
+The **[complex example](../complex/README.md#opentelemetry)** turns on the Strapi side with `STRAPI_OTEL_ENABLED=true`. For **any other app**, set `server.observability.tracing.enabled` and/or `server.observability.metrics.enabled`. **Metrics** also need the performance hub signals (DB perf + request tracking).
 
 ---
 
@@ -66,7 +90,7 @@ Strapi does **not** retain long-term history; Jaeger / your backend stores trace
 
 ## 5. Collector not running
 
-Strapi **keeps running**. Export is **async** (batched); failed OTLP calls should **not** block requests. You may see **warnings** in Strapi logs. To disable OTLP entirely while developing, use **`STRAPI_OTEL_ENABLED=false`** in the complex example (see [complex README](../complex/README.md#opentelemetry)).
+Strapi **keeps running**. Export happens in the app's SDK, so retry and failure behavior depend on how you configured it. To stop sending data, start Strapi without the `--require` preload or set `STRAPI_OTEL_ENABLED=false` in the complex example.
 
 ---
 
@@ -79,4 +103,4 @@ Strapi **keeps running**. Export is **async** (batched); failed OTLP calls shoul
 
 ## Next steps (production)
 
-Run the collector (or vendor agent) where your ops team expects it; set OTLP `url` (and `headers` if required). Add Prometheus remote write, Grafana, Tempo, etc., by extending the collector config.
+Configure the SDK in your app the way your ops team expects (exporter endpoint, headers, sampler, resource attributes). Add Prometheus remote write, Grafana, Tempo, etc., by extending the collector config.

@@ -1,7 +1,9 @@
 import type { Core } from '@strapi/types';
-import type { Span } from '@opentelemetry/api';
+import { context, propagation, trace, type Span } from '@opentelemetry/api';
 
 import {
+  configureOpenTelemetryTracing,
+  shutdownOpenTelemetryTracing,
   withContentApiSpan,
   withStartupSpan,
   withStartupTraceChildPhase,
@@ -60,7 +62,7 @@ describe('withStartupSpan', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('runs fn when tracing is enabled but Node provider is not initialized', async () => {
+  it('runs fn when tracing is enabled and no SDK is registered', async () => {
     const strapi = mockStrapi(true);
     const fn = jest.fn().mockResolvedValue(42);
 
@@ -88,5 +90,22 @@ describe('withStartupTraceChildPhase', () => {
       withStartupTraceChildPhase({} as Span, strapi, 'strapi.startup.cli.test', fn)
     ).resolves.toBe(1);
     expect(fn).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('configureOpenTelemetryTracing', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('does not register a global provider, propagator, or context manager', async () => {
+    const setTracerProvider = jest.spyOn(trace, 'setGlobalTracerProvider');
+    const setPropagator = jest.spyOn(propagation, 'setGlobalPropagator');
+    const setContextManager = jest.spyOn(context, 'setGlobalContextManager');
+
+    configureOpenTelemetryTracing(mockStrapi(true));
+    await shutdownOpenTelemetryTracing();
+
+    expect(setTracerProvider).not.toHaveBeenCalled();
+    expect(setPropagator).not.toHaveBeenCalled();
+    expect(setContextManager).not.toHaveBeenCalled();
   });
 });
