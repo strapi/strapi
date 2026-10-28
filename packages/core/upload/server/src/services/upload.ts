@@ -234,7 +234,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
       if (await isOptimizableImage(currentFile)) {
         try {
-          return optimize(currentFile);
+          const optimizedFile = await optimize(currentFile);
+          return optimizedFile;
         } catch {
           return currentFile;
         }
