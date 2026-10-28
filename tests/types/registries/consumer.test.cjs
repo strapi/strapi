@@ -253,6 +253,79 @@ test('bundled package declarations neither opt in to strict types nor augment Se
   }
 });
 
+// The member names of the `Strapi.Registries.<registry>` interfaces a declaration file declares, or
+// `null` when it declares none. The callback returns `undefined`: `ts.forEachChild` stops at the
+// first truthy result, so returning the accumulator would visit the first child only.
+function registryMembers(source, registry) {
+  let members = null;
+  const visit = (node, namespaces) => {
+    const currentNamespaces = ts.isModuleDeclaration(node)
+      ? [...namespaces, node.name.text]
+      : namespaces;
+    if (
+      ts.isInterfaceDeclaration(node) &&
+      node.name.text === registry &&
+      currentNamespaces.slice(-2).join('.') === 'Strapi.Registries'
+    ) {
+      members = [
+        ...(members ?? []),
+        ...node.members.map((member) => member.name?.getText(source) ?? ''),
+      ];
+    }
+    ts.forEachChild(node, (child) => {
+      visit(child, currentNamespaces);
+    });
+  };
+  visit(source, []);
+  return members;
+}
+
+// Only type generation declares an application's license scope. A published declaration that set
+// `Settings.licenses` or listed licensed features would apply to every program that loads it.
+test('published declarations declare no license scope and list no licensed features', () => {
+  const published = new Map([
+    ...bundledWorkspaces(),
+    ...providers.map((directory) => [
+      readManifest(directory).name,
+      path.join(repository, directory),
+    ]),
+  ]);
+  let baseDeclarations = 0;
+  for (const [name, directory] of published) {
+    const manifest = readManifest(path.relative(repository, directory));
+    const dist = path.join(directory, 'dist');
+    const files = [
+      ...(fs.existsSync(dist) ? declarations(dist) : []),
+      // Entry points published next to `dist`, such as `@strapi/strapi/strict-types`.
+      ...(manifest.files ?? [])
+        .filter((file) => file.endsWith('.d.ts'))
+        .map((file) => path.join(directory, file)),
+    ];
+    for (const filename of files) {
+      const source = ts.createSourceFile(
+        filename,
+        fs.readFileSync(filename, 'utf8'),
+        ts.ScriptTarget.Latest
+      );
+      assert.equal(
+        (registryMembers(source, 'Settings') ?? []).includes('licenses'),
+        false,
+        `${filename} sets Strapi.Registries.Settings.licenses`
+      );
+      const licensed = registryMembers(source, 'LicensedFeatures');
+      if (licensed === null) continue;
+      // `@strapi/types` declares the empty base interface.
+      assert.ok(
+        name === '@strapi/types' && licensed.length === 0,
+        `${filename} declares Strapi.Registries.LicensedFeatures`
+      );
+      baseDeclarations += 1;
+    }
+  }
+  // Proves the walk reaches registry declarations.
+  assert.equal(baseDeclarations, 1, 'The base LicensedFeatures declaration was not found once');
+});
+
 // Only type generation writes the application's schemas. A package declares its own content types
 // in `PackageContentTypeSchemas`, which generated entries replace UID by UID.
 test('bundled package declarations declare content-type schemas only in PackageContentTypeSchemas', () => {
@@ -373,9 +446,85 @@ async function generateContracts(appDir, registered, api = fixture('app/src/api'
   };
 }
 
+// Type generation writes the license scope of an application with strict types into `strict.d.ts`,
+// from `typescript.licensedFeatures`. A program without it, such as a plugin or an application
+// that opts in by hand, keeps the unknown scope. Each fixture checks the gated contracts of
+// `licensed-provider.d.ts` in one scope.
+const licenseScopes = [
+  { scope: 'unknown', fixture: 'licensed-unknown.ts' },
+  { scope: 'no licensedFeatures', licensedFeatures: undefined, fixture: 'licensed-none.ts' },
+  {
+    scope: "licensedFeatures: ['review-workflows']",
+    licensedFeatures: ['review-workflows'],
+    fixture: 'licensed-review-workflows.ts',
+  },
+  {
+    scope: "licensedFeatures: ['licensed']",
+    licensedFeatures: ['licensed'],
+    fixture: 'licensed-only.ts',
+  },
+];
+
+// The files that set the scope of a program: the generated `strict.d.ts`, or a hand opt-in for the
+// unknown scope. Generated in `appDir`.
+async function licenseScopeFiles(appDir, scope) {
+  if (Object.hasOwn(scope, 'licensedFeatures') === false) return ['strapi-strict.d.ts'];
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const { generators } = require('@strapi/typescript-utils');
+  const typescript =
+    scope.licensedFeatures === undefined ? {} : { licensedFeatures: scope.licensedFeatures };
+  await generators.generate({
+    strapi: {
+      config: {
+        get(name, fallback) {
+          const [namespace, key] = name.split('.');
+          return namespace === 'typescript' && Object.hasOwn(typescript, key)
+            ? typescript[key]
+            : fallback;
+        },
+      },
+    },
+    pwd: appDir,
+    artifacts: { strict: true },
+    logger: { silent: true },
+  });
+  return [path.join(appDir, 'types/generated/strict.d.ts')];
+}
+
+// Runs `check` with the scope files of every license scope, then removes the generated files.
+async function withLicenseScopes(check) {
+  const appDirs = [];
+  try {
+    const scopes = [];
+    for (const scope of licenseScopes) {
+      const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+      appDirs.push(appDir);
+      scopes.push({ ...scope, files: await licenseScopeFiles(appDir, scope) });
+    }
+    check(scopes);
+  } finally {
+    for (const appDir of appDirs) fs.rmSync(appDir, { recursive: true, force: true });
+  }
+}
+
 for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   const options = { ...baseOptions, ...resolutionOptions };
   const compile = compiler(options);
+
+  test(`${resolution}: license-gated contracts follow the program's license scope`, async () => {
+    await withLicenseScopes((scopes) => {
+      for (const { scope, files, fixture } of scopes) {
+        assertClean(
+          compile([...files, 'licensed-provider.d.ts', fixture]),
+          `${resolution}, license scope ${scope}`
+        );
+      }
+    });
+    assertClean(
+      compile(['licensed-provider.d.ts', 'licensed-permissive.ts']),
+      `${resolution}, license scope without strict types`
+    );
+  });
 
   for (const provider of [
     'i18n',
@@ -995,6 +1144,35 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     assertClean(program, `${resolution}, strict registries without contracts`);
   });
 }
+
+// Each license scope fixture fails in every other scope, so that a gate that ignored the scope
+// would not pass them all.
+test('license scope fixtures fail in the other scopes', async () => {
+  const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+  const fixtureErrors = (program, name) =>
+    diagnostics(program).filter((diagnostic) => diagnostic.file?.fileName === fixture(name)).length;
+  await withLicenseScopes((scopes) => {
+    for (const program of scopes) {
+      for (const { scope, fixture: name } of scopes) {
+        if (scope === program.scope) continue;
+        assert.notEqual(
+          fixtureErrors(compile([...program.files, 'licensed-provider.d.ts', name]), name),
+          0,
+          `${name} (license scope ${scope}) passes with license scope ${program.scope}`
+        );
+      }
+    }
+  });
+  // The fixture without strict types fails with them.
+  assert.notEqual(
+    fixtureErrors(
+      compile(['strapi-strict.d.ts', 'licensed-provider.d.ts', 'licensed-permissive.ts']),
+      'licensed-permissive.ts'
+    ),
+    0,
+    'licensed-permissive.ts passes with strict types'
+  );
+});
 
 // The generated application modules import their sources with relative paths. An ECMAScript module
 // (`"type": "module"`) resolved with NodeNext needs the extension of each one (TS2835).

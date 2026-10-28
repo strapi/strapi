@@ -17,7 +17,8 @@ declare const app: Core.Strapi;
 declare const context: Parameters<Core.ControllerHandler>[0];
 declare const next: Parameters<Core.ControllerHandler>[1];
 
-// Review Workflows controllers only exist with the `review-workflows` feature.
+// Review Workflows controllers only exist with the `review-workflows` feature. This program declares
+// no license scope (see `licensed-*.ts`): they may be undefined.
 app.plugin('review-workflows').controller('workflows')?.update(context, next);
 app.controller('plugin::review-workflows.assignees')?.updateEntity(context, next);
 const stages = app.plugin('review-workflows').controller('stages');
@@ -37,7 +38,8 @@ app.controller('plugin::review-workflows.workflows')?.updates(context, next);
   routes: [{ method: 'GET', path: '/workflows/:workflow_id/stages', handler: 'stages.findAll' }],
 }) satisfies Core.RouterInputFor<Controllers, 'plugin::review-workflows'>;
 
-// Review Workflows services only exist with the `review-workflows` feature.
+// Review Workflows services only exist with the `review-workflows` feature: without a declared
+// license scope, they may be undefined.
 const validation = app.plugin('review-workflows').service('validation');
 validation satisfies ValidationService | undefined;
 validation?.limits.numberOfWorkflows satisfies number | undefined;
