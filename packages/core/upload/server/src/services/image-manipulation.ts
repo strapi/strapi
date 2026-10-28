@@ -64,14 +64,28 @@ const getMetadata = (file: UploadableFile): Promise<Metadata> => {
 };
 
 const getDimensions = async (file: UploadableFile): Promise<Dimensions> => {
+  const { width = null, height = null } = await getMetadata(file);
+
+  return { width, height };
+};
+
+/**
+ * Sharp's pixel-limit refusal must reject the upload. Treating it as "not an
+ * image" stores the original bytes, including EXIF and GPS.
+ */
+const rethrowPixelLimit = (error: unknown) => {
+  if (error instanceof Error && /pixel limit/i.test(error.message)) {
+    throw error;
+  }
+};
+
+const getFormat = async (file: UploadableFile) => {
   try {
-    const { width = null, height = null } = await getMetadata(file);
-    return { width, height };
-  } catch {
-    return {
-      width: file.width ?? null,
-      height: file.height ?? null,
-    };
+    const metadata = await getMetadata(file);
+    return metadata.format;
+  } catch (error) {
+    rethrowPixelLimit(error);
+    return undefined;
   }
 };
 
@@ -152,70 +166,65 @@ const generateThumbnail = async (file: UploadableFile) => {
  *
  */
 const optimize = async (file: UploadableFile) => {
-  try {
-    const { sizeOptimization = false, autoOrientation = false } =
-      (await getService('upload').getSettings()) ?? {};
+  const { sizeOptimization = false, autoOrientation = false } =
+    (await getService('upload').getSettings()) ?? {};
 
-    const { format, size } = await getMetadata(file);
+  const { format, size } = await getMetadata(file);
 
-    if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
-      let transformer;
-      if (!file.filepath) {
-        transformer = sharp({ ...getSharpOptions(), animated: true });
-      } else {
-        transformer = sharp(file.filepath, { ...getSharpOptions(), animated: true });
-      }
-      // reduce image quality
-      transformer[format]({ quality: sizeOptimization ? 80 : 100 });
-      // rotate image based on EXIF data
-      if (autoOrientation) {
-        transformer.rotate();
-      }
-      const filePath = file.tmpWorkingDirectory
-        ? join(file.tmpWorkingDirectory, `optimized-${file.hash}`)
-        : `optimized-${file.hash}`;
+  if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
+    let transformer;
+    if (!file.filepath) {
+      transformer = sharp({ ...getSharpOptions(), animated: true });
+    } else {
+      transformer = sharp(file.filepath, { ...getSharpOptions(), animated: true });
+    }
+    // reduce image quality
+    transformer[format]({ quality: sizeOptimization ? 80 : 100 });
+    // rotate image based on EXIF data
+    if (autoOrientation) {
+      transformer.rotate();
+    }
+    const filePath = file.tmpWorkingDirectory
+      ? join(file.tmpWorkingDirectory, `optimized-${file.hash}`)
+      : `optimized-${file.hash}`;
 
-      let newInfo;
-      if (!file.filepath) {
-        transformer.on('info', (info) => {
-          newInfo = info;
-        });
-
-        await writeStreamToFile(file.getStream().pipe(transformer), filePath);
-      } else {
-        newInfo = await transformer.toFile(filePath);
-      }
-
-      const {
-        width: newWidth,
-        height: newHeight,
-        size: newSize,
-        pageHeight: newPageHeight,
-      } = newInfo ?? {};
-
-      const newFile = { ...file };
-
-      newFile.getStream = () => fs.createReadStream(filePath);
-      newFile.filepath = filePath;
-
-      if (newSize && size && newSize > size) {
-        // Ignore optimization if output is bigger than original
-        return file;
-      }
-
-      return Object.assign(newFile, {
-        width: newWidth,
-        height: newPageHeight ?? newHeight,
-        size: newSize ? bytesToKbytes(newSize) : 0,
-        sizeInBytes: newSize,
+    let newInfo;
+    if (!file.filepath) {
+      transformer.on('info', (info) => {
+        newInfo = info;
       });
+
+      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    } else {
+      newInfo = await transformer.toFile(filePath);
     }
 
-    return file;
-  } catch {
-    // Preserve original bytes when EXIF/metadata reads or transforms fail (e.g. corrupt orientation tags).
-    return file;
+    const {
+      width: newWidth,
+      height: newHeight,
+      size: newSize,
+      pageHeight: newPageHeight,
+    } = newInfo ?? {};
+
+    const newFile = { ...file };
+
+    newFile.getStream = () => fs.createReadStream(filePath);
+    newFile.filepath = filePath;
+
+    if (newSize && size && newSize > size) {
+      // Ignore optimization if output is bigger than original
+      return file;
+    }
+
+    return Object.assign(newFile, {
+      width: newWidth,
+      height: newPageHeight ?? newHeight,
+      size: newSize ? bytesToKbytes(newSize) : 0,
+      sizeInBytes: newSize,
+    });
   }
+
+  return file;
 };
 
 const DEFAULT_BREAKPOINTS = {
@@ -232,24 +241,20 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
 
   if (!responsiveDimensions) return [];
 
-  try {
-    const originalDimensions = await getDimensions(file);
+  const originalDimensions = await getDimensions(file);
 
-    const breakpoints = getBreakpoints();
-    const results = [];
+  const breakpoints = getBreakpoints();
+  const results = [];
 
-    for (const key of Object.keys(breakpoints)) {
-      const breakpoint = breakpoints[key];
+  for (const key of Object.keys(breakpoints)) {
+    const breakpoint = breakpoints[key];
 
-      if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        results.push(await generateBreakpoint(key, { file, breakpoint }));
-      }
+    if (breakpointSmallerThan(breakpoint, originalDimensions)) {
+      results.push(await generateBreakpoint(key, { file, breakpoint }));
     }
-
-    return results;
-  } catch {
-    return [];
   }
+
+  return results;
 };
 
 const generateBreakpoint = async (
@@ -304,38 +309,18 @@ const isFaultyImage = async (file: UploadableFile) => {
 };
 
 const isOptimizableImage = async (file: UploadableFile) => {
-  let format;
-  try {
-    const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch {
-    // throw when the file is not a supported image
-    return false;
-  }
+  const format = await getFormat(file);
+  // Unsupported formats are not images; pixel-limit errors reject the upload.
   return format && FORMATS_TO_OPTIMIZE.has(format);
 };
 
 const isResizableImage = async (file: UploadableFile) => {
-  let format;
-  try {
-    const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch {
-    // throw when the file is not a supported image
-    return false;
-  }
+  const format = await getFormat(file);
   return format && FORMATS_TO_RESIZE.has(format);
 };
 
 const isImage = async (file: UploadableFile) => {
-  let format;
-  try {
-    const metadata = await getMetadata(file);
-    format = metadata.format;
-  } catch {
-    // throw when the file is not a supported image
-    return false;
-  }
+  const format = await getFormat(file);
   return format && FORMATS_TO_PROCESS.has(format);
 };
 
