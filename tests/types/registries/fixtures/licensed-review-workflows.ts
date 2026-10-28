@@ -9,6 +9,7 @@ import type {
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+type HasUndefined<T> = undefined extends T ? true : false;
 
 declare const app: Core.Strapi;
 
@@ -40,3 +41,20 @@ void app
   .then((user) => user.isSSOLocked satisfies boolean);
 // @ts-expect-error The feature is not listed: the contract is `undefined`.
 void app.service('plugin::licensed-provider.releases').publish(1);
+
+// The listed feature implies the admin EE edition, so EE-only services exist, and CE services have the members it adds.
+declare const adminChecks: [
+  Core.Assert<Equal<HasUndefined<Core.ServiceFor<'admin::persist-tables'>>, false>>,
+  Core.Assert<Equal<HasUndefined<Core.ServiceFor<'admin::seat-enforcement'>>, false>>,
+  Core.Assert<Equal<HasUndefined<Core.ServiceFor<'admin::metrics'>['getSSOProvidersList']>, false>>,
+  Core.Assert<
+    Equal<HasUndefined<Core.ServiceFor<'admin::role'>['ssoCheckRolesIdForDeletion']>, false>
+  >,
+  Core.Assert<
+    Equal<HasUndefined<Core.ServiceFor<'admin::user'>['getCurrentActiveUserCount']>, false>
+  >,
+];
+adminChecks satisfies unknown;
+
+void app.service('admin::seat-enforcement').getDisabledUserList();
+void app.service('admin::role').ssoCheckRolesIdForDeletion([]);

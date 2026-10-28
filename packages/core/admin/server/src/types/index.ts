@@ -38,10 +38,12 @@ export type * as Policies from './policies';
 export type { RateLimitOptions } from './rate-limit';
 
 /**
- * A service that the EE edition deep-merges over its CE implementation. CE code sees the CE members;
- * members only EE adds are optional because a CE runtime does not have them.
+ * A service that the EE edition deep-merges over its CE implementation when a license verifies at
+ * boot. Its contract follows the program's license scope: the EE shape in an application that lists
+ * a licensed feature, the CE shape in one that lists none, and the CE shape with the EE-only members
+ * optional in any other program, such as this package's.
  */
-type EditionService<TCE, TEE> = TCE & Partial<Omit<TEE, keyof TCE>>;
+type EditionService<TCE, TEE> = Core.LicensedExtension<TCE, TEE>;
 
 /**
  * The EE runtime shape of a service the EE edition deep-merges over its CE implementation: EE members
@@ -166,7 +168,10 @@ type PermissionServiceContract = Omit<
       };
 };
 
-/** EE runtime shapes of the admin services that the EE edition extends. */
+/**
+ * EE runtime shapes of the admin services that the EE edition extends. EE code runs only with the
+ * EE edition merged, so it passes them whatever the program's license scope.
+ */
 export type EnterpriseServices = {
   auth: EnterpriseService<typeof CEAuthService, typeof EEAuthService>;
   metrics: EnterpriseService<typeof CEMetricsService, typeof EEMetricsService>;
@@ -219,10 +224,13 @@ type DisabledUserStore = { id: string | number; isActive: boolean };
 
 /**
  * Default contracts loaded with the admin server types.
- * The EE edition deep-merges `auth`, `user`, `role`, `passport` and `metrics` over their CE
- * implementation: their contracts are the CE shape plus the EE-only members as optional.
- * `persist-tables` and `seat-enforcement` only exist in EE, so a CE runtime resolves them to
- * `undefined`. EE-only features read them through helpers that drop `undefined`.
+ * When a license verifies at boot, the EE edition deep-merges `auth`, `user`, `role`, `passport` and
+ * `metrics` over their CE implementation (`Core.LicensedExtension`) and adds `persist-tables` and
+ * `seat-enforcement` (`Core.Licensed<'licensed', …>`). An application with type generation lists
+ * its license in `licensedFeatures`: any listed feature gives the EE contracts, none gives the CE
+ * contracts and `undefined` for the EE-only services. Other programs get the CE contracts with the
+ * EE-only members optional, and the EE-only services may be `undefined`. EE code reads them through
+ * helpers that assume the EE edition.
  */
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -249,10 +257,10 @@ declare global {
         'admin::metrics': EditionService<typeof CEMetricsService, typeof EEMetricsService>;
         'admin::passport': EditionService<typeof CEPassportService, typeof EEPassportService>;
         'admin::permission': PermissionServiceContract;
-        'admin::persist-tables': typeof EEPersistTablesService | undefined;
+        'admin::persist-tables': Core.Licensed<'licensed', typeof EEPersistTablesService>;
         'admin::project-settings': typeof ProjectSettingsService;
         'admin::role': RoleService<EditionService<typeof CERoleService, typeof EERoleService>>;
-        'admin::seat-enforcement': typeof EESeatEnforcementService | undefined;
+        'admin::seat-enforcement': Core.Licensed<'licensed', typeof EESeatEnforcementService>;
         'admin::token': typeof TokenService;
         'admin::transfer': typeof TransferService;
         'admin::user': EditionService<typeof CEUserService, typeof EEUserService>;

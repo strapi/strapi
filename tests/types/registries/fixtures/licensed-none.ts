@@ -3,6 +3,7 @@ import type { CEUsersService } from './licensed-provider';
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+type HasMember<T, K extends string> = K extends keyof T ? true : false;
 
 declare const app: Core.Strapi;
 
@@ -24,3 +25,19 @@ checks satisfies unknown;
 app.service('plugin::licensed-provider.reports')?.count();
 // @ts-expect-error EE-only members are absent.
 app.service('plugin::licensed-provider.users').isSSOLocked;
+
+// The admin EE edition is not merged: EE-only services are missing, and CE services have their CE
+// members only.
+declare const adminChecks: [
+  Core.Assert<Equal<Core.ServiceFor<'admin::persist-tables'>, undefined>>,
+  Core.Assert<Equal<Core.ServiceFor<'admin::seat-enforcement'>, undefined>>,
+  Core.Assert<Equal<HasMember<Core.ServiceFor<'admin::metrics'>, 'getSSOProvidersList'>, false>>,
+  Core.Assert<
+    Equal<HasMember<Core.ServiceFor<'admin::role'>, 'ssoCheckRolesIdForDeletion'>, false>
+  >,
+  Core.Assert<Equal<HasMember<Core.ServiceFor<'admin::user'>, 'getCurrentActiveUserCount'>, false>>,
+];
+adminChecks satisfies unknown;
+
+// @ts-expect-error EE-only members are absent.
+void app.service('admin::role').ssoCheckRolesIdForDeletion([]);
