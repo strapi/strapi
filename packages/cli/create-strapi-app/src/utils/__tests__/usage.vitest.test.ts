@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { trackUsage } from '../usage';
 
 import type { Scope } from '../../types';
@@ -14,7 +16,7 @@ describe('trackUsage', () => {
   const originalTelemetry = process.env.STRAPI_TELEMETRY_DISABLED;
 
   beforeEach(() => {
-    jest.spyOn(global, 'fetch').mockResolvedValue(new Response());
+    vi.spyOn(global, 'fetch').mockResolvedValue(new Response());
   });
 
   afterEach(() => {
@@ -26,7 +28,7 @@ describe('trackUsage', () => {
       process.env.STRAPI_TELEMETRY_DISABLED = originalTelemetry;
     }
 
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('does not send when NODE_ENV is test', async () => {
