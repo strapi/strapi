@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+
 export const RELEASE_MODEL_UID = 'plugin::content-releases.release';
 export const RELEASE_ACTION_MODEL_UID = 'plugin::content-releases.release-action';
 
@@ -63,7 +65,16 @@ export const ACTIONS = [
     subCategory: 'options',
     pluginName: 'content-releases',
   },
-];
+] as const;
+
+// The declared permission action IDs match the registered actions.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type ActionIds = Core.Assert<
+  Core.SameNames<
+    Core.PermissionActionId<(typeof ACTIONS)[number]>,
+    Extract<Core.RegisteredPermissionAction, `plugin::content-releases.${string}`>
+  >
+>;
 
 export const ALLOWED_WEBHOOK_EVENTS = {
   RELEASES_PUBLISH: 'releases.publish',
