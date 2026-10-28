@@ -99,7 +99,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                       return null;
                     }
 
-                    return strapi.query('admin::user').findOne({
+                    return strapi.db.query('admin::user').findOne({
                       where: {
                         ...(userToPopulate.id ? { id: userToPopulate.id } : {}),
                         ...(userToPopulate.documentId
@@ -181,6 +181,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
+
+      if (version === null) {
+        throw new errors.NotFoundError('History version not found');
+      }
+
       const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
       const schemaDiff = serviceUtils.getSchemaAttributesDiff(
         version.schema,
