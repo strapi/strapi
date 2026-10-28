@@ -8,6 +8,7 @@ import type {
   StageRef,
 } from '../../../shared/contracts/release-actions';
 import { getEntry } from './entries';
+import type { EntryPopulate } from './entries';
 
 export interface EntryValidity {
   isEntryValid: boolean;
@@ -58,7 +59,7 @@ const STAGE_ERROR_MESSAGE = 'Entry is not at the required stage to publish';
 const SUBMITTED_VALUE_SUFFIX = /, but the final value was: [\s\S]*$/;
 
 // Only the field paths and messages: the details also carry the submitted values
-export const getValidationErrors = (error: Error) => {
+const getValidationErrors = (error: Error) => {
   const details: unknown = error instanceof errors.ValidationError ? error.details : null;
   const detailErrors: unknown[] =
     typeof details === 'object' &&
@@ -87,6 +88,14 @@ export const toError = (caught: unknown) =>
 // Only the error's name: its message can carry row contents
 export const getErrorName = (error: unknown) => (error instanceof Error ? error.name : 'Error');
 
+// InnoDB rolls back the whole transaction on a deadlock, savepoints included: nothing done in it
+// can be kept or recorded, so the caller's transaction must fail with it
+export const isMySqlDeadlock = (error: unknown) =>
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  error.code === 'ER_LOCK_DEADLOCK';
+
 // The reason shapes an entry that wasn't released stores
 export const toValidationReason = (error: Error) => ({
   validation: { errors: getValidationErrors(error) },
@@ -105,13 +114,23 @@ export const toEntryValidity = (check: EntryPublishability | Error): EntryValidi
     : { isEntryValid: false, reason: check.reason };
 };
 
-// A check's result, or the error that stopped it
+// A check's result, or the error that stopped it. In a transaction, each check reads in its own
+// savepoint: without one, on Postgres a failed read would abort the transaction, and every other
+// check with it.
 const readCheck = async (
-  readPublishability: () => Promise<EntryPublishability>
+  readPublishability: () => Promise<EntryPublishability>,
+  { strapi }: { strapi: Core.Strapi }
 ): Promise<EntryPublishability | Error> => {
+  const inTransaction = strapi.db.inTransaction();
+
   try {
-    return await readPublishability();
+    return await (inTransaction ? strapi.db.savepoint(readPublishability) : readPublishability());
   } catch (error) {
+    // In a transaction, a deadlock rolled it all back: no other check, nor what the caller
+    // records, can be kept. Outside one, it only undid this read, so it's a failed check.
+    if (inTransaction && isMySqlDeadlock(error)) {
+      throw error;
+    }
     return toError(error);
   }
 };
@@ -212,7 +231,7 @@ const createDraftPublishabilityCheck = ({ strapi }: { strapi: Core.Strapi }) => 
   const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
   const lookupsByContentType = new Map<
     UID.ContentType,
-    { populate: unknown; workflow: WorkflowWithRequiredStage }
+    { populate: EntryPopulate; workflow: WorkflowWithRequiredStage }
   >();
   const publishabilityByDraft = new Map<string, Promise<EntryPublishability>>();
 
@@ -276,11 +295,12 @@ const checkPublishActions = async <TAction extends PublishActionRef, TResult>(
 export const getPublishabilityForActions = <TAction extends PublishActionRef>(
   actions: readonly TAction[],
   { strapi }: { strapi: Core.Strapi }
-) => checkPublishActions(actions, readCheck, { strapi });
+) => checkPublishActions(actions, (read) => readCheck(read, { strapi }), { strapi });
 
 /**
  * The validity to store on each publish action, by action id. A draft that can't be read is
- * stored as not publishable and doesn't stop the others.
+ * stored as not publishable and doesn't stop the others, except in a transaction a MySQL deadlock,
+ * which is rethrown (it rolled the transaction back).
  */
 export const getValidityForActions = <TAction extends PublishActionRef>(
   actions: readonly TAction[],
@@ -288,7 +308,7 @@ export const getValidityForActions = <TAction extends PublishActionRef>(
 ) =>
   checkPublishActions(
     actions,
-    async (readPublishability) => toEntryValidity(await readCheck(readPublishability)),
+    async (readPublishability) => toEntryValidity(await readCheck(readPublishability, { strapi })),
     { strapi }
   );
 
@@ -298,5 +318,7 @@ export const getActionValidity = async (
   { strapi }: { strapi: Core.Strapi }
 ): Promise<EntryValidity> =>
   action.type === 'publish'
-    ? toEntryValidity(await readCheck(() => createDraftPublishabilityCheck({ strapi })(action)))
+    ? toEntryValidity(
+        await readCheck(() => createDraftPublishabilityCheck({ strapi })(action), { strapi })
+      )
     : UNPUBLISH_VALIDITY;

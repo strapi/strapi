@@ -30,8 +30,8 @@ A release is planned until it runs, then frozen: nothing changes it afterwards. 
 - **Empty** (planned): the release has no entries.
 - **Ready** (planned): publishing now would release every entry (`all_or_nothing`) or at least one (`allow_partial`).
 - **Blocked** (planned): publishing now would release nothing, so it is refused.
-- **Done** (frozen): every entry was released. A release with no entries ends done.
+- **Done** (frozen): every entry was released. A release with no entries ends done when it runs or misses its schedule.
 - **Partial** (frozen, `allow_partial` only): some entries were released, the others skipped.
-- **Failed** (frozen): the run released nothing, or the release never ran before its date passed. One that failed before the upgrade may have released some entries: nothing recorded which.
+- **Failed** (frozen): the run released nothing, or a release with entries never ran before its date passed. One that failed before the upgrade is frozen as failed, empty or not, and may have released some entries: nothing recorded which.
 
 See [Backend Design](./01-backend.md) for the rules behind each status.

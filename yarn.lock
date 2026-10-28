@@ -9713,9 +9713,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/design-system@npm:2.3.0-alpha.0":
-  version: 2.3.0-alpha.0
-  resolution: "@strapi/design-system@npm:2.3.0-alpha.0"
+"@strapi/design-system@npm:0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed":
+  version: 0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed
+  resolution: "@strapi/design-system@npm:0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed"
   dependencies:
     "@base-ui/react": "npm:1.7.0"
     "@codemirror/lang-json": "npm:6.0.1"
@@ -9741,7 +9741,7 @@ __metadata:
     "@radix-ui/react-tabs": "npm:1.0.4"
     "@radix-ui/react-tooltip": "npm:1.0.7"
     "@radix-ui/react-use-callback-ref": "npm:1.0.1"
-    "@strapi/ui-primitives": "npm:2.3.0-alpha.0"
+    "@strapi/ui-primitives": "npm:0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed"
     "@tanstack/react-virtual": "npm:^3.10.8"
     "@uiw/react-codemirror": "npm:4.22.2"
     class-variance-authority: "npm:0.7.1"
@@ -9750,7 +9750,7 @@ __metadata:
     react-remove-scroll: "npm:2.5.10"
     tailwind-merge: "npm:3.6.0"
   peerDependencies:
-    "@strapi/icons": ^2.0.0 || ^2.0.0-beta || ^2.0.0-alpha || ^2.3.0-alpha
+    "@strapi/icons": 0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed
     react: ^18.0.0
     react-dom: ^18.0.0
     styled-components: ^6.0.0
@@ -9758,7 +9758,7 @@ __metadata:
   peerDependenciesMeta:
     tailwindcss:
       optional: true
-  checksum: 10c0/782b9c43abbd75f5617e36490a20474277da4422b7fa6ba517d65a056aedbc2ab32bdd69a7af3da6c8f1ddc5ef22ec7b5986d029a46371fae7d8c7a5e3f0fb1c
+  checksum: 10c0/9d0855d26b076360f99c46155f99a46c12c5381e16da6e8e365153bcdc901dd3bc63239f0daf96d62244a7d47be0b277beda2ae62211d95e4f85b0b2e8706e4e
   languageName: node
   linkType: hard
 
@@ -9902,14 +9902,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/icons@npm:2.2.4":
-  version: 2.2.4
-  resolution: "@strapi/icons@npm:2.2.4"
+"@strapi/icons@npm:0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed":
+  version: 0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed
+  resolution: "@strapi/icons@npm:0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
     styled-components: ^6.0.0
-  checksum: 10c0/d1759162884136e5ce5af1f2a842715b636061213bee1d91c960818647d1a9a453ebe5e768fd9604a5e235da49e29e97f318ddde39bcf5feee9d3a2e6edd6511
+  checksum: 10c0/cc2b7749436cffacb737fd51c60e42e95c6bd1bfac348644f14ba01edab2c3b0494c63396d2ef3b6584f90c5a0577a5b8d21dd36e4e2cf61b31a8ea4e167cedc
   languageName: node
   linkType: hard
 
@@ -10487,9 +10487,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/ui-primitives@npm:2.3.0-alpha.0":
-  version: 2.3.0-alpha.0
-  resolution: "@strapi/ui-primitives@npm:2.3.0-alpha.0"
+"@strapi/ui-primitives@npm:0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed":
+  version: 0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed
+  resolution: "@strapi/ui-primitives@npm:0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed"
   dependencies:
     "@radix-ui/number": "npm:1.0.1"
     "@radix-ui/primitive": "npm:1.0.1"
@@ -10514,7 +10514,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 10c0/dae2ef11971389ec7713bb09df2417af2248f378747d3023b9d213d717b14e2daf319b6d0de22e69605c4c5f6064a98056bad8ce8047aa331580b037660f9fa3
+  checksum: 10c0/64c70d63d1483ce0a3730512ac0613e73a0824859689e3ac254207ba113d863d04aea2b9402a433a8a10f54086ea869b347a24e4128d16ac9d84757cae84f83d
   languageName: node
   linkType: hard
 

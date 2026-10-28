@@ -1,4 +1,6 @@
-import type { UID, Data, Core } from '@strapi/types';
+import type { UID, Data, Core, Modules } from '@strapi/types';
+
+export type EntryPopulate = Modules.Documents.Params.Pick<UID.ContentType, 'populate'>['populate'];
 
 interface EntryRef {
   contentType: UID.ContentType;
@@ -13,7 +15,7 @@ export const getEntry = async (
     locale,
     populate,
     status = 'draft',
-  }: EntryRef & { status?: 'draft' | 'published'; populate: any },
+  }: EntryRef & { status?: 'draft' | 'published'; populate: EntryPopulate },
   { strapi }: { strapi: Core.Strapi }
 ) => {
   if (documentId) {
