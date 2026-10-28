@@ -59,7 +59,7 @@
     "@strapi/typescript-utils": "5.59.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
-    "@types/node": "20.19.41",
+    "@types/node": "22.20.0",
     "eslint-config-custom": "5.59.0",
     "jest": "29.6.0",
     "tsconfig": "5.59.0",
@@ -67,7 +67,7 @@
     "vitest-config": "5.59.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }
