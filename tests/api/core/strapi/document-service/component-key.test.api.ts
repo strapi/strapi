@@ -2,7 +2,7 @@
 
 /**
  * Durable componentKey across Draft & Publish.
- * @see docs/docs/rfcs/03-component-key.md
+ * @see docs/docs/packages/core/core/component-key.md
  */
 
 const { createTestBuilder } = require('api-tests/builder');

@@ -2,10 +2,12 @@
 title: Durable componentKey for nested components
 description: Add a stable componentKey identity for component instances across draft/publish clones so Content API clients can round-trip nested updates without relying on status-local numeric ids
 tags:
-  - content-api
-  - document-service
-  - components
-  - draft-and-publish
+  - backend
+  - public-api
+  - tech-design
+status: draft
+review_notes:
+  - Design proposal for an unreleased feature (draft PR stack); verify against the code once merged.
 ---
 
 # Durable `componentKey` for nested components

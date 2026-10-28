@@ -35,6 +35,8 @@ const FIELDS_TO_IGNORE = new Set([
   'updatedBy',
   'id',
   'documentId',
+  // Component identity is per entry: keys from the source locale do not resolve on the target
+  'componentKey',
   'publishedAt',
   'strapi_stage',
   'strapi_assignee',

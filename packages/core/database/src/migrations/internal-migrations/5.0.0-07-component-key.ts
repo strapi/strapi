@@ -8,7 +8,7 @@
  * Existing draft/published pairs get unique keys per row; they share a key after
  * the next publish (createComponent preserves keys when cloning draft → published).
  *
- * @see docs/docs/rfcs/03-component-key.md
+ * @see docs/docs/packages/core/core/component-key.md
  */
 import { createId } from '@paralleldrive/cuid2';
 import type { Knex } from 'knex';
