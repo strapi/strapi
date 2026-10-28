@@ -661,7 +661,7 @@ jobs:
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
-          jestOptions: '--shard=${{ matrix.shard }}'
+          jestOptions: '--workers=4 --shard=${{ matrix.shard }}'
 
   # EE
   api_ee_pg:
@@ -776,7 +776,7 @@ jobs:
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
-          jestOptions: '--shard=${{ matrix.shard }}'
+          jestOptions: '--workers=4 --shard=${{ matrix.shard }}'
   sonarqube:
     name: SonarQube Analysis
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
