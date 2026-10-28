@@ -48,6 +48,14 @@ declare global {
         'plugin::i18n.settings': SettingsController;
         'plugin::i18n.ai-localization-jobs': AILocalizationJobsController;
       }
+
+      /** Registered at bootstrap (`services/permissions/actions.ts`). */
+      interface PermissionActions {
+        'plugin::i18n.locale.create': true;
+        'plugin::i18n.locale.read': true;
+        'plugin::i18n.locale.update': true;
+        'plugin::i18n.locale.delete': true;
+      }
     }
   }
 }
