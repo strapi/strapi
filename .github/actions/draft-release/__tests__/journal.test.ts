@@ -1,7 +1,9 @@
 import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { classifyFailure, createJournal } from '../lib/journal.ts';
+import { classifyFailure, createJournal, mutationFailure } from '../lib/journal.ts';
+
+import type { JournalSnapshot } from '../lib/types.ts';
 
 const clock = (): string => '2026-09-06T17:57:00Z';
 
@@ -88,7 +90,7 @@ describe('createJournal', () => {
 
     await assert.rejects(() =>
       journal.write({ op: 'milestone.rename', target: 'milestone/430' }, async () => {
-        throw Object.assign(new Error('GitHub PATCH failed: 422 already_exists'), { status: 422 });
+        throw mutationFailure('GitHub PATCH failed: 422 already_exists', 'refused');
       })
     );
 
@@ -135,6 +137,50 @@ describe('createJournal', () => {
     assert.equal(journal.entries().length, 1);
   });
 
+  it('persists attempted intent before the mutation and its result before returning', async () => {
+    const snapshots: JournalSnapshot[] = [];
+    const journal = createJournal({
+      apply: true,
+      clock,
+      persist(snapshot) {
+        snapshots.push(JSON.parse(JSON.stringify(snapshot)) as JournalSnapshot);
+      },
+    });
+
+    await journal.write(
+      { op: 'pr.create', target: 'pulls/<new>' },
+      async () => {
+        assert.equal(snapshots.at(-1)?.entries[0]?.state, 'attempted');
+
+        return { number: 27600 };
+      },
+      (pull) => ({ target: `pulls/${pull.number}` })
+    );
+
+    assert.equal(snapshots.at(-1)?.entries[0]?.state, 'applied');
+    assert.equal(snapshots.at(-1)?.entries[0]?.target, 'pulls/27600');
+  });
+
+  it('persists a failed transition after a refused mutation', async () => {
+    const snapshots: JournalSnapshot[] = [];
+    const journal = createJournal({
+      apply: true,
+      clock,
+      persist(snapshot) {
+        snapshots.push(JSON.parse(JSON.stringify(snapshot)) as JournalSnapshot);
+      },
+    });
+
+    await assert.rejects(() =>
+      journal.write({ op: 'pr.close', target: 'pulls/27600' }, async () => {
+        throw mutationFailure('GitHub refused the write', 'refused');
+      })
+    );
+
+    assert.equal(snapshots.at(-1)?.entries[0]?.state, 'failed');
+    assert.equal(snapshots.at(-1)?.entries[0]?.error, 'GitHub refused the write');
+  });
+
   it('stamps a real clock when none is injected', async () => {
     const journal = createJournal({ apply: false });
 
@@ -145,17 +191,14 @@ describe('createJournal', () => {
 });
 
 describe('classifyFailure', () => {
-  it('treats a status as proof the operation reached a verdict', () => {
-    assert.equal(classifyFailure(Object.assign(new Error('nope'), { status: 422 })), 'failed');
-    assert.equal(classifyFailure(Object.assign(new Error('nope'), { status: 1 })), 'failed');
+  it('marks a typed refusal as failed', () => {
+    assert.equal(classifyFailure(mutationFailure('nope', 'refused')), 'failed');
   });
 
   it('refuses to guess when nothing proves the write did not land', () => {
+    assert.equal(classifyFailure(mutationFailure('server error', 'unknown')), 'indeterminate');
     assert.equal(classifyFailure(new Error('socket hang up')), 'indeterminate');
-    assert.equal(
-      classifyFailure(Object.assign(new Error('x'), { status: '422' })),
-      'indeterminate'
-    );
+    assert.equal(classifyFailure(Object.assign(new Error('x'), { status: 422 })), 'indeterminate');
     assert.equal(classifyFailure(null), 'indeterminate');
     assert.equal(classifyFailure(undefined), 'indeterminate');
   });

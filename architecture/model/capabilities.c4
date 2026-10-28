@@ -1,0 +1,53 @@
+// A product map, deliberately separate from C4 runtime containment.
+model {
+  model_content = capability 'Model content' {
+    summary 'Define content types, components and fields.'
+    description 'Developers shape content in code or with the Content-Type Builder in development.'
+
+  }
+  manage_content = capability 'Manage content' {
+    summary 'Create, edit and organize entries and media.'
+
+  }
+  publish_content = capability 'Publish content' {
+    summary 'Make draft content available to delivery channels.'
+    description 'Draft & Publish applies to content types where it is enabled. The publishing journey shows this configuration; it does not imply every content type has drafts.'
+
+  }
+  deliver_content = capability 'Deliver content' {
+    summary 'Expose content to websites, apps and integrations.'
+    description 'Content APIs deliver data according to configured authentication and permissions. REST is the baseline; GraphQL is an optional plugin.'
+
+  }
+  govern_access = capability 'Control access' {
+    summary 'Configure admin roles and Content API access.'
+    description 'Admin users and roles are distinct from end-user identities supplied by Users & Permissions and from API tokens.'
+
+  }
+  extend_strapi = capability 'Extend Strapi' {
+    summary 'Adapt APIs, plugins, Admin UI and providers.'
+
+  }
+  edit_entries = capability 'Edit entries' {
+    summary 'Create and edit structured content with Admin permissions.'
+  }
+  manage_media = capability 'Manage media' {
+    summary 'Upload files and manage their metadata and storage.'
+  }
+  preview_content = capability 'Preview content' {
+    summary 'View content in a configured frontend preview.'
+  }
+  inspect_history = capability 'Content history' {
+    summary 'Inspect earlier versions when the licensed feature is enabled.'
+  }
+  manage_content -> edit_entries 'includes'
+  manage_content -> manage_media 'includes'
+  manage_content -> preview_content 'can include configured preview'
+  manage_content -> inspect_history 'can include licensed history'
+  model_content -> manage_content 'defines the structure of'
+  manage_content -> publish_content 'prepares content for'
+  publish_content -> deliver_content 'makes published content available to'
+  govern_access -> manage_content 'controls editing permissions'
+  govern_access -> deliver_content 'controls Content API permissions'
+  extend_strapi -> deliver_content 'adds application behaviour'
+}

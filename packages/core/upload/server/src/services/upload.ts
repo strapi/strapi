@@ -2,7 +2,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
-import _ from 'lodash';
+import _, { has, toNumber } from 'lodash';
 import { extension } from 'mime-types';
 import {
   async,
@@ -12,7 +12,6 @@ import {
   file as fileUtils,
   pagination as paginationUtils,
 } from '@strapi/utils';
-import { has, toNumber, isNil } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -291,6 +290,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return uploadedFiles;
   }
 
+  // `_.set(fileData, ['formats', key], ...)` reads an all-digit key (a `breakpoints`
+  // entry like `{ 100: 100 }`) as an array index and builds an array when formats is
+  // unset, so build the object explicitly.
+  function setFormat(fileData: UploadableFile, key: string, format: UploadableFile) {
+    fileData.formats = { ...fileData.formats, [key]: format };
+  }
+
   /**
    * When uploading an image, an additional thumbnail is generated.
    * Also, if there are responsive formats defined, another set of images will be generated too.
@@ -314,14 +320,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // For performance reasons, all uploads are wrapped in a single Promise.all
     const uploadThumbnail = async (thumbnailFile: UploadableFile) => {
       await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
+      setFormat(fileData, 'thumbnail', thumbnailFile);
     };
 
     // Generate thumbnail and responsive formats
     const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
       const { key, file } = format;
       await getService('provider').upload(file);
-      _.set(fileData, ['formats', key], file);
+      setFormat(fileData, key, file);
     };
 
     const uploadPromises: Promise<void>[] = [];
@@ -373,7 +379,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       } else {
         await getService('provider').upload(newFormat);
       }
-      _.set(fileData, ['formats', key], newFormat);
+      setFormat(fileData, key, newFormat);
     };
 
     const promises: Promise<unknown>[] = [];
@@ -518,8 +524,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         _.assign(fileData, { folderPath: dbFile.folderPath });
       }
 
-      // clear old formats — replaceImage / replace will set new ones
-      _.set(fileData, 'formats', {});
+      // `update` only writes the keys it gets, so clear the old image values. A new
+      // image gets its own from replaceImage / uploadImage; a non-image keeps null,
+      // like a fresh upload of the same file.
+      _.assign(fileData, { width: null, height: null, formats: null });
 
       if (dbFile.provider === config.provider) {
         if (await isImage(fileData)) {
@@ -553,7 +561,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return update(id, fileData, { user });
   }
 
-  async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
+  async function update(id: ID, values: Partial<UploadableFile>, opts?: CommonOptions) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -638,7 +646,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * Defaults to the `api.rest.withCount` config (true) when not specified on the request.
    */
   function resolveWithCount(pagination: Record<string, unknown>): boolean {
-    if (has('withCount', pagination)) {
+    if (has(pagination, 'withCount')) {
       const withCount = pagination.withCount;
 
       if (typeof withCount === 'boolean') {
@@ -681,7 +689,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;
 
     // Whether the consumer used page-based pagination (default) vs offset-based.
-    const isOffset = has('start', pagination) || has('limit', pagination);
+    const isOffset = has(pagination, 'start') || has(pagination, 'limit');
     const isPaged = !isOffset;
 
     // Resolve start/limit applying defaults and the maxLimit cap.
@@ -714,7 +722,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return {
       results: signedResults,
       // Omit total & pageCount when counting is disabled (withCount=false).
-      pagination: isNil(total) ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
+      pagination: total == null ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
     };
   }
 

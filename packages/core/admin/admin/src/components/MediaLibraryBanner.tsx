@@ -1,6 +1,9 @@
+import * as React from 'react';
+
 import { LinkButton, Typography } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useMatch } from 'react-router-dom';
 
 import { useScopedPersistentState } from '../hooks/usePersistentState';
 
@@ -90,7 +93,17 @@ const Banner = ({
   );
 };
 
-const MediaLibraryBanner = () => {
+interface MediaLibraryBannerProps {
+  /**
+   * Called synchronously (before paint) whenever this banner's own visibility changes, so a
+   * parent rendering it alongside another banner (e.g. `UpsellBanner`) can hide that other one
+   * instead of stacking both. This banner owns its dismissal state, so it's the source of truth
+   * for whether it's showing — the parent shouldn't have to re-derive that itself.
+   */
+  onVisibilityChange?: (isVisible: boolean) => void;
+}
+
+const MediaLibraryBanner = ({ onVisibilityChange }: MediaLibraryBannerProps = {}) => {
   const isLegacyMediaLibrary = window.strapi.featureFlags.isEnabled('useLegacyMediaLibrary');
 
   // The flag state is part of the key (not the stored value) so dismissing one
@@ -101,7 +114,21 @@ const MediaLibraryBanner = () => {
     false
   );
 
-  if (isDismissed) {
+  // `AuthenticatedLayout` renders this banner on every admin page, but it's only
+  // relevant on the Media Library itself (both the new and legacy `upload` plugin
+  // route share the same `plugins/upload` mount point).
+  const isOnMediaLibraryPage = useMatch('/plugins/upload/*') !== null;
+
+  const isVisible = isOnMediaLibraryPage && !isDismissed;
+
+  // useLayoutEffect (not useEffect) so the parent's re-render from this lands before the
+  // browser paints — otherwise a possibly-visible `UpsellBanner` would flash on screen for a
+  // frame before being hidden.
+  React.useLayoutEffect(() => {
+    onVisibilityChange?.(isVisible);
+  }, [isVisible, onVisibilityChange]);
+
+  if (!isVisible) {
     return null;
   }
 

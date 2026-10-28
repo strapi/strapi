@@ -2,16 +2,19 @@ import { Images } from '@strapi/icons';
 
 import pluginPkg from '../../package.json';
 
-import { MediaLibraryDialog } from './components/MediaLibraryDialog/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput/MediaLibraryInput';
+import { UploadProgressDialog } from './components/UploadProgressDialog';
 import { PERMISSIONS } from './constants';
-import { UploadProgressDialog } from './future/components/UploadProgressDialog';
-import { uploadProgressReducer } from './future/store/uploadProgress';
+import { MediaLibraryDialog } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
+import { MediaLibraryInput as LegacyMediaLibraryInput } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
+import { prefixPluginTranslations } from './legacy/utils/prefixPluginTranslations';
 import { pluginId } from './pluginId';
-import { getTrad, prefixPluginTranslations } from './utils';
+import { uploadProgressReducer } from './store/uploadProgress';
+import { getTranslationKey } from './utils/translations';
 
-import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog/MediaLibraryDialog';
 import type { MediaLibraryInputProps } from './components/MediaLibraryInput/MediaLibraryInput';
+import type { MediaLibraryDialogProps } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
+import type { MediaLibraryInputProps as LegacyMediaLibraryInputProps } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
@@ -37,11 +40,11 @@ const admin: Plugin.Config.AdminInput = {
       permissions: PERMISSIONS.main,
       Component: isLegacyMediaLibrary
         ? () => {
-            return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
+            return import('./legacy/pages/App/App').then((mod) => ({ default: mod.Upload }));
           }
         : () => {
-            return import('./future/App').then((mod) => ({
-              default: mod.BetaMediaLibrary,
+            return import('./App').then((mod) => ({
+              default: mod.MediaLibrary,
             }));
           },
       position: 4,
@@ -62,7 +65,7 @@ const admin: Plugin.Config.AdminInput = {
       id: 'media-library-settings',
       to: 'media-library',
       intlLabel: {
-        id: getTrad('plugin.name'),
+        id: getTranslationKey('plugin.name'),
         defaultMessage: 'Media Library',
       },
       Component() {
@@ -73,9 +76,16 @@ const admin: Plugin.Config.AdminInput = {
       permissions: PERMISSIONS.settings,
     });
 
+    /**
+     * The media field follows the same switch as the menu link above: the
+     * current input on the current Media Library, the legacy one when
+     * `useLegacyMediaLibrary` opts back out.
+     */
     app.addFields({
       type: 'media',
-      Component: MediaLibraryInput as React.FC<Partial<MediaLibraryInputProps>>,
+      Component: isLegacyMediaLibrary
+        ? (LegacyMediaLibraryInput as React.FC<Partial<LegacyMediaLibraryInputProps>>)
+        : (MediaLibraryInput as React.FC<Partial<MediaLibraryInputProps>>),
     });
     app.addComponents([
       {

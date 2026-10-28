@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { merge } from 'lodash/fp';
+import _, { merge } from 'lodash';
+
 import {
   cleanPermissionsInDatabase,
   findUserPermissions,
@@ -26,7 +26,7 @@ describe('Permission Service', () => {
   describe('Find permissions', () => {
     test('Find calls the right db query', async () => {
       const findMany = jest.fn(() => Promise.resolve([]));
-      global.strapi = merge(global.strapi, {
+      global.strapi = merge({}, global.strapi, {
         db: {
           query() {
             return { findMany };
@@ -44,7 +44,7 @@ describe('Permission Service', () => {
     test('Find calls the right db query', async () => {
       const findMany = jest.fn(() => Promise.resolve([]));
 
-      global.strapi = merge(global.strapi, {
+      global.strapi = merge({}, global.strapi, {
         db: {
           query() {
             return { findMany };
@@ -64,7 +64,7 @@ describe('Permission Service', () => {
     test('Removes unwanted properties', () => {
       const isValidCondition = jest.fn((condition) => ['cond'].includes(condition));
 
-      global.strapi = merge(global.strapi, {
+      global.strapi = merge({}, global.strapi, {
         admin: { services: { condition: { isValidCondition } } },
       });
 
@@ -154,7 +154,7 @@ describe('Permission Service', () => {
       registeredPerms.set('action-1', {});
       registeredPerms.set('action-3', { subjects: ['country'] });
 
-      global.strapi = merge(global.strapi, {
+      global.strapi = merge({}, global.strapi, {
         db: { query: () => ({ findMany, delete: dbDelete, update, count }) },
         admin: {
           services: {
@@ -231,7 +231,7 @@ describe('Permission Service', () => {
       const update = jest.fn(() => Promise.resolve());
       const count = jest.fn(() => Promise.resolve(3));
 
-      global.strapi = merge(global.strapi, {
+      global.strapi = merge({}, global.strapi, {
         db: { query: () => ({ findMany, delete: dbDelete, update, count }) },
         admin: {
           services: {
@@ -287,7 +287,7 @@ describe('Permission Service', () => {
       const update = jest.fn(() => Promise.resolve());
       const count = jest.fn(() => Promise.resolve(2));
 
-      global.strapi = merge(global.strapi, {
+      global.strapi = merge({}, global.strapi, {
         db: { query: () => ({ findMany, delete: dbDelete, update, count }) },
         admin: {
           services: {

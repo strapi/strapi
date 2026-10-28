@@ -218,6 +218,52 @@ describe('Release Action service', () => {
       );
     });
 
+    it('rejects invalid entry data before the uniqueness check', async () => {
+      const { validateEntryData, validateUniqueEntry } = serviceMock['release-validation'];
+      validateEntryData.mockClear();
+      validateUniqueEntry.mockClear();
+      validateEntryData.mockImplementationOnce(() => {
+        throw new Error('Invalid entry data');
+      });
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: baseStrapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+      };
+
+      await expect(releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
+        'Invalid entry data'
+      );
+      expect(validateEntryData).toHaveBeenCalledWith('api::contentTypeA.contentTypeA', '1');
+      expect(validateUniqueEntry).not.toHaveBeenCalled();
+    });
+
+    it('runs the uniqueness check after valid entry data', async () => {
+      const { validateEntryData, validateUniqueEntry } = serviceMock['release-validation'];
+      validateEntryData.mockClear();
+      validateUniqueEntry.mockClear();
+      validateUniqueEntry.mockRejectedValueOnce(new Error('Entry already in release'));
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: baseStrapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+      };
+
+      await expect(releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
+        'Entry already in release'
+      );
+      expect(validateEntryData).toHaveBeenCalledWith('api::contentTypeA.contentTypeA', '1');
+      expect(validateUniqueEntry).toHaveBeenCalledWith(1, mockActionArgs);
+    });
+
     it('throws an error if the release does not exist', () => {
       const strapiMock = {
         ...baseStrapiMock,
@@ -273,12 +319,14 @@ describe('Release Action service', () => {
         plugin: jest.fn().mockReturnValue({
           service: jest.fn().mockReturnValue({
             findConfiguration: jest.fn().mockReturnValue({ settings: { mainField: 'name' } }),
-            find: jest.fn().mockReturnValue([
-              { name: 'English (en)', code: 'en' },
-              { name: 'French (fr)', code: 'fr' },
-            ]),
           }),
         }),
+        localization: {
+          getLocales: jest.fn().mockResolvedValue([
+            { name: 'English (en)', code: 'en' },
+            { name: 'French (fr)', code: 'fr' },
+          ]),
+        },
       };
 
       const mockActions = [
@@ -342,6 +390,83 @@ describe('Release Action service', () => {
               code: 'fr',
               name: 'French (fr)',
             },
+            entryDocumentId: '2',
+            entry: {
+              name: 'test 2',
+              publishedAt: null,
+            },
+          },
+        ],
+      });
+    });
+
+    it('should not resolve action locales without a localization plugin', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            findConfiguration: jest.fn().mockReturnValue({ settings: { mainField: 'name' } }),
+          }),
+        }),
+        // Inert default of `strapi.localization` when no provider is registered
+        localization: {
+          getLocales: jest.fn().mockResolvedValue([]),
+        },
+      };
+
+      const mockActions = [
+        {
+          id: 1,
+          contentType: 'api::contentTypeA.contentTypeA',
+          locale: 'en',
+          entryDocumentId: '1',
+          entry: {
+            name: 'test 1',
+            publishedAt: '2021-01-01',
+          },
+        },
+        {
+          id: 2,
+          contentType: 'api::contentTypeB.contentTypeB',
+          locale: null,
+          entryDocumentId: '2',
+          entry: {
+            name: 'test 2',
+            publishedAt: null,
+          },
+        },
+      ];
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+
+      // @ts-expect-error ignore missing properties
+      const groupedData = await releaseActionService.groupActions(mockActions, 'locale');
+
+      expect(groupedData).toStrictEqual({
+        'No locale': [
+          {
+            id: 1,
+            contentType: {
+              displayName: 'contentTypeA',
+              mainFieldValue: 'test 1',
+              uid: 'api::contentTypeA.contentTypeA',
+            },
+            locale: undefined,
+            entryDocumentId: '1',
+            entry: {
+              name: 'test 1',
+              publishedAt: '2021-01-01',
+            },
+          },
+          {
+            id: 2,
+            contentType: {
+              displayName: 'contentTypeB',
+              mainFieldValue: 'test 2',
+              uid: 'api::contentTypeB.contentTypeB',
+            },
+            locale: null,
             entryDocumentId: '2',
             entry: {
               name: 'test 2',
