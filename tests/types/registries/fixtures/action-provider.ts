@@ -83,6 +83,22 @@ actionProvider.unstable_aliases('plugin::example.raed');
     },
   ],
 }) satisfies Core.RouteConfigFor;
+// The admin EE IDs are declared, although they are registered only with their EE feature.
+({
+  policies: [
+    {
+      name: 'admin::hasPermissions',
+      config: {
+        actions: [
+          'admin::provider-login.read',
+          'admin::provider-login.update',
+          'admin::audit-logs.read',
+          'admin::audit-logs.export',
+        ],
+      },
+    },
+  ],
+}) satisfies Core.RouteConfigFor;
 ({
   policies: [
     // @ts-expect-error The action ID is not declared.
