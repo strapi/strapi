@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/extensions
-import type { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer, RegisteredTool, ServerContext } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {
@@ -8,6 +7,8 @@ import {
 } from './internal/McpCapabilityRegistry';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
+import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
+import { toSdkToolResult } from './utils/toSdkMcpCapabilityResult';
 import type { McpAdminTokenAbility } from './authentication';
 
 /**
@@ -58,16 +59,24 @@ export class McpToolRegistry
 
   #user: Modules.MCP.McpHandlerContext['user'];
 
+  #shouldResolveSchemas: (definition: Modules.MCP.McpToolDefinition) => boolean;
+
   constructor(ctx: {
     strapi: Core.Strapi;
     definitions: McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>;
     ability: McpAdminTokenAbility;
     user: Modules.MCP.McpHandlerContext['user'];
+    /**
+     * Whether the current request needs this tool's schemas. Resolving them is the dominant
+     * per-request cost, so tools the request never lists nor calls skip it. Defaults to every tool.
+     */
+    shouldResolveSchemas?: (definition: Modules.MCP.McpToolDefinition) => boolean;
   }) {
     super(ctx.definitions);
     this.#strapi = ctx.strapi;
     this.#ability = ctx.ability;
     this.#user = ctx.user;
+    this.#shouldResolveSchemas = ctx.shouldResolveSchemas ?? (() => true);
   }
 
   bind(mcpServer: McpServer) {
@@ -76,6 +85,31 @@ export class McpToolRegistry
     super.register((definition) => {
       const { name, title, description, resolveInputSchema, resolveOutputSchema, createHandler } =
         definition;
+
+      if (this.#shouldResolveSchemas(definition) === false) {
+        // Keep the tool known to the SDK so a call answers `Tool <name> disabled` (no permission)
+        // rather than `not found`. The request never lists nor runs it, so no schema is needed.
+        const unavailableResult = {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Tool "${name}" is not available in this request`,
+            },
+          ],
+          isError: true,
+        };
+
+        return createSafeCapabilityRegistration({
+          strapi,
+          capabilityType: 'Tool',
+          name,
+          createHandler: () => async () => unavailableResult,
+          createFallbackHandler: () => async () => unavailableResult,
+          createErrorResult: () => unavailableResult,
+          registerWithSdk: (safeHandler) =>
+            mcpServer.registerTool(name, { title, description }, safeHandler),
+        });
+      }
 
       // Bind the session ability and token owner into the handler context so handlers can enforce
       // field-level and entity-level permission checks and set creator fields.
@@ -117,27 +151,43 @@ export class McpToolRegistry
             resolveInputSchema !== undefined ? resolveInputSchema(context) : undefined;
           const outputSchema = resolveOutputSchema(context);
 
-          // Adapt from our object-literal handler `({ args, extra })` to
-          // the MCP SDK's positional form `(args, extra)` / `(extra)`.
-          const baseHandler =
-            inputSchema !== undefined
-              ? (args: unknown, extra: unknown) =>
-                  safeHandler({ args, extra } as Parameters<typeof safeHandler>[0])
-              : (extra: unknown) => safeHandler({ extra } as Parameters<typeof safeHandler>[0]);
+          if (inputSchema !== undefined) {
+            // Adapt from Strapi's object parameter to the SDK's positional callback.
+            const sdkHandler = wrapCapabilityHandlerForMetrics(
+              strapi,
+              'tool',
+              name,
+              definition.telemetry,
+              async (args: unknown, context: ServerContext) =>
+                toSdkToolResult(
+                  await safeHandler({
+                    args,
+                    extra: createMcpCapabilityHandlerContext(context),
+                  } as Parameters<typeof safeHandler>[0])
+                )
+            );
+
+            return mcpServer.registerTool(
+              name,
+              { title, description, inputSchema, outputSchema },
+              sdkHandler
+            );
+          }
 
           const sdkHandler = wrapCapabilityHandlerForMetrics(
             strapi,
             'tool',
             name,
             definition.telemetry,
-            baseHandler
+            async (context: ServerContext) =>
+              toSdkToolResult(
+                await safeHandler({
+                  extra: createMcpCapabilityHandlerContext(context),
+                } as Parameters<typeof safeHandler>[0])
+              )
           );
 
-          return mcpServer.registerTool(
-            name,
-            { title, description, inputSchema, outputSchema },
-            sdkHandler
-          );
+          return mcpServer.registerTool(name, { title, description, outputSchema }, sdkHandler);
         },
       });
     });

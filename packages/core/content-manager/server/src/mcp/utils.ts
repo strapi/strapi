@@ -6,14 +6,16 @@ import { shapeRelationsForMcp } from './sanitizers/shape-relations';
 
 /**
  * Converts a Strapi content-type UID into a safe MCP tool-name segment.
- * `api::article.article` → `article`; `plugin::i18n.locale` → `plugin-i18n_locale`.
+ * `api::article.article` → `article`; `api::writer.editor` → `writer_editor` (the api name and the
+ * content-type name differ, so both are kept to stay unique within the api);
+ * `plugin::i18n.locale` → `plugin-i18n_locale`.
  */
 export const slugifyUidForMcpToolName = (uid: string): string => {
   const [namespace, modelName] = uid.split('::');
   const parts = modelName.split('.').map((part) => part.toLowerCase());
 
   if (namespace === 'api') {
-    return parts[0];
+    return parts[0] === parts[1] ? parts[0] : parts.join('_');
   }
 
   return `${namespace.toLowerCase()}-${parts.join('_')}`;

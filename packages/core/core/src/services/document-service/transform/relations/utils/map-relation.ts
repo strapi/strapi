@@ -1,19 +1,26 @@
 /* eslint-disable node/no-callback-literal */
-import { isObject, curry, isNil } from 'lodash/fp';
+import { curry, isObject } from 'lodash';
 
 import { traverseEntity, async } from '@strapi/utils';
 
 import { Relation } from './types';
 
+/**
+ * Whether a shorthand relation value is a numeric entry id (as opposed to a documentId).
+ *
+ * A string only counts as numeric when it is made of digits *entirely*. `parseInt` must not be
+ * used here: it stops at the first non-digit character, so a documentId that happens to start
+ * with a digit (e.g. `'3d52c864df72fcc68ab62ebe'` -> `3`) would be misclassified as an id.
+ */
 const isNumeric = (value: any): value is number => {
-  if (Array.isArray(value)) return false; // Handle [1, 'docId'] case
-  const parsed = parseInt(value, 10);
-  return !Number.isNaN(parsed);
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (typeof value === 'string') return /^\d+$/.test(value);
+  return false; // Arrays (e.g. [1, 'docId']), objects, etc.
 };
 
 const toArray = (value: any) => {
   // Keep value as it is if it's a nullish value
-  if (isNil(value)) return value;
+  if (value == null) return value;
   if (Array.isArray(value)) return value;
 
   return [value];
@@ -51,7 +58,7 @@ const mapRelation = async (
   };
 
   // undefined | null
-  if (isNil(relation)) {
+  if (relation == null) {
     return callback(relation);
   }
 
@@ -114,15 +121,18 @@ const mapRelation = async (
 };
 
 type TraverseEntity = Parameters<typeof traverseEntity>;
+type TraverseEntityRelationsOptions = TraverseEntity[1] & { includeMedia?: boolean };
 
 /**
- * Utility function, same as `traverseEntity` but only for relations.
+ * Utility function, same as `traverseEntity` but only for relations and, when requested, media.
  */
 const traverseEntityRelations = async (
   visitor: TraverseEntity[0],
-  options: TraverseEntity[1],
+  options: TraverseEntityRelationsOptions,
   data: TraverseEntity[2]
 ) => {
+  const { includeMedia = false, ...traverseOptions } = options;
+
   return traverseEntity(
     async (options, utils) => {
       const { attribute } = options;
@@ -131,23 +141,25 @@ const traverseEntityRelations = async (
         return;
       }
 
-      if (attribute.type !== 'relation') {
+      if (attribute.type !== 'relation' && !(includeMedia && attribute.type === 'media')) {
         return;
       }
 
-      // TODO: Handle join columns
-      if (attribute.useJoinTable === false) {
-        return;
-      }
+      if (attribute.type === 'relation') {
+        // TODO: Handle join columns
+        if (attribute.useJoinTable === false) {
+          return;
+        }
 
-      // morphToOne uses morphColumn (inline columns on the entity), handled directly in processData
-      if (attribute.relation === 'morphToOne') {
-        return;
+        // morphToOne uses morphColumn (inline columns on the entity), handled directly in processData
+        if (attribute.relation === 'morphToOne') {
+          return;
+        }
       }
 
       return visitor(options, utils);
     },
-    options,
+    traverseOptions,
     data
   );
 };
