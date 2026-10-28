@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
-import * as PrismModule from 'prismjs';
 import { useIntl } from 'react-intl';
 import { BaseRange, Element, Editor, Node, NodeEntry, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
@@ -12,6 +11,7 @@ import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
 import { codeLanguages } from '../utils/constants';
 import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
+import { Prism } from '../utils/prism';
 import { type Block } from '../utils/types';
 
 import 'prismjs/themes/prism-solarizedlight.css';
@@ -64,25 +64,6 @@ import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-tsx';
 import 'prismjs/components/prism-vbnet';
 import 'prismjs/components/prism-yaml';
-
-/**
- * prismjs is UMD and may not expose a namespace when bundled by Vite; the content-manager
- * index preloads it so `window.Prism` is set. Use that when the module import is empty.
- */
-function resolvePrism(): typeof PrismModule | undefined {
-  if (typeof PrismModule !== 'undefined' && PrismModule?.languages) {
-    return PrismModule;
-  }
-
-  if (typeof window === 'undefined') {
-    return undefined;
-  }
-
-  const globalPrism = (window as Window & { Prism?: typeof PrismModule }).Prism;
-  return globalPrism;
-}
-
-const Prism = resolvePrism();
 
 type BaseRangeCustom = BaseRange & { className: string };
 
