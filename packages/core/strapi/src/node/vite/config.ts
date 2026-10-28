@@ -59,7 +59,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     envPrefix: 'STRAPI_ADMIN_',
     // Vite 8 unified CJS default-import interop (dev and build). Preserve pre-Vite-8
     // behavior for custom admin code and plugin chunks until users can migrate imports.
-    // See packages/utils/upgrade/resources/codemods/5.60.0/BREAKING_CHANGES.md.
+    // See packages/utils/upgrade/resources/codemods/5.60.1/BREAKING_CHANGES.md.
     legacy: {
       inconsistentCjsInterop: true,
     },
