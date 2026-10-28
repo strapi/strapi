@@ -188,11 +188,14 @@ describe('Document localization capability', () => {
     expect(result.shared).toBe('published-value');
   });
 
-  it('replaces present shared fields from the published sibling', async () => {
-    const fillNonLocalizedAttributes = jest.fn((entry, relatedEntry) => {
-      entry.shared = relatedEntry.shared;
+  it('keeps shared fields already present on the entry being written', async () => {
+    registerProvider(localization, {
+      fillNonLocalizedAttributes(entry, relatedEntry) {
+        if (entry.shared == null) {
+          entry.shared = relatedEntry.shared;
+        }
+      },
     });
-    registerProvider(localization, { fillNonLocalizedAttributes });
     const findOne = jest.fn(async () => ({ shared: 'published-value' }));
     query.mockReturnValue({ findOne });
 
@@ -200,10 +203,9 @@ describe('Document localization capability', () => {
       draftAndPublishArticle,
       'doc-1',
       { localized: 'fr', shared: 'draft-value' },
-      { status: 'published', strategy: 'replace' }
+      { status: 'published' }
     );
 
-    expect(fillNonLocalizedAttributes).toHaveBeenCalled();
-    expect(result).toEqual({ localized: 'fr', shared: 'published-value' });
+    expect(result).toEqual({ localized: 'fr', shared: 'draft-value' });
   });
 });
