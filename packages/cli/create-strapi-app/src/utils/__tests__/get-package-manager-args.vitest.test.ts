@@ -1,10 +1,11 @@
 import execa from 'execa';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { getInstallArgs } from '../get-package-manager-args';
 
-jest.mock('execa');
+vi.mock('execa');
 
-const mockedExeca = execa as unknown as jest.Mock;
+const mockedExeca = execa as unknown as Mock;
 
 describe('getInstallArgs', () => {
   beforeEach(() => {

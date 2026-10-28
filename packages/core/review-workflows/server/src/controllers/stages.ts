@@ -58,6 +58,10 @@ export default {
       populate,
     });
 
+    if (stage === null) {
+      return ctx.notFound("Stage doesn't exist");
+    }
+
     ctx.body = {
       data: await sanitizer(stage),
     };

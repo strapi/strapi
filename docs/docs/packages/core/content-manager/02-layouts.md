@@ -110,7 +110,8 @@ interface ListFieldLayout {
    */
   cellFormatter?: (
     data: { [key: string]: unknown },
-    header: Omit<ListFieldLayout, 'cellFormatter'>
+    header: Omit<ListFieldLayout, 'cellFormatter'>,
+    meta: { collectionType: string; model: string }
   ) => React.ReactNode;
   label: string | MessageDescriptor;
   /**
@@ -126,3 +127,14 @@ interface ListFieldLayout {
 ```
 
 The `cellFormatter` property is paramount to plugin developers being able to inject their own columns, because we, most likely, will not have the components necessary to render the data the plugin provides. This is why they receive the data for the entire row & the header that they injected via the `'Admin/CM/pages/ListView/inject-column-in-table'` hook.
+
+The third argument, `meta`, holds the `collectionType` and `model` of the list view. Its type is exported as `ListCellMeta` from `@strapi/content-manager/strapi-admin`.
+
+:::caution Pass fields, never spread the row
+The row is user data. A content type can have attributes named `ref` or `key`. React treats them as the special `ref` and `key` props when you spread the row into a component: a string `ref` crashes the list view ("Function components cannot have string refs") and `key` is dropped. Read the fields your cell needs and pass them explicitly:
+
+```tsx
+cellFormatter: (row, _header, { model }) => <MyCell documentId={row.documentId} model={model} />;
+```
+
+:::
