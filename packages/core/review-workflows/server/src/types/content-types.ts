@@ -80,6 +80,22 @@ export interface WorkflowStageSchema extends Struct.CollectionTypeSchema {
   >;
 }
 
+/**
+ * The stage and assignee relations the plugin adds at register, when the license lists
+ * `review-workflows`, to every content type visible in the content manager that does not set
+ * `options.noStageAttribute` (`../register.ts`, `../utils/review-workflows.ts`). The runtime reads
+ * both options as truthy or falsy; the `except` shapes match their boolean values.
+ */
+export type StageAttributes = {
+  attributes: {
+    strapi_assignee: Schema.Attribute.Relation<'oneToOne', 'admin::user'>;
+    strapi_stage: Schema.Attribute.Relation<'oneToOne', 'plugin::review-workflows.workflow-stage'>;
+  };
+  except:
+    | { pluginOptions: { 'content-manager': { visible: false } } }
+    | { options: { noStageAttribute: true } };
+};
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Strapi {
@@ -88,6 +104,10 @@ declare global {
       interface PackageContentTypeSchemas {
         'plugin::review-workflows.workflow': WorkflowSchema;
         'plugin::review-workflows.workflow-stage': WorkflowStageSchema;
+      }
+
+      interface LicensedContentTypeAttributes {
+        'review-workflows': StageAttributes;
       }
     }
   }
