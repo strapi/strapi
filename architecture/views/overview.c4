@@ -1,0 +1,105 @@
+views {
+  view index {
+    title '01 Start here / Strapi in context'
+    link ../interface_overview/ 'Related: application interfaces'
+    description '''
+      **Audience:** everyone. **Scope:** a typical application built with Strapi.
+      **Question:** who uses this CMS, and what connects to it?
+      Teams model and manage content in their own CMS; websites and apps request it through APIs.
+      The Strapi box represents one team’s application, including its customizations; it is not a shared service operated by Strapi.
+      Webhooks are optional outbound integrations. Open Strapi for runtime architecture or the webhook receiver for integrations.
+    '''
+    include
+      content_editor,
+      developer,
+      administrator,
+      public_client,
+      strapi with { navigateTo strapi_containers },
+      external_system with { navigateTo strapi_providers }
+    exclude * -> *
+    include
+      content_editor -> strapi with { title 'Edits and publishes content' },
+      developer -> strapi with { title 'Builds and customizes the CMS' },
+      administrator -> strapi with { title 'Manages access and settings' },
+      public_client -> strapi with { title 'Requests content' navigateTo content_api_request_flow },
+      strapi -> external_system with { title 'Sends optional webhook events' }
+    autoLayout LeftRight 70 40
+  }
+
+  view strapi_capabilities {
+    title '01 Start here / Product capabilities'
+    link ../interface_overview/ 'Related: application interfaces'
+    description '''
+      **Audience:** product and engineering. **Type:** capability map, not a C4 container diagram.
+      **Question:** what can a team do with Strapi?
+      Arrows describe how capabilities support one another, not function calls or deployment units.
+      Publishing is a separate step for content types with Draft & Publish enabled. Access controls apply to both editing and API use.
+      Open a capability to explore its implementation or a representative journey.
+    '''
+    include
+      model_content with { navigateTo content_model },
+      manage_content with { navigateTo content_workspace },
+      publish_content with { navigateTo editorial_publishing },
+      deliver_content with { navigateTo content_api_request_flow },
+      govern_access with { navigateTo access_boundaries },
+      extend_strapi with { navigateTo strapi_extensions }
+    autoLayout LeftRight 70 40
+  }
+
+  view strapi_containers of strapi {
+    title '01 Start here / Runtime architecture'
+    link ../interface_overview/ 'Related: compare application interfaces'
+    description '''
+      **Audience:** everyone. **Type:** C4 container view of a typical Strapi application.
+      **Question:** what runs, and where are the runtime boundaries?
+      Here, a container means an application or data store; it does not imply Docker or a separate machine.
+      The Admin executes in a browser and the server in Node.js, even when one server distributes both.
+      The consuming application is outside the CMS. This baseline omits optional providers and development tooling. Use the related Application interfaces link to compare REST, GraphQL, Admin APIs, MCP and transfer. The request arrow opens a representative REST journey.
+      Open the Admin or server to go deeper; open the database for persistent state and a self-hosted deployment example.
+    '''
+    include
+      strapi,
+      content_editor,
+      public_client,
+      admin_web_app with { navigateTo admin_app_components },
+      server_runtime with { navigateTo strapi_container_internals },
+      database with { navigateTo application_state }
+    exclude * -> *
+    include
+      content_editor -> admin_web_app with { title 'Edits and publishes content' },
+      public_client -> server_runtime with { title 'Requests content via REST or optional GraphQL' technology 'HTTP(S)' navigateTo content_api_request_flow },
+      admin_web_app -> server_runtime with { title 'Calls Admin APIs' technology 'HTTP(S) / JSON' navigateTo content_publishing_flow },
+      server_runtime -> database with { title 'Reads and writes application data' technology 'SQL' }
+    autoLayout LeftRight 70 40
+  }
+
+  // Keep the existing ID for saved links; show one runtime rather than every container's internals.
+  view strapi_container_internals of strapi.server_runtime {
+    title '03 Engineering / Server / Request handling'
+    link ../interface_overview/ 'Related: compare application interfaces'
+    description '''
+      **Audience:** engineers. **Scope:** major server responsibilities during requests.
+      **Question:** how do Admin and generated Content API requests reach their handlers?
+      Content Manager and the generated Content API share document operations. Admin settings have their own APIs.
+      The router dispatches to the matching API family; it does not invoke all branches for one request. Authentication and route policies apply before the handler runs.
+      This responsibility map omits middleware detail and does not represent separate deployed services or a chronological call sequence.
+      Open Document Service for persistence detail. Startup, authentication and plugin assembly have separate focused views.
+    '''
+    include
+      http_server with { navigateTo content_api_runtime_components },
+      auth with { navigateTo access_boundaries },
+      admin_server_apis with { navigateTo admin_login_flow },
+      content_manager_server with { navigateTo content_manager_components },
+      core_api_layer with { navigateTo generated_core_api_code },
+      document_service with { navigateTo document_service_code }
+    exclude * -> *
+    include
+      http_server -> auth,
+      http_server -> admin_server_apis,
+      http_server -> content_manager_server,
+      http_server -> core_api_layer,
+      content_manager_server -> document_service with { title 'Edits and publishes documents' },
+      core_api_layer -> document_service with { title 'Runs content operations' }
+    autoLayout LeftRight 70 40
+  }
+}

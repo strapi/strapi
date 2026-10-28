@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext } from 'react';
+import { ReactNode, createContext, useContext, useMemo } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Trash, WarningCircle } from '@strapi/icons';
@@ -36,8 +36,10 @@ const StyledRoot = styled(Box)`
 
 // TODO: How to make this a button instead?
 const Root = ({ children, error = null, minWidth, maxWidth }: AttachmentRootProps) => {
+  const contextValue = useMemo(() => ({ error }), [error]);
+
   return (
-    <AttachmentContext.Provider value={{ error }}>
+    <AttachmentContext.Provider value={contextValue}>
       <Flex
         direction="column"
         alignItems="flex-start"

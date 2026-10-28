@@ -1,4 +1,3 @@
-import { isNil } from 'lodash/fp';
 import Koa from 'koa';
 import createError from 'http-errors';
 import delegate from 'delegates';
@@ -32,7 +31,7 @@ const addCustomMethods = (app: Koa) => {
   };
 
   app.response.deleted = function deleted(data) {
-    if (isNil(data)) {
+    if (data == null) {
       this.status = 204;
     } else {
       this.status = 200;
@@ -45,8 +44,20 @@ const addCustomMethods = (app: Koa) => {
   return app;
 };
 
-const createKoaApp = ({ proxy, keys }: { proxy: boolean; keys: string[] }) => {
+const createKoaApp = ({
+  proxy,
+  proxyIpHeader = 'X-Forwarded-For',
+  maxIpsCount = 0,
+  keys,
+}: {
+  proxy: boolean;
+  proxyIpHeader: string;
+  maxIpsCount: number;
+  keys: string[];
+}) => {
   const app = new Koa({ proxy });
+  app.proxyIpHeader = proxyIpHeader;
+  app.maxIpsCount = maxIpsCount;
   app.keys = keys;
 
   addCustomMethods(app);

@@ -1,13 +1,15 @@
 ---
 title: Strapi (WIP)
 slug: /api/Strapi
+description: 'Central Strapi class that manages project configuration, directories, and instance state.'
 tags:
-  - class
-  - public
-  - global
+  - public-api
 
 toc_min_heading_level: 2
 toc_max_heading_level: 3
+status: needs-review
+review_notes:
+  - Marked WIP. Examples use `global.strapi`, which the repo guidelines forbid (use dependency injection).
 ---
 
 import Type from '@site/docs/api/components/type';
@@ -79,6 +81,7 @@ A set of paths to specific Strapi project parts.
 
 ### `strapi.isLoaded`
 
+{/* prettier-ignore */}
 - <Type>Boolean</Type>
 
   - `true`: Everything (all `register` and `bootstrap` functions available in your strapi project) has been loaded
@@ -126,7 +129,7 @@ strapi.eventHub.emit('user.created', { username: 'johndoe', email: 'johndoe@exam
 
 In this example, we are emitting a `user.created` event with some data attached to it, and then listening for a user.updated event and logging the data. These events can be used to trigger actions within the Strapi application or to communicate with external systems.
 
-For more information on how to use the EventEmitter class and its methods, see the [Node.js documentation](ttps://nodejs.org/docs/latest-v18.x/api/events.html#class-eventemitter).
+For more information on how to use the EventEmitter class and its methods, see the [Node.js documentation](https://nodejs.org/docs/latest-v18.x/api/events.html#class-eventemitter).
 
 ### `strapi.startupLogger`
 
@@ -184,6 +187,7 @@ By default, the telemetry service is enabled, but you can disable it by setting 
 
 ### `strapi.requestContext`
 
+{/* prettier-ignore */}
 - <Type>Object</Type> Context Storage
 
   - `run(store, cb)`: <Type>Function</Type>
@@ -195,6 +199,7 @@ The request context stores the ctx object from KoaJS on each request. This allow
 
 ### `strapi.customFields`
 
+{/* prettier-ignore */}
 - <Type>Object</Type>
 
   - `register(customField)`: <Type>Function</Type> Register a new custom field
@@ -567,6 +572,7 @@ The strapi containers are accessible via `strapi.get('name-of-the-container')`.
 
 ### `config`
 
+{/* prettier-ignore */}
 - <Type>Object</Type>
 
   - `get(path, defaultValue)`: <Type>Function</Type>
