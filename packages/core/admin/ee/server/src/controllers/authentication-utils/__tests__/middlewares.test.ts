@@ -153,6 +153,29 @@ describe('redirectWithAuth', () => {
     );
   });
 
+  test('follows a custom admin.url for the access cookie, where the panel reads it', async () => {
+    (global.strapi.config.get as jest.Mock).mockImplementation(
+      (key: string, defaultValue?: unknown) => {
+        if (key === 'admin.absoluteUrl') return 'https://example.com/strapi/dashboard';
+        if (key === 'admin.path') return '/dashboard';
+        if (key === 'admin.auth.cookie.secure') return false;
+        return defaultValue;
+      }
+    );
+
+    const ctx = createCtx();
+
+    await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(ctx.cookiesSet).toHaveBeenCalledWith(
+      DEFAULT_AUTH_COOKIE_NAME,
+      'access-token',
+      expect.objectContaining({
+        path: '/strapi/dashboard',
+      })
+    );
+  });
+
   test('respects admin.auth.cookie.domain for the access cookie', async () => {
     (global.strapi.config.get as jest.Mock).mockImplementation(
       (key: string, defaultValue?: unknown) => {

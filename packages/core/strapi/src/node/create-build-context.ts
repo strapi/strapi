@@ -139,10 +139,16 @@ const createBuildContext = async ({
   // NOTE: Transports `admin.auth.cookie.name` / `path` / `domain` into the bundle; always
   // assigned so ambient STRAPI_ADMIN_AUTH_COOKIE_* env vars cannot make the bundle disagree
   // with the server. Domain falls back to `admin.auth.domain`, matching the server resolution.
+  // The path is only used for the access cookie, which the panel reads from its own pages,
+  // so it falls back to the path the browser loads the panel from, matching
+  // getAccessCookiePath() in @strapi/admin.
   env.STRAPI_ADMIN_AUTH_COOKIE_NAME =
     strapiInstance.config.get<string | undefined>('admin.auth.cookie.name') || '';
+  const configuredCookiePath = strapiInstance.config.get<unknown>('admin.auth.cookie.path');
   env.STRAPI_ADMIN_AUTH_COOKIE_PATH =
-    strapiInstance.config.get<string | undefined>('admin.auth.cookie.path') || '';
+    typeof configuredCookiePath === 'string' && configuredCookiePath.trim() !== ''
+      ? configuredCookiePath
+      : adminPublicPath;
   env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN =
     strapiInstance.config.get<string | undefined>('admin.auth.cookie.domain') ||
     strapiInstance.config.get<string | undefined>('admin.auth.domain') ||

@@ -533,6 +533,11 @@ export default {
 
     const updatedVersion = await updateDocument(ctx);
 
+    // The document can be deleted between the existence check and the update
+    if (updatedVersion === null) {
+      return ctx.notFound();
+    }
+
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
   },
@@ -572,6 +577,11 @@ export default {
     const sanitizedBody = await sanitizeFn(body);
 
     const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
+
+    // The source document can be deleted between the existence check and the clone
+    if (clonedDocument === undefined) {
+      return ctx.notFound();
+    }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {

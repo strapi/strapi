@@ -1,12 +1,12 @@
 # PR checker for status
 
-This action checks a PR labels, milestone and status to validate it is ready for merging.
+This action checks a PR labels and status to check that it is ready for merging.
 
-> ❗️ When making changes to this code, make sure to run the build before committing. See [Development](#development) to know more.
+> ❗️ Run the build after you change this code. See [Development](#development) for more information.
 
 ## Conditions
 
-1. The PR should not have the following labels:
+1. The PR must not have the following labels:
 
 - `flag: 💥 Breaking change`
 - `flag: don't merge`
@@ -14,8 +14,7 @@ This action checks a PR labels, milestone and status to validate it is ready for
 2. The PR must have one of the QA labels: `qa-done` or `qa-skipped`.
 3. The PR should have one and only one `source: *` label.
 4. The PR should have one and only one `pr: *` label.
-5. PRs targeting `develop` must have a milestone defined.
-6. Community PRs must not target `main`.
+5. Community PRs must not target `main`.
 
 ## Contributing
 
@@ -29,7 +28,7 @@ This action checks a PR labels, milestone and status to validate it is ready for
 
 ### Development
 
-In order for the action to run on github all the code needs to be bundled and committed because github actions do not manage dependencies for us. [Github reference documentation](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github).
+GitHub Actions does not manage dependencies for us. For this reason, the action needs all the code bundled and committed before it can run on GitHub. See the [GitHub reference documentation](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github).
 
 ### Commands
 
