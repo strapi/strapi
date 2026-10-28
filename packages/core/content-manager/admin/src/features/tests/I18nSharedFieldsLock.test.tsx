@@ -5,12 +5,6 @@ import { renderHook, act } from '@testing-library/react';
 import { I18nSharedFieldsLock, useI18nSharedFieldsLock } from '../I18nSharedFieldsLock';
 
 describe('I18nSharedFieldsLock', () => {
-  const wrapper =
-    (resetKey: string) =>
-    ({ children }: { children: React.ReactNode }) => (
-      <I18nSharedFieldsLock resetKey={resetKey}>{children}</I18nSharedFieldsLock>
-    );
-
   it('starts locked and stays unlocked across rerenders', () => {
     const { result, rerender } = renderHook(
       () =>
@@ -19,7 +13,11 @@ describe('I18nSharedFieldsLock', () => {
           unlock: state.unlock,
           relock: state.relock,
         })),
-      { wrapper: wrapper('doc-a:fr') }
+      {
+        wrapper: ({ children }: { children: React.ReactNode }) => (
+          <I18nSharedFieldsLock resetKey="doc-a:fr">{children}</I18nSharedFieldsLock>
+        ),
+      }
     );
 
     expect(result.current.isUnlocked).toBe(false);
