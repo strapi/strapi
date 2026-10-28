@@ -8,6 +8,7 @@ import { controllers } from './controllers';
 import { routes } from './routes';
 
 export type * from './types';
+export type * from './types/content-types';
 
 const getPlugin = () => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
