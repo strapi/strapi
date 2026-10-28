@@ -90,3 +90,18 @@ app.ee.entitlements.register({
   feature: 'cms-content-release',
   limits: [],
 });
+
+// The admin EE controllers: the audit logs controller may be missing, and the actions the EE edition
+// adds to CE controllers are optional. The actions it replaces keep their CE contract.
+declare const adminControllerChecks: [
+  Core.Assert<HasUndefined<Core.ControllerFor<'admin::audit-logs'>>>,
+  Core.Assert<HasUndefined<Core.ControllerFor<'admin::admin'>['licenseLimitInformation']>>,
+  Core.Assert<HasUndefined<Core.ControllerFor<'admin::authentication'>['getProviders']>>,
+  Core.Assert<HasUndefined<Core.ControllerFor<'admin::user'>['isSSOLocked']>>,
+  Core.Assert<Equal<HasUndefined<Core.ControllerFor<'admin::role'>['create']>, false>>,
+];
+adminControllerChecks satisfies unknown;
+
+// @ts-expect-error The controller may be missing.
+void app.controller('admin::audit-logs').findMany;
+void app.controller('admin::user').isSSOLocked?.call;

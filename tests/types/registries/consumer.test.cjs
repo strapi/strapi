@@ -475,6 +475,13 @@ const licenseScopes = [
     // No bundled package gates a contract on `'licensed'` alone.
     bundled: 'licensed-bundled-none.ts',
   },
+  {
+    scope: "licensedFeatures: ['audit-logs']",
+    licensedFeatures: ['audit-logs'],
+    fixture: 'licensed-audit-logs.ts',
+    // Only the admin gates a contract on `audit-logs`: its fixture checks it.
+    bundled: 'licensed-bundled-none.ts',
+  },
 ];
 
 // The files that set the scope of a program: the generated `strict.d.ts`, or a hand opt-in for the

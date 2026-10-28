@@ -53,3 +53,19 @@ void app.service('admin::role').ssoCheckRolesIdForDeletion([]);
 const articles = app.documents('api::article.article');
 // @ts-expect-error Review workflows adds no stage.
 articles.findFirst({ populate: { strapi_stage: true } }) satisfies Promise<unknown>;
+
+// The admin EE edition is not merged: the audit logs controller is missing, and CE controllers have
+// their CE actions only.
+declare const adminControllerChecks: [
+  Core.Assert<Equal<Core.ControllerFor<'admin::audit-logs'>, undefined>>,
+  Core.Assert<
+    Equal<HasMember<Core.ControllerFor<'admin::admin'>, 'licenseLimitInformation'>, false>
+  >,
+  Core.Assert<Equal<HasMember<Core.ControllerFor<'admin::authentication'>, 'getProviders'>, false>>,
+  Core.Assert<Equal<HasMember<Core.ControllerFor<'admin::user'>, 'isSSOLocked'>, false>>,
+  Core.Assert<Equal<HasMember<Core.ControllerFor<'admin::role'>, 'create'>, true>>,
+];
+adminControllerChecks satisfies unknown;
+
+// @ts-expect-error EE-only actions are absent.
+void app.controller('admin::user').isSSOLocked;

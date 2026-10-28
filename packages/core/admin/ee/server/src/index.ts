@@ -17,6 +17,7 @@ import { registerAdminUserAuditEvents } from '../../../server/src/audit-logs/adm
 import { registerWebhookAuditEvents } from '../../../server/src/audit-logs/webhooks';
 import { registerAuthAuditEvents } from '../../../server/src/audit-logs/auth';
 import { registerSsoSettingsAuditEvents } from '../../../server/src/audit-logs/sso-settings';
+import type { Controllers } from './types/controllers';
 
 const getAdminEE = () => {
   const eeAdmin = {
@@ -40,7 +41,9 @@ const getAdminEE = () => {
     ...eeAdmin,
     controllers: {
       ...eeAdmin.controllers,
-      ...(isAuditLogsEnabled ? { 'audit-logs': auditLogsController } : {}),
+      ...(isAuditLogsEnabled
+        ? { 'audit-logs': auditLogsController satisfies Controllers['audit-logs'] }
+        : {}),
     },
     routes: {
       ...eeAdmin.routes,
@@ -82,5 +85,12 @@ const getAdminEE = () => {
     },
   };
 };
+
+// The registered EE contracts name the merged controllers. The conditional `audit-logs` spread
+// escapes the excess property check, so the names are compared.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type ControllerNames = Core.Assert<
+  Core.SameNames<keyof ReturnType<typeof getAdminEE>['controllers'], keyof Controllers>
+>;
 
 export default getAdminEE;

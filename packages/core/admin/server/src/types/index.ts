@@ -1,5 +1,6 @@
 import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
+import type { Controllers as EEControllers } from '../../../ee/server/src/types/controllers';
 import type { HasPermissionsConfig } from './policies';
 import type { RateLimitOptions } from './rate-limit';
 import type * as ActionService from '../services/action';
@@ -315,23 +316,33 @@ declare global {
       }
 
       /**
-       * The CE controllers (`controllers/index.ts`). The EE edition merges its own actions over
-       * `admin`, `authentication`, `role` and `user` (`ee/server/src/controllers/index.ts`).
+       * The CE controllers (`controllers/index.ts`). When a license verifies at boot, the EE edition
+       * merges its actions over `admin`, `authentication`, `role` and `user`
+       * (`ee/server/src/controllers/index.ts`, `Core.LicensedExtension`), like the services it
+       * extends.
        */
       interface PackageControllers {
-        'admin::admin': Controllers['admin'];
+        'admin::admin': Core.LicensedExtension<Controllers['admin'], EEControllers['admin']>;
         'admin::admin-token': Controllers['admin-token'];
         'admin::ai': Controllers['ai'];
         'admin::api-token': Controllers['api-token'];
+        /**
+         * Added by the EE edition when the license that verifies at boot lists `audit-logs`. Also
+         * absent when `admin.auditLogs.enabled` is `false`, which the types do not model.
+         */
+        'admin::audit-logs': Core.Licensed<'audit-logs', EEControllers['audit-logs']>;
         'admin::authenticated-session': Controllers['authenticated-session'];
         'admin::authenticated-user': Controllers['authenticated-user'];
-        'admin::authentication': Controllers['authentication'];
+        'admin::authentication': Core.LicensedExtension<
+          Controllers['authentication'],
+          EEControllers['authentication']
+        >;
         'admin::content-api': Controllers['content-api'];
         'admin::homepage': Controllers['homepage'];
         'admin::permission': Controllers['permission'];
-        'admin::role': Controllers['role'];
+        'admin::role': Core.LicensedExtension<Controllers['role'], EEControllers['role']>;
         'admin::transfer': Controllers['transfer'];
-        'admin::user': Controllers['user'];
+        'admin::user': Core.LicensedExtension<Controllers['user'], EEControllers['user']>;
         'admin::webhooks': Controllers['webhooks'];
       }
 
