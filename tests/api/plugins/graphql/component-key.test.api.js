@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * GraphQL surfacing of durable componentKey on nested components.
+ * GraphQL surfacing of durable strapiComponentKey on nested components.
  * Stacked on feat/component-key (#27077).
  */
 
@@ -41,7 +41,7 @@ const articleModel = {
   draftAndPublish: false,
 };
 
-describe('GraphQL — componentKey', () => {
+describe('GraphQL — strapiComponentKey', () => {
   beforeAll(async () => {
     await builder.addComponent(blockComponent).addContentTypes([articleModel]).build();
 
@@ -70,7 +70,7 @@ describe('GraphQL — componentKey', () => {
     await builder.cleanup();
   });
 
-  test('query returns componentKey on nested components', async () => {
+  test('query returns strapiComponentKey on nested components', async () => {
     const res = await graphqlQuery({
       query: /* GraphQL */ `
         query ($documentId: ID!) {
@@ -80,7 +80,7 @@ describe('GraphQL — componentKey', () => {
                 title
                 blocks {
                   id
-                  componentKey
+                  strapiComponentKey
                   name
                 }
               }
@@ -96,12 +96,12 @@ describe('GraphQL — componentKey', () => {
 
     const blocks = res.body.data.gqlKeyArticle.data.attributes.blocks;
     expect(blocks).toHaveLength(2);
-    expect(blocks[0].componentKey).toEqual(expect.any(String));
-    expect(blocks[1].componentKey).toEqual(expect.any(String));
-    expect(blocks[0].componentKey).not.toBe(blocks[1].componentKey);
+    expect(blocks[0].strapiComponentKey).toEqual(expect.any(String));
+    expect(blocks[1].strapiComponentKey).toEqual(expect.any(String));
+    expect(blocks[0].strapiComponentKey).not.toBe(blocks[1].strapiComponentKey);
   });
 
-  test('componentKey is nullable in the schema', async () => {
+  test('strapiComponentKey is nullable in the schema', async () => {
     const res = await graphqlQuery({
       query: /* GraphQL */ `
         {
@@ -119,11 +119,11 @@ describe('GraphQL — componentKey', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    const field = res.body.data.__type.fields.find((f) => f.name === 'componentKey');
+    const field = res.body.data.__type.fields.find((f) => f.name === 'strapiComponentKey');
     expect(field.type).toEqual({ kind: 'SCALAR', name: 'ID' });
   });
 
-  test('a component without componentKey returns null instead of failing the query', async () => {
+  test('a component without strapiComponentKey returns null instead of failing the query', async () => {
     const other = await strapi.documents('api::gql-key-article.gql-key-article').create({
       data: { title: 'no-key', blocks: [{ name: 'legacy' }] },
       populate: ['blocks'],
@@ -131,7 +131,7 @@ describe('GraphQL — componentKey', () => {
 
     await strapi.db
       .query('default.gql-key-block')
-      .update({ where: { id: other.blocks[0].id }, data: { componentKey: null } });
+      .update({ where: { id: other.blocks[0].id }, data: { strapiComponentKey: null } });
 
     const res = await graphqlQuery({
       query: /* GraphQL */ `
@@ -140,7 +140,7 @@ describe('GraphQL — componentKey', () => {
             data {
               attributes {
                 blocks {
-                  componentKey
+                  strapiComponentKey
                   name
                 }
               }
@@ -154,11 +154,11 @@ describe('GraphQL — componentKey', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.errors).toBeUndefined();
     expect(res.body.data.gqlKeyArticle.data.attributes.blocks).toEqual([
-      { componentKey: null, name: 'legacy' },
+      { strapiComponentKey: null, name: 'legacy' },
     ]);
   });
 
-  test('mutation update accepts componentKey on component input', async () => {
+  test('mutation update accepts strapiComponentKey on component input', async () => {
     const read = await graphqlQuery({
       query: /* GraphQL */ `
         query ($documentId: ID!) {
@@ -166,7 +166,7 @@ describe('GraphQL — componentKey', () => {
             data {
               attributes {
                 blocks {
-                  componentKey
+                  strapiComponentKey
                   name
                 }
               }
@@ -178,7 +178,7 @@ describe('GraphQL — componentKey', () => {
     });
 
     const blocks = read.body.data.gqlKeyArticle.data.attributes.blocks;
-    const targetKey = blocks[0].componentKey;
+    const targetKey = blocks[0].strapiComponentKey;
 
     const updateRes = await graphqlQuery({
       query: /* GraphQL */ `
@@ -187,7 +187,7 @@ describe('GraphQL — componentKey', () => {
             data {
               attributes {
                 blocks {
-                  componentKey
+                  strapiComponentKey
                   name
                 }
               }
@@ -199,8 +199,8 @@ describe('GraphQL — componentKey', () => {
         documentId,
         data: {
           blocks: [
-            { componentKey: targetKey, name: 'a-updated' },
-            { componentKey: blocks[1].componentKey, name: 'b' },
+            { strapiComponentKey: targetKey, name: 'a-updated' },
+            { strapiComponentKey: blocks[1].strapiComponentKey, name: 'b' },
           ],
         },
       },
@@ -210,6 +210,6 @@ describe('GraphQL — componentKey', () => {
     expect(updateRes.body.errors).toBeUndefined();
 
     const updated = updateRes.body.data.updateGqlKeyArticle.data.attributes.blocks;
-    expect(updated.find((b) => b.componentKey === targetKey).name).toBe('a-updated');
+    expect(updated.find((b) => b.strapiComponentKey === targetKey).name).toBe('a-updated');
   });
 });

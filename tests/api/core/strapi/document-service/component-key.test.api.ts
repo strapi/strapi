@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Durable componentKey across Draft & Publish.
+ * Durable strapiComponentKey across Draft & Publish.
  * @see docs/docs/packages/core/core/component-key.md
  */
 
@@ -78,7 +78,7 @@ const populate = {
   },
 };
 
-describe('Document Service — componentKey', () => {
+describe('Document Service — strapiComponentKey', () => {
   beforeAll(async () => {
     await builder
       .addComponent(nestedComponent)
@@ -97,7 +97,7 @@ describe('Document Service — componentKey', () => {
     await builder.cleanup();
   });
 
-  test('assigns componentKey on create and preserves it across publish', async () => {
+  test('assigns strapiComponentKey on create and preserves it across publish', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'hello',
@@ -107,11 +107,11 @@ describe('Document Service — componentKey', () => {
     });
 
     expect(created.blocks).toHaveLength(2);
-    expect(created.blocks[0].componentKey).toEqual(expect.any(String));
-    expect(created.blocks[1].componentKey).toEqual(expect.any(String));
-    expect(created.blocks[0].componentKey).not.toBe(created.blocks[1].componentKey);
+    expect(created.blocks[0].strapiComponentKey).toEqual(expect.any(String));
+    expect(created.blocks[1].strapiComponentKey).toEqual(expect.any(String));
+    expect(created.blocks[0].strapiComponentKey).not.toBe(created.blocks[1].strapiComponentKey);
 
-    const draftKeys = created.blocks.map((b) => b.componentKey);
+    const draftKeys = created.blocks.map((b) => b.strapiComponentKey);
 
     await strapi.documents(UID).publish({
       documentId: created.documentId,
@@ -123,17 +123,19 @@ describe('Document Service — componentKey', () => {
       populate: ['blocks'],
     });
 
-    expect(published.blocks.map((b) => b.componentKey).sort()).toEqual([...draftKeys].sort());
+    expect(published.blocks.map((b) => b.strapiComponentKey).sort()).toEqual([...draftKeys].sort());
     // Row ids differ across status even when keys match
-    const publishedByKey = Object.fromEntries(published.blocks.map((b) => [b.componentKey, b.id]));
-    const draftByKey = Object.fromEntries(created.blocks.map((b) => [b.componentKey, b.id]));
+    const publishedByKey = Object.fromEntries(
+      published.blocks.map((b) => [b.strapiComponentKey, b.id])
+    );
+    const draftByKey = Object.fromEntries(created.blocks.map((b) => [b.strapiComponentKey, b.id]));
     for (const key of draftKeys) {
       expect(publishedByKey[key]).toBeDefined();
       expect(publishedByKey[key]).not.toBe(draftByKey[key]);
     }
   });
 
-  test('preserves componentKey across discardDraft', async () => {
+  test('preserves strapiComponentKey across discardDraft', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'discard',
@@ -149,13 +151,13 @@ describe('Document Service — componentKey', () => {
       status: 'published',
       populate: ['blocks'],
     });
-    const publishedKey = published.blocks[0].componentKey;
+    const publishedKey = published.blocks[0].strapiComponentKey;
 
     // Mutate draft so discard has something to restore from published
     await strapi.documents(UID).update({
       documentId: created.documentId,
       data: {
-        blocks: [{ componentKey: publishedKey, name: 'draft-only' }],
+        blocks: [{ strapiComponentKey: publishedKey, name: 'draft-only' }],
       },
     });
 
@@ -167,11 +169,11 @@ describe('Document Service — componentKey', () => {
       populate: ['blocks'],
     });
 
-    expect(draft.blocks[0].componentKey).toBe(publishedKey);
+    expect(draft.blocks[0].strapiComponentKey).toBe(publishedKey);
     expect(draft.blocks[0].name).toBe('keep-me');
   });
 
-  test('clone mints new componentKeys (does not copy source keys)', async () => {
+  test('clone mints new strapiComponentKeys (does not copy source keys)', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'clone-source',
@@ -184,9 +186,9 @@ describe('Document Service — componentKey', () => {
       populate,
     });
 
-    const sourceBlockKey = created.blocks[0].componentKey;
-    const sourceNestedKey = created.blocks[0].nested.componentKey;
-    const sourceZoneKeys = created.zones.map((z) => z.componentKey);
+    const sourceBlockKey = created.blocks[0].strapiComponentKey;
+    const sourceNestedKey = created.blocks[0].nested.strapiComponentKey;
+    const sourceZoneKeys = created.zones.map((z) => z.strapiComponentKey);
 
     const { entries } = await strapi.documents(UID).clone({
       documentId: created.documentId,
@@ -196,19 +198,19 @@ describe('Document Service — componentKey', () => {
     expect(entries).toHaveLength(1);
     const cloned = entries[0];
 
-    expect(cloned.blocks[0].componentKey).toEqual(expect.any(String));
-    expect(cloned.blocks[0].componentKey).not.toBe(sourceBlockKey);
-    expect(cloned.blocks[0].nested.componentKey).toEqual(expect.any(String));
-    expect(cloned.blocks[0].nested.componentKey).not.toBe(sourceNestedKey);
+    expect(cloned.blocks[0].strapiComponentKey).toEqual(expect.any(String));
+    expect(cloned.blocks[0].strapiComponentKey).not.toBe(sourceBlockKey);
+    expect(cloned.blocks[0].nested.strapiComponentKey).toEqual(expect.any(String));
+    expect(cloned.blocks[0].nested.strapiComponentKey).not.toBe(sourceNestedKey);
 
     expect(cloned.zones).toHaveLength(2);
     cloned.zones.forEach((zone, i) => {
-      expect(zone.componentKey).toEqual(expect.any(String));
-      expect(zone.componentKey).not.toBe(sourceZoneKeys[i]);
+      expect(zone.strapiComponentKey).toEqual(expect.any(String));
+      expect(zone.strapiComponentKey).not.toBe(sourceZoneKeys[i]);
     });
   });
 
-  test('updates draft by componentKey from published response', async () => {
+  test('updates draft by strapiComponentKey from published response', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'round-trip',
@@ -227,20 +229,20 @@ describe('Document Service — componentKey', () => {
       populate: ['blocks'],
     });
 
-    const targetKey = published.blocks[0].componentKey;
+    const targetKey = published.blocks[0].strapiComponentKey;
 
     const updated = await strapi.documents(UID).update({
       documentId: created.documentId,
       data: {
         blocks: [
-          { componentKey: targetKey, name: 'one-updated' },
-          { componentKey: published.blocks[1].componentKey, name: 'two' },
+          { strapiComponentKey: targetKey, name: 'one-updated' },
+          { strapiComponentKey: published.blocks[1].strapiComponentKey, name: 'two' },
         ],
       },
       populate: ['blocks'],
     });
 
-    const updatedBlock = updated.blocks.find((b) => b.componentKey === targetKey);
+    const updatedBlock = updated.blocks.find((b) => b.strapiComponentKey === targetKey);
     expect(updatedBlock.name).toBe('one-updated');
 
     // Published unchanged until next publish
@@ -249,10 +251,10 @@ describe('Document Service — componentKey', () => {
       status: 'published',
       populate: ['blocks'],
     });
-    expect(stillPublished.blocks.find((b) => b.componentKey === targetKey).name).toBe('one');
+    expect(stillPublished.blocks.find((b) => b.strapiComponentKey === targetKey).name).toBe('one');
   });
 
-  test('echoing published id + componentKey updates the draft block', async () => {
+  test('echoing published id + strapiComponentKey updates the draft block', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'echo',
@@ -277,31 +279,31 @@ describe('Document Service — componentKey', () => {
       populate: ['blocks'],
     });
 
-    expect(updated.blocks.map((b) => b.componentKey)).toEqual(
-      published.blocks.map((b) => b.componentKey)
+    expect(updated.blocks.map((b) => b.strapiComponentKey)).toEqual(
+      published.blocks.map((b) => b.strapiComponentKey)
     );
     expect(updated.blocks.map((b) => b.id)).toEqual(created.blocks.map((b) => b.id));
     expect(updated.blocks[0].name).toBe('one-updated');
   });
 
-  test('create ignores client componentKeys and mints distinct ones', async () => {
+  test('create ignores client strapiComponentKeys and mints distinct ones', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'client-keys',
         blocks: [
-          { componentKey: 'client-key', name: 'a' },
-          { componentKey: 'client-key', name: 'b' },
+          { strapiComponentKey: 'client-key', name: 'a' },
+          { strapiComponentKey: 'client-key', name: 'b' },
         ],
       },
       populate: ['blocks'],
     });
 
-    const keys = created.blocks.map((b) => b.componentKey);
+    const keys = created.blocks.map((b) => b.strapiComponentKey);
     expect(keys).not.toContain('client-key');
     expect(new Set(keys).size).toBe(2);
   });
 
-  test('a componentKey repeated in one field creates a new block', async () => {
+  test('a strapiComponentKey repeated in one field creates a new block', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'copied-block',
@@ -315,8 +317,8 @@ describe('Document Service — componentKey', () => {
       documentId: created.documentId,
       data: {
         blocks: [
-          { id: original.id, componentKey: original.componentKey, name: 'original' },
-          { componentKey: original.componentKey, name: 'copy' },
+          { id: original.id, strapiComponentKey: original.strapiComponentKey, name: 'original' },
+          { strapiComponentKey: original.strapiComponentKey, name: 'copy' },
         ],
       },
       populate: ['blocks'],
@@ -324,8 +326,8 @@ describe('Document Service — componentKey', () => {
 
     expect(updated.blocks.map((b) => b.name)).toEqual(['original', 'copy']);
     expect(updated.blocks[0].id).toBe(original.id);
-    expect(updated.blocks[0].componentKey).toBe(original.componentKey);
-    expect(updated.blocks[1].componentKey).not.toBe(original.componentKey);
+    expect(updated.blocks[0].strapiComponentKey).toBe(original.strapiComponentKey);
+    expect(updated.blocks[1].strapiComponentKey).not.toBe(original.strapiComponentKey);
   });
 
   test('omit-id full replace still works (non-breaking)', async () => {
@@ -347,10 +349,10 @@ describe('Document Service — componentKey', () => {
 
     expect(updated.blocks).toHaveLength(2);
     expect(updated.blocks.map((b) => b.name).sort()).toEqual(['new-a', 'new-b']);
-    expect(updated.blocks.every((b) => typeof b.componentKey === 'string')).toBe(true);
+    expect(updated.blocks.every((b) => typeof b.strapiComponentKey === 'string')).toBe(true);
   });
 
-  test('unknown componentKey throws ApplicationError', async () => {
+  test('unknown strapiComponentKey throws ApplicationError', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'unknown-key',
@@ -363,7 +365,7 @@ describe('Document Service — componentKey', () => {
       strapi.documents(UID).update({
         documentId: created.documentId,
         data: {
-          blocks: [{ componentKey: 'does-not-exist-on-this-entity', name: 'nope' }],
+          blocks: [{ strapiComponentKey: 'does-not-exist-on-this-entity', name: 'nope' }],
         },
       })
     ).rejects.toMatchObject({
@@ -385,11 +387,11 @@ describe('Document Service — componentKey', () => {
       populate,
     });
 
-    const blockKey = created.blocks[0].componentKey;
-    const nestedKey = created.blocks[0].nested.componentKey;
-    const dzKey = created.zones[0].componentKey;
-    const dzCompoKey = created.zones[1].componentKey;
-    const dzNestedKey = created.zones[1].nested.componentKey;
+    const blockKey = created.blocks[0].strapiComponentKey;
+    const nestedKey = created.blocks[0].nested.strapiComponentKey;
+    const dzKey = created.zones[0].strapiComponentKey;
+    const dzCompoKey = created.zones[1].strapiComponentKey;
+    const dzNestedKey = created.zones[1].nested.strapiComponentKey;
 
     await strapi.documents(UID).publish({ documentId: created.documentId });
 
@@ -398,39 +400,39 @@ describe('Document Service — componentKey', () => {
       data: {
         blocks: [
           {
-            componentKey: blockKey,
+            strapiComponentKey: blockKey,
             name: 'outer-updated',
-            nested: { componentKey: nestedKey, label: 'inner-updated' },
+            nested: { strapiComponentKey: nestedKey, label: 'inner-updated' },
           },
         ],
         zones: [
-          { __component: 'default.key-dz', componentKey: dzKey, heading: 'first-updated' },
+          { __component: 'default.key-dz', strapiComponentKey: dzKey, heading: 'first-updated' },
           {
             __component: 'default.key-compo',
-            componentKey: dzCompoKey,
+            strapiComponentKey: dzCompoKey,
             name: 'second-updated',
-            nested: { componentKey: dzNestedKey, label: 'dz-nested-updated' },
+            nested: { strapiComponentKey: dzNestedKey, label: 'dz-nested-updated' },
           },
         ],
       },
       populate,
     });
 
-    expect(updated.blocks[0].componentKey).toBe(blockKey);
+    expect(updated.blocks[0].strapiComponentKey).toBe(blockKey);
     expect(updated.blocks[0].name).toBe('outer-updated');
-    expect(updated.blocks[0].nested.componentKey).toBe(nestedKey);
+    expect(updated.blocks[0].nested.strapiComponentKey).toBe(nestedKey);
     expect(updated.blocks[0].nested.label).toBe('inner-updated');
 
-    expect(updated.zones[0].componentKey).toBe(dzKey);
+    expect(updated.zones[0].strapiComponentKey).toBe(dzKey);
     expect(updated.zones[0].heading).toBe('first-updated');
-    expect(updated.zones[1].componentKey).toBe(dzCompoKey);
+    expect(updated.zones[1].strapiComponentKey).toBe(dzCompoKey);
     expect(updated.zones[1].name).toBe('second-updated');
-    expect(updated.zones[1].nested.componentKey).toBe(dzNestedKey);
+    expect(updated.zones[1].nested.strapiComponentKey).toBe(dzNestedKey);
     expect(updated.zones[1].nested.label).toBe('dz-nested-updated');
   });
 
   describe('REST Content API', () => {
-    test('GET published → PUT with componentKey updates the entry', async () => {
+    test('GET published → PUT with strapiComponentKey updates the entry', async () => {
       const created = await strapi.documents(UID).create({
         data: {
           title: 'rest-round-trip',
@@ -451,9 +453,9 @@ describe('Document Service — componentKey', () => {
       });
 
       expect(getStatus).toBe(200);
-      expect(published.blocks[0].componentKey).toEqual(expect.any(String));
+      expect(published.blocks[0].strapiComponentKey).toEqual(expect.any(String));
 
-      const targetKey = published.blocks[0].componentKey;
+      const targetKey = published.blocks[0].strapiComponentKey;
 
       const { statusCode: putStatus, body: putBody } = await rq({
         method: 'PUT',
@@ -462,8 +464,8 @@ describe('Document Service — componentKey', () => {
           data: {
             title: 'rest-round-trip',
             blocks: [
-              { componentKey: targetKey, name: 'alpha-updated' },
-              { componentKey: published.blocks[1].componentKey, name: 'beta' },
+              { strapiComponentKey: targetKey, name: 'alpha-updated' },
+              { strapiComponentKey: published.blocks[1].strapiComponentKey, name: 'beta' },
             ],
           },
         },
@@ -471,12 +473,12 @@ describe('Document Service — componentKey', () => {
       });
 
       expect(putStatus).toBe(200);
-      expect(putBody.data.blocks.find((b) => b.componentKey === targetKey).name).toBe(
+      expect(putBody.data.blocks.find((b) => b.strapiComponentKey === targetKey).name).toBe(
         'alpha-updated'
       );
     });
 
-    test('unknown componentKey returns 400', async () => {
+    test('unknown strapiComponentKey returns 400', async () => {
       const created = await strapi.documents(UID).create({
         data: {
           title: 'rest-unknown',
@@ -492,7 +494,7 @@ describe('Document Service — componentKey', () => {
         url: `/with-key-compos/${created.documentId}`,
         body: {
           data: {
-            blocks: [{ componentKey: 'foreign-or-unknown-key', name: 'nope' }],
+            blocks: [{ strapiComponentKey: 'foreign-or-unknown-key', name: 'nope' }],
           },
         },
         qs: { populate: ['blocks'] },

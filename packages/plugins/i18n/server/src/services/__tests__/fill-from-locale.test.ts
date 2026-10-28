@@ -130,7 +130,7 @@ describe('transformDocument — field filtering', () => {
     'updatedBy',
     'id',
     'documentId',
-    'componentKey',
+    'strapiComponentKey',
     'publishedAt',
     'strapi_stage',
     'strapi_assignee',
@@ -289,8 +289,8 @@ describe('transformDocument — components', () => {
     const result = await service.transformDocument(
       {
         sections: [
-          { heading: 'First', id: 1, componentKey: 'source-key-1' },
-          { heading: 'Second', id: 2, componentKey: 'source-key-2' },
+          { heading: 'First', id: 1, strapiComponentKey: 'source-key-1' },
+          { heading: 'Second', id: 2, strapiComponentKey: 'source-key-2' },
         ],
       },
       MODEL as any,
@@ -303,10 +303,10 @@ describe('transformDocument — components', () => {
     expect(sections).toHaveLength(2);
     expect(sections[0]).toMatchObject({ heading: 'First', __temp_key__: expectedKeys[0] });
     expect(sections[1]).toMatchObject({ heading: 'Second', __temp_key__: expectedKeys[1] });
-    // id and componentKey are in FIELDS_TO_REMOVE so they should be stripped
+    // id and strapiComponentKey are in FIELDS_TO_REMOVE so they should be stripped
     expect(sections[0]).not.toHaveProperty('id');
-    expect(sections[0]).not.toHaveProperty('componentKey');
-    expect(sections[1]).not.toHaveProperty('componentKey');
+    expect(sections[0]).not.toHaveProperty('strapiComponentKey');
+    expect(sections[1]).not.toHaveProperty('strapiComponentKey');
   });
 
   test('continues repeatable component temp keys after the base-62 boundary', async () => {

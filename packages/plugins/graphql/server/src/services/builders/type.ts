@@ -345,8 +345,8 @@ export default (context: Context) => {
           }
 
           // Nullable: rows written before the key was backfilled must not fail the whole query
-          if (modelType === 'component' && isNotDisabled(contentType)('componentKey')) {
-            t.id('componentKey');
+          if (modelType === 'component' && isNotDisabled(contentType)('strapiComponentKey')) {
+            t.id('strapiComponentKey');
           }
 
           if (modelType !== 'component' && isNotDisabled(contentType)('documentId')) {
@@ -386,8 +386,8 @@ export default (context: Context) => {
             .filter(isNotPrivate(contentType))
             // Ignore disabled fields (from extension service)
             .filter(isNotDisabled(contentType))
-            // componentKey is registered explicitly above (ID scalar); skip the string attribute pass
-            .filter((attributeName) => attributeName !== 'componentKey')
+            // strapiComponentKey is registered explicitly above (ID scalar); skip the string attribute pass
+            .filter((attributeName) => attributeName !== 'strapiComponentKey')
             // Add each attribute to the type definition
             .forEach((attributeName) => {
               const attribute = attributes[attributeName];

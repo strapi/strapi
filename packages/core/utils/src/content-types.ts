@@ -14,7 +14,7 @@ const COLLECTION_TYPE = 'collectionType';
 
 const ID_ATTRIBUTE = 'id';
 const DOC_ID_ATTRIBUTE = 'documentId';
-const COMPONENT_KEY_ATTRIBUTE = 'componentKey';
+const COMPONENT_KEY_ATTRIBUTE = 'strapiComponentKey';
 
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
 const FIRST_PUBLISHED_AT_ATTRIBUTE = 'firstPublishedAt';
@@ -56,7 +56,6 @@ const RESERVED_ATTRIBUTE_NAMES: string[] = [
   // ID fields
   'id',
   'document_id',
-  'component_key',
 
   // Creator fields
   'created_at',

@@ -70,7 +70,7 @@ const removeIdentifiers = (value: any) => {
     delete value.id;
   }
 
-  // componentKey identifies a single component row on a single entry. Copies made for
+  // strapiComponentKey identifies a single component row on a single entry. Copies made for
   // another locale must get their own key, otherwise the document service resolves the
   // copied key against the target entry's components and fails to find a match.
   if (typeof value === 'object' && has(value, COMPONENT_KEY_ATTRIBUTE)) {

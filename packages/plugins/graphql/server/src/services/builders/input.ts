@@ -50,8 +50,8 @@ export default ({ strapi }: Context) => {
           }
 
           // Durable identity for Content API round-trips under Draft & Publish
-          if (modelType === 'component' && isFieldEnabled('componentKey')) {
-            t.id('componentKey');
+          if (modelType === 'component' && isFieldEnabled('strapiComponentKey')) {
+            t.id('strapiComponentKey');
           }
 
           validAttributes.forEach(([attributeName, attribute]: [string, any]) => {
