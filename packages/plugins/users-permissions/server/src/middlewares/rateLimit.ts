@@ -1,6 +1,5 @@
 import type { Context, Next } from 'koa';
 import type { Core } from '@strapi/types';
-import type { RateLimitOptions } from 'koa2-ratelimit';
 import koa2Ratelimit from 'koa2-ratelimit';
 
 import path from 'path';
@@ -9,7 +8,27 @@ import lodash from 'lodash';
 
 const { toLower, isString, has } = lodash;
 
-type RateLimitConfig = Partial<RateLimitOptions> & { enabled?: boolean };
+// The koa2-ratelimit types below are local on purpose. `@types/koa2-ratelimit` depends on mongoose
+// (and through it on mongodb and @aws-sdk), so it cannot be a runtime dependency. The published
+// declarations of this plugin must not reference types that apps cannot resolve. `globals.d.ts`
+// types the `koa2-ratelimit` import for the same reason.
+
+/** A rate limit duration: milliseconds, or time units that add up, such as `{ min: 5 }`. */
+type RateLimitDuration =
+  | number
+  | Partial<Record<'ms' | 'sec' | 'min' | 'hour' | 'day' | 'week' | 'month' | 'year', number>>;
+
+/**
+ * The `plugin::users-permissions.ratelimit` config and the `rateLimit` route middleware config.
+ * The middleware passes the other rate limiter options, such as `delayAfter` or `store`, as is.
+ */
+type RateLimitConfig = {
+  enabled?: boolean;
+  interval?: RateLimitDuration;
+  max?: number;
+  [option: string]: unknown;
+};
+
 type RequestContext = { request: { path?: unknown; ip?: string; body?: unknown } };
 
 const { RateLimitError } = errors;
