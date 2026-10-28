@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { castDraft } from 'immer';
 
 import { GetInitData } from '../../../shared/contracts/init';
 
@@ -51,9 +52,9 @@ const appSlice = createSlice({
         ({ isDisplayed }) => isDisplayed
       );
       state.singleTypeLinks = authorizedSingleTypeLinks.filter(({ isDisplayed }) => isDisplayed);
-      state.components = components;
+      state.components = castDraft(components);
       state.contentStructure = contentStructure;
-      state.models = contentTypeSchemas;
+      state.models = castDraft(contentTypeSchemas);
       state.fieldSizes = fieldSizes;
       state.isLoading = false;
     },
