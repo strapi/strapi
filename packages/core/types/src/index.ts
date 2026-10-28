@@ -45,9 +45,76 @@ declare global {
       /**
        * Application-wide type settings. Add `strict: true` to use registered contracts.
        * Loading a package's contracts alone does not enable strict lookups.
+       *
+       * With strict types, type generation also writes `licenses: 'declared'`: license-gated
+       * contracts then follow {@link LicensedFeatures} (see `Core.LicenseScope`). Packages never
+       * set either key.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface Settings {}
+
+      /**
+       * The license features Strapi gates code on, keyed by the name a license lists. Each value is
+       * the `options` object the feature's license entry may carry, typed from the readers of each
+       * option. The license registry ships some numeric limits as numeric strings
+       * (`core/src/ee/entitlements.ts:48-50`).
+       *
+       * `Core.Licensed` gates and `typescript.licensedFeatures` accept these names. Strapi declares
+       * the whole inventory here, so that every package checks its gates against the same names.
+       */
+      interface LicenseFeatures {
+        /** Admin EE single sign-on: providers, routes and role options (`admin/ee/server`). */
+        sso: Record<string, unknown>;
+        /**
+         * Admin EE audit logs. Their controllers, routes and services also need
+         * `admin.auditLogs.enabled` not to be `false` (`admin/ee/server/src/index.ts`).
+         */
+        'audit-logs': {
+          /**
+           * Maximum retention, in days, that `admin.auditLogs.retentionDays` can lower. `null`, the
+           * default of gold licenses, sets no maximum: 90 days unless configured.
+           */
+          retentionDays?: number | `${number}` | null;
+        };
+        /** Review workflows services and controllers (`@strapi/review-workflows`). */
+        'review-workflows': {
+          numberOfWorkflows?: number | `${number}`;
+          stagesPerWorkflow?: number | `${number}`;
+        };
+        /** Content releases services and controllers (`@strapi/content-releases`). */
+        'cms-content-releases': {
+          /** Maximum number of pending releases, 3 when unset. */
+          maximumReleases?: number | `${number}`;
+        };
+        /** Content history services and controller (`@strapi/content-manager`). */
+        'cms-content-history': {
+          /** Maximum retention, in days, that `admin.history.retentionDays` can lower. */
+          retentionDays?: number | `${number}`;
+        };
+        /** Advanced preview in the content manager admin panel; it gates no server contract. */
+        'cms-advanced-preview': Record<string, unknown>;
+        /** Strapi-managed AI features of the admin (`admin/server/src/ai`). */
+        'cms-ai': Record<string, unknown>;
+        /** A custom AI provider of the admin (`admin/server/src/ai`). */
+        'cms-byok-ai': Record<string, unknown>;
+      }
+
+      /**
+       * The license gates the application builds against: names of {@link LicenseFeatures}, or
+       * `'licensed'` for any license. Values are not read: each key is `true`.
+       *
+       * Type generation is the only producer. With strict types, it writes this registry from
+       * `typescript.licensedFeatures` into `types/generated/strict.d.ts`, with
+       * `Settings.licenses: 'declared'`. Contracts gated by a listed name are typed as registered,
+       * the others as `undefined` (`Core.Licensed`). A listed name means "listed in the license
+       * that verifies at boot" (`STRAPI_LICENSE` or `license.txt`): Strapi registers gated
+       * contracts once, at boot, and a later license change neither adds nor removes them.
+       *
+       * Never declare it in a published package: a global declaration applies to every program
+       * that loads the package.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface LicensedFeatures {}
 
       /**
        * Service contracts supplied by Strapi and plugin packages, keyed by full service UID.
