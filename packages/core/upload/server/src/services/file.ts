@@ -280,6 +280,8 @@ const deleteByIds = async (ids: number[] = []) => {
     .query(FILE_MODEL_UID)
     .findMany({ where: { id: { $in: ids } } });
 
+  await getService('upload').validateNoFileRelations(filesToDelete);
+
   await Promise.all(filesToDelete.map((file: File) => getService('upload').remove(file)));
 
   return filesToDelete;
