@@ -1952,7 +1952,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
         const res = await publishManually(release.id);
 
-        expect(res.statusCode).toBe(500);
+        // Names what stopped the run, with the release it froze
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.message).toBe("An entry couldn't be released (Error)");
+        expect(res.body.error.details.release).toMatchObject({ status: 'failed' });
 
         const found = await getRelease(release.id);
         expect(found.status).toBe('failed');
@@ -1987,7 +1990,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
         const res = await publishManually(release.id);
 
-        expect(res.statusCode).toBe(500);
+        expect(res.statusCode).toBe(400);
 
         const found = await getRelease(release.id);
         expect(found.status).toBe('failed');
@@ -2053,7 +2056,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
         const res = await publishManually(release.id);
 
-        expect(res.statusCode).toBe(500);
+        expect(res.statusCode).toBe(400);
         const found = await getRelease(release.id);
         expect(found.status).toBe('failed');
         expect(found.releasedAt).not.toBeNull();
@@ -2814,7 +2817,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
           documentIds.map((documentId) => ({ documentId }))
         );
 
-        expect((await publishManually(release.id)).statusCode).toBe(500);
+        expect((await publishManually(release.id)).statusCode).toBe(400);
 
         const actions = await getActionsByEntry(release.id);
         expect(actions[failingId]).toMatchObject({
@@ -3157,7 +3160,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.data.status).toBe('blocked');
     });
 
-    test('carries over every entry of a release that failed before the upgrade', async () => {
+    test('rejects a release that failed before the upgrade, whose skipped entries are unknown', async () => {
       const ids = [await createProduct({ valid: true }), await createProduct({ valid: false })];
       const release = await createReleaseWithActions(
         'all_or_nothing',
@@ -3171,9 +3174,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       const res = await createFromSkippedEntries(release.id);
 
-      expect(res.statusCode).toBe(201);
-      const actions = await getActionsByEntry(res.body.data.id);
-      expect(Object.keys(actions).sort()).toEqual([...ids].sort());
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toBe(
+        'Release failed before the upgrade, so its skipped entries are unknown'
+      );
     });
 
     test('each entry starts from its current state, not from what the run recorded', async () => {
@@ -4336,6 +4340,16 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         releasedAt: null,
         failureReason: null,
       });
+    });
+
+    test('a release overdue by less than the grace period can still be published by hand', async () => {
+      const productId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('all_or_nothing', [{ documentId: productId }]);
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-2) });
+
+      expect((await publishManually(release.id)).statusCode).toBe(200);
+      expect(await getRelease(release.id)).toMatchObject({ status: 'done', failureReason: null });
+      expect(await hasPublishedVersion(productUID, productId)).toBe(true);
     });
 
     test('a release that ran normally has no failure reason', async () => {

@@ -78,6 +78,8 @@ interface ReleaseDrawerProps {
   };
   // A value of the timezone list, from the release settings
   defaultTimezone?: string | null;
+  // Fill today in the date of a scheduled release that has no date yet
+  isDatePrefilled?: boolean;
   isSubmitting?: boolean;
   isSubmitDisabled?: boolean;
   // Shown above the release info
@@ -92,6 +94,7 @@ export const ReleaseDrawer = ({
   submitLabel,
   initialValues,
   defaultTimezone: settingsTimezone,
+  isDatePrefilled = true,
   isSubmitting = false,
   isSubmitDisabled = false,
   children,
@@ -110,11 +113,16 @@ export const ReleaseDrawer = ({
     FALLBACK_TIMEZONE;
   const timezone = findTimezone(initialValues.timezone) ?? defaultTimezone;
   const zonedScheduledAt = scheduledAt && utcToZonedTime(scheduledAt, getTimezoneName(timezone));
+  const defaultDate = isDatePrefilled ? format(new Date(), 'yyyy-MM-dd') : null;
 
   const formInitialValues: FormValues = {
     name: initialValues.name,
     isScheduled: initialValues.isScheduled,
-    date: initialValues.isScheduled ? format(zonedScheduledAt ?? new Date(), 'yyyy-MM-dd') : null,
+    date: initialValues.isScheduled
+      ? zonedScheduledAt
+        ? format(zonedScheduledAt, 'yyyy-MM-dd')
+        : defaultDate
+      : null,
     time: initialValues.isScheduled && zonedScheduledAt ? format(zonedScheduledAt, 'HH:mm') : '',
     timezone: initialValues.isScheduled ? timezone : null,
     releaseCondition: initialValues.releaseCondition,
@@ -208,6 +216,7 @@ export const ReleaseDrawer = ({
                   <ScheduleFields
                     timezoneList={timezoneList}
                     defaultTimezone={defaultTimezone}
+                    defaultDate={defaultDate}
                     initialSchedule={formInitialValues}
                   />
                 </Flex>
@@ -245,12 +254,14 @@ export const ReleaseDrawer = ({
 interface ScheduleFieldsProps {
   timezoneList: TimezoneOption[];
   defaultTimezone: string;
+  defaultDate: string | null;
   initialSchedule: Pick<FormValues, 'date' | 'time' | 'timezone'>;
 }
 
 const ScheduleFields = ({
   timezoneList,
   defaultTimezone,
+  defaultDate,
   initialSchedule,
 }: ScheduleFieldsProps) => {
   const { formatMessage } = useIntl();
@@ -265,7 +276,7 @@ const ScheduleFields = ({
       setFieldValue('time', '');
       setFieldValue('timezone', null);
     } else {
-      setFieldValue('date', initialSchedule.date ?? format(new Date(), 'yyyy-MM-dd'));
+      setFieldValue('date', initialSchedule.date ?? defaultDate);
       setFieldValue('time', initialSchedule.time);
       setFieldValue('timezone', initialSchedule.timezone ?? defaultTimezone);
     }
@@ -306,7 +317,7 @@ const ScheduleFields = ({
                     defaultMessage: 'Clear',
                   })}
                   onClear={() => setFieldValue('date', null)}
-                  value={values.date ? new Date(values.date) : new Date()}
+                  value={values.date ? new Date(values.date) : undefined}
                   minDate={utcToZonedTime(
                     new Date(),
                     // A cleared timezone is '': fall back to the default

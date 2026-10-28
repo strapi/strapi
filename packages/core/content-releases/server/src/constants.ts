@@ -1,6 +1,10 @@
 export const RELEASE_MODEL_UID = 'plugin::content-releases.release';
 export const RELEASE_ACTION_MODEL_UID = 'plugin::content-releases.release-action';
 
+// How long a planned release whose schedule passed stays planned before the overdue sweep freezes
+// it as failed. It keeps the scheduled run from racing the sweep, and lets a user publish a release
+// the server missed (e.g. it was restarting) by hand: publishing late beats failing. Nothing checks
+// the schedule when publishing by hand, on purpose.
 export const OVERDUE_GRACE_PERIOD_MS = 5 * 60 * 1000;
 export const OVERDUE_SWEEP_CRON_RULE = '* * * * *';
 

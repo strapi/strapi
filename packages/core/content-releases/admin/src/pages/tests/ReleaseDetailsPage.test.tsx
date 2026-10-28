@@ -458,16 +458,16 @@ describe('Release details tabs, header and rows', () => {
     await waitFor(() => expect(actionsRequest).toHaveBeenLastCalledWith('notReady'));
   });
 
-  it('keeps Publish enabled on a blocked release, since the run re-checks the entries', async () => {
+  it('disables Publish on a blocked release', async () => {
     mockRelease(plannedRelease, [action(1)]);
 
     renderPage();
 
-    expect(await screen.findByRole('button', { name: 'Publish' })).toBeEnabled();
+    expect(await screen.findByRole('button', { name: 'Publish' })).toBeDisabled();
   });
 
-  it('says why the publish of a blocked release was refused', async () => {
-    mockRelease(plannedRelease, [action(1)]);
+  it('says why the run refused a release whose readiness changed since it was checked', async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
     server.use(
       http.post('/content-releases/:releaseId/publish', () =>
         HttpResponse.json(

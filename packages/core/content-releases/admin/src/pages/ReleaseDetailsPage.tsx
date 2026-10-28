@@ -459,9 +459,9 @@ const ReleaseDetailsLayout = ({
                     variant="default"
                     onClick={handlePublishRelease(release.id.toString())}
                     loading={isPublishing}
-                    // A blocked release stays clickable: the stored status can be stale, and the
-                    // run re-checks every entry before refusing
-                    disabled={release.status === 'empty'}
+                    // Blocked means running now would release nothing. A stale Ready is still
+                    // refused by the run, which re-checks every entry
+                    disabled={release.status === 'empty' || release.status === 'blocked'}
                   >
                     {formatMessage({
                       id: 'content-releases.header.actions.publish',
@@ -1048,7 +1048,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                       );
 
                       return (
-                        <Tr key={id}>
+                        <Tr key={id} background={isDeleted ? 'neutral100' : undefined}>
                           <Td width="25%" maxWidth="200px">
                             {isDeleted || isUntitled ? (
                               <ItalicName ellipsis textColor={isDeleted ? 'neutral500' : undefined}>

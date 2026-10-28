@@ -23,6 +23,7 @@ import type {
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import {
+  getErrorName,
   getService,
   isFailedBeforeUpgrade,
   isReleaseBlocked,
@@ -201,9 +202,11 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       { actionIds, ...releaseData }: CreateReleaseFromSkippedEntries.Request['body'],
       { user }: { user: UserInfo }
     ) {
-      const sourceRelease: Pick<Release, 'id' | 'releasedAt' | 'status'> | null = await strapi.db
-        .query(RELEASE_MODEL_UID)
-        .findOne({ where: { id: releaseId }, select: ['id', 'releasedAt', 'status'] });
+      const sourceRelease: Pick<Release, 'id' | 'releasedAt' | 'status' | 'failureReason'> | null =
+        await strapi.db.query(RELEASE_MODEL_UID).findOne({
+          where: { id: releaseId },
+          select: ['id', 'releasedAt', 'status', 'failureReason'],
+        });
 
       if (!sourceRelease) {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
@@ -215,6 +218,13 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (sourceRelease.status !== 'partial' && sourceRelease.status !== 'failed') {
         throw new errors.ValidationError('Release has no skipped entries');
+      }
+
+      // The old run recorded nothing, so some of its entries may already be live
+      if (sourceRelease.failureReason === 'failed_before_upgrade') {
+        throw new errors.ValidationError(
+          'Release failed before the upgrade, so its skipped entries are unknown'
+        );
       }
 
       const releaseWithCreatorFields = await validateNewRelease(releaseData, { user });
@@ -451,12 +461,25 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         await reportFailedRun(release, error);
 
         // The frozen release comes with the error, telling a run that failed from a refused publish
-        throw error instanceof errors.ValidationError
-          ? new errors.ValidationError(error.message, {
-              ...(typeof error.details === 'object' && error.details),
-              release,
-            })
-          : error;
+        if (error instanceof errors.ValidationError) {
+          throw new errors.ValidationError(error.message, {
+            ...(typeof error.details === 'object' && error.details),
+            release,
+          });
+        }
+
+        // Another application error is meant for the client: sent as is
+        if (error instanceof errors.ApplicationError) {
+          throw error;
+        }
+
+        // An unexpected error would be a bare 500. Only its name is sent, its message can carry row
+        // contents: the log keeps the whole error
+        strapi.log.error(`[Content Releases] Release ${release.name} failed`, { error });
+        throw new errors.ApplicationError(
+          `An entry couldn't be released (${getErrorName(error)})`,
+          { release }
+        );
       }
 
       const { release } = result;

@@ -85,6 +85,16 @@ describe('CreateReleaseFromSkippedDrawer', () => {
     expect(screen.getByRole('radio', { name: 'Release all ready items' })).toBeChecked();
   });
 
+  it('leaves the date empty for the user to pick', async () => {
+    mockSkippedEntries([skippedAction(1, 'Spring sale')]);
+
+    renderDrawer();
+
+    await screen.findByText('1 entry carried over');
+    expect(screen.getByRole('combobox', { name: 'Date' })).toHaveValue('');
+    expect(screen.getByRole('combobox', { name: 'Time' })).toHaveValue('');
+  });
+
   it('collapses long lists behind "Show more"', async () => {
     const count = COLLAPSED_ENTRIES_COUNT + 1;
     mockSkippedEntries(

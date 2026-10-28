@@ -146,6 +146,8 @@ export const CreateReleaseFromSkippedDrawer = ({
         releaseCondition: 'allow_partial',
       }}
       defaultTimezone={settings?.data.defaultTimezone}
+      // The user picks a date, or ticks that the release has none yet
+      isDatePrefilled={false}
       isSubmitting={isSubmitting}
       isSubmitDisabled={isLoadingEntries || carriedOverEntries.length === 0}
     >

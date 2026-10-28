@@ -30,7 +30,7 @@ The same menu has a "Delete" option, enabled if the user has the `plugin::conten
 
 #### Create a release from skipped entries:
 
-Once a release has run as partial or failed (except a release that failed before the upgrade), a "Create release from skipped entries" button appears in the header. It requires the `plugin::content-releases.create` and `plugin::content-releases.create-action` permissions and is hidden when every skipped entry has since been deleted. It opens a side panel listing the entries carried over to the new release, with the release mode defaulting to "Release all ready items".
+Once a release has run as partial or failed (except a release that failed before the upgrade, which the API refuses too), a "Create release from skipped entries" button appears in the header. It requires the `plugin::content-releases.create` and `plugin::content-releases.create-action` permissions and is hidden when every skipped entry has since been deleted. It opens a side panel listing the entries carried over to the new release, with the release mode defaulting to "Release all ready items" and the date left empty: the user picks one or ticks "I don't have a release date yet".
 
 #### View Entry Status
 
@@ -45,4 +45,4 @@ In a planned release, the entry's "three dots" menu also has an "Edit entry" lin
 
 #### Publish a release:
 
-To execute the release of a content release, users can simply click on the "Publish" button (shown if you have the "plugin::content-releases.publish" permission). If any of the entries exhibit validation errors, the "Publish" action triggers a notification to alert users of the errors.
+To execute the release of a content release, users can simply click on the "Publish" button (shown if you have the "plugin::content-releases.publish" permission). It's disabled while the release is empty or blocked, as running it would release nothing. A release that reads ready may still be refused if an entry changed since it was checked: the notification shows why, and the release reads blocked after the refetch.
