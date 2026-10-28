@@ -48,6 +48,14 @@ declare global {
         'plugin::documentation.documentation': Services['documentation'];
         'plugin::documentation.override': OverrideService;
       }
+
+      /** Registered at bootstrap (`bootstrap.ts`). */
+      interface PermissionActions {
+        'plugin::documentation.read': true;
+        'plugin::documentation.settings.update': true;
+        'plugin::documentation.settings.regenerate': true;
+        'plugin::documentation.settings.read': true;
+      }
     }
   }
 }

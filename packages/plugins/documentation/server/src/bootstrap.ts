@@ -29,10 +29,25 @@ const RBAC_ACTIONS = [
     pluginName: 'documentation',
     category: 'documentation',
   },
-];
+] as const;
+
+// The declared permission action IDs match the registered actions.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type ActionIds = Core.Assert<
+  Core.SameNames<
+    Core.PermissionActionId<(typeof RBAC_ACTIONS)[number]>,
+    Extract<Core.RegisteredPermissionAction, `plugin::documentation.${string}`>
+  >
+>;
+// `as const` makes the list readonly, and the action provider takes a mutable array.
+type ActionInputs = Parameters<
+  Core.ServiceFor<'admin::permission'>['actionProvider']['registerMany']
+>[0];
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
-  await strapi.service('admin::permission').actionProvider.registerMany(RBAC_ACTIONS);
+  await strapi
+    .service('admin::permission')
+    .actionProvider.registerMany(RBAC_ACTIONS as unknown as ActionInputs);
 
   const pluginStore = strapi.store!({
     environment: '',
