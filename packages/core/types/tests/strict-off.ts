@@ -1,6 +1,7 @@
 import type { Core, Modules, Public, Schema, Struct, UID, Utils } from '../src';
 import type * as Internal from '../src/internal';
 import type { IsStrict } from '../src/core/strictness';
+import type { SuggestedString } from '../src/utils/string';
 
 interface LegacyItemSchema extends Struct.CollectionTypeSchema {
   attributes: { title: Schema.Attribute.String };
@@ -38,6 +39,9 @@ declare global {
       }
       interface Events {
         'legacy.event': [{ id: number }];
+      }
+      interface PermissionActions {
+        'plugin::legacy.items.read': true;
       }
       interface PackageConfigs {
         'plugin::legacy': { enabled: boolean };
@@ -555,3 +559,18 @@ type PreviewStatusChecks = [
 ];
 declare const previewStatusChecks: PreviewStatusChecks;
 previewStatusChecks satisfies unknown;
+
+// Without strict types, permission action references, lookups and registrations accept any ID.
+// Registered IDs are still listed for completion.
+type LegacyAction = { uid: 'items.raed'; pluginName: 'legacy' };
+type PermissionActionChecks = [
+  Expect<SameValues<Core.PermissionActionReference, string>>,
+  Expect<Equal<Core.PermissionActionReference, SuggestedString<'plugin::legacy.items.read'>>>,
+  Expect<Equal<Core.PermissionActionLookupName, SuggestedString<'plugin::legacy.items.read'>>>,
+  Expect<
+    Equal<Core.PermissionActionLookup<'plugin::legacy.items.raed'>, 'plugin::legacy.items.raed'>
+  >,
+  Expect<Equal<Core.PermissionActionCheck<LegacyAction>, LegacyAction>>,
+];
+declare const permissionActionChecks: PermissionActionChecks;
+permissionActionChecks satisfies unknown;

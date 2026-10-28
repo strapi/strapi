@@ -219,6 +219,30 @@ declare global {
       interface Events {}
 
       /**
+       * Permission actions keyed by action ID, the ID the admin action provider computes from the
+       * `uid` and `pluginName` of a registered action: `api::<uid>` without a plugin name,
+       * `admin::<uid>` for `'admin'`, `plugin::<pluginName>.<uid>` otherwise (see
+       * `Core.PermissionActionId`). Values are not read: declare each ID as `true`.
+       *
+       * Additive only, with no `Package*` and `App*` pair. Keys are runtime IDs, not ownership: any
+       * code can register an action in any namespace, and two declarations of an ID describe the
+       * same runtime action, so they never conflict. The package that registers an action declares
+       * its ID; applications declare the actions they register.
+       *
+       * At runtime, the second registration of an ID throws at boot, and the second registrant may
+       * be the owner: an application that registers a plugin's ID in its `register` makes the
+       * plugin's `bootstrap` throw. Register actions in an application's `register` or a plugin's
+       * `bootstrap`, not in an application's `bootstrap`, which runs after the admin removes the
+       * permissions of unregistered actions. The IDs of content releases, review workflows, SSO and
+       * audit logs exist only when their feature is enabled.
+       *
+       * With strict types enabled, once any ID is declared, typed permission checks accept declared
+       * IDs only (see `Core.PermissionActionReference`).
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface PermissionActions {}
+
+      /**
        * Content-type schemas declared by the package that owns them, keyed by UID (e.g.
        * `'plugin::upload.file'`), read in strict mode instead of `Public.ContentTypeSchemas`.
        * Written by hand next to the package's other contracts. Without generated entries, these
