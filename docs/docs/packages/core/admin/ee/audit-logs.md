@@ -26,6 +26,12 @@ To save audit log data, we utilize an Audit Logs local provider responsible for 
 
 This content type stores all the audit logs. For each allowed event, we save an entry in the audit logs content type.
 
+The `admin::audit-log` content type is registered by the CE admin (`packages/core/admin/server/src/content-types/index.ts`) in every edition, with or without a license, like the content types of content releases and review workflows. The CE bootstrap also adds `strapi_audit_logs` to the persisted tables. The schema file stays under `packages/core/admin/ee/server/src/audit-logs/content-types/`.
+
+### Runtime gates
+
+The routes, controller, services and the `admin::audit-logs.read` / `admin::audit-logs.export` permission actions all use one condition, `isAuditLogsEnabled` in `packages/core/admin/ee/server/src/audit-logs/utils.ts`: the license includes the `audit-logs` feature and `admin.auditLogs.enabled` is not `false`. When the config disables audit logs, the role editor does not list the audit-log permissions.
+
 ### Subscribing to all events
 
 The Audit Logs feature adds a subscriber to the [EventHub](../../core/event-hub.md), allowing it to listen to all events in the application. However, we don't save every event in the audit logs; we only save the default ones (see the defaultEvents array in the service file).
