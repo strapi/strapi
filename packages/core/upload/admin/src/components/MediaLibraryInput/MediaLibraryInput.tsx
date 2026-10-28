@@ -219,10 +219,10 @@ export const MediaLibraryInput = ({
       timeout: 4000,
       message: formatMessage(
         {
-          // en.json is the short English string. Locales that include {fileTypes}
-          // still receive the accepted types below.
+          // Legacy key: translated everywhere, and it names the accepted types,
+          // which the field already passes as `fileTypes`.
           id: getTranslationKey('input.notification.not-supported'),
-          defaultMessage: "You can't upload this type of file.",
+          defaultMessage: `You can't upload this type of file, only the following types are accepted – {fileTypes}`,
         },
         { fileTypes: (allowedTypes ?? []).join(',') }
       ),

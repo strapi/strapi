@@ -611,7 +611,7 @@
   "app.components.PluginCard.compatibleCommunity": "Compatible with the community",
   "app.components.MediaLibraryBanner.button": "Docs",
   "app.components.MediaLibraryBanner.button.enabled": "Read blog post",
-  "app.components.MediaLibraryBanner.close": "Close the banner. ",
+  "app.components.MediaLibraryBanner.close": "Close the banner.",
   "app.components.MediaLibraryBanner.intro": "Introducing the new Media Library ",
   "app.components.MediaLibraryBanner.text": "Check the documentation to learn how to switch to the new one.",
   "app.components.MediaLibraryBanner.text.enabled": "You're now using the revamped version.",

@@ -191,7 +191,7 @@
   "input.url.description": "Separate your URL links by a carriage return.",
   "input.url.label": "URL(s)",
   "input.url.placeholder": "Empty",
-  "input.notification.not-supported": "You can't upload this type of file.",
+  "input.notification.not-supported": "You can't upload this type of file, only the following types are accepted – {fileTypes}",
   "list.assets.title": "Assets ({count})",
   "list.asset.at.finished": "The assets have finished loading.",
   "list.assets-empty.search": "No result found",
