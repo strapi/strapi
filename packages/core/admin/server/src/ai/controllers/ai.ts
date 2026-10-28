@@ -3,7 +3,7 @@ import { GetAiFeatureConfig, GetAiToken } from '../../../../shared/contracts/ai'
 
 export default {
   async getAiToken(ctx: Context) {
-    if (strapi.ai.admin.isEnabled() === false) {
+    if (strapi.ai.admin.isStrapiManagedAiEnabled() === false) {
       return ctx.notFound();
     }
 
@@ -21,20 +21,20 @@ export default {
       ctx.body = {
         data: aiToken,
       } satisfies GetAiToken.Response;
-    } catch (error) {
+    } catch {
       return ctx.internalServerError('AI token request failed. Check server logs for details.');
     }
   },
 
   async getAiUsage(ctx: Context) {
-    if (strapi.ai.admin.isEnabled() === false) {
+    if (strapi.ai.admin.isStrapiManagedAiEnabled() === false) {
       return ctx.notFound();
     }
 
     try {
       const usage = await strapi.ai.admin.getAiUsage();
       ctx.body = usage;
-    } catch (error) {
+    } catch {
       return ctx.internalServerError(
         'AI usage data request failed. Check server logs for details.'
       );
@@ -42,7 +42,7 @@ export default {
   },
 
   async getAiFeatureConfig(ctx: Context) {
-    if (strapi.ai.admin.isEnabled() === false) {
+    if (strapi.ai.admin.isAvailable() === false) {
       return ctx.notFound();
     }
 

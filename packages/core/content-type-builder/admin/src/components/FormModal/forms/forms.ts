@@ -239,7 +239,7 @@ export const forms = {
       base({ data, type, step, attributes }: Base<'base'>) {
         try {
           return attributesForm.base[type](data as never, step ?? '', attributes as never);
-        } catch (err) {
+        } catch {
           return commonBaseForm;
         }
       },
@@ -326,8 +326,7 @@ export const forms = {
       advanced({ extensions }: { extensions: FormAPI }) {
         const baseForm = contentTypeForm.advanced
           .default()
-          .sections.map((section) => section.items)
-          .flat();
+          .sections.flatMap((section) => section.items);
         const itemsToAdd = extensions.getAdvancedForm(['contentType']);
 
         return {

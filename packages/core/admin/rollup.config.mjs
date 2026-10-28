@@ -1,5 +1,4 @@
 import { defineConfig } from 'rollup';
-import path from 'path';
 import { baseConfig } from '../../../rollup.utils.mjs';
 
 export default defineConfig([

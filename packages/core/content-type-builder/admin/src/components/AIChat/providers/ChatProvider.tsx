@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createContext,
+  useCallback,
   useContext,
   useMemo,
   useState,
@@ -95,7 +96,14 @@ export const BaseChatProvider = ({
     sendMessage: _sendMessage,
     status,
     stop,
-    ...chat
+    setMessages,
+    regenerate,
+    clearError,
+    error,
+    resumeStream,
+    addToolResult,
+    addToolOutput,
+    addToolApprovalResponse,
   } = useAIChat({
     id: chatId?.toString(),
     experimental_throttle: 100,
@@ -106,48 +114,54 @@ export const BaseChatProvider = ({
    * -----------------------------------------------------------------------------------------------*/
 
   // NOTE: body is using state variables, so they can not be passed as a prop in useChat
-  const sendMessage: typeof _sendMessage = async (message, options) => {
-    if (status === 'streaming' || status === 'submitted') {
-      return;
-    }
+  const sendMessage: typeof _sendMessage = useCallback(
+    async (message, options) => {
+      if (status === 'streaming' || status === 'submitted') {
+        return;
+      }
 
-    return _sendMessage(message, {
-      ...options,
-      body: {
-        ...options?.body,
-        schemas,
-        metadata: {
-          lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
+      return _sendMessage(message, {
+        ...options,
+        body: {
+          ...options?.body,
+          schemas,
+          metadata: {
+            lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
+          },
         },
-      },
-    });
-  };
+      });
+    },
+    [_sendMessage, lastSeenSchemas, schemas, status]
+  );
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    if (status === 'streaming' || status === 'submitted') {
-      return;
-    }
+      if (status === 'streaming' || status === 'submitted') {
+        return;
+      }
 
-    const readyAttachments = attachments.filter((a) => a.status !== 'loading');
-    if (input.trim().length === 0 && attachments.length === 0) {
-      return;
-    }
+      const readyAttachments = attachments.filter((a) => a.status !== 'loading');
+      if (input.trim().length === 0 && attachments.length === 0) {
+        return;
+      }
 
-    const files = readyAttachments.map(
-      (attachment) =>
-        ({
-          type: 'file',
-          filename: attachment.filename,
-          mediaType: attachment.mediaType,
-          url: attachment.url,
-        }) as const
-    );
-    sendMessage({ text: input, files });
-    setInput('');
-    setAttachments([]);
-  };
+      const files = readyAttachments.map(
+        (attachment) =>
+          ({
+            type: 'file',
+            filename: attachment.filename,
+            mediaType: attachment.mediaType,
+            url: attachment.url,
+          }) as const
+      );
+      sendMessage({ text: input, files });
+      setInput('');
+      setAttachments([]);
+    },
+    [attachments, input, sendMessage, status]
+  );
 
   /* -------------------------------------------------------------------------------------------------
    * Chat title
@@ -178,48 +192,83 @@ export const BaseChatProvider = ({
   }, [status, messages, trackUsage]);
 
   const isChatAvailable = useAIAvailability();
-
-  return (
-    <ChatContext.Provider
-      value={{
-        isChatEnabled: isChatAvailable,
-        id,
-        status,
-        stop,
-        sendMessage,
-        ...chat,
-        messages,
-        handleSubmit,
-        input,
-        setInput,
-        handleInputChange: (e) => setInput(e.target.value),
-        reset: () => {
-          stop();
-          setChatId(generateRandomId());
-          trackUsage('didStartNewChat');
-          resetTitle();
-        },
-        schemas,
-        // Chat
-        title,
-        isChatOpen,
-        openChat: () => {
-          setIsChatOpen(true);
-          // if this is the first open, it's a new chat
-          if (openCount === 0) {
-            trackUsage('didStartNewChat');
-          }
-          setOpenCount((prev) => prev + 1);
-        },
-        closeChat: () => setIsChatOpen(false),
-        // Attachments
-        attachments,
-        setAttachments,
-      }}
-    >
-      {children}
-    </ChatContext.Provider>
+  const handleInputChange = useCallback<ChatContextType['handleInputChange']>(
+    (e) => setInput(e.target.value),
+    []
   );
+  const reset = useCallback(() => {
+    stop();
+    setChatId(generateRandomId());
+    trackUsage('didStartNewChat');
+    resetTitle();
+  }, [resetTitle, stop, trackUsage]);
+  const openChat = useCallback(() => {
+    setIsChatOpen(true);
+    // if this is the first open, it's a new chat
+    if (openCount === 0) {
+      trackUsage('didStartNewChat');
+    }
+    setOpenCount((prev) => prev + 1);
+  }, [openCount, trackUsage]);
+  const closeChat = useCallback(() => setIsChatOpen(false), []);
+  const contextValue = useMemo<ChatContextType>(
+    () => ({
+      isChatEnabled: isChatAvailable,
+      id,
+      status,
+      stop,
+      sendMessage,
+      setMessages,
+      regenerate,
+      clearError,
+      error,
+      resumeStream,
+      addToolResult,
+      addToolOutput,
+      addToolApprovalResponse,
+      messages,
+      handleSubmit,
+      input,
+      setInput,
+      handleInputChange,
+      reset,
+      schemas,
+      title,
+      isChatOpen,
+      openChat,
+      closeChat,
+      attachments,
+      setAttachments,
+    }),
+    [
+      isChatAvailable,
+      id,
+      status,
+      stop,
+      sendMessage,
+      setMessages,
+      regenerate,
+      clearError,
+      error,
+      resumeStream,
+      addToolResult,
+      addToolOutput,
+      addToolApprovalResponse,
+      messages,
+      handleSubmit,
+      input,
+      handleInputChange,
+      reset,
+      schemas,
+      title,
+      isChatOpen,
+      openChat,
+      closeChat,
+      attachments,
+    ]
+  );
+
+  return <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>;
 };
 
 export const ChatProvider = ({

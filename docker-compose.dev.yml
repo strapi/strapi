@@ -5,7 +5,7 @@ services:
     image: postgres
     restart: always
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     environment:
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi

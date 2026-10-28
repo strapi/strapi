@@ -1,7 +1,7 @@
 import type { Core, Modules, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
-import { omit, castArray } from 'lodash/fp';
+import { omit, castArray } from 'lodash';
 
 import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
@@ -57,35 +57,15 @@ const shouldCreateHistoryVersion = (
 };
 
 /**
- * Returns the content type schema (and its components schemas).
+ * Returns the content type schema.
  * Used to determine if changes were made in the content type builder since a history version was created.
  * And therefore which fields can be restored and which cannot.
  */
 const getSchemas = (uid: UID.CollectionType) => {
   const attributesSchema = strapi.getModel(uid).attributes;
 
-  // TODO: Handle nested components
-  const componentsSchemas = Object.keys(attributesSchema).reduce(
-    (currentComponentSchemas, key) => {
-      const fieldSchema = attributesSchema[key];
-
-      if (fieldSchema.type === 'component') {
-        const componentSchema = strapi.getModel(fieldSchema.component).attributes;
-        return {
-          ...currentComponentSchemas,
-          [fieldSchema.component]: componentSchema,
-        };
-      }
-
-      // Ignore anything that's not a component
-      return currentComponentSchemas;
-    },
-    {} as CreateHistoryVersion['componentsSchemas']
-  );
-
   return {
-    schema: omit(FIELDS_TO_IGNORE, attributesSchema) as CreateHistoryVersion['schema'],
-    componentsSchemas,
+    schema: omit(attributesSchema, FIELDS_TO_IGNORE) as CreateHistoryVersion['schema'],
   };
 };
 
@@ -158,7 +138,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
               await getService(strapi, 'history').createVersion({
                 contentType: uid,
-                data: omit(FIELDS_TO_IGNORE, entry) as Modules.Documents.AnyDocument,
+                data: omit(entry, FIELDS_TO_IGNORE) as Modules.Documents.AnyDocument,
                 relatedDocumentId: documentId,
                 locale: entry.locale,
                 status,

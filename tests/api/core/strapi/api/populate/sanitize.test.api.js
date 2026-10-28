@@ -12,6 +12,7 @@ const builder = createTestBuilder();
 let strapi;
 let file;
 let contentAPIRequest;
+let restrictedContentAPIRequest;
 
 const schemas = {
   contentTypes: {
@@ -23,6 +24,10 @@ const schemas = {
       attributes: {
         cover: {
           type: 'media',
+        },
+        related: {
+          type: 'relation',
+          relation: 'morphToMany',
         },
       },
     },
@@ -40,6 +45,12 @@ const schemas = {
         cp: { type: 'component', repeatable: false, component: 'default.cp-a' },
         dz: { type: 'dynamiczone', components: ['default.cp-a', 'default.cp-b'] },
         img: { type: 'media', multiple: false },
+        relatedAs: {
+          type: 'relation',
+          relation: 'morphMany',
+          target: 'api::a.a',
+          morphBy: 'related',
+        },
       },
     },
     // Content type with populateCreatorFields enabled to test admin::user output sanitization
@@ -53,6 +64,27 @@ const schemas = {
       },
       attributes: {
         title: { type: 'string' },
+        relatedAs: {
+          type: 'relation',
+          relation: 'morphMany',
+          target: 'api::a.a',
+          morphBy: 'related',
+        },
+      },
+    },
+    d: {
+      kind: 'collectionType',
+      displayName: 'd',
+      singularName: 'd',
+      pluralName: 'ds',
+      attributes: {
+        title: { type: 'string' },
+        relatedAs: {
+          type: 'relation',
+          relation: 'morphMany',
+          target: 'api::a.a',
+          morphBy: 'related',
+        },
       },
     },
   },
@@ -87,6 +119,7 @@ const fixtures = {
         restricted: 'restricted',
         password: 'password',
         relA: a[0].id,
+        relatedAs: [a[0].id],
         cp: { name: 'cp_one' },
         dz: [
           { __component: 'default.cp-a', name: 'cp_two' },
@@ -96,6 +129,9 @@ const fixtures = {
       },
     ],
   c: () => [{ title: 'Test with creator fields' }],
+  d:
+    (_file) =>
+    ({ a }) => [{ title: 'allowed related', relatedAs: [a[0].id] }],
 };
 
 const uploadFile = async () => {
@@ -127,11 +163,52 @@ describe('Sanitize populated entries', () => {
       .addContentTypes(Object.values(schemas.contentTypes))
       .addFixtures(schemas.contentTypes.a.singularName, fixtures.a(file))
       .addFixtures(schemas.contentTypes.b.singularName, fixtures.b(file))
+      .addFixtures(schemas.contentTypes.d.singularName, fixtures.d(file))
       .build();
 
-    strapi = await createStrapiInstance();
-    contentAPIRequest = createContentAPIRequest({ strapi });
+    strapi = await createStrapiInstance({ bypassAuth: false });
     adminRequest = await createAuthRequest({ strapi });
+    const tokenNameSuffix = Date.now();
+
+    const fullAccessToken = await adminRequest({
+      method: 'POST',
+      url: '/admin/api-tokens',
+      body: {
+        name: `populate-sanitize-full-access-${tokenNameSuffix}`,
+        description: 'populate sanitize full access token',
+        type: 'full-access',
+      },
+    });
+
+    const restrictedToken = await adminRequest({
+      method: 'POST',
+      url: '/admin/api-tokens',
+      body: {
+        name: `populate-sanitize-restricted-${tokenNameSuffix}`,
+        description: 'populate sanitize restricted token',
+        type: 'custom',
+        permissions: ['plugin::upload.content-api.findOne', 'api::a.a.find', 'api::d.d.find'],
+      },
+    });
+
+    if (fullAccessToken.status !== 201) {
+      throw new Error(
+        `Failed to create full access token: ${JSON.stringify(fullAccessToken.body)}`
+      );
+    }
+
+    if (restrictedToken.status !== 201) {
+      throw new Error(`Failed to create restricted token: ${JSON.stringify(restrictedToken.body)}`);
+    }
+
+    contentAPIRequest = createContentAPIRequest({
+      strapi,
+      auth: { token: fullAccessToken.body.data.accessKey },
+    });
+    restrictedContentAPIRequest = createContentAPIRequest({
+      strapi,
+      auth: { token: restrictedToken.body.data.accessKey },
+    });
 
     // Create content type c via admin API to ensure createdBy/updatedBy are set
     await adminRequest({
@@ -187,6 +264,61 @@ describe('Sanitize populated entries', () => {
 
       expect(b).not.toHaveProperty('restricted');
       expect(b).not.toHaveProperty('password');
+    });
+
+    test("Media's morph relations only include target UIDs the caller can find", async () => {
+      const { status, body } = await restrictedContentAPIRequest.get(`/upload/files/${file.id}`, {
+        qs: {
+          populate: {
+            related: true,
+          },
+        },
+      });
+
+      expect(status).toBe(200);
+      expect(body.related).toBeDefined();
+      expect(Array.isArray(body.related)).toBeTruthy();
+      expect(body.related).toHaveLength(1);
+      expect(body.related[0].__type).toBe('api::a.a');
+    });
+
+    test('Morph relation count populate only includes target UIDs the caller can find', async () => {
+      const { status, body } = await restrictedContentAPIRequest.get(
+        `/${schemas.contentTypes.a.pluralName}`,
+        {
+          qs: {
+            populate: {
+              related: {
+                count: true,
+              },
+            },
+          },
+        }
+      );
+
+      expect(status).toBe(200);
+      expect(body.data[0].related).toEqual({ count: 1 });
+    });
+
+    test('Entity morph relations only include target UIDs the caller can find', async () => {
+      const { status, body } = await restrictedContentAPIRequest.get(
+        `/${schemas.contentTypes.a.pluralName}`,
+        {
+          qs: {
+            populate: {
+              related: true,
+            },
+          },
+        }
+      );
+
+      expect(status).toBe(200);
+      expect(body.data[0].related).toEqual([
+        expect.objectContaining({ __type: 'api::d.d', title: 'allowed related' }),
+      ]);
+      expect(body.data[0].related).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ __type: 'api::b.b' })])
+      );
     });
   });
 

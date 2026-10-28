@@ -212,6 +212,81 @@ describe('Content types utils', () => {
     });
   });
 
+  describe('isPrivateAttribute memoization', () => {
+    test('Recomputes nothing for a repeated lookup on the same model', () => {
+      const model = createModelWithPrivates(['foobar']);
+      global.strapi = { config: createConfig() };
+
+      for (let i = 0; i < 10; i += 1) {
+        expect(isPrivateAttribute(model, 'foobar')).toBe(true);
+        expect(isPrivateAttribute(model, 'bar')).toBe(false);
+      }
+
+      // The stored-private set is derived once per model, not once per lookup.
+      expect(strapi.config.get).toHaveBeenCalledTimes(1);
+    });
+
+    test('Keeps distinct models isolated, including models sharing a uid', () => {
+      global.strapi = { config: createConfig() };
+
+      const permissive = createModelWithPrivates([]);
+      const restrictive = createModelWithPrivates(['foobar']);
+
+      // Same uid, different objects — a uid-keyed cache would conflate these.
+      expect(permissive.uid).toEqual(restrictive.uid);
+
+      expect(isPrivateAttribute(permissive, 'foobar')).toBe(false);
+      expect(isPrivateAttribute(restrictive, 'foobar')).toBe(true);
+      // Re-check in the other order in case the first lookup poisoned the second.
+      expect(isPrivateAttribute(restrictive, 'foobar')).toBe(true);
+      expect(isPrivateAttribute(permissive, 'foobar')).toBe(false);
+    });
+
+    test('Applies to components, which the removed schema getter never covered', () => {
+      global.strapi = { config: createConfig() };
+
+      const component = {
+        uid: 'default.my-component',
+        modelType: 'component',
+        options: { privateAttributes: ['secret'] },
+        attributes: { secret: { type: 'string' }, visible: { type: 'string' } },
+      };
+
+      expect(isPrivateAttribute(component, 'secret')).toBe(true);
+      expect(isPrivateAttribute(component, 'visible')).toBe(false);
+    });
+
+    test('Does not cache a result derived before strapi.config exists', () => {
+      const model = createModelWithPrivates([]);
+
+      // Early boot: the instance exists but config is not wired up yet, so `bar` cannot
+      // be known as private.
+      global.strapi = {};
+      expect(isPrivateAttribute(model, 'bar')).toBe(false);
+
+      // Once config is available the same model object must see it.
+      global.strapi = { config: createConfig(['bar']) };
+      expect(isPrivateAttribute(model, 'bar')).toBe(true);
+    });
+
+    test('Still honours attributes flagged private directly, without consulting config', () => {
+      const model = createModelWithPrivates([]);
+      global.strapi = { config: createConfig() };
+
+      // `foo` is `private: true` on the attribute, so the fast path returns before the
+      // stored set is ever built.
+      expect(isPrivateAttribute(model, 'foo')).toBe(true);
+      expect(strapi.config.get).not.toHaveBeenCalled();
+    });
+
+    test('Tolerates a nil model', () => {
+      global.strapi = { config: createConfig() };
+
+      expect(isPrivateAttribute(undefined, 'foo')).toBe(false);
+      expect(isPrivateAttribute(null, 'foo')).toBe(false);
+    });
+  });
+
   describe('isTypedAttribute', () => {
     test('Returns false if attribute does not have a type', () => {
       expect(isTypedAttribute({})).toBe(false);

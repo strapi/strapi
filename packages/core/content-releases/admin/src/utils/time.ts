@@ -18,7 +18,7 @@ export const getTimezoneOffset = (timezone: string, date: Date) => {
     }
 
     return utcOffset;
-  } catch (error) {
+  } catch {
     // When timezone is invalid we catch the error and return empty to don't break the app
     return '';
   }

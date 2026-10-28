@@ -1,0 +1,140 @@
+import * as React from 'react';
+
+import { LinkButton, Typography } from '@strapi/design-system';
+import { ExternalLink } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import { useMatch } from 'react-router-dom';
+
+import { useScopedPersistentState } from '../hooks/usePersistentState';
+
+import { DismissibleBanner } from './DismissibleBanner';
+
+const Banner = ({
+  isLegacyMediaLibrary,
+  onDismiss,
+}: {
+  isLegacyMediaLibrary: boolean;
+  onDismiss: () => void;
+}) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <DismissibleBanner
+      onDismiss={onDismiss}
+      closeLabel={formatMessage({
+        id: 'app.components.MediaLibraryBanner.close',
+        defaultMessage: 'Close',
+      })}
+      message={
+        <>
+          <Typography
+            variant="delta"
+            fontWeight="bold"
+            textColor="neutral0"
+            textAlign="center"
+            fontSize={2}
+          >
+            {formatMessage({
+              id: 'app.components.MediaLibraryBanner.intro',
+              defaultMessage: 'Introducing the new Media Library ',
+            })}
+          </Typography>
+          <Typography
+            variant="delta"
+            textColor="neutral0"
+            textAlign="center"
+            paddingRight={4}
+            fontSize={2}
+          >
+            {formatMessage(
+              isLegacyMediaLibrary
+                ? {
+                    id: 'app.components.MediaLibraryBanner.text',
+                    defaultMessage:
+                      'Check the documentation to learn how to switch to the new one.',
+                  }
+                : {
+                    id: 'app.components.MediaLibraryBanner.text.enabled',
+                    defaultMessage: "You're now using the revamped version.",
+                  }
+            )}
+          </Typography>
+        </>
+      }
+      action={
+        isLegacyMediaLibrary ? (
+          <LinkButton
+            width="max-content"
+            variant="tertiary"
+            startIcon={<ExternalLink />}
+            href="https://docs.strapi.io/cms/features/media-library"
+            target="_blank"
+          >
+            {formatMessage({
+              id: 'app.components.MediaLibraryBanner.button',
+              defaultMessage: 'Docs',
+            })}
+          </LinkButton>
+        ) : (
+          <LinkButton
+            width="max-content"
+            variant="tertiary"
+            href="https://strapi.io/blog/strapi-release-roundup-everything-that-changed-between-june-and-august-2026"
+            target="_blank"
+          >
+            {formatMessage({
+              id: 'app.components.MediaLibraryBanner.button.enabled',
+              defaultMessage: 'Read blog post',
+            })}
+          </LinkButton>
+        )
+      }
+    />
+  );
+};
+
+interface MediaLibraryBannerProps {
+  /**
+   * Called synchronously (before paint) whenever this banner's own visibility changes, so a
+   * parent rendering it alongside another banner (e.g. `UpsellBanner`) can hide that other one
+   * instead of stacking both. This banner owns its dismissal state, so it's the source of truth
+   * for whether it's showing — the parent shouldn't have to re-derive that itself.
+   */
+  onVisibilityChange?: (isVisible: boolean) => void;
+}
+
+const MediaLibraryBanner = ({ onVisibilityChange }: MediaLibraryBannerProps = {}) => {
+  const isLegacyMediaLibrary = window.strapi.featureFlags.isEnabled('useLegacyMediaLibrary');
+
+  // The flag state is part of the key (not the stored value) so dismissing one
+  // message never collides with the other, and toggling `useLegacyMediaLibrary`
+  // (enabling it, or rolling it back) brings the banner back with the right message.
+  const [isDismissed, setIsDismissed] = useScopedPersistentState<boolean>(
+    `STRAPI_MEDIA_LIBRARY_BANNER_DISMISSED_FOR_${isLegacyMediaLibrary}`,
+    false
+  );
+
+  // `AuthenticatedLayout` renders this banner on every admin page, but it's only
+  // relevant on the Media Library itself (both the new and legacy `upload` plugin
+  // route share the same `plugins/upload` mount point).
+  const isOnMediaLibraryPage = useMatch('/plugins/upload/*') !== null;
+
+  const isVisible = isOnMediaLibraryPage && !isDismissed;
+
+  // useLayoutEffect (not useEffect) so the parent's re-render from this lands before the
+  // browser paints — otherwise a possibly-visible `UpsellBanner` would flash on screen for a
+  // frame before being hidden.
+  React.useLayoutEffect(() => {
+    onVisibilityChange?.(isVisible);
+  }, [isVisible, onVisibilityChange]);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <Banner isLegacyMediaLibrary={isLegacyMediaLibrary} onDismiss={() => setIsDismissed(true)} />
+  );
+};
+
+export { MediaLibraryBanner };

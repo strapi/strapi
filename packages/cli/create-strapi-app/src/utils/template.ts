@@ -2,6 +2,7 @@ import path from 'node:path';
 import url from 'node:url';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 import * as tar from 'tar';
 import retry from 'async-retry';
 
@@ -158,7 +159,7 @@ async function downloadGithubRepo(rootPath: string, { owner, repo, branch, subPa
   }
 
   await pipeline(
-    Readable.fromWeb(res.body),
+    Readable.fromWeb(res.body as WebReadableStream),
     tar.x({
       cwd: rootPath,
       strip: filePath ? filePath.split('/').length + 1 : 1,
