@@ -52,8 +52,8 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
       .getByRole('listitem', { name: 'Create your schema' })
       .getByRole('link', { name: 'Start' });
     await expect(startCtbTourLink).toBeEnabled();
-    // Avoid clickAndWait's networkidle here: the admin SPA often never reaches "idle" (polling),
-    // and the overview can mount after guided-tour-meta — wait for route + CTB dialog instead.
+    // Don't wait for network idle here: the admin SPA often never reaches "idle" (polling), and
+    // the overview can mount after guided-tour-meta — wait for route + CTB dialog instead.
     await Promise.all([
       page.waitForURL(/\/plugins\/content-type-builder/, { timeout: 30_000 }),
       startCtbTourLink.click(),
