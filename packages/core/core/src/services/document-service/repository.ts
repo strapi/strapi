@@ -424,7 +424,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToData(contentType)
     )(params);
 
-    const doc = await entries.create(queryParams);
+    // componentKey is server-assigned on create, like documentId
+    const doc = await entries.create({
+      ...queryParams,
+      data: components.stripComponentKeys(contentType, queryParams.data),
+    });
 
     emitEvent('entry.create', doc);
 
@@ -477,8 +481,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           (modelUid) => strapi.getModel(modelUid as UID.Schema)
         );
         // Clone is a new document — mint fresh componentKeys (do not copy source keys)
-        components.stripComponentKeys(contentType, data);
-        const dataWithDocumentId = { ...data, documentId: newDocumentId };
+        const dataWithDocumentId = {
+          ...components.stripComponentKeys(contentType, data),
+          documentId: newDocumentId,
+        };
         const doc = await entries.create({
           ...queryParams,
           data: dataWithDocumentId,
@@ -577,7 +583,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
       if (documentExists) {
         const mergedData = await copyNonLocalizedFields(contentType, documentId, {
-          ...queryParams.data,
+          ...components.stripComponentKeys(contentType, queryParams.data),
           documentId,
         });
 

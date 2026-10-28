@@ -344,8 +344,9 @@ export default (context: Context) => {
             t.nonNull.id('id');
           }
 
+          // Nullable: rows written before the key was backfilled must not fail the whole query
           if (modelType === 'component' && isNotDisabled(contentType)('componentKey')) {
-            t.nonNull.id('componentKey');
+            t.id('componentKey');
           }
 
           if (modelType !== 'component' && isNotDisabled(contentType)('documentId')) {
