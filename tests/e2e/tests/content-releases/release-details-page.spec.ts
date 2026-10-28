@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
 import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
-import { test, expect, releaseName } from './fixtures';
+import { test, testLoggedIn, expect, releaseName } from './fixtures';
+import { createReleaseOfMatches } from './release-api';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -55,8 +56,9 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     ).not.toBeVisible();
     await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
     await expect(
-      page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+      page.getByRole('gridcell', { name: 'Publish', exact: true }).first()
     ).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Done', exact: true }).first()).toBeVisible();
   });
 
   test('after publishing a release, the CM list view reflects the new status without a manual refresh', async ({
@@ -154,7 +156,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
   test(
     'a release mixing publish and unpublish actions is applied atomically',
     { tag: ['@release'] },
-    async ({ page }) => {
+    async ({ page, details }) => {
       // Confirm the release is genuinely mixed: grouped by action it shows both publish and unpublish.
       await page.getByLabel('Group by').click();
       await page.getByRole('option', { name: 'Actions' }).click();
@@ -170,15 +172,56 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       await expect(page.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
       await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
       await expect(
-        page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+        page.getByRole('gridcell', { name: 'Publish', exact: true }).first()
       ).toBeVisible();
       await expect(
-        page.getByRole('gridcell', { name: 'This entry was unpublished.' }).first()
+        page.getByRole('gridcell', { name: 'Unpublish', exact: true }).first()
       ).toBeVisible();
+      await expect(page.getByRole('button', { name: /was skipped$/ })).toHaveCount(0);
+      await expect(page.getByRole('tab', { name: 'Skipped (0)', exact: true })).toBeVisible();
       // Nothing was skipped, so there is nothing to carry over to a new release
-      await expect(
-        page.getByRole('button', { name: 'Create release from skipped entries' })
-      ).toBeHidden();
+      await expect(details.createFromSkippedButton).toBeHidden();
+    }
+  );
+
+  // Its own release: starting on the seeded one, like `test` does, would only be navigated away from
+  testLoggedIn(
+    'a release with an entry that is not ready is blocked, shows why and refuses to publish',
+    async ({ page, details }) => {
+      const releaseId = await createReleaseOfMatches(page, {
+        name: 'Matchday',
+        releaseCondition: 'all_or_nothing',
+        matches: [{ kit_man: 'Will Kitman', opponent: 'West Ham' }, { kit_man: 'Roy Kent' }],
+      });
+
+      await details.goto(releaseId);
+
+      await expect(page.getByText('Blocked', { exact: true })).toBeVisible();
+      await expect(details.tab('All', 2)).toBeVisible();
+      await expect(details.tab('Ready', 1)).toBeVisible();
+      await expect(details.tab('Not ready', 1)).toBeVisible();
+
+      await details.tab('Not ready').click();
+      await expect(page).toHaveURL(/filter=notReady/);
+      await expect(details.entryCell('Roy Kent')).toBeVisible();
+      await expect(details.entryCell('Will Kitman')).toHaveCount(0);
+
+      await details
+        .entryRow('Roy Kent')
+        .getByRole('button', { name: 'Why Roy Kent isn’t ready' })
+        .click();
+      const reason = page.getByRole('dialog');
+      await expect(reason.getByText('Not ready: Validation error')).toBeVisible();
+      await expect(reason.getByText('Opponent', { exact: true })).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(reason).toBeHidden();
+
+      await expect(details.publishButton).toBeEnabled();
+      await details.publishButton.click();
+      // Refused on the entry's own validation error
+      await expect(page.getByRole('alert').filter({ hasText: /opponent/i })).toBeVisible();
+      await expect(page.getByText('Blocked', { exact: true })).toBeVisible();
+      await expect(details.publishButton).toBeVisible();
     }
   );
 });

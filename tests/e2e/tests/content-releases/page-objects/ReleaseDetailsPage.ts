@@ -17,6 +17,7 @@ export class ReleaseDetailsPage {
     this.publishButton = page.getByRole('button', { name: 'Publish', exact: true });
     this.createFromSkippedButton = page.getByRole('button', {
       name: 'Create release from skipped entries',
+      exact: true,
     });
   }
 
@@ -42,6 +43,28 @@ export class ReleaseDetailsPage {
    */
   entryCell(name: string): Locator {
     return this.page.getByRole('gridcell', { name, exact: true });
+  }
+
+  /**
+   * A tab filtering the entries, named "Label (count)" when it shows a count. With `count`, only
+   * the tab showing exactly that count matches. The name mirrors the English
+   * `content-releases.pages.ReleaseDetails.tab.label-with-count` message: a change there breaks this.
+   */
+  tab(label: string, count?: number): Locator {
+    if (count !== undefined) {
+      return this.page.getByRole('tab', { name: `${label} (${count})`, exact: true });
+    }
+
+    const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    return this.page.getByRole('tab', { name: new RegExp(`^${escapedLabel}( \\(\\d+\\))?$`) });
+  }
+
+  /**
+   * The table row of an entry.
+   */
+  entryRow(name: string): Locator {
+    return this.page.getByRole('row').filter({ has: this.entryCell(name) });
   }
 
   /**
