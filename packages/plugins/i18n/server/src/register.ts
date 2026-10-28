@@ -5,8 +5,10 @@ import validateLocaleCreation from './controllers/validate-locale-creation';
 import graphqlProvider from './graphql';
 import { getService } from './utils';
 import { aiLocalizationJob } from './models/ai-localization-job';
+import { createLocalizationProvider } from './localization';
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  strapi.localization.register(createLocalizationProvider(strapi));
   strapi.get('models').add(aiLocalizationJob);
 
   extendContentTypes(strapi);

@@ -431,6 +431,14 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Cornish (United Kingdom) (kw-GB)",
   },
   {
+    "code": "co",
+    "name": "Corsican (co)",
+  },
+  {
+    "code": "co-FR",
+    "name": "Corsican (France) (co-FR)",
+  },
+  {
     "code": "hr",
     "name": "Croatian (hr)",
   },

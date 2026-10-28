@@ -1,10 +1,9 @@
 import type { Schema, Modules, UID, Struct } from '@strapi/types';
+import type { errors } from '@strapi/utils';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
-import type { errors } from '@strapi/utils';
-
-type ReleaseActionEntryType = 'single-types' | 'collection-types';
+export type ReleaseActionEntryType = 'single-types' | 'collection-types';
 
 export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   // Entity attributes

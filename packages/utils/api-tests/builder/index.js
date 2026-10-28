@@ -1,9 +1,8 @@
 'use strict';
 
-const { get } = require('lodash/fp');
+const { get } = require('lodash');
 
 const modelsUtils = require('../models');
-const { sanitize } = require('../../../core/utils');
 const actionRegistry = require('./action-registry');
 const { createContext } = require('./context');
 
@@ -42,7 +41,7 @@ const createTestBuilder = (options = {}) => {
     },
 
     addAction(code, ...params) {
-      const actionCreator = get(code, actionRegistry);
+      const actionCreator = get(actionRegistry, code);
 
       ctx.addAction(actionCreator(...params));
 

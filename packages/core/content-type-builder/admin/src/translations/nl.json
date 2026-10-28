@@ -141,8 +141,6 @@
   "form.attribute.condition.enum-change-warning": "De volgende velden hebben voorwaarden die afhankelijk zijn van dit veld: {fieldNames}. Het wijzigen of verwijderen van de enumeratiewaarden {values} zal deze voorwaarden verbreken. Wil je doorgaan?",
   "form.attribute.condition.enum-change-warning-values": ". Het wijzigen of verwijderen van de enumeratiewaarden ",
   "form.attribute.condition.enum-change-warning-end": " zal deze voorwaarden verbreken. Wil je doorgaan?",
-  "form.attribute.condition.field-change-warning": "De volgende velden hebben voorwaarden die afhankelijk zijn van dit veld: {fieldNames}. Het hernoemen ervan zal deze voorwaarden verbreken. Wil je doorgaan?",
-  "form.attribute.condition.field-change-warning-end": ". Het hernoemen ervan zal deze voorwaarden verbreken. Wil je doorgaan?",
   "form.button.add-components-to-dynamiczone": "Voeg componenten toe aan de zone",
   "form.button.add-field": "Voeg een veld toe",
   "form.button.add-first-field-to-created-component": "Voeg een eerste veld toe aan het component",

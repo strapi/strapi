@@ -3,10 +3,9 @@
  * Module that will validate input data for entity creation or edition
  */
 
-import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
-import { has, prop, isObject, isEmpty } from 'lodash/fp';
+import { uniqBy, castArray, isNil, mergeWith, get, has, isEmpty, isObject } from 'lodash';
 import jsonLogic from 'json-logic-js';
-import strapiUtils from '@strapi/utils';
+import * as strapiUtils from '@strapi/utils';
 import type { Modules, UID, Struct, Schema } from '@strapi/types';
 import { Validators, ValidatorMetas } from './validators';
 
@@ -138,6 +137,28 @@ const addDefault = (createOrUpdate: CreateOrUpdate) => {
 const preventCast = (validator: strapiUtils.yup.AnySchema) =>
   validator.transform((val, originalVal) => originalVal);
 
+/**
+ * On update, a component sent without an `id` is created, not updated (see
+ * `updateOrCreateComponent` in the document service). Its fields have no previous value to keep,
+ * so in a non-draft write they are validated as on creation.
+ */
+const getComponentCreateOrUpdate = (
+  createOrUpdate: CreateOrUpdate,
+  componentData: unknown,
+  options: ValidatorContext
+): CreateOrUpdate => {
+  if (
+    createOrUpdate === 'update' &&
+    options.isDraft !== true &&
+    isObject(componentData) &&
+    get(componentData, 'id') === undefined
+  ) {
+    return 'creation';
+  }
+
+  return createOrUpdate;
+};
+
 const createComponentValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
@@ -160,7 +181,7 @@ const createComponentValidator =
         .array()
         .of(
           yup.lazy((item) =>
-            createModelValidator(createOrUpdate)(
+            createModelValidator(getComponentCreateOrUpdate(createOrUpdate, item, options))(
               { componentContext, model, data: item },
               options
             ).notNull()
@@ -179,7 +200,9 @@ const createComponentValidator =
       return validator;
     }
 
-    let validator = createModelValidator(createOrUpdate)(
+    let validator = createModelValidator(
+      getComponentCreateOrUpdate(createOrUpdate, updatedAttribute.value, options)
+    )(
       {
         model,
         data: updatedAttribute.value,
@@ -206,7 +229,7 @@ const createDzValidator =
 
     validator = yup.array().of(
       yup.lazy((item) => {
-        const model = strapi.getModel(prop('__component', item));
+        const model = strapi.getModel(get(item, '__component'));
         const schema = yup
           .object()
           .shape({
@@ -216,7 +239,10 @@ const createDzValidator =
 
         return model
           ? schema.concat(
-              createModelValidator(createOrUpdate)({ model, data: item, componentContext }, options)
+              createModelValidator(getComponentCreateOrUpdate(createOrUpdate, item, options))(
+                { model, data: item, componentContext },
+                options
+              )
             )
           : schema;
       }) as any // FIXME: yup v1
@@ -427,7 +453,7 @@ const createScalarAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMeta, options: ValidatorContext) => {
     let validator;
 
-    if (has(metas.attr.type, Validators)) {
+    if (has(Validators, metas.attr.type)) {
       validator = (Validators as any)[metas.attr.type](metas, options);
     } else {
       // No validators specified - fall back to mixed
@@ -529,6 +555,37 @@ const createAttributeValidator =
     return validator;
   };
 
+/**
+ * Conditional visibility is evaluated against the written data. On creation, an attribute
+ * missing from the payload is stored with its schema default, so the condition must see that
+ * default. On update, a missing attribute keeps its stored value, which is not known here.
+ * Only used to evaluate conditions: the validated payload is left untouched.
+ */
+const getVisibilityData = (
+  createOrUpdate: CreateOrUpdate,
+  model: Struct.Schema,
+  data: Record<string, unknown>
+): Record<string, unknown> => {
+  if (createOrUpdate !== 'creation' || isObject(data) === false) {
+    return data;
+  }
+
+  return Object.entries(model.attributes).reduce((visibilityData, [attributeName, attribute]) => {
+    if (
+      visibilityData[attributeName] !== undefined ||
+      'default' in attribute === false ||
+      attribute.default === undefined
+    ) {
+      return visibilityData;
+    }
+
+    const defaultValue =
+      typeof attribute.default === 'function' ? attribute.default() : attribute.default;
+
+    return { ...visibilityData, [attributeName]: defaultValue };
+  }, data);
+};
+
 const createModelValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
@@ -536,13 +593,14 @@ const createModelValidator =
     options: ValidatorContext
   ): strapiUtils.yup.AnyObjectSchema => {
     const writableAttributes = model ? getWritableAttributes(model as any) : [];
+    const visibilityData = model ? getVisibilityData(createOrUpdate, model, data) : data;
 
     const schema = writableAttributes.reduce(
       (validators, attributeName) => {
         const metas = {
           attr: model.attributes[attributeName],
-          updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
-          data,
+          updatedAttribute: { name: attributeName, value: get(data, attributeName) },
+          data: visibilityData,
           model,
           entity,
           componentContext,
@@ -710,7 +768,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
                 data: componentValue as Record<string, unknown>,
               }),
               (objValue, srcValue) => {
-                if (isArray(objValue)) {
+                if (Array.isArray(objValue)) {
                   return objValue.concat(srcValue);
                 }
               }
@@ -733,7 +791,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
                 data: value,
               }),
               (objValue, srcValue) => {
-                if (isArray(objValue)) {
+                if (Array.isArray(objValue)) {
                   return objValue.concat(srcValue);
                 }
               }
@@ -760,6 +818,12 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
+
+      // Relations sent with empty connect and disconnect lists leave nothing to look up
+      if (uniqueValues.length === 0) {
+        return;
+      }
+
       const count = await strapi.db.query(key as UID.Schema).count({
         where: {
           id: {

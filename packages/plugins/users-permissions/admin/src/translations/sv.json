@@ -46,7 +46,7 @@
   "PopUpForm.Providers.key.label": "Klient ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.redirectURL.front-end.label": "Omdirigerings-URL: en till din front-end-app",
-  "PopUpForm.Providers.redirectURL.label": "Webbadressen för omdirigering som ska läggas till i {Provider} applikationskonfigurationer",
+  "PopUpForm.Providers.redirectURL.label": "Webbadressen för omdirigering som ska läggas till i {provider} applikationskonfigurationer",
   "PopUpForm.Providers.secret.label": "Klient hemlighet",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.subdomain.label": "Host URI (Subdomän)",

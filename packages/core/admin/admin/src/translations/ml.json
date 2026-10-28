@@ -82,7 +82,6 @@
   "Settings.apiTokens.title": "API ടോക്കണുകൾ",
   "Settings.application.description": "അഡ്മിനിസ്ട്രേഷൻ പാനലിന്റെ ആഗോള വിവരങ്ങൾ",
   "Settings.application.get-help": "സഹായം തേടു",
-  "Settings.application.link-pricing": "എല്ലാ വിലനിർണ്ണയ പ്ലാനുകളും കാണുക",
   "Settings.application.link-upgrade": "നിങ്ങളുടെ അഡ്മിൻ പാനൽ നവീകരിക്കുക",
   "Settings.application.node-version": "നോഡ് പതിപ്പ്",
   "Settings.application.strapi-version": "സ്ട്രാപ്പി പതിപ്പ്",

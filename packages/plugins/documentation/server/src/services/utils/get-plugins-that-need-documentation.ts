@@ -1,6 +1,8 @@
+import type { Core } from '@strapi/types';
+
 import type { PluginConfig } from '../../types';
 
-const getPluginsThatNeedDocumentation = (config: PluginConfig) => {
+const getPluginsThatNeedDocumentation = (strapi: Core.Strapi, config: PluginConfig) => {
   // Default plugins that need documentation generated
   const defaultPlugins = ['upload', 'users-permissions'];
 
@@ -8,8 +10,8 @@ const getPluginsThatNeedDocumentation = (config: PluginConfig) => {
   const userPluginsConfig = config['x-strapi-config'].plugins;
 
   if (userPluginsConfig === null) {
-    // The user hasn't specified any plugins to document, use the defaults
-    return defaultPlugins;
+    // The user hasn't specified any plugins to document, use the defaults that are installed
+    return defaultPlugins.filter((plugin) => strapi.plugin(plugin) !== undefined);
   }
 
   if (userPluginsConfig.length) {

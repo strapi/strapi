@@ -35,6 +35,8 @@ import { buildValidParams } from '../../../../utils/api';
 import type { CheckUIDAvailability } from '../../../../../../shared/contracts/uid';
 import type { Schema } from '@strapi/types';
 
+const EMPTY_ATTRIBUTE: NonNullable<UIDInputProps['attribute']> = {};
+
 /* -------------------------------------------------------------------------------------------------
  * InputUID
  * -----------------------------------------------------------------------------------------------*/
@@ -47,7 +49,7 @@ interface UIDInputProps extends Omit<InputProps, 'type'> {
 }
 
 const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
-  ({ hint, label, labelAction, name, required, attribute = {}, ...props }, ref) => {
+  ({ hint, label, labelAction, name, required, attribute = EMPTY_ATTRIBUTE, ...props }, ref) => {
     const { currentDocumentMeta } = useDocumentContext('UIDInput');
     const allFormValues = useForm('InputUID', (form) => form.values);
     const [availability, setAvailability] = React.useState<CheckUIDAvailability.Response>();
@@ -123,7 +125,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
             message: formatAPIError(res.error),
           });
         }
-      } catch (err) {
+      } catch {
         toggleNotification({
           type: 'danger',
           message: formatMessage({
@@ -147,10 +149,10 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
       },
       {
         // Don't check availability if the value is empty or wasn't changed
-        skip: !Boolean(
+        skip: !(
           (hasChanged || isCloning) &&
-            trimmedDebouncedValue !== '' &&
-            validationRegExp.test(trimmedDebouncedValue)
+          trimmedDebouncedValue !== '' &&
+          validationRegExp.test(trimmedDebouncedValue)
         ),
       }
     );

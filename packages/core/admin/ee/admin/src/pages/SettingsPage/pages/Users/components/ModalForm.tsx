@@ -1,15 +1,13 @@
 import type { FormLayoutInputProps } from '../../../../../../../../admin/src/types/forms';
 
-export const FORM_INITIAL_VALUES = {
-  ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
-    ? {
-        useSSORegistration: true,
-      }
-    : {}),
-};
+export const FORM_INITIAL_VALUES = window.strapi.features.isEnabled(window.strapi.features.SSO)
+  ? {
+      useSSORegistration: true,
+    }
+  : {};
 
-export const ROLE_LAYOUT = [
-  ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
+export const ROLE_LAYOUT = (
+  window.strapi.features.isEnabled(window.strapi.features.SSO)
     ? [
         [
           {
@@ -23,5 +21,5 @@ export const ROLE_LAYOUT = [
           },
         ],
       ]
-    : []),
-] satisfies FormLayoutInputProps[][];
+    : []
+) satisfies FormLayoutInputProps[][];

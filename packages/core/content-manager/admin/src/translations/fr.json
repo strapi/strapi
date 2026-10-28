@@ -139,6 +139,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "Configurez les paramètres de vos modèles et groupes",
   "containers.SettingsView.list.subtitle": "Configurez le layout et l'affichage de vos types de collection et groupes",
   "containers.SettingsView.list.title": "Paramètres d'affichage",
+  "containers.empty-label": "Sans titre",
   "containers.untitled": "Sans titre",
   "dnd.cancel-item": "{item}, , abandonné. Annulation de la réorganisation.",
   "dnd.drop-item": "{item}, abandonné. Position finale dans la liste : {position}",

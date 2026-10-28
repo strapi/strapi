@@ -49,7 +49,7 @@ const hashAdminUserEmail = async (payload?: User) => {
 
   try {
     return await digestMessage(payload.email);
-  } catch (error) {
+  } catch {
     return null;
   }
 };
