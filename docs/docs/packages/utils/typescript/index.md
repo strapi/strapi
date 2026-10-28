@@ -26,6 +26,10 @@ The schema generators (`src/generators/common/models/attributes.ts`) write each 
 
 With `typescript.strictTypes`, the generators also write `Schema.Attribute.Conditional` on an attribute with a `conditions.visible` rule. A hidden field skips validation, so the strict write inputs make a conditional attribute optional and nullable. With strict types, each attribute also gets a JSDoc line with its write rule when it has one, for example ``Required when published. `null` only in drafts.`` (`getAttributeWriteRule`). A component is not published itself, so its fields say `Required when the parent is published`. Editors show it on the input keys of the Document Service. Without strict types, the generators write no strict-only modifier and no comment, and generated files stay as in previous releases. Unit tests in `src/__tests__/generators/schemas/` check both outputs.
 
+## Strict opt-in
+
+With `typescript.strictTypes`, the strict generator (`src/generators/strict/`) writes `strict.d.ts`: the import of `@strapi/strapi/strict-types`, and the application's license scope, `Settings.licenses: 'declared'` and a `LicensedFeatures` entry per name of `typescript.licensedFeatures`. It does not check the names: `Core.Config.TypeScript` types the key. A value that is not an array of strings fails the generation.
+
 ## Application contracts
 
 With `typescript.strictTypes`, the services generator (`src/generators/services/`) registers each `api::*` service in `Strapi.Registries.AppServices`. When the service module exports a type named `ServiceContract`, the generator registers that type. The controllers generator does the same with `ControllerContract` in `AppControllers`. Otherwise it registers the type that the default export provides (see [public registries](../../core/types/type-system/02-concepts/03-public-registry.mdx)), and lists the uid in `Strapi.Registries.InferredServices` or `InferredControllers`, with the value `true`. `Core.ServiceFactory` and `Core.ControllerFactory` reject those uids: the registered type is read from the factory, so checking the factory against it would be circular. The marker interface is not emitted when no uid needs it.
