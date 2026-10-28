@@ -11,6 +11,7 @@ import {
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';
+import { persistTablesWithPrefix } from '../../ee/server/src/services/persist-tables';
 import {
   DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
   DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
@@ -185,6 +186,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       'Server is in production mode, but admin.auth.cookie.secure has been set to false. This is not recommended and will allow cookies to be sent over insecure connections.'
     );
   }
+
+  // The audit-log content type is registered in every edition: persist its table with it
+  await persistTablesWithPrefix('strapi_audit_logs');
 
   await registerAdminConditions();
   await registerPermissionActions();
