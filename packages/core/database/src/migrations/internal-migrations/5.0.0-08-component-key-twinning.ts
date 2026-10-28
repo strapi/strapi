@@ -1,5 +1,5 @@
 /**
- * Best-effort twinning of `component_key` across draft/published component pairs.
+ * Best-effort twinning of `strapi_component_key` across draft/published component pairs.
  *
  * After `5.0.0-07-component-key`, each existing component row has its own unique key.
  * Draft and published rows that represent the same logical block only share a key after
@@ -18,7 +18,7 @@ import type { Database } from '../..';
 import type { Meta } from '../../metadata';
 import type { JoinTable, MorphJoinTable, RelationalAttribute } from '../../types';
 
-const COMPONENT_KEY_COLUMN = 'component_key';
+const COMPONENT_KEY_COLUMN = 'strapi_component_key';
 
 type EntityPair = {
   documentId: string;
@@ -305,7 +305,7 @@ const twinNestedComponents = async (
       }
 
       const nestedMeta = db.metadata.get(nestedUID);
-      if (!nestedMeta?.attributes?.componentKey) {
+      if (!nestedMeta?.attributes?.strapiComponentKey) {
         continue;
       }
 
@@ -374,7 +374,7 @@ const twinContentType = async (knex: Knex, db: Database, meta: Meta) => {
         }
 
         const componentMeta = db.metadata.get(componentUID);
-        if (!componentMeta?.attributes?.componentKey) {
+        if (!componentMeta?.attributes?.strapiComponentKey) {
           continue;
         }
 

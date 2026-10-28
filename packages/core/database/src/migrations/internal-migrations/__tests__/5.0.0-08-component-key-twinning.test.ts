@@ -2,7 +2,7 @@ import type { Knex } from 'knex';
 
 import { twinComponentKeys, twinComponentKeysMigration } from '../5.0.0-08-component-key-twinning';
 
-type ComponentRow = { id: number; component_key: string };
+type ComponentRow = { id: number; strapi_component_key: string };
 type LinkRow = {
   entity_id: number;
   component_id: number;
@@ -25,8 +25,8 @@ const buildHarness = () => {
     'articles_components',
   ]);
   const columns = new Map<string, Set<string>>([
-    ['components_default_blocks', new Set(['id', 'component_key', 'name'])],
-    ['components_default_nested', new Set(['id', 'component_key', 'label'])],
+    ['components_default_blocks', new Set(['id', 'strapi_component_key', 'name'])],
+    ['components_default_nested', new Set(['id', 'strapi_component_key', 'label'])],
   ]);
 
   const entities: EntityRow[] = [
@@ -35,15 +35,15 @@ const buildHarness = () => {
   ];
 
   const blocks: ComponentRow[] = [
-    { id: 10, component_key: 'draft-block-a' },
-    { id: 11, component_key: 'draft-block-b' },
-    { id: 20, component_key: 'pub-block-a-old' },
-    { id: 21, component_key: 'pub-block-b-old' },
+    { id: 10, strapi_component_key: 'draft-block-a' },
+    { id: 11, strapi_component_key: 'draft-block-b' },
+    { id: 20, strapi_component_key: 'pub-block-a-old' },
+    { id: 21, strapi_component_key: 'pub-block-b-old' },
   ];
 
   const nested: ComponentRow[] = [
-    { id: 100, component_key: 'draft-nested-a' },
-    { id: 200, component_key: 'pub-nested-a-old' },
+    { id: 100, strapi_component_key: 'draft-nested-a' },
+    { id: 200, strapi_component_key: 'pub-nested-a-old' },
   ];
 
   const links: LinkRow[] = [
@@ -94,7 +94,7 @@ const buildHarness = () => {
     },
   ];
 
-  const updates: Array<{ table: string; id: number; component_key: string }> = [];
+  const updates: Array<{ table: string; id: number; strapi_component_key: string }> = [];
 
   const makeSelectBuilder = (tableName: string) => {
     const state: {
@@ -131,13 +131,17 @@ const buildHarness = () => {
         state.orderBy = Array.isArray(arg) ? arg : [{ column: arg, order: 'asc' }];
         return builder;
       }),
-      update: jest.fn(async (payload: { component_key: string }) => {
+      update: jest.fn(async (payload: { strapi_component_key: string }) => {
         const match = (tableName === 'components_default_blocks' ? blocks : nested).find((row) =>
           state.filters.every((fn) => fn(row))
         );
         if (match) {
-          match.component_key = payload.component_key;
-          updates.push({ table: tableName, id: match.id, component_key: payload.component_key });
+          match.strapi_component_key = payload.strapi_component_key;
+          updates.push({
+            table: tableName,
+            id: match.id,
+            strapi_component_key: payload.strapi_component_key,
+          });
         }
         return 1;
       }),
@@ -245,7 +249,7 @@ const buildHarness = () => {
       {
         tableName: 'components_default_blocks',
         attributes: {
-          componentKey: { type: 'string' },
+          strapiComponentKey: { type: 'string' },
           nested: {
             type: 'relation',
             relation: 'oneToOne',
@@ -260,7 +264,7 @@ const buildHarness = () => {
       {
         tableName: 'components_default_nested',
         attributes: {
-          componentKey: { type: 'string' },
+          strapiComponentKey: { type: 'string' },
         },
       },
     ],
@@ -296,16 +300,16 @@ describe('twinComponentKeys migration', () => {
     expect(twinComponentKeysMigration.name).toBe('5.0.0-08-component-key-twinning');
   });
 
-  it('copies draft component_key onto matching published rows including nested', async () => {
+  it('copies draft strapi_component_key onto matching published rows including nested', async () => {
     const h = buildHarness();
 
     await twinComponentKeys(h.knex, h.db);
 
-    expect(h.blocks.find((b) => b.id === 20)?.component_key).toBe('draft-block-a');
-    expect(h.blocks.find((b) => b.id === 21)?.component_key).toBe('draft-block-b');
-    expect(h.nested.find((n) => n.id === 200)?.component_key).toBe('draft-nested-a');
+    expect(h.blocks.find((b) => b.id === 20)?.strapi_component_key).toBe('draft-block-a');
+    expect(h.blocks.find((b) => b.id === 21)?.strapi_component_key).toBe('draft-block-b');
+    expect(h.nested.find((n) => n.id === 200)?.strapi_component_key).toBe('draft-nested-a');
 
-    expect(h.updates.map((u) => `${u.table}:${u.id}:${u.component_key}`).sort()).toEqual(
+    expect(h.updates.map((u) => `${u.table}:${u.id}:${u.strapi_component_key}`).sort()).toEqual(
       [
         'components_default_blocks:20:draft-block-a',
         'components_default_blocks:21:draft-block-b',
@@ -316,9 +320,9 @@ describe('twinComponentKeys migration', () => {
 
   it('is a no-op when keys already match', async () => {
     const h = buildHarness();
-    h.blocks.find((b) => b.id === 20)!.component_key = 'draft-block-a';
-    h.blocks.find((b) => b.id === 21)!.component_key = 'draft-block-b';
-    h.nested.find((n) => n.id === 200)!.component_key = 'draft-nested-a';
+    h.blocks.find((b) => b.id === 20)!.strapi_component_key = 'draft-block-a';
+    h.blocks.find((b) => b.id === 21)!.strapi_component_key = 'draft-block-b';
+    h.nested.find((n) => n.id === 200)!.strapi_component_key = 'draft-nested-a';
 
     await twinComponentKeys(h.knex, h.db);
 
@@ -337,8 +341,8 @@ describe('twinComponentKeys migration', () => {
 
     await twinComponentKeys(h.knex, h.db);
 
-    expect(h.blocks.find((b) => b.id === 20)?.component_key).toBe('pub-block-a-old');
-    expect(h.blocks.find((b) => b.id === 21)?.component_key).toBe('pub-block-b-old');
+    expect(h.blocks.find((b) => b.id === 20)?.strapi_component_key).toBe('pub-block-a-old');
+    expect(h.blocks.find((b) => b.id === 21)?.strapi_component_key).toBe('pub-block-b-old');
     expect(h.updates).toEqual([]);
   });
 
@@ -353,8 +357,8 @@ describe('twinComponentKeys migration', () => {
 
     await twinComponentKeys(h.knex, h.db);
 
-    expect(h.blocks.find((b) => b.id === 20)?.component_key).toBe('pub-block-a-old');
-    expect(h.blocks.find((b) => b.id === 21)?.component_key).toBe('pub-block-b-old');
+    expect(h.blocks.find((b) => b.id === 20)?.strapi_component_key).toBe('pub-block-a-old');
+    expect(h.blocks.find((b) => b.id === 21)?.strapi_component_key).toBe('pub-block-b-old');
     expect(h.updates.filter((u) => u.table === 'components_default_blocks')).toEqual([]);
   });
 
@@ -374,7 +378,7 @@ describe('twinComponentKeys migration', () => {
 
     await twinComponentKeys(h.knex, h.db);
 
-    expect(h.blocks.find((b) => b.id === 21)?.component_key).toBe('draft-block-b');
+    expect(h.blocks.find((b) => b.id === 21)?.strapi_component_key).toBe('draft-block-b');
   });
 
   it('skips content types without draft & publish', async () => {

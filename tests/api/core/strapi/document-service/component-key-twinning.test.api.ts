@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Best-effort twinning of componentKey across existing draft/published pairs.
+ * Best-effort twinning of strapiComponentKey across existing draft/published pairs.
  * @see packages/core/database/src/migrations/internal-migrations/5.0.0-08-component-key-twinning.ts
  */
 
@@ -46,7 +46,7 @@ const ct = {
 
 const UID = 'api::with-twin-compo.with-twin-compo';
 
-describe('componentKey twinning migration', () => {
+describe('strapiComponentKey twinning migration', () => {
   beforeAll(async () => {
     await builder.addComponent(component).addContentType(ct).build();
     strapi = await createStrapiInstance();
@@ -57,7 +57,7 @@ describe('componentKey twinning migration', () => {
     await builder.cleanup();
   });
 
-  test('aligns divergent draft/published componentKeys without re-publish', async () => {
+  test('aligns divergent draft/published strapiComponentKeys without re-publish', async () => {
     const created = await strapi.documents(UID).create({
       data: {
         title: 'twin-me',
@@ -80,8 +80,8 @@ describe('componentKey twinning migration', () => {
     });
 
     // Sanity: publish already shared keys
-    expect(published.blocks.map((b) => b.componentKey).sort()).toEqual(
-      draft.blocks.map((b) => b.componentKey).sort()
+    expect(published.blocks.map((b) => b.strapiComponentKey).sort()).toEqual(
+      draft.blocks.map((b) => b.strapiComponentKey).sort()
     );
 
     // Simulate a 5.0.0-07 backfill where each status row got a unique key
@@ -89,19 +89,19 @@ describe('componentKey twinning migration', () => {
     await strapi.db
       .connection(publishedTable)
       .where({ id: published.blocks[0].id })
-      .update({ component_key: 'force-divergent-key-aaa' });
+      .update({ strapi_component_key: 'force-divergent-key-aaa' });
     await strapi.db
       .connection(publishedTable)
       .where({ id: published.blocks[1].id })
-      .update({ component_key: 'force-divergent-key-bbb' });
+      .update({ strapi_component_key: 'force-divergent-key-bbb' });
 
     const before = await strapi.documents(UID).findOne({
       documentId: created.documentId,
       status: 'published',
       populate: ['blocks'],
     });
-    expect(before.blocks.map((b) => b.componentKey).sort()).not.toEqual(
-      draft.blocks.map((b) => b.componentKey).sort()
+    expect(before.blocks.map((b) => b.strapiComponentKey).sort()).not.toEqual(
+      draft.blocks.map((b) => b.strapiComponentKey).sort()
     );
 
     await twinComponentKeys(strapi.db.connection, strapi.db);
@@ -117,12 +117,12 @@ describe('componentKey twinning migration', () => {
       populate: ['blocks'],
     });
 
-    expect(afterPublished.blocks.map((b) => b.componentKey).sort()).toEqual(
-      afterDraft.blocks.map((b) => b.componentKey).sort()
+    expect(afterPublished.blocks.map((b) => b.strapiComponentKey).sort()).toEqual(
+      afterDraft.blocks.map((b) => b.strapiComponentKey).sort()
     );
     // Draft keys are the source of truth (copied onto published)
-    expect(afterPublished.blocks.map((b) => b.componentKey).sort()).toEqual(
-      draft.blocks.map((b) => b.componentKey).sort()
+    expect(afterPublished.blocks.map((b) => b.strapiComponentKey).sort()).toEqual(
+      draft.blocks.map((b) => b.strapiComponentKey).sort()
     );
   });
 });
