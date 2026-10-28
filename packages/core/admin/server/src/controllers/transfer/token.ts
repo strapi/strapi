@@ -13,6 +13,7 @@ import type {
   TokenRevoke,
   TokenUpdate,
 } from '../../../../shared/contracts/transfer';
+import type { Controllers, PrefixedActions } from '../../types/controllers';
 
 const { ApplicationError } = errors;
 
@@ -135,4 +136,4 @@ export default {
 
     ctx.created({ data: accessToken } satisfies TokenRegenerate.Response);
   },
-};
+} satisfies PrefixedActions<Controllers['transfer'], 'token'>;

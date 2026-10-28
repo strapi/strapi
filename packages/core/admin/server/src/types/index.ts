@@ -1,3 +1,4 @@
+import type { Controllers } from './controllers';
 import type { HasPermissionsConfig } from './policies';
 import type { RateLimitOptions } from './rate-limit';
 import type * as ActionService from '../services/action';
@@ -31,6 +32,7 @@ import type { AdminRole, Permission, SanitizedAdminUser } from '../../../shared/
 import type { AutoRegistrationEvent } from '../audit-logs/auth';
 import type { HomepageLayout } from '../controllers/validation/schema';
 
+export type * as Controllers from './controllers';
 export type * as Policies from './policies';
 export type { RateLimitOptions } from './rate-limit';
 
@@ -252,6 +254,27 @@ declare global {
         'admin.auth.autoRegistration': [AutoRegistrationEvent];
         /** EE only: a new audit log export, with the filters of its query. */
         'audit-log.export': [{ filters: unknown }];
+      }
+
+      /**
+       * The CE controllers (`controllers/index.ts`). The EE edition merges its own actions over
+       * `admin`, `authentication`, `role` and `user` (`ee/server/src/controllers/index.ts`).
+       */
+      interface PackageControllers {
+        'admin::admin': Controllers['admin'];
+        'admin::admin-token': Controllers['admin-token'];
+        'admin::ai': Controllers['ai'];
+        'admin::api-token': Controllers['api-token'];
+        'admin::authenticated-session': Controllers['authenticated-session'];
+        'admin::authenticated-user': Controllers['authenticated-user'];
+        'admin::authentication': Controllers['authentication'];
+        'admin::content-api': Controllers['content-api'];
+        'admin::homepage': Controllers['homepage'];
+        'admin::permission': Controllers['permission'];
+        'admin::role': Controllers['role'];
+        'admin::transfer': Controllers['transfer'];
+        'admin::user': Controllers['user'];
+        'admin::webhooks': Controllers['webhooks'];
       }
 
       interface PackagePolicies {

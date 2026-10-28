@@ -14,7 +14,10 @@ import webhooks from './webhooks';
 import contentApi from './content-api';
 import homepage from './homepage';
 import ai from '../ai/controllers/ai';
+import type { Controllers } from '../types/controllers';
 
+// `transfer` prefixes its action names at runtime: `transfer/runner.ts` and `transfer/token.ts`
+// check its actions against the contract.
 export default {
   admin,
   'api-token': apiToken,
@@ -30,4 +33,4 @@ export default {
   'content-api': contentApi,
   homepage,
   ai,
-};
+} satisfies Omit<Controllers, 'transfer'> & { transfer: unknown };
