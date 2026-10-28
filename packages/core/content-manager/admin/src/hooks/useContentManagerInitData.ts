@@ -73,11 +73,11 @@ const useContentManagerInitData = (): AppState => {
     'useContentManagerInitData',
     (state) => state.checkUserHasPermissions
   );
-  const { isLoading: isLoadingAuth, user } = useAuth('useContentManagerInitData', (state) => ({
-    isLoading: state.isLoading,
-    user: state.user,
-  }));
-  const adminUserId = user?.id ?? user?.email;
+  const isLoadingAuth = useAuth('useContentManagerInitData', (state) => state.isLoading);
+  const adminUserId = useAuth(
+    'useContentManagerInitData',
+    (state) => state.user?.id ?? state.user?.email
+  );
 
   const state = useTypedSelector((state) => state['content-manager'].app);
 
