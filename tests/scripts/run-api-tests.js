@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
 const execa = require('execa');
 const yargs = require('yargs');
 
@@ -73,6 +74,23 @@ const prepareWorkerApps = (workers) => {
   }
 };
 
+/**
+ * The database client the generated app connects to. `--database` can't tell: with
+ * `--no-generate-app` it keeps its sqlite default whatever the app was generated for. The app
+ * reads DATABASE_CLIENT from the environment first, then from its .env.
+ */
+const appDatabaseClient = () => {
+  if (process.env.DATABASE_CLIENT) {
+    return process.env.DATABASE_CLIENT;
+  }
+
+  if (!fs.existsSync(process.env.ENV_PATH)) {
+    return undefined;
+  }
+
+  return dotenv.parse(fs.readFileSync(process.env.ENV_PATH)).DATABASE_CLIENT;
+};
+
 const runAllTests = async (args, { workers }) => {
   // Required for Jest: code run under Jest (including app code loaded by tests) can execute in a context
   // where Node treats dynamic import() as VM-bound; supported Node versions require this flag.
@@ -108,8 +126,13 @@ const main = async ({ database, generateApp, workers }, args) => {
     }
 
     if (workers > 1) {
-      if (database.client !== 'sqlite') {
-        throw new Error('--workers needs SQLite: the workers would share one database');
+      const client = appDatabaseClient();
+
+      if (client !== 'sqlite') {
+        const found = client ? `uses ${client}` : 'has no DATABASE_CLIENT';
+        throw new Error(
+          `--workers needs a SQLite test app, and ${appPath} ${found}. On Postgres or MySQL the workers would share one database.`
+        );
       }
 
       prepareWorkerApps(workers);
