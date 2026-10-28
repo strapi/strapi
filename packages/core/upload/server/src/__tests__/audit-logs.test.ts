@@ -83,7 +83,7 @@ describe('Upload audit events', () => {
     });
 
     test('records an option missing from the new value as null', () => {
-      const { autoOrientation, ...withoutAutoOrientation } = settings;
+      const { autoOrientation: _unused, ...withoutAutoOrientation } = settings;
 
       expect(getUploadSettingsChanges(settings, withoutAutoOrientation)).toEqual({
         autoOrientation: { before: false, after: null },
