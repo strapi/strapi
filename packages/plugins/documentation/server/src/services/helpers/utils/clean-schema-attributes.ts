@@ -108,9 +108,9 @@ const cleanSchemaAttributes = (
         const rawComponentSchema: OpenAPIV3.SchemaObject = {
           type: 'object',
           properties: {
-            // Row id (status-local) + durable componentKey for Draft & Publish round-trips
+            // Row id (status-local) + durable strapiComponentKey for Draft & Publish round-trips
             id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
-            componentKey: { type: 'string' },
+            strapiComponentKey: { type: 'string' },
             ...cleanSchemaAttributes(componentAttributes, {
               isRequest,
               relationTargetSchemaNames,
@@ -146,7 +146,7 @@ const cleanSchemaAttributes = (
             type: 'object',
             properties: {
               id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
-              componentKey: { type: 'string' },
+              strapiComponentKey: { type: 'string' },
               __component: { type: 'string', enum: [component] },
               ...cleanSchemaAttributes(componentAttributes, {
                 isRequest,
