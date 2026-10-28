@@ -14,6 +14,38 @@ function assertCloudError(e: unknown): asserts e is CloudError {
   }
 }
 
+export function shouldAttemptCloudLogin({
+  skipCloud = false,
+  nonInteractive = false,
+  ci,
+  stdinIsTTY,
+}: {
+  skipCloud?: boolean;
+  nonInteractive?: boolean;
+  ci?: string;
+  stdinIsTTY?: boolean;
+}): boolean {
+  if (skipCloud || nonInteractive) {
+    return false;
+  }
+
+  if (isCiEnv(ci)) {
+    return false;
+  }
+
+  return stdinIsTTY === true;
+}
+
+function isCiEnv(ci: string | undefined): boolean {
+  if (ci === undefined) {
+    return false;
+  }
+
+  const normalized = ci.toLowerCase();
+
+  return normalized === 'true' || normalized === '1';
+}
+
 export async function handleCloudLogin(): Promise<boolean> {
   const logger = cloudServices.createLogger({
     silent: false,
