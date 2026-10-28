@@ -8,7 +8,7 @@
  *
  * Nested components are twinned recursively when both sides link the same nested field.
  *
- * @see docs/docs/rfcs/03-component-key.md
+ * @see docs/docs/packages/core/core/component-key.md
  */
 import type { Knex } from 'knex';
 
