@@ -6,7 +6,6 @@ import { toPrintableText } from './printable-text';
 import {
   fetchPackument,
   fetchPluginCatalog,
-  searchPackageNames,
   type CatalogPlugin,
   type Packument,
   type PackumentLookup,
@@ -112,49 +111,6 @@ const describeCatalogPlugin = ({
   kind,
 });
 
-const searchCandidatePackageNames = async ({
-  registryUrl,
-  license,
-  logger,
-  fetchImplementation,
-  installedPluginNames,
-}: {
-  registryUrl: string;
-  license: string;
-  logger: Logger;
-  fetchImplementation: typeof fetch;
-  installedPluginNames: string[];
-}): Promise<string[]> => {
-  const searchResult = await searchPackageNames({
-    registryUrl,
-    text: ENTERPRISE_SCOPE,
-    license,
-    fetchImplementation,
-  });
-
-  if (searchResult.status === 'license-rejected') {
-    throw new EnterpriseInstallError(searchResult.message);
-  }
-
-  if (searchResult.status === 'unavailable') {
-    const registryHost = new URL(registryUrl).host;
-
-    if (installedPluginNames.length === 0) {
-      throw new EnterpriseInstallError(
-        `Could not search ${registryHost}. Try again later, or name the plugin to install.`
-      );
-    }
-
-    logger.warn(
-      `Could not search ${registryHost}, so only the installed Enterprise plugins are listed.`
-    );
-
-    return [];
-  }
-
-  return searchResult.packageNames;
-};
-
 const describeCandidatePlugins = async ({
   registryUrl,
   appDir,
@@ -228,25 +184,9 @@ export const discoverEnterprisePlugins = async ({
   }
 
   if (catalogResult.status === 'unavailable') {
-    const searchedPackageNames = await searchCandidatePackageNames({
-      registryUrl,
-      license,
-      logger,
-      fetchImplementation,
-      installedPluginNames,
-    });
-
-    return {
-      plugins: await describeCandidatePlugins({
-        registryUrl,
-        appDir,
-        license,
-        logger,
-        fetchImplementation,
-        packageNames: [...searchedPackageNames, ...installedPluginNames],
-      }),
-      lockedPlugins: [],
-    };
+    throw new EnterpriseInstallError(
+      `Could not list the Enterprise plugins from ${new URL(registryUrl).host}. Try again later, or name the plugin to install.`
+    );
   }
 
   const enterpriseCatalogPlugins = catalogResult.plugins.filter(({ name }) =>

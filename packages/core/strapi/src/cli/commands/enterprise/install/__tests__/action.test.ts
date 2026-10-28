@@ -94,8 +94,8 @@ const createDependencies = async (
     env: { STRAPI_LICENSE: LICENSE },
     homeDir: await createTemporaryDirectory(),
     fetchImplementation: createRegistryFetch({
-      searchResult: [AI_BYOK],
       packuments: { [AI_BYOK]: aiByokPackument },
+      catalog: { plugins: [{ name: AI_BYOK, licensed: true }] },
     }),
     promptForLicense: jest.fn(),
     promptForPlugins: jest.fn(),
@@ -190,7 +190,6 @@ describe('runInstall with package names', () => {
   it('installs the exact version a tag points to', async () => {
     const dependencies = await createDependencies({
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK],
         packuments: {
           [AI_BYOK]: {
             ...aiByokPackument,
@@ -276,7 +275,6 @@ describe('runInstall with package names', () => {
   ])('installs nothing when %s is already installed', async (_case, requestedVersion) => {
     const dependencies = await createDependencies({
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK],
         packuments: {
           [AI_BYOK]: {
             ...aiByokPackument,
@@ -467,7 +465,6 @@ describe('runInstall with package names', () => {
   it('says the license does not include a plugin the catalog lists, with the server message', async () => {
     const dependencies = await createDependencies({
       fetchImplementation: createRegistryFetch({
-        searchResult: [],
         packuments: { [LOCKED_PLUGIN]: 403 },
         catalog: {
           plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
@@ -495,7 +492,6 @@ describe('runInstall with package names', () => {
         logger: createTestLogger(),
         dependencies: await createDependencies({
           fetchImplementation: createRegistryFetch({
-            searchResult: [],
             packuments: { [LOCKED_PLUGIN]: 403 },
             catalog: { plugins: [{ name: LOCKED_PLUGIN, licensed: false }] },
           }),
@@ -511,7 +507,6 @@ describe('runInstall with package names', () => {
   it('asks the catalog once, on the first plugin outside the license', async () => {
     const dependencies = await createDependencies({
       fetchImplementation: createRegistryFetch({
-        searchResult: [],
         packuments: { [LOCKED_PLUGIN]: 403, [AI_BYOK]: 403 },
         catalog: {
           plugins: [
@@ -561,7 +556,6 @@ describe('runInstall with package names', () => {
         logger: createTestLogger(),
         dependencies: await createDependencies({
           fetchImplementation: createRegistryFetch({
-            searchResult: [],
             packuments: { [LOCKED_PLUGIN]: 403 },
             catalog: { plugins: [] },
           }),
@@ -613,12 +607,11 @@ describe('runInstall with the checklist', () => {
     );
   });
 
-  it('offers a plugin this CLI does not know, found through the registry search', async () => {
+  it('offers a plugin this CLI does not know, found in the catalog', async () => {
     const newPlugin = '@strapi-enterprise/plugin-new';
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK, newPlugin],
         packuments: {
           [AI_BYOK]: aiByokPackument,
           [newPlugin]: createPackument(
@@ -632,6 +625,12 @@ describe('runInstall with the checklist', () => {
             ],
             { latest: '2.0.0' }
           ),
+        },
+        catalog: {
+          plugins: [
+            { name: AI_BYOK, licensed: true },
+            { name: newPlugin, licensed: true },
+          ],
         },
       }),
       promptForPlugins: jest.fn().mockResolvedValue([]),
@@ -660,8 +659,8 @@ describe('runInstall with the checklist', () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [],
-        packuments: { [AI_BYOK]: 403 },
+        packuments: {},
+        catalog: { plugins: [] },
       }),
     });
 
@@ -680,7 +679,6 @@ describe('runInstall with the checklist', () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: 500,
         packuments: { [AI_BYOK]: aiByokPackument, [LOCKED_PLUGIN]: 403 },
         catalog: {
           plugins: [
@@ -733,7 +731,6 @@ describe('runInstall with the checklist', () => {
       dependencies: await createDependencies({
         isInteractive: true,
         fetchImplementation: createRegistryFetch({
-          searchResult: [],
           packuments: { [LOCKED_PLUGIN]: 403 },
           catalog: {
             plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
@@ -763,7 +760,6 @@ describe('runInstall with the checklist', () => {
       dependencies: await createDependencies({
         isInteractive: true,
         fetchImplementation: createRegistryFetch({
-          searchResult: [],
           packuments: { [LOCKED_PLUGIN]: 403 },
           catalog: { plugins: [], notLicensedMessage: NOT_LICENSED_MESSAGE },
         }),
@@ -779,7 +775,6 @@ describe('runInstall with the checklist', () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [],
         packuments: {},
         catalog: {
           plugins: [{ name: LOCKED_PLUGIN, displayName: 'Locked', licensed: false }],
@@ -805,7 +800,6 @@ describe('runInstall with the checklist', () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [],
         packuments: { [AI_BYOK]: aiByokPackument },
         catalog: {
           plugins: [
@@ -842,7 +836,6 @@ describe('runInstall with the checklist', () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [],
         packuments: { [AI_BYOK]: aiByokPackument },
         catalog: { plugins: [{ name: AI_BYOK, licensed: true }] },
       }),
@@ -884,7 +877,6 @@ describe('runInstall with the checklist', () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       fetchImplementation: createRegistryFetch({
-        searchResult: [AI_BYOK],
         packuments: {
           [AI_BYOK]: createPackument(
             AI_BYOK,
@@ -898,6 +890,7 @@ describe('runInstall with the checklist', () => {
             { latest: '0.0.0-experimental.658048e' }
           ),
         },
+        catalog: { plugins: [{ name: AI_BYOK, licensed: true }] },
       }),
     });
     const logger = createTestLogger();
@@ -964,7 +957,6 @@ describe('runInstall with --registry', () => {
     expect(requestedUrls(dependencies)).toEqual(
       expect.arrayContaining([
         'https://packages.strapi.io/-/strapi/plugins',
-        expect.stringMatching(/^https:\/\/packages\.strapi\.io\/-\/v1\/search\?/),
         `https://packages.strapi.io/${AI_BYOK}`,
       ])
     );
@@ -1015,11 +1007,7 @@ describe('runInstall with --registry', () => {
       `Using the Enterprise registry at ${LOCAL_REGISTRY} (--registry).`
     );
     expect(requestedUrls(dependencies)).toEqual(
-      expect.arrayContaining([
-        `${LOCAL_REGISTRY}/-/strapi/plugins`,
-        expect.stringMatching(new RegExp(`^${LOCAL_REGISTRY}/-/v1/search\\?`)),
-        `${LOCAL_REGISTRY}/${AI_BYOK}`,
-      ])
+      expect.arrayContaining([`${LOCAL_REGISTRY}/-/strapi/plugins`, `${LOCAL_REGISTRY}/${AI_BYOK}`])
     );
     expect(requestedUrls(dependencies).every((url) => url.startsWith(`${LOCAL_REGISTRY}/`))).toBe(
       true
@@ -1051,7 +1039,6 @@ describe('runInstall with --registry', () => {
   it('asks that registry about a named plugin outside the license', async () => {
     const dependencies = await createDependencies({
       fetchImplementation: createRegistryFetch({
-        searchResult: [],
         packuments: { [LOCKED_PLUGIN]: 403 },
         catalog: {
           plugins: [{ name: LOCKED_PLUGIN, licensed: false }],
@@ -1073,6 +1060,33 @@ describe('runInstall with --registry', () => {
       `${LOCAL_REGISTRY}/${LOCKED_PLUGIN}`,
       `${LOCAL_REGISTRY}/-/strapi/plugins`,
     ]);
+  });
+
+  it('names that registry when it cannot list the plugins, and writes nothing', async () => {
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      fetchImplementation: createRegistryFetch({
+        packuments: { [AI_BYOK]: aiByokPackument },
+        catalog: 503,
+      }),
+    });
+
+    await expect(
+      runInstall({
+        appDir: await createApp({ installedPackages: { [AI_BYOK]: '1.1.0' } }),
+        packageArguments: [],
+        registry: LOCAL_REGISTRY,
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(
+      new EnterpriseInstallError(
+        'Could not list the Enterprise plugins from localhost:4873. Try again later, or name the plugin to install.'
+      )
+    );
+    expect(requestedUrls(dependencies)).toEqual([`${LOCAL_REGISTRY}/-/strapi/plugins`]);
+    expect(dependencies.promptForPlugins).not.toHaveBeenCalled();
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
   });
 
   it('stops before any request or write when the value is not allowed', async () => {

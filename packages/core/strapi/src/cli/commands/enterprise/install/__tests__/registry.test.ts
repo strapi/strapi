@@ -1,4 +1,4 @@
-import { fetchPackument, fetchPluginCatalog, searchPackageNames } from '../registry';
+import { fetchPackument, fetchPluginCatalog } from '../registry';
 import {
   createFetchResponse,
   createPackument,
@@ -7,64 +7,6 @@ import {
 } from './test-helpers';
 
 const packageName = '@strapi-enterprise/plugin-ai-byok';
-
-describe('searchPackageNames', () => {
-  it('lists the package names the registry search returns, with the license as token', async () => {
-    const fetchImplementation = jest.fn().mockResolvedValue(
-      createFetchResponse(200, {
-        objects: [
-          { package: { name: packageName } },
-          { package: { name: '@strapi-enterprise/ai-workflows' } },
-          { package: {} },
-        ],
-      })
-    );
-
-    await expect(
-      searchPackageNames({
-        text: '@strapi-enterprise',
-        registryUrl: REGISTRY_URL,
-        license: 'the-license',
-        fetchImplementation,
-      })
-    ).resolves.toEqual({
-      status: 'available',
-      packageNames: [packageName, '@strapi-enterprise/ai-workflows'],
-    });
-    expect(fetchImplementation).toHaveBeenCalledWith(
-      'https://packages.strapi.io/-/v1/search?text=%40strapi-enterprise&size=250',
-      expect.objectContaining({ headers: { Authorization: 'Bearer the-license' } })
-    );
-  });
-
-  it.each([
-    ['answers with an error', jest.fn().mockResolvedValue(createFetchResponse(500))],
-    ['cannot be reached', jest.fn().mockRejectedValue(new TypeError('fetch failed'))],
-  ])('reports the search as unavailable when it %s', async (_case, fetchImplementation) => {
-    await expect(
-      searchPackageNames({
-        text: '@strapi-enterprise',
-        registryUrl: REGISTRY_URL,
-        license: 'the-license',
-        fetchImplementation,
-      })
-    ).resolves.toEqual({ status: 'unavailable' });
-  });
-
-  it('tells a rejected license apart from an unavailable search', async () => {
-    await expect(
-      searchPackageNames({
-        text: '@strapi-enterprise',
-        registryUrl: REGISTRY_URL,
-        license: 'the-license',
-        fetchImplementation: jest.fn().mockResolvedValue(createFetchResponse(401)),
-      })
-    ).resolves.toEqual({
-      status: 'license-rejected',
-      message: expect.stringContaining('https://packages.strapi.io rejected this Strapi license.'),
-    });
-  });
-});
 
 describe('fetchPackument', () => {
   it('asks the Strapi registry for the full metadata, with the license as token', async () => {
@@ -252,13 +194,13 @@ describe('fetchPluginCatalog', () => {
     });
   });
 
-  it('gives up on the catalog after 5 seconds, since the search can replace it', async () => {
+  it('gives up on the catalog after 15 seconds, like the other registry requests', async () => {
     const timeoutSpy = jest.spyOn(AbortSignal, 'timeout');
     const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(404));
 
     await fetchCatalog(fetchImplementation);
 
-    expect(timeoutSpy).toHaveBeenCalledWith(5000);
+    expect(timeoutSpy).toHaveBeenCalledWith(15000);
     timeoutSpy.mockRestore();
   });
 

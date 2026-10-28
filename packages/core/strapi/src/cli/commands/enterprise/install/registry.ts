@@ -2,8 +2,6 @@ import { BILLING_URL } from './constants';
 import { toPrintableText } from './printable-text';
 
 const REQUEST_TIMEOUT_MS = 15 * 1000;
-const CATALOG_TIMEOUT_MS = 5 * 1000;
-const SEARCH_PAGE_SIZE = 250;
 
 export interface StrapiPackageMetadata {
   name?: string;
@@ -37,53 +35,6 @@ const authorizationHeader = (license: string) => ({ Authorization: `Bearer ${lic
 
 const describeRejectedLicense = (registryUrl: string) =>
   `${registryUrl} rejected this Strapi license. Check it at ${BILLING_URL}`;
-
-export type SearchResult =
-  | { status: 'available'; packageNames: string[] }
-  | { status: 'license-rejected'; message: string }
-  /** The search could not be reached, failed, or answered with invalid data. */
-  | { status: 'unavailable' };
-
-export const searchPackageNames = async ({
-  registryUrl,
-  text,
-  license,
-  fetchImplementation,
-}: {
-  registryUrl: string;
-  text: string;
-  license: string;
-  fetchImplementation: typeof fetch;
-}): Promise<SearchResult> => {
-  const searchUrl = `${registryUrl}/-/v1/search?text=${encodeURIComponent(text)}&size=${SEARCH_PAGE_SIZE}`;
-
-  try {
-    const response = await fetchImplementation(searchUrl, {
-      headers: authorizationHeader(license),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-
-    if (response.status === 401) {
-      return { status: 'license-rejected', message: describeRejectedLicense(registryUrl) };
-    }
-
-    if (!response.ok) {
-      return { status: 'unavailable' };
-    }
-
-    const { objects } = (await response.json()) as {
-      objects?: Array<{ package?: { name?: unknown } }>;
-    };
-
-    const packageNames = (objects ?? [])
-      .map((searchResult) => searchResult.package?.name)
-      .filter((packageName): packageName is string => typeof packageName === 'string');
-
-    return { status: 'available', packageNames };
-  } catch {
-    return { status: 'unavailable' };
-  }
-};
 
 export const fetchPackument = async ({
   registryUrl,
@@ -194,7 +145,7 @@ export const fetchPluginCatalog = async ({
   try {
     const response = await fetchImplementation(`${registryUrl}/-/strapi/plugins`, {
       headers: { ...authorizationHeader(license), Accept: 'application/json' },
-      signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
 
     if (response.status === 401) {
