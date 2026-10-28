@@ -71,6 +71,7 @@ describe('Content types utils', () => {
       expect(getNonWritableAttributes(model)).toEqual([
         'id',
         'documentId',
+        'strapiComponentKey',
         'createdAt',
         'updatedAt',
         'non_writable_field',

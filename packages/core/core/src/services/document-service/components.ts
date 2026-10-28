@@ -7,6 +7,7 @@ import {
   getComponentJoinColumnEntityName,
   getComponentJoinColumnInverseName,
   getComponentTypeColumn,
+  createDocumentId,
 } from '../../utils/transform-content-types-to-models';
 
 // type aliases for readability
@@ -173,13 +174,31 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
-      const componentValue = data[attributeName as keyof TData] as ComponentValue;
+      const rawComponentValue = data[attributeName as keyof TData] as ComponentValue;
+      const loadedValue = (await strapi.db
+        .query(uid)
+        .load(
+          entityToUpdate,
+          attributeName,
+          getComponentLoadParams(componentUID)
+        )) as ComponentValue;
+
+      // Resolve durable strapiComponentKey → row id on this parent (draft or published) before
+      // delete/update so Content API clients can round-trip keys from either status.
+      const componentValue = resolveComponentIdentities(
+        attributeName,
+        loadedValue,
+        rawComponentValue,
+        componentUID
+      );
+
       const previousValue = await deleteOldComponents(
         uid,
         componentUID,
         entityToUpdate,
         attributeName,
-        componentValue
+        componentValue,
+        { previousValue: loadedValue }
       );
 
       const previousComponents = _.castArray(previousValue ?? []).filter(
@@ -253,13 +272,23 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
         ) as ComponentValue;
       }
     } else if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = data[attributeName as keyof TData] as DynamicZoneValue;
+      const rawDynamiczoneValues = data[attributeName as keyof TData] as DynamicZoneValue;
+      const loadedValue = (await strapi.db
+        .query(uid)
+        .load(entityToUpdate, attributeName, getDynamicZoneLoadParams())) as DynamicZoneValue;
+
+      const dynamiczoneValues = resolveComponentIdentities(
+        attributeName,
+        loadedValue,
+        rawDynamiczoneValues
+      ) as DynamicZoneValue;
 
       const previousValue = await deleteOldDZComponents(
         uid,
         entityToUpdate,
         attributeName,
-        dynamiczoneValues
+        dynamiczoneValues,
+        { previousValue: loadedValue }
       );
 
       if (!Array.isArray(dynamiczoneValues)) {
@@ -306,6 +335,109 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
   }
 
   return componentBody;
+};
+
+/**
+ * Map payload entries that carry `strapiComponentKey` onto the matching component row already
+ * linked to this parent entity.
+ *
+ * - An `id` that belongs to this parent wins and is left unchanged.
+ * - An `id` that does not belong to this parent (e.g. the published row echoed back while the
+ *   draft is updated) is replaced by the row matching `strapiComponentKey`, when there is one.
+ * - Each row is claimed once: a key repeated in the same field (copied block) becomes a new
+ *   component with a fresh key instead of updating the block it was copied from.
+ *
+ * Fail closed: unknown keys without an id throw the same relation error as invalid ids.
+ * Entries without id/key are creates.
+ */
+const resolveComponentIdentities = <T extends ComponentValue | DynamicZoneValue>(
+  attributeName: string,
+  previousValue: T | null | undefined,
+  componentValue: T,
+  componentUID?: UID.Component
+): T => {
+  if (componentValue == null) {
+    return componentValue;
+  }
+
+  type Entry = {
+    id?: Modules.EntityService.Params.Attribute.ID;
+    strapiComponentKey?: string | null;
+    __component?: string;
+  };
+
+  const previous = _.castArray(previousValue || []).filter(Boolean) as Entry[];
+  const values = _.castArray(componentValue) as Entry[];
+
+  // Dynamic zones: ids and keys are only unique within the same __component uid
+  const sameType = (a: Entry, b: Entry) =>
+    !a.__component || !b.__component || a.__component === b.__component;
+
+  const ownedRow = (value: Entry) =>
+    isNil(value.id)
+      ? undefined
+      : previous.find(
+          (entry) =>
+            !isNil(entry.id) && String(entry.id) === String(value.id) && sameType(entry, value)
+        );
+
+  const hasKey = (value: Entry) => typeof value.strapiComponentKey === 'string';
+
+  const claimed = new Set<Entry>();
+  values.forEach((value) => {
+    const row = value && typeof value === 'object' ? ownedRow(value) : undefined;
+    if (row) {
+      claimed.add(row);
+    }
+  });
+
+  const asNewComponent = (value: Entry) => {
+    const uid = (value.__component ?? componentUID) as UID.Component | undefined;
+    const data = omit(value, ['id', 'strapiComponentKey']);
+    return uid ? stripComponentKeys(strapi.getModel(uid), data) : data;
+  };
+
+  const resolveOne = (value: Entry) => {
+    if (value == null || typeof value !== 'object') {
+      return value;
+    }
+
+    if (ownedRow(value)) {
+      return value;
+    }
+
+    if (!hasKey(value)) {
+      return isNil(value.id) ? asNewComponent(value) : value;
+    }
+
+    const match = previous.find(
+      (entry) => entry.strapiComponentKey === value.strapiComponentKey && sameType(entry, value)
+    );
+
+    if (match && claimed.has(match)) {
+      return asNewComponent(value);
+    }
+
+    if (!match?.id) {
+      if (!isNil(value.id)) {
+        // Foreign id and unknown key: let the id check reject it as before
+        return value;
+      }
+
+      throw new errors.ApplicationError(
+        `Some of the provided components in ${attributeName} are not related to the entity`
+      );
+    }
+
+    claimed.add(match);
+    return { ...value, id: match.id };
+  };
+
+  if (Array.isArray(componentValue)) {
+    return values.map(resolveOne) as T;
+  }
+
+  return resolveOne(componentValue as Entry) as T;
 };
 
 const pickStringifiedId = ({
@@ -577,11 +709,18 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   componentUID: UID.Component,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   attributeName: string,
-  componentValue: ComponentValue
+  componentValue: ComponentValue,
+  options?: { previousValue?: ComponentValue }
 ) => {
-  const previousValue = (await strapi.db
-    .query(uid)
-    .load(entityToUpdate, attributeName, getComponentLoadParams(componentUID))) as ComponentValue;
+  const previousValue =
+    options?.previousValue ??
+    ((await strapi.db
+      .query(uid)
+      .load(
+        entityToUpdate,
+        attributeName,
+        getComponentLoadParams(componentUID)
+      )) as ComponentValue);
   const idsToKeep = _.castArray(componentValue)
     .filter((value) => has(value, 'id'))
     .map(pickStringifiedId);
@@ -612,11 +751,14 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   attributeName: string,
-  dynamiczoneValues: DynamicZoneValue
+  dynamiczoneValues: DynamicZoneValue,
+  options?: { previousValue?: DynamicZoneValue }
 ) => {
-  const previousValue = (await strapi.db
-    .query(uid)
-    .load(entityToUpdate, attributeName, getDynamicZoneLoadParams())) as DynamicZoneValue;
+  const previousValue =
+    options?.previousValue ??
+    ((await strapi.db
+      .query(uid)
+      .load(entityToUpdate, attributeName, getDynamicZoneLoadParams())) as DynamicZoneValue);
 
   const idsToKeep = _.castArray(dynamiczoneValues)
     .filter((value) => has(value, 'id'))
@@ -904,8 +1046,17 @@ const createComponent = async <TUID extends UID.Component>(
 
   const componentData = await createComponents(uid, data);
 
+  // Preserve strapiComponentKey on publish/discard; mint one on first create.
+  // Document clone strips keys first so this mints fresh identities.
+  const existingKey = (data as unknown as { strapiComponentKey?: string }).strapiComponentKey;
+  const strapiComponentKey =
+    typeof existingKey === 'string' && existingKey.length > 0 ? existingKey : createDocumentId();
+
   // Make sure we don't save the component with a pre-defined ID.
-  const entryData = assignComponentData(schema, componentData, omit(data, 'id'));
+  const entryData = assignComponentData(schema, componentData, {
+    ...omit(data, 'id'),
+    strapiComponentKey,
+  });
 
   return strapi.db.query(uid).create({ data: entryData });
 };
@@ -933,11 +1084,12 @@ const updateComponent = async <TUID extends UID.Component>(
     return { id: componentToUpdate.id, changed: false };
   }
 
+  // strapiComponentKey is durable identity — do not allow clients to reassign it on update
   const component = await strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
-    data: assignComponentData(schema, componentData, data),
+    data: assignComponentData(schema, componentData, omit(data, 'strapiComponentKey')),
   });
 
   return component ? { id: component.id, changed: true } : null;
@@ -1217,6 +1369,53 @@ const createComponentRelationFilter = () => {
   };
 };
 
+/**
+ * Return a copy of `data` without `strapiComponentKey` in nested component / dynamic-zone payloads,
+ * so createComponent mints new keys (client creates, document clone, copied blocks).
+ * Publish/discard must NOT call this — they intentionally preserve keys across status rows.
+ */
+const stripComponentKeys = <T>(schema: Schema.Schema | undefined, data: T): T => {
+  if (data == null || typeof data !== 'object' || !schema) {
+    return data;
+  }
+
+  const { attributes = {} } = schema;
+  const result: Record<string, unknown> = { ...(data as Record<string, unknown>) };
+
+  const stripOne = (componentSchema: Schema.Schema | undefined, entry: unknown) => {
+    if (entry == null || typeof entry !== 'object') {
+      return entry;
+    }
+    return stripComponentKeys(
+      componentSchema,
+      omit(entry as Record<string, unknown>, 'strapiComponentKey')
+    );
+  };
+
+  for (const attributeName of Object.keys(attributes)) {
+    const attribute = attributes[attributeName];
+    const value = result[attributeName];
+
+    if (value == null) {
+      continue;
+    }
+
+    if (attribute.type === 'component') {
+      const componentSchema = strapi.getModel(attribute.component);
+
+      result[attributeName] = Array.isArray(value)
+        ? value.map((entry) => stripOne(componentSchema, entry))
+        : stripOne(componentSchema, value);
+    } else if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
+      result[attributeName] = value.map((entry: any) =>
+        entry?.__component ? stripOne(strapi.getModel(entry.__component), entry) : entry
+      );
+    }
+  }
+
+  return result as T;
+};
+
 export {
   omitComponentData,
   assignComponentData,
@@ -1226,6 +1425,7 @@ export {
   updateComponents,
   deleteComponents,
   deleteComponent,
+  stripComponentKeys,
   createComponentRelationFilter,
   findComponentParent,
   getParentSchemasForComponent,

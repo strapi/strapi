@@ -1,4 +1,10 @@
-import { updateComponents, deleteComponents, isComponentUnchanged } from '../components';
+import {
+  updateComponents,
+  deleteComponents,
+  isComponentUnchanged,
+  createComponents,
+  stripComponentKeys,
+} from '../components';
 
 const PAGE_UID = 'api::page.page';
 const LINK_UID = 'monster.links';
@@ -430,6 +436,158 @@ describe('updateComponents', () => {
       expect(queries[LEGACY_UID].delete).toHaveBeenCalledWith({ where: { id: '30' } });
       expect(result.zone.map((block: any) => block.id)).toEqual([1, 20]);
     });
+  });
+});
+
+describe('strapiComponentKey', () => {
+  const page = { id: 10 };
+  const keyed = (id: number, strapiComponentKey: string, title: string) => ({
+    ...link(id, title),
+    strapiComponentKey,
+  });
+  const storedLinks = [keyed(1, 'key-a', 'a'), keyed(2, 'key-b', 'b')];
+
+  it('updates the draft component by strapiComponentKey when the published id is echoed back', async () => {
+    const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+    // 51 and 52 are the ids of the published rows, not related to the draft being updated
+    const result = await updateComponents(PAGE_UID, page, {
+      links: [
+        { ...linkInput(51, 'a updated'), strapiComponentKey: 'key-a' },
+        { ...linkInput(52, 'b'), strapiComponentKey: 'key-b' },
+      ],
+    } as any);
+
+    expect(queries[LINK_UID].delete).not.toHaveBeenCalled();
+    expect(queries[LINK_UID].create).not.toHaveBeenCalled();
+    expect(queries[LINK_UID].update).toHaveBeenCalledTimes(1);
+    expect(queries[LINK_UID].update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: expect.not.objectContaining({ strapiComponentKey: expect.anything() }),
+    });
+    expect(result.links.map((item: any) => item.id)).toEqual([1, 2]);
+  });
+
+  it('keeps an id that belongs to the entry over its strapiComponentKey', async () => {
+    const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+    await updateComponents(PAGE_UID, page, {
+      links: [{ ...linkInput(2, 'b updated'), strapiComponentKey: 'key-a' }],
+    } as any);
+
+    expect(queries[LINK_UID].update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 2 } })
+    );
+    expect(queries[LINK_UID].delete).toHaveBeenCalledWith({ where: { id: '1' } });
+  });
+
+  it('resolves the echoed published id by strapiComponentKey in a dynamic zone', async () => {
+    const queries = setup({
+      [PAGE_UID]: {
+        10: {
+          zone: [
+            { id: 1, __component: LINK_UID, title: 'a', image: null, strapiComponentKey: 'k' },
+          ],
+        },
+      },
+    });
+
+    const result = await updateComponents(PAGE_UID, page, {
+      zone: [{ __component: LINK_UID, ...linkInput(77, 'a updated'), strapiComponentKey: 'k' }],
+    } as any);
+
+    expect(queries[LINK_UID].update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 1 } })
+    );
+    expect(result.zone.map((block: any) => block.id)).toEqual([1]);
+  });
+
+  it('rejects a foreign id whose strapiComponentKey is unknown', async () => {
+    setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+    await expect(
+      updateComponents(PAGE_UID, page, {
+        links: [{ ...linkInput(51, 'a'), strapiComponentKey: 'unknown' }],
+      } as any)
+    ).rejects.toThrow('Some of the provided components in links are not related to the entity');
+  });
+
+  it.each([
+    [
+      'after the original',
+      [
+        { ...linkInput(1, 'a'), strapiComponentKey: 'key-a' },
+        { ...linkInput(undefined, 'copy'), strapiComponentKey: 'key-a' },
+      ],
+      [1, 100],
+    ],
+    [
+      'before the original',
+      [
+        { ...linkInput(undefined, 'copy'), strapiComponentKey: 'key-a' },
+        { ...linkInput(1, 'a'), strapiComponentKey: 'key-a' },
+      ],
+      [100, 1],
+    ],
+    [
+      'twice without id',
+      [
+        { ...linkInput(undefined, 'a updated'), strapiComponentKey: 'key-a' },
+        { ...linkInput(undefined, 'copy'), strapiComponentKey: 'key-a' },
+      ],
+      [1, 100],
+    ],
+  ])(
+    'creates a new component for a strapiComponentKey repeated %s',
+    async (_label, links, expectedIds) => {
+      const queries = setup({ [PAGE_UID]: { 10: { links: storedLinks } } });
+
+      const result = await updateComponents(PAGE_UID, page, { links } as any);
+
+      expect(queries[LINK_UID].create).toHaveBeenCalledTimes(1);
+      const created = queries[LINK_UID].create.mock.calls[0][0].data;
+      expect(created.title).toBe('copy');
+      expect(created.strapiComponentKey).toEqual(expect.any(String));
+      expect(created.strapiComponentKey).not.toBe('key-a');
+      expect(queries[LINK_UID].update).not.toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ title: 'copy' }) })
+      );
+      expect(result.links.map((item: any) => item.id)).toEqual(expectedIds);
+    }
+  );
+
+  it('strips client strapiComponentKeys on create so the server assigns distinct keys', async () => {
+    const queries = setup({});
+    const input = {
+      links: [
+        { ...linkInput(undefined, 'a'), strapiComponentKey: 'dup' },
+        { ...linkInput(undefined, 'b'), strapiComponentKey: 'dup' },
+      ],
+      sections: [
+        {
+          title: 's',
+          strapiComponentKey: 'dup',
+          links: [{ title: 'n', strapiComponentKey: 'dup' }],
+        },
+      ],
+      zone: [{ __component: LINK_UID, title: 'z', strapiComponentKey: 'dup' }],
+    };
+
+    const stripped = stripComponentKeys(models[PAGE_UID], input);
+
+    // the caller's payload is left untouched
+    expect(input.links[0].strapiComponentKey).toBe('dup');
+    expect(JSON.stringify(stripped)).not.toContain('strapiComponentKey');
+
+    await createComponents(PAGE_UID, stripped as any);
+
+    const keys = [
+      ...queries[LINK_UID].create.mock.calls,
+      ...queries[SECTION_UID].create.mock.calls,
+    ].map(([{ data }]: any) => data.strapiComponentKey);
+    expect(keys).toHaveLength(5);
+    expect(keys).not.toContain('dup');
+    expect(new Set(keys).size).toBe(5);
   });
 });
 
