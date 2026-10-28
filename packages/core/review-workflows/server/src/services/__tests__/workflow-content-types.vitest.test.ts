@@ -21,6 +21,8 @@ vi.mock('../../utils', () => ({
 }));
 
 const ARTICLE_UID = 'api::article.article';
+// A content type UID stored in a workflow after its model was deleted
+const ORPHAN_UID = 'api::orphan.orphan';
 
 const createContentManagerMock = (storedOptions: Record<string, Record<string, unknown>> = {}) => ({
   // Mirrors the Content Manager service: the configuration is read from `contentType.uid`
@@ -42,7 +44,10 @@ const createStrapiMock = (
 
   return {
     plugin: vi.fn(() => ({ service: vi.fn(() => contentManagerService) })),
-    db: { query: vi.fn(() => ({ update })) },
+    db: {
+      query: vi.fn(() => ({ update })),
+      metadata: { has: vi.fn((uid: string) => uid !== ORPHAN_UID) },
+    },
   } as unknown as Core.Strapi;
 };
 
@@ -113,6 +118,25 @@ describe('Review workflows - Workflow content types service', () => {
     expect(contentManagerService.updateConfiguration).toHaveBeenCalledWith(
       { uid: ARTICLE_UID },
       { options: { foo: 'bar', reviewWorkflows: false } }
+    );
+  });
+
+  test('skips the stage cleanup of a content type that no longer exists', async () => {
+    const contentManagerService = createContentManagerMock();
+    const service = workflowContentTypesFactory({
+      strapi: createStrapiMock(contentManagerService),
+    });
+
+    await expect(
+      service.migrate({ srcContentTypes: [ARTICLE_UID, ORPHAN_UID], destContentTypes: [] })
+    ).resolves.toEqual([]);
+
+    expect(deleteAllEntitiesStage).toHaveBeenCalledTimes(1);
+    expect(deleteAllEntitiesStage).toHaveBeenCalledWith(ARTICLE_UID, {});
+    expect(contentManagerService.updateConfiguration).toHaveBeenCalledTimes(1);
+    expect(contentManagerService.updateConfiguration).toHaveBeenCalledWith(
+      { uid: ARTICLE_UID },
+      expect.anything()
     );
   });
 });

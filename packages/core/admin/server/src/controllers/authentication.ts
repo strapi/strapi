@@ -275,14 +275,14 @@ export default {
     const input = ctx.request.body as ForgotPassword.Request['body'];
 
     await validateForgotPasswordInput(input);
+    // The promise below can settle after Strapi is destroyed, so capture the logger now.
+    const logger = strapi.log;
 
     // Not awaited: the response must not reveal whether the email exists. The call runs
     // synchronously so a broken service still surfaces as a 500; only a rejection of the
     // returned promise is caught here, since nothing else would handle it.
     Promise.resolve(getService('auth').forgotPassword(input)).catch((error: unknown) => {
-      // destroy() deletes global.strapi. This rejection is not awaited, so it can
-      // surface after shutdown and must not take the process down.
-      global.strapi?.log.error('Failed to process the forgot-password request', { error });
+      logger.error('Failed to process the forgot-password request', { error });
     });
 
     ctx.status = 204;
