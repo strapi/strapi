@@ -16,6 +16,8 @@ export const CATEGORY_NAME_REGEX = /^[A-Za-z][-_0-9A-Za-z]*$/;
 export const ICON_REGEX = /^[A-Za-z0-9][-A-Za-z0-9]*$/;
 export const UID_REGEX = /^[A-Za-z0-9-_.~]*$/;
 export const KEBAB_BASE_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// Fully-qualified content-type uid: `api::a.a` / `plugin::p.p` / `strapi::x` / `admin::x`.
+export const CONTENT_TYPE_UID_REGEX = /^((strapi|admin)::[\w-]+|(api|plugin)::[\w-]+\.[\w-]+)$/;
 
 export type CommonTestConfig = TestConfig<unknown | undefined, Record<string, unknown>>;
 
@@ -85,7 +87,7 @@ export const isValidDefaultJSON: CommonTestConfig = {
       return true;
     }
 
-    if (_.isNumber(val) || _.isNull(val) || _.isObject(val) || _.isArray(val)) {
+    if (_.isNumber(val) || _.isNull(val) || _.isObject(val) || Array.isArray(val)) {
       return true;
     }
 
@@ -93,7 +95,7 @@ export const isValidDefaultJSON: CommonTestConfig = {
       JSON.parse(val as string);
 
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   },

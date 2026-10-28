@@ -1,6 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import {
   clickAndWait,
+  confirmRenameMigration,
   describeOnCondition,
   findAndClose,
   locateFirstAfter,
@@ -290,6 +291,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
+      // Decline data-preserving rename so history still sees delete+create (unknown fields).
+      await confirmRenameMigration(page, { preserve: false });
       await waitForRestart(page);
       await expect(page.getByLabel('titleRename')).toBeVisible();
 
@@ -508,6 +511,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
+      // Decline data-preserving rename so history still sees delete+create (unknown fields).
+      await confirmRenameMigration(page, { preserve: false });
       await waitForRestart(page);
       await expect(page.getByLabel('titleRename')).toBeVisible();
 

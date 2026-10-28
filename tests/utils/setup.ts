@@ -11,7 +11,7 @@ import { navToHeader } from './shared';
 export type SharedSetupOptions = {
   login?: boolean; // Whether to log in to the application
   resetFiles?: boolean; // Whether to reset files before tests
-  /** DTS packet name under `tests/e2e/data` (e.g. `with-admin`). When set, runs `resetDatabaseAndImportDataFromPath` — the e2e DB reset/seed (see docs/guides/e2e/02-data-transfer.md). Runs after `resetFiles` when `firstRun || resetAlways`. */
+  /** DTS packet name under `tests/e2e/data` (e.g. `with-admin`). When set, runs `resetDatabaseAndImportDataFromPath` — the e2e DB reset/seed (see docs/docs/contributing/03-testing/e2e/02-data-transfer.md). Runs after `resetFiles` when `firstRun || resetAlways`. */
   importData?: string;
   /** When true, rebuilds CM config + Super Admin permissions after DTS import for tests that need the current permission registry. */
   resyncSuperAdminPermissions?: boolean;

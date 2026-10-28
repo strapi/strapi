@@ -1,7 +1,9 @@
 import type { Core } from '@strapi/types';
-import { flow, map, sum, size, mean, max, defaultTo } from 'lodash/fp';
+import { defaultTo, map, size, mean, max, sum } from 'lodash';
 import { add } from 'date-fns';
 import { getService } from '../../utils';
+import type workflowMetrics from './index';
+import type { WeeklyMetrics } from './index';
 
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -9,31 +11,25 @@ const getWeeklyCronScheduleAt = (date: Date) =>
   `${date.getSeconds()} ${date.getMinutes()} ${date.getHours()} * * ${date.getDay()}`;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const metrics = getService('workflow-metrics', { strapi });
+  const metrics = getService('workflow-metrics', { strapi }) as typeof workflowMetrics;
   const workflowsService = getService('workflows', { strapi });
 
   const getMetricsStoreValue = async () => {
     const value = await strapi.store.get({ type: 'plugin', name: 'ee', key: 'metrics' });
-    return defaultTo({}, value);
+    return defaultTo(value, {});
   };
 
   const setMetricsStoreValue = (value: unknown) =>
     strapi.store.set({ type: 'plugin', name: 'ee', key: 'metrics', value });
 
   return {
-    async computeMetrics() {
+    async computeMetrics(): Promise<WeeklyMetrics> {
       // There will never be more than 200 workflow, so we can safely fetch them all
       const workflows = await workflowsService.find({ populate: 'stages' });
 
-      const stagesCount = flow(
-        map('stages'), // Number of stages per workflow
-        map(size)
-      )(workflows);
+      const stagesCount = map(workflows, (workflow) => size(workflow.stages));
 
-      const contentTypesCount = flow(
-        map('contentTypes'), // Number of content types per workflow
-        map(size)
-      )(workflows);
+      const contentTypesCount = map(workflows, (workflow) => size(workflow.contentTypes));
 
       return {
         numberOfActiveWorkflows: size(workflows),
@@ -45,7 +41,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async sendMetrics() {
       const computedMetrics = await this.computeMetrics();
-      metrics.sendDidSendReviewWorkflowPropertiesOnceAWeek(computedMetrics);
+      await metrics.sendDidSendReviewWorkflowPropertiesOnceAWeek(computedMetrics);
 
       const metricsInfoStored = await getMetricsStoreValue();
       // @ts-expect-error metricsInfoStored can use spread

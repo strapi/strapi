@@ -1,4 +1,4 @@
-import { isObject } from 'lodash/fp';
+import { isObject } from 'lodash';
 import ora from 'ora';
 import type { Ora } from 'ora';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
@@ -300,12 +300,12 @@ export default async (opts: CmdOptions) => {
     try {
       const table = buildTransferTable(results.engine);
       console.log(table?.toString());
-    } catch (e) {
+    } catch {
       console.error('There was an error displaying the results of the transfer.');
     }
 
     exitWith(0, exitMessageText('transfer'));
-  } catch (e) {
+  } catch {
     await strapi.telemetry.send('didDEITSProcessFail', getTransferTelemetryPayload(engine));
     exitWith(1, exitMessageText('transfer', true));
   }
