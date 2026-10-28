@@ -44,11 +44,22 @@ export interface Entitlement {
   limits: EntitlementLimit[];
 }
 
+/**
+ * License options are untyped JSON, and the registry has shipped some limits as numeric strings
+ * (`retentionDays: "90"`). Reads such a string as its number; any other value is returned as is.
+ */
+export const parseNumericString = (value: unknown): unknown => {
+  if (typeof value !== 'string' || value.trim() === '') {
+    return value;
+  }
+
+  const number = Number(value);
+  return Number.isNaN(number) ? value : number;
+};
+
 const normalize = (value: unknown): number | null => {
-  // License options are untyped JSON, and the registry has shipped some limits as numeric
-  // strings (`retentionDays: "90"`). Enforcement coerces those implicitly, so accepting only
-  // real numbers here showed a 90-day audit-logs cap as "Unlimited".
-  const limit = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+  // Accepting only real numbers here showed a 90-day audit-logs cap as "Unlimited".
+  const limit = parseNumericString(value);
 
   if (typeof limit !== 'number' || Number.isNaN(limit)) {
     return null;
