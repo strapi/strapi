@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "アップロードされたファイルが許可されている最大アセットサイズを超えています。",
+  "apiError.FileTooBig": "ファイルが大きすぎるためアップロードできません。サーバーが許可する最大リクエストサイズを超えています。",
   "assets.uploaded": "{number, plural, one {# 件のアセット} other {# 件のアセット}}をアップロードしました",
   "asset-details.title": "ファイル詳細",
   "asset-details.description": "ファイル情報とメタデータを表示します",

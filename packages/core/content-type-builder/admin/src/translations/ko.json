@@ -142,8 +142,6 @@
   "form.attribute.condition.enum-change-warning": "다음 필드에 이 필드에 의존하는 조건이 있습니다: {fieldNames}. 열거형 값 {values}을(를) 변경하거나 삭제하면 이 조건들이 깨집니다. 계속하시겠습니까?",
   "form.attribute.condition.enum-change-warning-values": ". 열거형 값 ",
   "form.attribute.condition.enum-change-warning-end": "을(를) 변경하거나 삭제하면 이 조건들이 깨집니다. 계속하시겠습니까?",
-  "form.attribute.condition.field-change-warning": "다음 필드에 이 필드에 의존하는 조건이 있습니다: {fieldNames}. 이름을 변경하면 이 조건들이 깨집니다. 계속하시겠습니까?",
-  "form.attribute.condition.field-change-warning-end": ". 이름을 변경하면 이 조건들이 깨집니다. 계속하시겠습니까?",
   "form.button.add-components-to-dynamiczone": "다이나믹 존에 컴포넌트 추가",
   "form.button.add-field": "다른 필드 추가",
   "form.button.add-first-field-to-created-component": "컴포넌트에 첫 필드 만들기",

@@ -16,6 +16,7 @@ import {
 import { fixLocaleFiles, validateBundle } from '../validate';
 import { backfillMissingEnKeys } from '../backfill-en';
 import { writeEnJsonForBundle } from '../write-en';
+import { alignDefaultMessagesForBundle } from '../align-defaults';
 import { buildGapReport } from '../report-gaps';
 import type { TranslationBundle } from '../types';
 
@@ -533,6 +534,51 @@ describe('writeEnJsonForBundle', () => {
 
     assert.equal(result.changed, true);
     assert.equal(readJsonRecord(bundle.enJsonPath)['plugin.name'], 'Media Library');
+  });
+});
+
+describe('alignDefaultMessagesForBundle', () => {
+  it('rewrites no-substitution template defaultMessages to the catalog', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-align-tpl-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    const sourcePath = path.join(srcDir, 'Widget.tsx');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'input.notification.not-supported': "You can't upload this type of file." }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      sourcePath,
+      [
+        'formatMessage({',
+        "  id: getTrad('input.notification.not-supported'),",
+        "  defaultMessage: `You can't upload this type of file, only the following types are accepted – {fileTypes}`,",
+        '});',
+        '',
+      ].join('\n')
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const changed = alignDefaultMessagesForBundle(
+      bundle,
+      readJsonRecord(bundle.enJsonPath),
+      new Set(),
+      { target: 'self' }
+    );
+
+    assert.equal(changed, 1);
+    assert.match(
+      fs.readFileSync(sourcePath, 'utf8'),
+      /defaultMessage: 'You can\\'t upload this type of file\.'/
+    );
   });
 });
 

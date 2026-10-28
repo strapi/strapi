@@ -171,6 +171,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "Configureer de instellingen voor je collectie types en groepen",
   "containers.SettingsView.list.subtitle": "Configureer de instellingen voor je collectie types en groepen",
   "containers.SettingsView.list.title": "Geef configuraties weer",
+  "containers.empty-label": "Naamloos",
   "containers.untitled": "Naamloos",
   "dnd.cancel-item": "{item}, losgelaten. Herschikking geannuleerd.",
   "dnd.drop-item": "{item}, losgelaten. Uiteindelijke positie in lijst: {position}.",

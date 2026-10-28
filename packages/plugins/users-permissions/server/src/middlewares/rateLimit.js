@@ -2,7 +2,7 @@
 
 const path = require('path');
 const utils = require('@strapi/utils');
-const { isString, has, toLower } = require('lodash/fp');
+const { toLower, isString, has } = require('lodash');
 
 const { RateLimitError } = utils.errors;
 
@@ -46,8 +46,8 @@ const routeUsesEmailIdentifier = (requestPath) => {
  * `/api/auth/local/` share one bucket.
  */
 const normalizeRequestPathForRateLimit = (requestPath) => {
-  const normalized = path.normalize(requestPath);
-  const lower = toLower(normalized);
+  const normalized = path.posix.normalize(requestPath);
+  const lower = normalized.toLowerCase();
   return lower.replace(/\/+$/, '') || '/';
 };
 
@@ -102,7 +102,7 @@ module.exports =
       };
     }
 
-    if (!has('enabled', rateLimitConfig)) {
+    if (!has(rateLimitConfig, 'enabled')) {
       rateLimitConfig.enabled = true;
     }
 

@@ -1,5 +1,6 @@
 import { errors } from '@strapi/utils';
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
+
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../tests/helpers/create-context';
@@ -217,7 +218,7 @@ describe('API Token Controller', () => {
 
         expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
         expect(badRequest).not.toHaveBeenCalled();
-        expect(create).toHaveBeenCalledWith(omit(['expiresAt'], createBody), callingUser);
+        expect(create).toHaveBeenCalledWith(omit(createBody, ['expiresAt']), callingUser);
         expect(created).toHaveBeenCalledWith({ data: tokenBody });
       });
 

@@ -1,0 +1,51 @@
+views {
+  view content_type_builder_server_code of strapi.server_runtime.content_type_builder_server {
+    title '05 Code reference / Content-Type Builder / Server'
+    description '''
+      **Question:** where are schema-editing requests validated and turned into definition files?
+      Routes, middleware, controllers and services coordinate development-only schema edits. The schema builder writes definitions; the reload and database synchronization are subsequent responsibilities.
+      This source map does not describe production schema editing. Open schema files for the complete development change journey and use card links for the relevant source directories.
+    '''
+
+    include
+      ctb_server_routes,
+      ctb_server_middlewares,
+      ctb_server_controllers,
+      ctb_server_services,
+      ctb_schema_builder,
+      strapi.application_source,
+      strapi.application_source.content_type_schema_files with { navigateTo content_type_builder_schema_change_flow },
+      ctb_server_routes -> ctb_server_middlewares,
+      ctb_server_routes -> ctb_server_controllers,
+      ctb_server_controllers -> ctb_server_services,
+      ctb_server_services -> ctb_schema_builder,
+      ctb_server_middlewares -> ctb_server_controllers,
+      ctb_schema_builder -> strapi.application_source.content_type_schema_files
+  }
+
+  dynamic view content_type_builder_schema_change_flow {
+    variant sequence
+    title '02 Journeys / Content-Type Builder / Development schema change'
+    description '''
+      **Audience:** technical readers. **Scenario:** a developer saves a schema change in a development application.
+      **Question:** how does a visual schema edit become application code and database structure?
+      Content-Type Builder writes schema changes only when `autoReload` is enabled (normally `strapi develop`).
+      The development supervisor reloads the application, whose new runtime loads the source schemas and
+      synchronizes the database schema.
+      **Outcome:** the restarted application uses the new definition. Deploying that code to production is a separate operation;
+      this flow does not transfer development content. Arrows summarize responsibility handoffs across the reload, not calls within one process.
+    '''
+
+    strapi.admin_web_app.content_type_builder_ui.ctb_ui_data_manager -> strapi.server_runtime.content_type_builder_server.ctb_server_controllers 'submit schema change (autoReload enabled)'
+    strapi.server_runtime.content_type_builder_server.ctb_server_controllers -> strapi.server_runtime.content_type_builder_server.ctb_schema_builder 'build schema update'
+    strapi.server_runtime.content_type_builder_server.ctb_schema_builder -> strapi.application_source.content_type_schema_files 'write schema.json definitions'
+    strapi.server_runtime.content_type_builder_server.ctb_server_controllers -> strapi.cli_tooling.development_supervisor 'request reload after the write'
+    strapi.cli_tooling.development_supervisor -> strapi.server_runtime.schema_loader 'start a new runtime'
+    strapi.server_runtime.schema_loader -> strapi.application_source.content_type_schema_files 'read schema files during load'
+    strapi.server_runtime.schema_loader -> strapi.server_runtime.schema_sync 'provide content type definitions'
+    strapi.server_runtime.schema_sync -> strapi.server_runtime.database_layer 'sync database metadata and tables'
+    include
+      strapi.application_source.content_type_schema_files with { navigateTo application_state },
+      strapi.cli_tooling.development_supervisor with { navigateTo strapi_startup }
+  }
+}

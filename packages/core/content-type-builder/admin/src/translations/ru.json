@@ -135,8 +135,6 @@
   "form.attribute.condition.enum-change-warning": "Следующие поля имеют условия, которые зависят от этого поля: {fieldNames}. Изменение или удаление значений перечисления {values} нарушит эти условия. Вы хотите продолжить?",
   "form.attribute.condition.enum-change-warning-values": ". Изменение или удаление значений перечисления ",
   "form.attribute.condition.enum-change-warning-end": " нарушит эти условия. Вы хотите продолжить?",
-  "form.attribute.condition.field-change-warning": "Следующие поля имеют условия, которые зависят от этого поля: {fieldNames}. Переименование нарушит эти условия. Вы хотите продолжить?",
-  "form.attribute.condition.field-change-warning-end": ". Переименование нарушит эти условия. Вы хотите продолжить?",
   "form.button.add-components-to-dynamiczone": "Добавить компоненты в зону",
   "form.button.add-field": "Еще поле",
   "form.button.add-first-field-to-created-component": "Добавить первое поле в компонент",

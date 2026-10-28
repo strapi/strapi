@@ -80,7 +80,6 @@
   "Settings.apiTokens.title": "API Tokens",
   "Settings.application.description": "Se dit projekts detaljer",
   "Settings.application.get-help": "Få hjælp",
-  "Settings.application.link-pricing": "Se alle priser",
   "Settings.application.link-upgrade": "Opgrader dit projekt",
   "Settings.application.node-version": "NODE VERSION",
   "Settings.application.strapi-version": "STRAPI VERSION",

@@ -22,7 +22,8 @@ export const createConnection = (userConfig: Knex.Config, strapiConfig?: Partial
 
   // initialization code to run upon opening a new connection
   if (strapiConfig?.pool?.afterCreate) {
-    knexConfig.pool = knexConfig.pool || {};
+    // copy so the wrapper below is not written into the caller's pool config (shared with strapi.config)
+    knexConfig.pool = { ...knexConfig.pool };
     // if the user has set their own afterCreate in config, we will replace it and call it
     const userAfterCreate = knexConfig.pool?.afterCreate;
     const strapiAfterCreate = strapiConfig.pool.afterCreate;
@@ -42,5 +43,19 @@ export const createConnection = (userConfig: Knex.Config, strapiConfig?: Partial
     };
   }
 
-  return knex(knexConfig);
+  const instance = knex(knexConfig);
+
+  // knex up to 3.2.6 made `password` non-enumerable on the connection object it was given, which
+  // is the live config object, so it stayed out of JSON.stringify and Object.keys. 3.2.7 clones the
+  // config instead and hides it on the clone only, so do it here. The value is unchanged.
+  const connection = userConfig.connection;
+  if (
+    typeof connection === 'object' &&
+    connection !== null &&
+    Object.prototype.hasOwnProperty.call(connection, 'password')
+  ) {
+    Object.defineProperty(connection, 'password', { enumerable: false });
+  }
+
+  return instance;
 };
