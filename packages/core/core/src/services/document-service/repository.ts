@@ -581,7 +581,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
             ...queryParams.data,
             documentId,
           },
-          { status: 'draft', strategy: 'fill' }
+          { status: 'draft' }
         );
 
         updatedDraft = await entries.create({
@@ -626,7 +626,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [draftsToPublish, oldPublishedVersions, publishedVersions] = await Promise.all([
+    const [draftsToPublish, oldPublishedVersions] = await Promise.all([
       strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
@@ -643,15 +643,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           publishedAt: { $ne: null },
         },
         select: ['id', 'locale'],
-      }),
-      // All published locales of this document (not scoped to the publish lookup).
-      // Used so a first publish of FR can inherit EN published shared fields.
-      strapi.db.query(uid).findMany({
-        where: {
-          documentId,
-          publishedAt: { $ne: null },
-        },
-        select: ['locale'],
       }),
     ]);
 
@@ -686,28 +677,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       addFirstPublishedAtToDraft(draft, entries.update, contentType)
     );
 
-    // First publish of a locale must inherit shared fields from an existing
-    // published sibling. Copying the draft would publish unpublished shared
-    // edits and i18n sync would then overwrite every published locale.
-    const publishedLocales = new Set(
-      (publishedVersions as Array<{ locale?: string }>).map((entry) => entry.locale)
+    // The locale being published is the source of truth for its shared fields,
+    // including the first publish of a locale that has never been live. Copying
+    // an already-published sibling here would drop edits made on this draft.
+    // The i18n middleware then syncs the published values to other locales the
+    // same way it does when republishing a locale that was already live.
+    const publishedEntries = await async.map(updatedDraft, (draft: any) =>
+      entries.publish(draft, queryParams)
     );
-
-    // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(updatedDraft, async (draft: any) => {
-      const isFirstPublishForLocale = !publishedLocales.has(draft.locale);
-      const hasPublishedSibling = [...publishedLocales].some((locale) => locale !== draft.locale);
-
-      let entryToPublish = draft;
-      if (hasDraftAndPublish && isFirstPublishForLocale && hasPublishedSibling) {
-        entryToPublish = await copyNonLocalizedFields(contentType, documentId, draft, {
-          status: 'published',
-          strategy: 'replace',
-        });
-      }
-
-      return entries.publish(entryToPublish, queryParams);
-    });
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(
