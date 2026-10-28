@@ -98,6 +98,22 @@ declare global {
         'plugin::content-releases.release-action': Controllers['release-action'] | undefined;
         'plugin::content-releases.settings': Controllers['settings'] | undefined;
       }
+
+      /**
+       * Registered in `register` (`constants.ts`), only when the `cms-content-releases` EE feature
+       * is enabled: without it, these IDs are absent at runtime.
+       */
+      interface PermissionActions {
+        'plugin::content-releases.read': true;
+        'plugin::content-releases.create': true;
+        'plugin::content-releases.update': true;
+        'plugin::content-releases.delete': true;
+        'plugin::content-releases.publish': true;
+        'plugin::content-releases.delete-action': true;
+        'plugin::content-releases.create-action': true;
+        'plugin::content-releases.settings.read': true;
+        'plugin::content-releases.settings.update': true;
+      }
     }
   }
 }
