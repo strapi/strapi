@@ -132,4 +132,27 @@ describe('increment/decrement with relation filter subquery', () => {
 
     await connection.destroy();
   });
+
+  it('keeps increments when the knex query is built more than once', async () => {
+    const { db, connection } = makeDb();
+    await setupTables(connection);
+    const em = createEntityManager(db);
+
+    const qb = em
+      .createQueryBuilder(TEST_UID)
+      .init({ where: { related: { title: 'Category A' } } })
+      .increment('views', 1);
+
+    qb.getKnexQuery();
+    await qb.execute();
+
+    const rows = await connection('tests').orderBy('id').select('name', 'views');
+    expect(rows).toEqual([
+      { name: 'Hugo LLORIS', views: 11 },
+      { name: 'Samuel UMTITI', views: 10 },
+      { name: 'Lucas HERNANDEZ', views: 11 },
+    ]);
+
+    await connection.destroy();
+  });
 });

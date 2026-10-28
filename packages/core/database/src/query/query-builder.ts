@@ -434,13 +434,7 @@ const createQueryBuilder = (
 
     runSubQuery() {
       const originalType = state.type;
-      const data = state.data;
-      // Inner SELECT must not inherit increment/decrement SET clauses (getKnexQuery
-      // applies them after the type switch). Apply them on the outer write instead.
-      const increments = state.increments;
-      const decrements = state.decrements;
-      state.increments = [];
-      state.decrements = [];
+      const { data, increments, decrements } = state;
 
       // Build the inner SELECT from a clone that stays `select`, so the outer write
       // state is never mutated. clone() shallow-merges state (shared where/joins,
@@ -448,6 +442,10 @@ const createQueryBuilder = (
       // against it. The clone inherits processed: true and must only read shared arrays.
       const sub = this.clone();
       sub.alias = this.alias;
+      // getKnexQuery applies increments/decrements after the type switch; keep them
+      // off the inner SELECT and apply them on the outer write instead.
+      sub.state.increments = [];
+      sub.state.decrements = [];
       const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
