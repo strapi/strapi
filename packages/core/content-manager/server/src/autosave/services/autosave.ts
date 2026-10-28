@@ -123,7 +123,8 @@ const createAutosaveService = ({ strapi }: { strapi: Core.Strapi }) => {
         where: {
           contentType,
           documentId,
-          ...(typeof locale === 'string' ? { locale } : {}),
+          // `*` is how the Document Service deletes every locale of a document at once.
+          ...(typeof locale === 'string' && locale !== '*' ? { locale } : {}),
         },
       });
     },

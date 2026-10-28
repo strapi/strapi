@@ -162,6 +162,16 @@ describe('autosave service', () => {
       where: { contentType: 'api::article.article', documentId: 'doc-1' },
     });
 
+    deleteMany.mockClear();
+    await service.deleteForDocument({
+      contentType: 'api::article.article',
+      documentId: 'doc-1',
+      locale: '*',
+    });
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { contentType: 'api::article.article', documentId: 'doc-1' },
+    });
+
     await service.deleteForUser(1);
     expect(deleteMany).toHaveBeenCalledWith({ where: { user_id: 1 } });
   });
