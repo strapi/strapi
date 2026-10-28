@@ -9,6 +9,7 @@ import {
   hasUserConfiguredAuthOptionsExpiresIn,
 } from './services/token';
 import adminActions from './config/admin-actions';
+import type { CreateActionPayload } from './domain/action';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';
 import {
@@ -27,7 +28,10 @@ const defaultAdminAuthSettings = {
 };
 
 const registerPermissionActions = async () => {
-  await getService('permission').actionProvider.registerMany(adminActions.actions);
+  // `as const` makes the list readonly, and the action provider takes a mutable array.
+  await getService('permission').actionProvider.registerMany(
+    adminActions.actions as unknown as CreateActionPayload[]
+  );
 };
 
 const registerAdminConditions = async () => {

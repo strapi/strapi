@@ -288,6 +288,44 @@ declare global {
         'admin::rateLimit': RateLimitOptions | undefined;
         'admin::data-transfer': undefined;
       }
+
+      /** The CE actions, registered at bootstrap (`config/admin-actions.ts`). */
+      interface PermissionActions {
+        'admin::marketplace.read': true;
+        'admin::webhooks.create': true;
+        'admin::webhooks.read': true;
+        'admin::webhooks.update': true;
+        'admin::webhooks.delete': true;
+        'admin::users.create': true;
+        'admin::users.read': true;
+        'admin::users.update': true;
+        'admin::users.delete': true;
+        'admin::roles.create': true;
+        'admin::roles.read': true;
+        'admin::roles.update': true;
+        'admin::roles.delete': true;
+        'admin::api-tokens.access': true;
+        'admin::admin-tokens.access': true;
+        'admin::admin-tokens.create': true;
+        'admin::admin-tokens.read': true;
+        'admin::admin-tokens.update': true;
+        'admin::admin-tokens.regenerate': true;
+        'admin::admin-tokens.delete': true;
+        'admin::api-tokens.create': true;
+        'admin::api-tokens.read': true;
+        'admin::api-tokens.update': true;
+        'admin::api-tokens.regenerate': true;
+        'admin::api-tokens.delete': true;
+        'admin::project-settings.update': true;
+        'admin::project-settings.read': true;
+        'admin::debug-dump.read': true;
+        'admin::transfer.tokens.access': true;
+        'admin::transfer.tokens.create': true;
+        'admin::transfer.tokens.read': true;
+        'admin::transfer.tokens.update': true;
+        'admin::transfer.tokens.regenerate': true;
+        'admin::transfer.tokens.delete': true;
+      }
     }
   }
 }
