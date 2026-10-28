@@ -100,3 +100,35 @@ describe('createContentType - draft and publish reserved attribute names', () =>
     expect(strapi.log.warn).not.toHaveBeenCalled();
   });
 });
+
+describe('createContentType - experimental schema keys', () => {
+  beforeEach(() => {
+    global.strapi = {
+      log: {
+        warn: jest.fn(),
+      },
+      config: {
+        get: jest.fn().mockReturnValue(false),
+      },
+    } as any;
+  });
+
+  it('keeps indexes and foreignKeys on __schema__ so the content-type builder can write them back', () => {
+    const indexes = [{ name: 'articles_slug_idx', columns: ['slug'] }];
+    const foreignKeys = [{ name: 'articles_author_fk', columns: ['author_id'] }];
+
+    const result = createContentType('api::article.article', {
+      schema: {
+        ...baseSchema,
+        collectionName: 'articles',
+        indexes,
+        foreignKeys,
+      } as any,
+      actions: {},
+      lifecycles: {},
+    }) as { __schema__: { indexes?: unknown; foreignKeys?: unknown } };
+
+    expect(result.__schema__.indexes).toEqual(indexes);
+    expect(result.__schema__.foreignKeys).toEqual(foreignKeys);
+  });
+});

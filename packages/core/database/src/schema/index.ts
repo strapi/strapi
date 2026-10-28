@@ -5,15 +5,18 @@ import createSchemaDiff from './diff';
 import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 import { backfillUniqueIndexes } from './backfill-unique-indexes';
+import { createRenameHelpers } from './rename-helpers';
 
 import type { Schema, SchemaDiff } from './types';
+import type { RenameHelpers } from './rename-helpers';
 import type { Database } from '..';
 
 export type * from './types';
+export type { AttributeRenameHandler, AttributeRenames, RenameHelpers } from './rename-helpers';
 
 const debug = createDebug('strapi::database');
 
-export interface SchemaProvider {
+export interface SchemaProvider extends RenameHelpers {
   builder: ReturnType<typeof createSchemaBuilder>;
   schemaDiff: ReturnType<typeof createSchemaDiff>;
   schemaStorage: ReturnType<typeof createSchemaStorage>;
@@ -44,6 +47,10 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
     builder: createSchemaBuilder(db),
     schemaDiff: createSchemaDiff(db),
     schemaStorage: createSchemaStorage(db),
+
+    // Guarded, logged runtime helpers for generated rename migrations
+    // (`db.schema.renameColumn(knex, …)` etc.). See rename-helpers.ts.
+    ...createRenameHelpers({ db }),
 
     /**
      * Drops the database schema
@@ -108,32 +115,34 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
     // TODO: support option to disable auto migration & run a CLI command instead to avoid doing it at startup
     // TODO: Allow keeping extra indexes / extra tables / extra columns (globally or on a per table basis)
     async sync(): Promise<SchemaDiff['status']> {
-      if (await db.migrations.shouldRun()) {
-        debug('Found migrations to run');
-        await db.migrations.up();
+      return db.runInPhase('schema sync', async () => {
+        if (await db.migrations.shouldRun()) {
+          debug('Found migrations to run');
+          await db.migrations.up();
 
-        return this.syncSchema();
-      }
+          return this.syncSchema();
+        }
 
-      const oldSchema = await this.schemaStorage.read();
+        const oldSchema = await this.schemaStorage.read();
 
-      if (!oldSchema) {
-        debug('Schema not persisted yet');
-        return this.syncSchema();
-      }
+        if (!oldSchema) {
+          debug('Schema not persisted yet');
+          return this.syncSchema();
+        }
 
-      const { hash: oldHash } = oldSchema;
-      const hash = await this.schemaStorage.hashSchema(this.schema);
+        const { hash: oldHash } = oldSchema;
+        const hash = await this.schemaStorage.hashSchema(this.schema);
 
-      if (oldHash !== hash) {
-        debug('Schema changed');
+        if (oldHash !== hash) {
+          debug('Schema changed');
 
-        return this.syncSchema();
-      }
+          return this.syncSchema();
+        }
 
-      debug('Schema unchanged');
+        debug('Schema unchanged');
 
-      return 'UNCHANGED';
+        return 'UNCHANGED';
+      });
     },
   };
 };

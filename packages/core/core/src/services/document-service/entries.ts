@@ -1,13 +1,13 @@
 import type { UID, Modules } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
-import { assoc, omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import yup from 'yup';
 
 import * as components from './components';
 
 import { transformParamsDocumentId } from './transform/id-transform';
 import { transformParamsToQuery } from './transform/query';
-import { pickSelectionParams } from './params';
+import { isParamEmpty, pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
 import { clearTransformDataRequestCache, transformData } from './transform/data';
 import {
@@ -64,18 +64,19 @@ const createEntriesService = (
   const contentType = strapi.contentType(uid);
 
   async function createEntry(params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
+    const { data: inputData, ...restParams } = await transformParamsDocumentId(uid, params);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
     // Validation
-    if (!data) {
+    if (!inputData) {
       throw new Error('Create requires data attribute');
     }
 
+    const data = isParamEmpty(inputData.documentId) ? omit(inputData, 'documentId') : inputData;
+
     // Check for uniqueness based on documentId and locale (if localized)
     if (data.documentId) {
-      const i18nService = strapi.plugin('i18n')?.service('content-types');
-      const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
+      const isLocalized = strapi.localization.isLocalizedContentType(contentType);
       const hasDraftAndPublish = contentType.options?.draftAndPublish === true;
 
       const whereClause: Record<string, unknown> = { documentId: data.documentId };
@@ -175,8 +176,10 @@ const createEntriesService = (
   }
 
   async function updateEntry(entryToUpdate: any, params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
+    const { data: inputData, ...restParams } = await transformParamsDocumentId(uid, params);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
+
+    const data = inputData ? omit(inputData, 'documentId') : inputData;
 
     const validData = await entityValidator.validateEntityUpdate(
       contentType,
@@ -236,10 +239,11 @@ const createEntriesService = (
 
   async function publishEntry(entry: any, params = {} as any) {
     clearTransformDataRequestCache();
+    const publishedAt = new Date();
 
     return async.pipe(
-      omit('id'),
-      assoc('publishedAt', new Date()),
+      (value) => omit(value, 'id'),
+      (value) => ({ ...value, publishedAt }),
       (draft) => {
         const opts = {
           uid,
@@ -260,8 +264,8 @@ const createEntriesService = (
 
     const documentId = entry.documentId;
     const result = await async.pipe(
-      omit('id'),
-      assoc('publishedAt', null),
+      (value) => omit(value, 'id'),
+      (value) => ({ ...value, publishedAt: null }),
       (entry) => {
         const opts = {
           uid,
