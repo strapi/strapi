@@ -231,6 +231,61 @@ describe('Blocks validator', () => {
         validator([{ type: 'link', url: 'kaboom', children: [{ type: 'text', text: 'fail' }] }])
       ).rejects.toThrow(errors.YupValidationError);
     });
+
+    it.each([
+      ['java', 'script:alert(1)'].join(''),
+      'VbScRiPt:msgbox(1)',
+      'DATA:text/html,alert(1)',
+      ' \tJaVaScRiPt:alert(1)',
+      '%6aavascript:alert(1)',
+    ])('rejects the unsafe URL scheme %s in link nodes', async (url) => {
+      const validator = strapiUtils.validateYupSchema(
+        Validators.blocks(
+          {
+            attr: { type: 'blocks' },
+          },
+          { isDraft: false }
+        )
+      );
+
+      await expect(
+        validator([
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'link',
+                url,
+                children: [{ type: 'text', text: 'Click me' }],
+              },
+            ],
+          },
+        ])
+      ).rejects.toThrow(errors.YupValidationError);
+    });
+
+    it.each(['ftp://example.com', 'tel:+15555550123', '//example.com'])(
+      'accepts %s',
+      async (url) => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.blocks(
+            {
+              attr: { type: 'blocks' },
+            },
+            { isDraft: false }
+          )
+        );
+
+        const value = [
+          {
+            type: 'paragraph',
+            children: [{ type: 'link', url, children: [{ type: 'text', text: 'Click me' }] }],
+          },
+        ];
+
+        await expect(validator(value)).resolves.toEqual(value);
+      }
+    );
   });
   describe('Heading', () => {
     it('Should accept a valid paragraph schema', async () => {

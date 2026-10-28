@@ -1,6 +1,7 @@
-import { curry, isEmpty, isNil, isArray, isPlainObject } from 'lodash/fp';
+import { isEmpty, isPlainObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
+import { curry } from '../curry';
 import traverseEntity from '../traverse-entity';
 import { isScalarAttribute, constants } from '../content-types';
 
@@ -44,10 +45,12 @@ const defaultSanitizeOutput = async (ctx: Context, entity: Data) => {
     throw new Error('Missing schema in defaultSanitizeOutput');
   }
 
+  // Named parameters rather than a rest-spread: this runs once per key, per node, per
+  // entity, and `(...args)` allocated a fresh array on every call.
   return traverseEntity(
-    (...args) => {
-      removePassword(...args);
-      removePrivate(...args);
+    (visitorOptions, visitorUtils) => {
+      removePassword(visitorOptions, visitorUtils);
+      removePrivate(visitorOptions, visitorUtils);
     },
     ctx,
     entity
@@ -86,7 +89,7 @@ const defaultSanitizeFilters = curry((ctx: Context, filters: unknown) => {
     // enumerable keys (Date, RegExp, boxed primitives, etc.) are "empty" and would wrongly drop valid operands.
     traverseQueryFilters(({ key, value }, { remove }) => {
       const isEmptyPlainObject = isPlainObject(value) && isEmpty(value);
-      const isEmptyArrayOperand = isArray(value) && isEmpty(value);
+      const isEmptyArrayOperand = Array.isArray(value) && value.length === 0;
       if (isEmptyPlainObject || isEmptyArrayOperand) {
         remove(key);
       }
@@ -149,7 +152,7 @@ const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
         return;
       }
 
-      if (isNil(attribute) || !isScalarAttribute(attribute)) {
+      if (attribute == null || !isScalarAttribute(attribute)) {
         remove(key);
       }
     }, ctx),
@@ -158,7 +161,7 @@ const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
     // Remove password fields
     traverseQueryFields(removePassword, ctx),
     // Remove nil values from fields array
-    (value) => (isArray(value) ? value.filter((field) => !isNil(field)) : value)
+    (value) => (Array.isArray(value) ? value.filter((field) => field != null) : value)
   )(fields);
 });
 

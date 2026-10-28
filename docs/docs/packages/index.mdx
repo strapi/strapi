@@ -1,0 +1,15 @@
+---
+title: Packages
+description: Catalog of the workspace packages under packages/, with one page per package that mirrors the repository tree.
+sidebar_label: Overview
+sidebar_position: 1
+hide_table_of_contents: true
+---
+
+import PackageTable from '@site/src/components/PackageTable';
+
+Each workspace package under `packages/` has a page at the same path in this site: `packages/core/database` is documented in [`/packages/core/database`](/packages/core/database). The table is generated from each `package.json`.
+
+To see how the packages depend on each other, open the [package map](/architecture/package-map).
+
+<PackageTable />

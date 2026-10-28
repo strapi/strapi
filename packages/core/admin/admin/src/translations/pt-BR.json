@@ -154,7 +154,7 @@
   "Settings.profile.form.section.experience.here": "aqui",
   "Settings.profile.form.section.experience.interfaceLanguage": "Linguagem da interface",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "Somente sua interface será exibida com a linguagem selecionada.",
-  "Settings.profile.form.section.experience.interfaceLanguageHelp": "A nova linguagem seleciona só será exibida a você. Por favor, leia essa {documentation} para disponibilizar outras linguagens para sua equipe.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "As alterações de preferência se aplicam apenas a você. Mais informações disponíveis {here}.",
   "Settings.profile.form.section.experience.mode.label": "Modo de interface",
   "Settings.profile.form.section.experience.mode.hint": "Selecione o modo de interface que você deseja usar",
   "Settings.profile.form.section.experience.mode.option-label": "modo {name}",
