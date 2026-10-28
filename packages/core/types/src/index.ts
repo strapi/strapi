@@ -172,7 +172,10 @@ declare global {
        * Additive only, with no `Package*` and `App*` pair. Any code can replace a hook at runtime
        * (`set` overwrites it, `extend` wraps it), but the context is built by the single caller, so an
        * application cannot change what a package's hook passes. Applications and plugins register the
-       * hooks they create and call. Redeclaring a UID with another contract is a type error.
+       * hooks they create and call. Redeclaring a UID with another contract is a type error only
+       * where the later declaration is type-checked: with `skipLibCheck`, the default in Strapi
+       * applications, the first declaration in program order wins silently, often the
+       * application's.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface Hooks {}
@@ -192,7 +195,9 @@ declare global {
        * code can write it, and its owner keeps reading it with its own contract, so an application
        * cannot replace the contract of a package key. The package that writes and reads a key
        * registers it; applications register their own keys. Redeclaring a key with another value is
-       * a type error.
+       * a type error only where the later declaration is type-checked: with `skipLibCheck`, the
+       * default in Strapi applications, the first declaration in program order wins silently, often
+       * the application's.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface Stores {}
@@ -206,7 +211,9 @@ declare global {
        * code emits any name. The package that emits a name registers it, with the payload of each of
        * its producers; applications register the events they emit. A listener can then rely on the
        * registered payload, so with strict types an emit of a registered name must match it.
-       * Redeclaring a name with another payload is a type error.
+       * Redeclaring a name with another payload is a type error only where the later declaration is
+       * type-checked: with `skipLibCheck`, the default in Strapi applications, the first declaration
+       * in program order wins silently, often the application's.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface Events {}
