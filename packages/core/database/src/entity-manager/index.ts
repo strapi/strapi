@@ -775,7 +775,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .connect(relsToAdd)
               .get()
               // set the order based on the order of the ids
-              .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {} as Record<ID, number>);
+              .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx + 1 }), {} as Record<ID, number>);
 
             insert.forEach((row: Record<string, unknown>) => {
               row[orderColumnName] = orderMap[row[inverseJoinColumn.name] as number];

@@ -209,7 +209,12 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     if (r.position?.before) {
       const { idx: beforeIdx, relation } = findRelation(r.position.before);
       if (relation.init) {
-        r.order = relation.order - 0.5;
+        if (beforeIdx === 0) {
+          r.order =
+            relation.order > 0.5 ? relation.order - 0.5 : Math.max(0.001, relation.order / 2);
+        } else {
+          r.order = relation.order - 0.5;
+        }
       } else {
         r.order = relation.order;
       }
@@ -225,7 +230,11 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     } else if (r.position?.start) {
       if (computedRelations.length > 0) {
         const firstRelation = computedRelations[0];
-        r.order = firstRelation.init ? firstRelation.order - 0.5 : firstRelation.order;
+        r.order = firstRelation.init
+          ? firstRelation.order > 0.5
+            ? firstRelation.order - 0.5
+            : Math.max(0.001, firstRelation.order / 2)
+          : firstRelation.order;
       } else {
         r.order = 0.5;
       }
@@ -280,7 +289,9 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
         let offset = 1;
         relations.forEach((relation) => {
           if (!relation.init) {
-            map[relation.id] = parseFloat(orderStr) + (offset / (relations.length + 1)) * 0.49;
+            const calculatedOrder =
+              parseFloat(orderStr) + (offset / (relations.length + 1)) * 0.49;
+            map[relation.id] = Math.max(0.001, calculatedOrder);
             offset += 1;
           }
         });

@@ -309,4 +309,22 @@ describe('Given there are no relations in the database', () => {
       ]);
     });
   });
+
+  describe('When I connect a relation at the start and the first relation order is 0', () => {
+    test('Then it computes a positive non-negative order', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 0 },
+          { id: 2, order: 1 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 3, position: { start: true } }]);
+
+      const orderMap = orderer.getOrderMap();
+      expect(orderMap[3]).toBeGreaterThan(0);
+    });
+  });
 });
