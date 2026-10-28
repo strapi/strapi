@@ -174,7 +174,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   // Publishing one of these documents waits for its pause first, through the same middleware
   const publishPauses = new Map<string, () => Promise<void>>();
   // The next release-action query of this kind fails in the database
-  const failNextActionQuery: { kind: 'findMany' | 'update' | 'updateMany' | 'count' | null } = {
+  const failNextActionQuery: { kind: 'findMany' | 'updateMany' | 'count' | null } = {
     kind: null,
   };
   let unsubscribeFailingActionQueries: () => void;
@@ -396,7 +396,6 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     unsubscribeFailingActionQueries = strapi.db.lifecycles.subscribe({
       models: ['plugin::content-releases.release-action'],
       beforeFindMany: () => failIfArmed('findMany'),
-      beforeUpdate: () => failIfArmed('update'),
       beforeUpdateMany: () => failIfArmed('updateMany'),
       beforeCount: () => failIfArmed('count'),
     });
@@ -900,11 +899,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         });
       });
 
-      test('narrows further with a filter on the actions', async () => {
+      test('combines the outcome filter with a filter on the actions', async () => {
+        const validId = await createProduct({ valid: true });
         const invalidId = await createProduct({ valid: false });
         const failingId = await createProduct({ valid: true });
         const release = await createReleaseWithActions('allow_partial', [
-          { documentId: await createProduct({ valid: true }) },
+          { documentId: validId },
           { documentId: invalidId },
           { documentId: failingId },
         ]);
@@ -918,7 +918,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         const res = await rq({
           method: 'GET',
           url: `/content-releases/${release.id}/actions`,
-          qs: { filter: 'skipped', filters: { outcome: 'skipped_invalid' } },
+          // Alone, `filter` matches the invalid and failing entries, `filters` the valid and invalid
+          // ones: only the invalid entry matches both
+          qs: { filter: 'skipped', filters: { entryDocumentId: { $in: [validId, invalidId] } } },
         });
 
         expect(res.statusCode).toBe(200);
@@ -1196,7 +1198,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.data.scheduledAt).toBeNull();
+      expect(res.body.data).toMatchObject({ scheduledAt: null, timezone: null });
       expect(
         strapi.plugin('content-releases').service('scheduling').getAll().has(String(release.id))
       ).toBe(false);
@@ -2077,7 +2079,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     describe('a database error outside the entries rolls the whole run back', () => {
       const publishWithFailure = async (
         releaseId,
-        kind: 'findMany' | 'update' | 'updateMany'
+        kind: 'findMany' | 'updateMany'
       ): Promise<{ statusCode: number; publishEvents: unknown[] }> => {
         const onPublishEvent = jest.fn();
         const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
@@ -2173,7 +2175,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         ]);
         expect((await getRelease(release.id)).status).toBe('blocked');
 
-        const { statusCode, publishEvents } = await publishWithFailure(release.id, 'update');
+        const { statusCode, publishEvents } = await publishWithFailure(release.id, 'updateMany');
 
         expect(statusCode).toBe(500);
         expect(await getRelease(release.id)).toMatchObject({ status: 'blocked', releasedAt: null });
@@ -2209,6 +2211,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       test('is left out of the entry pickers and the homepage widget', async () => {
         const { release, invalidId } = await createFailedRelease();
+        const unattachedId = await createProduct({ valid: true });
 
         const [attached, notAttached, mapped, upcoming] = await Promise.all([
           rq({
@@ -2219,7 +2222,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
           rq({
             method: 'GET',
             url: '/content-releases/getByDocumentAttached',
-            qs: { contentType: productUID, entryDocumentId: invalidId, hasEntryAttached: false },
+            qs: {
+              contentType: productUID,
+              entryDocumentId: unattachedId,
+              hasEntryAttached: false,
+            },
           }),
           rq({
             method: 'GET',
@@ -2864,7 +2871,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body.error.message).toBe("An entry couldn't be checked (Error)");
-      expect((await getRelease(release.id)).releasedAt).toBeNull();
+      expect(await getRelease(release.id)).toMatchObject({ releasedAt: null, status: 'blocked' });
+      expect((await getActionsByEntry(release.id))[uncheckableId]).toMatchObject({
+        isEntryValid: false,
+        reason: { error: { name: 'Error' } },
+        outcome: null,
+      });
     });
 
     test('a scheduled allow_partial run with no publishable entry records each entry with its own skip reason', async () => {
@@ -3467,19 +3479,27 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('filters by status, release condition and schedule', async () => {
+      const DAY = 24 * 60 * 60 * 1000;
+      // Three pending releases at most: the default license caps them there
       const blocked = await createReleaseWithActions('all_or_nothing', [
         { documentId: await createProduct({ valid: false }) },
       ]);
-      const empty = (await createRelease({ releaseCondition: 'allow_partial' })).body.data;
-      const scheduled = (
-        await createRelease({
-          releaseCondition: 'allow_partial',
-          scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          timezone: 'Europe/Paris',
-        })
-      ).body.data;
-      // Releases from earlier tests stay listed: only read these three
-      const ids = [blocked.id, empty.id, scheduled.id];
+      const scheduledRes = await createRelease({
+        releaseCondition: 'allow_partial',
+        scheduledAt: new Date(Date.now() + DAY),
+        timezone: 'Europe/Paris',
+      });
+      const laterRes = await createRelease({
+        releaseCondition: 'all_or_nothing',
+        scheduledAt: new Date(Date.now() + 3 * DAY),
+        timezone: 'Europe/Paris',
+      });
+      expect(scheduledRes.statusCode).toBe(201);
+      expect(laterRes.statusCode).toBe(201);
+      const scheduled = scheduledRes.body.data;
+      const later = laterRes.body.data;
+      // Only read these three releases
+      const ids = [blocked.id, scheduled.id, later.id];
       const findIds = async (filters: Record<string, unknown>) => {
         const res = await rq({
           method: 'GET',
@@ -3492,12 +3512,28 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       };
 
       expect(await findIds({ status: { $in: ['blocked'] } })).toEqual([blocked.id]);
-      expect(await findIds({ releaseCondition: 'allow_partial' })).toEqual(
-        [empty.id, scheduled.id].sort()
-      );
-      expect(await findIds({ scheduledAt: { $null: true } })).toEqual(
-        [blocked.id, empty.id].sort()
-      );
+      expect(await findIds({ releaseCondition: 'allow_partial' })).toEqual([scheduled.id]);
+      expect(await findIds({ scheduledAt: { $null: true } })).toEqual([blocked.id]);
+
+      // As the releases page sends them: combined, with "is not" and a date range
+      expect(await findIds({ $and: [{ status: { $ne: 'empty' } }] })).toEqual([blocked.id]);
+      expect(
+        await findIds({
+          $and: [{ status: { $ne: 'blocked' } }, { releaseCondition: { $eq: 'all_or_nothing' } }],
+        })
+      ).toEqual([later.id]);
+      const now = Date.now();
+      const start = new Date(now).toISOString();
+      const end = new Date(now + 2 * DAY).toISOString();
+      expect(await findIds({ $and: [{ scheduledAt: { $gte: start, $lt: end } }] })).toEqual([
+        scheduled.id,
+      ]);
+      // "is not" on a date: outside its bounds. Releases without a date don't match, as with $ne
+      expect(
+        await findIds({
+          $and: [{ $or: [{ scheduledAt: { $lt: start } }, { scheduledAt: { $gte: end } }] }],
+        })
+      ).toEqual([later.id]);
     });
 
     test('Find many releases with an entry attached', async () => {
@@ -4250,16 +4286,19 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test.each([
-      ['overdue', { scheduledAt: minutesFromNow(-10) }],
-      ['scheduled in the future', { scheduledAt: minutesFromNow(60) }],
-      ['not scheduled', {}],
+      ['overdue', -10],
+      ['scheduled in the future', 60],
+      ['not scheduled', null],
     ])(
       'a release that failed before the upgrade (%s) is frozen by the sweep, without a webhook',
-      async (_, state) => {
+      async (_, offset) => {
         const release = await createReleaseWithActions('all_or_nothing', [
           { documentId: await createProduct({ valid: false }) },
         ]);
-        await setReleaseState(release.id, { status: 'failed', ...state });
+        await setReleaseState(release.id, {
+          status: 'failed',
+          ...(offset === null ? {} : { scheduledAt: minutesFromNow(offset) }),
+        });
 
         const webhooks = await sweepListeningToWebhooks(release.id);
 
@@ -4279,14 +4318,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     );
 
     test.each([
-      ['overdue by less than the grace period', { scheduledAt: minutesFromNow(-2) }],
-      ['scheduled in the future', { scheduledAt: minutesFromNow(60) }],
-      ['not scheduled', {}],
-    ])('a planned release %s is left as it is', async (_, state) => {
+      ['overdue by less than the grace period', -2],
+      ['scheduled in the future', 60],
+      ['not scheduled', null],
+    ])('a planned release %s is left as it is', async (_, offset) => {
       const release = await createReleaseWithActions('all_or_nothing', [
         { documentId: await createProduct({ valid: true }) },
       ]);
-      await setReleaseState(release.id, state);
+      await setReleaseState(
+        release.id,
+        offset === null ? {} : { scheduledAt: minutesFromNow(offset) }
+      );
 
       await sweep();
 

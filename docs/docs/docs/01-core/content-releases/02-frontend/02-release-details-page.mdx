@@ -19,12 +19,16 @@ Entries in a release can be grouped by the following options:
 
 #### Edit a release:
 
-If the user has the `plugin::content-releases.update` permissions, a "three dot" button will appear in the header giving access to a menu with an "Edit" option.
-The Edit button opens a modal, enabling users to modify the release name. To save the changes, the new name must be unique (only for pending releases), non-empty, and distinctly modified.
+Until a release has run, a "three dot" button in the header gives access to a menu with an "Edit" option, enabled if the user has the `plugin::content-releases.update` permissions.
+The Edit option opens a side panel, enabling users to modify the release name, schedule and release mode. The name must be non-empty and unique among pending releases.
 
 #### Delete a release:
 
-If the user has the `plugin::content-releases.delete` permissions, a "three dot" button will appear in the header giving access to a menu with a "Delete" option. Selecting this option triggers a confirmation modal.
+The same menu has a "Delete" option, enabled if the user has the `plugin::content-releases.delete` permissions. Selecting it opens a confirmation modal.
+
+#### Create a release from skipped entries:
+
+Once a release has run as partial or failed (except a release that failed before the upgrade), a "Create release from skipped entries" button appears in the header. It requires the `plugin::content-releases.create` and `plugin::content-releases.create-action` permissions and is hidden when every skipped entry has since been deleted. It opens a side panel listing the entries carried over to the new release, with the release mode defaulting to "Release all ready items".
 
 #### View Entry Status
 

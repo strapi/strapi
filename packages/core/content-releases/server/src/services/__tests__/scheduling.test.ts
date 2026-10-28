@@ -190,14 +190,13 @@ describe('Scheduling service', () => {
 
   describe('syncFromDatabase', () => {
     it('should sync the scheduled jobs from the database', async () => {
-      const findMany = jest
-        .fn()
-        .mockReturnValue([{ id: 1, scheduledAt: new Date(), releasedAt: null }]);
       const strapiMock = {
         ...baseStrapiMock,
         db: {
           query: jest.fn(() => ({
-            findMany,
+            findMany: jest
+              .fn()
+              .mockReturnValue([{ id: 1, scheduledAt: new Date(), releasedAt: null }]),
             findOne: jest.fn().mockReturnValue({ id: 1 }),
           })),
         },

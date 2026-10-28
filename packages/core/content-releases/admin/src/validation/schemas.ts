@@ -12,7 +12,6 @@ export const RELEASE_SCHEMA = yup
   .object()
   .shape({
     name: yup.string().trim().required(translatedErrors.required.id).nullable(),
-    scheduledAt: yup.string().nullable(),
     isScheduled: yup.boolean().optional(),
     time: yup
       .string()
@@ -27,12 +26,13 @@ export const RELEASE_SCHEMA = yup
         function (time) {
           const { date, timezone } = this.parent;
 
-          if (!date || !timezone || !time) {
+          // Timezone is in format "UTC&Europe/Paris", so we get the region part for the dates functions
+          const region = timezone?.split('&')[1];
+
+          // An invalid timezone is reported by the timezone field
+          if (!date || !region || !time) {
             return true;
           }
-
-          // Timezone is in format "UTC&Europe/Paris", so we get the region part for the dates functions
-          const region = timezone.split('&')[1];
 
           const selectedTime = zonedTimeToUtc(`${date} ${time}`, region);
           const now = new Date();
@@ -42,7 +42,16 @@ export const RELEASE_SCHEMA = yup
       ),
     timezone: yup.string().when('isScheduled', {
       is: true,
-      then: yup.string().required(translatedErrors.required.id).nullable(),
+      then: yup
+        .string()
+        .required(translatedErrors.required.id)
+        .nullable()
+        // A free-typed value that isn't one of the timezone options has no region part
+        .test(
+          'timezone-from-list',
+          'components.Input.error.validation.combobox.invalid',
+          (timezone) => Boolean(timezone?.split('&')[1])
+        ),
       otherwise: yup.string().nullable(),
     }),
     date: yup.string().when('isScheduled', {

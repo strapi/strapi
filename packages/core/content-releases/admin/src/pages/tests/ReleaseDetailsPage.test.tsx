@@ -1,9 +1,11 @@
 import { useRBAC } from '@strapi/admin/strapi-admin';
-import { act, within } from '@testing-library/react';
+import { within } from '@testing-library/react';
 import { render, server, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
+import { getSkippedEntriesQuery } from '../../components/CreateReleaseFromSkippedDrawer';
+import { useGetReleaseActionsQuery } from '../../services/release';
 import { ReleaseDetailsPage } from '../ReleaseDetailsPage';
 
 import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
@@ -55,8 +57,7 @@ describe.skip('Releases details page', () => {
     const releaseSubtitle = await screen.findAllByText('No entries');
     expect(releaseSubtitle[0]).toBeInTheDocument();
 
-    const releaseStatus = screen.getByText('empty');
-    expect(releaseStatus).toBeInTheDocument();
+    expect(screen.getByText('Empty')).toBeInTheDocument();
 
     const moreButton = screen.getByRole('button', { name: 'Release edit and delete menu' });
     expect(moreButton).toBeInTheDocument();
@@ -189,9 +190,7 @@ describe.skip('Releases details page', () => {
     );
     expect(releaseTitle).toBeInTheDocument();
 
-    const releaseStatus = screen.getByText('ready');
-    expect(releaseStatus).toBeInTheDocument();
-    expect(releaseStatus).toHaveStyle(`color: #328048`);
+    expect(screen.getByText('Ready')).toBeInTheDocument();
 
     const cat1Row = screen.getByRole('row', { name: /cat1/i });
     expect(within(cat1Row).getByRole('gridcell', { name: 'Ready to publish' })).toBeInTheDocument();
@@ -234,9 +233,7 @@ describe.skip('Releases details page', () => {
     );
     expect(releaseTitle).toBeInTheDocument();
 
-    const releaseStatus = screen.getByText('done');
-    expect(releaseStatus).toBeInTheDocument();
-    expect(releaseStatus).toHaveStyle(`color: #4945ff`);
+    expect(screen.getByText('Done')).toBeInTheDocument();
   });
 });
 
@@ -318,17 +315,28 @@ describe('Create release from skipped entries', () => {
   });
 
   it("doesn't offer it when every skipped entry has been deleted", async () => {
-    const skippedRequest = mockRelease(partialRelease, [
-      skippedAction(1, null),
-      skippedAction(2, null),
-    ]);
+    mockRelease(partialRelease, [skippedAction(1, null), skippedAction(2, null)]);
 
-    renderPage();
+    // Reads the page's skipped entries query from the same cache entry, so it shows the response
+    // in the same render as the page
+    const SkippedEntriesLoaded = () => {
+      const { data } = useGetReleaseActionsQuery(getSkippedEntriesQuery('3'));
+
+      return data ? <p>Skipped entries loaded</p> : null;
+    };
+
+    render(
+      <>
+        <Routes>
+          <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+        </Routes>
+        <SkippedEntriesLoaded />
+      </>,
+      { initialEntries: [{ pathname: `/content-releases/3` }] }
+    );
 
     await screen.findByText(partialRelease.data.name);
-    await waitFor(() => expect(skippedRequest).toHaveBeenCalled());
-    // Let the page render the response
-    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    await screen.findByText('Skipped entries loaded');
     expect(
       screen.queryByRole('button', { name: 'Create release from skipped' })
     ).not.toBeInTheDocument();
@@ -517,7 +525,8 @@ describe('Release details tabs, header and rows', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Publish' }));
 
-    expect(await screen.findByText('Done')).toBeVisible();
+    // The row's outcome, not the release's status badge, which reads "Done" too
+    expect(await screen.findByRole('gridcell', { name: 'Done' })).toBeVisible();
     expect(screen.queryByText('Unknown')).not.toBeInTheDocument();
   });
 

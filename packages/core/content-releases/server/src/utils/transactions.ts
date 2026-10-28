@@ -24,7 +24,7 @@ export const lockPlannedRelease = async <TColumn extends keyof Release>(
   releaseId: Data.ID,
   columns: TColumn[],
   { strapi }: { strapi: Core.Strapi }
-): Promise<Pick<Release, TColumn>> => {
+): Promise<Pick<Release, TColumn | 'releasedAt'>> => {
   const release = await lockRelease(releaseId, [...columns, 'releasedAt'], { strapi });
 
   if (!release) {
