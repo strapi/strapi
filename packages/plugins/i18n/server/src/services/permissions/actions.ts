@@ -284,7 +284,8 @@ const syncSuperAdminPermissionsWithLocales = async () => {
 const registerI18nActions = async () => {
   const { actionProvider } = strapi.service('admin::permission');
 
-  await actionProvider.registerMany(actions);
+  // The `as const` list, so the action provider checks the IDs; `actions` is the same array.
+  await actionProvider.registerMany(registeredActions);
 };
 
 const registerI18nActionsHooks = () => {

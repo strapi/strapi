@@ -131,12 +131,5 @@ const registerPermissionActions = async () => {
       Extract<Core.RegisteredPermissionAction, `plugin::upload.${string}`>
     >
   >;
-  // `as const` makes the list readonly, and the action provider takes a mutable array.
-  type ActionInputs = Parameters<
-    Core.ServiceFor<'admin::permission'>['actionProvider']['registerMany']
-  >[0];
-
-  await strapi
-    .service('admin::permission')
-    .actionProvider.registerMany(actions as unknown as ActionInputs);
+  await strapi.service('admin::permission').actionProvider.registerMany(actions);
 };

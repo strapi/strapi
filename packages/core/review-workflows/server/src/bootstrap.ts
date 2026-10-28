@@ -51,10 +51,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       Extract<Core.RegisteredPermissionAction, `admin::review-workflows.${string}`>
     >
   >;
-  // `as const` makes the list readonly, and the action provider takes a mutable array.
-  await actionProvider.registerMany(
-    actions.reviewWorkflows as unknown as Parameters<typeof actionProvider.registerMany>[0]
-  );
+  await actionProvider.registerMany(actions.reviewWorkflows);
 
   // Webhooks and events
   await registerWebhookEvents();
