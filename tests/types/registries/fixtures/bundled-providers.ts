@@ -12,7 +12,8 @@ app.service('admin::permission').engine satisfies object;
 app.plugin('upload').service('upload').formatFileInfo satisfies (...args: never[]) => unknown;
 app.plugin('email').service('email').sendTemplatedEmail satisfies (...args: never[]) => unknown;
 app.plugin('content-type-builder').service('content-types') satisfies object;
-// EE-feature plugins register their services only with the feature: they may be undefined.
+// EE-feature plugins register their services only with the feature. This program has no type
+// generation marker, so it declares no license scope (see `licensed-*.ts`): they may be undefined.
 app.plugin('review-workflows').service('workflows')?.getAssignedWorkflow satisfies
   ((...args: never[]) => unknown) | undefined;
 app.plugin('content-releases').service('release')?.findPage satisfies
@@ -80,7 +81,8 @@ app.hook('plugin::unregistered.hook').register(() => {});
 
 declare const enabled: Strapi.Registries.Settings extends { strict: true } ? true : false;
 enabled satisfies true;
-// EE-only admin services do not exist in a CE runtime: their contract includes `undefined`.
+// EE-only admin services do not exist in a CE runtime. Without a declared license scope, their
+// contract includes `undefined`.
 // @ts-expect-error The service may be undefined.
 void app.service('admin::persist-tables').persistTablesWithPrefix('prefix');
 // @ts-expect-error The service may be undefined.

@@ -131,6 +131,8 @@ builder.populateDeep('all');
 // @ts-expect-error Registered builders have no arbitrary chain methods.
 builder.missing();
 
+// History services and controllers only exist with the `cms-content-history` feature. This program
+// declares no license scope (see `licensed-*.ts`): they may be undefined.
 const versions = app
   .service('plugin::content-manager.history')
   ?.findVersionsPage({ query: { contentType: 'api::article.article' }, state: { userAbility: {} } })
