@@ -27,7 +27,7 @@ The plugin adds three content types. `plugin::users-permissions.user` (table `up
 - It registers the strategy `users-permissions` for the `content-api` auth scope, with `strapi.get('auth').register`.
 - It adds a `content-api.output` sanitizer that removes the `users` relation from role entities.
 - It calls `server/src/graphql` when the `graphql` plugin exists. That code disables queries and mutations on permissions, replaces the create, update and delete mutations of users and roles, and adds the `me` query and the auth mutations (`login`, `register` and the password and email flows).
-- It registers a hand-written OpenAPI spec (`documentation/content-api.yaml`) with the `documentation` plugin when it exists.
+- It registers a hand-written OpenAPI spec (`documentation/content-api.json`) with the `documentation` plugin when it exists.
 
 ### Authentication strategy
 

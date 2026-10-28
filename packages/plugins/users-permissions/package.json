@@ -39,6 +39,9 @@
     },
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "build": "run -T npm-run-all clean build:code",
     "build:code": "run -T rollup -c",
