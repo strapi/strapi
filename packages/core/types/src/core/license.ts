@@ -73,9 +73,10 @@ export type LicensedExtension<TCE, TEE> =
       : TCE & Partial<Omit<TEE, keyof TCE>>;
 
 /**
- * The names a license feature read accepts (`strapi.ee.features.isEnabled` and `get`): any string,
- * with the inventory names listed for completion. Use it as the constraint of the name's type
- * parameter, and {@link LicenseFeatureLookup} as the parameter type.
+ * The names a license feature read (`strapi.ee.features.isEnabled` and `get`) or an entitlement
+ * registration (`strapi.ee.entitlements.register`) accepts: any string, with the inventory names
+ * listed for completion. Use it as the constraint of the name's type parameter, and
+ * {@link LicenseFeatureLookup} as the parameter type.
  */
 export type LicenseFeatureLookupName = SuggestedString<LicenseFeatureName>;
 

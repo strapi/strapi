@@ -131,6 +131,44 @@ type LicenseFeatureReads = IsStrict extends false
   ? LegacyLicenseFeatureReads
   : StrictLicenseFeatureReads;
 
+/** The limits a license feature enforces, as a feature module registers them. */
+type LicenseEntitlementInput = {
+  feature: string;
+  limits: Array<{
+    key: string;
+    unit?: 'days' | 'count';
+    // Handed the feature as the license lists it (live, or a lapsed license's retained
+    // snapshot); returns the limit the feature enforces.
+    get: (
+      feature?: string | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
+    ) => unknown;
+  }>;
+};
+
+/** License entitlements without strict mode: develop's signatures. */
+type LegacyLicenseEntitlements = {
+  register: (input: LicenseEntitlementInput) => void;
+  list: () => Array<{
+    feature: string;
+    limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+  }>;
+  listRetained: () => Array<{
+    feature: string;
+    limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+  }>;
+};
+
+/** License entitlements with strict types: a literal feature name is a feature of the inventory. */
+type StrictLicenseEntitlements = Omit<LegacyLicenseEntitlements, 'register'> & {
+  register: <TName extends Core.LicenseFeatureLookupName>(
+    input: Omit<LicenseEntitlementInput, 'feature'> & { feature: Core.LicenseFeatureLookup<TName> }
+  ) => void;
+};
+
+type LicenseEntitlements = IsStrict extends false
+  ? LegacyLicenseEntitlements
+  : StrictLicenseEntitlements;
+
 export interface Strapi extends StrapiContainer, Lookups {
   server: Modules.Server.Server;
   log: Logger;
@@ -205,29 +243,7 @@ export interface Strapi extends StrapiContainer, Lookups {
       strapi: Core.Strapi;
     }) => Promise<{ trialEndsAt: string } | null>;
     features: LicenseFeatureReads;
-    entitlements: {
-      register: (input: {
-        feature: string;
-        limits: Array<{
-          key: string;
-          unit?: 'days' | 'count';
-          // Handed the feature as the license lists it (live, or a lapsed license's retained
-          // snapshot); returns the limit the feature enforces.
-          get: (
-            feature?:
-              string | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
-          ) => unknown;
-        }>;
-      }) => void;
-      list: () => Array<{
-        feature: string;
-        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
-      }>;
-      listRetained: () => Array<{
-        feature: string;
-        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
-      }>;
-    };
+    entitlements: LicenseEntitlements;
   };
   features: Modules.Features.FeaturesService;
   components: Schema.Components;

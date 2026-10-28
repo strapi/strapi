@@ -77,3 +77,8 @@ featureChecks satisfies unknown;
 app.ee.features.isEnabled(runtimeName) satisfies boolean;
 // @ts-expect-error A literal feature name is a feature of the inventory.
 app.ee.features.isEnabled('cms-content-release');
+app.ee.entitlements.register({
+  // @ts-expect-error A literal feature name is a feature of the inventory.
+  feature: 'cms-content-release',
+  limits: [],
+});

@@ -648,7 +648,8 @@ type LicenseChecks = [
 declare const licenseChecks: LicenseChecks;
 licenseChecks satisfies unknown;
 
-// License feature reads keep develop's types: any name, and `get` may return a string.
+// License feature reads and entitlements keep develop's types: any name, and `get` may return a
+// string.
 type LicenseFeatureReadChecks = [
   Expect<
     Equal<
@@ -661,6 +662,32 @@ type LicenseFeatureReadChecks = [
     >
   >,
   Expect<Equal<Core.LicenseFeatureLookup<'reveiw-workflows'>, 'reveiw-workflows'>>,
+  Expect<
+    Equal<
+      Core.Strapi['ee']['entitlements'],
+      {
+        register: (input: {
+          feature: string;
+          limits: Array<{
+            key: string;
+            unit?: 'days' | 'count';
+            get: (
+              feature?:
+                string | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
+            ) => unknown;
+          }>;
+        }) => void;
+        list: () => Array<{
+          feature: string;
+          limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+        }>;
+        listRetained: () => Array<{
+          feature: string;
+          limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+        }>;
+      }
+    >
+  >,
 ];
 declare const licenseFeatureReadChecks: LicenseFeatureReadChecks;
 licenseFeatureReadChecks satisfies unknown;
