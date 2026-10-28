@@ -121,7 +121,14 @@ const addLabelActionToField = (
 
   return {
     ...field,
-    labelAction: <NonLocalizedLabelAction />,
+    labelAction: (
+      <NonLocalizedLabelAction
+        title={{
+          id: getTranslation('Field.not-localized'),
+          defaultMessage: 'This value is common to all locales',
+        }}
+      />
+    ),
   };
 };
 
@@ -139,7 +146,7 @@ const LabelAction = ({ title, icon = 'earth' }: LabelActionProps) => {
   const Icon = icon === 'lock' ? Lock : Earth;
 
   return (
-    <Span tag="span" title={title}>
+    <Span tag="span">
       <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
       <Tooltip label={formatMessage(title)}>
         <Icon aria-hidden focusable={false} />
@@ -148,13 +155,19 @@ const LabelAction = ({ title, icon = 'earth' }: LabelActionProps) => {
   );
 };
 
-const NonLocalizedLabelAction = () => {
+const NonLocalizedLabelAction = ({ title }: Pick<LabelActionProps, 'title'>) => {
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { data: locales = [] } = useGetLocalesQuery();
   const isUnlocked = useI18nSharedFieldsLock(
     'NonLocalizedLabelAction',
     (state) => state.isUnlocked
   );
+
+  // History rewrites this title via cloneElement. Honor that copy so the
+  // restore-replaces-all-locales warning renders instead of the edit-view lock tooltip.
+  if (title?.id && title.id !== getTranslation('Field.not-localized')) {
+    return <LabelAction title={title} icon="lock" />;
+  }
 
   const currentLocale = query?.plugins?.i18n?.locale;
   const defaultLocale = Array.isArray(locales)
@@ -167,7 +180,7 @@ const NonLocalizedLabelAction = () => {
     return null;
   }
 
-  const title: MessageDescriptor = isUnlocked
+  const sharedFieldTitle: MessageDescriptor = isUnlocked
     ? {
         id: getTranslation('Field.not-localized-unlocked'),
         defaultMessage: 'This value is common to all locales. Saving will update every locale.',
@@ -177,7 +190,7 @@ const NonLocalizedLabelAction = () => {
         defaultMessage: 'This value is common to all locales. Edit it in the default locale.',
       };
 
-  return <LabelAction title={title} icon="lock" />;
+  return <LabelAction title={sharedFieldTitle} icon="lock" />;
 };
 
 const Span = styled(Flex)`

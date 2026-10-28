@@ -4,7 +4,7 @@ import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
 
 import type { Config } from '../types';
-import validateSettings, { settingsSchema } from './validation/admin/settings';
+import validateSettings, { settingsSchema, type Settings } from './validation/admin/settings';
 
 // The stored settings' known keys. `GET /upload/settings` echoes read-only
 // config (e.g. `concurrentUploadRequests`) alongside them, and the legacy
@@ -23,7 +23,11 @@ export default {
       return ctx.forbidden();
     }
 
-    const validated = await validateSettings(body);
+    // Validation runs in strict mode, which skips schema defaults. Casting the
+    // validated body applies them, so a body without `aiMetadata` stores `true`
+    // (the value `aiMetadata.isEnabled()` assumes) instead of no key at all.
+    // The cast only adds defaults to an already valid body, so it is a `Settings`.
+    const validated = settingsSchema.cast(await validateSettings(body)) as Settings;
     const source = validated as Record<string, unknown>;
     const data = Object.fromEntries(
       SETTINGS_KEYS.filter((key) => key in source).map((key) => [key, source[key]])
@@ -44,6 +48,12 @@ export default {
     // need to bound this override the config.
     const { concurrentUploadRequests = 1 } = strapi.config.get<Config>('plugin::upload');
 
-    ctx.body = { data: { ...data, concurrentUploadRequests } };
+    ctx.body = {
+      data: {
+        ...data,
+        concurrentUploadRequests,
+        aiMetadataAvailable: getService('aiMetadataProvider').hasProvider(),
+      },
+    };
   },
 };

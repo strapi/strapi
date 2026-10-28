@@ -56,6 +56,26 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     await expect(page.getByText('variations (3)', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Add an entry' })).not.toBeDisabled();
 
+    // Add a shared dynamic-zone component so create-locale exercises nested morph populate.
+    await page.getByRole('button', { name: 'Add a component to variationBlocks' }).click();
+    await page
+      .getByText('Pick one component', { exact: true })
+      .locator('xpath=following::button[normalize-space(.)="variations"][1]')
+      .click();
+    const sharedDzName = page.locator('input[name="variationBlocks.0.name"]');
+    // Inherited dynamic-zone items have an id, so the accordion starts collapsed and
+    // the nested inputs are not mounted until it is opened.
+    const openSharedDynamicZone = async () => {
+      if ((await sharedDzName.count()) > 0) {
+        return;
+      }
+
+      await page.getByRole('button', { name: /^variations(?: - |$)/ }).click();
+    };
+    await sharedDzName.fill('Shared DZ variation');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved');
+
     // Regression of #24890 / Mathilde review on #27184: shared fields must NOT show
     // a Globe / "common to all locales" icon on the default locale.
     await expect(page.getByText(/This value is common to all locales/i)).toHaveCount(0);
@@ -75,6 +95,17 @@ test.describe('Lock non-localized fields on secondary locales', () => {
 
     await expect(page.getByText('variations (3)', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Add an entry' })).toBeDisabled();
+    await openSharedDynamicZone();
+    await expect(sharedDzName).toHaveValue('Shared DZ variation');
+    await expect(sharedDzName).toBeDisabled();
+    await expect(
+      page.getByRole('button', { name: 'Add a component to variationBlocks' })
+    ).toBeDisabled();
+    const sharedDzComponent = page.getByRole('listitem').filter({ has: sharedDzName });
+    await expect(sharedDzComponent).toBeVisible();
+    await expect(
+      sharedDzComponent.locator('label').filter({ hasText: 'name' }).locator('svg')
+    ).toHaveCount(0);
 
     for (const [index, name] of variationNames.entries()) {
       await page.getByRole('button', { name, exact: true }).click();
@@ -151,6 +182,9 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     for (const name of variationNames) {
       await expect(page.getByRole('button', { name, exact: true })).toBeVisible();
     }
+    await openSharedDynamicZone();
+    await expect(sharedDzName).toHaveValue('Shared DZ variation');
+    await expect(sharedDzName).not.toBeDisabled();
 
     // Editing the shared field on the default locale syncs to the secondary locale
     await isAvailable.uncheck();

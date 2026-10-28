@@ -1,4 +1,4 @@
-import { first } from 'lodash/fp';
+import { first } from 'lodash';
 import type { Context } from '../../types';
 import type { Constants } from '../../constants';
 

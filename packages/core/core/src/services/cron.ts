@@ -1,4 +1,3 @@
-import { isFunction } from 'lodash/fp';
 import type { Modules } from '@strapi/types';
 import type { Cron } from 'croner';
 
@@ -270,11 +269,11 @@ const createCronService = () => {
         let fn: TaskFn;
         let options: CronSchedule;
         let taskName: string | null;
-        if (isFunction(taskValue)) {
+        if (typeof taskValue === 'function') {
           taskName = null;
           fn = taskValue.bind(tasks);
           options = taskExpression;
-        } else if (isFunction(taskValue.task)) {
+        } else if (typeof taskValue.task === 'function') {
           taskName = taskExpression;
           fn = taskValue.task.bind(taskValue);
           options = taskValue.options;

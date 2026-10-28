@@ -17,6 +17,7 @@ export { useDocumentLayout as unstable_useDocumentLayout } from './hooks/useDocu
 export type {
   EditFieldLayout,
   EditLayout,
+  ListCellMeta,
   ListFieldLayout,
   ListLayout,
 } from './hooks/useDocumentLayout';

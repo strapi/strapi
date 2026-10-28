@@ -21,7 +21,7 @@ describe('Documentation plugin | clean schema attributes', () => {
     global.strapi = {} as any;
   });
 
-  it('includes target properties for every sibling relation to the same content type', () => {
+  it('uses the target schema for every sibling relation to the same content type', () => {
     const schema = cleanSchemaAttributes(
       {
         primaryAuthor: {
@@ -35,24 +35,17 @@ describe('Documentation plugin | clean schema attributes', () => {
           target: 'api::author.author',
         },
       } as any,
-      { didAddStrapiComponentsToSchemas: () => false }
+      {
+        relationTargetSchemaNames: new Map([['api::author.author', 'Author']]),
+        didAddStrapiComponentsToSchemas: () => false,
+      }
     );
 
-    expect(schema.primaryAuthor).toMatchObject({
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-      },
-    });
-    expect(schema.secondaryAuthor).toMatchObject({
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-      },
-    });
+    expect(schema.primaryAuthor).toStrictEqual({ $ref: '#/components/schemas/Author' });
+    expect(schema.secondaryAuthor).toStrictEqual({ $ref: '#/components/schemas/Author' });
   });
 
-  it('resolves a repeated sibling relation target once per schema traversal', () => {
+  it('does not look up generated sibling relation targets', () => {
     const schema = cleanSchemaAttributes(
       {
         primaryAuthor: {
@@ -66,25 +59,46 @@ describe('Documentation plugin | clean schema attributes', () => {
           target: 'api::author.author',
         },
       } as any,
-      { didAddStrapiComponentsToSchemas: () => false }
+      {
+        relationTargetSchemaNames: new Map([['api::author.author', 'Author']]),
+        didAddStrapiComponentsToSchemas: () => false,
+      }
     );
 
-    expect(schema.primaryAuthor).toMatchObject({
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-      },
-    });
-    expect(schema.secondaryAuthor).toMatchObject({
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-      },
-    });
-    expect(global.strapi.contentType).toHaveBeenCalledTimes(1);
+    expect(schema.primaryAuthor).toStrictEqual({ $ref: '#/components/schemas/Author' });
+    expect(schema.secondaryAuthor).toStrictEqual({ $ref: '#/components/schemas/Author' });
+    expect(global.strapi.contentType).not.toHaveBeenCalled();
   });
 
-  it('terminates genuine relation cycles with the id and documentId fallback', () => {
+  it('uses a canonical schema reference for a fully connected relation graph', () => {
+    const targets = ['api::a.a', 'api::b.b', 'api::c.c', 'api::d.d'];
+    const contentType = jest.fn((uid: string) => ({
+      attributes: Object.fromEntries(
+        targets
+          .filter((target) => target !== uid)
+          .map((target) => [target, { type: 'relation', relation: 'oneToOne', target }])
+      ),
+    }));
+    global.strapi = { contentType } as any;
+
+    const schema = cleanSchemaAttributes(
+      {
+        a: { type: 'relation', relation: 'oneToOne', target: 'api::a.a' },
+      } as any,
+      {
+        relationTargetSchemaNames: new Map(
+          targets.map((target) => [target, `Schema${target.at(-1)?.toUpperCase()}`])
+        ),
+        didAddStrapiComponentsToSchemas: () => false,
+      }
+    );
+
+    expect(schema.a).toStrictEqual({ $ref: '#/components/schemas/SchemaA' });
+    expect(JSON.stringify(schema)).toBe('{"a":{"$ref":"#/components/schemas/SchemaA"}}');
+    expect(contentType).not.toHaveBeenCalled();
+  });
+
+  it('uses the finite id and documentId fallback for an ungenerated relation target', () => {
     global.strapi = {
       contentType: jest.fn((uid) => {
         if (uid === 'api::a.a') {
@@ -112,19 +126,17 @@ describe('Documentation plugin | clean schema attributes', () => {
       { didAddStrapiComponentsToSchemas: () => false }
     );
 
-    const recursiveA = (schema as any).a.properties.b.properties.a;
-
-    expect(recursiveA).toMatchObject({
+    expect(schema.a).toStrictEqual({
       type: 'object',
       properties: {
         id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
         documentId: { type: 'string' },
       },
     });
-    expect(Object.keys(recursiveA.properties)).toEqual(['id', 'documentId']);
+    expect(global.strapi.contentType).not.toHaveBeenCalled();
   });
 
-  it('does not retain a target visited inside a component for a later outer relation', () => {
+  it('uses target schemas for relations inside components and outer relations', () => {
     global.strapi = {
       components: {
         'shared.author': {
@@ -149,51 +161,37 @@ describe('Documentation plugin | clean schema attributes', () => {
         authorComponent: { type: 'component', component: 'shared.author', repeatable: false },
         author: { type: 'relation', relation: 'oneToOne', target: 'api::author.author' },
       } as any,
-      { didAddStrapiComponentsToSchemas: () => false }
+      {
+        relationTargetSchemaNames: new Map([['api::author.author', 'Author']]),
+        didAddStrapiComponentsToSchemas: () => false,
+      }
     );
 
-    expect((schema as any).authorComponent.properties.author).toMatchObject({
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-      },
+    expect((schema as any).authorComponent.properties.author).toStrictEqual({
+      $ref: '#/components/schemas/Author',
     });
-    expect(schema.author).toMatchObject({
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-      },
-    });
+    expect(schema.author).toStrictEqual({ $ref: '#/components/schemas/Author' });
   });
 
-  it('cleans up traversal state when resolving a target throws', () => {
-    const typeMap = new Map<string, boolean>();
-    const contentType = jest
-      .fn()
-      .mockImplementationOnce(() => {
-        throw new Error('target lookup failed');
-      })
-      .mockImplementation(() => ({
-        attributes: {
-          name: { type: 'string' },
-        },
-      }));
+  it('does not look up an ungenerated relation target', () => {
+    const contentType = jest.fn(() => {
+      throw new Error('target lookup failed');
+    });
 
     global.strapi = { contentType } as any;
 
     const attributes = {
       author: { type: 'relation', relation: 'oneToOne', target: 'api::author.author' },
     } as any;
-    const options = { typeMap, didAddStrapiComponentsToSchemas: () => false };
-
-    expect(() => cleanSchemaAttributes(attributes, options)).toThrow('target lookup failed');
-    expect(typeMap.has('api::author.author')).toBe(false);
-
-    expect(cleanSchemaAttributes(attributes, options).author).toMatchObject({
+    expect(
+      cleanSchemaAttributes(attributes, { didAddStrapiComponentsToSchemas: () => false }).author
+    ).toStrictEqual({
       type: 'object',
       properties: {
-        name: { type: 'string' },
+        id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
+        documentId: { type: 'string' },
       },
     });
+    expect(contentType).not.toHaveBeenCalled();
   });
 });

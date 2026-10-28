@@ -6,7 +6,7 @@ const isProviderPrivate = async () => strapi.plugin('upload').provider.isPrivate
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async trackUsage(event: string, properties?: Record<string, any>) {
-    const isAiAvailable = strapi.ai.admin.isStrapiManagedAiEnabled();
+    const isAiAvailable = getService('aiMetadataProvider').hasProvider();
 
     return strapi.telemetry.send(event, {
       ...properties,

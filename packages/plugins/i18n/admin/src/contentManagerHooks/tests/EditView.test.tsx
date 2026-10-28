@@ -107,7 +107,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(mutatedField.labelAction).toBeUndefined();
   });
 
-  it('injects a labelAction element when content type is localized (root-level field)', () => {
+  it('shows the localized tooltip without a native title tooltip (root-level field)', async () => {
     const titleField = makeEditField();
 
     const layout = makeEditLayout({ ctLocalized: true, topFields: [[titleField]] });
@@ -120,8 +120,17 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(React.isValidElement(action)).toBe(true);
 
     if (action) {
-      render(action);
+      const { user } = render(action);
       expect(screen.getByText(/This value is unique for the selected locale/i)).toBeInTheDocument();
+      const label = screen.getByText(
+        /This value is unique for the selected locale/i
+      ).parentElement!;
+      expect(label).not.toHaveAttribute('title');
+
+      await user.hover(label.lastElementChild!);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'This value is unique for the selected locale'
+      );
     }
   });
 
@@ -190,6 +199,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     const { layout: mutated } = mutateEditViewHook({ layout });
     const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
 
+    expect(action.props.title.id).toBe('i18n.Field.not-localized');
     render(action);
     expect(
       screen.getByText(/This value is common to all locales. Edit it in the default locale./i)
@@ -219,6 +229,31 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     render(action);
     expect(
       screen.getByText(/This value is common to all locales. Saving will update every locale./i)
+    ).toBeInTheDocument();
+  });
+
+  it('renders the history restore warning when a shared-field title is rewritten', () => {
+    const titleField = makeEditField({
+      attribute: { type: 'string', pluginOptions: { i18n: { localized: false } } },
+    });
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[titleField]] });
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement<{
+      title: { id: string; defaultMessage: string };
+    }>;
+
+    render(
+      React.cloneElement(action, {
+        title: {
+          id: 'history.content.not-localized',
+          defaultMessage:
+            'This value is common to all locales. If you restore this version and save the changes, the content will be replaced for all locales.',
+        },
+      })
+    );
+
+    expect(
+      screen.getByText(/If you restore this version and save the changes/i)
     ).toBeInTheDocument();
   });
 

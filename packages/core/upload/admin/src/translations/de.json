@@ -53,7 +53,7 @@
   "list.assets.loading-asset": "Lade die Vorschau für Medien: {path}",
   "list.assets.not-supported-content": "Keine Vorschau verfügbar",
   "list.assets.preview-asset": "Vorschau für das Video unter {path}",
-  "list.assets.selected": "{number, plural, =0 {Keine Dateien} one {1 Datei} other {# Dateien}} bereits hochgeladen",
+  "list.assets.selected": "{numberFolders, plural, one {1 Ordner} other {# Ordner}} - {numberAssets, plural, one {1 Datei} other {# Dateien}}",
   "list-assets-select": "Datei {name} auswählen",
   "list.assets.type-not-allowed": "Dieser Dateityp ist nicht zulässig.",
   "list.assets.to-upload": "{number, plural, =0 {Keine Datei} one {1 Datei} other {# Dateien}} bereit zum Hochladen",

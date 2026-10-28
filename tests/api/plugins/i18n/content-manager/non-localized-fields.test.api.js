@@ -3,7 +3,7 @@
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
-const { set } = require('lodash/fp');
+const { set } = require('lodash');
 
 const modelsUtils = require('api-tests/models');
 const { cloneDeep } = require('lodash');
@@ -272,7 +272,7 @@ describe('i18n', () => {
 
   afterAll(async () => {
     // Delete all locales that have been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
 
     await strapi.destroy();
     await builder.cleanup();
@@ -411,7 +411,7 @@ describe('i18n', () => {
           const updateAt = [{ key: 'name', value: 'Compo Name' }];
 
           const updatedValue = updateAt.reduce((acc, { key, value }) => {
-            return set(key, `${key}::${value}::${method}`, acc);
+            return set(acc, key, `${key}::${value}::${method}`);
           }, {});
 
           if (isPublish) {
@@ -724,6 +724,183 @@ describe('i18n', () => {
           }),
           strapi.db.query('api::category.category').findOne({
             where: { documentId: docId, locale: 'en', publishedAt: { $notNull: true } },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+        ]);
+
+        expect(enDraft.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'draft-value' }),
+        ]);
+        expect(enPublished.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'published-value' }),
+        ]);
+      });
+
+      test('publishing a new locale keeps published shared trees aligned per status', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'publish source default',
+          nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+        const publishEn = await publish('api::category.category', docId, {
+          nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
+        });
+        expect(publishEn.statusCode).toBe(200);
+
+        const updateRes = await update('api::category.category', docId, {
+          nonLocalizedRepeatableCompo: [{ name: 'draft-value' }],
+        });
+        expect(updateRes.statusCode).toBe(200);
+
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'publish source french',
+          nonLocalizedRepeatableCompo: [],
+        });
+        expect(frRes.statusCode).toBe(200);
+
+        const publishFr = await publish('api::category.category', docId, { locale: 'fr' });
+        expect(publishFr.statusCode).toBe(200);
+        expect(publishFr.body.data.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'published-value' }),
+        ]);
+
+        const [enDraft, enPublished, frDraft, frPublished] = await Promise.all([
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale: 'en', publishedAt: null },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale: 'en', publishedAt: { $notNull: true } },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale: 'fr', publishedAt: null },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale: 'fr', publishedAt: { $notNull: true } },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+        ]);
+
+        expect(enDraft.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'draft-value' }),
+        ]);
+        expect(frDraft.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'draft-value' }),
+        ]);
+        expect(enPublished.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'published-value' }),
+        ]);
+        expect(frPublished.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'published-value' }),
+        ]);
+      });
+
+      test('publishing the default locale later syncs the draft shared tree to published locales', async () => {
+        const createRes = await create('api::category.category', {
+          name: 'later publish default',
+          nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+        expect(
+          (
+            await publish('api::category.category', docId, {
+              nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
+            })
+          ).statusCode
+        ).toBe(200);
+
+        expect(
+          (
+            await update('api::category.category', docId, {
+              nonLocalizedRepeatableCompo: [{ name: 'draft-value' }],
+            })
+          ).statusCode
+        ).toBe(200);
+
+        expect(
+          (
+            await update('api::category.category', docId, {
+              locale: 'fr',
+              name: 'later publish french',
+              nonLocalizedRepeatableCompo: [],
+            })
+          ).statusCode
+        ).toBe(200);
+
+        expect((await publish('api::category.category', docId, { locale: 'fr' })).statusCode).toBe(
+          200
+        );
+
+        const publishEn = await publish('api::category.category', docId, { locale: 'en' });
+        expect(publishEn.statusCode).toBe(200);
+
+        const [enPublished, frPublished] = await Promise.all([
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale: 'en', publishedAt: { $notNull: true } },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale: 'fr', publishedAt: { $notNull: true } },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+        ]);
+
+        expect(enPublished.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'draft-value' }),
+        ]);
+        expect(frPublished.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'draft-value' }),
+        ]);
+      });
+
+      test('creating a published locale via the document service inherits the published sibling', async () => {
+        const created = await strapi.documents('api::category.category').create({
+          data: {
+            name: 'document service default',
+            nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
+          },
+          status: 'published',
+        });
+
+        await strapi.documents('api::category.category').update({
+          documentId: created.documentId,
+          data: {
+            nonLocalizedRepeatableCompo: [{ name: 'draft-value' }],
+          },
+        });
+
+        const frPublished = await strapi.documents('api::category.category').update({
+          documentId: created.documentId,
+          locale: 'fr',
+          status: 'published',
+          populate: ['nonLocalizedRepeatableCompo'],
+          data: {
+            name: 'document service french',
+          },
+        });
+
+        expect(frPublished.nonLocalizedRepeatableCompo).toEqual([
+          expect.objectContaining({ name: 'published-value' }),
+        ]);
+
+        const [enDraft, enPublished] = await Promise.all([
+          strapi.db.query('api::category.category').findOne({
+            where: { documentId: created.documentId, locale: 'en', publishedAt: null },
+            populate: ['nonLocalizedRepeatableCompo'],
+          }),
+          strapi.db.query('api::category.category').findOne({
+            where: {
+              documentId: created.documentId,
+              locale: 'en',
+              publishedAt: { $notNull: true },
+            },
             populate: ['nonLocalizedRepeatableCompo'],
           }),
         ]);

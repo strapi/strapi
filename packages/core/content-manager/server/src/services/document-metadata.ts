@@ -1,4 +1,4 @@
-import { groupBy, pick, uniq } from 'lodash/fp';
+import { groupBy, pick } from 'lodash';
 
 import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
@@ -143,7 +143,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     allVersions: DocumentVersion[]
   ) {
     // Group all versions by locale
-    const versionsByLocale = groupBy('locale', allVersions);
+    const versionsByLocale = groupBy(allVersions, 'locale');
 
     // Delete the current locale
     if (version.locale) {
@@ -181,16 +181,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     >;
 
     // Sort the default locale first so `availableLocales[0]` is the canonical
-    // source for non-localized field inheritance in the admin. Guarded so that
-    // we no-op if the i18n plugin or its locales service is unavailable.
-    let defaultLocaleCode: string | undefined;
+    // source for non-localized field inheritance in the admin. Without a
+    // localization provider there is no default locale and the order is kept.
+    let defaultLocaleCode: string | null | undefined = null;
     try {
-      defaultLocaleCode = await strapi.plugin('i18n')?.service('locales')?.getDefaultLocale();
+      defaultLocaleCode = await strapi.localization.getDefaultLocale();
     } catch {
-      // i18n plugin disabled or service errored — leave order untouched.
+      // The provider (e.g. its locale store lookup) errored — leave order untouched.
     }
 
-    if (!defaultLocaleCode) {
+    // The provider may resolve `undefined` at runtime when no default locale is stored
+    if (defaultLocaleCode === null || defaultLocaleCode === undefined || defaultLocaleCode === '') {
       return filtered as DocumentMetadata['availableLocales'];
     }
 
@@ -221,8 +222,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     if (!availableStatus) return availableStatus;
 
-    // Pick status fields (at fields, status, by fields), use lodash fp
-    return pick(AVAILABLE_STATUS_FIELDS, availableStatus);
+    // Pick status fields (at fields, status, by fields), use lodash
+    return pick(availableStatus, AVAILABLE_STATUS_FIELDS);
   },
 
   /**
@@ -260,7 +261,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       where.$or = [{ locale: { $in: locales } }, { locale: { $null: true } }];
     }
 
-    return strapi.query(uid).findMany({
+    return strapi.db.query(uid).findMany({
       where,
       select: AVAILABLE_STATUS_SCALAR_FIELDS,
     });
@@ -304,15 +305,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   ) {
     const model = strapi.getModel(uid);
     const hasDnP = contentTypes.hasDraftAndPublish(model);
-    const isLocalized = (model.pluginOptions?.i18n as any)?.localized === true;
+    const isLocalized = strapi.localization.isLocalizedContentType(model);
 
     // Resolve once for all return paths — admin lock logic needs this even when
     // the current locale is excluded from `availableLocales`.
     let defaultLocale: string | null = null;
     if (isLocalized) {
       try {
-        defaultLocale =
-          (await strapi.plugin('i18n')?.service('locales')?.getDefaultLocale()) ?? null;
+        defaultLocale = (await strapi.localization.getDefaultLocale()) ?? null;
       } catch {
         defaultLocale = null;
       }
@@ -352,7 +352,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         : null;
       return {
         availableLocales: [],
-        availableStatus: otherVersion ? [pick(AVAILABLE_STATUS_FIELDS, otherVersion)] : [],
+        availableStatus: otherVersion ? [pick(otherVersion, AVAILABLE_STATUS_FIELDS)] : [],
         defaultLocale,
         versions: [] as DocumentVersion[],
       };
@@ -366,72 +366,92 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // (scalars + media + components + dynamic zones; relations stay server-filled).
     let nonLocalizedFields: string[] = [];
     let nonLocalizedMediaFields: string[] = [];
+    // Without a localization provider there are no non-localized attributes.
     let nestedPopulate: Record<string, unknown> = {};
-    const dynamicZonePopulate: Record<string, unknown> = {};
     try {
-      const i18nPlugin = strapi.plugin('i18n');
-      if (i18nPlugin) {
-        const i18nService = i18nPlugin.service('content-types');
-        if (i18nService?.getNonLocalizedAttributes) {
-          if (model?.attributes) {
-            const allNonLocalized = i18nService.getNonLocalizedAttributes(model);
-            // Get scalar and media attributes separately
-            const scalarAttrs = getScalarAttributes(model);
-            const mediaAttrs = getMediaAttributes(model);
+      if (model?.attributes !== undefined) {
+        const allNonLocalized = strapi.localization.getNonLocalizedAttributes(model);
+        // Get scalar and media attributes separately
+        const scalarAttrs = getScalarAttributes(model);
+        const mediaAttrs = getMediaAttributes(model);
 
-            // Separate scalar fields (can be in fields array) from media fields (need to be populated)
-            nonLocalizedFields = allNonLocalized.filter(
-              (field: string) => field in model.attributes && scalarAttrs.includes(field)
-            );
-            nonLocalizedMediaFields = allNonLocalized.filter(
-              (field: string) => field in model.attributes && mediaAttrs.includes(field)
-            );
+        // Separate scalar fields (can be in fields array) from media fields (need to be populated)
+        nonLocalizedFields = allNonLocalized.filter(
+          (field: string) => field in model.attributes && scalarAttrs.includes(field)
+        );
+        nonLocalizedMediaFields = allNonLocalized.filter(
+          (field: string) => field in model.attributes && mediaAttrs.includes(field)
+        );
 
-            if (typeof i18nService.getNestedPopulateOfNonLocalizedAttributes === 'function') {
-              nestedPopulate = dottedPathsToPopulate(
-                i18nService.getNestedPopulateOfNonLocalizedAttributes(uid)
-              );
-              // Dynamic zones are polymorphic, so each component needs its own
-              // deep-populate fragment. A wildcard only populates the immediate
-              // attributes and can omit nested shared component data.
-              for (const field of Object.keys(nestedPopulate)) {
-                const attribute = model.attributes[field];
+        const getNestedPopulate = strapi.localization.getNestedPopulateOfNonLocalizedAttributes;
+        if (typeof getNestedPopulate === 'function') {
+          const buildNestedPopulate = (
+            schemaUID: UID.Schema,
+            populate = dottedPathsToPopulate(getNestedPopulate(schemaUID))
+          ): Record<string, unknown> => {
+            const schema = strapi.getModel(schemaUID);
+
+            return Object.fromEntries(
+              Object.entries(populate).map(([field, value]) => {
+                const attribute = schema?.attributes[field];
+
                 if (attribute?.type === 'dynamiczone') {
-                  dynamicZonePopulate[field] = {
-                    on: attribute.components.reduce<Record<string, { populate: object }>>(
-                      (acc, componentUID) => {
+                  return [
+                    field,
+                    {
+                      on: attribute.components.reduce<
+                        Record<string, { populate: Record<string, unknown> }>
+                      >((acc, componentUID) => {
                         acc[componentUID] = {
-                          populate: dottedPathsToPopulate(
-                            i18nService.getNestedPopulateOfNonLocalizedAttributes(componentUID)
-                          ),
+                          populate: buildNestedPopulate(componentUID),
                         };
                         return acc;
-                      },
-                      {}
-                    ),
-                  };
+                      }, {}),
+                    },
+                  ];
                 }
-              }
-            } else {
-              const componentAndDzFields = allNonLocalized.filter(
-                (field: string) =>
-                  field in model.attributes &&
-                  (model.attributes[field]?.type === 'component' ||
-                    model.attributes[field]?.type === 'dynamiczone')
-              );
-              nestedPopulate = componentAndDzFields.reduce(
-                (acc: Record<string, true>, field: string) => {
-                  acc[field] = true;
-                  return acc;
-                },
-                {}
-              );
-            }
-          }
+
+                if (
+                  attribute?.type === 'component' &&
+                  typeof value === 'object' &&
+                  value !== null &&
+                  'populate' in value
+                ) {
+                  return [
+                    field,
+                    {
+                      populate: buildNestedPopulate(
+                        attribute.component,
+                        (value as { populate: Record<string, unknown> }).populate
+                      ),
+                    },
+                  ];
+                }
+
+                return [field, value];
+              })
+            );
+          };
+
+          nestedPopulate = buildNestedPopulate(uid);
+        } else {
+          const componentAndDzFields = allNonLocalized.filter(
+            (field: string) =>
+              field in model.attributes &&
+              (model.attributes[field]?.type === 'component' ||
+                model.attributes[field]?.type === 'dynamiczone')
+          );
+          nestedPopulate = componentAndDzFields.reduce(
+            (acc: Record<string, true>, field: string) => {
+              acc[field] = true;
+              return acc;
+            },
+            {}
+          );
         }
       }
     } catch {
-      // i18n plugin might not be enabled or might error, ignore silently
+      // The provider errored — fall back to no prefilled non-localized fields
     }
 
     // Build populate object for non-localized media + nested component/DZ fields
@@ -451,10 +471,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       populate: {
         ...nestedPopulate,
         ...mediaPopulate,
-        ...dynamicZonePopulate,
         ...AVAILABLE_STATUS_POPULATE,
       },
-      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),
+      fields: [...new Set([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields])],
       filters: {
         documentId: version.documentId,
       },

@@ -1,6 +1,6 @@
 import type { Struct, Modules, Schema } from '@strapi/types';
 import { errors, contentTypes } from '@strapi/utils';
-import { curry, assoc } from 'lodash/fp';
+import { assign, curry } from 'lodash';
 
 type Transform = (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
@@ -12,17 +12,17 @@ type AsyncTransform = (
   params: Modules.Documents.Params.All
 ) => Promise<Modules.Documents.Params.All>;
 
-const getDefaultLocale = async (): Promise<string> => {
-  return strapi.plugin('i18n').service('locales').getDefaultLocale();
+const getDefaultLocale = async (): Promise<string | null> => {
+  return strapi.localization.getDefaultLocale();
 };
 
 const defaultLocale: AsyncTransform = async (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
   if (!params.locale) {
-    return assoc('locale', await getDefaultLocale(), params);
+    return assign({}, params, { locale: await getDefaultLocale() });
   }
 
   return params;
@@ -32,10 +32,7 @@ const defaultLocale: AsyncTransform = async (contentType, params) => {
  * Add locale lookup query to the params
  */
 const localeToLookup: Transform = (contentType, params) => {
-  if (
-    !params.locale ||
-    !strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)
-  ) {
+  if (!params.locale || !strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
@@ -48,14 +45,14 @@ const localeToLookup: Transform = (contentType, params) => {
     );
   }
 
-  return assoc(['lookup', 'locale'], params.locale, params);
+  return { ...params, lookup: { ...params.lookup, locale: params.locale } };
 };
 
 /**
  * Add locale lookup query to the params
  */
 const multiLocaleToLookup: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
@@ -64,7 +61,7 @@ const multiLocaleToLookup: Transform = (contentType, params) => {
       return params;
     }
 
-    return assoc(['lookup', 'locale'], params.locale, params);
+    return { ...params, lookup: { ...params.lookup, locale: params.locale } };
   }
 
   return params;
@@ -74,14 +71,14 @@ const multiLocaleToLookup: Transform = (contentType, params) => {
  * Translate locale status parameter into the data that will be saved
  */
 const localeToData: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
   if (params.locale) {
     const isValidLocale = typeof params.locale === 'string' && params.locale !== '*';
     if (isValidLocale) {
-      return assoc(['data', 'locale'], params.locale, params);
+      return { ...params, data: { ...params.data, locale: params.locale } };
     }
 
     throw new errors.ValidationError(
@@ -151,6 +148,30 @@ const normalizeMediaIds = (
 
   return data;
 };
+export type CopyNonLocalizedFieldsOptions = {
+  /**
+   * Which publication status to copy from. Locale insert of a draft must not
+   * pick an older published row; first publish of a locale must not pick the draft.
+   */
+  status?: 'draft' | 'published';
+  /**
+   * `fill` inherits only unset/empty shared fields (create-locale).
+   * `replace` overwrites shared fields from the sibling (first publish of a locale).
+   */
+  strategy?: 'fill' | 'replace';
+};
+
+const statusWhere = (
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  status: 'draft' | 'published'
+) => {
+  if (!contentTypes.hasDraftAndPublish(contentType)) {
+    return {};
+  }
+
+  return status === 'published' ? { publishedAt: { $ne: null } } : { publishedAt: { $null: true } };
+};
+
 /**
  * Copy non-localized fields from an existing entry to a new entry being created
  * for a different locale of the same document. Returns a new object with the merged data.
@@ -158,53 +179,62 @@ const normalizeMediaIds = (
 const copyNonLocalizedFields = async (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
   documentId: string,
-  dataToCreate: Record<string, any>
+  dataToCreate: Record<string, any>,
+  options: CopyNonLocalizedFieldsOptions = {}
 ): Promise<Record<string, any>> => {
-  // Check if this is a localized content type and if i18n plugin is available
-  const i18nService = strapi.plugin('i18n')?.service('content-types');
-  if (!i18nService?.isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return dataToCreate;
   }
 
-  // Find the canonical default-locale draft explicitly. Ordering by publishedAt
-  // is database-dependent because drafts store NULL, and could select an older
-  // published value instead of the current draft.
-  const attributesToPopulate = i18nService.getNestedPopulateOfNonLocalizedAttributes(
+  const status = options.status ?? 'draft';
+  const strategy = options.strategy ?? 'fill';
+
+  // Select the default-locale sibling of the status being written. Ordering by
+  // publishedAt is database-dependent because drafts store NULL.
+  const attributesToPopulate = strapi.localization.getNestedPopulateOfNonLocalizedAttributes(
     contentType.uid
   );
   const defaultLocaleCode = await getDefaultLocale();
-  const draftFilter = contentTypes.hasDraftAndPublish(contentType)
-    ? { publishedAt: { $null: true } }
-    : {};
+  const publicationWhere = statusWhere(contentType, status);
   const query = strapi.db.query(contentType.uid);
   let existingEntry = await query.findOne({
     where: {
       documentId,
       locale: defaultLocaleCode,
-      ...draftFilter,
+      ...publicationWhere,
     },
     populate: attributesToPopulate,
   });
 
   // A document can exist without its default locale. Keep locale creation
-  // functional in that case, but still prefer a draft deterministically.
+  // functional in that case, but still prefer the matching status.
   if (!existingEntry) {
     existingEntry = await query.findOne({
-      where: { documentId, ...draftFilter },
+      where: { documentId, ...publicationWhere },
       populate: attributesToPopulate,
     });
   }
 
-  // If an entry exists in another locale, copy its non-localized fields
-  if (existingEntry) {
-    const mergedData = { ...dataToCreate };
-    i18nService.fillNonLocalizedAttributes(mergedData, existingEntry, {
-      model: contentType.uid,
-    });
-    return normalizeMediaIds(contentType, mergedData);
+  if (!existingEntry) {
+    return dataToCreate;
   }
 
-  return dataToCreate;
+  if (strategy === 'replace') {
+    // The localization provider fills only unset fields. Copy onto an empty
+    // object, then overlay, so a first publish replaces draft shared values
+    // with the published sibling without a separate copy API.
+    const copied: Record<string, any> = {};
+    strapi.localization.fillNonLocalizedAttributes(copied, existingEntry, {
+      model: contentType.uid,
+    });
+    return normalizeMediaIds(contentType, { ...dataToCreate, ...copied });
+  }
+
+  const mergedData = { ...dataToCreate };
+  strapi.localization.fillNonLocalizedAttributes(mergedData, existingEntry, {
+    model: contentType.uid,
+  });
+  return normalizeMediaIds(contentType, mergedData);
 };
 
 const defaultLocaleCurry = curry(defaultLocale);
