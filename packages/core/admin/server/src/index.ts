@@ -13,6 +13,7 @@ import middlewares from './middlewares';
 import getEEAdmin from '../../ee/server/src';
 
 export type * from './types';
+export type * from './types/content-types';
 
 // eslint-disable-next-line import/no-mutable-exports
 let admin = {
