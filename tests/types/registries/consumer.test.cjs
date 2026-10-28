@@ -424,6 +424,21 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: permission action IDs are checked once any is registered`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'permission-actions.ts']),
+      `${resolution}, registered permission actions`
+    );
+    assertClean(
+      compile(['settings.d.ts', 'permission-actions-empty.ts']),
+      `${resolution}, empty permission action registry`
+    );
+    assertClean(
+      compile(['permission-actions-permissive.ts']),
+      `${resolution}, permission actions without strict types`
+    );
+  });
+
   test(`${resolution}: a loose policy config keeps references checked`, () => {
     assertClean(
       compile(['settings.d.ts', 'policies-loose.d.ts', 'policies-loose.ts']),
@@ -884,6 +899,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       ['strapi-strict.d.ts', 'middlewares.ts'],
       ['strapi-strict.d.ts', 'policy-namespaces.ts'],
       ['settings.d.ts', 'policies-loose.d.ts', 'policies-loose.ts'],
+      ['settings.d.ts', 'permission-actions.ts'],
       ['strapi-strict.d.ts', 'upload-files.ts'],
       ['strapi-strict.d.ts', 'action-provider.ts'],
       ['settings.d.ts', 'schemas.ts'],
