@@ -77,10 +77,10 @@ export type PaginatedResult<
  */
 export type GetValues<
   TSchemaUID extends UID.Schema,
-  TFields extends
-    Schema.AttributeNames<TSchemaUID> = Schema.NonPopulatableAttributeNames<TSchemaUID>,
-  TPopulate extends
-    Schema.AttributeNames<TSchemaUID> = Schema.PopulatableAttributeNames<TSchemaUID>,
+  TFields extends Schema.AttributeNames<TSchemaUID> =
+    Schema.NonPopulatableAttributeNames<TSchemaUID>,
+  TPopulate extends Schema.AttributeNames<TSchemaUID> =
+    Schema.PopulatableAttributeNames<TSchemaUID>,
 > = If<
   Constants.AreSchemaRegistriesExtended,
   Guard.Never<TFields | TPopulate, Schema.AttributeNames<TSchemaUID>> extends infer TKeys extends

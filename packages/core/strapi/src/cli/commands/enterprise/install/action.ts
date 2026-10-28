@@ -26,7 +26,6 @@ interface InstallDependencies {
   isInteractive: boolean;
   env: NodeJS.ProcessEnv;
   homeDir: string;
-  now: Date;
   fetchImplementation: typeof fetch;
   promptForLicense: typeof promptForLicense;
   promptForPlugins: typeof promptForPlugins;
@@ -277,7 +276,6 @@ export const runInstall = async ({
     isInteractive: dependencies.isInteractive,
     logger,
     env: dependencies.env,
-    now: dependencies.now,
     prompt: dependencies.promptForLicense,
   });
 
@@ -365,7 +363,6 @@ export const action = async (
         isInteractive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
         env: process.env,
         homeDir: os.homedir(),
-        now: new Date(),
         fetchImplementation: fetch,
         promptForLicense,
         promptForPlugins,
