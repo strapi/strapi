@@ -534,6 +534,16 @@ type AuthVerifyChecks = [
 declare const authVerifyChecks: AuthVerifyChecks;
 authVerifyChecks satisfies unknown;
 
+// `Core.RouteConfig` keeps develop's `auth`: strategies by name only. `RouteConfigFor` also takes
+// strategy objects.
+type RouteAuthChecks = [
+  Expect<
+    Equal<Core.RouteConfig['auth'], false | { scope?: string[]; strategies?: string[] } | undefined>
+  >,
+];
+declare const routeAuthChecks: RouteAuthChecks;
+routeAuthChecks satisfies unknown;
+
 // Without strict types, preview handler params keep develop's `string` status.
 type PreviewStatusChecks = [
   Expect<
