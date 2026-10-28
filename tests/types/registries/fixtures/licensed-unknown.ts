@@ -10,6 +10,7 @@ import type {
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+type HasUndefined<T> = undefined extends T ? true : false;
 
 declare const app: Core.Strapi;
 
@@ -43,3 +44,18 @@ app.plugin('licensed-provider').service('reports')?.count() satisfies number | u
 // @ts-expect-error The service may be missing.
 app.service('plugin::licensed-provider.reports').count();
 app.service('plugin::licensed-provider.users').isSSOLocked?.() satisfies boolean | undefined;
+
+// The admin EE edition: EE-only services may be missing, and the members it adds to CE services
+// are optional.
+declare const adminChecks: [
+  Core.Assert<HasUndefined<Core.ServiceFor<'admin::persist-tables'>>>,
+  Core.Assert<HasUndefined<Core.ServiceFor<'admin::seat-enforcement'>>>,
+  Core.Assert<HasUndefined<Core.ServiceFor<'admin::metrics'>['getSSOProvidersList']>>,
+  Core.Assert<HasUndefined<Core.ServiceFor<'admin::role'>['ssoCheckRolesIdForDeletion']>>,
+  Core.Assert<HasUndefined<Core.ServiceFor<'admin::user'>['getCurrentActiveUserCount']>>,
+];
+adminChecks satisfies unknown;
+
+// @ts-expect-error The service may be missing.
+void app.service('admin::seat-enforcement').getDisabledUserList();
+void app.service('admin::role').ssoCheckRolesIdForDeletion?.([]);
