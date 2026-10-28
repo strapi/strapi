@@ -427,6 +427,15 @@ declare global {
   changed at runtime (extensions in `src/extensions`, attributes added by other plugins). Without
   generated schemas, as in a package compiled alone, the declared UIDs are precise and every other
   UID stays generic.
+- A declared UID that type generation did not write stays in the application's content-type
+  union, with the package schema. This bridges generated types that are stale after an upgrade,
+  but it also accepts a UID that the runtime never registered, and a call on it throws. Declare
+  only the content types the package registers whenever it is enabled, in every edition and under
+  every license. `examples/strict-types/checks/package-schemas.ts` enforces it: a declared UID
+  that the Community Edition example does not generate is a drift.
+- Models added with `strapi.get('models').add`, such as the content history
+  `plugin::content-manager.history-version`, are not content types. Type generation does not write
+  them: never declare them in `PackageContentTypeSchemas`.
 - An attribute a package adds to other content types only when the boot license lists a feature,
   such as the review workflows `strapi_stage` and `strapi_assignee`, is declared in
   `Strapi.Registries.LicensedContentTypeAttributes`, keyed by its gate: `attributes`, and the
