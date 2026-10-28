@@ -449,19 +449,28 @@ async function generateContracts(appDir, registered, api = fixture('app/src/api'
 // Type generation writes the license scope of an application with strict types into `strict.d.ts`,
 // from `typescript.licensedFeatures`. A program without it, such as a plugin or an application
 // that opts in by hand, keeps the unknown scope. Each fixture checks the gated contracts of
-// `licensed-provider.d.ts` in one scope.
+// `licensed-provider.d.ts` in one scope, each bundled fixture those of the packages bundled with
+// `@strapi/strapi` (review workflows, content releases, content history).
 const licenseScopes = [
-  { scope: 'unknown', fixture: 'licensed-unknown.ts' },
-  { scope: 'no licensedFeatures', licensedFeatures: undefined, fixture: 'licensed-none.ts' },
+  { scope: 'unknown', fixture: 'licensed-unknown.ts', bundled: 'licensed-bundled-unknown.ts' },
+  {
+    scope: 'no licensedFeatures',
+    licensedFeatures: undefined,
+    fixture: 'licensed-none.ts',
+    bundled: 'licensed-bundled-none.ts',
+  },
   {
     scope: "licensedFeatures: ['review-workflows']",
     licensedFeatures: ['review-workflows'],
     fixture: 'licensed-review-workflows.ts',
+    bundled: 'licensed-bundled-review-workflows.ts',
   },
   {
     scope: "licensedFeatures: ['licensed']",
     licensedFeatures: ['licensed'],
     fixture: 'licensed-only.ts',
+    // No bundled package gates a contract on `'licensed'` alone.
+    bundled: 'licensed-bundled-none.ts',
   },
 ];
 
@@ -513,11 +522,12 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
 
   test(`${resolution}: license-gated contracts follow the program's license scope`, async () => {
     await withLicenseScopes((scopes) => {
-      for (const { scope, files, fixture } of scopes) {
+      for (const { scope, files, fixture, bundled } of scopes) {
         assertClean(
           compile([...files, 'licensed-provider.d.ts', fixture]),
           `${resolution}, license scope ${scope}`
         );
+        assertClean(compile([...files, bundled]), `${resolution}, license scope ${scope}, bundled`);
       }
     });
     assertClean(
@@ -1159,6 +1169,14 @@ test('license scope fixtures fail in the other scopes', async () => {
           fixtureErrors(compile([...program.files, 'licensed-provider.d.ts', name]), name),
           0,
           `${name} (license scope ${scope}) passes with license scope ${program.scope}`
+        );
+      }
+      for (const { scope, bundled } of scopes) {
+        if (bundled === program.bundled) continue;
+        assert.notEqual(
+          fixtureErrors(compile([...program.files, bundled]), bundled),
+          0,
+          `${bundled} (license scope ${scope}) passes with license scope ${program.scope}`
         );
       }
     }
