@@ -95,6 +95,18 @@ declare global {
         'plugin::review-workflows.stages': Controllers['stages'] | undefined;
         'plugin::review-workflows.workflows': Controllers['workflows'] | undefined;
       }
+
+      /**
+       * Registered at bootstrap (`config/actions.ts`) under the `admin` plugin name, only when the
+       * `review-workflows` EE feature is enabled: without it, these IDs are absent at runtime.
+       */
+      interface PermissionActions {
+        'admin::review-workflows.create': true;
+        'admin::review-workflows.read': true;
+        'admin::review-workflows.update': true;
+        'admin::review-workflows.delete': true;
+        'admin::review-workflows.stage.transition': true;
+      }
     }
   }
 }
