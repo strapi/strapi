@@ -118,6 +118,18 @@ class RateLimitError<TMessage extends string = string, TDetails = unknown> exten
   }
 }
 
+class ConflictError<TMessage extends string = string, TDetails = unknown> extends ApplicationError<
+  'ConflictError',
+  TMessage,
+  TDetails
+> {
+  constructor(message = 'Conflict' as TMessage, details?: TDetails) {
+    super(message, details);
+    this.name = 'ConflictError';
+    this.message = message;
+  }
+}
+
 class PayloadTooLargeError<
   TMessage extends string = string,
   TDetails = unknown,
@@ -163,6 +175,7 @@ export {
   ForbiddenError,
   UnauthorizedError,
   RateLimitError,
+  ConflictError,
   PayloadTooLargeError,
   PolicyError,
   NotImplementedError,

@@ -7,6 +7,7 @@ import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
 import { historyAdmin } from './history';
 import { reducer } from './modules/reducers';
+import { createAutosaveLogoutMiddleware } from './pages/EditView/utils/autosave';
 import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
@@ -17,6 +18,8 @@ import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
 export default {
   register(app: StrapiApp) {
     const cm = new ContentManagerPlugin();
+
+    app.addMiddlewares([createAutosaveLogoutMiddleware]);
 
     app.addReducers({
       [PLUGIN_ID]: reducer,

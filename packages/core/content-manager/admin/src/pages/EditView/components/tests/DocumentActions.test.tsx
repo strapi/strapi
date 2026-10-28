@@ -15,6 +15,19 @@ const mockNavigate = jest.fn();
 const mockParams: { id?: string } = {};
 let mockIsRelationModalContext = true;
 let mockIsAnyRelationModalOpen = false;
+const mockClearAutosave = jest.fn();
+const conflictError = {
+  status: 409,
+  data: {
+    data: null,
+    error: {
+      status: 409,
+      name: 'ConflictError',
+      message: 'The document has changed since it was loaded',
+    },
+  },
+};
+let mockPendingBaseVersion: string | undefined;
 let parentInitialFormValues: Record<string, unknown> | undefined;
 let currentDocumentSchema: { options: { draftAndPublish: boolean } } = {
   options: { draftAndPublish: true },
@@ -76,7 +89,8 @@ jest.mock('../../../../hooks/useDocumentActions', () => ({
 }));
 jest.mock('../../../../hooks/useDocument', () => ({
   useDoc: () => ({
-    schema: { options: { draftAndPublish: true } },
+    document: { updatedAt: '2026-01-01T00:00:00.000Z' },
+    schema: currentDocumentSchema,
     getInitialFormValues: () => parentInitialFormValues,
   }),
   useDocument: () => ({
@@ -87,7 +101,11 @@ jest.mock('../../../../hooks/useDocument', () => ({
 }));
 jest.mock('../../../../hooks/useDocumentContext', () => ({
   useDocumentContext: () => ({
-    currentDocument: { schema: currentDocumentSchema, components: {} },
+    currentDocument: {
+      schema: currentDocumentSchema,
+      components: {},
+      document: { updatedAt: '2026-01-01T00:00:00.000Z' },
+    },
     currentDocumentMeta: {
       documentId: undefined,
       model: 'api::child.child',
@@ -126,6 +144,12 @@ jest.mock('../FormInputs/Relations/RelationModal', () => ({
       },
     });
   },
+}));
+jest.mock('../Autosave', () => ({
+  useAutosave: () => ({
+    clear: mockClearAutosave,
+    pendingBaseVersion: mockPendingBaseVersion,
+  }),
 }));
 
 import {
@@ -199,6 +223,264 @@ describe('PublishAction create navigation', () => {
   });
 });
 
+const ExistingDocumentActionHarness = () => {
+  const action = UpdateAction({
+    activeTab: 'draft',
+    documentId: 'child',
+    model: 'api::child.child',
+    collectionType: 'collection-types',
+    meta: { availableStatus: [], availableLocales: [] },
+    document: { documentId: 'child', id: 1, status: 'draft' },
+  });
+
+  return action ? <DocumentActions actions={[{ ...action, id: 'update' }]} /> : null;
+};
+
+const ExistingDocumentFormHarness = () => {
+  const [submitted, setSubmitted] = React.useState(false);
+
+  if (submitted) {
+    return <span>Native form submitted</span>;
+  }
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        setSubmitted(true);
+      }}
+    >
+      <ExistingDocumentActionHarness />
+    </form>
+  );
+};
+
+const ExistingPublishActionHarness = () => {
+  const action = PublishAction({
+    activeTab: 'draft',
+    documentId: 'child',
+    model: 'api::child.child',
+    collectionType: 'collection-types',
+    meta: { availableStatus: [], availableLocales: [] },
+    document: {
+      documentId: 'child',
+      id: 1,
+      status: 'draft',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
+  });
+
+  return action ? (
+    <DocumentActions actions={[{ ...action, id: 'publish', disabled: false }]} />
+  ) : null;
+};
+
+const DiscardActionHarness = () => {
+  const action = DiscardAction({
+    activeTab: 'draft',
+    documentId: 'child',
+    model: 'api::child.child',
+    collectionType: 'collection-types',
+    meta: { availableStatus: [], availableLocales: [] },
+    document: { documentId: 'child', id: 1, status: 'modified' },
+  });
+
+  return action ? <DocumentActions actions={[{ ...action, id: 'discard' }]} /> : null;
+};
+
+describe('autosave conflicts and backup cleanup', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockIsRelationModalContext = false;
+    mockPendingBaseVersion = undefined;
+    mockUpdateDocument.mockResolvedValue({ data: { documentId: 'child', locale: 'en' } });
+    mockPublish.mockResolvedValue({ data: { documentId: 'child', locale: 'en' } });
+    mockDiscard.mockResolvedValue({ data: { documentId: 'child', locale: 'en' } });
+    mockFetchDraftDocument.mockResolvedValue({ data: undefined });
+    mockCountDraftRelations.mockResolvedValue({
+      data: { unpublishedRelations: 0, draftM2mLinks: 0 },
+      error: undefined,
+    });
+    mockUseDraftRelationCountQuery.mockReturnValue({
+      data: { data: { unpublishedRelations: 0, draftM2mLinks: 0 } },
+      isLoading: false,
+      isError: false,
+    });
+  });
+
+  afterEach(() => {
+    mockIsRelationModalContext = true;
+    currentDocumentSchema = { options: { draftAndPublish: true } };
+  });
+
+  it('offers Reload and Overwrite when the saved version is stale', async () => {
+    mockUpdateDocument.mockResolvedValueOnce({
+      error: conflictError,
+    });
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('This document has changed')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Overwrite' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Overwrite' }));
+
+    expect(mockUpdateDocument).toHaveBeenNthCalledWith(
+      2,
+      expect.not.objectContaining({ baseVersion: expect.anything() }),
+      {}
+    );
+  });
+
+  it('prevents native form submission while waiting to open a conflict dialog', async () => {
+    mockUpdateDocument.mockResolvedValueOnce({
+      error: conflictError,
+    });
+
+    const { user } = render(<ExistingDocumentFormHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(screen.queryByText('Native form submitted')).not.toBeInTheDocument();
+    expect(await screen.findByText('This document has changed')).toBeInTheDocument();
+  });
+
+  it('uses the recovered backup version when saving restored changes', async () => {
+    mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(mockUpdateDocument).toHaveBeenCalledWith(
+      expect.objectContaining({ baseVersion: '2025-12-31T23:59:00.000Z' }),
+      {}
+    );
+    expect(mockClearAutosave).toHaveBeenCalled();
+  });
+
+  it('offers conflict resolution when a restored backup is stale', async () => {
+    mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
+    mockUpdateDocument.mockResolvedValueOnce({
+      error: conflictError,
+    });
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('This document has changed')).toBeInTheDocument();
+  });
+
+  it('uses the recovered backup version when publishing restored changes', async () => {
+    mockPendingBaseVersion = '2025-12-31T23:59:00.000Z';
+
+    const { user } = render(<ExistingPublishActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+    expect(mockPublish).toHaveBeenCalledWith(
+      expect.objectContaining({ baseVersion: '2025-12-31T23:59:00.000Z' }),
+      {}
+    );
+    expect(mockClearAutosave).toHaveBeenCalled();
+  });
+
+  it('offers Reload and Overwrite when publishing a stale draft', async () => {
+    mockPublish
+      .mockResolvedValueOnce({
+        error: conflictError,
+      })
+      .mockResolvedValueOnce({ data: { documentId: 'child', locale: 'en' } });
+
+    const { user } = render(<ExistingPublishActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+    expect(await screen.findByText('This document has changed')).toBeInTheDocument();
+    expect(mockPublish).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ baseVersion: '2026-01-01T00:00:00.000Z' }),
+      {}
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Overwrite' }));
+
+    expect(mockPublish).toHaveBeenNthCalledWith(
+      2,
+      expect.not.objectContaining({ baseVersion: expect.anything() }),
+      {}
+    );
+  });
+
+  it('drops the backup before reload so the same draft is not offered again', async () => {
+    const reload = jest.fn();
+    const order: string[] = [];
+    mockClearAutosave.mockImplementation(async () => {
+      order.push('clear');
+    });
+    mockUpdateDocument.mockResolvedValueOnce({
+      error: conflictError,
+    });
+    const locationSpy = jest.spyOn(globalThis, 'location', 'get').mockReturnValue({
+      ...globalThis.location,
+      reload: () => {
+        order.push('reload');
+        reload();
+      },
+    } as Location);
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(await screen.findByRole('button', { name: 'Reload' }));
+
+    expect(order).toEqual(['clear', 'reload']);
+    expect(reload).toHaveBeenCalled();
+    locationSpy.mockRestore();
+  });
+
+  it('sends a version token when saving a draft and publish document', async () => {
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(mockUpdateDocument).toHaveBeenCalled());
+    expect(mockUpdateDocument).toHaveBeenCalledWith(
+      expect.objectContaining({ baseVersion: '2026-01-01T00:00:00.000Z' }),
+      {}
+    );
+  });
+
+  it('does not send a version token when saving a content type without draft and publish', async () => {
+    currentDocumentSchema = { options: { draftAndPublish: false } };
+
+    const { user } = render(<ExistingDocumentActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(mockUpdateDocument).toHaveBeenCalled());
+    expect(mockUpdateDocument.mock.calls[0][0]).not.toHaveProperty('baseVersion');
+  });
+
+  it('clears the local backup after discarding server changes', async () => {
+    const { user } = render(<DiscardActionHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }));
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    expect(mockDiscard).toHaveBeenCalledWith({
+      collectionType: 'collection-types',
+      model: 'api::child.child',
+      documentId: 'child',
+      params: {},
+    });
+    expect(mockClearAutosave).toHaveBeenCalled();
+  });
+});
+
 describe('relation parent updates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -255,6 +537,10 @@ describe('relation parent updates', () => {
     await user.click(screen.getByRole('button', { name: 'Publish child' }));
 
     await waitFor(() => expect(mockPublish).toHaveBeenCalled());
+    expect(mockPublish).toHaveBeenCalledWith(
+      expect.not.objectContaining({ baseVersion: expect.anything() }),
+      {}
+    );
     await waitFor(() =>
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'GO_TO_CREATED_RELATION' })

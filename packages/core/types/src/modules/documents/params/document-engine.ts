@@ -79,6 +79,11 @@ export type Update<TContentTypeUID extends UID.ContentType> = Pick<
   'data:partial' | 'fields' | 'populate' | 'locale:string' | 'lookup'
 > & {
   documentId: ID;
+  /**
+   * Opaque version token returned as `updatedAt` by a previous read.
+   * When provided, the update fails if the document changed in the meantime.
+   */
+  baseVersion?: string;
 };
 
 export type Publish<TContentTypeUID extends UID.ContentType> = Pick<

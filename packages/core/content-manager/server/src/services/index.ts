@@ -8,6 +8,7 @@ import permissionChecker from './permission-checker';
 import permission from './permission';
 import populateBuilder from './populate-builder';
 import uid from './uid';
+import autosave from '../autosave';
 import history from '../history';
 import preview from '../preview';
 import homepage from '../homepage';
@@ -27,6 +28,7 @@ export default {
   permission,
   'populate-builder': populateBuilder,
   uid,
+  ...(autosave.services ? autosave.services : {}),
   ...(history.services ? history.services : {}),
   ...(preview.services ? preview.services : {}),
   ...homepage.services,

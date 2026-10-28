@@ -254,6 +254,7 @@ const updateDocument = async (ctx: any, opts?: Options) => {
   const { userAbility, user } = ctx.state;
   const { id, model } = ctx.params;
   const { body } = ctx.request;
+  const { baseVersion, ...documentData } = body;
 
   const documentManager = getService('document-manager');
   const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -268,7 +269,7 @@ const updateDocument = async (ctx: any, opts?: Options) => {
     .populateFromQuery(permissionQuery)
     .build();
 
-  const { locale } = await getDocumentLocaleAndStatus(body, model);
+  const { locale } = await getDocumentLocaleAndStatus(documentData, model);
 
   // Load document version to update
   const [documentVersion, documentExists] = await Promise.all([
@@ -297,12 +298,13 @@ const updateDocument = async (ctx: any, opts?: Options) => {
     ? setCreatorFields({ user, isEdition: true })
     : setCreatorFields({ user });
   const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
-  const sanitizedBody = await sanitizeFn(body);
+  const sanitizedBody = await sanitizeFn(documentData);
 
   const updatedDocument = await documentManager.update(documentVersion?.documentId || id, model, {
     data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
+    baseVersion,
   });
 
   return updatedDocument;

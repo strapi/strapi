@@ -26,6 +26,7 @@ import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
+import { assertBaseVersionCurrent, prepareBaseVersionCheck } from './base-version';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
 import {
@@ -538,7 +539,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function update(opts = {} as any) {
-    const { documentId, ...params } = opts;
+    const { documentId, baseVersion, ...params } = opts;
 
     const queryParams = await async.pipe(
       validateParams,
@@ -555,6 +556,27 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
+
+    // Content types without draft & publish save in place. Checking baseVersion there would
+    // 409 an ordinary save, which those types never did. Draft & publish keeps the check.
+    const expectedBaseVersion = prepareBaseVersionCheck(hasDraftAndPublish, baseVersion);
+
+    if (expectedBaseVersion) {
+      const lockedEntry = await strapi.db
+        .queryBuilder(uid)
+        .select(['id', 'updatedAt'])
+        .where({ ...queryParams?.lookup, documentId })
+        .forUpdate()
+        .first()
+        .execute<{ id: number; updatedAt: Date | string }>();
+
+      assertBaseVersionCurrent({
+        expected: expectedBaseVersion,
+        currentUpdatedAt: lockedEntry?.updatedAt ?? null,
+        documentId,
+        locale: queryParams?.locale,
+      });
+    }
 
     // Validation
     // Find if document exists

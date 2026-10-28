@@ -1,6 +1,6 @@
 import type { Ability } from '@casl/ability';
 
-import permissionCheckerService from '../permission-checker';
+import permissionCheckerService, { ACTIONS } from '../permission-checker';
 
 const createStrapiMock = () => ({
   service: jest.fn(() => ({
@@ -20,6 +20,42 @@ const createStrapiMock = () => ({
 });
 
 describe('permission-checker', () => {
+  test('can sanitize output using a separate entity as the permission subject', async () => {
+    const toSubject = jest.fn((_entity: any, model: string) => model);
+    const sanitizeOutput = jest.fn((data: any) => data);
+    const permissionService = {
+      createPermissionsManager: jest.fn(() => ({
+        toSubject,
+        sanitizeOutput,
+      })),
+      actionProvider: {
+        unstable_aliases: jest.fn(() => []),
+      },
+    };
+    const strapi = {
+      service: jest.fn(() => permissionService),
+    };
+    const userAbility = {
+      can: jest.fn(),
+      cannot: jest.fn(),
+    } as unknown as Ability;
+    const backup = { title: 'Unsaved title' };
+    const document = { documentId: 'doc-1', locale: 'fr', title: 'Saved title' };
+
+    const permissionChecker = permissionCheckerService({ strapi } as any).create({
+      userAbility,
+      model: 'api::article.article',
+    });
+
+    await permissionChecker.sanitizeOutput(backup as any, { subject: document as any });
+
+    expect(toSubject).toHaveBeenCalledWith(document, 'api::article.article');
+    expect(sanitizeOutput).toHaveBeenCalledWith(backup, {
+      subject: 'api::article.article',
+      action: ACTIONS.read,
+    });
+  });
+
   test('requiresEntity is true when rules have conditions', () => {
     const strapi = createStrapiMock();
     const userAbility = {

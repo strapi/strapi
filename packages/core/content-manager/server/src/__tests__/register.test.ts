@@ -1,6 +1,12 @@
 import register from '../register';
+import autosave from '../autosave';
 import history from '../history';
 import preview from '../preview';
+
+jest.mock('../autosave', () => ({
+  __esModule: true,
+  default: { register: jest.fn() },
+}));
 
 jest.mock('../history', () => ({
   __esModule: true,
@@ -21,6 +27,7 @@ describe('content-manager register', () => {
 
     expect(registerAttributeRenameHandler).toHaveBeenCalledTimes(1);
     expect(typeof registerAttributeRenameHandler.mock.calls[0][0]).toBe('function');
+    expect(autosave.register).toHaveBeenCalledWith({ strapi });
     expect(history.register).toHaveBeenCalledWith({ strapi });
     expect(preview.register).toHaveBeenCalledWith({ strapi });
   });
