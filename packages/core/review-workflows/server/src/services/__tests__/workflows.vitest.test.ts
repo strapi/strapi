@@ -107,6 +107,7 @@ const createStrapiMock = ({ releaseActionService }: { releaseActionService?: unk
 describe('review-workflows workflows service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    replaceStages.mockReset();
     validateWorkflowCount.mockResolvedValue(undefined);
     migrate.mockResolvedValue([]);
     deleteMany.mockResolvedValue(undefined);
@@ -149,10 +150,86 @@ describe('review-workflows workflows service', () => {
     expect(data).not.toHaveProperty('stageRequiredToPublish');
   });
 
+  describe('stageRequiredToPublishName', () => {
+    const workflowWithStages = {
+      ...workflow,
+      stages: [
+        { id: 10, name: 'Todo' },
+        { id: 11, name: 'Done' },
+      ],
+    };
+
+    const getUpdateData = (strapi: ReturnType<typeof createStrapiMock>) => {
+      const dbQuery = strapi.db.query.mock.results[0].value;
+      return dbQuery.update.mock.calls[0][0].data;
+    };
+
+    it('resolves the name against the current stages when stages are not updated', async () => {
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+
+      await service.update(workflowWithStages, { data: { stageRequiredToPublishName: 'Done' } });
+
+      expect(replaceStages).not.toHaveBeenCalled();
+      expect(getUpdateData(strapi).stageRequiredToPublish).toBe(11);
+    });
+
+    it('resolves the name against the new stages when stages are updated', async () => {
+      replaceStages.mockResolvedValue([
+        { id: 10, name: 'Todo' },
+        { id: 12, name: 'Review' },
+      ]);
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+
+      await service.update(workflowWithStages, {
+        data: {
+          stages: [{ id: 10, name: 'Todo' }, { name: 'Review' }],
+          stageRequiredToPublishName: 'Review',
+        },
+      });
+
+      expect(getUpdateData(strapi).stageRequiredToPublish).toBe(12);
+    });
+
+    it('rejects a name that only exists in the stages being replaced', async () => {
+      replaceStages.mockResolvedValue([{ id: 10, name: 'Todo' }]);
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+
+      await expect(
+        service.update(workflowWithStages, {
+          data: {
+            stages: [{ id: 10, name: 'Todo' }],
+            stageRequiredToPublishName: 'Done',
+          },
+        })
+      ).rejects.toThrow('Stage required to publish does not exist');
+    });
+
+    it('rejects a name that matches no stage', async () => {
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+
+      await expect(
+        service.update(workflowWithStages, { data: { stageRequiredToPublishName: 'Unknown' } })
+      ).rejects.toThrow('Stage required to publish does not exist');
+    });
+
+    it('clears the required stage when the name is null', async () => {
+      const strapi = createStrapiMock({ releaseActionService: undefined });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+
+      await service.update(workflowWithStages, { data: { stageRequiredToPublishName: null } });
+
+      expect(getUpdateData(strapi).stageRequiredToPublish).toBeNull();
+    });
+  });
+
   describe('when release-action service is missing', () => {
     it('update should not throw', async () => {
       const strapi = createStrapiMock({ releaseActionService: undefined });
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await expect(service.update(workflow, { data: {} })).resolves.toEqual(workflow);
       expect(validateActionsByContentTypes).not.toHaveBeenCalled();
@@ -160,7 +237,7 @@ describe('review-workflows workflows service', () => {
 
     it('delete should not throw', async () => {
       const strapi = createStrapiMock({ releaseActionService: undefined });
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await expect(service.delete(workflow, {})).resolves.toEqual(workflow);
       expect(validateActionsByContentTypes).not.toHaveBeenCalled();
@@ -172,7 +249,7 @@ describe('review-workflows workflows service', () => {
       const strapi = createStrapiMock({
         releaseActionService: { validateActionsByContentTypes },
       });
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await service.update(workflow, { data: {} });
 
@@ -183,7 +260,7 @@ describe('review-workflows workflows service', () => {
       const strapi = createStrapiMock({
         releaseActionService: { validateActionsByContentTypes },
       });
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await service.delete(workflow, {});
 
@@ -202,7 +279,7 @@ describe('review-workflows workflows service', () => {
       const strapi = createStrapiMock({ releaseActionService: undefined });
       strapi.db.query().create.mockResolvedValue(populatedWorkflow);
       createMany.mockResolvedValue([{ id: 10 }]);
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await service.create({ data: { name: 'Default', stages: [{ name: 'Todo' }] } });
 
@@ -218,7 +295,7 @@ describe('review-workflows workflows service', () => {
     it('update records the fields that changed', async () => {
       const strapi = createStrapiMock({ releaseActionService: undefined });
       strapi.db.query().update.mockResolvedValue({ ...populatedWorkflow, name: 'Renamed' });
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await service.update(populatedWorkflow, { data: { name: 'Renamed' } });
 
@@ -232,7 +309,7 @@ describe('review-workflows workflows service', () => {
     it('update writes nothing when nothing changed', async () => {
       const strapi = createStrapiMock({ releaseActionService: undefined });
       strapi.db.query().update.mockResolvedValue(populatedWorkflow);
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await service.update(populatedWorkflow, { data: { name: 'Default' } });
 
@@ -253,7 +330,7 @@ describe('review-workflows workflows service', () => {
           after: ['api::blog.blog'],
         },
       ]);
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await service.update(populatedWorkflow, {
         data: { contentTypes: ['api::article.article', 'api::page.page'] },
@@ -274,7 +351,7 @@ describe('review-workflows workflows service', () => {
 
     it('delete records the deleted workflow', async () => {
       const strapi = createStrapiMock({ releaseActionService: undefined });
-      const service = workflowsFactory({ strapi: strapi as any });
+      const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
 
       await service.delete(populatedWorkflow, {});
 
