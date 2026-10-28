@@ -548,6 +548,35 @@ type RouteAuthChecks = [
 declare const routeAuthChecks: RouteAuthChecks;
 routeAuthChecks satisfies unknown;
 
+// Route configs keep develop's types. Without strict types, `RouteConfigFor` accepts every route
+// config develop accepts, and any policy name.
+type RouteConfigChecks = [
+  Expect<
+    Equal<
+      Core.RouteConfig,
+      {
+        prefix?: string;
+        middlewares?: Array<string | Core.MiddlewareHandler>;
+        policies?: Array<string | { name: string; config: unknown }>;
+        auth?: false | { scope?: string[]; strategies?: string[] };
+      }
+    >
+  >,
+  Expect<Equal<Core.Route['config'], Core.RouteConfig | undefined>>,
+  Expect<Equal<Core.RouteConfig extends Core.RouteConfigFor ? true : false, true>>,
+  Expect<
+    Equal<Core.RouteConfig extends Core.RouteConfigFor<'plugin::legacy'> ? true : false, true>
+  >,
+  Expect<
+    SameValues<
+      NonNullable<Core.RouteConfigFor['policies']>[number],
+      string | { name: string; config: unknown }
+    >
+  >,
+];
+declare const routeConfigChecks: RouteConfigChecks;
+routeConfigChecks satisfies unknown;
+
 // Without strict types, preview handler params keep develop's `string` status.
 type PreviewStatusChecks = [
   Expect<
