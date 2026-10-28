@@ -30,6 +30,8 @@ import { EditFieldForm, EditFieldFormProps } from './EditFieldForm';
 import type { ConfigurationFormData, EditFieldSpacerLayout } from './Form';
 import type { EditLayout } from '../../hooks/useDocumentLayout';
 
+const EMPTY_METADATAS: NonNullable<FieldsProps['metadatas']> = {};
+
 type FormField = ConfigurationFormData['layout'][number]['children'][number];
 type Field = Omit<ConfigurationFormData['layout'][number]['children'][number], '__temp_key__'>;
 
@@ -110,7 +112,12 @@ const createDragAndDropContainersFromLayout = (layout: ConfigurationFormData['la
   }));
 };
 
-const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
+const Fields = ({
+  attributes,
+  fieldSizes,
+  components,
+  metadatas = EMPTY_METADATAS,
+}: FieldsProps) => {
   const { formatMessage } = useIntl();
 
   const layout = useForm<ConfigurationFormData['layout']>(
@@ -122,7 +129,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
   const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
 
-  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
+  const existingFields = new Set(layout.flatMap((row) => row.children.map((field) => field.name)));
 
   /**
    * Get the fields that are not already in the layout
@@ -132,7 +139,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   const remainingFields = Object.entries(metadatas).reduce<Field[]>((acc, current) => {
     const [name, { visible, ...field }] = current;
 
-    if (!existingFields.includes(name) && visible === true) {
+    if (!existingFields.has(name) && visible === true) {
       const type = attributes[name]?.type;
       const size = type ? fieldSizes[type] : GRID_COLUMNS;
 
@@ -334,7 +341,8 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             activeIndex !== -1 &&
             overIndex !== -1;
           const canCreateNewRowForItem =
-            activeContainerIndex !== overContainerIndex && GRID_COLUMNS - spaceTaken === 0;
+            activeContainerIndex !== overContainerIndex &&
+            GRID_COLUMNS - spaceTaken < draggedItem.size;
           const isHoveringOverSpacer = overItem?.name === TEMP_FIELD_NAME;
 
           /**
@@ -396,7 +404,14 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
               }
 
               const newContainerPrototype = draft[overContainerIndex];
-              const newContainerId = `container-${draft.length}`;
+
+              // Using draft.length directly can collide with an existing container id
+              // (e.g. after rows were removed), causing React key conflicts and flicker.
+              const findFreeContainerId = (i: number): string =>
+                containersAsDictionary[`container-${i}`]
+                  ? findFreeContainerId(i + 1)
+                  : `container-${i}`;
+              const newContainerId = findFreeContainerId(draft.length);
 
               draft.splice(insertIndex, 0, {
                 ...newContainerPrototype,
@@ -419,7 +434,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           targetChildren.splice(overIndex, 0, draggedItem);
         });
 
-        setContainers(update);
+        setContainers(update.filter((container) => container.children.length > 0));
       }}
       onDragEnd={(event) => {
         const { active, over } = event;

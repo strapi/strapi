@@ -172,6 +172,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "すべてのコレクションタイプとグループの設定を構成します",
   "containers.SettingsView.list.subtitle": "コレクションタイプとグループのレイアウトと表示を設定",
   "containers.SettingsView.list.title": "表示設定",
+  "containers.empty-label": "無題",
   "containers.untitled": "無題",
   "dnd.cancel-item": "{item}をドロップしました。並べ替えがキャンセルされました。",
   "dnd.drop-item": "{item}をドロップしました。リスト内の最終位置: {position}。",

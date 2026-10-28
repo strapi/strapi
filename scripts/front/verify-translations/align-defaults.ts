@@ -111,10 +111,15 @@ export const alignDefaultMessagesForBundle = (
           }
         }
 
-        if (defaultMessageProp && ts.isStringLiteral(defaultMessageProp.initializer)) {
+        const initializer = defaultMessageProp?.initializer;
+        // No-substitution templates (backticks, no ${}) are string defaults too.
+        // Templates with expressions stay untouched — rewriting them drops the holes.
+        if (
+          initializer &&
+          (ts.isStringLiteral(initializer) || ts.isNoSubstitutionTemplateLiteral(initializer))
+        ) {
           const line =
-            sourceFile.getLineAndCharacterOfPosition(defaultMessageProp.getStart(sourceFile)).line +
-            1;
+            sourceFile.getLineAndCharacterOfPosition(initializer.getStart(sourceFile)).line + 1;
           const edit = edits.find(
             (candidate) =>
               candidate.line === line ||
@@ -123,12 +128,9 @@ export const alignDefaultMessagesForBundle = (
               candidate.line === line - 2
           );
 
-          if (
-            edit &&
-            normalizeMessage(defaultMessageProp.initializer.text) === normalizeMessage(edit.current)
-          ) {
+          if (edit && normalizeMessage(initializer.text) === normalizeMessage(edit.current)) {
             replaceAt.set(
-              defaultMessageProp.initializer.getStart(sourceFile),
+              initializer.getStart(sourceFile),
               `'${escapeForSingleQuotedString(edit.expected)}'`
             );
           }

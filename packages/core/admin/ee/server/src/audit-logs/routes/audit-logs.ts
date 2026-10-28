@@ -1,13 +1,13 @@
 import { enableFeatureMiddleware } from '../../routes/utils';
 
-const getRouteConfig = () => ({
+const getRouteConfig = (actions: string[] = ['admin::audit-logs.read']) => ({
   middlewares: [enableFeatureMiddleware('audit-logs')],
   policies: [
     'admin::isAuthenticatedAdmin',
     {
       name: 'admin::hasPermissions',
       config: {
-        actions: ['admin::audit-logs.read'],
+        actions,
       },
     },
   ],
@@ -27,6 +27,12 @@ export default {
       path: '/audit-logs/users',
       handler: 'audit-logs.findManyUsers',
       config: getRouteConfig(),
+    },
+    {
+      method: 'GET',
+      path: '/audit-logs/export',
+      handler: 'audit-logs.export',
+      config: getRouteConfig(['admin::audit-logs.read', 'admin::audit-logs.export']),
     },
     {
       method: 'GET',

@@ -82,7 +82,6 @@
   "Settings.apiTokens.title": "एपीआई टोकन",
   "Settings.application.description": "व्यवस्थापन पैनल की वैश्विक जानकारी",
   "Settings.application.get-help": "मदद लें",
-  "Settings.application.link-pricing": "सभी मूल्य निर्धारण योजनाएं देखें",
   "Settings.application.link-upgrade": "अपना व्यवस्थापक पैनल अपग्रेड करें",
   "Settings.application.node-version": "नोड संस्करण",
   "Settings.application.strapi-version": "स्ट्रैपी संस्करण",

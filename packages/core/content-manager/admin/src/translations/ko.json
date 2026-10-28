@@ -173,6 +173,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "모든 콘텐츠 타입 및 그룹에 대한 설정을 구성합니다.",
   "containers.SettingsView.list.subtitle": "콘텐츠 타입 및 그룹의 레이아웃과 표시를 구성합니다.",
   "containers.SettingsView.list.title": "표시 설정",
+  "containers.empty-label": "제목 없음",
   "containers.untitled": "제목 없음",
   "dnd.cancel-item": "{item}, 놓았습니다. 순서 변경이 취소되었습니다.",
   "dnd.drop-item": "{item}, 놓았습니다. 목록에서의 최종 위치: {position}.",

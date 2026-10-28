@@ -47,9 +47,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     ROLE_LAYOUT,
     async () =>
       (
-        await import(
-          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/ModalForm'
-        )
+        await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/ModalForm')
       ).ROLE_LAYOUT,
     {
       combine(ceRoles, eeRoles) {
@@ -64,9 +62,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     FORM_INITIAL_VALUES,
     async () =>
       (
-        await import(
-          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/ModalForm'
-        )
+        await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/ModalForm')
       ).FORM_INITIAL_VALUES,
     {
       combine(ceValues, eeValues) {
@@ -83,9 +79,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     MagicLinkCE,
     async () =>
       (
-        await import(
-          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE'
-        )
+        await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE')
       ).MagicLinkEE
   );
 

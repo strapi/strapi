@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "Het geüploade bestand overschrijdt de maximaal toegestane bestandsgrootte.",
+  "apiError.FileTooBig": "Het bestand is te groot om te uploaden. Het overschrijdt de maximale aanvraaggrootte die door de server is toegestaan.",
   "assets.uploaded": "{number, plural, one {# bestand} other {# bestanden}} succesvol geüpload",
   "asset-details.title": "Bestandsdetails",
   "asset-details.description": "Toont bestandsinformatie en metadata",

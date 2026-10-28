@@ -16,6 +16,7 @@ import {
   LayoutContent,
 } from '../../../layouts/UnauthenticatedLayout';
 import { translatedErrors } from '../../../utils/translatedErrors';
+import { getRedirectTo } from '../utils';
 
 import type { Login } from '../../../../../shared/contracts/authentication';
 
@@ -40,7 +41,6 @@ const Login = ({ children }: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
-  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const navigate = useNavigate();
 
   const { login } = useAuth('Login', (auth) => auth);
@@ -60,10 +60,7 @@ const Login = ({ children }: LoginProps) => {
 
       setApiError(message);
     } else {
-      const redirectTo = query.get('redirectTo');
-      const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
-
-      navigate(redirectUrl);
+      navigate(getRedirectTo(searchString));
     }
   };
 

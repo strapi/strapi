@@ -32,7 +32,8 @@ describe('AI Controller', () => {
     return {
       ai: {
         admin: {
-          isEnabled: jest.fn().mockReturnValue(aiEnabled),
+          isAvailable: jest.fn().mockReturnValue(aiEnabled),
+          isStrapiManagedAiEnabled: jest.fn().mockReturnValue(aiEnabled),
           getAiToken: jest.fn(),
           getAiUsage: jest.fn(),
           getAiFeatureConfig: jest.fn(),
