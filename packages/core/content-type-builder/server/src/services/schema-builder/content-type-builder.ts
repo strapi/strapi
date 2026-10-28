@@ -378,6 +378,8 @@ export default function createComponentBuilder() {
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
         .set('options', {
+          // Payloads may omit options keys the CTB does not edit (e.g. populateCreatorFields)
+          ...contentType.schema.options,
           ...infos.options,
           // A payload that does not set draftAndPublish keeps the stored value
           draftAndPublish:
