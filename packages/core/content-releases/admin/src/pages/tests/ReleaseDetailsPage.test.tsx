@@ -1,6 +1,6 @@
 import { useRBAC } from '@strapi/admin/strapi-admin';
 import { within } from '@testing-library/react';
-import { render, server, screen, waitFor } from '@tests/utils';
+import { fireEvent, render, server, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
@@ -10,20 +10,12 @@ import { ReleaseDetailsPage } from '../ReleaseDetailsPage';
 
 import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
 
-/**
- * Mocking the useDocument hook to avoid validation errors for testing
- */
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useRBAC: jest.fn(() => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true, canPublish: true },
   })),
-}));
-
-jest.mock('@strapi/content-manager/strapi-admin', () => ({
-  ...jest.requireActual('@strapi/content-manager/strapi-admin'),
-  unstable_useDocument: jest.fn().mockReturnValue({ validate: jest.fn().mockReturnValue({}) }),
 }));
 
 describe.skip('Releases details page', () => {
@@ -310,7 +302,7 @@ describe('Create release from skipped entries', () => {
     renderPage();
 
     expect(
-      await screen.findByRole('button', { name: 'Create release from skipped' })
+      await screen.findByRole('button', { name: 'Create release from skipped entries' })
     ).toBeInTheDocument();
   });
 
@@ -338,7 +330,7 @@ describe('Create release from skipped entries', () => {
     await screen.findByText(partialRelease.data.name);
     await screen.findByText('Skipped entries loaded');
     expect(
-      screen.queryByRole('button', { name: 'Create release from skipped' })
+      screen.queryByRole('button', { name: 'Create release from skipped entries' })
     ).not.toBeInTheDocument();
   });
 
@@ -348,7 +340,7 @@ describe('Create release from skipped entries', () => {
     renderPage();
 
     expect(
-      await screen.findByRole('button', { name: 'Create release from skipped' })
+      await screen.findByRole('button', { name: 'Create release from skipped entries' })
     ).toBeInTheDocument();
   });
 
@@ -369,7 +361,7 @@ describe('Create release from skipped entries', () => {
     await screen.findByText(partialRelease.data.name);
     expect(skippedRequest).not.toHaveBeenCalled();
     expect(
-      screen.queryByRole('button', { name: 'Create release from skipped' })
+      screen.queryByRole('button', { name: 'Create release from skipped entries' })
     ).not.toBeInTheDocument();
   });
 });
@@ -472,6 +464,32 @@ describe('Release details tabs, header and rows', () => {
     renderPage();
 
     expect(await screen.findByRole('button', { name: 'Publish' })).toBeEnabled();
+  });
+
+  it('says why the publish of a blocked release was refused', async () => {
+    mockRelease(plannedRelease, [action(1)]);
+    server.use(
+      http.post('/content-releases/:releaseId/publish', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'title must be defined.',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Publish' }));
+
+    expect(await screen.findByText('title must be defined.')).toBeInTheDocument();
   });
 
   it('disables Publish on an empty release', async () => {
@@ -679,6 +697,78 @@ describe('Release details tabs, header and rows', () => {
     expect(within(dialog).getByRole('button', { name: 'Next' })).toBeDisabled();
   });
 
+  // `count` entries not ready, the table showing those from `tableStart`, by 10. The server pages
+  // the entries not ready by the request's `pageSize`.
+  const mockManyNotReady = (count: number, tableStart = 0) => {
+    const notReady = Array.from({ length: count }, (_, index) =>
+      action(index + 1, { isEntryValid: false })
+    );
+    const respond = (rows: unknown[], pageSize: number) =>
+      HttpResponse.json({
+        data: { Article: rows },
+        meta: {
+          pagination: { page: 1, pageSize, total: count, pageCount: Math.ceil(count / pageSize) },
+          contentTypes: {},
+          components: {},
+        },
+      });
+
+    server.use(
+      http.get('/content-releases/:releaseId', () =>
+        HttpResponse.json({
+          data: { ...plannedRelease, actions: { meta: { count, notReadyCount: count } } },
+        })
+      ),
+      http.get('/content-releases/:releaseId/actions', ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        if (params.get('filter') === 'notReady') {
+          const pageSize = Number(params.get('pageSize'));
+          return respond(notReady.slice(0, pageSize), pageSize);
+        }
+        return respond(notReady.slice(tableStart, tableStart + 10), 10);
+      })
+    );
+  };
+
+  it('steps through more entries not ready than load at once', async () => {
+    mockManyNotReady(101);
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Why article 1 isn’t ready' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(await within(dialog).findByText('1 of 101 entries not ready')).toBeInTheDocument();
+
+    // To the last entry of the first load (`fireEvent`: a hundred user clicks take seconds)
+    const next = within(dialog).getByRole('button', { name: 'Next' });
+    for (let step = 1; step < 100; step++) {
+      fireEvent.click(next);
+    }
+    expect(within(dialog).getByText('100 of 101 entries not ready')).toBeInTheDocument();
+
+    // Then past it
+    fireEvent.click(next);
+
+    expect(await within(dialog).findByText('101 of 101 entries not ready')).toBeInTheDocument();
+    expect(within(dialog).getByText('article 101')).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Next' })).toBeDisabled();
+  });
+
+  it('loads the entries not ready up to a row the first load lacks', async () => {
+    mockManyNotReady(201, 140);
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Why article 150 isn’t ready' }));
+
+    const dialog = await screen.findByRole('dialog');
+    // The table's rows come first
+    expect(await within(dialog).findByText('10 of 201 entries not ready')).toBeInTheDocument();
+    expect(within(dialog).getByText('article 150')).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Next' })).toBeEnabled();
+  });
+
   it('steps through the skipped entries of a run, a deleted one included', async () => {
     const deleted = action(1, {
       entry: null,
@@ -756,8 +846,16 @@ describe('Release details tabs, header and rows', () => {
 
     renderPage();
 
+    // In the header, and in place of the table
+    const message = 'This release ran with no entries.';
+    await screen.findByRole('heading', { level: 1 });
+    // The header has no role to find it by
+    // eslint-disable-next-line testing-library/no-node-access
+    const header = document.querySelector<HTMLElement>('[data-strapi-header]') as HTMLElement;
+    const inHeader = await within(header).findByText(message);
+    expect(inHeader).toBeVisible();
     await waitFor(() =>
-      expect(screen.getAllByText('This release ran with no entries.')).toHaveLength(2)
+      expect(screen.getAllByText(message).filter((element) => element !== inHeader)).toHaveLength(1)
     );
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
     expect(screen.queryByText('Open the Content Manager')).not.toBeInTheDocument();

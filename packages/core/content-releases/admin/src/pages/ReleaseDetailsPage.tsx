@@ -51,6 +51,7 @@ import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import {
+  InlineBadge,
   PlannedActionStatus,
   ReleasedActionStatus,
   hasSkipReason,
@@ -74,15 +75,17 @@ import { useTypedDispatch } from '../store/hooks';
 import { isBaseQueryError } from '../utils/api';
 import { getTimezoneOffset } from '../utils/time';
 
-import type { ReleaseActionFilter } from '../../../shared/constants';
 import type {
   ReleaseAction,
+  ReleaseActionFilter,
   ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import type { ReleaseDataResponse } from '../../../shared/contracts/releases';
 
+// The drawer's rows load 100 first, then twice as many each time it needs more
 const REASON_PAGE_SIZE = 100;
-const MAX_REASON_PAGE_SIZE = 500;
+// Looking for the opened row stops there: past it, the drawer steps through the table's rows
+const MAX_REASON_SEARCH_SIZE = 500;
 
 const getRunTotals = (release: ReleaseDataResponse) => {
   if (
@@ -200,7 +203,7 @@ const ReleaseDetailsLayout = ({
   );
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { allowedActions } = useRBAC(PERMISSIONS);
   const { canCreate, canCreateAction, canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
@@ -241,8 +244,8 @@ const ReleaseDetailsLayout = ({
         totalPublishedEntries,
         totalUnpublishedEntries,
       });
-    } else if (isFetchError(response.error)) {
-      // When the response returns an object with 'error', handle fetch error
+    } else if (isBaseQueryError(response.error)) {
+      // The API's error, e.g. why a blocked release was refused
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -368,7 +371,15 @@ const ReleaseDetailsLayout = ({
           primaryAction={
             release.releasedAt ? (
               showCreateFromSkipped && (
-                <Button size="S" variant="default" onClick={() => setIsSkippedDrawerOpen(true)}>
+                <Button
+                  size="S"
+                  variant="default"
+                  onClick={() => setIsSkippedDrawerOpen(true)}
+                  aria-label={formatMessage({
+                    id: 'content-releases.header.actions.create-from-skipped.label',
+                    defaultMessage: 'Create release from skipped entries',
+                  })}
+                >
                   {formatMessage({
                     id: 'content-releases.header.actions.create-from-skipped',
                     defaultMessage: 'Create release from skipped',
@@ -579,6 +590,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const { formatMessage } = useIntl();
   // The row whose reason the drawer shows
   const [reasonActionId, setReasonActionId] = React.useState<ReleaseAction['id'] | null>(null);
+  const [reasonPageSize, setReasonPageSize] = React.useState(REASON_PAGE_SIZE);
   const [{ query }, setQuery] = useQueryParams<GetReleaseActionsQueryParams>();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -636,17 +648,37 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   );
 
   const reasonFilter: ReleaseActionFilter = release?.releasedAt ? 'skipped' : 'notReady';
-  const reasonCount = tabs.find(({ value }) => value === reasonFilter)?.count;
-  const { currentData: reasonData } = useGetReleaseActionsQuery(
+  const {
+    // `data`, not `currentData`, for the drawer: the rows already loaded stay while more load
+    data: reasonData,
+    currentData: currentReasonData,
+    isFetching: isFetchingReasons,
+  } = useGetReleaseActionsQuery(
     {
       releaseId,
       filter: reasonFilter,
       groupBy: selectedGroupBy,
       page: 1,
-      pageSize: Math.min(Math.max(reasonCount ?? REASON_PAGE_SIZE, 1), MAX_REASON_PAGE_SIZE),
+      pageSize: reasonPageSize,
     },
     { skip: !release || reasonActionId === null }
   );
+
+  // A row past the rows loaded so far: load more until it's among them. On the loaded rows of
+  // these very args only, so a failed load doesn't grow it again and again.
+  React.useEffect(() => {
+    if (reasonActionId === null || !currentReasonData) {
+      return;
+    }
+
+    const { total, pageSize } = currentReasonData.meta.pagination;
+    const isLoaded = Object.values(currentReasonData.data)
+      .flat()
+      .some(({ id }) => id === reasonActionId);
+    if (!isLoaded && total > pageSize && pageSize < MAX_REASON_SEARCH_SIZE) {
+      setReasonPageSize(Math.min(pageSize * 2, MAX_REASON_SEARCH_SIZE));
+    }
+  }, [reasonActionId, currentReasonData]);
 
   const [updateReleaseAction] = useUpdateReleaseActionMutation();
 
@@ -862,11 +894,17 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
       .flat()
       .map(({ id }, index) => [id, index])
   );
-  const fullReasonRows = reasonData && Object.values(reasonData.data).flat();
-  const reasonRows =
-    fullReasonRows && fullReasonRows.some(({ id }) => id === reasonActionId)
-      ? reasonData.data
-      : releaseActions;
+  // The drawer steps through every row with a reason once they've loaded, the table's until then.
+  // A row that has no reason there is from other rows, e.g. the planned release's before it ran.
+  const reasonWindow =
+    reasonData &&
+    Object.values(reasonData.data)
+      .flat()
+      .some((action) => action.id === reasonActionId && hasReason(action))
+      ? reasonData
+      : undefined;
+  const reasonRows = reasonWindow?.data ?? releaseActions;
+  const reasonPagination = reasonWindow?.meta.pagination;
   const reasonItems = Object.values(reasonRows)
     .flat()
     .filter(hasReason)
@@ -912,11 +950,11 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                     : undefined
                 }
               >
-                <Flex gap={2}>
+                <Flex tag="span" gap={2}>
                   {formatMessage(label)}
                   {count !== undefined &&
                     (value === activeTab ? (
-                      <Badge active>{count}</Badge>
+                      <InlineBadge active>{count}</InlineBadge>
                     ) : (
                       <Typography textColor="neutral600">{count}</Typography>
                     ))}
@@ -955,7 +993,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           <EmptyStateLayout
             icon={<EmptyDocuments width="16rem" />}
             content={formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.tab.emptyFilter',
+              id: 'content-releases.pages.ReleaseDetails.tab.empty-filter',
               defaultMessage: 'No entries to show here.',
             })}
           />
@@ -1120,7 +1158,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
       </Flex>
       <EntryReasonDrawer
         items={reasonItems}
-        total={reasonData?.meta.pagination.total}
+        total={reasonPagination?.total}
+        onLoadMore={
+          reasonPagination && reasonPagination.total > reasonPagination.pageSize
+            ? () => setReasonPageSize((size) => size * 2)
+            : undefined
+        }
+        // Only the drawer's own rows load more: the table's step right away
+        isLoadingMore={isFetchingReasons && reasonWindow !== undefined}
         selectedId={reasonActionId}
         onSelect={setReasonActionId}
         onClose={() => setReasonActionId(null)}

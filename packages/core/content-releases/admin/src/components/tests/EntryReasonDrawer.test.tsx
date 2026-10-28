@@ -263,6 +263,45 @@ describe('EntryReasonDrawer', () => {
     expect(await screen.findByText('1 of 30 skipped entries')).toBeInTheDocument();
   });
 
+  it('loads the entries after the last one loaded, then steps into them', async () => {
+    const onSelect = jest.fn();
+    const onLoadMore = jest.fn();
+    const props = { total: 3, selectedId: 2, onSelect, onClose: jest.fn(), onLoadMore };
+    const { rerender, user } = render(
+      <EntryReasonDrawer {...props} items={[details(1), details(2)]} />
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Next' }));
+
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+    expect(onSelect).not.toHaveBeenCalled();
+
+    rerender(<EntryReasonDrawer {...props} items={[details(1), details(2)]} isLoadingMore />);
+    // Not twice while they load
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+
+    rerender(<EntryReasonDrawer {...props} items={[details(1), details(2), details(3)]} />);
+
+    expect(onSelect).toHaveBeenCalledWith(3);
+  });
+
+  it('lets Next try again when the entries after the last one failed to load', async () => {
+    const onSelect = jest.fn();
+    const onLoadMore = jest.fn();
+    const props = { total: 3, selectedId: 2, onSelect, onClose: jest.fn(), onLoadMore };
+    const { rerender, user } = render(
+      <EntryReasonDrawer {...props} items={[details(1), details(2)]} />
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Next' }));
+    rerender(<EntryReasonDrawer {...props} items={[details(1), details(2)]} isLoadingMore />);
+    rerender(<EntryReasonDrawer {...props} items={[details(1), details(2)]} />);
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(onLoadMore).toHaveBeenCalledTimes(2);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it("isn't open without a selected entry", () => {
     renderDrawer([details(1)], { selectedId: null as unknown as number });
 

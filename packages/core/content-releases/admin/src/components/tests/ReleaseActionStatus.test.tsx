@@ -91,4 +91,11 @@ describe('ReleasedActionStatus', () => {
     expect(screen.getByText('Unknown')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
+
+  it('shows "Unknown" when the run recorded no outcome', () => {
+    render(<ReleasedActionStatus {...defaultProps} outcome={null} />);
+
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
 });

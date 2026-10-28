@@ -16,7 +16,7 @@ export class ReleaseDetailsPage {
     this.page = page;
     this.publishButton = page.getByRole('button', { name: 'Publish', exact: true });
     this.createFromSkippedButton = page.getByRole('button', {
-      name: 'Create release from skipped',
+      name: 'Create release from skipped entries',
       exact: true,
     });
   }
@@ -47,7 +47,8 @@ export class ReleaseDetailsPage {
 
   /**
    * A tab filtering the entries, named "Label (count)" when it shows a count. With `count`, only
-   * the tab showing exactly that count matches.
+   * the tab showing exactly that count matches. The name mirrors the English
+   * `content-releases.pages.ReleaseDetails.tab.label-with-count` message: a change there breaks this.
    */
   tab(label: string, count?: number): Locator {
     if (count !== undefined) {

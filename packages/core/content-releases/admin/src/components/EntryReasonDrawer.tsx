@@ -50,6 +50,10 @@ export interface EntryReasonDetails {
 interface EntryReasonDrawerProps {
   items: EntryReasonDetails[];
   total?: number;
+  /** Loads the rows after `items`, when there are any: Next on the last one steps into them */
+  onLoadMore?: () => void;
+  /** Rows are loading: Next waits for them. A failed load leaves Next to try again. */
+  isLoadingMore?: boolean;
   selectedId: ReleaseAction['id'] | null;
   onSelect: (id: ReleaseAction['id']) => void;
   onClose: () => void;
@@ -412,6 +416,8 @@ const GoToEntryLink = ({ details }: { details: EntryReasonDetails }) => {
 export const EntryReasonDrawer = ({
   items,
   total,
+  onLoadMore,
+  isLoadingMore = false,
   selectedId,
   onSelect,
   onClose,
@@ -430,6 +436,30 @@ export const EntryReasonDrawer = ({
     current ??
     (selectedId === null || lastShown.current?.id === selectedId ? lastShown.current : null);
   const rowCount = Math.max(total ?? 0, items.length);
+  // The row Next was pressed on while the rows after it load
+  const [advancingFrom, setAdvancingFrom] = React.useState<ReleaseAction['id'] | null>(null);
+  const next = index >= 0 ? items[index + 1] : undefined;
+  React.useEffect(() => {
+    if (advancingFrom === null) {
+      return;
+    }
+
+    // Stepped elsewhere, or closed, meanwhile: nothing to advance from
+    if (advancingFrom !== selectedId) {
+      setAdvancingFrom(null);
+    } else if (next) {
+      setAdvancingFrom(null);
+      onSelect(next.id);
+    }
+  }, [advancingFrom, selectedId, next, onSelect]);
+  const handleNext = () => {
+    if (index < items.length - 1) {
+      onSelect(items[index + 1].id);
+    } else if (onLoadMore) {
+      setAdvancingFrom(selectedId);
+      onLoadMore();
+    }
+  };
 
   return (
     <Drawer
@@ -480,8 +510,12 @@ export const EntryReasonDrawer = ({
                   <Button
                     variant="tertiary"
                     size="S"
-                    disabled={items.length === 0 || index === items.length - 1}
-                    onClick={() => onSelect(items[index + 1].id)}
+                    disabled={
+                      items.length === 0 ||
+                      isLoadingMore ||
+                      (index === items.length - 1 && !onLoadMore)
+                    }
+                    onClick={handleNext}
                   >
                     {formatMessage({
                       id: 'content-releases.reason-drawer.next',
