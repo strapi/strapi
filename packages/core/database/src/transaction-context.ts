@@ -20,24 +20,11 @@ export interface TransactionObject {
   rollback: () => Promise<void>;
   get: () => Knex.Transaction;
 }
-export interface CallbackLogger {
-  error: (message: string) => void;
-}
-
-/**
- * One database instance owns this set. A process can boot several instances,
- * and one shutdown must not wait on another's commit hooks.
- */
-export interface CallbackTracker {
-  pending: Set<Promise<unknown>>;
-  logger?: CallbackLogger;
-}
 
 export interface Store {
   trx: Knex.Transaction | null;
   commitCallbacks: Callback[];
   rollbackCallbacks: Callback[];
-  tracker?: CallbackTracker;
 }
 
 const storage = new AsyncLocalStorage<Store>();
@@ -89,146 +76,41 @@ const waitForDeadlockRetry = (attempt: number) =>
   });
 
 /**
- * Commit and rollback hooks run after the transaction finishes, and the
- * caller does not wait for them. Hooks that return a promise (document
- * events, history, audit logs) keep using the database, so they are tracked
- * until they settle and Database#destroy can wait before closing the pool.
- * Hooks registered synchronously while a batch runs are included. A rejection
- * is logged and does not change the transaction result: the data is already
- * committed, and failing the request would invite a retry of that write.
- *
- * Shutdown stops waiting after this long. A hook that never settles (a hung
- * listener) must not block process exit.
+ * Errors thrown by commit or rollback hooks. The transaction has already been
+ * finalised when a hook runs, so a deadlock raised by a hook must not replay
+ * the transaction handler.
  */
-const CALLBACK_DRAIN_TIMEOUT_MS = 10_000;
+const hookErrors = new WeakSet<object>();
 
-const formatCallbackError = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.stack ?? error.message;
-  }
+const isTransactionHookError = (error: unknown) =>
+  !!error && typeof error === 'object' && hookErrors.has(error);
 
-  return String(error);
-};
-
-const reportCallbackError = (error: unknown, logger?: CallbackLogger) => {
-  const message = `Transaction callback failed: ${formatCallbackError(error)}`;
-
-  try {
-    if (logger) {
-      logger.error(message);
-      return;
-    }
-
-    console.error(message);
-  } catch {
-    // A broken logger must not leave the hook in the pending set.
-    try {
-      console.error(message);
-    } catch {
-      // ignore
-    }
-  }
-};
-
-const track = (
-  promise: Promise<unknown>,
-  pending: Set<Promise<unknown>> | undefined,
-  logger?: CallbackLogger
-) => {
-  const settled = promise.then(
-    () => undefined,
-    (error: unknown) => {
-      reportCallbackError(error, logger);
-    }
-  );
-
-  if (!pending) {
-    return settled;
-  }
-
-  pending.add(settled);
-  settled.then(
-    () => {
-      pending.delete(settled);
-    },
-    () => {
-      pending.delete(settled);
-    }
-  );
-  return settled;
-};
-
-const runCallbacks = (callbacks: Callback[] | undefined, tracker?: CallbackTracker) => {
+const runCallbacks = async (callbacks: Callback[] | undefined) => {
   if (!callbacks) {
     return;
   }
 
+  // Hooks can register more hooks while they run.
   while (callbacks.length > 0) {
     const batch = callbacks.splice(0, callbacks.length);
     for (const cb of batch) {
       try {
-        const result = cb();
-        if (result && typeof (result as Promise<unknown>).then === 'function') {
-          track(result as Promise<unknown>, tracker?.pending, tracker?.logger);
-        }
+        await cb();
       } catch (error) {
-        // The transaction is already committed. A synchronous throw must not
-        // be retried as a deadlock.
-        reportCallbackError(error, tracker?.logger);
+        if (error && typeof error === 'object') {
+          hookErrors.add(error);
+        }
+
+        // Drop the remaining hooks so a reused store does not run them later.
+        callbacks.length = 0;
+        throw error;
       }
     }
   }
 };
 
-const waitForPendingCallbacks = async (
-  pending: Set<Promise<unknown>>,
-  options?: {
-    timeoutMs?: number;
-    onTimeout?: (pendingCount: number) => void;
-  }
-) => {
-  const timeoutMs = options?.timeoutMs ?? CALLBACK_DRAIN_TIMEOUT_MS;
-
-  if (pending.size === 0) {
-    return;
-  }
-
-  let timedOut = false;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-
-  const timeout = new Promise<void>((resolve) => {
-    timer = setTimeout(() => {
-      timedOut = true;
-      resolve();
-    }, timeoutMs);
-  });
-
-  const drain = async () => {
-    while (pending.size > 0 && !timedOut) {
-      // Snapshot so hooks that register more hooks are picked up on the next pass.
-      await Promise.allSettled(Array.from(pending));
-    }
-  };
-
-  try {
-    await Promise.race([drain(), timeout]);
-  } finally {
-    if (timer) {
-      clearTimeout(timer);
-    }
-  }
-
-  if (pending.size > 0) {
-    options?.onTimeout?.(pending.size);
-  }
-};
-
 const transactionCtx = {
-  async run<TCallback extends Callback>(
-    trx: Knex.Transaction,
-    cb: TCallback,
-    tracker?: CallbackTracker
-  ) {
+  async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const store = storage.getStore();
     return storage.run<ReturnType<TCallback>, void[]>(
       {
@@ -236,8 +118,6 @@ const transactionCtx = {
         // Fill with existing callbacks if nesting transactions
         commitCallbacks: store?.commitCallbacks || [],
         rollbackCallbacks: store?.rollbackCallbacks || [],
-        // Nested work commits with the outermost transaction, so it shares that tracker.
-        tracker: store?.tracker ?? tracker,
       },
       cb
     );
@@ -265,7 +145,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    runCallbacks(store?.commitCallbacks, store?.tracker);
+    await runCallbacks(store?.commitCallbacks);
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -285,7 +165,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    runCallbacks(store?.rollbackCallbacks, store?.tracker);
+    await runCallbacks(store?.rollbackCallbacks);
   },
 
   onCommit(cb: Callback) {
@@ -303,4 +183,4 @@ const transactionCtx = {
   },
 };
 
-export { isDeadlockError, transactionCtx, waitForDeadlockRetry, waitForPendingCallbacks };
+export { isDeadlockError, isTransactionHookError, transactionCtx, waitForDeadlockRetry };

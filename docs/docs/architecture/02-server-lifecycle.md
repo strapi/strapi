@@ -144,7 +144,7 @@ If `start()` catches an error, it calls `stopWithError()`. This logs the error a
 3. `strapi.app.destroy({ strapi })`, if the application defines it.
 4. `server.destroy()`.
 5. `eventHub.destroy()`, which removes all listeners and subscribers.
-6. `db.destroy()`, which waits for commit and rollback hooks that are still running, then closes the pool.
+6. `db.destroy()`.
 7. `process.removeAllListeners()`.
 8. `delete global.strapi`. This lets a test create a new instance.
 9. The service container is cleared so a test that keeps the instance does not retain every service. The logger is registered again. Telemetry is registered again when it was loaded, because `strapi export` sends an event after the transfer destroys the instance. Reading any other service after this throws.

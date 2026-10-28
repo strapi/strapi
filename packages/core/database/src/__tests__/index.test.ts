@@ -287,41 +287,61 @@ describe('Database', () => {
         await db.destroy();
       });
 
-      it(`does not retry a transaction when a commit hook fails with ${title}`, async () => {
+      it(`rejects without retrying when a commit hook fails with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
-        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         let runs = 0;
-        await db.transaction(async ({ onCommit }) => {
-          runs += 1;
-          onCommit(() =>
-            Promise.reject(Object.assign(new Error('deadlock detected'), { code: '40P01' }))
-          );
-        });
+        const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+        await expect(
+          db.transaction(async ({ onCommit }) => {
+            runs += 1;
+            onCommit(() => Promise.reject(error));
+          })
+        ).rejects.toBe(error);
 
         expect(runs).toBe(1);
         await db.destroy();
       });
 
-      it(`does not retry when a commit hook throws synchronously with ${title}`, async () => {
+      it(`rejects without retrying when a commit hook throws synchronously with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
-        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         let runs = 0;
-        await db.transaction(async ({ onCommit }) => {
-          runs += 1;
-          onCommit(() => {
+        const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+        await expect(
+          db.transaction(async ({ onCommit }) => {
+            runs += 1;
+            onCommit(() => {
+              throw error;
+            });
+          })
+        ).rejects.toBe(error);
+
+        expect(runs).toBe(1);
+        await db.destroy();
+      });
+
+      it(`rejects without retrying when a rollback hook fails with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        let runs = 0;
+        const hookError = new Error('rollback hook failed');
+        await expect(
+          db.transaction(async ({ onRollback }) => {
+            runs += 1;
+            onRollback(() => Promise.reject(hookError));
             throw Object.assign(new Error('deadlock detected'), { code: '40P01' });
-          });
-        });
+          })
+        ).rejects.toBe(hookError);
 
         expect(runs).toBe(1);
         await db.destroy();
       });
 
-      it(`returns before commit hooks finish and destroy waits for them with ${title}`, async () => {
+      it(`waits for commit hooks before resolving with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
 
@@ -338,9 +358,8 @@ describe('Database', () => {
           );
         });
 
-        expect(finished).toBe(false);
-        await db.destroy();
         expect(finished).toBe(true);
+        await db.destroy();
       });
     });
   });

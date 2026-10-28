@@ -6,8 +6,8 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - 'Deadlock retry: the outermost transaction runs the handler up to 3 times. Commit callbacks are not awaited, and a hook failure does not retry the write.'
-  - 'update locks the document rows with FOR NO KEY UPDATE on Postgres and FOR UPDATE on MySQL. Shutdown waits 10 seconds for commit callbacks. Checked against repository.ts, query-builder.ts and transaction-context.ts.'
+  - 'Deadlock retry: the outermost transaction runs the handler up to 3 times. Commit callbacks are awaited, a failing callback rejects the call, and a hook failure does not retry the write.'
+  - 'update locks the document rows with FOR NO KEY UPDATE on Postgres and FOR UPDATE on MySQL. Checked against repository.ts, query-builder.ts and transaction-context.ts.'
   - The webhook runner paragraph describes `contentTypeEvents`. That claim was checked against `webhook-runner.ts` and `webhook-store.ts`. The rest of this page was not re-verified.
 ---
 
@@ -138,7 +138,7 @@ Database lifecycles run inside the transaction. If the transaction rolls back la
 
 The repository does not emit events directly. `emitEvent` calls `strapi.db.transaction(({ onCommit }) => ...)` and registers a callback. The callback runs only after the outermost transaction commits. It does not run on rollback.
 
-The transaction context starts those callbacks and does not await them. The Document Service call can resolve before the event reaches its listeners. A callback that throws or rejects is logged and does not fail the write. Shutdown waits up to 10 seconds for callbacks that are still running, then continues and logs a warning.
+The transaction context awaits those callbacks before the outermost `strapi.db.transaction` resolves. A callback that throws or rejects makes the call reject, although the data is already committed. `emitEvent` catches and logs its own errors, so an event failure does not fail the write.
 
 When the callback runs, the event manager:
 

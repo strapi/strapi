@@ -1,9 +1,4 @@
-import { isDeadlockError, transactionCtx, waitForPendingCallbacks } from '../transaction-context';
-
-const flush = () =>
-  new Promise((resolve) => {
-    setImmediate(resolve);
-  });
+import { isDeadlockError, isTransactionHookError, transactionCtx } from '../transaction-context';
 
 const fakeTrx = () =>
   ({
@@ -27,95 +22,55 @@ describe('isDeadlockError', () => {
   });
 });
 
-describe('transaction callback tracking', () => {
-  test('logs a rejected commit hook on that database and drops it from the set', async () => {
-    const logger = { error: jest.fn() };
-    const pending = new Set<Promise<unknown>>();
-    const other = new Set<Promise<unknown>>();
+describe('transaction hooks', () => {
+  test('commit waits for commit hooks, including hooks they register', async () => {
+    const order: string[] = [];
 
-    await transactionCtx.run(
-      fakeTrx(),
-      async () => {
-        transactionCtx.onCommit(() => Promise.reject(new Error('hook failed')));
-        await transactionCtx.commit(fakeTrx());
-      },
-      { pending, logger }
-    );
-
-    await flush();
-
-    expect(logger.error).toHaveBeenCalledTimes(1);
-    expect(logger.error.mock.calls[0][0]).toContain('hook failed');
-    expect(pending.size).toBe(0);
-    expect(other.size).toBe(0);
-  });
-
-  test('a second database does not see the first database hooks', async () => {
-    const firstLogger = { error: jest.fn() };
-    const secondLogger = { error: jest.fn() };
-    const first = new Set<Promise<unknown>>();
-    const second = new Set<Promise<unknown>>();
-
-    await transactionCtx.run(
-      fakeTrx(),
-      async () => {
-        transactionCtx.onCommit(() => {
-          throw new Error('sync fail');
+    await transactionCtx.run(fakeTrx(), async () => {
+      transactionCtx.onCommit(async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 10);
         });
-        await transactionCtx.commit(fakeTrx());
-      },
-      { pending: first, logger: firstLogger }
-    );
+        order.push('first');
+        transactionCtx.onCommit(() => {
+          order.push('nested');
+        });
+      });
+      await transactionCtx.commit(fakeTrx());
+      order.push('after commit');
+    });
 
-    await transactionCtx.run(
-      fakeTrx(),
-      async () => {
-        transactionCtx.onCommit(() => undefined);
-        await transactionCtx.commit(fakeTrx());
-      },
-      { pending: second, logger: secondLogger }
-    );
-
-    expect(firstLogger.error).toHaveBeenCalledTimes(1);
-    expect(secondLogger.error).not.toHaveBeenCalled();
-    expect(first.size).toBe(0);
-    expect(second.size).toBe(0);
+    expect(order).toEqual(['first', 'nested', 'after commit']);
   });
 
-  test('destroy wait returns when a hook is still pending and reports the count', async () => {
-    let release: () => void = () => {};
-    const hung = new Promise<void>((resolve) => {
-      release = resolve;
+  test('a rejected commit hook fails commit and is marked as a hook error', async () => {
+    const error = Object.assign(new Error('hook failed'), { code: '40P01' });
+    const later = jest.fn();
+
+    await transactionCtx.run(fakeTrx(), async () => {
+      transactionCtx.onCommit(() => Promise.reject(error));
+      transactionCtx.onCommit(later);
+      await expect(transactionCtx.commit(fakeTrx())).rejects.toBe(error);
     });
-    const pending = new Set<Promise<unknown>>([hung]);
-    const onTimeout = jest.fn();
 
-    await waitForPendingCallbacks(pending, { timeoutMs: 20, onTimeout });
-
-    expect(onTimeout).toHaveBeenCalledWith(1);
-    expect(pending.has(hung)).toBe(true);
-
-    release();
-    await flush();
+    expect(later).not.toHaveBeenCalled();
+    expect(isTransactionHookError(error)).toBe(true);
   });
 
-  test('destroy wait finishes without a warning when hooks settle', async () => {
-    let resolveHook: () => void = () => {};
-    const hook = new Promise<void>((resolve) => {
-      resolveHook = resolve;
+  test('a throwing rollback hook fails rollback', async () => {
+    const error = new Error('rollback hook failed');
+
+    await transactionCtx.run(fakeTrx(), async () => {
+      transactionCtx.onRollback(() => {
+        throw error;
+      });
+      await expect(transactionCtx.rollback(fakeTrx())).rejects.toBe(error);
     });
-    const pending = new Set<Promise<unknown>>();
-    const tracked = hook.then(() => undefined);
-    pending.add(tracked);
-    tracked.then(() => pending.delete(tracked));
 
-    const onTimeout = jest.fn();
-    const waiting = waitForPendingCallbacks(pending, { timeoutMs: 500, onTimeout });
+    expect(isTransactionHookError(error)).toBe(true);
+  });
 
-    resolveHook();
-    await waiting;
-
-    expect(onTimeout).not.toHaveBeenCalled();
-    expect(pending.size).toBe(0);
+  test('a driver error is not a hook error', () => {
+    expect(isTransactionHookError(Object.assign(new Error('x'), { code: '40P01' }))).toBe(false);
   });
 });
