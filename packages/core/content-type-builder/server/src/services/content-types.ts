@@ -254,6 +254,10 @@ export const editContentType = async (
 ) => {
   const builder = createBuilder();
 
+  if (builder.contentTypes.has(uid) === false) {
+    throw new ApplicationError('contentType.notFound');
+  }
+
   const previousSchema = builder.contentTypes.get(uid).schema;
   const isPluginContentType = Boolean(builder.contentTypes.get(uid).plugin);
   const previousKind = previousSchema.kind;
