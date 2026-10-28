@@ -13,7 +13,6 @@ export default function createBuilder() {
   const components = Object.values(strapi.components).map((componentInput) => ({
     category: componentInput.category,
     modelName: componentInput.modelName,
-    plugin: componentInput.modelName,
     uid: componentInput.uid,
     filename: componentInput.__filename__,
     dir: join(strapi.dirs.app.components, componentInput.category),
