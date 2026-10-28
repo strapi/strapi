@@ -9,4 +9,10 @@ fi
 
 jestOptions=($JEST_OPTIONS)
 
-yarn test:e2e --setup --concurrency=1 -- "${jestOptions[@]}"
+domainArgs=()
+if [[ -n "${DOMAINS:-}" ]]; then
+  # shellcheck disable=SC2206 # deliberate word splitting: DOMAINS is a space separated list
+  domainArgs=(--domains ${DOMAINS})
+fi
+
+yarn test:e2e --setup --concurrency=1 "${domainArgs[@]}" -- "${jestOptions[@]}"

@@ -151,6 +151,11 @@ export default {
 
     const document = await createOrUpdateDocument(ctx);
 
+    // The document can be deleted between the existence check and the update
+    if (document === null) {
+      return ctx.notFound();
+    }
+
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
@@ -234,8 +239,14 @@ export default {
       }
 
       const publishResult = await documentManager.publish(document.documentId, model, { locale });
+      const publishedVersion = publishResult.at(0);
 
-      return publishResult.at(0);
+      // The draft can be deleted between the existence check and the publish
+      if (publishedVersion === undefined) {
+        throw new errors.NotFoundError();
+      }
+
+      return publishedVersion;
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);

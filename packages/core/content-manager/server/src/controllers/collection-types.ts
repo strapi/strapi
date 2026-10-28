@@ -1,4 +1,4 @@
-import { isNil, omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import {
   setCreatorFields,
@@ -361,7 +361,7 @@ export default {
 
     const { locale, status } = await getDocumentLocaleAndStatus(queryForValidation, model);
 
-    const paramsForDocumentService = omit(['publicationStatusFilter'], permissionQuery) as Record<
+    const paramsForDocumentService = omit(permissionQuery, ['publicationStatusFilter']) as Record<
       string,
       unknown
     >;
@@ -535,6 +535,11 @@ export default {
 
     const updatedVersion = await updateDocument(ctx);
 
+    // The document can be deleted between the existence check and the update
+    if (updatedVersion === null) {
+      return ctx.notFound();
+    }
+
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
   },
@@ -574,6 +579,11 @@ export default {
     const sanitizedBody = await sanitizeFn(body);
 
     const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
+
+    // The source document can be deleted between the existence check and the clone
+    if (clonedDocument === undefined) {
+      return ctx.notFound();
+    }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
@@ -681,7 +691,7 @@ export default {
        * 2. User can update and publish a document
        *    Action will be allowed, but document will not be updated, only published with the latest draft
        */
-      const isCreate = isNil(id);
+      const isCreate = id == null;
       if (isCreate) {
         if (permissionChecker.cannot.create()) {
           throw new errors.ForbiddenError();

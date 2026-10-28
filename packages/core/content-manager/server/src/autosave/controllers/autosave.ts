@@ -1,4 +1,4 @@
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import { errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 
@@ -91,7 +91,7 @@ const createAutosaveController = ({ strapi }: { strapi: Core.Strapi }) => {
         : { added: {}, removed: {} };
       // The content type may have changed since the backup was taken, and a field it no longer
       // has cannot be restored into the form, so it is dropped rather than handed back.
-      const data = omit(Object.keys(unknownAttributes.removed), entry.data);
+      const data = omit(entry.data, Object.keys(unknownAttributes.removed));
       const hasChanged =
         Object.keys(unknownAttributes.added).length > 0 ||
         Object.keys(unknownAttributes.removed).length > 0;
@@ -155,7 +155,7 @@ const createAutosaveController = ({ strapi }: { strapi: Core.Strapi }) => {
           data,
           // Recorded alongside the payload so a later Content-Type Builder change can be detected
           // when the backup is read back.
-          schema: omit(FIELDS_TO_IGNORE, strapi.getModel(scope.contentType).attributes),
+          schema: omit(strapi.getModel(scope.contentType).attributes, FIELDS_TO_IGNORE),
           baseVersion: body.baseVersion,
         }
       );

@@ -56,6 +56,33 @@ describe('Schema', () => {
       },
     });
 
+    const schemaWithSearchable = (searchable?: boolean | null) => ({
+      data: {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: 'api::article.article',
+            displayName: 'Article',
+            draftAndPublish: false,
+            singularName: 'article',
+            pluralName: 'articles',
+            kind: 'collectionType',
+            attributes: [
+              {
+                action: 'create',
+                name: 'secret',
+                properties: {
+                  type: 'text',
+                  private: true,
+                  ...(searchable === undefined ? {} : { searchable }),
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
     test('reports a missing schema', () => {
       expect(() => validateUpdateSchema(undefined)).toThrow('Schema is required');
     });
@@ -86,6 +113,283 @@ describe('Schema', () => {
           components: [{ config: {} }],
           contentTypes: [{ options: {}, pluginOptions: {} }],
         },
+      });
+    });
+
+    test('retains searchable when a private attribute explicitly disables search', () => {
+      expect(validateUpdateSchema(schemaWithSearchable(false))).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true, searchable: false },
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    test('retains searchable when a private attribute explicitly enables search', () => {
+      expect(validateUpdateSchema(schemaWithSearchable(true))).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true, searchable: true },
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    test('accepts an absent searchable property', () => {
+      const schema = validateUpdateSchema(schemaWithSearchable());
+
+      expect(schema).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true },
+                },
+              ],
+            },
+          ],
+        },
+      });
+      expect(schema).not.toHaveProperty('data.contentTypes.0.attributes.0.properties.searchable');
+    });
+
+    test('rejects a null searchable property', () => {
+      expect(() => validateUpdateSchema(schemaWithSearchable(null))).toThrow();
+    });
+
+    describe('renames', () => {
+      const schemaWithRenames = (renames: unknown) => ({
+        data: {
+          contentTypes: [
+            {
+              action: 'update',
+              uid: 'api::article.article',
+              displayName: 'Article',
+              draftAndPublish: false,
+              kind: 'collectionType',
+              renames,
+              attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+            },
+          ],
+        },
+      });
+
+      test('accepts valid rename hops', () => {
+        expect(
+          validateUpdateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]))
+        ).toMatchObject({
+          data: { contentTypes: [{ renames: [{ oldName: 'title', newName: 'heading' }] }] },
+        });
+      });
+
+      test('accepts a draft-and-publish-only reserved name as the old name of a hop', () => {
+        // `status` is a legal attribute while draft and publish is off; renaming it away
+        // is how a type becomes eligible to enable draft and publish.
+        expect(
+          validateUpdateSchema(schemaWithRenames([{ oldName: 'status', newName: 'state' }]))
+        ).toMatchObject({
+          data: { contentTypes: [{ renames: [{ oldName: 'status', newName: 'state' }] }] },
+        });
+      });
+
+      test.each([
+        ['a newline in the new name', { oldName: 'title', newName: 'heading\nprocess.exit(1)' }],
+        ['a line separator in the new name', { oldName: 'title', newName: 'heading\u2028x' }],
+        [
+          'a name that does not match the attribute name rules',
+          { oldName: 'title', newName: '1x' },
+        ],
+        ['an empty name', { oldName: '', newName: 'heading' }],
+        ['a name longer than 64 characters', { oldName: 'title', newName: 'a'.repeat(65) }],
+        ['a reserved name', { oldName: 'title', newName: 'id' }],
+        ['a draft-and-publish reserved new name', { oldName: 'title', newName: 'status' }],
+        ['a reserved old name', { oldName: 'documentId', newName: 'heading' }],
+        ['a hop that does not change the name', { oldName: 'title', newName: 'title' }],
+      ])('rejects %s', (_label, hop) => {
+        expect(() => validateUpdateSchema(schemaWithRenames([hop]))).toThrow();
+      });
+
+      test('rejects more than 200 hops', () => {
+        const hops = Array.from({ length: 201 }, (_value, index) => ({
+          oldName: `field${index}`,
+          newName: `field${index + 1}`,
+        }));
+
+        expect(() => validateUpdateSchema(schemaWithRenames(hops))).toThrow();
+      });
+    });
+
+    describe('uid targetField', () => {
+      let customFieldLookup: jest.Mock;
+
+      beforeEach(() => {
+        customFieldLookup = jest.fn();
+        global.strapi = {
+          contentTypes: {},
+          get: jest.fn((name: string) =>
+            name === 'custom-fields' ? { get: customFieldLookup } : {}
+          ),
+        } as any;
+      });
+
+      const schemaWithUid = ({
+        action,
+        targetField,
+        target,
+      }: {
+        action: 'create' | 'update';
+        targetField: string;
+        target?: Record<string, unknown>;
+      }) => ({
+        data: {
+          contentTypes: [
+            {
+              action,
+              uid: 'api::article.article',
+              displayName: 'Article',
+              draftAndPublish: false,
+              kind: 'collectionType',
+              ...(action === 'create' ? { singularName: 'article', pluralName: 'articles' } : {}),
+              attributes: [
+                ...(target ? [{ action, name: 'heading', properties: target }] : []),
+                { action, name: 'slug', properties: { type: 'uid', targetField } },
+              ],
+            },
+          ],
+        },
+      });
+
+      const colorPicker = { type: 'customField', customField: 'plugin::color-picker.color' };
+
+      describe.each(['create', 'update'] as const)('on %s', (action) => {
+        test('accepts a string target', () => {
+          expect(() =>
+            validateUpdateSchema(
+              schemaWithUid({ action, targetField: 'heading', target: { type: 'string' } })
+            )
+          ).not.toThrow();
+        });
+
+        test('accepts a custom field stored as a string', () => {
+          customFieldLookup.mockReturnValue({ type: 'string' });
+
+          expect(() =>
+            validateUpdateSchema(
+              schemaWithUid({ action, targetField: 'heading', target: colorPicker })
+            )
+          ).not.toThrow();
+          expect(customFieldLookup).toHaveBeenCalledWith('plugin::color-picker.color');
+        });
+
+        test('rejects a custom field stored as an integer', () => {
+          customFieldLookup.mockReturnValue({ type: 'integer' });
+
+          expect(() =>
+            validateUpdateSchema(
+              schemaWithUid({ action, targetField: 'heading', target: colorPicker })
+            )
+          ).toThrow('Invalid target type');
+        });
+
+        test('rejects an unknown custom field', () => {
+          customFieldLookup.mockImplementation(() => {
+            throw new Error('Could not find Custom Field: plugin::color-picker.color');
+          });
+
+          expect(() =>
+            validateUpdateSchema(
+              schemaWithUid({ action, targetField: 'heading', target: colorPicker })
+            )
+          ).toThrow('Invalid target type');
+        });
+
+        test('rejects an integer target', () => {
+          expect(() =>
+            validateUpdateSchema(
+              schemaWithUid({ action, targetField: 'heading', target: { type: 'integer' } })
+            )
+          ).toThrow('Invalid target type');
+        });
+      });
+
+      test('rejects a missing target on create', () => {
+        expect(() =>
+          validateUpdateSchema(schemaWithUid({ action: 'create', targetField: 'title' }))
+        ).toThrow('Target does not exist');
+      });
+
+      test('accepts a missing target on update', () => {
+        expect(() =>
+          validateUpdateSchema(schemaWithUid({ action: 'update', targetField: 'title' }))
+        ).not.toThrow();
+      });
+
+      test('ignores a deleted attribute with the target name on update', () => {
+        expect(() =>
+          validateUpdateSchema({
+            data: {
+              contentTypes: [
+                {
+                  action: 'update',
+                  uid: 'api::article.article',
+                  displayName: 'Article',
+                  draftAndPublish: false,
+                  kind: 'collectionType',
+                  renames: [{ oldName: 'heading', newName: 'title' }],
+                  attributes: [
+                    { action: 'delete', name: 'heading' },
+                    { action: 'update', name: 'title', properties: { type: 'string' } },
+                    {
+                      action: 'update',
+                      name: 'slug',
+                      properties: { type: 'uid', targetField: 'heading' },
+                    },
+                  ],
+                },
+              ],
+            },
+          })
+        ).not.toThrow();
+      });
+
+      test('accepts a uid whose target is deleted in the same update', () => {
+        expect(() =>
+          validateUpdateSchema({
+            data: {
+              contentTypes: [
+                {
+                  action: 'update',
+                  uid: 'api::article.article',
+                  displayName: 'Article',
+                  draftAndPublish: false,
+                  kind: 'collectionType',
+                  attributes: [
+                    { action: 'delete', name: 'heading' },
+                    {
+                      action: 'update',
+                      name: 'slug',
+                      properties: { type: 'uid', targetField: 'heading' },
+                    },
+                  ],
+                },
+              ],
+            },
+          })
+        ).not.toThrow();
       });
     });
   });
@@ -213,6 +517,133 @@ describe('Schema', () => {
         },
         false
       );
+    });
+
+    test('allows enabling draft and publish when status is renamed away in the same update', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          renames: [{ oldName: 'status', newName: 'state' }],
+          attributes: [{ action: 'update', name: 'state' }],
+        },
+        false
+      );
+    });
+
+    test('allows enabling draft and publish when status is renamed away without rename hops', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          attributes: [
+            { action: 'update', name: 'title' },
+            { action: 'update', name: 'state' },
+          ],
+        },
+        false
+      );
+    });
+
+    test('blocks enabling draft and publish when a rename hop drops status but the payload keeps it', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          renames: [{ oldName: 'status', newName: 'state' }],
+          attributes: [
+            { action: 'update', name: 'title' },
+            { action: 'update', name: 'status' },
+          ],
+        },
+        true
+      );
+    });
+
+    test('blocks enabling draft and publish when a non-configurable status is left out of the payload', () => {
+      global.strapi.contentTypes['api::reservation.reservation'].attributes.status = {
+        type: 'enumeration',
+        enum: ['confirmed', 'canceled'],
+        configurable: false,
+      };
+
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          attributes: [{ action: 'update', name: 'title' }],
+        },
+        true
+      );
+
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          attributes: [
+            { action: 'update', name: 'title' },
+            { action: 'delete', name: 'status' },
+          ],
+        },
+        true
+      );
+    });
+
+    test('blocks enabling draft and publish when a later hop renames another field onto status', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          renames: [
+            { oldName: 'status', newName: 'state' },
+            { oldName: 'title', newName: 'status' },
+          ],
+          attributes: [
+            { action: 'update', name: 'state' },
+            { action: 'update', name: 'status' },
+          ],
+        },
+        true
+      );
+    });
+
+    test('accepts a full update that renames status away while enabling draft and publish', () => {
+      expect(
+        validateUpdateSchema({
+          data: {
+            contentTypes: [
+              {
+                action: 'update',
+                uid: 'api::reservation.reservation',
+                displayName: 'Reservation',
+                draftAndPublish: true,
+                kind: 'collectionType',
+                renames: [{ oldName: 'status', newName: 'state' }],
+                attributes: [
+                  { action: 'update', name: 'title', properties: { type: 'string' } },
+                  {
+                    action: 'update',
+                    name: 'state',
+                    properties: { type: 'enumeration', enum: ['confirmed', 'canceled'] },
+                  },
+                ],
+              },
+            ],
+          },
+        })
+      ).toMatchObject({
+        data: {
+          contentTypes: [
+            { draftAndPublish: true, renames: [{ oldName: 'status', newName: 'state' }] },
+          ],
+        },
+      });
     });
 
     test('allows draft and publish when no reserved attributes are present', () => {

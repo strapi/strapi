@@ -1,4 +1,4 @@
-import { difference, omit } from 'lodash/fp';
+import { difference, omit } from 'lodash';
 import type { Struct } from '@strapi/types';
 
 /**
@@ -33,7 +33,7 @@ export const getSchemaAttributesDiff = (
   snapshotAttributes: Struct.SchemaAttributes,
   contentTypeAttributes: Struct.SchemaAttributes
 ) => {
-  const sanitizedContentTypeAttributes = omit(FIELDS_TO_IGNORE, contentTypeAttributes);
+  const sanitizedContentTypeAttributes = omit(contentTypeAttributes, FIELDS_TO_IGNORE);
 
   const snapshotKeys = Object.keys(snapshotAttributes);
   const contentTypeKeys = Object.keys(sanitizedContentTypeAttributes);
