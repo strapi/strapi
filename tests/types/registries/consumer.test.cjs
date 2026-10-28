@@ -453,10 +453,14 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
-  test(`${resolution}: action providers accept explicit undefined optional fields`, () => {
+  test(`${resolution}: action providers check declared permission action IDs`, () => {
     assertClean(
       compile(['strapi-strict.d.ts', 'action-provider.ts']),
       `${resolution}, action provider registration`
+    );
+    assertClean(
+      compile(['action-provider-permissive.ts']),
+      `${resolution}, action provider without strict types`
     );
   });
 
