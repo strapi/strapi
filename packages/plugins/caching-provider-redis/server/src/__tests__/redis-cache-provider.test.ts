@@ -74,14 +74,21 @@ describe('createRedisCacheProvider', () => {
     expect(redis.del).toHaveBeenCalledWith(`${DEFAULT_KEY_PREFIX}ns${SEP}k`);
   });
 
-  it('set with expiresAt calls pexpireat', async () => {
+  it('set with expiresAt uses one SET PXAT and does not pexpireat', async () => {
     const redis = buildMockRedis();
     const exp = new Date('2035-01-01T00:00:00.000Z');
 
     const provider = createRedisCacheProvider(redis as any, {});
     await provider.set('ns', 'k', 'v', { expiresAt: exp });
 
-    expect(redis.pexpireat).toHaveBeenCalledWith(`${DEFAULT_KEY_PREFIX}ns${SEP}k`, exp.getTime());
+    expect(redis.set).toHaveBeenCalledWith(
+      `${DEFAULT_KEY_PREFIX}ns${SEP}k`,
+      expect.stringContaining('"v"'),
+      'PXAT',
+      exp.getTime()
+    );
+    expect(redis.pexpireat).not.toHaveBeenCalled();
+    expect(redis.persist).not.toHaveBeenCalled();
   });
 
   it('delete removes the key', async () => {

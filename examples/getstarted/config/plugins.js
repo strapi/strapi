@@ -1,10 +1,6 @@
 'use strict';
 
 module.exports = () => ({
-  // Requires Redis and a matching server.cache.providers.redis config when enabled
-  'cache-provider-redis': {
-    enabled: false,
-  },
   graphql: {
     enabled: true,
     config: {

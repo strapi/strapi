@@ -47,6 +47,13 @@ describe('caching provider init', () => {
     cachingProvider.init!(strapi);
 
     expect(models.add).toHaveBeenCalledWith(cacheEntryModel);
+    expect(cacheEntryModel.indexes).toEqual([
+      {
+        name: 'strapi_cache_entries_namespace_key_unique',
+        columns: ['namespace', 'key'],
+        type: 'unique',
+      },
+    ]);
 
     const registry = resolvers.get('cacheProviderRegistry') as {
       getRegisteredNames: () => string[];

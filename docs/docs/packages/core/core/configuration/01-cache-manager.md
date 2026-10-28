@@ -63,6 +63,7 @@ Types: [`ServerCache`](https://github.com/strapi/strapi/blob/main/packages/core/
 ### `database`
 
 - Table **`strapi_cache_entries`**, model uid **`strapi::cache-entry`**: `namespace`, `key`, `value` (JSON), `expiresAt`, `createdAt`, `updatedAt`.
+- Unique index on (`namespace`, `key`) so concurrent `set` calls cannot insert duplicate rows. Schema sync creates it from the model; there is no separate SQL migration.
 - **`set`** upserts; **`get`** removes expired rows.
 - Requires a working DB connection and synced schema for the internal model.
 

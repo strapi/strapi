@@ -113,11 +113,13 @@ export const createRedisCacheProvider = (
         expiresAt: expiresAt ? expiresAt.toISOString() : null,
       };
 
-      await redis.set(rkey, JSON.stringify(payload));
+      const serialized = JSON.stringify(payload);
 
       if (expiresAt) {
-        await redis.pexpireat(rkey, expiresAt.getTime());
+        // SET + expiry in one command so a crash cannot leave the key without a TTL.
+        await redis.set(rkey, serialized, 'PXAT', expiresAt.getTime());
       } else {
+        await redis.set(rkey, serialized);
         await redis.persist(rkey);
       }
     },

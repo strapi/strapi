@@ -162,7 +162,7 @@ describe('Admin Auth Strategy', () => {
         'session-123',
         expect.objectContaining({
           permissions: [{ id: 1, action: 'read', subject: 'all' }],
-          user,
+          user: { id: 1, isActive: true, roles: [] },
         }),
         expect.objectContaining({ provider: 'database', expiresAt: expect.any(Date) })
       );
@@ -200,6 +200,8 @@ describe('Admin Auth Strategy', () => {
 
       expect(findUserPermissions).toHaveBeenCalledTimes(1);
       expect(generateAbility).toHaveBeenCalledTimes(2);
+      expect(generateAbility).toHaveBeenLastCalledWith([{ id: 1 }], user);
+      expect(secondCtx.state.user).toBe(user);
     });
 
     test('recomputes after cache invalidation (DB-backed clear)', async () => {
@@ -260,6 +262,121 @@ describe('Admin Auth Strategy', () => {
       await adminAuthStrategy.authenticate(secondCtx);
 
       expect(findUserPermissions).toHaveBeenCalledTimes(2);
+    });
+
+    test('does not store password, reset, or registration tokens in the auth cache', async () => {
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => true);
+      const ctx = createContext({}, { request, state: {} });
+      const user = {
+        id: 1,
+        isActive: true,
+        email: 'admin@example.com',
+        firstname: 'Ada',
+        password: '$2a$10$hashed-password',
+        resetPasswordToken: 'reset-token',
+        resetPasswordTokenExpiresAt: '2030-01-01T00:00:00.000Z',
+        registrationToken: 'registration-token',
+        roles: [
+          {
+            id: 3,
+            code: 'strapi-super-admin',
+            name: 'Super Admin',
+            description: 'Full access',
+            users: [{ id: 9, password: '$2a$10$other-user' }],
+          },
+        ],
+      } as any;
+      const findOne = jest.fn(() => user);
+      const findUserPermissions = jest.fn(async () => [{ id: 1, action: 'read' }]);
+      const generateAbility = jest.fn(async () => 'ability');
+
+      global.strapi = buildStrapi({
+        validateAccessToken,
+        isSessionActive,
+        findOne,
+        findUserPermissions,
+        generateAbility,
+      });
+
+      const response = await adminAuthStrategy.authenticate(ctx);
+
+      expect(response).toStrictEqual({
+        authenticated: true,
+        credentials: user,
+        ability: 'ability',
+      });
+      expect(cacheManager.set).toHaveBeenCalledWith(
+        INTERNAL_CACHE_NS.ADMIN_AUTH_ABILITY,
+        'session-123',
+        {
+          permissions: [{ id: 1, action: 'read' }],
+          user: {
+            id: 1,
+            isActive: true,
+            roles: [{ id: 3, code: 'strapi-super-admin' }],
+          },
+        },
+        expect.objectContaining({ provider: 'database', expiresAt: expect.any(Date) })
+      );
+      const stored = JSON.stringify(cacheManager.set.mock.calls[0][2]);
+      expect(stored).not.toContain('hashed-password');
+      expect(stored).not.toContain('reset-token');
+      expect(stored).not.toContain('registration-token');
+      expect(stored).not.toContain('other-user');
+      expect(stored).not.toContain('admin@example.com');
+    });
+
+    test('rejects a deactivated user when the auth cache hits', async () => {
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => true);
+      const firstCtx = createContext({}, { request, state: {} });
+      const secondCtx = createContext({}, { request, state: {} });
+      const activeUser = {
+        id: 1,
+        isActive: true,
+        email: 'admin@example.com',
+        password: '$2a$10$hashed-password',
+        roles: [{ id: 3, code: 'strapi-author' }],
+      } as any;
+      const findOne = jest
+        .fn()
+        .mockResolvedValueOnce(activeUser)
+        .mockResolvedValueOnce({ ...activeUser, isActive: false });
+      const findUserPermissions = jest.fn(async () => [{ id: 1 }]);
+      const generateAbility = jest.fn(async () => 'ability');
+
+      global.strapi = buildStrapi({
+        validateAccessToken,
+        isSessionActive,
+        findOne,
+        findUserPermissions,
+        generateAbility,
+      });
+
+      const firstResponse = await adminAuthStrategy.authenticate(firstCtx);
+      const secondResponse = await adminAuthStrategy.authenticate(secondCtx);
+
+      expect(firstResponse).toStrictEqual({
+        authenticated: true,
+        credentials: activeUser,
+        ability: 'ability',
+      });
+      expect(secondResponse).toStrictEqual({ authenticated: false });
+      expect(secondCtx.state.user).toBeUndefined();
+      expect(findUserPermissions).toHaveBeenCalledTimes(1);
+      expect(generateAbility).toHaveBeenCalledTimes(1);
+      expect(cacheManager.delete).toHaveBeenCalledWith(
+        INTERNAL_CACHE_NS.ADMIN_AUTH_ABILITY,
+        'session-123',
+        { provider: 'database' }
+      );
     });
 
     test('rejects an inactive session even when the cache was already warmed', async () => {

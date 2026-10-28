@@ -30,4 +30,11 @@ export const cacheEntryModel: Model = {
       type: 'datetime',
     },
   },
+  indexes: [
+    {
+      name: 'strapi_cache_entries_namespace_key_unique',
+      columns: ['namespace', 'key'],
+      type: 'unique',
+    },
+  ],
 };
