@@ -21,6 +21,7 @@ import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
 import { createRepository } from './entity-repository';
 import {
+  cleanMorphToManyOrderColumn,
   deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
   encodePolymorphicRelation,
   encodePolymorphicId,
@@ -1002,43 +1003,78 @@ export const createEntityManager = (db: Database): EntityManager => {
               })),
             ];
 
-            const adjacentRelations = await this.createQueryBuilder(joinTable.name)
-              .where({
-                $or: [
-                  {
-                    [joinColumn.name]: id,
-                    [idColumn.name]: {
-                      $in: compact(
-                        cleanRelationData.connect?.map(
-                          (r) => r.position?.after || r.position?.before
-                        )
-                      ),
+            const computeOrderMap = async () => {
+              const adjacentRelations = await this.createQueryBuilder(joinTable.name)
+                .where({
+                  $or: [
+                    {
+                      [joinColumn.name]: id,
+                      [idColumn.name]: {
+                        $in: compact(
+                          cleanRelationData.connect?.map(
+                            (r) => r.position?.after || r.position?.before
+                          )
+                        ),
+                      },
                     },
-                  },
-                  {
-                    [joinColumn.name]: id,
-                    order: this.createQueryBuilder(joinTable.name)
-                      .min('order')
-                      .where({ [joinColumn.name]: id })
-                      .where(joinTable.on || {})
-                      .transacting(trx)
-                      .getKnexQuery(),
-                  },
-                  {
-                    [joinColumn.name]: id,
-                    order: this.createQueryBuilder(joinTable.name)
-                      .max('order')
-                      .where({ [joinColumn.name]: id })
-                      .where(joinTable.on || {})
-                      .transacting(trx)
-                      .getKnexQuery(),
-                  },
-                ],
-              })
-              .where(joinTable.on || {})
-              .orderBy('order')
-              .transacting(trx)
-              .execute<Array<Record<string, any>>>();
+                    {
+                      [joinColumn.name]: id,
+                      order: this.createQueryBuilder(joinTable.name)
+                        .min('order')
+                        .where({ [joinColumn.name]: id })
+                        .where(joinTable.on || {})
+                        .transacting(trx)
+                        .getKnexQuery(),
+                    },
+                    {
+                      [joinColumn.name]: id,
+                      order: this.createQueryBuilder(joinTable.name)
+                        .max('order')
+                        .where({ [joinColumn.name]: id })
+                        .where(joinTable.on || {})
+                        .transacting(trx)
+                        .getKnexQuery(),
+                    },
+                  ],
+                })
+                .where(joinTable.on || {})
+                .orderBy('order')
+                .transacting(trx)
+                .execute<Array<Record<string, any>>>();
+
+              return relationsOrderer(
+                // Merge id & __type to get a single id key
+                adjacentRelations.map(
+                  encodePolymorphicRelation({
+                    idColumn: idColumn.name,
+                    typeColumn: typeColumn.name,
+                  })
+                ),
+                idColumn.name,
+                'order',
+                cleanRelationData.options?.strict
+              )
+                .connect(
+                  // Merge id & __type to get a single id key
+                  (cleanRelationData.connect || []).map(
+                    encodePolymorphicRelation({ idColumn: 'id', typeColumn: '__type' })
+                  )
+                )
+                .getOrderMap();
+            };
+
+            let orderMap: Record<ID, number> = {};
+
+            if (hasConnect) {
+              orderMap = await computeOrderMap();
+
+              // The order column is unsigned on MySQL/MariaDB, so renumber from 1 to make room at the start
+              if (Object.values(orderMap).some((order) => order < 0)) {
+                await cleanMorphToManyOrderColumn({ id, joinTable, db, transaction: trx });
+                orderMap = await computeOrderMap();
+              }
+            }
+
             if (!isEmpty(idsToDelete)) {
               const where = {
                 $or: idsToDelete.map((item: any) => {
@@ -1079,24 +1115,6 @@ export const createEntityManager = (db: Database): EntityManager => {
                 ...data.__pivot,
                 field: attributeName,
               })) satisfies Record<string, any>[];
-
-              const orderMap = relationsOrderer(
-                // Merge id & __type to get a single id key
-                adjacentRelations.map(
-                  encodePolymorphicRelation({
-                    idColumn: idColumn.name,
-                    typeColumn: typeColumn.name,
-                  })
-                ),
-                idColumn.name,
-                'order',
-                cleanRelationData.options?.strict
-              )
-                .connect(
-                  // Merge id & __type to get a single id key
-                  dataset.map(encodePolymorphicRelation({ idColumn: 'id', typeColumn: '__type' }))
-                )
-                .getOrderMap();
 
               rows.forEach((row: Record<string, unknown>) => {
                 const rowId = row[idColumn.name] as number;
