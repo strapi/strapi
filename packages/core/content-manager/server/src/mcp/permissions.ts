@@ -4,14 +4,11 @@ import type { Core, Modules, Struct, UID } from '@strapi/types';
 import { getService } from '../utils';
 import type { ContentManagerModelForMcp } from './types';
 
-/** Returns true if the content type identified by `uid` has the i18n `localized` plugin option enabled. */
+/** Returns true if the registered localization provider reports the content type identified by `uid` as localized. */
 export const isContentTypeLocalized = (strapi: Core.Strapi, uid: string): boolean => {
   const ct = strapi.contentTypes?.[uid as UID.ContentType];
   if (ct === undefined) return false;
-  return (
-    (ct as { pluginOptions?: { i18n?: { localized?: boolean } } }).pluginOptions?.i18n
-      ?.localized === true
-  );
+  return strapi.localization.isLocalizedContentType(ct);
 };
 
 const localeDefaultDescription = (

@@ -1,5 +1,5 @@
 import type { Struct } from '@strapi/types';
-import { isArray, isObject, reject } from 'lodash/fp';
+import { isObject, reject } from 'lodash';
 import type { Diff } from '../../../utils/json';
 import * as utils from '../../../utils';
 
@@ -27,7 +27,7 @@ const isOptionalAdminType = (diff: Diff) => {
   }
 
   // modified
-  if ('values' in diff && isArray(diff.values) && isObject(diff.values[0])) {
+  if ('values' in diff && Array.isArray(diff.values) && isObject(diff.values[0])) {
     const name = (diff?.values[0] as Struct.ContentTypeSchema)?.info?.singularName;
     return (OPTIONAL_CONTENT_TYPES as ReadonlyArray<string | undefined>).includes(name);
   }
@@ -47,7 +47,7 @@ const strategies = {
   // - the property within a content type is an ignorable one
   // - those that are (not transferrable and optionally available), for example EE features such as audit logs
   strict(diffs: Diff[]) {
-    return reject(isIgnorableStrict, diffs);
+    return reject(diffs, isIgnorableStrict);
   },
 };
 

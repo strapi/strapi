@@ -96,6 +96,33 @@ describe('Filters', () => {
     });
   };
 
+  const renderWithSearch = (search: string) =>
+    renderRTL(
+      <Filters.Root options={DEFAULT_FILTERS}>
+        <Filters.Trigger />
+        <Filters.Popover />
+        <Filters.List />
+        <LocationSpy />
+      </Filters.Root>,
+      { initialEntries: [{ search }] }
+    );
+
+  const addNameFilter = async (user: ReturnType<typeof render>['user'], value: string) => {
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.type(await screen.findByRole('textbox', { name: 'Name' }), value);
+    fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+  };
+
+  const URL_ENCODING_CASES = [
+    ['a literal percent sign', '100%'],
+    ['a percent sign mid-string', '50%off'],
+    ['a trailing percent sign', 'discount%'],
+    ['an ampersand', 'a&b'],
+    ['a plus sign', 'a+b'],
+    ['a hash', 'a#b'],
+    ['text that merely looks pre-encoded', 'a%26b'],
+  ] as const;
+
   it('should open the popover when the trigger is clicked', async () => {
     const { user } = render();
 
@@ -154,6 +181,16 @@ describe('Filters', () => {
     expect(await screen.findByRole('option', { name: 'Name' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'Status' })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: 'Created At' })).toBeInTheDocument();
+  });
+
+  it('should label the empty option of the Select field combobox with its placeholder', async () => {
+    const { user } = render();
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+
+    expect(await screen.findByRole('option', { name: 'Select field' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Choose here' })).not.toBeInTheDocument();
   });
 
   it("should display a list of the operators when the combobox named Select filter is pressed & the 'Status' filter is selected", async () => {
@@ -489,5 +526,219 @@ describe('Filters', () => {
     });
     expect(screen.queryByText(/hello world/)).not.toBeInTheDocument();
     expect(screen.queryAllByText(/hello there/)).toHaveLength(1);
+  });
+
+  it.each(URL_ENCODING_CASES)('should show %s on the chip as typed', async (_label, value) => {
+    const { user } = render();
+
+    await addNameFilter(user, value);
+
+    expect(await screen.findByText(`Name $eq ${value}`)).toBeInTheDocument();
+  });
+
+  it.each(URL_ENCODING_CASES)('should store %s url-encoded in the query', async (_label, value) => {
+    const { user } = render();
+
+    await addNameFilter(user, value);
+    await screen.findByText(`Name $eq ${value}`);
+
+    await waitFor(() => {
+      expect(currentSearch).toContain(`filters[$and][0][name][$eq]=${encodeURIComponent(value)}`);
+    });
+  });
+
+  it.each(URL_ENCODING_CASES)(
+    'should open the edit form pre-filled with %s without crashing',
+    async (_label, value) => {
+      const { user } = render();
+
+      await addNameFilter(user, value);
+
+      // Clicking the chip is what used to throw `URI malformed` while rendering the form.
+      await user.click(await screen.findByText(`Name $eq ${value}`));
+
+      expect(await screen.findByRole('button', { name: 'Update filter' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue(value);
+    }
+  );
+
+  it('should edit a percent value and keep the new one', async () => {
+    const { user } = render();
+
+    await addNameFilter(user, '100%');
+    await user.click(await screen.findByText('Name $eq 100%'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Update filter' })).toBeInTheDocument();
+    });
+
+    const nameInput = screen.getByRole('textbox', { name: 'Name' });
+    await user.clear(nameInput);
+    await user.type(nameInput, '75%');
+    fireEvent.click(screen.getByRole('button', { name: 'Update filter' }));
+
+    expect(await screen.findByText('Name $eq 75%')).toBeInTheDocument();
+    expect(screen.queryByText('Name $eq 100%')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(currentSearch).toContain('filters[$and][0][name][$eq]=75%25');
+    });
+  });
+
+  const SEARCH_TERMS = [
+    ['a percent sign', '100%'],
+    ['an ampersand', 'a&b'],
+    ['a hash', 'a#b'],
+  ] as const;
+
+  it.each(SEARCH_TERMS)(
+    'should keep a sibling $or filter containing %s when a filter is added',
+    async (_label, term) => {
+      const encodedTerm = encodeURIComponent(term);
+      const { user } = renderWithSearch(`?filters[$or][0][name][$eq]=${encodedTerm}`);
+
+      await addNameFilter(user, 'jimbob');
+      await screen.findByText('Name $eq jimbob');
+
+      await waitFor(() => {
+        expect(currentSearch).toContain(`filters[$or][0][name][$eq]=${encodedTerm}`);
+      });
+    }
+  );
+
+  it.each(SEARCH_TERMS)(
+    'should keep a search term containing %s when a filter is added',
+    async (_label, term) => {
+      const encodedTerm = encodeURIComponent(term);
+      const { user } = renderWithSearch(`?_q=${encodedTerm}`);
+
+      await addNameFilter(user, 'jimbob');
+      await screen.findByText('Name $eq jimbob');
+
+      await waitFor(() => {
+        expect(currentSearch).toContain(`_q=${encodedTerm}`);
+      });
+      expect(new URLSearchParams(currentSearch).get('_q')).toBe(term);
+    }
+  );
+
+  it.each(SEARCH_TERMS)(
+    'should keep a search term containing %s when a filter is removed',
+    async (_label, term) => {
+      const encodedTerm = encodeURIComponent(term);
+      renderWithSearch(`?_q=${encodedTerm}&filters[$and][0][name][$eq]=jimbob`);
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Name $eq jimbob' }));
+
+      await waitFor(() => {
+        expect(getAppliedFilters()).toHaveLength(0);
+      });
+      expect(currentSearch).toContain(`_q=${encodedTerm}`);
+      expect(new URLSearchParams(currentSearch).get('_q')).toBe(term);
+    }
+  );
+
+  it('should remove the right chip when a percent value is applied twice', async () => {
+    const { user } = render();
+
+    await addNameFilter(user, '100%');
+    await screen.findByText('Name $eq 100%');
+    await addNameFilter(user, '100%');
+
+    await waitFor(() => {
+      expect(screen.queryAllByText('Name $eq 100%')).toHaveLength(2);
+    });
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Name $eq 100%' })[0]);
+
+    await waitFor(() => {
+      expect(screen.queryAllByText('Name $eq 100%')).toHaveLength(1);
+    });
+  });
+
+  describe('boolean filters', () => {
+    const BOOLEAN_FILTERS = [
+      { name: 'name', label: 'Name', type: 'string' },
+      { name: 'isArchived', label: 'Is Archived', type: 'boolean' },
+    ] satisfies Filters.Filter[];
+
+    const renderBoolean = (search?: string) =>
+      renderRTL(
+        <Filters.Root options={BOOLEAN_FILTERS}>
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+          <LocationSpy />
+        </Filters.Root>,
+        search ? { initialEntries: [{ search }] } : undefined
+      );
+
+    /**
+     * The toggle's input is visually hidden behind the track, so `user.click` can't reach it.
+     */
+    const openWithIsArchived = async (user: ReturnType<typeof renderBoolean>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+      await user.click(await screen.findByRole('option', { name: 'Is Archived' }));
+
+      return screen.findByRole('checkbox', { name: 'Is Archived' });
+    };
+
+    it('should apply a false filter without touching the toggle', async () => {
+      const { user } = renderBoolean();
+
+      await openWithIsArchived(user);
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq false');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=false']);
+    });
+
+    it('should apply a false filter after toggling true and back', async () => {
+      const { user } = renderBoolean();
+
+      const toggle = await openWithIsArchived(user);
+      fireEvent.click(toggle);
+      fireEvent.click(toggle);
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq false');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=false']);
+    });
+
+    it('should apply a true filter', async () => {
+      const { user } = renderBoolean();
+
+      fireEvent.click(await openWithIsArchived(user));
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq true');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=true']);
+    });
+
+    it('should not apply a filter after clearing the toggle', async () => {
+      const { user } = renderBoolean();
+
+      const toggle = await openWithIsArchived(user);
+      fireEvent.click(toggle);
+      fireEvent.click(await screen.findByRole('button', { name: 'Clear' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      // the cleared submit is a no-op, so a follow-up submit is the only filter applied
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Add filter' })).toBeEnabled());
+      fireEvent.click(toggle);
+      await waitFor(() => expect(toggle).toBeChecked());
+      fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq true');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=true']);
+    });
+
+    it('should open the edit form with the toggle matching the applied value', async () => {
+      const { user } = renderBoolean('?filters[$and][0][isArchived][$eq]=false');
+
+      await user.click(await screen.findByText('Is Archived $eq false'));
+
+      expect(await screen.findByRole('checkbox', { name: 'Is Archived' })).not.toBeChecked();
+    });
   });
 });

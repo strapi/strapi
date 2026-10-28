@@ -18,6 +18,9 @@ const createFeaturesService = (strapi: Core.Strapi): Modules.Features.FeaturesSe
         return service.config?.future?.[futureFlagName as FeatureName] === true;
       },
     },
+    isEnabled(flagName): boolean {
+      return service.config?.[flagName] === true;
+    },
   };
 
   return service;

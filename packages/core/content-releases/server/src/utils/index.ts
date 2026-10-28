@@ -28,6 +28,35 @@ export const getService = <TName extends keyof Services>(
   return strapi.plugin('content-releases').service(name);
 };
 
+type ReleaseId = Parameters<ReleaseService['updateReleaseStatus']>[0];
+
+/**
+ * Refresh every affected release. One failure must not skip the rest; the first
+ * error is rethrown so the caller's try/catch still logs it.
+ */
+export const updateAffectedReleaseStatuses = async (
+  releases: ReadonlyArray<{ id: ReleaseId }>,
+  { strapi }: { strapi: Core.Strapi }
+) => {
+  let firstError: unknown;
+  let hasFailure = false;
+
+  for (const release of releases) {
+    try {
+      await getService('release', { strapi }).updateReleaseStatus(release.id);
+    } catch (error) {
+      if (!hasFailure) {
+        firstError = error;
+        hasFailure = true;
+      }
+    }
+  }
+
+  if (hasFailure) {
+    throw firstError;
+  }
+};
+
 export const getDraftEntryValidStatus = async (
   { contentType, documentId, locale }: Action,
   { strapi }: { strapi: Core.Strapi }

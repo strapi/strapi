@@ -2,7 +2,7 @@
 
 import assert from 'node:assert';
 import path from 'node:path';
-import { isEqual } from 'lodash/fp';
+import { isEqual } from 'lodash';
 import { register } from 'esbuild-register/dist/node';
 
 import { INTERNAL_RESOURCES_DIRECTORY } from '../../codemod-repository/constants';

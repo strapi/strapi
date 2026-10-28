@@ -21,8 +21,7 @@ export namespace OrderKind {
  * type D = 'title,description'; // ❌
  */
 type SingleAttribute<TSchemaUID extends UID.Schema> =
-  | 'id'
-  | Guard.Never<Schema.NonPopulatableAttributeNames<TSchemaUID>, string>;
+  'id' | Guard.Never<Schema.NonPopulatableAttributeNames<TSchemaUID>, string>;
 
 /**
  * Ordered single non-populatable attribute representation
@@ -65,8 +64,7 @@ export type StringNotation<TSchemaUID extends UID.Schema> =
  * type F = 'title'; // ❌
  */
 export type ArrayNotation<TSchemaUID extends UID.Schema> =
-  | StringNotation<TSchemaUID>[]
-  | ObjectNotation<TSchemaUID>[];
+  StringNotation<TSchemaUID>[] | ObjectNotation<TSchemaUID>[];
 
 /**
  * Object notation for a sort
@@ -107,6 +105,4 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
  * type K = { author: { email: 'asc', role: { name: 'desc' } } }; // ✅
  */
 export type Any<TSchemaUID extends UID.Schema> =
-  | StringNotation<TSchemaUID>
-  | ArrayNotation<TSchemaUID>
-  | ObjectNotation<TSchemaUID>;
+  StringNotation<TSchemaUID> | ArrayNotation<TSchemaUID> | ObjectNotation<TSchemaUID>;

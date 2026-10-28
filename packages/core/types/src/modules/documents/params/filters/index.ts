@@ -51,21 +51,20 @@ type AttributeCondition<
     // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
     AttributeUtils.ScalarValues
   > extends infer TAttributeValue
-    ?
-        | TAttributeValue // Implicit $eq operator
-        | ({
-            [TIter in Operator.BooleanValue]?: boolean;
-          } & {
-            [TIter in Operator.DynamicValue]?: TAttributeValue;
-          } & {
-            [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
-          } & {
-            [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
-          } & {
-            [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
-          } & {
-            [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
-          })
+    ? | TAttributeValue // Implicit $eq operator
+      | ({
+          [TIter in Operator.BooleanValue]?: boolean;
+        } & {
+          [TIter in Operator.DynamicValue]?: TAttributeValue;
+        } & {
+          [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
+        } & {
+          [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
+        } & {
+          [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
+        } & {
+          [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
+        })
     : never;
 
 /**
@@ -92,8 +91,7 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         // Generic representation of the filter object tree in case we don't have access to the attributes' list
         {
           [TKey in string]?:
-            | AttributeCondition<TSchemaUID, never>
-            | NestedAttributeCondition<TSchemaUID, never>;
+            AttributeCondition<TSchemaUID, never> | NestedAttributeCondition<TSchemaUID, never>;
         }
       >
     : never);

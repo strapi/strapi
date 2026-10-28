@@ -84,7 +84,13 @@ const RecentDocumentsTable = ({
               </Typography>
             </Td>
             <Td>
-              <StageColumn strapi_stage={document.strapi_stage} />
+              {document.strapi_stage === null || document.strapi_stage === undefined ? (
+                <Typography textColor="neutral600" aria-hidden>
+                  -
+                </Typography>
+              ) : (
+                <StageColumn strapi_stage={document.strapi_stage} />
+              )}
             </Td>
             <Td onClick={(e) => e.stopPropagation()}>
               <Box display="inline-block">

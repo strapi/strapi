@@ -1,8 +1,12 @@
 import type { UID } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createHistoryService } from '../history';
 
 const createMock = jest.fn();
+const findPageMock = jest.fn();
+const findManyMock = jest.fn();
+const findOneMock = jest.fn();
 const userId = 'user-id';
 const fakeDate = new Date('1970-01-01T00:00:00.000Z');
 
@@ -27,11 +31,11 @@ const mockStrapi = {
         getStatus: jest.fn(),
       })),
     },
-    i18n: {
-      service: jest.fn(() => ({
-        getDefaultLocale: jest.fn().mockReturnValue('en'),
-      })),
-    },
+  },
+  localization: {
+    getDefaultLocale: jest.fn().mockResolvedValue('en'),
+    isLocalizedContentType: jest.fn().mockReturnValue(false),
+    getLocales: jest.fn().mockResolvedValue([]),
   },
   // @ts-expect-error - Ignore
   plugin: (plugin: string) => mockStrapi.plugins[plugin],
@@ -40,6 +44,9 @@ const mockStrapi = {
       if (uid === HISTORY_VERSION_UID) {
         return {
           create: createMock,
+          findPage: findPageMock,
+          findMany: findManyMock,
+          findOne: findOneMock,
         };
       }
     },
@@ -134,7 +141,6 @@ describe('history-version service', () => {
           type: 'string' as const,
         },
       },
-      componentsSchemas: {},
       status: 'draft' as const,
     };
 
@@ -160,7 +166,6 @@ describe('history-version service', () => {
       },
       locale: 'en',
       relatedDocumentId: 'randomid',
-      componentsSchemas: {},
       schema: {
         title: {
           type: 'string' as const,
@@ -179,5 +184,59 @@ describe('history-version service', () => {
         createdAt: fakeDate,
       },
     });
+  });
+
+  it('sorts the version ids only, then fetches the versions by id', async () => {
+    findPageMock.mockResolvedValueOnce({
+      results: [{ id: 2 }, { id: 1 }],
+      pagination: { page: 1, pageSize: 20, pageCount: 1, total: 2 },
+    });
+    findManyMock.mockResolvedValueOnce([
+      { id: 1, data: { title: 'First version' }, schema: {}, locale: null },
+      { id: 2, data: { title: 'Second version' }, schema: {}, locale: null },
+    ]);
+
+    const { results } = await historyService.findVersionsPage({
+      query: {
+        contentType: 'api::article.article' as UID.ContentType,
+        documentId: 'randomid',
+      },
+      state: { userAbility: {} },
+    } as any);
+
+    expect(findPageMock).toHaveBeenCalledWith(expect.objectContaining({ select: ['id'] }));
+    expect(findManyMock).toHaveBeenCalledWith({
+      where: { id: { $in: [2, 1] } },
+      populate: ['createdBy'],
+    });
+    expect(results.map((result) => result.id)).toEqual([2, 1]);
+  });
+
+  it('leaves out the versions deleted between the two queries', async () => {
+    findPageMock.mockResolvedValueOnce({
+      results: [{ id: 2 }, { id: 1 }],
+      pagination: { page: 1, pageSize: 20, pageCount: 1, total: 2 },
+    });
+    findManyMock.mockResolvedValueOnce([
+      { id: 2, data: { title: 'Second version' }, schema: {}, locale: null },
+    ]);
+
+    const { results } = await historyService.findVersionsPage({
+      query: {
+        contentType: 'api::article.article' as UID.ContentType,
+        documentId: 'randomid',
+      },
+      state: { userAbility: {} },
+    } as any);
+
+    expect(results.map((result) => result.id)).toEqual([2]);
+  });
+
+  it('throws a not found error when restoring an unknown version', async () => {
+    findOneMock.mockResolvedValueOnce(null);
+
+    await expect(historyService.restoreVersion(999)).rejects.toThrow(
+      new errors.NotFoundError('History version not found')
+    );
   });
 });
