@@ -4,6 +4,7 @@
  * @see docs/docs/architecture/10-future-flags.md
  */
 export interface FeaturesFutureFlags {
+  unstableContentTypeBuilderIndexing?: boolean;
   experimental_firstPublishedAt?: boolean;
   unstableNextDesignSystem?: boolean;
   [futureFlagName: string]: boolean | undefined;

@@ -3,6 +3,7 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
 import { transformData } from './transform/data';
+import { checkUniqueAttributeAvailability as checkUniqueAttributeAvailabilityImpl } from './unique-indexes-sync';
 
 import entityValidator from '../entity-validator';
 
@@ -58,5 +59,17 @@ export const createDocumentService = (
       transformData,
     },
     use: middlewares.use.bind(middlewares),
+    /**
+     * Check if a value for a unique-index attribute is available (not taken by another document).
+     * Used by the content-manager for the "Available" / "Unavailable" badge.
+     */
+    checkUniqueAttributeAvailability(
+      uid: UID.ContentType,
+      attributeName: string,
+      value: unknown,
+      options?: { documentId?: string; locale?: string }
+    ) {
+      return checkUniqueAttributeAvailabilityImpl(strapi, uid, attributeName, value, options);
+    },
   });
 };

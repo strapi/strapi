@@ -1,9 +1,17 @@
 import { getTrad } from '../../../utils/getTrad';
 import { componentForm } from '../component/componentForm';
+import { isAttributeIndexingFutureEnabled } from '../utils/indexing';
 
 import { attributeOptions } from './attributeOptions';
 
 type DataType = 'biginteger' | 'string' | 'integer' | 'float' | 'decimal';
+
+const getIndexedOption = () => {
+  if (!isAttributeIndexingFutureEnabled()) {
+    return [];
+  }
+  return [attributeOptions.indexed];
+};
 
 const conditionSection = {
   sectionTitle: {
@@ -163,7 +171,12 @@ export const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [attributeOptions.required, attributeOptions.unique, attributeOptions.private],
+          items: [
+            attributeOptions.required,
+            attributeOptions.unique,
+            ...getIndexedOption(),
+            attributeOptions.private,
+          ],
         },
         conditionSection,
       ],
@@ -203,6 +216,7 @@ export const advancedForm = {
           items: [
             attributeOptions.required,
             attributeOptions.unique,
+            ...getIndexedOption(),
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,
@@ -349,6 +363,7 @@ export const advancedForm = {
           items: [
             attributeOptions.required,
             attributeOptions.unique,
+            ...getIndexedOption(),
             attributeOptions.max,
             attributeOptions.min,
             attributeOptions.private,
@@ -424,6 +439,7 @@ export const advancedForm = {
           items: [
             attributeOptions.required,
             attributeOptions.unique,
+            ...getIndexedOption(),
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,

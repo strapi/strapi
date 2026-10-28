@@ -655,6 +655,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         ...initialState,
         modifiedData: {
           type: 'string',
+          indexed: false,
         },
       };
 
@@ -671,7 +672,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         step: null,
         uid: 'api::address.address',
       });
-      const expected = { ...initialState, modifiedData: {} };
+      const expected = { ...initialState, modifiedData: { indexed: false } };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -686,7 +687,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         step: null,
         uid: 'api::address.address',
       });
-      const expected = { ...initialState, modifiedData: {} };
+      const expected = { ...initialState, modifiedData: { indexed: false } };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -723,7 +724,10 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         step: null,
         uid: 'api::address.address',
       });
-      const expected = { ...initialState, modifiedData: { type: 'enumeration', enum: [] } };
+      const expected = {
+        ...initialState,
+        modifiedData: { type: 'enumeration', enum: [], indexed: false },
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -762,7 +766,10 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         step: null,
         uid: 'api::address.address',
       });
-      const expected = { ...initialState, modifiedData: { type: 'json', default: null } };
+      const expected = {
+        ...initialState,
+        modifiedData: { type: 'json', default: null, indexed: false },
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });

@@ -1,6 +1,7 @@
 import type { UID, Modules } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { omit } from 'lodash';
+import yup from 'yup';
 
 import * as components from './components';
 
@@ -9,6 +10,30 @@ import { transformParamsToQuery } from './transform/query';
 import { isParamEmpty, pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
 import { clearTransformDataRequestCache, transformData } from './transform/data';
+import {
+  getVariantClaimDataForPayload,
+  parseUniqueConstraintError,
+  syncDocumentsTableAfterPublish,
+  syncDocumentsTableAfterUnpublish,
+  syncDocumentsTableAfterUpdate,
+  validateDocumentsTableUniques,
+  validateVariantClaimUniques,
+} from './unique-indexes-sync';
+
+const UNIQUE_MESSAGE = 'This attribute must be unique';
+
+function throwUniqueAttributeErrors(attributeNames: string[]): never {
+  if (attributeNames.length === 1) {
+    const yupError = new yup.ValidationError(UNIQUE_MESSAGE, undefined, attributeNames[0]);
+    throw new errors.YupValidationError(yupError);
+  }
+  const inner = attributeNames.map(
+    (path) => new yup.ValidationError(UNIQUE_MESSAGE, undefined, path)
+  );
+  const yupError = new yup.ValidationError(UNIQUE_MESSAGE);
+  yupError.inner = inner;
+  throw new errors.YupValidationError(yupError);
+}
 
 /**
  * Reads and validates the `api.documents.strictRelations` flag.
@@ -105,10 +130,30 @@ const createEntriesService = (
     );
 
     const entryData = applyTransforms(contentType, dataWithComponents);
+    const dataWithClaim = {
+      ...entryData,
+      ...getVariantClaimDataForPayload(strapi, uid, entryData),
+    };
 
-    const doc = await strapi.db.query(uid).create({ ...query, data: entryData });
+    const variantConflicts = await validateVariantClaimUniques(strapi, uid, dataWithClaim);
+    const globalConflicts =
+      dataWithClaim.publishedAt === true
+        ? await validateDocumentsTableUniques(strapi, uid, dataWithClaim)
+        : [];
+    const allConflicts = [...new Set([...variantConflicts, ...globalConflicts])];
+    if (allConflicts.length > 0) throwUniqueAttributeErrors(allConflicts);
 
-    return doc;
+    try {
+      const doc = await strapi.db.query(uid).create({ ...query, data: dataWithClaim });
+      if (doc.publishedAt) {
+        await syncDocumentsTableAfterPublish(strapi, uid, doc as Record<string, unknown>);
+      }
+      return doc;
+    } catch (e) {
+      const attr = parseUniqueConstraintError(strapi, uid, e);
+      if (attr) throwUniqueAttributeErrors([attr.attributeName]);
+      throw e;
+    }
   }
 
   async function deleteEntry(id: number, query = {} as any) {
@@ -118,6 +163,15 @@ const createEntriesService = (
 
     await components.deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
 
+    try {
+      if (deletedEntry?.documentId && deletedEntry?.publishedAt) {
+        await syncDocumentsTableAfterUnpublish(strapi, uid, deletedEntry.documentId);
+      }
+    } catch (e) {
+      const attr = parseUniqueConstraintError(strapi, uid, e);
+      if (attr) throwUniqueAttributeErrors([attr.attributeName]);
+      throw e;
+    }
     return deletedEntry;
   }
 
@@ -146,10 +200,41 @@ const createEntriesService = (
     );
 
     const entryData = applyTransforms(contentType, dataWithComponents);
+    const dataWithClaim = {
+      ...entryData,
+      ...getVariantClaimDataForPayload(strapi, uid, { ...entryToUpdate, ...entryData }),
+    };
 
-    return strapi.db
-      .query(uid)
-      .update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
+    const variantConflicts = await validateVariantClaimUniques(strapi, uid, dataWithClaim, {
+      excludeId: entryToUpdate.id,
+    });
+    const globalConflicts =
+      entryToUpdate.publishedAt === true
+        ? await validateDocumentsTableUniques(
+            strapi,
+            uid,
+            { ...entryToUpdate, ...dataWithClaim },
+            {
+              excludeDocumentId: entryToUpdate.documentId,
+            }
+          )
+        : [];
+    const allConflicts = [...new Set([...variantConflicts, ...globalConflicts])];
+    if (allConflicts.length > 0) throwUniqueAttributeErrors(allConflicts);
+
+    try {
+      const updated = await strapi.db
+        .query(uid)
+        .update({ ...query, where: { id: entryToUpdate.id }, data: dataWithClaim });
+      if (entryToUpdate.publishedAt) {
+        await syncDocumentsTableAfterUpdate(strapi, uid, updated as Record<string, unknown>, true);
+      }
+      return updated;
+    } catch (e) {
+      const attr = parseUniqueConstraintError(strapi, uid, e);
+      if (attr) throwUniqueAttributeErrors([attr.attributeName]);
+      throw e;
+    }
   }
 
   async function publishEntry(entry: any, params = {} as any) {
@@ -169,7 +254,7 @@ const createEntriesService = (
         };
         return transformData(draft, opts);
       },
-      // Create the published entry
+      // Create the published entry (createEntry syncs documents table when published)
       (draft) => createEntry({ ...params, data: draft, locale: draft.locale, status: 'published' })
     )(entry);
   }
@@ -177,7 +262,8 @@ const createEntriesService = (
   async function discardDraftEntry(entry: any, params = {} as any) {
     clearTransformDataRequestCache();
 
-    return async.pipe(
+    const documentId = entry.documentId;
+    const result = await async.pipe(
       (value) => omit(value, 'id'),
       (value) => ({ ...value, publishedAt: null }),
       (entry) => {
@@ -193,6 +279,16 @@ const createEntriesService = (
       // Create the draft entry
       (data) => createEntry({ ...params, locale: data.locale, data, status: 'draft' })
     )(entry);
+    try {
+      if (documentId) {
+        await syncDocumentsTableAfterUnpublish(strapi, uid, documentId);
+      }
+    } catch (e) {
+      const attr = parseUniqueConstraintError(strapi, uid, e);
+      if (attr) throwUniqueAttributeErrors([attr.attributeName]);
+      throw e;
+    }
+    return result;
   }
 
   return {
