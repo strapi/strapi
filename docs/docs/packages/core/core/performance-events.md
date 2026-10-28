@@ -2,9 +2,8 @@
 title: Performance hub events
 description: Versioned performance signals on strapi.eventHub for plugins and operators
 tags:
-  - core
-  - plugins
-  - observability
+  - backend
+  - public-api
 ---
 
 # Performance hub events
