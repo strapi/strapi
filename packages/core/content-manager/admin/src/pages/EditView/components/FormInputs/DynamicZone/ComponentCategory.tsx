@@ -18,6 +18,8 @@ import { resolvePreviewImageUrl } from '../../../../../utils/previewImage';
 
 import type { Struct } from '@strapi/types';
 
+const EMPTY_COMPONENTS: NonNullable<ComponentCategoryProps['components']> = [];
+
 interface ComponentCategoryProps {
   category: string;
   components?: Array<{
@@ -117,7 +119,7 @@ const ComponentTileVisual = ({ previewUrl, icon, displayName }: ComponentTileVis
 
 const ComponentCategory = ({
   category,
-  components = [],
+  components = EMPTY_COMPONENTS,
   variant = 'primary',
   onAddComponent,
 }: ComponentCategoryProps) => {

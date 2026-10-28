@@ -56,13 +56,42 @@ describe('logTransferFilterSummary', () => {
     logTransferFilterSummary({ only: ['content'] });
 
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only content'));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Stages not transferred (destination data preserved): files, config')
+    );
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
+  });
+
+  test('prints omitted stages when --only content,files leaves config out', () => {
+    logTransferFilterSummary({ only: ['content', 'files'] });
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only content, files'));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Stages not transferred (destination data preserved): config')
+    );
+  });
+
+  test('does not print omitted-stages line when --only includes every stage preset', () => {
+    logTransferFilterSummary({ only: ['content', 'files', 'config'] });
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only content, files, config'));
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('Stages not transferred'));
+  });
+
+  test('does not print omitted-stages line for --exclude alone', () => {
+    logTransferFilterSummary({ exclude: ['config'] });
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('excluding config'));
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('Stages not transferred'));
   });
 
   test('does not print files note when content is also skipped via --only config', () => {
     logTransferFilterSummary({ only: ['config'] });
 
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only config'));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Stages not transferred (destination data preserved): content, files')
+    );
     expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
   });
 

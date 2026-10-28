@@ -74,7 +74,7 @@ export default (strapi: Core.Strapi) => {
       apis: Record<string, Core.Plugin | Core.Module>,
       source: 'api' | 'plugin'
     ) => {
-      _.forEach(apis, (api, apiName) => {
+      for (const [apiName, api] of Object.entries(apis ?? {})) {
         const controllers = _.reduce(
           api.controllers,
           (acc, controller, controllerName) => {
@@ -94,7 +94,7 @@ export default (strapi: Core.Strapi) => {
         if (!_.isEmpty(controllers)) {
           actionMap[`${source}::${apiName}`] = { controllers };
         }
-      });
+      }
     };
 
     registerAPIsActions(strapi.apis, 'api');

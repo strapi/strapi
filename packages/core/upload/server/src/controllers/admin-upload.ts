@@ -13,6 +13,16 @@ import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-per
 import { Config, FileInfo } from '../types';
 import { prepareUploadRequest, type FileUploadError } from '../utils/mime-validation';
 import type { UploadFileInfo } from '../../../shared/contracts/files';
+import type { UrlFetchProgress } from '../services/file';
+
+/**
+ * Minimum delay between two `file:progress` frames for the same URL.
+ *
+ * `fetchUrlToInputFile` reports once per streamed chunk (~8000 calls for a 512MB file at
+ * 64KB chunks); at ~5 frames a second a 10s transfer costs ~50 frames, which is plenty for
+ * a bar the user watches.
+ */
+const URL_FETCH_PROGRESS_INTERVAL_MS = 200;
 
 export default {
   async bulkUpdateFileInfo(ctx: Context) {
@@ -46,12 +56,20 @@ export default {
     ctx.body = results;
   },
 
+  /**
+   * `PUT /upload/files/:id`
+   *
+   * Update the editable metadata (`fileInfo`) of an existing file. Also reached
+   * through the `POST /upload` multiplexer, which delegates here with the id in
+   * `ctx.query` — hence the dual read below, route params winning.
+   */
   async updateFileInfo(ctx: Context) {
     const {
       state: { userAbility, user },
-      query: { id },
       request: { body },
     } = ctx;
+
+    const id = ctx.params?.id ?? ctx.query.id;
 
     if (typeof id !== 'string') {
       throw new errors.ValidationError('File id is required');
@@ -75,12 +93,20 @@ export default {
     ctx.body = await pm.sanitizeOutput(signedFile, { action: ACTIONS.read });
   },
 
+  /**
+   * `POST /upload/files/:id/replace`
+   *
+   * Replace the binary content of an existing file. Also reached through the
+   * `POST /upload` multiplexer, which delegates here with the id in `ctx.query`
+   * — hence the dual read below, route params winning.
+   */
   async replaceFile(ctx: Context) {
     const {
       state: { userAbility, user },
-      query: { id },
       request: { body, files: { files: filesInput } = {} },
     } = ctx;
+
+    const id = ctx.params?.id ?? ctx.query.id;
 
     if (typeof id !== 'string') {
       throw new errors.ValidationError('File id is required');
@@ -209,7 +235,8 @@ export default {
   },
 
   /**
-   * @experimental
+   * `POST /upload/files`
+   *
    * Upload a single file and return the created File.
    *
    * Accepts one file per request (multipart `files` + `fileInfo`) and returns a
@@ -217,7 +244,7 @@ export default {
    * generation inline — that responsibility is decoupled and will be handled by a
    * background job. Auth and permission checks mirror `POST /upload`.
    */
-  async unstable_uploadFile(ctx: Context) {
+  async uploadFile(ctx: Context) {
     const {
       state: { userAbility, user },
       request: { body, files: { files } = {} },
@@ -288,18 +315,20 @@ export default {
   },
 
   /**
-   * @experimental
+   * `POST /upload/actions/upload-from-urls`
+   *
    * Upload files from URLs with SSE streaming for per-file progress
    *
    * Accepts JSON body with URLs and fetches them server-side.
    * Streams Server-Sent Events as each URL is fetched and uploaded:
    * - file:fetching  — when starting to fetch a URL
+   * - file:progress  — throttled byte progress of the remote → server temp file transfer
    * - file:uploading — when upload starts for a fetched file
    * - file:complete  — when a file is successfully uploaded
    * - file:error     — when a URL fetch or upload fails
    * - stream:complete — final summary with all results
    */
-  async unstable_uploadFromUrls(ctx: Context) {
+  async uploadFromUrls(ctx: Context) {
     const {
       state: { userAbility, user },
       request: { body },
@@ -357,11 +386,42 @@ export default {
         writeSSE('file:fetching', { url, index: i, total });
 
         try {
+          // `fetchUrlToInputFile` reports raw, unthrottled progress — coalescing it into a
+          // sane frame rate is the caller's job. State is per URL: the loop is sequential.
+          let lastProgressAt = 0;
+          let hasAnnouncedSize = false;
+          let hasReachedTotal = false;
+
+          const onFetchProgress = ({ bytesWritten, totalBytes }: UrlFetchProgress) => {
+            // The frame that reaches the total always goes out, or a throttled last chunk
+            // leaves the row short of 100% until `file:complete`.
+            const isFinal = !hasReachedTotal && totalBytes !== null && bytesWritten >= totalBytes;
+            if (
+              hasAnnouncedSize &&
+              !isFinal &&
+              Date.now() - lastProgressAt < URL_FETCH_PROGRESS_INTERVAL_MS
+            ) {
+              return;
+            }
+
+            hasAnnouncedSize = true;
+            hasReachedTotal = hasReachedTotal || isFinal;
+            lastProgressAt = Date.now();
+
+            writeSSE('file:progress', {
+              index: i,
+              loadedBytes: bytesWritten,
+              totalBytes,
+              phase: 'fetch',
+            });
+          };
+
           // Fetch URL to temp file
           const { file } = await fileService.fetchUrlToInputFile(
             url,
             tmpWorkingDirectory,
-            sizeLimit
+            sizeLimit,
+            onFetchProgress
           );
           const fileName = file.originalFilename;
 

@@ -6,6 +6,100 @@ import type { AttributeConditions } from '../../../types';
 
 describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', () => {
   describe('Editing a common attribute (string, integer, json, media, ...)', () => {
+    it('marks a scalar attribute as not searchable when it becomes private', () => {
+      const contentType = initCT('test', {
+        attributes: [{ name: 'secret', type: 'text' }],
+      });
+      const initializedState = init({
+        contentTypes: { [contentType.uid]: contentType },
+      });
+
+      const state = reducer(
+        initializedState,
+        actions.editAttribute({
+          attributeToSet: { name: 'secret', type: 'text', private: true },
+          forTarget: 'contentType',
+          targetUid: contentType.uid,
+          name: 'secret',
+        })
+      );
+
+      expect(state.current.contentTypes[contentType.uid]).toMatchObject({
+        attributes: [
+          {
+            name: 'secret',
+            type: 'text',
+            private: true,
+            searchable: false,
+            status: 'CHANGED',
+          },
+        ],
+      });
+    });
+
+    it.each([true, false])(
+      'preserves searchable: %s when editing a private scalar attribute',
+      (searchable) => {
+        const contentType = initCT('test', {
+          attributes: [{ name: 'secret', type: 'text' }],
+        });
+        const initializedState = init({
+          contentTypes: { [contentType.uid]: contentType },
+        });
+
+        const state = reducer(
+          initializedState,
+          actions.editAttribute({
+            attributeToSet: { name: 'secret', type: 'text', private: true, searchable },
+            forTarget: 'contentType',
+            targetUid: contentType.uid,
+            name: 'secret',
+          })
+        );
+
+        expect(state.current.contentTypes[contentType.uid]).toMatchObject({
+          attributes: [
+            {
+              name: 'secret',
+              type: 'text',
+              private: true,
+              searchable,
+              status: 'CHANGED',
+            },
+          ],
+        });
+      }
+    );
+
+    it('does not force searchable when privacy is disabled', () => {
+      const contentType = initCT('test', {
+        attributes: [{ name: 'secret', type: 'text', private: true, searchable: false }],
+      });
+      const initializedState = init({
+        contentTypes: { [contentType.uid]: contentType },
+      });
+
+      const state = reducer(
+        initializedState,
+        actions.editAttribute({
+          attributeToSet: { name: 'secret', type: 'text', private: false },
+          forTarget: 'contentType',
+          targetUid: contentType.uid,
+          name: 'secret',
+        })
+      );
+
+      const [attribute] = state.current.contentTypes[contentType.uid].attributes;
+
+      expect(attribute).toEqual({
+        name: 'secret',
+        type: 'text',
+        private: false,
+        status: 'CHANGED',
+      });
+      expect(attribute).not.toHaveProperty('searchable');
+    });
+
     it('Should edit the attribute correctly and preserve the order of the attributes for a content type', () => {
       const contentType = initCT('test', {
         attributes: [
