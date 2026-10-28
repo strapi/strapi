@@ -20,6 +20,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const stagePermissionsService = getService('stage-permissions', { strapi });
   const workflowValidator = getService('validation', { strapi });
 
+  /**
+   * Returns the table linking the entities of a content type to their stage, or undefined when
+   * the content type no longer exists or has no stage attribute
+   */
+  const getEntityStageJoinTable = (contentTypeUID: UID.ContentType) => {
+    if (strapi.db.metadata.has(contentTypeUID) === false) {
+      return undefined;
+    }
+
+    const { attributes } = strapi.db.metadata.get(contentTypeUID) as any;
+    return attributes[ENTITY_STAGE_ATTRIBUTE]?.joinTable;
+  };
+
   return {
     find({ workflowId, populate }: any) {
       return strapi.db.query(STAGE_MODEL_UID).findMany({
@@ -313,8 +326,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @returns
      */
     async updateEntitiesStage(contentTypeUID: any, { fromStageId, toStageId }: any) {
-      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID) as any;
-      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
+      const joinTable = getEntityStageJoinTable(contentTypeUID);
+
+      // No entity can be linked to a stage
+      if (joinTable === undefined) {
+        return;
+      }
+
+      const { tableName } = strapi.db.metadata.get(contentTypeUID);
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
 
@@ -358,8 +377,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @returns
      */
     async deleteAllEntitiesStage(contentTypeUID: any) {
-      const { attributes } = strapi.db.metadata.get(contentTypeUID) as any;
-      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
+      const joinTable = getEntityStageJoinTable(contentTypeUID);
+
+      // No entity can be linked to a stage
+      if (joinTable === undefined) {
+        return;
+      }
 
       // Delete all stage links for the content type
       return strapi.db.transaction(async ({ trx }) =>

@@ -64,6 +64,43 @@ const createFindByIdStrapiMock = () => {
   return { strapi, dbQuery };
 };
 
+const orphanUID = 'api::orphan.orphan';
+const noStageUID = 'api::no-stage.no-stage';
+
+// `orphanUID` has no model anymore, `noStageUID` has a model without a stage attribute
+const createEntitiesStageStrapiMock = () => {
+  const deleteLinks = vi.fn();
+  const models: Record<string, { tableName: string; attributes: Record<string, unknown> }> = {
+    [productUID]: {
+      tableName: 'products',
+      attributes: { strapi_stage: { joinTable: { name: 'products_strapi_stage_lnk' } } },
+    },
+    [noStageUID]: { tableName: 'no_stages', attributes: {} },
+  };
+
+  const strapi = {
+    db: {
+      metadata: {
+        has: vi.fn((uid: string) => uid in models),
+        get: vi.fn((uid: string) => {
+          if (uid in models) {
+            return models[uid];
+          }
+          throw new Error(`Metadata for "${uid}" not found`);
+        }),
+      },
+      getConnection: vi.fn(() => ({
+        from: vi.fn(() => ({ delete: vi.fn(() => ({ transacting: deleteLinks })) })),
+      })),
+      transaction: vi.fn(async (work: (args: { trx: unknown }) => Promise<unknown>) =>
+        work({ trx: {} })
+      ),
+    },
+  } as unknown as Core.Strapi;
+
+  return { strapi, deleteLinks };
+};
+
 describe('review-workflows stages service', () => {
   describe('replaceStages', () => {
     it('moves the entities of a deleted stage before the stage is deleted and the transaction ends', async () => {
@@ -101,6 +138,55 @@ describe('review-workflows stages service', () => {
         stagesService.replaceStages(srcStages, destStages, [productUID] as never)
       ).rejects.toThrow('move failed');
       expect(events).not.toContain('transaction:commit');
+    });
+  });
+
+  describe('updateEntitiesStage', () => {
+    it.each([
+      ['no longer exists', orphanUID],
+      ['has no stage attribute', noStageUID],
+    ])('does nothing for a content type that %s', async (_, contentTypeUID) => {
+      const { strapi } = createEntitiesStageStrapiMock();
+      const stagesService = stagesFactory({ strapi });
+
+      await expect(
+        stagesService.updateEntitiesStage(contentTypeUID, { fromStageId: 2, toStageId: 1 })
+      ).resolves.toBeUndefined();
+      expect(strapi.db.transaction).not.toHaveBeenCalled();
+    });
+
+    it('lets a deleted stage be removed while the workflow still lists a content type that no longer exists', async () => {
+      const events: string[] = [];
+      const strapi = createReplaceStagesStrapiMock(events);
+      const { strapi: entitiesStageStrapi } = createEntitiesStageStrapiMock();
+      Object.assign(strapi.db, { metadata: entitiesStageStrapi.db.metadata });
+      const stagesService = stagesFactory({ strapi });
+
+      await stagesService.replaceStages(srcStages, destStages, [orphanUID] as never);
+
+      expect(events).toEqual(['stage:delete', 'transaction:commit']);
+    });
+  });
+
+  describe('deleteAllEntitiesStage', () => {
+    it('deletes the stage links of a content type', async () => {
+      const { strapi, deleteLinks } = createEntitiesStageStrapiMock();
+      const stagesService = stagesFactory({ strapi });
+
+      await stagesService.deleteAllEntitiesStage(productUID);
+
+      expect(deleteLinks).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['no longer exists', orphanUID],
+      ['has no stage attribute', noStageUID],
+    ])('does nothing for a content type that %s', async (_, contentTypeUID) => {
+      const { strapi, deleteLinks } = createEntitiesStageStrapiMock();
+      const stagesService = stagesFactory({ strapi });
+
+      await expect(stagesService.deleteAllEntitiesStage(contentTypeUID)).resolves.toBeUndefined();
+      expect(deleteLinks).not.toHaveBeenCalled();
     });
   });
 
