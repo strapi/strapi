@@ -3,11 +3,14 @@ import type { Core } from '@strapi/types';
 import fs from 'fs';
 import registerGraphQL from './graphql';
 
+import { instantiateStockActions } from './controllers/create-extensible-controller';
 import authStrategy from './strategies/users-permissions';
 import { defaultSanitizeOutput } from './utils/sanitize/sanitizers';
 
 /** Register instance-bound authentication, sanitizers, and optional plugin integrations. */
 export default ({ strapi }: { strapi: Core.Strapi }) => {
+  // Extensions that spread a stock controller keep delegates that need this instance.
+  instantiateStockActions(strapi);
   strapi.get('auth').register('content-api', authStrategy({ strapi }));
   strapi.sanitizers.add('content-api.output', defaultSanitizeOutput(strapi));
 

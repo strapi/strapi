@@ -22,8 +22,9 @@ The plugin adds three content types. `plugin::users-permissions.user` (table `up
 
 ### `register`
 
-[`server/src/register.js`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/register.js) does four things:
+[`server/src/register.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/users-permissions/server/src/register.ts) does five things:
 
+- It builds the stock actions of the `user`, `role`, `permissions`, `settings` and `contentmanageruser` controllers for the Strapi instance. These controllers are factories. An app extension can replace one with a plain object that spreads it (`{ ...plugin.controllers.user, me }`). Core does not call the factory then, so the copied stock actions call the controller that `register` builds.
 - It registers the strategy `users-permissions` for the `content-api` auth scope, with `strapi.get('auth').register`.
 - It adds a `content-api.output` sanitizer that removes the `users` relation from role entities.
 - It calls `server/src/graphql` when the `graphql` plugin exists. That code disables queries and mutations on permissions, replaces the create, update and delete mutations of users and roles, and adds the `me` query and the auth mutations (`login`, `register` and the password and email flows).
