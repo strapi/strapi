@@ -9,7 +9,7 @@ import {
   toCheckboxChoice,
   type PluginRow,
 } from '../selection';
-import { createPackument } from './test-helpers';
+import { createPackument, NOT_LICENSED_MESSAGE } from './test-helpers';
 
 jest.mock('../checklist-prompt', () => ({ promptChecklist: jest.fn() }));
 
@@ -195,7 +195,7 @@ describe('toCheckboxChoice', () => {
 
 describe('describeLockedGroup', () => {
   it('is the server message', () => {
-    expect(describeLockedGroup('Available as an add-on.')).toBe('Available as an add-on.');
+    expect(describeLockedGroup(NOT_LICENSED_MESSAGE)).toBe(NOT_LICENSED_MESSAGE);
   });
 
   it.each([undefined, ''])('is the default heading for %j', (message) => {
@@ -208,11 +208,11 @@ describe('describeLockedRows', () => {
     expect(
       describeLockedRows(
         [{ entry: aiByokEntry, state: 'locked' }, rowFor(threeVersions, '1.2.0')],
-        'Available as an add-on.'
+        NOT_LICENSED_MESSAGE
       )
     ).toBe(
       [
-        'Available as an add-on.',
+        NOT_LICENSED_MESSAGE,
         `  ✕ AI BYOK (@strapi-enterprise/plugin-ai-byok)  ${aiByokEntry.summary}`,
       ].join('\n')
     );
@@ -271,14 +271,14 @@ describe('promptForPlugins', () => {
 
     await promptForPlugins(
       [{ entry: lockedEntry, state: 'locked' }, rowFor(threeVersions)],
-      'Available as an add-on.'
+      NOT_LICENSED_MESSAGE
     );
 
     expect(promptChecklistMock).toHaveBeenCalledWith({
       message: 'Which Enterprise plugins do you want to install or upgrade?',
       choices: [expect.objectContaining({ value: '@strapi-enterprise/plugin-ai-byok@1.2.0' })],
       footer: {
-        heading: 'Available as an add-on.',
+        heading: NOT_LICENSED_MESSAGE,
         lines: [`  ✕ AI BYOK (@strapi-enterprise/plugin-locked)  ${aiByokEntry.summary}`],
       },
     });
