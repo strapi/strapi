@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type { HasPermissionsConfig } from './policies';
 import type { RateLimitOptions } from './rate-limit';
@@ -77,6 +78,53 @@ type ActionProviderInput = Omit<CreateActionPayload, 'category'> & {
 };
 
 type ActionProvider = (typeof PermissionService)['actionProvider'];
+
+/**
+ * An action to register, as `as const` arrays and inline literals type it: arrays may be readonly.
+ * Same fields as {@link ActionProviderInput}.
+ */
+type ActionRegistration = Readonly<
+  Omit<ActionProviderInput, 'subjects' | 'options' | 'aliases'>
+> & {
+  readonly subjects?: readonly string[] | undefined;
+  readonly options?: { readonly applyToProperties: readonly string[] | null } | undefined;
+  readonly aliases?:
+    | readonly { readonly actionId: string; readonly subjects?: readonly string[] | undefined }[]
+    | undefined;
+};
+
+/**
+ * The action provider with strict types. `register` and `registerMany` check that each action's
+ * computed ID is a registered permission action (`Core.PermissionActionCheck`); reads accept any
+ * runtime ID and reject an unregistered literal (`Core.PermissionActionLookup`). Without strict
+ * types, the contract keeps the implementation's signatures.
+ */
+type StrictActionProvider = Omit<
+  ActionProvider,
+  'register' | 'registerMany' | 'get' | 'has' | 'appliesToProperty' | 'unstable_aliases'
+> & {
+  register<const TAction extends ActionRegistration>(
+    actionAttributes: Core.PermissionActionCheck<TAction>
+  ): ReturnType<ActionProvider['register']>;
+  registerMany<const TActions extends readonly ActionRegistration[]>(actionsAttributes: {
+    [TIndex in keyof TActions]: Core.PermissionActionCheck<TActions[TIndex]>;
+  }): ReturnType<ActionProvider['registerMany']>;
+  get<TId extends Core.PermissionActionLookupName>(
+    actionId: Core.PermissionActionLookup<TId>
+  ): ReturnType<ActionProvider['get']>;
+  has<TId extends Core.PermissionActionLookupName>(
+    actionId: Core.PermissionActionLookup<TId>
+  ): ReturnType<ActionProvider['has']>;
+  appliesToProperty<TId extends Core.PermissionActionLookupName>(
+    property: string,
+    actionId: Core.PermissionActionLookup<TId>,
+    subject: Parameters<ActionProvider['appliesToProperty']>[2]
+  ): ReturnType<ActionProvider['appliesToProperty']>;
+  unstable_aliases<TId extends Core.PermissionActionLookupName>(
+    actionId: Core.PermissionActionLookup<TId>,
+    subject?: string | null
+  ): ReturnType<ActionProvider['unstable_aliases']>;
+};
 type PermissionsManager = ReturnType<(typeof PermissionService)['createPermissionsManager']>;
 type SectionsBuilder = (typeof PermissionService)['sectionsBuilder'];
 
@@ -108,12 +156,14 @@ type PermissionServiceContract = Omit<
       matcher: (action: Action) => unknown
     ): ReturnType<SectionsBuilder['addMatcher']>;
   };
-  actionProvider: Omit<ActionProvider, 'register' | 'registerMany'> & {
-    register(actionAttributes: ActionProviderInput): ReturnType<ActionProvider['register']>;
-    registerMany(
-      actionsAttributes: ActionProviderInput[]
-    ): ReturnType<ActionProvider['registerMany']>;
-  };
+  actionProvider: Core.IsStrict extends true
+    ? StrictActionProvider
+    : Omit<ActionProvider, 'register' | 'registerMany'> & {
+        register(actionAttributes: ActionProviderInput): ReturnType<ActionProvider['register']>;
+        registerMany(
+          actionsAttributes: ActionProviderInput[]
+        ): ReturnType<ActionProvider['registerMany']>;
+      };
 };
 
 /** EE runtime shapes of the admin services that the EE edition extends. */

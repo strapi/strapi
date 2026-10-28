@@ -22,11 +22,19 @@ type RoleService = Core.IsStrict extends true
   ? Strapi.Registries.PackageServices['admin::role']
   : typeof role;
 
+/**
+ * With strict types, the registered contract: the action provider checks permission action IDs.
+ * Without them, as on develop.
+ */
+type PermissionService = Core.IsStrict extends true
+  ? Strapi.Registries.PackageServices['admin::permission']
+  : typeof permission;
+
 type S = {
   role: RoleService;
   user: typeof user;
   passport: typeof passport;
-  permission: typeof permission;
+  permission: PermissionService;
   'content-type': typeof contentType;
   token: typeof token;
   auth: typeof auth;

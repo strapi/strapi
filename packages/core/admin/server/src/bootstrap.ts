@@ -9,7 +9,6 @@ import {
   hasUserConfiguredAuthOptionsExpiresIn,
 } from './services/token';
 import adminActions from './config/admin-actions';
-import type { CreateActionPayload } from './domain/action';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';
 import {
@@ -28,10 +27,11 @@ const defaultAdminAuthSettings = {
 };
 
 const registerPermissionActions = async () => {
-  // `as const` makes the list readonly, and the action provider takes a mutable array.
-  await getService('permission').actionProvider.registerMany(
-    adminActions.actions as unknown as CreateActionPayload[]
-  );
+  // With strict types, the registered contract checks the action IDs. Without them, the build
+  // resolves the lookup to develop's `Core.Service`, which takes the readonly `as const` list.
+  await (
+    getService('permission') as Core.ServiceFor<'admin::permission'>
+  ).actionProvider.registerMany(adminActions.actions);
 };
 
 const registerAdminConditions = async () => {
