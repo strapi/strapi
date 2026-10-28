@@ -9,6 +9,8 @@ type Equal<T, U> =
 type Expect<T extends true> = T;
 type Declared = Strapi.Registries.PackageContentTypeSchemas;
 type Generated = Strapi.Registries.AppContentTypeSchemas;
+// The schemas of bundled packages join the union when the program loads them (`i18n.d.ts`).
+type Bundled = Extract<keyof Declared, 'plugin::i18n.locale'>;
 
 const productFindFirst = () => app.documents('plugin::catalog.product').findFirst();
 declare const product: Awaited<ReturnType<typeof productFindFirst>>;
@@ -18,7 +20,12 @@ declare const checks: [
     Equal<Schema.ContentType<'plugin::catalog.product'>, Generated['plugin::catalog.product']>
   >,
   Expect<Equal<Schema.ContentType<'plugin::catalog.tag'>, Declared['plugin::catalog.tag']>>,
-  Expect<Equal<UID.ContentType, 'admin::user' | 'plugin::catalog.product' | 'plugin::catalog.tag'>>,
+  Expect<
+    Equal<
+      UID.ContentType,
+      'admin::user' | 'plugin::catalog.product' | 'plugin::catalog.tag' | Bundled
+    >
+  >,
   Expect<Equal<UID.CollectionType, UID.ContentType>>,
 ];
 checks satisfies unknown;
