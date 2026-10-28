@@ -45,7 +45,7 @@ const FALLBACK_TIMEZONE = 'UTC+00:00&Africa/Abidjan';
 
 // The timezone list's values are `${offset}&${IANA name}`
 const getTimezoneName = (timezone: string) => timezone.split('&')[1];
-const formatTimezoneLabel = (timezone: string) => timezone.replace('&', ' ');
+const formatTimezoneLabel = (timezone: string) => timezone.replaceAll('&', ' ');
 
 export interface ReleaseDrawerValues {
   name: string;

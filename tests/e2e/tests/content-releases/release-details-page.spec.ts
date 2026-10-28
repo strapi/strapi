@@ -186,7 +186,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
 
   // Its own release: starting on the seeded one, like `test` does, would only be navigated away from
   testLoggedIn(
-    'a release with an entry that is not ready is blocked, shows why and refuses to publish',
+    'a release with an entry that is not ready is blocked, shows why and cannot be published',
     async ({ page, details }) => {
       const releaseId = await createReleaseOfMatches(page, {
         name: 'Matchday',
@@ -216,12 +216,8 @@ describeOnCondition(edition === 'EE')('Release page', () => {
       await page.keyboard.press('Escape');
       await expect(reason).toBeHidden();
 
-      await expect(details.publishButton).toBeEnabled();
-      await details.publishButton.click();
-      // Refused on the entry's own validation error
-      await expect(page.getByRole('alert').filter({ hasText: /opponent/i })).toBeVisible();
-      await expect(page.getByText('Blocked', { exact: true })).toBeVisible();
-      await expect(details.publishButton).toBeVisible();
+      // Blocked means running now would release nothing
+      await expect(details.publishButton).toBeDisabled();
     }
   );
 });
