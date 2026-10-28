@@ -183,7 +183,7 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
           getComponentLoadParams(componentUID)
         )) as ComponentValue;
 
-      // Resolve durable componentKey → row id on this parent (draft or published) before
+      // Resolve durable strapiComponentKey → row id on this parent (draft or published) before
       // delete/update so Content API clients can round-trip keys from either status.
       const componentValue = resolveComponentIdentities(
         attributeName,
@@ -338,12 +338,12 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
 };
 
 /**
- * Map payload entries that carry `componentKey` onto the matching component row already
+ * Map payload entries that carry `strapiComponentKey` onto the matching component row already
  * linked to this parent entity.
  *
  * - An `id` that belongs to this parent wins and is left unchanged.
  * - An `id` that does not belong to this parent (e.g. the published row echoed back while the
- *   draft is updated) is replaced by the row matching `componentKey`, when there is one.
+ *   draft is updated) is replaced by the row matching `strapiComponentKey`, when there is one.
  * - Each row is claimed once: a key repeated in the same field (copied block) becomes a new
  *   component with a fresh key instead of updating the block it was copied from.
  *
@@ -362,7 +362,7 @@ const resolveComponentIdentities = <T extends ComponentValue | DynamicZoneValue>
 
   type Entry = {
     id?: Modules.EntityService.Params.Attribute.ID;
-    componentKey?: string | null;
+    strapiComponentKey?: string | null;
     __component?: string;
   };
 
@@ -381,7 +381,7 @@ const resolveComponentIdentities = <T extends ComponentValue | DynamicZoneValue>
             !isNil(entry.id) && String(entry.id) === String(value.id) && sameType(entry, value)
         );
 
-  const hasKey = (value: Entry) => typeof value.componentKey === 'string';
+  const hasKey = (value: Entry) => typeof value.strapiComponentKey === 'string';
 
   const claimed = new Set<Entry>();
   values.forEach((value) => {
@@ -393,7 +393,7 @@ const resolveComponentIdentities = <T extends ComponentValue | DynamicZoneValue>
 
   const asNewComponent = (value: Entry) => {
     const uid = (value.__component ?? componentUID) as UID.Component | undefined;
-    const data = omit(value, ['id', 'componentKey']);
+    const data = omit(value, ['id', 'strapiComponentKey']);
     return uid ? stripComponentKeys(strapi.getModel(uid), data) : data;
   };
 
@@ -411,7 +411,7 @@ const resolveComponentIdentities = <T extends ComponentValue | DynamicZoneValue>
     }
 
     const match = previous.find(
-      (entry) => entry.componentKey === value.componentKey && sameType(entry, value)
+      (entry) => entry.strapiComponentKey === value.strapiComponentKey && sameType(entry, value)
     );
 
     if (match && claimed.has(match)) {
@@ -1046,16 +1046,16 @@ const createComponent = async <TUID extends UID.Component>(
 
   const componentData = await createComponents(uid, data);
 
-  // Preserve componentKey on publish/discard; mint one on first create.
+  // Preserve strapiComponentKey on publish/discard; mint one on first create.
   // Document clone strips keys first so this mints fresh identities.
-  const existingKey = (data as unknown as { componentKey?: string }).componentKey;
-  const componentKey =
+  const existingKey = (data as unknown as { strapiComponentKey?: string }).strapiComponentKey;
+  const strapiComponentKey =
     typeof existingKey === 'string' && existingKey.length > 0 ? existingKey : createDocumentId();
 
   // Make sure we don't save the component with a pre-defined ID.
   const entryData = assignComponentData(schema, componentData, {
     ...omit(data, 'id'),
-    componentKey,
+    strapiComponentKey,
   });
 
   return strapi.db.query(uid).create({ data: entryData });
@@ -1084,12 +1084,12 @@ const updateComponent = async <TUID extends UID.Component>(
     return { id: componentToUpdate.id, changed: false };
   }
 
-  // componentKey is durable identity — do not allow clients to reassign it on update
+  // strapiComponentKey is durable identity — do not allow clients to reassign it on update
   const component = await strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
-    data: assignComponentData(schema, componentData, omit(data, 'componentKey')),
+    data: assignComponentData(schema, componentData, omit(data, 'strapiComponentKey')),
   });
 
   return component ? { id: component.id, changed: true } : null;
@@ -1370,7 +1370,7 @@ const createComponentRelationFilter = () => {
 };
 
 /**
- * Return a copy of `data` without `componentKey` in nested component / dynamic-zone payloads,
+ * Return a copy of `data` without `strapiComponentKey` in nested component / dynamic-zone payloads,
  * so createComponent mints new keys (client creates, document clone, copied blocks).
  * Publish/discard must NOT call this — they intentionally preserve keys across status rows.
  */
@@ -1388,7 +1388,7 @@ const stripComponentKeys = <T>(schema: Schema.Schema | undefined, data: T): T =>
     }
     return stripComponentKeys(
       componentSchema,
-      omit(entry as Record<string, unknown>, 'componentKey')
+      omit(entry as Record<string, unknown>, 'strapiComponentKey')
     );
   };
 

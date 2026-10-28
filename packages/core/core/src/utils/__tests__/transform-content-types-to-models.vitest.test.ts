@@ -264,7 +264,7 @@ const expectedModels = [
     tableName: 'empty',
     attributes: {
       id: { type: 'increments' },
-      componentKey: { type: 'string' },
+      strapiComponentKey: { type: 'string' },
     },
     lifecycles: {},
   },
@@ -312,6 +312,14 @@ describe('transformContentTypesToModels', () => {
       const models = transformContentTypesToModels(contentTypes, identifiers);
 
       expect(models).toMatchModels(expectedModels);
+    });
+
+    it.each(['componentKey', 'component_key'])('allows a user attribute named %s', (name) => {
+      const modifiedContentTypes = patchContentTypes('countries', {
+        attributes: { [name]: { type: 'string' } },
+      });
+
+      expect(() => transformContentTypesToModels(modifiedContentTypes, identifiers)).not.toThrow();
     });
 
     it.each(['id', 'document_id', 'ID', 'documentId'])(

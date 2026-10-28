@@ -428,13 +428,13 @@ const createComponent = async <TUID extends UID.Component = UID.Component>(
   // Remove predefined IDs and replace nested component data with the created components.
   const dataWithoutComponents = omitComponentData(model, omit(data, 'id'));
 
-  // Preserve componentKey when restoring/transferring; mint one when absent
-  const existingKey = (data as unknown as { componentKey?: string }).componentKey;
-  const componentKey =
+  // Preserve strapiComponentKey when restoring/transferring; mint one when absent
+  const existingKey = (data as unknown as { strapiComponentKey?: string }).strapiComponentKey;
+  const strapiComponentKey =
     typeof existingKey === 'string' && existingKey.length > 0 ? existingKey : createId();
 
   return strapi.db.query(uid).create({
-    data: { ...componentData, ...dataWithoutComponents, componentKey },
+    data: { ...componentData, ...dataWithoutComponents, strapiComponentKey },
   });
 };
 
@@ -448,12 +448,12 @@ const updateComponent = async <TUID extends UID.Component>(
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
-  // componentKey is durable identity — do not allow reassignment on update
+  // strapiComponentKey is durable identity — do not allow reassignment on update
   return strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
-    data: Object.assign(omitComponentData(model, omit(data, 'componentKey')), componentData),
+    data: Object.assign(omitComponentData(model, omit(data, 'strapiComponentKey')), componentData),
   });
 };
 

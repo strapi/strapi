@@ -424,7 +424,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToData(contentType)
     )(params);
 
-    // componentKey is server-assigned on create, like documentId
+    // strapiComponentKey is server-assigned on create, like documentId
     const doc = await entries.create({
       ...queryParams,
       data: components.stripComponentKeys(contentType, queryParams.data),
@@ -480,7 +480,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           contentType,
           (modelUid) => strapi.getModel(modelUid as UID.Schema)
         );
-        // Clone is a new document — mint fresh componentKeys (do not copy source keys)
+        // Clone is a new document — mint fresh strapiComponentKeys (do not copy source keys)
         const dataWithDocumentId = {
           ...components.stripComponentKeys(contentType, data),
           documentId: newDocumentId,

@@ -275,7 +275,7 @@ export const transformContentTypesToModels = (
   identifiers: Identifiers
 ): Model[] => {
   const models: Model[] = [];
-  const reservedAttributeNames = new Set(['document_id', 'component_key', identifiers.ID_COLUMN]);
+  const reservedAttributeNames = new Set(['document_id', identifiers.ID_COLUMN]);
 
   contentTypes.forEach((contentType) => {
     assert(contentType.collectionName, 'Content type "collectionName" is required');
@@ -294,13 +294,14 @@ export const transformContentTypesToModels = (
 
     // Durable identity for component instances across draft/publish clones.
     // Copied on publish/clone (same value on both status rows); numeric `id` stays row-local.
-    const componentKeyAttribute: Record<string, Schema.Attribute.AnyAttribute> =
+    const strapiComponentKeyAttribute: Record<string, Schema.Attribute.AnyAttribute> =
       modelType === 'component'
-        ? { componentKey: { type: 'string', default: createDocumentId } }
+        ? { strapiComponentKey: { type: 'string', default: createDocumentId } }
         : {};
 
     // TODO: this needs to be combined with getReservedNames, we should not be maintaining two lists
-    // Prevent user from creating a documentId / componentKey attribute
+    // Prevent user from creating a documentId attribute.
+    // strapiComponentKey is already illegal through the reserved `strapi*` prefix.
     Object.keys(contentType.attributes || {}).forEach((attributeName) => {
       const snakeCasedAttributeName = _.snakeCase(attributeName);
       if (reservedAttributeNames.has(snakeCasedAttributeName)) {
@@ -324,7 +325,7 @@ export const transformContentTypesToModels = (
           type: 'increments',
         },
         ...documentIdAttribute,
-        ...componentKeyAttribute,
+        ...strapiComponentKeyAttribute,
         ...transformAttributes(contentType, identifiers),
       },
       indexes: contentType.indexes as Model['indexes'],
