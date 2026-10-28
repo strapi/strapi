@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/strapi';
+import type { Core, Schema, UID } from '@strapi/strapi';
 import type {
   CEUsersService,
   EEUsersService,
@@ -10,6 +10,12 @@ import type {
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 type HasUndefined<T> = undefined extends T ? true : false;
+
+/** The licensed attributes of `licensed-schemas.d.ts` a content type has. */
+type LicensedAttributeNames<TUID extends UID.ContentType> = Extract<
+  keyof Schema.ContentType<TUID>['attributes'],
+  'strapi_stage' | 'strapi_assignee' | 'licensed_note'
+>;
 
 declare const app: Core.Strapi;
 
@@ -31,6 +37,24 @@ declare const checks: [
       Omit<CEUsersService, keyof EEUsersService> & EEUsersService
     >
   >,
+  // Review workflows adds its stage and assignee to the content types it extends, and the provider
+  // (`licensed`) adds its attribute to every content type, package ones included.
+  Core.Assert<
+    Equal<
+      LicensedAttributeNames<'api::article.article'>,
+      'strapi_stage' | 'strapi_assignee' | 'licensed_note'
+    >
+  >,
+  Core.Assert<Equal<LicensedAttributeNames<'api::hidden.hidden'>, 'licensed_note'>>,
+  Core.Assert<Equal<LicensedAttributeNames<'api::note.note'>, 'licensed_note'>>,
+  Core.Assert<Equal<LicensedAttributeNames<'plugin::review-workflows.workflow'>, 'licensed_note'>>,
+  Core.Assert<
+    Equal<
+      Schema.ContentType<'api::article.article'>['attributes']['strapi_stage'],
+      Schema.Attribute.Relation<'oneToOne', 'plugin::review-workflows.workflow-stage'>
+    >
+  >,
+  Core.Assert<Equal<'api::article.article' extends UID.CollectionType ? true : false, true>>,
 ];
 checks satisfies unknown;
 
@@ -58,3 +82,11 @@ adminChecks satisfies unknown;
 
 void app.service('admin::seat-enforcement').getDisabledUserList();
 void app.service('admin::role').ssoCheckRolesIdForDeletion([]);
+
+const articles = app.documents('api::article.article');
+articles.findFirst({
+  populate: { strapi_stage: true, strapi_assignee: true },
+}) satisfies Promise<unknown>;
+const hiddens = app.documents('api::hidden.hidden');
+// @ts-expect-error Review workflows does not extend content types hidden from the content manager.
+hiddens.findFirst({ populate: { strapi_stage: true } }) satisfies Promise<unknown>;

@@ -1,9 +1,15 @@
-import type { Core } from '@strapi/strapi';
+import type { Core, Schema, UID } from '@strapi/strapi';
 import type { CEUsersService } from './licensed-provider';
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 type HasMember<T, K extends string> = K extends keyof T ? true : false;
+
+/** The licensed attributes of `licensed-schemas.d.ts` a content type has. */
+type LicensedAttributeNames<TUID extends UID.ContentType> = Extract<
+  keyof Schema.ContentType<TUID>['attributes'],
+  'strapi_stage' | 'strapi_assignee' | 'licensed_note'
+>;
 
 declare const app: Core.Strapi;
 
@@ -18,6 +24,8 @@ declare const checks: [
   Core.Assert<Equal<Core.ServiceFor<'plugin::licensed-provider.seats'>, undefined>>,
   Core.Assert<Equal<Core.ControllerFor<'plugin::licensed-provider.reports'>, undefined>>,
   Core.Assert<Equal<Core.ServiceFor<'plugin::licensed-provider.users'>, CEUsersService>>,
+  // Licensed attributes are missing.
+  Core.Assert<Equal<LicensedAttributeNames<'api::article.article'>, never>>,
 ];
 checks satisfies unknown;
 
@@ -41,3 +49,7 @@ adminChecks satisfies unknown;
 
 // @ts-expect-error EE-only members are absent.
 void app.service('admin::role').ssoCheckRolesIdForDeletion([]);
+
+const articles = app.documents('api::article.article');
+// @ts-expect-error Review workflows adds no stage.
+articles.findFirst({ populate: { strapi_stage: true } }) satisfies Promise<unknown>;

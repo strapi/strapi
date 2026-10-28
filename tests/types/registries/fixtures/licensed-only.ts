@@ -1,9 +1,15 @@
-import type { Core } from '@strapi/strapi';
+import type { Core, Schema, UID } from '@strapi/strapi';
 import type { EEUsersService, SeatsService } from './licensed-provider';
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 type HasUndefined<T> = undefined extends T ? true : false;
+
+/** The licensed attributes of `licensed-schemas.d.ts` a content type has. */
+type LicensedAttributeNames<TUID extends UID.ContentType> = Extract<
+  keyof Schema.ContentType<TUID>['attributes'],
+  'strapi_stage' | 'strapi_assignee' | 'licensed_note'
+>;
 
 declare const app: Core.Strapi;
 
@@ -23,6 +29,8 @@ declare const checks: [
       EEUsersService['isSSOLocked']
     >
   >,
+  // Only the attribute gated by `licensed` is added.
+  Core.Assert<Equal<LicensedAttributeNames<'api::article.article'>, 'licensed_note'>>,
 ];
 checks satisfies unknown;
 

@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/strapi';
+import type { Core, Schema, UID } from '@strapi/strapi';
 import type {
   CEUsersService,
   EEUsersService,
@@ -11,6 +11,12 @@ import type {
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 type HasUndefined<T> = undefined extends T ? true : false;
+
+/** The licensed attributes of `licensed-schemas.d.ts` a content type has. */
+type LicensedAttributeNames<TUID extends UID.ContentType> = Extract<
+  keyof Schema.ContentType<TUID>['attributes'],
+  'strapi_stage' | 'strapi_assignee' | 'licensed_note'
+>;
 
 declare const app: Core.Strapi;
 
@@ -37,6 +43,8 @@ declare const checks: [
       CEUsersService & Partial<Omit<EEUsersService, keyof CEUsersService>>
     >
   >,
+  // Licensed attributes are missing: the schemas are those type generation writes.
+  Core.Assert<Equal<LicensedAttributeNames<'api::article.article'>, never>>,
 ];
 checks satisfies unknown;
 
