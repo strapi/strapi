@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": ".",
+    "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo",
     "noEmit": false
   },
   "include": ["_internal"]

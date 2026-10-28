@@ -15,6 +15,7 @@
     "moduleResolution": "Bundler",
     "skipLibCheck": true,
     "noEmit": true,
+    "emitDeclarationOnly": true,
     "types": [],
     "noUncheckedSideEffectImports": true,
     "erasableSyntaxOnly": true

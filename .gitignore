@@ -117,7 +117,7 @@ packages/generators/app/files/public/
 schema.graphql
 dist
 .nx
-.tsbuildinfo
+*.tsbuildinfo
 .eslintcache
 
 ############################

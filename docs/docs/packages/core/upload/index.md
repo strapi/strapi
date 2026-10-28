@@ -13,7 +13,7 @@ review_notes:
 
 `@strapi/upload` is the plugin that stores files for a Strapi application. It provides the Media Library in the admin panel, the upload routes of the admin API and the Content API, and the file and folder content types. It processes images and hands the files to an upload provider.
 
-The plugin has a server part (`strapi-server`), an admin part (`strapi-admin`) and shared code (`shared/`, exported as `./_internal/shared`). The plugin loader always enables it. The `media` attribute of any content type points to its files. The provider packages under `packages/providers/upload-*` implement the storage.
+The plugin has a server part (`strapi-server`), an admin part (`strapi-admin`) and shared code (`shared/`, its own TypeScript project that both sides reference). The plugin loader always enables it. The `media` attribute of any content type points to its files. The provider packages under `packages/providers/upload-*` implement the storage.
 
 ## Key concepts
 

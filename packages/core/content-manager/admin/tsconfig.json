@@ -6,5 +6,6 @@
     },
     "types": ["@testing-library/jest-dom", "jest", "vite/client", "@strapi/types/globals-admin"]
   },
-  "include": ["./src", "../shared", "./tests"]
+  "references": [{ "path": "../shared" }],
+  "include": ["./src", "./tests"]
 }

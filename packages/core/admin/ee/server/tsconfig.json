@@ -1,6 +1,7 @@
 {
   "extends": "tsconfig/base.json",
   "include": ["src"],
+  "references": [{ "path": "../../shared" }],
   "compilerOptions": {
     "types": ["node", "jest"]
   }

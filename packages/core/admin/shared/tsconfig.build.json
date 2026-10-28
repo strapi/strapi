@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["."],
+  "exclude": ["**/__tests__", "**/*.test.*"],
+  "compilerOptions": {
+    "types": [],
+    "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo"
+  }
+}
