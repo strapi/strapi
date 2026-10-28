@@ -16,6 +16,12 @@
 // Usage: node tests/types/strict-off-parity/run.cjs --baseline <checkout> [--head <checkout>]
 //          [--out <dir>] [--keep]
 // Exit code 0 when the outputs are equal, 1 when they differ. `--out` keeps both outputs and the diff.
+//
+// Snapshot mode, run by CI (`yarn test:types:strict-off`), checks the head checkout alone and skips
+// the surface: `types/generated/*` must equal the committed copy in `<dir>`, and the diagnostics and
+// equivalence programs must be empty. `--update` rewrites `<dir>` instead of comparing with it.
+//
+// Usage: node tests/types/strict-off-parity/run.cjs --snapshot <dir> [--update] [--head <checkout>]
 
 const assert = require('node:assert/strict');
 const childProcess = require('node:child_process');
@@ -32,10 +38,22 @@ const { values: options } = parseArgs({
     head: { type: 'string', default: path.resolve(__dirname, '../../..') },
     out: { type: 'string' },
     keep: { type: 'boolean', default: false },
+    snapshot: { type: 'string' },
+    update: { type: 'boolean', default: false },
   },
 });
 
-assert.ok(options.baseline !== undefined, 'Missing --baseline <checkout>');
+assert.ok(
+  options.baseline !== undefined || options.snapshot !== undefined,
+  'Missing --baseline <checkout> or --snapshot <dir>'
+);
+assert.ok(
+  options.baseline === undefined || options.snapshot === undefined,
+  '--baseline and --snapshot cannot be combined'
+);
+assert.ok(options.update === false || options.snapshot !== undefined, '--update needs --snapshot');
+
+const UPDATE_COMMAND = 'yarn test:types:strict-off --update';
 
 const fixture = path.join(__dirname, 'app');
 
@@ -292,7 +310,7 @@ function dumpSurface(ts, program, checkout, app) {
   return normalizePath(output.join('\n'), checkout, app).replace(/(__@\w+)@\d+/g, '$1');
 }
 
-function collect(checkout, label) {
+function collect(checkout, label, { surface = true } = {}) {
   const { directory, app } = prepare(checkout, label);
 
   try {
@@ -313,7 +331,7 @@ function collect(checkout, label) {
           checkout,
           app
         ),
-        'surface.txt': dumpSurface(ts, program, checkout, app),
+        ...(surface === true ? { 'surface.txt': dumpSurface(ts, program, checkout, app) } : {}),
       },
     };
   } finally {
@@ -336,32 +354,92 @@ function diff(baselineDirectory, headDirectory) {
     maxBuffer: 1024 * 1024 * 256,
   });
 
+  // `diff` exits with 2 on trouble, e.g. a missing directory, and prints nothing on stdout then.
+  assert.notEqual(result.status, 2, `diff failed:\n${result.stderr}`);
+
   return result.stdout;
 }
 
-const baseline = collect(path.resolve(options.baseline), 'baseline');
-const head = collect(path.resolve(options.head), 'head');
-const out = options.out ?? fs.mkdtempSync(path.join(os.tmpdir(), 'strict-off-parity-out-'));
+function compareCheckouts() {
+  const baseline = collect(path.resolve(options.baseline), 'baseline');
+  const head = collect(path.resolve(options.head), 'head');
+  const out = options.out ?? fs.mkdtempSync(path.join(os.tmpdir(), 'strict-off-parity-out-'));
 
-writeOutputs(path.join(out, 'baseline'), baseline.outputs);
-writeOutputs(path.join(out, 'head'), head.outputs);
+  writeOutputs(path.join(out, 'baseline'), baseline.outputs);
+  writeOutputs(path.join(out, 'head'), head.outputs);
 
-const changes = diff(path.join(out, 'baseline'), path.join(out, 'head'));
+  const changes = diff(path.join(out, 'baseline'), path.join(out, 'head'));
 
-fs.writeFileSync(path.join(out, 'parity.diff'), changes);
+  fs.writeFileSync(path.join(out, 'parity.diff'), changes);
 
-const files = Object.keys({ ...baseline.outputs, ...head.outputs }).sort();
+  const files = Object.keys({ ...baseline.outputs, ...head.outputs }).sort();
 
-for (const file of files) {
-  const equal = baseline.outputs[file] === head.outputs[file];
+  for (const file of files) {
+    const equal = baseline.outputs[file] === head.outputs[file];
 
-  console.log(`${equal ? 'same' : 'DIFF'} ${file}`);
+    console.log(`${equal ? 'same' : 'DIFF'} ${file}`);
+  }
+
+  if (changes === '') {
+    console.log('Strict-off parity holds.');
+    if (options.out === undefined) fs.rmSync(out, { recursive: true, force: true });
+  } else {
+    console.log(`Strict-off parity broken, see ${path.join(out, 'parity.diff')}`);
+    process.exitCode = 1;
+  }
 }
 
-if (changes === '') {
-  console.log('Strict-off parity holds.');
-  if (options.out === undefined) fs.rmSync(out, { recursive: true, force: true });
-} else {
-  console.log(`Strict-off parity broken, see ${path.join(out, 'parity.diff')}`);
-  process.exitCode = 1;
+function checkSnapshot() {
+  const snapshot = path.resolve(options.snapshot);
+  const { outputs } = collect(path.resolve(options.head), 'head', { surface: false });
+  const generated = Object.fromEntries(
+    Object.entries(outputs)
+      .filter(([name]) => name.startsWith('generated/'))
+      .map(([name, content]) => [name.slice('generated/'.length), content])
+  );
+  const failures = [];
+
+  if (options.update === true) {
+    fs.rmSync(snapshot, { recursive: true, force: true });
+    writeOutputs(snapshot, generated);
+    console.log(`Updated the type generation snapshot in ${snapshot}`);
+  } else if (fs.existsSync(snapshot) === false) {
+    failures.push(
+      `Missing type generation snapshot ${snapshot}, create it with \`${UPDATE_COMMAND}\`.`
+    );
+  } else {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), 'strict-off-parity-generated-'));
+
+    writeOutputs(out, generated);
+
+    const changes = diff(snapshot, out);
+
+    fs.rmSync(out, { recursive: true, force: true });
+
+    if (changes !== '') {
+      failures.push(
+        `Type generation output differs from the snapshot in ${snapshot}:\n${changes}\n` +
+          `If the change is intended (e.g. develop changed type generation), refresh the snapshot ` +
+          `with \`${UPDATE_COMMAND}\` and commit it.`
+      );
+    }
+  }
+
+  for (const name of ['diagnostics.txt', 'equivalence.txt']) {
+    if (outputs[name] !== '') {
+      failures.push(
+        `The strict-off ${name.replace('.txt', '')} program has errors:\n${outputs[name]}`
+      );
+    }
+  }
+
+  if (failures.length === 0) {
+    console.log('Strict-off snapshot holds.');
+  } else {
+    console.error(failures.join('\n\n'));
+    process.exitCode = 1;
+  }
 }
+
+if (options.snapshot === undefined) compareCheckouts();
+else checkSnapshot();
