@@ -47,8 +47,10 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       return this.findAllContentTypes();
     }
 
-    // @ts-expect-error should be resolved from data-mapper types
-    return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
+    // The models are `unknown` without strict types, as on develop.
+    return this.findAllContentTypes().filter(
+      contentTypesUtils.isKind(kind) as (contentType: unknown) => boolean
+    );
   },
 
   async findConfiguration(contentType: Struct.ContentTypeSchema) {
