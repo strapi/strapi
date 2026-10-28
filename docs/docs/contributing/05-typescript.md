@@ -89,8 +89,6 @@ declare global {
   that use the legacy `Node` module resolution.
 - Do not augment `Strapi.Registries.Settings` in published source. Only `@strapi/types/strict`
   sets the switch.
-- Do not declare `Strapi.Registries.LicensedFeatures` in published source. Type generation writes
-  it, with `Settings.licenses`, into an application's `strict.d.ts`. The consumer tests check both.
 - Check implementations against their contracts with a type annotation or `satisfies`.
 - Check the names of the runtime maps (`services`, `controllers`) against the registered names,
   given by `keyof Core.RegisteredFor<Strapi.Registries.PackageServices, 'plugin::x'>`. A plain
@@ -110,19 +108,8 @@ declare global {
   `skipLibCheck` can hide the conflict in a consumer.
 - A package bundled with `@strapi/strapi` that registers contracts must also be imported by
   `packages/core/strapi/strict-types.d.ts`.
-- A service or controller that the admin EE edition merges over its CE implementation registers
-  `Core.LicensedExtension<CE, EE>`, e.g. `admin::user`: the EE shape when the application lists
-  any feature in `licensedFeatures`, the CE shape when it lists none, and the CE shape with the
-  EE-only members optional in package and plugin programs. EE-only admin services, such as
-  `admin::seat-enforcement`, register `Core.Licensed<'licensed', Contract>`, and the audit logs
-  controller `Core.Licensed<'audit-logs', Contract>`. EE code passes the EE service shape,
-  `EnterpriseServices`, as an explicit type argument.
-- A package whose services and controllers exist only with an EE feature registers each entry as
-  `Core.Licensed<'<feature>', Contract>`, e.g. `plugin::review-workflows.workflows`. A CE
-  application, or a license without the feature, does not register them. The entry is `Contract`
-  when the application lists the feature in `licensedFeatures`, `undefined` when it does not, and
-  `Contract | undefined` in package and plugin programs, where strict callers check the lookup
-  result.
+- A service or controller that exists only under a license wraps its entry in `Core.Licensed` or
+  `Core.LicensedExtension`. Read [License-gated contracts](#license-gated-contracts).
 
 ### Service contracts
 
@@ -193,7 +180,8 @@ declare global {
   which changes the emitted declaration. Annotate the variable with the widened type that develop
   infers, then add `satisfies`.
 - Check routes against the hand-written `Controllers` map, not against the registry. A
-  `| undefined` entry has no actions to reference.
+  `Core.Licensed` entry is `Contract | undefined` in a package program, with no actions to
+  reference.
 - Routes mounted only with controllers merged over another map check against both maps. Admin's
   EE routes use `RouteControllers` (`ee/server/src/types/controllers.ts`), the CE `Controllers`
   intersected with the EE ones: in the package program, the registered
@@ -444,7 +432,8 @@ declare global {
   `packages/utils/typescript/src/generators/content-types/index.ts`, which a new attribute joins),
   and strict types add them to the schemas of an application that lists the gate in
   `typescript.licensedFeatures`. Review workflows is the worked example:
-  `packages/core/review-workflows/server/src/types/content-types.ts`.
+  `packages/core/review-workflows/server/src/types/content-types.ts`. Read
+  [License-gated contracts](#license-gated-contracts).
 - In strict mode, each declared UID is a required key of `strapi.contentTypes`, as generated UIDs
   are in an application. A plain record such as `Record<UID.ContentType, any>` no longer fits
   `Core.Strapi['contentTypes']`, so type a content-type record parameter as
@@ -502,6 +491,113 @@ A schema with unknown attributes, such as an unregistered or generic UID, keeps 
 `Data.Input`. Without strict types, the params keep develop's types. With strict types, type
 generation also writes the rule of each attribute as a JSDoc line, which editors show on the input
 keys.
+
+## License-gated contracts
+
+Some services and controllers exist only under a license. Strapi registers them when the license
+that verifies at boot lists their feature: `ee.init` reads `STRAPI_LICENSE` or `license.txt` at
+the start of `register()`, and each gated package picks what it registers once, when it loads.
+A later change, such as the online license check, `ee.disable` or `ee.update`, registers or
+removes nothing. "Licensed" in the types therefore means "listed in the license the application
+boots with". The types cannot check that license: the application states it.
+
+### Listing the application's features
+
+With strict types, an application lists the features it builds against in `config/typescript.ts`:
+
+```ts
+// config/typescript.ts
+import type { Core } from '@strapi/strapi';
+
+export default {
+  strictTypes: true,
+  licensedFeatures: ['review-workflows', 'cms-content-releases'],
+} satisfies Core.Config.TypeScript;
+```
+
+- `Core.Config.TypeScript` types each name against the feature inventory, so a typo fails with
+  TS2820 and a "Did you mean" suggestion. Type generation does not check the names, so a
+  configuration file without the type is not checked.
+- Type generation writes the license scope into `types/generated/strict.d.ts`:
+  `Strapi.Registries.Settings` gets `licenses: 'declared'`, and `Strapi.Registries.LicensedFeatures`
+  gets one `true` entry per listed name, or no entry when the key is unset.
+- `'licensed'` stands for any license that verifies at boot, whatever its features: the admin EE
+  edition and seats depend on it. Every listed feature implies it. List it alone for a license
+  with no feature.
+- With strict types, type generation follows `licensedFeatures` only, never the license it boots
+  with: for service and controller contracts, and for the attributes a package adds to content
+  types under a license (`strapi_stage` and `strapi_assignee` of review workflows, read
+  [Content-type schemas](#content-type-schemas)). Generated files are then the same on every
+  machine. One exception remains: admin registers the `admin::audit-log` content type only when a
+  license verifies, so type generation writes it only under a license.
+- Without strict types, nothing changes: `licensedFeatures` is ignored, lookups keep
+  `Core.Service` and `Core.Controller`, and generated schemas follow the license type generation
+  boots with, as in previous releases.
+
+### Program states
+
+A gated registry entry is `Core.Licensed<Gate, T>`, or `Core.LicensedExtension<CE, EE>` for a
+contract that the admin EE edition merges over its CE implementation. What it resolves to depends
+on the program:
+
+| Program                                                                 | `Core.Licensed<Gate, T>` | `Core.LicensedExtension<CE, EE>`      |
+| ----------------------------------------------------------------------- | ------------------------ | ------------------------------------- |
+| A package, a plugin, or any program without the generated `strict.d.ts` | `T \| undefined`         | CE, with the EE-only members optional |
+| An application with strict types and no `licensedFeatures`              | `undefined`              | CE                                    |
+| An application that lists `Gate` (or any feature, for `'licensed'`)     | `T`                      | EE                                    |
+| An application that lists other features, not `Gate`                    | `undefined`              | EE                                    |
+
+`Core.LicenseScope` is `'declared'` in a program that loads the generated `strict.d.ts` and
+`'unknown'` elsewhere, and `Core.LicenseState<Gate>` is `'on'`, `'off'` or `'unknown'`. An entry is
+never `never`, which would hide misuses. `packages/core/types/src/core/license.ts` holds these
+types.
+
+### Applications
+
+- An application deployed to both the Community and the Enterprise Edition lists the feature and
+  keeps its runtime check, e.g. `strapi.ee.features.isEnabled('review-workflows')`, before it calls
+  a gated contract. The types then give `T` and do not require the check: without the feature,
+  the lookup still returns `undefined` at runtime.
+- In an application that does not list a feature, defensive code on its contracts fails, e.g.
+  `strapi.service('plugin::review-workflows.workflows')?.getAssignedWorkflow(…)` gives TS2339
+  "Property 'getAssignedWorkflow' does not exist on type 'never'". The lookup is `undefined`, so
+  `?.` and `if` checks narrow it to `never`: the types say the contract never exists in this
+  application. List the feature in `licensedFeatures` when the application runs with it, or remove
+  the code.
+- The audit logs controller, `admin::audit-logs`, is `Core.Licensed<'audit-logs', Contract>`.
+  Admin also leaves it out when `admin.auditLogs.enabled` is `false`, which the types do not model:
+  an application that lists `audit-logs` and sets the option to `false` gets `undefined` at
+  runtime.
+- With strict types, `strapi.ee.features.isEnabled` and `get`, and the `feature` of
+  `strapi.ee.entitlements.register`, accept a runtime `string` but reject a literal name that is not
+  in the inventory. `get` types the options of an inventory feature and returns no `string`.
+  Without strict types, they keep develop's signatures.
+
+### Package authors
+
+- Wrap a gated entry in `Core.Licensed<'<feature>', Contract>`, e.g.
+  `'plugin::review-workflows.workflows': Core.Licensed<'review-workflows', WorkflowsService>`, never
+  in a bare `Contract | undefined`. The gate must be a name of the inventory or `'licensed'`.
+  Content releases, review workflows and content history wrap every entry they register under
+  their feature.
+- A service or controller that the admin EE edition merges over its CE implementation registers
+  `Core.LicensedExtension<CE, EE>`, e.g. `admin::user`. EE-only admin services, such as
+  `admin::seat-enforcement`, register `Core.Licensed<'licensed', Contract>`.
+- Never declare `Strapi.Registries.LicensedFeatures` or `Settings.licenses` in published source.
+  Only type generation writes them, into an application's `strict.d.ts`: a published declaration
+  would set the license scope of every program that loads it. `yarn test:types:registries` fails
+  when a published declaration augments either.
+- A package program has no license scope, so it sees `Contract | undefined` and checks the lookup
+  result. Code that runs only under the license states it locally: review workflows'
+  `getService` returns `NonNullable<Core.ServiceFor<…>>`, and admin EE code passes
+  `EnterpriseServices` as an explicit type argument.
+- A new feature joins the inventory, `Strapi.Registries.LicenseFeatures` in
+  `packages/core/types/src/index.ts`, with the options its readers expect. The inventory lives in
+  `@strapi/types` because one package checks the feature of another, e.g. admin's EE metrics read
+  `cms-content-releases`.
+- Declare an attribute that exists only under a license in
+  `Strapi.Registries.LicensedContentTypeAttributes`, as described in
+  [Content-type schemas](#content-type-schemas).
 
 ## Keeping types unchanged without strict mode
 
