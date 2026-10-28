@@ -34,7 +34,15 @@ controller.custom satisfies unknown;
 
 ({
   policies: [
-    { name: 'admin::hasPermissions', config: { actions: ['read', ['update', 'article']] } },
+    {
+      name: 'admin::hasPermissions',
+      config: {
+        actions: [
+          'plugin::content-manager.explorer.read',
+          ['plugin::content-manager.explorer.update', 'api::article.article'],
+        ],
+      },
+    },
   ],
 }) satisfies Core.RouteConfigFor;
 ({
