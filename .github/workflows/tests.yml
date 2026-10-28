@@ -206,7 +206,8 @@ jobs:
           retention-days: 1
 
   unit_back_vitest:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'
+    # e2e: the vitest projects include the e2e helpers in tests/utils.
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.e2e == 'true'
     name: 'unit_back_vitest (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
