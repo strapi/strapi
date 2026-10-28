@@ -21,7 +21,7 @@ export type Component<
        * Durable identity for this component instance across draft/publish clones.
        * Prefer this over `id` for Content API round-trips when Draft & Publish is enabled.
        */
-      componentKey?: string;
+      strapiComponentKey?: string;
     },
     Pick<AttributeValues<TComponentUID>, TComponentKeys>,
   ]

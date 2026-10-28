@@ -344,7 +344,7 @@ describe('content-types service', () => {
       });
     });
 
-    test('Removes componentKey from components and dynamic zones', () => {
+    test('Removes strapiComponentKey from components and dynamic zones', () => {
       const compoModel = {
         attributes: {
           name: { type: 'string' },
@@ -372,8 +372,8 @@ describe('content-types service', () => {
       };
 
       const input = {
-        component: [{ id: 2, componentKey: 'key-a', name: 'Hello' }],
-        dz: [{ id: 3, componentKey: 'key-b', __component: 'compo', name: 'World' }],
+        component: [{ id: 2, strapiComponentKey: 'key-a', name: 'Hello' }],
+        dz: [{ id: 3, strapiComponentKey: 'key-b', __component: 'compo', name: 'World' }],
       };
 
       const result = copyNonLocalizedAttributes(model, input);

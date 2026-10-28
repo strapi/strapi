@@ -1,8 +1,8 @@
 /**
- * Add + backfill `component_key` on existing component tables.
+ * Add + backfill `strapi_component_key` on existing component tables.
  *
  * Internal migrations run *before* schema sync, so this migration must create the
- * column when missing. Schema sync then tracks it via the system `componentKey`
+ * column when missing. Schema sync then tracks it via the system `strapiComponentKey`
  * attribute on component models (transformContentTypesToModels).
  *
  * Existing draft/published pairs get unique keys per row; they share a key after
@@ -16,12 +16,12 @@ import type { Knex } from 'knex';
 import type { Migration } from '../common';
 import type { Database } from '../..';
 
-const COMPONENT_KEY_COLUMN = 'component_key';
+const COMPONENT_KEY_COLUMN = 'strapi_component_key';
 
 const ensureAndBackfillComponentKeys = async (knex: Knex, db: Database) => {
   for (const meta of db.metadata.values()) {
-    // Only component models receive the system `componentKey` attribute
-    if (!meta.attributes?.componentKey) {
+    // Only component models receive the system `strapiComponentKey` attribute
+    if (!meta.attributes?.strapiComponentKey) {
       continue;
     }
 
