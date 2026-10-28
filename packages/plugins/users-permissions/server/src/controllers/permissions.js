@@ -11,7 +11,7 @@ module.exports = {
   },
 
   async getPolicies(ctx) {
-    const policies = _.keys(strapi.plugin('users-permissions').policies);
+    const policies = Object.keys(strapi.plugin('users-permissions').policies);
 
     ctx.send({
       policies: _.without(policies, 'permissions'),

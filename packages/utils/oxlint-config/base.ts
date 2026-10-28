@@ -47,6 +47,29 @@ export const base = {
             message:
               'Use native Array.prototype.forEach or Object.entries / Object.values instead.',
           },
+          {
+            group: [
+              'lodash/keys',
+              'lodash/keys.js',
+              'lodash/values',
+              'lodash/values.js',
+              'lodash/entries',
+              'lodash/entries.js',
+            ],
+            message: 'Use native Object.keys / Object.values / Object.entries instead.',
+          },
+          {
+            group: [
+              'lodash/concat',
+              'lodash/concat.js',
+              'lodash/filter',
+              'lodash/filter.js',
+              'lodash/find',
+              'lodash/find.js',
+            ],
+            message:
+              'Use native Array.prototype.concat (or an array spread), filter or find instead.',
+          },
         ],
         paths: [
           {
@@ -54,6 +77,12 @@ export const base = {
             importNames: ['isArray', 'forEach', 'each'],
             message:
               'Use native Array.isArray, Array.prototype.forEach or Object.entries / Object.values instead.',
+          },
+          {
+            name: 'lodash',
+            importNames: ['keys', 'values', 'entries', 'concat', 'filter', 'find'],
+            message:
+              'Use native Object.keys / Object.values / Object.entries or Array.prototype.concat / filter / find instead.',
           },
         ],
       },
