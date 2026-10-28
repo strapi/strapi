@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
 import type { Release } from '../../../shared/contracts/releases';
@@ -78,25 +79,54 @@ declare global {
         'core_content-releases_settings': { defaultTimezone?: string | null | undefined };
       }
 
-      // Registered only when the `cms-content-releases` EE feature is enabled, so a CE application, or a
-      // license without the feature, resolves them to `undefined`.
-      // TODO @Nico Redesign as a real opt-in to licensed features, so applications that have the
-      // feature can drop `undefined`, instead of every application seeing it.
+      // Registered only when the `cms-content-releases` EE feature is enabled: `undefined` unless
+      // the application lists the feature in `licensedFeatures`, `T | undefined` in package and
+      // plugin programs.
       interface PackageServices {
-        'plugin::content-releases.homepage': Services['homepage'] | undefined;
-        'plugin::content-releases.release': Services['release'] | undefined;
-        'plugin::content-releases.release-action': Services['release-action'] | undefined;
-        'plugin::content-releases.release-validation': Services['release-validation'] | undefined;
-        'plugin::content-releases.scheduling': Services['scheduling'] | undefined;
-        'plugin::content-releases.settings': Services['settings'] | undefined;
+        'plugin::content-releases.homepage': Core.Licensed<
+          'cms-content-releases',
+          Services['homepage']
+        >;
+        'plugin::content-releases.release': Core.Licensed<
+          'cms-content-releases',
+          Services['release']
+        >;
+        'plugin::content-releases.release-action': Core.Licensed<
+          'cms-content-releases',
+          Services['release-action']
+        >;
+        'plugin::content-releases.release-validation': Core.Licensed<
+          'cms-content-releases',
+          Services['release-validation']
+        >;
+        'plugin::content-releases.scheduling': Core.Licensed<
+          'cms-content-releases',
+          Services['scheduling']
+        >;
+        'plugin::content-releases.settings': Core.Licensed<
+          'cms-content-releases',
+          Services['settings']
+        >;
       }
 
-      // Registered with the services (`index.ts`), so `undefined` for the same reason.
+      // Registered with the services (`index.ts`), under the same feature.
       interface PackageControllers {
-        'plugin::content-releases.homepage': Controllers['homepage'] | undefined;
-        'plugin::content-releases.release': Controllers['release'] | undefined;
-        'plugin::content-releases.release-action': Controllers['release-action'] | undefined;
-        'plugin::content-releases.settings': Controllers['settings'] | undefined;
+        'plugin::content-releases.homepage': Core.Licensed<
+          'cms-content-releases',
+          Controllers['homepage']
+        >;
+        'plugin::content-releases.release': Core.Licensed<
+          'cms-content-releases',
+          Controllers['release']
+        >;
+        'plugin::content-releases.release-action': Core.Licensed<
+          'cms-content-releases',
+          Controllers['release-action']
+        >;
+        'plugin::content-releases.settings': Core.Licensed<
+          'cms-content-releases',
+          Controllers['settings']
+        >;
       }
 
       /**
