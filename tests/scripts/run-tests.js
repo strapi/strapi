@@ -80,6 +80,12 @@ const toFileFilter = (filePath) => `${filePath.replace(/[.*+?^${}()|[\]\\]/g, '\
 
 const cwd = path.resolve(__dirname, '../..');
 
+/**
+ * Test app `j` listens on `E2E_PORT_BASE + j` (default 8000). Set another base to run two e2e
+ * runs on one machine, for example from two worktrees.
+ */
+const E2E_PORT_BASE = Number.parseInt(process.env.E2E_PORT_BASE ?? '8000', 10);
+
 const pathExists = async (filePath) => {
   try {
     await fs.access(filePath);
@@ -260,7 +266,8 @@ yargs
             });
 
             // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
-            // canonical port is `8000 + j` above — same as baseURL / webServer; helpers read PORT.
+            // canonical port is `E2E_PORT_BASE + j` below, the same as baseURL / webServer;
+            // helpers read PORT.
             // `port` is always a safe integer here (never user-controlled). `JSON.stringify(port)`
             // embeds a numeric literal; Node coerces env values to strings on read.
             const configFileTemplate = `
@@ -327,7 +334,7 @@ module.exports = config
                   await runDomain({
                     domain: run.domain,
                     testAppPath,
-                    port: 8000 + j,
+                    port: E2E_PORT_BASE + j,
                     testArgs: [
                       ...argsWithoutShard,
                       ...run.files.map((file) =>
@@ -347,7 +354,7 @@ module.exports = config
                   await runDomain({
                     domain: pendingDomains.shift(),
                     testAppPath,
-                    port: 8000 + j,
+                    port: E2E_PORT_BASE + j,
                     testArgs: forwardedRunnerArgs,
                   });
                 }
