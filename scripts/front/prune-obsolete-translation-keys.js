@@ -1,5 +1,8 @@
-// Remove translation keys from locale files that no longer exist in en.json.
-// Misplaced keys (present in another package's en.json) are moved there first.
+// Remove translation keys from locale files that no longer exist in en.json
+// and are not referenced by that package's source.
+// Misplaced keys (present in exactly one other package's en.json) are moved there first.
+// Keys still referenced in source are kept even when en.json does not list them.
+// Keys owned by multiple packages are kept rather than dropped.
 // Usage:
 //   yarn translations:prune              # dry run (default)
 //   yarn translations:prune --write      # migrate misplaced keys, then prune
@@ -24,6 +27,105 @@ const getPackageDirs = async () => {
 };
 
 const getPackageName = (packageDir) => packageDir.replace(/^packages\//, '');
+
+const getPluginPrefix = (packageDir) => {
+  const packageName = getPackageName(packageDir);
+
+  if (packageName === 'core/admin') {
+    return null;
+  }
+
+  const segment = packageName.split('/').pop();
+
+  return segment && segment.length > 0 ? segment : null;
+};
+
+const SOURCE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx']);
+
+const listSourceFiles = (packageDir) => {
+  const files = [];
+
+  const walk = (dir) => {
+    if (!fs.existsSync(dir)) {
+      return;
+    }
+
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const filePath = join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        if (entry.name === 'node_modules' || entry.name === '__tests__' || entry.name === 'tests') {
+          continue;
+        }
+
+        walk(filePath);
+        continue;
+      }
+
+      const extension = entry.name.slice(entry.name.lastIndexOf('.'));
+
+      if (!SOURCE_EXTENSIONS.has(extension) || /\.(test|spec)\.[jt]sx?$/.test(entry.name)) {
+        continue;
+      }
+
+      files.push(filePath);
+    }
+  };
+
+  walk(join(packageDir, 'admin', 'src'));
+  walk(join(packageDir, 'ee', 'admin', 'src'));
+
+  return files;
+};
+
+const recordReferencedKey = (keys, raw, prefix, fromHelper) => {
+  if (!raw) {
+    return;
+  }
+
+  if (fromHelper || !prefix) {
+    keys.add(raw);
+
+    if (prefix && raw.startsWith(`${prefix}.`)) {
+      keys.add(raw.slice(prefix.length + 1));
+    }
+
+    return;
+  }
+
+  const prefixWithDot = `${prefix}.`;
+
+  if (raw.startsWith(prefixWithDot)) {
+    keys.add(raw.slice(prefixWithDot.length));
+    keys.add(raw);
+  }
+};
+
+const HELPER_KEY_PATTERN =
+  /(?:getTrad|getTranslation|getTranslationKey)\(\s*(['"`])([^'"`$\n]+)\1/g;
+const MESSAGE_ID_PATTERN = /\bid\s*:\s*(['"`])([^'"`$\n]+)\1/g;
+
+const collectReferencedKeys = (packageDir) => {
+  const prefix = getPluginPrefix(packageDir);
+  const keys = new Set();
+
+  listSourceFiles(packageDir).forEach((filePath) => {
+    const text = fs.readFileSync(filePath, 'utf8');
+
+    HELPER_KEY_PATTERN.lastIndex = 0;
+    MESSAGE_ID_PATTERN.lastIndex = 0;
+
+    for (const match of text.matchAll(HELPER_KEY_PATTERN)) {
+      recordReferencedKey(keys, match[2], prefix, true);
+    }
+
+    for (const match of text.matchAll(MESSAGE_ID_PATTERN)) {
+      recordReferencedKey(keys, match[2], prefix, false);
+    }
+  });
+
+  return keys;
+};
 
 const getLocaleFromFilePath = (filePath) => basename(filePath, '.json');
 
@@ -60,20 +162,80 @@ const buildEnKeyOwners = (packageDirs) => {
   return ownersByKey;
 };
 
-const getObsoleteKeys = (baseTranslation, localeTranslation) => {
+const getObsoleteKeys = (baseTranslation, localeTranslation, preservedKeys = new Set()) => {
   const baseKeys = new Set(Object.keys(baseTranslation));
 
-  return Object.keys(localeTranslation).filter((key) => !baseKeys.has(key));
+  return Object.keys(localeTranslation).filter(
+    (key) => !baseKeys.has(key) && !preservedKeys.has(key)
+  );
 };
 
-const pruneObsoleteKeysFromJSON = (baseTranslation, localeTranslation) => {
-  return Object.keys(baseTranslation).reduce((acc, key) => {
+const pruneObsoleteKeysFromJSON = (
+  baseTranslation,
+  localeTranslation,
+  preservedKeys = new Set()
+) => {
+  const pruned = Object.keys(baseTranslation).reduce((acc, key) => {
     if (key in localeTranslation) {
       acc[key] = localeTranslation[key];
     }
 
     return acc;
   }, {});
+
+  Object.keys(localeTranslation).forEach((key) => {
+    if (!(key in pruned) && preservedKeys.has(key)) {
+      pruned[key] = localeTranslation[key];
+    }
+  });
+
+  return pruned;
+};
+
+const getAmbiguousKeys = ({
+  sourcePackageDir,
+  localeTranslation,
+  baseTranslation,
+  ownersByKey,
+}) => {
+  const ambiguous = new Set();
+
+  Object.keys(localeTranslation).forEach((key) => {
+    if (key in baseTranslation) {
+      return;
+    }
+
+    const owners = (ownersByKey.get(key) ?? []).filter(
+      (owner) => owner.packageDir !== sourcePackageDir
+    );
+
+    if (owners.length > 1) {
+      ambiguous.add(key);
+    }
+  });
+
+  return ambiguous;
+};
+
+const getPreservedKeys = ({
+  sourcePackageDir,
+  localeTranslation,
+  baseTranslation,
+  ownersByKey,
+  referencedKeys = new Set(),
+}) => {
+  const preserved = new Set(referencedKeys);
+
+  getAmbiguousKeys({
+    sourcePackageDir,
+    localeTranslation,
+    baseTranslation,
+    ownersByKey,
+  }).forEach((key) => {
+    preserved.add(key);
+  });
+
+  return preserved;
 };
 
 const getMisplacedKeyActions = ({
@@ -81,8 +243,9 @@ const getMisplacedKeyActions = ({
   localeTranslation,
   baseTranslation,
   ownersByKey,
+  referencedKeys = new Set(),
 }) => {
-  const obsoleteKeys = getObsoleteKeys(baseTranslation, localeTranslation);
+  const obsoleteKeys = getObsoleteKeys(baseTranslation, localeTranslation, referencedKeys);
 
   return obsoleteKeys.map((key) => {
     const owners = ownersByKey.get(key) ?? [];
@@ -110,9 +273,15 @@ const getMisplacedKeyActions = ({
   });
 };
 
-const migrateMisplacedKeys = async ({ write = false, verbose = false } = {}) => {
-  const packageDirs = await getPackageDirs();
-  const ownersByKey = buildEnKeyOwners(packageDirs);
+const migrateMisplacedKeys = async ({
+  write = false,
+  verbose = false,
+  packageDirs: packageDirsArg = null,
+  ownersByKey: ownersByKeyArg = null,
+  referencedKeysByPackage = new Map(),
+} = {}) => {
+  const packageDirs = packageDirsArg ?? (await getPackageDirs());
+  const ownersByKey = ownersByKeyArg ?? buildEnKeyOwners(packageDirs);
   const translationFiles = await getTranslationFilePaths(packageDirs);
 
   const migrations = [];
@@ -132,6 +301,7 @@ const migrateMisplacedKeys = async ({ write = false, verbose = false } = {}) => 
       localeTranslation,
       baseTranslation,
       ownersByKey,
+      referencedKeys: referencedKeysByPackage.get(sourcePackageDir) ?? new Set(),
     });
 
     actions.forEach((action) => {
@@ -198,17 +368,31 @@ const migrateMisplacedKeys = async ({ write = false, verbose = false } = {}) => 
   return { migrations, skipped, ambiguous, write };
 };
 
-const pruneTranslationFile = async (filePath, { write = false } = {}) => {
+const pruneTranslationFile = async (
+  filePath,
+  { write = false, referencedKeys = new Set(), ownersByKey = new Map(), sourcePackageDir } = {}
+) => {
   const baseTranslation = await fs.readJSON(join(dirname(filePath), 'en.json'));
   const localeTranslation = await fs.readJSON(filePath);
-  const obsoleteKeys = getObsoleteKeys(baseTranslation, localeTranslation);
+  const preservedKeys = getPreservedKeys({
+    sourcePackageDir,
+    localeTranslation,
+    baseTranslation,
+    ownersByKey,
+    referencedKeys,
+  });
+  const obsoleteKeys = getObsoleteKeys(baseTranslation, localeTranslation, preservedKeys);
 
   if (obsoleteKeys.length === 0) {
     return { filePath, obsoleteKeys, changed: false };
   }
 
   if (write) {
-    const prunedTranslation = pruneObsoleteKeysFromJSON(baseTranslation, localeTranslation);
+    const prunedTranslation = pruneObsoleteKeysFromJSON(
+      baseTranslation,
+      localeTranslation,
+      preservedKeys
+    );
     await fs.writeJson(filePath, prunedTranslation, { spaces: 2 });
   }
 
@@ -241,7 +425,18 @@ const logFileGroupedActions = (items, filePathKey, keyField, { verbose, formatIt
 };
 
 const pruneTranslations = async ({ write = false, verbose = false } = {}) => {
-  const migrationSummary = await migrateMisplacedKeys({ write, verbose });
+  const packageDirs = await getPackageDirs();
+  const ownersByKey = buildEnKeyOwners(packageDirs);
+  const referencedKeysByPackage = new Map(
+    packageDirs.map((packageDir) => [packageDir, collectReferencedKeys(packageDir)])
+  );
+  const migrationSummary = await migrateMisplacedKeys({
+    write,
+    verbose,
+    packageDirs,
+    ownersByKey,
+    referencedKeysByPackage,
+  });
   const { migrations, skipped, ambiguous } = migrationSummary;
 
   if (migrations.length > 0) {
@@ -291,9 +486,20 @@ const pruneTranslations = async ({ write = false, verbose = false } = {}) => {
     }
   }
 
-  const translationFiles = await getTranslationFilePaths();
+  const translationFiles = await getTranslationFilePaths(packageDirs);
   const results = await Promise.all(
-    translationFiles.map((filePath) => pruneTranslationFile(filePath, { write }))
+    translationFiles.map((filePath) => {
+      const sourcePackageDir = packageDirs.find((packageDir) =>
+        filePath.startsWith(join(packageDir, ...TRANSLATIONS_PATH))
+      );
+
+      return pruneTranslationFile(filePath, {
+        write,
+        referencedKeys: referencedKeysByPackage.get(sourcePackageDir) ?? new Set(),
+        ownersByKey,
+        sourcePackageDir,
+      });
+    })
   );
 
   const changedResults = results.filter((result) => result.changed);
@@ -363,7 +569,10 @@ if (require.main === module) {
 module.exports = {
   getObsoleteKeys,
   pruneObsoleteKeysFromJSON,
+  getAmbiguousKeys,
+  getPreservedKeys,
   getMisplacedKeyActions,
+  collectReferencedKeys,
   migrateMisplacedKeys,
   pruneTranslationFile,
   pruneTranslations,

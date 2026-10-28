@@ -1,4 +1,26 @@
 {
+  "components.Input.error.validation.email": "这是一个无效的电子邮件",
+  "components.Input.error.validation.json": "这与JSON格式不匹配",
+  "components.Input.error.validation.max": "值太大(最大值:{max})。",
+  "components.Input.error.validation.maxLength": "值太长(最大长度:{max})。",
+  "components.Input.error.validation.min": "值太小(最小值:{min})。",
+  "components.Input.error.validation.minLength": "值太短(最小长度:{min})。",
+  "components.Input.error.validation.minSupMax": "不能高于",
+  "components.Input.error.validation.regex": "值与正则表达式不匹配。",
+  "components.Input.error.validation.required": "此值是必需的。",
+  "components.Input.error.validation.unique": "此值已被使用。",
   "components.NotAllowedInput.text": "无权查看此字段",
-  "components.Search.placeholder": "搜索..."
+  "components.Search.placeholder": "搜索...",
+  "content-manager.components.uid.available": "可用",
+  "content-manager.components.uid.regenerate": "重新生成",
+  "content-manager.components.uid.unavailable": "不可用",
+  "content-manager.containers.List.draft": "草稿",
+  "content-manager.containers.list.items": "{number, plural, =0 {项目} one {项目} other {项目}}",
+  "content-manager.containers.List.published": "已发布",
+  "content-manager.form.Input.hint.character.unit": "{maxValue, plural, one { 个字符} other { 个字符}}",
+  "content-manager.form.Input.hint.minMaxDivider": " / ",
+  "content-manager.form.Input.hint.text": "{min, select, undefined {} other {最小. {min}}}{divider}{max, select, undefined {} other {最大. {max}}}{unit}{br}{description}",
+  "content-manager.link-to-ctb": "编辑模型",
+  "content-manager.pages.NoContentType.text": "您还没有任何内容,我们建议您创建第一个内容类型。",
+  "Settings.roles.created": "角色已创建"
 }

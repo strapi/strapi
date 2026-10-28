@@ -36,6 +36,7 @@
   "Settings.locales.modal.edit.confirmation": "Afslut",
   "Settings.locales.modal.edit.success": "Sprogvariant redigeret",
   "Settings.locales.modal.edit.tab.label": "Navigerer mellem i18n standardindstillinger og avancerede indstillinger",
+  "Settings.locales.modal.locales.label": "Sprogvarianter",
   "Settings.locales.modal.title": "Konfigurationer",
   "Settings.locales.row.default-locale": "Standard sprogvariant",
   "Settings.locales.row.displayName": "Visningsnavn",

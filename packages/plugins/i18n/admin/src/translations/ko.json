@@ -67,6 +67,7 @@
   "Settings.locales.modal.edit.confirmation": "완료",
   "Settings.locales.modal.edit.success": "로케일이 수정되었습니다.",
   "Settings.locales.modal.edit.tab.label": "Navigating between the I18N basic settings and advanced settings",
+  "Settings.locales.modal.locales.label": "로케일",
   "Settings.locales.modal.title": "설정",
   "Settings.locales.row.default-locale": "기본값",
   "Settings.locales.row.displayName": "표시 이름",

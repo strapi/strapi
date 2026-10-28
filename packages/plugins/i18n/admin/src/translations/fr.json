@@ -36,6 +36,7 @@
   "Settings.locales.modal.edit.confirmation": "Terminer",
   "Settings.locales.modal.edit.success": "Locale modifiée avec succès",
   "Settings.locales.modal.edit.tab.label": "Navigation entre les paramètres de base et les paramètres avancés de l'I18N",
+  "Settings.locales.modal.locales.label": "Locales",
   "Settings.locales.modal.title": "Configurations",
   "Settings.locales.row.default-locale": "Locale par défaut",
   "Settings.locales.row.displayName": "Nom d'affichage",

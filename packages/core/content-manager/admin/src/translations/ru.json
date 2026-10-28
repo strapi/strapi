@@ -171,6 +171,7 @@
   "permissions.not-allowed.update": "У вас нет прав на просмотр этого документа",
   "plugin.description.long": "Быстрый способ увидеть, отредактировать и удалить данные в вашей базе данных.",
   "plugin.description.short": "Быстрый способ увидеть, отредактировать и удалить данные в вашей базе данных.",
+  "plugin.name": "Редактор контента",
   "popUpWarning.bodyMessage.contentType.delete": "Вы уверены, что хотите удалить эту запись?",
   "popUpWarning.bodyMessage.contentType.delete.all": "Вы уверены, что хотите удалить эти записи?",
   "popUpWarning.bodyMessage.contentType.publish.all": "Are you sure you want to publish these entries?",

@@ -1,5 +1,12 @@
 {
   "apiError.FileTooBig": "文件太大，无法上传。已超出服务器允许的最大请求大小",
+  "config.title": "配置视图 - 媒体库",
+  "form.input.label.file-location": "位置",
+  "form.input.label.folder-location": "位置",
+  "form.input.label.folder-location-default-label": "媒体库",
+  "form.input.label.folder-name": "文件夹名称",
+  "modal.folder.create.submit": "新增",
+  "modal.folder.create.title": "新增文件夹",
   "upload.generic-error": "上传文件时发生错误",
   "bulk.select.label": "选择所有资源",
   "button.next": "下一步",

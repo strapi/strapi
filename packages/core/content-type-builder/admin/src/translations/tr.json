@@ -28,6 +28,7 @@
   "button.model.create": "Yeni koleksiyon tipi oluştur",
   "button.single-types.create": "Yeni tekil tip oluştur",
   "component.repeatable": "(tekrarlayabilen)",
+  "ComponentIconPicker.search.placeholder": "Bir ikon ara",
   "components.SelectComponents.displayed-value": "{number} bileşen seçildi",
   "components.componentSelect.no-component-available": "Tüm bileşenleri ekledin",
   "components.componentSelect.no-component-available.with-search": "Aramanızla eşleşen bileşen bulunamadı",

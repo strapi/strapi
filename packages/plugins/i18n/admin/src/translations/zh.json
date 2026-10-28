@@ -36,6 +36,7 @@
   "Settings.locales.modal.edit.confirmation": "完成",
   "Settings.locales.modal.edit.success": "已成功編輯地區設定",
   "Settings.locales.modal.edit.tab.label": "在 I18N 基礎和進階設定間瀏覽",
+  "Settings.locales.modal.locales.label": "地區設定",
   "Settings.locales.modal.title": "設定",
   "Settings.locales.row.default-locale": "預設地區設定",
   "Settings.locales.row.displayName": "顯示名稱",

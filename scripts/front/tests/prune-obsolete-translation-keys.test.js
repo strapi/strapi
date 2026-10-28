@@ -4,6 +4,7 @@ const {
   getObsoleteKeys,
   pruneObsoleteKeysFromJSON,
   getMisplacedKeyActions,
+  getPreservedKeys,
 } = require('../prune-obsolete-translation-keys');
 
 describe('prune-obsolete-translation-keys', () => {
@@ -35,6 +36,76 @@ describe('prune-obsolete-translation-keys', () => {
       'Auth.components.Oops.text': 'Your account has been suspended.',
       'Auth.components.Oops.title': 'Oops...',
       'Auth.form.button.go-home': 'GO BACK HOME',
+    });
+  });
+
+  it('should keep a key present in source but absent from en.json', () => {
+    const referencedKeys = new Set(['Auth.form.button.forgot-password']);
+
+    expect(getObsoleteKeys(baseTranslation, localeTranslation, referencedKeys)).toEqual([
+      'Auth.components.Oops.text.admin',
+      'upload.generic-error',
+    ]);
+
+    expect(pruneObsoleteKeysFromJSON(baseTranslation, localeTranslation, referencedKeys)).toEqual({
+      'Auth.components.Oops.text': 'Your account has been suspended.',
+      'Auth.components.Oops.title': 'Oops...',
+      'Auth.form.button.go-home': 'GO BACK HOME',
+      'Auth.form.button.forgot-password': 'Send Email',
+    });
+
+    const actions = getMisplacedKeyActions({
+      sourcePackageDir: 'packages/core/admin',
+      localeTranslation,
+      baseTranslation,
+      ownersByKey: new Map(),
+      referencedKeys,
+    });
+
+    expect(actions.map((action) => action.key)).toEqual([
+      'Auth.components.Oops.text.admin',
+      'upload.generic-error',
+    ]);
+  });
+
+  it('should keep ambiguous keys instead of dropping them', () => {
+    const localeTranslationWithAmbiguousKey = {
+      'page.title': 'Impostazioni - Libreria Multimediale',
+      'upload.generic-error': 'Upload failed',
+    };
+    const ownersByKey = new Map([
+      [
+        'page.title',
+        [
+          { packageDir: 'packages/core/upload', packageName: 'core/upload' },
+          {
+            packageDir: 'packages/plugins/users-permissions',
+            packageName: 'plugins/users-permissions',
+          },
+        ],
+      ],
+      [
+        'upload.generic-error',
+        [{ packageDir: 'packages/core/upload', packageName: 'core/upload' }],
+      ],
+    ]);
+
+    const preservedKeys = getPreservedKeys({
+      sourcePackageDir: 'packages/core/admin',
+      localeTranslation: localeTranslationWithAmbiguousKey,
+      baseTranslation,
+      ownersByKey,
+      referencedKeys: new Set(),
+    });
+
+    expect([...preservedKeys]).toEqual(['page.title']);
+    expect(
+      getObsoleteKeys(baseTranslation, localeTranslationWithAmbiguousKey, preservedKeys)
+    ).toEqual(['upload.generic-error']);
+    expect(
+      pruneObsoleteKeysFromJSON(baseTranslation, localeTranslationWithAmbiguousKey, preservedKeys)
+    ).toEqual({
+      'page.title': 'Impostazioni - Libreria Multimediale',
     });
   });
 

@@ -57,6 +57,7 @@
   "Settings.locales.modal.edit.confirmation": "Terminar",
   "Settings.locales.modal.edit.success": "Configuración regional editada correctamente",
   "Settings.locales.modal.edit.tab.label": "Navegación entre la configuración básica de I18N y la configuración avanzada",
+  "Settings.locales.modal.locales.label": "Configuraciones regionales",
   "Settings.locales.modal.title": "Configuraciones",
   "Settings.locales.row.default-locale": "Configuración regional predeterminada",
   "Settings.locales.row.displayName": "Nombre",

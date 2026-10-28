@@ -31,6 +31,7 @@
   "Settings.locales.modal.edit.confirmation": "完成",
   "Settings.locales.modal.edit.success": "该语言已完成编辑",
   "Settings.locales.modal.edit.tab.label": "将会在国际化基础设置及高级设置之前切换",
+  "Settings.locales.modal.locales.label": "语言",
   "Settings.locales.modal.title": "配置",
   "Settings.locales.row.default-locale": "默认语言",
   "Settings.permissions.loading": "加载权限中",

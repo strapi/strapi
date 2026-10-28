@@ -38,6 +38,7 @@
   "Settings.locales.modal.edit.confirmation": "Готово!",
   "Settings.locales.modal.edit.success": "Перевод успешно отредактирован",
   "Settings.locales.modal.edit.tab.label": "Переключение между основными настройками этого плагина и расширенными настройками",
+  "Settings.locales.modal.locales.label": "Переводы",
   "Settings.locales.modal.title": "Настройки",
   "Settings.locales.row.default-locale": "Перевод по умолчанию",
   "Settings.locales.row.displayName": "Отображаемое имя",

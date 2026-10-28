@@ -1,5 +1,12 @@
 {
   "apiError.FileTooBig": "檔案太大，無法上傳。已超出伺服器允許的最大請求大小。",
+  "form.input.label.file-location": "位置",
+  "form.input.label.folder-location": "位置",
+  "form.input.label.folder-name": "資料夾名稱",
+  "modal.folder.create.delete": "刪除",
+  "modal.folder.create.submit": "新增",
+  "modal.folder.create.title": "新增資料夾",
+  "modal.upload-list.sub-header.add-folder": "新增資料夾",
   "upload.generic-error": "上傳檔案時發生錯誤。",
   "bulk.select.label": "選取所有素材",
   "button.next": "繼續",

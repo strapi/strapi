@@ -57,6 +57,7 @@
   "Settings.locales.modal.edit.confirmation": "Tamamla",
   "Settings.locales.modal.edit.success": "Yerel ayar başarıyla düzenlendi",
   "Settings.locales.modal.edit.tab.label": "Temel uluslararasılaştırma ayarları ile gelişmiş ayarlar arasında geçiş yapılıyor",
+  "Settings.locales.modal.locales.label": "Yerel ayarlar",
   "Settings.locales.modal.title": "Kurulumlar",
   "Settings.locales.row.default-locale": "Varsayılan yerel ayar",
   "Settings.locales.row.displayName": "Görüntülenme adı",

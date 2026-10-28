@@ -58,6 +58,7 @@
   "Auth.reset-password.title": "إعادة تعيين كلمة المرور",
   "Content Manager": "مدير محتوى",
   "Content Type Builder": "منشئ أنواع المحتوى",
+  "content-manager.components.TableDelete.label": "{number, plural, one {# entry} آخر {# entries}} selected",
   "Documentation": "توثيق",
   "Email": "البريد الإلكتروني",
   "Files Upload": "رفع الملفات",
