@@ -78,6 +78,86 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should drop a pending folder target when the kind changes', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'singleType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'singleType',
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should keep a pending new-folder name when the kind changes', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { newFolderName: 'Marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'singleType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'singleType',
+          folder: { newFolderName: 'Marketing' },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should keep a pending folder target when the kind is unchanged', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'collectionType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('ON_CHANGE_RELATION_TARGET', () => {
@@ -723,6 +803,71 @@ describe('CTB | components | FormModal | reducer | actions', () => {
       const expected = { ...initialState, formErrors: action.payload.errors };
 
       expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  // Errors describe the data they were produced from. Every action that replaces that data
+  // must drop them, otherwise the previous attempt's errors show up on a blank form.
+  // https://github.com/strapi/strapi/issues/20947
+  describe('Clearing stale form errors', () => {
+    const stateWithErrors: State = {
+      ...initialState,
+      modifiedData: { name: '', type: 'string' },
+      formErrors: {
+        name: {
+          id: 'component.Input.error.validation.required',
+          defaultMessage: 'this is required',
+        },
+      },
+    };
+
+    it('clears the errors when a new attribute type is picked', () => {
+      const action = actions.setAttributeDataSchema({
+        attributeType: 'text',
+        nameToSetForRelation: 'address',
+        targetUid: 'api::address.address',
+        isEditing: false,
+        modifiedDataToSetForEditing: {},
+        step: null,
+        uid: 'api::address.address',
+      });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
+    });
+
+    it('clears the errors when an existing attribute is opened for editing', () => {
+      const action = actions.setAttributeDataSchema({
+        isEditing: true,
+        modifiedDataToSetForEditing: { name: 'address', type: 'string' },
+        uid: 'api::address.address',
+      });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
+    });
+
+    it('clears the errors when a custom field is picked', () => {
+      const action = actions.setCustomFieldDataSchema({
+        isEditing: false,
+        modifiedDataToSetForEditing: {},
+        uid: 'api::address.address',
+        customField: { type: 'string' },
+      });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
+    });
+
+    it('clears the errors when a dynamic zone schema is set', () => {
+      const action = actions.setDynamicZoneDataSchema({
+        attributeToEdit: { name: 'dz', type: 'dynamiczone', components: [] },
+      });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
+    });
+
+    it('clears the errors when the data to edit is replaced', () => {
+      const action = actions.setDataToEdit({ data: { displayName: 'Address' } });
+
+      expect(reducer(stateWithErrors, action).formErrors).toEqual({});
     });
   });
 

@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
 import { generateKeyPairSync } from 'crypto';
+import { mkdtempSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { resolveMx } from 'dns/promises';
 
 import provider from '../src/index';
@@ -210,6 +213,104 @@ describe('@strapi/provider-email-sendmail', () => {
           html: 'y',
         })
       ).rejects.toThrow('No recipients');
+    });
+  });
+
+  describe('attachment file/URL access', () => {
+    let server: MinimalSmtpServer;
+
+    beforeEach(async () => {
+      server = new MinimalSmtpServer();
+      await server.listen();
+      mockedResolveMx.mockReset();
+    });
+
+    afterEach(async () => {
+      await server.close();
+    });
+
+    it('does not read a local file referenced by attachments[].path', async () => {
+      const dir = mkdtempSync(join(tmpdir(), 'sendmail-attach-'));
+      const secretPath = join(dir, 'secret.txt');
+      const secret = 'FILE_ACCESS_SHOULD_BE_BLOCKED_9f3a';
+      writeFileSync(secretPath, secret);
+
+      const errors: unknown[] = [];
+      const instance = provider.init(
+        {
+          devPort: server.port,
+          devHost: '127.0.0.1',
+          logger: { error: (...args: unknown[]) => errors.push(...args) },
+        },
+        { defaultFrom: 'a@b.com' }
+      );
+
+      await expect(
+        instance.send({
+          to: 'recipient@target.com',
+          cc: '',
+          bcc: '',
+          subject: 'S',
+          text: 'T',
+          html: 'T',
+          attachments: [{ path: secretPath }],
+        } as Parameters<typeof instance.send>[0])
+      ).rejects.toThrow();
+
+      // nodemailer refuses to open the file rather than streaming it into the message.
+      expect(errors.some((e) => /access rejected/i.test(String((e as Error)?.message ?? e)))).toBe(
+        true
+      );
+      // The file content never reaches the SMTP peer.
+      expect(server.lastData ?? '').not.toContain(secret);
+    });
+
+    it('does not fetch a URL referenced by attachments[].href', async () => {
+      const errors: unknown[] = [];
+      const instance = provider.init(
+        {
+          devPort: server.port,
+          devHost: '127.0.0.1',
+          logger: { error: (...args: unknown[]) => errors.push(...args) },
+        },
+        { defaultFrom: 'a@b.com' }
+      );
+
+      await expect(
+        instance.send({
+          to: 'recipient@target.com',
+          cc: '',
+          bcc: '',
+          subject: 'S',
+          text: 'T',
+          html: 'T',
+          attachments: [{ href: 'http://127.0.0.1:1/internal' }],
+        } as Parameters<typeof instance.send>[0])
+      ).rejects.toThrow();
+
+      expect(errors.some((e) => /access rejected/i.test(String((e as Error)?.message ?? e)))).toBe(
+        true
+      );
+    });
+
+    it('still delivers an inline-content attachment', async () => {
+      const instance = provider.init(
+        { devPort: server.port, devHost: '127.0.0.1', silent: true },
+        { defaultFrom: 'a@b.com' }
+      );
+
+      await instance.send({
+        to: 'recipient@target.com',
+        cc: '',
+        bcc: '',
+        subject: 'S',
+        text: 'T',
+        html: 'T',
+        attachments: [{ filename: 'a.txt', content: 'hello' }],
+      } as Parameters<typeof instance.send>[0]);
+
+      // base64 of "hello"
+      expect(server.lastData).toContain('aGVsbG8=');
     });
   });
 });

@@ -17,7 +17,6 @@ export const ADMIN_VITE_MONOREPO_EXAMPLE_OPTIMIZE_INCLUDE = [
   'date-fns/formatISO',
   'highlight.js',
   'lodash/capitalize',
-  'lodash/fp',
   'lodash/groupBy',
   'lodash/has',
   'lodash/isNil',

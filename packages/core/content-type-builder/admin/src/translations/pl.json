@@ -141,8 +141,6 @@
   "form.attribute.condition.enum-change-warning": "Następujące pola mają warunki zależne od tego pola: {fieldNames}. Zmiana lub usunięcie wartości wyliczeniowych {values} spowoduje naruszenie tych warunków. Czy chcesz kontynuować?",
   "form.attribute.condition.enum-change-warning-values": ". Zmiana lub usunięcie wartości wyliczeniowych",
   "form.attribute.condition.enum-change-warning-end": " spowoduje złamanie tych warunków. Czy chcesz kontynuować?",
-  "form.attribute.condition.field-change-warning": "Następujące pola mają warunki zależne od tego pola: {fieldNames}. Zmiana nazwy spowoduje naruszenie tych warunków. Czy chcesz kontynuować?",
-  "form.attribute.condition.field-change-warning-end": ". Zmiana nazwy spowoduje naruszenie tych warunków. Czy chcesz kontynuować?",
   "form.button.add-components-to-dynamiczone": "Dodaj komponenty do strefy",
   "form.button.add-field": "Dodaj kolejne pole",
   "form.button.add-first-field-to-created-component": "Dodaj pierwsze pole do komponentu",

@@ -1,4 +1,4 @@
 import builApiEndpointPath from './build-api-endpoint-path';
-import buildComponentSchema from './build-component-schema';
+import buildComponentSchema, { getRelationTargetSchemaNames } from './build-component-schema';
 
-export { builApiEndpointPath, buildComponentSchema };
+export { builApiEndpointPath, buildComponentSchema, getRelationTargetSchemaNames };

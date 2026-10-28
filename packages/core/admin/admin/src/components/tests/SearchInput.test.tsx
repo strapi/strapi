@@ -100,6 +100,64 @@ describe('SearchInput', () => {
     expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
   });
 
+  it('should keep an applied filter containing an ampersand when searching', async () => {
+    const encoded = `filters[$and][0][name][$eq]=${encodeURIComponent('a&b')}`;
+
+    const { user, getByRole } = render(<SearchInput label="Search label" />, {
+      initialEntries: [{ search: `?${encoded}` }],
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <LocationDisplay />
+            </>
+          );
+        },
+      },
+    });
+
+    await user.click(getByRole('button', { name: 'Search' }));
+    await user.type(getByRole('searchbox', { name: 'Search label' }), 'needle');
+    await user.keyboard('[Enter]');
+
+    await waitFor(() => {
+      expect(getByRole('listitem')).toHaveTextContent('_q=needle');
+    });
+
+    expect(getByRole('listitem')).toHaveTextContent(encoded);
+  });
+
+  it.each([
+    ['a percent sign', '100%'],
+    ['an ampersand', 'a&b'],
+    ['a hash', 'a#b'],
+  ])('should keep a filter containing %s when the search is cleared', async (_label, value) => {
+    const encoded = `filters[$and][0][name][$eq]=${encodeURIComponent(value)}`;
+
+    const { user, getByRole } = render(<SearchInput label="Search label" />, {
+      initialEntries: [{ search: `?${encoded}&_q=needle` }],
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <LocationDisplay />
+            </>
+          );
+        },
+      },
+    });
+
+    await user.click(getByRole('button', { name: 'Clear' }));
+
+    await waitFor(() => {
+      expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
+    });
+
+    expect(getByRole('listitem')).toHaveTextContent(encoded);
+  });
+
   describe('blur behavior', () => {
     it.each([
       {

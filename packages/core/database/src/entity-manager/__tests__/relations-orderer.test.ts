@@ -62,8 +62,8 @@ describe('Given I have some relations in the database', () => {
 
       expect(orderer.get()).toMatchObject([
         { id: 2, order: 4 },
-        { id: 5, order: 7 },
-        { id: 4, order: 7 },
+        { id: 5, order: 9.5 },
+        { id: 4, order: 9.5 },
         { id: 3, order: 10 },
       ]);
     });
@@ -89,7 +89,7 @@ describe('Given I have some relations in the database', () => {
 
       expect(orderer.get()).toMatchObject([
         { id: 5, order: 0.5 },
-        { id: 1, order: 1.25 },
+        { id: 1, order: 1.5 },
         { id: 3, order: 3 },
         { id: 2, order: 3.5 },
       ]);
@@ -182,6 +182,70 @@ describe('Given I have some relations in the database', () => {
         { id: 2, order: 2 },
       ]);
       expect(orderer.getOrderMap()[3]).toBeLessThan(0.5);
+    });
+  });
+
+  describe('When I connect before a relation whose neighbours are not loaded', () => {
+    test('Then it is placed immediately before it', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 1 },
+          { id: 9, order: 9 },
+          { id: 10, order: 10 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 4, position: { before: 9 } }]);
+
+      const orderMap = orderer.getOrderMap();
+      expect(orderMap[4]).toBeGreaterThan(8);
+      expect(orderMap[4]).toBeLessThan(9);
+    });
+  });
+
+  describe('When I connect after a relation whose neighbours are not loaded', () => {
+    test('Then it is placed immediately after it', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 1 },
+          { id: 5, order: 5 },
+          { id: 10, order: 10 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 4, position: { after: 5 } }]);
+
+      const orderMap = orderer.getOrderMap();
+      expect(orderMap[4]).toBeGreaterThan(5);
+      expect(orderMap[4]).toBeLessThan(6);
+    });
+  });
+
+  describe('When I connect several relations before the same anchor', () => {
+    test('Then they are all placed immediately before it, in payload order', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 1 },
+          { id: 5, order: 5 },
+          { id: 10, order: 10 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([
+        { id: 6, position: { before: 5 } },
+        { id: 7, position: { before: 5 } },
+      ]);
+
+      const orderMap = orderer.getOrderMap();
+      expect(orderMap[6]).toBeGreaterThan(4);
+      expect(orderMap[7]).toBeLessThan(5);
+      expect(orderMap[6]).toBeLessThan(orderMap[7]);
     });
   });
 
