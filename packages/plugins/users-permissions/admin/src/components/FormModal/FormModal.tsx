@@ -25,10 +25,12 @@ export type FormModalProps = {
   providerToEditName?: string;
 };
 
+const DEFAULT_INITIAL_DATA: ProviderFormValues = { enabled: false };
+
 /** Edits one authentication provider with its provider-specific form. */
 const FormModal = ({
   headerBreadcrumbs,
-  initialData = { enabled: false },
+  initialData = DEFAULT_INITIAL_DATA,
   isSubmitting,
   layout,
   isOpen,

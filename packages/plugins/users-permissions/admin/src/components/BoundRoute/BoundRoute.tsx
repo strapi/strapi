@@ -15,11 +15,13 @@ const MethodBox = styled(Box)`
   border-radius: ${({ theme }) => theme.spaces[1]} 0 0 ${({ theme }) => theme.spaces[1]};
 `;
 
-const BoundRoute = ({
-  route = { handler: 'Nocontroller.error', method: 'GET', path: '/there-is-no-path' },
-}: {
-  route?: Route;
-}) => {
+const DEFAULT_ROUTE: Route = {
+  handler: 'Nocontroller.error',
+  method: 'GET',
+  path: '/there-is-no-path',
+};
+
+const BoundRoute = ({ route = DEFAULT_ROUTE }: { route?: Route }) => {
   const { formatMessage } = useIntl();
 
   const { method, handler: title, path } = route;
