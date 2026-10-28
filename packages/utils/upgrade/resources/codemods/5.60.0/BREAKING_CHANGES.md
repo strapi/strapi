@@ -1,6 +1,6 @@
-# Strapi 5.50 — Vite 8 upgrade notes
+# Strapi 5.60 — Vite 8 upgrade notes
 
-These notes apply when upgrading to Strapi **5.50.0** (Vite 8 on the admin bundler path).
+These notes apply when upgrading to Strapi **5.60.0** (Vite 8 on the admin bundler path).
 
 ## CommonJS default-import interop
 
@@ -24,11 +24,11 @@ Then audit default imports from CommonJS dependencies in admin source.
 
 ## Node.js version
 
-Strapi **5.50.0+** requires **Node.js >= 22.12.0** (LTS: 22.x, 24.x, or 26.x). This matches Vite 8's engine requirement and Strapi's supported Node policy.
+Strapi **5.60.0+** requires **Node.js >= 22.12.0** (LTS: 22.x, 24.x, or 26.x). This matches Vite 8's engine requirement and Strapi's supported Node policy.
 
 ## Custom `src/admin/vite.config.*`
 
-The `@strapi/upgrade` codemods for 5.50.0 migrate common deprecated options. Some Rolldown options that Rollup supported are **removed** (not aliased). If your config used any of the following, update manually after the codemod runs:
+The `@strapi/upgrade` codemods for 5.60.0 migrate common deprecated options. Some Rolldown options that Rollup supported are **removed** (not aliased). If your config used any of the following, update manually after the codemod runs:
 
 - `output.format: 'system'` or `'amd'`
 - Rollup plugin hooks: `shouldTransformCachedModule`, `resolveFileUrl`, `renderDynamicImport`

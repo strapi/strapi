@@ -251,7 +251,7 @@ const transform: Transform = (file, api) => {
       '/*',
       ' * Strapi upgrade (Vite 8): manual review required after rolldownOptions migration:',
       ...[...reviewWarnings].map((warning) => ` * - ${warning}`),
-      ' * See packages/utils/upgrade/resources/codemods/5.50.0/BREAKING_CHANGES.md',
+      ' * See packages/utils/upgrade/resources/codemods/5.60.0/BREAKING_CHANGES.md',
       ' */',
       '',
     ].join('\n');
