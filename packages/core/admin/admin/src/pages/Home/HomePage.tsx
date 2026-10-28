@@ -81,16 +81,40 @@ export const WidgetComponent = ({
   const [loadedComponent, setLoadedComponent] = React.useState<React.ComponentType<{
     columnWidth?: number;
   }> | null>(null);
+  const [hasLoadError, setHasLoadError] = React.useState(false);
 
   React.useEffect(() => {
+    let active = true;
+
+    // A changed module should not stay stuck on a previous failure.
+    setHasLoadError(false);
+
     const loadComponent = async () => {
       const resolvedComponent = await component();
 
-      setLoadedComponent(() => resolvedComponent);
+      if (active) {
+        setLoadedComponent(() => resolvedComponent);
+      }
     };
 
-    loadComponent();
+    // A rejected module load used to be unhandled, so the widget never left Widget.Loading.
+    loadComponent().catch((error) => {
+      if (!active) {
+        return;
+      }
+
+      console.error(error);
+      setHasLoadError(true);
+    });
+
+    return () => {
+      active = false;
+    };
   }, [component]);
+
+  if (hasLoadError) {
+    return <Widget.Error />;
+  }
 
   const Component = loadedComponent;
 
