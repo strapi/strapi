@@ -60,6 +60,10 @@ const defaultServerConfig = {
       },
     },
   },
+  cache: {
+    defaultProvider: 'memory',
+    providers: {},
+  },
 } satisfies Partial<Core.Config.Server>;
 
 const defaultConfig = {

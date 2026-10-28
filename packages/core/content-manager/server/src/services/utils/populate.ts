@@ -1,6 +1,7 @@
 import { set, merge, isEmpty, matchesProperty } from 'lodash';
 
 import * as strapiUtils from '@strapi/utils';
+import { INTERNAL_CACHE_NS } from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
@@ -202,12 +203,10 @@ const getDeepPopulate = (
  * @param options - Options to apply while populating
  * @param level - Current level of nested call
  */
-const validationPopulateCache = new Map<string, Record<string, any>>();
-
 const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
-  const cached = validationPopulateCache.get(uid);
-  if (cached) {
-    return cached;
+  const cached = strapi.memoryCacheSync.get(INTERNAL_CACHE_NS.CM_VALIDATION_POPULATE, uid);
+  if (cached?.value !== undefined && cached.value !== null) {
+    return cached.value as Record<string, any>;
   }
 
   const model = strapi.getModel(uid);
@@ -289,7 +288,7 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
     {}
   );
 
-  validationPopulateCache.set(uid, result);
+  strapi.memoryCacheSync.set(INTERNAL_CACHE_NS.CM_VALIDATION_POPULATE, uid, result);
   return result;
 };
 
@@ -302,12 +301,10 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
  * @returns result.populate
  * @returns result.hasRelations
  */
-const draftCountPopulateCache = new Map<string, { populate: any; hasRelations: boolean }>();
-
 const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelations: boolean } => {
-  const cached = draftCountPopulateCache.get(uid);
-  if (cached) {
-    return cached;
+  const cached = strapi.memoryCacheSync.get(INTERNAL_CACHE_NS.CM_DRAFT_COUNT_POPULATE, uid);
+  if (cached?.value !== undefined && cached.value !== null) {
+    return cached.value as { populate: any; hasRelations: boolean };
   }
 
   const model = strapi.getModel(uid);
@@ -397,7 +394,7 @@ const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelatio
   }, {});
 
   const result = { populate, hasRelations };
-  draftCountPopulateCache.set(uid, result);
+  strapi.memoryCacheSync.set(INTERNAL_CACHE_NS.CM_DRAFT_COUNT_POPULATE, uid, result);
   return result;
 };
 
@@ -435,12 +432,12 @@ const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populat
   return populateQuery;
 };
 
-const deepPopulateCache = new Map<string, object>();
-
 const buildDeepPopulate = async (uid: UID.CollectionType) => {
-  const cached = deepPopulateCache.get(uid);
-  if (cached) {
-    return cached;
+  const cached = await strapi.cacheManager.get(INTERNAL_CACHE_NS.CM_DEEP_POPULATE_BUILD, uid, {
+    provider: 'memory',
+  });
+  if (cached?.value !== undefined && cached.value !== null) {
+    return cached.value as object;
   }
 
   const result = await getService('populate-builder')(uid)
@@ -448,7 +445,9 @@ const buildDeepPopulate = async (uid: UID.CollectionType) => {
     .countRelations()
     .build();
 
-  deepPopulateCache.set(uid, result);
+  await strapi.cacheManager.set(INTERNAL_CACHE_NS.CM_DEEP_POPULATE_BUILD, uid, result, {
+    provider: 'memory',
+  });
 
   return result;
 };
