@@ -9,9 +9,7 @@ import type { Core } from '@strapi/types';
  * force every connection to the SQL-server shape and reject SQLite.
  */
 export type DatabaseConfig =
-  | Core.Config.Database<'sqlite'>
-  | Core.Config.Database<'mysql'>
-  | Core.Config.Database<'postgres'>;
+  Core.Config.Database<'sqlite'> | Core.Config.Database<'mysql'> | Core.Config.Database<'postgres'>;
 
 /**
  * Config that can be passed to `defineApp({ config })`.

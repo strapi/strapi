@@ -59,12 +59,8 @@ graph TB
   ".": {
     /* existing: createStrapi, factories, … + defineApp, defineConfig, fromDisk, startStrapi */
   },
-  "./attributes": {
-    /* NEW: is.* attribute builders */
-  },
-  "./plugins": {
-    /* NEW: recommendedPlugins() preset (imports-only) */
-  },
+  "./attributes": {/* NEW: is.* attribute builders */},
+  "./plugins": {/* NEW: recommendedPlugins() preset (imports-only) */},
 }
 ```
 

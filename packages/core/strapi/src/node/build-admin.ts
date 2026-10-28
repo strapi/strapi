@@ -26,7 +26,7 @@ interface BuildAdminOptions {
   /** Minify the output. @default true */
   minify?: boolean;
   /** Generate sourcemaps. @default false */
-  sourcemaps?: boolean;
+  sourcemap?: boolean;
   /** Print build statistics. @default false */
   stats?: boolean;
   /**
@@ -64,7 +64,7 @@ export const buildAdmin = async ({
   dir = process.cwd(),
   bundler = 'vite',
   minify = true,
-  sourcemaps = false,
+  sourcemap = false,
   stats = false,
   logger = createLogger({ debug: process.argv.includes('--debug') }),
 }: BuildAdminOptions): Promise<void> => {
@@ -77,7 +77,7 @@ export const buildAdmin = async ({
   const ctx = await createBuildContext({
     cwd,
     logger,
-    options: { bundler, minify, sourcemaps, stats },
+    options: { bundler, minify, sourcemap, stats },
     app,
   });
 

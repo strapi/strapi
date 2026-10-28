@@ -1,4 +1,4 @@
-import { defaultsDeep } from 'lodash/fp';
+import { defaultsDeep } from 'lodash';
 import { env } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 
@@ -209,7 +209,7 @@ export const loadProgrammaticPlugins = (
         ? (pluginServer.config.default as (opts: { env: unknown }) => unknown)({ env })
         : (pluginServer.config?.default ?? {});
 
-    const config = defaultsDeep(defaultConfig, userConfig);
+    const config = defaultsDeep({}, userConfig, defaultConfig);
 
     if (typeof pluginServer.config?.validator === 'function') {
       try {

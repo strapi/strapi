@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import _, { omit } from 'lodash';
@@ -79,11 +80,13 @@ const defaultConfig = {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const loadAppPackageJson = (appDir: string): Record<string, any> => {
-  try {
-    return require(path.resolve(appDir, 'package.json'));
-  } catch (error) {
+  const pkgPath = path.resolve(appDir, 'package.json');
+
+  if (!fs.existsSync(pkgPath)) {
     return { name: path.basename(appDir) || 'strapi-app', version: '0.0.0', strapi: {} };
   }
+
+  return require(pkgPath);
 };
 
 export const loadConfiguration = (opts: StrapiOptions) => {

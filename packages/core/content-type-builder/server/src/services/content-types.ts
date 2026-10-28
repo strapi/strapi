@@ -34,7 +34,7 @@ export const isContentTypeVisible = (model: Struct.ContentTypeSchema) =>
  * File-based content types carry no such tag and stay editable.
  */
 export const getContentTypeOrigin = (model: Struct.ContentTypeSchema): string | undefined =>
-  getOr(undefined, 'pluginOptions.content-type-builder.origin', model);
+  get(model, 'pluginOptions.content-type-builder.origin');
 
 export const isContentTypeEditable = (model: Struct.ContentTypeSchema) =>
   getContentTypeOrigin(model) !== 'programmatic';

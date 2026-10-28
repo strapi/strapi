@@ -96,12 +96,8 @@ import { defineApp, fromDisk } from '@strapi/strapi';
 
 defineApp({
   config: fromDisk('./config'), // legacy config dir, from disk
-  contentTypes: [
-    /* in code */
-  ],
-  routes: ({ get, post }) => [
-    /* in code */
-  ],
+  contentTypes: [/* in code */],
+  routes: ({ get, post }) => [/* in code */],
   controllers: fromDisk('./src/controllers'), // from disk
   policies: fromDisk('./src/policies'), // from disk
 });

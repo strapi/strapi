@@ -83,8 +83,7 @@ export type PluginModule = Core.Plugin | ((opts: { env: unknown }) => Core.Plugi
  * resolvable.
  */
 export type PluginEntry =
-  | PluginModule
-  | { plugin: PluginModule; enabled?: boolean; config?: object; resolve?: string };
+  PluginModule | { plugin: PluginModule; enabled?: boolean; config?: object; resolve?: string };
 
 /**
  * The input accepted by {@link definePlugin}: a plugin module plus its canonical

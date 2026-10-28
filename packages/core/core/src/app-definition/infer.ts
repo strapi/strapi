@@ -122,7 +122,9 @@ export type InferContentTypeSchema<TContentType extends AppContentType> = {
  * file-level example) to get full `strapi.documents(...)` typing.
  */
 export type RegisterContentTypes<TApp> = {
-  [TContentType in InCodeContentTypes<TApp> as ContentTypeUID<TContentType>]: InferContentTypeSchema<TContentType>;
+  [
+    TContentType in InCodeContentTypes<TApp> as ContentTypeUID<TContentType>
+  ]: InferContentTypeSchema<TContentType>;
 };
 
 /**
@@ -166,5 +168,7 @@ export type InferComponentSchema<TComponent extends AppComponent> = {
  * attributes (and `is.component({ component })` references) type-check.
  */
 export type RegisterComponents<TApp> = {
-  [TComponent in InCodeComponents<TApp> as ComponentUID<TComponent>]: InferComponentSchema<TComponent>;
+  [
+    TComponent in InCodeComponents<TApp> as ComponentUID<TComponent>
+  ]: InferComponentSchema<TComponent>;
 };

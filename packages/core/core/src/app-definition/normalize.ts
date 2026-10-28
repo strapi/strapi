@@ -90,7 +90,7 @@ export const normalizeContentType = (ct: AppContentType) => {
     },
     options: ct.options ?? {},
     pluginOptions: {
-      ...(ct.pluginOptions ?? {}),
+      ...ct.pluginOptions,
       'content-type-builder': {
         ...ctbPluginOptions,
         origin: 'programmatic',
@@ -162,7 +162,7 @@ export const buildApiModules = (
     // content-api behavior instead.
     const routes = customRoutes.map((route) => ({
       ...route,
-      config: { auth: false, ...(route.config ?? {}) },
+      config: { auth: false, ...route.config },
     }));
 
     // Inline routes are content-api routes (served under the `/api` prefix, like

@@ -102,8 +102,7 @@ export type PluginModule =
   | (() => Core.Plugin); // factory form (called with { env } like legacy)
 
 export type PluginEntry =
-  | PluginModule
-  | { plugin: PluginModule; enabled?: boolean; config?: object };
+  PluginModule | { plugin: PluginModule; enabled?: boolean; config?: object };
 ```
 
 ## Route DSL (`routes.ts`)
