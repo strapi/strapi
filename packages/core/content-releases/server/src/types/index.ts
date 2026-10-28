@@ -1,3 +1,4 @@
+import type { Controllers } from './controllers';
 import type createHomepageService from '../services/homepage';
 import type { Release } from '../../../shared/contracts/releases';
 import type { ReleaseService } from '../services/release';
@@ -5,6 +6,8 @@ import type { FindPageQuery, ReleaseActionService } from '../services/release-ac
 import type createSchedulingService from '../services/scheduling';
 import type { SettingsService } from '../services/settings';
 import type createReleaseValidationService from '../services/validation';
+
+export type * from './controllers';
 
 type ReleaseValidationImplementation = ReturnType<typeof createReleaseValidationService>;
 
@@ -46,7 +49,8 @@ export type Services = {
 
 /**
  * Default contracts loaded with the Content Releases server types.
- * The services are only registered when the `cms-content-releases` EE feature is enabled.
+ * The services and controllers are only registered when the `cms-content-releases` EE feature is
+ * enabled.
  */
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -85,6 +89,14 @@ declare global {
         'plugin::content-releases.release-validation': Services['release-validation'] | undefined;
         'plugin::content-releases.scheduling': Services['scheduling'] | undefined;
         'plugin::content-releases.settings': Services['settings'] | undefined;
+      }
+
+      // Registered with the services (`index.ts`), so `undefined` for the same reason.
+      interface PackageControllers {
+        'plugin::content-releases.homepage': Controllers['homepage'] | undefined;
+        'plugin::content-releases.release': Controllers['release'] | undefined;
+        'plugin::content-releases.release-action': Controllers['release-action'] | undefined;
+        'plugin::content-releases.settings': Controllers['settings'] | undefined;
       }
     }
   }
