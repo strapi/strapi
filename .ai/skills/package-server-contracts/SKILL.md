@@ -1,6 +1,6 @@
 ---
 name: package-server-contracts
-description: Use when adding or changing a service, controller, policy, middleware, or config contract of a Strapi monorepo package, when a server package looks up another package, when a strict lookup resolves to `unknown`, when editing `server/src/types/` registry declarations or a `server/src/registries.ts` file, or when changing `types` or `paths` in a server tsconfig.
+description: Use when adding or changing a service, controller, policy, middleware, or config contract or a permission action ID of a Strapi monorepo package, when a server package looks up another package, when a strict lookup resolves to `unknown`, when editing `server/src/types/` registry declarations or a `server/src/registries.ts` file, or when changing `types` or `paths` in a server tsconfig.
 ---
 
 # Package server contracts
@@ -33,6 +33,7 @@ declare global {
 - Services and controllers that exist only with an EE feature register `Contract | undefined`.
 - Tag `@internal` the contract members only the package calls, and controller actions no route references.
 - Controllers: contracts plus a `Controllers` map in `server/src/types/controllers.ts`; the runtime map `satisfies Controllers`; factories `satisfies Core.ControllerFactory<uid>`; routes `satisfies Core.RouterInputFor<Controllers, 'plugin::x'>` on a variable annotated with the type develop infers.
+- Permission actions: declare the action IDs you register in `PermissionActions` (computed ID, value `true`), next to your other registry declarations. Write the action list `as const`, pass it straight to `registerMany`, and compare it with ``Core.Assert<Core.SameNames<Core.PermissionActionId<(typeof actions)[number]>, Extract<Core.RegisteredPermissionAction, `plugin::x.${string}`>>>``. Name action IDs in route configs as literals. EE-gated IDs get a JSDoc line naming the feature.
 - Config: the input type (what `config/*.ts` contains) lives in `@strapi/types` (`Core.Config.*`). The resolved contract (`ResolvedConfig.<Name>`, loader defaults required) lives in the package that applies the defaults and is what `PackageConfigs` registers. JSDoc on each links to the other. Core namespaces: one file each in `packages/core/core/src/types/config/`.
 
 ## Consuming another package's contracts
