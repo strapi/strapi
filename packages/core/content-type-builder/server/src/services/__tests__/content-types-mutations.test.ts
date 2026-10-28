@@ -138,7 +138,12 @@ describe('content type mutation compensation', () => {
         'content-type-builder': { services: { 'api-handler': apiHandler } },
       },
       eventHub: { emit: jest.fn() },
-      db: { query: jest.fn(() => ({ count: jest.fn().mockResolvedValue(0) })) },
+      db: {
+        query: jest.fn(() => ({
+          count: jest.fn().mockResolvedValue(0),
+          findOne: jest.fn().mockResolvedValue(null),
+        })),
+      },
       log: { error: jest.fn() },
     } as any;
   });
@@ -217,6 +222,59 @@ describe('content type mutation compensation', () => {
 
     expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', {
       contentType: { uid: contentType.uid, schema: { ...contentType, kind: 'singleType' } },
+    });
+  });
+
+  describe('collectionType to singleType entry guard', () => {
+    type Row = { documentId: string; locale?: string; publishedAt: string | null };
+
+    const mockRows = (rows: Row[]) => {
+      const matches = (row: Row, where?: { documentId?: { $ne: string } }) =>
+        where?.documentId === undefined || row.documentId !== where.documentId.$ne;
+
+      strapi.db.query = jest.fn(() => ({
+        count: jest.fn(async (params?: { where?: { documentId?: { $ne: string } } }) => {
+          return rows.filter((row) => matches(row, params?.where)).length;
+        }),
+        findOne: jest.fn(async () => rows[0] ?? null),
+      })) as any;
+    };
+
+    const switchToSingleType = () =>
+      editContentType(contentType.uid, {
+        contentType: { ...contentType, kind: 'singleType', attributes: {} },
+      });
+
+    it('allows the switch when the only document has a draft and a published row', async () => {
+      mockRows([
+        { documentId: 'doc-1', publishedAt: null },
+        { documentId: 'doc-1', publishedAt: '2026-01-01T00:00:00.000Z' },
+      ]);
+
+      await expect(switchToSingleType()).resolves.toBeDefined();
+    });
+
+    it('allows the switch when the only document exists in several locales', async () => {
+      mockRows([
+        { documentId: 'doc-1', locale: 'en', publishedAt: null },
+        { documentId: 'doc-1', locale: 'en', publishedAt: '2026-01-01T00:00:00.000Z' },
+        { documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { documentId: 'doc-1', locale: 'fr', publishedAt: '2026-01-01T00:00:00.000Z' },
+      ]);
+
+      await expect(switchToSingleType()).resolves.toBeDefined();
+    });
+
+    it('rejects the switch when several documents exist', async () => {
+      mockRows([
+        { documentId: 'doc-1', publishedAt: null },
+        { documentId: 'doc-2', publishedAt: null },
+      ]);
+
+      await expect(switchToSingleType()).rejects.toThrow(
+        'You cannot convert a collectionType to a singleType when having multiple entries in DB'
+      );
+      expect(builder.editContentType).not.toHaveBeenCalled();
     });
   });
 
