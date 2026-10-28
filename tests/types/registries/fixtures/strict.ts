@@ -49,7 +49,7 @@ jobs.getJobForCollectionType satisfies Core.ControllerHandler;
     'plugin::content-manager.hasPermissions',
     {
       name: 'plugin::content-manager.hasPermissions',
-      config: { actions: ['read'], hasAtLeastOne: true },
+      config: { actions: ['plugin::content-manager.explorer.read'], hasAtLeastOne: true },
     },
   ],
 }) satisfies Core.RouteConfigFor;
