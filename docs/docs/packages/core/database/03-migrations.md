@@ -76,7 +76,7 @@ await db.schema.applyAttributeRenames(knex, {
 
 ## Post-sync migrations
 
-Post-sync migrations live in the application's `database/migrations-post` directory (resolved next to `database/migrations`, so it follows `<outDir>` when `useTypescriptMigrations` is enabled; override with `database.settings.migrations.postDir`). They run on boot **after** schema sync and the post-sync repairs, but before the `strapi::content-types.afterSync` hook, so columns Strapi just created from content-type changes in the same deploy already exist. Use them to backfill data into those columns; use pre-sync user migrations for DDL that schema sync does not manage.
+Post-sync migrations live in the application's `database/migrations-post` directory (or `<outDir>/database/migrations-post` when `useTypescriptMigrations` is enabled, same as user migrations). They run on boot **after** schema sync and the post-sync repairs, but before the `strapi::content-types.afterSync` hook, so columns Strapi just created from content-type changes in the same deploy already exist. Use them to backfill data into those columns; use pre-sync user migrations for DDL that schema sync does not manage.
 
 They share the user migration runner: same discovery and file-name ordering, one transaction per file, gated by `database.settings.runMigrations`, and tracked in their own `strapi_migrations_post` table (reserved, so schema sync never drops it). They are roll-forward only: `down` is never called.
 
