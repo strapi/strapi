@@ -180,11 +180,13 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
 
-    // Go to the content manager and bulk select articlesto make sure the "add to release" does not show up
+    // Go to the content manager and bulk select articles to make sure the "add to release" does not show up
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
     await page.getByRole('checkbox', { name: 'Select all entries' }).check();
+    // The bulk actions must be rendered, otherwise the check below passes on an empty bar
+    await expect(page.getByRole('button', { name: 'Delete' })).toBeVisible();
     await expect(page.getByRole('button', { name: /add to release/i })).not.toBeVisible();
   });
 });
