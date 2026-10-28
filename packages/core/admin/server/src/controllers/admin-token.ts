@@ -1,7 +1,8 @@
 import type { Context } from 'koa';
 
 import { strings, errors } from '@strapi/utils';
-import { trim, has } from 'lodash/fp';
+import { trim, has } from 'lodash';
+
 import { getService } from '../utils';
 import constants from '../services/constants';
 import {
@@ -168,10 +169,10 @@ export default {
     const apiTokenService = getService('api-token-admin');
 
     const mutableBody = body as Record<string, unknown>;
-    if (has('name', mutableBody)) {
+    if (has(mutableBody, 'name')) {
       mutableBody.name = trim(body.name ?? '');
     }
-    if (has('description', mutableBody) || mutableBody.description === null) {
+    if (has(mutableBody, 'description') || mutableBody.description === null) {
       mutableBody.description = trim(body.description ?? '');
     }
 
@@ -182,7 +183,7 @@ export default {
       return ctx.notFound('API Token not found');
     }
 
-    if (has('name', body)) {
+    if (has(body, 'name')) {
       const nameAlreadyTaken = await apiTokenService.getByName(body.name!);
       if (nameAlreadyTaken !== null && !strings.isEqual(nameAlreadyTaken.id, id)) {
         throw new ApplicationError('Name already taken');
