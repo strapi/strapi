@@ -128,6 +128,10 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#diagnostics = diagnostics;
     const { path: filePath } = this.options.file;
 
+    // The catch below maps every failure to a bad file or key. Load the stream
+    // packages first so a missing dependency keeps its own message and stack.
+    await loadStreamDeps();
+
     try {
       // Read the metadata to ensure the file can be parsed
       await this.#loadMetadata();
@@ -293,33 +297,42 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#assetMetadata = metadata;
   }
 
-  async createEntitiesReadStream(): Promise<Readable> {
+  createEntitiesReadStream(): Readable {
     this.#reportInfo('creating entities read stream');
     return this.#streamJsonlDirectory('entities');
   }
 
-  async createSchemasReadStream(): Promise<Readable> {
+  createSchemasReadStream(): Readable {
     this.#reportInfo('creating schemas read stream');
     return this.#streamJsonlDirectory('schemas');
   }
 
-  async createLinksReadStream(): Promise<Readable> {
+  createLinksReadStream(): Readable {
     this.#reportInfo('creating links read stream');
     return this.#streamJsonlDirectory('links');
   }
 
-  async createConfigurationReadStream(): Promise<Readable> {
+  createConfigurationReadStream(): Readable {
     this.#reportInfo('creating configuration read stream');
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
 
-  async createAssetsReadStream(): Promise<Readable> {
-    const inStream = await this.#getBackupStream();
+  createAssetsReadStream(): Readable {
     const outStream = new PassThrough({ objectMode: true });
+    this.#reportInfo('creating assets read stream');
+    this.#pipeAssets(outStream).catch((error: unknown) => {
+      if (!outStream.destroyed) {
+        outStream.destroy(error instanceof Error ? error : new Error(String(error)));
+      }
+    });
+    return outStream;
+  }
+
+  async #pipeAssets(outStream: PassThrough): Promise<void> {
+    const inStream = await this.#getBackupStream();
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
     const assetMetadata = this.#assetMetadata;
-    this.#reportInfo('creating assets read stream');
 
     let activeAsyncEntries = 0;
     const runReadEntry = async (fn: () => Promise<void>) => {
@@ -366,8 +379,6 @@ class LocalFileSourceProvider implements ISourceProvider {
       ],
       (err) => this.#endPassThroughWhenTarIdle(outStream, () => activeAsyncEntries, err)
     );
-
-    return outStream;
   }
 
   async #getBackupStream() {
@@ -394,11 +405,19 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   // `directory` must be posix formatted path
-  async #streamJsonlDirectory(directory: string) {
+  #streamJsonlDirectory(directory: string): Readable {
+    const outStream = new PassThrough({ objectMode: true });
+    this.#pipeJsonlDirectory(outStream, directory).catch((error: unknown) => {
+      if (!outStream.destroyed) {
+        outStream.destroy(error instanceof Error ? error : new Error(String(error)));
+      }
+    });
+    return outStream;
+  }
+
+  async #pipeJsonlDirectory(outStream: PassThrough, directory: string): Promise<void> {
     const { chain, parser } = await loadStreamDeps();
     const inStream = await this.#getBackupStream();
-
-    const outStream = new PassThrough({ objectMode: true });
 
     let activeAsyncEntries = 0;
     const runReadEntry = async (fn: () => Promise<void>) => {
@@ -426,9 +445,7 @@ class LocalFileSourceProvider implements ISourceProvider {
             await runReadEntry(async () => {
               const transforms = [
                 // JSONL parser to read the data chunks one by one (line by line)
-                parser.asStream({
-                  checkErrors: true,
-                }),
+                parser(),
                 // The JSONL parser returns each line as key/value
                 (line: { key: string; value: object }) => line.value,
               ];
@@ -460,8 +477,6 @@ class LocalFileSourceProvider implements ISourceProvider {
       ],
       (err) => this.#endPassThroughWhenTarIdle(outStream, () => activeAsyncEntries, err)
     );
-
-    return outStream;
   }
 
   // For collecting an entire JSON file then parsing it, not for streaming JSONL

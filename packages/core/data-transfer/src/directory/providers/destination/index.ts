@@ -12,6 +12,7 @@ import type {
 } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { loadStreamDeps } from '../../../utils/esm-deps';
+import { deferWritable } from '../../../utils/defer-writable';
 import { createDirectoryJsonlWriter, createFilePathFactory } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
@@ -111,52 +112,35 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
     }
   }
 
-  async createSchemasWriteStream(): Promise<Writable> {
-    this.#reportInfo('creating schemas write stream');
-    const filePathFactory = createFilePathFactory('schemas');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    const { chain, stringer } = await loadStreamDeps();
-    return chain([stringer(), entryStream]);
+  createSchemasWriteStream(): Writable {
+    return this.#createJsonlWriteStream('schemas');
   }
 
-  async createEntitiesWriteStream(): Promise<Writable> {
-    this.#reportInfo('creating entities write stream');
-    const filePathFactory = createFilePathFactory('entities');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    const { chain, stringer } = await loadStreamDeps();
-    return chain([stringer(), entryStream]);
+  createEntitiesWriteStream(): Writable {
+    return this.#createJsonlWriteStream('entities');
   }
 
-  async createLinksWriteStream(): Promise<Writable> {
-    this.#reportInfo('creating links write stream');
-    const filePathFactory = createFilePathFactory('links');
-    const entryStream = createDirectoryJsonlWriter(
-      this.#rootResolved,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-    const { chain, stringer } = await loadStreamDeps();
-    return chain([stringer(), entryStream]);
+  createLinksWriteStream(): Writable {
+    return this.#createJsonlWriteStream('links');
   }
 
-  async createConfigurationWriteStream(): Promise<Writable> {
-    this.#reportInfo('creating configuration write stream');
-    const filePathFactory = createFilePathFactory('configuration');
+  createConfigurationWriteStream(): Writable {
+    return this.#createJsonlWriteStream('configuration');
+  }
+
+  #createJsonlWriteStream(stage: string): Writable {
+    this.#reportInfo(`creating ${stage} write stream`);
+    const filePathFactory = createFilePathFactory(stage);
     const entryStream = createDirectoryJsonlWriter(
       this.#rootResolved,
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
-    const { chain, stringer } = await loadStreamDeps();
-    return chain([stringer(), entryStream]);
+
+    return deferWritable(async () => {
+      const { chain, stringer } = await loadStreamDeps();
+      return chain([stringer(), entryStream]);
+    });
   }
 
   createAssetsWriteStream(): Writable {

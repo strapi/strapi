@@ -283,12 +283,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
     const { chain, parser } = await loadStreamDeps();
     const files = await this.#listJsonlFiles(posixSubdir);
     for (const absPath of files) {
-      const transforms = [
-        parser.asStream({
-          checkErrors: true,
-        }),
-        (line: { key: string; value: object }) => line.value,
-      ];
+      const transforms = [parser(), (line: { key: string; value: object }) => line.value];
 
       const stream = chain(transforms);
       fs.createReadStream(absPath).pipe(stream);

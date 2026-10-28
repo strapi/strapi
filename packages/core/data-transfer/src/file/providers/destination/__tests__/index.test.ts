@@ -47,7 +47,7 @@ describe('Local File Destination Provider', () => {
       };
       const provider = createLocalFileDestinationProvider(providerOptions);
 
-      await expect(provider.bootstrap()).rejects.toThrow("Can't encrypt without a key");
+      expect(() => provider.bootstrap()).toThrow("Can't encrypt without a key");
     });
 
     it('Adds .gz extension to the archive path when compression is enabled', async () => {

@@ -140,7 +140,7 @@ async transferEntities(): Promise {
   const source = await this.sourceProvider.createEntitiesReadStream?.();
 
   // 2. Create transform stream for data modifications
-  const transform = this.#createStageTransformStream(stage);
+  const transform = await this.#createStageTransformStream(stage);
 
   // 3. Create progress tracker
   const tracker = this.#progressTracker(stage);

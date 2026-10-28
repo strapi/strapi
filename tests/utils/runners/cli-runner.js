@@ -124,7 +124,7 @@ const runCLI = async ({ domainDir, jestConfigPath, testApps, testArgs, domain })
       env: {
         TEST_APPS: testApps.join(','),
         JWT_SECRET: process.env.JWT_SECRET || 'test-jwt-secret',
-        // data-transfer loads ESM-only stream-json/stream-chain with import().
+        // data-transfer loads ESM-only stream-chain with import().
         // Jest's vm rejects that unless this flag is set, same as the API runner.
         NODE_OPTIONS: [process.env.NODE_OPTIONS, '--experimental-vm-modules']
           .filter(Boolean)

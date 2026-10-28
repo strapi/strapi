@@ -853,6 +853,11 @@ class TransferEngine<
     this.#closed = false;
 
     try {
+      // Stream packages load with import(), not at startup. Fail before any
+      // provider runs: destination beforeTransfer deletes uploads, and a fast
+      // failure during bootstrap races the DB transaction and hangs rollback.
+      await loadStreamDeps();
+
       this.#emitTransferUpdate('init');
       await this.bootstrap();
       await this.init();

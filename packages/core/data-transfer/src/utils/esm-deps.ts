@@ -1,30 +1,30 @@
 type StreamChainModule = typeof import('stream-chain');
-type JsonlParserModule = typeof import('stream-json/jsonl/parser.js');
-type JsonlStringerModule = typeof import('stream-json/jsonl/stringer.js');
+type JsonlParserStreamModule = typeof import('stream-chain/jsonl/parserStream.js');
+type JsonlStringerStreamModule = typeof import('stream-chain/jsonl/stringerStream.js');
 
 export interface StreamDeps {
   chain: StreamChainModule['chainUnchecked'];
-  parser: JsonlParserModule['parser'];
-  stringer: JsonlStringerModule['stringer'];
+  parser: JsonlParserStreamModule['parserStream'];
+  stringer: JsonlStringerStreamModule['stringerStream'];
 }
 
 let cached: Promise<StreamDeps> | undefined;
 
 /**
- * Loads stream-chain and stream-json via dynamic import (CJS-safe) and caches them.
- * Both packages are ESM-only, so they cannot be loaded with require() on Node < 20.19 / 22.12
- * or under Jest's --experimental-vm-modules.
+ * Loads stream-chain via dynamic import (CJS-safe) and caches it.
+ * The package is ESM-only, so it cannot be loaded with require() on Node < 20.19 / 22.12
+ * or under Jest without --experimental-vm-modules.
  */
 export const loadStreamDeps = (): Promise<StreamDeps> => {
   cached ??= Promise.all([
     import('stream-chain'),
-    // Extension is required: stream-json's export map does not resolve the extensionless subpath.
-    import('stream-json/jsonl/parser.js'), // eslint-disable-line import/extensions
-    import('stream-json/jsonl/stringer.js'), // eslint-disable-line import/extensions
+    // Extension is required: stream-chain's "./*" export does not resolve the extensionless subpath.
+    import('stream-chain/jsonl/parserStream.js'), // eslint-disable-line import/extensions
+    import('stream-chain/jsonl/stringerStream.js'), // eslint-disable-line import/extensions
   ]).then(([streamChain, jsonlParser, jsonlStringer]) => ({
     chain: streamChain.chainUnchecked,
-    parser: jsonlParser.parser,
-    stringer: jsonlStringer.stringer,
+    parser: jsonlParser.parserStream,
+    stringer: jsonlStringer.stringerStream,
   }));
 
   return cached;
