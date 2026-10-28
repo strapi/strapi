@@ -6,6 +6,7 @@ export type * as AI from './ai';
 // individual files
 export type * as AuditLogs from './audit-logs';
 export type * as Auth from './auth';
+export type * as Cache from './cache';
 export type * as ContentAPI from './content-api';
 export type * as CoreStore from './core-store';
 export type * as Cron from './cron';

@@ -93,6 +93,11 @@ describe('Populate', () => {
     beforeEach(() => {
       global.strapi = {
         getModel: jest.fn((uid) => fakeModels[uid]),
+        memoryCacheSync: {
+          get: jest.fn(() => null),
+          set: jest.fn(),
+          delete: jest.fn(),
+        },
       } as any;
     });
 
