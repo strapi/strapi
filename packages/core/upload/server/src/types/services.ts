@@ -419,6 +419,17 @@ declare global {
         'plugin::upload.upload': Services['upload'];
         'plugin::upload.weeklyMetrics': Services['weeklyMetrics'];
       }
+
+      /** Registered at bootstrap (`bootstrap.ts`). */
+      interface PermissionActions {
+        'plugin::upload.read': true;
+        'plugin::upload.assets.create': true;
+        'plugin::upload.assets.update': true;
+        'plugin::upload.assets.download': true;
+        'plugin::upload.assets.copy-link': true;
+        'plugin::upload.configure-view': true;
+        'plugin::upload.settings.read': true;
+      }
     }
   }
 }
