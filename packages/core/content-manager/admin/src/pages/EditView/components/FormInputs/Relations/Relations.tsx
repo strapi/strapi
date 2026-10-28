@@ -112,7 +112,13 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
  * -----------------------------------------------------------------------------------------------*/
 
 const RELATIONS_TO_DISPLAY = 5;
-const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
+const ONE_WAY_RELATIONS = new Set([
+  'oneWay',
+  'oneToOne',
+  'manyToOne',
+  'oneToManyMorph',
+  'oneToOneMorph',
+]);
 const EMPTY_RELATION_RESULTS: RelationResult[] = [];
 
 type RelationPosition =
@@ -140,7 +146,8 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
 }
 
 interface RelationsFieldProps
-  extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
+  extends
+    Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {}
 
 export interface RelationsFormValue {
@@ -227,7 +234,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { data, isLoading, isFetching, refetch } = useGetRelationsQuery(
+    const { data, isLoading, isFetching, isError, refetch } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -360,7 +367,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           href: `../${COLLECTION_TYPES}/${targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
         };
 
-        if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
+        if (ONE_WAY_RELATIONS.has(props.attribute.relation)) {
           // Remove any existing relation so they can be replaced with the new one
           field.value?.connect?.forEach(handleDisconnect);
           relations.forEach(handleDisconnect);
@@ -430,6 +437,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           documentParams={currentDocumentMeta.params}
           mainField={props.mainField}
         />
+        {isError ? (
+          <Typography variant="pi" textColor="danger600">
+            {formatMessage({
+              id: 'anErrorOccurred',
+              defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+            })}
+          </Typography>
+        ) : null}
       </Flex>
     );
   }
@@ -545,7 +560,7 @@ const RelationsInput = ({
   const targetModel = props.attribute.targetModel;
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
-  const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
+  const [searchForTrigger, { data, isLoading, isError }] = useLazySearchRelationsQuery();
 
   /**
    * Because we're using a lazy query, we need to trigger the search
@@ -625,6 +640,7 @@ const RelationsInput = ({
        *
        */
       onChange(relation);
+      setSearchParams({ _q: '', page: 1 });
     },
     [data, formatMessage, onChange, toggleNotification]
   );
@@ -676,6 +692,7 @@ const RelationsInput = ({
           hasNextPage={hasNextPage}
           isLoadingPermissions={isLoadingPermissions}
           isLoadingSearchRelations={isLoading}
+          isSearchRelationsError={isError}
           handleChange={handleChange}
           setSearchParams={setSearchParams}
           data={data}
@@ -692,11 +709,14 @@ const RelationsInput = ({
 
 const MemoizedRelationsComboboxInput = React.memo(RelationsInput);
 
-interface RelationModalWithContextProps
-  extends Omit<RelationsInputProps, 'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'> {
+interface RelationModalWithContextProps extends Omit<
+  RelationsInputProps,
+  'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'
+> {
   relation: DocumentMeta;
   hasNextPage: boolean;
   isLoadingSearchRelations: boolean;
+  isSearchRelationsError: boolean;
   isLoadingPermissions: boolean;
   handleChange: (relationId?: string) => void;
   data?: FindAvailable.Response;
@@ -715,6 +735,7 @@ const RelationModalWithContext = ({
   placeholder,
   hasNextPage,
   isLoadingSearchRelations,
+  isSearchRelationsError,
   isLoadingPermissions,
   handleChange,
   mainField,
@@ -797,14 +818,23 @@ const RelationModalWithContext = ({
           }
           hasMoreItems={hasNextPage}
           loading={isLoadingSearchRelations || isLoadingPermissions}
-          onOpenChange={() => {
-            handleSearch(textValue ?? '');
+          onOpenChange={(isOpen) => {
+            // Selecting an option closes the list while `textValue` still holds its label.
+            // Searching on close would omit that option and cache an empty result.
+            if (isOpen) {
+              handleSearch(textValue ?? '');
+            }
           }}
           noOptionsMessage={() =>
-            formatMessage({
-              id: getTranslation('relation.notAvailable'),
-              defaultMessage: 'No relations available',
-            })
+            isSearchRelationsError
+              ? formatMessage({
+                  id: 'anErrorOccurred',
+                  defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+                })
+              : formatMessage({
+                  id: getTranslation('relation.notAvailable'),
+                  defaultMessage: 'No relations available',
+                })
           }
           loadingMessage={formatMessage({
             id: getTranslation('relation.isLoading'),
@@ -1073,7 +1103,7 @@ const RelationsList = ({
    * These relation types will only ever have one item
    * in their list, so you can't reorder a single item!
    */
-  const canReorder = !ONE_WAY_RELATIONS.includes(relationType);
+  const canReorder = !ONE_WAY_RELATIONS.has(relationType);
 
   const dynamicListHeight =
     data.length > RELATIONS_TO_DISPLAY

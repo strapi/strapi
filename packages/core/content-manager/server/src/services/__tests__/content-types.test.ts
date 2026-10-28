@@ -1,4 +1,5 @@
 import createConfigurationService from '../configuration';
+import createContentTypesService from '../content-types';
 import storeUtils from '../utils/store';
 
 const createCfg = (opts = {}) => {
@@ -111,4 +112,44 @@ describe('Model Configuration', () => {
   });
 
   test.todo('Sync Configuration');
+});
+
+describe('findContentTypesByKind', () => {
+  const contentTypes = {
+    'api::article.article': { uid: 'api::article.article', kind: 'collectionType' },
+    'api::homepage.homepage': { uid: 'api::homepage.homepage', kind: 'singleType' },
+  };
+
+  const strapi = {
+    contentTypes,
+    plugins: {
+      'content-manager': {
+        services: {
+          'data-mapper': { toContentManagerModel: (contentType: unknown) => contentType },
+        },
+      },
+    },
+  } as any;
+
+  beforeEach(() => {
+    global.strapi = strapi;
+  });
+
+  test('returns the content types of the given kind', () => {
+    const service = createContentTypesService({ strapi });
+
+    expect(service.findContentTypesByKind('collectionType')).toStrictEqual([
+      contentTypes['api::article.article'],
+    ]);
+    expect(service.findContentTypesByKind('singleType')).toStrictEqual([
+      contentTypes['api::homepage.homepage'],
+    ]);
+  });
+
+  test('returns all content types when no kind is given', () => {
+    const service = createContentTypesService({ strapi });
+
+    expect(service.findContentTypesByKind(undefined)).toStrictEqual(Object.values(contentTypes));
+    expect(service.findContentTypesByKind(null)).toStrictEqual(Object.values(contentTypes));
+  });
 });
