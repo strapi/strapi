@@ -14,6 +14,7 @@ const { ApplicationError } = errors;
  */
 const createActionProvider = (options?: Options) => {
   const provider = providerFactory<Action>(options);
+  const throwOnDuplicates = options?.throwOnDuplicates ?? true;
   const actionHooks = {
     appliesPropertyToSubject: hooks.createAsyncParallelHook(),
   };
@@ -39,10 +40,28 @@ const createActionProvider = (options?: Options) => {
     },
 
     async registerMany(actionsAttributes: CreateActionPayload[]) {
+      if (strapi.isLoaded) {
+        throw new Error(`You can't register new actions outside of the bootstrap function.`);
+      }
+
       validateRegisterProviderAction(actionsAttributes);
 
-      for (const attributes of actionsAttributes) {
-        await this.register(attributes);
+      const actions = actionsAttributes.map((attributes) => domain.create(attributes));
+
+      // Reject duplicates (within the batch or already registered) before registering anything
+      const actionIds = new Set<string>();
+      for (const { actionId } of actions) {
+        const isDuplicate = actionIds.has(actionId) === true || provider.has(actionId) === true;
+
+        if (throwOnDuplicates === true && isDuplicate === true) {
+          throw new Error(`Duplicated item key: ${actionId}`);
+        }
+
+        actionIds.add(actionId);
+      }
+
+      for (const action of actions) {
+        await provider.register(action.actionId, action);
       }
 
       return this;
