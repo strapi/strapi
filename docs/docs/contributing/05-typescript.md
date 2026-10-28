@@ -420,6 +420,15 @@ declare global {
   changed at runtime (extensions in `src/extensions`, attributes added by other plugins). Without
   generated schemas, as in a package compiled alone, the declared UIDs are precise and every other
   UID stays generic.
+- An attribute a package adds to other content types only when the boot license lists a feature,
+  such as the review workflows `strapi_stage` and `strapi_assignee`, is declared in
+  `Strapi.Registries.LicensedContentTypeAttributes`, keyed by its gate: `attributes`, and the
+  `except` schema shapes of the content types the package leaves out. Type generation with strict
+  types leaves these attributes out (`LICENSED_ATTRIBUTES` in
+  `packages/utils/typescript/src/generators/content-types/index.ts`, which a new attribute joins),
+  and strict types add them to the schemas of an application that lists the gate in
+  `typescript.licensedFeatures`. Review workflows is the worked example:
+  `packages/core/review-workflows/server/src/types/content-types.ts`.
 - In strict mode, each declared UID is a required key of `strapi.contentTypes`, as generated UIDs
   are in an application. A plain record such as `Record<UID.ContentType, any>` no longer fits
   `Core.Strapi['contentTypes']`, so type a content-type record parameter as

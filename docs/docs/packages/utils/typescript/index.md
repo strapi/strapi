@@ -26,6 +26,10 @@ The schema generators (`src/generators/common/models/attributes.ts`) write each 
 
 With `typescript.strictTypes`, the generators also write `Schema.Attribute.Conditional` on an attribute with a `conditions.visible` rule. A hidden field skips validation, so the strict write inputs make a conditional attribute optional and nullable. With strict types, each attribute also gets a JSDoc line with its write rule when it has one, for example ``Required when published. `null` only in drafts.`` (`getAttributeWriteRule`). A component is not published itself, so its fields say `Required when the parent is published`. Editors show it on the input keys of the Document Service. Without strict types, the generators write no strict-only modifier and no comment, and generated files stay as in previous releases. Unit tests in `src/__tests__/generators/schemas/` check both outputs.
 
+## Licensed attributes
+
+With `typescript.strictTypes`, the content-types generator leaves out the attributes a package adds only when the license that verifies at boot lists a feature (`LICENSED_ATTRIBUTES`: the review workflows `strapi_stage` and `strapi_assignee`), so generated schemas do not depend on the license type generation boots with. `@strapi/types` adds them from `typescript.licensedFeatures` (`Strapi.Registries.LicensedContentTypeAttributes`). Without strict types, generated schemas keep the attributes of the boot license, as in previous releases. Application attributes cannot use these names: the `strapi` prefix is reserved.
+
 ## Strict opt-in
 
 With `typescript.strictTypes`, the strict generator (`src/generators/strict/`) writes `strict.d.ts`: the import of `@strapi/strapi/strict-types`, and the application's license scope, `Settings.licenses: 'declared'` and a `LicensedFeatures` entry per name of `typescript.licensedFeatures`. It does not check the names: `Core.Config.TypeScript` types the key. A value that is not an array of strings fails the generation.
