@@ -177,6 +177,68 @@ describe('Action Provider', () => {
         expect(actionProvider.size()).toBe(0);
       });
 
+      test(`If the same action appears twice in the array, don't register any of them`, async () => {
+        const createAction = (uid: string) => ({
+          section: 'settings',
+          displayName: uid,
+          category: 'category',
+          uid,
+        });
+
+        const actionProvider = createActionProvider();
+        const registerAll = () =>
+          actionProvider.registerMany([
+            createAction('dup.a'),
+            createAction('dup.b'),
+            createAction('dup.a'),
+            createAction('dup.c'),
+          ]);
+
+        await expect(registerAll()).rejects.toThrowError('Duplicated item key: api::dup.a');
+        expect(actionProvider.size()).toBe(0);
+      });
+
+      test(`If one action is already registered, don't register the others`, async () => {
+        const createAction = (uid: string) => ({
+          section: 'settings',
+          displayName: uid,
+          category: 'category',
+          uid,
+        });
+
+        const actionProvider = createActionProvider();
+        await actionProvider.register(createAction('dup.b'));
+
+        const willRegister = jest.fn();
+        actionProvider.hooks.willRegister.register(willRegister);
+
+        const registerAll = () =>
+          actionProvider.registerMany([
+            createAction('dup.a'),
+            createAction('dup.b'),
+            createAction('dup.c'),
+          ]);
+
+        await expect(registerAll()).rejects.toThrowError('Duplicated item key: api::dup.b');
+        expect(actionProvider.keys()).toStrictEqual(['api::dup.b']);
+        expect(willRegister).not.toHaveBeenCalled();
+      });
+
+      test(`Can't register many actions if strapi is loaded`, async () => {
+        global.strapi.isLoaded = true;
+
+        const actionProvider = createActionProvider();
+        const registerAll = () =>
+          actionProvider.registerMany([
+            { section: 'settings', displayName: 'Foo', category: 'category', uid: 'foo' },
+          ]);
+
+        await expect(registerAll()).rejects.toThrowError(
+          `You can't register new actions outside of the bootstrap function.`
+        );
+        expect(actionProvider.size()).toBe(0);
+      });
+
       test('Registering many action shall trigger the registration hooks multiple time', async () => {
         const attributes = [
           {
