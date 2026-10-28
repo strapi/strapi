@@ -235,8 +235,12 @@ export const getAttributeWriteRule = (
     return 'Required on every create, drafts included (`[]` is enough). Never `null`.';
   }
 
+  // A component is not published itself: its required check runs when the parent is published
+  const whenPublished =
+    draftAndPublish === undefined ? 'when the parent is published' : 'when published';
+
   if (attribute.type === 'relation' || attribute.type === 'media') {
-    return 'Required when published, only with `api.documents.strictRelations`.';
+    return `Required ${whenPublished}, only with \`api.documents.strictRelations\`.`;
   }
 
   if (draftAndPublish === false) {
@@ -245,7 +249,7 @@ export const getAttributeWriteRule = (
 
   return hasDefault === true
     ? `${defaultRule} \`null\` only in drafts.`
-    : 'Required when published. `null` only in drafts.';
+    : `Required ${whenPublished}. \`null\` only in drafts.`;
 };
 
 /**

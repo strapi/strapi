@@ -185,7 +185,7 @@ export interface SharedRules extends Struct.ComponentSchema {
         singularName: 'rule';
     };
     attributes: {
-        /** Required when published, only with \`api.documents.strictRelations\`. */
+        /** Required when the parent is published, only with \`api.documents.strictRelations\`. */
         author: Schema.Attribute.Relation<'manyToOne', 'admin::user'> & Schema.Attribute.Required;
         /** Required on every create, drafts included (\`[]\` is enough). Never \`null\`. */
         blocks: Schema.Attribute.DynamicZone<[
@@ -204,7 +204,7 @@ export interface SharedRules extends Struct.ComponentSchema {
         tags: Schema.Attribute.Component<'shared.tag', true> & Schema.Attribute.Required;
         /** Required only when its condition shows it. */
         teaser: Schema.Attribute.Text & Schema.Attribute.Required & Schema.Attribute.Conditional;
-        /** Required when published. \`null\` only in drafts. */
+        /** Required when the parent is published. \`null\` only in drafts. */
         title: Schema.Attribute.String & Schema.Attribute.Required;
         /** Default: 0. */
         views: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;

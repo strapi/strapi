@@ -430,7 +430,19 @@ describe('Attributes', () => {
       ['function default', { type: 'string', default: () => 'a' }, undefined],
       ['default that ends a comment', { type: 'string', default: '*/' }, 'Default: "*\\/".'],
     ])('%s', (_, attribute, rule) => {
-      expect(getAttributeWriteRule(attribute)).toBe(rule);
+      expect(getAttributeWriteRule(attribute, { draftAndPublish: true })).toBe(rule);
+    });
+
+    test('in a component, required fields are checked when the parent is published', () => {
+      expect(getAttributeWriteRule({ type: 'string', required: true })).toBe(
+        'Required when the parent is published. `null` only in drafts.'
+      );
+      expect(getAttributeWriteRule({ type: 'media', required: true })).toBe(
+        'Required when the parent is published, only with `api.documents.strictRelations`.'
+      );
+      expect(getAttributeWriteRule({ type: 'string', required: true, default: 'a' })).toBe(
+        'Default: "a". `null` only in drafts.'
+      );
     });
 
     test('without draft and publish, every write publishes', () => {
