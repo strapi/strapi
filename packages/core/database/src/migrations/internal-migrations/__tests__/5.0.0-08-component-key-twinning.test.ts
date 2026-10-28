@@ -285,6 +285,9 @@ const buildHarness = () => {
     get nested() {
       return nested;
     },
+    get links() {
+      return links;
+    },
   };
 };
 
@@ -320,6 +323,58 @@ describe('twinComponentKeys migration', () => {
     await twinComponentKeys(h.knex, h.db);
 
     expect(h.updates).toEqual([]);
+  });
+
+  it('does not twin a reordered draft with the wrong published block', async () => {
+    const h = buildHarness();
+    // zone-like field holding two types; the draft swapped them after publish
+    const typeOf = (entityId: number, componentId: number) =>
+      h.links.find((l) => l.entity_id === entityId && l.component_id === componentId)!;
+    typeOf(2, 21).component_type = 'default.other';
+    typeOf(1, 11).component_type = 'default.other';
+    typeOf(1, 10).order = 2;
+    typeOf(1, 11).order = 1;
+
+    await twinComponentKeys(h.knex, h.db);
+
+    expect(h.blocks.find((b) => b.id === 20)?.component_key).toBe('pub-block-a-old');
+    expect(h.blocks.find((b) => b.id === 21)?.component_key).toBe('pub-block-b-old');
+    expect(h.updates).toEqual([]);
+  });
+
+  it('skips a field whose draft list is shorter than the published one', async () => {
+    const h = buildHarness();
+    // draft block 10 was removed after publish
+    h.links.splice(
+      h.links.findIndex((l) => l.entity_id === 1 && l.component_id === 10),
+      1
+    );
+    h.links.find((l) => l.entity_id === 1 && l.component_id === 11)!.order = 1;
+
+    await twinComponentKeys(h.knex, h.db);
+
+    expect(h.blocks.find((b) => b.id === 20)?.component_key).toBe('pub-block-a-old');
+    expect(h.blocks.find((b) => b.id === 21)?.component_key).toBe('pub-block-b-old');
+    expect(h.updates.filter((u) => u.table === 'components_default_blocks')).toEqual([]);
+  });
+
+  it('skips a field whose component types differ in order', async () => {
+    const h = buildHarness();
+    h.links.find((l) => l.entity_id === 1 && l.component_id === 11)!.component_type =
+      'default.nested';
+
+    await twinComponentKeys(h.knex, h.db);
+
+    expect(h.updates).toEqual([]);
+  });
+
+  it('pairs by position even when order values have gaps', async () => {
+    const h = buildHarness();
+    h.links.find((l) => l.entity_id === 1 && l.component_id === 11)!.order = 5;
+
+    await twinComponentKeys(h.knex, h.db);
+
+    expect(h.blocks.find((b) => b.id === 21)?.component_key).toBe('draft-block-b');
   });
 
   it('skips content types without draft & publish', async () => {

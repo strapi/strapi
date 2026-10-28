@@ -3,8 +3,9 @@
  *
  * After `5.0.0-07-component-key`, each existing component row has its own unique key.
  * Draft and published rows that represent the same logical block only share a key after
- * the next publish. This migration aligns them without requiring a re-publish by matching
- * join-table links on the same document (document_id + locale) by field + order + type.
+ * the next publish. This migration aligns them without requiring a re-publish by pairing
+ * join-table links on the same document (document_id + locale) field by field, by position,
+ * only when draft and published hold the same component types in the same order.
  *
  * Nested components are twinned recursively when both sides link the same nested field.
  *
@@ -176,10 +177,44 @@ const loadLinks = async (
   return query;
 };
 
-const linkMatchKey = (link: LinkRow): string => {
-  const order = link.order == null ? '0' : String(link.order);
-  const type = link.component_type ?? '';
-  return `${link.field}::${order}::${type}`;
+/**
+ * Pair draft and published links field by field, by position. A field is only paired when both
+ * sides hold the same number of components with the same types in the same order; otherwise the
+ * draft was edited (reordered, shortened, retyped) and guessing would give a draft block the key
+ * of a different published block. Those fields are skipped and line up on the next publish.
+ */
+const pairLinks = (draftLinks: LinkRow[], publishedLinks: LinkRow[]): Array<[LinkRow, LinkRow]> => {
+  const groupByField = (links: LinkRow[]) => {
+    const groups = new Map<string, LinkRow[]>();
+    for (const link of links) {
+      const group = groups.get(link.field) ?? [];
+      group.push(link);
+      groups.set(link.field, group);
+    }
+    return groups;
+  };
+
+  const publishedByField = groupByField(publishedLinks);
+  const pairs: Array<[LinkRow, LinkRow]> = [];
+
+  for (const [field, draftGroup] of groupByField(draftLinks)) {
+    const publishedGroup = publishedByField.get(field) ?? [];
+
+    const sameShape =
+      draftGroup.length === publishedGroup.length &&
+      draftGroup.every(
+        (link, index) =>
+          (link.component_type ?? null) === (publishedGroup[index].component_type ?? null)
+      );
+
+    if (!sameShape) {
+      continue;
+    }
+
+    draftGroup.forEach((link, index) => pairs.push([link, publishedGroup[index]]));
+  }
+
+  return pairs;
 };
 
 const copyComponentKey = async (
@@ -259,14 +294,8 @@ const twinNestedComponents = async (
 
     const draftLinks = await loadLinks(knex, joinTable, draftComponentId);
     const publishedLinks = await loadLinks(knex, joinTable, publishedComponentId);
-    const publishedByKey = new Map(publishedLinks.map((link) => [linkMatchKey(link), link]));
 
-    for (const draftLink of draftLinks) {
-      const publishedLink = publishedByKey.get(linkMatchKey(draftLink));
-      if (!publishedLink) {
-        continue;
-      }
-
+    for (const [draftLink, publishedLink] of pairLinks(draftLinks, publishedLinks)) {
       const nestedUID =
         draftLink.component_type ??
         ('target' in attribute ? (attribute as { target?: string }).target : undefined);
@@ -337,14 +366,8 @@ const twinContentType = async (knex: Knex, db: Database, meta: Meta) => {
     for (const pair of pairs) {
       const draftLinks = await loadLinks(knex, joinTable, pair.draftId);
       const publishedLinks = await loadLinks(knex, joinTable, pair.publishedId);
-      const publishedByKey = new Map(publishedLinks.map((link) => [linkMatchKey(link), link]));
 
-      for (const draftLink of draftLinks) {
-        const publishedLink = publishedByKey.get(linkMatchKey(draftLink));
-        if (!publishedLink) {
-          continue;
-        }
-
+      for (const [draftLink, publishedLink] of pairLinks(draftLinks, publishedLinks)) {
         const componentUID = draftLink.component_type ?? relationAttribute.target;
         if (!componentUID) {
           continue;

@@ -75,7 +75,7 @@ Draft and published remain **separate rows** with separate field values. They ma
 
 1. Schema sync adds `component_key` (system attribute on component models).
 2. Internal migration backfills a unique key per existing row.
-3. Best-effort twinning migration (`5.0.0-08-component-key-twinning`) aligns draft/published pairs by parent `document_id` + locale + field + order + type (nested components included). Twins that cannot be matched still share a key after the **next publish**.
+3. Best-effort twinning migration (`5.0.0-08-component-key-twinning`) aligns draft/published pairs by parent `document_id` + locale, then field by field by position (nested components included). A field is only twinned when draft and published hold the same number of components with the same types in the same order; reordered, shortened or retyped fields are skipped rather than matched to the wrong block, and share keys after the **next publish**.
 
 ## Implementation sketch
 
