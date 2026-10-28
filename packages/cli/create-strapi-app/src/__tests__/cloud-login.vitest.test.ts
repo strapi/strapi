@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { shouldAttemptCloudLogin } from '../cloud';
 
 describe('shouldAttemptCloudLogin', () => {
