@@ -20,6 +20,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const stagePermissionsService = getService('stage-permissions', { strapi });
   const workflowValidator = getService('validation', { strapi });
 
+  /**
+   * Returns the table linking the entities of a content type to their stage, or undefined when
+   * the content type no longer exists or has no stage attribute
+   */
+  const getEntityStageJoinTable = (contentTypeUID: UID.ContentType) => {
+    if (strapi.db.metadata.has(contentTypeUID) === false) {
+      return undefined;
+    }
+
+    const { attributes } = strapi.db.metadata.get(contentTypeUID) as any;
+    return attributes[ENTITY_STAGE_ATTRIBUTE]?.joinTable;
+  };
+
   return {
     find({ workflowId, populate }: any) {
       return strapi.db.query(STAGE_MODEL_UID).findMany({
@@ -28,9 +41,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
-    findById(id: string | number, { populate }: any = {}) {
+    findById(id: string | number, { workflowId, populate }: any = {}) {
       return strapi.db.query(STAGE_MODEL_UID).findOne({
-        where: { id },
+        where: workflowId === undefined ? { id } : { id, workflow: workflowId },
         populate,
       });
     },
@@ -207,7 +220,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       assertAtLeastOneStageRemain(srcStages || [], { created, deleted });
 
       // Update stages and assign entity stages
-      return strapi.db.transaction(async ({ trx }) => {
+      return strapi.db.transaction(async () => {
         // Create the new stages
         const createdStages = await this.createMany(created, { fields: ['id'] });
         // Put all the newly created stages ids
@@ -233,13 +246,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await async.map(contentTypesToMigrate, (contentTypeUID: any) => {
+          // Wait for it: deleting the stage also deletes its links to the entities.
+          // `strapi.db.transaction` reuses the current transaction.
+          await async.map(contentTypesToMigrate, (contentTypeUID: any) =>
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,
               toStageId: nearestStage.id,
-              trx,
-            });
-          });
+            })
+          );
 
           return this.delete(stage);
         });
@@ -309,12 +323,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @param {string} contentTypeUID
      * @param {number | undefined | null} fromStageId
      * @param {number} toStageId
-     * @param {import('knex').Knex.Transaction} trx
      * @returns
      */
     async updateEntitiesStage(contentTypeUID: any, { fromStageId, toStageId }: any) {
-      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID) as any;
-      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
+      const joinTable = getEntityStageJoinTable(contentTypeUID);
+
+      // No entity can be linked to a stage
+      if (joinTable === undefined) {
+        return;
+      }
+
+      const { tableName } = strapi.db.metadata.get(contentTypeUID);
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
 
@@ -358,8 +377,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @returns
      */
     async deleteAllEntitiesStage(contentTypeUID: any) {
-      const { attributes } = strapi.db.metadata.get(contentTypeUID) as any;
-      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
+      const joinTable = getEntityStageJoinTable(contentTypeUID);
+
+      // No entity can be linked to a stage
+      if (joinTable === undefined) {
+        return;
+      }
 
       // Delete all stage links for the content type
       return strapi.db.transaction(async ({ trx }) =>
