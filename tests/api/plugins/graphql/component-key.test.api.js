@@ -101,6 +101,63 @@ describe('GraphQL — componentKey', () => {
     expect(blocks[0].componentKey).not.toBe(blocks[1].componentKey);
   });
 
+  test('componentKey is nullable in the schema', async () => {
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        {
+          __type(name: "ComponentDefaultGqlKeyBlock") {
+            fields {
+              name
+              type {
+                kind
+                name
+              }
+            }
+          }
+        }
+      `,
+    });
+
+    expect(res.statusCode).toBe(200);
+    const field = res.body.data.__type.fields.find((f) => f.name === 'componentKey');
+    expect(field.type).toEqual({ kind: 'SCALAR', name: 'ID' });
+  });
+
+  test('a component without componentKey returns null instead of failing the query', async () => {
+    const other = await strapi.documents('api::gql-key-article.gql-key-article').create({
+      data: { title: 'no-key', blocks: [{ name: 'legacy' }] },
+      populate: ['blocks'],
+    });
+
+    await strapi.db
+      .query('default.gql-key-block')
+      .update({ where: { id: other.blocks[0].id }, data: { componentKey: null } });
+
+    const res = await graphqlQuery({
+      query: /* GraphQL */ `
+        query ($documentId: ID!) {
+          gqlKeyArticle(documentId: $documentId) {
+            data {
+              attributes {
+                blocks {
+                  componentKey
+                  name
+                }
+              }
+            }
+          }
+        }
+      `,
+      variables: { documentId: other.documentId },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.gqlKeyArticle.data.attributes.blocks).toEqual([
+      { componentKey: null, name: 'legacy' },
+    ]);
+  });
+
   test('mutation update accepts componentKey on component input', async () => {
     const read = await graphqlQuery({
       query: /* GraphQL */ `
