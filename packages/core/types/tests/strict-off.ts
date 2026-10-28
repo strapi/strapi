@@ -82,6 +82,13 @@ declare global {
       interface AppContentTypeSchemas {
         'api::strict-only.page': Struct.SingleTypeSchema;
       }
+      // Attributes of a listed gate: schemas keep develop's types without strict types.
+      interface LicensedContentTypeAttributes {
+        'review-workflows': {
+          attributes: { strapi_stage: Schema.Attribute.Relation<'oneToOne', 'admin::user'> };
+          except: never;
+        };
+      }
       interface ComponentSchemas {
         'strict-only.seo': Struct.ComponentSchema;
       }

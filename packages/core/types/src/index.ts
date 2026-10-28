@@ -324,9 +324,26 @@ declare global {
        * UID, package ones included, to `types/generated/contentTypes.d.ts`. An entry replaces the
        * package schema for that UID, since it holds what the application changed at runtime
        * (extensions, attributes added by other plugins). Applications do not declare it by hand.
+       *
+       * With strict types, the generated schemas leave out the attributes of
+       * {@link LicensedContentTypeAttributes}, which follow the application's license scope.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface AppContentTypeSchemas {}
+
+      /**
+       * Attributes a package adds at register to the content types of other modules, only when the
+       * license that verifies at boot lists a gate, keyed by that gate (a `Core.LicenseGate`). Each
+       * entry has `attributes`, the attributes added, and `except`, the schema shapes of the content
+       * types the package leaves out.
+       *
+       * Read in strict mode, from the program's license scope (`Core.LicenseState`): the
+       * content-type schemas of an application that lists the gate in `typescript.licensedFeatures`
+       * carry the attributes, those of any other program do not. Type generation with strict types
+       * leaves them out of the schemas it writes, whatever the license it boots with.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface LicensedContentTypeAttributes {}
 
       /**
        * Component schemas keyed by UID, read in strict mode instead of `Public.ComponentSchemas`.
