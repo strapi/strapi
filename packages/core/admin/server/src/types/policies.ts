@@ -1,9 +1,14 @@
-/** A permission checked by `admin::hasPermissions`: an action, an `[action, subject]` pair, or an object. */
+import type { Core } from '@strapi/types';
+
+/**
+ * A permission checked by `admin::hasPermissions`: an action, an `[action, subject]` pair, or an object.
+ * With strict types, once any permission action ID is registered, the action must be registered.
+ */
 export type PermissionCheck =
-  | string
-  | [action: string]
-  | [action: string, subject: string]
-  | { action: string; subject?: string };
+  | Core.PermissionActionReference
+  | [action: Core.PermissionActionReference]
+  | [action: Core.PermissionActionReference, subject: string]
+  | { action: Core.PermissionActionReference; subject?: string };
 
 /** Config of `admin::hasPermissions`. Every listed permission must be granted to the admin user. */
 export type HasPermissionsConfig = {
