@@ -30,7 +30,7 @@ Today’s supported workaround is to omit ids and replace the whole component ar
 ## Goals
 
 - Non-breaking: omit-id full-array replace keeps working; draft-`id` updates keep working (Content Manager).
-- Honest identity: do **not** silently remap published numeric `id` → draft row.
+- Honest identity: do **not** silently remap a bare published numeric `id` → draft row; a foreign `id` is only replaced when it comes with a `componentKey` that resolves on the parent.
 - Align with the `documentId` mental model: stable handle for the logical nested block; `id` remains the row PK.
 - Fail closed: unknown / foreign keys reject like invalid ids.
 
@@ -53,10 +53,14 @@ Draft and published remain **separate rows** with separate field values. They ma
 
 ### Behavior
 
-1. **Create** — mint `componentKey` if absent; preserve if present (publish/discard path).
+1. **Create** — the server assigns `componentKey`, like `documentId`: Document Service `create` (and the new-locale create inside `update`) strips client-supplied keys before writing, so `createComponent` mints them.
 2. **Publish / discard** — funnel through `createComponents` → `createComponent`; keys copy with other scalars.
 3. **Document clone** — strip source `componentKey`s so `createComponent` mints **new** keys (clone is a new document, same as a new `documentId`).
-4. **Update** — before delete/update, resolve payload `componentKey` → row `id` on the **parent being updated** (usually draft). Unknown keys → ApplicationError.
+4. **Update** — before delete/update, resolve payload `componentKey` → row `id` on the **parent being updated** (usually draft). Unknown keys without an `id` → ApplicationError.
+   - An `id` that belongs to the parent wins over `componentKey`.
+   - An `id` that does not belong to the parent (for example the published row echoed back with its key) is replaced by the row matching `componentKey`. With no matching key, the foreign `id` is rejected as before.
+   - Each row is claimed once per field: a key repeated in the same field (copied block) becomes a new component with a fresh key and never updates the block it was copied from.
+   - New components (no `id`) have nested keys stripped so copied sub-trees get fresh keys.
 5. **Omit-id full replace** — unchanged.
 6. **Update by draft `id`** — unchanged.
 
@@ -65,6 +69,7 @@ Draft and published remain **separate rows** with separate field values. They ma
 - Resolve only against components linked to the parent entity under update (and `__component` for dynamic zones).
 - Do not allow reassigning `componentKey` on update.
 - Never resolve by bare published numeric `id` across statuses.
+- Client-supplied keys are ignored on create, so a client cannot pick or duplicate keys.
 
 ### Migration
 
@@ -98,5 +103,7 @@ Primary touchpoints:
 - [x] Load published → update with `\{ componentKey, …fields \}` updates the draft instance
 - [x] Omit-id array replace still works
 - [x] Invalid / foreign `componentKey` → 400
+- [x] Echoed published `id` + `componentKey` updates the draft instance
+- [x] Client keys ignored on create; a repeated key in one field creates a new block
 - [x] Nested components + dynamic zones covered
 - [x] Document clone mints new `componentKey`s
