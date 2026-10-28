@@ -347,7 +347,7 @@ The JSDoc on each type gives the runtime reason. Without strict types, results k
 ### Document write inputs
 
 With strict types, the `data` of Document Service `create`, `update` and `clone`, and of the core
-service `create`, follows the entity validator
+service `create`, `update` and `createOrUpdate`, follows the entity validator
 (`packages/core/types/src/modules/documents/params/write.ts`). The rules come from the modifiers
 type generation already emits, `Schema.Attribute.Required` and `Schema.Attribute.DefaultTo`:
 
@@ -363,6 +363,10 @@ type generation already emits, `Schema.Attribute.Required` and `Schema.Attribute
 - `update` and `clone` require no key. On update, a component value with `id` is partial; a value
   without `id` creates a component and follows the create rules.
 - `create` requires `data`.
+- The core service defaults the status to `published`, so its writes follow the published rules
+  unless the params pass `status: 'draft'`. `createOrUpdate` takes the update input, but its first
+  call on an empty single type creates the entry: the create rules then apply at runtime, and the
+  types do not check them.
 
 A schema with unknown attributes, such as an unregistered or generic UID, keeps develop's
 `Data.Input`. Without strict types, the params keep develop's types. With strict types, type

@@ -5,7 +5,7 @@ import type { Documents } from '../../modules';
 import type { IsStrict } from '../strictness';
 import type { Pick as ParamsPick } from '../../modules/documents/params';
 import type { StrictResult } from '../../modules/documents/result';
-import type { CreateInput } from '../../modules/documents/params/write';
+import type { CreateInput, UpdateInput } from '../../modules/documents/params/write';
 
 // TODO: Migration to use Documents
 type Document = Documents.AnyDocument;
@@ -88,6 +88,18 @@ type CreateParams<TContentTypeUID extends UID.ContentType> = ReadParams<TContent
   );
 
 /**
+ * The params of a core service `update` (collection type) or `createOrUpdate` (single type), with
+ * strict types. As for {@link CreateParams}, the core service defaults `status` to `'published'`, so
+ * `data` follows the published update rules ({@link UpdateInput}) unless the params pass
+ * `status: 'draft'`: every key is optional, and `null` is accepted where the validator accepts it.
+ */
+type UpdateParams<TContentTypeUID extends UID.ContentType> = ReadParams<TContentTypeUID> &
+  (
+    | { status?: 'published'; data: UpdateInput<TContentTypeUID, 'published'> }
+    | { status: 'draft'; data: UpdateInput<TContentTypeUID, 'draft'> }
+  );
+
+/**
  * Base Core-API service type
  */
 export interface Base {
@@ -157,8 +169,11 @@ export interface StrictCollectionType<TContentTypeUID extends UID.ContentType> e
   create<const TParams extends CreateParams<TContentTypeUID>>(
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams>>;
-  /** `null` when the document does not exist. */
-  update<const TParams extends ReadParams<TContentTypeUID> & { data: Data }>(
+  /**
+   * `null` when the document does not exist. `data` follows the update rules of the status, published
+   * unless the params pass another `status` (see {@link UpdateParams}).
+   */
+  update<const TParams extends UpdateParams<TContentTypeUID>>(
     docId: Documents.ID,
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
@@ -179,8 +194,15 @@ export interface StrictSingleType<TContentTypeUID extends UID.ContentType> exten
   find<const TParams extends ReadParams<TContentTypeUID>>(
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
-  /** Updates the entry, or creates it when there is none. */
-  createOrUpdate<const TParams extends ReadParams<TContentTypeUID> & { data: Data }>(
+  /**
+   * Updates the entry, or creates it when there is none. `data` follows the update rules of the
+   * status, published unless the params pass another `status` (see {@link UpdateParams}).
+   *
+   * The first call on an empty single type creates the entry, and the create rules apply then: the
+   * types accept partial `data`, but a published create without the required attributes fails at
+   * runtime with a validation error.
+   */
+  createOrUpdate<const TParams extends UpdateParams<TContentTypeUID>>(
     params: TParams
   ): Promise<Entry<TContentTypeUID, TParams> | null>;
   delete(params: object): Promise<{
