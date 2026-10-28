@@ -267,8 +267,7 @@ export type McpResourceReadResult = {
  */
 export type McpToolHandler<
   InputSchema extends z.ZodObject<z.ZodRawShape> | undefined =
-    | z.ZodObject<z.ZodRawShape>
-    | undefined,
+    z.ZodObject<z.ZodRawShape> | undefined,
   OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
 > = (
   params: {
@@ -297,8 +296,7 @@ export type McpToolSchemaResolver<Schema> = (context: McpHandlerContext) => Sche
 export type McpToolDefinitionFields<
   Name extends string = string,
   InputSchema extends z.ZodObject<z.ZodRawShape> | undefined =
-    | z.ZodObject<z.ZodRawShape>
-    | undefined,
+    z.ZodObject<z.ZodRawShape> | undefined,
   OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
   Title extends string = string,
   Description extends string = string,
@@ -321,8 +319,7 @@ export type McpToolDefinitionFields<
 export type McpToolDefinition<
   Name extends string = string,
   InputSchema extends z.ZodObject<z.ZodRawShape> | undefined =
-    | z.ZodObject<z.ZodRawShape>
-    | undefined,
+    z.ZodObject<z.ZodRawShape> | undefined,
   OutputSchema extends z.ZodObject<z.ZodRawShape> = z.ZodObject<z.ZodRawShape>,
   Title extends string = string,
   Description extends string = string,
@@ -375,8 +372,7 @@ export type McpPromptCallback<ArgsSchema extends z.ZodObject<z.ZodRawShape> | un
 export type McpPromptDefinitionFields<
   Name extends string = string,
   ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined =
-    | z.ZodObject<z.ZodRawShape>
-    | undefined,
+    z.ZodObject<z.ZodRawShape> | undefined,
   Title extends string = string,
   Description extends string = string,
 > = {
@@ -394,8 +390,7 @@ export type McpPromptDefinitionFields<
 export type McpPromptDefinition<
   Name extends string = string,
   ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined =
-    | z.ZodObject<z.ZodRawShape>
-    | undefined,
+    z.ZodObject<z.ZodRawShape> | undefined,
   Title extends string = string,
   Description extends string = string,
 > = McpPromptDefinitionFields<Name, ArgsSchema, Title, Description> & McpCapabilityAccess;
