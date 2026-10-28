@@ -7,6 +7,8 @@ import {
   ENCRYPTION_HEADER_PREFIX_LENGTH,
   ENCRYPTION_HEADER_SALT_LENGTH,
   ENCRYPTION_HEADER_VERSION,
+  ENCRYPTION_TLV_CIPHER,
+  ENCRYPTION_TLV_KDF,
   EncryptionHeaderParseError,
   hasStrapiExMagic,
   parseStrapiExEncryptionHeader,
@@ -95,5 +97,52 @@ describe('STRAPIEX encryption header', () => {
     header.writeUInt16BE(ENCRYPTION_HEADER_PREFIX_LENGTH, ENCRYPTION_HEADER_MAGIC.length + 1);
 
     expect(() => parseStrapiExEncryptionHeader(header)).toThrow(/Missing or invalid salt/);
+  });
+
+  test('throws when reserved flags are set', () => {
+    const header = buildStrapiExEncryptionHeader(randomBytes(ENCRYPTION_HEADER_SALT_LENGTH));
+
+    header.writeUInt8(1, ENCRYPTION_HEADER_MAGIC.length + 3);
+
+    expect(() => parseStrapiExEncryptionHeader(header)).toThrow(
+      /Unsupported encryption header flags/
+    );
+  });
+
+  test.each([
+    ['KDF', ENCRYPTION_TLV_KDF, /Unsupported KDF id/],
+    ['cipher', ENCRYPTION_TLV_CIPHER, /Unsupported cipher id/],
+  ])('throws when the %s id is unknown', (_name, type, error) => {
+    const base = buildStrapiExEncryptionHeader(randomBytes(ENCRYPTION_HEADER_SALT_LENGTH));
+    const header = Buffer.concat([base, Buffer.from([type, 1, 0x7f])]);
+
+    header.writeUInt16BE(header.length, ENCRYPTION_HEADER_MAGIC.length + 1);
+
+    expect(() => parseStrapiExEncryptionHeader(header)).toThrow(error);
+  });
+
+  test('throws when header_length is smaller than the fixed prefix', () => {
+    const header = buildStrapiExEncryptionHeader(randomBytes(ENCRYPTION_HEADER_SALT_LENGTH));
+
+    header.writeUInt16BE(ENCRYPTION_HEADER_PREFIX_LENGTH - 1, ENCRYPTION_HEADER_MAGIC.length + 1);
+
+    expect(() => parseStrapiExEncryptionHeader(header)).toThrow(/Invalid encryption header length/);
+  });
+
+  test('throws when header_length exceeds the available bytes', () => {
+    const header = buildStrapiExEncryptionHeader(randomBytes(ENCRYPTION_HEADER_SALT_LENGTH));
+
+    header.writeUInt16BE(header.length + 1, ENCRYPTION_HEADER_MAGIC.length + 1);
+
+    expect(() => parseStrapiExEncryptionHeader(header)).toThrow(/Invalid encryption header length/);
+  });
+
+  test('throws when a TLV value is truncated', () => {
+    const base = buildStrapiExEncryptionHeader(randomBytes(ENCRYPTION_HEADER_SALT_LENGTH));
+    const header = Buffer.concat([base, Buffer.from([0x7f, 10, 0x00])]);
+
+    header.writeUInt16BE(header.length, ENCRYPTION_HEADER_MAGIC.length + 1);
+
+    expect(() => parseStrapiExEncryptionHeader(header)).toThrow(/Truncated encryption header TLV/);
   });
 });
