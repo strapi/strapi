@@ -80,6 +80,8 @@
     "test:ts:back": "run -T tsc -p server/tsconfig.json && run -T tsc -p ee/server/tsconfig.json",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json && run -T tsc -p ee/admin/tsconfig.json",
     "test:unit": "run -T jest",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"
   },
@@ -89,6 +91,8 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.1.19",
     "@reduxjs/toolkit": "1.9.7",
+    "@simplewebauthn/browser": "14.0.0",
+    "@simplewebauthn/server": "14.0.1",
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
     "@strapi/permissions": "5.59.0",
@@ -128,6 +132,7 @@
     "p-map": "4.0.0",
     "passport-local": "1.0.0",
     "pluralize": "8.0.0",
+    "qrcode.react": "4.2.0",
     "qs": "6.16.0",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
@@ -175,7 +180,9 @@
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1",
     "vite": "6.4.5",
-    "vite-plugin-dts": "^4.3.0"
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "catalog:",
+    "vitest-config": "5.59.0"
   },
   "peerDependencies": {
     "@strapi/data-transfer": "^5.0.0",

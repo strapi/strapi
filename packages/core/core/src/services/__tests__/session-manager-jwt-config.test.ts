@@ -228,6 +228,7 @@ describe('SessionManager JWT Configuration', () => {
       const rotateResult = await sessionManager('test').rotateRefreshToken(refreshResult.token);
 
       expect(rotateResult).toHaveProperty('token');
+      expect(rotateResult).toHaveProperty('userId', 'user123');
       expect(rotateResult).not.toHaveProperty('error');
     });
 

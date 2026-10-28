@@ -6,6 +6,7 @@ import adminToken from './admin-token';
 import authenticatedUser from './authenticated-user';
 import authenticatedSession from './authenticated-session';
 import authentication from './authentication';
+import mfa from './mfa';
 import permission from './permission';
 import role from './role';
 import transfer from './transfer';
@@ -13,6 +14,7 @@ import user from './user';
 import webhooks from './webhooks';
 import contentApi from './content-api';
 import homepage from './homepage';
+import securitySettings from './security-settings';
 import ai from '../ai/controllers/ai';
 
 export default {
@@ -22,6 +24,7 @@ export default {
   'authenticated-user': authenticatedUser,
   'authenticated-session': authenticatedSession,
   authentication,
+  mfa,
   permission,
   role,
   transfer,
@@ -29,5 +32,6 @@ export default {
   webhooks,
   'content-api': contentApi,
   homepage,
+  'security-settings': securitySettings,
   ai,
 };

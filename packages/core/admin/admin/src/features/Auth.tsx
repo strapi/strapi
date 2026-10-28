@@ -4,7 +4,8 @@ import { Dialog } from '@strapi/design-system';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { Login } from '../../../shared/contracts/authentication';
+import { Login, type LoginMfa } from '../../../shared/contracts/authentication';
+import { type MfaWebauthnLogin } from '../../../shared/contracts/mfa';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
@@ -23,6 +24,8 @@ import {
   useGetMeQuery,
   useGetMyPermissionsQuery,
   useLazyCheckPermissionsQuery,
+  useLoginMfaMutation,
+  useLoginMfaWebauthnMutation,
   useLoginMutation,
   useLogoutMutation,
 } from '../services/auth';
@@ -58,6 +61,21 @@ interface AuthContextValue {
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
+  /** Persists the session token exactly as `login` does. The trust `trustDevice` asks for arrives
+   * as an httpOnly cookie the panel never sees. */
+  loginMfa: (
+    body: Pick<LoginMfa.Request['body'], 'challengeToken' | 'code' | 'trustDevice'> & {
+      rememberMe: boolean;
+    }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
+  /** Satisfies the *same* challenge with an assertion instead of a code. `trustDevice` and
+   * `rememberMe` are carried for the reasons `loginMfa` gives: dropping either here would silently
+   * lose the user's choice. */
+  loginMfaWebauthn: (
+    body: Pick<MfaWebauthnLogin.Request['body'], 'challengeToken' | 'assertion' | 'trustDevice'> & {
+      rememberMe: boolean;
+    }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaWebauthnMutation>[0]>>>;
   logout: () => Promise<void>;
   /**
    * @alpha
@@ -193,6 +211,8 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
+  const [loginMfaMutation] = useLoginMfaMutation();
+  const [loginMfaWebauthnMutation] = useLoginMfaWebauthnMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const pendingLogoutRef = React.useRef<(() => void) | null>(null);
@@ -412,8 +432,12 @@ const AuthProvider = ({
       /**
        * There will always be a `data` key in the response
        * because if something fails, it will throw an error.
+       *
+       * An MFA-enrolled account resolves `res.data` to the challenge shape instead of a
+       * session: no token exists yet, so there is nothing to persist here until the caller
+       * completes `/login/mfa` and receives a real session response.
        */
-      if ('data' in res) {
+      if ('data' in res && !('mfaRequired' in res.data)) {
         const { token } = res.data;
 
         resetSessionExpiredNotification();
@@ -428,6 +452,41 @@ const AuthProvider = ({
       return res;
     },
     [dispatch, loginMutation]
+  );
+
+  const loginMfa = React.useCallback<AuthContextValue['loginMfa']>(
+    async ({ rememberMe, ...body }) => {
+      const res = await loginMfaMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
+
+      if ('data' in res) {
+        // As in `login`: this is where an enrolled account's session actually starts, so the
+        // `sessionExpired` latch has to be re-armed here or the next expiry passes in silence.
+        resetSessionExpiredNotification();
+        dispatch(loginAction({ token: res.data.token, persist: rememberMe }));
+      }
+
+      return res;
+    },
+    [dispatch, loginMfaMutation]
+  );
+
+  const loginMfaWebauthn = React.useCallback<AuthContextValue['loginMfaWebauthn']>(
+    async ({ rememberMe, ...body }) => {
+      const res = await loginMfaWebauthnMutation({
+        ...body,
+        deviceId: getOrCreateDeviceId(),
+        rememberMe,
+      });
+
+      if ('data' in res) {
+        // See `loginMfa`.
+        resetSessionExpiredNotification();
+        dispatch(loginAction({ token: res.data.token, persist: rememberMe }));
+      }
+
+      return res;
+    },
+    [dispatch, loginMfaWebauthnMutation]
   );
 
   /**
@@ -537,6 +596,8 @@ const AuthProvider = ({
         token={token}
         user={user}
         login={login}
+        loginMfa={loginMfa}
+        loginMfaWebauthn={loginMfaWebauthn}
         logout={logout}
         permissions={userPermissions}
         checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}
