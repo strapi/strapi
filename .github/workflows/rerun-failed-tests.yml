@@ -7,6 +7,9 @@ name: 'Re-run failed tests'
 #
 # Release PRs are left alone: the releaser reviews a red check there before anything is re-run.
 #
+# A run whose commit is no longer the PR's head is left alone too. The re-run joins the PR's
+# Tests concurrency group, which cancels runs in progress, so it would cancel the newer commit's run.
+#
 # workflow_run only fires for workflow files on the default branch, so this has no effect
 # until it is merged there.
 
@@ -17,6 +20,7 @@ on:
 
 permissions:
   actions: write # to re-run jobs
+  pull-requests: read # to read the PR's head commit
 
 jobs:
   rerun:
@@ -32,6 +36,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
+          # Empty when the PR has been closed, which skips the re-run as well.
+          PR_SHA=$(gh api -X GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open \
+            -f "head=$HEAD_OWNER:$HEAD_BRANCH" --jq '.[0].head.sha // ""')
+          if [ "$PR_SHA" != "$RUN_SHA" ]; then
+            echo "Left $RUN_URL alone: its commit is no longer the PR's head." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           gh run rerun "$RUN_ID" --failed --repo "$GITHUB_REPOSITORY"
           echo "Re-ran the failed jobs of $RUN_URL once." >> "$GITHUB_STEP_SUMMARY"
