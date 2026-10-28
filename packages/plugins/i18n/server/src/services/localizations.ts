@@ -1,4 +1,4 @@
-import { cloneDeep, isEmpty } from 'lodash/fp';
+import { isEmpty, cloneDeep } from 'lodash';
 
 import type { Schema } from '@strapi/types';
 import { async } from '@strapi/utils';

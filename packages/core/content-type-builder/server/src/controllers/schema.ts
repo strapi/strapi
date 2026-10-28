@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash';
 
 import { getService } from '../utils';
 import { validateUpdateSchema } from './validation/schema';
@@ -24,7 +24,11 @@ export default () => {
       try {
         const { data } = await validateUpdateSchema(ctx.request.body);
 
-        if (isEmpty(data.components) && isEmpty(data.contentTypes)) {
+        if (
+          isEmpty(data.components) &&
+          isEmpty(data.contentTypes) &&
+          isEmpty(data.contentStructure)
+        ) {
           ctx.body = {};
           return;
         }

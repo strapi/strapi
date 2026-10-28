@@ -133,11 +133,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async #deleteAllAssets(trx?: Knex.Transaction) {
     assertValidStrapi(this.strapi);
-    this.#reportInfo('deleting all assets');
     // if we're not restoring files, don't touch the files
     if (!this.#areAssetsIncluded()) {
       return;
     }
+
+    this.#reportInfo('deleting all assets');
 
     const stream: Readable = this.strapi.db
       // Create a query builder instance (default type is 'select')
