@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+
 export const actions = [
   {
     uid: 'marketplace.read',
@@ -276,7 +278,20 @@ export const actions = [
     category: 'transfer tokens',
     subCategory: 'general',
   },
-];
+] as const;
+
+// The declared permission action IDs match the registered actions. Review workflows declares its
+// own `admin::review-workflows.*` IDs.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type ActionIds = Core.Assert<
+  Core.SameNames<
+    Core.PermissionActionId<(typeof actions)[number]>,
+    Exclude<
+      Extract<Core.RegisteredPermissionAction, `admin::${string}`>,
+      `admin::review-workflows.${string}`
+    >
+  >
+>;
 
 export default {
   actions,
