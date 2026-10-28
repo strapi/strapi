@@ -148,7 +148,7 @@ class Database {
     };
 
     this.logger = config.logger ?? console;
-    const perfFromUser = { ...(config.performance ?? {}) };
+    const perfFromUser = { ...config.performance };
     // Sink-only keys (read by core) must not live on `@strapi/database` runtime perf config.
     delete (perfFromUser as DatabasePerformanceConfig & { output?: unknown }).output;
     const getRequestId = perfFromUser.getRequestId;

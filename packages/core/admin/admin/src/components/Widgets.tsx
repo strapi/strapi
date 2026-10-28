@@ -741,8 +741,8 @@ const PerformanceRoutesSqlWidget = () => {
               defaultMessage: 'Slowest routes (by average wall time)',
             })}
           </Typography>
-          {slowestRoutes.map((r, index) => (
-            <RouteRow key={`perf-route-${index}`}>
+          {slowestRoutes.map((r) => (
+            <RouteRow key={`${r.method} ${r.route}`}>
               <Typography variant="pi" fontWeight="bold" textColor="neutral800" ellipsis>
                 {r.method} {r.route}
               </Typography>

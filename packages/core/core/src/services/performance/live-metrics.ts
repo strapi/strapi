@@ -67,7 +67,7 @@ function freshSlice(minute: number): Slice {
     sumDbPercent: 0,
     slowQuerySum: 0,
     slowDbEvents: 0,
-    histogram: new Array<number>(BUCKET_COUNT).fill(0),
+    histogram: Array.from({ length: BUCKET_COUNT }, () => 0),
     routes: new Map(),
     fingerprints: new Map(),
   };
@@ -247,7 +247,7 @@ export function createPerformanceLiveMetrics(
     let sumDbPercent = 0;
     let slowQuerySum = 0;
     let slowDbEvents = 0;
-    const histogram = new Array<number>(BUCKET_COUNT).fill(0);
+    const histogram = Array.from({ length: BUCKET_COUNT }, () => 0);
     const routes = new Map<string, RouteAgg>();
     const fingerprints = new Map<string, FingerprintAgg>();
 
