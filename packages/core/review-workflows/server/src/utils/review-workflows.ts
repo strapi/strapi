@@ -7,7 +7,7 @@ import {
 } from '../constants/workflows';
 
 /** Returns the content types that can use review workflow stages. */
-export const getVisibleContentTypesUID = (contentTypes: Core.Strapi['contentTypes']) =>
+export const getVisibleContentTypesUID = (contentTypes: Partial<Core.Strapi['contentTypes']>) =>
   Object.keys(
     pickBy(
       contentTypes,
