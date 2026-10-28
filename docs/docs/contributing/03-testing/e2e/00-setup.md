@@ -98,7 +98,7 @@ yarn test:e2e -c 3
 
 ### Sharding by duration
 
-CI passes `--shard=i/n` after the inner `--`. When `tests/e2e/shard-weights.json` has weights for the edition and browser, the runner splits the spec files itself instead of letting Playwright split each domain by file count: `tests/utils/runners/shard-plan.js` packs every `(domain, spec file)` pair, weighted by its measured seconds, into `n × test apps` lanes, heaviest first. Every shard computes the same plan, so each file runs exactly once. A spec with no weight yet counts as a typical (median) file. Without weights, the runner falls back to Playwright's own `--shard`.
+CI passes `--shard=i/n` after the inner `--`. When `tests/e2e/shard-weights.json` has weights for the edition and browser, the runner splits the spec files itself instead of letting Playwright split each domain by file count: `tests/utils/runners/shard-plan.js` packs every `(domain, spec file)` pair, weighted by its measured seconds, into `n × test apps` lanes, heaviest first. Each domain a lane runs also costs about 20 seconds to start and stop Strapi, so short files join a lane that already runs their domain. Every shard computes the same plan, so each file runs exactly once. A spec with no weight yet counts as a typical (median) file. Without weights, the runner falls back to Playwright's own `--shard`.
 
 The weights go stale as specs are added, split or sped up. The e2e jobs upload their JUnit reports as `<edition>-e2e-junit-<browser>-<job index>` artifacts (kept 7 days). To regenerate the file, download them from a few recent develop runs with no flaky retries and average them:
 
