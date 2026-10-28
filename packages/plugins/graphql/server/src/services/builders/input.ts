@@ -49,6 +49,11 @@ export default ({ strapi }: Context) => {
             t.id('id');
           }
 
+          // Durable identity for Content API round-trips under Draft & Publish
+          if (modelType === 'component' && isFieldEnabled('strapiComponentKey')) {
+            t.id('strapiComponentKey');
+          }
+
           validAttributes.forEach(([attributeName, attribute]: [string, any]) => {
             // Enums
             if (isEnumeration(attribute)) {
