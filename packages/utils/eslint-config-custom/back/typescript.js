@@ -28,7 +28,32 @@ const config = {
     '@typescript-eslint/comma-dangle': 'off',
     '@typescript-eslint/quotes': 'off',
     '@typescript-eslint/no-shadow': 'off',
-    '@typescript-eslint/naming-convention': 'warn',
+    '@typescript-eslint/naming-convention': [
+      'warn',
+      // Intentionally unused bindings (OxLint default no-unused-vars, front no-unused-vars).
+      {
+        selector: 'variable',
+        filter: { regex: '^_', match: true },
+        format: null,
+      },
+      {
+        selector: 'parameter',
+        filter: { regex: '^_', match: true },
+        format: null,
+      },
+      {
+        selector: 'variable',
+        format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+      },
+      {
+        selector: 'function',
+        format: ['camelCase', 'PascalCase'],
+      },
+      {
+        selector: 'typeLike',
+        format: ['PascalCase'],
+      },
+    ],
     '@typescript-eslint/no-empty-interface': 'warn',
     '@typescript-eslint/no-explicit-any': 'off',
   },

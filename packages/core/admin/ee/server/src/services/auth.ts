@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
-import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
 import {
   assignResetPasswordToken,
   assertResetPasswordTokenIsValid,
+  completePasswordReset,
 } from '../../../../server/src/services/auth';
 
 const { ApplicationError } = errors;
@@ -66,11 +66,7 @@ const resetPassword = async ({ resetPasswordToken, password }: any = {}) => {
 
   await assertResetPasswordTokenIsValid(matchingUser);
 
-  return getService('user').updateById(matchingUser.id, {
-    password,
-    resetPasswordToken: null,
-    resetPasswordTokenExpiresAt: null,
-  });
+  return completePasswordReset(matchingUser, password);
 };
 
 export default {

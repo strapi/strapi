@@ -1,5 +1,5 @@
 import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
-import { snakeCase } from 'lodash/fp';
+import snakeCase from 'lodash/snakeCase';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 
@@ -126,8 +126,9 @@ const createTextShape = (usedAttributeNames: Array<string>, reservedNames: Array
         message: getTrad('error.validation.regex'),
         test(value) {
           try {
-            return new RegExp(value || '') !== null;
-          } catch (e) {
+            new RegExp(value || '');
+            return true;
+          } catch {
             return false;
           }
         },
@@ -154,8 +155,9 @@ const createStringShape = (usedAttributeNames: Array<string>, reservedNames: Arr
         message: getTrad('error.validation.regex'),
         test(value) {
           try {
-            return new RegExp(value || '') !== null;
-          } catch (e) {
+            new RegExp(value || '');
+            return true;
+          } catch {
             return false;
           }
         },

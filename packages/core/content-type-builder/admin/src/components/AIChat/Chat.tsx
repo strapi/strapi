@@ -97,7 +97,7 @@ const getErrorMessage = (err: Error) => {
   try {
     const error = JSON.parse(err.message);
     return error.error;
-  } catch (e) {
+  } catch {
     return err;
   }
 };

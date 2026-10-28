@@ -63,7 +63,7 @@ export const Base64Img: React.FC<Base64ImgProps> = ({
           setIsLoading(false);
           return;
         }
-      } catch (e) {
+      } catch {
         // If URL parsing fails, continue with the fetch attempt
       }
 

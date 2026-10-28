@@ -10,6 +10,7 @@ import { createComponentUid } from './utils/createUid';
 import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 
+import type { FolderSelection } from '../DataManager/utils/contentStructure';
 import type { Schema, Struct, UID } from '@strapi/types';
 import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
@@ -36,6 +37,7 @@ export type FormModalData = Record<string, unknown> & {
   displayName?: string;
   draftAndPublish?: boolean;
   enum?: string[];
+  folder?: FolderSelection;
   icon?: string;
   kind?: Struct.ContentTypeKind;
   multiple?: boolean;
@@ -172,6 +174,13 @@ const slice = createSlice({
         if (previousType !== undefined && ['date', 'datetime', 'time'].includes(previousType)) {
           // return obj.updateIn(keys, () => value).remove('default');
           delete state.modifiedData.default;
+        }
+      }
+
+      // If the user changes the content type kind (single vs. collecton), the folder selection becomes stale and should be deleted from the pending action.
+      if (keys.length === 1 && keys.includes('kind') && value !== obj.kind) {
+        if (obj.folder && 'targetGroupId' in obj.folder) {
+          delete state.modifiedData.folder;
         }
       }
 
@@ -367,9 +376,15 @@ const slice = createSlice({
       const { data } = action.payload;
       state.modifiedData = data;
       state.initialData = data;
+      state.formErrors = {};
     },
     setAttributeDataSchema: (state, action: PayloadAction<SetAttributeDataSchemaPayload>) => {
       const { isEditing } = action.payload;
+
+      // The errors describe the data being replaced below, so they no longer apply. Leaving
+      // them behind surfaces the previous attempt's errors on a freshly picked, blank type.
+      // See https://github.com/strapi/strapi/issues/20947
+      state.formErrors = {};
 
       if (isEditing === true) {
         const { modifiedDataToSetForEditing } = action.payload;
@@ -433,6 +448,8 @@ const slice = createSlice({
     setCustomFieldDataSchema: (state, action: PayloadAction<SetCustomFieldDataSchemaPayload>) => {
       const { payload } = action;
 
+      state.formErrors = {};
+
       if (payload.isEditing === true) {
         const { modifiedDataToSetForEditing } = action.payload;
         state.modifiedData = modifiedDataToSetForEditing;
@@ -462,6 +479,7 @@ const slice = createSlice({
       const { attributeToEdit } = action.payload;
       state.modifiedData = attributeToEdit;
       state.initialData = attributeToEdit;
+      state.formErrors = {};
     },
     setErrors: (state, action: PayloadAction<SetErrorsPayload>) => {
       state.formErrors = action.payload.errors;

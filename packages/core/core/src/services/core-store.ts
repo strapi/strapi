@@ -1,4 +1,4 @@
-import { toString } from 'lodash/fp';
+import { toString } from 'lodash';
 import type { Database, Model } from '@strapi/database';
 
 const coreStoreModel: Model = {
@@ -101,7 +101,7 @@ const createCoreStore = ({ db }: { db: Database }) => {
     ) {
       try {
         return JSON.parse(data.value);
-      } catch (err) {
+      } catch {
         return new Date(data.value);
       }
     } else if (data.type === 'number') {

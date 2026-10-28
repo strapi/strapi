@@ -4,7 +4,6 @@ const path = require('path');
 const _ = require('lodash');
 const dotenv = require('dotenv');
 const { createStrapi } = require('../../core/strapi');
-const { Core } = require('../../core/types');
 const { createUtils } = require('./utils');
 
 const superAdminCredentials = {

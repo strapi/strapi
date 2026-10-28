@@ -1,5 +1,4 @@
-import { castArray, maxBy } from 'lodash/fp';
-import _ from 'lodash';
+import _, { castArray, maxBy } from 'lodash';
 
 import { InvalidRelationError } from '../errors';
 import type { ID } from '../types';
@@ -163,6 +162,11 @@ const sortConnectArray = (connectArr: Link[], initialArr: Link[] = [], strictSor
  * - The final step would be to recalculate fractional order values.
  *      [ { id: 2, order: 4 }, { id: 5, order: 3.33 },  { id: 4, order: 3.66 }, { id: 3, order: 10 } ]
  *
+ * `initArr` is not the full relation list. For an ordered connect, `updateRelations` loads only
+ * the rows named as anchors by the payload plus the lowest- and highest-ordered rows, so entries
+ * that are adjacent in `computedRelations` are not adjacent in the stored list. Placement must be
+ * computed from the anchor's own order, never from its neighbours in this array.
+ *
  * @param {Array<*>} initArr - array of relations to initialize the class with
  * @param {string} idColumn - the column name of the id
  * @param {string} orderColumn - the column name of the order
@@ -185,7 +189,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     'order'
   );
 
-  const maxOrder = maxBy('order', computedRelations)?.order || 0;
+  const maxOrder = maxBy(computedRelations, 'order')?.order || 0;
 
   const findRelation = (id: ID) => {
     const idx = computedRelations.findIndex((r) => r.id === id);
@@ -205,11 +209,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     if (r.position?.before) {
       const { idx: beforeIdx, relation } = findRelation(r.position.before);
       if (relation.init) {
-        const prevRelation = beforeIdx > 0 ? computedRelations[beforeIdx - 1] : null;
-        r.order =
-          prevRelation && prevRelation.order < relation.order
-            ? (prevRelation.order + relation.order) / 2
-            : relation.order - 0.5;
+        r.order = relation.order - 0.5;
       } else {
         r.order = relation.order;
       }
@@ -217,12 +217,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     } else if (r.position?.after) {
       const { idx: afterIdx, relation } = findRelation(r.position.after);
       if (relation.init) {
-        const nextRelation =
-          afterIdx < computedRelations.length - 1 ? computedRelations[afterIdx + 1] : null;
-        r.order =
-          nextRelation && nextRelation.order > relation.order
-            ? (relation.order + nextRelation.order) / 2
-            : relation.order + 0.5;
+        r.order = relation.order + 0.5;
       } else {
         r.order = relation.order;
       }
@@ -257,7 +252,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
 
         try {
           insertRelation(relation);
-        } catch (err) {
+        } catch {
           throw new Error(
             `There was a problem connecting relation with id ${
               relation.id

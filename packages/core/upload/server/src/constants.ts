@@ -1,3 +1,9 @@
+import {
+  AI_METADATA_CHUNK_SIZE,
+  AI_METADATA_MAX_FILES,
+  AI_METADATA_SUPPORTED_IMAGE_TYPES,
+} from '../../shared/constants';
+
 const ACTIONS = {
   read: 'plugin::upload.read',
   readSettings: 'plugin::upload.settings.read',
@@ -34,4 +40,8 @@ export {
   API_UPLOAD_FOLDER_BASE_NAME,
   ALLOWED_SORT_STRINGS,
   ALLOWED_WEBHOOK_EVENTS,
+  // Re-exported from `shared/` so the admin panel can gate on the same values.
+  AI_METADATA_CHUNK_SIZE,
+  AI_METADATA_MAX_FILES,
+  AI_METADATA_SUPPORTED_IMAGE_TYPES,
 };

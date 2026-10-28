@@ -35,7 +35,7 @@ const render = (
 ): ReturnType<typeof renderAdmin> =>
   renderAdmin(ui, {
     ...options,
-    providerOptions: { storeConfig: storeConfig() },
+    providerOptions: { ...options.providerOptions, storeConfig: storeConfig() },
   });
 
 const renderHook: typeof renderHookAdmin = (hook, options) =>

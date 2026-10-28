@@ -26,7 +26,7 @@ export const useCTBTracking = () => {
   const trackUsage = useCallback(
     (event: string, properties?: Record<string, unknown>) => {
       const enhancedProperties = {
-        ...(properties ?? {}),
+        ...properties,
         ctbSessionId: sessionId,
       };
 

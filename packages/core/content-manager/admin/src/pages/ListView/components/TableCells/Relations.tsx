@@ -18,9 +18,15 @@ import type { CellContentProps } from './CellContent';
 interface RelationSingleProps extends Pick<CellContentProps, 'mainField' | 'content'> {}
 
 const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
+  const { formatMessage } = useIntl();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.empty-label',
+    defaultMessage: 'Untitled',
+  });
+
   return (
     <Typography maxWidth="50rem" textColor="neutral800" ellipsis>
-      {getRelationLabel(content, mainField)}
+      {getRelationLabel(content, mainField, emptyLabel)}
     </Typography>
   );
 };
@@ -29,12 +35,18 @@ const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
  * RelationMultiple
  * -----------------------------------------------------------------------------------------------*/
 
-interface RelationMultipleProps
-  extends Pick<CellContentProps, 'mainField' | 'content' | 'name' | 'rowId'> {}
+interface RelationMultipleProps extends Pick<
+  CellContentProps,
+  'mainField' | 'content' | 'name' | 'rowId'
+> {}
 
 const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleProps) => {
   const { model } = useDoc();
   const { formatMessage } = useIntl();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.empty-label',
+    defaultMessage: 'Untitled',
+  });
   const { notifyStatus } = useNotifyAT();
   const [isOpen, setIsOpen] = React.useState(false);
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
@@ -99,7 +111,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
             {data.results.map((entry) => (
               <Menu.Item key={entry.documentId}>
                 <Typography maxWidth="50rem" ellipsis>
-                  {getRelationLabel(entry, mainField)}
+                  {getRelationLabel(entry, mainField, emptyLabel)}
                 </Typography>
               </Menu.Item>
             ))}
