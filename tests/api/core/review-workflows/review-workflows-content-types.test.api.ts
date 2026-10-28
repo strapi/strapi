@@ -406,6 +406,18 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
       expect(res.status).toBe(200);
       expect(await getWorkflow(workflow.id)).toBeUndefined();
     });
+
+    test('It should delete a stage of a workflow with an orphaned content type', async () => {
+      const workflow = await createWorkflowWithOrphan();
+      const [firstStage] = workflow.stages;
+
+      const res = await updateWorkflow(workflow.id, {
+        stages: [{ id: firstStage.id, name: firstStage.name }],
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.stages).toMatchObject([{ id: firstStage.id }]);
+    });
   });
 
   describe('Creating entity assigned to a workflow', () => {
