@@ -64,6 +64,21 @@ declare global {
       interface PackagePolicies {
         'plugin::content-manager.hasPermissions': HasPermissionsConfig | undefined;
       }
+
+      /**
+       * Registered at bootstrap (`services/permission.ts`). The `explorer.*` actions apply to the
+       * content types, read at bootstrap.
+       */
+      interface PermissionActions {
+        'plugin::content-manager.explorer.create': true;
+        'plugin::content-manager.explorer.read': true;
+        'plugin::content-manager.explorer.update': true;
+        'plugin::content-manager.explorer.delete': true;
+        'plugin::content-manager.explorer.publish': true;
+        'plugin::content-manager.single-types.configure-view': true;
+        'plugin::content-manager.collection-types.configure-view': true;
+        'plugin::content-manager.components.configure-layout': true;
+      }
     }
   }
 }
