@@ -6,6 +6,7 @@ import {
   ENCRYPTION_HEADER_MAGIC,
   hasStrapiExMagic,
   LEGACY_KDF_SALT,
+  parseStrapiExEncryptionHeader,
   readStrapiExHeaderLength,
   EncryptionHeaderParseError,
 } from '../format';
@@ -36,8 +37,37 @@ const roundTrip = async (
 describe('encryption streams', () => {
   test('round-trips STRAPIEX exports with a per-file salt header', async () => {
     const plaintext = 'sensitive-export-data';
-    const decrypted = await roundTrip(plaintext, 'export-password', 'strapiex');
+    const key = 'export-password';
+    const encrypted = await collectStream(
+      Readable.from([plaintext]).pipe(createEncryptionStream({ key, format: 'strapiex' }))
+    );
+    const headerLength = readStrapiExHeaderLength(encrypted);
+    const header = parseStrapiExEncryptionHeader(encrypted.subarray(0, headerLength!));
+    const decrypted = await collectStream(
+      Readable.from(encrypted).pipe(createDecryptionStream({ key }))
+    );
 
+    expect(decrypted.toString()).toBe(plaintext);
+    expect(header.cipherId).toBe(1);
+    expect(header.nonce).toHaveLength(12);
+    expect(header.authTag).toHaveLength(16);
+  });
+
+  test('round-trips legacy STRAPIEX AES-128-ECB exports', async () => {
+    const plaintext = 'legacy-strapiex-ecb-export';
+    const key = 'export-password';
+    const encrypted = await collectStream(
+      Readable.from([plaintext]).pipe(
+        createEncryptionStream({ key, format: 'strapiex', algorithm: 'aes-128-ecb' })
+      )
+    );
+    const headerLength = readStrapiExHeaderLength(encrypted);
+    const header = parseStrapiExEncryptionHeader(encrypted.subarray(0, headerLength!));
+    const decrypted = await collectStream(
+      Readable.from(encrypted).pipe(createDecryptionStream({ key }))
+    );
+
+    expect(header.cipherId).toBe(0);
     expect(decrypted.toString()).toBe(plaintext);
   });
 
@@ -151,6 +181,50 @@ describe('encryption streams', () => {
     await expect(
       collectStream(Readable.from(truncated).pipe(createDecryptionStream({ key })))
     ).rejects.toThrow(EncryptionHeaderParseError);
+  });
+
+  test('rejects tampered authenticated ciphertext', async () => {
+    const key = 'export-password';
+    const encrypted = await collectStream(
+      Readable.from(['plaintext']).pipe(createEncryptionStream({ key, format: 'strapiex' }))
+    );
+    const headerLength = readStrapiExHeaderLength(encrypted)!;
+    const tampered = Buffer.from(encrypted);
+
+    tampered[headerLength] = (tampered[headerLength] + 1) % 256;
+
+    await expect(
+      collectStream(Readable.from(tampered).pipe(createDecryptionStream({ key })))
+    ).rejects.toThrow();
+  });
+
+  test('rejects an incorrect password for authenticated ciphertext', async () => {
+    const encrypted = await collectStream(
+      Readable.from(['plaintext']).pipe(
+        createEncryptionStream({ key: 'export-password', format: 'strapiex' })
+      )
+    );
+
+    await expect(
+      collectStream(
+        Readable.from(encrypted).pipe(createDecryptionStream({ key: 'wrong-password' }))
+      )
+    ).rejects.toThrow();
+  });
+
+  test('rejects truncated authenticated ciphertext', async () => {
+    const key = 'export-password';
+    const encrypted = await collectStream(
+      Readable.from(['plaintext']).pipe(createEncryptionStream({ key, format: 'strapiex' }))
+    );
+
+    await expect(
+      collectStream(
+        Readable.from(encrypted.subarray(0, encrypted.length - 1)).pipe(
+          createDecryptionStream({ key })
+        )
+      )
+    ).rejects.toThrow();
   });
 
   test('supports piping through pipeline', async () => {

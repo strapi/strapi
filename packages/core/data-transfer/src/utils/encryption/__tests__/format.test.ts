@@ -7,6 +7,8 @@ import {
   ENCRYPTION_HEADER_PREFIX_LENGTH,
   ENCRYPTION_HEADER_SALT_LENGTH,
   ENCRYPTION_HEADER_VERSION,
+  ENCRYPTION_GCM_NONCE_LENGTH,
+  ENCRYPTION_GCM_TAG_LENGTH,
   ENCRYPTION_TLV_CIPHER,
   ENCRYPTION_TLV_KDF,
   EncryptionHeaderParseError,
@@ -47,6 +49,22 @@ describe('STRAPIEX encryption header', () => {
     const parsed = parseStrapiExEncryptionHeader(extended);
 
     expect(parsed.salt).toEqual(salt);
+  });
+
+  test('builds and parses authenticated AES-256-GCM header metadata', () => {
+    const salt = randomBytes(ENCRYPTION_HEADER_SALT_LENGTH);
+    const nonce = randomBytes(ENCRYPTION_GCM_NONCE_LENGTH);
+    const authTag = randomBytes(ENCRYPTION_GCM_TAG_LENGTH);
+    const header = buildStrapiExEncryptionHeader(salt, { cipherId: 1, nonce, authTag });
+
+    expect(parseStrapiExEncryptionHeader(header)).toEqual({
+      headerVersion: ENCRYPTION_HEADER_VERSION,
+      salt,
+      kdfId: 0,
+      cipherId: 1,
+      nonce,
+      authTag,
+    });
   });
 
   test('uses header_length as the ciphertext offset for variable-size headers', () => {

@@ -8,13 +8,22 @@ type Cipheriv = ReturnType<typeof createCipheriv>;
 // different key values depending on algorithm chosen
 const getEncryptionStrategy = (
   algorithm: Algorithm,
-  kdfSalt: string | Buffer = LEGACY_KDF_SALT
+  kdfSalt: string | Buffer = LEGACY_KDF_SALT,
+  initVector?: BinaryLike
 ): EncryptionStrategy => {
   const strategies: Strategies = {
     'aes-128-ecb'(key: string): Cipheriv {
       const hashedKey = scryptSync(key, kdfSalt, 16);
       const initVector: BinaryLike | null = null;
       const securityKey: CipherKey = hashedKey;
+      return createCipheriv(algorithm, securityKey, initVector);
+    },
+    'aes-256-gcm'(key: string): Cipheriv {
+      if (!initVector) {
+        throw new Error('AES-256-GCM requires a nonce');
+      }
+
+      const securityKey: CipherKey = scryptSync(key, kdfSalt, 32);
       return createCipheriv(algorithm, securityKey, initVector);
     },
     aes128(key: string): Cipheriv {
@@ -51,7 +60,8 @@ const getEncryptionStrategy = (
 export const createEncryptionCipher = (
   key: string,
   algorithm: Algorithm = 'aes-128-ecb',
-  kdfSalt: string | Buffer = LEGACY_KDF_SALT
+  kdfSalt: string | Buffer = LEGACY_KDF_SALT,
+  initVector?: BinaryLike
 ): Cipheriv => {
-  return getEncryptionStrategy(algorithm, kdfSalt)(key);
+  return getEncryptionStrategy(algorithm, kdfSalt, initVector)(key);
 };
