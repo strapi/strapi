@@ -7,6 +7,7 @@ import {
   deleteContentTypes,
   editContentType,
 } from '../content-types';
+import { collectUnhandledRejections } from './unhandled-rejections';
 
 const files = {
   schemas: new Set<string>(),
@@ -335,6 +336,27 @@ describe('content type mutation compensation', () => {
     expect(apiHandler.rollback).toHaveBeenCalledWith(contentType.uid);
     expect(apiHandler.rollback).not.toHaveBeenCalledWith(secondContentType.uid);
     expect(files.groups).toBe('before');
+  });
+
+  it('logs a failing event listener instead of leaving an unhandled rejection', async () => {
+    // A user listener that throws makes the event hub emit reject
+    jest.mocked(strapi.eventHub.emit).mockRejectedValue(new Error('listener failed'));
+
+    const rejections = await collectUnhandledRejections(async () => {
+      await editContentType(contentType.uid, {
+        contentType: { ...contentType, attributes: {} },
+      });
+      await deleteContentType(contentType.uid);
+    });
+
+    expect(rejections).toEqual([]);
+    expect(strapi.eventHub.emit).toHaveBeenCalledTimes(2);
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'A content-type.update listener failed: listener failed'
+    );
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'A content-type.delete listener failed: listener failed'
+    );
   });
 
   it('reports a committed deletion and emits its event when backup cleanup alone fails', async () => {

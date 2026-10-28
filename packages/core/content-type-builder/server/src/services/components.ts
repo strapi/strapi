@@ -2,6 +2,7 @@ import type { Internal, Struct } from '@strapi/types';
 import { get, has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
+import { emitSchemaEvent } from '../utils/events';
 import createBuilder from './schema-builder';
 import type { SchemaHandler } from './schema-builder/schema-handler';
 
@@ -51,7 +52,7 @@ export const createComponent = async ({
 
   await builder.writeFiles();
 
-  strapi.eventHub.emit('component.create', { component: newComponent });
+  await emitSchemaEvent('component.create', { component: newComponent });
 
   return newComponent;
 };
@@ -85,7 +86,7 @@ export const editComponent = async (
 
   await builder.writeFiles();
 
-  strapi.eventHub.emit('component.update', { component: updatedComponent });
+  await emitSchemaEvent('component.update', { component: updatedComponent });
 
   return updatedComponent;
 };
@@ -97,7 +98,7 @@ export const deleteComponent = async (uid: Internal.UID.Component) => {
 
   await builder.writeFiles();
 
-  strapi.eventHub.emit('component.delete', { component: deletedComponent });
+  await emitSchemaEvent('component.delete', { component: deletedComponent });
 
   return deletedComponent;
 };

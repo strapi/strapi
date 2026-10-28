@@ -3,6 +3,7 @@ import _, { get } from 'lodash';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
+import { emitSchemaEvent } from '../utils/events';
 import { getService } from '../utils';
 import createBuilder from './schema-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
@@ -107,7 +108,7 @@ export const createContentTypes = async (contentTypes: any[]) => {
   }
 
   for (const contentType of createdContentTypes) {
-    strapi.eventHub.emit('content-type.create', { contentType });
+    await emitSchemaEvent('content-type.create', { contentType });
   }
 
   return createdContentTypes;
@@ -195,7 +196,7 @@ export const createContentType = async (
   }
 
   if (!options.deferEvent) {
-    strapi.eventHub.emit('content-type.create', { contentType: newContentType });
+    await emitSchemaEvent('content-type.create', { contentType: newContentType });
   }
 
   return newContentType;
@@ -348,7 +349,7 @@ export const editContentType = async (
 
   await builder.writeFiles();
 
-  strapi.eventHub.emit('content-type.update', { contentType: updatedContentType });
+  await emitSchemaEvent('content-type.update', { contentType: updatedContentType });
 
   return updatedContentType;
 };
@@ -399,7 +400,7 @@ export const deleteContentTypes = async (uids: UID.ContentType[]) => {
   }
 
   for (const contentType of deletedContentTypes) {
-    strapi.eventHub.emit('content-type.delete', { contentType });
+    await emitSchemaEvent('content-type.delete', { contentType });
   }
 };
 
@@ -448,7 +449,7 @@ export const deleteContentType = async (uid: UID.ContentType, defaultBuilder: an
   }
 
   if (!defaultBuilder) {
-    strapi.eventHub.emit('content-type.delete', { contentType });
+    await emitSchemaEvent('content-type.delete', { contentType });
   }
 
   return contentType;
