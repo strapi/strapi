@@ -198,10 +198,13 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const tokenService = getService('token');
 
   await roleService.createRolesIfNoneExist();
-  await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();
 
-  await permissionService.cleanPermissionsInDatabase();
+  // Actions can still be registered in the app bootstrap, which runs after the admin one
+  strapi.hook('strapi::app.afterBootstrap').register(async () => {
+    await roleService.resetSuperAdminPermissions();
+    await permissionService.cleanPermissionsInDatabase();
+  });
 
   await userService.displayWarningIfUsersDontHaveRole();
 
