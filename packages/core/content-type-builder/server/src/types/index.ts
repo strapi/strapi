@@ -72,6 +72,11 @@ declare global {
       interface PackageMiddlewares {
         'plugin::content-type-builder.isDevelopmentMode': undefined;
       }
+
+      /** Registered at bootstrap (`bootstrap.ts`). */
+      interface PermissionActions {
+        'plugin::content-type-builder.read': true;
+      }
     }
   }
 }
