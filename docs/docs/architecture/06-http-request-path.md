@@ -131,7 +131,7 @@ The `auth` container service ([`services/auth/index.ts`](https://github.com/stra
 `authenticate` does this:
 
 - If `config.auth` is `false`, it calls the next middleware and sets nothing.
-- Otherwise it tries the strategies registered for `route.info.type`, in registration order. `config.auth.strategies` can restrict them by name.
+- Otherwise it tries the strategies registered for `route.info.type`, in registration order. `config.auth.strategies` replaces that list. Each entry is a strategy name, resolved among the strategies of the route type (an unknown name is skipped), or a strategy object, used as is. Admin's transfer routes pass the data-transfer strategy object. Typed route configs (`Core.RouteConfigFor`) accept both forms; `Core.RouteConfig` keeps names only.
 - If a strategy returns `authenticated: true`, it sets `ctx.state.isAuthenticated` and `ctx.state.auth = { strategy, credentials, ability }` and stops.
 - If a strategy returns an `error`, it responds 401 with that error at once.
 - If no strategy authenticates, it responds 401 `Missing or invalid credentials`.

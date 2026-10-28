@@ -171,6 +171,16 @@ packages/core/content-releases/server/src/controllers/release.ts
 
 Handles requests to interact with the Release Action content type
 
+### Contracts
+
+The controller contracts are in `server/src/types/controllers.ts`. The plugin returns its controllers, services and routes only when the `cms-content-releases` EE feature is enabled, so each one is registered as `Contract | undefined`. The routes are checked against the `Controllers` map of that file. See [Controller contracts and typed routes](../../../contributing/05-typescript.md#controller-contracts-and-typed-routes).
+
+## Permissions
+
+With the `cms-content-releases` feature, `register` registers 9 admin permission actions (`ACTIONS` in `server/src/constants.ts`): `plugin::content-releases.read`, `create`, `update`, `delete`, `publish`, `delete-action`, `create-action`, `settings.read` and `settings.update`. The release, release action and settings routes check them with the `admin::hasPermissions` policy. Without the feature, these actions are not registered.
+
+The same IDs are declared in `Strapi.Registries.PermissionActions` (`server/src/types/index.ts`), and `constants.ts` checks that both lists match. See [Permission action contracts](../../../contributing/05-typescript.md#permission-action-contracts).
+
 ## Services
 
 ### Release

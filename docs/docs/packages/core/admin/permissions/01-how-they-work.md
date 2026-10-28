@@ -56,12 +56,14 @@ Examples: `admin::audit-logs.read`, `plugin::content-manager.explorer.create`
 
 ### Register an action
 
-An action can be registered in the backend during the `bootstrap` phase of the app.
+Register an action in a plugin's `register` or `bootstrap`, or in the application's `register`. The admin bootstrap runs after the plugins' `bootstrap` and before the application's. It deletes the stored permissions of every action that is not registered yet (`cleanPermissionsInDatabase`). An action registered in the application's `bootstrap` therefore loses its role permissions at each start. Registering an ID twice throws at boot, and `register` throws once Strapi is loaded.
+
+With strict types, a package or application also declares the IDs it registers in `Strapi.Registries.PermissionActions`, so that typed `hasPermissions` configs and action provider calls accept them. See [Permission action contracts](../../../../contributing/05-typescript.md#permission-action-contracts).
 
 Example:
 
 ```ts
-// bootstrap.ts
+// a plugin's bootstrap.ts
 module.exports = async () => {
   const actions = [
     {
