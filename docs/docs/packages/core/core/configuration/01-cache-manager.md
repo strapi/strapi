@@ -151,6 +151,6 @@ Jest’s `modulePathIgnorePatterns` includes `.cache`, which matches path segmen
 
 ## Related documentation
 
-- [Configuration introduction](./00-intro) — how config files are loaded.
+- [Configuration introduction](./00-intro.md) — how config files are loaded.
 - [Sessions and JWT](../../../../architecture/08-authentication.md) — authentication tokens and `SessionManager` (separate from cache providers).
 - [Event Hub](../event-hub.md) — another core service registered during bootstrap.

@@ -44,7 +44,7 @@ Defines settings related to the Strapi admin panel, such as the 'autoopen' optio
 
 Defines settings related to the Strapi backend server, such as 'host' and 'port'.
 
-Optional nested key **`cache`** configures the pluggable cache manager (`server.cache`: default provider name and per-provider options). See [Cache manager](./01-cache-manager).
+Optional nested key **`cache`** configures the pluggable cache manager (`server.cache`: default provider name and per-provider options). See [Cache manager](./01-cache-manager.md).
 
 #### database
 
