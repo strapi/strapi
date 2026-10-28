@@ -1,15 +1,30 @@
-import _ from 'lodash';
-import { getOr } from 'lodash/fp';
+import _, { get } from 'lodash';
+
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
+import { getService } from '../utils';
 import createBuilder from './schema-builder';
+import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { coreUids, pluginsUids } from './constants';
 
 const { ApplicationError } = errors;
 
+export const isCTBOwnedApplicationContentType = (uid: UID.ContentType): boolean =>
+  uid.startsWith('api::');
+
+export const assertCTBOwnedApplicationContentType = (uid: UID.ContentType): void => {
+  if (!isCTBOwnedApplicationContentType(uid)) {
+    throw new ApplicationError(`Content type "${uid}" is not managed by CTB and cannot be deleted`);
+  }
+};
+
+const pruneFolderReferences = (uids: UID.ContentType[]) => {
+  return getService('content-structure').commitFromUpdate({ deletedUids: new Set(uids) });
+};
+
 export const isContentTypeVisible = (model: Struct.ContentTypeSchema) =>
-  getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
+  get(model, 'pluginOptions.content-type-builder.visible', true) === true;
 
 /**
  * Programmatic content types (defined in code via `defineApp`) are tagged with
@@ -73,18 +88,50 @@ export const formatContentType = (contentType: any) => {
 export const createContentTypes = async (contentTypes: any[]) => {
   const builder = createBuilder();
   const createdContentTypes: any[] = [];
+  const generatedApiNames: string[] = [];
+  let schemaAlreadyRolledBack = false;
 
-  for (const contentType of contentTypes) {
-    createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));
+  try {
+    for (const contentType of contentTypes) {
+      createdContentTypes.push(
+        await createContentType(contentType, {
+          defaultBuilder: builder,
+          generatedApiNames,
+          deferEvent: true,
+        })
+      );
+    }
+
+    const schemaFilesWritten = await builder.writeFiles();
+    if (!schemaFilesWritten) {
+      schemaAlreadyRolledBack = true;
+      throw new ApplicationError('Invalid schema edition');
+    }
+  } catch (error) {
+    const apiHandler = strapi
+      .plugin('content-type-builder')
+      .service('api-handler') as typeof import('./api-handler');
+    await rollbackSchemaMutation({
+      builder,
+      apiHandler,
+      generatedApiNames,
+      schemaAlreadyRolledBack,
+    });
+
+    throw error;
   }
 
-  await builder.writeFiles();
+  for (const contentType of createdContentTypes) {
+    strapi.eventHub.emit('content-type.create', { contentType });
+  }
 
   return createdContentTypes;
 };
 
 type CreateContentTypeOptions = {
   defaultBuilder?: any; // TODO
+  generatedApiNames?: string[];
+  deferEvent?: boolean;
 };
 
 /**
@@ -123,19 +170,48 @@ export const createContentType = async (
     return builder.editComponent(options);
   });
 
-  // generate api skeleton
-  await generateAPI({
-    displayName: contentType!.displayName || contentType!.info.displayName,
-    singularName: contentType!.singularName,
-    pluralName: contentType!.pluralName,
-    kind: contentType!.kind,
-  });
+  const generatedApiNames = options.generatedApiNames ?? [];
+  let schemaAlreadyRolledBack = false;
 
-  if (!options.defaultBuilder) {
-    await builder.writeFiles();
+  try {
+    // Generate before writing the schema so a successful mutation retains the existing layout.
+    if (!contentType.plugin) {
+      generatedApiNames.push(contentType.singularName);
+
+      await generateAPI({
+        displayName: contentType!.displayName || contentType!.info.displayName,
+        singularName: contentType!.singularName,
+        pluralName: contentType!.pluralName,
+        kind: contentType!.kind,
+      });
+    }
+
+    if (!options.defaultBuilder) {
+      const schemaFilesWritten = await builder.writeFiles();
+      if (!schemaFilesWritten) {
+        schemaAlreadyRolledBack = true;
+        throw new ApplicationError('Invalid schema edition');
+      }
+    }
+  } catch (error) {
+    if (!options.defaultBuilder) {
+      const apiHandler = strapi
+        .plugin('content-type-builder')
+        .service('api-handler') as typeof import('./api-handler');
+      await rollbackSchemaMutation({
+        builder,
+        apiHandler,
+        generatedApiNames,
+        schemaAlreadyRolledBack,
+      });
+    }
+
+    throw error;
   }
 
-  strapi.eventHub.emit('content-type.create', { contentType: newContentType });
+  if (!options.deferEvent) {
+    strapi.eventHub.emit('content-type.create', { contentType: newContentType });
+  }
 
   return newContentType;
 };
@@ -168,6 +244,23 @@ export const generateAPI = ({
 };
 
 /**
+ * A document can span several rows (draft and published versions, one per locale),
+ * so compare documentIds instead of counting rows.
+ */
+const hasMultipleDocuments = async (uid: UID.ContentType) => {
+  const firstEntry = await strapi.db.query(uid).findOne({ select: ['documentId'] });
+  if (firstEntry === null) {
+    return false;
+  }
+
+  const otherDocumentsCount = await strapi.db.query(uid).count({
+    where: { documentId: { $ne: firstEntry.documentId } },
+  });
+
+  return otherDocumentsCount > 0;
+};
+
+/**
  * Edits a contentType and handle the nested contentTypes sent with it
  */
 export const editContentType = async (
@@ -176,7 +269,12 @@ export const editContentType = async (
 ) => {
   const builder = createBuilder();
 
+  if (builder.contentTypes.has(uid) === false) {
+    throw new ApplicationError('contentType.notFound');
+  }
+
   const previousSchema = builder.contentTypes.get(uid).schema;
+  const isPluginContentType = Boolean(builder.contentTypes.get(uid).plugin);
   const previousKind = previousSchema.kind;
   const newKind = contentType.kind || previousKind;
 
@@ -194,8 +292,7 @@ export const editContentType = async (
   contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
 
   if (newKind !== previousKind && newKind === 'singleType') {
-    const entryCount = await strapi.db.query(uid).count();
-    if (entryCount > 1) {
+    if ((await hasMultipleDocuments(uid)) === true) {
       throw new ApplicationError(
         'You cannot convert a collectionType to a singleType when having multiple entries in DB'
       );
@@ -219,24 +316,44 @@ export const editContentType = async (
   });
 
   if (newKind !== previousKind) {
-    const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
+    let schemaAlreadyRolledBack = false;
+    const apiHandler = strapi
+      .plugin('content-type-builder')
+      .service('api-handler') as typeof import('./api-handler');
     await apiHandler.backup(uid);
 
     try {
-      await apiHandler.clear(uid);
+      await apiHandler.clear(uid, { preserveBackup: true });
 
-      // generate new api skeleton
-      await generateAPI({
-        displayName: updatedContentType.schema.info.displayName,
-        singularName: updatedContentType.schema.info.singularName,
-        pluralName: updatedContentType.schema.info.pluralName,
-        kind: updatedContentType.schema.kind,
+      if (!isPluginContentType) {
+        // generate new api skeleton
+        await generateAPI({
+          displayName: updatedContentType.schema.info.displayName,
+          singularName: updatedContentType.schema.info.singularName,
+          pluralName: updatedContentType.schema.info.pluralName,
+          kind: updatedContentType.schema.kind,
+        });
+      }
+
+      const schemaFilesWritten = await builder.writeFiles();
+      if (!schemaFilesWritten) {
+        schemaAlreadyRolledBack = true;
+        throw new ApplicationError('Invalid schema edition');
+      }
+      await pruneFolderReferences([uid]);
+    } catch (error) {
+      await rollbackSchemaMutation({
+        builder,
+        apiHandler,
+        backedUpApiUids: [uid],
+        schemaAlreadyRolledBack,
       });
 
-      await builder.writeFiles();
-    } catch (error) {
+      throw error;
+    }
+
+    for (const error of await finalizeSchemaMutation({ apiHandler, backedUpApiUids: [uid] })) {
       strapi.log.error(error);
-      await apiHandler.rollback(uid);
     }
 
     return updatedContentType;
@@ -250,21 +367,52 @@ export const editContentType = async (
 };
 
 export const deleteContentTypes = async (uids: UID.ContentType[]) => {
-  const builder = createBuilder();
-  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
+  uids.forEach(assertCTBOwnedApplicationContentType);
 
-  for (const uid of uids) {
-    await deleteContentType(uid, builder);
+  const builder = createBuilder();
+  const apiHandler = strapi
+    .plugin('content-type-builder')
+    .service('api-handler') as typeof import('./api-handler');
+
+  const deletedContentTypes: any[] = [];
+  const backedUpApiUids: UID.ContentType[] = [];
+  let schemaAlreadyRolledBack = false;
+
+  try {
+    for (const uid of uids) {
+      await apiHandler.backup(uid);
+      backedUpApiUids.push(uid);
+      deletedContentTypes.push(builder.deleteContentType(uid));
+    }
+
+    const schemaFilesWritten = await builder.writeFiles();
+    if (!schemaFilesWritten) {
+      schemaAlreadyRolledBack = true;
+      throw new ApplicationError('Invalid schema edition');
+    }
+
+    for (const uid of uids) {
+      await apiHandler.clear(uid, { preserveBackup: true });
+    }
+
+    await pruneFolderReferences(uids);
+  } catch (error) {
+    await rollbackSchemaMutation({
+      builder,
+      apiHandler,
+      backedUpApiUids,
+      schemaAlreadyRolledBack,
+    });
+
+    throw error;
   }
 
-  await builder.writeFiles();
-  for (const uid of uids) {
-    try {
-      await apiHandler.clear(uid);
-    } catch (error) {
-      strapi.log.error(error);
-      await apiHandler.rollback(uid);
-    }
+  for (const error of await finalizeSchemaMutation({ apiHandler, backedUpApiUids })) {
+    strapi.log.error(error);
+  }
+
+  for (const contentType of deletedContentTypes) {
+    strapi.eventHub.emit('content-type.delete', { contentType });
   }
 };
 
@@ -272,23 +420,49 @@ export const deleteContentTypes = async (uids: UID.ContentType[]) => {
  * Deletes a content type and the api files related to it
  */
 export const deleteContentType = async (uid: UID.ContentType, defaultBuilder: any = undefined) => {
+  assertCTBOwnedApplicationContentType(uid);
+
   const builder = defaultBuilder || createBuilder();
   // make a backup
-  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
+  const apiHandler = strapi
+    .plugin('content-type-builder')
+    .service('api-handler') as typeof import('./api-handler');
   await apiHandler.backup(uid);
 
-  const contentType = builder.deleteContentType(uid);
+  let contentType;
+  let schemaAlreadyRolledBack = false;
 
   if (!defaultBuilder) {
     try {
-      await builder.writeFiles();
-      await apiHandler.clear(uid);
-    } catch {
-      await apiHandler.rollback(uid);
+      contentType = builder.deleteContentType(uid);
+      const schemaFilesWritten = await builder.writeFiles();
+      if (!schemaFilesWritten) {
+        schemaAlreadyRolledBack = true;
+        throw new ApplicationError('Invalid schema edition');
+      }
+      await apiHandler.clear(uid, { preserveBackup: true });
+      await pruneFolderReferences([uid]);
+    } catch (error) {
+      await rollbackSchemaMutation({
+        builder,
+        apiHandler,
+        backedUpApiUids: [uid],
+        schemaAlreadyRolledBack,
+      });
+
+      throw error;
     }
+
+    for (const error of await finalizeSchemaMutation({ apiHandler, backedUpApiUids: [uid] })) {
+      strapi.log.error(error);
+    }
+  } else {
+    contentType = builder.deleteContentType(uid);
   }
 
-  strapi.eventHub.emit('content-type.delete', { contentType });
+  if (!defaultBuilder) {
+    strapi.eventHub.emit('content-type.delete', { contentType });
+  }
 
   return contentType;
 };

@@ -1,0 +1,162 @@
+/**
+ * Site-wide theme overrides.
+ *
+ * `future.v4` puts Infima and the theme CSS in cascade layers. This file is unlayered, so it wins
+ * over them regardless of specificity. Caveat: a variable set on `:root` here also beats Infima's
+ * `html[data-theme='dark']` value, so every variable Infima redefines for dark mode must be set
+ * again in the dark block below.
+ */
+
+:root {
+  /* Strapi brand primary (#4945ff) and its Infima scale. */
+  --ifm-color-primary: #4945ff;
+  --ifm-color-primary-dark: #2925ff;
+  --ifm-color-primary-darker: #1914ff;
+  --ifm-color-primary-darkest: #0500e3;
+  --ifm-color-primary-light: #6965ff;
+  --ifm-color-primary-lighter: #7976ff;
+  --ifm-color-primary-lightest: #a8a6ff;
+  --ifm-color-primary-contrast-background: #f0f0ff;
+  --ifm-color-primary-contrast-foreground: #271fe0;
+
+  --ifm-font-family-base:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+  --ifm-font-family-monospace:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --ifm-line-height-base: 1.65;
+  --ifm-heading-font-weight: 700;
+  --ifm-container-width-xl: 1440px;
+
+  --ifm-navbar-shadow: 0 1px 0 var(--ifm-color-emphasis-200);
+
+  --ifm-code-font-size: 88%;
+  --ifm-code-border-radius: 5px;
+  --ifm-code-padding-vertical: 0.1rem;
+  --ifm-code-padding-horizontal: 0.3rem;
+  --ifm-pre-border-radius: 10px;
+  --ifm-pre-padding: 1.1rem;
+  --docusaurus-highlighted-code-line-bg: rgb(73 69 255 / 10%);
+
+  --ifm-table-cell-padding: 0.6rem 0.85rem;
+  --ifm-table-head-background: var(--ifm-color-emphasis-100);
+  --ifm-table-border-color: var(--ifm-color-emphasis-200);
+  --ifm-table-stripe-background: transparent;
+
+  /* Package group colors (validated categorical palette, light surface). */
+  --pkg-group-core: #2a78d6;
+  --pkg-group-plugins: #eb6834;
+  --pkg-group-providers: #1baf7a;
+  --pkg-group-utils: #eda100;
+  --pkg-group-cli: #e87ba4;
+  --pkg-group-generators: #008300;
+  --pkg-group-other: #8a8983;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #7b79ff;
+  --ifm-color-primary-dark: #5653ff;
+  --ifm-color-primary-darker: #4341ff;
+  --ifm-color-primary-darkest: #0c08ff;
+  --ifm-color-primary-light: #a09fff;
+  --ifm-color-primary-lighter: #b3b1ff;
+  --ifm-color-primary-lightest: #eaeaff;
+  --ifm-color-primary-contrast-background: #25244d;
+  --ifm-color-primary-contrast-foreground: #d9d8ff;
+
+  --docusaurus-highlighted-code-line-bg: rgb(123 121 255 / 18%);
+  --ifm-table-stripe-background: transparent;
+
+  --pkg-group-core: #3987e5;
+  --pkg-group-plugins: #d95926;
+  --pkg-group-providers: #199e70;
+  --pkg-group-utils: #c98500;
+  --pkg-group-cli: #d55181;
+  --pkg-group-generators: #008300;
+  --pkg-group-other: #85847e;
+}
+
+/* `data-pkg-group` exposes the group color as `--pkg-color` to any component. */
+[data-pkg-group='core'] {
+  --pkg-color: var(--pkg-group-core);
+}
+[data-pkg-group='plugins'] {
+  --pkg-color: var(--pkg-group-plugins);
+}
+[data-pkg-group='providers'] {
+  --pkg-color: var(--pkg-group-providers);
+}
+[data-pkg-group='utils'] {
+  --pkg-color: var(--pkg-group-utils);
+}
+[data-pkg-group='cli'] {
+  --pkg-color: var(--pkg-group-cli);
+}
+[data-pkg-group='generators'] {
+  --pkg-color: var(--pkg-group-generators);
+}
+[data-pkg-group='other'] {
+  --pkg-color: var(--pkg-group-other);
+}
+
+/* Navbar: keep items on one line; tighter spacing while the temporary sections are listed. */
+
+.navbar__item {
+  white-space: nowrap;
+}
+
+@media (max-width: 1440px) {
+  .navbar {
+    --ifm-navbar-item-padding-horizontal: 0.55rem;
+  }
+}
+
+/* Readability */
+
+.markdown {
+  --ifm-h1-font-size: 2.25rem;
+}
+
+.markdown > h2 {
+  margin-top: 2.5rem;
+}
+
+/* Code */
+
+.theme-code-block {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  box-shadow: none;
+}
+
+.markdown :not(pre) > code {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  vertical-align: baseline;
+}
+
+/* Tables */
+
+.markdown table {
+  font-size: 0.925rem;
+}
+
+.markdown table th {
+  text-align: left;
+  font-weight: 600;
+}
+
+/* Navbar GitHub icon (item with `className: 'header-github-link'`). */
+
+.header-github-link::before {
+  content: '';
+  display: flex;
+  width: 22px;
+  height: 22px;
+  background-color: var(--ifm-navbar-link-color);
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+  transition: background-color var(--ifm-transition-fast);
+}
+
+.header-github-link:hover::before {
+  background-color: var(--ifm-navbar-link-hover-color);
+}

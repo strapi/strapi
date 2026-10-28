@@ -1,4 +1,4 @@
-import { isNil, omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import {
   setCreatorFields,
@@ -17,6 +17,7 @@ import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
 import { getPopulateForLocalizations, buildDeepPopulate } from '../services/utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from '../services/utils/draft-relations';
 
 /**
  * Returns documentIds for (documentId, locale) that have both draft and published,
@@ -75,7 +76,7 @@ const getDocumentIdsByDraftPublishRelation = async (
 
 /** Map from __status filter value to top-level query fields (mirrors client STATUS_PARAMS). */
 const STATUS_QUERY_FROM_FILTER: Record<string, Record<string, string>> = {
-  draft: { status: 'draft', publicationFilter: 'never-published-document' },
+  draft: { status: 'draft', publicationFilter: 'never-published' },
   published: { status: 'published' },
   'published-modified': { publicationStatusFilter: 'published-modified' },
   'published-unmodified': { publicationStatusFilter: 'published-unmodified' },
@@ -358,7 +359,7 @@ export default {
 
     const { locale, status } = await getDocumentLocaleAndStatus(queryForValidation, model);
 
-    const paramsForDocumentService = omit(['publicationStatusFilter'], permissionQuery) as Record<
+    const paramsForDocumentService = omit(permissionQuery, ['publicationStatusFilter']) as Record<
       string,
       unknown
     >;
@@ -532,6 +533,11 @@ export default {
 
     const updatedVersion = await updateDocument(ctx);
 
+    // The document can be deleted between the existence check and the update
+    if (updatedVersion === null) {
+      return ctx.notFound();
+    }
+
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
   },
@@ -571,6 +577,11 @@ export default {
     const sanitizedBody = await sanitizeFn(body);
 
     const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
+
+    // The source document can be deleted between the existence check and the clone
+    if (clonedDocument === undefined) {
+      return ctx.notFound();
+    }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
@@ -678,7 +689,7 @@ export default {
        * 2. User can update and publish a document
        *    Action will be allowed, but document will not be updated, only published with the latest draft
        */
-      const isCreate = isNil(id);
+      const isCreate = id == null;
       if (isCreate) {
         if (permissionChecker.cannot.create()) {
           throw new errors.ForbiddenError();
@@ -1022,7 +1033,23 @@ export default {
       });
 
       if (!entity) {
-        return ctx.notFound();
+        // The document may simply not have a version in the requested locale yet.
+        // Check every existing locale/status version before deciding it truly doesn't exist —
+        // findLocales returns one row per locale AND per publication state.
+        const versions = await documentManager.findLocales(id, model, { populate });
+
+        if (versions.length === 0) {
+          return ctx.notFound();
+        }
+
+        if (
+          permissionChecker.requiresEntity.read() &&
+          versions.every((version) => permissionChecker.cannot.read(version))
+        ) {
+          return ctx.forbidden();
+        }
+
+        return { data: EMPTY_DRAFT_RELATION_COUNTS };
       }
 
       if (permissionChecker.cannot.read(entity)) {

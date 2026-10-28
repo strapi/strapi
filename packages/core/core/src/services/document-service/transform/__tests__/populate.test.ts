@@ -1,3 +1,5 @@
+import { traverse } from '@strapi/utils';
+
 import { PRODUCT_UID, CATEGORY_UID, models } from './utils';
 
 import { transformPopulate } from '../populate';
@@ -57,5 +59,48 @@ describe('transformPopulate', () => {
     const expected = { categories: { fields: ['this', 'that', 'documentId'] } };
 
     expect(await transformPopulate(input, { uid: PRODUCT_UID })).toEqual(expected);
+  });
+
+  it('should not mutate the given populate', async () => {
+    const input = {
+      categories: {
+        fields: ['name'],
+        populate: { relatedCategories: { fields: ['name'] } },
+      },
+    };
+    const before = structuredClone(input);
+
+    expect(await transformPopulate(input, { uid: PRODUCT_UID })).toEqual({
+      categories: {
+        fields: ['name', 'documentId'],
+        populate: { relatedCategories: { fields: ['name', 'documentId'] } },
+      },
+    });
+    expect(input).toEqual(before);
+  });
+
+  it('should set a new value instead of writing into the one it visits', async () => {
+    // The traversal deep-clones its input today, so a visitor writing into `value` would
+    // not reach the caller. Check the visitor itself so that guarantee is not load bearing.
+    const traverseQueryPopulate = jest.spyOn(traverse, 'traverseQueryPopulate');
+    await transformPopulate({}, { uid: PRODUCT_UID });
+    const visitor = traverseQueryPopulate.mock.calls[0][0];
+    traverseQueryPopulate.mockRestore();
+
+    const fields = Object.freeze(['name']);
+    const value = Object.freeze({ fields, filters: { name: 'a' } });
+    const set = jest.fn();
+
+    await visitor(
+      { key: 'categories', value, attribute: models[PRODUCT_UID].attributes.categories } as any,
+      { set, remove: jest.fn() }
+    );
+
+    expect(set).toHaveBeenCalledWith('categories', {
+      fields: ['name', 'documentId'],
+      filters: { name: 'a' },
+    });
+    expect(value.fields).toBe(fields);
+    expect(fields).toEqual(['name']);
   });
 });

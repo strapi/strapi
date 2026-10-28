@@ -1,13 +1,13 @@
-import { has, assoc, mapValues, prop } from 'lodash/fp';
+import { objects } from '@strapi/utils';
+import { has, get, mapValues } from 'lodash';
+
 import { getService } from '../utils';
 import { createModelConfigurationSchema, validateKind } from './validation';
 
-const hasEditMainField = has('edit.mainField');
-const getEditMainField = prop('edit.mainField');
-const assocListMainField = assoc('list.mainField');
-
 const assocMainField = (metadata: any) =>
-  hasEditMainField(metadata) ? assocListMainField(getEditMainField(metadata), metadata) : metadata;
+  has(metadata, 'edit.mainField')
+    ? objects.set(metadata, 'list.mainField', get(metadata, 'edit.mainField'))
+    : metadata;
 
 export default {
   async findContentTypes(ctx: any) {
@@ -57,7 +57,7 @@ export default {
     const confWithUpdatedMetadata = {
       ...configuration,
       metadatas: {
-        ...mapValues(assocMainField, configuration.metadatas),
+        ...mapValues(configuration.metadatas, (value) => assocMainField(value)),
         documentId: {
           edit: {},
           list: {
@@ -117,7 +117,7 @@ export default {
 
     const confWithUpdatedMetadata = {
       ...newConfiguration,
-      metadatas: mapValues(assocMainField, newConfiguration.metadatas),
+      metadatas: mapValues(newConfiguration.metadatas, (value) => assocMainField(value)),
     };
 
     const components = await contentTypeService.findComponentsConfigurations(contentType);

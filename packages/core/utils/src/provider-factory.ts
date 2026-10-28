@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep } from 'lodash';
 import {
   createAsyncSeriesHook,
   createAsyncParallelHook,

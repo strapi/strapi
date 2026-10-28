@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admin';
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -12,6 +12,8 @@ import type { I18nBaseQuery } from '../types';
 
 interface Query extends I18nBaseQuery {
   page?: number;
+  filters?: unknown;
+  _q?: unknown;
 }
 
 const LocalePicker = () => {
@@ -26,15 +28,15 @@ const LocalePicker = () => {
   const handleChange = React.useCallback(
     (code: string, replace = false) => {
       setQuery(
-        {
+        withEncodedUserParams(query, {
           page: 1,
           plugins: { ...query.plugins, i18n: { locale: code } },
-        },
+        }),
         'push',
         replace
       );
     },
-    [query.plugins, setQuery]
+    [query, setQuery]
   );
 
   React.useEffect(() => {

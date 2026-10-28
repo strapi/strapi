@@ -27,6 +27,8 @@ import type {
   AttributeConditionValue,
 } from '../../../types';
 
+const EMPTY_CONDITION_FIELDS: NonNullable<ConditionFormProps['conditionFields']> = [];
+
 const SmallAttributeIcon = styled(AttributeIcon)`
   width: 16px !important;
   height: 16px !important;
@@ -120,7 +122,7 @@ export const ConditionForm = ({
   onChange,
   onDelete,
   attributeName,
-  conditionFields = [],
+  conditionFields = EMPTY_CONDITION_FIELDS,
 }: ConditionFormProps) => {
   const { formatMessage } = useIntl();
   const [localValue, setLocalValue] = React.useState<LocalValue>(convertFromJsonLogic(value));

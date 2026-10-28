@@ -25,6 +25,12 @@ let builder;
 
 let authenticatedRole;
 let publicRole;
+const createdUserIds = new Set();
+
+const trackCreatedUser = (user) => {
+  createdUserIds.add(user.id);
+  return user;
+};
 
 const articleModel = {
   attributes: {
@@ -76,7 +82,7 @@ const optInModel = {
 let userSeq = 0;
 const createUser = async (overrides = {}) => {
   userSeq += 1;
-  return strapi.db.query('plugin::users-permissions.user').create({
+  const user = await strapi.db.query('plugin::users-permissions.user').create({
     data: {
       username: `reluser${userSeq}`,
       email: `reluser${userSeq}@strapi.io`,
@@ -86,6 +92,8 @@ const createUser = async (overrides = {}) => {
       ...overrides,
     },
   });
+
+  return trackCreatedUser(user);
 };
 
 const createArticle = (title = 'Article') =>
@@ -137,6 +145,11 @@ describe('U&P users REST relation handling (issue 26606)', () => {
   });
 
   afterAll(async () => {
+    await Promise.all(
+      [...createdUserIds].map((id) =>
+        strapi.db.query('plugin::users-permissions.user').delete({ where: { id } })
+      )
+    );
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -153,6 +166,7 @@ describe('U&P users REST relation handling (issue 26606)', () => {
       const res = await rq({ method: 'POST', url: '/users', body: payload });
 
       expect(res.statusCode).toBe(201);
+      trackCreatedUser(res.body);
       expect(res.body).toMatchObject({
         username: payload.username,
         email: payload.email,
@@ -429,7 +443,15 @@ describe('U&P users REST relation handling (issue 26606)', () => {
   // relation it could not be referenced by `documentId` (nor via the longhand
   // connect/disconnect object) at the REST boundary. These lock in full parity.
   describe('role relation by documentId + longhand', () => {
-    const postUser = (body) => rq({ method: 'POST', url: '/users', body });
+    const postUser = async (body) => {
+      const res = await rq({ method: 'POST', url: '/users', body });
+
+      if (res.statusCode === 201) {
+        trackCreatedUser(res.body);
+      }
+
+      return res;
+    };
     let roleSeq = 0;
     const uniqueUser = () => {
       roleSeq += 1;
