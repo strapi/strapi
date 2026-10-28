@@ -1,19 +1,17 @@
 import type { Struct, Core } from '@strapi/types';
 import { CoreService } from './core-service';
 
-export class SingleTypeService extends CoreService implements Core.CoreAPI.Service.SingleType {
-  private contentType: Struct.SingleTypeSchema;
-
-  constructor(contentType: Struct.SingleTypeSchema) {
-    super();
-
-    this.contentType = contentType;
-  }
-
+/**
+ * @internal Exported so apps can extend it. Not a stable API yet: it may change in a minor release.
+ */
+export class SingleTypeService
+  extends CoreService<Struct.SingleTypeSchema>
+  implements Core.CoreAPI.Service.SingleType
+{
   async getDocumentId() {
     const { uid } = this.contentType;
 
-    return strapi.db
+    return this.strapi.db
       .query(uid)
       .findOne()
       .then((document) => document?.documentId as string);
@@ -22,7 +20,7 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
   async find(params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).findFirst(this.getFetchParams(params));
+    return this.strapi.documents(uid).findFirst(this.getFetchParams(params));
   }
 
   async createOrUpdate(params = {}) {
@@ -31,13 +29,13 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     const documentId = await this.getDocumentId();
 
     if (documentId) {
-      return strapi.documents(uid).update({
+      return this.strapi.documents(uid).update({
         ...this.getFetchParams(params),
         documentId,
       });
     }
 
-    return strapi.documents(uid).create(this.getFetchParams(params));
+    return this.strapi.documents(uid).create(this.getFetchParams(params));
   }
 
   async delete(params = {}) {
@@ -46,7 +44,7 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     const documentId = await this.getDocumentId();
     if (!documentId) return { deletedEntries: 0 };
 
-    const { entries } = await strapi.documents(uid).delete({
+    const { entries } = await this.strapi.documents(uid).delete({
       ...this.getFetchParams(params),
       documentId,
     });
@@ -54,11 +52,3 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     return { deletedEntries: entries.length };
   }
 }
-
-const createSingleTypeService = (
-  contentType: Struct.SingleTypeSchema
-): Core.CoreAPI.Service.SingleType => {
-  return new SingleTypeService(contentType);
-};
-
-export { createSingleTypeService };
