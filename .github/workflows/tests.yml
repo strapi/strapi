@@ -171,6 +171,8 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
       - name: Published registry contracts
         run: yarn test:types:registries
+      - name: Strict-off type generation snapshot
+        run: yarn test:types:strict-off
       # nx ignores examples (.nxignore), so the affected targets above never run this one
       - name: Strict types example application
         run: yarn test:types:example
