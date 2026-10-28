@@ -74,12 +74,10 @@ export type BuiltInCustomFieldOptionName =
   | 'default';
 
 export type CustomFieldOptionInput =
-  | BuiltInCustomFieldOptionInput
-  | (keyof CustomFieldOptionInputRegistry & string);
+  BuiltInCustomFieldOptionInput | (keyof CustomFieldOptionInputRegistry & string);
 
 export type CustomFieldOptionName =
-  | BuiltInCustomFieldOptionName
-  | (keyof CustomFieldOptionNameRegistry & `options.${string}`);
+  BuiltInCustomFieldOptionName | (keyof CustomFieldOptionNameRegistry & `options.${string}`);
 
 export interface CustomFieldOption {
   intlLabel: MessageDescriptor & {
