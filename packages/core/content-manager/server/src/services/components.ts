@@ -64,8 +64,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async findComponentsConfigurations(model: Struct.ComponentSchema) {
     // Cache on request state so the same request can reuse configs
     const requestState = strapi.requestContext?.get?.()?.state as
-      | { __componentsConfigurationsCache?: Map<string, Record<string, Configuration>> }
-      | undefined;
+      { __componentsConfigurationsCache?: Map<string, Record<string, Configuration>> } | undefined;
     const requestCache = requestState?.__componentsConfigurationsCache;
 
     const componentUids = new Set<UID.Component>();

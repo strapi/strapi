@@ -392,4 +392,37 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
       expect(await entry[ENTITY_STAGE_ATTRIBUTE]).toBeNull();
     });
   });
+
+  describe('Content manager configuration', () => {
+    const getConfigurationOptions = async (uid) => {
+      const { body } = await requests.admin.get(
+        `/content-manager/content-types/${uid}/configuration`
+      );
+      return body.data.contentType.options;
+    };
+
+    test('Assigning and unassigning a content type keeps its other configuration options', async () => {
+      const res = await requests.admin.put(
+        `/content-manager/content-types/${dogUID}/configuration`,
+        {
+          body: { options: { custom: 'value' } },
+        }
+      );
+      expect(res.status).toBe(200);
+
+      const workflow = await createWorkflow({ contentTypes: [dogUID] }).then(
+        (res) => res.body.data
+      );
+      expect(await getConfigurationOptions(dogUID)).toMatchObject({
+        custom: 'value',
+        reviewWorkflows: true,
+      });
+
+      await updateWorkflow(workflow.id, { contentTypes: [] });
+      expect(await getConfigurationOptions(dogUID)).toMatchObject({
+        custom: 'value',
+        reviewWorkflows: false,
+      });
+    });
+  });
 });

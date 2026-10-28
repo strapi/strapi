@@ -43,6 +43,8 @@ import type { DistributiveOmit } from 'react-redux';
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
   document?: ReturnType<UseDocument>;
+  /** The field's width in the edit layout, out of 12. */
+  size?: number;
 };
 
 /**
@@ -57,6 +59,8 @@ const BaseInputRenderer = ({
   visible,
   hint: providedHint,
   document: providedDocument,
+  // Not spread with the rest: design-system inputs have a `size` prop of their own.
+  size: layoutSize,
   ...inputProps
 }: InputRendererProps) => {
   const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
@@ -186,6 +190,7 @@ const BaseInputRenderer = ({
         {...props}
         // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
         hint={hint}
+        layoutSize={layoutSize}
         disabled={fieldIsDisabled}
       />
     );

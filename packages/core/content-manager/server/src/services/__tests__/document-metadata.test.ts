@@ -265,7 +265,7 @@ describe('document-metadata service', () => {
   describe('getManyAvailableStatus', () => {
     const createServiceWithQuery = () => {
       const findMany = jest.fn().mockResolvedValue([]);
-      const service = createService({ query: () => ({ findMany }) });
+      const service = createService({ db: { query: () => ({ findMany }) } });
 
       return { service, findMany };
     };

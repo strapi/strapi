@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import { Box, VisuallyHidden } from '@strapi/design-system';
 
+const DEFAULT_ON_LOAD_DURATION: NonNullable<VideoPreviewProps['onLoadDuration']> = () => {};
+
 // According to MDN
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value
 const HAVE_FUTURE_DATA = 3;
@@ -17,7 +19,7 @@ interface VideoPreviewProps {
 export const VideoPreview = ({
   url,
   mime,
-  onLoadDuration = () => {},
+  onLoadDuration = DEFAULT_ON_LOAD_DURATION,
   alt,
   ...props
 }: VideoPreviewProps) => {

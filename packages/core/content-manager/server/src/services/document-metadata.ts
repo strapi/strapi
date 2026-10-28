@@ -261,7 +261,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       where.$or = [{ locale: { $in: locales } }, { locale: { $null: true } }];
     }
 
-    return strapi.query(uid).findMany({
+    return strapi.db.query(uid).findMany({
       where,
       select: AVAILABLE_STATUS_SCALAR_FIELDS,
     });
