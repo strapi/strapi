@@ -110,12 +110,13 @@ declare global {
   `skipLibCheck` can hide the conflict in a consumer.
 - A package bundled with `@strapi/strapi` that registers contracts must also be imported by
   `packages/core/strapi/strict-types.d.ts`.
-- A service that the admin EE edition deep-merges over its CE implementation registers
+- A service or controller that the admin EE edition merges over its CE implementation registers
   `Core.LicensedExtension<CE, EE>`, e.g. `admin::user`: the EE shape when the application lists
   any feature in `licensedFeatures`, the CE shape when it lists none, and the CE shape with the
   EE-only members optional in package and plugin programs. EE-only admin services, such as
-  `admin::seat-enforcement`, register `Core.Licensed<'licensed', Contract>`. EE code passes the EE
-  shape, `EnterpriseServices`, as an explicit type argument.
+  `admin::seat-enforcement`, register `Core.Licensed<'licensed', Contract>`, and the audit logs
+  controller `Core.Licensed<'audit-logs', Contract>`. EE code passes the EE service shape,
+  `EnterpriseServices`, as an explicit type argument.
 - A package whose services and controllers exist only with an EE feature registers each entry as
   `Core.Licensed<'<feature>', Contract>`, e.g. `plugin::review-workflows.workflows`. A CE
   application, or a license without the feature, does not register them. The entry is `Contract`
