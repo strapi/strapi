@@ -30,9 +30,9 @@ The sources are authored in TypeScript and compiled to CommonJS (`yarn build` �
 
 What it exposes:
 
-- `GET /api/hello` — a tiny **public** HTML page (so a browser has something to
-  render).
-- `POST /api/echo` — a **public** JSON route returning `{ youSent: <body> }`.
+- `GET /api/hello` — a tiny **public** HTML page (`auth: false`, so a browser has
+  something to render). Inline `/api` routes require auth unless that opt-out is set.
+- `POST /api/echo` — a **public** JSON route (`auth: false`) returning `{ youSent: <body> }`.
 - `/api/articles` — auto-CRUD for the `article` content type, **auth-gated** by
   default (like a file-based app).
 - `/admin` — the admin **panel**, once built (see below). The `article` content

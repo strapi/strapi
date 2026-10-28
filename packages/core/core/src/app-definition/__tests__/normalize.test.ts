@@ -117,6 +117,34 @@ describe('buildApiModules', () => {
     expect(router.routes).toHaveLength(1);
   });
 
+  it('requires auth on inline /api routes unless auth: false is set', () => {
+    const modules = buildApiModules(
+      [],
+      [
+        routeVerbs.post('/echo', () => ({})),
+        routeVerbs.get('/health', () => ({}), { auth: false }),
+        routeVerbs.get('/owned', () => ({}), { policies: ['global::is-owner'] }),
+      ]
+    );
+
+    const router = modules[CUSTOM_API_NAME].routes.custom as {
+      type: string;
+      routes: Array<{
+        path: string;
+        config?: { auth?: false | { scope?: string[] }; policies?: string[] };
+      }>;
+    };
+
+    // `type: 'content-api'` is what `registerAPIRoutes` mounts under `/api`.
+    expect(router.type).toBe('content-api');
+
+    const byPath = Object.fromEntries(router.routes.map((route) => [route.path, route]));
+
+    expect(byPath['/echo'].config?.auth).toBeUndefined();
+    expect(byPath['/health'].config).toEqual({ auth: false });
+    expect(byPath['/owned'].config).toEqual({ policies: ['global::is-owner'] });
+  });
+
   it('throws on a duplicate content type within one API', () => {
     expect(() => buildApiModules([article, article])).toThrow(/Duplicate/);
   });

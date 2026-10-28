@@ -156,14 +156,17 @@ export const buildApiModules = (
     const mod = getModule(CUSTOM_API_NAME);
 
     // Inline routes are content-api routes (served under the `/api` prefix, like
-    // file-based custom routes) and default to public (`auth: false`) so they
-    // work without any permission setup. An explicit per-route `config.auth`
-    // always wins. `registerAPIRoutes` forces `type: 'content-api'` on every api
-    // router regardless, so this is set explicitly for clarity.
-    const routes = customRoutes.map((route) => ({
-      ...route,
-      config: { auth: false, ...route.config },
-    }));
+    // file-based custom routes). Auth is required unless the author sets
+    // `config.auth: false` — the same rule as file-based routes, where omitting
+    // `auth` leaves the route protected and only an explicit `false` makes it
+    // public. Do not inject `auth: false` here: `registerAPIRoutes` fills
+    // `config.auth.scope` for string handlers and the auth middleware treats
+    // anything other than `auth: false` as protected. `registerAPIRoutes` also
+    // forces `type: 'content-api'` on every api router, so this is set
+    // explicitly for clarity.
+    const routes = customRoutes.map((route) =>
+      route.config === undefined ? { ...route } : { ...route, config: { ...route.config } }
+    );
 
     mod.routes.custom = { type: 'content-api', routes };
   }

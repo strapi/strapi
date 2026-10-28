@@ -44,7 +44,7 @@ export default defineApp({
     },
   ],
 
-  routes: ({ post }) => [post('/echo', (ctx) => ({ youSent: ctx.request.body }))],
+  routes: ({ post }) => [post('/echo', (ctx) => ({ youSent: ctx.request.body }), { auth: false })],
 
   bootstrap({ strapi }) {
     strapi.log.info('Hello from the bootstrap function!');
@@ -73,7 +73,8 @@ yarn start
   (`api` defaults to `true`). These routes are **auth-gated** by default — grant
   permissions (via the users-permissions plugin) or use an API token to access
   them, exactly like a file-based app.
-- A custom **public** route: `POST /api/echo` returns `{ youSent: <body> }`.
+- A custom **public** route (`auth: false`): `POST /api/echo` returns `{ youSent: <body> }`.
+  Inline `/api` routes require auth unless that opt-out is set.
 - A `bootstrap` lifecycle that logs on startup.
 
 ```bash

@@ -187,11 +187,11 @@ checked only after `yarn build` + the relevant tests pass.
    minimum**. **`i18n`** is additionally required for auto-CRUD (`api: true`) route generation
    (`getConditionalQueryParams` reads `strapi.plugin('i18n')`). `recommendedPlugins()` bundles
    both. _(ADR-0007)_
-2. **Inline custom routes are content-api routes (under `/api`), default public.**
+2. **Inline custom routes are content-api routes (under `/api`) and require auth.**
    `registerAPIRoutes` forces `type: 'content-api'` on every api router; there is no
    registry-driven path to a root, no-prefix router. So `post('/echo', …)` is served at
-   `/api/echo`. Inline routes default to `config.auth: false` (public) so they work with no
-   permission setup; an explicit per-route `config.auth` wins. Reversible. _(ADR-0012)_
+   `/api/echo`. Inline routes require auth unless the author sets `config.auth: false`,
+   matching file-based routes. _(ADR-0012)_
 3. **Programmatic apps run under CommonJS (Phase 1).** The published `.mjs` bundles use bare
    directory imports (e.g. `lodash/fp`) that Node's strict ESM resolver rejects, so
    ESM-native execution is deferred to a later packaging pass. `recommendedPlugins()` resolves

@@ -51,9 +51,9 @@ module.exports = defineApp({
     },
   ],
 
-  // Inline custom routes are content-api routes (served under `/api`) and are
-  // public by default, so `POST /api/echo` works with no permission setup.
-  routes: ({ post }) => [post('/echo', (ctx) => ({ youSent: ctx.request.body }))],
+  // Inline custom routes are content-api routes (served under `/api`) and
+  // require auth unless `auth: false` is set. This echo route opts out.
+  routes: ({ post }) => [post('/echo', (ctx) => ({ youSent: ctx.request.body }), { auth: false })],
 
   bootstrap({ strapi }) {
     strapi.log.info('Hello from the bootstrap function!');

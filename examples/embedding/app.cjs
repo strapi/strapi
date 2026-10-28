@@ -1,7 +1,7 @@
 /**
  * Shared programmatic Strapi definition for the embedding recipes.
  *
- * Kept minimal: one public custom route (`POST /api/echo`) and no auto-CRUD so
+ * Kept minimal: one public custom route (`POST /api/echo`, `auth: false`) and no auto-CRUD so
  * only the `email` plugin is required (see `examples/single-file/README.md`).
  */
 const { defineApp, defineConfig } = require('@strapi/strapi');
@@ -43,5 +43,5 @@ module.exports = defineApp({
       attributes: { body: is.text() },
     },
   ],
-  routes: ({ post }) => [post('/echo', (ctx) => ({ youSent: ctx.request.body }))],
+  routes: ({ post }) => [post('/echo', (ctx) => ({ youSent: ctx.request.body }), { auth: false })],
 });

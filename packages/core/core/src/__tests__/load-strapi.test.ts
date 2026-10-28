@@ -45,7 +45,10 @@ const minimalApp = (dbFilename: string) =>
         attributes: { body: is.text() },
       },
     ],
-    routes: ({ post }) => [post('/echo', (ctx) => ({ youSent: ctx.request.body }))],
+    routes: ({ get, post }) => [
+      post('/echo', (ctx) => ({ youSent: ctx.request.body })),
+      get('/public-echo', () => ({ youSent: { ping: 'pong' } }), { auth: false }),
+    ],
   });
 
 describe('loadStrapi', () => {
@@ -62,12 +65,14 @@ describe('loadStrapi', () => {
     try {
       expect(strapi.isLoaded).toBe(true);
 
-      const echo = await request(strapi.server.app.callback())
-        .post('/api/echo')
-        .send({ ping: 'pong' });
+      const http = request(strapi.server.app.callback());
 
-      expect(echo.status).toBe(200);
-      expect(echo.body).toEqual({ youSent: { ping: 'pong' } });
+      const echo = await http.post('/api/echo').send({ ping: 'pong' });
+      expect(echo.status).toBe(401);
+
+      const publicEcho = await http.get('/api/public-echo');
+      expect(publicEcho.status).toBe(200);
+      expect(publicEcho.body).toEqual({ youSent: { ping: 'pong' } });
 
       // loadStrapi must not open a listening socket — the host owns the port.
       expect(strapi.server.httpServer.listening).toBe(false);

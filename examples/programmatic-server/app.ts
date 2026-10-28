@@ -59,13 +59,16 @@ const app = defineApp({
     },
   ],
 
-  // Inline custom routes are content-api routes (served under `/api`) and are
-  // public by default. `GET /api/hello` returns a tiny HTML page so a real
-  // browser has something to render; `POST /api/echo` returns JSON.
+  // Inline custom routes are content-api routes (served under `/api`) and
+  // require auth unless `auth: false` is set. These two opt out: `GET /api/hello`
+  // returns a tiny HTML page so a real browser has something to render;
+  // `POST /api/echo` returns JSON.
   routes: ({ get, post }) => [
-    get('/hello', (ctx) => {
-      ctx.type = 'html';
-      ctx.body = `<!doctype html>
+    get(
+      '/hello',
+      (ctx) => {
+        ctx.type = 'html';
+        ctx.body = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -78,8 +81,10 @@ const app = defineApp({
     </main>
   </body>
 </html>`;
-    }),
-    post('/echo', (ctx) => ({ youSent: ctx.request.body })),
+      },
+      { auth: false }
+    ),
+    post('/echo', (ctx) => ({ youSent: ctx.request.body }), { auth: false }),
   ],
 
   bootstrap({ strapi }) {

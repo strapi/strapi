@@ -182,8 +182,8 @@ rewriting it:
    `post('/echo', (ctx) => ({ ... }))` works as shown — and a handler that sets
    `ctx.body` itself also works. _Implementation note:_ `registerAPIRoutes` forces
    `type: 'content-api'` on every api router, so inline routes are served under the `/api`
-   prefix (i.e. `POST /api/echo`) and default to `config.auth: false` (public) so they work
-   with no permission setup.
+   prefix (i.e. `POST /api/echo`). They require auth unless the author sets
+   `config.auth: false`, matching file-based routes.
 
 ## Code-review findings (runtime integration details)
 

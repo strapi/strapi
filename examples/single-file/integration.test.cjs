@@ -4,7 +4,7 @@
  *
  * Boots a fully programmatic app (no `config/**`, no `src/api/**`, no
  * `package.json` plugin scan), then asserts:
- *   - the custom inline route is mounted and public,
+ *   - inline /api routes require auth unless `auth: false` is set,
  *   - auto-CRUD routes are mounted and auth-gated (secure by default),
  *   - the auto-generated service + DB schema work via the document service,
  *   - a `fromDisk(...)` content type boots and registers its model.
@@ -64,7 +64,10 @@ test('G2: in-code app — custom route, auto-CRUD, document service, schema', as
         attributes: { title: is.string({ required: true }), content: is.text() },
       },
     ],
-    routes: ({ post }) => [post('/echo', (ctx) => ({ youSent: ctx.request.body }))],
+    routes: ({ get, post }) => [
+      post('/echo', (ctx) => ({ youSent: ctx.request.body })),
+      get('/public-echo', () => ({ youSent: { ping: 'pong' } }), { auth: false }),
+    ],
   });
 
   const strapi = createStrapi({ app, serveAdminPanel: false });
@@ -73,10 +76,17 @@ test('G2: in-code app — custom route, auto-CRUD, document service, schema', as
   try {
     const http = request(strapi.server.app.callback());
 
-    // Custom inline route — content-api (under /api) and public by default.
+    // Inline content-api routes (under /api) require auth unless opted out.
     const echo = await http.post('/api/echo').send({ ping: 'pong' });
-    assert.strictEqual(echo.status, 200, 'POST /api/echo should be public (200)');
-    assert.deepStrictEqual(echo.body, { youSent: { ping: 'pong' } }, 'echo returns body');
+    assert.strictEqual(echo.status, 401, 'inline /api routes require auth by default');
+
+    const publicEcho = await http.get('/api/public-echo');
+    assert.strictEqual(publicEcho.status, 200, 'auth: false opts an inline /api route out');
+    assert.deepStrictEqual(
+      publicEcho.body,
+      { youSent: { ping: 'pong' } },
+      'public echo returns body'
+    );
 
     // Auto-CRUD routes are mounted and secure (no users-permissions grant).
     const list = await http.get('/api/articles');
