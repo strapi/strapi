@@ -1,6 +1,11 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Schema } from '@strapi/types';
-import type { WorkflowSchema, WorkflowStageSchema } from './content-types';
+import type {
+  ENTITY_ASSIGNEE_ATTRIBUTE,
+  ENTITY_STAGE_ATTRIBUTE,
+  STAGE_MODEL_UID,
+} from '../constants/workflows';
+import type { StageAttributes, WorkflowSchema, WorkflowStageSchema } from './content-types';
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
@@ -9,6 +14,28 @@ type Expect<T extends true> = T;
 declare const checks: [
   Expect<Equal<Schema.ContentType<'plugin::review-workflows.workflow'>, WorkflowSchema>>,
   Expect<Equal<Schema.ContentType<'plugin::review-workflows.workflow-stage'>, WorkflowStageSchema>>,
+  // The licensed attributes are the relations `../register.ts` adds, as type generation writes them.
+  Expect<
+    Equal<
+      keyof StageAttributes['attributes'],
+      typeof ENTITY_STAGE_ATTRIBUTE | typeof ENTITY_ASSIGNEE_ATTRIBUTE
+    >
+  >,
+  Expect<
+    Equal<
+      StageAttributes['attributes'][typeof ENTITY_STAGE_ATTRIBUTE],
+      Schema.Attribute.Relation<'oneToOne', typeof STAGE_MODEL_UID>
+    >
+  >,
+  Expect<
+    Equal<
+      StageAttributes['attributes'][typeof ENTITY_ASSIGNEE_ATTRIBUTE],
+      Schema.Attribute.Relation<'oneToOne', 'admin::user'>
+    >
+  >,
+  Expect<
+    Equal<Strapi.Registries.LicensedContentTypeAttributes['review-workflows'], StageAttributes>
+  >,
 ];
 checks satisfies unknown;
 
