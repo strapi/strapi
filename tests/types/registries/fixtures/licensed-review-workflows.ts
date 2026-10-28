@@ -90,3 +90,21 @@ articles.findFirst({
 const hiddens = app.documents('api::hidden.hidden');
 // @ts-expect-error Review workflows does not extend content types hidden from the content manager.
 hiddens.findFirst({ populate: { strapi_stage: true } }) satisfies Promise<unknown>;
+
+// The listed feature implies the admin EE edition, so CE controllers have the actions it adds.
+// `audit-logs` is not listed, so the audit logs controller is missing.
+declare const adminControllerChecks: [
+  Core.Assert<Equal<Core.ControllerFor<'admin::audit-logs'>, undefined>>,
+  Core.Assert<
+    Equal<HasUndefined<Core.ControllerFor<'admin::admin'>['licenseLimitInformation']>, false>
+  >,
+  Core.Assert<
+    Equal<HasUndefined<Core.ControllerFor<'admin::authentication'>['getProviders']>, false>
+  >,
+  Core.Assert<Equal<HasUndefined<Core.ControllerFor<'admin::user'>['isSSOLocked']>, false>>,
+];
+adminControllerChecks satisfies unknown;
+
+void app.controller('admin::user').isSSOLocked.call;
+// @ts-expect-error The feature is not listed: the contract is `undefined`.
+void app.controller('admin::audit-logs').findMany;
