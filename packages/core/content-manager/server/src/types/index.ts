@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import type * as Controllers from './controllers';
 import type * as Services from './services';
 import type { HasPermissionsConfig } from './policies';
@@ -30,11 +31,19 @@ declare global {
         'plugin::content-manager.content-structure': Services.ContentStructureService;
         'plugin::content-manager.content-types': Services.ContentTypesService;
         'plugin::content-manager.data-mapper': Services.DataMapperService;
-        // Registered only when the `cms-content-history` feature is enabled.
-        'plugin::content-manager.history': Services.HistoryService | undefined;
+        // Registered only when the `cms-content-history` feature is enabled: `undefined` unless
+        // the application lists the feature in `licensedFeatures`, `T | undefined` in package and
+        // plugin programs.
+        'plugin::content-manager.history': Core.Licensed<
+          'cms-content-history',
+          Services.HistoryService
+        >;
         'plugin::content-manager.homepage': Services.HomepageService;
-        // Registered only when the `cms-content-history` feature is enabled.
-        'plugin::content-manager.lifecycles': Services.LifecyclesService | undefined;
+        // Registered with `history`, under the same feature.
+        'plugin::content-manager.lifecycles': Core.Licensed<
+          'cms-content-history',
+          Services.LifecyclesService
+        >;
         'plugin::content-manager.permission': Services.PermissionService;
         'plugin::content-manager.permission-checker': Services.PermissionCheckerService;
         'plugin::content-manager.preview': Services.PreviewService;
@@ -51,8 +60,11 @@ declare global {
         'plugin::content-manager.collection-types': Controllers.CollectionTypesController;
         'plugin::content-manager.components': Controllers.ComponentsController;
         'plugin::content-manager.content-types': Controllers.ContentTypesController;
-        // Registered only when the `cms-content-history` feature is enabled.
-        'plugin::content-manager.history-version': Controllers.HistoryVersionController | undefined;
+        // Registered with the history services, under the same feature.
+        'plugin::content-manager.history-version': Core.Licensed<
+          'cms-content-history',
+          Controllers.HistoryVersionController
+        >;
         'plugin::content-manager.homepage': Controllers.HomepageController;
         'plugin::content-manager.init': Controllers.InitController;
         'plugin::content-manager.preview': Controllers.PreviewController;
