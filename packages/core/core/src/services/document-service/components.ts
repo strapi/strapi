@@ -177,7 +177,11 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
       const rawComponentValue = data[attributeName as keyof TData] as ComponentValue;
       const loadedValue = (await strapi.db
         .query(uid)
-        .load(entityToUpdate, attributeName, getComponentLoadParams(componentUID))) as ComponentValue;
+        .load(
+          entityToUpdate,
+          attributeName,
+          getComponentLoadParams(componentUID)
+        )) as ComponentValue;
 
       // Resolve durable componentKey → row id on this parent (draft or published) before
       // delete/update so Content API clients can round-trip keys from either status.
@@ -670,7 +674,11 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
     options?.previousValue ??
     ((await strapi.db
       .query(uid)
-      .load(entityToUpdate, attributeName, getComponentLoadParams(componentUID))) as ComponentValue);
+      .load(
+        entityToUpdate,
+        attributeName,
+        getComponentLoadParams(componentUID)
+      )) as ComponentValue);
   const idsToKeep = _.castArray(componentValue)
     .filter((value) => has(value, 'id'))
     .map(pickStringifiedId);
