@@ -42,7 +42,6 @@ const details = (id: number, overrides: Partial<EntryReasonDetails> = {}): Entry
       ],
     },
   },
-  isUnchecked: false,
   location: {
     contentTypeUid: 'api::article.article',
     kind: 'collectionType',
@@ -124,7 +123,7 @@ describe('EntryReasonDrawer', () => {
 
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('Why this entry isn’t ready')).toBeInTheDocument();
-    expect(within(dialog).getByText('Not ready: Not ready to publish')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready: Review stage')).toBeInTheDocument();
     expect(
       within(dialog).getByText('At To do, needs Approved to be published')
     ).toBeInTheDocument();
@@ -132,11 +131,13 @@ describe('EntryReasonDrawer', () => {
   });
 
   it('says an entry was never checked, rather than listing nothing', async () => {
-    renderDrawer([details(1, { outcome: null, reason: null, isUnchecked: true })]);
+    renderDrawer([details(1, { outcome: null, reason: null, missingReason: 'unchecked' })]);
 
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('1 issue')).toBeInTheDocument();
-    expect(within(dialog).getByText('The entry couldn’t be validated')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready: Not checked yet')).toBeInTheDocument();
+    expect(within(dialog).getByText(/hasn’t been checked yet/)).toBeInTheDocument();
+    expect(within(dialog).queryByText(/Validation error/)).not.toBeInTheDocument();
   });
 
   it('names the error a run failed on', async () => {
@@ -214,6 +215,52 @@ describe('EntryReasonDrawer', () => {
     await user.click(closeButtons[closeButtons.length - 1]);
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('keeps showing an entry a refetch dropped, rather than closing', async () => {
+    const onSelect = jest.fn();
+    const props = { onSelect, onClose: jest.fn(), selectedId: 2, releasedAt: null };
+    const { rerender, user } = render(
+      <EntryReasonDrawer {...props} items={[details(1), details(2)]} />
+    );
+
+    expect(await screen.findByText('Article 2')).toBeInTheDocument();
+
+    rerender(<EntryReasonDrawer {...props} items={[details(1)]} />);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Article 2')).toBeInTheDocument();
+    expect(screen.queryByText(/ of /)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    expect(onSelect).toHaveBeenLastCalledWith(1);
+  });
+
+  it("doesn't show the last entry for another row the list lacks", async () => {
+    const props = { onSelect: jest.fn(), onClose: jest.fn(), releasedAt: null };
+    const { rerender } = render(
+      <EntryReasonDrawer {...props} items={[details(1), details(2)]} selectedId={2} />
+    );
+
+    expect(await screen.findByText('Article 2')).toBeInTheDocument();
+
+    rerender(<EntryReasonDrawer {...props} items={[details(1), details(2)]} selectedId={9} />);
+
+    expect(screen.queryByText('Article 2')).not.toBeInTheDocument();
+  });
+
+  it('counts every entry with a reason, when only part of them is loaded', async () => {
+    render(
+      <EntryReasonDrawer
+        items={[details(1), details(2)]}
+        total={30}
+        selectedId={1}
+        onSelect={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByText('1 of 30 skipped entries')).toBeInTheDocument();
   });
 
   it("isn't open without a selected entry", () => {

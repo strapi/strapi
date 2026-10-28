@@ -23,20 +23,20 @@ const STATUS_MESSAGES = {
   failed: { id: 'content-releases.pages.Releases.status.failed', defaultMessage: 'Failed' },
 } satisfies Record<Release['status'], MessageDescriptor>;
 
-const getBadgeProps = (status: Release['status']) => {
-  const color = BADGE_COLOR_BY_STATUS[status];
-
-  return {
-    textColor: `${color}600`,
-    backgroundColor: `${color}100`,
-    borderColor: `${color}200`,
-  };
-};
+const getBadgeColorProps = (color: NonNullable<BadgeProps['variant']>) => ({
+  textColor: `${color}600`,
+  backgroundColor: `${color}100`,
+  borderColor: `${color}200`,
+});
 
 const ReleaseStatusBadge = ({ status }: { status: Release['status'] }) => {
   const { formatMessage } = useIntl();
 
-  return <Badge {...getBadgeProps(status)}>{formatMessage(STATUS_MESSAGES[status])}</Badge>;
+  return (
+    <Badge {...getBadgeColorProps(BADGE_COLOR_BY_STATUS[status])}>
+      {formatMessage(STATUS_MESSAGES[status])}
+    </Badge>
+  );
 };
 
-export { ReleaseStatusBadge, STATUS_MESSAGES };
+export { ReleaseStatusBadge, STATUS_MESSAGES, getBadgeColorProps };

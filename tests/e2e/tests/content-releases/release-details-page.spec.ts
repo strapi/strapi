@@ -198,7 +198,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
 
     await details.goto(releaseId);
 
-    await expect(page.getByText('blocked', { exact: true })).toBeVisible();
+    await expect(page.getByText('Blocked', { exact: true })).toBeVisible();
     await expect(details.tab('All', 2)).toBeVisible();
     await expect(details.tab('Ready', 1)).toBeVisible();
     await expect(details.tab('Not ready', 1)).toBeVisible();
@@ -221,7 +221,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await expect(details.publishButton).toBeEnabled();
     await details.publishButton.click();
     await expect(page.locator('[role="alert"]').first()).toBeVisible();
-    await expect(page.getByText('blocked', { exact: true })).toBeVisible();
+    await expect(page.getByText('Blocked', { exact: true })).toBeVisible();
     await expect(details.publishButton).toBeVisible();
   });
 });

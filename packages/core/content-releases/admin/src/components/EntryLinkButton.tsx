@@ -26,19 +26,16 @@ const useCanReadEntry = ({
 }: Pick<EntryLocation, 'contentTypeUid' | 'locale'>) => {
   const permissions = useAuth('useCanReadEntry', (state) => state.permissions);
 
-  return React.useMemo(() => {
-    const readPermission = permissions.find(
-      (permission) =>
-        permission.subject === contentTypeUid &&
-        permission.action === 'plugin::content-manager.explorer.read'
-    );
-
-    if (!readPermission) {
-      return false;
-    }
-
-    return !locale || Boolean(readPermission.properties?.locales?.includes(locale));
-  }, [contentTypeUid, locale, permissions]);
+  return React.useMemo(
+    () =>
+      permissions.some(
+        (permission) =>
+          permission.subject === contentTypeUid &&
+          permission.action === 'plugin::content-manager.explorer.read' &&
+          (!locale || Boolean(permission.properties?.locales?.includes(locale)))
+      ),
+    [contentTypeUid, locale, permissions]
+  );
 };
 
 // Where a `Link` opens the entry in the Content Manager

@@ -587,31 +587,123 @@ describe('Release details tabs, header and rows', () => {
     ).toBeVisible();
   });
 
-  it('opens why an entry isn’t ready from its badge, and steps to the next one', async () => {
-    mockRelease(plannedRelease, [
-      action(1, {
-        isEntryValid: false,
-        reason: {
-          validation: { errors: [{ path: ['title'], message: 'title must be defined.' }] },
+  const mockReasonRows = (
+    release: Record<string, unknown>,
+    { page, reasons }: { page: Record<string, unknown[]>; reasons: Record<string, unknown[]> }
+  ) => {
+    const reasonRequests = jest.fn();
+    const respond = (data: Record<string, unknown[]>, total: number) =>
+      HttpResponse.json({
+        data,
+        meta: {
+          pagination: { page: 1, pageSize: 10, total, pageCount: 1 },
+          contentTypes: {},
+          components: {},
         },
-      }),
-      action(2),
-      action(3, { isEntryValid: false, reason: null }),
-    ]);
+      });
+
+    server.use(
+      http.get('/content-releases/:releaseId', () => HttpResponse.json({ data: release })),
+      http.get('/content-releases/:releaseId/actions', ({ request }) => {
+        const filter = new URL(request.url).searchParams.get('filter');
+        if (filter === 'notReady' || filter === 'skipped') {
+          reasonRequests(filter);
+          return respond(reasons, Object.values(reasons).flat().length);
+        }
+        return respond(page, Object.values(page).flat().length + 10);
+      })
+    );
+
+    return reasonRequests;
+  };
+
+  const category = (id: number, overrides: Record<string, unknown> = {}) =>
+    action(id, {
+      contentType: {
+        uid: 'api::category.category',
+        displayName: 'Category',
+        mainFieldValue: `category ${id}`,
+      },
+      ...overrides,
+    });
+
+  it('steps through every entry not ready, beyond the page and the group', async () => {
+    const notValidated = action(1, {
+      isEntryValid: false,
+      reason: { validation: { errors: [{ path: ['title'], message: 'title must be defined.' }] } },
+    });
+    const unrecorded = action(3, { isEntryValid: false, reason: null });
+    const reasonRequests = mockReasonRows(
+      { ...plannedRelease, actions: { meta: { count: 14, notReadyCount: 3 } } },
+      {
+        page: {
+          Article: [
+            notValidated,
+            action(2),
+            unrecorded,
+            action(4, { type: 'unpublish', isEntryValid: false }),
+          ],
+        },
+        reasons: {
+          Article: [unrecorded, notValidated],
+          Category: [category(5, { isEntryValid: null, reason: null })],
+        },
+      }
+    );
 
     const { user } = renderPage();
 
-    await user.click(await screen.findByRole('button', { name: 'Why article 1 isn’t ready' }));
+    const notReadyBadge = await screen.findByRole('button', { name: 'Why article 1 isn’t ready' });
+    expect(
+      screen.queryByRole('button', { name: 'Why article 4 isn’t ready' })
+    ).not.toBeInTheDocument();
+    await user.click(notReadyBadge);
 
     const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByText('1 of 2 entries not ready')).toBeInTheDocument();
-    expect(within(dialog).getByText('article 1')).toBeInTheDocument();
+    await waitFor(() => expect(reasonRequests).toHaveBeenCalledWith('notReady'));
+    expect(await within(dialog).findByText('1 of 3 entries not ready')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready: Validation error')).toBeInTheDocument();
     expect(within(dialog).getByText('Title')).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole('button', { name: 'Next' }));
 
     expect(await within(dialog).findByText('article 3')).toBeInTheDocument();
-    expect(within(dialog).getByText('The entry couldn’t be validated')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready')).toBeInTheDocument();
+    expect(within(dialog).getByText(/wasn’t recorded/)).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Next' }));
+
+    expect(await within(dialog).findByText('category 5')).toBeInTheDocument();
+    expect(within(dialog).getByText('Not ready: Not checked yet')).toBeInTheDocument();
+    expect(within(dialog).getByText(/hasn’t been checked yet/)).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Next' })).toBeDisabled();
+  });
+
+  it('steps through the skipped entries of a run, a deleted one included', async () => {
+    const deleted = action(1, {
+      entry: null,
+      outcome: 'skipped_invalid',
+      reason: { validation: { errors: [{ path: ['title'], message: 'title must be defined.' }] } },
+    });
+    const held = action(3, { outcome: 'skipped_held' });
+    mockReasonRows(partialRelease, {
+      page: { Article: [deleted, action(2, { outcome: 'published' }), held] },
+      reasons: { Article: [deleted, held] },
+    });
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Why Deleted entry was skipped' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(await within(dialog).findByText('1 of 2 skipped entries')).toBeInTheDocument();
+    expect(within(dialog).getByText('Deleted entry')).toBeInTheDocument();
+    expect(within(dialog).queryByRole('link', { name: 'Go to entry' })).not.toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Next' }));
+
+    expect(await within(dialog).findByText('article 3')).toBeInTheDocument();
+    expect(within(dialog).getByText('Skipped: Waiting on other entries')).toBeInTheDocument();
   });
 
   it('names an entry with an empty main field "Untitled", not by its id', async () => {

@@ -35,7 +35,7 @@ import { RELEASE_SCHEMA } from '../validation/schemas';
 
 import type { ReleaseCondition } from '../../../shared/contracts/releases';
 
-const DRAWER_STYLE = {
+export const DRAWER_STYLE = {
   '--drawer-inset': '1.6rem',
   '--drawer-content-width': '50rem',
 } as React.CSSProperties;
@@ -497,7 +497,7 @@ const DrawerForm = styled(Form)`
   min-height: 0;
 `;
 
-const ScrollArea = styled(Box)`
+export const ScrollArea = styled(Box)`
   flex: 1;
   min-height: 0;
   overflow-y: auto;

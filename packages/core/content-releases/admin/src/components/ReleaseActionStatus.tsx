@@ -1,18 +1,20 @@
-import { Badge, Flex } from '@strapi/design-system';
+import { Badge, Flex, type BadgeProps } from '@strapi/design-system';
 import { ChevronRight } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { getBadgeColorProps } from './ReleaseStatusBadge';
+
 import type { ReleaseActionOutcome } from '../../../shared/constants';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 
-type BadgeColor = 'success' | 'danger' | 'neutral';
-
-const getBadgeProps = (color: BadgeColor) => ({
-  textColor: `${color}600`,
-  backgroundColor: `${color}100`,
-  borderColor: `${color}200`,
-});
+const isActionNotReady = ({
+  type,
+  isEntryValid,
+}: {
+  type: ReleaseAction['type'];
+  isEntryValid: ReleaseAction['isEntryValid'] | null;
+}) => type === 'publish' && isEntryValid !== true;
 
 type SkippedOutcome = Exclude<ReleaseActionOutcome, 'published' | 'unpublished'>;
 
@@ -60,6 +62,11 @@ const SKIPPED_REASONS = {
 const isSkippedOutcome = (outcome: ReleaseActionOutcome): outcome is SkippedOutcome =>
   outcome in SKIPPED_REASONS;
 
+const hasSkipReason = (outcome: ReleaseActionOutcome | null, isOutcomeUnknown: boolean) =>
+  !isOutcomeUnknown && outcome !== null && isSkippedOutcome(outcome);
+
+const InlineBadge = (props: BadgeProps) => <Badge {...props} tag={'span' as 'div'} />;
+
 const PillButton = styled.button`
   padding: 0;
   border: none;
@@ -85,12 +92,12 @@ interface ReasonPillProps {
 
 const ReasonPill = ({ label, ariaLabel, onOpenReason }: ReasonPillProps) => (
   <PillButton type="button" aria-label={ariaLabel} aria-haspopup="dialog" onClick={onOpenReason}>
-    <Badge {...getBadgeProps('danger')}>
+    <InlineBadge {...getBadgeColorProps('danger')}>
       <Flex gap={1} tag="span">
         {label}
         <ChevronRight width="0.8rem" height="0.8rem" aria-hidden />
       </Flex>
-    </Badge>
+    </InlineBadge>
   </PillButton>
 );
 
@@ -116,9 +123,9 @@ export const PlannedActionStatus = ({
 }: PlannedActionStatusProps) => {
   const { formatMessage } = useIntl();
 
-  if (action === 'unpublish' || isEntryValid === true) {
+  if (!isActionNotReady({ type: action, isEntryValid })) {
     return (
-      <Badge {...getBadgeProps('success')}>
+      <Badge {...getBadgeColorProps('success')}>
         {formatMessage({
           id: 'content-releases.pages.ReleaseDetails.entry-validation.ready',
           defaultMessage: 'Ready',
@@ -170,20 +177,16 @@ export const ReleasedActionStatus = ({
 }: ReleasedActionStatusProps) => {
   const { formatMessage } = useIntl();
 
-  if (isOutcomeUnknown || !outcome) {
-    return (
-      <Badge {...getBadgeProps('neutral')}>
+  if (!hasSkipReason(outcome, isOutcomeUnknown)) {
+    return isOutcomeUnknown || !outcome ? (
+      <Badge {...getBadgeColorProps('neutral')}>
         {formatMessage({
           id: 'content-releases.pages.ReleaseDetails.outcome.unknown',
           defaultMessage: 'Unknown',
         })}
       </Badge>
-    );
-  }
-
-  if (!isSkippedOutcome(outcome)) {
-    return (
-      <Badge {...getBadgeProps('success')}>
+    ) : (
+      <Badge {...getBadgeColorProps('success')}>
         {formatMessage({
           id: 'content-releases.pages.ReleaseDetails.outcome.done',
           defaultMessage: 'Done',
@@ -210,4 +213,4 @@ export const ReleasedActionStatus = ({
   );
 };
 
-export { SKIPPED_REASONS, isSkippedOutcome };
+export { InlineBadge, SKIPPED_REASONS, hasSkipReason, isActionNotReady, isSkippedOutcome };

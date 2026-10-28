@@ -24,15 +24,11 @@ import { styled } from 'styled-components';
 import { getFieldLabel, getProblem } from '../utils/fieldErrors';
 
 import { getEntryLinkProps, useCanReadEntry, type EntryLocation } from './EntryLinkButton';
-import { SKIPPED_REASONS, isSkippedOutcome } from './ReleaseActionStatus';
+import { InlineBadge, SKIPPED_REASONS, isSkippedOutcome } from './ReleaseActionStatus';
+import { DRAWER_STYLE, ScrollArea } from './ReleaseDrawer';
 
 import type { ReleaseActionOutcome } from '../../../shared/constants';
 import type { ReleaseAction, ReleaseActionReason } from '../../../shared/contracts/release-actions';
-
-const DRAWER_STYLE = {
-  '--drawer-inset': '1.6rem',
-  '--drawer-content-width': '50rem',
-} as React.CSSProperties;
 
 /**
  * A row's entry, and why it wasn't, or won't be, released
@@ -47,12 +43,13 @@ export interface EntryReasonDetails {
   action: ReleaseAction['type'];
   outcome: ReleaseActionOutcome | null;
   reason: ReleaseActionReason | null;
-  isUnchecked: boolean;
+  missingReason?: 'unchecked' | 'unrecorded';
   location: EntryLocation;
 }
 
 interface EntryReasonDrawerProps {
   items: EntryReasonDetails[];
+  total?: number;
   selectedId: ReleaseAction['id'] | null;
   onSelect: (id: ReleaseAction['id']) => void;
   onClose: () => void;
@@ -63,21 +60,38 @@ interface EntryReasonDrawerProps {
  * Building blocks
  * -----------------------------------------------------------------------------------------------*/
 
-// The kind of problem, for the status badge: a planned entry's reason has no outcome
-const getReasonTitle = (details: EntryReasonDetails): MessageDescriptor | null => {
-  if (details.outcome && isSkippedOutcome(details.outcome)) {
-    return SKIPPED_REASONS[details.outcome].title;
+const NOT_CHECKED_TITLE = {
+  id: 'content-releases.reason-drawer.title.not-checked',
+  defaultMessage: 'Not checked yet',
+};
+
+const REVIEW_STAGE_TITLE = {
+  id: 'content-releases.pages.ReleaseDetails.entry-validation.review-stage',
+  defaultMessage: 'Review stage',
+};
+
+const getReasonTitle = ({
+  outcome,
+  reason,
+  missingReason,
+}: EntryReasonDetails): MessageDescriptor | null => {
+  if (outcome && isSkippedOutcome(outcome)) {
+    return SKIPPED_REASONS[outcome].title;
   }
 
-  if (details.reason?.error) {
+  if (missingReason === 'unchecked') {
+    return NOT_CHECKED_TITLE;
+  }
+
+  if (reason?.error) {
     return SKIPPED_REASONS.skipped_error.title;
   }
 
-  if (details.reason?.validation || details.isUnchecked) {
+  if (reason?.validation) {
     return SKIPPED_REASONS.skipped_invalid.title;
   }
 
-  return details.reason?.stage ? SKIPPED_REASONS.skipped_not_approved.title : null;
+  return reason?.stage ? REVIEW_STAGE_TITLE : null;
 };
 
 const useEntryLink = (details: EntryReasonDetails) => {
@@ -116,10 +130,11 @@ const IssueSection = ({ title, count, children }: IssueSectionProps & React.Prop
         <Typography fontWeight="bold" textColor="warning700">
           {title}
         </Typography>
-        <Flex gap={2}>
-          <Badge textColor="warning700" backgroundColor="neutral0" borderColor="warning200">
+        {/* Spans: a button holds inline content only */}
+        <Flex gap={2} tag="span">
+          <InlineBadge textColor="warning700" backgroundColor="neutral0" borderColor="warning200">
             {count}
-          </Badge>
+          </InlineBadge>
           {isOpen ? <CaretUp aria-hidden /> : <CaretDown aria-hidden />}
         </Flex>
       </SectionToggle>
@@ -179,14 +194,15 @@ const ReasonBody = ({
   releasedAt?: string | null;
 }) => {
   const { formatMessage, formatDate } = useIntl();
-  const { reason, outcome, isUnchecked } = details;
+  const { reason, outcome, missingReason } = details;
   const isFrozen = outcome !== null;
   const skippedReason: { title: MessageDescriptor; description?: MessageDescriptor } | null =
     outcome && isSkippedOutcome(outcome) ? SKIPPED_REASONS[outcome] : null;
   const description = skippedReason?.description;
   const reasonTitle = getReasonTitle(details);
   const errors = reason?.validation?.errors ?? [];
-  const isFieldsUnreadable = (Boolean(reason?.validation) && errors.length === 0) || isUnchecked;
+  const isFieldsUnreadable =
+    (Boolean(reason?.validation) && errors.length === 0) || Boolean(missingReason);
   const fieldIssueCount = errors.length || (isFieldsUnreadable ? 1 : 0);
   const issueCount = fieldIssueCount + (reason?.stage ? 1 : 0) + (reason?.error ? 1 : 0);
 
@@ -266,7 +282,7 @@ const ReasonBody = ({
                 )}
                 problem={formatMessage({
                   id: 'content-releases.reason-drawer.error.hint',
-                  defaultMessage: 'Something stopped this entry on the server. Its logs say more.',
+                  defaultMessage: 'Something on the server stopped it, not the entry’s content.',
                 })}
               />
             </IssueSection>
@@ -302,10 +318,14 @@ const ReasonBody = ({
                     id: 'content-releases.pages.ReleaseDetails.field-error.entry',
                     defaultMessage: 'Entry',
                   })}
-                  problem={formatMessage({
-                    id: 'content-releases.pages.ReleaseDetails.entry-validation.fields.unchecked',
-                    defaultMessage: 'The entry couldn’t be validated',
-                  })}
+                  problem={formatMessage(
+                    {
+                      id: 'content-releases.reason-drawer.fields.unreadable',
+                      defaultMessage:
+                        '{missingReason, select, unchecked {This entry hasn’t been checked yet. Saving it checks it.} unrecorded {Why it isn’t ready wasn’t recorded. Saving the entry checks it again.} other {The entry couldn’t be validated}}',
+                    },
+                    { missingReason: missingReason ?? 'none' }
+                  )}
                 />
               )}
             </IssueSection>
@@ -391,6 +411,7 @@ const GoToEntryLink = ({ details }: { details: EntryReasonDetails }) => {
  */
 export const EntryReasonDrawer = ({
   items,
+  total,
   selectedId,
   onSelect,
   onClose,
@@ -398,11 +419,21 @@ export const EntryReasonDrawer = ({
 }: EntryReasonDrawerProps) => {
   const { formatMessage } = useIntl();
   const index = items.findIndex(({ id }) => id === selectedId);
-  const details = index >= 0 ? items[index] : null;
+  const current = index >= 0 ? items[index] : null;
+  const lastShown = React.useRef<EntryReasonDetails | null>(null);
+  React.useEffect(() => {
+    if (current) {
+      lastShown.current = current;
+    }
+  });
+  const details =
+    current ??
+    (selectedId === null || lastShown.current?.id === selectedId ? lastShown.current : null);
+  const rowCount = Math.max(total ?? 0, items.length);
 
   return (
     <Drawer
-      open={details !== null}
+      open={selectedId !== null && details !== null}
       onOpenChange={(isOpen) => {
         if (!isOpen) onClose();
       }}
@@ -423,20 +454,22 @@ export const EntryReasonDrawer = ({
                 borderWidth="0 0 1px 0"
               >
                 <Typography variant="pi" textColor="neutral600">
-                  {formatMessage(
-                    {
-                      id: 'content-releases.reason-drawer.position',
-                      defaultMessage:
-                        '{current} of {total} {isFrozen, select, true {skipped {total, plural, one {entry} other {entries}}} other {{total, plural, one {entry} other {entries}} not ready}}',
-                    },
-                    { current: index + 1, total: items.length, isFrozen: details.outcome !== null }
-                  )}
+                  {/* No position for an entry that's no longer in the list */}
+                  {index >= 0 &&
+                    formatMessage(
+                      {
+                        id: 'content-releases.reason-drawer.position',
+                        defaultMessage:
+                          '{current} of {total} {isFrozen, select, true {skipped {total, plural, one {entry} other {entries}}} other {{total, plural, one {entry} other {entries}} not ready}}',
+                      },
+                      { current: index + 1, total: rowCount, isFrozen: details.outcome !== null }
+                    )}
                 </Typography>
                 <Flex gap={2}>
                   <Button
                     variant="tertiary"
                     size="S"
-                    disabled={index === 0}
+                    disabled={index <= 0}
                     onClick={() => onSelect(items[index - 1].id)}
                   >
                     {formatMessage({
@@ -447,7 +480,7 @@ export const EntryReasonDrawer = ({
                   <Button
                     variant="tertiary"
                     size="S"
-                    disabled={index === items.length - 1}
+                    disabled={items.length === 0 || index === items.length - 1}
                     onClick={() => onSelect(items[index + 1].id)}
                   >
                     {formatMessage({
@@ -496,12 +529,6 @@ const DrawerLayout = styled.div`
   flex: 1;
   flex-direction: column;
   min-height: 0;
-`;
-
-const ScrollArea = styled(Box)`
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 `;
 
 const EntryTitle = styled(Typography)<{ $isItalic: boolean }>`

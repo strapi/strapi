@@ -1,7 +1,7 @@
 import { useAuth } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@tests/utils';
 
-import { EntryLinkButton } from '../EntryLinkButton';
+import { EntryLinkButton, getEntryLinkProps } from '../EntryLinkButton';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -68,5 +68,20 @@ describe('EntryLinkButton', () => {
     render(<EntryLinkButton {...defaultProps} locale={null} />);
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('asks the edit view to show the entry’s errors, when it has some', () => {
+    expect(getEntryLinkProps({ ...defaultProps, showErrors: true }).state).toEqual({
+      forceValidation: true,
+    });
+    expect(getEntryLinkProps(defaultProps).state).toBeUndefined();
+  });
+
+  it('shows the link to a user whose second role grants the locale', () => {
+    mockPermissions([...readArticles(['en']), ...readArticles(['fr'])]);
+
+    render(<EntryLinkButton {...defaultProps} />);
+
+    expect(screen.getByRole('link', { name: 'Open entry' })).toBeInTheDocument();
   });
 });

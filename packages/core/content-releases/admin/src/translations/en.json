@@ -112,7 +112,6 @@
   "pages.Settings.releases.timezone.label": "Default timezone",
   "pages.Settings.releases.timezone.hint": "The timezone of every release can still be changed individually.",
   "pages.Settings.releases.setting.default-timezone-notification-success": "Default timezone updated.",
-  "pages.ReleaseDetails.entry-validation.fields.unchecked": "The entry couldn’t be validated",
   "widget.upcoming-releases.link": "Open Releases",
   "widget.upcoming-releases.title": "Upcoming releases",
   "widget.upcoming-releases.no-data": "No releases",
@@ -184,10 +183,12 @@
   "reason-drawer.eyebrow": "{isFrozen, select, true {Why this entry was skipped} other {Why this entry isn’t ready}}",
   "reason-drawer.status": "{isFrozen, select, true {Skipped} other {Not ready}}{hasReason, select, true {: {reason}} other {}}",
   "reason-drawer.issues": "{count, plural, one {# issue} other {# issues}}",
-  "reason-drawer.error.hint": "Something stopped this entry on the server. Its logs say more.",
+  "reason-drawer.error.hint": "Something on the server stopped it, not the entry’s content.",
   "reason-drawer.stage": "At {entryStage, select, none {no stage} other {{entryStage}}}, needs {requiredStage} to be published",
   "reason-drawer.captured": "Captured when the release ran on {date}. The entry may have changed since.",
   "reason-drawer.checked": "Checked when the entry was last saved. Saving it again checks it again.",
   "reason-drawer.go-to-entry": "Go to entry",
-  "pages.ReleaseDetails.entry-validation.review-stage": "Review stage"
+  "pages.ReleaseDetails.entry-validation.review-stage": "Review stage",
+  "reason-drawer.title.not-checked": "Not checked yet",
+  "reason-drawer.fields.unreadable": "{missingReason, select, unchecked {This entry hasn’t been checked yet. Saving it checks it.} unrecorded {Why it isn’t ready wasn’t recorded. Saving the entry checks it again.} other {The entry couldn’t be validated}}"
 }
