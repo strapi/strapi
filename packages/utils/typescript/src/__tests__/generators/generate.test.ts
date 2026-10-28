@@ -35,6 +35,7 @@ describe('generate', () => {
       middlewares: {},
       contentTypes: {},
       components: {},
+      config: { get: (_path: string, fallback?: unknown) => fallback },
     };
 
     return {
