@@ -28,9 +28,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
-    findById(id: string | number, { populate }: any = {}) {
+    findById(id: string | number, { workflowId, populate }: any = {}) {
       return strapi.db.query(STAGE_MODEL_UID).findOne({
-        where: { id },
+        where: workflowId === undefined ? { id } : { id, workflow: workflowId },
         populate,
       });
     },
@@ -207,7 +207,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       assertAtLeastOneStageRemain(srcStages || [], { created, deleted });
 
       // Update stages and assign entity stages
-      return strapi.db.transaction(async ({ trx }) => {
+      return strapi.db.transaction(async () => {
         // Create the new stages
         const createdStages = await this.createMany(created, { fields: ['id'] });
         // Put all the newly created stages ids
@@ -233,13 +233,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await async.map(contentTypesToMigrate, (contentTypeUID: any) => {
+          // Wait for it: deleting the stage also deletes its links to the entities.
+          // `strapi.db.transaction` reuses the current transaction.
+          await async.map(contentTypesToMigrate, (contentTypeUID: any) =>
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,
               toStageId: nearestStage.id,
-              trx,
-            });
-          });
+            })
+          );
 
           return this.delete(stage);
         });
@@ -309,7 +310,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @param {string} contentTypeUID
      * @param {number | undefined | null} fromStageId
      * @param {number} toStageId
-     * @param {import('knex').Knex.Transaction} trx
      * @returns
      */
     async updateEntitiesStage(contentTypeUID: any, { fromStageId, toStageId }: any) {
