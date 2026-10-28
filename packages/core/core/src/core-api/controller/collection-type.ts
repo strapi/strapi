@@ -1,4 +1,4 @@
-import { isObject } from 'lodash/fp';
+import { isObject } from 'lodash';
 import { errors } from '@strapi/utils';
 import type { Core, Struct, Utils, UID } from '@strapi/types';
 import type Koa from 'koa';

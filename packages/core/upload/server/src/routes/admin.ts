@@ -11,7 +11,10 @@ export const routes = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.settings.read'],
+              // Not `settings.read`: the Media Library needs this payload to
+              // work, and the default Editor and Author roles don't hold that
+              // action. Writing still requires it (see the PUT below).
+              actions: ['plugin::upload.read'],
             },
           },
         ],

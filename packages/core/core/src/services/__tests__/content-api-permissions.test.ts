@@ -1,4 +1,5 @@
 import * as z from 'zod/v4';
+import { z as exportedZ } from '@strapi/utils';
 
 import createContentAPI from '../content-api';
 
@@ -472,6 +473,44 @@ describe('Content API - Permissions', () => {
         shape: Record<string, z.ZodType>;
       };
       expect(bodySchema?.shape?.clientMutationId).toBeDefined();
+    });
+
+    it('composes and parses an exported z schema with an existing route body schema', () => {
+      contentAPI.addInputParams({
+        metadata: {
+          schema: exportedZ.object({
+            label: exportedZ.string().trim().min(1),
+            enabled: exportedZ.boolean().default(true),
+          }),
+        },
+      });
+      const route = contentAPIRoute({
+        method: 'POST',
+        request: {
+          body: {
+            'application/json': z.object({
+              title: z.string().min(1),
+            }),
+          },
+        },
+      });
+
+      contentAPI.applyExtraParamsToRoutes([route]);
+
+      const bodySchema = route.request?.body?.['application/json'] as z.ZodType;
+      expect(
+        bodySchema.parse({
+          title: 'Document',
+          metadata: { label: '  imported schema  ' },
+        })
+      ).toEqual({
+        title: 'Document',
+        metadata: { label: 'imported schema', enabled: true },
+      });
+      expect(bodySchema.safeParse({ title: '', metadata: { label: 'valid' } }).success).toBe(false);
+      expect(bodySchema.safeParse({ title: 'Document', metadata: { label: '' } }).success).toBe(
+        false
+      );
     });
   });
 });

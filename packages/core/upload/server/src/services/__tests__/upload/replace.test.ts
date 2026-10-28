@@ -25,6 +25,12 @@ const imageManipulationMock = {
   isOptimizableImage: jest.fn(async () => false),
   optimize: jest.fn(),
   generateFileName: jest.fn((name: string) => name),
+  getDimensions: jest.fn(async () => ({ width: 640, height: 480 })),
+  isResizableImage: jest.fn(async () => false),
+  generateThumbnail: jest.fn(async () => null),
+  generateResponsiveFormats: jest.fn(
+    async (): Promise<Array<{ key: string; file: Record<string, unknown> }>> => []
+  ),
 };
 
 const fileServiceMock = {
@@ -89,6 +95,7 @@ describe('Upload service - replace()', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    imageManipulationMock.isImage.mockImplementation(async () => false);
   });
 
   test('replacing an image with a non-image deletes the old generated formats', async () => {
@@ -117,6 +124,124 @@ describe('Upload service - replace()', () => {
     expect(deletedHashes).toEqual(['large_document_abc123', 'thumbnail_document_abc123']);
   });
 
+  test('replacing an image with a non-image clears the image dimensions and formats', async () => {
+    currentDbFile = {
+      id: 10,
+      hash: 'document_stu',
+      ext: '.png',
+      provider: PROVIDER,
+      width: 640,
+      height: 480,
+      formats: {
+        thumbnail: { hash: 'thumbnail_document_stu', ext: '.png' },
+      },
+    };
+
+    await uploadService.replace(10, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    // `update` only writes the keys it receives, so the old image values stay
+    // unless they are reset explicitly. A non-image file has no dimensions or formats.
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({
+      width: null,
+      height: null,
+      formats: null,
+    });
+  });
+
+  test('replacing an image with a non-image on another provider clears the image dimensions and formats', async () => {
+    currentDbFile = {
+      id: 11,
+      hash: 'document_vwx',
+      ext: '.png',
+      provider: 'aws-s3',
+      width: 640,
+      height: 480,
+      formats: {
+        thumbnail: { hash: 'thumbnail_document_vwx', ext: '.png' },
+      },
+    };
+
+    await uploadService.replace(11, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.upload).toHaveBeenCalledTimes(1);
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({
+      width: null,
+      height: null,
+      formats: null,
+    });
+  });
+
+  test('replacing a non-image with an image sets the new image dimensions', async () => {
+    currentDbFile = {
+      id: 12,
+      hash: 'document_yza',
+      ext: '.pdf',
+      provider: PROVIDER,
+      width: null,
+      height: null,
+      formats: null,
+    };
+
+    imageManipulationMock.isImage.mockImplementation(async () => true);
+
+    await uploadService.replace(12, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace).toHaveBeenCalledTimes(1);
+    // The new image is too small for any format, so formats stay null like a fresh upload.
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({
+      width: 640,
+      height: 480,
+      formats: null,
+    });
+  });
+
+  test.each([
+    ['the same provider', PROVIDER],
+    ['another provider', 'aws-s3'],
+  ])(
+    'replacing an image on %s with a numeric breakpoint key stores formats as an object',
+    async (_label, provider) => {
+      currentDbFile = {
+        id: 13,
+        hash: 'image_bcd',
+        ext: '.png',
+        provider,
+        width: 640,
+        height: 480,
+        formats: {
+          100: { hash: '100_image_bcd', ext: '.png' },
+        },
+      };
+
+      // A `breakpoints` config like `{ 100: 100 }` produces a format keyed '100'.
+      const format = { hash: '100_image_bcd', ext: '.png' };
+      imageManipulationMock.isImage.mockImplementation(async () => true);
+      imageManipulationMock.isResizableImage.mockImplementationOnce(async () => true);
+      imageManipulationMock.generateResponsiveFormats.mockImplementationOnce(async () => [
+        { key: '100', file: format },
+      ]);
+
+      await uploadService.replace(13, {
+        data: { fileInfo: {} as any },
+        file: inputFile() as any,
+      });
+
+      // lodash `_.set` reads '100' as an array index and would build an array.
+      const { formats } = dbUpdate.mock.calls[0][0].data;
+      expect(Array.isArray(formats)).toBe(false);
+      expect(formats).toEqual({ 100: format });
+    }
+  );
+
   test('replacing a formatless file with a non-image deletes nothing', async () => {
     currentDbFile = {
       id: 2,
@@ -133,6 +258,157 @@ describe('Upload service - replace()', () => {
 
     expect(providerMethods.replace).toHaveBeenCalledTimes(1);
     expect(providerMethods.delete).not.toHaveBeenCalled();
+  });
+
+  test('keeps the file in its folder', async () => {
+    currentDbFile = {
+      id: 4,
+      hash: 'in_folder_abc',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    await uploadService.replace(4, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    // Left to `formatFileInfo` this became '/', contradicting the surviving
+    // relation — and `folder.deleteByIds` selects by folderPath, so deleting the
+    // folder left the file behind, invisible and never freed from storage.
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folderPath: '/7' });
+  });
+
+  test('moves the file when a folder is sent explicitly', async () => {
+    currentDbFile = {
+      id: 5,
+      hash: 'moving_def',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    fileServiceMock.getFolderPath.mockImplementationOnce(async () => '/9');
+
+    // Replace-and-move in one request is a supported call, so an explicit folder
+    // still wins over the file's current location.
+    await uploadService.replace(5, {
+      data: { fileInfo: { folder: 9 } as any },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folder: 9, folderPath: '/9' });
+  });
+
+  test('sends the file to the root when the folder is explicitly cleared', async () => {
+    currentDbFile = {
+      id: 6,
+      hash: 'to_root_ghi',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    // `null` is a deliberate move to the root, unlike an absent folder.
+    await uploadService.replace(6, {
+      data: { fileInfo: { folder: null } as any },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folder: null, folderPath: '/' });
+  });
+
+  test('forwards the path meta to the provider', async () => {
+    currentDbFile = {
+      id: 7,
+      hash: 'prefixed_jkl',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    // `path` is the provider storage prefix, not a `files` column, so the provider
+    // call is the only place it shows up.
+    await uploadService.replace(7, {
+      data: { fileInfo: {} as any, path: 'baz/qux' },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace.mock.calls[0][0]).toMatchObject({ path: 'baz/qux' });
+  });
+
+  /**
+   * `formatFileInfo` turns the triplet into a one-element `related` array, and the database
+   * layer reads a bare array as `set` — whose morphToMany branch deletes every join row for
+   * the file before inserting. Writing `related` here would therefore detach the file from
+   * every other entry using it, so the triplet is dropped instead of forwarded.
+   */
+  test('does not write related, even when the relation triplet is sent', async () => {
+    currentDbFile = {
+      id: 8,
+      hash: 'related_mno',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(8, {
+      data: {
+        fileInfo: {} as any,
+        refId: 12,
+        ref: 'api::article.article',
+        field: 'cover',
+      },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
+  });
+
+  test('still forwards the other metas when the triplet is sent alongside them', async () => {
+    currentDbFile = {
+      id: 8,
+      hash: 'related_with_path',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(8, {
+      data: {
+        fileInfo: {} as any,
+        refId: 12,
+        ref: 'api::article.article',
+        field: 'cover',
+        path: 'baz/qux',
+      },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace.mock.calls[0][0]).toMatchObject({ path: 'baz/qux' });
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
+  });
+
+  test('does not invent a path or a relation when no metas are sent', async () => {
+    currentDbFile = {
+      id: 9,
+      hash: 'no_path_pqr',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(9, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace.mock.calls[0][0]).not.toHaveProperty('path');
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
   });
 
   test('checks the file size before writing anything to the provider', async () => {

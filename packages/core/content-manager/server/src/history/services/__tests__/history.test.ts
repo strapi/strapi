@@ -1,10 +1,12 @@
 import type { UID } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createHistoryService } from '../history';
 
 const createMock = jest.fn();
 const findPageMock = jest.fn();
 const findManyMock = jest.fn();
+const findOneMock = jest.fn();
 const userId = 'user-id';
 const fakeDate = new Date('1970-01-01T00:00:00.000Z');
 
@@ -29,13 +31,11 @@ const mockStrapi = {
         getStatus: jest.fn(),
       })),
     },
-    i18n: {
-      service: jest.fn(() => ({
-        getDefaultLocale: jest.fn().mockReturnValue('en'),
-        isLocalizedContentType: jest.fn().mockReturnValue(false),
-        find: jest.fn().mockResolvedValue([]),
-      })),
-    },
+  },
+  localization: {
+    getDefaultLocale: jest.fn().mockResolvedValue('en'),
+    isLocalizedContentType: jest.fn().mockReturnValue(false),
+    getLocales: jest.fn().mockResolvedValue([]),
   },
   // @ts-expect-error - Ignore
   plugin: (plugin: string) => mockStrapi.plugins[plugin],
@@ -46,6 +46,7 @@ const mockStrapi = {
           create: createMock,
           findPage: findPageMock,
           findMany: findManyMock,
+          findOne: findOneMock,
         };
       }
     },
@@ -140,7 +141,6 @@ describe('history-version service', () => {
           type: 'string' as const,
         },
       },
-      componentsSchemas: {},
       status: 'draft' as const,
     };
 
@@ -166,7 +166,6 @@ describe('history-version service', () => {
       },
       locale: 'en',
       relatedDocumentId: 'randomid',
-      componentsSchemas: {},
       schema: {
         title: {
           type: 'string' as const,
@@ -231,5 +230,13 @@ describe('history-version service', () => {
     } as any);
 
     expect(results.map((result) => result.id)).toEqual([2]);
+  });
+
+  it('throws a not found error when restoring an unknown version', async () => {
+    findOneMock.mockResolvedValueOnce(null);
+
+    await expect(historyService.restoreVersion(999)).rejects.toThrow(
+      new errors.NotFoundError('History version not found')
+    );
   });
 });

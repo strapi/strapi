@@ -7,6 +7,8 @@ import { Wrapper } from './Styles';
 
 import type { IntlLabel } from '../../types';
 
+const EMPTY_RADIOS: NonNullable<CustomRadioGroupProps['radios']> = [];
+
 interface Radio {
   title: IntlLabel;
   description: IntlLabel;
@@ -25,7 +27,7 @@ export const CustomRadioGroup = ({
   intlLabel,
   name,
   onChange,
-  radios = [],
+  radios = EMPTY_RADIOS,
   value,
 }: CustomRadioGroupProps) => {
   const { formatMessage } = useIntl();
