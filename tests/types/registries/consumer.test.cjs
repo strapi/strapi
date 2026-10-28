@@ -448,9 +448,12 @@ async function generateContracts(appDir, registered, api = fixture('app/src/api'
 
 // Type generation writes the license scope of an application with strict types into `strict.d.ts`,
 // from `typescript.licensedFeatures`. A program without it, such as a plugin or an application
-// that opts in by hand, keeps the unknown scope. Each fixture checks the gated contracts of
-// `licensed-provider.d.ts` in one scope, each bundled fixture those of the packages bundled with
-// `@strapi/strapi` (review workflows, content releases, content history).
+// that opts in by hand, keeps the unknown scope. Each fixture checks, in one scope, the gated
+// contracts of `licensed-provider.d.ts` and the licensed attributes that review workflows and the
+// provider add to the generated schemas of `licensed-schemas.d.ts`; each bundled fixture checks
+// those of the packages bundled with `@strapi/strapi` (review workflows, content releases, content
+// history).
+const licensedFiles = ['licensed-provider.d.ts', 'licensed-schemas.d.ts'];
 const licenseScopes = [
   { scope: 'unknown', fixture: 'licensed-unknown.ts', bundled: 'licensed-bundled-unknown.ts' },
   {
@@ -520,11 +523,11 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   const options = { ...baseOptions, ...resolutionOptions };
   const compile = compiler(options);
 
-  test(`${resolution}: license-gated contracts follow the program's license scope`, async () => {
+  test(`${resolution}: license-gated contracts and attributes follow the program's license scope`, async () => {
     await withLicenseScopes((scopes) => {
       for (const { scope, files, fixture, bundled } of scopes) {
         assertClean(
-          compile([...files, 'licensed-provider.d.ts', fixture]),
+          compile([...files, ...licensedFiles, fixture]),
           `${resolution}, license scope ${scope}`
         );
         assertClean(compile([...files, bundled]), `${resolution}, license scope ${scope}, bundled`);
@@ -1166,7 +1169,7 @@ test('license scope fixtures fail in the other scopes', async () => {
       for (const { scope, fixture: name } of scopes) {
         if (scope === program.scope) continue;
         assert.notEqual(
-          fixtureErrors(compile([...program.files, 'licensed-provider.d.ts', name]), name),
+          fixtureErrors(compile([...program.files, ...licensedFiles, name]), name),
           0,
           `${name} (license scope ${scope}) passes with license scope ${program.scope}`
         );

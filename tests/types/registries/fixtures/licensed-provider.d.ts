@@ -1,8 +1,8 @@
-import type { Core } from '@strapi/strapi';
+import type { Core, Schema } from '@strapi/strapi';
 
 // A package whose contracts exist only with a license, gated the way review workflows
 // (`review-workflows`), content releases (`cms-content-releases`) and the admin EE edition
-// (`licensed`) gate theirs.
+// (`licensed`) gate theirs. With any license, it adds an attribute to every content type.
 export type ReportsService = { count(): number };
 export type ReleasesService = { publish(id: number): Promise<void> };
 export type SeatsService = { getDisabledUserList(): Promise<number[]> };
@@ -27,6 +27,9 @@ declare global {
       }
       interface PackageControllers {
         'plugin::licensed-provider.reports': Core.Licensed<'review-workflows', ReportsController>;
+      }
+      interface LicensedContentTypeAttributes {
+        licensed: { attributes: { licensed_note: Schema.Attribute.Text }; except: never };
       }
     }
   }
