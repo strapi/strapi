@@ -89,6 +89,8 @@ declare global {
   that use the legacy `Node` module resolution.
 - Do not augment `Strapi.Registries.Settings` in published source. Only `@strapi/types/strict`
   sets the switch.
+- Do not declare `Strapi.Registries.LicensedFeatures` in published source. Type generation writes
+  it, with `Settings.licenses`, into an application's `strict.d.ts`. The consumer tests check both.
 - Check implementations against their contracts with a type annotation or `satisfies`.
 - Check the names of the runtime maps (`services`, `controllers`) against the registered names,
   given by `keyof Core.RegisteredFor<Strapi.Registries.PackageServices, 'plugin::x'>`. A plain

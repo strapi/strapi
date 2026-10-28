@@ -60,7 +60,7 @@ Feature flags for enabling and configuring future features that would be breakin
 
 #### typescript
 
-Controls TypeScript tooling during development: `autogenerate` emits types for JavaScript projects, `strictTypes` also generates the application level contracts and the opt-in to registered core contracts (enabled by default in new TypeScript projects).
+Controls TypeScript tooling during development: `autogenerate` emits types for JavaScript projects, `strictTypes` also generates the application level contracts and the opt-in to registered core contracts (enabled by default in new TypeScript projects). With `strictTypes`, `licensedFeatures` lists the license features the application builds against: type generation types the license-gated contracts from it, not from the license it boots with.
 
 #### plugins
 
