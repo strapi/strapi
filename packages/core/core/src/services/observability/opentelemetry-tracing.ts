@@ -255,8 +255,7 @@ export function registerOpenTelemetryTracing(strapi: Core.Strapi): void {
 
   type TracingConfig = NonNullable<NonNullable<Core.Config.Server['observability']>['tracing']>;
   const cfg = strapi.config.get('server.observability.tracing') as
-    | Partial<TracingConfig>
-    | undefined;
+    Partial<TracingConfig> | undefined;
 
   const serviceName = cfg?.serviceName ?? 'strapi';
 

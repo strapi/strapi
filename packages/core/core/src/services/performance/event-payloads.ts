@@ -29,14 +29,7 @@ export type PublicDatabaseQueryPerformancePayload = DatabaseQueryPerfEvent & {
 };
 
 export type PublicRequestPerfStage =
-  | 'middleware'
-  | 'auth'
-  | 'policy'
-  | 'controller'
-  | 'service'
-  | 'sanitize'
-  | 'validate'
-  | 'other';
+  'middleware' | 'auth' | 'policy' | 'controller' | 'service' | 'sanitize' | 'validate' | 'other';
 
 export interface PublicRequestStartPayload {
   schemaVersion: typeof PERFORMANCE_PUBLIC_SCHEMA_VERSION;

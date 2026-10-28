@@ -38,8 +38,7 @@ function isMetricsFeatureEnabled(strapi: Core.Strapi): boolean {
 
 function isOtlpConfigured(strapi: Core.Strapi): boolean {
   const otlp = strapi.config.get('server.observability.metrics.otlp') as
-    | Partial<{ enabled: boolean; url: string }>
-    | undefined;
+    Partial<{ enabled: boolean; url: string }> | undefined;
   return otlp?.enabled === true && typeof otlp.url === 'string' && otlp.url.length > 0;
 }
 
@@ -108,11 +107,9 @@ export function registerOpenTelemetryPerformanceMetrics(strapi: Core.Strapi): vo
   }
 
   const metricsCfg = strapi.config.get('server.observability.metrics') as
-    | Partial<MetricsObsConfig>
-    | undefined;
+    Partial<MetricsObsConfig> | undefined;
   const tracingCfg = strapi.config.get('server.observability.tracing') as
-    | { serviceName?: string }
-    | undefined;
+    { serviceName?: string } | undefined;
   const serviceName = metricsCfg?.serviceName ?? tracingCfg?.serviceName ?? 'strapi';
   const otlp = metricsCfg?.otlp;
 

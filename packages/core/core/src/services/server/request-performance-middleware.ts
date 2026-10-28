@@ -102,8 +102,7 @@ export async function runRequestPerformanceMiddleware(
 
     if (emitSettings.emitStageEvents) {
       const stages = ctx.state.strapiPerfStages as
-        | Array<{ stage: PublicRequestPerfStage; stageDurationMs: number }>
-        | undefined;
+        Array<{ stage: PublicRequestPerfStage; stageDurationMs: number }> | undefined;
       if (Array.isArray(stages)) {
         for (const s of stages) {
           strapi.eventHub
