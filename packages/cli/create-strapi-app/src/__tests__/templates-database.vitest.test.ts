@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { env } from '@strapi/utils';
+import { afterEach, describe, expect, it } from 'vitest';
 
 /**
  * Every scaffolded template ships a `config/database` file that validates the
@@ -17,7 +18,7 @@ const templates = fs
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
 
-const loadDatabaseConfig = (template: string) => {
+const loadDatabaseConfig = async (template: string) => {
   const configDir = path.join(templatesDir, template, 'config');
   const file = ['database.ts', 'database.js']
     .map((name) => path.join(configDir, name))
@@ -27,8 +28,8 @@ const loadDatabaseConfig = (template: string) => {
     throw new Error(`No database config found for template "${template}"`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mod = require(file);
+  // Import through Vitest so `.ts` templates are transformed (native `require` would load them as ESM without `__dirname`)
+  const mod = await import(file);
 
   return (mod.default ?? mod) as (ctx: { env: typeof env }) => unknown;
 };
@@ -48,16 +49,16 @@ describe('create-strapi-app templates database config', () => {
     expect(templates.length).toBeGreaterThan(0);
   });
 
-  it.each(templates)('%s throws on an unsupported DATABASE_CLIENT', (template) => {
+  it.each(templates)('%s throws on an unsupported DATABASE_CLIENT', async (template) => {
     process.env.DATABASE_CLIENT = 'oracle';
-    const config = loadDatabaseConfig(template);
+    const config = await loadDatabaseConfig(template);
 
     expect(() => config({ env })).toThrow('Unsupported DATABASE_CLIENT');
   });
 
-  it.each(templates)('%s builds a config for a supported DATABASE_CLIENT', (template) => {
+  it.each(templates)('%s builds a config for a supported DATABASE_CLIENT', async (template) => {
     process.env.DATABASE_CLIENT = 'sqlite';
-    const config = loadDatabaseConfig(template);
+    const config = await loadDatabaseConfig(template);
 
     expect(() => config({ env })).not.toThrow();
   });
