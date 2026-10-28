@@ -83,6 +83,11 @@ declare global {
         // Spread over the options read from the `ratelimit` key of the plugin config.
         'plugin::email.rateLimit': RateLimitOptions | undefined;
       }
+
+      /** Registered at bootstrap (`bootstrap.ts`). */
+      interface PermissionActions {
+        'plugin::email.settings.read': true;
+      }
     }
   }
 }
