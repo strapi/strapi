@@ -114,8 +114,11 @@ declare global {
   explicit type argument. The registered contract is the CE shape with the EE-only members
   optional.
 - A package whose services and controllers exist only with an EE feature registers each entry as
-  `Contract | undefined`, e.g. `plugin::review-workflows.workflows`. A CE application, or a license
-  without the feature, does not register them. Strict callers check the lookup result.
+  `Core.Licensed<'<feature>', Contract>`, e.g. `plugin::review-workflows.workflows`. A CE
+  application, or a license without the feature, does not register them. The entry is `Contract`
+  when the application lists the feature in `licensedFeatures`, `undefined` when it does not, and
+  `Contract | undefined` in package and plugin programs, where strict callers check the lookup
+  result.
 
 ### Service contracts
 
