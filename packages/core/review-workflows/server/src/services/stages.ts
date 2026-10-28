@@ -28,9 +28,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
-    findById(id: string | number, { populate }: any = {}) {
+    findById(id: string | number, { workflowId, populate }: any = {}) {
       return strapi.db.query(STAGE_MODEL_UID).findOne({
-        where: { id },
+        where: workflowId === undefined ? { id } : { id, workflow: workflowId },
         populate,
       });
     },

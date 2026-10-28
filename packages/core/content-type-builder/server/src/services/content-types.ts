@@ -229,6 +229,23 @@ export const generateAPI = ({
 };
 
 /**
+ * A document can span several rows (draft and published versions, one per locale),
+ * so compare documentIds instead of counting rows.
+ */
+const hasMultipleDocuments = async (uid: UID.ContentType) => {
+  const firstEntry = await strapi.db.query(uid).findOne({ select: ['documentId'] });
+  if (firstEntry === null) {
+    return false;
+  }
+
+  const otherDocumentsCount = await strapi.db.query(uid).count({
+    where: { documentId: { $ne: firstEntry.documentId } },
+  });
+
+  return otherDocumentsCount > 0;
+};
+
+/**
  * Edits a contentType and handle the nested contentTypes sent with it
  */
 export const editContentType = async (
@@ -256,8 +273,7 @@ export const editContentType = async (
   contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
 
   if (newKind !== previousKind && newKind === 'singleType') {
-    const entryCount = await strapi.db.query(uid).count();
-    if (entryCount > 1) {
+    if ((await hasMultipleDocuments(uid)) === true) {
       throw new ApplicationError(
         'You cannot convert a collectionType to a singleType when having multiple entries in DB'
       );
