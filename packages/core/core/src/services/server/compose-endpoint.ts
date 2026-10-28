@@ -6,13 +6,42 @@ import Router from '@koa/router';
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
 import { createPolicicesMiddleware } from './policy';
+import {
+  RoutePathMigrationError,
+  type RoutePathConstraint,
+  translateRoutePath,
+} from './route-path';
 
 const getMethod = (route: Core.Route) => {
   return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
 };
 
-const getPath = (route: Core.Route) =>
-  typeof route.path === 'string' ? trim(route.path) : route.path;
+const getPath = (route: Core.Route, strapi: Core.Strapi) => {
+  if (typeof route.path !== 'string') {
+    return { path: route.path, constraints: [] };
+  }
+
+  const path = trim(route.path);
+  const translated = translateRoutePath(path);
+
+  if (translated.changed) {
+    strapi.log.warn(
+      `Route "${route.method} ${path}" uses path-to-regexp v6 syntax and was migrated to "${translated.path}".`
+    );
+  }
+
+  return translated;
+};
+
+const createRoutePathConstraintMiddleware =
+  (constraints: RoutePathConstraint[]): Core.MiddlewareHandler =>
+  async (ctx, next) => {
+    if (constraints.some(({ name, pattern }) => !pattern.test(ctx.params[name]))) {
+      return ctx.notFound();
+    }
+
+    return next();
+  };
 
 const createRouteInfoMiddleware =
   (routeInfo: Core.Route): Core.MiddlewareHandler =>
@@ -77,7 +106,7 @@ export default (strapi: Core.Strapi) => {
   return (route: Core.Route, { router }: { router: Router }) => {
     try {
       const method = getMethod(route);
-      const path = getPath(route);
+      const { path, constraints } = getPath(route, strapi);
 
       const middlewares = resolveRouteMiddlewares(route, strapi);
 
@@ -85,6 +114,7 @@ export default (strapi: Core.Strapi) => {
 
       const routeHandler = compose([
         createRouteInfoMiddleware(route),
+        createRoutePathConstraintMiddleware(constraints),
         authenticate,
         authorize,
         createPolicicesMiddleware(route, strapi),
@@ -93,8 +123,23 @@ export default (strapi: Core.Strapi) => {
         ...castArray(action),
       ]);
 
-      router[method](path, routeHandler);
+      try {
+        router[method](path, routeHandler);
+      } catch (error) {
+        if (typeof route.path === 'string' && error instanceof Error) {
+          throw new RoutePathMigrationError(
+            route.path,
+            `path-to-regexp v8 rejected the translated path "${path}": ${error.message}`
+          );
+        }
+
+        throw error;
+      }
     } catch (error) {
+      if (error instanceof RoutePathMigrationError) {
+        throw error;
+      }
+
       if (error instanceof Error) {
         error.message = `Error creating endpoint ${route.method} ${route.path}: ${error.message}`;
       }
