@@ -31,7 +31,7 @@ In `register`, `extendReviewWorkflowContentTypes` adds two one-to-one relations 
 
 ### Document Service middlewares
 
-Three middlewares in `services/document-service-middleware.ts` connect the workflow to the write path. `assignStageOnCreate` sets the first stage on `create` and `clone`. `handleStageOnUpdate` emits the `review-workflows.updateEntryStage` event when the stage changes. `checkStageBeforePublish` rejects `publish` when the entry is not at `stageRequiredToPublish`. See [Document write path](../../../architecture/05-document-write-path.md).
+Three middlewares in `services/document-service-middleware.ts` connect the workflow to the write path. `assignStageOnCreate` sets the first stage on `create` and `clone`, and on an `update` that creates a new locale of the document. `handleStageOnUpdate` emits the `review-workflows.updateEntryStage` event when the stage changes. `checkStageBeforePublish` rejects `publish` when the entry is not at `stageRequiredToPublish`. See [Document write path](../../../architecture/05-document-write-path.md).
 
 ### Stage permissions
 

@@ -560,7 +560,11 @@ const RelationsInput = ({
   const targetModel = props.attribute.targetModel;
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
-  const [searchForTrigger, { data, isLoading, isError }] = useLazySearchRelationsQuery();
+  const [searchForTrigger, { data, isLoading, isFetching, isError, error: searchError }] =
+    useLazySearchRelationsQuery();
+  // Refetching a failed search reports `isError: false` and `isLoading: true` until it settles.
+  // Keep showing the previous error meanwhile instead of flashing the loading state.
+  const isRetryingFailedSearch = isFetching && searchError !== undefined;
 
   /**
    * Because we're using a lazy query, we need to trigger the search
@@ -691,8 +695,8 @@ const RelationsInput = ({
           placeholder={placeholder}
           hasNextPage={hasNextPage}
           isLoadingPermissions={isLoadingPermissions}
-          isLoadingSearchRelations={isLoading}
-          isSearchRelationsError={isError}
+          isLoadingSearchRelations={isLoading && !isRetryingFailedSearch}
+          isSearchRelationsError={isError || isRetryingFailedSearch}
           handleChange={handleChange}
           setSearchParams={setSearchParams}
           data={data}
