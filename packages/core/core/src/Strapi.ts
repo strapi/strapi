@@ -356,21 +356,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('auth', createAuth())
       .add('server', () => createServer(this))
       .add('fs', () => createStrapiFs(this))
-      .add('eventHub', () =>
-        createEventHub({
-          onSubscriberError: (error, { eventName, phase }) => {
-            try {
-              this.log.warn(
-                `[event-hub] ${phase} handler failed for "${eventName}": ${
-                  error instanceof Error ? error.message : String(error)
-                }`
-              );
-            } catch {
-              console.warn('[strapi:event-hub]', phase, eventName, error);
-            }
-          },
-        })
-      )
+      .add('eventHub', () => createEventHub())
       .add('performanceEvents', () => createPerformanceEventsPublicApi(this))
       .add('performanceMetrics', () => createPerformanceLiveMetrics(this))
       .add('startupLogger', () => utils.createStartupLogger(this))

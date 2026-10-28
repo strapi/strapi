@@ -41,12 +41,12 @@ describe('createPerformanceLiveMetrics', () => {
       'server.performance.requestTrackingEnabled': false,
       'database.performance.enabled': false,
     });
-    const subscribeSpy = jest.spyOn(strapi.eventHub, 'subscribe');
+    const onSpy = jest.spyOn(strapi.eventHub, 'on');
 
     const metrics = createPerformanceLiveMetrics(strapi);
 
     expect(metrics.isActive()).toBe(false);
-    expect(subscribeSpy).not.toHaveBeenCalled();
+    expect(onSpy).not.toHaveBeenCalled();
 
     const snap = metrics.snapshot();
     expect(snap.active).toBe(false);
@@ -98,6 +98,22 @@ describe('createPerformanceLiveMetrics', () => {
     });
     expect(snap.slowestRoutes[0].avgDurationMs).toBeCloseTo(105);
 
+    metrics.dispose();
+  });
+
+  it('listens only for performance events', () => {
+    const strapi = mockStrapi();
+    const subscribeSpy = jest.spyOn(strapi.eventHub, 'subscribe');
+    const onSpy = jest.spyOn(strapi.eventHub, 'on');
+
+    const metrics = createPerformanceLiveMetrics(strapi);
+
+    expect(subscribeSpy).not.toHaveBeenCalled();
+    expect(onSpy.mock.calls.map(([eventName]) => eventName)).toEqual([
+      PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY,
+      PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW,
+      PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR,
+    ]);
     metrics.dispose();
   });
 

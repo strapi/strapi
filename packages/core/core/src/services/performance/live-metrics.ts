@@ -222,20 +222,17 @@ export function createPerformanceLiveMetrics(
     agg.totalMs += ms;
   };
 
-  const subscriber: Modules.EventHub.Subscriber = async (eventName, ...args) => {
-    if (eventName === PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY) {
-      recordRequestSummary((args[0] ?? {}) as Parameters<typeof recordRequestSummary>[0]);
-      return;
-    }
-    if (
-      eventName === PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW ||
-      eventName === PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR
-    ) {
-      recordDbQuery((args[0] ?? {}) as Parameters<typeof recordDbQuery>[0]);
-    }
-  };
-
-  const unsubscribe = strapi.eventHub.subscribe(subscriber);
+  const unsubscribes = [
+    strapi.eventHub.on(PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY, async (event) => {
+      recordRequestSummary(event as Parameters<typeof recordRequestSummary>[0]);
+    }),
+    strapi.eventHub.on(PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW, async (event) => {
+      recordDbQuery(event as Parameters<typeof recordDbQuery>[0]);
+    }),
+    strapi.eventHub.on(PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR, async (event) => {
+      recordDbQuery(event as Parameters<typeof recordDbQuery>[0]);
+    }),
+  ];
 
   const snapshot = (): Modules.PerformanceMetrics.PerformanceLiveSnapshot => {
     const minute = currentMinute();
@@ -332,7 +329,7 @@ export function createPerformanceLiveMetrics(
     isActive: () => true,
     snapshot,
     dispose() {
-      unsubscribe();
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
     },
   };
 }

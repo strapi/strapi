@@ -46,13 +46,19 @@ strapi.performanceEvents.getSchemaVersion(); // 1
 strapi.performanceEvents.getCapabilities(); // { schemaVersion: 1, events: [...] }
 ```
 
-You may still use `strapi.eventHub.subscribe` / `on`, but core isolates errors only for listeners registered through **`performanceEvents.subscribe`** and for internal routing via the hub’s global error handler.
+You may still use `strapi.eventHub.subscribe` / `on`. Listener errors from those APIs propagate to
+the emitter. Core isolates errors only for listeners registered through
+**`performanceEvents.subscribe`**.
 
 ## Event catalog
 
 ### `performance.db.query.slow` / `performance.db.query.error`
 
 Emitted when `database.performance.enabled` is true and the database layer records a slow or failed query.
+
+When `server.performance.requestTrackingEnabled` is true, the database also measures every query
+for the request summary's `dbTotalMs`, even if `database.performance.enabled` is false. This
+request-only telemetry does not emit database performance events.
 
 Payload (**v1**): `schemaVersion`, `eventVersion`, plus
 

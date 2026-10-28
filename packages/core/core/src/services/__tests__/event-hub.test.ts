@@ -194,37 +194,24 @@ describe('Event Hub', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('continues emit when a hub subscriber throws', async () => {
-    const onSubscriberError = jest.fn();
-    const { emit, subscribe } = createEventHub({ onSubscriberError });
+  it('rejects when a hub subscriber throws', async () => {
+    const { emit, subscribe } = createEventHub();
 
-    const second = jest.fn();
     subscribe(async () => {
       throw new Error('subscriber boom');
     });
-    subscribe(second);
 
-    await expect(emit('e')).resolves.toBeUndefined();
-    expect(onSubscriberError).toHaveBeenCalledWith(
-      expect.any(Error),
-      expect.objectContaining({ eventName: 'e', phase: 'subscriber' })
-    );
-    expect(second).toHaveBeenCalled();
+    await expect(emit('e')).rejects.toThrow('subscriber boom');
   });
 
-  it('continues emit when an on() listener throws', async () => {
-    const onSubscriberError = jest.fn();
-    const { emit, on } = createEventHub({ onSubscriberError });
+  it('rejects when an on() listener throws', async () => {
+    const { emit, on } = createEventHub();
 
     on('e', async () => {
       throw new Error('listener boom');
     });
 
-    await expect(emit('e')).resolves.toBeUndefined();
-    expect(onSubscriberError).toHaveBeenCalledWith(
-      expect.any(Error),
-      expect.objectContaining({ eventName: 'e', phase: 'listener' })
-    );
+    await expect(emit('e')).rejects.toThrow('listener boom');
   });
 });
 

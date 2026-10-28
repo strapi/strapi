@@ -233,6 +233,39 @@ describe('Database performance events', () => {
     }
   });
 
+  it('reports every query duration to request telemetry when performance events are disabled', async () => {
+    const notify = jest.fn();
+    const db = new Database({
+      ...baseConfig,
+      performance: {
+        enabled: false,
+        getRequestId: () => 'request-only',
+        notifyQueryTelemetry: notify,
+      },
+    });
+    const subscriber = jest.fn();
+    db.subscribeToPerformanceEvents(subscriber);
+    const queryData = {
+      __knexQueryUid: 'request-only-query',
+      sql: 'select 1',
+      method: 'select',
+    };
+
+    (db.connection as any).emit('query', queryData);
+    (db.connection as any).emit('query-response', [], queryData);
+    await waitForSubscribers();
+
+    expect(subscriber).not.toHaveBeenCalled();
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        durationMs: expect.any(Number),
+        requestId: 'request-only',
+        slowOrErrorEventEmitted: false,
+      })
+    );
+    await db.destroy();
+  });
+
   it('mergeKnexQueryContext forwards getRequestId into the Knex queryContext', async () => {
     const qc = jest.fn();
 

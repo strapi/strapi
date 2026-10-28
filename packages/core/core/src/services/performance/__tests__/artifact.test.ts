@@ -98,6 +98,24 @@ describe('Performance artifact writer', () => {
     await expect(readFile(artifactPath, 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
+  it('subscribes only to performance events', async () => {
+    const strapi = mockStrapi() as any;
+    const subscribeSpy = jest.spyOn(strapi.eventHub, 'subscribe');
+    const onSpy = jest.spyOn(strapi.eventHub, 'on');
+
+    const dispose = attachPerformanceArtifactWriter(strapi);
+
+    expect(subscribeSpy).not.toHaveBeenCalled();
+    expect(onSpy.mock.calls.map(([eventName]) => eventName)).toEqual([
+      PERFORMANCE_HUB_EVENT.REQUEST_START,
+      PERFORMANCE_HUB_EVENT.REQUEST_STAGE,
+      PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY,
+      PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW,
+      PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR,
+    ]);
+    await dispose();
+  });
+
   it('respects maxEvents as a rolling cap (preferred key)', async () => {
     const strapi = mockStrapi({
       'database.performance.maxEvents': 2,

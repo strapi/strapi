@@ -1,7 +1,7 @@
 import { mkdir, rename, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import type { Core, Modules } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { percentileNearestSorted } from '@strapi/utils';
 
 import {
@@ -252,20 +252,11 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
     }
   };
 
-  const subscriber: Modules.EventHub.Subscriber = async (eventName, ...args) => {
-    const isDb =
-      eventName === PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW ||
-      eventName === PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR;
-    const isReq = (PERFORMANCE_ARTIFACT_REQUEST_EVENTS as readonly string[]).includes(eventName);
-
-    if (!isDb && !isReq) {
-      return;
-    }
-
+  const recordEvent = (eventName: string, event: unknown) => {
     buffer.push({
       kind: eventName,
       emittedAt: new Date().toISOString(),
-      event: args[0],
+      event,
     });
 
     while (buffer.length > maxEvents) {
@@ -273,7 +264,15 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
     }
   };
 
-  const unsubscribe = strapi.eventHub.subscribe(subscriber);
+  const unsubscribes = [
+    ...PERFORMANCE_ARTIFACT_REQUEST_EVENTS,
+    PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW,
+    PERFORMANCE_HUB_EVENT.DB_QUERY_ERROR,
+  ].map((eventName) =>
+    strapi.eventHub.on(eventName, async (event) => {
+      recordEvent(eventName, event);
+    })
+  );
 
   const flushTimer = setInterval(() => {
     flush().catch(() => {});
@@ -282,7 +281,7 @@ export function attachPerformanceArtifactWriter(strapi: Core.Strapi): Performanc
 
   return async () => {
     clearInterval(flushTimer);
-    unsubscribe();
+    unsubscribes.forEach((unsubscribe) => unsubscribe());
     await flush();
   };
 }

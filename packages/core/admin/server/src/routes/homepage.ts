@@ -12,7 +12,7 @@ export default [
     path: '/homepage/performance-metrics',
     handler: 'homepage.getPerformanceHomeMetrics',
     config: {
-      policies: ['admin::isAuthenticatedAdmin'],
+      policies: ['admin::isAuthenticatedAdmin', 'admin::isSuperAdmin'],
     },
   },
   {

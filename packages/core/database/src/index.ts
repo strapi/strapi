@@ -218,7 +218,8 @@ class Database {
   }
 
   private registerPerformanceListeners() {
-    if (!this.performance.enabled) {
+    // Request telemetry needs query durations even if slow-query monitoring is disabled.
+    if (!this.performance.enabled && !this.notifyQueryTelemetry) {
       return;
     }
 
@@ -287,19 +288,23 @@ class Database {
     const queryContextRequestId = state.requestId;
     const contextualRequestId = queryContextRequestId ?? this.getRequestId?.();
 
-    const event = this.buildPerformanceEventPayload({
-      state,
-      durationMs,
-      contextualRequestId,
-      success,
-      errorCode,
-    });
-
     let slowOrErrorEventEmitted = false;
 
-    if (event) {
-      this.emitPerformance(event);
-      slowOrErrorEventEmitted = true;
+    // Slow-query/error events remain opt-in. The telemetry hook above is deliberately broader:
+    // request tracking needs the duration of every query to calculate its DB time.
+    if (this.performance.enabled) {
+      const event = this.buildPerformanceEventPayload({
+        state,
+        durationMs,
+        contextualRequestId,
+        success,
+        errorCode,
+      });
+
+      if (event) {
+        this.emitPerformance(event);
+        slowOrErrorEventEmitted = true;
+      }
     }
 
     this.notifyQueryTelemetry?.({
