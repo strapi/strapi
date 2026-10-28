@@ -53,7 +53,11 @@ describe('loadStrapi', () => {
     const workDir = mkdtempSync(join(tmpdir(), 'load-strapi-'));
     const dbFile = join(workDir, 'data.db');
 
-    const strapi = await loadStrapi(minimalApp(dbFile), { serveAdminPanel: false });
+    const strapi = await loadStrapi(minimalApp(dbFile), {
+      appDir: workDir,
+      distDir: workDir,
+      serveAdminPanel: false,
+    });
 
     try {
       expect(strapi.isLoaded).toBe(true);
