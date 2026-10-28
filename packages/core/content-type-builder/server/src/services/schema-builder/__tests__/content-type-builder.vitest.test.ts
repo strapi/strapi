@@ -378,7 +378,11 @@ describe('content-type-builder createContentType draftAndPublish', () => {
       attributes: { title: { type: 'string' } },
       ...infos,
     });
-    return contentType.schema.options;
+    const { options } = contentType.schema;
+    if (options === undefined) {
+      throw new Error('Expected the created content type to have options');
+    }
+    return options;
   };
 
   it('does not set draftAndPublish when the payload does not set it', () => {
