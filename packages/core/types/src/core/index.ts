@@ -17,4 +17,5 @@ export * from './strapi';
 export type * from './content-api-schema-registry';
 export type * from './permission';
 export type * from './registry-drift';
+export type * from './license';
 export type { IsStrict } from './strictness';

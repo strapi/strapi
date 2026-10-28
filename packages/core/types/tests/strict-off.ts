@@ -12,8 +12,17 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      // A declared license scope listing one feature: lookups stay permissive without strict types.
+      interface Settings {
+        licenses: 'declared';
+      }
+      interface LicensedFeatures {
+        'review-workflows': true;
+      }
       interface PackageServices {
         'plugin::legacy.example': { count(): number };
+        'plugin::legacy.licensed': Core.Licensed<'review-workflows', { count(): number }>;
+        'plugin::legacy.unlicensed': Core.Licensed<'cms-content-releases', { count(): number }>;
       }
       interface AppServices {
         'plugin::legacy.example': { count(): string };
@@ -25,6 +34,10 @@ declare global {
       }
       interface PackageControllers {
         'plugin::legacy.example': { list: Core.ControllerHandler };
+        'plugin::legacy.licensed': Core.Licensed<
+          'review-workflows',
+          { list: Core.ControllerHandler }
+        >;
       }
       interface AppControllers {
         'plugin::legacy.example': { find: Core.ControllerHandler };
@@ -621,3 +634,16 @@ type PermissionActionChecks = [
 ];
 declare const permissionActionChecks: PermissionActionChecks;
 permissionActionChecks satisfies unknown;
+
+// License gates are strict-only: without strict types, gated lookups keep develop's types, even in a
+// declared license scope.
+type LicenseChecks = [
+  Expect<Equal<Core.LicenseScope, 'declared'>>,
+  Expect<Equal<Core.ServiceFor<'plugin::legacy.licensed'>, Core.Service>>,
+  Expect<Equal<Core.ServiceFor<'plugin::legacy.unlicensed'>, Core.Service>>,
+  Expect<Equal<Core.ControllerFor<'plugin::legacy.licensed'>, Core.Controller>>,
+  Expect<Equal<Core.Strapi['services']['plugin::legacy.licensed'], Core.Service>>,
+  Expect<Equal<Core.Strapi['controllers']['plugin::legacy.licensed'], Core.Controller>>,
+];
+declare const licenseChecks: LicenseChecks;
+licenseChecks satisfies unknown;
