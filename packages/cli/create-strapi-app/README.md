@@ -46,12 +46,12 @@ With that flag, and no overriding flags, the defaults are:
 - initialize a git repository
 - SQLite
 
-Cloud login runs only when neither `--skip-cloud` nor `--non-interactive` is set. `--non-interactive` already skips it; `--skip-cloud` skips it on its own.
+`--non-interactive` also skips cloud login, so `--skip-cloud` is not needed with it.
 
 ```
-yarn create strapi-app my-project --non-interactive --skip-cloud
+yarn create strapi-app my-project --non-interactive
 ```
 
 ```
-npx create-strapi-app my-project --non-interactive --skip-cloud
+npx create-strapi-app my-project --non-interactive
 ```
