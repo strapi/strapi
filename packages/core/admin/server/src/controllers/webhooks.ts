@@ -60,6 +60,16 @@ const webhookValidator = yup
         .required();
     }),
     events: yup.array().of(yup.string()).required(),
+    // The body template: a JSON object, or null to send the default payload
+    body: yup
+      .mixed()
+      .nullable()
+      .test(
+        'is-json-object',
+        'body must be a JSON object',
+        (value) => value === undefined || value === null || _.isPlainObject(value)
+      ),
+    bodyMode: yup.string().oneOf(['merge', 'replace']),
     contentTypeEvents: yup.lazy((data) =>
       yup.object(
         _.isPlainObject(data)

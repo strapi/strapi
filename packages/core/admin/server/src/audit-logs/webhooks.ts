@@ -17,16 +17,28 @@ export interface WebhookEvent {
 /**
  * The webhook as it may enter a payload: header names only, sorted. Header values
  * carry `Authorization` tokens and are never recorded, not even on the event hub.
+ * The body template is recorded as its sorted top-level keys for the same reason
+ * (a pipeline token can sit in the body), or `null` for the default payload.
  */
 export interface AuditedWebhook extends WebhookEvent {
   url: string;
   events: string[];
   contentTypeEvents: Record<string, string[]>;
   headers: string[];
+  body: string[] | null;
+  bodyMode: Modules.WebhookStore.BodyMode;
   isEnabled: boolean;
 }
 
-const AUDITED_FIELDS = ['name', 'url', 'events', 'contentTypeEvents', 'isEnabled'] as const;
+const AUDITED_FIELDS = [
+  'name',
+  'url',
+  'events',
+  'contentTypeEvents',
+  'body',
+  'bodyMode',
+  'isEnabled',
+] as const;
 
 /**
  * Header values are secrets, so the diff lists names only. `changed`: headers whose
@@ -44,6 +56,8 @@ export type WebhookChanges = Partial<{
   events: Modules.AuditLogs.FieldChange<string[]>;
   contentTypeEvents: Modules.AuditLogs.FieldChange<Record<string, string[]>>;
   headers: HeaderChanges;
+  body: Modules.AuditLogs.FieldChange<string[] | null>;
+  bodyMode: Modules.AuditLogs.FieldChange<Modules.WebhookStore.BodyMode>;
   isEnabled: Modules.AuditLogs.FieldChange<boolean>;
 }>;
 
@@ -82,6 +96,8 @@ export const toAuditedWebhook = (webhook: Webhook): AuditedWebhook => ({
     ])
   ),
   headers: sortStrings(Object.keys(webhook.headers ?? {})),
+  body: webhook.body ? sortStrings(Object.keys(webhook.body)) : null,
+  bodyMode: webhook.bodyMode ?? 'merge',
   isEnabled: webhook.isEnabled,
 });
 
@@ -106,17 +122,32 @@ const getHeaderChanges = (
   return Object.values(changes).some((list) => list.length > 0) ? changes : undefined;
 };
 
+/**
+ * The url and the body are compared as stored, so a change to their stripped part
+ * (the url path, a body value) is recorded too.
+ */
+const hasChanged = (
+  field: (typeof AUDITED_FIELDS)[number],
+  [previous, next]: [Webhook, Webhook],
+  [before, after]: [AuditedWebhook, AuditedWebhook]
+): boolean => {
+  switch (field) {
+    case 'url':
+      return previous.url !== next.url;
+    case 'body':
+      return !isEqual(previous.body ?? null, next.body ?? null);
+    default:
+      return !isEqual(before[field], after[field]);
+  }
+};
+
 export const getWebhookChanges = (previous: Webhook, next: Webhook): WebhookChanges => {
   const before = toAuditedWebhook(previous);
   const after = toAuditedWebhook(next);
   const changes: WebhookChanges = {};
 
   for (const field of AUDITED_FIELDS) {
-    // The url is compared as stored, so a change to its stripped part is recorded too.
-    const changed =
-      field === 'url' ? previous.url !== next.url : !isEqual(before[field], after[field]);
-
-    if (changed) {
+    if (hasChanged(field, [previous, next], [before, after])) {
       (changes as Record<string, unknown>)[field] = { before: before[field], after: after[field] };
     }
   }
@@ -157,6 +188,8 @@ export const registerWebhookAuditEvents = (auditLogsLifecycle: AuditLogsLifecycl
         events: event.events,
         contentTypeEvents: event.contentTypeEvents,
         headers: event.headers,
+        body: event.body,
+        bodyMode: event.bodyMode,
         isEnabled: event.isEnabled,
       },
     })

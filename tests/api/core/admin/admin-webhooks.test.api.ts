@@ -162,6 +162,148 @@ describe('Admin API Webhooks', () => {
     });
   });
 
+  describe('Body template', () => {
+    const template = {
+      ref: 'main',
+      inputs: { event: '{{ event }}', uid: '{{ uid }}', title: '{{ entry.name }}' },
+      entry: '{{ entry }}',
+    };
+
+    test('A webhook sends the default payload by default', async () => {
+      const { webhook, status } = await createWebhook({});
+
+      expect(status).toBe(201);
+      expect(webhook).toMatchObject({ body: null, bodyMode: 'merge' });
+    });
+
+    test('Can save a body template and its mode', async () => {
+      const { webhook: createdWebhook, status } = await createWebhook({ body: template });
+
+      expect(status).toBe(201);
+      expect(createdWebhook).toMatchObject({ body: template, bodyMode: 'merge' });
+
+      const { webhook, status: updateStatus } = await updateWebhook(createdWebhook.id, {
+        body: { text: 'Published: {{ entry.name }}' },
+        bodyMode: 'replace',
+      });
+
+      expect(updateStatus).toBe(200);
+      expect(webhook).toMatchObject({
+        body: { text: 'Published: {{ entry.name }}' },
+        bodyMode: 'replace',
+      });
+    });
+
+    test('Can not save an unknown body mode', async () => {
+      const { status } = await createWebhook({ body: template, bodyMode: 'append' as any });
+
+      expect(status).toBe(400);
+    });
+
+    test('Updating a webhook without a body keeps the saved template', async () => {
+      const { webhook: createdWebhook } = await createWebhook({ body: template });
+
+      const { webhook, status } = await updateWebhook(createdWebhook.id, { name: 'renamed' });
+
+      expect(status).toBe(200);
+      expect(webhook).toMatchObject({ name: 'renamed', body: template });
+    });
+
+    test('Can go back to the default payload with a null body', async () => {
+      const { webhook: createdWebhook } = await createWebhook({ body: template });
+
+      const { webhook, status } = await updateWebhook(createdWebhook.id, { body: null });
+
+      expect(status).toBe(200);
+      expect(webhook.body).toBeNull();
+    });
+
+    test.each([[['ref']], ['{"ref":"main"}'], [42], [true]])(
+      'Can not save a body that is not a JSON object (%j)',
+      async (body: any) => {
+        const { status } = await createWebhook({ body });
+
+        expect(status).toBe(400);
+      }
+    );
+
+    test('Entry events are sent with the rendered body template', async () => {
+      const requests: Array<{ url: string; body: Record<string, unknown> }> = [];
+
+      const server = http.createServer((req, res) => {
+        let body = '';
+        req.on('data', (chunk) => {
+          body += chunk;
+        });
+        req.on('end', () => {
+          requests.push({ url: req.url, body: JSON.parse(body) });
+          res.end();
+        });
+      });
+
+      await new Promise<void>((resolve) => {
+        server.listen(0, '127.0.0.1', resolve);
+      });
+
+      const { port } = server.address() as AddressInfo;
+      const getDeliveries = (url: string) =>
+        requests.filter((req) => req.url === url).map((req) => req.body);
+
+      try {
+        await createWebhook({
+          url: `http://127.0.0.1:${port}/merge`,
+          events: ['entry.create'],
+          body: template,
+        });
+        await createWebhook({
+          url: `http://127.0.0.1:${port}/replace`,
+          events: ['entry.create'],
+          body: template,
+          bodyMode: 'replace',
+        });
+        // For each event, webhooks are sent one after the other, in the order they were created.
+        // So once the last webhook received the event, the other ones were already handled.
+        await createWebhook({
+          url: `http://127.0.0.1:${port}/default`,
+          events: ['entry.create'],
+        });
+
+        const article = await strapi
+          .documents(ARTICLE_UID as any)
+          .create({ data: { name: 'Hello' } });
+
+        const timeout = Date.now() + 10000;
+        while (getDeliveries('/default').length < 1 && Date.now() < timeout) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 50);
+          });
+        }
+
+        const entry = expect.objectContaining({ documentId: article.documentId, name: 'Hello' });
+        const defaultPayload = {
+          event: 'entry.create',
+          createdAt: expect.any(String),
+          model: 'webhook-article',
+          uid: ARTICLE_UID,
+          entry,
+        };
+        const rendered = {
+          ref: 'main',
+          inputs: { event: 'entry.create', uid: ARTICLE_UID, title: 'Hello' },
+          entry,
+        };
+
+        expect(getDeliveries('/default')).toEqual([defaultPayload]);
+        expect(getDeliveries('/merge')).toEqual([{ ...defaultPayload, ...rendered }]);
+        expect(getDeliveries('/replace')).toEqual([rendered]);
+      } finally {
+        await new Promise((resolve) => {
+          server.close(resolve);
+        });
+      }
+    });
+  });
+
   describe('Content type events', () => {
     test('A webhook has no content type events by default', async () => {
       const { webhook, status } = await createWebhook({});
