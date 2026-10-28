@@ -637,15 +637,27 @@ const FillFromAnotherLocaleAction = ({
  * UnlockSharedFieldsAction
  * -----------------------------------------------------------------------------------------------*/
 
-const UnlockSharedFieldsAction = () => {
+const UnlockSharedFieldsAction = ({ model, collectionType, documentId }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams<I18nBaseQuery>();
-  const { hasI18n } = useI18n();
+  const { hasI18n, canUpdate } = useI18n();
   const { data: locales = [] } = useGetLocalesQuery();
   const { isUnlocked, unlock, relock } = useI18nSharedFieldsLock(
     'UnlockSharedFieldsAction',
     (state) => state
   );
+  // Only need the schema to know which root-level attributes are shared, so skip
+  // fetching the document itself (it's already loaded elsewhere).
+  const { schema } = useDocument({ model, collectionType, documentId }, { skip: true });
+  const values = useForm('UnlockSharedFieldsAction', (state) => state.values) as Record<
+    string,
+    unknown
+  >;
+  const initialValues = useForm(
+    'UnlockSharedFieldsAction',
+    (state) => state.initialValues
+  ) as Record<string, unknown>;
+  const setValues = useForm('UnlockSharedFieldsAction', (state) => state.setValues);
 
   const currentLocaleCode = query.plugins?.i18n?.locale;
   const defaultLocale = Array.isArray(locales)
@@ -658,9 +670,44 @@ const UnlockSharedFieldsAction = () => {
     currentLocaleCode && defaultLocale?.code && currentLocaleCode !== defaultLocale.code
   );
 
-  if (!hasI18n || !isSecondaryLocale) {
+  /**
+   * Editing shared fields overwrites the default locale's saved values (see the
+   * warning copy below), so only an admin who can update the default locale may
+   * see or invoke the unlock action — a user permitted to edit only a secondary
+   * locale must not be able to reach it.
+   */
+  const canEditSharedFields = Boolean(
+    defaultLocale?.code && canUpdate.includes(defaultLocale.code)
+  );
+
+  if (!hasI18n || !isSecondaryLocale || !canEditSharedFields) {
     return null;
   }
+
+  /**
+   * Root-level attributes that are "shared" (locked while reading a secondary
+   * locale). Mirrors `useShouldLockNonLocalizedField` in the content-manager
+   * (relations and uids are always locale-specific; everything else is shared
+   * unless explicitly `pluginOptions.i18n.localized === true`), so re-locking
+   * resets exactly the fields this action unlocks — nothing more.
+   */
+  const sharedFieldNames = schema?.attributes
+    ? Object.keys(schema.attributes).filter((name) => {
+        const attribute = schema.attributes[name] as {
+          type?: string;
+          pluginOptions?: object;
+        };
+
+        if (attribute.type === 'relation' || attribute.type === 'uid') {
+          return false;
+        }
+
+        const i18nOptions = attribute.pluginOptions as
+          { i18n?: { localized?: boolean } } | undefined;
+
+        return i18nOptions?.i18n?.localized !== true;
+      })
+    : [];
 
   if (isUnlocked) {
     return {
@@ -671,6 +718,16 @@ const UnlockSharedFieldsAction = () => {
         defaultMessage: 'Keep shared fields locked',
       }),
       onClick: () => {
+        // Discard any edits made to shared fields while unlocked so they are
+        // never saved — only the locked baseline (`initialValues`) is kept.
+        // Locale-specific field edits are left untouched.
+        if (sharedFieldNames.length > 0) {
+          const resetValues = sharedFieldNames.reduce<Record<string, unknown>>(
+            (acc, name) => ({ ...acc, [name]: initialValues[name] }),
+            { ...values }
+          );
+          setValues(resetValues);
+        }
         relock();
         return true;
       },
