@@ -479,20 +479,22 @@ export type StagesService = {
   /**
    * Moves the entries of a content type to the stage `toStageId`: the entries at `fromStageId`,
    * the entries without a stage when it is `null`, or the entries with a stage when it is
-   * `undefined`. `trx` is ignored. Resolves what the database driver returns for the write.
+   * `undefined`. Resolves what the database driver returns for the write, or `undefined` without a
+   * write when the content type no longer exists or has no stage attribute.
    *
    * @internal
    */
   updateEntitiesStage(
     contentTypeUID: UID.ContentType,
-    params: { fromStageId?: number | null; toStageId: number; trx?: unknown }
-  ): Promise<number | number[]>;
+    params: { fromStageId?: number | null; toStageId: number }
+  ): Promise<number | number[] | undefined>;
   /**
-   * Removes the stage of every entry of a content type. Resolves the number of removed links.
+   * Removes the stage of every entry of a content type. Resolves the number of removed links, or
+   * `undefined` without a write when the content type no longer exists or has no stage attribute.
    *
    * @internal
    */
-  deleteAllEntitiesStage(contentTypeUID: UID.ContentType): Promise<number>;
+  deleteAllEntitiesStage(contentTypeUID: UID.ContentType): Promise<number | undefined>;
 };
 
 /**
