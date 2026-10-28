@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { isArray, castArray, isPlainObject } from 'lodash/fp';
+import { castArray, isPlainObject } from 'lodash';
 import type { Knex } from 'knex';
 
 import { isOperator, isOperatorOfType } from '@strapi/utils';
@@ -60,7 +60,7 @@ const processSingleAttributeWhere = (
 };
 
 const processAttributeWhere = (attribute: Attribute | null, where: unknown, operator = '$eq') => {
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return where.map((sub) => processSingleAttributeWhere(attribute, sub, operator));
   }
 
@@ -118,11 +118,11 @@ function processWhere(
   where: Record<string, unknown> | Record<string, unknown>[],
   ctx: WhereCtx
 ): Record<string, unknown> | Record<string, unknown>[] {
-  if (!isArray(where) && !isRecord(where)) {
+  if (!Array.isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return where.map((sub) => processWhere(sub, ctx));
   }
 
@@ -250,14 +250,14 @@ const applyOperator = (
     case '$in': {
       // @ts-ignore
       // TODO: fix in v5
-      qb.whereIn(column, isKnexQuery(value) ? value : castArray(value));
+      qb.whereIn(column, isKnexQuery(value) ? value : [...castArray(value)]);
       break;
     }
 
     case '$notIn': {
       // @ts-ignore
       // TODO: fix in v5
-      qb.whereNotIn(column, isKnexQuery(value) ? value : castArray(value));
+      qb.whereNotIn(column, isKnexQuery(value) ? value : [...castArray(value)]);
       break;
     }
 
@@ -430,11 +430,11 @@ type Where =
   | Array<Where>;
 
 const applyWhere = (qb: Knex.QueryBuilder, where: Where): Knex.QueryBuilder | undefined => {
-  if (!isArray(where) && !isRecord(where)) {
+  if (!Array.isArray(where) && !isRecord(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (isArray(where)) {
+  if (Array.isArray(where)) {
     return qb.where((subQB: Knex.QueryBuilder) =>
       where.forEach((subWhere) => applyWhere(subQB, subWhere))
     );
@@ -487,4 +487,48 @@ const escapeLike = (value: unknown) => escapeQuery(`${value}`, LIKE_SPECIAL_CHAR
 const likeEscapeClause = (qb: Knex.QueryBuilder) =>
   qb.client.dialect === 'sqlite3' ? " ESCAPE '\\'" : '';
 
-export { applyWhere, processWhere };
+/**
+ * Prefix unaliased root column keys with `alias` (e.g. `published_at` → `t0.published_at`).
+ * Used for update/delete subqueries that join other tables sharing column names.
+ * Group operators are walked; already-qualified keys (`t1.title`) and operator keys are left as-is.
+ */
+function qualifyRootColumns(where: Record<string, unknown>, alias: string): Record<string, unknown>;
+function qualifyRootColumns(
+  where: Record<string, unknown>[],
+  alias: string
+): Record<string, unknown>[];
+function qualifyRootColumns(
+  where: Record<string, unknown> | Record<string, unknown>[],
+  alias: string
+): Record<string, unknown> | Record<string, unknown>[] {
+  if (Array.isArray(where)) {
+    return where.map((sub) => qualifyRootColumns(sub, alias));
+  }
+
+  const result: Record<string, unknown> = {};
+
+  for (const key of Object.keys(where)) {
+    const value = where[key];
+
+    if (isOperatorOfType('group', key)) {
+      if (Array.isArray(value)) {
+        result[key] = value.map((sub) => (isRecord(sub) ? qualifyRootColumns(sub, alias) : sub));
+      } else {
+        result[key] = value;
+      }
+      continue;
+    }
+
+    if (key === '$not' && isRecord(value)) {
+      result[key] = qualifyRootColumns(value, alias);
+      continue;
+    }
+
+    const qualifiedKey = key.includes('.') || isOperator(key) ? key : `${alias}.${key}`;
+    result[qualifiedKey] = value;
+  }
+
+  return result;
+}
+
+export { applyWhere, processWhere, qualifyRootColumns };

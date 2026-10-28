@@ -22,7 +22,11 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     const countApiTokens = await getService('api-token-admin').countAll();
     const countAdmins = await getService('user').count();
-    const countLocales = (await strapi.plugin('i18n')?.service('locales')?.count()) ?? null;
+    // null tells the homepage no localization plugin is installed, unlike 0 locales
+    const countLocales =
+      strapi.localization.isEnabled() === true
+        ? (await strapi.localization.getLocales()).length
+        : null;
     const countsAssets = await strapi.db.query('plugin::upload.file').count();
     const countWebhooks = await strapi.db.query('strapi::webhook').count();
 

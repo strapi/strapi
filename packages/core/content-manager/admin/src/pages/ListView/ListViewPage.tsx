@@ -18,6 +18,8 @@ import {
   useIsMobile,
   useClipboard,
   tours,
+  deepEncodeQueryValues,
+  withEncodedUserParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -50,6 +52,7 @@ import {
   usePersistentPartialQueryParams,
 } from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
+import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
@@ -61,10 +64,16 @@ import { listViewFilters as Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent, hasContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
+import {
+  applyAttributeRenamesToFilters,
+  applyAttributeRenamesToHeaders,
+  applyAttributeRenamesToSort,
+} from './utils/applyAttributeRenames';
 
 import type { Modules } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
+const NON_LINKABLE_TYPES = new Set(['media', 'relation', 'component', 'dynamiczone']);
 
 /* -------------------------------------------------------------------------------------------------
  * ListViewPage
@@ -85,6 +94,7 @@ type ListViewQuery = {
   page?: string;
   pageSize?: string;
   sort?: string;
+  _q?: string;
 };
 
 const ListViewPage = () => {
@@ -131,6 +141,18 @@ const ListViewPage = () => {
     [model]
   );
   const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
+
+  const { currentData: configuration } = useGetContentTypeConfigurationQuery(model);
+  const attributeRenames = React.useMemo(
+    () => configuration?.contentType?.attributeRenames ?? {},
+    [configuration?.contentType?.attributeRenames]
+  );
+  /**
+   * The schema can be cached before this configuration response arrives. Dropping
+   * unknown column names in that window deletes a renamed field before its new
+   * name is known, and the browser cannot get it back.
+   */
+  const configurationReady = configuration?.contentType?.uid === model;
 
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
@@ -190,18 +212,29 @@ const ListViewPage = () => {
   }, [displayedHeaderNames, handleResetHeaders, list.layout]);
 
   React.useEffect(() => {
-    if (!schema?.attributes) return;
+    if (!configurationReady || !schema?.attributes) return;
     if (!displayedHeaderNames || displayedHeaderNames.length === 0) return;
     if (schema.uid !== model) return;
 
-    const allowedDisplayHeaders = displayedHeaderNames.filter((header) =>
-      Object.keys(schema?.attributes).includes(header)
+    const nextHeaders = applyAttributeRenamesToHeaders(
+      displayedHeaderNames,
+      schema.attributes,
+      attributeRenames
     );
+    const headersChanged = nextHeaders.some((name, index) => name !== displayedHeaderNames[index]);
 
-    if (allowedDisplayHeaders.length !== displayedHeaderNames.length) {
-      handleSetHeaders(allowedDisplayHeaders);
+    if (headersChanged || nextHeaders.length !== displayedHeaderNames.length) {
+      handleSetHeaders(nextHeaders);
     }
-  }, [displayedHeaderNames, handleSetHeaders, model, schema?.attributes, schema?.uid]);
+  }, [
+    attributeRenames,
+    configurationReady,
+    displayedHeaderNames,
+    handleSetHeaders,
+    model,
+    schema?.attributes,
+    schema?.uid,
+  ]);
 
   const [{ query }, setQuery] = useQueryParams<ListViewQuery>({
     page: '1',
@@ -211,7 +244,66 @@ const ListViewPage = () => {
       : '',
   });
 
-  const params = React.useMemo(() => buildValidParams(query), [query]);
+  React.useEffect(() => {
+    if (!configurationReady || !schema?.attributes || schema.uid !== model) {
+      return;
+    }
+
+    const nextSort =
+      typeof query.sort === 'string'
+        ? applyAttributeRenamesToSort(query.sort, schema.attributes, attributeRenames)
+        : query.sort;
+    const nextFilters = query.filters
+      ? applyAttributeRenamesToFilters(query.filters, schema.attributes, attributeRenames)
+      : query.filters;
+    const sortChanged = nextSort !== query.sort;
+    const filtersChanged = JSON.stringify(nextFilters) !== JSON.stringify(query.filters);
+
+    if (!sortChanged && !filtersChanged) {
+      return;
+    }
+
+    setQuery(
+      withEncodedUserParams(query, {
+        ...(sortChanged ? { sort: nextSort } : {}),
+        ...(filtersChanged ? { filters: deepEncodeQueryValues(nextFilters) } : {}),
+      }),
+      'push',
+      true
+    );
+  }, [
+    attributeRenames,
+    configurationReady,
+    model,
+    query,
+    schema?.attributes,
+    schema?.uid,
+    setQuery,
+  ]);
+
+  const params = React.useMemo(() => {
+    if (!configurationReady || !schema?.attributes || schema.uid !== model) {
+      return buildValidParams(query);
+    }
+
+    return buildValidParams({
+      ...query,
+      ...(typeof query.sort === 'string'
+        ? {
+            sort: applyAttributeRenamesToSort(query.sort, schema.attributes, attributeRenames),
+          }
+        : {}),
+      ...(query.filters
+        ? {
+            filters: applyAttributeRenamesToFilters(
+              query.filters,
+              schema.attributes,
+              attributeRenames
+            ),
+          }
+        : {}),
+    });
+  }, [attributeRenames, configurationReady, model, query, schema?.attributes, schema?.uid]);
   const hasAppliedFilters = (query.filters?.$and?.length ?? 0) > 0;
   const hasStatusFilter = Boolean(
     query.filters?.$and?.some(
@@ -231,9 +323,9 @@ const ListViewPage = () => {
         .map((s) => s.trim())
         .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
         .join(',');
-      setQuery({ sort: cleaned || undefined }, 'push', true);
+      setQuery(withEncodedUserParams(query, { sort: cleaned || undefined }), 'push', true);
     }
-  }, [hasStatusFilter, query.sort, setQuery]);
+  }, [hasStatusFilter, query, setQuery]);
 
   const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
@@ -271,9 +363,13 @@ const ListViewPage = () => {
     }
   }, [pagination, formatMessage, query, navigate]);
 
-  const { canCreate } = useDocumentRBAC('ListViewPage', ({ canCreate }) => ({
-    canCreate,
-  }));
+  const { canCreate, isLoadingActionsRBAC } = useDocumentRBAC(
+    'ListViewPage',
+    ({ canCreate, isLoading }) => ({
+      canCreate,
+      isLoadingActionsRBAC: isLoading,
+    })
+  );
 
   const runHookWaterfall = useStrapiApp('ListViewPage', ({ runHookWaterfall }) => runHookWaterfall);
   /**
@@ -333,7 +429,7 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isLoadingLayout || !isHydrated || isLoading) {
+  if (isLoadingLayout || !isHydrated || isLoading || isLoadingActionsRBAC) {
     return <Page.Loading />;
   }
 
@@ -366,13 +462,12 @@ const ListViewPage = () => {
    * dynamic zones (they embed their own links/menus), plugin-formatted columns
    * (`cellFormatter`), and the synthetic `status` column.
    */
-  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
   const linkCandidates = tableHeaders.filter(
     ({ name, attribute, cellFormatter }) =>
       name !== 'status' &&
       typeof cellFormatter !== 'function' &&
       attribute &&
-      !NON_LINKABLE_TYPES.includes(attribute.type)
+      !NON_LINKABLE_TYPES.has(attribute.type)
   );
 
   // The link column for a given row: the first candidate that actually has a
@@ -586,7 +681,6 @@ const ListViewPage = () => {
                             if (typeof cellFormatter === 'function') {
                               return (
                                 <Table.Cell key={header.name}>
-                                  {/* @ts-expect-error – TODO: fix this TS error */}
                                   {cellFormatter(row, header, { collectionType, model })}
                                 </Table.Cell>
                               );
@@ -621,6 +715,7 @@ const ListViewPage = () => {
               </Table.Root>
               <Pagination.Root
                 {...pagination}
+                defaultPageSize={list.settings.pageSize}
                 onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
               >
                 <Pagination.PageSize />

@@ -14,7 +14,7 @@ import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavig
 
 import { OptionBoxWrapper } from './OptionBoxWrapper';
 
-const newAttributes: string[] = [];
+const newAttributes = new Set<string>();
 
 const NewBadge = () => (
   <Flex grow={1} justifyContent="flex-end">
@@ -54,7 +54,7 @@ export const AttributeOption = ({ type = 'text' }: AttributeOptionProps) => {
             <Typography fontWeight="bold" textColor="neutral800">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
             </Typography>
-            {newAttributes.includes(type) && <NewBadge />}
+            {newAttributes.has(type) && <NewBadge />}
           </Flex>
           <Flex>
             <Typography variant="pi" textColor="neutral600">

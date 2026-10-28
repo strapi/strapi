@@ -194,7 +194,7 @@ describeOnCondition(edition === 'EE')('MCP actions in audit-logs (api)', () => {
     expect(statusCode).toBe(201);
 
     const log = await expectExactlyOneLog('entry.create');
-    expect(log.payload).toMatchObject({ origin: 'admin' });
+    expect(log.payload).toMatchObject({ origin: 'admin-panel' });
   });
 
   test('a create through MCP is audited and tagged with the mcp origin', async () => {
