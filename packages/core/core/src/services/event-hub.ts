@@ -35,6 +35,7 @@ export interface EventHub {
   removeAllListeners(): EventHub;
   removeAllSubscribers(): EventHub;
   addListener(eventName: string, listener: Listener): () => void;
+  hasListeners(eventName: string): boolean;
 }
 
 /**
@@ -56,7 +57,9 @@ export default function createEventHub(options?: CreateEventHubOptions): EventHu
   // Default subscriber to easily add listeners with the on() method
   const defaultSubscriber = async (eventName: string, ...args: unknown[]) => {
     if (listeners.has(eventName)) {
-      for (const listener of listeners.get(eventName)) {
+      // Iterate over a copy so that a listener removed during the emit (e.g. a once() listener)
+      // does not make the loop skip the next listener
+      for (const listener of listeners.get(eventName).slice()) {
         try {
           await listener(...args);
         } catch (error) {
@@ -112,14 +115,48 @@ export default function createEventHub(options?: CreateEventHubOptions): EventHu
     },
 
     off(eventName, listener) {
-      listeners.get(eventName)?.splice(listeners.get(eventName).indexOf(listener), 1);
+      const eventListeners = listeners.get(eventName);
+
+      if (eventListeners === undefined) {
+        return;
+      }
+
+      const listenerIndex = eventListeners.indexOf(listener);
+
+      // Only remove the listener if it exists
+      if (listenerIndex >= 0) {
+        eventListeners.splice(listenerIndex, 1);
+      }
     },
 
     once(eventName, listener) {
-      return eventHub.on(eventName, async (...args) => {
-        eventHub.off(eventName, listener);
+      let fired = false;
+
+      // Remove the registered wrapper, not the original listener which is not in the list
+      const wrapper: Listener = async (...args) => {
+        // An emit that copied the listener list before the removal can still call the wrapper
+        if (fired === true) {
+          return;
+        }
+
+        fired = true;
+        eventHub.off(eventName, wrapper);
         return listener(...args);
-      });
+      };
+
+      return eventHub.on(eventName, wrapper);
+    },
+
+    hasListeners(eventName) {
+      // Subscribers other than the default one receive every event
+      const hasCustomSubscriber = subscribers.some(
+        (subscriber) => subscriber !== defaultSubscriber
+      );
+      // Listeners are only reached through the default subscriber
+      const hasEventListener =
+        subscribers.includes(defaultSubscriber) && (listeners.get(eventName)?.length ?? 0) > 0;
+
+      return hasCustomSubscriber || hasEventListener;
     },
 
     destroy() {

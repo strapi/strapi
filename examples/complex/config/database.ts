@@ -55,7 +55,13 @@ export default ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database 
     sqlite: {
       client: 'sqlite',
       connection: {
-        filename: env('DATABASE_FILENAME', '.tmp/data.db'),
+        filename: (() => {
+          const f = env('DATABASE_FILENAME');
+          if (!f) {
+            return path.join(process.cwd(), '.tmp', 'data.db');
+          }
+          return path.isAbsolute(f) ? f : path.join(process.cwd(), f);
+        })(),
       },
       useNullAsDefault: true,
     },

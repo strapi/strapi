@@ -65,7 +65,9 @@ const ProfileWidget = () => {
       )}
       {user?.roles?.length && (
         <Flex marginTop={2} gap={1} wrap="wrap">
-          {user?.roles?.map((role) => <Badge key={role.id}>{role.name}</Badge>)}
+          {user?.roles?.map((role) => (
+            <Badge key={role.id}>{role.name}</Badge>
+          ))}
         </Flex>
       )}
     </Flex>
@@ -116,8 +118,9 @@ const FingerprintPanel = styled(Box)`
 
 const FingerprintText = styled.span`
   display: block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   font-size: 1.1rem;
   line-height: 1.4;
   word-break: break-word;

@@ -1,5 +1,6 @@
 import admin from './admin';
 import ai from './ai';
+import contentStructure from './content-structure';
 import coreStore from './coreStore';
 import cron from './cron';
 import mcp from './mcp';
@@ -23,6 +24,7 @@ export const providers: NamedProvider[] = [
   { name: 'observability-performance-metrics', definition: observabilityPerformanceMetrics },
   { name: 'admin', definition: admin },
   { name: 'ai', definition: ai },
+  { name: 'content-structure', definition: contentStructure },
   { name: 'core-store', definition: coreStore },
   { name: 'session-manager', definition: sessionManager },
   { name: 'webhooks', definition: webhooks },

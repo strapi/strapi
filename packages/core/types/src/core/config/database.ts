@@ -45,9 +45,7 @@ type Connection<TClient extends Database.ClientKind> = {
 type SharedDatabaseConnection<TClient extends Database.ClientKind> = {
   client: TClient;
   connection:
-    | Connection<TClient>
-    | (() => Promise<Connection<TClient>>)
-    | (() => Connection<TClient>);
+    Connection<TClient> | (() => Promise<Connection<TClient>>) | (() => Connection<TClient>);
   debug?: boolean;
   pool?: PoolConfig;
   acquireConnectionTimeout?: number;
@@ -65,6 +63,11 @@ export interface Database<TClient extends Database.ClientKind = Database.ClientK
     forceMigration?: boolean;
     runMigrations?: boolean;
     useTypescriptMigrations?: boolean;
+    /**
+     * Describe the pool on connection pool timeouts. Defaults to true. Must be a boolean (for
+     * example `env.bool('DATABASE_POOL_TIMEOUT_DIAGNOSTICS', true)`): a string is not read as false.
+     */
+    poolTimeoutDiagnostics?: boolean;
   };
   performance?: {
     enabled?: boolean;

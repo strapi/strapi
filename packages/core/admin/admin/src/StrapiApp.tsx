@@ -434,9 +434,8 @@ class StrapiApp {
             defaultMessage: 'Last activity',
           },
           component: async () => {
-            const { AuditLogsWidget } = await import(
-              '../../ee/admin/src/components/AuditLogs/Widgets'
-            );
+            const { AuditLogsWidget } =
+              await import('../../ee/admin/src/components/AuditLogs/Widgets');
             return AuditLogsWidget;
           },
           pluginId: 'admin',

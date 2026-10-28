@@ -5,6 +5,17 @@ import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+const StyledWarning = styled(WarningCircle)`
+  width: 24px;
+  height: 24px;
+
+  path {
+    fill: ${({ theme }) => theme.colors.danger600};
+  }
+`;
+
+const DEFAULT_ICON: NonNullable<ConfirmDialogProps['icon']> = <StyledWarning />;
+
 /* -------------------------------------------------------------------------------------------------
  * ConfirmDialog
  * -----------------------------------------------------------------------------------------------*/
@@ -51,7 +62,7 @@ interface ConfirmDialogProps extends Pick<ButtonProps, 'variant'>, Pick<Dialog.B
  */
 const ConfirmDialog = ({
   children,
-  icon = <StyledWarning />,
+  icon = DEFAULT_ICON,
   onConfirm,
   onCancel,
   variant = 'danger-light',
@@ -126,15 +137,6 @@ const ConfirmDialog = ({
     </Dialog.Content>
   );
 };
-
-const StyledWarning = styled(WarningCircle)`
-  width: 24px;
-  height: 24px;
-
-  path {
-    fill: ${({ theme }) => theme.colors.danger600};
-  }
-`;
 
 export { ConfirmDialog };
 export type { ConfirmDialogProps };

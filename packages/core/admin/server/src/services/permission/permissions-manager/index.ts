@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { cloneDeep, isPlainObject } from 'lodash/fp';
+import _, { cloneDeep, isPlainObject } from 'lodash';
+
 import { subject as asSubject } from '@casl/ability';
 import type { Core } from '@strapi/types';
 import { withAdminPermissionsSpan } from '@strapi/utils';

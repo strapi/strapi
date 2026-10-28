@@ -9,7 +9,15 @@ import path from 'node:path';
 import os from 'node:os';
 import { validateFile, type SecurityConfig } from '../mime-validation';
 
-type ContentKind = 'jpg' | 'png' | 'pdf' | 'docx' | 'txt' | 'unknown';
+type ContentKind = 'jpg' | 'png' | 'pdf' | 'docx' | 'txt' | 'unknown' | 'mov';
+
+function createMinimalQuickTimeBuffer(): Buffer {
+  // ISO BMFF ftyp box with QuickTime brand (`qt  `) — what file-type recognizes as video/quicktime
+  return Buffer.from([
+    0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00,
+    0x71, 0x74, 0x20, 0x20,
+  ]);
+}
 
 function createMinimalJpegBuffer(): Buffer {
   const jfif = Buffer.from([
@@ -134,6 +142,7 @@ describe('mime-validation matrix (real detection)', () => {
     fixturePaths.docx = path.join(fixturesDir, 'real.docx');
     fixturePaths.txt = path.join(fixturesDir, 'real.txt');
     fixturePaths.unknown = path.join(fixturesDir, 'real.bin');
+    fixturePaths.mov = path.join(fixturesDir, 'real.mov');
 
     fs.writeFileSync(fixturePaths.jpg, createMinimalJpegBuffer());
     fs.writeFileSync(fixturePaths.png, createMinimalPngBuffer());
@@ -141,6 +150,7 @@ describe('mime-validation matrix (real detection)', () => {
     fs.writeFileSync(fixturePaths.docx, createMinimalDocxBuffer());
     fs.writeFileSync(fixturePaths.txt, Buffer.from('plain text', 'utf8'));
     fs.writeFileSync(fixturePaths.unknown, Buffer.alloc(200, 0xab));
+    fs.writeFileSync(fixturePaths.mov, createMinimalQuickTimeBuffer());
   });
 
   afterAll(() => {
@@ -463,6 +473,24 @@ describe('mime-validation matrix (real detection)', () => {
       uploadedFileDeclaredType: 'image/png',
       expectedResult: 'allow',
     },
+    {
+      description: '.mov declared as octet-stream, video/* allowed → allow (#23788)',
+      allowedList: ['video/*'],
+      bannedList: [],
+      contentKind: 'mov',
+      uploadedFileName: 'sample.mov',
+      uploadedFileDeclaredType: 'application/octet-stream',
+      expectedResult: 'allow',
+    },
+    {
+      description: '.mov declared as octet-stream, no security config → allow (#23788)',
+      allowedList: undefined,
+      bannedList: [],
+      contentKind: 'mov',
+      uploadedFileName: 'sample.mov',
+      uploadedFileDeclaredType: 'application/octet-stream',
+      expectedResult: 'allow',
+    },
   ];
 
   it.each(MATRIX)(
@@ -498,4 +526,23 @@ describe('mime-validation matrix (real detection)', () => {
       }
     }
   );
+
+  it('stores video/quicktime for real QuickTime content declared as application/octet-stream (#23788)', async () => {
+    const buffer = fs.readFileSync(fixturePaths.mov);
+    const result = await validateFile(
+      {
+        buffer,
+        size: buffer.length,
+        name: 'sample_960x400_ocean_with_audio.mov',
+        originalFilename: 'sample_960x400_ocean_with_audio.mov',
+        mimetype: 'application/octet-stream',
+        type: 'application/octet-stream',
+      },
+      {},
+      mockStrapi
+    );
+
+    expect(result.isValid).toBe(true);
+    expect(result.detectedMime).toBe('video/quicktime');
+  });
 });

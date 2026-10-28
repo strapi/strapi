@@ -58,3 +58,4 @@ export {
 export * from './publication-filter';
 export * from './has-published-version-param';
 export { hasSort } from './sort-query';
+export { emitAudit, type AuditEmitter } from './audit-logs';
