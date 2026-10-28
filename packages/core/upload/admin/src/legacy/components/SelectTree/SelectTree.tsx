@@ -15,6 +15,9 @@ import { flattenTree, FlattenedNode } from './utils/flattenTree';
 import { getOpenValues } from './utils/getOpenValues';
 import { getValuesToClose } from './utils/getValuesToClose';
 
+const EMPTY_COMPONENTS: NonNullable<SelectProps['components']> = {};
+const EMPTY_STYLES: NonNullable<SelectProps['styles']> = {};
+
 const hasParent = (option: FlattenedNode<string | number | null>) => !option.parent;
 
 export type OptionSelectTree = {
@@ -133,8 +136,8 @@ interface SelectProps<
 }
 
 const Select = ({
-  components = {},
-  styles = {},
+  components = EMPTY_COMPONENTS,
+  styles = EMPTY_STYLES,
   error,
   ariaErrorMessage,
   ...props

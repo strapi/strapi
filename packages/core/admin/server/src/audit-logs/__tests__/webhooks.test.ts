@@ -38,6 +38,7 @@ describe('webhook audit events', () => {
       details: {
         url: 'https://example.com',
         events: ['entry.create', 'entry.update'],
+        contentTypeEvents: {},
         headers: ['Authorization', 'X-Env'],
         isEnabled: true,
       },
@@ -80,9 +81,19 @@ describe('toAuditedWebhook', () => {
       name: 'Deploy site',
       url: 'https://example.com',
       events: ['entry.create', 'entry.update'],
+      contentTypeEvents: {},
       headers: ['Authorization', 'X-Env'],
       isEnabled: true,
     });
+  });
+
+  test('sorts the events of each content type', () => {
+    expect(
+      toAuditedWebhook({
+        ...webhook,
+        contentTypeEvents: { 'api::article.article': ['entry.update', 'entry.create'] },
+      }).contentTypeEvents
+    ).toEqual({ 'api::article.article': ['entry.create', 'entry.update'] });
   });
 });
 
@@ -118,6 +129,30 @@ describe('getWebhookChanges', () => {
       events: { before: ['entry.create', 'entry.update'], after: ['entry.create'] },
       headers: { added: ['X-Region'], removed: ['X-Env'], changed: ['Authorization'] },
     });
+  });
+
+  test('records a change of the events of a content type', () => {
+    expect(
+      getWebhookChanges(
+        { ...webhook, contentTypeEvents: { 'api::article.article': ['entry.delete'] } },
+        {
+          ...webhook,
+          contentTypeEvents: {
+            'api::article.article': ['entry.delete'],
+            'api::page.page': ['entry.publish'],
+          },
+        }
+      )
+    ).toEqual({
+      contentTypeEvents: {
+        before: { 'api::article.article': ['entry.delete'] },
+        after: { 'api::article.article': ['entry.delete'], 'api::page.page': ['entry.publish'] },
+      },
+    });
+  });
+
+  test('records nothing when a webhook saved without content type events gets an empty map', () => {
+    expect(getWebhookChanges(webhook, { ...webhook, contentTypeEvents: {} })).toEqual({});
   });
 
   test('records a url change within the same host, without the path', () => {

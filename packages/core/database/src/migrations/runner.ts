@@ -19,6 +19,8 @@ export interface MigrationRunnerOptions {
   storage: ReturnType<typeof createStorage>;
   logger: MigrationRunnerLogger;
   getMigrations: () => Promise<RunnableMigration[]>;
+  /** Labels pool timeout reports with the running migration's name. */
+  withPhase?: <T>(phase: string, fn: () => Promise<T>) => Promise<T>;
 }
 
 const logEvent = (
@@ -40,6 +42,9 @@ const wrapMigrationError = (name: string, direction: 'up' | 'down', cause: unkno
 };
 
 export const createMigrationRunner = (opts: MigrationRunnerOptions) => {
+  const withPhase =
+    opts.withPhase ?? (<T>(_phase: string, fn: () => Promise<T>): Promise<T> => fn());
+
   const getPendingMigrations = async (): Promise<RunnableMigration[]> => {
     const [migrations, executedNames] = await Promise.all([
       opts.getMigrations(),
@@ -75,7 +80,9 @@ export const createMigrationRunner = (opts: MigrationRunnerOptions) => {
         logEvent(opts.logger, 'migrating', migration.name);
 
         try {
-          await migration.up();
+          await withPhase(`migration ${migration.name}`, async () => {
+            await migration.up();
+          });
         } catch (error) {
           throw wrapMigrationError(migration.name, 'up', error);
         }
@@ -99,7 +106,9 @@ export const createMigrationRunner = (opts: MigrationRunnerOptions) => {
         logEvent(opts.logger, 'reverting', migration.name);
 
         try {
-          await migration.down();
+          await withPhase(`migration ${migration.name}`, async () => {
+            await migration.down();
+          });
         } catch (error) {
           throw wrapMigrationError(migration.name, 'down', error);
         }
