@@ -24,6 +24,6 @@ export {
   contentTypeBuilder,
   ContentTypeBuilder,
   allPermissions,
-  AdminPermissions,
+  type AdminPermissions,
   Documentation,
 };

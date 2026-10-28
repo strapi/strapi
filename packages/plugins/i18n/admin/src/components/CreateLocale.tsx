@@ -30,7 +30,7 @@ import { Check, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
-import { CreateLocale } from '../../../shared/contracts/locales';
+import { type CreateLocale } from '../../../shared/contracts/locales';
 import { useCreateLocaleMutation, useGetDefaultLocalesQuery } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
