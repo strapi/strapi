@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "lib": ["ES2020"],
+    "lib": ["ES2024"],
     "target": "ES2019",
     "strict": true,
     "skipLibCheck": true,
