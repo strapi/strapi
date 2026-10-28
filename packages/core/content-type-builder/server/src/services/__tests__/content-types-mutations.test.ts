@@ -215,6 +215,16 @@ describe('content type mutation compensation', () => {
     expect(files.groups).toBe('before');
   });
 
+  it('emits the update event when a kind switch succeeds', async () => {
+    await editContentType(contentType.uid, {
+      contentType: { ...contentType, kind: 'singleType', attributes: {} },
+    });
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', {
+      contentType: { uid: contentType.uid, schema: { ...contentType, kind: 'singleType' } },
+    });
+  });
+
   describe('collectionType to singleType entry guard', () => {
     type Row = { documentId: string; locale?: string; publishedAt: string | null };
 
