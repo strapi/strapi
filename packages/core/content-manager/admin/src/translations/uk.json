@@ -289,18 +289,5 @@
   "history.restore.success.message": "Вміст відновленої версії ще не опубліковано.",
   "history.restore.error.message": "Не вдалося відновити версію.",
   "validation.error": "У вашому документі є помилки. Будь ласка, виправте їх перед збереженням.",
-  "bulk-publish.edit": "Редагувати",
-  "containers.Edit.Link.Layout": "Налаштувати компонування",
-  "containers.Edit.Link.Model": "Змінити Тип Колекцій",
-  "containers.Edit.addAnItem": "Додати елемент...",
-  "containers.Edit.clickToJump": "Натисніть щоб перейти до запису",
-  "containers.Edit.editing": "Редагування...",
-  "containers.Edit.pluginHeader.title.new": "Створити запис",
-  "containers.Edit.reset": "Скинути",
-  "containers.Edit.returnList": "Повернутися до списку",
-  "containers.Edit.seeDetails": "Докладніше",
-  "containers.Edit.submit": "Зберегти",
-  "containers.List.errorFetchRecords": "Помилка",
-  "containers.ListSettingsView.modal-form.edit-label": "Налаштуйте підпис",
-  "popUpWarning.warning.cancelAllSettings": "Ви впевнені, що хочете скасувати свої зміни?"
+  "bulk-publish.edit": "Редагувати"
 }

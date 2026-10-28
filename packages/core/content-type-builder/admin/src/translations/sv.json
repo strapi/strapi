@@ -187,7 +187,6 @@
   "relation.oneToOne": "har och tillhör en",
   "relation.oneWay": "har en",
   "table.button.no-fields": "Lägg till nytt fält",
-  "table.content.create-first-content-type": "Skapa din första samlingstyp",
   "table.content.create-first-content-type.start-with-prompt": "Börja med en uppmaning",
   "table.content.no-fields.collection-type": "Lägg till ett första fält till samlingstypen",
   "table.content.no-fields.component": "Lägg till ett första fält i komponenten",

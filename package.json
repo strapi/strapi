@@ -102,7 +102,8 @@
     "test:migrations": "node --import tsx tests/migration/scripts/run-migration-scenario.ts",
     "test:migrations:plan": "node --import tsx tests/migration/scripts/run-migration-scenario.ts --print-plan",
     "test:migrations:smoke": "node --import tsx tests/migration/scripts/run-migration-scenario.ts --initial legacy --database sqlite --skip-build",
-    "test:migrations:unit": "jest --config tests/migration/fixture/jest.config.js"
+    "test:migrations:unit": "jest --config tests/migration/fixture/jest.config.js",
+    "translations:prune": "node scripts/front/prune-obsolete-translation-keys.js"
   },
   "resolutions": {
     "ajv@^8.0.0": "8.20.0",

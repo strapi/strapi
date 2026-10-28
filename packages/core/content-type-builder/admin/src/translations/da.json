@@ -168,7 +168,6 @@
   "relation.oneToOne": "har og tilhører én",
   "relation.oneWay": "har én",
   "table.button.no-fields": "Tilføj nyt felt",
-  "table.content.create-first-content-type": "Opret din først dokumenttype",
   "table.content.no-fields.collection-type": "Tilføj dit første felt til denne dokumenttype",
   "table.content.no-fields.component": "Tilføj dit første felt til dette komponent"
 }
