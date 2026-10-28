@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import type { Controllers as CEControllers } from '../../../../server/src/types/controllers';
 
 /** EE actions of the admin project controller, merged over the CE `admin` controller. */
 export type AdminController = {
@@ -64,3 +65,9 @@ export type Controllers = {
   role: RoleController;
   user: UserController;
 };
+
+/**
+ * The controllers the EE routes reference: the CE controllers with the EE actions merged over them.
+ * The EE routes are mounted only together with the EE controllers, so `audit-logs` is required here.
+ */
+export type RouteControllers = CEControllers & Controllers;
