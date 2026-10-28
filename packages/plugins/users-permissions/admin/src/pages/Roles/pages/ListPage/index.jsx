@@ -86,7 +86,7 @@ export const RolesListPage = () => {
   const deleteData = async (id, formatMessage, toggleNotification) => {
     try {
       await del(`/users-permissions/roles/${id}`);
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),

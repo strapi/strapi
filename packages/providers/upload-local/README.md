@@ -44,7 +44,7 @@ module.exports = ({ env }) => ({
 });
 ```
 
-The `sizeLimit` parameter must be a number. Be aware that the unit is in bytes, and the default is 1000000. When setting this value high, you should make sure to also configure the body parser middleware `maxFileSize` so the file can be sent and processed. Read more [here](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#configuration)
+The `sizeLimit` parameter must be a number. Be aware that the unit is in bytes, and the default is 1000000000 (1GB). When setting this value high, you should make sure to also configure the body parser middleware `maxFileSize` so the file can be sent and processed — it defaults to roughly 200MB, and rejects larger files before the upload plugin ever sees them. Read more [here](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#configuration)
 
 ### Security Middleware Configuration
 

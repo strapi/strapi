@@ -2,6 +2,19 @@ import domain from '..';
 
 describe('Action Domain', () => {
   describe('appliesToProperty', () => {
+    test('Handles actions with missing options', () => {
+      const action = domain.create({
+        uid: 'read',
+        section: 'contentTypes',
+        displayName: 'Read',
+        category: 'content',
+      });
+
+      Reflect.deleteProperty(action, 'options');
+
+      expect(domain.appliesToProperty('fields')(action)).toBe(false);
+    });
+
     test('Should return false when action.options.applyToProperties is Nil', () => {
       const action: any = { options: {} };
       const property: any = 'foo';

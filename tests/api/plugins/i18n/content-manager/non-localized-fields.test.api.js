@@ -3,7 +3,7 @@
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
-const { set } = require('lodash/fp');
+const { set } = require('lodash');
 
 const modelsUtils = require('api-tests/models');
 const { cloneDeep } = require('lodash');
@@ -210,7 +210,7 @@ describe('i18n', () => {
 
   afterAll(async () => {
     // Delete all locales that have been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
 
     await strapi.destroy();
     await builder.cleanup();
@@ -349,7 +349,7 @@ describe('i18n', () => {
           const updateAt = [{ key: 'name', value: 'Compo Name' }];
 
           const updatedValue = updateAt.reduce((acc, { key, value }) => {
-            return set(key, `${key}::${value}::${method}`, acc);
+            return set(acc, key, `${key}::${value}::${method}`);
           }, {});
 
           if (isPublish) {

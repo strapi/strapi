@@ -104,7 +104,7 @@ const ReleasesSettingsPage = () => {
           }),
         });
       }
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({

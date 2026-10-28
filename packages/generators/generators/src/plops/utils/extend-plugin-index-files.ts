@@ -267,7 +267,7 @@ const handleEmptyFile = (root: jscodeshift.Collection<any>, firstStatement: any)
     const newProgram = j.program([firstStatement]);
     try {
       root.replaceWith(newProgram);
-    } catch (replaceError) {
+    } catch {
       // Last resort - throw descriptive error
       throw new Error(
         `Unable to add statement to empty file: ${error.message}. Root collection may be invalid.`

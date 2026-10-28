@@ -99,7 +99,7 @@ export const SingleSignOnPage = () => {
         type: 'success',
         message: formatMessage({ id: 'notification.success.saved' }),
       });
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -219,10 +219,6 @@ export const SingleSignOnPage = () => {
                             label: name,
                             value: id.toString(),
                           })),
-                          placeholder: formatMessage({
-                            id: 'components.InputSelect.option.placeholder',
-                            defaultMessage: 'Choose here',
-                          }),
                           size: 6,
                           type: 'enumeration' as const,
                         },

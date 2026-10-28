@@ -21,9 +21,9 @@ describe('Release Validation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
 
-      expect(() =>
-        releaseValidationService.validateEntryData('api::plop.plop', 'collection-types', '1')
-      ).toThrow('No content type found for uid api::plop.plop');
+      expect(() => releaseValidationService.validateEntryData('api::plop.plop', '1')).toThrow(
+        'No content type found for uid api::plop.plop'
+      );
     });
 
     it('throws an error if the content type does not have draftAndPublish enabled', () => {
