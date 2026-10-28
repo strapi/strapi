@@ -10,11 +10,11 @@ review_notes:
 
 ## Purpose
 
-Provides reusable TypeScript configurations for the Strapi monorepo. Extends `@tsconfig/node20` with strict type-checking and module options consistent across all packages.
+Provides reusable TypeScript configurations for the Strapi monorepo. Sets strict type-checking and module options consistent across all packages.
 
 ## Key concepts
 
-- **Base config**: Enables strict mode, declaration maps, and ESNext modules. Extends Node 20 preset from @tsconfig/node20. See [base.json](https://github.com/strapi/strapi/tree/develop/packages/utils/tsconfig).
+- **Base config**: Enables strict mode, declaration maps, and ESNext modules. Sets `lib` and `target` to `es2023`, because the typescript-eslint parser used by `yarn lint` does not support `es2024`. See [base.json](https://github.com/strapi/strapi/tree/develop/packages/utils/tsconfig).
 - **Client config**: Additional configuration for client-side code.
 - **Consumed by**: Core packages (`@strapi/database`, `@strapi/core`, `@strapi/permissions`), plugins, and providers extend these configs in their `tsconfig.build.json`.
 

@@ -63,7 +63,7 @@
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
     "@types/jscodeshift": "17.3.0",
-    "@types/node": "20.19.41",
+    "@types/node": "22.20.0",
     "copyfiles": "2.4.1",
     "eslint-config-custom": "5.60.0",
     "outdent": "^0.8.0",
@@ -72,7 +72,7 @@
     "vitest-config": "5.60.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }

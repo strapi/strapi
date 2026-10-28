@@ -56,14 +56,14 @@
     "lodash": "4.18.1"
   },
   "devDependencies": {
-    "@types/node": "20.19.41",
+    "@types/node": "22.20.0",
     "eslint-config-custom": "5.60.0",
     "tsconfig": "5.60.0",
     "vitest": "catalog:",
     "vitest-config": "5.60.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }
