@@ -22,8 +22,30 @@ const READ_ONLY_STATEMENT =
 const WRITE_STATEMENT =
   /^\s*(?:insert(?:\s+or\s+\w+)?\s+into|update|delete\s+from|replace\s+into)\s+(?:[`"]?\w+[`"]?\.)?[`"]?(\w+)[`"]?/i;
 
+const DELETE_STATEMENT = /^\s*(?:delete|replace|insert\s+or\s+replace)\b/i;
+const CHANGED_ON_DELETE = /^(?:cascade|set null|set default)$/i;
+
 const dirtyTables = new Set<string>();
 let everyTableDirty = false;
+
+/**
+ * For each table, the tables whose foreign keys to it delete or change rows when a row of it is
+ * deleted. Strapi's link tables reference their entries with ON DELETE CASCADE, so deleting an
+ * entry also deletes link rows in tables the statement doesn't name.
+ */
+const deleteCascades = new Map<string, string[]>();
+
+const markDeletedFrom = (tableName: string, seen = new Set<string>()) => {
+  if (seen.has(tableName)) {
+    return;
+  }
+
+  seen.add(tableName);
+  dirtyTables.add(tableName);
+  (deleteCascades.get(tableName) ?? []).forEach((referencing) =>
+    markDeletedFrom(referencing, seen)
+  );
+};
 
 const trackWrites = ({ sql }: { sql?: unknown }) => {
   if (typeof sql !== 'string' || READ_ONLY_STATEMENT.test(sql)) {
@@ -32,10 +54,12 @@ const trackWrites = ({ sql }: { sql?: unknown }) => {
 
   const match = WRITE_STATEMENT.exec(sql);
 
-  if (match) {
-    dirtyTables.add(match[1]);
-  } else {
+  if (!match) {
     everyTableDirty = true;
+  } else if (DELETE_STATEMENT.test(sql)) {
+    markDeletedFrom(match[1]);
+  } else {
+    dirtyTables.add(match[1]);
   }
 };
 
@@ -57,6 +81,19 @@ async function captureInitialTestData() {
     } catch (error) {
       console.warn(`Could not capture data for table ${tableName}:`, error.message);
       initialTestData[tableName] = [];
+    }
+  }
+
+  for (const tableName of allTableNames) {
+    const foreignKeys = await strapi.db.dialect.schemaInspector.getForeignKeys(tableName);
+
+    for (const { referencedTable, onDelete } of foreignKeys) {
+      if (CHANGED_ON_DELETE.test(onDelete ?? '')) {
+        deleteCascades.set(referencedTable, [
+          ...(deleteCascades.get(referencedTable) ?? []),
+          tableName,
+        ]);
+      }
     }
   }
 
