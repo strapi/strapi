@@ -1,0 +1,104 @@
+views {
+  view events_and_jobs of strapi.server_runtime {
+    title '03 Engineering / Server / Events and webhook delivery'
+    link ../scheduled_work/ 'Related: scheduled work'
+    description '''
+      **Audience:** engineers and operators. **Question:** how does a content change reach a subscribed external system?
+      Document Service schedules entry events after transaction commit, whether the operation was initiated by an API, an editor or a job.
+      The local event hub notifies webhook listeners, which enqueue delivery in an in-memory worker queue and send HTTP requests.
+      Neither the event hub nor the webhook queue is a persisted broker. The runner provides no persisted replay or automatic retry queue. A successful content write does not guarantee external delivery.
+      This map shows entry events; media and release features can emit other events. Open Document Service for its internals; use the related Scheduled work link to explore timed execution separately.
+    '''
+    include
+      document_service with { navigateTo document_service_code },
+      event_hub,
+      webhook_delivery,
+      external_system
+    exclude * -> *
+    include
+      document_service -> event_hub,
+      event_hub -> webhook_delivery,
+      webhook_delivery -> external_system
+    autoLayout LeftRight 55 35
+  }
+  view scheduled_work of strapi.server_runtime {
+    title '03 Engineering / Server / Scheduled work'
+    link ../events_and_jobs/ 'Related: events and webhook delivery'
+    link ../production_operations/ 'Related: operating responsibilities'
+    description '''
+      **Audience:** engineers and operators. **Question:** how does timed work reach application services?
+      The in-process scheduler invokes configured application callbacks and programmatically registered jobs, including licensed Content Releases.
+      Release scheduling reads future unreleased schedules from the database at bootstrap. That reload is distinct from live cross-instance schedule synchronization or replaying missed jobs.
+      Content Releases uses row locking and release-state checks to protect publication. Arbitrary application tasks need their own coordination and idempotency design.
+      Disabling configured application cron tasks does not disable every plugin-registered job. The application-task document call is illustrative; jobs can use other services. Open Document Service for its internals. The related links lead to operating responsibilities and emitted events.
+    '''
+    include
+      cron_scheduler,
+      application_tasks,
+      release_service with { navigateTo editorial_publishing },
+      document_service with { navigateTo document_service_code },
+      strapi.database with { navigateTo application_state }
+    exclude * -> *
+    include
+      cron_scheduler -> application_tasks,
+      cron_scheduler -> release_service,
+      application_tasks -> document_service,
+      release_service -> document_service,
+      release_service -> strapi.database
+    autoLayout LeftRight 55 35
+  }
+
+  view request_customization of strapi.server_runtime {
+    title '03 Engineering / Extensions / Custom routes and document middleware'
+    link ../strapi_extensions/ 'Guide: choose an extension mechanism'
+    description '''
+      **Audience:** application developers. **Question:** where can custom request behavior and shared document behavior be added?
+      This construction/dependency map shows what the endpoint composer installs, not a literal execution timeline. Its route chain authenticates, authorizes, runs policies, then route middleware and the resolved controller. Global middleware wraps the broader Koa pipeline separately.
+      The example handler uses Document Service, whose middleware also affects callers that do not use this route, such as Content Manager. Route policies alone do not protect every document caller. Custom controllers must apply appropriate validation/sanitization.
+      Document middleware is distinct from database lifecycles and application register/bootstrap/destroy hooks.
+    '''
+    include
+      strapi.server_runtime.endpoint_composer,
+      strapi.server_runtime.auth with { navigateTo auth_code },
+      strapi.server_runtime.custom_policies,
+      strapi.server_runtime.custom_route_middleware,
+      strapi.server_runtime.custom_controller,
+      strapi.server_runtime.document_service.ds_middlewares,
+      strapi.server_runtime.document_service.ds_document_operations with { navigateTo document_service_code }
+    exclude * -> *
+    include
+      strapi.server_runtime.endpoint_composer -> strapi.server_runtime.auth,
+      strapi.server_runtime.endpoint_composer -> strapi.server_runtime.custom_policies,
+      strapi.server_runtime.endpoint_composer -> strapi.server_runtime.custom_route_middleware,
+      strapi.server_runtime.endpoint_composer -> strapi.server_runtime.custom_controller,
+      strapi.server_runtime.custom_controller -> strapi.server_runtime.document_service.ds_middlewares,
+      strapi.server_runtime.document_service.ds_middlewares -> strapi.server_runtime.document_service.ds_document_operations
+    autoLayout LeftRight 65 40
+  }
+  view custom_fields {
+    title '03 Engineering / Extensions / Custom fields'
+    link ../strapi_extensions/ 'Guide: choose an extension mechanism'
+    description '''
+      **Audience:** application and plugin developers. **Type:** registration and schema map.
+      **Question:** how does a custom editing input connect to stored data?
+      Browser and server registrations share a matching field UID and supported underlying type. Admin registration supplies the input and configuration UI; the Edit view loads that input for an attribute.
+      Server registration maps the field to an existing supported type. During startup, loaded content-type/component attributes are normalized before database model creation. These are separate browser and server responsibilities, not a network call or a new database type.
+      Content-Type Builder can select registered fields; the saved schema carries their UID and options. Open schema definitions for that development journey.
+    '''
+    include
+      custom_field_definition,
+      strapi.admin_web_app.custom_field_admin,
+      strapi.admin_web_app.content_manager_ui.cm_ui_edit_view with { navigateTo content_manager_ui_internals },
+      strapi.server_runtime.custom_field_server,
+      strapi.server_runtime.custom_field_conversion,
+      strapi.application_source.content_type_schema_files with { navigateTo content_type_builder_schema_change_flow }
+    exclude * -> *
+    include
+      custom_field_definition -> strapi.admin_web_app.custom_field_admin,
+      custom_field_definition -> strapi.server_runtime.custom_field_server,
+      strapi.admin_web_app.content_manager_ui.cm_ui_edit_view -> strapi.admin_web_app.custom_field_admin,
+      strapi.server_runtime.custom_field_conversion -> strapi.server_runtime.custom_field_server,
+      strapi.server_runtime.custom_field_conversion -> strapi.application_source.content_type_schema_files
+    autoLayout LeftRight 65 40
+  }
+}

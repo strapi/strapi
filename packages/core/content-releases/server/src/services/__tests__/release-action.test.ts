@@ -340,6 +340,52 @@ describe('Release Action service', () => {
       );
     });
 
+    it('rejects invalid entry data before the uniqueness check', async () => {
+      const { validateEntryData, validateUniqueEntry } = serviceMock['release-validation'];
+      validateEntryData.mockClear();
+      validateUniqueEntry.mockClear();
+      validateEntryData.mockImplementationOnce(() => {
+        throw new Error('Invalid entry data');
+      });
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: baseStrapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+      };
+
+      await expect(releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
+        'Invalid entry data'
+      );
+      expect(validateEntryData).toHaveBeenCalledWith('api::contentTypeA.contentTypeA', '1');
+      expect(validateUniqueEntry).not.toHaveBeenCalled();
+    });
+
+    it('runs the uniqueness check after valid entry data', async () => {
+      const { validateEntryData, validateUniqueEntry } = serviceMock['release-validation'];
+      validateEntryData.mockClear();
+      validateUniqueEntry.mockClear();
+      validateUniqueEntry.mockRejectedValueOnce(new Error('Entry already in release'));
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: baseStrapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+      };
+
+      await expect(releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
+        'Entry already in release'
+      );
+      expect(validateEntryData).toHaveBeenCalledWith('api::contentTypeA.contentTypeA', '1');
+      expect(validateUniqueEntry).toHaveBeenCalledWith(1, mockActionArgs);
+    });
+
     it("points a single type's action at its document, without changing the request", async () => {
       const actionCreate = jest.fn(({ data }) => ({ id: 1, ...data }));
       const strapiMock = {
@@ -671,9 +717,12 @@ describe('Release Action service', () => {
           query: jest.fn().mockReturnValue({ create: actionCreate, findOne: jest.fn() }),
         },
       };
+      // `validateEntryData` is synchronous: it throws
       serviceMock['release-validation'].validateEntryData
-        .mockResolvedValueOnce(undefined)
-        .mockRejectedValueOnce(new Error('No entry found'));
+        .mockReturnValueOnce(undefined)
+        .mockImplementationOnce(() => {
+          throw new Error('No entry found');
+        });
 
       // @ts-expect-error Ignore missing properties
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });

@@ -1,5 +1,5 @@
 import path from 'path';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import fse from 'fs-extra';
 // eslint-disable-next-line node/no-unpublished-import
 import SwaggerParser from '@apidevtools/swagger-parser';
@@ -235,6 +235,23 @@ describe('Documentation plugin | Documentation service', () => {
       const mockFinalDoc = lastMockCall[1];
 
       expect(mockFinalDoc['x-strapi-config'].plugins).toEqual(['upload', 'users-permissions']);
+    });
+
+    it('generates documentation only for the installed default plugins if the user provided nothing in the config', async () => {
+      const { 'users-permissions': usersPermissions, ...otherPlugins } = global.strapi.plugins;
+      global.strapi.plugins = otherPlugins;
+
+      try {
+        const docService = documentation({ strapi: global.strapi });
+
+        await docService.generateFullDoc();
+        const lastMockCall = jest.mocked(fse.writeJson).mock.calls.at(-1)!;
+        const mockFinalDoc = lastMockCall[1];
+
+        expect(mockFinalDoc['x-strapi-config'].plugins).toEqual(['upload']);
+      } finally {
+        global.strapi.plugins = { ...otherPlugins, 'users-permissions': usersPermissions };
+      }
     });
 
     it("generates documentation only for plugins in the user's config", async () => {

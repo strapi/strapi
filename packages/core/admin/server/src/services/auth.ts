@@ -109,6 +109,8 @@ const validatePassword = (password: string, hash: string) => bcrypt.compare(pass
  * @param email the users email address
  * @param password the users password
  */
+export const USER_NOT_ACTIVE_MESSAGE = 'User not active';
+
 const checkCredentials = async ({ email, password }: { email: string; password: string }) => {
   const user: AdminUser = await strapi.db.query('admin::user').findOne({ where: { email } });
 
@@ -123,7 +125,7 @@ const checkCredentials = async ({ email, password }: { email: string; password: 
   }
 
   if (!(user.isActive === true)) {
-    return [null, false, { message: 'User not active' }];
+    return [null, false, { message: USER_NOT_ACTIVE_MESSAGE }];
   }
 
   return [null, user];

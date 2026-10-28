@@ -1,0 +1,9 @@
+{
+  "label": "CLI",
+  "position": 6,
+  "link": {
+    "type": "generated-index",
+    "slug": "/packages/cli",
+    "description": "Workspace packages under packages/cli/ in the monorepo."
+  }
+}

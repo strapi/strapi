@@ -15,8 +15,11 @@ import {
 } from './migrations';
 import type { ContentTypesSyncInput } from './migrations';
 import { addEntryDocumentToReleaseActions } from './migrations/database/5.0.0-document-id-in-actions';
+import { registerReleasesEntitlements } from './entitlements';
 
 export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
+  registerReleasesEntitlements(strapi);
+
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     await strapi.service('admin::permission').actionProvider.registerMany(ACTIONS);
 

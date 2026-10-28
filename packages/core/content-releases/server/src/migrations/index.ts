@@ -9,6 +9,11 @@ import type { ReleaseActionOutcome } from '../../../shared/constants';
 import { getActionValidity, getService, runAfterCommit } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
 
+// The core store saves content types as JSON: compare live attributes in that form, so values
+// JSON drops (e.g. the `publishedAt.default` function) do not count as a change
+const toPersistedForm = (attributes: Schema.ContentType['attributes'] | undefined) =>
+  JSON.parse(JSON.stringify(attributes ?? null));
+
 export interface ContentTypesSyncInput {
   oldContentTypes: Record<string, Schema.ContentType>;
   contentTypes: Record<string, Schema.ContentType>;
@@ -197,7 +202,8 @@ export async function revalidateChangedContentTypes(
   { oldContentTypes, contentTypes }: ContentTypesSyncInput,
   { strapi }: { strapi: Core.Strapi }
 ) {
-  if (oldContentTypes === undefined || contentTypes === undefined) {
+  // `null` when the core store has no saved schemas
+  if (oldContentTypes === undefined || oldContentTypes === null || contentTypes === undefined) {
     return;
   }
 
@@ -208,7 +214,10 @@ export async function revalidateChangedContentTypes(
       contentTypes[uid] &&
       contentTypesUtils.hasDraftAndPublish(oldContentTypes[uid]) &&
       contentTypesUtils.hasDraftAndPublish(contentTypes[uid]) &&
-      !isEqual(oldContentTypes[uid]?.attributes, contentTypes[uid]?.attributes)
+      !isEqual(
+        toPersistedForm(oldContentTypes[uid]?.attributes),
+        toPersistedForm(contentTypes[uid]?.attributes)
+      )
   );
 
   if (changedContentTypes.length === 0) {

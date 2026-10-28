@@ -301,9 +301,9 @@ const ReasonBody = ({
               count={fieldIssueCount}
             >
               {errors.length > 0 ? (
-                errors.map((error, index) => (
+                errors.map((error) => (
                   <IssueCard
-                    key={`${error.path.join('.')}-${index}`}
+                    key={`${error.path.join('.')}-${error.message}`}
                     label={
                       error.path.length > 0
                         ? getFieldLabel(error.path)

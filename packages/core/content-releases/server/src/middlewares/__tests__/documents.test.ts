@@ -27,6 +27,8 @@ const commit = () => {
   commitCallbacks = [];
 };
 
+const isLocalizedContentType = jest.fn();
+
 const strapi = {
   plugin: () => ({
     service: (name: string) =>
@@ -37,6 +39,10 @@ const strapi = {
     inTransaction: jest.fn(() => true),
     transaction: async (work: (params: { onCommit: (cb: () => unknown) => void }) => unknown) =>
       work({ onCommit: (cb) => commitCallbacks.push(cb) }),
+  },
+  localization: {
+    isLocalizedContentType,
+    getDefaultLocale: jest.fn().mockResolvedValue('en'),
   },
   log: { error: logError },
 } as unknown as Core.Strapi;
@@ -158,27 +164,46 @@ describe('createRevalidateActionsOnDraftChange', () => {
 });
 
 describe('createDeleteActionsOnDelete', () => {
-  const deleteEntry = (locale = 'en') =>
+  const deleteEntry = (
+    params: Record<string, unknown> = { locale: 'en' },
+    draftAndPublish = true
+  ) =>
     runMiddleware(createDeleteActionsOnDelete({ strapi }), {
       action: 'delete',
-      contentType: { uid: UID, options: { draftAndPublish: true } },
-      params: { documentId: 'doc-1', locale },
+      contentType: { uid: UID, options: { draftAndPublish } },
+      params: { documentId: 'doc-1', ...params },
     });
 
-  it("deletes the actions of the deleted entry's locale", async () => {
-    await deleteEntry();
+  beforeEach(() => {
+    isLocalizedContentType.mockReturnValue(true);
+  });
+
+  it.each([
+    ['a non-localized entry, without a locale', false, {}, {}],
+    ['a non-localized entry, whatever the locale passed', false, { locale: 'en' }, {}],
+    ['one locale of a localized entry', true, { locale: 'fr' }, { locale: 'fr' }],
+    ['every locale of a localized entry', true, { locale: '*' }, {}],
+    [
+      'some locales of a localized entry',
+      true,
+      { locale: ['en', 'fr'] },
+      { locale: { $in: ['en', 'fr'] } },
+    ],
+    ['a localized entry without a locale', true, {}, { locale: 'en' }],
+  ])('deletes the actions of %s', async (_, localized, params, localeFilter) => {
+    isLocalizedContentType.mockReturnValue(localized);
+
+    await deleteEntry(params);
 
     expect(deletePlannedActions.mock.calls).toStrictEqual([
-      [{ contentType: UID, entryDocumentId: 'doc-1', locale: 'en' }],
+      [{ contentType: UID, entryDocumentId: 'doc-1', ...localeFilter }],
     ]);
   });
 
-  it('deletes the actions of every locale when every locale is deleted', async () => {
-    await deleteEntry('*');
+  it('leaves releases alone for a content type without draft and publish', async () => {
+    await deleteEntry({}, false);
 
-    expect(deletePlannedActions.mock.calls).toStrictEqual([
-      [{ contentType: UID, entryDocumentId: 'doc-1' }],
-    ]);
+    expect(deletePlannedActions).not.toHaveBeenCalled();
   });
 
   it('logs a failure to delete the actions and still returns the deleted entry', async () => {

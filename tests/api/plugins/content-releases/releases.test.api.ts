@@ -156,7 +156,6 @@ const INVALID_PRODUCT_MESSAGE =
   'description must be a `string` type, but the final value was: `null`.';
 // What a release action stores: the message without the value it ends with
 const INVALID_PRODUCT_RECORDED_MESSAGE = 'description must be a `string` type';
-
 describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const builder = createTestBuilder();
   let strapi;
@@ -4437,5 +4436,115 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         }
       }
     );
+  });
+
+  describe('Delete an entry that is in a release', () => {
+    const getActions = (releaseId) =>
+      strapi.db
+        .query('plugin::content-releases.release-action')
+        .findMany({ where: { release: { id: releaseId } } });
+
+    // A document with an `en` and a `fr` locale, both in one release
+    const createLocalizedItemInRelease = async () => {
+      const { documentId } = await strapi
+        .documents(localizedItemUID)
+        .create({ data: { name: 'English' }, locale: 'en' });
+      await strapi
+        .documents(localizedItemUID)
+        .update({ documentId, locale: 'fr', data: { name: 'Français' } });
+
+      const release = (await createRelease()).body.data;
+      for (const locale of ['en', 'fr']) {
+        const res = await rq({
+          method: 'POST',
+          url: `/content-releases/${release.id}/actions`,
+          body: {
+            contentType: localizedItemUID,
+            entryDocumentId: documentId,
+            locale,
+            type: 'publish',
+          },
+        });
+        expect(res.statusCode).toBe(201);
+      }
+
+      return { documentId, release };
+    };
+
+    test('deleting a non-localized entry takes it out of the release', async () => {
+      const keptId = await createProduct({ valid: true });
+      const deletedId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: keptId },
+        { documentId: deletedId },
+      ]);
+
+      const deleteRes = await rq({
+        method: 'DELETE',
+        url: `/content-manager/collection-types/${productUID}/${deletedId}`,
+      });
+      expect(deleteRes.statusCode).toBe(200);
+
+      expect(await waitFor(async () => (await getActions(release.id)).length === 1)).toBe(true);
+      expect((await getActions(release.id))[0].entryDocumentId).toBe(keptId);
+
+      const publishRes = await publishManually(release.id);
+      expect(publishRes.statusCode).toBe(200);
+      expect(publishRes.body.data.status).toBe('done');
+    });
+
+    test('bulk deleting non-localized entries takes them out of their releases', async () => {
+      const keptId = await createProduct({ valid: true });
+      const deletedIds = [
+        await createProduct({ valid: true }),
+        await createProduct({ valid: true }),
+      ];
+      const release = await createReleaseWithActions(
+        'all_or_nothing',
+        [keptId, ...deletedIds].map((documentId) => ({ documentId }))
+      );
+      const emptiedRelease = await createReleaseWithActions('all_or_nothing', [
+        { documentId: deletedIds[0] },
+      ]);
+
+      const deleteRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${productUID}/actions/bulkDelete`,
+        body: { documentIds: deletedIds },
+      });
+      expect(deleteRes.statusCode).toBe(200);
+      expect(deleteRes.body.count).toBe(2);
+
+      expect(await waitFor(async () => (await getActions(release.id)).length === 1)).toBe(true);
+      expect((await getActions(release.id))[0].entryDocumentId).toBe(keptId);
+
+      expect(
+        await waitFor(async () => (await getRelease(emptiedRelease.id)).status === 'empty')
+      ).toBe(true);
+      expect(await getActions(emptiedRelease.id)).toHaveLength(0);
+    });
+
+    test('deleting one locale of a localized entry only takes that locale out', async () => {
+      const { documentId, release } = await createLocalizedItemInRelease();
+
+      const deleteRes = await rq({
+        method: 'DELETE',
+        url: `/content-manager/collection-types/${localizedItemUID}/${documentId}`,
+        qs: { locale: 'fr' },
+      });
+      expect(deleteRes.statusCode).toBe(200);
+
+      expect(await waitFor(async () => (await getActions(release.id)).length === 1)).toBe(true);
+      expect((await getActions(release.id))[0].locale).toBe('en');
+    });
+
+    test('deleting a localized entry without a locale takes the default locale out', async () => {
+      const { documentId, release } = await createLocalizedItemInRelease();
+
+      await strapi.documents(localizedItemUID).delete({ documentId });
+
+      expect(await waitFor(async () => (await getActions(release.id)).length === 1)).toBe(true);
+      expect((await getActions(release.id))[0].locale).toBe('fr');
+    });
   });
 });

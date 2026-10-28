@@ -58,6 +58,10 @@ import type { MessageDescriptor } from 'react-intl';
 
 type ReleaseRow = GetReleases.Response['data'][number];
 
+// Stable defaults: a literal default prop is a new reference on every render
+const EMPTY_RELEASES: ReleaseRow[] = [];
+const EMPTY_OPTIONS: NonNullable<Filters.ValueInputProps['options']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * ReleasesTable
  * -----------------------------------------------------------------------------------------------*/
@@ -189,7 +193,11 @@ const ReleaseConditionBadge = ({
  * offer an empty "Choose here" option, but these fields always have a value. Being a custom
  * input with options, its tag also shows the option's label rather than the stored value.
  */
-const OptionFilterInput = ({ name, options = [], ...props }: Filters.ValueInputProps) => {
+const OptionFilterInput = ({
+  name,
+  options = EMPTY_OPTIONS,
+  ...props
+}: Filters.ValueInputProps) => {
   const field = useField<string>(name);
 
   return (
@@ -396,7 +404,7 @@ interface ReleasesTableProps {
 }
 
 const ReleasesTable = ({
-  releases = [],
+  releases = EMPTY_RELEASES,
   isLoading = false,
   hasFilters = false,
   onClearFilters,

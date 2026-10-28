@@ -1,6 +1,6 @@
 'use strict';
 
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import { async } from '@strapi/utils';
 
 import { createStrapiInstance } from 'api-tests/strapi';
@@ -232,6 +232,28 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         createdWorkflow = res.body.data;
       });
+      test('It should not create a workflow with a name that already exists', async () => {
+        const res = await requests.admin.post('/review-workflows/workflows', {
+          body: {
+            data: {
+              name: testWorkflow.name,
+              stages: [{ name: 'Stage 1' }],
+            },
+          },
+        });
+
+        if (hasRW) {
+          expect(res.status).toBe(400);
+          expect(res.body.error).toMatchObject({
+            name: 'ValidationError',
+            message: 'A workflow with this name already exists.',
+            details: { errors: [{ path: ['name'] }] },
+          });
+        } else {
+          expect(res.status).toBe(404);
+          expect(res.body.data).toBeUndefined();
+        }
+      });
     });
 
     describe('Update workflow', () => {
@@ -273,6 +295,24 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
               { id: createdWorkflow.stages[0].id, name: 'Stage 1_Updated' },
               { name: 'Stage 2' },
             ],
+          });
+        } else {
+          expect(res.status).toBe(404);
+          expect(res.body.data).toBeUndefined();
+        }
+      });
+
+      test('It should not rename a workflow to a name that already exists', async () => {
+        const res = await requests.admin.put(`/review-workflows/workflows/${createdWorkflow.id}`, {
+          body: { data: { name: testWorkflow.name } },
+        });
+
+        if (hasRW) {
+          expect(res.status).toBe(400);
+          expect(res.body.error).toMatchObject({
+            name: 'ValidationError',
+            message: 'A workflow with this name already exists.',
+            details: { errors: [{ path: ['name'] }] },
           });
         } else {
           expect(res.status).toBe(404);
@@ -359,6 +399,30 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           expect(res.status).toBe(404);
           expect(res.body.data).toBeUndefined();
         }
+      });
+      test("It shouldn't return a stage that does not exist", async () => {
+        const res = await requests.admin.get(
+          `/review-workflows/workflows/${testWorkflow.id}/stages/123456789`
+        );
+
+        expect(res.status).toBe(404);
+      });
+      test("It shouldn't return a stage that belongs to another workflow", async () => {
+        const otherStage = await strapi.db.query(STAGE_MODEL_UID).create({
+          data: { name: 'Other stage' },
+        });
+        const otherWorkflow = await strapi.db.query(WORKFLOW_MODEL_UID).create({
+          data: { contentTypes: [], name: 'other workflow', stages: [otherStage.id] },
+        });
+
+        const res = await requests.admin.get(
+          `/review-workflows/workflows/${testWorkflow.id}/stages/${otherStage.id}`
+        );
+
+        await strapi.db.query(WORKFLOW_MODEL_UID).delete({ where: { id: otherWorkflow.id } });
+        await strapi.db.query(STAGE_MODEL_UID).delete({ where: { id: otherStage.id } });
+
+        expect(res.status).toBe(404);
       });
     });
   });
@@ -484,14 +548,24 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         await updateStage(productUID, entry.documentId, secondStage);
         await publishEntry(productUID, entry.documentId);
 
-        // Update the assignee of the entry
+        // Assign the entry, then remove the assignee
         const user = requests.admin.getLoggedUser();
-        await requests.admin.put(
+        const assignResponse = await requests.admin.put(
           `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/assignee`,
           {
-            body: { data: null },
+            body: { data: { id: user.id } },
           }
         );
+        expect(assignResponse.status).toBe(200);
+
+        const removeResponse = await requests.admin.put(
+          `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/assignee`,
+          {
+            body: { data: { id: null } },
+          }
+        );
+        expect(removeResponse.status).toBe(200);
+        expect(removeResponse.body.data[ENTITY_ASSIGNEE_ATTRIBUTE]).toBeNull();
 
         // Find entity and check its status
         const updatedEntry = await requests.admin.get(
@@ -623,14 +697,14 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           expect(workflowRes.body.data).toBeInstanceOf(Object);
           expect(workflowRes.body.data.stages).toBeInstanceOf(Array);
           expect(workflowRes.body.data.stages[0]).toMatchObject(
-            omit(['updatedAt'], stagesUpdateData[0])
+            omit(stagesUpdateData[0], ['updatedAt'])
           );
           expect(workflowRes.body.data.stages[1]).toMatchObject(
-            omit(['updatedAt'], stagesUpdateData[1])
+            omit(stagesUpdateData[1], ['updatedAt'])
           );
           expect(workflowRes.body.data.stages[2]).toMatchObject({
             id: expect.any(Number),
-            ...omit(['updatedAt'], stagesUpdateData[2]),
+            ...omit(stagesUpdateData[2], ['updatedAt']),
           });
         } else {
           expect(workflowRes.status).toBe(404);
@@ -892,6 +966,57 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
           body: { data: { contentTypes: [productUID] } },
         });
+      });
+
+      test('When a stage with content is deleted, the content should keep a stage', async () => {
+        const { body } = await requests.admin.put(
+          `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+          {
+            body: { data: { stages: [defaultStage, secondStage, { name: 'Stage to delete' }] } },
+          }
+        );
+        const stageToDelete = body.data.stages.find((stage) => stage.name === 'Stage to delete');
+
+        const entries = await async.map([1, 2, 3], (index) =>
+          createEntry(productUID, { name: `Product in deleted stage ${index}` })
+        );
+
+        await async.map(entries, async (entry) => {
+          const { status } = await updateStage(productUID, entry.documentId, stageToDelete);
+          expect(status).toBe(200);
+        });
+
+        // Simulate a slow database: moving the entities takes some time
+        const stagesService = strapi.plugin('review-workflows').service('stages');
+        const updateEntitiesStage = stagesService.updateEntitiesStage;
+        const updateEntitiesStageSpy = jest
+          .spyOn(stagesService, 'updateEntitiesStage')
+          .mockImplementation(async (...args) => {
+            await new Promise((resolve) => {
+              setTimeout(resolve, 100);
+            });
+            return updateEntitiesStage.apply(stagesService, args);
+          });
+
+        // Delete the last stage, its content should be moved to the previous stage
+        const { status } = await requests.admin.put(
+          `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+          { body: { data: { stages: [defaultStage, secondStage] } } }
+        );
+
+        expect(status).toBe(200);
+        expect(updateEntitiesStageSpy).toHaveBeenCalled();
+        updateEntitiesStageSpy.mockRestore();
+
+        const entriesAfter = await strapi.db.query(productUID).findMany({
+          where: { documentId: { $in: entries.map((entry) => entry.documentId) } },
+          populate: [ENTITY_STAGE_ATTRIBUTE],
+        });
+
+        expect(entriesAfter).not.toHaveLength(0);
+        for (const entry of entriesAfter) {
+          expect(entry[ENTITY_STAGE_ATTRIBUTE]?.name).toEqual(secondStage.name);
+        }
       });
 
       test('When content exists in a review stage and this stage is deleted, the content should be moved to the nearest available stage', async () => {
