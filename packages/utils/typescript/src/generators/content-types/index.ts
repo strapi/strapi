@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { sortBy } from 'lodash';
+import { omit, sortBy } from 'lodash';
 
 import { models } from '../common';
 import { resolveInterfaceNames } from '../common/interface-names';
@@ -14,6 +14,22 @@ const NO_CONTENT_TYPE_PLACEHOLDER_COMMENT = `/*
 `;
 
 /**
+ * Attributes a package adds at register only when the license that verifies at boot lists a gate:
+ * the stage and assignee relations of review workflows (`@strapi/review-workflows`,
+ * `constants/workflows.ts`). The package declares them in
+ * `Strapi.Registries.LicensedContentTypeAttributes`, and strict types add them from the
+ * application's `typescript.licensedFeatures`, so strict generated schemas leave them out, whatever
+ * the license type generation boots with. Application attributes cannot use these names: the
+ * `strapi` prefix is reserved.
+ */
+const LICENSED_ATTRIBUTES = ['strapi_stage', 'strapi_assignee'];
+
+const withoutLicensedAttributes = (schema: models.utils.Schema): models.utils.Schema => ({
+  ...schema,
+  attributes: omit(schema.attributes, LICENSED_ATTRIBUTES),
+});
+
+/**
  * Generate type definitions for Strapi Content-Types
  */
 export const generateContentTypesDefinitions = async (
@@ -23,7 +39,8 @@ export const generateContentTypesDefinitions = async (
 
   const { contentTypes } = strapi;
 
-  const schemas = sortBy(Object.values<models.utils.Schema>(contentTypes ?? {}), 'uid');
+  const runtimeSchemas = sortBy(Object.values<models.utils.Schema>(contentTypes ?? {}), 'uid');
+  const schemas = strict === true ? runtimeSchemas.map(withoutLicensedAttributes) : runtimeSchemas;
   const interfaceNames = resolveInterfaceNames(
     schemas.map(({ uid }) => uid),
     options.logger,

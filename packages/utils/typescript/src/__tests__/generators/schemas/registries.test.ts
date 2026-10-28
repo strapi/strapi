@@ -216,6 +216,80 @@ describe('conditional attributes', () => {
   });
 });
 
+describe('licensed attributes', () => {
+  // The relations review workflows adds at register when the license lists `review-workflows`
+  // (`@strapi/review-workflows`, `register.ts`).
+  const relation = (target: string) => ({
+    writable: true,
+    private: false,
+    configurable: false,
+    visible: false,
+    useJoinTable: true,
+    type: 'relation',
+    relation: 'oneToOne',
+    target,
+  });
+  const article = (stageAttributes: boolean) => ({
+    contentTypes: {
+      'api::article.article': {
+        uid: 'api::article.article',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        collectionName: 'articles',
+        info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+        options: { draftAndPublish: true },
+        attributes: {
+          title: { type: 'string', required: true },
+          ...(stageAttributes === true
+            ? {
+                strapi_stage: relation('plugin::review-workflows.workflow-stage'),
+                strapi_assignee: relation('admin::user'),
+              }
+            : {}),
+        },
+      },
+    },
+  });
+
+  test('without strict types, the attributes of the boot license are written', async () => {
+    const logger = createLogger({ silent: true });
+    const { output } = await generateContentTypesDefinitions({
+      strapi: article(true),
+      logger,
+      strict: false,
+    });
+
+    expect(output).toContain(
+      "strapi_stage: Schema.Attribute.Relation<'oneToOne', 'plugin::review-workflows.workflow-stage'>;"
+    );
+    expect(output).toContain(
+      "strapi_assignee: Schema.Attribute.Relation<'oneToOne', 'admin::user'>;"
+    );
+  });
+
+  test('with strict types, the output does not depend on the boot license', async () => {
+    const logger = createLogger({ silent: true });
+    const strapi = article(true);
+    const { output } = await generateContentTypesDefinitions({ strapi, logger, strict: true });
+    const { output: unlicensed } = await generateContentTypesDefinitions({
+      strapi: article(false),
+      logger,
+      strict: true,
+    });
+
+    expect(output).toBe(unlicensed);
+    expect(output).not.toContain('strapi_stage');
+    expect(output).not.toContain('strapi_assignee');
+    expect(output).toContain('title: Schema.Attribute.String & Schema.Attribute.Required;');
+    // The runtime schema keeps its attributes.
+    expect(Object.keys(strapi.contentTypes['api::article.article'].attributes)).toEqual([
+      'title',
+      'strapi_stage',
+      'strapi_assignee',
+    ]);
+  });
+});
+
 describe('duplicate interface names', () => {
   const contentType = (uid: string) => ({
     uid,
