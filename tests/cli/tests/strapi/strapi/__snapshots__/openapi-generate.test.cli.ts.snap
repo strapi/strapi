@@ -12351,9 +12351,9 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
-    "/connect/(.*)": {
+    "/connect/{*path}": {
       "get": {
-        "operationId": "users-permissions/get/connect_____",
+        "operationId": "users-permissions/get/connect__path_",
         "parameters": [],
         "responses": {
           "400": {

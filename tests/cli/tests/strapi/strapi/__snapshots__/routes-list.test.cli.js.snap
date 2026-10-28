@@ -3,11 +3,11 @@
 exports[`routes:list should output list of routes 1`] = `
 "│ Method             │ Path                                                                            │
 │ HEAD|ACL|BIND|CHE… │ /_health                                                                        │
-│ HEAD|GET           │ /admin/:path*                                                                   │
-│ HEAD|GET           │ /uploads/(.*)                                                                   │
-│ HEAD|GET           │ /plugins/documentation/(.*)                                                     │
+│ HEAD|GET           │ /admin{/*path}                                                                  │
+│ HEAD|GET           │ /uploads/{*path}                                                                │
+│ HEAD|GET           │ /plugins/documentation/{*path}                                                  │
 │ HEAD|GET           │ /                                                                               │
-│ HEAD|GET           │ /((?!uploads/).+)                                                               │
+│ HEAD|GET           │ /^\\/(?!uploads\\/).+/                                                            │
 │ HEAD|ACL|BIND|CHE… │ /graphql                                                                        │
 │ HEAD|GET           │ /api/articles                                                                   │
 │ HEAD|GET           │ /api/articles/:id                                                               │
@@ -98,7 +98,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /api/upload/files/:id                                                           │
 │ DELETE             │ /api/upload/files/:id                                                           │
 │ HEAD|GET           │ /api/i18n/locales                                                               │
-│ HEAD|GET           │ /api/connect/(.*)                                                               │
+│ HEAD|GET           │ /api/connect/{*path}                                                            │
 │ POST               │ /api/auth/local                                                                 │
 │ POST               │ /api/auth/local/register                                                        │
 │ HEAD|GET           │ /api/auth/:provider/callback                                                    │
@@ -296,7 +296,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /i18n/ai-localization-jobs/collection-types/:contentType/:documentId            │
 │ HEAD|GET           │ /i18n/ai-localization-jobs/single-types/:contentType                            │
 │ HEAD|GET           │ /documentation                                                                  │
-│ HEAD|GET           │ /documentation/v:major(\\d+).:minor(\\d+).:patch(\\d+)                             │
+│ HEAD|GET           │ /documentation/v:major.:minor.:patch                                            │
 │ HEAD|GET           │ /documentation/login                                                            │
 │ POST               │ /documentation/login                                                            │
 │ HEAD|GET           │ /documentation/getInfos                                                         │

@@ -69,7 +69,9 @@ const getPathParams = (routePath: string): OpenAPIV3.ParameterObject[] => {
   }, [] as OpenAPIV3.ParameterObject[]);
 };
 
-const getPathWithPrefix = (prefix: string | undefined, route: Core.Route) => {
+type StringPathRoute = Core.Route & { path: string };
+
+const getPathWithPrefix = (prefix: string | undefined, route: StringPathRoute) => {
   // When the prefix is set on the routes and
   // the current route is not trying to remove it
   if (prefix && !_.has(route.config, 'prefix')) {
@@ -93,14 +95,15 @@ const getPathWithPrefix = (prefix: string | undefined, route: Core.Route) => {
  */
 const getPaths = ({ routeInfo, uniqueName, contentTypeInfo, kind }: ApiInfo) => {
   // Get the routes for the current content type
-  const contentTypeRoutes = routeInfo.routes.filter((route) => {
+  const contentTypeRoutes = routeInfo.routes.filter((route): route is StringPathRoute => {
     return (
-      route.path.includes(contentTypeInfo.pluralName) ||
-      route.path.includes(contentTypeInfo.singularName)
+      typeof route.path === 'string' &&
+      (route.path.includes(contentTypeInfo.pluralName) ||
+        route.path.includes(contentTypeInfo.singularName))
     );
   });
 
-  const paths = contentTypeRoutes.reduce((acc: any, route: Core.Route) => {
+  const paths = contentTypeRoutes.reduce((acc: any, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = hasFindMethod(route.handler);
     const methodVerb = route.method.toLowerCase();

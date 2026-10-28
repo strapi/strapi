@@ -20,7 +20,7 @@ export class OperationIDAssembler implements Assembler.Operation {
       // 'origin/get' or 'get'
       .map(this._appendMethod(method))
       // 'origin/get/entity_by_id' or 'get/entity_by_id'
-      .map(this._maybeAppendPath(path));
+      .map(this._maybeAppendPath(String(path)));
 
     debug('assembled an operation ID for %o %o: %o', method, path, operationId);
 

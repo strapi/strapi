@@ -49,7 +49,7 @@ describe('Review workflows middlewares', () => {
 
       expect(strapiMock.server.router.use).toBeCalled();
       expect(strapiMock.server.router.use).toBeCalledWith(
-        '/content-type-builder/content-types/:uid?',
+        '/content-type-builder/content-types{/:uid}',
         expect.any(Function)
       );
       expect(ctxMock.request.body.contentType.reviewWorkflows).toBeUndefined();
