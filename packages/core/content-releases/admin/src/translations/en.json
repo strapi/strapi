@@ -102,5 +102,9 @@
   "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "No required stage for publication.",
   "widget.upcoming-releases.link": "Open Releases",
   "widget.upcoming-releases.title": "Upcoming releases",
-  "widget.upcoming-releases.no-data": "No releases"
+  "widget.upcoming-releases.no-data": "No releases",
+  "content-manager.actions.edit.label": "Edit",
+  "cancel": "Cancel",
+  "content-manager-edit-view.edit-entry": "Edit entry",
+  "pages.ReleaseDetails.entry-validation.review-stage": "Review stage"
 }
