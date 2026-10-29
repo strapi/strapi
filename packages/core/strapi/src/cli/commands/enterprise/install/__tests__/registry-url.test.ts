@@ -23,9 +23,13 @@ describe('resolveRegistryUrl', () => {
     ['http://127.0.0.1:4873', 'http://127.0.0.1:4873'],
     ['http://[::1]:4873/', 'http://[::1]:4873'],
     ['http://[0:0:0:0:0:0:0:1]:4873', 'http://[::1]:4873'],
-    ['https://registry.example.com/npm/', 'https://registry.example.com/npm'],
+    ['http://2130706433:4873', 'http://127.0.0.1:4873'],
+    ['https://127.0.0.1', 'https://127.0.0.1'],
+    ['https://packages.strapi.io', 'https://packages.strapi.io'],
+    ['https://packages.staging.strapi.team/', 'https://packages.staging.strapi.team'],
+    ['https://packages.strapi.io/npm/', 'https://packages.strapi.io/npm'],
     ['HTTP://LOCALHOST:4873/', 'http://localhost:4873'],
-    ['  https://Registry.Example.com  ', 'https://registry.example.com'],
+    ['  https://Packages.Strapi.IO  ', 'https://packages.strapi.io'],
   ])('uses %j, and warns that it does', (registry, registryUrl) => {
     const logger = createTestLogger();
 
@@ -72,16 +76,27 @@ describe('resolveRegistryUrl', () => {
   });
 
   it.each([
+    'https://example.com',
     'http://registry.example.com',
+    'https://evilstrapi.io',
+    'https://strapi.io.evil.com',
+    'https://packages.strapi.io%2eevil.com',
+    'https://strapi.io',
+    'https://strapi.team',
+    'https://packages.strapi.io.',
+    'http://packages.strapi.io',
+    'http://localhost.',
+    'http://foo.localhost',
+    'http://0.0.0.0',
     'http://192.168.1.10:4873',
     'http://[::2]:4873',
-    'http://[::ffff:127.0.0.1]:4873',
+    'http://[::ffff:127.0.0.1]',
     'ftp://localhost',
     'localhost:4873',
   ])('stops on %s, since the license is sent to it', (registry) => {
     expect(() => resolve(registry)).toThrow(
       new EnterpriseInstallError(
-        '--registry must use https, or http on localhost, 127.0.0.1 or [::1], because the license is sent to it.'
+        '--registry must be http(s) on localhost, 127.0.0.1 or [::1], or https on a strapi.io or strapi.team server, because the license is sent to it.'
       )
     );
   });

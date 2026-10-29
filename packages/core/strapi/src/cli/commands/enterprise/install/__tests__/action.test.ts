@@ -1100,7 +1100,7 @@ describe('runInstall with --registry', () => {
         logger: createTestLogger(),
         dependencies,
       })
-    ).rejects.toThrow('--registry must use https');
+    ).rejects.toThrow('--registry must be http(s) on localhost');
     expect(dependencies.fetchImplementation).not.toHaveBeenCalled();
     expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
   });

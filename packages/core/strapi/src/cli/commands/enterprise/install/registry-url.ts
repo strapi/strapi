@@ -4,6 +4,7 @@ import { EnterpriseInstallError } from './errors';
 
 const REGISTRY_OPTION = '--registry';
 const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]'];
+const STRAPI_DOMAIN_SUFFIXES = ['.strapi.io', '.strapi.team'];
 
 const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, '');
 
@@ -44,11 +45,14 @@ export const resolveRegistryUrl = ({
     );
   }
 
-  const isLocalHttp = url.protocol === 'http:' && LOCAL_HOSTNAMES.includes(url.hostname);
+  const isHttps = url.protocol === 'https:';
+  const isLocal = (isHttps || url.protocol === 'http:') && LOCAL_HOSTNAMES.includes(url.hostname);
+  const isStrapiServer =
+    isHttps && STRAPI_DOMAIN_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix));
 
-  if (url.protocol !== 'https:' && !isLocalHttp) {
+  if (!isLocal && !isStrapiServer) {
     throw new EnterpriseInstallError(
-      `${REGISTRY_OPTION} must use https, or http on localhost, 127.0.0.1 or [::1], because the license is sent to it.`
+      `${REGISTRY_OPTION} must be http(s) on localhost, 127.0.0.1 or [::1], or https on a strapi.io or strapi.team server, because the license is sent to it.`
     );
   }
 
