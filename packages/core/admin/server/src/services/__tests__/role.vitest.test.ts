@@ -1025,11 +1025,11 @@ describe('Role', () => {
     });
 
     test('Does not delete and recreate a permission that only changed order', async () => {
-      const createMany = jest.fn(() => Promise.resolve([]));
-      const deleteByIds = jest.fn();
-      const sendDidUpdateRolePermissions = jest.fn();
-      const syncPermissionsForRole = jest.fn();
-      const findMany = jest.fn(() =>
+      const createMany = vi.fn(() => Promise.resolve([]));
+      const deleteByIds = vi.fn();
+      const sendDidUpdateRolePermissions = vi.fn();
+      const syncPermissionsForRole = vi.fn();
+      const findMany = vi.fn(() =>
         Promise.resolve([
           {
             id: 3,
@@ -1047,14 +1047,14 @@ describe('Role', () => {
         admin: {
           services: {
             metrics: { sendDidUpdateRolePermissions },
-            role: { getSuperAdmin: jest.fn(() => Promise.resolve({ id: 0 })) },
+            role: { getSuperAdmin: vi.fn(() => Promise.resolve({ id: 0 })) },
             'api-token-admin': { syncPermissionsForRole },
             permission: {
               findMany,
               createMany,
               deleteByIds,
               actionProvider: {
-                values: jest.fn(() => [
+                values: vi.fn(() => [
                   {
                     actionId: 'action-0',
                     section: 'contentTypes',
@@ -1066,7 +1066,7 @@ describe('Role', () => {
           },
         },
         eventHub: {
-          emit: jest.fn(),
+          emit: vi.fn(),
         },
       } as any;
 
@@ -1108,11 +1108,11 @@ describe('Role', () => {
       /** Every condition is registered when not given */
       registeredConditions?: string[];
     } = {}) => {
-      const findUserPermissions = jest.fn(() => Promise.resolve(toPermission(userPermissions)));
-      const findMany = jest.fn(() => Promise.resolve(toPermission(rolePermissions)));
+      const findUserPermissions = vi.fn(() => Promise.resolve(toPermission(userPermissions)));
+      const findMany = vi.fn(() => Promise.resolve(toPermission(rolePermissions)));
       const actionProvider = {
         has: () => true,
-        appliesToProperty: jest.fn(
+        appliesToProperty: vi.fn(
           async (property: string, _action: string, subject?: string | null) =>
             property === 'locales' && !!subject && localizedSubjects.includes(subject)
         ),

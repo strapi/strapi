@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, vi, type Mock } from 'vitest';
 import { errors } from '@strapi/utils';
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
@@ -173,7 +173,7 @@ describe('Role controller', () => {
           services: {
             role: {
               assignPermissions,
-              checkPermissionsCeiling: jest.fn(),
+              checkPermissionsCeiling: vi.fn(),
               findOne: findOneRole,
               getSuperAdmin: vi.fn(() => undefined),
               hooks: {
@@ -246,7 +246,7 @@ describe('Role controller', () => {
           services: {
             role: {
               assignPermissions,
-              checkPermissionsCeiling: jest.fn(),
+              checkPermissionsCeiling: vi.fn(),
               findOne: findOneRole,
               getSuperAdmin: vi.fn(() => undefined),
               hooks: {
@@ -305,8 +305,8 @@ describe('Role controller', () => {
         },
       ];
 
-      const setup = (checkPermissionsCeiling: jest.Mock, state: Record<string, unknown> = {}) => {
-        const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
+      const setup = (checkPermissionsCeiling: Mock, state: Record<string, unknown> = {}) => {
+        const assignPermissions = vi.fn((roleID, permissions) => Promise.resolve(permissions));
 
         const ctx = createContext(
           {
@@ -324,27 +324,27 @@ describe('Role controller', () => {
               role: {
                 assignPermissions,
                 checkPermissionsCeiling,
-                findOne: jest.fn(() => Promise.resolve({ id: roleID })),
-                getSuperAdmin: jest.fn(() => undefined),
+                findOne: vi.fn(() => Promise.resolve({ id: roleID })),
+                getSuperAdmin: vi.fn(() => undefined),
                 hooks: {
                   willValidateUpdatePermissions: {
-                    call: jest.fn(() => Promise.resolve(normalizedPermissions)),
+                    call: vi.fn(() => Promise.resolve(normalizedPermissions)),
                   },
                 },
               },
               permission: {
-                sanitizePermission: jest.fn((permissions) => permissions),
+                sanitizePermission: vi.fn((permissions) => permissions),
                 conditionProvider: {
-                  values: jest.fn(() => []),
+                  values: vi.fn(() => []),
                 },
                 actionProvider: {
-                  values: jest.fn(() => [
+                  values: vi.fn(() => [
                     {
                       actionId: 'plugin::content-manager.explorer.read',
                       subjects: ['api::article.article'],
                     },
                   ]),
-                  get: jest.fn(() => ({
+                  get: vi.fn(() => ({
                     actionId: 'plugin::content-manager.explorer.read',
                     subjects: ['api::article.article'],
                     options: { applyToProperties: ['fields', 'locales'] },
@@ -359,7 +359,7 @@ describe('Role controller', () => {
       };
 
       test('Checks the requester holds the normalized permissions before assigning them', async () => {
-        const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
+        const checkPermissionsCeiling = vi.fn(() => Promise.resolve());
         const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
 
         await roleController.updatePermissions(ctx);
@@ -376,7 +376,7 @@ describe('Role controller', () => {
       });
 
       test('Checks an admin user session against the user', async () => {
-        const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
+        const checkPermissionsCeiling = vi.fn(() => Promise.resolve());
         const { ctx } = setup(checkPermissionsCeiling, {
           auth: { strategy: { name: 'admin' }, credentials: user },
         });
@@ -392,7 +392,7 @@ describe('Role controller', () => {
 
       test('Checks an admin token request against the token permissions and its owner', async () => {
         const adminPermissions = [{ action: 'admin::roles.update', subject: null }];
-        const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
+        const checkPermissionsCeiling = vi.fn(() => Promise.resolve());
         const { ctx } = setup(checkPermissionsCeiling, {
           auth: { strategy: { name: 'admin-token' }, credentials: { adminPermissions } },
         });
@@ -407,7 +407,7 @@ describe('Role controller', () => {
       });
 
       test('Checks an admin token request with no loaded permissions against nothing', async () => {
-        const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
+        const checkPermissionsCeiling = vi.fn(() => Promise.resolve());
         const { ctx } = setup(checkPermissionsCeiling, {
           auth: { strategy: { name: 'admin-token' }, credentials: {} },
         });
@@ -426,9 +426,9 @@ describe('Role controller', () => {
           'You cannot grant permissions you do not hold yourself',
           { permissions: normalizedPermissions }
         );
-        const checkPermissionsCeiling = jest.fn(() => Promise.reject(forbiddenError));
+        const checkPermissionsCeiling = vi.fn(() => Promise.reject(forbiddenError));
         const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
-        ctx.forbidden = jest.fn();
+        ctx.forbidden = vi.fn();
 
         await roleController.updatePermissions(ctx);
 
@@ -443,9 +443,9 @@ describe('Role controller', () => {
 
       test('Rethrows errors other than a ForbiddenError', async () => {
         const error = new Error('boom');
-        const checkPermissionsCeiling = jest.fn(() => Promise.reject(error));
+        const checkPermissionsCeiling = vi.fn(() => Promise.reject(error));
         const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
-        ctx.forbidden = jest.fn();
+        ctx.forbidden = vi.fn();
 
         await expect(roleController.updatePermissions(ctx)).rejects.toBe(error);
 

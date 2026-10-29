@@ -59,9 +59,9 @@ describe('Admin Token Controller', () => {
 
     test('Passes the calling token permissions when the request is made with an admin token', async () => {
       const adminPermissions = [{ action: 'admin::admin-tokens.create', subject: null }];
-      const create = jest.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
-      const exists = jest.fn(() => false);
-      const created = jest.fn();
+      const create = vi.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
+      const exists = vi.fn(() => false);
+      const created = vi.fn();
       const ctx = createContext(
         { body: createBody },
         {
@@ -87,9 +87,9 @@ describe('Admin Token Controller', () => {
     });
 
     test('Passes no permissions as an empty ceiling for a token without loaded permissions', async () => {
-      const create = jest.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
-      const exists = jest.fn(() => false);
-      const created = jest.fn();
+      const create = vi.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
+      const exists = vi.fn(() => false);
+      const created = vi.fn();
       const ctx = createContext(
         { body: createBody },
         {
@@ -115,9 +115,9 @@ describe('Admin Token Controller', () => {
     });
 
     test('Passes no calling token for an admin user session', async () => {
-      const create = jest.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
-      const exists = jest.fn(() => false);
-      const created = jest.fn();
+      const create = vi.fn().mockResolvedValue({ ...baseAdminToken, accessKey: 'new-key' });
+      const exists = vi.fn(() => false);
+      const created = vi.fn();
       const ctx = createContext(
         { body: createBody },
         {
@@ -401,9 +401,9 @@ describe('Admin Token Controller', () => {
     });
 
     test('Forbids regenerating a sibling token with an admin token of the same owner', async () => {
-      const regenerate = jest.fn();
-      const getById = jest.fn().mockResolvedValue(baseAdminToken);
-      const forbidden = jest.fn();
+      const regenerate = vi.fn();
+      const getById = vi.fn().mockResolvedValue(baseAdminToken);
+      const forbidden = vi.fn();
       const ctx = createContext(
         { params: { id: baseAdminToken.id } },
         {
@@ -431,9 +431,9 @@ describe('Admin Token Controller', () => {
 
     test('Regenerates the admin token the request is made with', async () => {
       const tokenWithKey = { ...baseAdminToken, accessKey: 'new-key' };
-      const regenerate = jest.fn().mockResolvedValue(tokenWithKey);
-      const getById = jest.fn().mockResolvedValue(baseAdminToken);
-      const created = jest.fn();
+      const regenerate = vi.fn().mockResolvedValue(tokenWithKey);
+      const getById = vi.fn().mockResolvedValue(baseAdminToken);
+      const created = vi.fn();
       const ctx = createContext(
         { params: { id: String(baseAdminToken.id) } },
         {
@@ -537,8 +537,8 @@ describe('Admin Token Controller', () => {
     });
 
     test('Gets a sibling token without accessKey with an admin token of the same owner', async () => {
-      const getById = jest.fn().mockResolvedValue(baseAdminToken);
-      const send = jest.fn();
+      const getById = vi.fn().mockResolvedValue(baseAdminToken);
+      const send = vi.fn();
       const ctx = createContext(
         { params: { id: baseAdminToken.id } },
         {
@@ -566,11 +566,11 @@ describe('Admin Token Controller', () => {
 
     test('Gets the admin token the request is made with, with its accessKey', async () => {
       const tokenWithKey = { ...baseAdminToken, accessKey: 'plaintext-key' };
-      const getById = jest
+      const getById = vi
         .fn()
         .mockResolvedValueOnce(baseAdminToken)
         .mockResolvedValueOnce(tokenWithKey);
-      const send = jest.fn();
+      const send = vi.fn();
       const ctx = createContext(
         { params: { id: baseAdminToken.id } },
         {
@@ -725,10 +725,10 @@ describe('Admin Token Controller', () => {
 
     test('Passes the calling token permissions when the request is made with an admin token', async () => {
       const adminPermissions = [{ action: 'admin::admin-tokens.update', subject: null }];
-      const update = jest.fn().mockResolvedValue({ ...baseAdminToken, ...updateBody });
-      const getById = jest.fn(() => baseAdminToken);
-      const getByName = jest.fn(() => null);
-      const send = jest.fn();
+      const update = vi.fn().mockResolvedValue({ ...baseAdminToken, ...updateBody });
+      const getById = vi.fn(() => baseAdminToken);
+      const getByName = vi.fn(() => null);
+      const send = vi.fn();
       const ctx = createContext(
         { body: updateBody, params: { id } },
         {
