@@ -23,16 +23,16 @@ The tests make no real AI call. A small OpenAI-compatible server in the test pro
 - On pull requests from a branch of `strapi/strapi`.
 - On pushes to `develop` and `main`.
 
-Pull requests from forks skip the job. GitHub gives no secrets to fork runs, so the job cannot install the plugin. The push run on `develop` reports what a fork pull request broke, after the merge.
+Pull requests from forks skip the job. GitHub gives no secrets to fork runs, so the job cannot install the plugins. The push run on `develop` reports what a fork pull request broke, after the merge.
 
 The job is part of the required `aggregate_test_result` check, so a failure blocks the merge. A skipped job does not block it.
 
-## Keep the plugin code private
+## Keep the code of the plugins private
 
-The plugin code is not public: not its source, not its built files, and not the prompts it sends to the AI provider. The job follows these rules. Keep them when you change it.
+The code of the Enterprise plugins is not public: not their source, not their built files, and not the prompts they send to AI providers. The job follows these rules. Keep them when you change it.
 
-- Never run the job, or any pull request code with the license, from `pull_request_target` or `workflow_run`. Fork code could then read the license and the plugin.
-- The job restores caches but never saves them. The plugin is installed in `$RUNNER_TEMP`, outside the repository, with a temporary npm cache.
+- Never run the job, or any pull request code with the license, from `pull_request_target` or `workflow_run`. Fork code could then read the license and the plugins.
+- The job restores caches but never saves them. The plugins are installed in `$RUNNER_TEMP`, outside the repository, with a temporary npm cache.
 - The license never goes to disk. The npm configuration only references `${STRAPI_LICENSE}`.
 - The mock provider never logs, stores, or returns the request body. Assertions only use the request path and the model name.
 - Do not print the installed plugin files, the npm configuration, or the environment in the logs.
@@ -44,7 +44,7 @@ Test names, logs from Strapi, screenshots, traces, and the Trunk report can be p
 You need a Strapi license that includes the `cms-byok-ai` feature and access to the Enterprise registry. Strapi employees can ask the Enterprise squad for one.
 
 1. Put the license in `tests/e2e/.env` as `STRAPI_LICENSE` (see [Setup](./00-setup.md#running-enterprise-ee-tests-locally)).
-2. Install the plugin outside the repository:
+2. Install the BYOK plugin outside the repository:
 
    ```shell
    export STRAPI_LICENSE="<your license>"
@@ -58,10 +58,10 @@ You need a Strapi license that includes the `cms-byok-ai` feature and access to 
    yarn test:e2e:ee --setup --domains enterprise-plugins -- --project=chromium
    ```
 
-When `STRAPI_BYOK_PLUGIN_PATH` is set, [`tests/app-template/config/plugins.js`](https://github.com/strapi/strapi/blob/develop/tests/app-template/config/plugins.js) loads the plugin from that path and points it to the mock provider.
+When `STRAPI_BYOK_PLUGIN_PATH` is set, [`tests/app-template/config/plugins.js`](https://github.com/strapi/strapi/blob/develop/tests/app-template/config/plugins.js) loads the BYOK plugin from that path and points it to the mock provider.
 
 ## When the job fails
 
 1. Read the Strapi logs in the job output (lines that start with `[WebServer]`). BYOK logs why it stays off, for example a missing license feature or a missing Strapi API.
 2. Open the Playwright trace from the job artifacts.
-3. If your change breaks the plugin on purpose, or you cannot find the cause, contact the Enterprise squad before you merge. The plugin code is private, so they may need to change it.
+3. If your change breaks the Enterprise plugins on purpose, or you cannot find the cause, contact the Enterprise squad before you merge. The code of the plugins is private, so the squad may need to change it.

@@ -57,7 +57,7 @@ To run only one domain, meaning a top-level directory in e2e/tests such as "admi
 yarn test:e2e --domains=admin
 ```
 
-The `enterprise-plugins` domain needs a private plugin, so it runs only when you name it with `--domains`. See [Enterprise plugins](./03-enterprise-plugins.md).
+The `enterprise-plugins` domain needs the private Enterprise plugins, so it runs only when you name it with `--domains`. See [Enterprise plugins](./03-enterprise-plugins.md).
 
 To pass file filters or Playwright-only flags (`--project`, `--grep`, `--reporter`, `--debug`, …), put them **after** a `--` that follows the runner options. (If you use **npm** instead of yarn, add one more `--` before those args: `npm run test:e2e -- --domains=admin -- login.spec.ts`.)
 
