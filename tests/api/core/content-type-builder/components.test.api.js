@@ -1,6 +1,6 @@
 'use strict';
 
-const { createAuthRequest } = require('api-tests/request');
+const { createAuthRequest, createContentAPIRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
 
 let strapi;
@@ -341,6 +341,147 @@ describe('Content Type Builder - Components', () => {
       expect(tryGet.body).toEqual({
         error: 'component.notFound',
       });
+    });
+  });
+
+  describe('Moving a component to another category keeps its entries', () => {
+    const PAGE_UID = 'api::page.page';
+    const CARD = {
+      displayName: 'Card',
+      icon: 'calendar',
+      attributes: { title: { type: 'string' } },
+    };
+
+    let contentApi;
+
+    const updateSchema = (data) =>
+      rq({ method: 'POST', url: '/content-type-builder/update-schema', body: { data } });
+
+    const componentTypes = async (tableName) =>
+      strapi.db.getConnection(tableName).pluck('component_type');
+
+    beforeAll(async () => {
+      // card nested in a wrapper component, and used both in a dynamic zone and as a single component
+      const res = await updateSchema({
+        components: [
+          {
+            action: 'create',
+            uid: 'default.card',
+            category: 'default',
+            displayName: CARD.displayName,
+            icon: CARD.icon,
+            attributes: [{ action: 'create', name: 'title', properties: { type: 'string' } }],
+          },
+          {
+            action: 'create',
+            uid: 'default.wrapper',
+            category: 'default',
+            displayName: 'Wrapper',
+            icon: 'calendar',
+            attributes: [
+              {
+                action: 'create',
+                name: 'inner',
+                properties: { type: 'component', repeatable: false, component: 'default.card' },
+              },
+            ],
+          },
+        ],
+        contentTypes: [
+          {
+            action: 'create',
+            uid: PAGE_UID,
+            displayName: 'Page',
+            singularName: 'page',
+            pluralName: 'pages',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            attributes: [
+              {
+                action: 'create',
+                name: 'sections',
+                properties: {
+                  type: 'dynamiczone',
+                  components: ['default.card', 'default.wrapper'],
+                },
+              },
+              {
+                action: 'create',
+                name: 'hero',
+                properties: { type: 'component', repeatable: false, component: 'default.card' },
+              },
+            ],
+          },
+        ],
+      });
+      expect(res.statusCode).toBe(200);
+
+      await restart();
+      contentApi = createContentAPIRequest({ strapi });
+
+      const created = await contentApi({
+        method: 'POST',
+        url: '/pages',
+        body: {
+          data: {
+            sections: [
+              { __component: 'default.card', title: 'A' },
+              { __component: 'default.wrapper', inner: { title: 'I' } },
+            ],
+            hero: { title: 'H' },
+          },
+        },
+      });
+      expect(created.statusCode).toBe(201);
+    });
+
+    afterAll(async () => {
+      await updateSchema({
+        contentTypes: [{ action: 'delete', uid: PAGE_UID }],
+        components: [
+          { action: 'delete', uid: 'blocks.card' },
+          { action: 'delete', uid: 'default.wrapper' },
+        ],
+      });
+    });
+
+    test('the dynamic zone and component rows follow the new uid', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/content-type-builder/components/default.card',
+        body: { component: { ...CARD, category: 'blocks' } },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ data: { uid: 'blocks.card' } });
+
+      await restart();
+      contentApi = createContentAPIRequest({ strapi });
+
+      const pageTable = strapi.db.metadata.get(PAGE_UID).attributes.sections.joinTable.name;
+      const wrapperTable =
+        strapi.db.metadata.get('default.wrapper').attributes.inner.joinTable.name;
+
+      expect((await componentTypes(pageTable)).sort()).toEqual([
+        'blocks.card',
+        'blocks.card',
+        'default.wrapper',
+      ]);
+      expect(await componentTypes(wrapperTable)).toEqual(['blocks.card']);
+
+      const { statusCode, body } = await contentApi({
+        method: 'GET',
+        url: '/pages',
+        qs: { populate: '*' },
+      });
+
+      expect(statusCode).toBe(200);
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0].sections).toEqual([
+        expect.objectContaining({ __component: 'blocks.card', title: 'A' }),
+        expect.objectContaining({ __component: 'default.wrapper' }),
+      ]);
+      expect(body.data[0].hero).toMatchObject({ title: 'H' });
     });
   });
 });
