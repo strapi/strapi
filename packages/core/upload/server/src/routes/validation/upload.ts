@@ -58,12 +58,20 @@ export class UploadRouteValidator extends AbstractRouteValidator {
 
   /**
    * Paginated files response schema: `{ data, meta: { pagination } }`.
-   *
+   */
+  get paginatedFiles() {
+    return z.object({
+      data: this.files,
+      meta: z.object({ pagination: this.paginationMeta }),
+    });
+  }
+
+  /**
    * Pagination meta is either page-based (`page`/`pageSize`) or offset-based
    * (`start`/`limit`), and `total`/`pageCount` are omitted when
    * `pagination[withCount]=false`.
    */
-  get paginatedFiles() {
+  get paginationMeta() {
     const pagedPagination = z.object({
       page: z.number().int(),
       pageSize: z.number().int(),
@@ -77,11 +85,39 @@ export class UploadRouteValidator extends AbstractRouteValidator {
       total: z.number().int().optional(),
     });
 
+    return z.union([pagedPagination, offsetPagination]);
+  }
+
+  /**
+   * Folder schema for the read-only folders routes. `path` is made of `pathId`s and is only
+   * meant as a subtree filter key; `namePath` is the same path made of folder names.
+   */
+  get folder() {
+    const parent = z.object({ id: z.number().int().positive(), documentId: z.string() });
+
     return z.object({
-      data: this.files,
-      meta: z.object({
-        pagination: z.union([pagedPagination, offsetPagination]),
-      }),
+      id: z.number().int().positive(),
+      documentId: z.string(),
+      name: z.string(),
+      path: z.string(),
+      namePath: z.string(),
+      parent: parent.nullable(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+    });
+  }
+
+  /**
+   * Content API folder lookup parameter: a numeric id or a documentId
+   */
+  get folderIdOrDocumentId() {
+    return z.union([z.number().int().positive(), z.string()]);
+  }
+
+  get paginatedFolders() {
+    return z.object({
+      data: z.array(this.folder),
+      meta: z.object({ pagination: this.paginationMeta }),
     });
   }
 
