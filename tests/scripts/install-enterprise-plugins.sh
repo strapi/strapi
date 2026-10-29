@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# Installs the latest @strapi-enterprise/plugin-byok in the given directory, for the
-# enterprise-plugins e2e domain. The plugin code is private: keep the directory outside the
+# Installs the latest Strapi Enterprise plugins in the given directory, for the
+# enterprise-plugins e2e domain. Their code is private: keep the directory outside the
 # repository, so no cache or artifact can include it.
 set -euo pipefail
+
+enterprise_plugin_packages=(
+  @strapi-enterprise/plugin-byok
+)
 
 if [[ $# -ne 1 ]]; then
   echo "Usage: $0 <install directory outside the repository>" >&2
@@ -10,7 +14,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 if [[ -z "${STRAPI_LICENSE:-}" ]]; then
-  echo "STRAPI_LICENSE is required. It must include the cms-byok-ai feature." >&2
+  echo "STRAPI_LICENSE is required. It must include the features of the Enterprise plugins." >&2
   exit 1
 fi
 
@@ -25,7 +29,7 @@ printf '%s\n' \
   '//packages.strapi.io/:_authToken=${STRAPI_LICENSE}' \
   > "$npm_temporary_directory/.npmrc"
 
-# A temporary npm cache keeps the plugin out of the npm cache that CI saves.
+# A temporary npm cache keeps the plugins out of the npm cache that CI saves.
 # Peer dependencies are skipped: Strapi comes from the test app.
 npm install \
   --prefix "$install_directory" \
@@ -36,8 +40,9 @@ npm install \
   --no-audit \
   --no-fund \
   --no-update-notifier \
-  @strapi-enterprise/plugin-byok@latest
+  "${enterprise_plugin_packages[@]/%/@latest}"
 
-npm ls --prefix "$install_directory" --all \
-  @strapi-enterprise/plugin-byok \
-  @strapi-enterprise/ai-workflows
+for package_json_path in "$install_directory"/node_modules/@strapi-enterprise/*/package.json; do
+  node --print 'const { name, version } = require(process.argv[1]); `${name}@${version}`' \
+    "$package_json_path"
+done

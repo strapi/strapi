@@ -41,24 +41,26 @@ Test names, logs from Strapi, screenshots, traces, and the Trunk report can be p
 
 ## Reproduce a failure locally
 
-You need a Strapi license that includes the `cms-byok-ai` feature and access to the Enterprise registry. Strapi employees can ask the Enterprise squad for one.
+You need a Strapi license that includes the features of the Enterprise plugins, such as `cms-byok-ai` for BYOK, and access to the Enterprise registry. Strapi employees can ask the Enterprise squad for one.
 
 1. Put the license in `tests/e2e/.env` as `STRAPI_LICENSE` (see [Setup](./00-setup.md#running-enterprise-ee-tests-locally)).
-2. Install the BYOK plugin outside the repository:
+2. Install the Enterprise plugins outside the repository:
 
    ```shell
    export STRAPI_LICENSE="<your license>"
-   tests/scripts/install-byok-plugin.sh "$HOME/.strapi-e2e/enterprise-plugins"
+   tests/scripts/install-enterprise-plugins.sh "$HOME/.strapi-e2e/enterprise-plugins"
    ```
 
 3. Run the domain. It runs only when you name it with `--domains`:
 
    ```shell
-   export STRAPI_BYOK_PLUGIN_PATH="$HOME/.strapi-e2e/enterprise-plugins/node_modules/@strapi-enterprise/plugin-byok"
+   export STRAPI_ENTERPRISE_PLUGINS_PATH="$HOME/.strapi-e2e/enterprise-plugins"
    yarn test:e2e:ee --setup --domains enterprise-plugins -- --project=chromium
    ```
 
-When `STRAPI_BYOK_PLUGIN_PATH` is set, [`tests/app-template/config/plugins.js`](https://github.com/strapi/strapi/blob/develop/tests/app-template/config/plugins.js) loads the BYOK plugin from that path and points it to the mock provider.
+When `STRAPI_ENTERPRISE_PLUGINS_PATH` is set, [`tests/app-template/config/plugins.js`](https://github.com/strapi/strapi/blob/develop/tests/app-template/config/plugins.js) loads the Enterprise plugins from that directory and points BYOK to the mock provider.
+
+To add an Enterprise plugin, add its package to [`tests/scripts/install-enterprise-plugins.sh`](https://github.com/strapi/strapi/blob/develop/tests/scripts/install-enterprise-plugins.sh), add its configuration to `tests/app-template/config/plugins.js`, and add its tests to the `enterprise-plugins` domain.
 
 ## When the job fails
 

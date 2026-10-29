@@ -21,9 +21,9 @@ test.describe('BYOK plugin', () => {
   let byokMockProvider: ByokMockProvider;
 
   test.beforeAll(async () => {
-    if (!process.env.STRAPI_BYOK_PLUGIN_PATH) {
+    if (!process.env.STRAPI_ENTERPRISE_PLUGINS_PATH) {
       throw new Error(
-        'STRAPI_BYOK_PLUGIN_PATH is not set. See docs/docs/contributing/03-testing/e2e/03-enterprise-plugins.md.'
+        'STRAPI_ENTERPRISE_PLUGINS_PATH is not set. See docs/docs/contributing/03-testing/e2e/03-enterprise-plugins.md.'
       );
     }
 

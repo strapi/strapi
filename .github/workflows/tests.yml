@@ -505,12 +505,12 @@ jobs:
         if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
         run: yarn nx run-many --targets build --nx-ignore-cycles --skip-nx-cache
 
-      - name: Install the BYOK plugin
+      - name: Install the Enterprise plugins
         env:
           STRAPI_LICENSE: ${{ secrets.strapiLicense }}
         run: |
-          tests/scripts/install-byok-plugin.sh "$RUNNER_TEMP/enterprise-plugins"
-          echo "STRAPI_BYOK_PLUGIN_PATH=$RUNNER_TEMP/enterprise-plugins/node_modules/@strapi-enterprise/plugin-byok" >> "$GITHUB_ENV"
+          tests/scripts/install-enterprise-plugins.sh "$RUNNER_TEMP/enterprise-plugins"
+          echo "STRAPI_ENTERPRISE_PLUGINS_PATH=$RUNNER_TEMP/enterprise-plugins" >> "$GITHUB_ENV"
 
       - name: Run [EE] e2e enterprise plugins E2E tests
         id: e2e

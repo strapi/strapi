@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = ({ env }) => ({
   upload: {
     config: {
@@ -8,12 +10,15 @@ module.exports = ({ env }) => ({
       },
     },
   },
-  // Only the enterprise-plugins e2e domain sets this path. The values below must match the mock
-  // provider in tests/e2e/tests/enterprise-plugins/byok-mock-provider.ts.
-  ...(env('STRAPI_BYOK_PLUGIN_PATH') && {
+  // Only the enterprise-plugins e2e domain sets this path. The byok values below must match the
+  // mock provider in tests/e2e/tests/enterprise-plugins/byok-mock-provider.ts.
+  ...(env('STRAPI_ENTERPRISE_PLUGINS_PATH') && {
     byok: {
       enabled: true,
-      resolve: env('STRAPI_BYOK_PLUGIN_PATH'),
+      resolve: path.join(
+        env('STRAPI_ENTERPRISE_PLUGINS_PATH'),
+        'node_modules/@strapi-enterprise/plugin-byok'
+      ),
       config: {
         connection: {
           apiKey: 'e2e-mock-provider-api-key',
