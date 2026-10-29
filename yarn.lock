@@ -20530,9 +20530,9 @@ __metadata:
   linkType: hard
 
 "ip-address@npm:^10.0.1":
-  version: 10.7.3
-  resolution: "ip-address@npm:10.7.3"
-  checksum: 10c0/145d9848f315a0375437d206dee763e2dd654063e8c5d6270a329e249cfad30b4ae760b237bb1991abfe67276f542310a89fca891ddf76f934e397e0dda1bf3b
+  version: 10.7.5
+  resolution: "ip-address@npm:10.7.5"
+  checksum: 10c0/0213462eada955051a4d5927a62f6613b7bf0f4b426347641491ef9c8498ee6e1ef0bcbe1455382de6d61771b0ab4a344919102d4b614d284161ed8df620125f
   languageName: node
   linkType: hard
 
