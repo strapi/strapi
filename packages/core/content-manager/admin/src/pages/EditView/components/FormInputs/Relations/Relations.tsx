@@ -578,7 +578,12 @@ const RelationsInput = ({
   const targetModel = props.attribute.targetModel;
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
-  const [searchForTrigger, { data, isLoading, isError }] = useLazySearchRelationsQuery();
+  const [searchForTrigger, { data, isLoading, isFetching, isError, error: searchError }] =
+    useLazySearchRelationsQuery();
+  // Refetching a failed search reports `isError: false` and `isLoading: true` until it settles.
+  // Keep showing the previous error meanwhile instead of flashing the loading state.
+  const isRetryingFailedSearch = isFetching && searchError !== undefined;
+
   /**
    * The options are only needed once the combobox has been opened. Searching when the field
    * mounts would send one request per relation field of the document on load.
@@ -727,8 +732,8 @@ const RelationsInput = ({
           placeholder={placeholder}
           hasNextPage={hasNextPage}
           isLoadingPermissions={isLoadingPermissions}
-          isLoadingSearchRelations={isLoading}
-          isSearchRelationsError={isError}
+          isLoadingSearchRelations={isLoading && !isRetryingFailedSearch}
+          isSearchRelationsError={isError || isRetryingFailedSearch}
           handleChange={handleChange}
           setSearchParams={setSearchParams}
           onOpen={handleOpen}
