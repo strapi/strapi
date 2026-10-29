@@ -440,6 +440,18 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "marketplace",
               },
               {
+                "action": "admin::password-policy.read",
+                "category": "password policy",
+                "displayName": "Read the password policy",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::password-policy.update",
+                "category": "password policy",
+                "displayName": "Update the password policy",
+                "subCategory": "general",
+              },
+              {
                 "action": "admin::project-settings.read",
                 "category": "project",
                 "displayName": "Read the project level settings",
@@ -1060,6 +1072,18 @@ describe('Role CRUD End to End', () => {
                 "category": "plugins and marketplace",
                 "displayName": "Access the marketplace",
                 "subCategory": "marketplace",
+              },
+              {
+                "action": "admin::password-policy.read",
+                "category": "password policy",
+                "displayName": "Read the password policy",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::password-policy.update",
+                "category": "password policy",
+                "displayName": "Update the password policy",
+                "subCategory": "general",
               },
               {
                 "action": "admin::project-settings.read",

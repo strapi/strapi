@@ -350,3 +350,47 @@ export declare namespace DebugDump {
     error?: errors.ApplicationError;
   }
 }
+
+/**
+ * Complexity rules every admin user's password has to satisfy (registration, password reset,
+ * profile and user updates). Editing it requires the `admin::password-policy.update`
+ * permission. The 72-byte bcrypt limit applies on top of these rules and is not configurable.
+ */
+export interface PasswordPolicy {
+  /** Minimum number of characters. */
+  minLength: number;
+  requireLowercase: boolean;
+  requireUppercase: boolean;
+  requireNumber: boolean;
+  /** Any character that is neither a letter nor a digit. */
+  requireSpecialCharacter: boolean;
+}
+
+/**
+ * GET /password-policy - Get the password policy.
+ * Public on purpose: the registration and reset-password pages validate against it before login.
+ */
+export declare namespace GetPasswordPolicy {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: PasswordPolicy;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * PUT /password-policy - Update the password policy (`admin::password-policy.update`)
+ */
+export declare namespace UpdatePasswordPolicy {
+  export interface Request {
+    body: PasswordPolicy;
+    query: {};
+  }
+  export interface Response {
+    data: PasswordPolicy;
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}

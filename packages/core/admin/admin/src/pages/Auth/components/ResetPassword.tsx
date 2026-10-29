@@ -11,6 +11,7 @@ import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useTypedDispatch } from '../../../core/store/hooks';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
+import { usePasswordPolicy } from '../../../hooks/usePasswordPolicy';
 import {
   Column,
   LayoutContent,
@@ -19,81 +20,30 @@ import {
 import { login } from '../../../reducer';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
-import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
-const RESET_PASSWORD_SCHEMA = yup.object().shape({
-  password: yup
-    .string()
-    .min(8, {
-      id: translatedErrors.minLength.id,
-      defaultMessage: 'Password must be at least 8 characters',
-      values: { min: 8 },
-    })
-    // bcrypt has a max length of 72 bytes (not characters!)
-    .test(
-      'required-byte-size',
-      {
-        id: 'components.Input.error.contain.maxBytes',
-        defaultMessage: 'Password must be less than 73 bytes',
-      },
-      function (value) {
-        if (!value || typeof value !== 'string') return true; // validated elsewhere
+import type { PasswordSchema } from '../../../utils/passwordPolicy';
 
-        const byteSize = getByteSize(value);
-        return byteSize <= 72;
-      }
-    )
-    .test(
-      'lowercase',
-      {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least 1 lowercase letter',
-      },
-      (value) => {
-        if (!value) return true;
-        return /[a-z]/.test(value);
-      }
-    )
-    .test(
-      'uppercase',
-      {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least 1 uppercase letter',
-      },
-      (value) => {
-        if (!value) return true;
-        return /[A-Z]/.test(value);
-      }
-    )
-    .test(
-      'number',
-      {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least 1 number',
-      },
-      (value) => {
-        if (!value) return true;
-        return /\d/.test(value);
-      }
-    )
-    .required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'Password is required',
-    })
-    .nullable(),
-  confirmPassword: yup
-    .string()
-    .required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'Confirm password is required',
-    })
-    .oneOf([yup.ref('password'), null], {
-      id: 'components.Input.error.password.noMatch',
-      defaultMessage: 'Passwords must match',
-    })
-    .nullable(),
-});
+const getResetPasswordSchema = (passwordSchema: PasswordSchema) =>
+  yup.object().shape({
+    password: passwordSchema
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'Password is required',
+      })
+      .nullable(),
+    confirmPassword: yup
+      .string()
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'Confirm password is required',
+      })
+      .oneOf([yup.ref('password'), null], {
+        id: 'components.Input.error.password.noMatch',
+        defaultMessage: 'Passwords must match',
+      })
+      .nullable(),
+  });
 
 const ResetPassword = () => {
   const { formatMessage } = useIntl();
@@ -102,6 +52,12 @@ const ResetPassword = () => {
   const { search: searchString } = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const { schema: passwordSchema, hint: passwordHint } = usePasswordPolicy();
+
+  const validationSchema = React.useMemo(
+    () => getResetPasswordSchema(passwordSchema),
+    [passwordSchema]
+  );
 
   const [resetPassword, { error }] = useResetPasswordMutation();
 
@@ -156,16 +112,12 @@ const ResetPassword = () => {
               // We know query.code is defined because we check for it above.
               handleSubmit({ password: values.password, resetPasswordToken: query.get('code')! });
             }}
-            validationSchema={RESET_PASSWORD_SCHEMA}
+            validationSchema={validationSchema}
           >
             <Flex direction="column" alignItems="stretch" gap={6}>
               {[
                 {
-                  hint: formatMessage({
-                    id: 'Auth.form.password.hint',
-                    defaultMessage:
-                      'Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number',
-                  }),
+                  hint: passwordHint,
                   label: formatMessage({
                     id: 'global.password',
                     defaultMessage: 'Password',

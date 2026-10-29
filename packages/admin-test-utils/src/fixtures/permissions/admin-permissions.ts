@@ -1578,6 +1578,22 @@ const admin = [
     },
     conditions: [],
   },
+  {
+    id: 379,
+    action: 'admin::password-policy.read',
+    actionParameters: {},
+    subject: null,
+    properties: {},
+    conditions: [],
+  },
+  {
+    id: 380,
+    action: 'admin::password-policy.update',
+    actionParameters: {},
+    subject: null,
+    properties: {},
+    conditions: [],
+  },
 ];
 
 const app = {
@@ -1833,6 +1849,26 @@ const app = {
       update: [
         {
           action: 'admin::project-settings.update',
+          subject: null,
+        },
+      ],
+    },
+    'password-policy': {
+      main: [
+        {
+          action: 'admin::password-policy.read',
+          subject: null,
+        },
+      ],
+      read: [
+        {
+          action: 'admin::password-policy.read',
+          subject: null,
+        },
+      ],
+      update: [
+        {
+          action: 'admin::password-policy.update',
           subject: null,
         },
       ],
