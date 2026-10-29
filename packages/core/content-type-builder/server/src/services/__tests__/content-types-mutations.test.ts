@@ -228,16 +228,37 @@ describe('content type mutation compensation', () => {
 
   describe('collectionType to singleType entry guard', () => {
     type Row = { documentId: string; locale?: string; publishedAt: string | null };
+    type Where = {
+      documentId?: { $ne?: string; $null?: boolean; $notNull?: boolean };
+      $or?: Where[];
+    };
+
+    // Rows here always carry a documentId, so `$null` never matches and `$notNull` always does
+    const matches = (row: Row, where?: Where): boolean => {
+      if (where === undefined) {
+        return true;
+      }
+      if (where.$or !== undefined) {
+        return where.$or.some((subWhere) => matches(row, subWhere));
+      }
+      const filter = where.documentId;
+      if (filter === undefined || filter.$notNull === true) {
+        return true;
+      }
+      if (filter.$null === true) {
+        return false;
+      }
+      return row.documentId !== filter.$ne;
+    };
 
     const mockRows = (rows: Row[]) => {
-      const matches = (row: Row, where?: { documentId?: { $ne: string } }) =>
-        where?.documentId === undefined || row.documentId !== where.documentId.$ne;
-
       strapi.db.query = jest.fn(() => ({
-        count: jest.fn(async (params?: { where?: { documentId?: { $ne: string } } }) => {
+        count: jest.fn(async (params?: { where?: Where }) => {
           return rows.filter((row) => matches(row, params?.where)).length;
         }),
-        findOne: jest.fn(async () => rows[0] ?? null),
+        findOne: jest.fn(async (params?: { where?: Where }) => {
+          return rows.find((row) => matches(row, params?.where)) ?? null;
+        }),
       })) as any;
     };
 
