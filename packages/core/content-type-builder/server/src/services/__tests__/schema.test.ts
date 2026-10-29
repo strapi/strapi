@@ -533,6 +533,62 @@ describe('Content Type Builder - Schema service', () => {
       );
     });
 
+    const updateArticleSchema: CTBSchema = {
+      contentTypes: [
+        {
+          action: 'update',
+          uid: 'api::test.test',
+          displayName: 'Test',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          pluginOptions: {},
+          options: {},
+          attributes: [],
+        },
+      ],
+      components: [],
+    };
+
+    it('does not wait forever for an event listener that never settles', async () => {
+      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+
+      try {
+        jest
+          .mocked(builderServiceMock.contentTypes.get)
+          .mockReturnValue({ uid: 'api::test.test', kind: 'collectionType' });
+        // e.g. a listener awaiting a `fetch` with no timeout
+        jest.mocked(strapi.eventHub.emit).mockReturnValue(new Promise(() => {}));
+
+        let settled = false;
+        const update = updateSchema(updateArticleSchema).then(() => {
+          settled = true;
+        });
+
+        await jest.advanceTimersByTimeAsync(10_000);
+
+        expect(settled).toBe(true);
+        await update;
+        expect(strapi.log.warn).toHaveBeenCalledWith(
+          expect.stringContaining('content-type.update')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('logs a listener rejection that cannot be converted to a string', async () => {
+      jest
+        .mocked(builderServiceMock.contentTypes.get)
+        .mockReturnValue({ uid: 'api::test.test', kind: 'collectionType' });
+      // `String()` throws on an object without `toString`
+      jest.mocked(strapi.eventHub.emit).mockRejectedValue(Object.create(null));
+
+      await expect(updateSchema(updateArticleSchema)).resolves.toBeUndefined();
+      expect(strapi.log.error).toHaveBeenCalledWith(
+        expect.stringContaining('content-type.update listener failed')
+      );
+    });
+
     it('should handle errors and rollback when API clearing fails', async () => {
       const contentTypeUid = 'api::test.test';
       const mockContentType = {
