@@ -11,17 +11,28 @@ type BuildFilesContext = Pick<
 >;
 
 const htmlEntryPlugin = (ctx: BuildFilesContext): Plugin => {
+  const htmlPath = path.join(ctx.runtimeDir, 'index.html');
   // Vite keys the html asset by its path from the root, so move it to the top level
-  const htmlKey = path
-    .relative(ctx.cwd, path.join(ctx.runtimeDir, 'index.html'))
-    .split(path.sep)
-    .join('/');
+  const htmlKey = path.relative(ctx.cwd, htmlPath).split(path.sep).join('/');
 
   return {
     name: 'strapi/server/build-files',
     apply: 'build',
     // Run after Vite's build:html plugin, which is what emits the html asset
     enforce: 'post',
+    // A custom src/admin/vite.config can replace build.rollupOptions.input, so add the html back
+    options(options) {
+      const { input = {} } = options;
+
+      if (typeof input === 'string' || Array.isArray(input)) {
+        const entries = [input].flat();
+        return entries.includes(htmlPath) ? null : { ...options, input: [...entries, htmlPath] };
+      }
+
+      return Object.values(input).includes(htmlPath)
+        ? null
+        : { ...options, input: { ...input, 'strapi-admin': htmlPath } };
+    },
     async generateBundle(_options, outputBundle) {
       const asset = outputBundle[htmlKey];
 
