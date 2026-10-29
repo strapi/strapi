@@ -57,6 +57,29 @@ describe('buildFilesPlugin', () => {
     expect(bundle['index.html'].fileName).toBe('index.html');
   });
 
+  describe('options', () => {
+    const html = `${process.cwd()}/.strapi/client/index.html`;
+    const options = (input?: Rollup.InputOption) => {
+      const hook = buildFilesPlugin(ctx).options;
+      const handler = typeof hook === 'function' ? hook : hook!.handler;
+
+      return handler.call({} as never, { input });
+    };
+
+    it('keeps an input that has the html entry', () => {
+      expect(options({ strapi: html })).toBeNull();
+      expect(options([html])).toBeNull();
+    });
+
+    it('adds the html entry to a replaced input', () => {
+      expect(options('/app/extra.ts')).toEqual({ input: ['/app/extra.ts', html] });
+      expect(options(['/app/extra.ts'])).toEqual({ input: ['/app/extra.ts', html] });
+      expect(options({ strapi: '/app/extra.ts' })).toEqual({
+        input: { strapi: '/app/extra.ts', 'strapi-admin': html },
+      });
+    });
+  });
+
   it('throws when the html asset is missing', async () => {
     await expect(generateBundle({})).rejects.toThrow(
       'Failed to find the html asset in bundle (.strapi/client/index.html)'
