@@ -98,6 +98,8 @@ describe('folder', () => {
     test('nests folders under their parent and sorts every level by name', async () => {
       const structure = await folderService.getStructure();
 
+      // Case-sensitive code-point order ('Beta' < 'Zeta' < 'alpha') is what
+      // `sortBy` has always returned. It documents current behaviour, not a spec.
       expect(structure).toEqual([
         { id: 3, name: 'Beta', children: [] },
         {
@@ -124,6 +126,8 @@ describe('folder', () => {
       // sorted list lengths add up to the number of folders. Re-sorting the
       // growing list on every insertion, as the code used to, adds up to more
       // (1 + 2 + … + N for N siblings).
+      // This deliberately checks the implementation: it is the only guard
+      // against the quadratic loop coming back. Update it if the sort changes.
       const sortedElements = sortBySpy.mock.calls.reduce(
         (sum: number, [list]: [unknown[]]) => sum + list.length,
         0
