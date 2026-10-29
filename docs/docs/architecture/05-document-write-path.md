@@ -65,11 +65,11 @@ sequenceDiagram
   EM->>EM: beforeCreate, insert, relations, findOne, afterCreate
   EM-->>Repo: row
   Repo->>TX: emitEvent registers an onCommit callback
-  Note over TX: transaction commits, callbacks start
-  Repo-->>MW: document
-  MW-->>Caller: document
+  Note over TX: transaction commits
   TX->>Hub: emit entry.create with model, uid, entry
   Hub->>WH: listener adds a job to the queue
+  Repo-->>MW: document
+  MW-->>Caller: document
   WH->>WH: POST to each enabled webhook
 ```
 

@@ -40,11 +40,11 @@ const idsFromInsertResult = (
  * `auto_increment_increment` apart, which is 1 unless the server is configured
  * otherwise (Group Replication, Galera).
  */
-const readAutoIncrementStep = async (db: {
-  connection: { raw: (sql: string) => Promise<unknown> };
+const readAutoIncrementStep = async (connection: {
+  raw: (sql: string) => Promise<unknown>;
 }): Promise<number> => {
   try {
-    const result = await db.connection.raw('SELECT @@auto_increment_increment AS step');
+    const result = await connection.raw('SELECT @@auto_increment_increment AS step');
     const rows = Array.isArray(result) ? result[0] : (result as { rows?: unknown }).rows;
     const step = Number(
       Array.isArray(rows) ? (rows[0] as { step?: unknown } | undefined)?.step : undefined

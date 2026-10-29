@@ -73,4 +73,20 @@ describe('transaction hooks', () => {
   test('a driver error is not a hook error', () => {
     expect(isTransactionHookError(Object.assign(new Error('x'), { code: '40P01' }))).toBe(false);
   });
+
+  test('a transaction opened from a commit hook does not run rolled-back commit hooks', async () => {
+    const rolledBack = jest.fn();
+
+    await transactionCtx.run(fakeTrx(), async () => {
+      transactionCtx.onCommit(async () => {
+        await transactionCtx.run(fakeTrx(), async () => {
+          transactionCtx.onCommit(rolledBack);
+          await transactionCtx.rollback(fakeTrx());
+        });
+      });
+      await transactionCtx.commit(fakeTrx());
+    });
+
+    expect(rolledBack).not.toHaveBeenCalled();
+  });
 });

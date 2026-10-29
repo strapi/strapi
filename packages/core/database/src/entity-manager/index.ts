@@ -398,7 +398,9 @@ export const createEntityManager = (db: Database): EntityManager => {
       const batchSize = db.dialect.getBatchInsertSize();
       const rowsProvideIds = dataToInsert.every((row) => row.id != null);
       const increment =
-        db.dialect.useReturning() || rowsProvideIds ? 1 : await readAutoIncrementStep(db);
+        db.dialect.useReturning() || rowsProvideIds
+          ? 1
+          : await readAutoIncrementStep(transactionCtx.get() ?? db.connection);
       const trx = await db.transaction();
       let createdEntries: Array<ID | { id: ID }> = [];
       try {

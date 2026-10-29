@@ -112,12 +112,16 @@ const runCallbacks = async (callbacks: Callback[] | undefined) => {
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const store = storage.getStore();
+    // Share callback arrays only while the parent transaction is still open.
+    // Commit hooks run after that transaction is cleared. A transaction they
+    // open must not keep the parent's arrays, or a rolled-back attempt's
+    // onCommit callbacks run beside the successful attempt.
+    const parent = store?.trx ? store : undefined;
     return storage.run<ReturnType<TCallback>, void[]>(
       {
         trx,
-        // Fill with existing callbacks if nesting transactions
-        commitCallbacks: store?.commitCallbacks || [],
-        rollbackCallbacks: store?.rollbackCallbacks || [],
+        commitCallbacks: parent ? parent.commitCallbacks : [],
+        rollbackCallbacks: parent ? parent.rollbackCallbacks : [],
       },
       cb
     );

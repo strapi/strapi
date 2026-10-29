@@ -39,17 +39,34 @@ const registerModelsHooks = () => {
     // syncing non-localized fields. `*` is not a stored locale, so a wildcard
     // discard stays unscoped and still limited to the draft row.
     const locale = localeForOriginalLookup(context.params.locale);
-    const originalData =
+    const documentId =
       'documentId' in context.params && context.params.documentId
-        ? await strapi.db.query(schema.uid).findOne({
-            where: {
-              documentId: context.params.documentId,
-              ...(locale ? { locale } : {}),
-              ...(schema.options?.draftAndPublish ? { publishedAt: { $null: true } } : {}),
-            },
-            populate: attributesToPopulate,
-          })
-        : null;
+        ? context.params.documentId
+        : undefined;
+    const draftOnly = schema.options?.draftAndPublish ? { publishedAt: { $null: true } } : {};
+    let originalData = documentId
+      ? await strapi.db.query(schema.uid).findOne({
+          where: {
+            documentId,
+            ...(locale ? { locale } : {}),
+            ...draftOnly,
+          },
+          populate: attributesToPopulate,
+        })
+      : null;
+
+    // A new locale has no row yet. Compare a sibling draft so copied
+    // non-localized values do not count as a change and rewrite every locale.
+    if (!originalData && documentId && locale) {
+      originalData = await strapi.db.query(schema.uid).findOne({
+        where: {
+          documentId,
+          locale: { $ne: locale },
+          ...draftOnly,
+        },
+        populate: attributesToPopulate,
+      });
+    }
 
     // Get the result of the document service action
     const result = (await next()) as any;
