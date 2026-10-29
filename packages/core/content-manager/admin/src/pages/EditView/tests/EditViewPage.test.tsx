@@ -125,6 +125,19 @@ describe('EditViewPage', () => {
     expect(screen.getByText('This value is required.')).toBeInTheDocument();
   });
 
+  it('keeps forceValidation when a locale saved by an earlier visit is restored into the URL', async () => {
+    window.localStorage.setItem(
+      'STRAPI_LOCALE',
+      JSON.stringify({ plugins: { i18n: { locale: 'en' } } })
+    );
+
+    renderEditView({ forceValidation: true });
+
+    await screen.findByRole('textbox', { name: /title/ });
+
+    expect(screen.getByText('This value is required.')).toBeInTheDocument();
+  });
+
   it('does not show validation errors initially without forceValidation', async () => {
     renderEditView();
 
