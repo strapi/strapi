@@ -141,6 +141,7 @@ describe('CM API - Custom order', () => {
   afterAll(async () => {
     await utils.deleteUsersById(users.map((user) => user.id));
     await utils.deleteRolesById(roles.map((role) => role.id));
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
     await strapi.destroy();
     await builder.cleanup();
   });
