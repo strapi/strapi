@@ -41,7 +41,7 @@ The `content-api` service ([`services/content-api/`](https://github.com/strapi/s
 
 ### Resolver wrapping
 
-`wrapResolvers` in `services/content-api/wrap-resolvers.ts` reads `resolversConfig`. The keys are `Type.field` paths. Each entry can set `auth` (with a `scope`), `middlewares` and `policies`. The auth check reads `context.state.auth`. Policies run last, through `createPoliciesMiddleware`.
+`wrapResolvers` in `services/content-api/wrap-resolvers.ts` reads `resolversConfig`. The keys are `Type.field` paths. Each entry can set `auth` (with a `scope`), `middlewares` and `policies`. The auth check reads `context.state.auth`. An inline function in `middlewares` runs with `(resolve, parent, args, context, info)`. A name or a `{ name, options }` entry refers to a registered Strapi middleware, as in routes. Its factory runs once, at schema build, with `options` (or `{}`). Its koa handler runs with `context.koaContext`, and its `next` resolves the rest of the chain. If the handler does not call `next`, the field resolves to `null`. Policies run last, through `createPoliciesMiddleware`.
 
 ### Landing page and CSP
 
