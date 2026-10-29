@@ -16,12 +16,11 @@ import type { Data } from '@strapi/types';
 import permissionDomain, { type CreatePermissionPayload } from '../domain/permission';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
 import type { Action } from '../domain/action';
-import type { CeilingPermission } from '../domain/permission/ceiling';
 
 import { validatePermissionsExist } from '../validation/permission';
 import roleConstants from './constants';
 import { getService } from '../utils';
-import { toEnforcedCeilingPermissions } from './permission/enforced-permissions';
+import { findRequesterCeilings, type CeilingRequester } from './permission/ceiling-requester';
 
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION, ROLE_TEXT_MAX_LENGTH } = roleConstants;
 
@@ -419,43 +418,6 @@ const assignPermissions = async (
   }
 
   return permissionsToReturn;
-};
-
-/**
- * Who updates the role, which decides the permissions they can grant: an admin user grants up
- * to their own permissions (all of them for a super admin), an admin token up to the token's
- * permissions and, unless its owner is a super admin, up to the owner's current permissions.
- */
-export type CeilingRequester =
-  { user: AdminUser } | { tokenPermissions: CeilingPermission[]; owner: AdminUser };
-
-/**
- * The permission sets a granted permission must stay within, all of them, as the engine
- * enforces them. Empty when the requester is not limited (a super admin).
- */
-const findRequesterCeilings = async (
-  requester: CeilingRequester
-): Promise<CeilingPermission[][]> => {
-  if ('tokenPermissions' in requester) {
-    const tokenPermissions = await toEnforcedCeilingPermissions(requester.tokenPermissions);
-
-    // A token can carry permissions its owner lost since it was written
-    if (hasSuperAdminRole(requester.owner)) {
-      return [tokenPermissions];
-    }
-
-    const ownerPermissions = await getService('permission').findUserPermissions(requester.owner);
-
-    return [tokenPermissions, await toEnforcedCeilingPermissions(ownerPermissions)];
-  }
-
-  if (hasSuperAdminRole(requester.user)) {
-    return [];
-  }
-
-  const userPermissions = await getService('permission').findUserPermissions(requester.user);
-
-  return [await toEnforcedCeilingPermissions(userPermissions)];
 };
 
 /**

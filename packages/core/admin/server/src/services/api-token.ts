@@ -26,6 +26,8 @@ import { getService } from '../utils';
 import permissionDomain from '../domain/permission';
 import { validatePermissionsExist } from '../validation/permission';
 import { toEnforcedCeilingPermissions } from './permission/enforced-permissions';
+import { findRequesterCeilings } from './permission/ceiling-requester';
+import type { CeilingPermission } from '../domain/permission/ceiling';
 import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
 import {
   AUDITED_EVENTS,
@@ -244,7 +246,7 @@ const assertAdminPermissionsValidity = async (adminPermissions?: PermissionInput
  */
 const describeCeilingRejection = (
   requested: PermissionInput,
-  userPermissions: Permission[]
+  userPermissions: CeilingPermission[]
 ): string | null => {
   const matching = permissionDomain.ceiling.findMatchingPermissions(requested, userPermissions);
 
@@ -271,27 +273,35 @@ const describeCeilingRejection = (
  * Enforce that every requested admin permission stays within the calling
  * user's own permission ceiling, then return the clamped permissions.
  *
- * Super-admins bypass this (they hold every permission).
+ * When the request is made with an admin token (`callingTokenPermissions` is given), the
+ * requested permissions must stay within the calling token's permissions and, unless `user` (the
+ * token owner) is a super admin, within the owner's too, the same two ceilings as a role update
+ * (`findRequesterCeilings`). A super-admin owner does not lift the token check. An empty list is
+ * a token that holds nothing.
+ *
+ * Otherwise super-admins bypass this (they hold every permission).
  * When admin permissions are requested, an authenticated user is required (no bypass when user is missing).
  *
  * Each requested permission follows the same per-permission rule as roles (`ceiling.ts`): every
- * combination of a requested field and locale must be covered by one user permission, and
- * omitting `fields` against a user restricted on it is rejected. Both sides are read as the
+ * combination of a requested field and locale must be covered by one held permission, and
+ * omitting `fields` against a ceiling restricted on it is rejected. Both sides are read as the
  * engine enforces them: an omitted `locales` on a localized subject is no locale, so it needs
- * nothing to cover it, and a user permission without `locales` there holds no locale. A
- * request that only several user permissions together would cover (`title` on `fr` from `title`
- * on `en` plus `body` on `fr`) is rejected. Conditions are inherited from the user, never taken
- * from the request (`getInheritedConditions`).
+ * nothing to cover it, and a held permission without `locales` there holds no locale. A
+ * request that only several held permissions together would cover (`title` on `fr` from `title`
+ * on `en` plus `body` on `fr`) is rejected. Conditions are inherited, never taken from the
+ * request (`getInheritedConditions`): from the owner, or from the calling token when the owner
+ * is a super admin, and the result must be within every ceiling.
  *
  * Returns the permissions with their inherited conditions.
- * Throws ValidationError if any permission exceeds the user's ceiling.
+ * Throws ValidationError if any permission exceeds a ceiling.
  *
  * Guaranteed postcondition: all returned permissions have conditions filtered to
  * registered conditions only, regardless of the user type.
  */
 const enforceAdminPermissionsCeiling = async (
   user: AdminUser | undefined | null,
-  requestedPermissions?: PermissionInput[]
+  requestedPermissions?: PermissionInput[],
+  callingTokenPermissions?: CeilingPermission[]
 ): Promise<PermissionInput[]> => {
   if (!requestedPermissions || requestedPermissions.length === 0) {
     return requestedPermissions || [];
@@ -301,7 +311,10 @@ const enforceAdminPermissionsCeiling = async (
       'Admin permission ceiling cannot be enforced without an authenticated user'
     );
   }
-  if (isSuperAdmin(user)) {
+
+  const hasCallingToken = callingTokenPermissions !== undefined;
+
+  if (!hasCallingToken && isSuperAdmin(user)) {
     // Sanitize conditions even for super-admins so this function is a complete boundary.
     // createApiTokenAdminPermissions also sanitizes, but relying on that downstream
     // is fragile — any future call path that skips it would store invalid conditions.
@@ -313,9 +326,11 @@ const enforceAdminPermissionsCeiling = async (
     });
   }
 
-  const userPermissions = await toEnforcedCeilingPermissions(
-    await getService('permission').findUserPermissions(user)
+  // The calling token first, then the owner (left out for a super-admin owner)
+  const ceilings = await findRequesterCeilings(
+    hasCallingToken ? { tokenPermissions: callingTokenPermissions, owner: user } : { user }
   );
+  const ceilingHolders = hasCallingToken ? ['the calling token', 'the owner'] : ['the owner'];
 
   // Only compared: the stored permission keeps the requested shape, which the engine enforces.
   // The requested conditions are ignored (inherited instead) and the requested action parameters
@@ -334,11 +349,30 @@ const enforceAdminPermissionsCeiling = async (
       requestedSubject !== null ? `${requested.action} on ${requestedSubject}` : requested.action;
 
     const enforced = enforcedRequested[index];
-    const conditions = permissionDomain.ceiling.getInheritedConditions(enforced, userPermissions);
+    const inherited = ceilings.map((held) =>
+      permissionDomain.ceiling.getInheritedConditions(enforced, held)
+    );
+    const rejectedBy = inherited.findIndex((conditions) => conditions === null);
 
-    if (conditions === null) {
-      const reason = describeCeilingRejection(enforced, userPermissions);
-      exceeding.push(reason === null ? label : `${label} (${reason})`);
+    if (rejectedBy !== -1) {
+      const reason = describeCeilingRejection(enforced, ceilings[rejectedBy]);
+      const holder = hasCallingToken ? `not held by ${ceilingHolders[rejectedBy]}` : null;
+      const details = [holder, reason].filter((part) => part !== null).join(': ');
+      exceeding.push(details === '' ? label : `${label} (${details})`);
+      return requested;
+    }
+
+    // The owner's conditions when the owner is a ceiling, as for every token: the owner re-sync
+    // (`reconcileTokenPermissionsToUserCeiling`) makes a token's conditions follow its owner, so
+    // storing the calling token's stricter ones would be undone. A super-admin owner is not
+    // re-synced, so there the calling token's conditions are kept.
+    const conditions = (inherited as string[][])[inherited.length - 1];
+
+    if (
+      ceilings.length > 1 &&
+      !permissionDomain.ceiling.isPermissionWithinCeiling({ ...enforced, conditions }, ceilings[0])
+    ) {
+      exceeding.push(`${label} (not held by the calling token under the owner's conditions)`);
       return requested;
     }
 
@@ -353,10 +387,10 @@ const enforceAdminPermissionsCeiling = async (
     );
   }
 
-  // The inherited conditions must keep every permission inside the ceiling. A failure here is a
-  // bug in getInheritedConditions, so refuse to store the permission rather than widen the token.
-  const outsideCeiling = enforcedClamped.filter(
-    (permission) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, userPermissions)
+  // The inherited conditions must keep every permission inside every ceiling. A failure here is
+  // a bug in getInheritedConditions, so refuse to store the permission rather than widen the token.
+  const outsideCeiling = enforcedClamped.filter((permission) =>
+    ceilings.some((held) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, held))
   );
 
   if (outsideCeiling.length > 0) {
@@ -434,15 +468,22 @@ const arePermissionsEqual = (p1: Permission, p2: Permission): boolean => {
 /**
  * Assign admin permissions to an API token (similar to role permission assignment).
  * ceilingUser is the user whose permissions act as the ceiling — always the token owner,
- * regardless of who is making the request.
+ * regardless of who is making the request. When the request is made with an admin token, its
+ * permissions are a ceiling too (`enforceAdminPermissionsCeiling`), so the conditions inherited
+ * here match the ones the caller already inherited.
  */
 const assignAdminPermissionsToToken = async (
   tokenId: Data.ID,
   permissions: PermissionInput[],
-  ceilingUser: AdminUser
+  ceilingUser: AdminUser,
+  callingTokenPermissions?: CeilingPermission[]
 ): Promise<Permission[]> => {
   await validatePermissionsExist(permissions as any);
-  const clampedPermissions = await enforceAdminPermissionsCeiling(ceilingUser, permissions);
+  const clampedPermissions = await enforceAdminPermissionsCeiling(
+    ceilingUser,
+    permissions,
+    callingTokenPermissions
+  );
 
   const permissionsWithToken = clampedPermissions.map((perm) =>
     permissionDomain.create({
@@ -799,11 +840,13 @@ const getExpirationFields = (lifespan: AnyApiToken['lifespan']) => {
 };
 
 /**
- * Create a token and its permissions
+ * Create a token and its permissions. `callingTokenPermissions` are the permissions of the admin
+ * token the request is made with, if any: an admin token cannot grant more than it holds.
  */
 const create = async <K extends AnyApiToken['kind']>(
   attributes: { kind: K } & (ContentApiApiTokenBody | AdminTokenBody),
-  callingUser?: AdminUser
+  callingUser?: AdminUser,
+  callingTokenPermissions?: CeilingPermission[]
 ): Promise<
   K extends 'content-api' ? ContentApiApiToken : K extends 'admin' ? AdminApiToken : AnyApiToken
 > => {
@@ -879,7 +922,8 @@ const create = async <K extends AnyApiToken['kind']>(
   await assertAdminPermissionsValidity(castedAdminTokenBody.adminPermissions);
   const clampedAdminPermissions = await enforceAdminPermissionsCeiling(
     callingUser,
-    castedAdminTokenBody.adminPermissions
+    castedAdminTokenBody.adminPermissions,
+    callingTokenPermissions
   );
 
   // Owner: when explicitly provided, it must match the caller.
@@ -1127,11 +1171,13 @@ const getByName = async (name: string, options?: GetByOptions) => {
 };
 
 /**
- * Update a token and its permissions
+ * Update a token and its permissions. `callingTokenPermissions` are the permissions of the admin
+ * token the request is made with, if any: an admin token cannot grant more than it holds.
  */
 const update = async (
   id: string | number,
-  attributes: Update.Request['body']
+  attributes: Update.Request['body'],
+  callingTokenPermissions?: CeilingPermission[]
 ): Promise<AnyApiToken> => {
   const originalToken = await strapi.db.query('admin::api-token').findOne({
     select: SELECT_FIELDS,
@@ -1217,6 +1263,7 @@ const update = async (
 
       // Ceiling is always the owner's permissions, not the calling user's.
       // A super admin editing another user's token must not overflow that user's scope.
+      // A request made with an admin token is limited by that token too.
       const ownerId = getOwnerId(originalToken as AdminApiToken);
       const resolvedOwner = await getService('user').findOne(ownerId);
       if (resolvedOwner === null || resolvedOwner === undefined) {
@@ -1225,7 +1272,8 @@ const update = async (
       tokenOwnerUser = resolvedOwner;
       clampedAdminPermissions = await enforceAdminPermissionsCeiling(
         tokenOwnerUser,
-        incomingAdminPermissions
+        incomingAdminPermissions,
+        callingTokenPermissions
       );
     }
 
@@ -1326,7 +1374,12 @@ const update = async (
     if (tokenOwnerUser === undefined) {
       throw new ValidationError('Updating admin permissions requires a resolved token owner');
     }
-    await assignAdminPermissionsToToken(id, clampedAdminPermissions, tokenOwnerUser);
+    await assignAdminPermissionsToToken(
+      id,
+      clampedAdminPermissions,
+      tokenOwnerUser,
+      callingTokenPermissions
+    );
   }
 
   const adminPermissionsFromDb = await strapi.db
@@ -1416,11 +1469,19 @@ export interface ContentApiTokenService extends SharedTokenMethods {
 
 export interface AdminTokenService extends SharedTokenMethods {
   authenticateAdminToken(accessToken: string): Promise<AdminTokenAuthenticationResult>;
-  create(attributes: AdminTokenBody, callingUser: AdminUser): Promise<AdminApiToken>;
+  create(
+    attributes: AdminTokenBody,
+    callingUser: AdminUser,
+    callingTokenPermissions?: CeilingPermission[]
+  ): Promise<AdminApiToken>;
   list(callingUser: AdminUser): Promise<AdminApiToken[]>;
   getById(id: string | number, options?: GetByOptions): Promise<AdminApiToken | null>;
   getByName(name: string, options?: GetByOptions): Promise<AdminApiToken | null>;
-  update(id: string | number, attributes: Partial<AdminTokenBody>): Promise<AdminApiToken>;
+  update(
+    id: string | number,
+    attributes: Partial<AdminTokenBody>,
+    callingTokenPermissions?: CeilingPermission[]
+  ): Promise<AdminApiToken>;
   revoke(id: string | number): Promise<AdminApiToken>;
   regenerate(id: string | number): Promise<AdminApiToken>;
   exists(where: WhereParams): Promise<boolean>;
@@ -1428,7 +1489,8 @@ export interface AdminTokenService extends SharedTokenMethods {
   assignAdminPermissionsToToken(
     tokenId: Data.ID,
     permissions: PermissionInput[],
-    ceilingUser: AdminUser
+    ceilingUser: AdminUser,
+    callingTokenPermissions?: CeilingPermission[]
   ): Promise<Permission[]>;
   syncPermissionsForUser(userId: Data.ID): Promise<void>;
   syncPermissionsForRole(roleId: Data.ID): Promise<void>;
@@ -1487,16 +1549,27 @@ function createTokenService(
   const svc: AdminTokenService = {
     ...shared,
     authenticateAdminToken,
-    create: (attributes: AdminTokenBody, callingUser: AdminUser) =>
-      create({ ...attributes, kind: 'admin' }, callingUser) as Promise<AdminApiToken>,
+    create: (
+      attributes: AdminTokenBody,
+      callingUser: AdminUser,
+      callingTokenPermissions?: CeilingPermission[]
+    ) =>
+      create(
+        { ...attributes, kind: 'admin' },
+        callingUser,
+        callingTokenPermissions
+      ) as Promise<AdminApiToken>,
     list: (callingUser: AdminUser) =>
       list(callingUser, { filter: { kind: 'admin' } }) as Promise<AdminApiToken[]>,
     getById: (id: string | number, options?: GetByOptions) =>
       getBy({ id, kind: 'admin' }, options) as Promise<AdminApiToken | null>,
     getByName: (name: string, options?: GetByOptions) =>
       getBy({ name, kind: 'admin' }, options) as Promise<AdminApiToken | null>,
-    update: (id: string | number, attributes: Partial<AdminTokenBody>) =>
-      update(id, attributes) as Promise<AdminApiToken>,
+    update: (
+      id: string | number,
+      attributes: Partial<AdminTokenBody>,
+      callingTokenPermissions?: CeilingPermission[]
+    ) => update(id, attributes, callingTokenPermissions) as Promise<AdminApiToken>,
     revoke: (id: string | number) => revoke(id) as Promise<AdminApiToken>,
     regenerate: (id: string | number) => regenerate(id) as Promise<AdminApiToken>,
     exists,

@@ -2881,6 +2881,83 @@ describe('API Token', () => {
       expect(deleteByIds).not.toHaveBeenCalled();
       expect(createMany).not.toHaveBeenCalled();
     });
+
+    describe('second pass with a calling token', () => {
+      // The update path clamps once, then again here: both passes must agree
+      const READ = 'plugin::content-manager.explorer.read';
+      const ARTICLE = 'api::article.article';
+      const IS_CREATOR = 'admin::is-creator';
+      const read = (conditions: string[]) => ({
+        action: READ,
+        subject: ARTICLE,
+        properties: { fields: ['title'] },
+        conditions,
+      });
+
+      const setup = (ownerPermissions: object[]) => {
+        const createMany = jest.fn().mockResolvedValue([]);
+
+        global.strapi = {
+          admin: {
+            services: {
+              permission: {
+                findUserPermissions: jest.fn().mockResolvedValue(ownerPermissions),
+                findMany: jest.fn().mockResolvedValue([]),
+                createMany,
+                deleteByIds: jest.fn(),
+                actionProvider: {
+                  ...ceilingProviders().actionProvider,
+                  values: jest.fn(() => [
+                    { actionId: READ, section: 'contentTypes', subjects: [ARTICLE] },
+                  ]),
+                },
+                conditionProvider: { has: jest.fn(() => true) },
+              },
+            },
+          },
+        } as any;
+
+        return createMany;
+      };
+
+      test('Inherits the owner conditions for a limited owner', async () => {
+        const owner = { id: 42, roles: [{ code: 'strapi-editor' }] } as any;
+        const createMany = setup([read([IS_CREATOR])]);
+
+        await assignAdminPermissionsToToken(10, [read([])] as any, owner, [
+          read([IS_CREATOR]),
+        ] as any);
+
+        expect(createMany).toHaveBeenCalledWith([
+          expect.objectContaining({ conditions: [IS_CREATOR], apiToken: 10 }),
+        ]);
+      });
+
+      test('Rejects for a limited owner when the owner conditions are outside the calling token', async () => {
+        const owner = { id: 42, roles: [{ code: 'strapi-editor' }] } as any;
+        const createMany = setup([read([])]);
+
+        await expect(
+          assignAdminPermissionsToToken(10, [read([IS_CREATOR])] as any, owner, [
+            read([IS_CREATOR]),
+          ] as any)
+        ).rejects.toThrow("not held by the calling token under the owner's conditions");
+        expect(createMany).not.toHaveBeenCalled();
+      });
+
+      test('Keeps the calling token condition for a super-admin owner', async () => {
+        const owner = { id: 1, roles: [{ code: 'strapi-super-admin' }] } as any;
+        const createMany = setup([]);
+
+        await assignAdminPermissionsToToken(10, [read([])] as any, owner, [
+          read([IS_CREATOR]),
+        ] as any);
+
+        expect(createMany).toHaveBeenCalledWith([
+          expect.objectContaining({ conditions: [IS_CREATOR], apiToken: 10 }),
+        ]);
+      });
+    });
   });
 
   describe('syncApiTokenPermissionsForUser', () => {
@@ -3481,6 +3558,167 @@ describe('API Token', () => {
         read({ fields: ['body'], locales: ['fr'] }, ['admin::is-creator']),
         read({ fields: ['title'], locales: ['en'] }, []),
       ]);
+    });
+  });
+
+  describe('enforceAdminPermissionsCeiling — calling token', () => {
+    const READ = 'plugin::content-manager.explorer.read';
+    const ARTICLE = 'api::article.article';
+    const IS_CREATOR = 'admin::is-creator';
+    const SAME_ROLE = 'admin::has-same-role-as-creator';
+    const ownerUser = { id: 42, roles: [{ code: 'strapi-editor' }] } as any;
+    const superAdminOwner = { id: 1, roles: [{ code: 'strapi-super-admin' }] } as any;
+
+    const read = (fields: string[] | null, conditions: string[] = []) => ({
+      action: READ,
+      subject: ARTICLE,
+      properties: fields === null ? {} : { fields },
+      conditions,
+    });
+
+    const setupOwner = (ownerPermissions: object[]) => {
+      const findUserPermissions = jest.fn().mockResolvedValue(ownerPermissions);
+
+      global.strapi = {
+        admin: {
+          services: {
+            permission: { findUserPermissions, ...ceilingProviders() },
+          },
+        },
+      } as any;
+
+      return findUserPermissions;
+    };
+
+    test('A super-admin owner does not lift the calling token check', async () => {
+      setupOwner([]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          superAdminOwner,
+          [read(['title', 'body'])] as any,
+          [read(['title'])] as any
+        )
+      ).rejects.toThrow(`Exceeding: ${READ} on ${ARTICLE} (not held by the calling token`);
+    });
+
+    test('Accepts what the calling token holds for a super-admin owner', async () => {
+      const findUserPermissions = setupOwner([]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          superAdminOwner,
+          [read(['title'])] as any,
+          [read(null)] as any
+        )
+      ).resolves.toEqual([read(['title'])]);
+      expect(findUserPermissions).not.toHaveBeenCalled();
+    });
+
+    test('Rejects what a stale calling token holds but the owner no longer does', async () => {
+      setupOwner([read(['title'])]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          ownerUser,
+          [read(['body'])] as any,
+          [read(['title', 'body'])] as any
+        )
+      ).rejects.toThrow(`Exceeding: ${READ} on ${ARTICLE} (not held by the owner`);
+    });
+
+    test('Rejects what the owner holds but the calling token does not', async () => {
+      setupOwner([read(['title', 'body'])]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(ownerUser, [read(['body'])] as any, [read(['title'])] as any)
+      ).rejects.toThrow('not held by the calling token');
+    });
+
+    // The owner re-sync makes a token's conditions follow its owner, so a stricter condition
+    // taken from the calling token would be widened on the next role change
+    test('Rejects when the owner holds the field unconditionally and the calling token under a condition', async () => {
+      setupOwner([read(['title'])]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          ownerUser,
+          [read(['title'])] as any,
+          [read(['title'], [IS_CREATOR])] as any
+        )
+      ).rejects.toThrow(
+        `Exceeding: ${READ} on ${ARTICLE} (not held by the calling token under the owner's conditions)`
+      );
+    });
+
+    test('Inherits the owner conditions when the calling token holds them', async () => {
+      setupOwner([read(['title'], [SAME_ROLE])]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          ownerUser,
+          [read(['title'])] as any,
+          [read(['title'], [IS_CREATOR, SAME_ROLE])] as any
+        )
+      ).resolves.toEqual([read(['title'], [SAME_ROLE])]);
+    });
+
+    test('Rejects when the calling token holds only some of the owner conditions', async () => {
+      setupOwner([read(['title'], [IS_CREATOR, SAME_ROLE])]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          ownerUser,
+          [read(['title'])] as any,
+          [read(['title'], [SAME_ROLE])] as any
+        )
+      ).rejects.toThrow("not held by the calling token under the owner's conditions");
+    });
+
+    test('Rejects when the calling token and the owner share no condition', async () => {
+      setupOwner([read(['title'], [SAME_ROLE])]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          ownerUser,
+          [read(['title'])] as any,
+          [read(['title'], [IS_CREATOR])] as any
+        )
+      ).rejects.toThrow("not held by the calling token under the owner's conditions");
+    });
+
+    test('Inherits the calling token condition for a super-admin owner', async () => {
+      setupOwner([]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          superAdminOwner,
+          [read(['title'])] as any,
+          [read(['title'], [IS_CREATOR])] as any
+        )
+      ).resolves.toEqual([read(['title'], [IS_CREATOR])]);
+    });
+
+    test('Rejects a field the calling token got under a condition only because of another field', async () => {
+      // The owner holds `title` unconditionally and `authorName` under is-creator, so a token
+      // for both inherits is-creator; a child for `title` alone inherits the owner's `[]`
+      setupOwner([read(['title']), read(['authorName'], [IS_CREATOR])]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(
+          ownerUser,
+          [read(['title'])] as any,
+          [read(['title', 'authorName'], [IS_CREATOR])] as any
+        )
+      ).rejects.toThrow("not held by the calling token under the owner's conditions");
+    });
+
+    test('Rejects everything for a calling token that holds nothing, even for a super-admin owner', async () => {
+      setupOwner([]);
+
+      await expect(
+        enforceAdminPermissionsCeiling(superAdminOwner, [read(['title'])] as any, [])
+      ).rejects.toThrow(`Exceeding: ${READ} on ${ARTICLE} (not held by the calling token)`);
     });
   });
 
