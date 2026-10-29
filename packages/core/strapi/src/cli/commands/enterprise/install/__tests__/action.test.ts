@@ -1195,6 +1195,7 @@ describe('runInstall with --registry, during the install', () => {
       HOME: path.dirname(seen.configPath),
       USERPROFILE: path.dirname(seen.configPath),
       YARN_GLOBAL_FOLDER: path.join(dependencies.homeDir, '.yarn', 'berry'),
+      COREPACK_HOME: path.join(dependencies.homeDir, '.cache', 'node', 'corepack'),
       YARN_UNSAFE_HTTP_WHITELIST: 'localhost',
     });
     expect(await fse.pathExists(path.dirname(seen.configPath))).toBe(false);
@@ -1233,6 +1234,39 @@ describe('runInstall with --registry, during the install', () => {
 
     expect(seen.config).toBe(overrideYarnrc(LOCAL_REGISTRY));
     expect(seen.env).not.toHaveProperty('YARN_GLOBAL_FOLDER');
+  });
+
+  it('keeps the Corepack folder already set in the environment', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({
+      env: { STRAPI_LICENSE: LICENSE, COREPACK_HOME: '/corepack' },
+      installPackages,
+    });
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.env).toEqual({
+      HOME: path.dirname(seen.configPath),
+      USERPROFILE: path.dirname(seen.configPath),
+      YARN_GLOBAL_FOLDER: path.join(dependencies.homeDir, '.yarn', 'berry'),
+      YARN_UNSAFE_HTTP_WHITELIST: 'localhost',
+    });
+  });
+
+  it('leaves the Corepack folder alone when XDG_CACHE_HOME places it outside the home folder', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({
+      env: { STRAPI_LICENSE: LICENSE, XDG_CACHE_HOME: '/cache' },
+      installPackages,
+    });
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.env).not.toHaveProperty('COREPACK_HOME');
   });
 
   it('allows no http host in Yarn 2+ for an https registry', async () => {

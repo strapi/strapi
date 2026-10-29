@@ -22,17 +22,26 @@ const buildYarnEnvironment = (
   homeDir: string
 ): NodeJS.ProcessEnv => {
   const { protocol, hostname } = new URL(registry.url);
-  // Yarn keeps its global cache under the home folder, unless one of these moves it elsewhere.
-  // Pointing it to the real home folder keeps the cache where it was.
+  // Yarn keeps its global cache, and Corepack the Yarn releases it downloads, under the home
+  // folder, unless one of these moves them elsewhere. Pointing them to the real home folder keeps
+  // both where they were.
   const keepsGlobalFolder =
     env.YARN_GLOBAL_FOLDER !== undefined ||
     env.XDG_DATA_HOME !== undefined ||
+    process.platform === 'win32';
+  const keepsCorepackHome =
+    env.COREPACK_HOME !== undefined ||
+    env.XDG_CACHE_HOME !== undefined ||
+    env.LOCALAPPDATA !== undefined ||
     process.platform === 'win32';
 
   return {
     HOME: configDir,
     USERPROFILE: configDir,
     ...(keepsGlobalFolder ? {} : { YARN_GLOBAL_FOLDER: path.join(homeDir, '.yarn', 'berry') }),
+    ...(keepsCorepackHome
+      ? {}
+      : { COREPACK_HOME: path.join(homeDir, '.cache', 'node', 'corepack') }),
     ...(protocol === 'http:'
       ? {
           YARN_UNSAFE_HTTP_WHITELIST: [env.YARN_UNSAFE_HTTP_WHITELIST, hostname]
