@@ -261,6 +261,48 @@ describe('Entity validator - strictRelations', () => {
       ).rejects.toMatchObject({ name: 'ValidationError' });
     });
 
+    // `{ set: null }` is a clear, same as `{ set: [] }`. A truthiness check used to
+    // ignore it in the entity manager; now it deletes the links, so the required
+    // check has to reject it or a strict update returns 200 with an empty relation.
+    test('strict + non-draft + { set: null } → throws (relation emptied)', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+      expect.hasAssertions();
+
+      await expect(
+        entityValidator.validateEntityUpdate(
+          requiredRelationModel,
+          { author: { set: null } },
+          { strictRelations: true }
+        )
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+    });
+
+    test('strict + non-draft + single media { set: null } → throws', async () => {
+      global.strapi.getModel = () => singleMediaModel;
+      expect.hasAssertions();
+
+      await expect(
+        entityValidator.validateEntityUpdate(
+          singleMediaModel,
+          { cover: { set: null } },
+          { strictRelations: true }
+        )
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+    });
+
+    // A null `set` beside a connect is not a clear. Released behaviour applies the
+    // connect, so a required update must keep accepting it.
+    test('strict + non-draft + { set: null, connect: [id] } → passes', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+
+      const data = await entityValidator.validateEntityUpdate(
+        requiredRelationModel,
+        { author: { set: null, connect: [1] } },
+        { strictRelations: true }
+      );
+      expect(data).toEqual({ author: { set: null, connect: [1] } });
+    });
+
     // Behaviour 1: a bare `{ connect: [] }` on UPDATE adds nothing and removes nothing,
     // so it can't be what empties a required field → treated as a no-op that passes.
     // (The admin CM can emit this when it diffs an unchanged relation field.)
