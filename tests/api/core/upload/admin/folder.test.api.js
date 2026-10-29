@@ -342,6 +342,44 @@ describe('Folder', () => {
       expect(hugeOffset.body.error.name).toBe('PaginationError');
     });
 
+    test('Can slice folders with start and limit, without pagination metadata', async () => {
+      const all = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { sort: 'id:ASC' },
+      });
+
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { start: 1, limit: 1, sort: 'id:ASC' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toEqual([all.body.data[1]]);
+      expect(res.body.pagination).toBeUndefined();
+    });
+
+    test('Rejects a limit or start past the safe integer range', async () => {
+      const hugeLimit = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { limit: '99999999999999999999' },
+      });
+
+      expect(hugeLimit.statusCode).toBe(400);
+      expect(hugeLimit.body.error.name).toBe('PaginationError');
+
+      const hugeStart = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { start: '99999999999999999999', limit: 1 },
+      });
+
+      expect(hugeStart.statusCode).toBe(400);
+      expect(hugeStart.body.error.name).toBe('PaginationError');
+    });
+
     test('Returns an empty page for a large offset within range', async () => {
       const res = await rq({
         method: 'GET',

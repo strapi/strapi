@@ -73,19 +73,22 @@ export default {
     // page plus the `pagination` metadata. Without them the endpoint keeps
     // returning every matching folder, which existing callers (destination
     // selects, the legacy picker) rely on.
-    if (query.page != null || query.pageSize != null) {
-      // The query transform accepts any positive integer, even past
-      // Number.MAX_SAFE_INTEGER. Such a pageSize fails in the database (500 on
-      // SQLite) and such an offset cannot be computed exactly, so reject both.
-      // 10 is findPage's default pageSize.
-      const { page = 1, pageSize = 10 } = dbQuery;
+    const isPaged = query.page != null || query.pageSize != null;
 
-      if (!Number.isSafeInteger(pageSize) || !Number.isSafeInteger((page - 1) * pageSize)) {
-        throw new errors.PaginationError(
-          `Invalid pagination parameters. pageSize and the resulting offset must be at most ${Number.MAX_SAFE_INTEGER}`
-        );
-      }
+    // The query transform accepts any positive integer, even past
+    // Number.MAX_SAFE_INTEGER. Such a limit or offset fails in the database
+    // (500 on SQLite) or cannot be computed exactly, so reject it for both
+    // pagination styles. 10 is findPage's default pageSize.
+    const { page = 1, pageSize = 10, offset, limit } = dbQuery;
+    const bounds = isPaged ? [pageSize, (page - 1) * pageSize] : [offset, limit];
 
+    if (bounds.some((value) => value != null && !Number.isSafeInteger(value))) {
+      throw new errors.PaginationError(
+        `Invalid pagination parameters. pageSize, start, limit and the resulting offset must be at most ${Number.MAX_SAFE_INTEGER}`
+      );
+    }
+
+    if (isPaged) {
       const { results, pagination } = await strapi.db.query(FOLDER_MODEL_UID).findPage(dbQuery);
 
       ctx.body = {
