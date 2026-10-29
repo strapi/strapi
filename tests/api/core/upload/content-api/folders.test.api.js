@@ -48,7 +48,9 @@ describe('Upload content API - read-only folders routes', () => {
     await rqAdmin({
       method: 'POST',
       url: '/upload/actions/bulk-delete',
-      body: { folderIds: [folders.clients.id, folders.archive.id] },
+      body: {
+        folderIds: [folders.clients.id, folders.archive.id, folders.imported?.id].filter(Boolean),
+      },
     });
     await Promise.all(
       tokenIds.map((id) => rqAdmin({ method: 'DELETE', url: `/admin/api-tokens/${id}` }))
@@ -184,6 +186,21 @@ describe('Upload content API - read-only folders routes', () => {
         folders.acme.id,
         folders.year.id,
       ]);
+    });
+
+    test('lists folders whose path is not made of pathIds', async () => {
+      folders.imported = await strapi.db
+        .query('plugin::upload.folder')
+        .create({ data: { name: 'Imported', pathId: 999998, path: '/imported' } });
+
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { filters: { id: folders.imported.id } },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toMatchObject([{ id: folders.imported.id, namePath: '/' }]);
     });
 
     test('never returns the files or children of a folder', async () => {
