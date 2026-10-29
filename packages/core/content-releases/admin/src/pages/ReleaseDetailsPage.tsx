@@ -1048,7 +1048,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                       );
 
                       return (
-                        <Tr key={id} background={isDeleted ? 'neutral100' : undefined}>
+                        <Tr key={id}>
                           <Td width="25%" maxWidth="200px">
                             {isDeleted || isUntitled ? (
                               <ItalicName ellipsis textColor={isDeleted ? 'neutral500' : undefined}>
