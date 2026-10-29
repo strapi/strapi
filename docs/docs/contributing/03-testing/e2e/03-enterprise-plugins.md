@@ -12,7 +12,7 @@ Some Enterprise plugins, such as `@strapi-enterprise/plugin-byok`, live in a pri
 
 The suite is the `enterprise-plugins` domain in [`tests/e2e/tests/enterprise-plugins`](https://github.com/strapi/strapi/blob/develop/tests/e2e/tests/enterprise-plugins). It checks that:
 
-- Strapi starts with the BYOK plugin, and BYOK accepts its provider.
+- Strapi starts with the BYOK plugin, and the plugin shows in the list of plugins.
 - The AI features show as available in their settings pages.
 - AI Translation works from the admin, against a mock provider.
 
