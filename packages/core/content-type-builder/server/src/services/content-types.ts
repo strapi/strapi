@@ -247,6 +247,17 @@ const hasMultipleDocuments = async (uid: UID.ContentType) => {
 };
 
 /**
+ * A single type holds one document, so refuse the switch while several exist.
+ */
+export const assertCanConvertToSingleType = async (uid: UID.ContentType) => {
+  if ((await hasMultipleDocuments(uid)) === true) {
+    throw new ApplicationError(
+      'You cannot convert a collectionType to a singleType when having multiple entries in DB'
+    );
+  }
+};
+
+/**
  * Edits a contentType and handle the nested contentTypes sent with it
  */
 export const editContentType = async (
@@ -278,11 +289,7 @@ export const editContentType = async (
   contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
 
   if (newKind !== previousKind && newKind === 'singleType') {
-    if ((await hasMultipleDocuments(uid)) === true) {
-      throw new ApplicationError(
-        'You cannot convert a collectionType to a singleType when having multiple entries in DB'
-      );
-    }
+    await assertCanConvertToSingleType(uid);
   }
 
   const uidMap = builder.createNewComponentUIDMap(components);
