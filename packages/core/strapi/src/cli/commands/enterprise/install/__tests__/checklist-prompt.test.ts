@@ -180,7 +180,7 @@ describe('promptChecklist', () => {
     await prompt.cancel();
   });
 
-  it('splits a word longer than a narrow terminal, so the link is never cut', async () => {
+  it('splits a word longer than a narrow terminal, so no line wraps', async () => {
     const prompt = startPrompt(choices, 25, {
       ...footer,
       heading: NOT_LICENSED_MESSAGE,

@@ -608,7 +608,7 @@ describe('runInstall with the checklist', () => {
     );
   });
 
-  it('offers a plugin this CLI does not know, found in the catalog', async () => {
+  it('offers every licensed plugin the catalog lists', async () => {
     const newPlugin = '@strapi-enterprise/plugin-new';
     const dependencies = await createDependencies({
       isInteractive: true,
