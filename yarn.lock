@@ -9968,7 +9968,7 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     stream-chain: "npm:2.2.5"
-    stream-json: "npm:1.9.1"
+    stream-json: "npm:3.7.0"
     tar: "npm:7.5.22"
     tar-stream: "npm:2.2.0"
     typescript: "npm:5.9.3"
@@ -28944,7 +28944,7 @@ __metadata:
     rollup-plugin-html: "npm:0.2.1"
     semver: "npm:7.7.4"
     stream-chain: "npm:2.2.5"
-    stream-json: "npm:1.9.1"
+    stream-json: "npm:3.7.0"
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.22"
@@ -28966,19 +28966,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stream-chain@npm:2.2.5, stream-chain@npm:^2.2.5":
+"stream-chain@npm:2.2.5":
   version: 2.2.5
   resolution: "stream-chain@npm:2.2.5"
   checksum: 10c0/c512f50190d7c92d688fa64e7af540c51b661f9c2b775fc72bca38ea9bca515c64c22c2197b1be463741daacbaaa2dde8a8ea24ebda46f08391224f15249121a
   languageName: node
   linkType: hard
 
-"stream-json@npm:1.9.1":
-  version: 1.9.1
-  resolution: "stream-json@npm:1.9.1"
+"stream-chain@npm:^4.2.5":
+  version: 4.4.1
+  resolution: "stream-chain@npm:4.4.1"
+  checksum: 10c0/130fc6d677f378a223c8fe3e5ee47e10ad898f2551f1e2b2134c2f77d0f8ac98d62d6ba185f99603332ac02f56b4c7b4abc86f23cecfed81b217885a306d410c
+  languageName: node
+  linkType: hard
+
+"stream-json@npm:3.7.0":
+  version: 3.7.0
+  resolution: "stream-json@npm:3.7.0"
   dependencies:
-    stream-chain: "npm:^2.2.5"
-  checksum: 10c0/0521e5cb3fb6b0e2561d715975e891bd81fa77d0239c8d0b1756846392bc3c7cdd7f1ddb0fe7ed77e6fdef58daab9e665d3b39f7d677bd0859e65a2bff59b92c
+    stream-chain: "npm:^4.2.5"
+  checksum: 10c0/5f56acbd01245580f947697de546f469c67714656ee31765631972841aed336984a25ebeb70fcb6cccf1c638827a9655d552a4f7a4ab9687bf26463e0cf24394
   languageName: node
   linkType: hard
 
