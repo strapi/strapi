@@ -5612,6 +5612,66 @@ type Tour = Components & { _meta: TourMeta };
 
 ---
 
+## createContext
+
+:::warning
+This helper is experimental and may change in a future release.
+:::
+
+`createContext` creates a context provider and a hook that reads a slice of the context with a selector. It is exported from `@strapi/admin/strapi-admin`. The admin builds its form, RBAC and many other contexts with it.
+
+Source: [`packages/core/admin/admin/src/components/Context.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/components/Context.tsx).
+
+### Usage
+
+```tsx
+import { createContext } from '@strapi/admin/strapi-admin';
+
+const [CounterProvider, useCounter] = createContext<{ count: number }>('Counter');
+
+const Count = () => {
+  const count = useCounter('Count', (state) => state.count);
+
+  return <span>{count}</span>;
+};
+
+const App = () => (
+  <CounterProvider count={1}>
+    <Count />
+  </CounterProvider>
+);
+```
+
+### API
+
+```ts
+function createContext<ContextValue extends object | null>(
+  rootComponentName: string,
+  defaultContext?: ContextValue
+): [Provider, useContext];
+
+function useContext<Selected>(
+  consumerName: string,
+  selector: (value: ContextValue) => Selected,
+  shouldThrowOnMissingContext?: boolean
+): Selected;
+```
+
+- The provider takes the context value as props. It keeps the same value while the props don't change.
+- Outside of a provider, `useContext` reads `defaultContext`. Without a default, it returns `undefined`, or throws a named error when `shouldThrowOnMissingContext` is `true`.
+
+### Re-renders
+
+The provider keeps its value in a store. `useContext` subscribes to the store with `useSyncExternalStore` and compares the selected value with `Object.is`, outside of render. A consumer re-renders only when the value it selects changes.
+
+- Select the values that the component renders. A selector that returns a new object on every call still works, but its component re-renders on every change of the context.
+- Do not select a stable function, such as `getValues`, and call it during render to read the context. The component doesn't re-render when the value behind the function changes, so it renders stale data. Select the value instead. Calling such a function in an event handler or an effect is fine.
+- The provider pushes its value into the store in a layout effect. A consumer rendered in the same pass as a provider update reads the previous value for that commit, then re-renders before paint.
+
+The helper used to be built on `use-context-selector`. With React 18, that library ran the render function of every consumer on every change of the context, which kept stale reads like the one above up to date by accident.
+
+---
+
 ## useContentTypes
 
 An abstraction around `react-query` to fetch content-types and components. It returns the raw API response
@@ -6214,6 +6274,21 @@ export const StringInput = forwardRef<HTMLInputElement, InputProps>(
 ```
 
 To handle the CM specific inputs, the EditView domain has its own `InputRenderer` component which follows the same principle but this will additionally handle attributes like custom-fields etc. The EditView them "simply" renders over its layout, passing props to the `InputRenderer`, if there's a dynamic-zone or component we recursively render the layout by utilising the `components` property of the `EditLayout` data-structure, as previously said, because this follows the same structure as its parent, we can iterate over it the exact same way rendering _any fields_ required, incl. deeply nested components and dynamic-zones.
+
+##### Progressive mounting
+
+[`FormLayout`](https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/pages/EditView/components/FormLayout.tsx) does not mount every row of the layout on the first render. The first render depends on the size of the screen, not on the size of the model.
+
+- A row that is not mounted yet renders a placeholder with an estimated height.
+- A row mounts when it gets close to the viewport. An `IntersectionObserver` watches its placeholder, with the edit view's scroll container as root.
+- The other rows mount in the background, one per idle period (`requestIdleCallback`, inside `startTransition` so that user input interrupts it).
+- A row with a field in error mounts right away, so the error is displayed and the field can receive the focus. It stays mounted after the errors are cleared.
+- A row with a required UID or a custom field mounts with the page, including when the field is inside a non-repeatable component. These inputs can set a value when they mount: a required UID fetches its default value, and a custom field may set a default.
+- Once mounted, a row stays mounted.
+
+Relation fields follow the same idea for their requests. A relation field fetches its connected relations once it gets close to the viewport (`useHasBeenNearViewport`, same margin as the rows), not when it mounts, and searches for the options of its combobox only once the combobox has been opened. After a save, only the fields that have already been near the viewport refetch their relations.
+
+A field in a row that is not mounted yet is not in the DOM. This affects browser search, autofill, end-to-end tests that look for a field low in the form without scrolling, and plugins that query inputs in the DOM. The form values do not depend on mounting: they live in the form state.
 
 #### ListView
 
@@ -7065,6 +7140,8 @@ This hook is considered unstable and may change in a future release.
 :::
 
 Returns a document based on the model, collection type & id passed as arguments. Also extracts its schema from the redux cache to be used for creating a validation schema.
+
+The validation schema is built the first time `validate` is called, not when the hook mounts. It is cached per `schema` and `components` objects, which `useContentTypeSchema` shares across hook instances. The edit view calls `useDocument` from every field, so building the schema on mount used to cost seconds and gigabytes of memory on large content types.
 
 ### Usage
 

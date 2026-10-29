@@ -50,6 +50,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [NPS](https://contributor.strapi.io/packages/core/admin/features/nps): Net Promoter Score survey that collects user feedback about Strapi.
 - [Admin telemetry (frontend)](https://contributor.strapi.io/packages/core/admin/features/telemetry): How the admin panel sends usage events from the browser — useTracking, event types, and plugin patterns.
 - [Guided Tour](https://contributor.strapi.io/packages/core/admin/guided-tour): Interactive onboarding system that guides new users through key features and workflows.
+- [createContext](https://contributor.strapi.io/packages/core/admin/hooks/create-context): API reference for the createContext helper of the admin, and how its consumers re-render
 - [useContentTypes](https://contributor.strapi.io/packages/core/admin/hooks/use-content-types): API reference for the useContentTypes hook in Strapi's Content Manager
 - [usePersistentState](https://contributor.strapi.io/packages/core/admin/hooks/use-persistent-state): API reference for the usePersistentState hook in Strapi
 - [@strapi/admin](https://contributor.strapi.io/packages/core/admin): React admin panel and its server part: admin users, roles, RBAC, tokens, admin authentication and admin routes.
