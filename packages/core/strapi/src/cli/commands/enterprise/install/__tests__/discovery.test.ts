@@ -357,6 +357,18 @@ describe('discoverEnterprisePlugins with the plugin catalog', () => {
     );
     expect(requestedPaths(fetchImplementation)).toEqual(['/-/strapi/plugins']);
   });
+
+  it('stops with the redirect error when the catalog request is redirected', async () => {
+    const fetchImplementation = jest.fn(async () => {
+      throw new TypeError('fetch failed', { cause: new Error('unexpected redirect') });
+    });
+
+    await expect(discover(await createTemporaryDirectory(), fetchImplementation)).rejects.toThrow(
+      new EnterpriseInstallError(
+        'https://packages.strapi.io redirected the request. Use the final registry URL.'
+      )
+    );
+  });
 });
 
 describe('discoverEnterprisePlugins without the plugin catalog', () => {

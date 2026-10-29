@@ -381,10 +381,15 @@ export const findOverridingConfigFiles = async ({
   return overridingFiles;
 };
 
-export interface RegistryAccess {
-  outcome: RegistryAccessOutcome;
-  /** Adds the setup when it is missing. Called once the registry has accepted the license. */
+export interface RegistrySetup {
+  /** Saves the setup, when there is one to save. Called once the registry has accepted the license. */
   apply: () => Promise<void>;
+  /** Runs the install with the environment it needs to reach the registry. */
+  install: (installPackages: (env?: NodeJS.ProcessEnv) => Promise<void>) => Promise<void>;
+}
+
+export interface RegistryAccess extends RegistrySetup {
+  outcome: RegistryAccessOutcome;
 }
 
 export const prepareRegistryAccess = async ({
@@ -455,6 +460,9 @@ export const prepareRegistryAccess = async ({
           ? `Configured access to ${registry.host} in ${userConfigPath}, reading the license from STRAPI_LICENSE.`
           : `Configured access to ${registry.host} in ${userConfigPath}.`
       );
+    },
+    async install(installPackages) {
+      await installPackages();
     },
   };
 };

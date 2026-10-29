@@ -8,15 +8,21 @@ const STRAPI_DOMAIN_SUFFIXES = ['.strapi.io', '.strapi.team'];
 
 const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, '');
 
-export const resolveRegistryUrl = ({
+export type RegistryTarget =
+  /** Used for the requests, and saved in the user configuration. */
+  | { kind: 'production'; url: string }
+  /** Used for the requests and for the install the command runs, never saved. */
+  | { kind: 'override'; url: string };
+
+export const resolveRegistryTarget = ({
   registry,
   logger,
 }: {
   registry: string | undefined;
   logger: Logger;
-}): string => {
+}): RegistryTarget => {
   if (registry === undefined) {
-    return trimTrailingSlashes(ENTERPRISE_REGISTRY_URL);
+    return { kind: 'production', url: trimTrailingSlashes(ENTERPRISE_REGISTRY_URL) };
   }
 
   const registryUrlOverride = registry.trim();
@@ -59,5 +65,5 @@ export const resolveRegistryUrl = ({
   const registryUrl = trimTrailingSlashes(`${url.origin}${url.pathname}`);
   logger.warn(`Using the Enterprise registry at ${registryUrl} (${REGISTRY_OPTION}).`);
 
-  return registryUrl;
+  return { kind: 'override', url: registryUrl };
 };

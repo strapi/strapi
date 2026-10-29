@@ -1,14 +1,18 @@
 import { EnterpriseInstallError } from '../errors';
-import { resolveRegistryUrl } from '../registry-url';
+import { resolveRegistryTarget } from '../registry-url';
 import { createTestLogger, loggedText } from './test-helpers';
 
-const resolve = (registry: string) => resolveRegistryUrl({ registry, logger: createTestLogger() });
+const resolve = (registry: string) =>
+  resolveRegistryTarget({ registry, logger: createTestLogger() });
 
-describe('resolveRegistryUrl', () => {
+describe('resolveRegistryTarget', () => {
   it('uses the Strapi registry, and warns nothing, without --registry', () => {
     const logger = createTestLogger();
 
-    expect(resolveRegistryUrl({ registry: undefined, logger })).toBe('https://packages.strapi.io');
+    expect(resolveRegistryTarget({ registry: undefined, logger })).toEqual({
+      kind: 'production',
+      url: 'https://packages.strapi.io',
+    });
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -33,7 +37,10 @@ describe('resolveRegistryUrl', () => {
   ])('uses %j, and warns that it does', (registry, registryUrl) => {
     const logger = createTestLogger();
 
-    expect(resolveRegistryUrl({ registry, logger })).toBe(registryUrl);
+    expect(resolveRegistryTarget({ registry, logger })).toEqual({
+      kind: 'override',
+      url: registryUrl,
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       `Using the Enterprise registry at ${registryUrl} (--registry).`
     );
@@ -52,7 +59,7 @@ describe('resolveRegistryUrl', () => {
       let error: unknown;
 
       try {
-        resolveRegistryUrl({ registry, logger });
+        resolveRegistryTarget({ registry, logger });
       } catch (thrownError) {
         error = thrownError;
       }

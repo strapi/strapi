@@ -1,3 +1,6 @@
+import http from 'node:http';
+import type { AddressInfo } from 'node:net';
+
 import { fetchPackument, fetchPluginCatalog } from '../registry';
 import {
   createFetchResponse,
@@ -257,5 +260,45 @@ describe('fetchPluginCatalog', () => {
     ],
   ])('reports the catalog as unavailable when it %s', async (_case, fetchImplementation) => {
     await expect(fetchCatalog(fetchImplementation)).resolves.toEqual({ status: 'unavailable' });
+  });
+});
+
+describe('requests to a registry that redirects', () => {
+  it('stops at the redirect, so the license is not sent on, and says the registry redirected', async () => {
+    const requestedPaths: Array<string | undefined> = [];
+    const server = http.createServer((request, response) => {
+      requestedPaths.push(request.url);
+      response.writeHead(302, { Location: '/elsewhere' }).end();
+    });
+
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', resolve);
+    });
+
+    const registryUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    try {
+      await expect(
+        fetchPackument({
+          registryUrl,
+          packageName,
+          license: 'the-license',
+          fetchImplementation: fetch,
+        })
+      ).resolves.toEqual({
+        status: 'unavailable',
+        message: `${registryUrl} redirected the request. Use the final registry URL.`,
+      });
+      await expect(
+        fetchPluginCatalog({ registryUrl, license: 'the-license', fetchImplementation: fetch })
+      ).resolves.toEqual({
+        status: 'redirected',
+        message: `${registryUrl} redirected the request. Use the final registry URL.`,
+      });
+      expect(requestedPaths).toEqual([`/${packageName}`, '/-/strapi/plugins']);
+    } finally {
+      server.closeAllConnections();
+      server.close();
+    }
   });
 });

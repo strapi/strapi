@@ -13,6 +13,7 @@ import {
   expectedSetupWarning,
   loggedText,
   NOT_LICENSED_MESSAGE,
+  readFilePermissions,
 } from './test-helpers';
 
 type InstallDependencies = Parameters<typeof runInstall>[0]['dependencies'];
@@ -964,6 +965,8 @@ describe('runInstall with --registry', () => {
       requestedUrls(dependencies).every((url) => url.startsWith('https://packages.strapi.io/'))
     ).toBe(true);
     expect(loggedText(logger)).not.toContain('--registry');
+    expect(loggedText(logger)).not.toContain('lockfile');
+    expect(dependencies.installPackages.mock.calls[0][0].env).toBeUndefined();
   });
 
   it('ignores STRAPI_ENTERPRISE_REGISTRY_URL, which the app .env can set', async () => {
@@ -988,7 +991,7 @@ describe('runInstall with --registry', () => {
     );
   });
 
-  it('sends every request to that registry, and sets it up in ~/.npmrc', async () => {
+  it('sends every request to that registry, and saves nothing to ~/.npmrc', async () => {
     const dependencies = await createDependencies({
       isInteractive: true,
       promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
@@ -1012,28 +1015,7 @@ describe('runInstall with --registry', () => {
     expect(requestedUrls(dependencies).every((url) => url.startsWith(`${LOCAL_REGISTRY}/`))).toBe(
       true
     );
-    expect(await fse.readFile(path.join(dependencies.homeDir, '.npmrc'), 'utf8')).toBe(
-      `@strapi-enterprise:registry=${LOCAL_REGISTRY}/\n//localhost:4873/:_authToken=${LICENSE}\n`
-    );
-  });
-
-  it('sets that registry up in ~/.yarnrc.yml for Yarn 2 and later', async () => {
-    const dependencies = await createDependencies({
-      isInteractive: true,
-      promptForPlugins: jest.fn().mockResolvedValue([`${AI_BYOK}@1.2.0`]),
-    });
-
-    await runInstall({
-      appDir: await createApp({ packageManager: 'yarn@4.5.0' }),
-      packageArguments: [],
-      registry: LOCAL_REGISTRY,
-      logger: createTestLogger(),
-      dependencies,
-    });
-
-    expect(await fse.readFile(path.join(dependencies.homeDir, '.yarnrc.yml'), 'utf8')).toBe(
-      `npmScopes:\n  strapi-enterprise:\n    npmRegistryServer: '${LOCAL_REGISTRY}/'\n    npmAlwaysAuth: true\n    npmAuthToken: '${LICENSE}'\n`
-    );
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
   });
 
   it('asks that registry about a named plugin outside the license', async () => {
@@ -1103,6 +1085,194 @@ describe('runInstall with --registry', () => {
     ).rejects.toThrow('--registry must be http(s) on localhost');
     expect(dependencies.fetchImplementation).not.toHaveBeenCalled();
     expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+  });
+});
+
+describe('runInstall with --registry, during the install', () => {
+  const LOCAL_REGISTRY = 'http://localhost:4873';
+  const OVERRIDE_NPMRC = `@strapi-enterprise:registry=${LOCAL_REGISTRY}/\n//localhost:4873/:_authToken=${LICENSE}\n`;
+  const overrideYarnrc = (registryUrl: string) =>
+    `npmScopes:\n  strapi-enterprise:\n    npmRegistryServer: '${registryUrl}/'\n    npmAlwaysAuth: true\n    npmAuthToken: '${LICENSE}'\n`;
+
+  /** Stands in for the package manager, and keeps the configuration file it would read. */
+  const createConfigReadingInstall = (
+    configFileOf: (env: NodeJS.ProcessEnv) => string,
+    { fails = false }: { fails?: boolean } = {}
+  ) => {
+    const seen = { env: {} as NodeJS.ProcessEnv, configPath: '', config: '', permissions: '' };
+    const installPackages = jest.fn(async ({ env = {} }: { env?: NodeJS.ProcessEnv }) => {
+      seen.env = env;
+      seen.configPath = configFileOf(env);
+      seen.config = await fse.readFile(seen.configPath, 'utf8');
+      seen.permissions = await readFilePermissions(seen.configPath);
+
+      if (fails) {
+        throw new PackageManagerError(1);
+      }
+    });
+
+    return { seen, installPackages };
+  };
+
+  const installWithRegistry = async (
+    dependencies: jest.Mocked<InstallDependencies>,
+    {
+      registry = `${LOCAL_REGISTRY}/`,
+      packageManager,
+    }: { registry?: string; packageManager?: string } = {}
+  ) => {
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ packageManager }),
+      packageArguments: ['plugin-ai-byok'],
+      registry,
+      logger,
+      dependencies,
+    });
+
+    return logger;
+  };
+
+  it('gives npm a temporary user configuration with only that registry, readable by its owner, and deletes it', async () => {
+    const { seen, installPackages } = createConfigReadingInstall(
+      (env) => env.NPM_CONFIG_USERCONFIG ?? ''
+    );
+    const dependencies = await createDependencies({ installPackages });
+
+    const logger = await installWithRegistry(dependencies);
+
+    expect(seen.env.npm_config_userconfig).toBe(seen.configPath);
+    expect(seen.config).toBe(OVERRIDE_NPMRC);
+    expect(seen.permissions).toBe('600');
+    expect(await fse.pathExists(path.dirname(seen.configPath))).toBe(false);
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'The lockfile may now contain localhost:4873 URLs. Do not commit it.'
+    );
+  });
+
+  it('leaves the user ~/.npmrc as it was, and gives npm none of its lines', async () => {
+    const { seen, installPackages } = createConfigReadingInstall(
+      (env) => env.NPM_CONFIG_USERCONFIG ?? ''
+    );
+    const dependencies = await createDependencies({ installPackages });
+    const userNpmrcPath = path.join(dependencies.homeDir, '.npmrc');
+    const userNpmrc = `fund=false\n@strapi-enterprise:registry=https://packages.strapi.io/\n//packages.strapi.io/:_authToken=${LICENSE}\n//localhost:4873/:_authToken=old-license`;
+    await fse.writeFile(userNpmrcPath, userNpmrc);
+
+    await installWithRegistry(dependencies);
+
+    expect(seen.config).toBe(OVERRIDE_NPMRC);
+    expect(await fse.readFile(userNpmrcPath, 'utf8')).toBe(userNpmrc);
+  });
+
+  it('deletes the temporary configuration when the install fails', async () => {
+    const { seen, installPackages } = createConfigReadingInstall(
+      (env) => env.NPM_CONFIG_USERCONFIG ?? '',
+      { fails: true }
+    );
+    const dependencies = await createDependencies({ installPackages });
+
+    await expect(installWithRegistry(dependencies)).rejects.toBeInstanceOf(PackageManagerError);
+    expect(seen.config).toBe(OVERRIDE_NPMRC);
+    expect(await fse.pathExists(path.dirname(seen.configPath))).toBe(false);
+  });
+
+  it('gives Yarn 2+ a temporary home folder, and leaves the user ~/.yarnrc.yml as it was', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({ installPackages });
+    const userYarnrcPath = path.join(dependencies.homeDir, '.yarnrc.yml');
+    await fse.writeFile(userYarnrcPath, 'enableTelemetry: false\n');
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.config).toBe(overrideYarnrc(LOCAL_REGISTRY));
+    expect(seen.permissions).toBe('600');
+    expect(seen.env).toEqual({
+      HOME: path.dirname(seen.configPath),
+      USERPROFILE: path.dirname(seen.configPath),
+      YARN_GLOBAL_FOLDER: path.join(dependencies.homeDir, '.yarn', 'berry'),
+      YARN_UNSAFE_HTTP_WHITELIST: 'localhost',
+    });
+    expect(await fse.pathExists(path.dirname(seen.configPath))).toBe(false);
+    expect(await fse.readFile(userYarnrcPath, 'utf8')).toBe('enableTelemetry: false\n');
+  });
+
+  it('keeps the Yarn cache and http allow list already set in the environment', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({
+      env: {
+        STRAPI_LICENSE: LICENSE,
+        YARN_GLOBAL_FOLDER: '/yarn-cache',
+        YARN_UNSAFE_HTTP_WHITELIST: 'registry.local',
+      },
+      installPackages,
+    });
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.env.YARN_GLOBAL_FOLDER).toBeUndefined();
+    expect(seen.env.YARN_UNSAFE_HTTP_WHITELIST).toBe('registry.local,localhost');
+  });
+
+  it('leaves the Yarn cache alone when XDG_DATA_HOME places it outside the home folder', async () => {
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({
+      env: { STRAPI_LICENSE: LICENSE, XDG_DATA_HOME: '/data' },
+      installPackages,
+    });
+
+    await installWithRegistry(dependencies, { packageManager: 'yarn@4.5.0' });
+
+    expect(seen.config).toBe(overrideYarnrc(LOCAL_REGISTRY));
+    expect(seen.env).not.toHaveProperty('YARN_GLOBAL_FOLDER');
+  });
+
+  it('allows no http host in Yarn 2+ for an https registry', async () => {
+    const registryUrl = 'https://packages.staging.strapi.team';
+    const { seen, installPackages } = createConfigReadingInstall((env) =>
+      path.join(env.HOME ?? '', '.yarnrc.yml')
+    );
+    const dependencies = await createDependencies({ installPackages });
+
+    await installWithRegistry(dependencies, {
+      registry: registryUrl,
+      packageManager: 'yarn@4.5.0',
+    });
+
+    expect(seen.config).toBe(overrideYarnrc(registryUrl));
+    expect(seen.env).not.toHaveProperty('YARN_UNSAFE_HTTP_WHITELIST');
+  });
+
+  it('stops before installing when a project .npmrc sets another license for that registry', async () => {
+    const dependencies = await createDependencies();
+    const appDir = await createApp();
+    await fse.writeFile(
+      path.join(appDir, '.npmrc'),
+      '//localhost:4873/:_authToken=other-license\n'
+    );
+
+    await expect(
+      runInstall({
+        appDir,
+        packageArguments: ['plugin-ai-byok'],
+        registry: LOCAL_REGISTRY,
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(
+      new EnterpriseInstallError(
+        `${path.join(appDir, '.npmrc')} sets another license for localhost:4873 and takes precedence over --registry.\nUpdate or remove that line, then run the command again.`
+      )
+    );
+    expect(dependencies.installPackages).not.toHaveBeenCalled();
   });
 });
 

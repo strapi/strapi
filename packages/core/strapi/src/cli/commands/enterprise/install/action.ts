@@ -11,8 +11,9 @@ import { isValidPackageName } from './package-name';
 import { detectPackageManager } from './package-manager';
 import { resolvePluginStatus } from './plugin-status';
 import { prepareRegistryAccess } from './registry-access';
+import { prepareRegistryOverride } from './registry-override';
 import { fetchPackument, fetchPluginCatalog } from './registry';
-import { resolveRegistryUrl } from './registry-url';
+import { resolveRegistryTarget } from './registry-url';
 import {
   buildPluginRow,
   describeLockedRows,
@@ -335,7 +336,8 @@ export const runInstall = async ({
     );
   }
 
-  const registryUrl = resolveRegistryUrl({ registry, logger });
+  const registryTarget = resolveRegistryTarget({ registry, logger });
+  const registryUrl = registryTarget.url;
   const packageManager = await detectPackageManager(appDir);
 
   const { license, source: licenseSource } = await resolveLicense({
@@ -346,16 +348,19 @@ export const runInstall = async ({
     prompt: dependencies.promptForLicense,
   });
 
-  const registryAccess = await prepareRegistryAccess({
+  const registryOptions = {
     registryUrl,
     appDir,
     packageManager,
     license,
-    licenseSource,
     logger,
     env: dependencies.env,
     homeDir: dependencies.homeDir,
-  });
+  };
+  const registrySetup =
+    registryTarget.kind === 'production'
+      ? await prepareRegistryAccess({ ...registryOptions, licenseSource })
+      : await prepareRegistryOverride(registryOptions);
 
   const strapiVersion = await readInstalledVersion(appDir, STRAPI_PACKAGE_NAME);
   warnWhenCompatibilityIsUnknown(strapiVersion, logger);
@@ -378,7 +383,7 @@ export const runInstall = async ({
     return;
   }
 
-  await registryAccess.apply();
+  await registrySetup.apply();
 
   const { command, args } = buildInstallCommand(packageManager, installSpecs);
   logger.info(`Running ${command} ${args.join(' ')}`);
@@ -392,7 +397,9 @@ export const runInstall = async ({
     })
   );
 
-  await dependencies.installPackages({ appDir, packageManager, installSpecs });
+  await registrySetup.install((env) =>
+    dependencies.installPackages({ appDir, packageManager, installSpecs, env })
+  );
 
   await printSetupLinks({ appDir, installedPackages, logger });
 };

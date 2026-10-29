@@ -179,7 +179,7 @@ export const discoverEnterprisePlugins = async ({
     listInstalledEnterprisePlugins(appDir),
   ]);
 
-  if (catalogResult.status === 'license-rejected') {
+  if (catalogResult.status === 'license-rejected' || catalogResult.status === 'redirected') {
     throw new EnterpriseInstallError(catalogResult.message);
   }
 
