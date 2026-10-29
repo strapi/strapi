@@ -2,6 +2,7 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
+import get from 'lodash/get';
 
 import { Condition } from '../../../../../../../shared/contracts/permissions';
 import { Permission as AuthPermission } from '../../../../../features/Auth';
@@ -12,6 +13,7 @@ import {
   getAllowedConditions,
   isPermissionHeld,
   isValueSelected,
+  listGroupLeaves,
 } from '../utils/createPermissionChecker';
 
 import type {
@@ -58,6 +60,17 @@ export interface PermissionsDataManagerContextValue extends Pick<State, 'modifie
     property?: string
   ) => boolean;
   /**
+   * Whether the user may use the checkbox of a component or nested group (`groupPath`, e.g.
+   * `seo` or `seo.media`): when {@link checkUserHasPermission} allows at least one field under
+   * it. A role saved in the UI holds the fields of a component, not the component path.
+   */
+  checkUserHasGroupPermission: (
+    action: string,
+    subject: string | null | undefined,
+    groupPath: string,
+    property?: string
+  ) => boolean;
+  /**
    * The conditions the user may set on `action` / `subject` given what is ticked, or
    * `undefined` when they are not restricted. See `getAllowedConditions` in
    * `utils/createPermissionChecker.ts`.
@@ -73,7 +86,7 @@ export const usePermissionsDataManager = () =>
 
 interface PermissionsDataManagerProviderProps extends Omit<
   PermissionsDataManagerContextValue,
-  'checkUserHasPermission' | 'getAllowedConditions'
+  'checkUserHasPermission' | 'checkUserHasGroupPermission' | 'getAllowedConditions'
 > {
   children: React.ReactNode;
 }
@@ -111,6 +124,35 @@ const PermissionsDataManagerProvider = ({
     [userPermissions, modifiedData]
   );
 
+  const checkUserHasGroupPermission = React.useCallback(
+    (
+      action: string,
+      subject: string | null | undefined,
+      groupPath: string,
+      property = 'fields'
+    ): boolean => {
+      if (userPermissions === undefined) {
+        return true;
+      }
+
+      const group = get(findActionForm(modifiedData, subject, action), [
+        'properties',
+        property,
+        ...groupPath.split('.'),
+      ]);
+      const leaves = listGroupLeaves(group);
+
+      if (leaves.length === 0) {
+        return checkUserHasPermission(action, subject, groupPath, property);
+      }
+
+      return leaves.some((leaf) =>
+        checkUserHasPermission(action, subject, `${groupPath}.${leaf}`, property)
+      );
+    },
+    [userPermissions, modifiedData, checkUserHasPermission]
+  );
+
   const getAllowedConditionsForUser = React.useCallback(
     (action: string, subject: string | null) =>
       getAllowedConditions(
@@ -134,6 +176,7 @@ const PermissionsDataManagerProvider = ({
       userPermissions={userPermissions}
       inheritConditions={inheritConditions}
       checkUserHasPermission={checkUserHasPermission}
+      checkUserHasGroupPermission={checkUserHasGroupPermission}
       getAllowedConditions={getAllowedConditionsForUser}
     >
       {children}

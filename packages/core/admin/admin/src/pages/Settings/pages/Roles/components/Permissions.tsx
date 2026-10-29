@@ -737,15 +737,19 @@ const reducer = (state: State, action: Action) =>
 
         const updatedValues = updateValuesWithPermissions(oldValues, value, permissionChecker);
 
+        set(nextModifiedDataState, pathToValue, updatedValues);
+
         // When enabling, fill in the user's conditions if needed.
         if (value === true) {
           const subjectForLookup =
             root === 'collectionTypes' || root === 'singleTypes' ? (subject ?? null) : null;
 
           if (actionId !== undefined && subjectForLookup !== null) {
+            // The conditions belong to the action, also when the toggled checkbox is a component
+            // or a nested field group inside it, and depend on everything ticked for the action
             inheritConditionsAtPath(
-              updatedValues,
-              [],
+              nextModifiedDataState,
+              pathToValue.slice(0, 3),
               actionId,
               subjectForLookup,
               userPermissions,
@@ -769,8 +773,6 @@ const reducer = (state: State, action: Action) =>
             });
           }
         }
-
-        set(nextModifiedDataState, pathToValue, updatedValues);
 
         if (value === false) {
           // @ts-expect-error – TODO: type better

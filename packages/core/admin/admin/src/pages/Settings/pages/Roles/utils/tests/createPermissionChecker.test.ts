@@ -11,6 +11,7 @@ import {
   isPermissionHeld,
   isPermissionWithinCeiling,
   isValueSelected,
+  listGroupLeaves,
   toEnforcedPermissions,
 } from '../createPermissionChecker';
 import { updateValuesWithPermissions } from '../updateValues';
@@ -665,6 +666,94 @@ describe('createPermissionChecker', () => {
       });
     });
 
+    describe('conditions', () => {
+      const C1 = 'admin::c1';
+      const C2 = 'admin::c2';
+      const fieldsForm = (fields: Record<string, boolean>, conditions = {}) => ({
+        properties: { fields },
+        conditions,
+      });
+      const tickFields = (userPermissions: AuthPermission[], form: object) =>
+        (tickAll(userPermissions, form as typeof actionForm) as typeof actionForm).properties
+          .fields as Record<string, boolean>;
+      const ticked = (fields: Record<string, boolean>) =>
+        Object.keys(fields).filter((field) => fields[field]);
+
+      const emptyForm = fieldsForm({ title: false, body: false });
+
+      it('does not mix fields held under different conditions', () => {
+        const fields = tickFields(
+          [read({ fields: ['title'] }, [IS_CREATOR]), read({ fields: ['body'] }, [SAME_ROLE])],
+          emptyForm
+        );
+
+        expect(ticked(fields)).toHaveLength(1);
+      });
+
+      it('does not add a field held only under a condition to an unconditional anchor', () => {
+        expect(
+          tickFields(
+            [read({ fields: ['title'] }), read({ fields: ['body'] }, [IS_CREATOR])],
+            emptyForm
+          )
+        ).toEqual({ title: true, body: false });
+      });
+
+      it('mixes fields held under the same condition', () => {
+        expect(
+          tickFields(
+            [read({ fields: ['title'] }, [IS_CREATOR]), read({ fields: ['body'] }, [IS_CREATOR])],
+            emptyForm
+          )
+        ).toEqual({ title: true, body: true });
+      });
+
+      it('does not add a field not held under every condition of the anchor', () => {
+        expect(
+          tickFields(
+            [read({ fields: ['title'] }, [C1, C2]), read({ fields: ['body'] }, [C1])],
+            emptyForm
+          )
+        ).toEqual({ title: true, body: false });
+      });
+
+      it('anchors on the widest permission and keeps its condition', () => {
+        expect(
+          tickFields(
+            [
+              read({ fields: ['title', 'body'] }, [IS_CREATOR]),
+              read({ fields: ['body', 'slug'] }, [SAME_ROLE]),
+            ],
+            fieldsForm({ title: false, body: false, slug: false })
+          )
+        ).toEqual({ title: true, body: true, slug: false });
+      });
+
+      it('keeps the ticked conditions', () => {
+        expect(
+          tickFields(
+            [read({ fields: ['title'] }, [IS_CREATOR]), read({ fields: ['body'] }, [SAME_ROLE])],
+            fieldsForm({ title: true, body: false }, { [IS_CREATOR]: true })
+          )
+        ).toEqual({ title: true, body: false });
+      });
+
+      it('leaves a selection the user can grant under one condition', () => {
+        const userPermissions = [
+          read({ fields: ['title'] }, [IS_CREATOR]),
+          read({ fields: ['body'] }, [SAME_ROLE]),
+        ];
+        const fields = tickFields(userPermissions, emptyForm);
+
+        expect(
+          getAllowedConditions(userPermissions, READ, SUBJECT, {
+            properties: { fields: ticked(fields) },
+            conditions: [],
+          })
+        ).toHaveLength(1);
+      });
+    });
+
     it('extends the current selection rather than replacing it', () => {
       const form = {
         ...actionForm,
@@ -771,6 +860,28 @@ describe('createPermissionChecker', () => {
       });
     });
 
+    it('ticks plugin and settings actions held under different conditions', () => {
+      // Each action is its own permission, so their conditions never need to agree
+      const subjectForm = {
+        'plugin::i18n.locale.create': { properties: { enabled: false }, conditions: {} },
+        'plugin::i18n.locale.read': { properties: { enabled: false }, conditions: {} },
+      };
+      const checker = createSubjectBulkPermissionChecker({
+        userPermissions: [
+          permission('plugin::i18n.locale.create', null, {}, [IS_CREATOR]),
+          permission('plugin::i18n.locale.read', null, {}, [SAME_ROLE]),
+        ],
+        subject: null,
+        subjectForm,
+        value: true,
+      });
+
+      expect(updateValuesWithPermissions(subjectForm, true, checker)).toEqual({
+        'plugin::i18n.locale.create': { properties: { enabled: true }, conditions: {} },
+        'plugin::i18n.locale.read': { properties: { enabled: true }, conditions: {} },
+      });
+    });
+
     it('checks plugin and settings actions by their id', () => {
       const subjectForm = {
         'plugin::i18n.locale.create': { properties: { enabled: false }, conditions: {} },
@@ -798,6 +909,23 @@ describe('createPermissionChecker', () => {
           value: true,
         })
       ).toBeUndefined();
+    });
+  });
+
+  describe('listGroupLeaves', () => {
+    it('lists the fields under a group, nested ones by their path', () => {
+      expect(
+        listGroupLeaves({
+          title: false,
+          meta: { robots: true, canonical: false },
+          conditions: false,
+        })
+      ).toEqual(['title', 'meta.robots', 'meta.canonical', 'conditions']);
+    });
+
+    it('lists nothing for a group that is missing or a single field', () => {
+      expect(listGroupLeaves(undefined)).toEqual([]);
+      expect(listGroupLeaves(false)).toEqual([]);
     });
   });
 });

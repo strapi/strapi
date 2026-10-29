@@ -480,6 +480,18 @@ const collectLeafPaths = (value: unknown, prefix: string[] = []): string[][] => 
   );
 };
 
+/**
+ * The paths of the fields under a component or nested group of an action form, relative to the
+ * group (`{ title: false, media: { url: true } }` gives `['title', 'media.url']`). Empty when
+ * `group` holds no field.
+ */
+export const listGroupLeaves = (group: unknown): string[] =>
+  isObject(group)
+    ? Object.entries(group).flatMap(([key, child]) =>
+        isObject(child) ? listGroupLeaves(child).map((leaf) => `${key}.${leaf}`) : [key]
+      )
+    : [];
+
 const coversSelection = (held: AuthPermission, selection: Selection): boolean =>
   Object.entries(selection.properties).every(([property, values]) =>
     values.every((value) => coversPropertyValue(held, property, value))
@@ -507,7 +519,12 @@ interface BulkPermissionCheckerOptions {
  * 1. Anchor: the held permission covering the current selection and the most leaves of the
  *    scope is picked first, and every leaf it covers is ticked. Without it, ticking leaf by
  *    leaf could pick `title` from one permission and `body` from another and then no locale.
- * 2. Extend: the remaining leaves are ticked when they can be added to the selection so far.
+ *    The anchor also fixes the conditions for the rest of the walk: none when it is
+ *    unconditional, else its conditions (the ticked conditions instead, when there are some).
+ * 2. Extend: the remaining leaves are ticked when they can be added to the selection so far
+ *    under those conditions. Unlike a single tick ({@link canTick}), a bulk tick never changes
+ *    the conditions, so it cannot mix fields held under different conditions, which no
+ *    condition would then cover.
  */
 export const createBulkPermissionChecker = ({
   userPermissions,
@@ -543,8 +560,38 @@ export const createBulkPermissionChecker = ({
 
   const anchor = matching
     .filter((perm) => coversSelection(perm, selection))
-    .map((perm) => leaves.filter((leaf) => coversPropertyValue(perm, leaf.property, leaf.value)))
-    .reduce<Leaf[]>((best, covered) => (covered.length > best.length ? covered : best), []);
+    .map((perm) => ({
+      perm,
+      covered: leaves.filter((leaf) => coversPropertyValue(perm, leaf.property, leaf.value)),
+    }))
+    .reduce<{ perm?: AuthPermission; covered: Leaf[] }>(
+      (best, candidate) => (candidate.covered.length > best.covered.length ? candidate : best),
+      { covered: [] }
+    );
+
+  // The conditions every tick must be covered under. `null` is no condition, which only an
+  // unconditional permission covers. Without an anchor (no permission covering the selection
+  // covers a leaf), the conditions the selection allows so far.
+  const getConditionDimension = (): (string | null)[] => {
+    if (selection.conditions.length > 0) {
+      return selection.conditions;
+    }
+
+    if (anchor.perm !== undefined) {
+      return isUnconditional(anchor.perm) ? [null] : anchor.perm.conditions!;
+    }
+
+    const allowed = getAllowedConditions(userPermissions, action, subject, selection);
+
+    return allowed === undefined || allowed.length === 0 ? [null] : allowed;
+  };
+
+  const conditionDimension = getConditionDimension();
+
+  const canExtend = (leaf: Leaf) =>
+    getAtoms({ ...withValue(selection, leaf.property, leaf.value), conditions: [] }).every((atom) =>
+      conditionDimension.every((condition) => isCoveredBy(matching, { ...atom, condition }))
+    );
 
   const select = (leaf: Leaf) => {
     const values = selection.properties[leaf.property] ?? [];
@@ -557,7 +604,7 @@ export const createBulkPermissionChecker = ({
 
   // The anchored leaves count as selected from the start, so the leaves walked before them
   // are checked against them too
-  anchor.forEach(select);
+  anchor.covered.forEach(select);
 
   return (path) => {
     const leaf = leafOf(path);
@@ -570,7 +617,7 @@ export const createBulkPermissionChecker = ({
       return true;
     }
 
-    if (canTick(userPermissions, action, subject, selection, leaf.property, leaf.value)) {
+    if (canExtend(leaf)) {
       select(leaf);
 
       return true;

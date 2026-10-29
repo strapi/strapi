@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen } from '@tests/utils';
 
 import { capitalise } from '../../../../../../utils/strings';
+import { isPermissionWithinCeiling } from '../../utils/createPermissionChecker';
 import { Permissions, type PermissionsAPI } from '../Permissions';
 
 import layout from './test-data.json';
@@ -655,6 +656,75 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
       expect(findSentRead(ref)?.properties).toEqual({ fields: ['name'], locales: ['en'] });
     });
 
+    describe('fields held under different conditions', () => {
+      const SAME_ROLE = 'admin::has-same-role-as-creator';
+      const userPermissions = [
+        permission(READ, CATEGORY, { fields: ['name'], locales: ['en'] }, [IS_CREATOR]),
+        permission(READ, CATEGORY, { fields: ['description'], locales: ['en'] }, [SAME_ROLE]),
+      ];
+
+      const expectOneHeldPermission = (ref: React.RefObject<PermissionsAPI>) => {
+        const checkedFields = ['name', 'description'].filter(
+          (field) =>
+            screen
+              .getByRole('checkbox', { name: `Select ${field} Read permission` })
+              .getAttribute('data-state') === 'checked'
+        );
+
+        expect(checkedFields).toHaveLength(1);
+
+        const sent = findSentRead(ref)!;
+        const [field] = sent.properties.fields!;
+
+        expect(sent.properties.fields).toHaveLength(1);
+        expect(sent.conditions).toEqual([field === 'name' ? IS_CREATOR : SAME_ROLE]);
+        // What the server checks
+        expect(isPermissionWithinCeiling(userPermissions, sent)).toBe(true);
+      };
+
+      it('ticks one held permission and its condition when selecting a whole action', async () => {
+        const ref = React.createRef<PermissionsAPI>();
+        const { user } = render(
+          <Permissions
+            ref={ref}
+            layout={layoutWithDescriptionAndFrench}
+            userPermissions={userPermissions}
+            isFormDisabled={false}
+          />
+        );
+
+        await user.click(screen.getByRole('button', { name: 'Category' }));
+        await user.click(screen.getByRole('checkbox', { name: 'Select Read category permission' }));
+
+        expectOneHeldPermission(ref);
+      });
+
+      it('ticks one held permission and its condition when selecting a whole column', async () => {
+        const ref = React.createRef<PermissionsAPI>();
+        // The column checkbox needs the action on every subject
+        const readSubjects = layout.sections.collectionTypes.actions.find(
+          (action) => action.actionId === READ
+        )!.subjects;
+        const everyOtherSubject = readSubjects
+          .filter((subject) => subject !== CATEGORY)
+          .map((subject) => permission(READ, subject));
+
+        const { user } = render(
+          <Permissions
+            ref={ref}
+            layout={layoutWithDescriptionAndFrench}
+            userPermissions={[...userPermissions, ...everyOtherSubject]}
+            isFormDisabled={false}
+          />
+        );
+
+        await user.click(screen.getByRole('checkbox', { name: 'Select all Read permissions' }));
+        await user.click(screen.getByRole('button', { name: 'Category' }));
+
+        expectOneHeldPermission(ref);
+      });
+    });
+
     it('fills in the condition once a field held only with that condition is ticked', async () => {
       const ref = React.createRef<PermissionsAPI>();
       const userPermissions = [
@@ -763,6 +833,216 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
         );
 
       expect(sent?.conditions).toEqual([IS_CREATOR]);
+    });
+
+    describe('component and nested field groups', () => {
+      const READ = 'plugin::content-manager.explorer.read';
+      const ADDRESS = 'api::address.address';
+
+      type FieldLayout =
+        (typeof layout)['sections']['collectionTypes']['subjects'][number]['properties'][number]['children'][number];
+
+      // Address with a `seo` component holding a `title` field and a nested `meta` group
+      const layoutWithSeo: typeof layout = JSON.parse(JSON.stringify(layout));
+      layoutWithSeo.sections.collectionTypes.subjects[0].properties[0].children.push({
+        label: 'seo',
+        value: 'seo',
+        required: false,
+        children: [
+          { label: 'title', value: 'title' },
+          {
+            label: 'meta',
+            value: 'meta',
+            children: [
+              { label: 'robots', value: 'robots' },
+              { label: 'canonical', value: 'canonical' },
+            ],
+          },
+        ],
+      } as unknown as FieldLayout);
+
+      const findSentRead = (ref: React.RefObject<PermissionsAPI>) =>
+        ref
+          .current!.getPermissions()
+          .permissionsToSend.find((perm) => perm.action === READ && perm.subject === ADDRESS);
+
+      const renderWithSeo = (userPermissions: AuthPermission[]) => {
+        const ref = React.createRef<PermissionsAPI>();
+        const result = render(
+          <Permissions
+            ref={ref}
+            layout={layoutWithSeo}
+            userPermissions={userPermissions}
+            isFormDisabled={false}
+          />
+        );
+
+        return { ref, ...result };
+      };
+
+      it('inherits the user conditions on the action when ticking a component', async () => {
+        const { ref, user } = renderWithSeo([
+          permission(READ, ADDRESS, { fields: ['seo'] }, [IS_CREATOR]),
+        ]);
+
+        await user.click(screen.getByRole('button', { name: 'Address' }));
+        await user.click(screen.getByRole('checkbox', { name: 'Select seo Read permission' }));
+
+        expect(screen.getByRole('checkbox', { name: 'Select seo Read permission' })).toBeChecked();
+
+        const sent = findSentRead(ref);
+        expect(sent?.properties.fields).toEqual(
+          expect.arrayContaining(['seo.title', 'seo.meta.robots', 'seo.meta.canonical'])
+        );
+        expect(sent?.properties.fields).toHaveLength(3);
+        expect(sent?.conditions).toEqual([IS_CREATOR]);
+      });
+
+      it('ticks one held permission and its condition when selecting a component row', async () => {
+        const userPermissions = [
+          permission(READ, ADDRESS, { fields: ['seo.title'] }, [IS_CREATOR]),
+          permission(READ, ADDRESS, { fields: ['seo.meta'] }, [SAME_ROLE]),
+        ];
+        const { ref, user } = renderWithSeo(userPermissions);
+
+        await user.click(screen.getByRole('button', { name: 'Address' }));
+        await user.click(screen.getByRole('checkbox', { name: 'Select all seo permissions' }));
+
+        const sent = findSentRead(ref)!;
+
+        // `meta` holds more fields, so it is the anchor
+        expect(sent.properties.fields).toEqual(
+          expect.arrayContaining(['seo.meta.robots', 'seo.meta.canonical'])
+        );
+        expect(sent.properties.fields).toHaveLength(2);
+        expect(sent.conditions).toEqual([SAME_ROLE]);
+        expect(isPermissionWithinCeiling(userPermissions, sent)).toBe(true);
+      });
+
+      it('inherits the user conditions on the action when ticking a nested field group', async () => {
+        const { ref, user } = renderWithSeo([
+          permission(READ, ADDRESS, { fields: ['seo.meta'] }, [IS_CREATOR]),
+        ]);
+
+        await user.click(screen.getByRole('button', { name: 'Address' }));
+        await user.click(screen.getByText('seo'));
+        await user.click(screen.getByRole('checkbox', { name: 'Select seo meta Read permission' }));
+
+        expect(
+          screen.getByRole('checkbox', { name: 'Select seo meta Read permission' })
+        ).toBeChecked();
+        expect(
+          screen.getByRole('checkbox', { name: 'Select seo title Read permission' })
+        ).not.toBeChecked();
+
+        const sent = findSentRead(ref);
+        expect(sent?.properties.fields).toEqual(
+          expect.arrayContaining(['seo.meta.robots', 'seo.meta.canonical'])
+        );
+        expect(sent?.properties.fields).toHaveLength(2);
+        expect(sent?.conditions).toEqual([IS_CREATOR]);
+      });
+
+      // A role saved in the UI holds the fields of a component, not the component path
+      describe('held as the fields under them', () => {
+        const SEO_LEAVES = ['seo.title', 'seo.meta.robots', 'seo.meta.canonical'];
+
+        const seoCheckbox = () =>
+          screen.getByRole('checkbox', { name: 'Select seo Read permission' });
+        const leafCheckbox = (parent: string, label: string) =>
+          screen.getByRole('checkbox', { name: `Select ${parent} ${label} Read permission` });
+
+        it('enables the component checkbox and ticks every field under it', async () => {
+          const { ref, user } = renderWithSeo([
+            permission(READ, ADDRESS, { fields: SEO_LEAVES }, [IS_CREATOR]),
+          ]);
+
+          await user.click(screen.getByRole('button', { name: 'Address' }));
+
+          expect(seoCheckbox()).toBeEnabled();
+
+          await user.click(seoCheckbox());
+          await user.click(screen.getByText('seo'));
+          await user.click(screen.getByText('meta'));
+
+          expect(leafCheckbox('seo', 'title')).toBeChecked();
+          expect(leafCheckbox('seo..meta', 'robots')).toBeChecked();
+          expect(leafCheckbox('seo..meta', 'canonical')).toBeChecked();
+
+          const sent = findSentRead(ref);
+          expect(sent?.properties.fields).toEqual(expect.arrayContaining(SEO_LEAVES));
+          expect(sent?.properties.fields).toHaveLength(3);
+          expect(sent?.conditions).toEqual([IS_CREATOR]);
+        });
+
+        it('enables the component checkbox when one field under it is not held, and ticks only the held ones', async () => {
+          const userPermissions = [
+            permission(READ, ADDRESS, { fields: ['seo.title', 'seo.meta.robots'] }, [IS_CREATOR]),
+          ];
+          const { ref, user } = renderWithSeo(userPermissions);
+
+          await user.click(screen.getByRole('button', { name: 'Address' }));
+
+          expect(seoCheckbox()).toBeEnabled();
+
+          await user.click(seoCheckbox());
+          await user.click(screen.getByText('seo'));
+          await user.click(screen.getByText('meta'));
+
+          expect(leafCheckbox('seo', 'title')).toBeChecked();
+          expect(leafCheckbox('seo..meta', 'robots')).toBeChecked();
+          expect(leafCheckbox('seo..meta', 'canonical')).not.toBeChecked();
+          expect(leafCheckbox('seo..meta', 'canonical')).toBeDisabled();
+
+          const sent = findSentRead(ref)!;
+          expect(sent.properties.fields).toEqual(
+            expect.arrayContaining(['seo.title', 'seo.meta.robots'])
+          );
+          expect(sent.properties.fields).toHaveLength(2);
+          expect(sent.conditions).toEqual([IS_CREATOR]);
+          expect(isPermissionWithinCeiling(userPermissions, sent)).toBe(true);
+        });
+
+        it('disables the component checkbox when no field under it is held', async () => {
+          const { user } = renderWithSeo([
+            permission(READ, ADDRESS, { fields: [ADDRESS_FIELDS[0]] }, [IS_CREATOR]),
+          ]);
+
+          await user.click(screen.getByRole('button', { name: 'Address' }));
+
+          expect(seoCheckbox()).toBeDisabled();
+
+          await user.hover(seoCheckbox());
+
+          expect(await screen.findByRole('tooltip')).toHaveTextContent(UNHELD_TOOLTIP);
+        });
+
+        it('enables a nested field group checkbox and ticks every field under it', async () => {
+          const { ref, user } = renderWithSeo([
+            permission(READ, ADDRESS, { fields: ['seo.meta.robots', 'seo.meta.canonical'] }, [
+              IS_CREATOR,
+            ]),
+          ]);
+
+          await user.click(screen.getByRole('button', { name: 'Address' }));
+          await user.click(screen.getByText('seo'));
+
+          const metaCheckbox = leafCheckbox('seo', 'meta');
+          expect(metaCheckbox).toBeEnabled();
+
+          await user.click(metaCheckbox);
+
+          expect(leafCheckbox('seo', 'meta')).toBeChecked();
+          expect(leafCheckbox('seo', 'title')).not.toBeChecked();
+
+          const sent = findSentRead(ref);
+          expect(sent?.properties.fields).toEqual(
+            expect.arrayContaining(['seo.meta.robots', 'seo.meta.canonical'])
+          );
+          expect(sent?.properties.fields).toHaveLength(2);
+          expect(sent?.conditions).toEqual([IS_CREATOR]);
+        });
+      });
     });
 
     it('only lets the user select conditions they hold', async () => {

@@ -164,6 +164,7 @@ const ActionRow = ({
     onChangeParentCheckbox,
     onChangeSimpleCheckbox,
     checkUserHasPermission,
+    checkUserHasGroupPermission,
   } = usePermissionsDataManager();
 
   const isActive = rowToOpen === name;
@@ -285,7 +286,7 @@ const ActionRow = ({
               const data = get(modifiedData, checkboxName, {});
 
               const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
-              const userHasPermission = checkUserHasPermission(
+              const userHasPermission = checkUserHasGroupPermission(
                 actionId,
                 subject,
                 name,
@@ -440,8 +441,13 @@ const SubActionRow = ({
   subject,
 }: SubActionRowProps) => {
   const { formatMessage } = useIntl();
-  const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox, checkUserHasPermission } =
-    usePermissionsDataManager();
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+    checkUserHasPermission,
+    checkUserHasGroupPermission,
+  } = usePermissionsDataManager();
   const [rowToOpen, setRowToOpen] = React.useState<string | null>(null);
 
   const handleClickToggleSubLevel = (name: string) => {
@@ -578,7 +584,7 @@ const SubActionRow = ({
 
                       const { hasAllActionsSelected, hasSomeActionsSelected } =
                         getCheckboxState(checkboxValue);
-                      const userHasPermission = checkUserHasPermission(
+                      const userHasPermission = checkUserHasGroupPermission(
                         actionId,
                         subject,
                         `${parentName}.${value}`,
