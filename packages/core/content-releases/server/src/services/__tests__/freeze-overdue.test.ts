@@ -1,6 +1,8 @@
 import { OVERDUE_GRACE_PERIOD_MS } from '../../constants';
 import type { ReleaseFailureReason, ReleaseStatus } from '../../../../shared/constants';
+import type { Release } from '../../../../shared/contracts/releases';
 import createSchedulingService from '../scheduling';
+import type { RunTotals } from '../release-run';
 
 const NOW = new Date('2026-10-15T09:00:00.000Z');
 const minutesAgo = (minutes: number) => new Date(NOW.getTime() - minutes * 60 * 1000);
@@ -13,23 +15,33 @@ type Row = {
   status: ReleaseStatus;
 };
 
-// What `recordMissedRun` returns: null when the release ran meanwhile
-type MissedRun = {
-  id: number;
-  name: string;
-  status: ReleaseStatus;
-  failureReason: ReleaseFailureReason | null;
-} | null;
+// What `recordMissedRun` returns, as much of it as the reporters read: null when the release ran
+// meanwhile
+type MissedRun =
+  | (Pick<Release, 'id' | 'name' | 'status' | 'releaseCondition' | 'failureReason'> & RunTotals)
+  | null;
+
+// A release with one entry that missed its run: the entry counts as skipped
+const missedRun = (
+  id: number,
+  overrides: Partial<NonNullable<MissedRun>> = {}
+): NonNullable<MissedRun> => ({
+  id,
+  name: `Release ${id}`,
+  status: 'failed',
+  releaseCondition: 'all_or_nothing',
+  failureReason: 'missed_schedule',
+  totalPublishedEntries: 0,
+  totalUnpublishedEntries: 0,
+  totalSkippedEntries: 1,
+  ...overrides,
+});
 
 const setup = ({ rows, locked = rows }: { rows: Row[]; locked?: Row[] }) => {
   const findMany = jest.fn().mockResolvedValue(rows.map(({ id }) => ({ id })));
   const recordMissedRun = jest.fn(
-    async (id: number, failureReason: ReleaseFailureReason): Promise<MissedRun> => ({
-      id,
-      name: `Release ${id}`,
-      status: 'failed',
-      failureReason,
-    })
+    async (id: number, failureReason: ReleaseFailureReason): Promise<MissedRun> =>
+      missedRun(id, { failureReason })
   );
   const reportFailedRun = jest.fn();
   const reportReleasedRun = jest.fn();
@@ -146,18 +158,18 @@ describe('Scheduling service: freezeOverdueReleases', () => {
     expect(frozen).toHaveLength(1);
     expect(recordMissedRun.mock.calls).toStrictEqual([[1, 'missed_schedule']]);
     expect(reportFailedRun).toHaveBeenCalledWith(
-      { id: 1, name: 'Release 1', status: 'failed', failureReason: 'missed_schedule' },
+      missedRun(1),
       expect.objectContaining({ name: 'MissedSchedule' }),
       { trigger: 'sweep' }
     );
     expect(strapi.requestContext.run).toHaveBeenCalled();
   });
 
-  it('reports an empty release it froze as done like the scheduled run it missed', async () => {
+  it('hands an empty release it froze as done to the released-run reporter, as the sweep', async () => {
     const { service, recordMissedRun, reportFailedRun, reportReleasedRun, strapi } = setup({
       rows: [release({ id: 1, status: 'empty', scheduledAt: minutesAgo(10) })],
     });
-    const done = { id: 1, name: 'Release 1', status: 'done' as const, failureReason: null };
+    const done = missedRun(1, { status: 'done', failureReason: null, totalSkippedEntries: 0 });
     recordMissedRun.mockResolvedValueOnce(done);
 
     await service.freezeOverdueReleases({ now: NOW });

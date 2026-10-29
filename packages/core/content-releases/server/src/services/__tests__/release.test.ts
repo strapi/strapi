@@ -1042,15 +1042,24 @@ describe('Release service', () => {
     });
 
     it('records a failed all_or_nothing run as failed everywhere, with only the error name', async () => {
-      mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });
+      const stored = {
+        id: 1,
+        name: 'March',
+        releasedAt: null,
+        releaseCondition: 'all_or_nothing',
+        failureReason: null,
+      };
+      mockExecute.mockReturnValueOnce(stored);
       const publish = jest
         .fn()
         .mockResolvedValueOnce(undefined)
         .mockRejectedValueOnce(new errors.ValidationError('Publish failed'));
-      const releaseUpdate = jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data }));
+      // The row as the run wrote it
+      const releaseUpdate = jest.fn(async ({ data }) => ({ ...stored, ...data }));
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
+        telemetry: { send: jest.fn() },
         documents: jest.fn().mockReturnValue({ publish }),
         db: {
           ...baseStrapiMock.db,
@@ -1092,6 +1101,23 @@ describe('Release service', () => {
         outcome: 'failure',
         reason: 'ValidationError',
       });
+      expect(strapiMock.telemetry.send.mock.calls).toStrictEqual([
+        [
+          'didPublishContentRelease',
+          {
+            eventProperties: {
+              releaseCondition: 'all_or_nothing',
+              trigger: 'manual',
+              status: 'failed',
+              failureReason: 'run_failed',
+              totalEntries: 2,
+              totalPublishedEntries: 0,
+              totalUnpublishedEntries: 0,
+              totalSkippedEntries: 2,
+            },
+          },
+        ],
+      ]);
     });
 
     // InnoDB rolls back the whole transaction on a deadlock, the entries released before included
@@ -1268,6 +1294,7 @@ describe('Release service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
+        telemetry: { send: jest.fn() },
         documents: jest.fn().mockReturnValue({ publish, unpublish: jest.fn() }),
         plugin: jest.fn().mockReturnValue({
           service: jest.fn().mockReturnValue({
@@ -1304,8 +1331,9 @@ describe('Release service', () => {
       expect(releaseQuery.update.mock.calls).toStrictEqual([
         [{ where: { id: 1 }, data: { status: 'blocked' } }],
       ]);
-      // Not a run: no releases.publish webhook and no release.trigger audit event
+      // Not a run: no releases.publish webhook, no release.trigger audit event and no telemetry
       expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
+      expect(strapiMock.telemetry.send).not.toHaveBeenCalled();
     });
   });
 
@@ -1774,8 +1802,15 @@ describe('Release service', () => {
       );
     });
 
-    it('sends the trigger of a published run', async () => {
-      mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });
+    it('sends a published run once, with the trigger it ran by', async () => {
+      const stored = {
+        id: 1,
+        name: 'March',
+        releasedAt: null,
+        releaseCondition: 'all_or_nothing',
+        failureReason: null,
+      };
+      mockExecute.mockReturnValueOnce(stored);
       const { releaseService, send } = setup({
         db: {
           ...baseStrapiMock.db,
@@ -1785,12 +1820,8 @@ describe('Release service', () => {
               .mockReturnValue([
                 { id: 1, contentType: 'collectionType', type: 'publish', entryDocumentId: 'a' },
               ]),
-            update: jest.fn(async ({ data }) => ({
-              id: 1,
-              name: 'March',
-              releaseCondition: 'all_or_nothing',
-              ...data,
-            })),
+            // The row as the run wrote it
+            update: jest.fn(async ({ data }) => ({ ...stored, ...data })),
             updateMany: jest.fn(),
           }),
         },
@@ -1799,17 +1830,22 @@ describe('Release service', () => {
 
       await releaseService.publish(1, { trigger: 'scheduled' });
 
-      expect(send).toHaveBeenCalledWith('didPublishContentRelease', {
-        eventProperties: {
-          releaseCondition: 'all_or_nothing',
-          trigger: 'scheduled',
-          status: 'done',
-          totalEntries: 1,
-          totalPublishedEntries: 1,
-          totalUnpublishedEntries: 0,
-          totalSkippedEntries: 0,
-        },
-      });
+      expect(send.mock.calls).toStrictEqual([
+        [
+          'didPublishContentRelease',
+          {
+            eventProperties: {
+              releaseCondition: 'all_or_nothing',
+              trigger: 'scheduled',
+              status: 'done',
+              totalEntries: 1,
+              totalPublishedEntries: 1,
+              totalUnpublishedEntries: 0,
+              totalSkippedEntries: 0,
+            },
+          },
+        ],
+      ]);
     });
 
     it.each([

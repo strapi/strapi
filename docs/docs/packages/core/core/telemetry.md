@@ -185,7 +185,7 @@ Metrics service: `packages/core/content-manager/server/src/services/metrics.ts`.
 
 ### Content releases
 
-Sent from `packages/core/content-releases/server/src/services/release.ts`. They count every release, whether it runs by hand, on schedule or through the API; the admin sends no release events.
+Sent from `packages/core/content-releases/server/src/services/release.ts`. They count every release, whether it runs by hand, on schedule or through the API; the admin sends none of them. Its only release event is `willEditReleaseFromHome`, from the home page widget.
 
 | Event                      | Trigger                                                                       | Properties                                                                                                                                                                                                                                                  |
 | -------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -195,6 +195,8 @@ Sent from `packages/core/content-releases/server/src/services/release.ts`. They 
 | `didPublishContentRelease` | Run that ended done, partial or failed, or a release that missed its schedule | `releaseCondition`, `trigger` (`manual`, `scheduled`), `status` (`done`, `partial`, `failed`), `totalEntries`, `totalPublishedEntries`, `totalUnpublishedEntries`, `totalSkippedEntries`, and when failed `failureReason` (`run_failed`, `missed_schedule`) |
 
 A release that missed its schedule is sent by the overdue sweep as `trigger: scheduled` with `failureReason: missed_schedule`. An empty release the sweep freezes as done sends nothing: it published nothing.
+
+They replace the admin events `didCreateRelease` and `didPublishRelease`, which only counted releases created or published from the admin: a dashboard on those names gets no new data and must move to `didCreateContentRelease` and `didPublishContentRelease`.
 
 ### Review workflows (EE)
 

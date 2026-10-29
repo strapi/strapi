@@ -48,8 +48,8 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   // What the run the release missed would have sent: a release that froze as done (an empty one)
-  // reports success; one that missed its schedule, its failure. A release that failed before the
-  // upgrade reported its failure then.
+  // reports success, without telemetry since it published nothing; one that missed its schedule,
+  // its failure. A release that failed before the upgrade reported its failure then.
   const reportFrozenRelease = async (release: FrozenRelease) => {
     const releaseService = getService('release', { strapi });
 
