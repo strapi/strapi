@@ -25,7 +25,7 @@ export class UploadRouteValidator extends AbstractRouteValidator {
   get file() {
     return z.object({
       id: this.fileId,
-      documentId: z.uuid(),
+      documentId: z.string(),
       name: z.string(),
       alternativeText: z.string().nullable().optional(),
       caption: z.string().nullable().optional(),
