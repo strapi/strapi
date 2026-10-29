@@ -938,16 +938,21 @@ const disconnectItemRef = (item: unknown): Record<string, unknown> | undefined =
   return undefined;
 };
 
+type DisconnectMatch = {
+  currentId: number;
+  currentType: string | undefined;
+  typeField: string;
+  opts: { locale?: string };
+};
+
 const disconnectItemMatchesCurrent = async (
   strapi: Core.Strapi,
   sourceUid: UID.Schema,
   attribute: CloneRelationAttribute,
   item: unknown,
-  currentId: number,
-  currentType: string | undefined,
-  typeField: string,
-  opts: { locale?: string }
+  match: DisconnectMatch
 ) => {
+  const { currentId, currentType, typeField, opts } = match;
   const ref = disconnectItemRef(item);
 
   if (!ref) {
@@ -1009,16 +1014,12 @@ const disconnectMatchesCurrent = async (
           return true;
         }
 
-        return disconnectItemMatchesCurrent(
-          strapi,
-          sourceUid,
-          attribute,
-          item,
+        return disconnectItemMatchesCurrent(strapi, sourceUid, attribute, item, {
           currentId,
           currentType,
           typeField,
-          opts
-        );
+          opts,
+        });
       }),
     Promise.resolve(false)
   );
@@ -1177,16 +1178,21 @@ const schemaUidForPostCloneUpdate = (
   return cloneComponent as UID.Schema;
 };
 
+type PostCloneRelationContext = {
+  rootUid: UID.ContentType;
+  sourceRootId: number;
+  clonedEntryId: number;
+  clonedData: Record<string, unknown>;
+  originalData: Record<string, unknown>;
+  locale: string | undefined;
+};
+
 const applyOnePostCloneRelationUpdate = async (
   strapi: Core.Strapi,
-  rootUid: UID.ContentType,
-  sourceRootId: number,
-  clonedEntryId: number,
-  clonedData: Record<string, unknown>,
-  originalData: Record<string, unknown>,
   update: PostCloneRelationUpdate,
-  locale: string | undefined
+  context: PostCloneRelationContext
 ) => {
+  const { rootUid, sourceRootId, clonedEntryId, clonedData, originalData, locale } = context;
   const attributeName = update.dataPath.split('.').pop()!;
   const ownerEntryId = resolveOwnerEntryId(clonedData, update.ownerPath, clonedEntryId);
   const sourceOwnerId = resolveOwnerEntryId(originalData, update.ownerPath, sourceRootId);
@@ -1256,15 +1262,13 @@ export const applyPostCloneRelationUpdates = async (
   const locale = clonedData.locale as string | undefined;
 
   await runInOrder(postCloneUpdates, (update) =>
-    applyOnePostCloneRelationUpdate(
-      strapi,
+    applyOnePostCloneRelationUpdate(strapi, update, {
       rootUid,
       sourceRootId,
       clonedEntryId,
       clonedData,
       originalData,
-      update,
-      locale
-    )
+      locale,
+    })
   );
 };

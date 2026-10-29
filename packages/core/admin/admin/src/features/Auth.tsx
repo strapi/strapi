@@ -53,12 +53,14 @@ interface User
     Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
     Partial<Omit<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>> {}
 
+type AdminUserRef = Pick<User, 'id' | 'email'> | null;
+type AdminUserId = string | number | undefined;
+
 /**
  * Which admin is signed in. Id wins, and email covers a profile that has no id
  * yet. Session-switch guards compare this, so they have to share one definition.
  */
-const getAdminUserId = (user?: Pick<User, 'id' | 'email'> | null): string | number | undefined =>
-  user?.id ?? user?.email;
+const getAdminUserId = (user?: AdminUserRef): AdminUserId => user?.id ?? user?.email;
 
 interface AuthContextValue {
   login: (
@@ -456,8 +458,8 @@ const AuthProvider = ({
    * Logout is handled by the `isLoggedIn` storage listener above.
    */
   const lastResetTokenRef = React.useRef<string | null>(null);
-  const adminUserIdRef = React.useRef<string | number | undefined>(undefined);
-  const discardedEditsAdminIdRef = React.useRef<string | number | undefined>(undefined);
+  const adminUserIdRef = React.useRef<AdminUserId>(undefined);
+  const discardedEditsAdminIdRef = React.useRef<AdminUserId>(undefined);
   const adminUserId = getAdminUserId(user);
   adminUserIdRef.current = adminUserId;
 
