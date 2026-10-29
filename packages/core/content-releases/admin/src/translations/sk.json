@@ -72,7 +72,6 @@
   "pages.ReleaseDetails.groupBy.option.locales": "Lokalizácie",
   "pages.ReleaseDetails.groupBy.option.actions": "Akcie",
   "pages.ReleaseDetails.header-subtitle.scheduled": "Naplánované na {date} o {time} ({offset})",
-  "pages.ReleaseDetails.entry-validation.fields": "Polia",
   "pages.Settings.releases.description": "Vytvárajte a spravujte aktualizácie obsahu",
   "pages.Settings.releases.preferences.title": "Predvoľby",
   "pages.Settings.releases.timezone.label": "Predvolené časové pásmo",
