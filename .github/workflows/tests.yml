@@ -438,17 +438,16 @@ jobs:
         if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
         run: exit 1
 
-  # Checks that changes do not break @strapi-enterprise/plugin-byok. The plugin is private: its
-  # code (source, built files, source maps) and the prompts it sends must never become public.
+  # Checks that changes do not break the Strapi Enterprise plugins.
   # See docs/docs/contributing/03-testing/e2e/03-enterprise-plugins.md.
   #
-  # - Fork PRs skip this job: GitHub gives them no secrets, so they cannot install the plugin. The
-  #   push run on develop catches what a fork PR breaks.
-  # - Never run this job, or any PR code with the license, from `pull_request_target` or
-  #   `workflow_run`: fork code could then read the license and the plugin.
-  # - Caches are restored, never saved, so no cache can hold the plugin. Do not use the
-  #   `yarn-nm-install` or `run-build` actions here: they save caches.
-  # - The plugin is installed in $RUNNER_TEMP, outside the paths that caches and artifacts use.
+  # - Fork PRs skip this job: GitHub gives them no secrets, so they cannot install the plugins.
+  #   This also keeps the license and the plugins away from fork code. Pushes to develop and
+  #   main still run the job.
+  # - Never run this job from `pull_request_target` or `workflow_run`: fork code could then
+  #   read the license and the plugins.
+  # - Caches are restored, never saved, so no cache can hold a plugin. The plugins are
+  #   installed in $RUNNER_TEMP, outside the paths that caches and artifacts use.
   e2e_enterprise_plugins:
     if: >-
       ${{ (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
