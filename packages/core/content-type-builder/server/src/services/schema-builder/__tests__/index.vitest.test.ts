@@ -81,4 +81,100 @@ describe('createBuilder', () => {
 
     expect(builder.contentTypes.get('admin::user').writable).toBe(false);
   });
+
+  describe('component uid change', () => {
+    type RecordedUpdate = { table: string; oldUID: string; newUID: string };
+
+    // A `*_cmps` join table attribute, as `@strapi/core` builds it for `component`
+    // and `dynamiczone` attributes of content types and components.
+    const cmpsAttribute = (name: string) => ({
+      type: 'relation',
+      joinTable: { name, pivotColumns: ['entity_id', 'cmp_id', 'field', 'component_type'] },
+    });
+
+    const createDb = () => {
+      const updates: RecordedUpdate[] = [];
+
+      const db = {
+        metadata: new Map(
+          Object.entries({
+            'api::page.page': {
+              attributes: {
+                sections: cmpsAttribute('pages_cmps'),
+                hero: cmpsAttribute('pages_cmps'),
+              },
+            },
+            'default.wrapper': {
+              attributes: { inner: cmpsAttribute('components_default_wrappers_cmps') },
+            },
+          })
+        ),
+        transaction: vi.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) =>
+          run({ trx: {} })
+        ),
+        getConnection: vi.fn((table: string) => ({
+          where: (column: string, oldUID: string) => ({
+            update: (values: Record<string, string>) => ({
+              async transacting() {
+                expect(column).toBe('component_type');
+                updates.push({ table, oldUID, newUID: values[column] });
+                return 1;
+              },
+            }),
+          }),
+        })),
+      };
+
+      return { db, updates };
+    };
+
+    const cardInfos = {
+      uid: 'default.card',
+      displayName: 'card',
+      icon: 'star',
+      attributes: { title: { type: 'string' } },
+    };
+
+    beforeEach(() => {
+      (global as any).strapi.components['default.card'] = createComponent('default', 'card');
+    });
+
+    it('rewrites component_type in every component join table when the category changes', async () => {
+      const { db, updates } = createDb();
+      (global as any).strapi.db = db;
+
+      const builder = createBuilder();
+      builder.editComponent({ ...cardInfos, category: 'blocks' });
+
+      await expect(builder.writeFiles()).resolves.toBe(true);
+
+      expect(fse.writeJSON).toHaveBeenCalledWith(
+        path.join(COMPONENTS_DIR, 'blocks', 'card.json'),
+        expect.anything(),
+        expect.anything()
+      );
+      expect(db.transaction).toHaveBeenCalledTimes(1);
+      expect(updates).toEqual([
+        { table: 'pages_cmps', oldUID: 'default.card', newUID: 'blocks.card' },
+        {
+          table: 'components_default_wrappers_cmps',
+          oldUID: 'default.card',
+          newUID: 'blocks.card',
+        },
+      ]);
+    });
+
+    it('issues no update when the category does not change', async () => {
+      const { db, updates } = createDb();
+      (global as any).strapi.db = db;
+
+      const builder = createBuilder();
+      builder.editComponent({ ...cardInfos, category: 'default', displayName: 'Card' });
+
+      await expect(builder.writeFiles()).resolves.toBe(true);
+
+      expect(db.transaction).not.toHaveBeenCalled();
+      expect(updates).toEqual([]);
+    });
+  });
 });
