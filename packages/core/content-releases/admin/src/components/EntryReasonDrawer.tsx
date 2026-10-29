@@ -14,6 +14,7 @@ import { useIntl, type MessageDescriptor } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { getFieldLabel, getProblem } from '../utils/fieldErrors';
+import { getReleaseDateParts } from '../utils/time';
 
 import { getEntryLinkProps, useCanReadEntry, type EntryLocation } from './EntryLinkButton';
 import { SKIPPED_REASONS, isSkippedOutcome } from './ReleaseActionStatus';
@@ -54,7 +55,7 @@ interface EntryReasonDrawerProps {
   release?: ReleaseDates | null;
 }
 
-type ReleaseDates = Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason'>;
+type ReleaseDates = Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason' | 'timezone'>;
 
 /* -------------------------------------------------------------------------------------------------
  * Building blocks
@@ -70,13 +71,31 @@ const REVIEW_STAGE_TITLE = {
   defaultMessage: 'Review stage',
 };
 
+/**
+ * The reason the badge names. An entry with several kinds of issue gets none: naming the first
+ * would hide the others, which the issue box lists.
+ */
 const getReasonTitle = ({
   outcome,
   reason,
   missingReason,
 }: EntryReasonDetails): MessageDescriptor | null => {
-  if (outcome && isSkippedOutcome(outcome)) {
-    return SKIPPED_REASONS[outcome].title;
+  const skippedReason: { title: MessageDescriptor; description?: MessageDescriptor } | null =
+    outcome && isSkippedOutcome(outcome) ? SKIPPED_REASONS[outcome] : null;
+
+  // A held or missed entry has one issue: the sentence that explains it
+  if (skippedReason?.description) {
+    return skippedReason.title;
+  }
+
+  const issueKinds = [reason?.error, reason?.validation || missingReason, reason?.stage];
+
+  if (issueKinds.filter(Boolean).length > 1) {
+    return null;
+  }
+
+  if (skippedReason) {
+    return skippedReason.title;
   }
 
   if (missingReason === 'unchecked') {
@@ -161,9 +180,10 @@ const IssueCard = ({ label, fieldKey, problem }: IssueCardProps) => {
  * A planned release's reasons are live: no note.
  */
 const useCapturedNote = (isFrozen: boolean, release?: ReleaseDates | null) => {
-  const { formatMessage, formatDate } = useIntl();
-  const formatReleaseDate = (date: string) =>
-    formatDate(new Date(date), { dateStyle: 'medium', timeStyle: 'short' });
+  const { formatMessage, formatDate, formatTime } = useIntl();
+  // As the page header dates the release
+  const getDateParts = (date: string) =>
+    getReleaseDateParts({ formatDate, formatTime }, new Date(date), release?.timezone);
 
   if (!isFrozen) {
     return null;
@@ -174,11 +194,13 @@ const useCapturedNote = (isFrozen: boolean, release?: ReleaseDates | null) => {
       {
         id: 'content-releases.reason-drawer.captured.not-run',
         defaultMessage:
-          '{hasDate, select, true {Scheduled for {date}. } other {}}The entry may have changed since.',
+          '{hasDate, select, true {State captured for the run scheduled on {date} at {time} ({offset}).} other {State captured before the release could run.}}',
       },
       {
         hasDate: Boolean(release.scheduledAt),
-        date: release.scheduledAt ? formatReleaseDate(release.scheduledAt) : '',
+        ...(release.scheduledAt
+          ? getDateParts(release.scheduledAt)
+          : { date: '', time: '', offset: '' }),
       }
     );
   }
@@ -187,9 +209,9 @@ const useCapturedNote = (isFrozen: boolean, release?: ReleaseDates | null) => {
     ? formatMessage(
         {
           id: 'content-releases.reason-drawer.captured',
-          defaultMessage: 'State captured when the release ran on {date}.',
+          defaultMessage: 'State captured when the release ran on {date} at {time} ({offset}).',
         },
-        { date: formatReleaseDate(release.releasedAt) }
+        getDateParts(release.releasedAt)
       )
     : null;
 };
