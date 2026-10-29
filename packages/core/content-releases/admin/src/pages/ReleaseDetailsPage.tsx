@@ -6,7 +6,6 @@ import {
   Table,
   BackButton,
   ConfirmDialog,
-  useTracking,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
@@ -208,7 +207,6 @@ const ReleaseDetailsLayout = ({
   const { allowedActions } = useRBAC(PERMISSIONS);
   const { canCreate, canCreateAction, canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
-  const { trackUsage } = useTracking();
   const [isSkippedDrawerOpen, setIsSkippedDrawerOpen] = React.useState(false);
 
   const release = data?.data;
@@ -257,12 +255,6 @@ const ReleaseDetailsLayout = ({
           }),
         });
       }
-
-      trackUsage('didPublishRelease', {
-        totalEntries,
-        totalPublishedEntries,
-        totalUnpublishedEntries,
-      });
     } else if (isBaseQueryError(response.error)) {
       const error = response.error;
       const apiError = formatAPIError(error);

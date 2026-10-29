@@ -147,7 +147,8 @@ describe('Scheduling service: freezeOverdueReleases', () => {
     expect(recordMissedRun.mock.calls).toStrictEqual([[1, 'missed_schedule']]);
     expect(reportFailedRun).toHaveBeenCalledWith(
       { id: 1, name: 'Release 1', status: 'failed', failureReason: 'missed_schedule' },
-      expect.objectContaining({ name: 'MissedSchedule' })
+      expect.objectContaining({ name: 'MissedSchedule' }),
+      { trigger: 'sweep' }
     );
     expect(strapi.requestContext.run).toHaveBeenCalled();
   });
@@ -161,7 +162,7 @@ describe('Scheduling service: freezeOverdueReleases', () => {
 
     await service.freezeOverdueReleases({ now: NOW });
 
-    expect(reportReleasedRun).toHaveBeenCalledWith(done);
+    expect(reportReleasedRun).toHaveBeenCalledWith(done, { trigger: 'sweep' });
     expect(reportFailedRun).not.toHaveBeenCalled();
     expect(strapi.requestContext.run).toHaveBeenCalled();
   });

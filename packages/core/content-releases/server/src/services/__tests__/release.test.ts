@@ -1643,4 +1643,321 @@ describe('Release service', () => {
       expect(updateMany).not.toHaveBeenCalled();
     });
   });
+
+  describe('telemetry', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const reported = {
+      id: 1,
+      name: 'March',
+      releaseCondition: 'allow_partial' as const,
+      failureReason: null,
+      totalPublishedEntries: 2,
+      totalUnpublishedEntries: 1,
+      totalSkippedEntries: 3,
+    };
+
+    const setup = (overrides: Record<string, unknown> = {}) => {
+      const send = jest.fn();
+      const strapiMock = {
+        ...baseStrapiMock,
+        telemetry: { send },
+        eventHub: { emit: jest.fn() },
+        ...overrides,
+      };
+
+      // @ts-expect-error Ignore missing properties
+      return { releaseService: createReleaseService({ strapi: strapiMock }), send };
+    };
+
+    it.each(['manual', 'scheduled'] as const)(
+      'sends a %s run that released entries with its mode, status and totals',
+      async (trigger) => {
+        const { releaseService, send } = setup();
+
+        await releaseService.reportReleasedRun({ ...reported, status: 'partial' }, { trigger });
+
+        expect(send.mock.calls).toStrictEqual([
+          [
+            'didPublishContentRelease',
+            {
+              eventProperties: {
+                releaseCondition: 'allow_partial',
+                trigger,
+                status: 'partial',
+                totalEntries: 6,
+                totalPublishedEntries: 2,
+                totalUnpublishedEntries: 1,
+                totalSkippedEntries: 3,
+              },
+            },
+          ],
+        ]);
+      }
+    );
+
+    it("doesn't send an empty release the sweep froze as done: nothing was published", async () => {
+      const { releaseService, send } = setup();
+
+      await releaseService.reportReleasedRun(
+        {
+          ...reported,
+          status: 'done',
+          totalPublishedEntries: 0,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 0,
+        },
+        { trigger: 'sweep' }
+      );
+
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('sends a run that failed, with "run_failed" as its reason', async () => {
+      const { releaseService, send } = setup();
+
+      await releaseService.reportFailedRun(
+        {
+          ...reported,
+          releaseCondition: 'all_or_nothing',
+          totalPublishedEntries: 0,
+          totalUnpublishedEntries: 0,
+        },
+        new Error('Publish failed'),
+        { trigger: 'scheduled' }
+      );
+
+      expect(send.mock.calls).toStrictEqual([
+        [
+          'didPublishContentRelease',
+          {
+            eventProperties: {
+              releaseCondition: 'all_or_nothing',
+              trigger: 'scheduled',
+              status: 'failed',
+              failureReason: 'run_failed',
+              totalEntries: 3,
+              totalPublishedEntries: 0,
+              totalUnpublishedEntries: 0,
+              totalSkippedEntries: 3,
+            },
+          },
+        ],
+      ]);
+    });
+
+    it('sends a release that missed its schedule as a scheduled failure, with its stored reason', async () => {
+      const { releaseService, send } = setup();
+
+      await releaseService.reportFailedRun(
+        {
+          ...reported,
+          failureReason: 'missed_schedule',
+          totalPublishedEntries: 0,
+          totalUnpublishedEntries: 0,
+        },
+        new Error('Missed'),
+        { trigger: 'sweep' }
+      );
+
+      expect(send).toHaveBeenCalledWith(
+        'didPublishContentRelease',
+        expect.objectContaining({
+          eventProperties: expect.objectContaining({
+            status: 'failed',
+            failureReason: 'missed_schedule',
+            trigger: 'scheduled',
+          }),
+        })
+      );
+    });
+
+    it('sends the trigger of a published run', async () => {
+      mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });
+      const { releaseService, send } = setup({
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            findMany: jest
+              .fn()
+              .mockReturnValue([
+                { id: 1, contentType: 'collectionType', type: 'publish', entryDocumentId: 'a' },
+              ]),
+            update: jest.fn(async ({ data }) => ({
+              id: 1,
+              name: 'March',
+              releaseCondition: 'all_or_nothing',
+              ...data,
+            })),
+            updateMany: jest.fn(),
+          }),
+        },
+        contentTypes: { collectionType: { kind: 'collectionType' } },
+      });
+
+      await releaseService.publish(1, { trigger: 'scheduled' });
+
+      expect(send).toHaveBeenCalledWith('didPublishContentRelease', {
+        eventProperties: {
+          releaseCondition: 'all_or_nothing',
+          trigger: 'scheduled',
+          status: 'done',
+          totalEntries: 1,
+          totalPublishedEntries: 1,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 0,
+        },
+      });
+    });
+
+    it.each([
+      [null, false],
+      [new Date('2030-01-01T00:00:00.000Z'), true],
+    ])(
+      'sends a created release (scheduledAt %s) with its mode',
+      async (scheduledAt, isScheduled) => {
+        const { releaseService, send } = setup({
+          db: {
+            query: () => ({
+              create: jest.fn().mockReturnValue({
+                id: 1,
+                name: 'test',
+                releaseCondition: 'allow_partial',
+                scheduledAt,
+              }),
+            }),
+            inTransaction: () => false,
+          },
+        });
+
+        await releaseService.create(
+          { name: 'test', scheduledAt: null, timezone: null },
+          { user: mockUser }
+        );
+
+        expect(send.mock.calls).toStrictEqual([
+          [
+            'didCreateContentRelease',
+            {
+              eventProperties: {
+                releaseCondition: 'allow_partial',
+                isScheduled,
+                fromSkipped: false,
+              },
+            },
+          ],
+        ]);
+      }
+    );
+
+    it('sends a release created from skipped entries as such', async () => {
+      const created = { id: 2, name: 'March - skipped entries', releaseCondition: 'allow_partial' };
+      const { releaseService, send } = setup({
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            validatePendingReleasesLimit: jest.fn(),
+            validateUniqueNameForPendingRelease: jest.fn(),
+            validateScheduledAtIsLaterThanNow: jest.fn(),
+            prepareSkippedActions: jest.fn().mockResolvedValue([{ id: 1 }]),
+            createPrepared: jest.fn(),
+            set: jest.fn(),
+          }),
+        }),
+        db: {
+          ...baseStrapiMock.db,
+          inTransaction: () => false,
+          query: jest.fn().mockReturnValue({
+            findOne: jest
+              .fn()
+              .mockResolvedValueOnce({
+                id: 1,
+                releasedAt: new Date(),
+                status: 'partial',
+                failureReason: null,
+              })
+              .mockResolvedValueOnce(created),
+            create: jest.fn().mockResolvedValue(created),
+          }),
+        },
+      });
+
+      await releaseService.createFromSkippedEntries(
+        1,
+        { name: 'March - skipped entries', scheduledAt: null, timezone: null },
+        { user: mockUser }
+      );
+
+      expect(send.mock.calls).toStrictEqual([
+        [
+          'didCreateContentRelease',
+          {
+            eventProperties: {
+              releaseCondition: 'allow_partial',
+              isScheduled: false,
+              fromSkipped: true,
+            },
+          },
+        ],
+      ]);
+    });
+
+    const SCHEDULE = new Date('2030-01-01T00:00:00.000Z');
+
+    it.each([
+      ['switches the mode', 'all_or_nothing', null, null, true, false],
+      ['changes nothing tracked', 'allow_partial', null, null, false, false],
+      ['schedules the release', 'allow_partial', null, SCHEDULE, false, true],
+      ['unschedules the release', 'allow_partial', SCHEDULE, null, false, true],
+      ['moves the schedule', 'allow_partial', SCHEDULE, new Date('2031-01-01'), false, false],
+    ] as const)(
+      'sends an update that %s, saying what changed',
+      async (
+        _,
+        releaseCondition,
+        scheduledAt,
+        newScheduledAt,
+        releaseConditionChanged,
+        isScheduledChanged
+      ) => {
+        const { releaseService, send } = setup({
+          db: lockedReleaseDb(
+            {
+              releasedAt: null,
+              id: 1,
+              name: 'March',
+              releaseCondition: 'allow_partial',
+              scheduledAt,
+            },
+            {
+              update: jest.fn().mockResolvedValue({
+                id: 1,
+                name: 'March',
+                releaseCondition,
+                scheduledAt: newScheduledAt,
+              }),
+              updateMany: jest.fn(),
+              count: jest.fn(),
+            }
+          ),
+        });
+
+        await releaseService.update(
+          1,
+          {
+            name: 'March',
+            releaseCondition,
+            scheduledAt: newScheduledAt,
+            timezone: newScheduledAt ? 'Europe/Paris' : null,
+          },
+          { user: mockUser }
+        );
+
+        expect(send).toHaveBeenCalledWith('didUpdateContentRelease', {
+          eventProperties: { releaseConditionChanged, isScheduledChanged },
+        });
+      }
+    );
+  });
 });

@@ -185,7 +185,16 @@ Metrics service: `packages/core/content-manager/server/src/services/metrics.ts`.
 
 ### Content releases
 
-`didCreateContentRelease`, `didUpdateContentRelease`, `didDeleteContentRelease`, `didPublishContentRelease` — `packages/core/content-releases/server/src/services/release.ts`.
+Sent from `packages/core/content-releases/server/src/services/release.ts`. They count every release, whether it runs by hand, on schedule or through the API; the admin sends no release events.
+
+| Event                      | Trigger                                                                       | Properties                                                                                                                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `didCreateContentRelease`  | Release created, from scratch or from a release's skipped entries             | `releaseCondition`, `isScheduled`, `fromSkipped`                                                                                                                                                                                                            |
+| `didUpdateContentRelease`  | Release edited                                                                | `releaseConditionChanged`, `isScheduledChanged`                                                                                                                                                                                                             |
+| `didDeleteContentRelease`  | Release deleted                                                               | none                                                                                                                                                                                                                                                        |
+| `didPublishContentRelease` | Run that ended done, partial or failed, or a release that missed its schedule | `releaseCondition`, `trigger` (`manual`, `scheduled`), `status` (`done`, `partial`, `failed`), `totalEntries`, `totalPublishedEntries`, `totalUnpublishedEntries`, `totalSkippedEntries`, and when failed `failureReason` (`run_failed`, `missed_schedule`) |
+
+A release that missed its schedule is sent by the overdue sweep as `trigger: scheduled` with `failureReason: missed_schedule`. An empty release the sweep freezes as done sends nothing: it published nothing.
 
 ### Review workflows (EE)
 

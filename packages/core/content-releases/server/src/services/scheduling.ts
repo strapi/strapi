@@ -54,12 +54,12 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
     const releaseService = getService('release', { strapi });
 
     if (release.status === 'done') {
-      await releaseService.reportReleasedRun(release);
+      await releaseService.reportReleasedRun(release, { trigger: 'sweep' });
     } else if (release.failureReason === 'missed_schedule') {
       const error = new Error(`Release ${release.name} wasn't released at its scheduled time`);
       error.name = 'MissedSchedule';
 
-      await releaseService.reportFailedRun(release, error);
+      await releaseService.reportFailedRun(release, error, { trigger: 'sweep' });
     }
   };
 
