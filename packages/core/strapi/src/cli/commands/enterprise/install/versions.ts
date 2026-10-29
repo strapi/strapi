@@ -5,6 +5,7 @@ import semver from 'semver';
 import { STRAPI_PACKAGE_NAME } from './constants';
 import { EnterpriseInstallError } from './errors';
 import { listAncestorDirectories } from './directories';
+import { toPrintableText } from './printable-text';
 import type { Packument, PackumentVersion, StrapiPackageMetadata } from './registry';
 
 export interface InstalledPackageJson {
@@ -126,7 +127,7 @@ export const pickTargetVersion = (
       fitsStrapiVersion(packumentVersion, strapiVersion)
     )?.version,
     newestVersion: newest?.version,
-    newestVersionStrapiRange: getStrapiRange(newest),
+    newestVersionStrapiRange: toPrintableText(getStrapiRange(newest)),
   };
 };
 
@@ -162,7 +163,11 @@ export const resolveRequestedVersion = (
     return requestedVersion;
   }
 
-  if (taggedVersion !== undefined && publishedVersions.includes(taggedVersion)) {
+  if (
+    taggedVersion !== undefined &&
+    semver.valid(taggedVersion) === taggedVersion &&
+    publishedVersions.includes(taggedVersion)
+  ) {
     return taggedVersion;
   }
 
@@ -207,7 +212,7 @@ export const findUnsupportedStrapiRange = (
     return undefined;
   }
 
-  return semver.satisfies(strapiVersion, strapiRange) ? undefined : strapiRange;
+  return semver.satisfies(strapiVersion, strapiRange) ? undefined : toPrintableText(strapiRange);
 };
 
 /** A prerelease, such as an experimental build, is usually ahead of the latest stable release. */
