@@ -275,5 +275,28 @@ describe('<EditAssetDialog />', () => {
 
       expect(image).toHaveAttribute('src', 'http://localhost:4000/assets/test.png');
     });
+
+    it('keeps a replacement blob URL unchanged when cropping before save', () => {
+      const file = new File(['Replacement media'], 'test.png', { type: 'image/png' });
+      const fileList = [file] as File[] & { item: (i: number) => File };
+      fileList.item = (i: number) => fileList[i];
+      jest
+        .mocked(URL.createObjectURL)
+        .mockReturnValueOnce('blob:http://localhost:1337/replacement-image');
+
+      renderCompo({
+        canUpdate: true,
+        canCopyLink: false,
+        canDownload: false,
+      });
+
+      fireEvent.change(screen.getByTestId('file-input'), { target: { files: fileList } });
+      fireEvent.click(screen.getByRole('button', { name: 'Crop' }));
+
+      expect(screen.getByRole('img')).toHaveAttribute(
+        'src',
+        'blob:http://localhost:1337/replacement-image'
+      );
+    });
   });
 });
