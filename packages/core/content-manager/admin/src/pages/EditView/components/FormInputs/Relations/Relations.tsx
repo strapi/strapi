@@ -817,7 +817,7 @@ const RelationModalWithContext = ({
             placeholder ||
             formatMessage({
               id: getTranslation('relation.add'),
-              defaultMessage: 'Add relation',
+              defaultMessage: 'Add or create a relation',
             })
           }
           hasMoreItems={hasNextPage}

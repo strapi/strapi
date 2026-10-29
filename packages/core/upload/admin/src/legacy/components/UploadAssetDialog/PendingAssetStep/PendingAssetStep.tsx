@@ -191,7 +191,7 @@ export const PendingAssetStep = ({
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={onClose} variant="tertiary">
-          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
         </Button>
         <Button onClick={handleSubmit} loading={uploadStatus === Status.Uploading}>
           {formatMessage(

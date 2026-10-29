@@ -498,7 +498,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                 {
                   label: formatMessage({
                     id: 'Auth.form.firstname.label',
-                    defaultMessage: 'Firstname',
+                    defaultMessage: 'First name',
                   }),
                   name: 'firstname',
                   required: true,
@@ -508,7 +508,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                 {
                   label: formatMessage({
                     id: 'Auth.form.lastname.label',
-                    defaultMessage: 'Lastname',
+                    defaultMessage: 'Last name',
                   }),
                   name: 'lastname',
                   size: 6,
@@ -570,7 +570,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                         <A target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
                           {formatMessage({
                             id: 'Auth.privacy-policy-agreement.policy',
-                            defaultMessage: 'policy',
+                            defaultMessage: 'privacy policy',
                           })}
                         </A>
                       ),

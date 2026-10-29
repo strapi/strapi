@@ -204,7 +204,7 @@ const AddLogoDialog = () => {
           <Tabs.Trigger value="url">
             {formatMessage({
               id: 'Settings.application.customization.modal.upload.from-url',
-              defaultMessage: 'From url',
+              defaultMessage: 'From URL',
             })}
           </Tabs.Trigger>
         </Tabs.List>

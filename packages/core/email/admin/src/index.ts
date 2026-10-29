@@ -12,12 +12,12 @@ const admin: Plugin.Config.AdminInput = {
     app.addSettingsLink(
       {
         id: 'email',
-        intlLabel: { id: 'email.SettingsNav.section-label', defaultMessage: 'Email Plugin' },
+        intlLabel: { id: 'email.SettingsNav.section-label', defaultMessage: 'Email plugin' },
       },
       {
         intlLabel: {
           id: 'email.Settings.email.plugin.title',
-          defaultMessage: 'Settings',
+          defaultMessage: 'Configuration',
         },
         id: 'settings',
         to: 'email',

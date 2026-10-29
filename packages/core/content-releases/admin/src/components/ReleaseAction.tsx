@@ -148,13 +148,13 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
     variant: 'tertiary',
     label: formatMessage({
       id: 'content-manager-list-view.add-to-release',
-      defaultMessage: 'Add to Release',
+      defaultMessage: 'Add to release',
     }),
     dialog: {
       type: 'modal',
       title: formatMessage({
         id: 'content-manager-list-view.add-to-release',
-        defaultMessage: 'Add to Release',
+        defaultMessage: 'Add to release',
       }),
       content: ({ onClose }) => {
         return (

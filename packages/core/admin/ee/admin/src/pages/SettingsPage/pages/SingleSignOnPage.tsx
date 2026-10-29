@@ -104,7 +104,7 @@ export const SingleSignOnPage = () => {
         type: 'danger',
         message: formatMessage({
           id: 'notification.error',
-          defaultMessage: 'An error occurred, please try again.',
+          defaultMessage: 'An error occurred',
         }),
       });
     }
@@ -116,7 +116,7 @@ export const SingleSignOnPage = () => {
     <>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: 'SSO',
           }

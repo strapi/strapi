@@ -490,7 +490,7 @@ export const AssetsPage = () => {
                             <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
                               {formatMessage({
                                 id: getTranslationKey('import-files'),
-                                defaultMessage: 'File upload',
+                                defaultMessage: 'Import files',
                               })}
                             </MenuItem>
                             <MenuItem
@@ -499,7 +499,7 @@ export const AssetsPage = () => {
                             >
                               {formatMessage({
                                 id: getTranslationKey('import-from-url'),
-                                defaultMessage: 'File upload from URL',
+                                defaultMessage: 'Import from URL',
                               })}
                             </MenuItem>
                           </SimpleMenu>

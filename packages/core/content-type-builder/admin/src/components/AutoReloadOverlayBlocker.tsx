@@ -157,7 +157,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) =>
             <Link href="https://docs.strapi.io" isExternal>
               {formatMessage({
                 id: 'global.documentation',
-                defaultMessage: 'Read the documentation',
+                defaultMessage: 'Documentation',
               })}
             </Link>
           </Box>

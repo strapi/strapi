@@ -193,7 +193,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                       <Typography variant="beta" tag="h2">
                         {formatMessage({
                           id: 'global.roles',
-                          defaultMessage: "User's role",
+                          defaultMessage: 'Roles',
                         })}
                       </Typography>
                       <Box paddingTop={4}>

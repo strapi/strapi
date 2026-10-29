@@ -15,6 +15,8 @@ import {
 } from '../patterns';
 import { fixLocaleFiles, validateBundle } from '../validate';
 import { backfillMissingEnKeys } from '../backfill-en';
+import { writeEnJsonForBundle } from '../write-en';
+import { alignDefaultMessagesForBundle } from '../align-defaults';
 import type { TranslationBundle } from '../types';
 
 describe('pluginPrefixFromPackageName', () => {
@@ -466,6 +468,116 @@ describe('validateLocaleFile order vs orphans', () => {
 
     assert.ok(codes.includes('extra-locale-key'));
     assert.ok(codes.includes('locale-key-order'));
+  });
+});
+
+describe('writeEnJsonForBundle', () => {
+  it('adds missing keys and preserves existing en.json by default', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-write-en-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'plugin.name': 'Upload' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `
+        formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });
+        formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });
+        formatMessage({ id: getTrad('new.key'), defaultMessage: 'New' });
+      `
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const result = writeEnJsonForBundle(bundle, new Set());
+
+    assert.equal(result.changed, true);
+    assert.deepEqual(readJsonRecord(bundle.enJsonPath), {
+      'plugin.name': 'Upload',
+      'new.key': 'New',
+    });
+  });
+
+  it('overwrites existing en.json when syncExisting is set', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-write-en-sync-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'plugin.name': 'Upload' }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(srcDir, 'Widget.tsx'),
+      `formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });`
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const result = writeEnJsonForBundle(bundle, new Set(), { syncExisting: true });
+
+    assert.equal(result.changed, true);
+    assert.equal(readJsonRecord(bundle.enJsonPath)['plugin.name'], 'Media Library');
+  });
+});
+
+describe('alignDefaultMessagesForBundle', () => {
+  it('rewrites no-substitution template defaultMessages to the catalog', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-trad-align-tpl-'));
+    const srcDir = path.join(dir, 'admin', 'src');
+    const sourcePath = path.join(srcDir, 'Widget.tsx');
+    fs.mkdirSync(srcDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'en.json'),
+      `${JSON.stringify({ 'input.notification.not-supported': "You can't upload this type of file." }, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      sourcePath,
+      [
+        'formatMessage({',
+        "  id: getTrad('input.notification.not-supported'),",
+        "  defaultMessage: `You can't upload this type of file, only the following types are accepted – {fileTypes}`,",
+        '});',
+        '',
+      ].join('\n')
+    );
+
+    const bundle: TranslationBundle = {
+      packagePath: dir,
+      packageName: 'core/upload',
+      enJsonPath: path.join(dir, 'en.json'),
+      translationsDir: dir,
+      pluginPrefix: 'upload',
+      sourceDirs: [srcDir],
+    };
+
+    const changed = alignDefaultMessagesForBundle(
+      bundle,
+      readJsonRecord(bundle.enJsonPath),
+      new Set(),
+      { target: 'self' }
+    );
+
+    assert.equal(changed, 1);
+    assert.match(
+      fs.readFileSync(sourcePath, 'utf8'),
+      /defaultMessage: 'You can\\'t upload this type of file\.'/
+    );
   });
 });
 

@@ -62,7 +62,7 @@ export const contentTypeForm = {
                 description: {
                   id: getTrad('contentType.apiId-singular.description'),
                   defaultMessage:
-                    'Used to generate the API routes and databases tables/collections',
+                    'The UID is used to generate the API routes and databases tables/collections',
                 },
                 intlLabel: {
                   id: getTrad('contentType.apiId-singular.label'),
@@ -101,7 +101,7 @@ export const contentTypeForm = {
                 description: {
                   id: getTrad('contentType.apiId-singular.description'),
                   defaultMessage:
-                    'Used to generate the API routes and databases tables/collections',
+                    'The UID is used to generate the API routes and databases tables/collections',
                 },
                 intlLabel: {
                   id: getTrad('contentType.apiId-singular.label'),

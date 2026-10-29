@@ -21,7 +21,7 @@ const getContentIntlMessage = ({
   if (isFiltering) {
     return {
       id: 'list.assets-empty.title-withSearch',
-      defaultMessage: 'There are no elements with the applied filters',
+      defaultMessage: 'There are no assets with the applied filters',
     };
   }
 
@@ -35,13 +35,13 @@ const getContentIntlMessage = ({
 
     return {
       id: 'list.assets.empty',
-      defaultMessage: 'Media Library is empty',
+      defaultMessage: 'Upload your first assets...',
     };
   }
 
   return {
     id: 'header.actions.no-permissions',
-    defaultMessage: 'No permissions to view',
+    defaultMessage: 'The asset list is empty',
   };
 };
 

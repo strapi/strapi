@@ -28,7 +28,7 @@ const App = () => {
   const { formatMessage } = useIntl();
   const title = formatMessage({
     id: `${pluginId}.plugin.name`,
-    defaultMessage: 'Content Types Builder',
+    defaultMessage: 'Content-Type Builder',
   });
 
   const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);

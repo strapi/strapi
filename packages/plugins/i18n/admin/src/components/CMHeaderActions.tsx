@@ -276,7 +276,7 @@ const LocalePickerAction = ({
                   <Typography variant="sigma">
                     {formatMessage({
                       id: getTranslation('CMEditViewLocalePicker.locale.ai-translations'),
-                      defaultMessage: 'AI Translations',
+                      defaultMessage: 'AI Translations:',
                     })}
                   </Typography>
                 </Box>
@@ -673,7 +673,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
           <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: getTranslation('actions.delete.dialog.body'),
-              defaultMessage: 'Are you sure?',
+              defaultMessage: 'Are you sure you want to delete this locale?',
             })}
           </Typography>
         </Flex>

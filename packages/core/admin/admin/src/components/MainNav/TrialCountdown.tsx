@@ -95,11 +95,11 @@ const TrialCountdown = () => {
           isTargetDateInPast
             ? {
                 id: 'app.components.LeftMenu.trialCountdown.endedAt',
-                defaultMessage: 'Your trial ended on {date}',
+                defaultMessage: 'Your trial ended on {date}.',
               }
             : {
                 id: 'app.components.LeftMenu.trialCountdown.endsAt',
-                defaultMessage: 'Your trial ends on {date}',
+                defaultMessage: 'Your trial ends on {date}.',
               },
           {
             date: format(new Date(timeLeftData.data.trialEndsAt), 'PPP'),

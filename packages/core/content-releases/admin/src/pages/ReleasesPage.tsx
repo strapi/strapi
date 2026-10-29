@@ -261,7 +261,7 @@ const ReleasesPage = () => {
         type: 'success',
         message: formatMessage({
           id: 'content-releases.modal.release-created-notification-success',
-          defaultMessage: 'Release created.',
+          defaultMessage: 'Release created',
         }),
       });
 
@@ -312,7 +312,7 @@ const ReleasesPage = () => {
               >
                 {formatMessage({
                   id: 'content-releases.header.actions.add-release',
-                  defaultMessage: 'New release',
+                  defaultMessage: 'New Release',
                 })}
               </Button>
             ) : null

@@ -23,7 +23,7 @@ const Banner = ({
       onDismiss={onDismiss}
       closeLabel={formatMessage({
         id: 'app.components.MediaLibraryBanner.close',
-        defaultMessage: 'Close',
+        defaultMessage: 'Close the banner.',
       })}
       message={
         <>

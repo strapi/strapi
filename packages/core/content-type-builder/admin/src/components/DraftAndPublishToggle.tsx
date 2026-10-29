@@ -87,7 +87,7 @@ export const DraftAndPublishToggle = ({
         >
           {formatMessage({
             id: getTrad('popUpWarning.draft-publish.message'),
-            defaultMessage: 'If you disable the draft & publish, your drafts will be deleted.',
+            defaultMessage: 'If you disable the Draft & publish, your drafts will be deleted.',
           })}
         </ConfirmDialog>
       </Dialog.Root>

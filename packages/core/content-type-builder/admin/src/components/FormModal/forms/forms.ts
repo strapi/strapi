@@ -118,7 +118,7 @@ export const forms = {
                 type: 'condition-form',
                 intlLabel: {
                   id: 'form.attribute.condition.label',
-                  defaultMessage: 'Visibility condition',
+                  defaultMessage: 'Conditions',
                 },
                 description: {
                   id: 'form.attribute.condition.desc',

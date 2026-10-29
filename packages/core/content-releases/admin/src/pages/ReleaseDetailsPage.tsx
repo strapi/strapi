@@ -789,7 +789,7 @@ const ReleaseDetailsPage = () => {
         type: 'success',
         message: formatMessage({
           id: 'content-releases.modal.release-updated-notification-success',
-          defaultMessage: 'Release updated.',
+          defaultMessage: 'Release updated',
         }),
       });
       toggleEditReleaseModal();

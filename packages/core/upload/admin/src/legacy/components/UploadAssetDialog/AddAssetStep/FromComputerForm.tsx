@@ -149,7 +149,7 @@ export const FromComputerForm = ({
         <Button onClick={onClose} variant="tertiary">
           {formatMessage({
             id: 'app.components.Button.cancel',
-            defaultMessage: 'cancel',
+            defaultMessage: 'Cancel',
           })}
         </Button>
       </Modal.Footer>

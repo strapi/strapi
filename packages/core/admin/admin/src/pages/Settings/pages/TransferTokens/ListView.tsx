@@ -144,7 +144,7 @@ const ListView = () => {
     <>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: 'Transfer Tokens',
           }
@@ -157,7 +157,7 @@ const ListView = () => {
         })}
         subtitle={formatMessage({
           id: 'Settings.transferTokens.description',
-          defaultMessage: '"List of generated transfer tokens"', // TODO change this message
+          defaultMessage: 'List of generated transfer tokens', // TODO change this message
         })}
         primaryAction={
           canCreate ? (

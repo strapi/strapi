@@ -55,7 +55,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
         type: 'danger',
         message: formatMessage({
           id: 'notification.error',
-          defaultMessage: 'Something went wrong',
+          defaultMessage: 'An error occurred',
         }),
       });
     } finally {

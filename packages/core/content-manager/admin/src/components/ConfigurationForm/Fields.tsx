@@ -493,7 +493,7 @@ const Fields = ({
           <Typography fontWeight="bold">
             {formatMessage({
               id: getTranslation('containers.list.displayedFields'),
-              defaultMessage: 'Displayed fields',
+              defaultMessage: 'Displayed Fields',
             })}
           </Typography>
           <Typography variant="pi" textColor="neutral600">

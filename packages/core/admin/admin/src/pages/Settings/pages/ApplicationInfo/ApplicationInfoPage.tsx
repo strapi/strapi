@@ -81,7 +81,7 @@ const ApplicationInfoPage = () => {
     <>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: formatMessage({
               id: 'Settings.application.header',
@@ -135,7 +135,7 @@ const ApplicationInfoPage = () => {
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.strapiVersion',
-                        defaultMessage: 'strapi version',
+                        defaultMessage: 'Strapi version',
                       })}
                     </Typography>
                     <Flex gap={3} direction="column" alignItems="start" tag="dd">

@@ -13,8 +13,13 @@ const pickDefaultMessage = (extraction: MessageExtraction, existing: Map<string,
   if (
     extraction.kind === 'schema-driven' ||
     extraction.kind === 'error-passthrough' ||
+    extraction.kind === 'finite-enum' ||
     extraction.defaultMessage == null
   ) {
+    return;
+  }
+
+  if (extraction.expandedJsonKeys && extraction.expandedJsonKeys.length > 1) {
     return;
   }
 
@@ -24,12 +29,6 @@ const pickDefaultMessage = (extraction: MessageExtraction, existing: Map<string,
     for (const branch of extraction.messageId.split('|')) {
       if (branch && !branch.includes('${')) {
         keys.push(branch);
-      }
-    }
-  } else if (extraction.expandedJsonKeys?.length) {
-    for (const key of extraction.expandedJsonKeys) {
-      if (key && !key.includes('${')) {
-        keys.push(key);
       }
     }
   } else if (extraction.jsonKey && !extraction.jsonKey.includes('${')) {

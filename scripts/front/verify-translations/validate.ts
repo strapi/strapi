@@ -85,7 +85,7 @@ const validateExtractions = (
 
         if (normalizedDefault !== normalizedEn) {
           issues.push({
-            severity: 'warning',
+            severity: 'error',
             bundle: bundle.packageName,
             code: 'default-message-drift',
             message: `defaultMessage for "${jsonKey}" does not match en.json.\n  code: ${extraction.defaultMessage}\n  en.json: ${enValue}`,
@@ -134,7 +134,7 @@ const validateCrossPackageAdminKeys = (
 
           if (normalizedDefault !== normalizedEn) {
             issues.push({
-              severity: 'warning',
+              severity: 'error',
               bundle: bundle.packageName,
               code: 'default-message-drift',
               message: `defaultMessage for admin key "${branch}" does not match core/admin en.json.\n  code: ${extraction.defaultMessage}\n  en.json: ${enValue}`,

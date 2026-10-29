@@ -42,7 +42,7 @@ const TriggerContainer = ({ isPending, onCancel, response }: TriggerContainerPro
                   <Typography textColor="neutral400">
                     {formatMessage({
                       id: 'Settings.webhooks.trigger.cancel',
-                      defaultMessage: 'cancel',
+                      defaultMessage: 'Cancel trigger',
                     })}
                   </Typography>
                   <Cross fill="neutral400" height="1.2rem" width="1.2rem" />
@@ -73,7 +73,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
       <Flex gap={2} alignItems="center">
         <Loader height="1.2rem" width="1.2rem" />
         <Typography>
-          {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'pending' })}
+          {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'Pending…' })}
         </Typography>
       </Flex>
     );
@@ -84,7 +84,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
       <Flex gap={2} alignItems="center">
         <Check fill="success700" height="1.2rem" width="1.2rem" />
         <Typography>
-          {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'success' })}
+          {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'Success!' })}
         </Typography>
       </Flex>
     );
@@ -95,7 +95,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
       <Flex gap={2} alignItems="center">
         <Cross fill="danger700" height="1.2rem" width="1.2rem" />
         <Typography>
-          {formatMessage({ id: 'Settings.error', defaultMessage: 'error' })} {statusCode}
+          {formatMessage({ id: 'Settings.error', defaultMessage: 'Error' })} {statusCode}
         </Typography>
       </Flex>
     );

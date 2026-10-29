@@ -276,7 +276,7 @@ export const EditView = () => {
         type: 'danger',
         message: formatMessage({
           id: 'notification.error',
-          defaultMessage: 'Something went wrong',
+          defaultMessage: 'An error occurred',
         }),
       });
     }
@@ -343,7 +343,7 @@ export const EditView = () => {
       <Page.Main>
         <Page.Title>
           {formatMessage(
-            { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+            { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
             { name: 'API Tokens' }
           )}
         </Page.Title>

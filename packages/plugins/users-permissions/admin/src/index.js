@@ -54,7 +54,7 @@ export default {
         {
           intlLabel: {
             id: getTrad('HeaderNav.link.advancedSettings'),
-            defaultMessage: 'Advanced Settings',
+            defaultMessage: 'Advanced settings',
           },
           id: 'advanced-settings',
           to: `users-permissions/advanced-settings`,

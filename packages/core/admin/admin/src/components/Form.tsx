@@ -913,7 +913,8 @@ const Blocker = ({
           >
             {formatMessage({
               id: 'global.prompt.unsaved',
-              defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+              defaultMessage:
+                'Are you sure you want to leave this page? All your modifications will be lost.',
             })}
           </Dialog.Body>
           <Dialog.Footer>

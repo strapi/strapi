@@ -114,7 +114,7 @@ const AdvancedSettingsPage = () => {
           {
             name: formatMessage({
               id: getTrad('HeaderNav.link.advancedSettings'),
-              defaultMessage: 'Advanced Settings',
+              defaultMessage: 'Advanced settings',
             }),
           }
         )}

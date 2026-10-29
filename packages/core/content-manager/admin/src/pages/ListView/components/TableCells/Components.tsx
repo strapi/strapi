@@ -50,7 +50,7 @@ const RepeatableComponent = ({ content, mainField }: RepeatableComponentProps) =
         {formatMessage(
           {
             id: 'content-manager.containers.list.items',
-            defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
+            defaultMessage: '{number} {number, plural, =0 {items} one {item} other {items}}',
           },
           { number: content.length }
         )}

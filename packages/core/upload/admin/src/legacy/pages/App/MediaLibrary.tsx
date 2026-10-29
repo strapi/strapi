@@ -270,7 +270,7 @@ export const MediaLibrary = () => {
                   <Checkbox
                     aria-label={formatMessage({
                       id: getTrad('bulk.select.label'),
-                      defaultMessage: 'Select all folders & assets',
+                      defaultMessage: 'Select all assets',
                     })}
                     checked={
                       indeterminateBulkSelect

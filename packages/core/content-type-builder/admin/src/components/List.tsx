@@ -263,7 +263,7 @@ export const List = ({
         >
           {formatMessage({
             id: getTrad(`form.button.add.field.to.component`),
-            defaultMessage: 'Add another field',
+            defaultMessage: 'Add another field to this component',
           })}
         </NestedTFooter>
       )}

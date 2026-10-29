@@ -11,7 +11,7 @@ const NoPermissions = () => {
       <Layouts.Header
         title={formatMessage({
           id: getTranslation('header.name'),
-          defaultMessage: 'Content',
+          defaultMessage: 'Content Manager',
         })}
       />
       <Layouts.Content>

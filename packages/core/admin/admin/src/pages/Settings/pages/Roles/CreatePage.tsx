@@ -152,7 +152,7 @@ const CreatePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: formatMessage({ id: 'Settings.roles.created', defaultMessage: 'created' }),
+        message: formatMessage({ id: 'Settings.roles.created', defaultMessage: 'Role created' }),
       });
 
       navigate(`../roles/${res.data.id.toString()}`, { replace: true });
@@ -172,7 +172,7 @@ const CreatePage = () => {
     <Main>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: 'Roles',
           }

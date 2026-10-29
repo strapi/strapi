@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, navigationAction, prim
     <>
       <Page.Title>
         {formatMessage(
-          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings — {name}' },
           {
             name: title,
           }

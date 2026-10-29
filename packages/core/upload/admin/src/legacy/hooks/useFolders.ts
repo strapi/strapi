@@ -84,7 +84,7 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
       notifyStatus(
         formatMessage({
           id: 'list.asset.at.finished',
-          defaultMessage: 'The folders have finished loading.',
+          defaultMessage: 'The assets have finished loading.',
         })
       );
     }
