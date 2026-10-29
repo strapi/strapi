@@ -287,6 +287,32 @@ const exists = async (params = {}) => {
 };
 
 /**
+ * Maps each folder `path` (made of `pathId`s, e.g. `/1/4/7`) to the same path made of
+ * folder names (e.g. `/Clients/Acme/2026`), with a single query for all the ancestors.
+ */
+const getNamePaths = async (paths: string[]): Promise<Record<string, string>> => {
+  const segmentsByPath = paths.map((path) => path.split('/').filter(Boolean));
+  const pathIds = [...new Set(segmentsByPath.flat())].map(Number);
+
+  if (pathIds.length === 0) {
+    return {};
+  }
+
+  const ancestors: Pick<Folder, 'pathId' | 'name'>[] = await strapi.db
+    .query(FOLDER_MODEL_UID)
+    .findMany({ select: ['pathId', 'name'], where: { pathId: { $in: pathIds } } });
+
+  const nameByPathId = new Map(ancestors.map(({ pathId, name }) => [String(pathId), name]));
+
+  return Object.fromEntries(
+    paths.map((path, index) => [
+      path,
+      `/${segmentsByPath[index].map((pathId) => nameByPathId.get(pathId) ?? '').join('/')}`,
+    ])
+  );
+};
+
+/**
  * Returns the nested structure of folders
  * @returns {Promise<array>}
  */
@@ -336,4 +362,5 @@ export default {
   update,
   setPathIdAndPath,
   getStructure,
+  getNamePaths,
 };
