@@ -82,6 +82,57 @@ export interface Http {
   [key: string]: unknown;
 }
 
+export interface ServerPerformance {
+  /**
+   * When true, assigns a per-request id, aggregates DB query timings, and emits
+   * `performance.request.summary` on the event hub when the HTTP response finishes.
+   * See contributor docs: performance hub events.
+   */
+  requestTrackingEnabled?: boolean;
+  /**
+   * Requests slower than this (ms) always emit hub timeline events (`start`/`summary`/`stage`),
+   * even when `requestSampleRate` would skip them.
+   */
+  slowRequestMs?: number;
+  /**
+   * Probability in `[0, 1]` that a request emits hub timeline events (when tracking is enabled).
+   * Always combined with {@link slowRequestMs}: slow requests are never dropped from summaries.
+   */
+  requestSampleRate?: number;
+  /**
+   * When true with request tracking, records route-handler pipeline stage durations (`auth`, `policy`,
+   * `middleware`, `controller`) and emits `performance.request.stage` with the summary batch.
+   */
+  emitStageEvents?: boolean;
+}
+
+export interface ServerObservabilityMetrics {
+  /**
+   * When true, records request, slow-query, and phase histograms/counters on the global
+   * `@opentelemetry/api` meter. The app must register its own `MeterProvider` and exporter
+   * before Strapi starts; otherwise the API no-ops. Independent of
+   * {@link ServerObservabilityTracing.enabled}.
+   */
+  enabled?: boolean;
+}
+
+export interface ServerObservabilityTracing {
+  /**
+   * Enables OpenTelemetry spans in core (HTTP server, Knex queries, startup phases) through
+   * `@opentelemetry/api`. Strapi does not register a tracer provider, sampler, propagator, or
+   * exporter: the app owns the SDK. Distinct from Strapi product telemetry and from
+   * `database.performance` query logging.
+   */
+  enabled?: boolean;
+  /** When false, omit `strapi.http.route.*` stage spans (auth, policy, middleware, controller). */
+  recordRouteHandlerStages?: boolean;
+}
+
+export interface ServerObservability {
+  tracing?: ServerObservabilityTracing;
+  metrics?: ServerObservabilityMetrics;
+}
+
 export interface McpConfig {
   enabled?: boolean;
   /** Maximum time (ms) to wait for the MCP transport connection. Defaults to 5 000. */
@@ -120,5 +171,7 @@ export interface Server {
   openapi?: OpenAPI;
   webhooks?: Webhooks;
   http?: Http;
+  performance?: ServerPerformance;
+  observability?: ServerObservability;
   mcp?: McpConfig;
 }

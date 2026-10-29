@@ -193,6 +193,26 @@ describe('Event Hub', () => {
     await eventHub.emit('my-event');
     expect(fn).toHaveBeenCalledTimes(1);
   });
+
+  it('rejects when a hub subscriber throws', async () => {
+    const { emit, subscribe } = createEventHub();
+
+    subscribe(async () => {
+      throw new Error('subscriber boom');
+    });
+
+    await expect(emit('e')).rejects.toThrow('subscriber boom');
+  });
+
+  it('rejects when an on() listener throws', async () => {
+    const { emit, on } = createEventHub();
+
+    on('e', async () => {
+      throw new Error('listener boom');
+    });
+
+    await expect(emit('e')).rejects.toThrow('listener boom');
+  });
 });
 
 describe('Event Hub hasListeners', () => {

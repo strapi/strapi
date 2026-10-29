@@ -4,6 +4,29 @@
 
 > **Location:** this directory stays at `examples/complex` (Yarn workspace name `complex`) for historical reasons. It is **test infrastructure**, not a casual demo like `getstarted`. Test orchestration lives in [`tests/migration/`](../../tests/migration/README.md). **Future:** we may relocate the app under `tests/migration/` (e.g. `tests/migration/fixture/`) so ownership and CI path filters are clearer; until then, treat changes here as changes to the migration-test contract.
 
+## Built-in performance monitoring (demo)
+
+`config/database.ts` enables SQL slow/error instrumentation (`performance.db.*` on `eventHub`, structured warns, JSON Lines append to `.tmp/performance-events.jsonl` under the app directory). `config/server.ts` enables per-request summaries (`performance.request.summary`). Together they populate the **admin Home → HTTP performance (window)** and **Slow routes & SQL** widgets (super admin) when you run this app. `src/index.ts` mirrors summaries to **`strapi.log.debug`** only when the request did DB work (`dbQueryCount` or `slowQueryCount` above zero). `config/server.ts` sets **`STRAPI_APP_LOG_LEVEL`** (default **`debug`**) so those lines appear; set to `info` when you want quieter runs. Other env vars: `DATABASE_PERF_SLOW_MS` (default **5** ms in this example so slow-query events show up on a fast local DB; raise for quieter, production-like sampling), `DATABASE_PERF_CAPTURE_SQL`, `SERVER_PERF_REQUEST_TRACKING`, `SERVER_PERF_REQUEST_SAMPLE_RATE`, `SERVER_PERF_SLOW_REQUEST_MS`.
+
+### OpenTelemetry
+
+`config/server.ts` turns on Strapi's OpenTelemetry instrumentation (`server.observability.tracing` and `server.observability.metrics`) when `STRAPI_OTEL_ENABLED` is true (default **false**). Strapi only calls `@opentelemetry/api`; it never registers an SDK or exporter. To send data, preload an SDK in the Strapi process with `NODE_OPTIONS="--require ./otel.js"`.
+
+**Run order:** start the local collector + Jaeger stack, then Strapi with the SDK preloaded. Full steps, a sample `otel.js`, the Jaeger URL, and how to read traces vs metrics are in **[`examples/otel-local/README.md`](../otel-local/README.md)** — that file is the single “how to use OTel here” guide; this section only describes how **this** example is wired.
+
+### REST API smoke seed
+
+`yarn seed:rest` starts Strapi on an ephemeral localhost port, grants **Public** Content API **find** / **findOne** / **create** on every collection type listed in **`scripts/rest-stress-targets.json`** (all eight complex APIs: `basics`, `basic-dps`, i18n + draft types, `relations`, `hc-m2m-*`, …), then smoke-tests **`POST` / `GET` / `GET :id`** on **`/api/basics`** only. Same database requirements as `yarn seed:v5`. Optional: `SEED_REST_PORT` to pin the HTTP port instead of `0` (random).
+
+### REST API stress (telemetry / load smoke)
+
+With Strapi **already running** (e.g. `yarn develop:postgres`) and the collector up if you preload an OpenTelemetry SDK:
+
+1. Run **`yarn seed:rest`** once against this DB (grants Public permissions for all types in **`rest-stress-targets.json`**).
+2. From `examples/complex`: **`yarn stress:rest`** — same rotation as below, and **includes `--writes` by default** so Jaeger shows **POST** / **PUT** as well as **GET** (telemetry-friendly). Use **`yarn stress:rest:reads`** for **GET-only** (list + findOne; draft/publish uses **`status`**; i18n uses **`locale`** from the JSON or **`STRESS_REST_LOCALE`** / **`--locale`**).
+
+Defaults: `http://127.0.0.1:1337/api`, **300** requests, **15** concurrent per batch. Options and env vars: **`scripts/stress-rest-api.js`**. With writes (default `yarn stress:rest`), each index follows a **12-request cycle**: **POST** (create with generated scalars), **PUT** (partial update), extra **GET** lists, then **GET** findOne. Requires Public **create** and **update** (run **`yarn seed:rest`** once if you see 403 on writes).
+
 ## Content Types
 
 The project includes 8 content types covering the feature space v4→v5 migrations touch.
@@ -21,7 +44,7 @@ The project includes 8 content types covering the feature space v4→v5 migratio
 
 Intentionally unrealistic; each targets a specific migration code path.
 
-- `hc-m2m-source` / `hc-m2m-target` — high-cardinality many-to-many. At `--multiplier 100` produces ~2K sources × ~2K targets × 10 fanout = 20K+ join rows, crossing the 1000-row chunk boundary in `copyRelationTableRows`.
+- `hc-m2m-source` / `hc-m2m-target` — high-cardinality many-to-many. At `--multiplier 100` produces ~2K sources × ~2K targets × 10 fanout = 20K+ join rows, crossing the 1000-row chunk boundary in `copyRelationTableRows`. **REST** uses the same `createCoreRouter` / controller / service pattern as other collection types so `yarn stress:rest` can hit `/api/hc-m2m-sources` and `/api/hc-m2m-targets`.
 
 ## Supported databases
 

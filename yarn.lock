@@ -6108,7 +6108,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.9.0":
+"@opentelemetry/api@npm:1.9.1, @opentelemetry/api@npm:^1.9.0":
   version: 1.9.1
   resolution: "@opentelemetry/api@npm:1.9.1"
   checksum: 10c0/c608485fc8b5a91e1f7e05e843b45b509307456b31cd2ad365933d90813e40ebfedf179f1451c762037e82d7c76aa8500e95d2da3609f640a1206cde5322cd14
@@ -9854,6 +9854,7 @@ __metadata:
     "@modelcontextprotocol/client": "npm:2.3.1"
     "@modelcontextprotocol/node": "npm:2.1.1"
     "@modelcontextprotocol/server": "npm:2.3.1"
+    "@opentelemetry/api": "npm:1.9.1"
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/admin": "npm:5.60.0"
     "@strapi/database": "npm:5.60.0"
@@ -10921,6 +10922,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
+    "@opentelemetry/api": "npm:1.9.1"
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
     "@types/jest": "npm:29.5.2"

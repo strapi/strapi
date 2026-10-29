@@ -7,6 +7,7 @@ import { transformResponse } from './transform';
 import { createSingleTypeController } from './single-type';
 import { createCollectionTypeController } from './collection-type';
 import requestCtx from '../../services/request-context';
+import { withContentApiSpan } from '../../services/observability/opentelemetry-tracing';
 
 const isSingleType = (
   contentType: Struct.ContentTypeSchema
@@ -38,6 +39,9 @@ function createController({
 }) {
   // TODO: replace with Base class + SingleType and CollectionType classes
 
+  const contentApiSpanAttrs = (): { 'strapi.content_type.uid'?: string } =>
+    typeof contentType.uid === 'string' ? { 'strapi.content_type.uid': contentType.uid } : {};
+
   const proto: Core.CoreAPI.Controller.Base = {
     transformResponse(data, meta) {
       const ctx = requestCtx.get();
@@ -51,23 +55,50 @@ function createController({
     async sanitizeOutput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
-      return strapi.contentAPI.sanitize.output(data, contentType, { auth });
+      return withContentApiSpan(
+        strapi as Core.Strapi,
+        'strapi.content-api.sanitize.output',
+        contentApiSpanAttrs(),
+        async () => strapi.contentAPI.sanitize.output(data, contentType, { auth })
+      );
     },
 
     async sanitizeInput(data, ctx) {
-      return strapi.contentAPI.sanitize.input(data, contentType, getContentAPIOptions(ctx));
+      return withContentApiSpan(
+        strapi as Core.Strapi,
+        'strapi.content-api.sanitize.input',
+        contentApiSpanAttrs(),
+        async () => strapi.contentAPI.sanitize.input(data, contentType, getContentAPIOptions(ctx))
+      );
     },
 
     async sanitizeQuery(ctx) {
-      return strapi.contentAPI.sanitize.query(ctx.query, contentType, getContentAPIOptions(ctx));
+      return withContentApiSpan(
+        strapi as Core.Strapi,
+        'strapi.content-api.sanitize.query',
+        contentApiSpanAttrs(),
+        async () =>
+          strapi.contentAPI.sanitize.query(ctx.query, contentType, getContentAPIOptions(ctx))
+      );
     },
 
     async validateQuery(ctx) {
-      return strapi.contentAPI.validate.query(ctx.query, contentType, getContentAPIOptions(ctx));
+      return withContentApiSpan(
+        strapi as Core.Strapi,
+        'strapi.content-api.validate.query',
+        contentApiSpanAttrs(),
+        async () =>
+          strapi.contentAPI.validate.query(ctx.query, contentType, getContentAPIOptions(ctx))
+      );
     },
 
     async validateInput(data, ctx) {
-      return strapi.contentAPI.validate.input(data, contentType, getContentAPIOptions(ctx));
+      return withContentApiSpan(
+        strapi as Core.Strapi,
+        'strapi.content-api.validate.input',
+        contentApiSpanAttrs(),
+        async () => strapi.contentAPI.validate.input(data, contentType, getContentAPIOptions(ctx))
+      );
     },
   };
 

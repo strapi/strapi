@@ -444,13 +444,17 @@ const createQueryBuilder = (
       const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
+      db.mergeKnexQueryContext(nestedSubQuery);
+
       const qb = db.getConnection(tableName);
 
-      if (originalType === 'update') {
-        return qb.update(state.data).whereIn('id', nestedSubQuery);
-      }
+      const outer =
+        originalType === 'update'
+          ? qb.update(state.data).whereIn('id', nestedSubQuery)
+          : qb.delete().whereIn('id', nestedSubQuery);
+      db.mergeKnexQueryContext(outer);
 
-      return qb.delete().whereIn('id', nestedSubQuery);
+      return outer;
     },
 
     processState() {
@@ -742,6 +746,8 @@ const createQueryBuilder = (
         // (e.g. `status` sort). See helpers.toKnexOrderByDescriptor / buildStatusSortExpression.
         qb.orderBy(knexOrderBy as never);
       }
+
+      db.mergeKnexQueryContext(qb);
 
       if (this.shouldUseDeepSort()) {
         return helpers.wrapWithDeepSort(qb, { qb: this, db, uid });
