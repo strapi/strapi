@@ -574,10 +574,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
-        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
-          ...queryParams.data,
+        const mergedData = await copyNonLocalizedFields(
+          contentType,
           documentId,
-        });
+          {
+            ...queryParams.data,
+            documentId,
+          },
+          { status: 'draft' }
+        );
 
         updatedDraft = await entries.create({
           ...queryParams,
@@ -672,7 +677,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       addFirstPublishedAtToDraft(draft, entries.update, contentType)
     );
 
-    // Transform draft entry data and create published versions
+    // The locale being published is the source of truth for its shared fields,
+    // including the first publish of a locale that has never been live. Copying
+    // an already-published sibling here would drop edits made on this draft.
+    // The i18n middleware then syncs the published values to other locales the
+    // same way it does when republishing a locale that was already live.
     const publishedEntries = await async.map(updatedDraft, (draft: any) =>
       entries.publish(draft, queryParams)
     );
