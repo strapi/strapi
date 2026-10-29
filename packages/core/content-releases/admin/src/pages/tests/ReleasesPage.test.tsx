@@ -100,7 +100,7 @@ describe('Releases home page', () => {
     expect(screen.queryByRole('combobox', { name: /entries per page/i })).not.toBeInTheDocument();
   });
 
-  it('requests pending and done releases together, most recently updated first', async () => {
+  it('requests pending and done releases together, soonest scheduled first', async () => {
     let requestParams: URLSearchParams | undefined;
     server.use(
       http.get('/content-releases', ({ request }) => {
@@ -114,7 +114,7 @@ describe('Releases home page', () => {
     expect(await screen.findByRole('link', { name: 'Holiday newsletter' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Summer campaign' })).toBeInTheDocument();
     expect(screen.getByText('6 releases')).toBeInTheDocument();
-    expect(requestParams?.get('sort')).toBe('updatedAt:desc');
+    expect(requestParams?.get('sort')).toBe('scheduledAt:asc');
     // No releasedAt filter: pending and done releases come back together
     expect([...(requestParams?.keys() ?? [])].filter((key) => key.startsWith('filters'))).toEqual(
       []
@@ -207,9 +207,58 @@ describe('Releases home page', () => {
     const [missed, preUpgrade, unscheduled] = screen.getAllByRole('row').slice(1);
 
     expect(within(missed).getByText(/Sep 1, 2026 • 09:00 UTC/)).toBeInTheDocument();
+    expect(missed).toHaveTextContent(/Was due \S/);
     expect(within(preUpgrade).getByText(/Aug 20, 2026 • 10:00 UTC/)).toBeInTheDocument();
+    expect(preUpgrade).toHaveTextContent(/Was due \S/);
     expect(within(unscheduled).getByText('Not scheduled')).toBeInTheDocument();
     expect(screen.queryByText(/Sep 3, 2026/)).not.toBeInTheDocument();
+  });
+
+  it('words the schedule by whether it is to come, ran, or passed without a run', async () => {
+    const [base] = mockReleasesPageData.releasesByStatus.data;
+    const DAY = 24 * 60 * 60 * 1000;
+    server.use(
+      http.get('/content-releases', () =>
+        HttpResponse.json({
+          ...mockReleasesPageData.releasesByStatus,
+          data: [
+            {
+              ...base,
+              id: 1,
+              name: 'Upcoming',
+              status: 'ready',
+              scheduledAt: new Date(Date.now() + 3 * DAY).toISOString(),
+            },
+            {
+              ...base,
+              id: 2,
+              name: 'Ran',
+              status: 'done',
+              scheduledAt: new Date(Date.now() - 4 * DAY).toISOString(),
+              releasedAt: new Date(Date.now() - 3 * DAY).toISOString(),
+            },
+            // Its schedule passed, but the sweep hasn't frozen it yet
+            {
+              ...base,
+              id: 3,
+              name: 'Overdue',
+              status: 'ready',
+              scheduledAt: new Date(Date.now() - 3 * DAY).toISOString(),
+            },
+          ],
+        })
+      )
+    );
+
+    render(<ReleasesPage />);
+
+    await screen.findByRole('link', { name: 'Upcoming' });
+    const [upcoming, ran, overdue] = screen.getAllByRole('row').slice(1);
+
+    // The calendar-day count depends on the time of day: the words are what this checks
+    expect(upcoming).toHaveTextContent(/Scheduled in \d+ days/);
+    expect(ran).toHaveTextContent(/Released \d+ days ago/);
+    expect(overdue).toHaveTextContent(/Was due \d+ days ago/);
   });
 
   it("shows the API's error when creating a release fails", async () => {
@@ -532,14 +581,14 @@ describe('Releases home page', () => {
     const SCHEDULE_FROM = '2026-10-01T00:00:00.000Z';
     const FILTERED_URL = `/?filters[$and][0][releaseCondition][$eq]=all_or_nothing&filters[$and][1][scheduledAt][$gte]=${SCHEDULE_FROM}`;
 
-    it('sorts by most recent updates by default', async () => {
+    it('sorts by scheduled date, soonest first, by default', async () => {
       const requests = captureRequests();
       render(<ReleasesPage />);
 
       expect(
-        await screen.findByRole('button', { name: 'Sort: Most recent updates' })
+        await screen.findByRole('button', { name: 'Sort: Scheduled date (soonest first)' })
       ).toBeInTheDocument();
-      await waitFor(() => expect(requests.at(-1)?.get('sort')).toBe('updatedAt:desc'));
+      await waitFor(() => expect(requests.at(-1)?.get('sort')).toBe('scheduledAt:asc'));
     });
 
     it('changes the sort, back to the first page, keeping the filters', async () => {
@@ -548,8 +597,12 @@ describe('Releases home page', () => {
         initialEntries: [`${FILTERED_URL}&page=2&pageSize=8`],
       });
 
-      await user.click(await screen.findByRole('button', { name: 'Sort: Most recent updates' }));
+      await user.click(
+        await screen.findByRole('button', { name: 'Sort: Scheduled date (soonest first)' })
+      );
       expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+        'Scheduled date (soonest first)',
+        'Scheduled date (latest first)',
         'Most recent updates',
         'Oldest updates',
         'Most recently created',
@@ -634,10 +687,10 @@ describe('Releases home page', () => {
 
     it('still applies a sort from the URL that the menu does not offer', async () => {
       const requests = captureRequests();
-      render(<ReleasesPage />, { initialEntries: ['/?sort=scheduledAt:asc'] });
+      render(<ReleasesPage />, { initialEntries: ['/?sort=releasedAt:desc'] });
 
       expect(await screen.findByRole('button', { name: 'Sort' })).toBeInTheDocument();
-      await waitFor(() => expect(requests.at(-1)?.get('sort')).toBe('scheduledAt:asc'));
+      await waitFor(() => expect(requests.at(-1)?.get('sort')).toBe('releasedAt:desc'));
     });
   });
 });
