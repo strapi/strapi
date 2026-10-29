@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import type Koa from 'koa';
+import { describe, expect, test, vi, type Mock } from 'vitest';
 
 import documentation from '../documentation';
 
@@ -8,7 +9,7 @@ const SERVER_URL = 'http://localhost:1337';
 const createStrapi = (storedConfig: Record<string, unknown>) => {
   return {
     config: { server: { url: SERVER_URL } },
-    store: jest.fn(() => ({ get: jest.fn(async () => storedConfig) })),
+    store: vi.fn(() => ({ get: vi.fn(async () => storedConfig) })),
   };
 };
 
@@ -16,8 +17,8 @@ const createContext = (body: Record<string, unknown>) => {
   return {
     request: { body },
     session: {},
-    redirect: jest.fn(),
-  } as unknown as Koa.Context & { redirect: jest.Mock; session: Record<string, unknown> };
+    redirect: vi.fn(),
+  } as unknown as Koa.Context & { redirect: Mock; session: Record<string, unknown> };
 };
 
 describe('Documentation plugin | Documentation controller', () => {

@@ -3,6 +3,7 @@ import _ from 'lodash';
 import fse from 'fs-extra';
 // eslint-disable-next-line node/no-unpublished-import
 import SwaggerParser from '@apidevtools/swagger-parser';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { apis, plugins, components, contentTypes } from '../__mocks__/mock-strapi-data';
 import documentation from '../documentation';
 import override from '../override';
@@ -24,21 +25,28 @@ const mockStrapiInstance = {
     get: () => defaultConfig,
   },
   log: {
-    info: jest.fn(),
-    warn: jest.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+  },
+  plugin(name: string) {
+    return this.plugins[name];
+  },
+  api(name: string) {
+    return this.apis[name];
   },
 } as any;
 
-jest.mock('fs-extra', () => ({
-  ...jest.requireActual('fs-extra'),
-  writeJson: jest.fn(),
-  ensureFile: jest.fn(),
-}));
+vi.mock('fs-extra', async (importOriginal) => {
+  const actual = await importOriginal<{ default: typeof import('fs-extra') }>();
+  const mocked = { ...actual.default, writeJson: vi.fn(), ensureFile: vi.fn() };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('Documentation plugin | Documentation service', () => {
   beforeAll(() => {
     global.strapi = mockStrapiInstance;
-    global.strapi.contentType = jest.fn((uid) => {
+    global.strapi.contentType = vi.fn((uid) => {
       // Only deal with mocked data, return empty attributes for unmocked relations
       if (!global.strapi.contentTypes[uid]) return { attributes: {} };
 
@@ -46,7 +54,7 @@ describe('Documentation plugin | Documentation service', () => {
     }) as any;
 
     global.strapi.plugins.documentation = {
-      service: jest.fn((name) => {
+      service: vi.fn((name) => {
         const mockServices = {
           override: override({ strapi: global.strapi }),
         } as any;
@@ -70,8 +78,8 @@ describe('Documentation plugin | Documentation service', () => {
   it('generates a valid openapi schema', async () => {
     const docService = documentation({ strapi: global.strapi });
     await docService.generateFullDoc();
-    const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-      jest.mocked(fse.writeJson).mock.calls.length - 1
+    const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+      vi.mocked(fse.writeJson).mock.calls.length - 1
     ];
     const mockFinalDoc = lastMockCall[1];
 
@@ -126,7 +134,7 @@ describe('Documentation plugin | Documentation service', () => {
     const overrideService = override({ strapi: global.strapi });
 
     global.strapi.apis = generatedApis as any;
-    global.strapi.config.get = jest.fn((key) => {
+    global.strapi.config.get = vi.fn((key) => {
       if (key === 'plugin::documentation') {
         return {
           ...defaultConfig,
@@ -136,16 +144,16 @@ describe('Documentation plugin | Documentation service', () => {
 
       return undefined;
     }) as any;
-    global.strapi.contentType = jest.fn((uid) => {
+    global.strapi.contentType = vi.fn((uid) => {
       const [apiName, contentTypeName] = uid.replace('api::', '').split('.');
       return (generatedApis as any)[apiName]?.contentTypes[contentTypeName];
     }) as any;
-    global.strapi.plugins.documentation.service = jest.fn(() => overrideService) as any;
+    global.strapi.plugins.documentation.service = vi.fn(() => overrideService) as any;
 
     try {
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls.at(-1)!;
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls.at(-1)!;
       const generatedDocument = lastMockCall[1] as any;
 
       expect(generatedDocument.components.schemas.Source.properties.product).toStrictEqual({
@@ -172,8 +180,8 @@ describe('Documentation plugin | Documentation service', () => {
   it('generates the correct response component schema for a single type', async () => {
     const docService = documentation({ strapi: global.strapi });
     await docService.generateFullDoc();
-    const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-      jest.mocked(fse.writeJson).mock.calls.length - 1
+    const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+      vi.mocked(fse.writeJson).mock.calls.length - 1
     ];
     const mockFinalDoc = lastMockCall[1];
     const expected = {
@@ -194,8 +202,8 @@ describe('Documentation plugin | Documentation service', () => {
   it('generates the correct response component schema for a collection type', async () => {
     const docService = documentation({ strapi: global.strapi });
     await docService.generateFullDoc();
-    const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-      jest.mocked(fse.writeJson).mock.calls.length - 1
+    const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+      vi.mocked(fse.writeJson).mock.calls.length - 1
     ];
     const mockFinalDoc = lastMockCall[1];
     const expectedList = {
@@ -229,8 +237,8 @@ describe('Documentation plugin | Documentation service', () => {
       const docService = documentation({ strapi: global.strapi });
 
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
 
@@ -245,7 +253,7 @@ describe('Documentation plugin | Documentation service', () => {
         const docService = documentation({ strapi: global.strapi });
 
         await docService.generateFullDoc();
-        const lastMockCall = jest.mocked(fse.writeJson).mock.calls.at(-1)!;
+        const lastMockCall = vi.mocked(fse.writeJson).mock.calls.at(-1)!;
         const mockFinalDoc = lastMockCall[1];
 
         expect(mockFinalDoc['x-strapi-config'].plugins).toEqual(['upload']);
@@ -264,8 +272,8 @@ describe('Documentation plugin | Documentation service', () => {
       const docService = documentation({ strapi: global.strapi });
 
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
       expect(mockFinalDoc['x-strapi-config'].plugins).toEqual(['upload']);
@@ -281,8 +289,8 @@ describe('Documentation plugin | Documentation service', () => {
       const docService = documentation({ strapi: global.strapi });
 
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
       expect(mockFinalDoc['x-strapi-config'].plugins).toEqual([]);
@@ -329,8 +337,8 @@ describe('Documentation plugin | Documentation service', () => {
       global.strapi.config.get = () => ({ ...userConfig }) as any;
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
       // The generation data is dynamically added, it cannot be modified by the user
@@ -368,8 +376,8 @@ describe('Documentation plugin | Documentation service', () => {
       );
 
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
       expect(mockFinalDoc.paths['/test']).toBeUndefined();
@@ -393,7 +401,7 @@ describe('Documentation plugin | Documentation service', () => {
       );
       // Use the override service in the documentation service
       global.strapi.plugins.documentation = {
-        service: jest.fn((name) => {
+        service: vi.fn((name) => {
           const mockServices = {
             override: overrideService,
           } as any;
@@ -403,8 +411,8 @@ describe('Documentation plugin | Documentation service', () => {
       } as any;
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
 
@@ -434,7 +442,7 @@ describe('Documentation plugin | Documentation service', () => {
         { pluginOrigin: 'upload' }
       );
       global.strapi.plugins.documentation = {
-        service: jest.fn((name) => {
+        service: vi.fn((name) => {
           const mockServices = {
             override: overrideService,
           } as any;
@@ -445,8 +453,8 @@ describe('Documentation plugin | Documentation service', () => {
 
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
 
@@ -482,7 +490,7 @@ describe('Documentation plugin | Documentation service', () => {
         { pluginOrigin: 'upload' }
       );
       global.strapi.plugins.documentation = {
-        service: jest.fn((name) => {
+        service: vi.fn((name) => {
           const mockServices = {
             override: overrideService,
           } as any;
@@ -492,8 +500,8 @@ describe('Documentation plugin | Documentation service', () => {
       } as any;
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
 
@@ -547,7 +555,7 @@ describe('Documentation plugin | Documentation service', () => {
         { pluginOrigin: 'upload' }
       );
       global.strapi.plugins.documentation = {
-        service: jest.fn((name) => {
+        service: vi.fn((name) => {
           const mockServices = {
             override: overrideService,
           } as any;
@@ -557,8 +565,8 @@ describe('Documentation plugin | Documentation service', () => {
       } as any;
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc('2.0.0');
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
 
@@ -572,7 +580,7 @@ describe('Documentation plugin | Documentation service', () => {
       overrideService.excludeFromGeneration('kitchensink');
 
       global.strapi.plugins.documentation = {
-        service: jest.fn((name) => {
+        service: vi.fn((name) => {
           const mockServices = {
             override: overrideService,
           } as any;
@@ -583,8 +591,8 @@ describe('Documentation plugin | Documentation service', () => {
 
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
 
@@ -610,8 +618,8 @@ describe('Documentation plugin | Documentation service', () => {
         }) as any;
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
-      const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
-        jest.mocked(fse.writeJson).mock.calls.length - 1
+      const lastMockCall = vi.mocked(fse.writeJson).mock.calls[
+        vi.mocked(fse.writeJson).mock.calls.length - 1
       ];
       const mockFinalDoc = lastMockCall[1];
       expect(mockFinalDoc.paths['/kitchensinks']).toEqual({
