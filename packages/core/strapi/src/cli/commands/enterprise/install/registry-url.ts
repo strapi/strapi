@@ -3,7 +3,7 @@ import { ENTERPRISE_REGISTRY_URL } from './constants';
 import { EnterpriseInstallError } from './errors';
 
 const REGISTRY_OPTION = '--registry';
-const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]'];
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]']);
 const STRAPI_DOMAIN_SUFFIXES = ['.strapi.io', '.strapi.team'];
 
 const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, '');
@@ -52,7 +52,7 @@ export const resolveRegistryTarget = ({
   }
 
   const isHttps = url.protocol === 'https:';
-  const isLocal = (isHttps || url.protocol === 'http:') && LOCAL_HOSTNAMES.includes(url.hostname);
+  const isLocal = (isHttps || url.protocol === 'http:') && LOCAL_HOSTNAMES.has(url.hostname);
   const isStrapiServer =
     isHttps && STRAPI_DOMAIN_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix));
 
