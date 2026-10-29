@@ -8,7 +8,7 @@ const STRAPI_DOMAIN_SUFFIXES = ['.strapi.io', '.strapi.team'];
 
 const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, '');
 
-export type RegistryTarget =
+type RegistryTarget =
   /** Used for the requests, and saved in the user configuration. */
   | { kind: 'production'; url: string }
   /** Used for the requests and for the install the command runs, never saved. */

@@ -27,8 +27,10 @@ export interface DiscoveredPlugin {
   entry: EnterprisePluginEntry;
   lookup: Exclude<PackumentLookup, { status: 'unavailable' }>;
   installedVersion?: string;
-  listedOutsideLicense?: boolean;
+  listedOutsideLicense: boolean;
 }
+
+type CandidatePlugin = Omit<DiscoveredPlugin, 'listedOutsideLicense'>;
 
 interface DiscoveryResult {
   plugins: DiscoveredPlugin[];
@@ -125,13 +127,13 @@ const describeCandidatePlugins = async ({
   logger: Logger;
   fetchImplementation: typeof fetch;
   packageNames: string[];
-}): Promise<DiscoveredPlugin[]> => {
+}): Promise<CandidatePlugin[]> => {
   const candidatePackageNames = [...new Set(packageNames)].filter(isValidPackageName);
 
   const lookupFailures: string[] = [];
 
   const discoveredPlugins = await Promise.all(
-    candidatePackageNames.map(async (packageName): Promise<DiscoveredPlugin | undefined> => {
+    candidatePackageNames.map(async (packageName): Promise<CandidatePlugin | undefined> => {
       const [lookup, installedVersion] = await Promise.all([
         fetchPackument({ registryUrl, packageName, license, fetchImplementation }),
         readAppDependencyVersion(appDir, packageName),
@@ -157,7 +159,7 @@ const describeCandidatePlugins = async ({
   }
 
   return discoveredPlugins.filter(
-    (discoveredPlugin): discoveredPlugin is DiscoveredPlugin => discoveredPlugin !== undefined
+    (discoveredPlugin): discoveredPlugin is CandidatePlugin => discoveredPlugin !== undefined
   );
 };
 
