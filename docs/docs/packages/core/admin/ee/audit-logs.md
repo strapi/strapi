@@ -26,6 +26,12 @@ To save audit log data, we utilize an Audit Logs local provider responsible for 
 
 This content type stores all the audit logs. For each allowed event, we save an entry in the audit logs content type.
 
+### Gates and strict types
+
+The Enterprise admin, merged when a license verifies at boot, always registers the `admin::audit-log` content type, so that the data survives a downgrade. The controller and routes are added only when the license lists `audit-logs` and `admin.auditLogs.enabled` is not `false` (`ee/server/src/index.ts`). The `admin::audit-logs.read` and `admin::audit-logs.export` actions are registered at bootstrap with the `audit-logs` feature alone (`ee/server/src/bootstrap.ts`).
+
+With strict types, the controller is registered as `Core.Licensed<'audit-logs', Contract>`: an application that lists `audit-logs` in `licensedFeatures` gets the contract. The types do not model `admin.auditLogs.enabled`. The two action IDs are declared in `PermissionActions`. The content type is not declared in `PackageContentTypeSchemas`, because the Community Edition does not register it. Read [License-gated contracts](../../../../contributing/05-typescript.md#license-gated-contracts).
+
 ### Subscribing to all events
 
 The Audit Logs feature adds a subscriber to the [EventHub](../../core/event-hub.md), allowing it to listen to all events in the application. However, we don't save every event in the audit logs; we only save the default ones (see the defaultEvents array in the service file).

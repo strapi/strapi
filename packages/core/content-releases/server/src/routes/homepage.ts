@@ -1,4 +1,5 @@
-import type { Plugin } from '@strapi/types';
+import type { Core, Plugin } from '@strapi/types';
+import type { Controllers } from '../types/controllers';
 
 const info = { pluginName: 'content-manager', type: 'admin' };
 
@@ -15,6 +16,6 @@ const homepageRouter: Plugin.LoadedPlugin['routes'][string] = {
       },
     },
   ],
-};
+} satisfies Core.RouterInputFor<Controllers, 'plugin::content-releases'>;
 
 export default homepageRouter;

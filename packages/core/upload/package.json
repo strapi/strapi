@@ -32,13 +32,6 @@
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
-    "./_internal/shared": {
-      "types": "./dist/shared/index.d.ts",
-      "source": "./shared/index.ts",
-      "import": "./dist/shared/index.mjs",
-      "require": "./dist/shared/index.js",
-      "default": "./dist/shared/index.js"
-    },
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
@@ -81,6 +74,7 @@
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
     "@strapi/provider-upload-local": "5.60.0",
+    "@strapi/types": "5.60.0",
     "@strapi/utils": "5.60.0",
     "byte-size": "8.1.1",
     "cropperjs": "1.6.2",
@@ -106,7 +100,6 @@
   },
   "devDependencies": {
     "@strapi/admin": "5.60.0",
-    "@strapi/types": "5.60.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -145,5 +138,12 @@
     "description": "Media file management.",
     "required": true,
     "kind": "plugin"
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "dist/server/src/index.d.ts"
+      ]
+    }
   }
 }

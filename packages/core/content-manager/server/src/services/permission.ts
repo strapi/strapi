@@ -93,8 +93,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         subCategory: 'components',
         pluginName: 'content-manager',
       },
-    ];
+    ] as const;
 
+    // The declared permission action IDs match the registered actions.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    type ActionIds = Core.Assert<
+      Core.SameNames<
+        Core.PermissionActionId<(typeof actions)[number]>,
+        Extract<Core.RegisteredPermissionAction, `plugin::content-manager.${string}`>
+      >
+    >;
     await strapi.service('admin::permission').actionProvider.registerMany(actions);
   },
 });

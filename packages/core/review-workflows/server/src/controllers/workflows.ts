@@ -1,12 +1,23 @@
 import type { Context } from 'koa';
 
 import type { Core } from '@strapi/types';
-import { async } from '@strapi/utils';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
+import { async, type queryParams } from '@strapi/utils';
 
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
+import type {
+  Services,
+  WorkflowCreateInput,
+  WorkflowPopulate,
+  WorkflowUpdateInput,
+} from '../types';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
+
+type UserAbility = Parameters<
+  ContentManagerServices.PermissionCheckerService['create']
+>[0]['userAbility'];
 
 /**
  *
@@ -14,7 +25,10 @@ import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
  * @param userAbility
  * @return { PermissionChecker }
  */
-function getWorkflowsPermissionChecker({ strapi }: { strapi: Core.Strapi }, userAbility: unknown) {
+function getWorkflowsPermissionChecker(
+  { strapi }: { strapi: Core.Strapi },
+  userAbility: UserAbility
+) {
   return strapi
     .plugin('content-manager')
     .service('permission-checker')
@@ -49,7 +63,9 @@ interface PopulatedStage {
   [key: string]: unknown;
 }
 
-function formatWorkflowToAdmin(workflow: { stages?: PopulatedStage[]; [key: string]: unknown }) {
+function formatWorkflowToAdmin(
+  workflow: { stages?: PopulatedStage[]; [key: string]: unknown } | null
+) {
   if (!workflow) return;
   if (!workflow.stages) return workflow;
 
@@ -96,10 +112,12 @@ export default {
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
-    const workflowService = getService('workflows');
+    // Typed with the plugin's own service type, so the bug marker below holds with or without strict types.
+    const workflowService = getService('workflows') as Services['workflows'];
     const createdWorkflow = await workflowService
       .create({
-        data: await sanitizeCreateInput(workflowBody),
+        // The validator checks that each content type exists; its output type keeps plain strings.
+        data: await sanitizeCreateInput(workflowBody as WorkflowCreateInput),
       })
       .then(formatWorkflowToAdmin);
 
@@ -129,7 +147,8 @@ export default {
 
     // Sanitize input data
     const getPermittedFieldToUpdate = sanitizeUpdateInput(workflow);
-    const dataToUpdate = await getPermittedFieldToUpdate(workflowBody);
+    // The validator checks that each content type exists; its output type keeps plain strings.
+    const dataToUpdate = await getPermittedFieldToUpdate(workflowBody as WorkflowUpdateInput);
 
     // Update workflow
     const updatedWorkflow = await workflowService
@@ -163,7 +182,8 @@ export default {
     }
 
     const deletedWorkflow = await workflowService
-      .delete(workflow, { populate })
+      // The sanitized query types each parameter as `unknown`.
+      .delete(workflow, { populate: populate as WorkflowPopulate })
       .then(formatWorkflowToAdmin);
 
     ctx.body = {
@@ -185,7 +205,12 @@ export default {
 
     const [workflows, workflowCount] = await Promise.all([
       workflowService
-        .find({ populate, filters, sort })
+        // The sanitized query types each parameter as `unknown`.
+        .find({
+          populate: populate as WorkflowPopulate,
+          filters,
+          sort: sort as queryParams.Params['sort'],
+        })
         .then((workflows: Parameters<typeof formatWorkflowToAdmin>[0][]) =>
           workflows.map((workflow) => formatWorkflowToAdmin(workflow))
         ),

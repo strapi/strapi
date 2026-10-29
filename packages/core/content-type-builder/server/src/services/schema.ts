@@ -1,7 +1,7 @@
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import { mapValues } from 'lodash';
 
-import type { Schema } from '@strapi/types';
+import type { Internal, Schema } from '@strapi/types';
 
 import createBuilder from './schema-builder';
 import { createMigrationBuilder } from './migration-builder';
@@ -536,7 +536,9 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
 };
 
 export const getSchema = async () => {
-  const contentTypes = mapValues(strapi.contentTypes, (contentType) => {
+  // Generic schemas: mapping every declared package schema exceeds the size limit (TS7056).
+  const allContentTypes: Internal.Registry.GenericContentTypeSchemas = strapi.contentTypes;
+  const contentTypes = mapValues(allContentTypes, (contentType) => {
     const {
       uid,
       options,

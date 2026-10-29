@@ -131,7 +131,7 @@ const getRetentionDays = (strapi: Core.Strapi) => {
 
   return computeRetentionDays(
     typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
-    strapi.config.get('admin.auditLogs.retentionDays')
+    strapi.config.get<number | null | undefined>('admin.auditLogs.retentionDays')
   );
 };
 

@@ -103,3 +103,5 @@ export type {
   PublicationStatus,
   Locale,
 };
+
+export type * as Write from './write';

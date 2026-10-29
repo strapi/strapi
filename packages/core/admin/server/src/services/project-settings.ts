@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { pick } from 'lodash';
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
+import type { ImageManipulationService, UploadService } from '../types/plugin-services';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
@@ -40,7 +41,7 @@ const parseFilesData = async (files: UpdateProjectSettings.Request['files']) => 
       // Add formated data for the upload provider
       formatedFilesData[inputName] = await strapi
         .plugin('upload')
-        .service('upload')
+        .service<UploadService<Partial<UploadFile>>>('upload')
         .formatFileInfo({
           filename: file.originalFilename,
           type: file.mimetype,
@@ -50,7 +51,10 @@ const parseFilesData = async (files: UpdateProjectSettings.Request['files']) => 
       // Add image dimensions
       Object.assign(
         formatedFilesData[inputName]!,
-        await strapi.plugin('upload').service('image-manipulation').getDimensions({ getStream })
+        await strapi
+          .plugin('upload')
+          .service<ImageManipulationService>('image-manipulation')
+          .getDimensions({ getStream })
       );
 
       // Add file path, and stream
@@ -78,8 +82,7 @@ const getProjectSettings = async (): Promise<GetProjectSettings.Response> => {
 
   const projectSettings = {
     ...defaultProjectSettings,
-    // @ts-expect-error spread can be applied to return value
-    ...(await store.get({ key: 'project-settings' })),
+    ...((await store.get({ key: 'project-settings' })) as object | null),
   };
 
   // Filter file input fields

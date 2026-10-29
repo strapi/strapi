@@ -26,7 +26,7 @@ A content type is localized when `pluginOptions.i18n.localized` is `true` (`isLo
 
 ### Locale data and default locale
 
-The plugin adds the content type `plugin::i18n.locale` with `name` and a unique `code`. Content Manager and Content-Type Builder hide it. The default locale code is in the core store under `default_locale`. At `bootstrap`, `initDefaultLocale` creates the first locale when none exists. It uses English, or the code in `STRAPI_PLUGIN_I18N_INIT_LOCALE_CODE`.
+The plugin adds the content type `plugin::i18n.locale` with `name` and a unique `code`. Content Manager and Content-Type Builder hide it. `server/src/types/content-types.ts` declares its schema (`LocaleSchema`) for strict types, as type generation writes it. Keep it in sync with `content-types/locale/schema.json`: the drift check of `examples/strict-types` fails when they differ. The default locale code is in the core store under `default_locale`. At `bootstrap`, `initDefaultLocale` creates the first locale when none exists. It uses English, or the code in `STRAPI_PLUGIN_I18N_INIT_LOCALE_CODE`.
 
 ### Sync hook and core migrations
 

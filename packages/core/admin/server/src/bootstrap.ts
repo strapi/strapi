@@ -27,7 +27,11 @@ const defaultAdminAuthSettings = {
 };
 
 const registerPermissionActions = async () => {
-  await getService('permission').actionProvider.registerMany(adminActions.actions);
+  // With strict types, the registered contract checks the action IDs. Without them, the build
+  // resolves the lookup to develop's `Core.Service`, which takes the readonly `as const` list.
+  await (
+    getService('permission') as Core.ServiceFor<'admin::permission'>
+  ).actionProvider.registerMany(adminActions.actions);
 };
 
 const registerAdminConditions = async () => {

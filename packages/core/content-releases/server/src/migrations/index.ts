@@ -14,7 +14,11 @@ const toPersistedForm = (attributes: Schema.ContentType['attributes'] | undefine
   JSON.parse(JSON.stringify(attributes ?? null));
 
 interface Input {
-  oldContentTypes: Record<string, Schema.ContentType>;
+  /**
+   * The schemas saved at the previous start: `undefined` when the core store table does not exist yet,
+   * `null` when it has no saved schemas.
+   */
+  oldContentTypes: Record<string, Schema.ContentType> | null | undefined;
   contentTypes: Record<string, Schema.ContentType>;
 }
 

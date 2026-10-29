@@ -5,6 +5,10 @@ import { controllers } from './controllers';
 import { config } from './config';
 import middlewares from './middlewares';
 
+export type * from './types';
+export type * from './types/services';
+export type * from './types/controllers';
+
 export default {
   bootstrap,
   services,

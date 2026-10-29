@@ -23,11 +23,13 @@ The package is an Enterprise Edition plugin. It has a server part (`strapi-serve
 
 ### Workflow and stage content types
 
-`plugin::review-workflows.workflow` has a unique `name`, its `stages`, an optional `stageRequiredToPublish` and a JSON list `contentTypes`. `plugin::review-workflows.workflow-stage` has a `name`, a `color`, its `workflow` and a many-to-many relation `permissions` to `admin::permission`. Both are hidden from the content manager. On the first boot, `bootstrap` creates a workflow named "Default" with four stages when the database has none.
+`plugin::review-workflows.workflow` has a unique `name`, its `stages`, an optional `stageRequiredToPublish` and a JSON list `contentTypes`. `plugin::review-workflows.workflow-stage` has a `name`, a `color`, its `workflow` and a many-to-many relation `permissions` to `admin::permission`. Both are hidden from the content manager. `server/src/types/content-types.ts` declares their schemas (`WorkflowSchema`, `WorkflowStageSchema`) for strict types, as type generation writes them. The plugin registers both content types whatever the license, so the declarations hold in every edition. Keep them in sync with `content-types/workflow` and `content-types/workflow-stage`: the drift check of `examples/strict-types` fails when they differ. On the first boot, `bootstrap` creates a workflow named "Default" with four stages when the database has none.
 
 ### Stage and assignee attributes
 
-In `register`, `extendReviewWorkflowContentTypes` adds two one-to-one relations to every content type that is visible in the content manager: `strapi_stage` and `strapi_assignee`. The relations use a join table. An `afterSync` hook persists these join tables, so that the data survives a downgrade to the Community Edition. See [Extension points](../../../architecture/04-extension-points.md).
+In `register`, which runs only when the license that verifies at boot lists `review-workflows`, `extendReviewWorkflowContentTypes` adds two one-to-one relations to every content type that is visible in the content manager and does not set `options.noStageAttribute` (`utils/review-workflows.ts`): `strapi_stage` and `strapi_assignee`. The relations use a join table. An `afterSync` hook persists these join tables, so that the data survives a downgrade to the Community Edition. See [Extension points](../../../architecture/04-extension-points.md).
+
+For strict types, `server/src/types/content-types.ts` declares both relations and the rule in `Strapi.Registries.LicensedContentTypeAttributes` under `review-workflows` (`StageAttributes`). The content types of an application then carry them when its `typescript.licensedFeatures` lists `review-workflows`, whatever the license type generation boots with. Keep the declaration in sync with `register.ts` and `utils/review-workflows.ts`: the compile-only checks of `server/src/types/content-types.test.ts` tie the names and targets to `constants/workflows.ts`, not the rule.
 
 ### Document Service middlewares
 

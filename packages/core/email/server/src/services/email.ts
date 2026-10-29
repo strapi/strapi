@@ -1,5 +1,6 @@
 import { difference, template as lodashTemplate } from 'lodash';
 import { objects, template } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 
 import type {
   EmailConfig,
@@ -54,10 +55,10 @@ const sendTemplatedEmail = (
   return strapi.plugin('email').provider.send({ ...emailOptions, ...templatedAttributes });
 };
 
-const emailService = () => ({
+const emailService = (() => ({
   getProviderSettings,
   send,
   sendTemplatedEmail,
-});
+})) satisfies Core.ServiceFactory<'plugin::email.email'>;
 
 export default emailService;

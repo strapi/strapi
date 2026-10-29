@@ -43,6 +43,14 @@ const registerWebhookEvents = async () =>
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Permissions
   const { actionProvider } = getAdminService('permission');
+  // The declared permission action IDs match the registered actions.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  type ActionIds = Core.Assert<
+    Core.SameNames<
+      Core.PermissionActionId<(typeof actions.reviewWorkflows)[number]>,
+      Extract<Core.RegisteredPermissionAction, `admin::review-workflows.${string}`>
+    >
+  >;
   await actionProvider.registerMany(actions.reviewWorkflows);
 
   // Webhooks and events

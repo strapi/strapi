@@ -7,6 +7,9 @@ import type { WeeklyMetrics } from './index';
 
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
+/** The weekly metrics cron schedule, as the `plugin_ee_metrics` core store row holds it. */
+type MetricsStoreValue = { lastWeeklyUpdate?: number; weeklySchedule?: string };
+
 const getWeeklyCronScheduleAt = (date: Date) =>
   `${date.getSeconds()} ${date.getMinutes()} ${date.getHours()} * * ${date.getDay()}`;
 
@@ -14,12 +17,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('workflow-metrics', { strapi }) as typeof workflowMetrics;
   const workflowsService = getService('workflows', { strapi });
 
-  const getMetricsStoreValue = async () => {
+  const getMetricsStoreValue = async (): Promise<MetricsStoreValue> => {
     const value = await strapi.store.get({ type: 'plugin', name: 'ee', key: 'metrics' });
-    return defaultTo(value, {});
+    return defaultTo(value, {}) as MetricsStoreValue;
   };
 
-  const setMetricsStoreValue = (value: unknown) =>
+  const setMetricsStoreValue = (value: MetricsStoreValue) =>
     strapi.store.set({ type: 'plugin', name: 'ee', key: 'metrics', value });
 
   return {
@@ -44,7 +47,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await metrics.sendDidSendReviewWorkflowPropertiesOnceAWeek(computedMetrics);
 
       const metricsInfoStored = await getMetricsStoreValue();
-      // @ts-expect-error metricsInfoStored can use spread
       await setMetricsStoreValue({ ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() });
     },
 

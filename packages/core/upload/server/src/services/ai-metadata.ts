@@ -31,14 +31,26 @@ const chunk = <T>(items: T[], size: number): T[][] => {
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
+    /**
+     * Whether an AI metadata provider is available and the `aiMetadata` setting is on (the
+     * default).
+     *
+     * @internal
+     */
     async isEnabled() {
       if (!getService('aiMetadataProvider').hasProvider()) {
         return false;
       }
-      const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
+      // Bootstrap stores default settings, so the nullable store read is treated as present.
+      const settings = (await strapi.plugin('upload').service('upload').getSettings()) as Settings;
       return settings.aiMetadata ?? true;
     },
 
+    /**
+     * Counts the supported images, and those without an alternative text or a caption.
+     *
+     * @internal
+     */
     async countImagesWithoutMetadata() {
       const imagesWithoutMetadataCountPromise = strapi.db.query('plugin::upload.file').count({
         where: {
@@ -73,6 +85,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Update files with AI-generated metadata
      * Shared logic used by both upload flow and retroactive processing
+     *
+     * @internal
      */
     async updateFilesWithAIMetadata(
       files: File[],
@@ -115,6 +129,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Process existing files with job tracking for progress updates
+     *
+     * @internal
      */
     async processExistingFiles(jobId: number, user: { id: string | number }): Promise<void> {
       const jobService = getService('aiMetadataJobs');
@@ -181,6 +197,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
      * affects its own files; every other chunk still runs.
      *
      * @experimental
+     * @internal
      */
     async generateForFiles(
       fileIds: Array<number | string>,
@@ -256,6 +273,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Processes provided files for AI metadata generation
+     *
+     * @internal
      */
     async processFiles(files: File[]): Promise<Array<{ altText: string; caption: string } | null>> {
       if (!(await this.isEnabled())) {
@@ -290,7 +309,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const images = await fetchImagesAsBlobs(
         imageInputFiles,
-        strapi.config.get('server.absoluteUrl'),
+        strapi.config.get<string>('server.absoluteUrl'),
         strapi.log
       );
 

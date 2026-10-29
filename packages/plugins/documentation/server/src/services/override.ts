@@ -10,7 +10,18 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
   const excludedFromGeneration: string[] = [];
 
   return {
+    /**
+     * The registered overrides, merged by `generateFullDoc` in registration order.
+     *
+     * @internal
+     */
     registeredOverrides,
+    /**
+     * The APIs and plugins left out of the generated paths. Names are kept as given, duplicates
+     * included.
+     *
+     * @internal
+     */
     excludedFromGeneration,
     /**
      *
@@ -26,6 +37,11 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       excludedFromGeneration.push(api);
     },
 
+    /**
+     * Whether `name` is excluded from generation. Despite its name, `true` means excluded.
+     *
+     * @internal
+     */
     isEnabled(name: string) {
       return excludedFromGeneration.includes(name);
     },

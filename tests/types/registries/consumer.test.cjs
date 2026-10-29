@@ -1,0 +1,1468 @@
+'use strict';
+
+// Consumer programs for registered contracts. They read emitted declarations and real package
+// manifests, so build the packages first (`yarn test:ts` runs this file after the builds).
+// Fixtures assign a lookup result to a constant before checking it with `satisfies`: contextual
+// inference would otherwise make a permissive generic lookup look correctly typed.
+
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { test } = require('node:test');
+const ts = require('typescript');
+
+const repository = path.resolve(__dirname, '../../..');
+const fixture = (name) => path.join(__dirname, 'fixtures', name);
+const providers = [
+  'packages/plugins/i18n',
+  'packages/plugins/sentry',
+  'packages/plugins/graphql',
+  'packages/plugins/documentation',
+  'packages/core/admin',
+  'packages/core/content-manager',
+  'packages/core/content-releases',
+  'packages/core/content-type-builder',
+  'packages/core/email',
+  'packages/core/review-workflows',
+  'packages/core/upload',
+];
+const strictPackages = [
+  ...providers,
+  'packages/core/types',
+  'packages/core/core',
+  'packages/core/strapi',
+];
+const resolutions = {
+  Bundler: { moduleResolution: ts.ModuleResolutionKind.Bundler, module: ts.ModuleKind.ESNext },
+  Node: { moduleResolution: ts.ModuleResolutionKind.Node10, module: ts.ModuleKind.CommonJS },
+  NodeNext: { moduleResolution: ts.ModuleResolutionKind.NodeNext, module: ts.ModuleKind.NodeNext },
+};
+const baseOptions = {
+  noEmit: true,
+  strict: true,
+  noUncheckedIndexedAccess: true,
+  exactOptionalPropertyTypes: true,
+  esModuleInterop: true,
+  resolveJsonModule: true,
+  // Match generated applications. Contract fixtures still check every lookup and expected error.
+  skipLibCheck: true,
+  types: [],
+  target: ts.ScriptTarget.ES2022,
+};
+
+function permutations(values) {
+  if (values.length === 0) return [[]];
+  return values.flatMap((value, index) =>
+    permutations(values.filter((_, other) => index !== other)).map((rest) => [value, ...rest])
+  );
+}
+
+// Type generation writes `Public` schemas with the switch off and global schemas with it on.
+const generatedSchemas = (strict) => (strict ? 'generated-strict.d.ts' : 'generated.d.ts');
+const orders = (strict, schemas = [generatedSchemas(strict)]) =>
+  permutations([...schemas, 'i18n.d.ts', 'sentry.d.ts', 'overrides.d.ts']);
+
+function declarations(directory) {
+  assert.ok(fs.existsSync(directory), `Missing ${directory}. Build the packages before this test.`);
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const filename = path.join(directory, entry.name);
+    if (entry.isDirectory()) return declarations(filename);
+    return filename.endsWith('.d.ts') ? [filename] : [];
+  });
+}
+
+function readManifest(directory) {
+  return JSON.parse(fs.readFileSync(path.join(repository, directory, 'package.json'), 'utf8'));
+}
+
+function assertNoStrictSettings(node, source, namespaces = []) {
+  const currentNamespaces = ts.isModuleDeclaration(node)
+    ? [...namespaces, node.name.text]
+    : namespaces;
+  if (
+    ts.isInterfaceDeclaration(node) &&
+    node.name.text === 'Settings' &&
+    currentNamespaces.slice(-2).join('.') === 'Strapi.Registries'
+  ) {
+    assert.equal(
+      node.members.some((member) => member.name?.getText(source) === 'strict'),
+      false,
+      `Settings.strict leaked through ${source.fileName}`
+    );
+  }
+  ts.forEachChild(node, (child) => assertNoStrictSettings(child, source, currentNamespaces));
+}
+
+function diagnostics(program) {
+  return ts.getPreEmitDiagnostics(program);
+}
+
+function assertClean(program, description) {
+  const errors = diagnostics(program);
+  assert.equal(
+    errors.length,
+    0,
+    `${description}\n${ts.formatDiagnosticsWithColorAndContext(errors, {
+      getCanonicalFileName: (filename) => filename,
+      getCurrentDirectory: () => repository,
+      getNewLine: () => '\n',
+    })}`
+  );
+}
+
+// Parse dependency declarations once per resolver. Every check gets a fresh program and checker.
+function compiler(options) {
+  const host = ts.createCompilerHost(options);
+  const getSourceFile = host.getSourceFile;
+  const files = new Map();
+  host.getSourceFile = (filename, languageVersion, onError, shouldCreateNewSourceFile) => {
+    if (shouldCreateNewSourceFile || !files.has(filename)) {
+      files.set(filename, getSourceFile(filename, languageVersion, onError));
+    }
+    return files.get(filename);
+  };
+  return (names, overrides = {}) =>
+    ts.createProgram({
+      rootNames: names.map((name) => (path.isAbsolute(name) ? name : fixture(name))),
+      options: { ...options, ...overrides },
+      host,
+    });
+}
+
+test('published declarations do not activate strict registries', () => {
+  for (const directory of strictPackages) {
+    const files = declarations(path.join(repository, directory, 'dist'));
+    assert.notEqual(files.length, 0, `No declarations in ${directory}/dist`);
+    for (const filename of files) {
+      const contents = fs.readFileSync(filename, 'utf8');
+      const references = ts.preProcessFile(contents);
+      for (const reference of [
+        ...references.importedFiles,
+        ...references.typeReferenceDirectives,
+      ]) {
+        assert.doesNotMatch(
+          reference.fileName,
+          /(?:@strapi\/types\/strict$|\/strict-types$|strict-type-augmentations)/,
+          `Strict activation leaked through ${filename}`
+        );
+      }
+
+      const source = ts.createSourceFile(filename, contents, ts.ScriptTarget.Latest);
+      assertNoStrictSettings(source, source);
+    }
+  }
+});
+
+test('published registry contracts reference declared dependencies', () => {
+  for (const directory of providers) {
+    const manifest = readManifest(directory);
+    const files = declarations(path.join(repository, directory, 'dist/server/src/types'));
+    assert.notEqual(files.length, 0, `No registry contracts emitted for ${manifest.name}`);
+    for (const filename of files) {
+      for (const imported of ts.preProcessFile(fs.readFileSync(filename, 'utf8')).importedFiles) {
+        if (imported.fileName.startsWith('.')) continue;
+        const segments = imported.fileName.split('/');
+        const dependency = segments.slice(0, imported.fileName.startsWith('@') ? 2 : 1).join('/');
+        assert.ok(
+          manifest.dependencies?.[dependency],
+          `${filename} references ${dependency}, which must be a dependency of ${manifest.name}`
+        );
+      }
+    }
+  }
+});
+
+// Workspace package directories by package name.
+function workspaceDirectories() {
+  return new Map(
+    ['packages/core', 'packages/plugins', 'packages/utils', 'packages/cli'].flatMap((parent) =>
+      fs
+        .readdirSync(path.join(repository, parent))
+        .map((name) => path.join(repository, parent, name))
+        .filter((directory) => fs.existsSync(path.join(directory, 'package.json')))
+        .map((directory) => [readManifest(path.relative(repository, directory)).name, directory])
+    )
+  );
+}
+
+// Every `source` export condition names a file, so tools resolving sources do not fail.
+test('workspace export source conditions point to existing files', () => {
+  const sources = (value) =>
+    typeof value === 'object' && value !== null
+      ? Object.entries(value).flatMap(([key, entry]) =>
+          key === 'source' && typeof entry === 'string' ? [entry] : sources(entry)
+        )
+      : [];
+  for (const [name, directory] of workspaceDirectories()) {
+    const { exports } = readManifest(path.relative(repository, directory));
+    for (const source of sources(exports)) {
+      assert.ok(fs.existsSync(path.join(directory, source)), `${name} exports missing ${source}`);
+    }
+  }
+});
+
+// Workspace packages @strapi/strapi bundles, and @strapi/strapi itself.
+function bundledWorkspaces() {
+  const workspaces = workspaceDirectories();
+  return [
+    '@strapi/strapi',
+    ...Object.keys(readManifest('packages/core/strapi').dependencies),
+  ].flatMap((name) => (workspaces.has(name) ? [[name, workspaces.get(name)]] : []));
+}
+
+// Whether a declaration file augments the registry `Strapi.Registries.<registry>`.
+function augmentsRegistry(node, registry, namespaces = []) {
+  const currentNamespaces = ts.isModuleDeclaration(node)
+    ? [...namespaces, node.name.text]
+    : namespaces;
+  if (
+    ts.isInterfaceDeclaration(node) &&
+    node.name.text === registry &&
+    currentNamespaces.slice(-2).join('.') === 'Strapi.Registries'
+  ) {
+    return true;
+  }
+  return (
+    ts.forEachChild(node, (child) => augmentsRegistry(child, registry, currentNamespaces)) === true
+  );
+}
+
+test('bundled package declarations neither opt in to strict types nor augment Settings', () => {
+  for (const [name, directory] of bundledWorkspaces()) {
+    const dist = path.join(directory, 'dist');
+    if (fs.existsSync(dist) === false) continue;
+    for (const filename of declarations(dist)) {
+      const contents = fs.readFileSync(filename, 'utf8');
+      const { importedFiles, typeReferenceDirectives } = ts.preProcessFile(contents);
+      for (const reference of [...importedFiles, ...typeReferenceDirectives]) {
+        assert.notEqual(
+          reference.fileName,
+          '@strapi/strapi/strict-types',
+          `${filename} opts every consumer in to strict types`
+        );
+      }
+      // `@strapi/types` declares the base interface.
+      if (name === '@strapi/types') continue;
+      const source = ts.createSourceFile(filename, contents, ts.ScriptTarget.Latest);
+      assert.equal(
+        augmentsRegistry(source, 'Settings'),
+        false,
+        `${filename} augments Strapi.Registries.Settings`
+      );
+    }
+  }
+});
+
+// The member names of the `Strapi.Registries.<registry>` interfaces a declaration file declares, or
+// `null` when it declares none. The callback returns `undefined`: `ts.forEachChild` stops at the
+// first truthy result, so returning the accumulator would visit the first child only.
+function registryMembers(source, registry) {
+  let members = null;
+  const visit = (node, namespaces) => {
+    const currentNamespaces = ts.isModuleDeclaration(node)
+      ? [...namespaces, node.name.text]
+      : namespaces;
+    if (
+      ts.isInterfaceDeclaration(node) &&
+      node.name.text === registry &&
+      currentNamespaces.slice(-2).join('.') === 'Strapi.Registries'
+    ) {
+      members = [
+        ...(members ?? []),
+        ...node.members.map((member) => member.name?.getText(source) ?? ''),
+      ];
+    }
+    ts.forEachChild(node, (child) => {
+      visit(child, currentNamespaces);
+    });
+  };
+  visit(source, []);
+  return members;
+}
+
+// Only type generation declares an application's license scope. A published declaration that set
+// `Settings.licenses` or listed licensed features would apply to every program that loads it.
+test('published declarations declare no license scope and list no licensed features', () => {
+  const published = new Map([
+    ...bundledWorkspaces(),
+    ...providers.map((directory) => [
+      readManifest(directory).name,
+      path.join(repository, directory),
+    ]),
+  ]);
+  let baseDeclarations = 0;
+  for (const [name, directory] of published) {
+    const manifest = readManifest(path.relative(repository, directory));
+    const dist = path.join(directory, 'dist');
+    const files = [
+      ...(fs.existsSync(dist) ? declarations(dist) : []),
+      // Entry points published next to `dist`, such as `@strapi/strapi/strict-types`.
+      ...(manifest.files ?? [])
+        .filter((file) => file.endsWith('.d.ts'))
+        .map((file) => path.join(directory, file)),
+    ];
+    for (const filename of files) {
+      const source = ts.createSourceFile(
+        filename,
+        fs.readFileSync(filename, 'utf8'),
+        ts.ScriptTarget.Latest
+      );
+      assert.equal(
+        (registryMembers(source, 'Settings') ?? []).includes('licenses'),
+        false,
+        `${filename} sets Strapi.Registries.Settings.licenses`
+      );
+      const licensed = registryMembers(source, 'LicensedFeatures');
+      if (licensed === null) continue;
+      // `@strapi/types` declares the empty base interface.
+      assert.ok(
+        name === '@strapi/types' && licensed.length === 0,
+        `${filename} declares Strapi.Registries.LicensedFeatures`
+      );
+      baseDeclarations += 1;
+    }
+  }
+  // Proves the walk reaches registry declarations.
+  assert.equal(baseDeclarations, 1, 'The base LicensedFeatures declaration was not found once');
+});
+
+// Only type generation writes the application's schemas. A package declares its own content types
+// in `PackageContentTypeSchemas`, which generated entries replace UID by UID.
+test('bundled package declarations declare content-type schemas only in PackageContentTypeSchemas', () => {
+  let packageSchemas = 0;
+  for (const [name, directory] of bundledWorkspaces()) {
+    // `@strapi/types` declares the base interfaces.
+    if (name === '@strapi/types') continue;
+    const dist = path.join(directory, 'dist');
+    if (fs.existsSync(dist) === false) continue;
+    for (const filename of declarations(dist)) {
+      const contents = fs.readFileSync(filename, 'utf8');
+      const source = ts.createSourceFile(filename, contents, ts.ScriptTarget.Latest);
+      assert.equal(
+        augmentsRegistry(source, 'AppContentTypeSchemas'),
+        false,
+        `${filename} augments Strapi.Registries.AppContentTypeSchemas, which only type generation writes`
+      );
+      if (augmentsRegistry(source, 'PackageContentTypeSchemas') === true) packageSchemas += 1;
+    }
+  }
+  // Upload declares its schemas: proves the walk reaches registry augmentations.
+  assert.notEqual(packageSchemas, 0, 'No bundled package declares PackageContentTypeSchemas');
+});
+
+// Source files of a workspace package that register contracts, tests excluded.
+function registersContracts(directory) {
+  const visit = (current) =>
+    fs.readdirSync(current, { withFileTypes: true }).some((entry) => {
+      const filename = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        return ['node_modules', 'dist', '__tests__', 'tests'].includes(entry.name) === false
+          ? visit(filename)
+          : false;
+      }
+      return (
+        /\.tsx?$/.test(entry.name) &&
+        /interface (?:Package(?:Services|Controllers|Policies|Middlewares|Configs|ContentTypeSchemas)|Hooks)\b/.test(
+          fs.readFileSync(filename, 'utf8')
+        )
+      );
+    });
+  return ['src', 'server'].some(
+    (name) => fs.existsSync(path.join(directory, name)) && visit(path.join(directory, name))
+  );
+}
+
+test('@strapi/strapi/strict-types loads exactly the bundled packages that register contracts', () => {
+  const workspaces = workspaceDirectories();
+  const strictTypes = fs.readFileSync(
+    path.join(repository, 'packages/core/strapi/strict-types.d.ts'),
+    'utf8'
+  );
+  const listed = ts
+    .preProcessFile(strictTypes)
+    .typeReferenceDirectives.map(({ fileName }) => fileName.split('/').slice(0, 2).join('/'))
+    // `@strapi/types/strict` is the opt-in, not a provider.
+    .filter((name) => name !== '@strapi/types');
+  const bundled = Object.keys(readManifest('packages/core/strapi').dependencies).filter(
+    (name) => name !== '@strapi/types' && workspaces.has(name)
+  );
+
+  for (const name of bundled) {
+    if (registersContracts(workspaces.get(name)) === true) {
+      assert.ok(listed.includes(name), `${name} registers contracts but strict-types omits it`);
+    }
+  }
+  for (const name of listed) {
+    assert.ok(
+      bundled.includes(name),
+      `strict-types lists ${name}, which @strapi/strapi does not bundle`
+    );
+    assert.ok(
+      registersContracts(workspaces.get(name)) === true,
+      `strict-types lists ${name}, which registers no contract`
+    );
+  }
+});
+
+test('published middleware configs do not need third-party @types packages', () => {
+  // Applications do not install `@types/koa-compress` or `@types/koa-static`, and `koa-favicon`
+  // ships no types.
+  for (const name of ['compression', 'public', 'favicon']) {
+    const filename = path.join(repository, 'packages/core/core/dist/middlewares', `${name}.d.ts`);
+    const { importedFiles } = ts.preProcessFile(fs.readFileSync(filename, 'utf8'));
+    for (const imported of importedFiles) {
+      assert.doesNotMatch(
+        imported.fileName,
+        /^koa-(?:compress|static|favicon)$/,
+        `${filename} imports ${imported.fileName}`
+      );
+    }
+  }
+});
+
+// Generate `services.ts` and `controllers.ts` for `app/src/api` (or `api`), as an application
+// with strict types does, for the given registered UIDs.
+async function generateContracts(appDir, registered, api = fixture('app/src/api')) {
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const { generators } = require('@strapi/typescript-utils');
+  const strapi = {
+    dirs: { app: { api } },
+    services: Object.fromEntries(registered.services.map((uid) => [uid, {}])),
+    controllers: Object.fromEntries((registered.controllers ?? []).map((uid) => [uid, {}])),
+  };
+  await generators.generate({
+    strapi,
+    pwd: appDir,
+    artifacts: { services: true, controllers: true },
+    logger: { silent: true },
+  });
+  const files = ['services', 'controllers'].map((name) =>
+    path.join(appDir, `types/generated/${name}.ts`)
+  );
+  return {
+    files,
+    services: fs.readFileSync(files[0], 'utf8'),
+    controllers: fs.readFileSync(files[1], 'utf8'),
+  };
+}
+
+// Type generation writes the license scope of an application with strict types into `strict.d.ts`,
+// from `typescript.licensedFeatures`. A program without it, such as a plugin or an application
+// that opts in by hand, keeps the unknown scope. Each fixture checks, in one scope, the gated
+// contracts of `licensed-provider.d.ts` and the licensed attributes that review workflows and the
+// provider add to the generated schemas of `licensed-schemas.d.ts`; each bundled fixture checks
+// those of the packages bundled with `@strapi/strapi` (review workflows, content releases, content
+// history).
+const licensedFiles = ['licensed-provider.d.ts', 'licensed-schemas.d.ts'];
+const licenseScopes = [
+  { scope: 'unknown', fixture: 'licensed-unknown.ts', bundled: 'licensed-bundled-unknown.ts' },
+  {
+    scope: 'no licensedFeatures',
+    licensedFeatures: undefined,
+    fixture: 'licensed-none.ts',
+    bundled: 'licensed-bundled-none.ts',
+  },
+  {
+    scope: "licensedFeatures: ['review-workflows']",
+    licensedFeatures: ['review-workflows'],
+    fixture: 'licensed-review-workflows.ts',
+    bundled: 'licensed-bundled-review-workflows.ts',
+  },
+  {
+    scope: "licensedFeatures: ['licensed']",
+    licensedFeatures: ['licensed'],
+    fixture: 'licensed-only.ts',
+    // No bundled package gates a contract on `'licensed'` alone.
+    bundled: 'licensed-bundled-none.ts',
+  },
+  {
+    scope: "licensedFeatures: ['audit-logs']",
+    licensedFeatures: ['audit-logs'],
+    fixture: 'licensed-audit-logs.ts',
+    // Only the admin gates a contract on `audit-logs`: its fixture checks it.
+    bundled: 'licensed-bundled-none.ts',
+  },
+];
+
+// The files that set the scope of a program: the generated `strict.d.ts`, or a hand opt-in for the
+// unknown scope. Generated in `appDir`.
+async function licenseScopeFiles(appDir, scope) {
+  if (Object.hasOwn(scope, 'licensedFeatures') === false) return ['strapi-strict.d.ts'];
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const { generators } = require('@strapi/typescript-utils');
+  const typescript =
+    scope.licensedFeatures === undefined ? {} : { licensedFeatures: scope.licensedFeatures };
+  await generators.generate({
+    strapi: {
+      config: {
+        get(name, fallback) {
+          const [namespace, key] = name.split('.');
+          return namespace === 'typescript' && Object.hasOwn(typescript, key)
+            ? typescript[key]
+            : fallback;
+        },
+      },
+    },
+    pwd: appDir,
+    artifacts: { strict: true },
+    logger: { silent: true },
+  });
+  return [path.join(appDir, 'types/generated/strict.d.ts')];
+}
+
+// Runs `check` with the scope files of every license scope, then removes the generated files.
+async function withLicenseScopes(check) {
+  const appDirs = [];
+  try {
+    const scopes = [];
+    for (const scope of licenseScopes) {
+      const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+      appDirs.push(appDir);
+      scopes.push({ ...scope, files: await licenseScopeFiles(appDir, scope) });
+    }
+    check(scopes);
+  } finally {
+    for (const appDir of appDirs) fs.rmSync(appDir, { recursive: true, force: true });
+  }
+}
+
+for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
+  const options = { ...baseOptions, ...resolutionOptions };
+  const compile = compiler(options);
+
+  test(`${resolution}: license-gated contracts and attributes follow the program's license scope`, async () => {
+    await withLicenseScopes((scopes) => {
+      for (const { scope, files, fixture, bundled } of scopes) {
+        assertClean(
+          compile([...files, ...licensedFiles, fixture]),
+          `${resolution}, license scope ${scope}`
+        );
+        assertClean(compile([...files, bundled]), `${resolution}, license scope ${scope}, bundled`);
+      }
+    });
+    assertClean(
+      compile(['licensed-provider.d.ts', 'licensed-permissive.ts']),
+      `${resolution}, license scope without strict types`
+    );
+  });
+
+  for (const provider of [
+    'i18n',
+    'content-manager',
+    'graphql',
+    'email',
+    'documentation',
+    'upload',
+    'content-type-builder',
+    'review-workflows',
+  ]) {
+    test(`${resolution}: ${provider} contracts reach application consumers`, () => {
+      assertClean(
+        compile(['settings.d.ts', `${provider}-adoption.ts`]),
+        `${resolution}, ${provider} registered contracts`
+      );
+      assertClean(
+        compile([`${provider}-adoption-permissive.ts`]),
+        `${resolution}, ${provider} compatibility without strict contracts`
+      );
+    });
+  }
+
+  test(`${resolution}: registry helpers check factories and names against contracts`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'registry-helpers.ts']),
+      `${resolution}, registry helpers with strict types`
+    );
+    assertClean(
+      compile(['registry-helpers-permissive.ts']),
+      `${resolution}, registry helpers without strict types`
+    );
+  });
+
+  test(`${resolution}: config defaults preserve inferred nullability`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'config-defaults.ts']),
+      `${resolution}, registered config defaults`
+    );
+  });
+
+  test(`${resolution}: an empty policy inventory accepts no reference`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'policies-empty.ts']),
+      `${resolution}, empty policy inventory`
+    );
+  });
+
+  test(`${resolution}: permission action IDs are checked once any is registered`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'permission-actions.ts']),
+      `${resolution}, registered permission actions`
+    );
+    assertClean(
+      compile(['settings.d.ts', 'permission-actions-empty.ts']),
+      `${resolution}, empty permission action registry`
+    );
+    assertClean(
+      compile(['permission-actions-permissive.ts']),
+      `${resolution}, permission actions without strict types`
+    );
+  });
+
+  test(`${resolution}: a loose policy config keeps references checked`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'policies-loose.d.ts', 'policies-loose.ts']),
+      `${resolution}, policy configs typed any or unresolved`
+    );
+  });
+
+  test(`${resolution}: the upload service accepts hand-built files`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'upload-files.ts']),
+      `${resolution}, hand-built upload files`
+    );
+  });
+
+  test(`${resolution}: action providers check declared permission action IDs`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'action-provider.ts']),
+      `${resolution}, action provider registration`
+    );
+    assertClean(
+      compile(['action-provider-permissive.ts']),
+      `${resolution}, action provider without strict types`
+    );
+  });
+
+  test(`${resolution}: an empty middleware inventory accepts no name`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'middlewares-empty.ts']),
+      `${resolution}, empty middleware inventory`
+    );
+  });
+
+  test(`${resolution}: bundled middleware contracts type route middlewares and lookups`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'middlewares.ts']),
+      `${resolution}, bundled middleware contracts`
+    );
+  });
+
+  test(`${resolution}: relative policy names preserve registered config contracts`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'policy-namespaces.ts']),
+      `${resolution}, relative policy contracts`
+    );
+    assertClean(
+      compile(['policies.d.ts', 'policy-namespaces-permissive.ts']),
+      `${resolution}, relative policy compatibility without strict contracts`
+    );
+  });
+
+  test(`${resolution}: ordinary Strapi entry does not activate strict registries`, () => {
+    assertClean(compile(['normal-entry.ts']), `${resolution}, ordinary Strapi entry`);
+  });
+
+  test(`${resolution}: one application import enables bundled contracts`, () => {
+    assertClean(
+      compile([
+        'strapi-strict.d.ts',
+        'generated-strict.d.ts',
+        'common.ts',
+        'strict.ts',
+        'bundled-providers.ts',
+      ]),
+      `${resolution}, single application opt-in`
+    );
+  });
+
+  test(`${resolution}: application opt-in works through compilerOptions.types`, () => {
+    assertClean(
+      compile(['generated-strict.d.ts', 'common.ts', 'strict.ts', 'bundled-providers.ts'], {
+        types: ['@strapi/strapi/strict-types'],
+      }),
+      `${resolution}, application compilerOptions.types opt-in`
+    );
+  });
+
+  test(`${resolution}: generated plugin contracts follow installation without activating strictness`, async () => {
+    // This consumer test exercises the generator workspace's published entry.
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const generatedFile = path.join(appDir, 'types/generated/plugins.d.ts');
+    const manifest = readManifest('packages/plugins/sentry');
+    let enabledPlugins = {
+      sentry: {
+        enabled: true,
+        pathToPlugin: path.join(repository, 'packages/plugins/sentry'),
+        packageInfo: manifest,
+        info: { packageName: manifest.name },
+      },
+    };
+    const strapi = {
+      get plugins() {
+        return Object.fromEntries(Object.keys(enabledPlugins).map((name) => [name, {}]));
+      },
+      config: {
+        get(name) {
+          return name === 'enabledPlugins' ? enabledPlugins : { [manifest.name]: manifest.version };
+        },
+      },
+    };
+    const generate = () =>
+      generators.generate({
+        strapi,
+        pwd: appDir,
+        artifacts: { plugins: true },
+        logger: { silent: true },
+      });
+
+    try {
+      fs.writeFileSync(
+        path.join(appDir, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            module: ts.ModuleKind[resolutionOptions.module],
+            moduleResolution: resolution,
+          },
+        })
+      );
+      await generate();
+      assert.equal(
+        fs.readFileSync(generatedFile, 'utf8'),
+        "import type {} from '@strapi/plugin-sentry/strapi-server';\n"
+      );
+      assertClean(
+        compiler(options)([
+          generatedFile,
+          'normal-entry.ts',
+          'generated.d.ts',
+          'common.ts',
+          'permissive.ts',
+        ]),
+        `${resolution}, generated contracts without opt-in`
+      );
+      assertClean(
+        compiler(options)([
+          generatedFile,
+          'strapi-strict.d.ts',
+          'generated-strict.d.ts',
+          'common.ts',
+          'strict.ts',
+          'defaults.ts',
+        ]),
+        `${resolution}, generated optional contracts with one opt-in`
+      );
+
+      enabledPlugins = {};
+      await generate();
+      assert.equal(fs.readFileSync(generatedFile, 'utf8'), 'export {};\n');
+      assertClean(
+        compiler(options)([generatedFile, 'strapi-strict.d.ts', 'bundled-providers.ts']),
+        `${resolution}, removed plugin contracts after regeneration`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
+  test(`${resolution}: generated application controllers resolve in strict mode`, async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const generatedFile = path.join(appDir, 'types/generated/controllers.ts');
+    const strapi = {
+      dirs: { app: { api: fixture('app/src/api') } },
+      // `helpers` has no default export; plugin controllers are left to their packages.
+      controllers: Object.fromEntries(
+        [
+          'api::article.article',
+          'api::article.report',
+          'api::article.helpers',
+          'plugin::i18n.locales',
+        ].map((uid) => [uid, {}])
+      ),
+    };
+
+    try {
+      await generators.generate({
+        strapi,
+        pwd: appDir,
+        artifacts: { controllers: true },
+        logger: { silent: true },
+      });
+      const generated = fs.readFileSync(generatedFile, 'utf8');
+      assert.match(generated, /interface AppControllers/);
+      assert.doesNotMatch(generated, /plugin::/);
+      assertClean(
+        compiler(options)([
+          generatedFile,
+          'settings.d.ts',
+          'generated-strict.d.ts',
+          'controllers.ts',
+        ]),
+        `${resolution}, generated application controllers`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
+  test(`${resolution}: generated application contracts resolve in strict mode`, async () => {
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    try {
+      const generated = await generateContracts(appDir, {
+        services: ['api::article.article', 'api::article.stats', 'api::article.legacy'],
+        controllers: ['api::article.stats'],
+      });
+      assert.match(generated.services, /'api::article\.article': ServiceContractOf</);
+      assert.match(generated.services, /'api::article\.legacy': ServiceInstance</);
+      assert.match(generated.controllers, /'api::article\.stats': ControllerContractOf</);
+      assertClean(
+        compiler(options)([
+          ...generated.files,
+          'settings.d.ts',
+          'generated-strict.d.ts',
+          'contracts.ts',
+        ]),
+        `${resolution}, generated application contracts`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
+  test(`${resolution}: generated application policies resolve in strict mode`, async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const generatedFile = path.join(appDir, 'types/generated/policies.ts');
+    const strapi = {
+      dirs: { app: { api: fixture('app/src/api'), policies: fixture('app/src/policies') } },
+      // Package policies are left to their packages.
+      policies: Object.fromEntries(
+        [
+          'global::isOwner',
+          'global::isPublic',
+          'global::legacy',
+          'api::article.has-role',
+          'admin::isAuthenticatedAdmin',
+        ].map((uid) => [uid, () => true])
+      ),
+    };
+
+    try {
+      await generators.generate({
+        strapi,
+        pwd: appDir,
+        artifacts: { policies: true },
+        logger: { silent: true },
+      });
+      const generated = fs.readFileSync(generatedFile, 'utf8');
+      assert.match(generated, /interface AppPolicies/);
+      assert.doesNotMatch(generated, /admin::/);
+      assertClean(
+        compiler(options)([generatedFile, 'strapi-strict.d.ts', 'app-policies.ts']),
+        `${resolution}, generated application policies`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
+  test(`${resolution}: generated application middlewares resolve in strict mode`, async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const generatedFile = path.join(appDir, 'types/generated/middlewares.ts');
+    const strapi = {
+      dirs: { app: { api: fixture('app/src/api'), middlewares: fixture('app/src/middlewares') } },
+      // Bundled middlewares are left to their packages.
+      middlewares: Object.fromEntries(
+        [
+          'global::rateLimit',
+          'global::timer',
+          'global::legacy',
+          'global::koaHandler',
+          'global::ctxHandler',
+          'api::article.audit-log',
+          'strapi::cors',
+        ].map((uid) => [uid, () => undefined])
+      ),
+    };
+
+    try {
+      await generators.generate({
+        strapi,
+        pwd: appDir,
+        artifacts: { middlewares: true },
+        logger: { silent: true },
+      });
+      const generated = fs.readFileSync(generatedFile, 'utf8');
+      assert.match(generated, /interface AppMiddlewares/);
+      assert.doesNotMatch(generated, /strapi::/);
+      assertClean(
+        compiler(options)([generatedFile, 'strapi-strict.d.ts', 'app-middlewares.ts']),
+        `${resolution}, generated application middlewares`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
+  test(`${resolution}: normal package entries resolve to emitted declarations`, () => {
+    for (const directory of [...providers, 'packages/core/types', 'packages/core/strapi']) {
+      const manifest = readManifest(directory);
+      const subpath = providers.includes(directory) ? './strapi-server' : '.';
+      const specifier = manifest.name + (subpath === '.' ? '' : '/strapi-server');
+      const resolved = ts.resolveModuleName(specifier, fixture('common.ts'), options, ts.sys);
+      assert.ok(resolved.resolvedModule, `Cannot resolve ${specifier} with ${resolution}`);
+      const expected = path.join(repository, directory, manifest.exports[subpath].types);
+      assert.equal(
+        fs.realpathSync(resolved.resolvedModule.resolvedFileName),
+        fs.realpathSync(expected),
+        `${specifier} must resolve through its real package manifest with ${resolution}`
+      );
+    }
+  });
+
+  for (const strict of [false, true]) {
+    const mode = strict ? 'on' : 'off';
+    const settings = strict ? ['settings.d.ts'] : [];
+    const checks = strict ? ['strict.ts'] : ['permissive.ts'];
+
+    test(`${resolution}: switch ${mode}, package defaults`, () => {
+      const program = compile([
+        generatedSchemas(strict),
+        'i18n.d.ts',
+        'sentry.d.ts',
+        'policies.d.ts',
+        ...settings,
+        'common.ts',
+        ...checks,
+        ...(strict ? ['defaults.ts'] : []),
+      ]);
+      assertClean(program, `${resolution}, switch ${mode}, package defaults`);
+    });
+
+    test(`${resolution}: switch ${mode}, application overrides in all 24 declaration orders`, () => {
+      for (const order of orders(strict)) {
+        const program = compile([
+          ...order,
+          'policies.d.ts',
+          ...settings,
+          'common.ts',
+          ...checks,
+          ...(strict ? ['application.ts'] : []),
+        ]);
+        assertClean(program, `${resolution}, switch ${mode}, ${order.join(' > ')}`);
+      }
+    });
+
+    test(`${resolution}: switch ${mode}, registered names remain available in completions`, () => {
+      const filename = fixture('completions.ts');
+      const source = fs.readFileSync(filename, 'utf8');
+      const service = ts.createLanguageService({
+        ...ts.sys,
+        // ts.sys.useCaseSensitiveFileNames is a boolean, but LanguageServiceHost expects a function.
+        // Spreading ts.sys as-is crashes on case-sensitive file systems (Linux CI), where the value
+        // is `true` and TypeScript calls it.
+        useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
+        getCompilationSettings: () => options,
+        getCurrentDirectory: () => repository,
+        getScriptFileNames: () =>
+          ['i18n.d.ts', 'sentry.d.ts', 'policies.d.ts', ...settings, 'completions.ts'].map((name) =>
+            fixture(name)
+          ),
+        getScriptVersion: () => '0',
+        getScriptSnapshot(name) {
+          const contents = ts.sys.readFile(name);
+          return contents === undefined ? undefined : ts.ScriptSnapshot.fromString(contents);
+        },
+        getDefaultLibFileName: (settings) => ts.getDefaultLibFilePath(settings),
+      });
+      try {
+        const locations = [
+          ["app.plugin('", ['i18n', 'sentry', 'content-manager']],
+          ["app.api('", ['article']],
+          [
+            "app.service('",
+            ['plugin::i18n.locales', 'plugin::sentry.sentry', 'api::article.article'],
+          ],
+          ["app.controller('", ['plugin::i18n.locales', 'api::article.article']],
+          [
+            "app.policy('",
+            ['admin::isAuthenticatedAdmin', 'plugin::content-manager.hasPermissions'],
+          ],
+          ["handler: '", ['locales.listLocales', 'plugin::i18n.locales.listLocales']],
+          ["policies: ['", ['admin::isAuthenticatedAdmin']],
+          ["app.middleware('", ['admin::rateLimit', 'admin::data-transfer']],
+          ["middlewares: ['", ['admin::rateLimit']],
+          // With the switch on, editors list no name inside `{ name: '' }`: the inline handler
+          // member has `Function.name: string`, which matches any string being typed, so the object
+          // literal is typed as the handler. Bare names are listed.
+          ...(strict ? [] : [["middlewares: [{ name: '", ['admin::rateLimit']]]),
+          [
+            "policies: [{ name: '",
+            ['admin::hasPermissions', 'plugin::content-manager.hasPermissions'],
+          ],
+          // Config paths, the maps, plugin and API member lookups, and policy config contracts are
+          // typed only with the switch on: without it, `config.get(path)`, `plugin(name)` and
+          // `api(name)` keep develop's non-generic signatures, so nothing can depend on the argument.
+          ...(strict
+            ? [
+                ["app.config.get('", ['plugin::sentry']],
+                // Dotted paths list one level at a time, so large contracts stay out of the list.
+                [
+                  "app.config.get('plugin::sentry.",
+                  ['plugin::sentry.dsn', 'plugin::sentry.init'],
+                  ['plugin::sentry.init.dsn'],
+                ],
+                ["app.config.get('plugin::sentry.init.", ['plugin::sentry.init.dsn']],
+                ["app.plugin('sentry').config('", ['dsn', 'sendMetadata', 'init'], ['init.dsn']],
+                ["app.plugin('sentry').config('init.", ['init.dsn', 'init.debug']],
+                ["app.plugin('i18n').service('", ['locales']],
+                ["app.plugin('i18n').controller('", ['locales', 'iso-locales']],
+                ["app.api('article').service('", ['article']],
+                ["app.api('article').controller('", ['article']],
+                ["app.api('article').policy('", ['isOwner']],
+                ["app.plugin('content-manager').policy('", ['hasPermissions']],
+                ["app.services['", ['plugin::i18n.locales', 'admin::auth']],
+                ['app.plugins.', ['i18n', 'sentry']],
+                ["hasPermissions', config: {", ['actions', 'hasAtLeastOne']],
+                ["admin::rateLimit', config: {", ['max', 'interval']],
+              ]
+            : []),
+        ];
+        for (const [prefix, expected, unexpected = []] of locations) {
+          const offset = source.indexOf(prefix);
+          assert.notEqual(offset, -1, `Missing completion location ${prefix}`);
+          const completion = service.getCompletionsAtPosition(filename, offset + prefix.length, {});
+          const names = completion?.entries.map((entry) => entry.name) ?? [];
+          for (const name of expected) {
+            assert.ok(
+              names.includes(name),
+              `${prefix} should suggest ${name}; got ${names.join(', ')}`
+            );
+          }
+          for (const name of unexpected) {
+            assert.ok(names.includes(name) === false, `${prefix} should not suggest ${name}`);
+          }
+        }
+      } finally {
+        service.dispose();
+      }
+    });
+  }
+
+  // `baseOptions` already sets `exactOptionalPropertyTypes`. Strict-off fixtures and `strict.ts` read
+  // unregistered services through develop's index signatures, which this flag rejects by design.
+  test(`${resolution}: strict fixtures compile with noPropertyAccessFromIndexSignature`, () => {
+    for (const names of [
+      ['settings.d.ts', 'i18n-adoption.ts'],
+      ['settings.d.ts', 'content-manager-adoption.ts'],
+      ['settings.d.ts', 'registry-helpers.ts'],
+      ['settings.d.ts', 'graphql-adoption.ts'],
+      ['settings.d.ts', 'email-adoption.ts'],
+      ['settings.d.ts', 'documentation-adoption.ts'],
+      ['settings.d.ts', 'upload-adoption.ts'],
+      ['settings.d.ts', 'content-type-builder-adoption.ts'],
+      ['settings.d.ts', 'review-workflows-adoption.ts'],
+      ['settings.d.ts', 'config-defaults.ts'],
+      ['strapi-strict.d.ts', 'middlewares.ts'],
+      ['strapi-strict.d.ts', 'policy-namespaces.ts'],
+      ['settings.d.ts', 'policies-loose.d.ts', 'policies-loose.ts'],
+      ['settings.d.ts', 'permission-actions.ts'],
+      ['strapi-strict.d.ts', 'upload-files.ts'],
+      ['strapi-strict.d.ts', 'action-provider.ts'],
+      ['settings.d.ts', 'schemas.ts'],
+      ['settings.d.ts', 'document-write.ts'],
+      ['settings.d.ts', 'package-schemas.d.ts', 'package-schemas-open.ts'],
+      [
+        'settings.d.ts',
+        'package-schemas.d.ts',
+        'package-schemas-generated.d.ts',
+        'package-schemas-app.ts',
+      ],
+      ['strapi-strict.d.ts', 'generated-strict.d.ts', 'common.ts', 'bundled-providers.ts'],
+      [
+        generatedSchemas(true),
+        'i18n.d.ts',
+        'sentry.d.ts',
+        'overrides.d.ts',
+        'policies.d.ts',
+        'settings.d.ts',
+        'common.ts',
+        'application.ts',
+      ],
+    ]) {
+      assertClean(
+        compile(names, { noPropertyAccessFromIndexSignature: true }),
+        `${resolution}, noPropertyAccessFromIndexSignature, ${names.join(', ')}`
+      );
+    }
+  });
+
+  test(`${resolution}: compilerOptions.types can enable strict registries`, () => {
+    const program = compile(
+      [
+        'generated-strict.d.ts',
+        'i18n.d.ts',
+        'sentry.d.ts',
+        'policies.d.ts',
+        'common.ts',
+        'strict.ts',
+        'defaults.ts',
+      ],
+      { types: ['@strapi/types/strict'] }
+    );
+    assertClean(program, `${resolution}, compilerOptions.types activation`);
+  });
+
+  test(`${resolution}: generated global schemas narrow schema lookups in strict mode`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'schemas.ts']),
+      `${resolution}, strict generated schemas`
+    );
+  });
+
+  test(`${resolution}: the Document Service types fields, filters and populate in strict mode`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'document-service.ts']),
+      `${resolution}, Document Service on registered schemas`
+    );
+  });
+
+  test(`${resolution}: Document Service write inputs follow the validator in strict mode`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'document-write.ts']),
+      `${resolution}, Document Service write inputs`
+    );
+  });
+
+  test(`${resolution}: package schemas are precise without generated schemas, other UIDs stay generic`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'package-schemas.d.ts', 'package-schemas-open.ts']),
+      `${resolution}, package schemas without generated schemas`
+    );
+  });
+
+  test(`${resolution}: generated schemas replace package schemas for the same UID`, () => {
+    assertClean(
+      compile([
+        'settings.d.ts',
+        'package-schemas.d.ts',
+        'package-schemas-generated.d.ts',
+        'package-schemas-app.ts',
+      ]),
+      `${resolution}, package and generated schemas`
+    );
+  });
+
+  test(`${resolution}: strict registries without contracts accept template UIDs`, () => {
+    const program = compile(['strict-empty.ts'], { types: ['@strapi/types/strict'] });
+    assertClean(program, `${resolution}, strict registries without contracts`);
+  });
+}
+
+// Each license scope fixture fails in every other scope, so that a gate that ignored the scope
+// would not pass them all.
+test('license scope fixtures fail in the other scopes', async () => {
+  const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+  const fixtureErrors = (program, name) =>
+    diagnostics(program).filter((diagnostic) => diagnostic.file?.fileName === fixture(name)).length;
+  await withLicenseScopes((scopes) => {
+    for (const program of scopes) {
+      for (const { scope, fixture: name } of scopes) {
+        if (scope === program.scope) continue;
+        assert.notEqual(
+          fixtureErrors(compile([...program.files, ...licensedFiles, name]), name),
+          0,
+          `${name} (license scope ${scope}) passes with license scope ${program.scope}`
+        );
+      }
+      for (const { scope, bundled } of scopes) {
+        if (bundled === program.bundled) continue;
+        assert.notEqual(
+          fixtureErrors(compile([...program.files, bundled]), bundled),
+          0,
+          `${bundled} (license scope ${scope}) passes with license scope ${program.scope}`
+        );
+      }
+    }
+  });
+  // The fixture without strict types fails with them.
+  assert.notEqual(
+    fixtureErrors(
+      compile(['strapi-strict.d.ts', 'licensed-provider.d.ts', 'licensed-permissive.ts']),
+      'licensed-permissive.ts'
+    ),
+    0,
+    'licensed-permissive.ts passes with strict types'
+  );
+});
+
+// The generated application modules import their sources with relative paths. An ECMAScript module
+// (`"type": "module"`) resolved with NodeNext needs the extension of each one (TS2835).
+const moduleSetups = {
+  'CommonJS, Node': { type: 'commonjs', ...resolutions.Node },
+  'CommonJS, Bundler': { type: 'commonjs', ...resolutions.Bundler },
+  'CommonJS, NodeNext': { type: 'commonjs', ...resolutions.NodeNext },
+  'ESM, NodeNext': { type: 'module', ...resolutions.NodeNext },
+};
+
+for (const [setup, { type, ...resolutionOptions }] of Object.entries(moduleSetups)) {
+  test(`${setup}: generated application modules resolve their sources in strict mode`, async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const registered = (uids, value) => Object.fromEntries(uids.map((uid) => [uid, value]));
+    const artifacts = ['services', 'controllers', 'policies', 'middlewares'];
+
+    try {
+      // The sources and the generated files share the application's module format.
+      fs.writeFileSync(path.join(appDir, 'package.json'), JSON.stringify({ type }));
+      const src = path.join(appDir, 'src');
+      fs.cpSync(fixture('app/src'), src, { recursive: true });
+      await generators.generate({
+        strapi: {
+          dirs: {
+            app: {
+              api: path.join(src, 'api'),
+              policies: path.join(src, 'policies'),
+              middlewares: path.join(src, 'middlewares'),
+            },
+          },
+          services: registered(
+            ['api::article.article', 'api::article.stats', 'api::article.legacy'],
+            {}
+          ),
+          controllers: registered(
+            [
+              'api::article.article',
+              'api::article.report',
+              'api::article.helpers',
+              'api::article.stats',
+            ],
+            {}
+          ),
+          policies: registered(
+            ['global::isOwner', 'global::isPublic', 'global::legacy', 'api::article.has-role'],
+            () => true
+          ),
+          middlewares: registered(
+            [
+              'global::rateLimit',
+              'global::timer',
+              'global::legacy',
+              'global::koaHandler',
+              'global::ctxHandler',
+              'api::article.audit-log',
+            ],
+            () => undefined
+          ),
+        },
+        pwd: appDir,
+        artifacts: Object.fromEntries(artifacts.map((artifact) => [artifact, true])),
+        logger: { silent: true },
+      });
+      const generated = artifacts.map((artifact) =>
+        path.join(appDir, `types/generated/${artifact}.ts`)
+      );
+      assertClean(
+        compiler({ ...baseOptions, ...resolutionOptions })([
+          ...generated,
+          'settings.d.ts',
+          'generated-strict.d.ts',
+          'strapi-strict.d.ts',
+          'contracts.ts',
+          'controllers.ts',
+          'app-policies.ts',
+          'app-middlewares.ts',
+        ]),
+        `${setup}, generated application modules`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+}
+
+// Strict-off parity fixtures (`parity-<surface>.ts`) compile against develop too: their expected
+// errors are develop's. `*.isolated.ts` fixtures augment registries that affect every file, so each
+// gets its own program. Fixtures starting with `// @parity-settings: strict` expect diagnostics that
+// only the `strict` compiler option reports. Options mirror the generated application tsconfig.
+const parityFixtures = fs
+  .readdirSync(path.join(__dirname, 'fixtures'))
+  .filter((name) => name.startsWith('parity-') && name.endsWith('.ts'))
+  .sort();
+const isStrictParityFixture = (name) =>
+  fs
+    .readFileSync(path.join(__dirname, 'fixtures', name), 'utf8')
+    .startsWith('// @parity-settings: strict');
+const applicationOptions = {
+  noEmit: true,
+  module: ts.ModuleKind.CommonJS,
+  moduleResolution: ts.ModuleResolutionKind.Node10,
+  lib: ['lib.es2020.d.ts'],
+  target: ts.ScriptTarget.ES2019,
+  strict: false,
+  skipLibCheck: true,
+  esModuleInterop: true,
+  resolveJsonModule: true,
+  noImplicitThis: true,
+  types: [],
+};
+
+for (const strict of [false, true]) {
+  test(`switch off, develop parity with the application tsconfig (strict: ${strict})`, () => {
+    const compile = compiler({ ...applicationOptions, strict });
+    const fixtures = parityFixtures.filter(
+      (name) => strict === true || isStrictParityFixture(name) === false
+    );
+    const shared = fixtures.filter((name) => name.endsWith('.isolated.ts') === false);
+    const isolated = fixtures.filter((name) => name.endsWith('.isolated.ts'));
+    for (const [registries, contracts] of [
+      ['empty registries', []],
+      ['provider contracts', ['i18n.d.ts', 'sentry.d.ts', 'policies.d.ts']],
+    ]) {
+      for (const names of [shared, ...isolated.map((name) => [name])]) {
+        assertClean(
+          compile([...contracts, ...names]),
+          `strict: ${strict}, ${registries}, ${names.join(', ')}`
+        );
+      }
+    }
+  });
+}
+
+test('conflicting declaration files need one contract per UID, even with the switch off', () => {
+  const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+  for (const strict of [false, true]) {
+    const files = [
+      'collision-first.d.ts',
+      'collision-second.d.ts',
+      ...(strict ? ['settings.d.ts'] : []),
+    ];
+    const checked = compile(files, { skipLibCheck: false });
+    assert.deepEqual(
+      diagnostics(checked).map((diagnostic) => diagnostic.code),
+      [2717],
+      `Conflicting contracts must report TS2717 with strict ${strict ? 'on' : 'off'}`
+    );
+    assertClean(compile(files), 'skipLibCheck suppresses declaration conflicts');
+  }
+});
+
+const packageSchemas = ['package-schemas.d.ts', 'package-schemas-generated.d.ts'];
+
+test('generated schemas win over package schemas in all 120 declaration orders', () => {
+  const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+  for (const order of orders(true, packageSchemas)) {
+    assertClean(
+      compile([...order, 'settings.d.ts', 'package-schemas-app.ts']),
+      `generated over package schemas, ${order.join(' > ')}`
+    );
+  }
+});
+
+// Only the two schema files declare content-type schemas, so their relative order is the one that
+// can raise TS2717. `skipLibCheck: false` also reports errors of dependency declarations that exist
+// without package schemas (`@casl`, `koa`, `@strapi/types` dist): the package declaration adds none.
+test('package and generated schemas of the same UID do not conflict with skipLibCheck: false', () => {
+  const compile = compiler({ ...baseOptions, ...resolutions.Bundler, skipLibCheck: false });
+  const isFixture = (diagnostic) => diagnostic.file?.fileName.startsWith(fixture('')) === true;
+  const describe = (diagnostic) =>
+    `${path.relative(repository, diagnostic.file?.fileName ?? '')} TS${diagnostic.code}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`;
+  const libDiagnostics = (program) =>
+    diagnostics(program)
+      .filter((diagnostic) => isFixture(diagnostic) === false)
+      .map(describe)
+      .sort();
+  const baseline = libDiagnostics(compile(['package-schemas-generated.d.ts', 'settings.d.ts']));
+
+  for (const order of permutations(packageSchemas)) {
+    const program = compile([...order, 'settings.d.ts', 'package-schemas-app.ts']);
+    const description = order.join(' > ');
+    assert.deepEqual(diagnostics(program).filter(isFixture).map(describe), [], description);
+    assert.deepEqual(libDiagnostics(program), baseline, description);
+  }
+});
+
+test('a factory checked against its own inferred uid fails with TS2344 in every check order', async () => {
+  const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+  try {
+    const generated = await generateContracts(appDir, {
+      services: ['api::article.cycle'],
+      controllers: ['api::article.cycle'],
+    });
+    assert.match(generated.services, /'api::article\.cycle': ServiceInstance</);
+    assert.match(
+      generated.services,
+      /interface InferredServices \{\s*'api::article\.cycle': true;/
+    );
+    assert.match(generated.controllers, /'api::article\.cycle': ControllerInstance</);
+    assert.match(
+      generated.controllers,
+      /interface InferredControllers \{\s*'api::article\.cycle': true;/
+    );
+    const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+    const sources = [
+      'app/src/api/article/services/cycle.ts',
+      'app/src/api/article/controllers/cycle.ts',
+    ];
+    const names = [...generated.files, 'settings.d.ts', 'generated-strict.d.ts'];
+    // The sources first, then the lookups first. A lookup checked first used to close the cycle
+    // (TS7022 in the source, an `any` lookup); the marker only has keys, so the order no longer
+    // matters. `cycle-consumer.ts` fails with TS2578 if a lookup is `any`.
+    for (const order of [
+      [...sources, ...names, 'cycle-consumer.ts'],
+      ['cycle-consumer.ts', ...names, ...sources],
+    ]) {
+      assert.deepEqual(
+        diagnostics(compile(order))
+          .map(
+            (diagnostic) =>
+              `${path.relative(fixture('.'), diagnostic.file?.fileName ?? '')} TS${diagnostic.code}`
+          )
+          .sort(),
+        sources.map((source) => `${source} TS2344`).sort(),
+        `The inferred uid is not a factory uid, checked in the order ${order.join(', ')}`
+      );
+    }
+  } finally {
+    fs.rmSync(appDir, { recursive: true, force: true });
+  }
+});
+
+test('a contract reference that no longer resolves is reported with skipLibCheck', async () => {
+  // The copy keeps the fixture's module resolution: it stays next to the fixtures.
+  const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+  try {
+    const api = path.join(appDir, 'src/api');
+    fs.cpSync(fixture('app/src/api'), api, { recursive: true });
+    const generated = await generateContracts(appDir, { services: ['api::article.stats'] }, api);
+    assert.match(generated.services, /'api::article\.stats': ServiceContractOf</);
+    // The export is renamed after the generation.
+    const source = path.join(api, 'article/services/stats.ts');
+    fs.writeFileSync(
+      source,
+      fs.readFileSync(source, 'utf8').replace('as ServiceContract', 'as StatsServiceContract')
+    );
+    const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
+    const names = [...generated.files, 'settings.d.ts', 'generated-strict.d.ts'];
+    // The generated file is a `.ts` file: skipLibCheck does not hide the stale reference. The next
+    // generation drops the contract.
+    for (const skipLibCheck of [true, false]) {
+      assert.deepEqual(
+        diagnostics(compile(names, { skipLibCheck }))
+          .filter((diagnostic) => diagnostic.file?.fileName === generated.files[0])
+          .map((diagnostic) => diagnostic.code),
+        [2694],
+        `skipLibCheck: ${skipLibCheck}`
+      );
+    }
+  } finally {
+    fs.rmSync(appDir, { recursive: true, force: true });
+  }
+});

@@ -82,7 +82,8 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
     });
 
     // Unlimited is a number that will never be reached like 9999
-    if (pendingReleasesCount >= maximumPendingReleases) {
+    // A license can list the option as a numeric string (`'5'`), which `>=` compares as a number.
+    if (pendingReleasesCount >= (maximumPendingReleases as number)) {
       throw new errors.ValidationError('You have reached the maximum number of pending releases');
     }
   },

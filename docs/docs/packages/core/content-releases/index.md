@@ -20,6 +20,8 @@ The plugin runs on the server and in the admin panel. The admin part plugs into 
 
 The plugin defines two hidden content types. `Release` (`strapi_releases`) stores the name, the status and the schedule. `Release Action` (`strapi_release_actions`) stores one action for one entry. An action links to its entry with `contentType`, `locale` and `entryDocumentId`, not with a relation, because the entry ID can change and the document ID does not. Read [Backend design](./01-backend.md).
 
+`server/src/index.ts` returns both content types whatever the license, so that their data survives a disabled feature. `server/src/types/content-types.ts` declares their schemas (`ReleaseSchema`, `ReleaseActionSchema`) for strict types, as type generation writes them. Keep them in sync with `content-types/release/schema.ts` and `content-types/release-action/schema.ts`: the drift check of `examples/strict-types` fails when they differ.
+
 ### Release's status
 
 Releases are assigned one of five statuses:

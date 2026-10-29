@@ -21,6 +21,7 @@ import { getService } from '../utils';
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
 import type { Settings } from '../controllers/validation/admin/settings';
+import type { FileFormat } from '../types/services';
 
 type User = {
   id: string | number;
@@ -373,7 +374,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     const replaceFormat = async (key: string, newFormat: UploadableFile) => {
-      const oldFormat = oldFile.formats?.[key] as File | undefined;
+      const oldFormat = oldFile.formats?.[key] as FileFormat | undefined;
       if (oldFormat) {
         await getService('provider').replace(newFormat, oldFormat);
       } else {
@@ -580,7 +581,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  async function add(values: any, opts?: CommonOptions) {
+  async function add(values: UploadableFile, opts?: CommonOptions) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -617,6 +618,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function findMany(query: any = {}): Promise<File[]> {
+    // The Content API `find` (`GET /api/upload/files`) is not paginated: its nested `pagination`
+    // is ignored and every matching file is returned, as documented. Paginated reads go through
+    // `GET /api/upload/files/page`.
     const files = await strapi.db
       .query(FILE_MODEL_UID)
       .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
@@ -805,7 +809,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @internal
      */
     _uploadImage: uploadImage,
+    /**
+     * exposed for testing only
+     * @internal
+     */
     _replaceImage: replaceImage,
+    /**
+     * exposed for testing only
+     * @internal
+     */
     _queueConcurrentOperation: queueConcurrentOperation,
   };
 };

@@ -18,6 +18,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       },
     });
   },
+  /**
+   * Sends the `didInitializePluginUpload` telemetry event with the provider name and privacy.
+   *
+   * @internal
+   */
   async sendUploadPluginMetrics() {
     const uploadProvider = getProviderName();
     const privateProvider = await isProviderPrivate();

@@ -332,13 +332,60 @@ const generateFileName = (name: string) => {
 };
 
 export default {
+  /**
+   * Whether sharp fails to read the image of a file with a `filepath`.
+   *
+   * @internal
+   */
   isFaultyImage,
+  /**
+   * Whether the file is an image that `optimize` can compress (JPEG, PNG, WebP, TIFF, AVIF).
+   *
+   * @internal
+   */
   isOptimizableImage,
+  /**
+   * Whether the file is an image that thumbnails and responsive formats can be resized from (JPEG,
+   * PNG, WebP, TIFF, GIF).
+   *
+   * @internal
+   */
   isResizableImage,
+  /**
+   * Whether the file is an image the plugin processes (the resizable formats, SVG and AVIF).
+   *
+   * @internal
+   */
   isImage,
+  /**
+   * The width and height sharp reads from the image, `null` when it has none. The admin's project
+   * settings call it for the uploaded logos.
+   */
   getDimensions,
+  /**
+   * One resized file per breakpoint smaller than the image, or none when responsive dimensions are
+   * disabled in the settings.
+   *
+   * @internal
+   */
   generateResponsiveFormats,
+  /**
+   * The thumbnail of an image larger than the thumbnail size, `null` otherwise.
+   *
+   * @internal
+   */
   generateThumbnail,
+  /**
+   * Compresses and auto-orients the image as the settings ask. The original file is returned when
+   * nothing applies or when the result would be larger.
+   *
+   * @internal
+   */
   optimize,
+  /**
+   * A slug of the name followed by a random suffix, used as the file hash.
+   *
+   * @internal
+   */
   generateFileName,
 };

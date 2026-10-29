@@ -5,7 +5,7 @@ import path from 'path';
 
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
-import type { Struct } from '@strapi/types';
+import type { Schema, Struct } from '@strapi/types';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -65,7 +65,8 @@ export default {
   },
 
   async init() {
-    let uuid = strapi.config.get('uuid', false);
+    // `false as const` keeps the published `uuid: false` result type of develop.
+    let uuid = strapi.config.get('uuid', false as const);
     const hasAdmin = await getService('user').exists();
     const { menuLogo, authLogo } = await getService('project-settings').getProjectSettings();
     // set to null if telemetryDisabled flag not avaialble in package.json
@@ -160,8 +161,9 @@ export default {
   },
 
   async information() {
-    const currentEnvironment: string = strapi.config.get('environment');
-    const autoReload = strapi.config.get('autoReload', false);
+    const currentEnvironment = strapi.config.get<string>('environment');
+    // `false as const` keeps the published `autoReload: false` result type of develop.
+    const autoReload = strapi.config.get('autoReload', false as const);
     const strapiVersion = strapi.config.get('info.strapi', null);
     const dependencies = strapi.config.get('info.dependencies', {});
     const projectId = strapi.config.get('uuid', null);
@@ -218,7 +220,9 @@ export default {
     return {
       data: {
         isFirstSuperAdminUser,
-        schemas: strapi.contentTypes,
+        // Annotated so the published declaration resolves per application, not with this package's
+        // strict types.
+        schemas: strapi.contentTypes as Schema.ContentTypes,
       },
     } satisfies GetGuidedTourMeta.Response;
   },
