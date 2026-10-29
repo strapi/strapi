@@ -292,15 +292,13 @@ const exists = async (params = {}) => {
  */
 const getNamePaths = async (paths: string[]): Promise<Record<string, string>> => {
   const segmentsByPath = paths.map((path) => path.split('/').filter(Boolean));
-  const pathIds = [...new Set(segmentsByPath.flat())].map(Number);
+  const pathIds = [...new Set(segmentsByPath.flat())].map(Number).filter(Number.isInteger);
 
-  if (pathIds.length === 0) {
-    return {};
-  }
-
-  const ancestors: Pick<Folder, 'pathId' | 'name'>[] = await strapi.db
-    .query(FOLDER_MODEL_UID)
-    .findMany({ select: ['pathId', 'name'], where: { pathId: { $in: pathIds } } });
+  const ancestors: Pick<Folder, 'pathId' | 'name'>[] = pathIds.length
+    ? await strapi.db
+        .query(FOLDER_MODEL_UID)
+        .findMany({ select: ['pathId', 'name'], where: { pathId: { $in: pathIds } } })
+    : [];
 
   const nameByPathId = new Map(ancestors.map(({ pathId, name }) => [String(pathId), name]));
 
