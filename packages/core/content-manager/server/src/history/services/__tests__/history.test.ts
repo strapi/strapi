@@ -1,12 +1,18 @@
 import type { UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import { emitAudit, errors } from '@strapi/utils';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createHistoryService } from '../history';
 
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  emitAudit: jest.fn(),
+}));
+
 const createMock = jest.fn();
+const versionFindOneMock = jest.fn();
+const documentUpdateMock = jest.fn();
 const findPageMock = jest.fn();
 const findManyMock = jest.fn();
-const findOneMock = jest.fn();
 const userId = 'user-id';
 const fakeDate = new Date('1970-01-01T00:00:00.000Z');
 
@@ -44,9 +50,9 @@ const mockStrapi = {
       if (uid === HISTORY_VERSION_UID) {
         return {
           create: createMock,
+          findOne: versionFindOneMock,
           findPage: findPageMock,
           findMany: findManyMock,
-          findOne: findOneMock,
         };
       }
     },
@@ -67,6 +73,7 @@ const mockStrapi = {
   },
   documents: jest.fn(() => ({
     findOne: mockFindOne,
+    update: documentUpdateMock,
   })),
   config: {
     get: () => undefined,
@@ -141,7 +148,6 @@ describe('history-version service', () => {
           type: 'string' as const,
         },
       },
-      componentsSchemas: {},
       status: 'draft' as const,
     };
 
@@ -167,7 +173,6 @@ describe('history-version service', () => {
       },
       locale: 'en',
       relatedDocumentId: 'randomid',
-      componentsSchemas: {},
       schema: {
         title: {
           type: 'string' as const,
@@ -234,11 +239,66 @@ describe('history-version service', () => {
     expect(results.map((result) => result.id)).toEqual([2]);
   });
 
-  it('throws a not found error when restoring an unknown version', async () => {
-    findOneMock.mockResolvedValueOnce(null);
+  describe('restoreVersion', () => {
+    const version = {
+      id: 42,
+      contentType: 'api::article.article',
+      relatedDocumentId: 'abc123',
+      locale: 'en',
+      createdAt: new Date('2026-09-10T14:02:11.000Z'),
+      schema: { title: { type: 'string' } },
+      data: { title: 'Old title' },
+    };
 
-    await expect(historyService.restoreVersion(999)).rejects.toThrow(
-      new errors.NotFoundError('History version not found')
-    );
+    beforeEach(() => {
+      jest.mocked(emitAudit).mockClear();
+      versionFindOneMock.mockResolvedValue(version);
+    });
+
+    it('restores the version and emits entry.history.restore', async () => {
+      documentUpdateMock.mockResolvedValue({ documentId: 'abc123' });
+
+      await historyService.restoreVersion(42);
+
+      expect(documentUpdateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ documentId: 'abc123', locale: 'en' })
+      );
+      expect(emitAudit).toHaveBeenCalledWith(expect.anything(), 'entry.history.restore', {
+        uid: 'api::article.article',
+        documentId: 'abc123',
+        locale: 'en',
+        versionId: 42,
+        versionCreatedAt: '2026-09-10T14:02:11.000Z',
+      });
+    });
+
+    it('records a null locale for a content type without i18n', async () => {
+      versionFindOneMock.mockResolvedValue({ ...version, locale: null });
+      documentUpdateMock.mockResolvedValue({ documentId: 'abc123' });
+
+      await historyService.restoreVersion(42);
+
+      expect(emitAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        'entry.history.restore',
+        expect.objectContaining({ locale: null })
+      );
+    });
+
+    it('does not emit when the restore fails', async () => {
+      documentUpdateMock.mockResolvedValue(null);
+
+      await expect(historyService.restoreVersion(42)).rejects.toThrow('Failed to restore version');
+
+      expect(emitAudit).not.toHaveBeenCalled();
+    });
+
+    it('throws a not found error when restoring an unknown version', async () => {
+      versionFindOneMock.mockResolvedValueOnce(null);
+
+      await expect(historyService.restoreVersion(999)).rejects.toThrow(
+        new errors.NotFoundError('History version not found')
+      );
+    });
   });
 });
