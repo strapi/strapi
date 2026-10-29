@@ -3,12 +3,14 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
+import type { AppDefinition } from '@strapi/core';
 import type { Core, Modules } from '@strapi/types';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
+import { getProgrammaticPlugins } from './core/programmatic-plugins';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 import { getScanRoots } from './core/scan-roots';
 import { getModulePath } from './core/resolve-module';
@@ -54,6 +56,13 @@ interface CreateBuildContextArgs extends CLIContext {
   options?: BaseOptions;
   /** If true, Tailwind scans source and not `dist`. E.g. for Vite development server, which serves `admin/src` */
   dev?: boolean;
+  /**
+   * A programmatic app definition (a `defineApp(...)` result). When present,
+   * the build runs in **programmatic mode**: the Strapi instance is created
+   * from the definition (no file scan) and the frontend plugin set is derived
+   * from `app.plugins` rather than scanning `package.json` (ADR-0006, Phase 2).
+   */
+  app?: AppDefinition;
 }
 
 const NEXT_DESIGN_SYSTEM_FLAG = 'unstableNextDesignSystem';
@@ -95,6 +104,7 @@ const createBuildContext = async ({
   strapi,
   options = {},
   dev = false,
+  app,
 }: CreateBuildContextArgs): Promise<BuildContext> => {
   /**
    * If you make a new strapi instance when one already exists,
@@ -110,6 +120,8 @@ const createBuildContext = async ({
       // Options
       autoReload: true,
       serveAdminPanel: false,
+      // Programmatic mode: the definition is the single source of truth.
+      app,
     });
 
   const serverAbsoluteUrl = strapiInstance.config.get<string>('server.absoluteUrl');
@@ -183,7 +195,17 @@ const createBuildContext = async ({
   const runtimeDir = path.join(cwd, '.strapi', 'client');
   const entry = path.relative(cwd, path.join(runtimeDir, 'app.js'));
 
-  const plugins = await getEnabledPlugins({ cwd, logger, runtimeDir, strapi: strapiInstance });
+  /**
+   * In programmatic mode the frontend plugin set comes from the in-memory
+   * `app.plugins` map (import-and-add, ADR-0006) — never from a `package.json`
+   * scan. A `plugins: fromDisk()` source returns `null` here and falls back to
+   * the legacy discovery.
+   */
+  const programmaticPlugins = app ? getProgrammaticPlugins({ app, cwd }) : null;
+
+  const plugins =
+    programmaticPlugins ??
+    (await getEnabledPlugins({ cwd, logger, runtimeDir, strapi: strapiInstance }));
 
   logger.debug('Enabled plugins', os.EOL, plugins);
 

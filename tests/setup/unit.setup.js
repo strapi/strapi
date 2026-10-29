@@ -9,6 +9,13 @@ Object.defineProperty(global, 'strapi', {
     return strapiInstance;
   },
   set(value) {
+    // Allow destroy / teardown to clear the instance (Node 26 cannot `delete`
+    // this non-configurable accessor; Strapi.destroy assigns undefined).
+    if (value == null) {
+      strapiInstance = value;
+      return;
+    }
+
     strapiInstance = value;
 
     strapiInstance.plugin = (name) => strapiInstance.plugins[name];

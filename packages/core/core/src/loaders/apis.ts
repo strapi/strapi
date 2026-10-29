@@ -36,13 +36,18 @@ const isDotFile = (fd: fse.Dirent) => fd.name.startsWith('.');
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-export default async function loadAPIs(strapi: Core.Strapi) {
-  if (!existsSync(strapi.dirs.dist.api)) {
+/**
+ * Path-parametric core: load every API folder found under `dir` and register
+ * each into the `apis` registry. Shared by the legacy wrapper (which passes
+ * `strapi.dirs.dist.api`) and the programmatic `fromDisk(path)` resolver.
+ */
+export async function loadAPIsFromDir(strapi: Core.Strapi, dir: string) {
+  if (!existsSync(dir)) {
     return;
   }
 
   const apisFDs = await (
-    await fse.readdir(strapi.dirs.dist.api, { withFileTypes: true })
+    await fse.readdir(dir, { withFileTypes: true })
   )
     .filter(isDirectory)
     .filter(_.negate(isDotFile));
@@ -52,7 +57,7 @@ export default async function loadAPIs(strapi: Core.Strapi) {
   // only load folders
   for (const apiFD of apisFDs) {
     const apiName = normalizeName(apiFD.name);
-    const api = await loadAPI(apiName, join(strapi.dirs.dist.api, apiFD.name));
+    const api = await loadAPI(apiName, join(dir, apiFD.name));
 
     // @ts-expect-error TODO verify that it's a valid api, not missing bootstrap, register, and destroy
     apis[apiName] = api;
@@ -63,6 +68,10 @@ export default async function loadAPIs(strapi: Core.Strapi) {
   for (const apiName of Object.keys(apis)) {
     strapi.get('apis').add(apiName, apis[apiName]);
   }
+}
+
+export default async function loadAPIs(strapi: Core.Strapi) {
+  return loadAPIsFromDir(strapi, strapi.dirs.dist.api);
 }
 
 const validateContentTypesUnicity = (apis: APIs) => {

@@ -6,15 +6,19 @@ import { middlewares as internalMiddlewares } from '../middlewares';
 
 // TODO:: allow folders with index.js inside for bigger policies
 export default async function loadMiddlewares(strapi: Core.Strapi) {
-  const localMiddlewares = await loadLocalMiddlewares(strapi);
+  const localMiddlewares = await loadLocalMiddlewaresFromDir(strapi, strapi.dirs.dist.middlewares);
 
   strapi.get('middlewares').add(`global::`, localMiddlewares);
   strapi.get('middlewares').add(`strapi::`, internalMiddlewares);
 }
 
-const loadLocalMiddlewares = async (strapi: Core.Strapi) => {
-  const dir = strapi.dirs.dist.middlewares;
-
+/**
+ * Path-parametric core: read `.js` middleware factories from `dir` and return
+ * them as a map (registration is left to the caller). Shared by the legacy
+ * wrapper (`strapi.dirs.dist.middlewares`) and the programmatic `fromDisk`
+ * resolver.
+ */
+export const loadLocalMiddlewaresFromDir = async (strapi: Core.Strapi, dir: string) => {
   if (!(await fse.pathExists(dir))) {
     return {};
   }

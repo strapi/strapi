@@ -26,12 +26,22 @@ type ComponentMap = {
   [uid in UID.Component]: Struct.ComponentSchema;
 };
 
-export default async function loadComponents(strapi: Core.Strapi) {
-  if (!(await pathExists(strapi.dirs.dist.components))) {
+/**
+ * Path-parametric core: load components from `dir` and register them. `appDir`
+ * is only used to build human-readable file paths in error messages (defaults
+ * to `dir`). Shared by the legacy wrapper and the programmatic `fromDisk`
+ * resolver.
+ */
+export async function loadComponentsFromDir(
+  strapi: Core.Strapi,
+  dir: string,
+  appDir: string = dir
+) {
+  if (!(await pathExists(dir))) {
     return {};
   }
 
-  const map = await loadFiles<LoadedComponents>(strapi.dirs.dist.components, '*/*.*(js|json)');
+  const map = await loadFiles<LoadedComponents>(dir, '*/*.*(js|json)');
 
   const components = Object.keys(map).reduce((acc, category) => {
     Object.keys(map[category]).forEach((key) => {
@@ -39,7 +49,7 @@ export default async function loadComponents(strapi: Core.Strapi) {
 
       if (!schema.collectionName) {
         // NOTE: We're using the filepath from the app directory instead of the dist for information purpose
-        const filePath = join(strapi.dirs.app.components, category, schema.__filename__);
+        const filePath = join(appDir, category, schema.__filename__);
 
         return strapi.stopWithError(
           `Component ${key} is missing a "collectionName" property.\nVerify file ${filePath}.`
@@ -62,4 +72,8 @@ export default async function loadComponents(strapi: Core.Strapi) {
   }, {} as ComponentMap);
 
   strapi.get('components').add(components);
+}
+
+export default async function loadComponents(strapi: Core.Strapi) {
+  return loadComponentsFromDir(strapi, strapi.dirs.dist.components, strapi.dirs.app.components);
 }

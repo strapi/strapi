@@ -1,0 +1,27 @@
+{
+  "name": "example-embedding",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Programmatic Strapi — embedding recipes (Koa / Express / Next hosts)",
+  "scripts": {
+    "start:koa": "node koa-host.cjs",
+    "start:express": "node express-host.cjs",
+    "start:next": "node next-host.cjs",
+    "test": "node integration.test.cjs"
+  },
+  "dependencies": {
+    "@strapi/strapi": "workspace:*",
+    "better-sqlite3": "12.8.0",
+    "express": "4.21.2",
+    "koa": "2.16.4",
+    "next": "15.5.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "supertest": "7.2.2",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x"
+  }
+}

@@ -1,0 +1,4 @@
+node_modules
+.tmp
+public/uploads/*
+!public/uploads/.gitkeep

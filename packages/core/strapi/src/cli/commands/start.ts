@@ -1,11 +1,32 @@
 import { createCommand } from 'commander';
 import fs from 'fs';
 import path from 'path';
-import { createStrapi } from '@strapi/core';
+import { createStrapi, isAppDefinition, type AppDefinition } from '@strapi/core';
+import { importDefault } from '@strapi/utils';
 
 import type { StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
 import { tryQuickOutDir } from '../utils/try-quick-outdir';
+
+/**
+ * Detect a programmatic app: a compiled `src/index.js` whose default export is
+ * a `defineApp(...)` result (ADR-0009). Returning it lets `strapi start` thread
+ * `app` (and therefore `app.config`) through construction.
+ */
+const detectAppDefinition = (distDir: string): AppDefinition | undefined => {
+  const indexPath = path.resolve(distDir, 'src', 'index.js');
+
+  if (!fs.existsSync(indexPath)) {
+    return undefined;
+  }
+
+  try {
+    const mod = importDefault(indexPath);
+    return isAppDefinition(mod) ? mod : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const action = async () => {
   const appDir = process.cwd();
@@ -37,7 +58,9 @@ const action = async () => {
     }
   }
 
-  createStrapi({ appDir, distDir }).start();
+  const app = detectAppDefinition(distDir);
+
+  createStrapi(app ? { appDir, distDir, app } : { appDir, distDir }).start();
 };
 
 /**

@@ -1,6 +1,11 @@
 import type { Struct } from '@strapi/types';
 import { errors } from '@strapi/utils';
-import { editContentType, formatContentType } from '../content-types';
+import {
+  editContentType,
+  formatContentType,
+  getContentTypeOrigin,
+  isContentTypeEditable,
+} from '../content-types';
 
 describe('Content types service', () => {
   describe('format ContentType', () => {
@@ -31,6 +36,36 @@ describe('Content types service', () => {
 
     it('Returns consistent schemas', () => {
       expect(formatContentType(contentType)).toMatchSnapshot();
+    });
+
+    it('marks file-based content types as editable', () => {
+      expect(formatContentType(contentType).schema.editable).toBe(true);
+    });
+
+    it('marks programmatic content types as not editable', () => {
+      const programmatic = {
+        ...contentType,
+        pluginOptions: { 'content-type-builder': { origin: 'programmatic' } },
+      } as unknown as Struct.ContentTypeSchema;
+
+      expect(formatContentType(programmatic).schema.editable).toBe(false);
+    });
+  });
+
+  describe('content type origin', () => {
+    const make = (origin?: string) =>
+      ({
+        pluginOptions: origin ? { 'content-type-builder': { origin } } : {},
+      }) as unknown as Struct.ContentTypeSchema;
+
+    it('reads the programmatic origin tag', () => {
+      expect(getContentTypeOrigin(make('programmatic'))).toBe('programmatic');
+      expect(getContentTypeOrigin(make())).toBeUndefined();
+    });
+
+    it('treats only programmatic content types as read-only', () => {
+      expect(isContentTypeEditable(make('programmatic'))).toBe(false);
+      expect(isContentTypeEditable(make())).toBe(true);
     });
   });
 
