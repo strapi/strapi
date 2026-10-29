@@ -1,9 +1,10 @@
 import { pick } from 'lodash';
-import { errors } from '@strapi/utils';
+import { errors, validateZodSchema } from '@strapi/utils';
 
 import type Koa from 'koa';
 import type {} from 'koa-body';
 import type { EmailConfig, SendOptions } from '../types';
+import { EmailRouteValidator } from '../routes/validation';
 
 const { ApplicationError } = errors;
 
@@ -14,7 +15,9 @@ const { ApplicationError } = errors;
  */
 const emailController = {
   async send(ctx: Koa.Context) {
-    const options = ctx.request.body as SendOptions;
+    const options: SendOptions = validateZodSchema(new EmailRouteValidator(strapi).sendEmailInput)(
+      ctx.request.body
+    );
 
     try {
       await strapi.plugin('email').service('email').send(options);
