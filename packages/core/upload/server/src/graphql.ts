@@ -1,6 +1,10 @@
+import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { FILE_MODEL_UID } from './constants';
+import { resolveFileId } from './services/upload';
+
+const { NotFoundError } = errors;
 
 const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
 
@@ -53,10 +57,17 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
             info: FILE_INFO_INPUT_TYPE_NAME,
           },
 
-          async resolve(parent: unknown, args: { id: number; info: any }) {
+          // GraphQL `ID` arrives as a string: a numeric id or a documentId
+          async resolve(parent: unknown, args: { id: string; info: any }) {
             const { id, info } = args;
 
-            return getUploadService('upload').updateFileInfo(id, info);
+            const fileId = await resolveFileId(strapi, id);
+
+            if (!fileId) {
+              throw new NotFoundError();
+            }
+
+            return getUploadService('upload').updateFileInfo(fileId, info);
           },
         });
 
@@ -70,10 +81,11 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
             id: nonNull('ID'),
           },
 
-          async resolve(parent: unknown, args: { id: number }) {
+          async resolve(parent: unknown, args: { id: string }) {
             const { id } = args;
 
-            const file = await getUploadService('upload').findOne(id);
+            const fileId = await resolveFileId(strapi, id);
+            const file = fileId ? await getUploadService('upload').findOne(fileId) : null;
 
             if (!file) {
               return null;
