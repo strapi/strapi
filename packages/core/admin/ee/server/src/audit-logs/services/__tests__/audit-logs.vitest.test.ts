@@ -373,6 +373,37 @@ describe('Audit logs service', () => {
       expect(saveEvent).not.toHaveBeenCalled();
     });
 
+    it('no longer records the legacy media events', async () => {
+      const { handleEvent } = await setup();
+
+      for (const event of [
+        'media.create',
+        'media.update',
+        'media.delete',
+        'media-folder.create',
+        'media-folder.update',
+        'media-folder.delete',
+      ]) {
+        await handleEvent(event, { media: { id: 1 } });
+      }
+
+      expect(saveEvent).not.toHaveBeenCalled();
+    });
+
+    it('stores the row under the action given at registration', async () => {
+      const { lifecycle, handleEvent } = await setup();
+
+      lifecycle.registerEvent('media-folder.create', releaseTransform, { action: 'media.create' });
+      await handleEvent('media-folder.create', { releaseId: 7 });
+
+      expect(saveEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'media.create',
+          payload: expect.objectContaining({ action: 'media.create' }),
+        })
+      );
+    });
+
     it('records an event that always has an unknown actor without the session user', async () => {
       const { lifecycle, handleEvent } = await setup();
 
@@ -434,7 +465,7 @@ describe('Audit logs service', () => {
     it('keeps the stored shape of legacy events untouched', async () => {
       const { handleEvent } = await setup();
 
-      // The 28 built-in events predate the standard: first argument stored as-is
+      // The built-in events predate the standard: first argument stored as-is
       await handleEvent('entry.create', { uid: 'api::article.article', entry: { id: 1 } });
 
       expect(saveEvent).toHaveBeenCalledWith({
@@ -448,7 +479,7 @@ describe('Audit logs service', () => {
     it('still ignores upload uids on legacy events', async () => {
       const { handleEvent } = await setup();
 
-      await handleEvent('media.create', { uid: 'plugin::upload.file' });
+      await handleEvent('entry.create', { uid: 'plugin::upload.file', entry: { id: 1 } });
 
       expect(saveEvent).not.toHaveBeenCalled();
     });

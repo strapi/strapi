@@ -1,10 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { emitAudit } from '@strapi/utils';
 import {
   parseFilesData,
   getProjectSettings,
   deleteOldFiles,
   updateProjectSettings,
 } from '../project-settings';
+
+vi.mock('@strapi/utils', async () => ({
+  ...(await vi.importActual<typeof import('@strapi/utils')>('@strapi/utils')),
+  emitAudit: vi.fn(),
+}));
 
 vi.mock('fs', async () => {
   const actual = await vi.importActual<typeof import('fs')>('fs');
@@ -343,6 +349,13 @@ describe('Project setting', () => {
         key: 'project-settings',
         value: expectedOutput,
       });
+      expect(emitAudit).toHaveBeenCalledTimes(1);
+      expect(emitAudit).toHaveBeenCalledWith(expect.anything(), 'project-settings.update', {
+        changes: {
+          menuLogo: { before: 'name', after: 'filename.png' },
+          authLogo: { before: 'name', after: 'filename.png' },
+        },
+      });
     });
 
     it('Updates the project settings (delete)', async () => {
@@ -361,6 +374,12 @@ describe('Project setting', () => {
       expect(storeSet).toBeCalledWith({
         key: 'project-settings',
         value: expectedOutput,
+      });
+      expect(emitAudit).toHaveBeenCalledWith(expect.anything(), 'project-settings.update', {
+        changes: {
+          menuLogo: { before: 'name', after: null },
+          authLogo: { before: 'name', after: null },
+        },
       });
     });
 
@@ -396,6 +415,7 @@ describe('Project setting', () => {
         key: 'project-settings',
         value: expectedOutput,
       });
+      expect(emitAudit).not.toHaveBeenCalled();
     });
   });
 });
