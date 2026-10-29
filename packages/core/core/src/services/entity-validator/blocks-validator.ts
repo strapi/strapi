@@ -18,13 +18,14 @@ const textNodeValidator = yup.object().shape({
   code: yup.boolean(),
 });
 
-const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'ftp:', 'mailto:', 'tel:']);
+// eslint-disable-next-line no-script-url
+const BLOCKED_LINK_PROTOCOLS = new Set(['javascript:', 'vbscript:', 'data:']);
 
 const checkValidLink = (link: string) => {
   try {
     const url = new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
 
-    return ALLOWED_LINK_PROTOCOLS.has(url.protocol);
+    return !BLOCKED_LINK_PROTOCOLS.has(url.protocol);
   } catch {
     return false;
   }
