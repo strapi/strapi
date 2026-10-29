@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import isEqual from 'lodash/isEqual';
 
-import { useAuth, Permission } from '../features/Auth';
+import { getAdminUserId, useAuth, Permission } from '../features/Auth';
 import { once } from '../utils/once';
 import { capitalise } from '../utils/strings';
 
@@ -90,7 +90,7 @@ const useRBAC = (
     (state) => state.checkUserHasPermissions,
     true
   );
-  const adminUserId = useAuth('useRBAC', (state) => state.user?.id ?? state.user?.email);
+  const adminUserId = useAuth('useRBAC', (state) => getAdminUserId(state.user));
   const userPermissions = useAuth('useRBAC', (state) => state.permissions);
 
   const permssionsChecked = usePrev(actualPermissionsToCheck);

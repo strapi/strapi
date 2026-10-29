@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 
 import {
+  getAdminUserId,
   useAuth,
   type Permission,
   useNotification,
@@ -74,10 +75,7 @@ const useContentManagerInitData = (): AppState => {
     (state) => state.checkUserHasPermissions
   );
   const isLoadingAuth = useAuth('useContentManagerInitData', (state) => state.isLoading);
-  const adminUserId = useAuth(
-    'useContentManagerInitData',
-    (state) => state.user?.id ?? state.user?.email
-  );
+  const adminUserId = useAuth('useContentManagerInitData', (state) => getAdminUserId(state.user));
 
   const state = useTypedSelector((state) => state['content-manager'].app);
 

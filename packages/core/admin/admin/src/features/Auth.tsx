@@ -34,7 +34,7 @@ import {
 } from '../utils/getFetchClient';
 import { hasUnsavedChanges } from '../utils/unsavedChangesRegistry';
 
-import { showAdminNotification } from './Notifications';
+import { useNotification } from './Notifications';
 
 import type {
   Permission as PermissionContract,
@@ -52,6 +52,13 @@ interface User
   extends
     Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
     Partial<Omit<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>> {}
+
+/**
+ * Which admin is signed in. Id wins, and email covers a profile that has no id
+ * yet. Session-switch guards compare this, so they have to share one definition.
+ */
+const getAdminUserId = (user?: Pick<User, 'id' | 'email'> | null): string | number | undefined =>
+  user?.id ?? user?.email;
 
 interface AuthContextValue {
   login: (
@@ -164,6 +171,7 @@ const AuthProvider = ({
   _disableRenewToken = false,
 }: AuthProviderProps) => {
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
   const dispatch = useTypedDispatch();
   const store = useTypedStore();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
@@ -450,7 +458,7 @@ const AuthProvider = ({
   const lastResetTokenRef = React.useRef<string | null>(null);
   const adminUserIdRef = React.useRef<string | number | undefined>(undefined);
   const discardedEditsAdminIdRef = React.useRef<string | number | undefined>(undefined);
-  const adminUserId = user?.id ?? user?.email;
+  const adminUserId = getAdminUserId(user);
   adminUserIdRef.current = adminUserId;
 
   React.useEffect(() => {
@@ -634,12 +642,12 @@ const AuthProvider = ({
 
     discardedEditsAdminIdRef.current = undefined;
     if (previousAdminId !== adminUserId) {
-      showAdminNotification({
+      toggleNotification({
         type: 'info',
         message: formatMessage(REPLACED_SESSION_UNSAVED),
       });
     }
-  }, [adminUserId, formatMessage, isLoading]);
+  }, [adminUserId, formatMessage, isLoading, toggleNotification]);
 
   return (
     <>
@@ -677,5 +685,5 @@ const AuthProvider = ({
   );
 };
 
-export { AuthProvider, useAuth, STORAGE_KEYS };
+export { AuthProvider, getAdminUserId, useAuth, STORAGE_KEYS };
 export type { AuthContextValue, Permission, User };

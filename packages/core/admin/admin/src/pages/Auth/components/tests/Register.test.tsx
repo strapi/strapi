@@ -47,7 +47,7 @@ describe('Register', () => {
     });
   });
 
-  it('does not toast when registration-info is refetched after a successful invite', async () => {
+  it('does not refetch registration-info after a successful invite', async () => {
     let registrationInfoRequests = 0;
 
     server.use(
@@ -105,7 +105,7 @@ describe('Register', () => {
     await waitFor(() =>
       expect(screen.queryByRole('heading', { name: 'Welcome to Strapi!' })).not.toBeInTheDocument()
     );
-    expect(registrationInfoRequests).toBeGreaterThan(1);
+    expect(registrationInfoRequests).toBe(1);
     expect(screen.queryByText('Invalid registrationToken')).not.toBeInTheDocument();
   });
 

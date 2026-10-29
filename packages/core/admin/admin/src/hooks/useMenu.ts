@@ -4,7 +4,7 @@ import { Cog, ShoppingCart, House } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { useTypedSelector } from '../core/store/hooks';
-import { useAuth, type AuthContextValue } from '../features/Auth';
+import { getAdminUserId, useAuth, type AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
@@ -35,7 +35,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     (state) => state.checkUserHasPermissions,
     true
   );
-  const adminUserId = useAuth('useMenu', (state) => state.user?.id ?? state.user?.email);
+  const adminUserId = useAuth('useMenu', (state) => getAdminUserId(state.user));
   const rawMenu = useStrapiApp('useMenu', (state) => state.menu);
   const menu = React.useMemo(() => normalizeMenuLinks(rawMenu), [rawMenu]);
   const isLoadingAuth = useAuth('useMenu', (state) => state.isLoading);

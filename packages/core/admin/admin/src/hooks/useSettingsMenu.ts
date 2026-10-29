@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
 import { useAppInfo } from '../features/AppInfo';
-import { useAuth } from '../features/Auth';
+import { getAdminUserId, useAuth } from '../features/Auth';
 import { useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 import { PermissionMap } from '../types/permissions';
@@ -71,7 +71,7 @@ const useSettingsMenu = (): {
     'useSettingsMenu',
     (state) => state.checkUserHasPermissions
   );
-  const adminUserId = useAuth('useSettingsMenu', (state) => state.user?.id ?? state.user?.email);
+  const adminUserId = useAuth('useSettingsMenu', (state) => getAdminUserId(state.user));
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
   const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
   const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
