@@ -5,6 +5,7 @@ import { errors } from '@strapi/utils';
 import createSchemaHandler from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
+import { renameComponentUIDs } from './rename-component-uids';
 
 /**
  * Creates a content type schema builder instance
@@ -149,13 +150,13 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
      * @returns boolean true if all files have been written correctly, false if an error occurred
      * @throws ApplicationError if an error occurred and rollback failed
      */
-    writeFiles() {
+    async writeFiles() {
       const schemas = [
         ...Array.from(tmpComponents.values()),
         ...Array.from(tmpContentTypes.values()),
       ];
 
-      return Promise.all(schemas.map((schema) => schema.flush()))
+      const written = await Promise.all(schemas.map((schema) => schema.flush()))
         .then(() => true)
         .catch((error) => {
           strapi.log.error('Error writing schema files');
@@ -170,6 +171,21 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
 
           throw new errors.ApplicationError('Invalid schema edition');
         });
+
+      if (!written) {
+        return false;
+      }
+
+      // A component uid change (category move or rename) is also stored as
+      // `component_type` in the `*_cmps` join tables. Rewrite those rows now, while
+      // the running process still holds the pre-rename metadata that locates them.
+      const componentUIDRenames = Array.from(tmpComponents.values())
+        .filter((component) => component.initialUID && component.uid !== component.initialUID)
+        .map((component) => ({ oldUID: component.initialUID, newUID: component.uid }));
+
+      await renameComponentUIDs(strapi.db, componentUIDRenames);
+
+      return true;
     },
 
     /**

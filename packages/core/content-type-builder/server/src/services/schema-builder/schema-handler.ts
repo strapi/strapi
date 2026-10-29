@@ -78,6 +78,11 @@ export default function createSchemaHandler(infos: Infos) {
       return state.uid;
     },
 
+    // the uid the handler was created with (undefined for a new schema)
+    get initialUID() {
+      return initialState.uid;
+    },
+
     get writable() {
       return _.get(state, 'plugin') !== 'admin';
     },
