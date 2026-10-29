@@ -1,0 +1,317 @@
+import jscodeshift from 'jscodeshift';
+import type { Transform } from 'jscodeshift';
+
+import removeSplitVendorChunkPlugin from '../vite-config-remove-split-vendor-chunk-plugin.code';
+import renameDeprecatedOptions from '../vite-config-rename-deprecated-options.code';
+import manualChunksToCodeSplitting from '../vite-config-manual-chunks-to-code-splitting.code';
+import transformWithEsbuildToOxc from '../vite-config-transform-with-esbuild-to-oxc.code';
+
+const ADMIN_CONFIG_PATH = '/project/src/admin/vite.config.ts';
+
+const applyTransform = (
+  transform: Transform,
+  source: string,
+  path: string = ADMIN_CONFIG_PATH
+): string => {
+  const j = jscodeshift.withParser('tsx');
+  const api = {
+    j,
+    jscodeshift: j,
+    stats() {},
+    report() {},
+  };
+
+  const result = transform({ path, source }, api, {});
+
+  return typeof result === 'string' ? result : source;
+};
+
+describe('vite 8 config codemods', () => {
+  describe('remove splitVendorChunkPlugin', () => {
+    test('removes the import specifier and its usage from the plugins array', () => {
+      const source = `
+        import { mergeConfig, splitVendorChunkPlugin } from 'vite';
+        import react from '@vitejs/plugin-react-swc';
+
+        export default (config) =>
+          mergeConfig(config, {
+            plugins: [react(), splitVendorChunkPlugin()],
+          });
+      `;
+
+      const output = applyTransform(removeSplitVendorChunkPlugin, source);
+
+      expect(output).not.toContain('splitVendorChunkPlugin');
+      expect(output).toContain('mergeConfig');
+      expect(output).toContain('react()');
+    });
+
+    test('removes the whole import when splitVendorChunkPlugin is the only specifier', () => {
+      const source = `
+        import { splitVendorChunkPlugin } from 'vite';
+
+        export default (config) => ({ ...config, plugins: [splitVendorChunkPlugin()] });
+      `;
+
+      const output = applyTransform(removeSplitVendorChunkPlugin, source);
+
+      expect(output).not.toContain('splitVendorChunkPlugin');
+      expect(output).not.toContain("from 'vite'");
+    });
+
+    test('does not touch files outside src/admin/vite.config', () => {
+      const source = `import { splitVendorChunkPlugin } from 'vite';`;
+
+      const output = applyTransform(removeSplitVendorChunkPlugin, source, '/project/src/other.ts');
+
+      expect(output).toBe(source);
+    });
+  });
+
+  describe('rename deprecated options', () => {
+    test('renames build.rollupOptions, optimizeDeps.esbuildOptions and top-level esbuild', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: { rollupOptions: { input: 'x' } },
+          optimizeDeps: { esbuildOptions: { target: 'es2020' } },
+          esbuild: { jsx: 'automatic' },
+        });
+      `;
+
+      const output = applyTransform(renameDeprecatedOptions, source);
+
+      expect(output).toContain('rolldownOptions');
+      expect(output).not.toContain('rollupOptions');
+      expect(output).not.toContain('esbuildOptions');
+      expect(output).toContain('oxc');
+      expect(output).not.toMatch(/\besbuild\b/);
+    });
+
+    test('does not rename an unrelated esbuild key on a non-config object', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          define: { esbuild: 'not-a-vite-option' },
+        });
+      `;
+
+      const output = applyTransform(renameDeprecatedOptions, source);
+
+      // `esbuild` here is nested inside `define` (an object with no Vite marker
+      // keys of its own), so it must not be renamed to `oxc`.
+      expect(output).toContain("esbuild: 'not-a-vite-option'");
+    });
+
+    test('renames worker.rollupOptions to worker.rolldownOptions', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          worker: { rollupOptions: { format: 'es' } },
+        });
+      `;
+
+      const output = applyTransform(renameDeprecatedOptions, source);
+
+      expect(output).toContain('rolldownOptions');
+      expect(output).not.toContain('rollupOptions');
+    });
+
+    test('does not touch files outside src/admin/vite.config', () => {
+      const source = `export default { build: { rollupOptions: {} } };`;
+
+      const output = applyTransform(renameDeprecatedOptions, source, '/project/vite.config.ts');
+
+      expect(output).toBe(source);
+    });
+
+    test('prepends review comments for Rolldown-unsupported output formats', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rollupOptions: {
+              output: { format: 'system' },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(renameDeprecatedOptions, source);
+
+      expect(output).toContain('manual review required');
+      expect(output).toContain("output.format: 'system'");
+      expect(output).toContain('rolldownOptions');
+    });
+
+    test('prepends review comments for removed hooks and watch.chokidar', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              watch: { chokidar: { usePolling: true } },
+              plugins: [{ renderDynamicImport() {} }],
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(renameDeprecatedOptions, source);
+
+      expect(output).toContain('watch.chokidar');
+      expect(output).toContain("plugin hook 'renderDynamicImport'");
+    });
+  });
+
+  describe('manualChunks object -> codeSplitting.groups', () => {
+    test('migrates static manualChunks objects under output', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks: {
+                  vendor: ['react', 'react-dom'],
+                },
+              },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source);
+
+      expect(output).toContain('codeSplitting');
+      expect(output).toContain('name: "vendor"');
+      expect(output).not.toContain('manualChunks');
+    });
+
+    test('leaves function-form manualChunks untouched', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : undefined),
+              },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source);
+
+      expect(output).toBe(source);
+    });
+
+    test('does not touch files outside src/admin/vite.config', () => {
+      const source = `export default { build: { manualChunks: { vendor: ['react'] } } };`;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source, '/project/vite.config.ts');
+
+      expect(output).toBe(source);
+    });
+
+    test('migrates scoped package names in manualChunks', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks: {
+                  vendor: ['@strapi/design-system', 'lodash'],
+                },
+              },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source);
+
+      expect(output).toContain('codeSplitting');
+      expect(output).toContain('name: "vendor"');
+      expect(output).toContain('design-system');
+      expect(output).not.toContain('manualChunks');
+    });
+
+    test('ignores manualChunks groups with no string module names', () => {
+      const source = `
+        export default (config) => ({
+          ...config,
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks: {
+                  vendor: [],
+                },
+              },
+            },
+          },
+        });
+      `;
+
+      const output = applyTransform(manualChunksToCodeSplitting, source);
+
+      expect(output).toBe(source);
+    });
+  });
+
+  describe('transformWithEsbuild -> transformWithOxc', () => {
+    test('renames the import and its references when not aliased', () => {
+      const source = `
+        import { transformWithEsbuild } from 'vite';
+
+        export default async (config) => {
+          await transformWithEsbuild('code', 'id');
+          return config;
+        };
+      `;
+
+      const output = applyTransform(transformWithEsbuildToOxc, source);
+
+      expect(output).toContain('transformWithOxc');
+      expect(output).not.toContain('transformWithEsbuild');
+    });
+
+    test('only renames the imported name for aliased imports', () => {
+      const source = `
+        import { transformWithEsbuild as tfe } from 'vite';
+
+        export default async (config) => {
+          await tfe('code', 'id');
+          return config;
+        };
+      `;
+
+      const output = applyTransform(transformWithEsbuildToOxc, source);
+
+      expect(output).toContain('transformWithOxc as tfe');
+      expect(output).toContain('tfe(');
+      expect(output).not.toContain('transformWithEsbuild');
+    });
+
+    test('does not rename unrelated object keys that share the imported name', () => {
+      const source = `
+        import { transformWithEsbuild } from 'vite';
+
+        export default async (config) => {
+          const helpers = { transformWithEsbuild: true };
+          await transformWithEsbuild('code', 'id');
+          return helpers.transformWithEsbuild;
+        };
+      `;
+
+      const output = applyTransform(transformWithEsbuildToOxc, source);
+
+      expect(output).toContain('import { transformWithOxc }');
+      expect(output).toContain('await transformWithOxc(');
+      expect(output).toContain('{ transformWithEsbuild: true }');
+      expect(output).toContain('helpers.transformWithEsbuild');
+    });
+  });
+});

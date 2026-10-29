@@ -27,7 +27,7 @@ const htmlEntryPlugin = (ctx: BuildFilesContext): Plugin => {
 
       if (!asset) {
         throw new Error(
-          `Failed to find the html asset in bundle (${htmlKey}). Vite must build that file; a custom src/admin/vite.config must not replace build.rollupOptions.input`
+          `Failed to find the html asset in bundle (${htmlKey}). Vite must build that file; a custom src/admin/vite.config must not replace build.rolldownOptions.input`
         );
       }
 

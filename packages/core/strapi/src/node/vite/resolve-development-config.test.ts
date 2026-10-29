@@ -2,12 +2,18 @@ import http from 'node:http';
 
 import type { AliasOptions } from 'vite';
 import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
+import { getModulePath } from '../core/resolve-module';
 import { resolveDevelopmentConfig, resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
 
 jest.mock('browserslist-to-esbuild', () => ({
   __esModule: true,
   default: jest.fn(() => ['chrome100']),
+}));
+
+jest.mock('@vitejs/plugin-react-swc', () => ({
+  __esModule: true,
+  default: jest.fn(() => [{ name: 'vite:react-swc' }]),
 }));
 
 jest.mock('@tailwindcss/vite', () => ({
@@ -65,13 +71,13 @@ describe('Vite admin configuration', () => {
     const config = await resolveProductionConfig(ctx);
 
     expect(config.publicDir).toBe(false);
-    expect(config.build?.rollupOptions?.input).toEqual({ strapi: ctx.entry });
+    expect(config.build?.rolldownOptions?.input).toEqual({ strapi: ctx.entry });
   });
 
   it('builds from the html entry when the next design system is on', async () => {
     const config = await resolveProductionConfig(buildContext({ nextDesignSystem: true }));
 
-    expect(config.build?.rollupOptions?.input).toEqual({
+    expect(config.build?.rolldownOptions?.input).toEqual({
       strapi: expect.stringMatching(/index\.html$/),
     });
   });
@@ -195,5 +201,19 @@ describe('Vite admin configuration', () => {
     const config = await resolveProductionConfig(buildContext({ nextDesignSystem: false }));
 
     expect(pluginNames(config)).not.toContain('tailwindcss');
+  });
+
+  it('aliases path and node:path to path-browserify for browser bundles (#26541)', async () => {
+    const config = await resolveProductionConfig(buildContext());
+    const alias = asAliasRecord(config.resolve?.alias);
+
+    expect(alias.path).toBe(getModulePath('path-browserify'));
+    expect(alias['node:path']).toBe(getModulePath('path-browserify'));
+  });
+
+  it('preserves legacy CJS interop for custom admin bundles', async () => {
+    const config = await resolveProductionConfig(buildContext());
+
+    expect(config.legacy).toEqual({ inconsistentCjsInterop: true });
   });
 });

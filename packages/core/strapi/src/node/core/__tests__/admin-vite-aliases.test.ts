@@ -137,6 +137,15 @@ describe('buildAdminViteResolveAliases', () => {
     }
   );
 
+  it('resolves path-browserify from @strapi/admin closure for pnpm (#26541)', () => {
+    const adminPkg = JSON.parse(
+      fs.readFileSync(require.resolve('@strapi/admin/package.json'), 'utf8')
+    ) as { dependencies: Record<string, string> };
+
+    expect(adminPkg.dependencies['path-browserify']).toBe('1.0.1');
+    expect(getModulePath('path-browserify')).toContain('path-browserify');
+  });
+
   it.each(ADMIN_PINNED_ALIAS_MODULES)('aliases %s to its own package root', (mod) => {
     const alias = buildAdminViteResolveAliases();
     expect(alias[mod]).toBeDefined();
