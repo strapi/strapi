@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Flex, IconButton, Loader, TextButton, Typography } from '@strapi/design-system';
+import { IconButton, Loader, TextButton } from '@strapi/design-system';
 import { CaretDown, CaretUp, Download, Trash, Upload } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -151,21 +151,21 @@ export const CreateReleaseFromSkippedDrawer = ({
       isSubmitting={isSubmitting}
       isSubmitDisabled={isLoadingEntries || carriedOverEntries.length === 0}
     >
-      <Box background="neutral100" padding={4}>
+      <div className="bg-muted p-4">
         {isEntriesError ? (
-          <Typography tag="p" variant="omega" textColor="danger600" role="alert">
+          <p className="text-destructive" role="alert">
             {isBaseQueryError(entriesError)
               ? formatAPIError(entriesError)
               : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' })}
-          </Typography>
+          </p>
         ) : isLoadingEntries ? (
-          <Flex justifyContent="center" padding={4}>
+          <div className="flex justify-center p-4">
             <Loader small />
-          </Flex>
+          </div>
         ) : (
           <>
-            <Flex justifyContent="space-between" alignItems="center" paddingBottom={3}>
-              <Typography variant="delta" tag="h3">
+            <div className="flex items-center justify-between pb-3">
+              <h3 className="text-lg font-medium md:text-base">
                 {formatMessage(
                   {
                     id: 'content-releases.skipped-drawer.entries.title',
@@ -174,7 +174,7 @@ export const CreateReleaseFromSkippedDrawer = ({
                   },
                   { count: carriedOverCount }
                 )}
-              </Typography>
+              </h3>
               {carriedOverEntries.length > COLLAPSED_ENTRIES_COUNT && (
                 <TextButton
                   onClick={() => setIsExpanded((prev) => !prev)}
@@ -193,8 +193,8 @@ export const CreateReleaseFromSkippedDrawer = ({
                       })}
                 </TextButton>
               )}
-            </Flex>
-            <Flex tag="ul" id={entriesListId} direction="column" alignItems="stretch" gap={2}>
+            </div>
+            <ul id={entriesListId} className="flex flex-col gap-2">
               {visibleEntries.map((action) => (
                 <CarriedOverEntry
                   key={action.id}
@@ -206,10 +206,10 @@ export const CreateReleaseFromSkippedDrawer = ({
                   }
                 />
               ))}
-            </Flex>
+            </ul>
           </>
         )}
-      </Box>
+      </div>
     </ReleaseDrawer>
   );
 };
@@ -228,30 +228,12 @@ const CarriedOverEntry = ({ action, onRemove }: CarriedOverEntryProps) => {
   const entryTitle = action.contentType.mainFieldValue || action.entryDocumentId;
 
   return (
-    <Flex
-      tag="li"
-      background="neutral0"
-      hasRadius
-      borderColor="neutral150"
-      paddingTop={2}
-      paddingBottom={2}
-      paddingLeft={3}
-      paddingRight={2}
-      gap={3}
-    >
-      <Box flex={2} minWidth={0}>
-        <Typography variant="pi" fontWeight="semiBold" ellipsis>
-          {entryTitle}
-        </Typography>
-      </Box>
-      <Box flex={1}>
-        <Typography variant="pi" textColor="neutral600">
-          {action.locale?.name ?? '-'}
-        </Typography>
-      </Box>
-      <Flex flex={1} gap={1}>
+    <li className="flex items-center gap-3 rounded-md bg-background py-2 pr-2 pl-3 text-xs">
+      <span className="min-w-0 flex-2 truncate font-medium">{entryTitle}</span>
+      <span className="flex-1 text-muted-foreground">{action.locale?.name ?? '-'}</span>
+      <span className="flex flex-1 items-center gap-1">
         {action.type === 'publish' ? <Upload /> : <Download />}
-        <Typography variant="pi" textColor="neutral600">
+        <span className="text-muted-foreground">
           {action.type === 'publish'
             ? formatMessage({
                 id: 'content-releases.skipped-drawer.entries.publish',
@@ -261,8 +243,8 @@ const CarriedOverEntry = ({ action, onRemove }: CarriedOverEntryProps) => {
                 id: 'content-releases.skipped-drawer.entries.unpublish',
                 defaultMessage: 'Unpublish',
               })}
-        </Typography>
-      </Flex>
+        </span>
+      </span>
       <IconButton
         variant="ghost"
         onClick={onRemove}
@@ -277,6 +259,6 @@ const CarriedOverEntry = ({ action, onRemove }: CarriedOverEntryProps) => {
       >
         <Trash />
       </IconButton>
-    </Flex>
+    </li>
   );
 };

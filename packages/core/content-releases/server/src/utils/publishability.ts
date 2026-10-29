@@ -100,10 +100,19 @@ export const isMySqlDeadlock = (error: unknown) =>
 export const toValidationReason = (error: Error) => ({
   validation: { errors: getValidationErrors(error) },
 });
-export const toErrorReason = (error: unknown) => ({ error: { name: getErrorName(error) } });
+
+// Only the error's name: its message can carry row contents. An application error's message is
+// meant for the client (a manual publish sends it as is), so it's kept, without the submitted
+// value a type-mismatch message ends with.
+export const toErrorReason = (error: unknown): ReleaseActionReason => ({
+  error:
+    error instanceof errors.ApplicationError
+      ? { name: error.name, message: error.message.replace(SUBMITTED_VALUE_SUFFIX, '') }
+      : { name: getErrorName(error) },
+});
 
 // The validity stored for a checked entry. One whose check threw (e.g. its draft can't be read)
-// isn't publishable, with only the error's name.
+// isn't publishable, with only the error's name (and an application error's message).
 export const toEntryValidity = (check: EntryPublishability | Error): EntryValidity => {
   if (check instanceof Error) {
     return { isEntryValid: false, reason: toErrorReason(check) };

@@ -164,3 +164,101 @@ describe('ReleaseDrawer', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });
+
+describe('ReleaseDrawer keyboard and validation', () => {
+  it.each([
+    ['Date', 'dialog', 'Choose date'],
+    ['Time', 'listbox', undefined],
+    ['Timezone', 'listbox', undefined],
+  ] as const)('closes an open %s picker on Escape, not the drawer', async (field, role, name) => {
+    const onClose = jest.fn();
+    const { user } = renderDrawer({ onClose });
+    await screen.findByRole('dialog', { name: 'Edit release' });
+
+    await user.click(screen.getByRole('combobox', { name: field }));
+    expect(await screen.findByRole(role, { name, hidden: true })).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() =>
+      expect(screen.queryByRole(role, { name, hidden: true })).not.toBeInTheDocument()
+    );
+    expect(onClose).not.toHaveBeenCalled();
+
+    // With no picker open, Escape closes the drawer
+    await user.keyboard('{Escape}');
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  // The release is in 2099: any time is in the future
+  const clearTime = () => {
+    const time = screen.getByRole('combobox', { name: 'Time' });
+    // The first Clear after the time's input is its own
+    const clear = screen
+      .getAllByRole('button', { name: 'Clear' })
+      .find((button) => time.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING);
+    fireEvent.click(clear as HTMLElement);
+  };
+
+  it('clears the time error once a time is picked', async () => {
+    const { user } = renderDrawer();
+    const time = screen.getByRole('combobox', { name: 'Time' });
+    clearTime();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(time).toHaveAttribute('aria-invalid', 'true'));
+
+    await user.click(time);
+    await user.click(await screen.findByRole('option', { name: '10:00', hidden: true }));
+
+    await waitFor(() => expect(time).toHaveAttribute('aria-invalid', 'false'));
+  });
+
+  it('submits a time typed again after clearing it', async () => {
+    const onSubmit = jest.fn();
+    const { user } = renderDrawer({ onSubmit });
+    const time = screen.getByRole('combobox', { name: 'Time' });
+    clearTime();
+    await user.click(time);
+    await user.click(await screen.findByRole('option', { name: '10:00', hidden: true }));
+    clearTime();
+
+    await user.type(time, '10:00');
+    // Leaving the field keeps what was typed
+    await user.click(screen.getByRole('textbox', { name: 'Release name', hidden: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    // 10:00 in Paris
+    expect(onSubmit.mock.calls[0][0].scheduledAt).toEqual(new Date('2099-08-20T08:00:00.000Z'));
+  });
+
+  it('keeps a cleared time cleared when the field is left without picking one', async () => {
+    const onSubmit = jest.fn();
+    const { user } = renderDrawer({ onSubmit });
+    const time = screen.getByRole('combobox', { name: 'Time' });
+    clearTime();
+
+    await user.click(time);
+    await user.click(screen.getByRole('textbox', { name: 'Release name', hidden: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(time).toHaveAttribute('aria-invalid', 'true'));
+    expect(time).toHaveValue('');
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('selects the release mode with the arrow keys', async () => {
+    const { user } = renderDrawer();
+    const partial = screen.getByRole('radio', { name: 'Release all ready items' });
+    const allOrNothing = screen.getByRole('radio', { name: 'Require every entry to be ready' });
+
+    await user.click(partial);
+    // A quick press: the key is released before the group moves the focus
+    await user.keyboard('{ArrowDown}');
+
+    await waitFor(() => expect(allOrNothing).toHaveFocus());
+    expect(allOrNothing).toBeChecked();
+  });
+});

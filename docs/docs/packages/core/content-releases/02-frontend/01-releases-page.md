@@ -11,6 +11,10 @@ status: stub
 
 The releases page lists every release in one paginated table, sorted by last update (most recent first). Its columns are name, status, schedule, entries and release mode; clicking a row opens the release details page. The header subtitle shows the number of releases matching the applied filters (every release without filters).
 
+The schedule column shows when a release runs or ran: its `releasedAt` once it ran, otherwise its `scheduledAt`, or "Not scheduled". A release that froze without running (`failureReason` set: it missed its schedule or failed before the upgrade) shows its `scheduledAt`, as its `releasedAt` is only when it froze; without a schedule it shows "Not scheduled". The relative label above the date ("in 2 days", "yesterday") counts days by calendar day in the viewer's timezone, not by elapsed 24-hour periods.
+
+The list, the release details and its entries refetch when content changes in the Content Manager (save, discard, delete) and when an entry's review stage or a review workflow changes, as these change which entries are ready. The review-workflows mutations invalidate the `ReviewWorkflowStages` tag, which the release queries provide: extending those mutations from `services/release.ts` would depend on the plugins' load order.
+
 #### Filters
 
 A "Filters" button above the table opens the admin's list filters popover (`Filters` from `@strapi/admin`), with four fields:
@@ -30,7 +34,7 @@ A "Sort" menu on the right of the filter bar sets the `sort` URL param: most rec
 
 #### New Release Creation:
 
-If a user has the `plugin::content-releases.create` permission, a 'New release' button will be visible in the header. Clicking the button opens a side panel with the release name, its schedule (date, time and timezone, or "I don't have a release date yet") and its release mode. The name of a pending release must be unique. Once created, the user is taken to the new release.
+If a user has the `plugin::content-releases.create` permission, a 'New release' button will be visible in the header. Clicking the button opens a side panel with the release name, its schedule (date, time and timezone, or "I don't have a release date yet") and its release mode. The name of a pending release must be unique. Once created, the user is taken to the new release. If the API refuses it, e.g. for a name already in use, its error message shows in the notification.
 
 #### License limits
 

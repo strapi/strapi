@@ -50,6 +50,21 @@ describe('RelativeTime', () => {
     expect(screen.getByRole('time')).toHaveTextContent('now');
   });
 
+  it('counts days by calendar day rather than elapsed 24-hour periods', () => {
+    // Thursday 2026-10-29 15:00 UTC; Saturday midnight is 33 hours away, two calendar days
+    spiedDateNow = setDateNow(Date.parse('2026-10-29T15:00:00.000Z'));
+    render(<RelativeTime timestamp={new Date('2026-10-31T00:00:00.000Z')} />);
+
+    expect(screen.getByRole('time')).toHaveTextContent('in 2 days');
+  });
+
+  it('counts past days by calendar day rather than elapsed 24-hour periods', () => {
+    spiedDateNow = setDateNow(Date.parse('2026-10-29T01:00:00.000Z'));
+    render(<RelativeTime timestamp={new Date('2026-10-27T23:00:00.000Z')} />);
+
+    expect(screen.getByRole('time')).toHaveTextContent('2 days ago');
+  });
+
   // Regression for https://github.com/strapi/strapi/issues/27382
   it('does not throw when the timestamp is an invalid Date', () => {
     render(<RelativeTime timestamp={new Date('')} />);

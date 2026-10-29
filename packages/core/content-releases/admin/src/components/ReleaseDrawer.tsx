@@ -1,19 +1,16 @@
 import * as React from 'react';
 
 import {
-  Box,
   Button,
   Checkbox,
   Combobox,
   ComboboxOption,
   DatePicker,
   Field,
-  Flex,
   IconButton,
   Radio,
   TextInput,
   TimePicker,
-  Typography,
 } from '@strapi/design-system';
 import {
   Drawer,
@@ -25,9 +22,8 @@ import {
 import { Cross } from '@strapi/icons';
 import { format, formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
-import { Form, Formik, useFormikContext } from 'formik';
+import { Form, Formik, useFormikContext, type FormikHelpers } from 'formik';
 import { useIntl, type MessageDescriptor } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { RELEASE_CONDITIONS } from '../../../shared/constants';
 import { getTimezones } from '../utils/time';
@@ -35,10 +31,21 @@ import { RELEASE_SCHEMA } from '../validation/schemas';
 
 import type { ReleaseCondition } from '../../../shared/contracts/releases';
 
-export const DRAWER_STYLE = {
-  '--drawer-inset': '1.6rem',
-  '--drawer-content-width': '50rem',
-} as React.CSSProperties;
+/**
+ * The release side panels' size: the whole screen but its inset on a phone, 50rem from `sm` up.
+ * Set on the variants the design system sizes its drawer with, so they replace its widths.
+ */
+export const RELEASE_DRAWER_CLASS_NAME =
+  '[--drawer-inset:--spacing(4)] data-[swipe-axis=x]:[--drawer-content-width:calc(100%-2*var(--drawer-inset))] data-[swipe-axis=x]:sm:[--drawer-content-width:50rem]';
+
+/**
+ * Whether an Escape keydown is for a picker in the drawer rather than for the drawer: its list or
+ * calendar is open, or the focus is in its popup, which renders outside the drawer
+ */
+const isEscapeForPicker = (target: EventTarget | null, drawer: HTMLElement | null) =>
+  target instanceof Element &&
+  (target.closest('[role="combobox"][aria-expanded="true"]') !== null ||
+    (drawer !== null && !drawer.contains(target) && target !== target.ownerDocument.body));
 
 // Used when the browser's timezone isn't in the list
 const FALLBACK_TIMEZONE = 'UTC+00:00&Africa/Abidjan';
@@ -100,6 +107,27 @@ export const ReleaseDrawer = ({
   children,
 }: ReleaseDrawerProps) => {
   const { formatMessage } = useIntl();
+  const drawerRef = React.useRef<HTMLDivElement>(null);
+  const isEscapeForPickerRef = React.useRef(false);
+
+  // Pickers close on Escape from a listener on the document, in the capture phase, before the
+  // drawer's own. This one is added when the drawer opens, before any picker's, so it runs first
+  // and sees whether a picker is still open.
+  React.useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        isEscapeForPickerRef.current = isEscapeForPicker(event.target, drawerRef.current);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown, { capture: true });
+
+    return () => document.removeEventListener('keydown', handleKeyDown, { capture: true });
+  }, [open]);
 
   const scheduledAt = initialValues.scheduledAt ? new Date(initialValues.scheduledAt) : null;
   const { timezoneList, systemTimezone } = getTimezones(scheduledAt ?? new Date());
@@ -159,26 +187,29 @@ export const ReleaseDrawer = ({
           return;
         }
 
+        // Escape closes the open picker only: the drawer, and what was typed in it, stay
+        if (eventDetails.reason === 'escape-key' && isEscapeForPickerRef.current) {
+          eventDetails.cancel();
+          return;
+        }
+
         if (!isOpen) onClose();
       }}
       swipeDirection="right"
     >
-      <DrawerContent style={DRAWER_STYLE}>
+      <DrawerContent ref={drawerRef} className={RELEASE_DRAWER_CLASS_NAME}>
         <Formik<FormValues>
           onSubmit={handleSubmit}
           initialValues={formInitialValues}
           validationSchema={RELEASE_SCHEMA}
           validateOnChange={false}
         >
-          {({ values, errors, handleChange }) => (
-            <DrawerForm>
+          {() => (
+            <Form className="flex min-h-0 flex-1 flex-col">
+              <RevalidateAfterSubmit />
               <DrawerHeader>
-                <Flex justifyContent="space-between" alignItems="center" gap={2}>
-                  <DrawerTitle>
-                    <Typography variant="omega" fontWeight="bold">
-                      {title}
-                    </Typography>
-                  </DrawerTitle>
+                <div className="flex items-center justify-between gap-2">
+                  <DrawerTitle className="text-base font-semibold md:text-sm">{title}</DrawerTitle>
                   <IconButton
                     variant="ghost"
                     onClick={onClose}
@@ -186,64 +217,93 @@ export const ReleaseDrawer = ({
                   >
                     <Cross />
                   </IconButton>
-                </Flex>
+                </div>
               </DrawerHeader>
-              <ScrollArea>
+              <div className="min-h-0 flex-1 overflow-y-auto">
                 {children}
-                <Flex direction="column" alignItems="stretch" gap={4} padding={4}>
-                  <Typography variant="delta" tag="h3">
+                <div className="flex flex-col gap-4 p-4">
+                  <h3 className="text-lg font-medium md:text-base">
                     {formatMessage({
                       id: 'content-releases.release-drawer.release-info.title',
                       defaultMessage: 'Release info',
                     })}
-                  </Typography>
-                  <Field.Root
-                    name="name"
-                    error={
-                      errors.name && formatMessage({ id: errors.name, defaultMessage: errors.name })
-                    }
-                    required
-                  >
-                    <Field.Label>
-                      {formatMessage({
-                        id: 'content-releases.release-drawer.form.name.label',
-                        defaultMessage: 'Release name',
-                      })}
-                    </Field.Label>
-                    <TextInput type="text" value={values.name} onChange={handleChange} />
-                    <Field.Error />
-                  </Field.Root>
+                  </h3>
+                  <NameField />
                   <ScheduleFields
                     timezoneList={timezoneList}
                     defaultTimezone={defaultTimezone}
                     defaultDate={defaultDate}
                     initialSchedule={formInitialValues}
                   />
-                </Flex>
-                <Box borderColor="neutral150" borderStyle="solid" borderWidth="1px 0 0 0" />
+                </div>
+                <div className="border-t border-border" />
                 <ReleaseModeField />
-              </ScrollArea>
+              </div>
               <DrawerFooter>
-                <Flex
-                  justifyContent="space-between"
-                  paddingTop={4}
-                  borderColor="neutral150"
-                  borderStyle="solid"
-                  borderWidth="1px 0 0 0"
-                >
+                <div className="flex justify-between border-t border-border pt-4">
                   <Button variant="tertiary" onClick={onClose}>
                     {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
                   </Button>
                   <Button type="submit" loading={isSubmitting} disabled={isSubmitDisabled}>
                     {submitLabel}
                   </Button>
-                </Flex>
+                </div>
               </DrawerFooter>
-            </DrawerForm>
+            </Form>
           )}
         </Formik>
       </DrawerContent>
     </Drawer>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Fields
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * A field's error, from the first submit on. From then on every change validates the form again
+ * (see `RevalidateAfterSubmit`), so it goes away as soon as the field is valid.
+ */
+const useFieldError = (name: keyof FormValues) => {
+  const { formatMessage } = useIntl();
+  const { errors, submitCount } = useFormikContext<FormValues>();
+  const error = errors[name];
+
+  return submitCount > 0 && error ? formatMessage({ id: error, defaultMessage: error }) : undefined;
+};
+
+/**
+ * Errors only show after the first submit, so validating every change before it would only cost
+ * renders (enough to make typing lag). After it, every change is validated so stale errors clear.
+ */
+const RevalidateAfterSubmit = () => {
+  const { values, submitCount, validateForm } = useFormikContext<FormValues>();
+
+  React.useEffect(() => {
+    if (submitCount > 0) {
+      validateForm();
+    }
+  }, [values, submitCount, validateForm]);
+
+  return null;
+};
+
+const NameField = () => {
+  const { formatMessage } = useIntl();
+  const { values, handleChange } = useFormikContext<FormValues>();
+
+  return (
+    <Field.Root name="name" error={useFieldError('name')} required>
+      <Field.Label>
+        {formatMessage({
+          id: 'content-releases.release-drawer.form.name.label',
+          defaultMessage: 'Release name',
+        })}
+      </Field.Label>
+      <TextInput type="text" value={values.name} onChange={handleChange} />
+      <Field.Error />
+    </Field.Root>
   );
 };
 
@@ -265,42 +325,40 @@ const ScheduleFields = ({
   initialSchedule,
 }: ScheduleFieldsProps) => {
   const { formatMessage } = useIntl();
-  const { values, errors, setFieldValue } = useFormikContext<FormValues>();
+  const { values, setFieldValue, setValues } = useFormikContext<FormValues>();
+  const dateError = useFieldError('date');
+  const timeError = useFieldError('time');
+  const timezoneError = useFieldError('timezone');
 
   const handleNoScheduleChange = (hasNoSchedule: boolean) => {
-    setFieldValue('isScheduled', !hasNoSchedule);
-
-    if (hasNoSchedule) {
+    // At once, so the form is validated once, with every change
+    setValues({
+      ...values,
+      isScheduled: !hasNoSchedule,
       // Submitting without a schedule also removes it from the release
-      setFieldValue('date', null);
-      setFieldValue('time', '');
-      setFieldValue('timezone', null);
-    } else {
-      setFieldValue('date', initialSchedule.date ?? defaultDate);
-      setFieldValue('time', initialSchedule.time);
-      setFieldValue('timezone', initialSchedule.timezone ?? defaultTimezone);
-    }
+      ...(hasNoSchedule
+        ? { date: null, time: '', timezone: null }
+        : {
+            date: initialSchedule.date ?? defaultDate,
+            time: initialSchedule.time,
+            timezone: initialSchedule.timezone ?? defaultTimezone,
+          }),
+    });
   };
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={2}>
-      <Typography variant="pi" fontWeight="bold" textColor="neutral800">
+    <div className="flex flex-col gap-2">
+      <span className="text-xs font-semibold">
         {formatMessage({
           id: 'content-releases.release-drawer.form.schedule.label',
           defaultMessage: 'Schedule',
         })}
-      </Typography>
+      </span>
       {values.isScheduled && (
         <>
-          <Flex gap={2} alignItems="start">
-            <Box flex={1}>
-              <Field.Root
-                name="date"
-                error={
-                  errors.date && formatMessage({ id: errors.date, defaultMessage: errors.date })
-                }
-                required
-              >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+            <div className="flex-1">
+              <Field.Root name="date" error={dateError} required>
                 <DatePicker
                   aria-label={formatMessage({
                     id: 'content-releases.modal.form.input.label.date',
@@ -326,33 +384,35 @@ const ScheduleFields = ({
                 />
                 <Field.Error />
               </Field.Root>
-            </Box>
-            <Box flex={1}>
-              <Field.Root
-                name="time"
-                error={
-                  errors.time && formatMessage({ id: errors.time, defaultMessage: errors.time })
-                }
-                required
-              >
+            </div>
+            <div className="flex-1">
+              <Field.Root name="time" error={timeError} required>
                 <TimePicker
                   aria-label={formatMessage({
                     id: 'content-releases.modal.form.input.label.time',
                     defaultMessage: 'Time',
                   })}
-                  onChange={(time) => setFieldValue('time', time)}
+                  onChange={(time) => setFieldValue('time', time ?? '')}
                   clearLabel={formatMessage({
                     id: 'content-releases.modal.form.input.clearLabel',
                     defaultMessage: 'Clear',
                   })}
                   onClear={() => setFieldValue('time', '')}
-                  value={values.time || undefined}
+                  // Always controlled: left without a value, the picker would keep its own, and a
+                  // cleared time could come back, or a time typed again never reach the form
+                  value={values.time}
                 />
                 <Field.Error />
               </Field.Root>
-            </Box>
-          </Flex>
-          <TimezoneField timezoneOptions={timezoneList} />
+            </div>
+          </div>
+          <TimezoneField
+            timezoneOptions={timezoneList}
+            value={values.timezone}
+            date={values.date}
+            error={timezoneError}
+            setFieldValue={setFieldValue}
+          />
         </>
       )}
       <Checkbox
@@ -364,7 +424,7 @@ const ScheduleFields = ({
           defaultMessage: "I don't have a release date yet",
         })}
       </Checkbox>
-    </Flex>
+    </div>
   );
 };
 
@@ -377,104 +437,128 @@ interface TimezoneOption {
   value: string;
 }
 
-const TimezoneField = ({ timezoneOptions }: { timezoneOptions: TimezoneOption[] }) => {
-  const { values, errors, setFieldValue } = useFormikContext<FormValues>();
-  const { formatMessage } = useIntl();
-  const [timezoneList, setTimezoneList] = React.useState<TimezoneOption[]>(timezoneOptions);
+interface TimezoneFieldProps {
+  timezoneOptions: TimezoneOption[];
+  value: FormValues['timezone'];
+  date: FormValues['date'];
+  error: string | undefined;
+  setFieldValue: FormikHelpers<FormValues>['setFieldValue'];
+}
 
-  React.useEffect(() => {
-    if (values.date) {
-      // Update the timezone offset which varies with DST based on the date selected
-      const { timezoneList } = getTimezones(new Date(values.date));
-      setTimezoneList(timezoneList);
+// Memoized with its own props: its hundreds of options would otherwise render again with every
+// change anywhere in the form, which made typing in the other fields lag
+const TimezoneField = React.memo(
+  ({ timezoneOptions, value, date, error, setFieldValue }: TimezoneFieldProps) => {
+    const { formatMessage } = useIntl();
+    const [timezoneList, setTimezoneList] = React.useState<TimezoneOption[]>(timezoneOptions);
 
-      const selectedName = values.timezone && getTimezoneName(values.timezone);
-      const updatedTimezone = timezoneList.find(
-        (timezone) => getTimezoneName(timezone.value) === selectedName
-      );
-      if (updatedTimezone) {
-        setFieldValue('timezone', updatedTimezone.value);
+    React.useEffect(() => {
+      if (date) {
+        // Update the timezone offset which varies with DST based on the date selected
+        const { timezoneList } = getTimezones(new Date(date));
+        setTimezoneList(timezoneList);
+
+        const selectedName = value && getTimezoneName(value);
+        const updatedTimezone = timezoneList.find(
+          (timezone) => getTimezoneName(timezone.value) === selectedName
+        );
+        if (updatedTimezone) {
+          setFieldValue('timezone', updatedTimezone.value);
+        }
       }
-    }
-  }, [setFieldValue, values.date, values.timezone]);
+    }, [setFieldValue, date, value]);
 
-  return (
-    <Field.Root
-      name="timezone"
-      error={
-        errors.timezone && formatMessage({ id: errors.timezone, defaultMessage: errors.timezone })
-      }
-      required
-    >
-      <Field.Label>
-        {formatMessage({
-          id: 'content-releases.modal.form.input.label.timezone',
-          defaultMessage: 'Timezone',
-        })}
-      </Field.Label>
-      <Combobox
-        autocomplete={{ type: 'list', filter: 'contains' }}
-        value={values.timezone || undefined}
-        // Without `textValue`, the input keeps showing the offset from before the date changed
-        textValue={values.timezone ? formatTimezoneLabel(values.timezone) : undefined}
-        onChange={(timezone) => {
-          setFieldValue('timezone', timezone);
-        }}
-        onTextValueChange={(timezone) => {
-          setFieldValue('timezone', timezone);
-        }}
-        onClear={() => {
-          setFieldValue('timezone', '');
-        }}
-      >
-        {timezoneList.map((timezone) => (
-          <ComboboxOption key={timezone.value} value={timezone.value}>
-            {formatTimezoneLabel(timezone.value)}
-          </ComboboxOption>
-        ))}
-      </Combobox>
-      <Field.Error />
-    </Field.Root>
-  );
-};
+    return (
+      <Field.Root name="timezone" error={error} required>
+        <Field.Label>
+          {formatMessage({
+            id: 'content-releases.modal.form.input.label.timezone',
+            defaultMessage: 'Timezone',
+          })}
+        </Field.Label>
+        <Combobox
+          autocomplete={{ type: 'list', filter: 'contains' }}
+          value={value || undefined}
+          // Without `textValue`, the input keeps showing the offset from before the date changed
+          textValue={value ? formatTimezoneLabel(value) : undefined}
+          onChange={(timezone) => {
+            setFieldValue('timezone', timezone);
+          }}
+          onTextValueChange={(timezone) => {
+            setFieldValue('timezone', timezone);
+          }}
+          onClear={() => {
+            setFieldValue('timezone', '');
+          }}
+        >
+          {timezoneList.map((timezone) => (
+            <ComboboxOption key={timezone.value} value={timezone.value}>
+              {formatTimezoneLabel(timezone.value)}
+            </ComboboxOption>
+          ))}
+        </Combobox>
+        <Field.Error />
+      </Field.Root>
+    );
+  }
+);
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseModeField
  * -----------------------------------------------------------------------------------------------*/
 
+const ARROW_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+
 const ReleaseModeField = () => {
   const { formatMessage } = useIntl();
   const { values, setFieldValue } = useFormikContext<FormValues>();
+  // The radio group checks the radio an arrow key moves the focus to, but it watches the keys on
+  // the document, and the drawer keeps arrow keys from reaching it (for its own keyboard
+  // navigation). So the keys are watched here, in the capture phase. The group moves the focus
+  // after a timeout, often after the key is released, so the focus consumes the flag rather
+  // than the key release clearing it.
+  const isArrowKeyPressed = React.useRef(false);
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={4} padding={4}>
-      <Typography variant="delta" tag="h3" id="release-condition-label">
+    <div
+      className="flex flex-col gap-4 p-4"
+      onKeyDownCapture={(event) => {
+        isArrowKeyPressed.current = ARROW_KEYS.includes(event.key);
+      }}
+    >
+      <h3 className="text-lg font-medium md:text-base" id="release-condition-label">
         {formatMessage({
           id: 'content-releases.release-drawer.release-mode.title',
           defaultMessage: 'Release mode',
         })}
-      </Typography>
+      </h3>
       <Radio.Group
         aria-labelledby="release-condition-label"
         value={values.releaseCondition}
         onValueChange={(value) => setFieldValue('releaseCondition', value)}
       >
-        <Flex direction="column" alignItems="stretch" gap={4}>
+        <div className="flex flex-col gap-4">
           {RELEASE_CONDITIONS.map((condition) => (
-            <Flex key={condition} direction="column" alignItems="stretch" gap={1}>
-              <Radio.Item value={condition}>
+            <div key={condition} className="flex flex-col gap-1">
+              <Radio.Item
+                value={condition}
+                onFocus={() => {
+                  if (isArrowKeyPressed.current) {
+                    isArrowKeyPressed.current = false;
+                    setFieldValue('releaseCondition', condition);
+                  }
+                }}
+              >
                 {formatMessage(RELEASE_CONDITION_MESSAGES[condition].label)}
               </Radio.Item>
-              <Box paddingLeft={6}>
-                <Typography variant="pi" textColor="neutral600">
-                  {formatMessage(RELEASE_CONDITION_MESSAGES[condition].description)}
-                </Typography>
-              </Box>
-            </Flex>
+              <p className="pl-6 text-xs text-muted-foreground">
+                {formatMessage(RELEASE_CONDITION_MESSAGES[condition].description)}
+              </p>
+            </div>
           ))}
-        </Flex>
+        </div>
       </Radio.Group>
-    </Flex>
+    </div>
   );
 };
 
@@ -500,16 +584,3 @@ const RELEASE_CONDITION_MESSAGES = {
     },
   },
 } satisfies Record<ReleaseCondition, Record<'label' | 'description', MessageDescriptor>>;
-
-const DrawerForm = styled(Form)`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-`;
-
-export const ScrollArea = styled(Box)`
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-`;

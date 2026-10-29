@@ -353,6 +353,24 @@ describe('an error that is not a validation error', () => {
       reason: { error: { name: 'TypeError' } },
     });
   });
+
+  test("keeps an application error's message, which is meant for the client", async () => {
+    const strapi = buildStrapi({
+      validate: jest
+        .fn()
+        .mockRejectedValue(new errors.ApplicationError('The partner API is not answering')),
+      findOne: jest.fn().mockResolvedValue({ documentId: 'a' }),
+    });
+
+    const result = await getValidityForActions([action], { strapi });
+
+    expect(result.get(1)).toEqual({
+      isEntryValid: false,
+      reason: {
+        error: { name: 'ApplicationError', message: 'The partner API is not answering' },
+      },
+    });
+  });
 });
 
 describe('getValidityForActions', () => {

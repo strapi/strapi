@@ -11,16 +11,17 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
-  isFetchError,
   useStrapiApp,
   Layouts,
 } from '@strapi/admin/strapi-admin';
 import {
+  Box,
   Button,
   Flex,
   Main,
   Tr,
   Td,
+  Tooltip,
   Typography,
   Badge,
   SingleSelect,
@@ -228,16 +229,34 @@ const ReleaseDetailsLayout = ({
     const response = await publishRelease({ id });
 
     if ('data' in response) {
-      // When the response returns an object with 'data', handle success
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: 'content-releases.pages.ReleaseDetails.publish-notification-success',
-          defaultMessage: 'Release was published successfully.',
-        }),
-      });
+      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries, totalSkippedEntries } =
+        response.data.meta;
 
-      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries } = response.data.meta;
+      if (response.data.data.status === 'partial') {
+        toggleNotification({
+          type: 'warning',
+          message: formatMessage(
+            {
+              id: 'content-releases.pages.ReleaseDetails.publish-notification-partial',
+              defaultMessage:
+                'Released {released} of {total, plural, one {# entry} other {# entries}}, {skipped} skipped',
+            },
+            {
+              released: totalPublishedEntries + totalUnpublishedEntries,
+              total: totalEntries,
+              skipped: totalSkippedEntries,
+            }
+          ),
+        });
+      } else {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.publish-notification-success',
+            defaultMessage: 'Release was published successfully.',
+          }),
+        });
+      }
 
       trackUsage('didPublishRelease', {
         totalEntries,
@@ -245,10 +264,27 @@ const ReleaseDetailsLayout = ({
         totalUnpublishedEntries,
       });
     } else if (isBaseQueryError(response.error)) {
-      // The API's error, e.g. why a blocked release was refused
+      const error = response.error;
+      const apiError = formatAPIError(error);
+      // A run that failed sends the release it froze: it ran and released nothing. Without it,
+      // the publish was refused, e.g. a blocked release.
+      const hasRunFailed =
+        'details' in error &&
+        typeof error.details === 'object' &&
+        error.details !== null &&
+        'release' in error.details;
+
       toggleNotification({
         type: 'danger',
-        message: formatAPIError(response.error),
+        message: hasRunFailed
+          ? formatMessage(
+              {
+                id: 'content-releases.pages.ReleaseDetails.publish-notification-failed',
+                defaultMessage: 'Nothing was released: {error}',
+              },
+              { error: apiError }
+            )
+          : apiError,
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
@@ -315,7 +351,6 @@ const ReleaseDetailsLayout = ({
   const showCreateFromSkipped = canCreateFromSkipped && hasSkippedEntriesToCarryOver;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
-  const isScheduled = release.scheduledAt && release.timezone;
   const numberOfEntriesText = formatMessage(
     {
       id: 'content-releases.pages.Details.header-subtitle',
@@ -323,28 +358,92 @@ const ReleaseDetailsLayout = ({
     },
     { number: totalEntries }
   );
-  const scheduledText = isScheduled
-    ? formatMessage(
-        {
+
+  // A release that ran shows when. One that missed its schedule or failed before the upgrade never
+  // ran: it shows when it was scheduled for, not when it was frozen.
+  const getHeaderDate = () => {
+    if (release.releasedAt && !release.failureReason) {
+      return {
+        message: {
+          id: 'content-releases.pages.ReleaseDetails.header-subtitle.released-on',
+          defaultMessage: 'Released on {date} at {time} ({offset})',
+        },
+        date: new Date(release.releasedAt),
+        // An unscheduled release has no timezone of its own
+        timeZone: release.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+    }
+
+    if (release.scheduledAt && release.timezone) {
+      return {
+        message: {
           id: 'content-releases.pages.ReleaseDetails.header-subtitle.scheduled',
           defaultMessage: 'Scheduled for {date} at {time} ({offset})',
         },
-        {
-          date: formatDate(new Date(release.scheduledAt!), {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            timeZone: release.timezone!,
-          }),
-          time: formatTime(new Date(release.scheduledAt!), {
-            timeZone: release.timezone!,
-            hourCycle: 'h23',
-          }),
-          offset: getTimezoneOffset(release.timezone!, new Date(release.scheduledAt!)),
-        }
-      )
+        date: new Date(release.scheduledAt),
+        timeZone: release.timezone,
+      };
+    }
+
+    return null;
+  };
+
+  const headerDate = getHeaderDate();
+  const dateText = headerDate
+    ? formatMessage(headerDate.message, {
+        date: formatDate(headerDate.date, {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          timeZone: headerDate.timeZone,
+        }),
+        time: formatTime(headerDate.date, { timeZone: headerDate.timeZone, hourCycle: 'h23' }),
+        offset: getTimezoneOffset(headerDate.timeZone, headerDate.date),
+      })
     : '';
+
+  // Blocked means running now would release nothing. A stale Ready is still refused by the run,
+  // which re-checks every entry
+  const getPublishDisabledReason = () => {
+    if (release.status === 'empty') {
+      return formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.publish-disabled.empty',
+        defaultMessage: 'This release is empty.',
+      });
+    }
+
+    if (release.status !== 'blocked') {
+      return null;
+    }
+
+    return release.releaseCondition === 'allow_partial'
+      ? formatMessage({
+          id: 'content-releases.pages.ReleaseDetails.publish-disabled.allow_partial',
+          defaultMessage: 'Nothing in this release is ready to publish.',
+        })
+      : formatMessage({
+          id: 'content-releases.pages.ReleaseDetails.publish-disabled.all_or_nothing',
+          defaultMessage:
+            "Some entries aren't ready. This release only publishes when every entry is ready.",
+        });
+  };
+
+  const publishDisabledReason = getPublishDisabledReason();
+  const publishButton = (
+    <Button
+      size="S"
+      variant="default"
+      onClick={handlePublishRelease(release.id.toString())}
+      loading={isPublishing}
+      disabled={publishDisabledReason !== null}
+    >
+      {formatMessage({
+        id: 'content-releases.header.actions.publish',
+        defaultMessage: 'Publish',
+      })}
+    </Button>
+  );
 
   return (
     <Layouts.Root>
@@ -353,17 +452,11 @@ const ReleaseDetailsLayout = ({
           title={release.name}
           subtitle={
             <Flex gap={2} lineHeight={6}>
-              {release.releasedAt ? (
-                <RunSummary
-                  release={release}
-                  scheduledText={isScheduled ? scheduledText : ''}
-                  numberOfEntriesText={numberOfEntriesText}
-                />
-              ) : (
-                <Typography textColor="neutral600" variant="epsilon">
-                  {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
-                </Typography>
-              )}
+              <ReleaseSubtitle
+                release={release}
+                dateText={dateText}
+                numberOfEntriesText={numberOfEntriesText}
+              />
             </Flex>
           }
           secondaryAction={<ReleaseStatusBadge status={release.status} />}
@@ -454,20 +547,14 @@ const ReleaseDetailsLayout = ({
                   })}
                 </Button>
                 {canPublish ? (
-                  <Button
-                    size="S"
-                    variant="default"
-                    onClick={handlePublishRelease(release.id.toString())}
-                    loading={isPublishing}
-                    // Blocked means running now would release nothing. A stale Ready is still
-                    // refused by the run, which re-checks every entry
-                    disabled={release.status === 'empty' || release.status === 'blocked'}
-                  >
-                    {formatMessage({
-                      id: 'content-releases.header.actions.publish',
-                      defaultMessage: 'Publish',
-                    })}
-                  </Button>
+                  publishDisabledReason ? (
+                    <Tooltip label={publishDisabledReason}>
+                      {/* A disabled button takes neither focus nor hover: what holds it does */}
+                      <Box tabIndex={0}>{publishButton}</Box>
+                    </Tooltip>
+                  ) : (
+                    publishButton
+                  )
                 ) : null}
               </Flex>
             )
@@ -486,13 +573,13 @@ const ReleaseDetailsLayout = ({
   );
 };
 
-interface RunSummaryProps {
+interface ReleaseSubtitleProps {
   release: ReleaseDataResponse;
-  scheduledText: string;
+  dateText: string;
   numberOfEntriesText: string;
 }
 
-const RunSummary = ({ release, scheduledText, numberOfEntriesText }: RunSummaryProps) => {
+const ReleaseSubtitle = ({ release, dateText, numberOfEntriesText }: ReleaseSubtitleProps) => {
   const { formatMessage } = useIntl();
   const totals = getRunTotals(release);
 
@@ -517,14 +604,23 @@ const RunSummary = ({ release, scheduledText, numberOfEntriesText }: RunSummaryP
     );
   };
 
-  const parts = [scheduledText, getCountsText()].filter(Boolean);
+  // A planned release: its entries, then when it's scheduled for. A release that ran: when, then
+  // what the run did
+  const parts = (
+    release.releasedAt ? [dateText, getCountsText()] : [numberOfEntriesText, dateText]
+  ).filter(Boolean);
 
   return (
     <Typography textColor="neutral600" variant="epsilon">
-      {parts.join(' • ')}
+      {parts.map((part, index) => (
+        <React.Fragment key={part}>
+          {index > 0 && ' • '}
+          <span>{part}</span>
+        </React.Fragment>
+      ))}
       {totals && totals.skipped > 0 && (
         <>
-          {parts.length > 0 && ' • '}
+          {' • '}
           <Typography textColor="danger600" variant="epsilon">
             {formatMessage(
               {
@@ -593,7 +689,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const [reasonPageSize, setReasonPageSize] = React.useState(REASON_PAGE_SIZE);
   const [{ query }, setQuery] = useQueryParams<GetReleaseActionsQueryParams>();
   const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const {
     data: releaseData,
     isLoading: isReleaseLoading,
@@ -700,8 +796,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     });
 
     if ('error' in response) {
-      if (isFetchError(response.error)) {
-        // When the response returns an object with 'error', handle fetch error
+      if (isBaseQueryError(response.error)) {
+        // The API's error, e.g. why the entry can't be changed
         toggleNotification({
           type: 'danger',
           message: formatAPIError(response.error),
@@ -1169,7 +1265,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         selectedId={reasonActionId}
         onSelect={setReasonActionId}
         onClose={() => setReasonActionId(null)}
-        releasedAt={release.releasedAt}
+        release={release}
       />
     </Layouts.Content>
   );
@@ -1186,7 +1282,7 @@ const ReleaseDetailsPage = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
   const [isEditDrawerOpen, setIsEditDrawerOpen] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
@@ -1241,8 +1337,8 @@ const ReleaseDetailsPage = () => {
         }),
       });
       toggleEditDrawer();
-    } else if (isFetchError(response.error)) {
-      // When the response returns an object with 'error', handle fetch error
+    } else if (isBaseQueryError(response.error)) {
+      // The API's error, e.g. why the release can't be saved
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -1263,8 +1359,8 @@ const ReleaseDetailsPage = () => {
 
     if ('data' in response) {
       navigate('..');
-    } else if (isFetchError(response.error)) {
-      // When the response returns an object with 'error', handle fetch error
+    } else if (isBaseQueryError(response.error)) {
+      // The API's error, e.g. why the release can't be deleted
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),

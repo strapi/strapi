@@ -4,6 +4,8 @@ import { render, screen } from '@tests/utils';
 
 import { EntryReasonDrawer, type EntryReasonDetails } from '../EntryReasonDrawer';
 
+import type { Release } from '../../../../shared/contracts/releases';
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useAuth: jest.fn(),
@@ -52,9 +54,21 @@ const details = (id: number, overrides: Partial<EntryReasonDetails> = {}): Entry
   ...overrides,
 });
 
+const RAN_RELEASE: Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason'> = {
+  releasedAt: '2026-09-30T09:00:00.000Z',
+  scheduledAt: '2026-09-30T09:00:00.000Z',
+  failureReason: null,
+};
+
 const renderDrawer = (
   items: EntryReasonDetails[],
-  { selectedId = items[0].id, releasedAt = '2026-09-30T09:00:00.000Z' } = {}
+  {
+    selectedId = items[0].id,
+    release = RAN_RELEASE,
+  }: {
+    selectedId?: EntryReasonDetails['id'];
+    release?: Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason'>;
+  } = {}
 ) => {
   const onSelect = jest.fn();
   const onClose = jest.fn();
@@ -64,7 +78,7 @@ const renderDrawer = (
       selectedId={selectedId}
       onSelect={onSelect}
       onClose={onClose}
-      releasedAt={releasedAt}
+      release={release}
     />
   );
 
@@ -150,8 +164,27 @@ describe('EntryReasonDrawer', () => {
     expect(within(dialog).getByText('Couldn’t be published: KnexTimeoutError')).toBeInTheDocument();
   });
 
+  it("shows the message of an error that's meant for the user", async () => {
+    renderDrawer([
+      details(1, {
+        outcome: 'skipped_error',
+        reason: {
+          error: { name: 'PartnerApiError', message: 'The séance hotline is not answering' },
+        },
+      }),
+    ]);
+
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('Couldn’t be published: PartnerApiError')).toBeInTheDocument();
+    expect(within(dialog).getByText('The séance hotline is not answering')).toBeInTheDocument();
+  });
+
   it.each([
-    ['skipped_held', 'Waiting on other entries', /requires every entry to be ready/],
+    [
+      'skipped_held',
+      'Waiting on other entries',
+      /requires every entry to be ready.*another entry wasn’t ready or couldn’t be released/,
+    ],
     ['skipped_missed', 'Server unavailable', /server was down at the scheduled time/],
   ] as const)('explains %s in a sentence, with no issues to list', async (outcome, title, text) => {
     renderDrawer([details(1, { outcome, reason: null })]);
@@ -160,6 +193,65 @@ describe('EntryReasonDrawer', () => {
     expect(within(dialog).getByText(`Skipped: ${title}`)).toBeInTheDocument();
     expect(within(dialog).getByText(text)).toBeInTheDocument();
     expect(within(dialog).queryByText(/issues?$/)).not.toBeInTheDocument();
+  });
+
+  const formatDate = (date: string) =>
+    new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(
+      new Date(date)
+    );
+
+  it('dates a release that ran by its run', async () => {
+    renderDrawer([details(1)], {
+      release: {
+        releasedAt: '2026-09-30T09:12:00.000Z',
+        scheduledAt: '2026-09-30T09:00:00.000Z',
+        failureReason: null,
+      },
+    });
+
+    const dialog = await screen.findByRole('dialog');
+    expect(
+      within(dialog).getByText(
+        `Captured when the release ran on ${formatDate('2026-09-30T09:12:00.000Z')}. The entry may have changed since.`
+      )
+    ).toBeInTheDocument();
+  });
+
+  it.each(['missed_schedule', 'failed_before_upgrade'] as const)(
+    'dates a %s release by its schedule, not when it was marked failed',
+    async (failureReason) => {
+      renderDrawer([details(1, { outcome: 'skipped_missed', reason: null })], {
+        release: {
+          releasedAt: '2026-09-30T11:54:00.000Z',
+          scheduledAt: '2026-09-30T10:53:00.000Z',
+          failureReason,
+        },
+      });
+
+      const dialog = await screen.findByRole('dialog');
+      expect(
+        within(dialog).getByText(
+          `Scheduled for ${formatDate('2026-09-30T10:53:00.000Z')}. The entry may have changed since.`
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(dialog).queryByText(new RegExp(formatDate('2026-09-30T11:54:00.000Z')))
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it('shows no date for a release that failed before the upgrade without a schedule', async () => {
+    renderDrawer([details(1, { outcome: 'skipped_missed', reason: null })], {
+      release: {
+        releasedAt: '2026-09-30T11:54:00.000Z',
+        scheduledAt: null,
+        failureReason: 'failed_before_upgrade',
+      },
+    });
+
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('The entry may have changed since.')).toBeInTheDocument();
+    expect(within(dialog).queryByText(/Captured when the release ran/)).not.toBeInTheDocument();
   });
 
   it('steps through the entries with a reason', async () => {
@@ -219,7 +311,7 @@ describe('EntryReasonDrawer', () => {
 
   it('keeps showing an entry a refetch dropped, rather than closing', async () => {
     const onSelect = jest.fn();
-    const props = { onSelect, onClose: jest.fn(), selectedId: 2, releasedAt: null };
+    const props = { onSelect, onClose: jest.fn(), selectedId: 2, release: null };
     const { rerender, user } = render(
       <EntryReasonDrawer {...props} items={[details(1), details(2)]} />
     );
@@ -237,7 +329,7 @@ describe('EntryReasonDrawer', () => {
   });
 
   it("doesn't show the last entry for another row the list lacks", async () => {
-    const props = { onSelect: jest.fn(), onClose: jest.fn(), releasedAt: null };
+    const props = { onSelect: jest.fn(), onClose: jest.fn(), release: null };
     const { rerender } = render(
       <EntryReasonDrawer {...props} items={[details(1), details(2)]} selectedId={2} />
     );

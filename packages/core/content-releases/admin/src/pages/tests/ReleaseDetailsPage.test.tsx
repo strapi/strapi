@@ -437,6 +437,14 @@ describe('Release details tabs, header and rows', () => {
       { initialEntries: [{ pathname: `/content-releases/3`, search }] }
     );
 
+  const findHeader = async () => {
+    await screen.findByRole('heading', { level: 1 });
+
+    // The header has no role to find it by
+    // eslint-disable-next-line testing-library/no-node-access
+    return document.querySelector<HTMLElement>('[data-strapi-header]') as HTMLElement;
+  };
+
   beforeEach(() => {
     jest.mocked(useRBAC).mockReturnValue({
       isLoading: false,
@@ -465,6 +473,31 @@ describe('Release details tabs, header and rows', () => {
 
     expect(await screen.findByRole('button', { name: 'Publish' })).toBeDisabled();
   });
+
+  it.each([
+    ['blocked', 'allow_partial', 'Nothing in this release is ready to publish.'],
+    [
+      'blocked',
+      'all_or_nothing',
+      "Some entries aren't ready. This release only publishes when every entry is ready.",
+    ],
+    ['empty', 'all_or_nothing', 'This release is empty.'],
+  ])(
+    'says why Publish is disabled on a %s %s release',
+    async (status, releaseCondition, reason) => {
+      mockRelease({ ...plannedRelease, status, releaseCondition }, [action(1)]);
+
+      const { user } = renderPage();
+
+      expect(await screen.findByRole('button', { name: 'Publish' })).toBeDisabled();
+
+      // From the keyboard: the disabled button can't take focus, what holds it can
+      await user.click(screen.getByRole('button', { name: 'Refresh' }));
+      await user.tab();
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(reason);
+    }
+  );
 
   it('says why the run refused a release whose readiness changed since it was checked', async () => {
     mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
@@ -533,8 +566,13 @@ describe('Release details tabs, header and rows', () => {
         hasRun = true;
 
         return HttpResponse.json({
-          data: partialRelease,
-          meta: { totalEntries: 1, totalPublishedEntries: 1, totalUnpublishedEntries: 0 },
+          data: { ...partialRelease, status: 'done', totalSkippedEntries: 0 },
+          meta: {
+            totalEntries: 1,
+            totalPublishedEntries: 1,
+            totalUnpublishedEntries: 0,
+            totalSkippedEntries: 0,
+          },
         });
       })
     );
@@ -546,6 +584,163 @@ describe('Release details tabs, header and rows', () => {
     // The row's outcome, not the release's status badge, which reads "Done" too
     expect(await screen.findByRole('gridcell', { name: 'Done' })).toBeVisible();
     expect(screen.queryByText('Unknown')).not.toBeInTheDocument();
+  });
+
+  it('warns that a run skipped entries', async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
+    server.use(
+      http.post('/content-releases/:releaseId/publish', () =>
+        HttpResponse.json({
+          data: partialRelease,
+          meta: {
+            totalEntries: 10,
+            totalPublishedEntries: 7,
+            totalUnpublishedEntries: 1,
+            totalSkippedEntries: 2,
+          },
+        })
+      )
+    );
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Publish' }));
+
+    expect(await screen.findByText('Released 8 of 10 entries, 2 skipped')).toBeVisible();
+    expect(screen.queryByText('Release was published successfully.')).not.toBeInTheDocument();
+  });
+
+  it('says nothing was released when the run failed', async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
+    server.use(
+      http.post('/content-releases/:releaseId/publish', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: {
+              status: 400,
+              name: 'ApplicationError',
+              message: "An entry couldn't be released (PartnerApiError)",
+              // The release the run froze: the run happened, unlike a refused publish
+              details: {
+                release: { ...partialRelease, status: 'failed', totalPublishedEntries: 0 },
+              },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Publish' }));
+
+    expect(
+      await screen.findByText(
+        "Nothing was released: An entry couldn't be released (PartnerApiError)"
+      )
+    ).toBeVisible();
+  });
+
+  it('separates the parts of a planned release header with a bullet', async () => {
+    mockRelease(
+      {
+        ...plannedRelease,
+        status: 'ready',
+        scheduledAt: '2026-10-30T10:00:00.000Z',
+        timezone: 'Europe/Paris',
+      },
+      [action(1)]
+    );
+
+    renderPage();
+
+    const header = await findHeader();
+    await waitFor(() =>
+      expect(header).toHaveTextContent(
+        '3 entries • Scheduled for Friday, October 30, 2026 at 11:00 (UTC+01:00)'
+      )
+    );
+  });
+
+  it('says when a release that ran was released, not when it was scheduled', async () => {
+    mockRelease(
+      {
+        ...partialRelease,
+        scheduledAt: '2026-10-30T10:00:00.000Z',
+        timezone: 'Europe/Paris',
+        releasedAt: '2026-10-29T14:03:00.000Z',
+      },
+      [action(1, { outcome: 'published' })]
+    );
+
+    renderPage();
+
+    const header = await findHeader();
+    await waitFor(() =>
+      expect(header).toHaveTextContent(
+        'Released on Thursday, October 29, 2026 at 15:03 (UTC+01:00) • Released 8 of 10 entries • 2 skipped'
+      )
+    );
+    expect(header).not.toHaveTextContent('Scheduled for');
+  });
+
+  it('says when an unscheduled release that ran was released', async () => {
+    mockRelease({ ...partialRelease, scheduledAt: null, timezone: null }, [
+      action(1, { outcome: 'published' }),
+    ]);
+
+    renderPage();
+
+    const header = await findHeader();
+    await waitFor(() => expect(header).toHaveTextContent(/Released on .+ at \d{2}:\d{2}/));
+  });
+
+  it.each([
+    ['missed', 'missed_schedule'],
+    ['failed before the upgrade', 'failed_before_upgrade'],
+  ])('shows when a %s release was scheduled for, not when it froze', async (_, failureReason) => {
+    mockRelease(
+      {
+        ...partialRelease,
+        status: 'failed',
+        failureReason,
+        scheduledAt: '2026-10-30T10:00:00.000Z',
+        timezone: 'Europe/Paris',
+        releasedAt: '2026-11-02T08:00:00.000Z',
+      },
+      [action(1, { outcome: 'skipped_missed' })]
+    );
+
+    renderPage();
+
+    const header = await findHeader();
+    await waitFor(() =>
+      expect(header).toHaveTextContent(
+        'Scheduled for Friday, October 30, 2026 at 11:00 (UTC+01:00)'
+      )
+    );
+    expect(header).not.toHaveTextContent('Released on');
+  });
+
+  it('shows no date for an unscheduled release that failed before the upgrade', async () => {
+    mockRelease(
+      {
+        ...partialRelease,
+        status: 'failed',
+        failureReason: 'failed_before_upgrade',
+        scheduledAt: null,
+        timezone: null,
+      },
+      [action(1, { outcome: 'skipped_missed' })]
+    );
+
+    renderPage();
+
+    const header = await findHeader();
+    await waitFor(() => expect(header).toHaveTextContent('10 entries'));
+    expect(header).not.toHaveTextContent(/Scheduled for|Released on/);
   });
 
   it('sums what a run released and skipped', async () => {
@@ -848,10 +1043,7 @@ describe('Release details tabs, header and rows', () => {
 
     // In the header, and in place of the table
     const message = 'This release ran with no entries.';
-    await screen.findByRole('heading', { level: 1 });
-    // The header has no role to find it by
-    // eslint-disable-next-line testing-library/no-node-access
-    const header = document.querySelector<HTMLElement>('[data-strapi-header]') as HTMLElement;
+    const header = await findHeader();
     const inHeader = await within(header).findByText(message);
     expect(inHeader).toBeVisible();
     await waitFor(() =>
@@ -859,5 +1051,59 @@ describe('Release details tabs, header and rows', () => {
     );
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
     expect(screen.queryByText('Open the Content Manager')).not.toBeInTheDocument();
+  });
+
+  const mockApiError = (
+    method: 'put' | 'delete',
+    path: string,
+    message: string
+  ): Parameters<typeof server.use>[0] =>
+    http[method](path, () =>
+      HttpResponse.json(
+        { data: null, error: { status: 400, name: 'ValidationError', message, details: {} } },
+        { status: 400 }
+      )
+    );
+
+  it("says why the release couldn't be edited", async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
+    server.use(
+      mockApiError('put', '/content-releases/:releaseId', 'Release with name March already exists')
+    );
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Release edit and delete menu' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Edit' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Release with name March already exists')).toBeVisible();
+  });
+
+  it("says why the release couldn't be deleted", async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
+    server.use(mockApiError('delete', '/content-releases/:releaseId', 'Release already ran'));
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Release edit and delete menu' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
+    await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+    expect(await screen.findByText('Release already ran')).toBeVisible();
+  });
+
+  it("says why an entry's action couldn't be changed", async () => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
+    server.use(
+      mockApiError('put', '/content-releases/:releaseId/actions/:actionId', 'Release already ran')
+    );
+
+    renderPage();
+
+    // user-event's click doesn't change the visually hidden radio
+    fireEvent.click(await screen.findByRole('radio', { name: 'unpublish' }));
+
+    expect(await screen.findByText('Release already ran')).toBeVisible();
   });
 });

@@ -44,7 +44,8 @@ const SKIPPED_REASONS = {
     },
     description: {
       id: 'content-releases.pages.ReleaseDetails.outcome.skipped-held.description',
-      defaultMessage: 'This release requires every entry to be ready, and some were not.',
+      defaultMessage:
+        'This release requires every entry to be ready and released together: another entry wasn’t ready or couldn’t be released, so none were.',
     },
   },
   skipped_missed: {

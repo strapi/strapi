@@ -9,7 +9,6 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
-  isFetchError,
   Layouts,
   GradientBadge,
   Table,
@@ -51,6 +50,7 @@ import {
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
+import { isBaseQueryError } from '../utils/api';
 import { splitScheduleFilterValue, toReleasesApiFilters } from '../utils/scheduleFilters';
 import { getTimezoneOffset } from '../utils/time';
 
@@ -96,7 +96,10 @@ const RELEASE_CONDITION_BADGES = {
 const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
   const isFrozen = Boolean(release.releasedAt);
-  const date = release.releasedAt ?? release.scheduledAt;
+  // A release that froze without running never ran: `releasedAt` is when it froze, not a run
+  const date = release.failureReason
+    ? release.scheduledAt
+    : (release.releasedAt ?? release.scheduledAt);
 
   if (!date) {
     return (
@@ -536,7 +539,7 @@ const ReleasesPage = () => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams & Filters.Query>();
   // Only the filters the page controls: old links can still carry the filters of the removed tabs
   const { page, pageSize, sort = DEFAULT_SORT } = query;
@@ -617,8 +620,8 @@ const ReleasesPage = () => {
 
       trackUsage('didCreateRelease');
       navigate(response.data.data.id.toString());
-    } else if (isFetchError(response.error)) {
-      // When the response returns an object with 'error', handle fetch error
+    } else if (isBaseQueryError(response.error)) {
+      // The API's error, e.g. a pending release already has this name
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),

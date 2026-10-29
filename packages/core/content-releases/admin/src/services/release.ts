@@ -77,6 +77,14 @@ const extendInvalidatesTags = (
   Object.assign(endpoint, { invalidatesTags: newInvalidatesTags });
 };
 
+/**
+ * Invalidated by review-workflows when an entry's stage or a workflow changes. Readiness depends on
+ * the stage required to publish, so the queries that report it provide this tag. Extending those
+ * mutations instead would depend on the plugins' load order: review-workflows injects them after
+ * this file runs, and `enhanceEndpoints` skips endpoints that aren't injected yet.
+ */
+const REVIEW_WORKFLOW_STAGES_TAG = 'ReviewWorkflowStages';
+
 const releaseApi = adminApi
   .enhanceEndpoints({
     addTagTypes: [
@@ -86,6 +94,7 @@ const releaseApi = adminApi
       'ReleaseSettings',
       'Document',
       'UpcomingReleasesList',
+      REVIEW_WORKFLOW_STAGES_TAG,
     ],
     endpoints: {
       updateDocument(endpoint: AnyEndpointDefinition) {
@@ -107,24 +116,6 @@ const releaseApi = adminApi
         ]);
       },
       discardDocument(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      createWorkflow(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      updateWorkflow(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      deleteWorkflow(endpoint: AnyEndpointDefinition) {
         extendInvalidatesTags(endpoint, [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
@@ -179,8 +170,9 @@ const releaseApi = adminApi
               ? [
                   ...result.data.map(({ id }) => ({ type: 'Release' as const, id })),
                   { type: 'Release', id: 'LIST' },
+                  REVIEW_WORKFLOW_STAGES_TAG,
                 ]
-              : [{ type: 'Release', id: 'LIST' }],
+              : [{ type: 'Release', id: 'LIST' }, REVIEW_WORKFLOW_STAGES_TAG],
         }),
         getRelease: build.query<GetRelease.Response, GetRelease.Request['params']>({
           query({ id }) {
@@ -192,6 +184,7 @@ const releaseApi = adminApi
           providesTags: (result, error, arg) => [
             { type: 'Release', id: 'LIST' },
             { type: 'Release' as const, id: arg.id },
+            REVIEW_WORKFLOW_STAGES_TAG,
           ],
         }),
         getReleaseActions: build.query<
@@ -207,7 +200,7 @@ const releaseApi = adminApi
               },
             };
           },
-          providesTags: [{ type: 'ReleaseAction', id: 'LIST' }],
+          providesTags: [{ type: 'ReleaseAction', id: 'LIST' }, REVIEW_WORKFLOW_STAGES_TAG],
         }),
         createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
           query(data) {

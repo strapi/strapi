@@ -916,7 +916,11 @@ describe('Release service', () => {
         expect(result).toMatchObject({ release: { status: 'partial' } });
         expect(actionUpdate).toHaveBeenCalledWith({
           where: { id: 2 },
-          data: { ...UNCHECKED, reason: { error: { name: 'ValidationError' } } },
+          // An application error's message is meant for the client: kept
+          data: {
+            ...UNCHECKED,
+            reason: { error: { name: 'ValidationError', message: 'Lookup failed' } },
+          },
         });
       });
 
@@ -956,7 +960,9 @@ describe('Release service', () => {
           const reasons = {
             invalid: { validation: { errors: [] } },
             unreadable: { error: { name: 'TypeError' } },
-            'unreadable-validation': { error: { name: 'ValidationError' } },
+            'unreadable-validation': {
+              error: { name: 'ValidationError', message: 'Lookup failed' },
+            },
           };
           expect(getUpdatedActions(actionUpdateMany)).toStrictEqual(
             new Map(

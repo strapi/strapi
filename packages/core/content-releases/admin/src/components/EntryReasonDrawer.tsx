@@ -1,34 +1,27 @@
 import * as React from 'react';
 
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  IconButton,
-  LinkButton,
-  Typography,
-} from '@strapi/design-system';
+import { Badge, Button, IconButton, LinkButton } from '@strapi/design-system';
 import {
   Drawer,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  cn,
 } from '@strapi/design-system/next';
 import { CaretDown, CaretUp, Cross } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { Link } from 'react-router-dom';
-import { styled } from 'styled-components';
 
 import { getFieldLabel, getProblem } from '../utils/fieldErrors';
 
 import { getEntryLinkProps, useCanReadEntry, type EntryLocation } from './EntryLinkButton';
 import { InlineBadge, SKIPPED_REASONS, isSkippedOutcome } from './ReleaseActionStatus';
-import { DRAWER_STYLE, ScrollArea } from './ReleaseDrawer';
+import { RELEASE_DRAWER_CLASS_NAME } from './ReleaseDrawer';
 
 import type { ReleaseActionOutcome } from '../../../shared/constants';
 import type { ReleaseAction, ReleaseActionReason } from '../../../shared/contracts/release-actions';
+import type { Release } from '../../../shared/contracts/releases';
 
 /**
  * A row's entry, and why it wasn't, or won't be, released
@@ -57,8 +50,11 @@ interface EntryReasonDrawerProps {
   selectedId: ReleaseAction['id'] | null;
   onSelect: (id: ReleaseAction['id']) => void;
   onClose: () => void;
-  releasedAt?: string | null;
+  /** The release the entries are in: when its run captured the reasons */
+  release?: ReleaseDates | null;
 }
+
+type ReleaseDates = Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason'>;
 
 /* -------------------------------------------------------------------------------------------------
  * Building blocks
@@ -117,37 +113,29 @@ const IssueSection = ({ title, count, children }: IssueSectionProps & React.Prop
   const contentId = React.useId();
 
   return (
-    <Box
-      background="neutral0"
-      borderColor="warning200"
-      borderStyle="solid"
-      borderWidth="1px"
-      hasRadius
-      overflow="hidden"
-    >
-      <SectionToggle
+    <div className="overflow-hidden rounded-md border border-warning/40 bg-background">
+      <button
         type="button"
+        className="flex w-full cursor-pointer items-center justify-between bg-warning/10 p-3 text-warning aria-expanded:border-b aria-expanded:border-warning/40"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-controls={contentId}
       >
-        <Typography fontWeight="bold" textColor="warning700">
-          {title}
-        </Typography>
+        <span className="font-semibold">{title}</span>
         {/* Spans: a button holds inline content only */}
-        <Flex gap={2} tag="span">
+        <span className="flex items-center gap-2 [&>svg]:size-3 [&>svg]:fill-current">
           <InlineBadge textColor="warning700" backgroundColor="neutral0" borderColor="warning200">
             {count}
           </InlineBadge>
           {isOpen ? <CaretUp aria-hidden /> : <CaretDown aria-hidden />}
-        </Flex>
-      </SectionToggle>
+        </span>
+      </button>
       {isOpen && (
-        <Flex id={contentId} tag="ul" direction="column" alignItems="stretch" gap={2} padding={3}>
+        <ul id={contentId} className="flex flex-col gap-2 p-3">
           {children}
-        </Flex>
+        </ul>
       )}
-    </Box>
+    </div>
   );
 };
 
@@ -159,30 +147,21 @@ interface IssueCardProps {
 
 const IssueCard = ({ label, fieldKey, problem }: IssueCardProps) => {
   return (
-    <Box
-      tag="li"
-      background="neutral0"
-      borderColor="neutral200"
-      borderStyle="solid"
-      borderWidth="1px"
-      hasRadius
-      padding={3}
-    >
-      <Flex direction="column" alignItems="stretch" gap={2}>
-        <Flex justifyContent="space-between" alignItems="flex-start" gap={2}>
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography fontWeight="bold">{label}</Typography>
-            {/* Orange, like its section: the status badge above is the one red */}
-            <Typography textColor="warning700">{problem}</Typography>
-          </Flex>
-          {fieldKey && (
-            <FieldKey variant="pi" title={fieldKey}>
-              {fieldKey}
-            </FieldKey>
-          )}
-        </Flex>
-      </Flex>
-    </Box>
+    <li className="flex items-start justify-between gap-2 rounded-md border border-border bg-background p-3">
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="font-semibold">{label}</span>
+        {/* Orange, like its section: the status badge above is the one red */}
+        <span className="text-warning">{problem}</span>
+      </div>
+      {fieldKey && (
+        <span
+          className="max-w-2/5 shrink-0 truncate font-mono text-xs text-muted-foreground"
+          title={fieldKey}
+        >
+          {fieldKey}
+        </span>
+      )}
+    </li>
   );
 };
 
@@ -190,14 +169,54 @@ const IssueCard = ({ label, fieldKey, problem }: IssueCardProps) => {
  * EntryReasonDrawer
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * When the reasons were captured. A release that froze without running (it missed its schedule, or
+ * failed before the upgrade) is dated by its schedule, not by when it froze.
+ */
+const useCapturedNote = (isFrozen: boolean, release?: ReleaseDates | null) => {
+  const { formatMessage, formatDate } = useIntl();
+  const formatReleaseDate = (date: string) =>
+    formatDate(new Date(date), { dateStyle: 'medium', timeStyle: 'short' });
+
+  if (isFrozen && release?.failureReason) {
+    return formatMessage(
+      {
+        id: 'content-releases.reason-drawer.captured.not-run',
+        defaultMessage:
+          '{hasDate, select, true {Scheduled for {date}. } other {}}The entry may have changed since.',
+      },
+      {
+        hasDate: Boolean(release.scheduledAt),
+        date: release.scheduledAt ? formatReleaseDate(release.scheduledAt) : '',
+      }
+    );
+  }
+
+  if (isFrozen && release?.releasedAt) {
+    return formatMessage(
+      {
+        id: 'content-releases.reason-drawer.captured',
+        defaultMessage:
+          'Captured when the release ran on {date}. The entry may have changed since.',
+      },
+      { date: formatReleaseDate(release.releasedAt) }
+    );
+  }
+
+  return formatMessage({
+    id: 'content-releases.reason-drawer.checked',
+    defaultMessage: 'Checked when the entry was last saved. Saving it again checks it again.',
+  });
+};
+
 const ReasonBody = ({
   details,
-  releasedAt,
+  release,
 }: {
   details: EntryReasonDetails;
-  releasedAt?: string | null;
+  release?: ReleaseDates | null;
 }) => {
-  const { formatMessage, formatDate } = useIntl();
+  const { formatMessage } = useIntl();
   const { reason, outcome, missingReason } = details;
   const isFrozen = outcome !== null;
   const skippedReason: { title: MessageDescriptor; description?: MessageDescriptor } | null =
@@ -209,11 +228,12 @@ const ReasonBody = ({
     (Boolean(reason?.validation) && errors.length === 0) || Boolean(missingReason);
   const fieldIssueCount = errors.length || (isFieldsUnreadable ? 1 : 0);
   const issueCount = fieldIssueCount + (reason?.stage ? 1 : 0) + (reason?.error ? 1 : 0);
+  const capturedNote = useCapturedNote(isFrozen, release);
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={5}>
-      <Flex direction="column" alignItems="flex-start" gap={2}>
-        <Typography variant="sigma" textColor="neutral600">
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col items-start gap-2">
+        <span className="text-2xs font-semibold text-muted-foreground uppercase">
           {formatMessage(
             {
               id: 'content-releases.reason-drawer.eyebrow',
@@ -222,13 +242,16 @@ const ReasonBody = ({
             },
             { isFrozen }
           )}
-        </Typography>
-        <DrawerTitle>
-          <EntryTitle variant="beta" tag="span" $isItalic={details.isUntitled || details.isDeleted}>
-            {details.entryName}
-          </EntryTitle>
+        </span>
+        <DrawerTitle
+          className={cn(
+            'text-xl font-semibold md:text-lg',
+            (details.isUntitled || details.isDeleted) && 'italic'
+          )}
+        >
+          {details.entryName}
         </DrawerTitle>
-        <Typography variant="pi" textColor="neutral600">
+        <span className="text-xs text-muted-foreground">
           {[
             details.contentTypeName,
             formatMessage(
@@ -242,7 +265,7 @@ const ReasonBody = ({
           ]
             .filter(Boolean)
             .join(' · ')}
-        </Typography>
+        </span>
         <Badge textColor="danger600" backgroundColor="danger100" borderColor="danger200">
           {formatMessage(
             {
@@ -257,13 +280,13 @@ const ReasonBody = ({
             }
           )}
         </Badge>
-      </Flex>
+      </div>
 
       {description ? (
-        <Typography textColor="neutral700">{formatMessage(description)}</Typography>
+        <p>{formatMessage(description)}</p>
       ) : (
-        <Flex direction="column" alignItems="stretch" gap={3}>
-          <Typography fontWeight="bold">
+        <div className="flex flex-col gap-3">
+          <span className="font-semibold">
             {formatMessage(
               {
                 id: 'content-releases.reason-drawer.issues',
@@ -271,7 +294,7 @@ const ReasonBody = ({
               },
               { count: issueCount }
             )}
-          </Typography>
+          </span>
 
           {reason?.error && (
             <IssueSection title={formatMessage(SKIPPED_REASONS.skipped_error.title)} count={1}>
@@ -284,14 +307,17 @@ const ReasonBody = ({
                   },
                   { step: isFrozen ? details.action : 'check', name: reason.error.name }
                 )}
-                problem={formatMessage({
-                  id: 'content-releases.reason-drawer.error.hint',
-                  defaultMessage: 'Something on the server stopped it, not the entry’s content.',
-                })}
+                // The server keeps the message of an error meant for the user only
+                problem={
+                  reason.error.message ||
+                  formatMessage({
+                    id: 'content-releases.reason-drawer.error.hint',
+                    defaultMessage: 'Something on the server stopped it, not the entry’s content.',
+                  })
+                }
               />
             </IssueSection>
           )}
-
           {fieldIssueCount > 0 && (
             <IssueSection
               title={formatMessage({
@@ -362,33 +388,11 @@ const ReasonBody = ({
               />
             </IssueSection>
           )}
-        </Flex>
+        </div>
       )}
 
-      <Box background="neutral100" hasRadius padding={3}>
-        <Typography variant="pi" textColor="neutral600">
-          {isFrozen && releasedAt
-            ? formatMessage(
-                {
-                  id: 'content-releases.reason-drawer.captured',
-                  defaultMessage:
-                    'Captured when the release ran on {date}. The entry may have changed since.',
-                },
-                {
-                  date: formatDate(new Date(releasedAt), {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  }),
-                }
-              )
-            : formatMessage({
-                id: 'content-releases.reason-drawer.checked',
-                defaultMessage:
-                  'Checked when the entry was last saved. Saving it again checks it again.',
-              })}
-        </Typography>
-      </Box>
-    </Flex>
+      <p className="rounded-md bg-muted p-3 text-xs text-muted-foreground">{capturedNote}</p>
+    </div>
   );
 };
 
@@ -421,7 +425,7 @@ export const EntryReasonDrawer = ({
   selectedId,
   onSelect,
   onClose,
-  releasedAt,
+  release,
 }: EntryReasonDrawerProps) => {
   const { formatMessage } = useIntl();
   const index = items.findIndex(({ id }) => id === selectedId);
@@ -469,21 +473,13 @@ export const EntryReasonDrawer = ({
       }}
       swipeDirection="right"
     >
-      <DrawerContent style={DRAWER_STYLE}>
+      <DrawerContent className={RELEASE_DRAWER_CLASS_NAME}>
         {details && (
-          <DrawerLayout>
+          <div className="flex min-h-0 flex-1 flex-col">
             <DrawerHeader>
               {/* Lined off from the entry, like the footer's buttons */}
-              <Flex
-                justifyContent="space-between"
-                alignItems="center"
-                gap={2}
-                paddingBottom={3}
-                borderColor="neutral150"
-                borderStyle="solid"
-                borderWidth="0 0 1px 0"
-              >
-                <Typography variant="pi" textColor="neutral600">
+              <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
+                <span className="text-xs text-muted-foreground">
                   {/* No position for an entry that's no longer in the list */}
                   {index >= 0 &&
                     formatMessage(
@@ -494,8 +490,8 @@ export const EntryReasonDrawer = ({
                       },
                       { current: index + 1, total: rowCount, isFrozen: details.outcome !== null }
                     )}
-                </Typography>
-                <Flex gap={2}>
+                </span>
+                <div className="flex gap-2">
                   <Button
                     variant="tertiary"
                     size="S"
@@ -529,73 +525,23 @@ export const EntryReasonDrawer = ({
                   >
                     <Cross />
                   </IconButton>
-                </Flex>
-              </Flex>
+                </div>
+              </div>
             </DrawerHeader>
-            <ScrollArea>
-              <Box padding={5}>
-                <ReasonBody key={details.id} details={details} releasedAt={releasedAt} />
-              </Box>
-            </ScrollArea>
+            <div className="min-h-0 flex-1 overflow-y-auto p-5">
+              <ReasonBody key={details.id} details={details} release={release} />
+            </div>
             <DrawerFooter>
-              <Flex
-                justifyContent="space-between"
-                paddingTop={4}
-                borderColor="neutral150"
-                borderStyle="solid"
-                borderWidth="1px 0 0 0"
-              >
+              <div className="flex justify-between border-t border-border pt-4">
                 <Button variant="tertiary" onClick={onClose}>
                   {formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
                 </Button>
                 <GoToEntryLink details={details} />
-              </Flex>
+              </div>
             </DrawerFooter>
-          </DrawerLayout>
+          </div>
         )}
       </DrawerContent>
     </Drawer>
   );
 };
-
-const DrawerLayout = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-`;
-
-const EntryTitle = styled(Typography)<{ $isItalic: boolean }>`
-  font-style: ${({ $isItalic }) => ($isItalic ? 'italic' : 'normal')};
-`;
-
-const SectionToggle = styled.button`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: ${({ theme }) => theme.spaces[3]};
-  background: ${({ theme }) => theme.colors.warning100};
-  border: none;
-  cursor: pointer;
-
-  &[aria-expanded='true'] {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.warning200};
-  }
-
-  svg {
-    width: 1.2rem;
-    height: 1.2rem;
-    fill: ${({ theme }) => theme.colors.warning700};
-  }
-`;
-
-const FieldKey = styled(Typography)`
-  flex-shrink: 0;
-  max-width: 40%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: monospace;
-  color: ${({ theme }) => theme.colors.neutral500};
-`;

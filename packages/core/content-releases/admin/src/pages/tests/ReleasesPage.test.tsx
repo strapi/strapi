@@ -3,6 +3,7 @@
  * @jest-environment @strapi/admin-test-utils/environment
  * @jest-environment-options {"strapi": {"tz": "Europe/Paris"}}
  */
+import { adminApi } from '@strapi/admin/strapi-admin';
 import { within } from '@testing-library/react';
 import { defaultTestStoreConfig, fireEvent, render, server, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
@@ -10,6 +11,37 @@ import { http, HttpResponse } from 'msw';
 import { ReleasesPage } from '../ReleasesPage';
 
 import { mockReleasesPageData } from './mockReleasesPageData';
+
+// Review workflows' stage endpoint, injected after the releases service as in the admin, where
+// the review-workflows plugin loads after this one
+const reviewWorkflowsApi = adminApi
+  .enhanceEndpoints({ addTagTypes: ['Document', 'ReviewWorkflowStages'] })
+  .injectEndpoints({
+    endpoints: (build) => ({
+      updateStage: build.mutation<unknown, { id: string }>({
+        query: ({ id }) => ({
+          url: `/review-workflows/content-manager/collection-types/api::article.article/${id}/stage`,
+          method: 'PUT',
+          data: { id: 2 },
+        }),
+        invalidatesTags: (_result, _error, { id }) => [
+          { type: 'Document', id: `api::article.article_${id}` },
+          { type: 'Document', id: 'api::article.article_LIST' },
+          'ReviewWorkflowStages',
+        ],
+      }),
+    }),
+  });
+
+const StageChanger = () => {
+  const [updateStage] = reviewWorkflowsApi.useUpdateStageMutation();
+
+  return (
+    <button type="button" onClick={() => updateStage({ id: 'doc-1' })}>
+      Change stage
+    </button>
+  );
+};
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -126,6 +158,108 @@ describe('Releases home page', () => {
     [done, partial, failed].forEach((row) => {
       expect(within(row).queryByText(/ready$/)).not.toBeInTheDocument();
     });
+  });
+
+  it('shows the scheduled time of releases that froze without running', async () => {
+    const [base] = mockReleasesPageData.releasesByStatus.data;
+    const frozen = {
+      ...base,
+      status: 'failed' as const,
+      // Frozen by the overdue sweep two days after the schedule
+      releasedAt: '2026-09-03T14:30:00.000Z',
+      actions: { meta: { count: 5 } },
+    };
+    server.use(
+      http.get('/content-releases', () =>
+        HttpResponse.json({
+          ...mockReleasesPageData.releasesByStatus,
+          data: [
+            {
+              ...frozen,
+              id: 1,
+              name: 'Missed campaign',
+              failureReason: 'missed_schedule',
+              scheduledAt: '2026-09-01T09:00:00.000Z',
+              timezone: 'UTC',
+            },
+            {
+              ...frozen,
+              id: 2,
+              name: 'Pre-upgrade campaign',
+              failureReason: 'failed_before_upgrade',
+              scheduledAt: '2026-08-20T10:00:00.000Z',
+              timezone: 'UTC',
+            },
+            {
+              ...frozen,
+              id: 3,
+              name: 'Unscheduled pre-upgrade campaign',
+              failureReason: 'failed_before_upgrade',
+            },
+          ],
+        })
+      )
+    );
+
+    render(<ReleasesPage />);
+
+    await screen.findByRole('link', { name: 'Missed campaign' });
+    const [missed, preUpgrade, unscheduled] = screen.getAllByRole('row').slice(1);
+
+    expect(within(missed).getByText(/Sep 1, 2026 • 09:00 UTC/)).toBeInTheDocument();
+    expect(within(preUpgrade).getByText(/Aug 20, 2026 • 10:00 UTC/)).toBeInTheDocument();
+    expect(within(unscheduled).getByText('Not scheduled')).toBeInTheDocument();
+    expect(screen.queryByText(/Sep 3, 2026/)).not.toBeInTheDocument();
+  });
+
+  it("shows the API's error when creating a release fails", async () => {
+    server.use(
+      http.get('/content-releases', () => HttpResponse.json(mockReleasesPageData.emptyEntries)),
+      http.post('/content-releases', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'Release with name Winter campaign already exists',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    const { user } = render(<ReleasesPage />);
+
+    await user.click(await screen.findByRole('button', { name: 'New release' }));
+    await user.type(screen.getByRole('textbox', { name: 'Release name' }), 'Winter campaign');
+    await user.click(screen.getByRole('checkbox', { name: "I don't have a release date yet" }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create release' }));
+
+    expect(
+      await screen.findByText('Release with name Winter campaign already exists')
+    ).toBeInTheDocument();
+  });
+
+  it("refetches the releases when an entry's review stage changes", async () => {
+    const requests = captureRequests();
+    server.use(http.put('*/stage', () => HttpResponse.json({ data: {} })));
+
+    const { user } = render(
+      <>
+        <ReleasesPage />
+        <StageChanger />
+      </>
+    );
+
+    await screen.findByRole('link', { name: 'Holiday newsletter' });
+    const requestCount = requests.length;
+
+    await user.click(screen.getByRole('button', { name: 'Change stage' }));
+
+    await waitFor(() => expect(requests.length).toBeGreaterThan(requestCount));
   });
 
   it('paginates and blocks new releases once the pending limit is reached', async () => {

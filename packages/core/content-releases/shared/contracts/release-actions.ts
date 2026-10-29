@@ -25,8 +25,11 @@ export interface ReleaseActionReason {
   /** Field paths and messages. Each error's `value` is dropped, and so is the value a type-mismatch message ends with */
   validation?: { errors: { path: string[]; message: string }[] };
   stage?: { entryStage: StageRef | null; requiredStage: StageRef };
-  /** Only the error's name: its message can carry row contents */
-  error?: { name: string };
+  /**
+   * The error's name. Its message only for an application error, which is meant for the client:
+   * any other error's message can carry row contents.
+   */
+  error?: { name: string; message?: string };
 }
 
 export interface ReleaseAction extends Entity {
