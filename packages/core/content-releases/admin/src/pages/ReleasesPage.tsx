@@ -38,7 +38,7 @@ import {
   RELEASE_STATUSES,
 } from '../../../shared/constants';
 import { GetReleases } from '../../../shared/contracts/releases';
-import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
+import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
 import { ReleaseStatusBadge, STATUS_MESSAGES } from '../components/ReleaseStatusBadge';
 import { ScheduleFilterInput } from '../components/ScheduleFilterInput';
@@ -65,13 +65,6 @@ const EMPTY_OPTIONS: NonNullable<Filters.ValueInputProps['options']> = [];
  * ReleasesTable
  * -----------------------------------------------------------------------------------------------*/
 
-const RelativeTime = styled(BaseRelativeTime)`
-  display: inline-block;
-  &::first-letter {
-    text-transform: uppercase;
-  }
-`;
-
 const RELEASE_CONDITION_BADGES = {
   allow_partial: {
     icon: ChartCircle,
@@ -92,13 +85,32 @@ const RELEASE_CONDITION_BADGES = {
   { icon: React.ComponentType; message: MessageDescriptor }
 >;
 
+const SCHEDULE_MESSAGES = {
+  upcoming: {
+    id: 'content-releases.pages.Releases.schedule.upcoming',
+    defaultMessage: 'Scheduled {time}',
+  },
+  released: {
+    id: 'content-releases.pages.Releases.schedule.released',
+    defaultMessage: 'Released {time}',
+  },
+  overdue: {
+    id: 'content-releases.pages.Releases.schedule.overdue',
+    defaultMessage: 'Was due {time}',
+  },
+} satisfies Record<string, MessageDescriptor>;
+
+/**
+ * The words tell the states apart: "Scheduled in 2 days", "Released 3 days ago", "Was due 3 days
+ * ago" for a schedule that passed without a run, and "Not scheduled". A clock marks a run to come
+ * and a calendar a date that passed. Only an upcoming run keeps the table's text colour: the others
+ * are grey, so the runs to come stand out.
+ */
 const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
-  const isFrozen = Boolean(release.releasedAt);
   // A release that froze without running never ran: `releasedAt` is when it froze, not a run
-  const date = release.failureReason
-    ? release.scheduledAt
-    : (release.releasedAt ?? release.scheduledAt);
+  const hasRun = Boolean(release.releasedAt) && !release.failureReason;
+  const date = hasRun ? release.releasedAt : release.scheduledAt;
 
   if (!date) {
     return (
@@ -113,8 +125,16 @@ const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
 
   const timestamp = new Date(date);
   const timeZone = release.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const Icon = isFrozen ? Calendar : Clock;
   const absoluteTime = `${formatDate(timestamp, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(timestamp, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, timestamp)}`;
+  const isUpcoming = !hasRun && timestamp.getTime() > Date.now();
+  // An overdue release the sweep hasn't frozen yet was due too
+  const message = hasRun
+    ? SCHEDULE_MESSAGES.released
+    : isUpcoming
+      ? SCHEDULE_MESSAGES.upcoming
+      : SCHEDULE_MESSAGES.overdue;
+
+  const Icon = isUpcoming ? Clock : Calendar;
 
   return (
     <Flex gap={2} alignItems="flex-start">
@@ -122,9 +142,11 @@ const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
         <Icon width="1.2rem" height="1.2rem" aria-hidden />
       </Flex>
       <Flex direction="column" alignItems="flex-start">
-        <Typography textColor={isFrozen ? 'neutral600' : 'neutral800'}>
-          {/* The browser-zone default title would contradict the release-zone line below */}
-          <RelativeTime timestamp={timestamp} title={absoluteTime} />
+        <Typography textColor={isUpcoming ? 'neutral800' : 'neutral600'}>
+          {formatMessage(message, {
+            // The browser-zone default title would contradict the release-zone line below
+            time: <RelativeTime timestamp={timestamp} title={absoluteTime} />,
+          })}
         </Typography>
         <Typography variant="pi" textColor="neutral600">
           {absoluteTime}
@@ -177,11 +199,9 @@ const ReleaseConditionBadge = ({
   const { icon: Icon, message } = RELEASE_CONDITION_BADGES[releaseCondition];
 
   return (
-    <Flex gap={1} color="neutral800">
+    <Flex gap={2} color="neutral800">
       <Icon width="1.2rem" height="1.2rem" aria-hidden />
-      <Typography variant="pi" fontWeight="semiBold">
-        {formatMessage(message)}
-      </Typography>
+      <Typography textColor="neutral800">{formatMessage(message)}</Typography>
     </Flex>
   );
 };
@@ -316,10 +336,24 @@ const useReleasesFilterOptions = (): Filters.Filter[] => {
  * ReleasesSort
  * -----------------------------------------------------------------------------------------------*/
 
-const DEFAULT_SORT = 'updatedAt:desc';
+const DEFAULT_SORT = 'scheduledAt:asc';
 
-// No schedule sort: releases without a date land first or last depending on the database
+// The API lists unscheduled releases last in either schedule order
 const SORT_OPTIONS = [
+  {
+    value: 'scheduledAt:asc',
+    message: {
+      id: 'content-releases.pages.Releases.sort.scheduled-at-asc',
+      defaultMessage: 'Scheduled date (soonest first)',
+    },
+  },
+  {
+    value: 'scheduledAt:desc',
+    message: {
+      id: 'content-releases.pages.Releases.sort.scheduled-at-desc',
+      defaultMessage: 'Scheduled date (latest first)',
+    },
+  },
   {
     value: 'updatedAt:desc',
     message: {
