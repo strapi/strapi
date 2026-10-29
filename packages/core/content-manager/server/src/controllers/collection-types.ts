@@ -422,6 +422,11 @@ export default {
       : new Map();
 
     const setStatus = (document: any) => {
+      // Without Draft & Publish, `status` may be a regular attribute that must be preserved
+      if (!hasDraftAndPublish) {
+        return document;
+      }
+
       // Available status of document
       const availableStatuses = statusByDocumentId.get(document.documentId) || [];
       // Compute document version status

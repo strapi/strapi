@@ -312,4 +312,44 @@ describe('document-metadata service', () => {
       ]);
     });
   });
+
+  describe('formatDocumentWithMetadata status', () => {
+    const uid = 'api::article.article';
+
+    const setup = (draftAndPublish: boolean) => {
+      const model = { uid, options: { draftAndPublish }, attributes: {} };
+      const service = createService({ getModel: () => model });
+      jest.spyOn(service, 'getMetadata').mockResolvedValue({
+        versions: [],
+        availableLocales: [],
+        availableStatus: [],
+      } as any);
+
+      return service;
+    };
+
+    it('keeps a user-defined status attribute when draft and publish is disabled', async () => {
+      const service = setup(false);
+
+      const { data } = await service.formatDocumentWithMetadata(uid, {
+        id: 1,
+        documentId: 'doc-1',
+        status: 'active',
+      } as any);
+
+      expect(data.status).toBe('active');
+    });
+
+    it('computes the status when draft and publish is enabled', async () => {
+      const service = setup(true);
+
+      const { data } = await service.formatDocumentWithMetadata(uid, {
+        id: 1,
+        documentId: 'doc-1',
+        publishedAt: null,
+      } as any);
+
+      expect(data.status).toBe('draft');
+    });
+  });
 });
