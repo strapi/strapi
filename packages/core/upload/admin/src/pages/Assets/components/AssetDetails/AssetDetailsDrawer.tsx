@@ -310,13 +310,14 @@ const DetailField = ({ name, label, required, disabled }: DetailFieldProps) => {
   const field = useField<string>(name);
   const isSubmitting = useForm('DetailField', (state) => state.isSubmitting);
 
-  // The form context (use-context-selector) echoes changes back
-  // asynchronously — driving the input straight from `field.value` makes
-  // React rewrite the DOM value after the keystroke, which throws the cursor
-  // to the end of the field. The input is therefore controlled by local state
-  // (synchronous, cursor-safe) and the form follows; the effect below only
-  // matters for EXTERNAL value changes (discard/reset), where a cursor jump
-  // is fine because the user isn't typing.
+  // The input is controlled by local state (synchronous, cursor-safe) and the
+  // form follows. This was needed when the form context echoed changes back
+  // asynchronously: driving the input straight from `field.value` made React
+  // rewrite the DOM value after the keystroke, which threw the cursor to the
+  // end of the field. The form context now updates synchronously, but the
+  // local state is kept as a safe default. The effect below only matters for
+  // EXTERNAL value changes (discard/reset), where a cursor jump is fine
+  // because the user isn't typing.
   const fieldValue = field.value ?? '';
   const [value, setValue] = React.useState(fieldValue);
 

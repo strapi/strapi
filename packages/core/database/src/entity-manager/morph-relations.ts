@@ -3,8 +3,9 @@ import { curry, groupBy, mapValues, map, isEmpty } from 'lodash';
 import type { Knex } from 'knex';
 
 import { createQueryBuilder } from '../query';
+import { addSchema } from '../utils/knex';
 import type { Database } from '..';
-import type { MorphJoinTable, Relation } from '../types';
+import type { ID, MorphJoinTable, Relation } from '../types';
 
 type Rows = Record<string, unknown>[];
 
@@ -84,6 +85,64 @@ export const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
       .where({ $or: orWhere })
       .transacting(trx)
       .execute();
+  }
+};
+
+/**
+ * Renumber the order column of an entry's morphToMany relations so the values are continuous (1, 2, 3...)
+ */
+export const cleanMorphToManyOrderColumn = async ({
+  id,
+  joinTable,
+  db,
+  transaction: trx,
+}: {
+  id: ID;
+  joinTable: MorphJoinTable;
+  db: Database;
+  transaction?: Knex.Transaction;
+}) => {
+  const { joinColumn } = joinTable;
+
+  const selectRowsToOrder = (joinTableName: string) =>
+    db
+      .connection(joinTableName)
+      .select('id')
+      .rowNumber('src_order', 'order', joinColumn.name)
+      .where(joinColumn.name, id)
+      .toSQL();
+
+  switch (db.dialect.client) {
+    case 'mysql': {
+      const select = selectRowsToOrder(joinTable.name);
+
+      await db
+        .getConnection()
+        .raw(
+          `UPDATE ?? as a, ( ${select.sql} ) AS b
+          SET ?? = b.src_order
+          WHERE b.id = a.id`,
+          [joinTable.name, ...select.bindings, 'order']
+        )
+        .transacting(trx);
+
+      break;
+    }
+    default: {
+      const joinTableName = addSchema(db, joinTable.name);
+      const select = selectRowsToOrder(joinTableName);
+
+      // raw query as knex doesn't allow updating from a subquery
+      await db.connection
+        .raw(
+          `UPDATE ?? as a
+          SET ?? = b.src_order
+          FROM ( ${select.sql} ) AS b
+          WHERE b.id = a.id`,
+          [joinTableName, 'order', ...select.bindings]
+        )
+        .transacting(trx);
+    }
   }
 };
 
