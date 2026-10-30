@@ -3,6 +3,7 @@ import type { UID } from '@strapi/types';
 
 import { getSchema, updateSchema, renameAttribute } from '../schema';
 import type { Schema as CTBSchema } from '../../controllers/validation/schema';
+import { collectUnhandledRejections } from './unhandled-rejections';
 
 const builderServiceMock = {
   createContentType: jest.fn(),
@@ -487,6 +488,49 @@ describe('Content Type Builder - Schema service', () => {
 
       // Verify writeFiles is called
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs a failing event listener instead of leaving an unhandled rejection', async () => {
+      const mockContentType = { uid: 'api::test.test', kind: 'collectionType' };
+      const mockComponent = { uid: 'default.test', category: 'default' };
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+      jest.mocked(builderServiceMock.components.get).mockReturnValue(mockComponent);
+      // A user listener that throws makes the event hub emit reject
+      jest.mocked(strapi.eventHub.emit).mockRejectedValue(new Error('listener failed'));
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'update',
+            uid: 'api::test.test',
+            displayName: 'Test',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+          { action: 'delete', uid: 'api::other.other' },
+        ],
+        components: [
+          {
+            action: 'update',
+            uid: 'default.test',
+            displayName: 'Test',
+            attributes: [],
+          },
+          { action: 'delete', uid: 'default.other' },
+        ],
+      };
+
+      const rejections = await collectUnhandledRejections(() => updateSchema(schema));
+
+      expect(rejections).toEqual([]);
+      expect(strapi.eventHub.emit).toHaveBeenCalledTimes(4);
+      expect(strapi.log.error).toHaveBeenCalledTimes(4);
+      expect(strapi.log.error).toHaveBeenCalledWith(
+        expect.stringContaining('content-type.update listener failed: listener failed')
+      );
     });
 
     it('should handle errors and rollback when API clearing fails', async () => {

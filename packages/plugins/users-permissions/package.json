@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "5.59.0",
+  "version": "5.60.0",
   "description": "Protect your API with a full-authentication process based on JWT",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -55,7 +55,7 @@
   "dependencies": {
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
-    "@strapi/utils": "5.59.0",
+    "@strapi/utils": "5.60.0",
     "bcryptjs": "2.4.3",
     "formik": "2.4.9",
     "immer": "9.0.21",
@@ -72,8 +72,8 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@strapi/admin": "5.59.0",
-    "@strapi/strapi": "5.59.0",
+    "@strapi/admin": "5.60.0",
+    "@strapi/strapi": "5.60.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -95,7 +95,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=20.0.0 <=26.x.x",
+    "node": ">=22.0.0 <=26.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

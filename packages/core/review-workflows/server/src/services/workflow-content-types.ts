@@ -78,6 +78,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       );
 
       await async.map(deleted, async (uid: any) => {
+        // A stored UID can outlive its model, which leaves no configuration or stage links to clean up
+        if (strapi.db.metadata.has(uid) === false) {
+          return;
+        }
+
         await updateContentTypeConfig(uid, false);
         await stagesService.deleteAllEntitiesStage(uid, {});
       });
