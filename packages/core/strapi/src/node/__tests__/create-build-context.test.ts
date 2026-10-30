@@ -73,7 +73,7 @@ const buildStrapiMock = (
 
 const buildArgs = (strapi: Core.Strapi) => ({
   cwd: '/app',
-  // The tests observe `debug` only, so the mock leaves the rest of `Logger` out
+  // createBuildContext calls `debug` and `warn` only, so the mock leaves out the counters, spinner and progress bar
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
@@ -91,19 +91,28 @@ describe('createBuildContext', () => {
     jest.clearAllMocks();
   });
 
-  it('holds the Tailwind scan roots under Vite', async () => {
-    const ctx = await createBuildContext(buildArgs(buildStrapiMock()));
+  it('holds the Tailwind scan roots and warns nothing under Vite', async () => {
+    const args = buildArgs(buildStrapiMock());
+
+    const ctx = await createBuildContext(args);
 
     expect(ctx.scanRoots).toEqual([mockScanRoot]);
+    expect(args.logger.warn).not.toHaveBeenCalled();
   });
 
-  it('holds no scan root under webpack', async () => {
-    const ctx = await createBuildContext({
-      ...buildArgs(buildStrapiMock()),
-      options: { bundler: 'webpack' },
-    });
+  it('holds no scan root and warns once under webpack', async () => {
+    const args = { ...buildArgs(buildStrapiMock()), options: { bundler: 'webpack' as const } };
+
+    const ctx = await createBuildContext(args);
 
     expect(ctx.scanRoots).toEqual([]);
+    expect(args.logger.debug).not.toHaveBeenCalledWith(
+      'Tailwind scan roots',
+      expect.anything(),
+      []
+    );
+    expect(args.logger.warn).toHaveBeenCalledTimes(1);
+    expect(args.logger.warn).toHaveBeenCalledWith(expect.stringContaining('need Vite'));
   });
 
   it('transports admin.auth.cookie.name into STRAPI_ADMIN_AUTH_COOKIE_NAME', async () => {
