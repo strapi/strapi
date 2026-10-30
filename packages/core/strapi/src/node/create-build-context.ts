@@ -168,10 +168,10 @@ const createBuildContext = async ({
 
   const { bundler = 'vite', ...restOptions } = options;
 
-  const scanRoots = await getScanRoots(
-    { cwd, runtimeDir, plugins: pluginsWithFront, customisations },
-    dev
-  );
+  const scanRoots =
+    bundler === 'vite'
+      ? await getScanRoots({ cwd, runtimeDir, plugins: pluginsWithFront, customisations }, dev)
+      : [];
 
   logger.debug('Tailwind scan roots', os.EOL, scanRoots);
 
