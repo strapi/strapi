@@ -74,16 +74,27 @@ export type ScalarValues = GetValue<
 
 /**
  * Attribute.GetValues override with extended values
+ *
+ * @remark
+ * Optional properties explicitly allow `undefined` so that the type stays usable under
+ * `exactOptionalPropertyTypes`. This mirrors the runtime, which does not distinguish an absent key
+ * from an explicitly `undefined` one: the database layer iterates the schema attributes and skips
+ * any value failing `isUndefined` (see `processData` in `@strapi/database`), so `{}` and
+ * `{ foo: undefined }` produce the exact same query.
+ *
+ * Note that `null` is *not* equivalent: it means "write NULL" and must keep being spelled out.
+ *
+ * The required branch below (`-?`) is intentionally left alone.
  */
 export type GetValues<TSchemaUID extends UID.Schema> = {
-  id?: ID;
-  documentId?: DocumentID;
+  id?: ID | undefined;
+  documentId?: DocumentID | undefined;
 } & OmitRelationsWithoutTarget<
   TSchemaUID,
   {
-    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: GetValue<
-      Schema.AttributeByName<TSchemaUID, TKey>
-    >;
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?:
+      | GetValue<Schema.AttributeByName<TSchemaUID, TKey>>
+      | undefined;
   } & {
     [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: GetValue<
       Schema.AttributeByName<TSchemaUID, TKey>

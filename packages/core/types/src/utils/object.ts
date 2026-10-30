@@ -99,6 +99,34 @@ export type PartialBy<TValue, TKeys extends keyof TValue> = Omit<TValue, TKeys> 
   Partial<Pick<TValue, TKeys>>;
 
 /**
+ * Same as the built-in `Partial<TValue>`, but also adds `undefined` to every property type.
+ *
+ * @template TValue The original object type.
+ *
+ * @remark
+ * The built-in `Partial` only adds the `?` modifier; it does not add `undefined` to the property
+ * type. Under `exactOptionalPropertyTypes`, `{ foo?: string }` rejects `{ foo: undefined }`, so
+ * `Partial` alone is not enough to describe an input object whose properties may be explicitly set
+ * to `undefined`.
+ *
+ * Use this helper for **input** types where an absent property and an explicitly `undefined` one are
+ * handled identically at runtime. It is a no-op when `exactOptionalPropertyTypes` is disabled.
+ *
+ * @example
+ * ```typescript
+ * type Person = { name: string; age: number };
+ *
+ * declare const age: number | undefined;
+ *
+ * const a: Partial<Person> = { age };              // error under exactOptionalPropertyTypes
+ * const b: PartialWithUndefined<Person> = { age }; // ok
+ * ```
+ */
+export type PartialWithUndefined<TValue> = {
+  [TKey in keyof TValue]?: TValue[TKey] | undefined;
+};
+
+/**
  * Extracts all unique values from a given object as a union type.
  *
  * @template TObject - An object from which values are to be extracted. It must extend the `object` type.

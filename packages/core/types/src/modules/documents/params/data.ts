@@ -67,6 +67,6 @@ export type Input<TSchemaUID extends UID.Schema> = AttributeUtils.GetValues<TSch
  */
 export type PartialInput<TSchemaUID extends UID.Schema> = Utils.If<
   Utils.Constants.AreSchemaRegistriesExtended,
-  Partial<Input<TSchemaUID>>,
+  Utils.Object.PartialWithUndefined<Input<TSchemaUID>>,
   Input<TSchemaUID>
 >;
