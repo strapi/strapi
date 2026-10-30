@@ -38,6 +38,8 @@ import { updateValues, updateValuesWithPermissions } from '../utils/updateValues
 import { ContentTypes } from './ContentTypes';
 import { PluginsAndSettingsPermissions } from './PluginsAndSettings';
 
+const EMPTY_PERMISSIONS: NonNullable<PermissionsProps['permissions']> = [];
+
 const TAB_LABELS = [
   {
     labelId: 'app.components.LeftMenuLinkContainer.collectionTypes',
@@ -85,7 +87,13 @@ interface PermissionsProps {
 
 const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
   (
-    { layout, isFormDisabled, onLocaleValidationChange, permissions = [], userPermissions },
+    {
+      layout,
+      isFormDisabled,
+      onLocaleValidationChange,
+      permissions = EMPTY_PERMISSIONS,
+      userPermissions,
+    },
     api
   ) => {
     const [{ initialData, layouts, modifiedData }, dispatch] = React.useReducer(
@@ -643,19 +651,29 @@ const reducer = (state: State, action: Action) =>
        */
       case 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX': {
         const { keys, value, userPermissions } = action;
-        const pathToValue = [...keys.split('..')];
+        const pathToValue = keys.split('..');
         let nextModifiedDataState = cloneDeep(state.modifiedData);
         const oldValues = get(nextModifiedDataState, pathToValue, {});
 
+        const root = pathToValue[0];
+        // Plugin & setting permissions are stored with `subject: null` and their real
+        // action id is the full `plugin::`/`admin::` leaf segment (not the UI subcategory).
+        // For those, let the checker derive the action from each leaf path (subject stays null).
+        const isPluginOrSetting = root === 'plugins' || root === 'settings';
+
         let actionId: string | undefined;
-        let subject: string | undefined;
+        let subject: string | null | undefined;
 
-        if (pathToValue.length >= 2) {
-          subject = pathToValue[1];
-        }
+        if (isPluginOrSetting) {
+          subject = null;
+        } else {
+          if (pathToValue.length >= 2) {
+            subject = pathToValue[1];
+          }
 
-        if (pathToValue.length >= 3) {
-          actionId = pathToValue[2];
+          if (pathToValue.length >= 3) {
+            actionId = pathToValue[2];
+          }
         }
 
         const permissionChecker = createDynamicActionPermissionChecker(
@@ -668,7 +686,6 @@ const reducer = (state: State, action: Action) =>
 
         // In App Token context, when enabling, inherit conditions from the user's permissions.
         if (value === true && userPermissions !== undefined) {
-          const root = pathToValue[0];
           const subjectForLookup =
             root === 'collectionTypes' || root === 'singleTypes' ? (subject ?? null) : null;
 

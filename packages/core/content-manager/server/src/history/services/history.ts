@@ -1,6 +1,6 @@
 import type { Core, Data, Modules, Schema } from '@strapi/types';
-import { errors, traverseEntity } from '@strapi/utils';
-import { omit } from 'lodash/fp';
+import { emitAudit, errors, traverseEntity } from '@strapi/utils';
+import { omit } from 'lodash';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -10,6 +10,7 @@ import type {
 } from '../../../../shared/contracts/history-versions';
 import { createServiceUtils } from './utils';
 import { getService as getContentManagerService } from '../../utils';
+import { AUDITED_EVENTS, type HistoryRestoreEvent } from '../../audit-logs';
 
 // Needed because the query engine doesn't return any types yet
 type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
@@ -43,9 +44,12 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         locale = params.query.locale || defaultLocale;
       }
 
-      const [{ results, pagination }, localeDictionary] = await Promise.all([
+      // NOTE: We get the IDs first because sorting full rows runs MySQL/MariaDB out of sort memory
+      // See: https://github.com/strapi/strapi/issues/27393
+      const [{ results: versionRows, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params.query,
+          select: ['id'],
           where: {
             $and: [
               { contentType: params.query.contentType },
@@ -53,11 +57,20 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
               ...(locale ? [{ locale }] : []),
             ],
           },
-          populate: ['createdBy'],
           orderBy: [{ createdAt: 'desc' }],
         }),
         serviceUtils.getLocaleDictionary(),
       ]);
+
+      const ids = versionRows.map((version) => version.id);
+      const versions = ids.length
+        ? await query.findMany({
+            where: { id: { $in: ids } },
+            populate: ['createdBy'],
+          })
+        : [];
+      const versionsById = new Map(versions.map((version) => [version.id, version]));
+      const results = ids.map((id) => versionsById.get(id)).filter(Boolean);
 
       const populateEntry = async (entry: HistoryVersionQueryResult) => {
         return traverseEntity(
@@ -87,7 +100,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                       return null;
                     }
 
-                    return strapi.query('admin::user').findOne({
+                    return strapi.db.query('admin::user').findOne({
                       where: {
                         ...(userToPopulate.id ? { id: userToPopulate.id } : {}),
                         ...(userToPopulate.documentId
@@ -169,6 +182,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
+
+      if (version === null) {
+        throw new errors.NotFoundError('History version not found');
+      }
+
       const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
       const schemaDiff = serviceUtils.getSchemaAttributesDiff(
         version.schema,
@@ -187,7 +205,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Remove the schema attributes history should ignore
       const schema = structuredClone(version.schema);
-      schema.attributes = omit(FIELDS_TO_IGNORE, contentTypeSchemaAttributes);
+      schema.attributes = omit(contentTypeSchemaAttributes, FIELDS_TO_IGNORE);
 
       const dataWithoutMissingRelations = await traverseEntity(
         async (options, utils) => {
@@ -243,7 +261,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         dataWithoutAddedAttributes
       );
 
-      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
+      const data = omit(dataWithoutMissingRelations, ['id', ...Object.keys(schemaDiff.removed)]);
       const restoredDocument = await strapi.documents(version.contentType).update({
         documentId: version.relatedDocumentId,
         locale: version.locale,
@@ -253,6 +271,14 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!restoredDocument) {
         throw new errors.ApplicationError('Failed to restore version');
       }
+
+      await emitAudit({ strapi }, AUDITED_EVENTS.ENTRY_HISTORY_RESTORE, {
+        uid: version.contentType,
+        documentId: restoredDocument.documentId,
+        locale: version.locale ?? null,
+        versionId: version.id,
+        versionCreatedAt: new Date(version.createdAt).toISOString(),
+      } satisfies HistoryRestoreEvent);
 
       return restoredDocument;
     },

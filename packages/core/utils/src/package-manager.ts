@@ -1,7 +1,7 @@
 import execa from 'execa';
-import preferredPM from 'preferred-pm';
 
 import type { Options as ProcessOptions } from 'execa';
+import { getPreferredPM } from './get-preferred-pm';
 
 const SUPPORTED_PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const;
 const DEFAULT_PACKAGE_MANAGER = 'npm' as const;
@@ -9,10 +9,10 @@ const DEFAULT_PACKAGE_MANAGER = 'npm' as const;
 type SupportedPackageManagerName = (typeof SUPPORTED_PACKAGE_MANAGERS)[number];
 
 export const getPreferred = async (pkgPath: string): Promise<SupportedPackageManagerName> => {
+  const preferredPM = await getPreferredPM();
   const pm = await preferredPM(pkgPath);
 
-  const hasPackageManager = pm !== undefined;
-  if (!hasPackageManager) {
+  if (pm == null) {
     throw new Error(`Couldn't find a package manager in your project.`);
   }
 

@@ -2,22 +2,23 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
-import _ from 'lodash';
+import _, { has, toNumber } from 'lodash';
 import { extension } from 'mime-types';
 import {
   async,
   sanitize,
   contentTypes as contentTypesUtils,
   errors,
+  emitAudit,
   file as fileUtils,
   pagination as paginationUtils,
 } from '@strapi/utils';
-import { has, toNumber, isNil } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 
-import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
+import { FILE_MODEL_UID, FOLDER_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
+import { AUDITED_EVENTS, getUploadSettingsChanges, toAuditedFile } from '../audit-logs';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
@@ -44,8 +45,23 @@ type Metas = {
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 
+// The audit log records the folder of an updated file
+const FOLDER_REF_POPULATE = { folder: { fields: ['id', 'name'] } };
+
 const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
+
+/**
+ * Queue a provider operation for a later `Promise.all`, with a rejection handler
+ * attached in the same turn so a fast failure is never an unhandled rejection.
+ *
+ * `Promise.resolve` first — a provider may hand back a plain value, which
+ * `Promise.all` accepts but `.catch` would throw on.
+ */
+const queueConcurrentOperation = <T>(queue: Promise<T>[], operation: Promise<T>) => {
+  Promise.resolve(operation).catch(() => undefined);
+  queue.push(operation);
+};
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const fileService = getService('file');
@@ -279,6 +295,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return uploadedFiles;
   }
 
+  // `_.set(fileData, ['formats', key], ...)` reads an all-digit key (a `breakpoints`
+  // entry like `{ 100: 100 }`) as an array index and builds an array when formats is
+  // unset, so build the object explicitly.
+  function setFormat(fileData: UploadableFile, key: string, format: UploadableFile) {
+    fileData.formats = { ...fileData.formats, [key]: format };
+  }
+
   /**
    * When uploading an image, an additional thumbnail is generated.
    * Also, if there are responsive formats defined, another set of images will be generated too.
@@ -302,26 +325,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // For performance reasons, all uploads are wrapped in a single Promise.all
     const uploadThumbnail = async (thumbnailFile: UploadableFile) => {
       await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
+      setFormat(fileData, 'thumbnail', thumbnailFile);
     };
 
     // Generate thumbnail and responsive formats
     const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
       const { key, file } = format;
       await getService('provider').upload(file);
-      _.set(fileData, ['formats', key], file);
+      setFormat(fileData, key, file);
     };
 
     const uploadPromises: Promise<void>[] = [];
 
     // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
+    queueConcurrentOperation(uploadPromises, getService('provider').upload(fileData));
 
     // Generate & Upload thumbnail and responsive formats
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
-        uploadPromises.push(uploadThumbnail(thumbnailFile));
+        queueConcurrentOperation(uploadPromises, uploadThumbnail(thumbnailFile));
       }
 
       const formats = await generateResponsiveFormats(fileData);
@@ -329,7 +352,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         for (const format of formats) {
           // eslint-disable-next-line no-continue
           if (!format) continue;
-          uploadPromises.push(uploadResponsiveFormat(format));
+          queueConcurrentOperation(uploadPromises, uploadResponsiveFormat(format));
         }
       }
     }
@@ -361,13 +384,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       } else {
         await getService('provider').upload(newFormat);
       }
-      _.set(fileData, ['formats', key], newFormat);
+      setFormat(fileData, key, newFormat);
     };
 
     const promises: Promise<unknown>[] = [];
 
     // Replace the main file
-    promises.push(getService('provider').replace(fileData, oldFile));
+    queueConcurrentOperation(promises, getService('provider').replace(fileData, oldFile));
 
     const newFormatKeys = new Set<string>();
 
@@ -375,7 +398,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
         newFormatKeys.add('thumbnail');
-        promises.push(replaceFormat('thumbnail', thumbnailFile));
+        queueConcurrentOperation(promises, replaceFormat('thumbnail', thumbnailFile));
       }
 
       const formats = await generateResponsiveFormats(fileData);
@@ -384,7 +407,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           // eslint-disable-next-line no-continue
           if (!format) continue;
           newFormatKeys.add(format.key);
-          promises.push(replaceFormat(format.key, format.file));
+          queueConcurrentOperation(promises, replaceFormat(format.key, format.file));
         }
       }
     }
@@ -397,7 +420,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       for (const oldKey of Object.keys(oldFile.formats)) {
         if (!newFormatKeys.has(oldKey)) {
           const oldFormat = oldFile.formats[oldKey] as File;
-          promises.push(strapi.plugin('upload').provider.delete(oldFormat));
+          queueConcurrentOperation(promises, strapi.plugin('upload').provider.delete(oldFormat));
         }
       }
     }
@@ -436,7 +459,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   ) {
     const { user } = opts ?? {};
 
-    const dbFile = await findOne(id);
+    const dbFile = await findOne(id, FOLDER_REF_POPULATE);
 
     if (!dbFile) {
       throw new NotFoundError();
@@ -450,18 +473,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
       focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
-      folder: _.isUndefined(folder) ? dbFile.folder : folder,
+      ...(_.isUndefined(folder) ? {} : { folder }),
       folderPath: _.isUndefined(folder)
         ? dbFile.folderPath
         : await fileService.getFolderPath(folder),
     };
 
-    return update(id, newInfos, { user });
+    return update(id, newInfos, { user }, { previous: dbFile });
   }
 
   async function replace(
     id: ID,
-    { data, file }: { data: { fileInfo: FileInfo }; file: InputFile },
+    { data, file }: { data: { fileInfo: FileInfo } & Metas; file: InputFile },
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
@@ -470,7 +493,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const { isImage } = getService('image-manipulation');
 
-    const dbFile = await findOne(id);
+    const dbFile = await findOne(id, FOLDER_REF_POPULATE);
     if (!dbFile) {
       throw new NotFoundError();
     }
@@ -481,8 +504,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     let fileData: UploadableFile;
 
     try {
-      const { fileInfo } = data;
-      fileData = await enhanceAndValidateFile(file, fileInfo);
+      // `refId` / `ref` / `field` are dropped rather than forwarded: `formatFileInfo` turns
+      // them into a one-element `related` array, and a bare array reaches the morph join as
+      // `set` — which deletes every row for this file, detaching it from every other entry
+      // that uses it. Attaching an existing file to an entry is the content API's job.
+      const { fileInfo, refId: _refId, ref: _ref, field: _field, ...metas } = data;
+      fileData = await enhanceAndValidateFile(file, fileInfo, metas);
+
+      // Replacing a file writes new bytes just like creating one, so it has to
+      // respect sizeLimit too. Checked before any provider write, and measured on
+      // the same post-optimization file as the create path (uploadFileAndPersist).
+      await getService('provider').checkFileSize(fileData);
 
       // keep a constant hash and extension so the file url doesn't change when the file is replaced
       _.assign(fileData, {
@@ -490,8 +522,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ext: dbFile.ext,
       });
 
-      // clear old formats — replaceImage / replace will set new ones
-      _.set(fileData, 'formats', {});
+      // A plain replace sends no folder, so `formatFileInfo` resolved folderPath to
+      // '/' while the relation survived — and folder deletion selects by folderPath,
+      // which orphaned the file. An explicitly sent folder still moves it.
+      if (fileInfo?.folder === undefined) {
+        _.assign(fileData, { folderPath: dbFile.folderPath });
+      }
+
+      // `update` only writes the keys it gets, so clear the old image values. A new
+      // image gets its own from replaceImage / uploadImage; a non-image keeps null,
+      // like a fresh upload of the same file.
+      _.assign(fileData, { width: null, height: null, formats: null });
 
       if (dbFile.provider === config.provider) {
         if (await isImage(fileData)) {
@@ -522,10 +563,46 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await fse.remove(tmpWorkingDirectory);
     }
 
-    return update(id, fileData, { user });
+    return update(id, fileData, { user }, { replaced: true, previous: dbFile });
   }
 
-  async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
+  type FolderRef = { id: number; name: string } | null;
+
+  async function getFolderAfterUpdate(
+    values: Partial<UploadableFile>,
+    previous: { folder?: FolderRef } | null
+  ): Promise<FolderRef> {
+    const previousFolder = previous?.folder ?? null;
+
+    if (values.folder === undefined) {
+      return previousFolder;
+    }
+
+    const value = values.folder as number | { id: number } | null;
+    const folderId = value !== null && typeof value === 'object' ? value.id : value;
+
+    if (folderId == null) {
+      return null;
+    }
+
+    if (previousFolder && Number(previousFolder.id) === Number(folderId)) {
+      return previousFolder;
+    }
+
+    return strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id: folderId }, select: ['id', 'name'] });
+  }
+
+  async function update(
+    id: ID,
+    values: Partial<UploadableFile>,
+    opts?: CommonOptions,
+    {
+      replaced = false,
+      previous: knownPrevious,
+    }: { replaced?: boolean; previous?: Record<string, any> } = {}
+  ) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -537,9 +614,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     await sendMediaMetrics(fileValues);
 
+    // Callers that already read the file pass it, with its folder
+    const previous =
+      knownPrevious ??
+      (await strapi.db
+        .query(FILE_MODEL_UID)
+        .findOne({ where: { id }, populate: { folder: { select: ['id', 'name'] } } }));
+
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
     await emitEvent(MEDIA_UPDATE, res);
+
+    // The webhook event above carries no folder (a private field) and not the file as it was
+    if (res && previous) {
+      const folder = await getFolderAfterUpdate(values, previous);
+      strapi.eventHub.emit(AUDITED_EVENTS.MEDIA_UPDATE_AUDIT, {
+        file: toAuditedFile({ ...res, folder }),
+        previous: toAuditedFile(previous),
+        replaced,
+      });
+    }
 
     return res;
   }
@@ -610,7 +704,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * Defaults to the `api.rest.withCount` config (true) when not specified on the request.
    */
   function resolveWithCount(pagination: Record<string, unknown>): boolean {
-    if (has('withCount', pagination)) {
+    if (has(pagination, 'withCount')) {
       const withCount = pagination.withCount;
 
       if (typeof withCount === 'boolean') {
@@ -653,7 +747,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;
 
     // Whether the consumer used page-based pagination (default) vs offset-based.
-    const isOffset = has('start', pagination) || has('limit', pagination);
+    const isOffset = has(pagination, 'start') || has(pagination, 'limit');
     const isPaged = !isOffset;
 
     // Resolve start/limit applying defaults and the maxLimit cap.
@@ -686,7 +780,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return {
       results: signedResults,
       // Omit total & pageCount when counting is disabled (withCount=false).
-      pagination: isNil(total) ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
+      pagination: total == null ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
     };
   }
 
@@ -730,7 +824,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await getService('metrics').trackUsage('didDisableResponsiveDimensions');
     }
 
-    return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+    const previous = await getSettings();
+
+    await strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+
+    const changes = getUploadSettingsChanges(previous, value);
+
+    if (Object.keys(changes).length > 0) {
+      await emitAudit({ strapi }, AUDITED_EVENTS.UPLOAD_SETTINGS_UPDATE, { changes });
+    }
   }
 
   async function getConfiguration() {
@@ -769,5 +871,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @internal
      */
     _uploadImage: uploadImage,
+    _replaceImage: replaceImage,
+    _queueConcurrentOperation: queueConcurrentOperation,
   };
 };

@@ -155,7 +155,7 @@ const EditPage = () => {
         type: 'success',
         message: formatMessage({ id: 'notification.success.saved' }),
       });
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),

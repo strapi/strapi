@@ -11,6 +11,7 @@ export type InternalRelationAttribute = Schema.Attribute.Relation & {
   relation: Schema.Attribute.RelationKind.Any;
   inversedBy?: string;
   mappedBy?: string;
+  required?: boolean;
   private?: boolean;
   pluginOptions?: object;
   conditions?: {
@@ -22,5 +23,4 @@ export type InternalRelationAttribute = Schema.Attribute.Relation & {
  * Internal attribute type that can be any attribute or a relation with dominant property
  */
 export type InternalAttribute =
-  | Exclude<Schema.Attribute.AnyAttribute, Schema.Attribute.Relation>
-  | InternalRelationAttribute;
+  Exclude<Schema.Attribute.AnyAttribute, Schema.Attribute.Relation> | InternalRelationAttribute;

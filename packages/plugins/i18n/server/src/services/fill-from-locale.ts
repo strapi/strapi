@@ -1,8 +1,8 @@
-import { isArray } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
 import type { UID, Schema, Core } from '@strapi/types';
 
 const READ_ACTION = 'plugin::content-manager.explorer.read';
+const TEMP_KEY_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
 /**
  * Returns the main display field for a model (e.g. title, name).
@@ -19,12 +19,12 @@ const getMainField = async (targetUid: UID.Schema): Promise<string> => {
 };
 
 /**
- * Returns the display label for a relation.
- * Matches the logic of the getRelationLabel function in the content-manager plugin.
+ * Returns the display label for a relation in form state.
+ * Empty configured values stay untranslated so the admin can provide its localized fallback.
  */
 const getRelationLabel = (relation: Record<string, unknown>, mainField: string): string => {
   const label = relation[mainField];
-  if (typeof label === 'string') return label;
+  if (label === null || typeof label === 'string') return label ?? '';
   return String(relation.documentId ?? '');
 };
 
@@ -46,10 +46,64 @@ const FIELDS_TO_IGNORE = new Set([
 const STATUS_FIELDS = new Set(['id', 'documentId', 'locale', 'updatedAt', 'publishedAt']);
 
 /**
+ * Mirrors fractional-indexing's initial key range, i.e. generateNKeysBetween(undefined, undefined, n).
+ */
+const generateInitialTempKeys = (length: number): string[] => {
+  let previousKey: string | undefined;
+
+  return Array.from({ length }, () => {
+    const nextKey = incrementInitialTempKey(previousKey);
+    previousKey = nextKey;
+    return nextKey;
+  });
+};
+
+const incrementInitialTempKey = (key?: string): string => {
+  if (!key) {
+    return `a${TEMP_KEY_DIGITS[0]}`;
+  }
+
+  const [head, ...digits] = key;
+  let carry = true;
+
+  for (let index = digits.length - 1; carry && index >= 0; index -= 1) {
+    const nextDigitIndex = TEMP_KEY_DIGITS.indexOf(digits[index]) + 1;
+
+    if (nextDigitIndex === 0) {
+      throw new Error(`Invalid temporary key digit: ${digits[index]}`);
+    }
+
+    if (nextDigitIndex === TEMP_KEY_DIGITS.length) {
+      digits[index] = TEMP_KEY_DIGITS[0];
+    } else {
+      digits[index] = TEMP_KEY_DIGITS[nextDigitIndex];
+      carry = false;
+    }
+  }
+
+  if (!carry) {
+    return `${head}${digits.join('')}`;
+  }
+
+  if (head === 'z') {
+    throw new Error('Cannot increment temporary keys any further');
+  }
+
+  const nextHead = String.fromCharCode(head.charCodeAt(0) + 1);
+  if (nextHead > 'a') {
+    digits.push(TEMP_KEY_DIGITS[0]);
+  } else {
+    digits.pop();
+  }
+
+  return `${nextHead}${digits.join('')}`;
+};
+
+/**
  * Normalizes a value to an array: arrays pass through, single values become [value], null/undefined become [].
  */
 const normalizeToArray = (value: unknown): unknown[] => {
-  if (isArray(value)) return value;
+  if (Array.isArray(value)) return value;
   if (value) return [value];
   return [];
 };
@@ -183,14 +237,14 @@ const collectRelationsByUid = (
         const compSchema = (components[attribute.component] ?? {
           attributes: {},
         }) as Schema.Component;
-        if (attribute.repeatable && isArray(value)) {
+        if (attribute.repeatable && Array.isArray(value)) {
           for (const item of value as Record<string, unknown>[]) {
             collect(item, compSchema);
           }
         } else if (value) {
           collect(value as Record<string, unknown>, compSchema);
         }
-      } else if (attribute.type === 'dynamiczone' && isArray(value)) {
+      } else if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
         for (const item of value as Record<string, unknown>[]) {
           const compUid = (item as any)?.__component as string;
           const compSchema = (components[compUid] ?? { attributes: {} }) as Schema.Component;
@@ -420,11 +474,12 @@ const processDocumentData = async (
       const compSchema = (components[attribute.component] || {
         attributes: {},
       }) as Schema.Component;
-      if (attribute.repeatable && isArray(value)) {
+      if (attribute.repeatable && Array.isArray(value)) {
+        const tempKeys = generateInitialTempKeys(value.length);
         result[key] = await Promise.all(
           value.map(async (item: Record<string, unknown>, index: number) => {
             const processed = await processDocumentData(item, compSchema, components, preResolved);
-            return { ...processed, __temp_key__: index + 1 };
+            return { ...processed, __temp_key__: tempKeys[index] };
           })
         );
       } else if (value) {
@@ -441,14 +496,15 @@ const processDocumentData = async (
       continue;
     }
 
-    if (attribute.type === 'dynamiczone' && isArray(value)) {
+    if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
+      const tempKeys = generateInitialTempKeys(value.length);
       result[key] = await Promise.all(
         value.map(async (item: Record<string, unknown>, index: number) => {
           const compSchema = (components[item?.__component as string] || {
             attributes: {},
           }) as Schema.Component;
           const processed = await processDocumentData(item, compSchema, components, preResolved);
-          return { ...processed, __temp_key__: index + 1 };
+          return { ...processed, __temp_key__: tempKeys[index] };
         })
       );
       continue;

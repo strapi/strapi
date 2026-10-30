@@ -7,5 +7,6 @@ module.exports = {
   },
   documents: {
     strictParams: true,
+    strictRelations: true,
   },
 };

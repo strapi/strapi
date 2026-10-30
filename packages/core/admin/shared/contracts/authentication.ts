@@ -1,5 +1,5 @@
-import type { AdminUser, SanitizedAdminUser } from './shared';
 import type { errors } from '@strapi/utils';
+import type { AdminUser, SanitizedAdminUser } from './shared';
 
 /**
  * /login - Log in as an admin user

@@ -163,7 +163,7 @@ export declare namespace BulkMoveFolders {
   export interface Request {
     body: {
       folderIds: number[];
-      destinationFolderId: number;
+      destinationFolderId: number | null; // null = Media Library root
     };
   }
 

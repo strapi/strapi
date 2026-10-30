@@ -28,6 +28,35 @@ export const getService = <TName extends keyof Services>(
   return strapi.plugin('content-releases').service(name);
 };
 
+type ReleaseId = Parameters<ReleaseService['updateReleaseStatus']>[0];
+
+/**
+ * Refresh every affected release. One failure must not skip the rest; the first
+ * error is rethrown so the caller's try/catch still logs it.
+ */
+export const updateAffectedReleaseStatuses = async (
+  releases: ReadonlyArray<{ id: ReleaseId }>,
+  { strapi }: { strapi: Core.Strapi }
+) => {
+  let firstError: unknown;
+  let hasFailure = false;
+
+  for (const release of releases) {
+    try {
+      await getService('release', { strapi }).updateReleaseStatus(release.id);
+    } catch (error) {
+      if (!hasFailure) {
+        firstError = error;
+        hasFailure = true;
+      }
+    }
+  }
+
+  if (hasFailure) {
+    throw firstError;
+  }
+};
+
 export const getDraftEntryValidStatus = async (
   { contentType, documentId, locale }: Action,
   { strapi }: { strapi: Core.Strapi }
@@ -47,11 +76,21 @@ export const isEntryValid = async (
   { strapi }: { strapi: Core.Strapi }
 ) => {
   try {
+    // Mirror the document-service publish path: when `api.documents.strictRelations`
+    // is on, required media/relations are enforced on non-draft writes. Reading the
+    // flag here keeps the release "valid" badge consistent with what publish will
+    // actually accept (otherwise the UI can mark an entry valid that publish rejects).
+    const rawStrictRelations: unknown = strapi.config.get(
+      'api.documents.strictRelations',
+      undefined
+    );
+    const strictRelations = rawStrictRelations === true;
+
     // @TODO: When documents service has validateEntityCreation method, use it instead
     await strapi.entityValidator.validateEntityCreation(
       strapi.getModel(contentTypeUid as UID.ContentType),
       entry,
-      undefined,
+      { isDraft: false, locale: entry?.locale, strictRelations },
       // @ts-expect-error - FIXME: entity here is unnecessary
       entry
     );

@@ -1,7 +1,8 @@
-import { sortBy, map, isUndefined } from 'lodash/fp';
+import { map, sortBy } from 'lodash';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
+import { AUDITED_EVENTS } from '../audit-logs';
 
 import type { File, Folder } from '../types';
 
@@ -13,6 +14,10 @@ type FolderMap = {
 
 type FolderNode = Partial<Folder> & {
   children: FolderNode[];
+};
+
+type DeleteByIdsOptions = {
+  validateFiles?: (files: File[]) => Promise<void>;
 };
 
 const setPathIdAndPath = async (folder: Pick<Folder, 'parent'>) => {
@@ -63,7 +68,7 @@ const create = async (
  * @param ids ids of the folders to delete
  * @returns {Promise<Object[]>}
  */
-const deleteByIds = async (ids = []) => {
+const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOptions = {}) => {
   const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({ where: { id: { $in: ids } } });
   if (folders.length === 0) {
     return {
@@ -73,7 +78,7 @@ const deleteByIds = async (ids = []) => {
     };
   }
 
-  const pathsToDelete = map('path', folders);
+  const pathsToDelete = map(folders, 'path');
 
   // delete files
   const filesToDelete = await strapi.db.query(FILE_MODEL_UID).findMany({
@@ -84,6 +89,10 @@ const deleteByIds = async (ids = []) => {
       ]),
     },
   });
+
+  // A folder deletion cascades to every file in its subtree. Let callers enforce
+  // request-scoped permissions against the complete set before the first destructive action.
+  await validateFiles?.(filesToDelete);
 
   await Promise.all(filesToDelete.map((file: File) => getService('upload').remove(file)));
 
@@ -98,6 +107,9 @@ const deleteByIds = async (ids = []) => {
   });
 
   strapi.eventHub.emit('media-folder.delete', { folders });
+  folders.forEach((folder: Folder) => {
+    strapi.eventHub.emit(AUDITED_EVENTS.FOLDER_DELETE_AUDIT, { folder });
+  });
 
   return {
     folders,
@@ -116,13 +128,19 @@ const update = async (
     parent,
   }: {
     name: string;
-    parent: number | null;
+    /**
+     * Omit to rename in place: the name-only branch skips the transaction that rewrites
+     * descendant paths. Pass a number to re-parent, or null to move to the root.
+     */
+    parent?: number | null;
   },
   { user }: { user: { id: string | number } }
 ) => {
   // only name is updated
-  if (isUndefined(parent)) {
-    const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
+  if (parent === undefined) {
+    const existingFolder = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id }, populate: { parent: { select: ['id', 'name'] } } });
 
     if (!existingFolder) {
       return undefined;
@@ -130,15 +148,24 @@ const update = async (
 
     const newFolder = setCreatorFields({ user, isEdition: true })({ name, parent });
 
-    if (isUndefined(parent)) {
+    if (parent === undefined) {
       const folder = await strapi.db
         .query(FOLDER_MODEL_UID)
         .update({ where: { id }, data: newFolder });
+
+      strapi.eventHub.emit('media-folder.update', {
+        folder: { ...folder, parent: existingFolder.parent ?? null },
+        previous: existingFolder,
+      });
 
       return folder;
     }
     // location is updated => using transaction
   } else {
+    const previous = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id }, populate: { parent: { select: ['id', 'name'] } } });
+
     const trx = await strapi.db.transaction();
     try {
       // fetch existing folder
@@ -234,7 +261,17 @@ const update = async (
       .query(FOLDER_MODEL_UID)
       .update({ where: { id }, data: newFolder });
 
-    strapi.eventHub.emit('media-folder.update', { folder });
+    const parentFolder =
+      parent === null
+        ? null
+        : await strapi.db
+            .query(FOLDER_MODEL_UID)
+            .findOne({ where: { id: parent }, select: ['id', 'name'] });
+
+    strapi.eventHub.emit('media-folder.update', {
+      folder: { ...folder, parent: parentFolder },
+      previous,
+    });
     return folder;
   }
 };
@@ -285,7 +322,7 @@ const getStructure = async () => {
     }
 
     folderMap[parentId].children.push(folderMap[f.id]);
-    folderMap[parentId].children = sortBy('name', folderMap[parentId].children);
+    folderMap[parentId].children = sortBy(folderMap[parentId].children, 'name');
     delete folderMap[f.id].parent;
   });
 

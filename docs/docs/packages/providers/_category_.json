@@ -1,0 +1,9 @@
+{
+  "label": "Providers",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "slug": "/packages/providers",
+    "description": "Workspace packages under packages/providers/ in the monorepo."
+  }
+}

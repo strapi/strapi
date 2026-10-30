@@ -1,0 +1,70 @@
+name: 'Draft release'
+description: 'Pins the release range, computes the version, cuts or advances the release branch, opens or refreshes the draft PR and reconciles milestones.'
+
+inputs:
+  token:
+    description: 'GitHub App token. The default GITHUB_TOKEN cannot trigger CI on the release PR nor fire the labeled event.'
+    required: true
+  version:
+    description: 'Explicit x.y.z release version. Leave empty to decide it from the commits in the range.'
+    required: false
+    default: ''
+  dry_run:
+    description: 'Compute everything and record the planned writes without performing any of them.'
+    required: false
+    default: 'true'
+
+outputs:
+  version:
+    description: 'The resolved release version.'
+    value: ${{ steps.draft.outputs.version }}
+  bump:
+    description: 'minor or patch.'
+    value: ${{ steps.draft.outputs.bump }}
+  mode:
+    description: 'draft, refresh or redraft.'
+    value: ${{ steps.draft.outputs.mode }}
+  branch:
+    description: 'The release branch name.'
+    value: ${{ steps.draft.outputs.branch }}
+  pr_number:
+    description: 'The release pull request number. Empty on a dry run that would have created one.'
+    value: ${{ steps.draft.outputs.pr_number }}
+  pr_url:
+    description: 'The release pull request URL. Empty on a dry run that would have created one.'
+    value: ${{ steps.draft.outputs.pr_url }}
+  journal_path:
+    description: 'Path to the write journal, present whether the run succeeded or failed.'
+    value: ${{ steps.draft.outputs.journal_path }}
+
+# The TypeScript sources run directly through Node's type stripping. There is no build step and no
+# committed bundle, which is only possible because the action has no runtime dependencies.
+runs:
+  using: 'composite'
+  steps:
+    - name: Check Node supports type stripping
+      shell: bash
+      run: |
+        node -e '
+          const [major, minor] = process.versions.node.split(".").map(Number);
+          if (major < 22 || (major === 22 && minor < 18)) {
+            console.error(
+              "draft-release needs Node >= 22.18 to run TypeScript directly, found " +
+                process.versions.node + ". Add actions/setup-node before this action."
+            );
+            process.exit(1);
+          }
+        '
+
+    - name: Draft the release
+      id: draft
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/index.ts"
+      env:
+        INPUT_TOKEN: ${{ inputs.token }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_DRY_RUN: ${{ inputs.dry_run }}
+
+branding:
+  icon: 'tag'
+  color: 'blue'

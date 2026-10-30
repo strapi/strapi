@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import readPkgUp from 'read-pkg-up';
 
-import { ADMIN_VITE_ALIAS_MODULES } from './admin-vite-alias-modules';
+import { ADMIN_VITE_ALIAS_MODULES, ADMIN_VITE_SINGLETON_MODULES } from './admin-vite-alias-modules';
 import { getModule, type PackageJson } from './dependencies';
 import type { PluginMeta } from './plugins';
 
@@ -10,9 +10,33 @@ const REACT_PEER_DEPENDENCIES = new Set(['react', 'react-dom']);
 
 /**
  * Packages explicitly pre-bundled or aliased for the admin singleton contract.
- * Never auto-exclude these — they must stay on the include/dedupe path.
+ * Never auto-exclude these — they must stay on the optimizeDeps.include / dedupe path.
+ *
+ * The admin entry host (@strapi/strapi) must never land in optimizeDeps.exclude (#26944, #27014).
+ * CJS-only deps imported by @strapi/admin (e.g. invariant, lodash) belong in optimizeDeps.include
+ * (see vite/config.ts — #26964, #26944, #27014).
+ * The CodeMirror singletons (e.g. @uiw/react-codemirror — ESM with a React peer) match the
+ * exclude heuristic but must stay pre-bundled so the admin keeps a single instance
  */
-const PINNED_OPTIMIZE_MODULES = new Set<string>(ADMIN_VITE_ALIAS_MODULES);
+const PINNED_OPTIMIZE_MODULES = new Set<string>([
+  ...ADMIN_VITE_ALIAS_MODULES,
+  ...ADMIN_VITE_SINGLETON_MODULES,
+  '@strapi/strapi',
+]);
+
+/**
+ * Thin shared plugin UI kits that are known to break when Vite re-optimizes their pre-built
+ * dist (original #26944 victims). Only these names — plus packages that opt in via package.json —
+ * may be auto-excluded. Broad heuristic matching alone was too aggressive for large plugins
+ * (e.g. CKEditor) and orphaned their transitive CJS/UMD deps (#27136).
+ *
+ * @internal exported for tests
+ */
+export const ADMIN_VITE_OPTIMIZE_DEPS_EXCLUDE_ALLOWLIST = new Set<string>([
+  'strapi-design-extended',
+]);
+
+const isOfficialStrapiPackage = (name: string): boolean => name.startsWith('@strapi/');
 
 type PackageExportEntry =
   | string
@@ -89,10 +113,52 @@ export const shipsPreBuiltDist = (pkg: PackageJson): boolean => {
 };
 
 /**
+ * Shape check for packages that *could* be excluded (pre-built ESM + React peer + dist).
+ * Matching alone is not enough to exclude — see {@link isEligibleForOptimizeDepsExclude}.
+ *
  * @internal exported for tests
  */
 export const shouldExcludeFromOptimizeDeps = (pkg: PackageJson): boolean =>
   hasReactPeerDependency(pkg) && isEsmPackage(pkg) && shipsPreBuiltDist(pkg);
+
+type StrapiAdminViteMeta = {
+  optimizeDepsExclude?: unknown;
+};
+
+type StrapiPackageMeta = {
+  admin?: {
+    vite?: StrapiAdminViteMeta;
+  };
+};
+
+/**
+ * Packages may opt into optimizeDeps.exclude via package.json:
+ * `{ "strapi": { "admin": { "vite": { "optimizeDepsExclude": true } } } }`
+ *
+ * @internal exported for tests
+ */
+export const packageOptsIntoOptimizeDepsExclude = (pkg: PackageJson): boolean => {
+  const strapi = (pkg as PackageJson & { strapi?: StrapiPackageMeta }).strapi;
+
+  return strapi?.admin?.vite?.optimizeDepsExclude === true;
+};
+
+/**
+ * A candidate is excluded only when it matches the UI-kit shape AND is either on the
+ * known-safe allowlist or explicitly opts in. This keeps #26944 working for thin kits
+ * without auto-excluding large editor/chart plugins (#27136).
+ *
+ * @internal exported for tests
+ */
+export const isEligibleForOptimizeDepsExclude = (name: string, pkg: PackageJson): boolean => {
+  if (!shouldExcludeFromOptimizeDeps(pkg)) {
+    return false;
+  }
+
+  return (
+    ADMIN_VITE_OPTIMIZE_DEPS_EXCLUDE_ALLOWLIST.has(name) || packageOptsIntoOptimizeDepsExclude(pkg)
+  );
+};
 
 /**
  * @internal exported for tests
@@ -149,6 +215,13 @@ const loadAppPackageJson = async (cwd: string): Promise<PackageJson | null> => {
  * Strapi's React/design-system pre-bundling. Skip dep optimization so they resolve through
  * the admin resolve aliases instead of being re-bundled by Vite.
  *
+ * Scans app and plugin dependency trees (#26944). Only allowlisted or opt-in packages that
+ * also match the UI-kit shape are excluded (#27136). Official @strapi/* packages and pinned
+ * singletons are never auto-excluded — @strapi/strapi matches the heuristic but must stay on
+ * the optimizeDeps.include path (#26944, #27014).
+ *
+ * Apps can still exclude additional packages via `src/admin/vite.config` optimizeDeps.exclude.
+ *
  * @internal
  */
 export const collectAdminOptimizeDepsExclude = async (
@@ -177,13 +250,13 @@ export const collectAdminOptimizeDepsExclude = async (
   const exclude: string[] = [];
 
   for (const name of candidateNames) {
-    if (PINNED_OPTIMIZE_MODULES.has(name)) {
+    if (PINNED_OPTIMIZE_MODULES.has(name) || isOfficialStrapiPackage(name)) {
       continue;
     }
 
     const pkg = await getModule(name, cwd);
 
-    if (pkg && shouldExcludeFromOptimizeDeps(pkg)) {
+    if (pkg && isEligibleForOptimizeDepsExclude(name, pkg)) {
       exclude.push(name);
     }
   }

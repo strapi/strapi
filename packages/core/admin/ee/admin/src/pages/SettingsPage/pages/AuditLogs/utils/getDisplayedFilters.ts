@@ -1,20 +1,24 @@
 import { IntlShape } from 'react-intl';
 
 import { Filters } from '../../../../../../../../admin/src/components/Filters';
-import { getDisplayName } from '../../../../../../../../admin/src/utils/users';
-import { SanitizedAdminUser } from '../../../../../../../../shared/contracts/shared';
-import { ComboboxFilter } from '../components/ComboboxFilter';
+import { GetUsers } from '../../../../../../../../shared/contracts/audit-logs';
+import { ComboboxFilter, ComboboxFilterProps } from '../components/ComboboxFilter';
 
 import { actionTypes, getDefaultMessage } from './getActionTypesDefaultMessages';
+import { isLegacyAction } from './legacyActions';
+
+type UsersFilterProps = Pick<ComboboxFilterProps, 'loading' | 'hasMoreItems' | 'onLoadMore'>;
+
+type AuditLogUser = NonNullable<GetUsers.Response['results']>[number];
 
 export const getDisplayedFilters = ({
   formatMessage,
   users,
-  canReadUsers,
+  usersFilter,
 }: {
   formatMessage: IntlShape['formatMessage'];
-  users: SanitizedAdminUser[];
-  canReadUsers: boolean;
+  users: AuditLogUser[];
+  usersFilter?: UsersFilterProps;
 }): Filters.Filter[] => {
   const operators = [
     {
@@ -42,16 +46,19 @@ export const getDisplayedFilters = ({
       }),
       name: 'action',
       operators,
-      options: (Object.keys(actionTypes) as (keyof typeof actionTypes)[]).map((action) => ({
-        label: formatMessage(
-          {
-            id: `Settings.permissions.auditLogs.${action}`,
-            defaultMessage: getDefaultMessage(action),
-          },
-          { model: undefined }
-        ),
-        value: action,
-      })),
+      // Legacy keys stay in actionTypes to label stored rows; the new key filters both
+      options: (Object.keys(actionTypes) as (keyof typeof actionTypes)[])
+        .filter((action) => !isLegacyAction(action))
+        .map((action) => ({
+          label: formatMessage(
+            {
+              id: `Settings.permissions.auditLogs.${action}`,
+              defaultMessage: getDefaultMessage(action),
+            },
+            { model: undefined }
+          ),
+          value: action,
+        })),
       type: 'enumeration',
     },
     {
@@ -64,26 +71,23 @@ export const getDisplayedFilters = ({
     },
   ] satisfies Filters.Filter[];
 
-  if (canReadUsers && users) {
-    return [
-      ...filters,
-      {
-        input: ComboboxFilter,
-        label: formatMessage({
-          id: 'Settings.permissions.auditLogs.user',
-          defaultMessage: 'User',
-        }),
-        mainField: { name: 'id', type: 'integer' },
-        name: 'user',
-        operators,
-        options: users.map((user) => ({
-          label: getDisplayName(user),
-          value: user.id.toString(),
-        })),
-        type: 'relation',
-      } satisfies Filters.Filter,
-    ];
-  }
-
-  return filters;
+  return [
+    ...filters,
+    {
+      input: ComboboxFilter,
+      label: formatMessage({
+        id: 'Settings.permissions.auditLogs.user',
+        defaultMessage: 'User',
+      }),
+      mainField: { name: 'id', type: 'integer' },
+      name: 'user',
+      operators,
+      options: users.map((user) => ({
+        label: user.displayName,
+        value: user.id.toString(),
+      })),
+      type: 'relation',
+      ...usersFilter,
+    } satisfies Filters.Filter & UsersFilterProps,
+  ];
 };

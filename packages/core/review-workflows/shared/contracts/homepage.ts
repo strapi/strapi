@@ -10,12 +10,16 @@ export interface RecentDocument {
   locale: string | null;
   status?: 'draft' | 'published' | 'modified';
   title: string;
-  updatedAt: Date;
-  publishedAt?: Date | null;
+  updatedAt: string;
+  publishedAt?: string | null;
+  /**
+   * `null` when the document has no stage, e.g. its workflow was deleted or its content type
+   * was removed from its workflow.
+   */
   strapi_stage?: {
     color?: string;
     name: string;
-  };
+  } | null;
 }
 
 export declare namespace GetRecentlyAssignedDocuments {

@@ -74,21 +74,24 @@ const List = ({ attributes, children, element }: RenderElementProps) => {
 };
 
 const replaceListWithEmptyBlock = (editor: Editor, currentListPath: Path) => {
-  // Delete the empty list
-  Transforms.removeNodes(editor, { at: currentListPath });
+  // Normalize once the paragraph is in, or removing the only block adds a second paragraph
+  Editor.withoutNormalizing(editor, () => {
+    // Delete the empty list
+    Transforms.removeNodes(editor, { at: currentListPath });
 
-  if (currentListPath[0] === 0) {
-    // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
-    Transforms.insertNodes(
-      editor,
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text: '' }],
-      },
-      { at: currentListPath }
-    );
-    Transforms.select(editor, currentListPath);
-  }
+    if (currentListPath[0] === 0) {
+      // If the list was the only (or first) block element then insert empty paragraph as editor needs default value
+      Transforms.insertNodes(
+        editor,
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '' }],
+        },
+        { at: currentListPath }
+      );
+      Transforms.select(editor, currentListPath);
+    }
+  });
 };
 
 const isText = (node: unknown): node is Text => {
@@ -383,7 +386,7 @@ const handleShiftTabOnList = (editor: Editor) => {
         if (isNestedListNode(remainingList) && remainingList.children.length === 0) {
           Transforms.removeNodes(editor, { at: remainingListPath });
         }
-      } catch (error) {
+      } catch {
         // The path might no longer exist if the structure changed, which is fine
       }
     }

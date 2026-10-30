@@ -227,4 +227,31 @@ describe('formatErrorMessages', () => {
 
     expect(calls[0].id).toBe('error.required.withField');
   });
+
+  /**
+   * Messages such as `components.Input.error.validation.minLength` interpolate `{min}`. When a
+   * locale has no `.withField` variant react-intl falls back to the defaultMessage, so dropping
+   * the descriptor's own values leaked the raw `{min}` placeholder. See strapi/strapi#19030.
+   */
+  it('forwards the values carried by the descriptor alongside the field', () => {
+    const calls: Array<[ErrorMessageDescriptor, FormatMessageValues]> = [];
+    const spy = ((msg: ErrorMessageDescriptor, values: FormatMessageValues) => {
+      calls.push([msg, values]);
+      return msg.defaultMessage;
+    }) as FormatMessage;
+
+    formatErrorMessages(
+      {
+        name: {
+          id: 'components.Input.error.validation.minLength',
+          defaultMessage: 'The value is too short (min: {min}).',
+          values: { min: 8 },
+        },
+      } as unknown as FormErrors,
+      '',
+      spy
+    );
+
+    expect(calls[0][1]).toEqual({ min: 8, field: 'name' });
+  });
 });

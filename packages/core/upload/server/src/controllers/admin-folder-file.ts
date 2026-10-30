@@ -1,13 +1,15 @@
-import { strings } from '@strapi/utils';
+import { errors, strings } from '@strapi/utils';
 
 import type { Context } from 'koa';
 
 import { getService } from '../utils';
 import { ACTIONS, FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
+import { FolderContainsUnauthorizedAssetsError } from '../errors';
 import {
   validateDeleteManyFoldersFiles,
   validateMoveManyFoldersFiles,
 } from './validation/admin/folder-file';
+import { emitMediaMoves, readMediaMoves, type MediaMoveEvent } from '../audit-logs';
 
 import type { File, Folder } from '../types';
 
@@ -25,7 +27,7 @@ export default {
 
     const pmFile = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
-      action: ACTIONS.read,
+      action: ACTIONS.update,
       model: FILE_MODEL_UID,
     });
 
@@ -34,12 +36,49 @@ export default {
     const fileService = getService('file');
     const folderService = getService('folder');
 
-    const deletedFiles = await fileService.deleteByIds(body.fileIds);
+    const { fileIds = [], folderIds = [] } = body;
+
+    const canDeleteFiles = async (files: File[]) => {
+      const ids = [...new Set(files.map(({ id }) => id))];
+
+      if (ids.length === 0) {
+        return true;
+      }
+
+      const query = pmFile.addPermissionsQueryTo({ filters: { id: { $in: ids } } });
+      const permittedFiles = await strapi.db.query(FILE_MODEL_UID).findMany({
+        select: ['id'],
+        where: query.filters,
+      });
+
+      return permittedFiles.length === ids.length;
+    };
+
+    // https://github.com/strapi/strapi/issues/27649
+    // Validate explicitly selected files before deleting a folder. Otherwise a mixed request
+    // could delete permitted files first and only then discover a forbidden file in the folder.
+    if (fileIds.length > 0) {
+      const selectedFiles = await strapi.db.query(FILE_MODEL_UID).findMany({
+        where: { id: { $in: fileIds } },
+      });
+
+      if (!(await canDeleteFiles(selectedFiles))) {
+        throw new errors.ForbiddenError();
+      }
+    }
+
     const {
       folders: deletedFolders,
       totalFolderNumber,
       totalFileNumber,
-    } = await folderService.deleteByIds(body.folderIds);
+    } = await folderService.deleteByIds(folderIds, {
+      async validateFiles(files) {
+        if (!(await canDeleteFiles(files))) {
+          throw new FolderContainsUnauthorizedAssetsError();
+        }
+      },
+    });
+    const deletedFiles = await fileService.deleteByIds(fileIds);
 
     if (deletedFiles.length + deletedFolders.length > 1) {
       await getService('metrics').trackUsage('didBulkDeleteMediaLibraryElements', {
@@ -54,7 +93,7 @@ export default {
 
     ctx.body = {
       data: {
-        files: await pmFile.sanitizeOutput(deletedFiles),
+        files: await pmFile.sanitizeOutput(deletedFiles, { action: ACTIONS.read }),
         folders: await pmFolder.sanitizeOutput(deletedFolders),
       },
     };
@@ -81,13 +120,14 @@ export default {
 
     let totalFolderNumber = 0;
     let totalFileNumber = 0;
+    let moves: MediaMoveEvent[] = [];
 
     const trx = await strapi.db.transaction();
     try {
       // fetch folders
       const existingFolders = await strapi.db
         .queryBuilder(FOLDER_MODEL_UID)
-        .select(['id', 'pathId', 'path'])
+        .select(['id', 'name', 'pathId', 'path'])
         .where({ id: { $in: folderIds } })
         .transacting(trx.get())
         .forUpdate()
@@ -96,7 +136,7 @@ export default {
       // fetch files
       const existingFiles = await strapi.db
         .queryBuilder(FILE_MODEL_UID)
-        .select(['id'])
+        .select(['id', 'name'])
         .where({ id: { $in: fileIds } })
         .transacting(trx.get())
         .forUpdate()
@@ -122,6 +162,23 @@ export default {
         strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
       // @ts-expect-error - no dynamic typings for the models
       const pathColName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
+
+      // Read before the write: the audit log records where each item was.
+      const fileFolderAttribute = strapi.db.metadata.get(FILE_MODEL_UID).attributes.folder;
+      const folderParentAttribute = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
+      moves = await readMediaMoves(
+        (table) => strapi.db.getConnection(table).transacting(trx.get()),
+        {
+          files: existingFiles,
+          folders: existingFolders,
+          destinationFolderId,
+          // @ts-expect-error - no dynamic typings for the models
+          fileFolderJoinTable: fileFolderAttribute.joinTable,
+          // @ts-expect-error - no dynamic typings for the models
+          folderParentJoinTable: folderParentAttribute.joinTable,
+          folderTable,
+        }
+      );
 
       if (existingFolders.length > 0) {
         // update folders' parent relation
@@ -229,6 +286,10 @@ export default {
       await trx.rollback();
       throw e;
     }
+
+    emitMediaMoves({ strapi }, moves).catch((error) => {
+      strapi.log.error(`Could not record media moves in audit logs: ${error?.message ?? error}`);
+    });
 
     const updatedFolders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
       where: { id: { $in: folderIds } },

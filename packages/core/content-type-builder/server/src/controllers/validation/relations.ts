@@ -1,4 +1,3 @@
-import { isUndefined } from 'lodash/fp';
 import { yup } from '@strapi/utils';
 import type { TestContext, TestFunction } from 'yup';
 import type { Schema, UID } from '@strapi/types';
@@ -15,7 +14,7 @@ const isValidRelation = (validNatures: ReadonlyArray<string>): TestFunction<stri
     }
 
     if (this.parent.target === coreUids.STRAPI_USER) {
-      if (!validNatures.includes(value) || !isUndefined(this.parent.targetAttribute)) {
+      if (!validNatures.includes(value) || this.parent.targetAttribute !== undefined) {
         return this.createError({
           path: this.path,
           message: `must be one of the following values: ${STRAPI_USER_RELATIONS.join(', ')}`,
@@ -44,6 +43,7 @@ export const getRelationValidator = (
     type: yup.string().oneOf(['relation']).required(),
     relation: yup.string().test('isValidRelation', isValidRelation(allowedRelations)).required(),
     configurable: yup.boolean().nullable(),
+    required: yup.boolean(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
   };

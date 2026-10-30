@@ -21,8 +21,8 @@ export default class MysqlDialect extends Dialect {
     this.databaseInspector = new MysqlDatabaseInspector(db);
   }
 
-  configure() {
-    const connection = this.db.config.connection.connection as Knex.MySqlConnectionConfig;
+  configure(conn?: Knex.MySqlConnectionConfig) {
+    const connection = conn || (this.db.config.connection.connection as Knex.MySqlConnectionConfig);
 
     connection.supportBigNumbers = true;
     // Only allow bigNumberStrings option set to be true if no connection option passed
@@ -57,7 +57,7 @@ export default class MysqlDialect extends Dialect {
       await this.db.connection
         .raw(`set session sql_require_primary_key = 0;`)
         .connection(nativeConnection);
-    } catch (err) {
+    } catch {
       // Ignore error due to lack of session permissions
     }
 
@@ -76,7 +76,7 @@ export default class MysqlDialect extends Dialect {
     try {
       await this.db.connection.raw(`set foreign_key_checks = 0;`);
       await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
-    } catch (err) {
+    } catch {
       // Ignore error due to lack of session permissions
     }
   }
@@ -91,6 +91,45 @@ export default class MysqlDialect extends Dialect {
 
   usesForeignKeys() {
     return true;
+  }
+
+  /**
+   * Drops the foreign-key constraint named `name` on `table` (MySQL FK names
+   * are unique per database, so a stale one blocks re-creating it on any
+   * table), then the index of the same name. Runs on `trx`.
+   */
+  async dropSchemaObject(
+    trx: Knex,
+    { table, name }: { table: string; name: string }
+  ): Promise<boolean> {
+    let dropped = false;
+
+    const [foreignKeys] = await trx.raw(
+      `SELECT 1
+       FROM information_schema.table_constraints
+       WHERE table_schema = database() AND table_name = ? AND constraint_name = ?
+       AND constraint_type = 'FOREIGN KEY'
+       LIMIT 1`,
+      [table, name]
+    );
+    if (foreignKeys.length > 0) {
+      await trx.raw('ALTER TABLE ?? DROP FOREIGN KEY ??', [table, name]);
+      dropped = true;
+    }
+
+    const [indexes] = await trx.raw(
+      `SELECT 1
+       FROM information_schema.statistics
+       WHERE table_schema = database() AND table_name = ? AND index_name = ?
+       LIMIT 1`,
+      [table, name]
+    );
+    if (indexes.length > 0) {
+      await trx.raw('ALTER TABLE ?? DROP INDEX ??', [table, name]);
+      dropped = true;
+    }
+
+    return dropped;
   }
 
   transformErrors(error: Error) {

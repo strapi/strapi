@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import { WebSocket } from 'ws';
-import { once } from 'lodash/fp';
+import { once } from 'lodash';
 import type { Struct, Utils } from '@strapi/types';
 
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
@@ -25,8 +25,10 @@ import {
   transferAssetStreamChunkByteLength,
 } from '../../../utils/transfer-asset-chunk';
 
-export interface IRemoteStrapiDestinationProviderOptions
-  extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy' | 'onTransferPhase'> {
+export interface IRemoteStrapiDestinationProviderOptions extends Pick<
+  ILocalStrapiDestinationProviderOptions,
+  'restore' | 'strategy' | 'onTransferPhase'
+> {
   url: URL; // the url of the remote Strapi admin
   auth?: Auth.ITransferTokenAuth;
   retryMessageOptions?: {

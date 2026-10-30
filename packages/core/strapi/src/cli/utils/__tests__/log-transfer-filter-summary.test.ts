@@ -29,6 +29,21 @@ describe('logTransferFilterSummary', () => {
     expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
   });
 
+  test('prints auto-skip message when files were excluded because upload types are out of scope', () => {
+    logTransferFilterSummary({
+      exclude: ['files'],
+      onlyContentTypes: ['api::article.article'],
+      filesAutoExcluded: true,
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Skipping files stage: upload content types are not in transfer scope'
+      )
+    );
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('rsync'));
+  });
+
   test('prints files note when assets stage is skipped via --exclude files', () => {
     logTransferFilterSummary({ exclude: ['files'] });
 
@@ -41,13 +56,42 @@ describe('logTransferFilterSummary', () => {
     logTransferFilterSummary({ only: ['content'] });
 
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only content'));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Stages not transferred (destination data preserved): files, config')
+    );
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
+  });
+
+  test('prints omitted stages when --only content,files leaves config out', () => {
+    logTransferFilterSummary({ only: ['content', 'files'] });
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only content, files'));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Stages not transferred (destination data preserved): config')
+    );
+  });
+
+  test('does not print omitted-stages line when --only includes every stage preset', () => {
+    logTransferFilterSummary({ only: ['content', 'files', 'config'] });
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only content, files, config'));
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('Stages not transferred'));
+  });
+
+  test('does not print omitted-stages line for --exclude alone', () => {
+    logTransferFilterSummary({ exclude: ['config'] });
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('excluding config'));
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('Stages not transferred'));
   });
 
   test('does not print files note when content is also skipped via --only config', () => {
     logTransferFilterSummary({ only: ['config'] });
 
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('only config'));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Stages not transferred (destination data preserved): content, files')
+    );
     expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
   });
 
@@ -56,5 +100,43 @@ describe('logTransferFilterSummary', () => {
 
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('excluding files, content'));
     expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('plugin::upload.file'));
+  });
+
+  test('prints content type filters when exclude-content-types is set', () => {
+    logTransferFilterSummary({
+      excludeContentTypes: ['plugin::upload.file', 'plugin::upload.folder'],
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Content type filters: excluding plugin::upload.file, plugin::upload.folder'
+      )
+    );
+  });
+
+  test('prints content type filters when only-content-types is set', () => {
+    logTransferFilterSummary({
+      onlyContentTypes: ['api::article.article', 'api::category.category'],
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Content type filters: only api::article.article, api::category.category'
+      )
+    );
+  });
+
+  test('prints stage and content type filters on separate lines', () => {
+    logTransferFilterSummary({
+      exclude: ['files'],
+      onlyContentTypes: ['api::article.article'],
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Transfer filters: excluding files')
+    );
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Content type filters: only api::article.article')
+    );
   });
 });

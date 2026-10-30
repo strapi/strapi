@@ -406,9 +406,8 @@ class StrapiApp {
             defaultMessage: 'Last activity',
           },
           component: async () => {
-            const { AuditLogsWidget } = await import(
-              '../../ee/admin/src/components/AuditLogs/Widgets'
-            );
+            const { AuditLogsWidget } =
+              await import('../../ee/admin/src/components/AuditLogs/Widgets');
             return AuditLogsWidget;
           },
           pluginId: 'admin',
@@ -488,7 +487,7 @@ class StrapiApp {
       const normalizedKey = normalizeAdminLocale(key);
 
       acc[normalizedKey] = {
-        ...(acc[normalizedKey] || {}),
+        ...acc[normalizedKey],
         ...customTranslations[key],
       };
 
@@ -535,8 +534,8 @@ class StrapiApp {
     }>((acc, current) => {
       acc[current] = {
         ...adminTranslations[current],
-        ...(mergedTrads[current] || {}),
-        ...(normalizedCustomTranslations[current] ?? {}),
+        ...mergedTrads[current],
+        ...normalizedCustomTranslations[current],
       };
 
       return acc;

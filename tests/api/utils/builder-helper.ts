@@ -1,7 +1,5 @@
 import type { Core } from '@strapi/types';
 
-import { values } from 'lodash/fp';
-
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
@@ -26,11 +24,11 @@ export type BuilderResources = {
 };
 
 const addSchemasToBuilder = (schemas, builder) => {
-  for (const component of values(schemas.components)) {
+  for (const component of Object.values(schemas.components ?? {})) {
     builder.addComponent(component);
   }
 
-  builder.addContentTypes(values(schemas['content-types']));
+  builder.addContentTypes(Object.values(schemas['content-types'] ?? {}));
 };
 
 const bootstrapBuilder = ({ fixtures, schemas, locales }: BuilderResources, builder: Builder) => {
@@ -48,9 +46,13 @@ const bootstrapBuilder = ({ fixtures, schemas, locales }: BuilderResources, buil
   });
 };
 
+let documentServiceSetupBarrier = Promise.resolve();
+
 export const createTestSetup = async (
   resources: BuilderResources
 ): Promise<BuilderHelperReturn> => {
+  await documentServiceSetupBarrier;
+
   const builder = createTestBuilder();
   bootstrapBuilder(resources, builder);
   await builder.build();
@@ -71,6 +73,9 @@ export const createTestSetup = async (
 };
 
 export const destroyTestSetup = async ({ strapi, builder }) => {
-  await strapi.destroy();
-  await builder.cleanup();
+  documentServiceSetupBarrier = documentServiceSetupBarrier.then(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+  await documentServiceSetupBarrier;
 };

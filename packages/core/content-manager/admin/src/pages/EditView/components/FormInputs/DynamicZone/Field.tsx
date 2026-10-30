@@ -8,7 +8,7 @@ import {
   useNotification,
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 import { useIntl } from 'react-intl';
 
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
@@ -39,7 +39,8 @@ const [DynamicZoneProvider, useDynamicZone] = createContext<DynamicZoneContextVa
 );
 
 interface DynamicZoneProps
-  extends Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size' | 'hint'>,
+  extends
+    Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'>,
     Pick<DynamicZoneLabelProps, 'labelAction'> {
   children?: (props: InputRendererProps) => React.ReactNode;
@@ -120,7 +121,12 @@ const DynamicZone = ({
 
       const { category, info } = componentSchema;
 
-      const component = { uid: componentUid, displayName: info.displayName, icon: info.icon };
+      const component = {
+        uid: componentUid,
+        displayName: info.displayName,
+        icon: info.icon,
+        preview: info.preview,
+      };
 
       if (!acc[category]) {
         acc[category] = [];
@@ -149,7 +155,7 @@ const DynamicZone = ({
       setAddComponentIsOpen(false);
 
       const form = createDefaultForm(schema, components);
-      const transformations = pipe(transformDocument(schema, components), (data) => ({
+      const transformations = flow(transformDocument(schema, components), (data) => ({
         ...data,
         __component: uid,
       }));

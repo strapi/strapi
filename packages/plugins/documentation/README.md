@@ -82,7 +82,7 @@ Overriding the `full_documentation.json` is a bad idea since it will be regenera
 
 **_NOTE 2_**
 
-You can modify the `tags`, `paths`, and `components` keys on the generated documentation by providing replacement values. You can see how the API is used in the users-permissions plugin: `packages/plugins/users-permissions/server/register.js`
+You can modify the `tags`, `paths`, and `components` keys on the generated documentation by providing replacement values. You can see how the API is used in the users-permissions plugin: `packages/plugins/users-permissions/server/src/register.js`
 
 ### FAQ
 

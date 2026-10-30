@@ -1,11 +1,8 @@
-import { test, expect, type Page } from '@playwright/test';
-import { clickAndWait, describeOnCondition, navToHeader } from '../../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
-import { findAndClose } from '../../../utils/shared';
+import { type Page } from '@playwright/test';
+import { clickAndWait, describeOnCondition, findAndClose } from '../../../utils/shared';
+import { test, expect, releaseName } from './fixtures';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-const releaseName = 'Trent Crimm: The Independent';
 
 const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseName: string }) => {
   // Open the add to release dialog
@@ -28,16 +25,6 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
 };
 
 describeOnCondition(edition === 'EE')('Release page', () => {
-  test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin');
-    await page.goto('/admin');
-    await login({ page });
-
-    await navToHeader(page, ['Releases'], 'Releases');
-    await page.getByRole('link', { name: `${releaseName}` }).click();
-    await page.waitForURL('/admin/plugins/content-releases/*');
-  });
-
   test('A user should be able to add collection-type and single-type entries to a release and publish the release', async ({
     page,
   }) => {
@@ -70,6 +57,32 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await expect(
       page.getByRole('gridcell', { name: 'This entry was published.' }).first()
     ).toBeVisible();
+  });
+
+  test('after publishing a release, the CM list view reflects the new status without a manual refresh', async ({
+    cm,
+    releases,
+    details,
+  }) => {
+    // Add a collection-type entry (default "publish" action) to the release.
+    await cm.goToCollectionType('Author');
+    await cm.openEntry('Led Tasso');
+
+    await expect(cm.publishedTab).toBeDisabled();
+    await cm.addToRelease(releaseName);
+
+    // Publish the release.
+    await releases.goto();
+    await releases.openRelease(releaseName);
+    await details.publish();
+    // the release is published.
+    await expect(details.heading(releaseName)).toBeVisible();
+    await expect(details.publishButton).not.toBeVisible();
+
+    // Navigate straight to the CM list view (no browser refresh).
+    await cm.goToCollectionType('Author');
+    // the row already shows "Published"
+    await expect(cm.getRowStatus('Led Tasso', 'Published')).toBeVisible();
   });
 
   test('A user should be able to edit and delete a release', async ({ page }) => {
@@ -135,4 +148,33 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('menuitem', { name: 'Remove from release' }).click();
     await expect(row).not.toBeVisible();
   });
+
+  // Critical path #23 (workflows.releases-atomic-publish): the seeded release contains a mix of
+  // publish and unpublish actions. Applying it must execute every action in one atomic operation.
+  test(
+    'a release mixing publish and unpublish actions is applied atomically',
+    { tag: ['@release'] },
+    async ({ page }) => {
+      // Confirm the release is genuinely mixed: grouped by action it shows both publish and unpublish.
+      await page.getByLabel('Group by').click();
+      await page.getByRole('option', { name: 'Actions' }).click();
+      await expect(page.getByRole('separator', { name: 'publish', exact: true })).toBeVisible();
+      await expect(page.getByRole('separator', { name: 'unpublish' })).toBeVisible();
+
+      // Apply the whole release in one action.
+      await clickAndWait(page, page.getByRole('button', { name: 'Publish', exact: true }));
+
+      // Atomic apply: the release is now done — its title still shows, there is no Publish button or
+      // pending actions left, and both sides of the mix report as processed.
+      await expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
+      await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
+      await expect(
+        page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', { name: 'This entry was unpublished.' }).first()
+      ).toBeVisible();
+    }
+  );
 });

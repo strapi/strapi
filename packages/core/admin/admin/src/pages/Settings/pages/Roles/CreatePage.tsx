@@ -156,7 +156,7 @@ const CreatePage = () => {
       });
 
       navigate(`../roles/${res.data.id.toString()}`, { replace: true });
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),

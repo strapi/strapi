@@ -63,10 +63,13 @@ export interface Proxy {
   https?: string;
   fetch?: string;
   koa?: boolean;
+  ipHeader?: string;
+  maxIpsCount?: number;
 }
 
 export interface Webhooks {
   populateRelations?: boolean;
+  deduplicateReleaseWebhooks?: boolean;
   [key: string]: unknown;
 }
 

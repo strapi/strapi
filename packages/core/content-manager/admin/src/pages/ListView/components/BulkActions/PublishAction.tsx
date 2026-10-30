@@ -48,6 +48,12 @@ import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './Confirm
 import type { BulkActionComponent } from '../../../../content-manager';
 import type { Document } from '../../../../hooks/useDocument';
 
+const EMPTY_ROWS_TO_DISPLAY: NonNullable<SelectedEntriesTableContentProps['rowsToDisplay']> = [];
+const EMPTY_ENTRIES_TO_PUBLISH: NonNullable<SelectedEntriesTableContentProps['entriesToPublish']> =
+  [];
+const EMPTY_VALIDATION_ERRORS: NonNullable<SelectedEntriesTableContentProps['validationErrors']> =
+  {};
+
 type ContentManagerQueryPlugins = {
   i18n?: {
     locale?: string;
@@ -93,13 +99,20 @@ export const formatErrorMessages = (
       const defaultMessage = isErrorMessageDescriptor
         ? (value.defaultMessage as string)
         : (value as string);
+      /**
+       * The descriptor carries its own values (e.g. `{ min: 8 }`). They have to be forwarded,
+       * otherwise a locale without the `.withField` variant falls back to a `defaultMessage`
+       * that still contains `{min}` and react-intl renders the raw placeholder.
+       * See strapi/strapi#19030.
+       */
+      const values = isErrorMessageDescriptor ? value.values : undefined;
       messages.push(
         formatMessage(
           {
             id: `${id}.withField`,
             defaultMessage,
           },
-          { field: currentKey }
+          { ...values, field: currentKey }
         )
       );
     } else {
@@ -198,9 +211,9 @@ const TABLE_HEADERS = [
 
 const SelectedEntriesTableContent = ({
   isPublishing,
-  rowsToDisplay = [],
-  entriesToPublish = [],
-  validationErrors = {},
+  rowsToDisplay = EMPTY_ROWS_TO_DISPLAY,
+  entriesToPublish = EMPTY_ENTRIES_TO_PUBLISH,
+  validationErrors = EMPTY_VALIDATION_ERRORS,
 }: SelectedEntriesTableContentProps) => {
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();

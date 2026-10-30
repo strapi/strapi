@@ -4,28 +4,24 @@ import {
   difference,
   differenceWith,
   has,
-  isArray,
   isEmpty,
   isEqual,
-  isInteger,
-  isNil,
-  isNull,
   isNumber,
   isObject,
   isPlainObject,
   isString,
-  isUndefined,
   map,
   pick,
   uniqBy,
   uniqWith,
-} from 'lodash/fp';
+} from 'lodash';
 
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
 import { createRepository } from './entity-repository';
 import {
+  cleanMorphToManyOrderColumn,
   deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
   encodePolymorphicRelation,
   encodePolymorphicId,
@@ -83,7 +79,7 @@ async function batchInsertJoinTable(
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
-  isObject(value) && !isNil(value);
+  isObject(value) && value != null;
 
 const toId = (value: unknown | { id: unknown }): ID => {
   if (isRecord(value) && 'id' in value && isValidId(value.id)) {
@@ -98,7 +94,7 @@ const toId = (value: unknown | { id: unknown }): ID => {
 };
 const toIds = (value: unknown): ID[] => castArray(value || []).map(toId);
 
-const isValidId = (value: unknown): value is ID => isString(value) || isInteger(value);
+const isValidId = (value: unknown): value is ID => isString(value) || Number.isInteger(value);
 
 const isValidObjectId = (value: unknown): value is Entity =>
   isRecord(value) && 'id' in value && isValidId(value.id);
@@ -111,7 +107,7 @@ const toIdArray = (
   [key: string]: any;
 }[] => {
   const array = castArray(data)
-    .filter((datum) => !isNil(datum))
+    .filter((datum) => datum != null)
     .map((datum) => {
       // if it is a string or an integer return an obj with id = to datum
       if (isValidId(datum)) {
@@ -126,7 +122,7 @@ const toIdArray = (
       return datum;
     });
 
-  return uniqWith(isEqual, array);
+  return uniqWith(array, isEqual);
 };
 
 type ScalarAssoc = string | number | null;
@@ -148,20 +144,20 @@ type Assocs =
 
 const toAssocs = (data: Assocs) => {
   if (
-    isArray(data) ||
+    Array.isArray(data) ||
     isString(data) ||
     isNumber(data) ||
-    isNull(data) ||
+    data === null ||
     (isRecord(data) && 'id' in data)
   ) {
     return {
-      set: isNull(data) ? data : toIdArray(data),
+      set: data === null ? data : toIdArray(data),
     };
   }
 
   if (data?.set) {
     return {
-      set: isNull(data.set) ? data.set : toIdArray(data.set),
+      set: data.set === null ? data.set : toIdArray(data.set),
     };
   }
 
@@ -194,8 +190,8 @@ const processData = (
     if (types.isScalarAttribute(attribute)) {
       const field = createField(attribute);
 
-      if (isUndefined(data[attributeName])) {
-        if (!isUndefined(attribute.default) && withDefaults) {
+      if (data[attributeName] === undefined) {
+        if (attribute.default !== undefined && withDefaults) {
           if (typeof attribute.default === 'function') {
             obj[attributeName] = attribute.default();
           } else {
@@ -224,9 +220,8 @@ const processData = (
         const joinColumnName = attribute.joinColumn.name;
 
         // allow setting to null
-        let attrValue = !isUndefined(data[attributeName])
-          ? data[attributeName]
-          : data[joinColumnName];
+        let attrValue =
+          data[attributeName] !== undefined ? data[attributeName] : data[joinColumnName];
 
         // Legacy single-column storage: only one id fits. Take the last
         // and warn — modern schemas use a join table that can hold both
@@ -246,9 +241,9 @@ const processData = (
           attrValue = setIds.length > 0 ? setIds[setIds.length - 1] : null;
         }
 
-        if (isNull(attrValue)) {
+        if (attrValue === null) {
           obj[joinColumnName] = attrValue;
-        } else if (!isUndefined(attrValue)) {
+        } else if (attrValue !== undefined) {
           obj[joinColumnName] = toId(attrValue);
         }
 
@@ -269,8 +264,8 @@ const processData = (
           continue;
         }
 
-        if (!isUndefined(value)) {
-          if (!has('id', value) || !has(typeField, value)) {
+        if (value !== undefined) {
+          if (!has(value, 'id') || !has(value, typeField)) {
             throw new Error(`Expects properties ${typeField} an id to make a morph association`);
           }
 
@@ -317,7 +312,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const states = await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
-        .init(pick(['_q', 'where', 'filters'], params))
+        .init(pick(params, ['_q', 'where', 'filters']))
         .count()
         .first()
         .execute<{ count: number }>();
@@ -379,7 +374,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const metadata = db.metadata.get(uid);
       const { data } = params;
 
-      if (!isArray(data)) {
+      if (!Array.isArray(data)) {
         throw new Error('CreateMany expects data to be an array');
       }
 
@@ -481,7 +476,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const states = await db.lifecycles.run('beforeUpdateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
-      const { where, data } = params;
+      const { data } = params;
 
       const dataToUpdate = processData(metadata, data);
 
@@ -489,10 +484,11 @@ export const createEntityManager = (db: Database): EntityManager => {
         throw new Error('Update requires data');
       }
 
+      // Same pick set as count and deleteMany. See deleteMany for why.
       const updatedRows = await this.createQueryBuilder(uid)
-        .where(where)
+        .init(pick(params, ['_q', 'where', 'filters']))
         .update(dataToUpdate)
-        .execute<number>();
+        .execute<number>({ mapResults: false });
 
       const result = { count: updatedRows };
 
@@ -548,7 +544,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       // limit, offset, orderBy, populate, etc. must be ignored: populate throws on delete results,
       // and pagination keys can make deleteMany diverge from findMany or delete an unexpected slice.
       const deletedRows = await this.createQueryBuilder(uid)
-        .init(pick(['_q', 'where', 'filters'], params))
+        .init(pick(params, ['_q', 'where', 'filters']))
         .delete()
         .execute<number>({ mapResults: false });
 
@@ -569,7 +565,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
-        const isValidLink = has(attributeName, data) && !isNil(data[attributeName]);
+        const isValidLink = has(data, attributeName) && data[attributeName] != null;
 
         if (attribute.type !== 'relation' || !isValidLink) {
           continue;
@@ -617,8 +613,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
-                  ...(('on' in joinTable && joinTable.on) || {}),
-                  ...(data.__pivot || {}),
+                  ...('on' in joinTable && joinTable.on),
+                  ...data.__pivot,
                   order: idx + 1,
                   field: attributeName,
                 };
@@ -654,8 +650,8 @@ export const createEntityManager = (db: Database): EntityManager => {
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField as '__type'],
-            ...(('on' in joinTable && joinTable.on) || {}),
-            ...(data.__pivot || {}),
+            ...('on' in joinTable && joinTable.on),
+            ...data.__pivot,
             order: idx + 1,
           })) satisfies Record<string, any>[];
 
@@ -755,12 +751,12 @@ export const createEntityManager = (db: Database): EntityManager => {
           }
 
           // prepare new relations to insert
-          const insert = uniqBy('id', relsToAdd).map((data) => {
+          const insert = uniqBy(relsToAdd, 'id').map((data) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
-              ...(('on' in joinTable && joinTable.on) || {}),
-              ...(data.__pivot || {}),
+              ...('on' in joinTable && joinTable.on),
+              ...data.__pivot,
             };
           }) satisfies Record<string, any>[];
 
@@ -830,7 +826,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
-        if (attribute.type !== 'relation' || !has(attributeName, data)) {
+        if (attribute.type !== 'relation' || !has(data, attributeName)) {
           continue;
         }
         const cleanRelationData = toAssocs(data[attributeName]);
@@ -852,7 +848,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .transacting(trx)
               .execute();
 
-            if (!isNull(cleanRelationData.set)) {
+            if (cleanRelationData.set !== null) {
               const relId = toIds(cleanRelationData.set?.[0]);
               await this.createQueryBuilder(target)
                 .update({ [idColumn.name]: id, [typeColumn.name]: uid })
@@ -888,7 +884,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                       [idColumn.name]: id,
                       [typeColumn.name]: uid,
                       [joinColumn.name]: item.id,
-                      ...(joinTable.on || {}),
+                      ...joinTable.on,
                       field: attributeName,
                     };
                   }),
@@ -908,8 +904,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                   .where({
                     [idColumn.name]: id,
                     [typeColumn.name]: uid,
-                    ...(joinTable.on || {}),
-                    ...(data.__pivot || {}),
+                    ...joinTable.on,
+                    ...data.__pivot,
                   })
                   .max('order')
                   .first()
@@ -922,8 +918,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
-                  ...(joinTable.on || {}),
-                  ...(data.__pivot || {}),
+                  ...joinTable.on,
+                  ...data.__pivot,
                   order: startOrder + idx + 1,
                   field: attributeName,
                 })) satisfies Record<string, any>[];
@@ -940,7 +936,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .where({
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
                 field: attributeName,
               })
               .transacting(trx)
@@ -951,8 +947,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
+                ...joinTable.on,
+                ...data.__pivot,
                 order: idx + 1,
                 field: attributeName,
               })) satisfies Record<string, any>[];
@@ -992,8 +988,8 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: id,
                 [idColumn.name]: data.id,
                 [typeColumn.name]: data[typeField],
-                ...(('on' in joinTable && joinTable.on) || {}),
-                ...(data.__pivot || {}),
+                ...('on' in joinTable && joinTable.on),
+                ...data.__pivot,
                 order: idx + 1,
               })),
               ...(cleanRelationData.connect ?? []).map((data, idx) => ({
@@ -1001,39 +997,83 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [idColumn.name]: data.id,
                 // @ts-expect-error TODO
                 [typeColumn.name]: data[typeField],
-                ...(('on' in joinTable && joinTable.on) || {}),
-                ...(data.__pivot || {}),
+                ...('on' in joinTable && joinTable.on),
+                ...data.__pivot,
                 order: idx + 1,
               })),
             ];
 
-            const adjacentRelations = await this.createQueryBuilder(joinTable.name)
-              .where({
-                $or: [
-                  {
-                    [joinColumn.name]: id,
-                    [idColumn.name]: {
-                      $in: compact(
-                        cleanRelationData.connect?.map(
-                          (r) => r.position?.after || r.position?.before
-                        )
-                      ),
+            const computeOrderMap = async () => {
+              const adjacentRelations = await this.createQueryBuilder(joinTable.name)
+                .where({
+                  $or: [
+                    {
+                      [joinColumn.name]: id,
+                      [idColumn.name]: {
+                        $in: compact(
+                          cleanRelationData.connect?.map(
+                            (r) => r.position?.after || r.position?.before
+                          )
+                        ),
+                      },
                     },
-                  },
-                  {
-                    [joinColumn.name]: id,
-                    order: this.createQueryBuilder(joinTable.name)
-                      .max('order')
-                      .where({ [joinColumn.name]: id })
-                      .where(joinTable.on || {})
-                      .transacting(trx)
-                      .getKnexQuery(),
-                  },
-                ],
-              })
-              .where(joinTable.on || {})
-              .transacting(trx)
-              .execute<Array<Record<string, any>>>();
+                    {
+                      [joinColumn.name]: id,
+                      order: this.createQueryBuilder(joinTable.name)
+                        .min('order')
+                        .where({ [joinColumn.name]: id })
+                        .where(joinTable.on || {})
+                        .transacting(trx)
+                        .getKnexQuery(),
+                    },
+                    {
+                      [joinColumn.name]: id,
+                      order: this.createQueryBuilder(joinTable.name)
+                        .max('order')
+                        .where({ [joinColumn.name]: id })
+                        .where(joinTable.on || {})
+                        .transacting(trx)
+                        .getKnexQuery(),
+                    },
+                  ],
+                })
+                .where(joinTable.on || {})
+                .orderBy('order')
+                .transacting(trx)
+                .execute<Array<Record<string, any>>>();
+
+              return relationsOrderer(
+                // Merge id & __type to get a single id key
+                adjacentRelations.map(
+                  encodePolymorphicRelation({
+                    idColumn: idColumn.name,
+                    typeColumn: typeColumn.name,
+                  })
+                ),
+                idColumn.name,
+                'order',
+                cleanRelationData.options?.strict
+              )
+                .connect(
+                  // Merge id & __type to get a single id key
+                  (cleanRelationData.connect || []).map(
+                    encodePolymorphicRelation({ idColumn: 'id', typeColumn: '__type' })
+                  )
+                )
+                .getOrderMap();
+            };
+
+            let orderMap: Record<ID, number> = {};
+
+            if (hasConnect) {
+              orderMap = await computeOrderMap();
+
+              // The order column is unsigned on MySQL/MariaDB, so renumber from 1 to make room at the start
+              if (Object.values(orderMap).some((order) => order < 0)) {
+                await cleanMorphToManyOrderColumn({ id, joinTable, db, transaction: trx });
+                orderMap = await computeOrderMap();
+              }
+            }
 
             if (!isEmpty(idsToDelete)) {
               const where = {
@@ -1042,7 +1082,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                     [idColumn.name]: item.id,
                     [typeColumn.name]: item[typeField],
                     [joinColumn.name]: id,
-                    ...(joinTable.on || {}),
+                    ...joinTable.on,
                   };
                 }),
               };
@@ -1071,28 +1111,10 @@ export const createEntityManager = (db: Database): EntityManager => {
                 [joinColumn.name]: id,
                 [idColumn.name]: data.id,
                 [typeColumn.name]: data[typeField as '__type'],
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
+                ...joinTable.on,
+                ...data.__pivot,
                 field: attributeName,
               })) satisfies Record<string, any>[];
-
-              const orderMap = relationsOrderer(
-                // Merge id & __type to get a single id key
-                adjacentRelations.map(
-                  encodePolymorphicRelation({
-                    idColumn: idColumn.name,
-                    typeColumn: typeColumn.name,
-                  })
-                ),
-                idColumn.name,
-                'order',
-                cleanRelationData.options?.strict
-              )
-                .connect(
-                  // Merge id & __type to get a single id key
-                  dataset.map(encodePolymorphicRelation({ idColumn: 'id', typeColumn: '__type' }))
-                )
-                .getOrderMap();
 
               rows.forEach((row: Record<string, unknown>) => {
                 const rowId = row[idColumn.name] as number;
@@ -1114,7 +1136,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .delete()
               .where({
                 [joinColumn.name]: id,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
               })
               .transacting(trx)
               .execute();
@@ -1124,8 +1146,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               [idColumn.name]: data.id,
               [typeColumn.name]: data[typeField],
               field: attributeName,
-              ...(joinTable.on || {}),
-              ...(data.__pivot || {}),
+              ...joinTable.on,
+              ...data.__pivot,
               order: idx + 1,
             })) satisfies Record<string, any>[];
 
@@ -1160,7 +1182,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .transacting(trx)
             .execute();
 
-          if (!isNull(cleanRelationData.set)) {
+          if (cleanRelationData.set !== null) {
             const relIdsToAdd = toIds(cleanRelationData.set);
             await this.createQueryBuilder(target)
               .where({ id: relIdsToAdd })
@@ -1183,10 +1205,10 @@ export const createEntityManager = (db: Database): EntityManager => {
           }
 
           // only delete relations
-          if (isNull(cleanRelationData.set)) {
+          if (cleanRelationData.set === null) {
             await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
           } else {
-            const isPartialUpdate = !has('set', cleanRelationData);
+            const isPartialUpdate = !has(cleanRelationData, 'set');
             let relIdsToaddOrMove: ID[];
 
             if (isPartialUpdate) {
@@ -1201,9 +1223,9 @@ export const createEntityManager = (db: Database): EntityManager => {
               // fails because connect items carry extra fields like `position`).
               const relIdsToDelete = toIds(
                 differenceWith(
-                  (a: { id: ID }, b: { id: ID }) => a.id === b.id,
                   cleanRelationData.disconnect,
-                  cleanRelationData.connect ?? []
+                  cleanRelationData.connect ?? [],
+                  (a: { id: ID }, b: { id: ID }) => a.id === b.id
                 )
               );
 
@@ -1362,49 +1384,69 @@ export const createEntityManager = (db: Database): EntityManager => {
               }
 
               // prepare relations to insert
-              const insert = uniqBy('id', cleanRelationData.connect).map((relToAdd) => ({
+              const insert = uniqBy(cleanRelationData.connect, 'id').map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
-                ...(joinTable.on || {}),
-                ...(relToAdd.__pivot || {}),
+                ...joinTable.on,
+                ...relToAdd.__pivot,
               }));
 
               if (hasOrderColumn(attribute)) {
-                // Get all adjacent relations and the one with the highest order
-                const adjacentRelations = await this.createQueryBuilder(joinTable.name)
-                  .where({
-                    $or: [
-                      {
-                        [joinColumn.name]: id,
-                        [inverseJoinColumn.name]: {
-                          $in: compact(
-                            resolvedConnect.map((r) => r.position?.after || r.position?.before)
-                          ),
+                const computeOrderMap = async () => {
+                  // Get all adjacent relations and the one with the highest order
+                  const adjacentRelations = await this.createQueryBuilder(joinTable.name)
+                    .where({
+                      $or: [
+                        {
+                          [joinColumn.name]: id,
+                          [inverseJoinColumn.name]: {
+                            $in: compact(
+                              resolvedConnect.map((r) => r.position?.after || r.position?.before)
+                            ),
+                          },
                         },
-                      },
-                      {
-                        [joinColumn.name]: id,
-                        [orderColumnName]: this.createQueryBuilder(joinTable.name)
-                          .max(orderColumnName)
-                          .where({ [joinColumn.name]: id })
-                          .where(joinTable.on || {})
-                          .transacting(trx)
-                          .getKnexQuery(),
-                      },
-                    ],
-                  })
-                  .where(joinTable.on || {})
-                  .transacting(trx)
-                  .execute<Array<Record<string, any>>>();
+                        {
+                          [joinColumn.name]: id,
+                          [orderColumnName]: this.createQueryBuilder(joinTable.name)
+                            .min(orderColumnName)
+                            .where({ [joinColumn.name]: id })
+                            .where(joinTable.on || {})
+                            .transacting(trx)
+                            .getKnexQuery(),
+                        },
+                        {
+                          [joinColumn.name]: id,
+                          [orderColumnName]: this.createQueryBuilder(joinTable.name)
+                            .max(orderColumnName)
+                            .where({ [joinColumn.name]: id })
+                            .where(joinTable.on || {})
+                            .transacting(trx)
+                            .getKnexQuery(),
+                        },
+                      ],
+                    })
+                    .where(joinTable.on || {})
+                    .orderBy(orderColumnName)
+                    .transacting(trx)
+                    .execute<Array<Record<string, any>>>();
 
-                const orderMap = relationsOrderer(
-                  adjacentRelations,
-                  inverseJoinColumn.name,
-                  joinTable.orderColumnName,
-                  cleanRelationData.options?.strict
-                )
-                  .connect(resolvedConnect)
-                  .getOrderMap();
+                  return relationsOrderer(
+                    adjacentRelations,
+                    inverseJoinColumn.name,
+                    joinTable.orderColumnName,
+                    cleanRelationData.options?.strict
+                  )
+                    .connect(resolvedConnect)
+                    .getOrderMap();
+                };
+
+                let orderMap = await computeOrderMap();
+
+                // Order columns are unsigned on MySQL/MariaDB, so renumber from 1 to make room at the start
+                if (Object.values(orderMap).some((order) => order < 0)) {
+                  await cleanOrderColumns({ attribute, db, id, transaction: trx });
+                  orderMap = await computeOrderMap();
+                }
 
                 insert.forEach((row) => {
                   row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
@@ -1415,7 +1457,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               if (hasInverseOrderColumn(attribute)) {
                 const nonExistingRelsIds: ID[] = difference(
                   relIdsToaddOrMove,
-                  map(inverseJoinColumn.name, currentMovingRels)
+                  map(currentMovingRels, inverseJoinColumn.name)
                 );
 
                 const maxResults = await db
@@ -1469,11 +1511,11 @@ export const createEntityManager = (db: Database): EntityManager => {
                 continue;
               }
 
-              const insert = uniqBy('id', cleanRelationData.set).map((relToAdd) => ({
+              const insert = uniqBy(cleanRelationData.set, 'id').map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
-                ...(joinTable.on || {}),
-                ...(relToAdd.__pivot || {}),
+                ...joinTable.on,
+                ...relToAdd.__pivot,
               }));
 
               // add order value
@@ -1495,7 +1537,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                   .transacting(trx)
                   .execute<Array<Record<string, ID>>>();
 
-                const inverseRelsIds = map(inverseJoinColumn.name, existingRels);
+                const inverseRelsIds = map(existingRels, inverseJoinColumn.name);
 
                 const nonExistingRelsIds = difference(relIdsToaddOrMove, inverseRelsIds);
 
@@ -1608,7 +1650,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .where({
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
+                ...joinTable.on,
                 field: attributeName,
               })
               .transacting(trx)
@@ -1638,7 +1680,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .delete()
             .where({
               [joinColumn.name]: id,
-              ...(joinTable.on || {}),
+              ...joinTable.on,
             })
             .transacting(trx)
             .execute();
@@ -1675,6 +1717,113 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
     },
 
+    /**
+     * Deletes the relations of several entities of one model at once, with one statement per
+     * attribute. An attribute whose other side keeps an order column (bidirectional) is handled
+     * entity by entity, so that side gets renumbered.
+     */
+    async deleteManyRelations(uid, ids, options) {
+      if (ids.length === 0) {
+        return;
+      }
+
+      const { attributes } = db.metadata.get(uid);
+      const { transaction: trx } = options ?? {};
+
+      for (const attributeName of Object.keys(attributes)) {
+        const attribute = attributes[attributeName];
+
+        if (attribute.type !== 'relation') {
+          continue;
+        }
+
+        if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
+          const { target, morphBy } = attribute;
+
+          const targetAttribute = db.metadata.get(target).attributes[morphBy];
+
+          if (targetAttribute.type === 'relation' && targetAttribute.relation === 'morphToOne') {
+            const { idColumn, typeColumn } = targetAttribute.morphColumn;
+
+            await this.createQueryBuilder(target)
+              .update({ [idColumn.name]: null, [typeColumn.name]: null })
+              .where({ [idColumn.name]: { $in: ids }, [typeColumn.name]: uid })
+              .transacting(trx)
+              .execute();
+          } else if (
+            targetAttribute.type === 'relation' &&
+            targetAttribute.relation === 'morphToMany'
+          ) {
+            const { joinTable } = targetAttribute;
+            const { idColumn, typeColumn } = joinTable.morphColumn;
+
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({
+                [idColumn.name]: { $in: ids },
+                [typeColumn.name]: uid,
+                ...joinTable.on,
+                field: attributeName,
+              })
+              .transacting(trx)
+              .execute();
+          }
+
+          continue;
+        }
+
+        if (attribute.relation === 'morphToMany') {
+          const { joinTable } = attribute;
+          const { joinColumn } = joinTable;
+
+          await this.createQueryBuilder(joinTable.name)
+            .delete()
+            .where({ [joinColumn.name]: { $in: ids }, ...joinTable.on })
+            .transacting(trx)
+            .execute();
+
+          continue;
+        }
+
+        // do not need to delete links when using foreign keys
+        if (db.dialect.usesForeignKeys()) {
+          continue;
+        }
+
+        if ('joinColumn' in attribute && attribute.joinColumn && attribute.owner) {
+          continue;
+        }
+
+        if ('joinColumn' in attribute && attribute.joinColumn && !attribute.owner) {
+          const { target } = attribute;
+
+          await this.createQueryBuilder(target)
+            .where({ [attribute.joinColumn.referencedColumn]: { $in: ids } })
+            .update({ [attribute.joinColumn.referencedColumn]: null })
+            .transacting(trx)
+            .execute();
+        }
+
+        if ('joinTable' in attribute && attribute.joinTable) {
+          if (hasInverseOrderColumn(attribute)) {
+            for (const id of ids) {
+              await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
+            }
+
+            continue;
+          }
+
+          const { joinTable } = attribute;
+
+          await this.createQueryBuilder(joinTable.name)
+            .delete()
+            .where({ [joinTable.joinColumn.name]: { $in: ids }, ...joinTable.on })
+            .transacting(trx)
+            .execute();
+        }
+      }
+    },
+
     // TODO: add lifecycle events
     async populate(uid, entity, populate) {
       const entry = await this.findOne(uid, {
@@ -1690,7 +1839,7 @@ export const createEntityManager = (db: Database): EntityManager => {
     async load(uid, entity, fields, populate) {
       const { attributes } = db.metadata.get(uid);
 
-      const fieldsArr = castArray(fields);
+      const fieldsArr = Array.isArray(fields) ? fields : [fields];
       fieldsArr.forEach((field) => {
         const attribute = attributes[field];
 
@@ -1716,7 +1865,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
 
       if (Array.isArray(fields)) {
-        return pick(fields, entry);
+        return pick(entry, fields);
       }
 
       return entry[fields];

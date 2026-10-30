@@ -8,7 +8,7 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const modelsUtils = require('api-tests/models');
 const { createTestBuilder } = require('api-tests/builder');
-const { kebabCase } = require('lodash/fp');
+const { kebabCase } = require('lodash');
 
 let strapi;
 let rq;
@@ -408,6 +408,44 @@ describe('Content Type Builder - Content types', () => {
                 type: 'string',
               },
             },
+          },
+        },
+      });
+    });
+
+    test('Keeps draftAndPublish when the update payload does not set it', async () => {
+      const uid = 'api::ct-with-dp.ct-with-dp';
+      let res = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/content-types/${uid}`,
+        body: {
+          contentType: {
+            displayName: 'new displayName',
+            singularName: 'ct-with-dp',
+            pluralName: 'ct-with-dps',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      });
+      expect(res.statusCode).toBe(201);
+
+      await restart();
+
+      res = await rq({
+        method: 'GET',
+        url: `/content-type-builder/content-types/${uid}`,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          uid,
+          schema: {
+            draftAndPublish: true,
           },
         },
       });

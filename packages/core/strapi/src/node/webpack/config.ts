@@ -14,10 +14,40 @@ import { getUserConfig } from '../core/config';
 import { getLinkedDesignSystemPath } from '../core/linked-packages';
 import { getMonorepoAliases } from '../core/aliases';
 import { getModulePath } from '../core/resolve-module';
+import { buildSingletonAliasEntries } from '../core/admin-vite-aliases';
 
-const resolveBaseConfig = async (ctx: BuildContext) => {
+// esbuild's support table does not recognize current browserslist versions, so the
+// intersection of those targets is reported as missing arbitrary module namespace
+// names. Dual-published packages then fail on `export { x as "module.exports" }`.
+// The syntax has been supported by the admin's browsers since 2021.
+const esbuildSupported = {
+  'arbitrary-module-namespace-names': true,
+};
+
+const strapiProcessEnvPlugins = new WeakSet<object>();
+
+const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'production') => {
   const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
+  const bundledEnv = { ...ctx.env, NODE_ENV: nodeEnv };
+
+  const definePlugin = new DefinePlugin({
+    ...Object.entries(bundledEnv).reduce<Record<string, string>>((acc, [key, value]) => {
+      acc[`process.env.${key}`] = JSON.stringify(value);
+      return acc;
+    }, {}),
+    // Unlisted `process.env.*` reads (optional flags) must resolve to undefined
+    // in the browser instead of throwing `process is not defined`.
+    // mergeConfigWithUserConfig drops this key when src/admin/webpack.config
+    // defines `process.env` itself. This plugin is applied first, and webpack
+    // keeps the first value for an expression, so the key would hide the user's.
+    'process.env': JSON.stringify(bundledEnv),
+    // picomatch (via micromatch) reads `process.platform` on load and `process.version`
+    // for lookbehind patterns.
+    'process.platform': JSON.stringify('browser'),
+    'process.version': JSON.stringify(''),
+  });
+  strapiProcessEnvPlugins.add(definePlugin);
 
   return {
     experiments: {
@@ -34,19 +64,39 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         'react-router-dom': getModulePath('react-router-dom'),
         // Force single instance so plugin custom field chunks inherit root DesignSystemProvider context
         '@strapi/design-system': getModulePath('@strapi/design-system'),
+        // Force a single CodeMirror instance (resolved from design-system's closure) so the JSON
+        // custom field does not crash on cross-copy instanceof checks. Tolerant: unresolvable
+        // optional/transitive CodeMirror packages are skipped
+        ...Object.fromEntries(buildSingletonAliasEntries()),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
       },
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
+      // micromatch (used by the content-type builder) imports Node builtins.
+      fallback: {
+        path: require.resolve('path-browserify'),
+        util: require.resolve('util/'),
+      },
     },
     module: {
       rules: [
         {
-          test: /\.(ts|tsx)$/,
+          test: /\.tsx$/,
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: 'tsx',
             target,
             jsx: 'automatic',
+            supported: esbuildSupported,
+          },
+        },
+        {
+          // The tsx loader parses `<T, U>` generics as JSX and fails the admin build.
+          test: /\.ts$/,
+          loader: require.resolve('esbuild-loader'),
+          options: {
+            loader: 'ts',
+            target,
+            supported: esbuildSupported,
           },
         },
         {
@@ -57,6 +107,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
               loader: 'jsx',
               target,
               jsx: 'automatic',
+              supported: esbuildSupported,
             },
           },
         },
@@ -99,19 +150,14 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         inject: true,
         template: path.resolve(ctx.runtimeDir, 'index.html'),
       }),
-      new DefinePlugin(
-        Object.entries(ctx.env).reduce<Record<string, string>>((acc, [key, value]) => {
-          acc[`process.env.${key}`] = JSON.stringify(value);
-          return acc;
-        }, {})
-      ),
+      definePlugin,
       ctx.tsconfig &&
         new ForkTsCheckerPlugin({
           typescript: {
             configFile: ctx.tsconfig.path,
             configOverwrite: {
               compilerOptions: {
-                sourceMap: ctx.options.sourcemaps,
+                sourceMap: ctx.options.sourcemap,
               },
             },
           },
@@ -121,7 +167,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
 };
 
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuration> => {
-  const baseConfig = await resolveBaseConfig(ctx);
+  const baseConfig = await resolveBaseConfig(ctx, 'development');
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
   const linkedDesignSystemPath = getLinkedDesignSystemPath();
 
@@ -179,14 +225,14 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
   const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
-  const baseConfig = await resolveBaseConfig(ctx);
+  const baseConfig = await resolveBaseConfig(ctx, 'production');
 
   return {
     ...baseConfig,
     stats: 'errors-only',
     mode: 'production',
     bail: true,
-    devtool: ctx.options.sourcemaps ? 'source-map' : false,
+    devtool: ctx.options.sourcemap ? 'source-map' : false,
     output: {
       path: ctx.distPath,
       publicPath: `${ctx.basePath.replace(/\/$/, '')}/`,
@@ -222,26 +268,68 @@ const USER_CONFIGS = ['webpack.config.js', 'webpack.config.mjs', 'webpack.config
 
 type UserWebpackConfig = (config: Configuration, webpack: unknown) => Configuration;
 
+const definesBareProcessEnv = (
+  plugin: unknown
+): plugin is { definitions: Record<string, unknown> } => {
+  if (!plugin || typeof plugin !== 'object' || plugin.constructor?.name !== 'DefinePlugin') {
+    return false;
+  }
+
+  const definitions = (plugin as { definitions?: unknown }).definitions;
+
+  return (
+    !!definitions &&
+    typeof definitions === 'object' &&
+    Object.prototype.hasOwnProperty.call(definitions, 'process.env')
+  );
+};
+
+/**
+ * Webpack uses the first DefinePlugin value for an expression. Strapi's plugin
+ * is registered first, so its bare `process.env` object would hide a user's
+ * `DefinePlugin({ 'process.env': … })`. Per-key `process.env.*` defines stay,
+ * matching Vite, where a user define replaces Strapi's object.
+ */
+const preferUserProcessEnvDefine = (config: Configuration): Configuration => {
+  const plugins = config.plugins ?? [];
+  const userDefinesProcessEnv = plugins.some(
+    (plugin) => !!plugin && !strapiProcessEnvPlugins.has(plugin) && definesBareProcessEnv(plugin)
+  );
+
+  if (!userDefinesProcessEnv) {
+    return config;
+  }
+
+  for (const plugin of plugins) {
+    if (plugin && strapiProcessEnvPlugins.has(plugin) && definesBareProcessEnv(plugin)) {
+      delete plugin.definitions['process.env'];
+    }
+  }
+
+  return config;
+};
+
 const mergeConfigWithUserConfig = async (config: Configuration, ctx: BuildContext) => {
   const userConfig = await getUserConfig<UserWebpackConfig>(USER_CONFIGS, ctx);
+  let merged = config;
 
   if (userConfig) {
     if (typeof userConfig === 'function') {
       const webpack = await import('webpack');
-      return userConfig(config, webpack);
+      merged = userConfig(config, webpack);
+    } else {
+      ctx.logger.warn(
+        `You've exported something other than a function from ${path.join(
+          ctx.appDir,
+          'src',
+          'admin',
+          'webpack.config'
+        )}, this will ignored.`
+      );
     }
-
-    ctx.logger.warn(
-      `You've exported something other than a function from ${path.join(
-        ctx.appDir,
-        'src',
-        'admin',
-        'webpack.config'
-      )}, this will ignored.`
-    );
   }
 
-  return config;
+  return preferUserProcessEnvDefine(merged);
 };
 
 export { mergeConfigWithUserConfig, resolveDevelopmentConfig, resolveProductionConfig };

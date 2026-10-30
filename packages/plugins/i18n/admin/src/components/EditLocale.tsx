@@ -120,7 +120,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
 
       refetchPermissions();
       onOpenChange(false);
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({

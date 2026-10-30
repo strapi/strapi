@@ -81,13 +81,15 @@ const recreateStrapiInstance = async (config = {}) => {
       if (config.disableRateLimit) {
         s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
       }
-      if (config.enableRoutes) {
-        for (const { route, role } of config.enableRoutes) {
-          await enableAuthRoute(s, route, role);
-        }
-      }
     },
   });
+
+  if (config.enableRoutes) {
+    for (const { route, role } of config.enableRoutes) {
+      await enableAuthRoute(strapi, route, role);
+    }
+  }
+
   // The previous instance already seeded `internals.user`; remove it before
   // re-seeding so we don't attempt to create a duplicate (the user service now
   // goes through the Document Service, which validates uniqueness).
@@ -109,8 +111,10 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
   });
 
   afterAll(async () => {
-    await strapi.db.query('plugin::users-permissions.user').deleteMany();
-    await strapi.destroy();
+    if (strapi) {
+      await strapi.db.query('plugin::users-permissions.user').deleteMany();
+      await strapi.destroy();
+    }
   });
 
   test('Default (httpOnly=false): returns jwt and refreshToken in JSON, no cookie set', async () => {
@@ -281,6 +285,33 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(refreshRes.body.jwt).toEqual(expect.any(String));
       expect(refreshRes.body.refreshToken).toEqual(expect.any(String));
       expect(refreshRes.body.refreshToken).not.toBe(initialRefresh);
+    });
+
+    test('returns 401 when replaying an already rotated refresh token', async () => {
+      const rqAuth = createAuthRequest();
+
+      const loginRes = await loginUser();
+      expect(loginRes.statusCode).toBe(200);
+      const initialRefresh = loginRes.body.refreshToken;
+      expect(initialRefresh).toEqual(expect.any(String));
+
+      const refreshRes = await rqAuth({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: initialRefresh },
+      });
+      expect(refreshRes.statusCode).toBe(200);
+      expect(refreshRes.body.jwt).toEqual(expect.any(String));
+      expect(refreshRes.body.refreshToken).toEqual(expect.any(String));
+      expect(refreshRes.body.refreshToken).not.toBe(initialRefresh);
+
+      const replayRes = await rqAuth({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: initialRefresh },
+      });
+      expect(replayRes.statusCode).toBe(401);
+      expect(replayRes.body.error.message).toBe('Invalid refresh token');
     });
 
     test('With httpOnly header, sets cookie and omits refreshToken in body', async () => {
