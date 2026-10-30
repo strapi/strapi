@@ -25,7 +25,7 @@ export const REVIEW_WORKFLOW_COLUMNS = [
       name: 'name',
       type: 'string',
     },
-    cellFormatter: (props) => <StageColumn {...props} />,
+    cellFormatter: (props) => <StageColumn strapi_stage={props.strapi_stage} />,
   },
   {
     name: ASSIGNEE_ATTRIBUTE_NAME,
@@ -44,7 +44,7 @@ export const REVIEW_WORKFLOW_COLUMNS = [
       name: 'firstname',
       type: 'string',
     },
-    cellFormatter: (props) => <AssigneeColumn {...props} />,
+    cellFormatter: (props) => <AssigneeColumn strapi_assignee={props.strapi_assignee} />,
   },
 ] satisfies Array<Omit<ListFieldLayout, 'label'> & { label: MessageDescriptor }>;
 
