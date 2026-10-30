@@ -167,6 +167,13 @@ export default {
       );
     }
 
+    // Morph-to relations (morphToOne, morphToMany) have no single target model
+    if (attribute.target === undefined) {
+      throw new errors.ValidationError(
+        `The relational field ${targetField} on ${model} has no target model`
+      );
+    }
+
     const sourceUid = model;
     const targetUid = attribute.target;
 
