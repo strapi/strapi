@@ -81,10 +81,25 @@ describe('deleteActionsOnDelete', () => {
     await deleteDocument(params);
 
     const where = { contentType: UID, entryDocumentId: 'doc-1', ...localeFilter };
-    expect(releaseFindMany.mock.calls).toStrictEqual([[{ where: { actions: where } }]]);
-    expect(actionDeleteMany.mock.calls).toStrictEqual([[{ where }]]);
+    expect(releaseFindMany.mock.calls).toStrictEqual([
+      [{ where: { releasedAt: null, actions: where } }],
+    ]);
+    expect(actionDeleteMany.mock.calls).toStrictEqual([
+      [{ where: { ...where, release: { releasedAt: null } } }],
+    ]);
     expect(updateReleaseStatus).toHaveBeenCalledWith(1);
     expect(updateReleaseStatus).toHaveBeenCalledWith(2);
+  });
+
+  it('never looks up nor deletes the actions of a released release', async () => {
+    setupStrapi({ localized: false });
+
+    await deleteDocument({});
+
+    const [[{ where: releaseWhere }]] = releaseFindMany.mock.calls;
+    const [[{ where: actionWhere }]] = actionDeleteMany.mock.calls;
+    expect(releaseWhere.releasedAt).toBeNull();
+    expect(actionWhere.release).toStrictEqual({ releasedAt: null });
   });
 
   it('leaves releases alone for a content type without draft and publish', async () => {
@@ -225,6 +240,18 @@ describe('content-releases cleanup failures', () => {
         expect(logError).toHaveBeenCalledWith(message, { error });
       }
     );
+
+    // The update path filters released releases in its own lookup, covered by the status tests.
+    if (action !== 'update') {
+      it('only touches releases that are not released yet', async () => {
+        await invoke();
+
+        const [[{ where: releaseWhere }]] = findMany.mock.calls;
+        const [[{ where: actionWhere }]] = deleteMany.mock.calls;
+        expect(releaseWhere.releasedAt).toBeNull();
+        expect(actionWhere.release).toStrictEqual({ releasedAt: null });
+      });
+    }
 
     it('updates every affected release on success', async () => {
       await invoke();
