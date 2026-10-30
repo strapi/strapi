@@ -8,7 +8,6 @@ import {
   useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
-  Badge,
   Loader,
   SingleSelect,
   SingleSelectOption,
@@ -37,7 +36,7 @@ const PROFILE_OPTIONS: Array<{ value: TokenProfile | typeof UNSPECIFIED; label: 
 ];
 
 /**
- * API tokens with the profile that decides how their writes are recorded. Saved on change,
+ * Content API tokens with the profile that decides how their writes are recorded. Saved on change,
  * since each row is independent.
  */
 export const TokenProfilesTable = () => {
@@ -110,17 +109,12 @@ export const TokenProfilesTable = () => {
   }
 
   return (
-    <Table colCount={3} rowCount={tokens.length + 1}>
+    <Table colCount={2} rowCount={tokens.length + 1}>
       <Thead>
         <Tr>
           <Th>
             <Typography variant="sigma">
               {formatMessage({ id: getTranslation('tokens.name'), defaultMessage: 'Name' })}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {formatMessage({ id: getTranslation('tokens.kind'), defaultMessage: 'Kind' })}
             </Typography>
           </Th>
           <Th>
@@ -142,19 +136,6 @@ export const TokenProfilesTable = () => {
                   {token.description}
                 </Typography>
               ) : null}
-            </Td>
-            <Td>
-              <Badge>
-                {token.kind === 'admin'
-                  ? formatMessage({
-                      id: getTranslation('tokens.kind.admin'),
-                      defaultMessage: 'Admin',
-                    })
-                  : formatMessage({
-                      id: getTranslation('tokens.kind.content-api'),
-                      defaultMessage: 'Content API',
-                    })}
-              </Badge>
             </Td>
             <Td>
               <SingleSelect

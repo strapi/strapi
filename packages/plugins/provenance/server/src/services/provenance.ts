@@ -549,8 +549,8 @@ export const createProvenanceService = ({ strapi }: { strapi: Core.Strapi }) => 
 
     /**
      * Locks a document until the current transaction ends, so that concurrent writes,
-     * reviews and declarations on it run one after the other: each one reads values, stage
-     * and rows only once the previous one committed. Call it first in the transaction.
+     * reviews and declarations on it run one after the other: each one reads values and
+     * rows only once the previous one committed. Call it first in the transaction.
      */
     async lockDocument(uid: string, documentId: string) {
       // SQLite has a single writer: transactions never overlap
@@ -576,6 +576,30 @@ export const createProvenanceService = ({ strapi }: { strapi: Core.Strapi }) => 
             .onConflict([column('targetUid'), column('targetDocumentId')])
             .merge([column('targetUid')]);
         }
+      });
+    },
+
+    /**
+     * Gives a new document its lock row. A plain insert: its documentId is fresh, so nothing
+     * contends for the row, while `lockDocument` would first lock the gap where the row goes,
+     * and parallel creates would deadlock on each other's gaps on MySQL.
+     */
+    async createLock(uid: string, documentId: string) {
+      if (strapi.db.dialect.client === 'sqlite') {
+        return;
+      }
+
+      const { tableName, attributes } = strapi.db.metadata.get(DOCUMENT_LOCK_UID);
+      const column = (name: string) =>
+        (attributes[name] as { columnName?: string } | undefined)?.columnName ?? name;
+
+      await strapi.db.transaction(async ({ trx }) => {
+        await strapi.db
+          .getConnection(tableName)
+          .transacting(trx)
+          .insert({ [column('targetUid')]: uid, [column('targetDocumentId')]: documentId })
+          .onConflict([column('targetUid'), column('targetDocumentId')])
+          .ignore();
       });
     },
 

@@ -1,14 +1,14 @@
 import type { Core } from '@strapi/types';
+import { createApprovalsService } from './approvals';
 import { createProvenanceService } from './provenance';
 import { createRequestService } from './request';
-import { createReviewWorkflowsService } from './review-workflows';
 import { createSettingsService } from './settings';
 import { createTokenProfileService } from './token-profiles';
 import { createValuesService } from './values';
 
 export default {
+  approvals: createApprovalsService,
   provenance: createProvenanceService,
-  reviewWorkflows: createReviewWorkflowsService,
   settings: createSettingsService,
   tokenProfiles: createTokenProfileService,
   values: createValuesService,

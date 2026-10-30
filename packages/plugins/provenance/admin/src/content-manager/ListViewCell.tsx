@@ -10,7 +10,6 @@ import { getTranslation } from '../utils/translations';
 type Row = {
   documentId: string;
   updatedAt?: string;
-  strapi_stage?: { id?: number } | null;
 };
 
 export const ListViewCell = ({ row, model }: { row: Row; model: string }) => {
@@ -18,8 +17,7 @@ export const ListViewCell = ({ row, model }: { row: Row; model: string }) => {
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale;
   const [summary, setSummary] = React.useState<EntrySummary | null>(null);
-  // Moving a stage keeps `updatedAt`, but approving reviews the fields
-  const version = `${row.updatedAt ?? ''}|${row.strapi_stage?.id ?? ''}`;
+  const version = row.updatedAt ?? '';
 
   React.useEffect(() => {
     let active = true;

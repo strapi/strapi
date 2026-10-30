@@ -5,7 +5,9 @@ const VOCABULARY = 'http://cv.iptc.org/newscodes/digitalsourcetype/';
 const TERMS: Record<Source, string | null> = {
   'ai-generated': 'trainedAlgorithmicMedia',
   'ai-assisted': 'compositeWithTrainedAlgorithmicMedia',
-  'human-entered': 'digitalCreation',
+  // An admin session does not prove a person wrote the text: claiming `digitalCreation`
+  // would label pasted AI output as human work
+  'human-entered': null,
   // No IPTC term says "copied from another system" or "unknown"
   automated: null,
   unattributed: null,

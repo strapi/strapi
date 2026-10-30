@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   claimForField,
+  isHumanSession,
   resolveBaseDeclaration,
   resolveFieldDeclaration,
   type RequestSnapshot,
@@ -137,5 +138,55 @@ describe('claimForField', () => {
 
     expect(claimForField(request, 'title')?.source).toBe('ai');
     expect(claimForField(request, 'body')?.source).toBe('ai');
+  });
+});
+
+describe('agent identity', () => {
+  const agent = { id: 12, name: 'Blog Drafter' };
+  const snapshot = (overrides: Partial<RequestSnapshot> = {}): RequestSnapshot => ({
+    agent,
+    strategy: 'agent',
+    userId: 12,
+    headerClaim: null,
+    bodyClaims: {},
+    ...overrides,
+  });
+
+  it('records the agent as an AI writer, with its server-side name', () => {
+    expect(resolveBaseDeclaration(snapshot())).toEqual({
+      origin: 'ai',
+      signal: 'agent-identity',
+      agent: 'Blog Drafter',
+      actor: { type: 'agent', id: 12 },
+    });
+  });
+
+  it('wins over the MCP marker, so an agent connected through MCP keeps its name', () => {
+    expect(resolveBaseDeclaration(snapshot({ auditSource: 'mcp' })).signal).toBe('agent-identity');
+  });
+
+  it('wins over the session of a reviewer executing an approved action', () => {
+    const declaration = resolveBaseDeclaration(snapshot({ strategy: 'admin', userId: 1 }));
+
+    expect(declaration.origin).toBe('ai');
+    expect(declaration.actor).toEqual({ type: 'agent', id: 12 });
+  });
+
+  it('lets a claim add the model, not replace the name', () => {
+    const declaration = resolveFieldDeclaration(resolveBaseDeclaration(snapshot()), {
+      source: 'ai',
+      model: 'claude-opus-5-5',
+      agent: 'Someone else',
+    });
+
+    expect(declaration).toMatchObject({ agent: 'Blog Drafter', model: 'claude-opus-5-5' });
+  });
+
+  it('is not a human session, whatever the strategy', () => {
+    expect(isHumanSession(snapshot())).toBe(false);
+    expect(isHumanSession(snapshot({ strategy: 'admin', userId: 1 }))).toBe(false);
+    expect(
+      isHumanSession({ strategy: 'admin', userId: 1, headerClaim: null, bodyClaims: {} })
+    ).toBe(true);
   });
 });

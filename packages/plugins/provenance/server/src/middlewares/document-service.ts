@@ -2,24 +2,10 @@ import { contentTypes, errors } from '@strapi/utils';
 
 import type { Core, Modules } from '@strapi/types';
 
-import {
-  claimForField,
-  resolveBaseDeclaration,
-  resolveFieldDeclaration,
-} from '../domain/declaration';
-import { isEmptyValue, isStructured, isTrackedContentType, type Schema } from '../domain/fields';
-import {
-  canEnterStage,
-  isApproval,
-  parseStageId,
-  stageAfterWrite,
-  type WorkflowRules,
-} from '../domain/workflow';
-import { STAGE_ATTRIBUTE } from '../services/review-workflows';
+import { isStructured, isTrackedContentType, type Schema } from '../domain/fields';
 
 import type { ProvenanceService, Status, Target } from '../services/provenance';
 import type { RequestService } from '../services/request';
-import type { ReviewWorkflowsService } from '../services/review-workflows';
 import type { SettingsService } from '../services/settings';
 import type { ValuesService } from '../services/values';
 
@@ -27,14 +13,10 @@ type Dependencies = {
   provenance: ProvenanceService;
   request: RequestService;
   settings: SettingsService;
-  reviewWorkflows: ReviewWorkflowsService;
   values: ValuesService;
 };
 
 type Middleware = Modules.Documents.Middleware.Middleware;
-
-const APPROVAL_REFUSED =
-  'Only a person can move an entry to the approval stage. AI agents and integrations can send content to review but cannot approve it';
 
 // Passed on as `documentId $in`: databases limit the number of bound values
 const MAX_FILTERED_DOCUMENTS = 10_000;
@@ -45,8 +27,8 @@ const localesOf = (entries: Entry[] | undefined) => {
 };
 
 /**
- * Records field provenance around Document Service writes, and applies the review rules
- * that depend on it (publish guard, review workflow stages).
+ * Records field provenance around Document Service writes, and applies the review rule
+ * that depends on it (publish guard).
  *
  * The content write and its provenance share one transaction: a failure to record
  * provenance, or a rule that refuses the write, rolls the write back. Sharing the
@@ -67,7 +49,12 @@ export const createDocumentServiceMiddleware = ({
       return next();
     }
 
-    const { provenance, request, settings, reviewWorkflows, values } = getDependencies();
+    const { provenance, request, settings, values } = getDependencies();
+
+    if (!settings.isProvenanceEnabled()) {
+      return next();
+    }
+
     const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
     const writeStatus: Status = hasDraftAndPublish ? 'draft' : 'published';
     const params = ctx.params as Entry;
@@ -118,33 +105,14 @@ export const createDocumentServiceMiddleware = ({
       }
     };
 
-    /**
-     * The review workflow stage of an entry version. Read rather than parsed from the
-     * request: the Document Service accepts many relation syntaxes for it.
-     */
-    const readStage = async (target: Target) => {
-      const entry = (await strapi.documents(uid).findOne({
-        documentId: target.documentId,
-        locale: target.locale ?? undefined,
-        status: target.status,
-        fields: ['documentId'],
-        populate: { [STAGE_ATTRIBUTE]: { fields: ['id'] } },
-      } as any)) as Entry | null;
-
-      return parseStageId(entry?.[STAGE_ATTRIBUTE]);
-    };
-
     switch (action) {
       case 'create':
       case 'update': {
         const data: Entry = params.data ?? {};
         const fields = tracked.filter((field) => field in data);
-        const withStages = reviewWorkflows.hasStages(contentType as any);
-        // Review Workflows give a created entry its first stage
-        const touchesStage = withStages && (STAGE_ATTRIBUTE in data || action === 'create');
         const publishes = hasDraftAndPublish && params.status === 'published';
 
-        if (fields.length === 0 && !touchesStage && !publishes) {
+        if (fields.length === 0 && !publishes) {
           // Still waits for a review or a publish of this document in progress, for
           // instance the update the Content Manager runs before publishing
           if (action === 'update' && params.documentId && strapi.db.dialect.client !== 'sqlite') {
@@ -165,14 +133,6 @@ export const createDocumentServiceMiddleware = ({
           }
 
           const snapshot = await request.getSnapshot();
-          const base = resolveBaseDeclaration(snapshot);
-
-          let rules: WorkflowRules | null = null;
-
-          if (withStages) {
-            const workflowId = await reviewWorkflows.getWorkflowId(uid);
-            rules = workflowId !== null ? await settings.getRules(workflowId) : null;
-          }
 
           const previous: Target = {
             uid,
@@ -180,32 +140,10 @@ export const createDocumentServiceMiddleware = ({
             locale: params.locale ?? null,
             status: writeStatus,
           };
-          // An AI create goes to AI review: set it in the create itself rather than with a
-          // second update, which would run every hook, event and history version again
-          if (
-            action === 'create' &&
-            rules?.aiReviewStageId != null &&
-            data[STAGE_ATTRIBUTE] == null &&
-            fields.some(
-              (field) =>
-                !isEmptyValue(data[field]) &&
-                resolveFieldDeclaration(base, claimForField(snapshot, field)).origin === 'ai'
-            )
-          ) {
-            data[STAGE_ATTRIBUTE] = { id: rules.aiReviewStageId };
-          }
-
           let before: Entry | null = null;
-          let stageBefore: number | null = null;
 
           if (action === 'update' && fields.length > 0) {
-            before = await values.read(previous, {
-              fields,
-              extra: rules !== null ? { populate: { [STAGE_ATTRIBUTE]: { fields: ['id'] } } } : {},
-            });
-            stageBefore = parseStageId(before?.[STAGE_ATTRIBUTE]);
-          } else if (action === 'update' && rules !== null && touchesStage) {
-            stageBefore = await readStage(previous);
+            before = await values.read(previous, { fields });
           }
 
           // An update can create a locale. Its non-localized fields hold the values of the
@@ -227,7 +165,8 @@ export const createDocumentServiceMiddleware = ({
           const output = await next();
           const result = output as Entry | null;
 
-          if (!result) {
+          // No document, for instance an approval queue that parked the write: nothing changed
+          if (!result?.documentId) {
             return output;
           }
 
@@ -240,28 +179,8 @@ export const createDocumentServiceMiddleware = ({
 
           // A new document gets its lock row now, while nothing else can contend for it
           if (action === 'create') {
-            await provenance.lockDocument(uid, target.documentId);
+            await provenance.createLock(uid, target.documentId);
           }
-
-          let stageAfter = stageBefore;
-
-          if (rules !== null && touchesStage) {
-            stageAfter = await readStage(target);
-          }
-
-          const enteredStageId =
-            stageAfter !== null && stageAfter !== stageBefore ? stageAfter : null;
-
-          // Throwing rolls the whole write back
-          if (
-            rules !== null &&
-            enteredStageId !== null &&
-            !canEnterStage(rules, enteredStageId, base)
-          ) {
-            throw new errors.ForbiddenError(APPROVAL_REFUSED);
-          }
-
-          let changed: Awaited<ReturnType<ProvenanceService['recordWrite']>> = [];
 
           if (fields.length > 0) {
             // The caller may have narrowed or populated the result differently: components
@@ -282,7 +201,7 @@ export const createDocumentServiceMiddleware = ({
               });
             }
 
-            changed = await provenance.recordWrite({
+            const changed = await provenance.recordWrite({
               target,
               fields: recorded,
               // Fields of a new locale that are not inherited start empty
@@ -298,37 +217,6 @@ export const createDocumentServiceMiddleware = ({
                 target,
                 changed.map(({ field }) => field)
               );
-            }
-          }
-
-          if (rules !== null) {
-            if (
-              enteredStageId !== null &&
-              isApproval(rules, enteredStageId, base) &&
-              snapshot?.userId !== undefined
-            ) {
-              // A human approving takes editorial responsibility for every current value
-              await provenance.markReviewed({
-                target,
-                fields: tracked,
-                current: await readTracked(target),
-                userId: snapshot.userId,
-              });
-            } else {
-              // An AI change goes to AI review even when the write chose another stage
-              const nextStageId = stageAfterWrite({
-                rules,
-                currentStageId: stageAfter,
-                changed: changed.map(({ declaration }) => declaration),
-              });
-
-              if (nextStageId !== null) {
-                await strapi.documents(uid).update({
-                  documentId: target.documentId,
-                  locale: target.locale ?? undefined,
-                  data: { [STAGE_ATTRIBUTE]: { id: nextStageId } },
-                } as any);
-              }
             }
           }
 
@@ -350,22 +238,6 @@ export const createDocumentServiceMiddleware = ({
 
       case 'clone': {
         return strapi.db.transaction(async () => {
-          // Like a create: an AI clone starts in AI review, set in the clone itself
-          if (reviewWorkflows.hasStages(contentType as any)) {
-            const workflowId = await reviewWorkflows.getWorkflowId(uid);
-            const rules = workflowId !== null ? await settings.getRules(workflowId) : null;
-            const cloneData: Entry | undefined = params.data;
-
-            if (
-              rules?.aiReviewStageId != null &&
-              cloneData &&
-              cloneData[STAGE_ATTRIBUTE] == null &&
-              resolveBaseDeclaration(await request.getSnapshot()).origin === 'ai'
-            ) {
-              cloneData[STAGE_ATTRIBUTE] = { id: rules.aiReviewStageId };
-            }
-          }
-
           const output = await next();
           const result = output as { documentId?: string; entries?: Entry[] } | null;
 
@@ -373,11 +245,11 @@ export const createDocumentServiceMiddleware = ({
             return output;
           }
 
+          await provenance.createLock(uid, result.documentId);
+
           const snapshot = await request.getSnapshot();
-          const base = resolveBaseDeclaration(snapshot);
           const data: Entry = params.data ?? {};
           const fields = tracked.filter((field) => field in data);
-          const declarations = [base];
 
           // The clone keeps the provenance of the values it copies, and records the ones the
           // request overrides like an update
@@ -393,52 +265,13 @@ export const createDocumentServiceMiddleware = ({
             await provenance.copyRows({ from: source, to: target });
 
             if (fields.length > 0) {
-              const changed = await provenance.recordWrite({
+              await provenance.recordWrite({
                 target,
                 fields,
                 before: await readTracked(source, fields),
                 after: await readTracked(target, fields),
                 snapshot,
               });
-
-              declarations.push(...changed.map(({ declaration }) => declaration));
-            }
-          }
-
-          // A clone is a write: the same stage rules apply as on create
-          const firstLocale = localesOf(result.entries)[0] ?? null;
-
-          if (reviewWorkflows.hasStages(contentType as any)) {
-            const workflowId = await reviewWorkflows.getWorkflowId(uid);
-            const rules = workflowId !== null ? await settings.getRules(workflowId) : null;
-
-            if (rules !== null) {
-              const target: Target = {
-                uid,
-                documentId: result.documentId,
-                locale: firstLocale,
-                status: writeStatus,
-              };
-              const stageId = await readStage(target);
-
-              if (stageId !== null && !canEnterStage(rules, stageId, base)) {
-                throw new errors.ForbiddenError(APPROVAL_REFUSED);
-              }
-
-              const nextStageId = stageAfterWrite({
-                rules,
-                currentStageId: stageId,
-                // Cloning copies AI content as such: an AI clone goes to AI review
-                changed: base.origin === 'ai' ? declarations : declarations.slice(1),
-              });
-
-              if (nextStageId !== null) {
-                await strapi.documents(uid).update({
-                  documentId: target.documentId,
-                  locale: target.locale ?? undefined,
-                  data: { [STAGE_ATTRIBUTE]: { id: nextStageId } },
-                } as any);
-              }
             }
           }
 
@@ -526,7 +359,7 @@ export const createDocumentServiceMiddleware = ({
 
       case 'findMany':
       case 'count': {
-        if (!request.isAiReviewListing(uid) || !settings.isGovernanceEnabled()) {
+        if (!request.isAiReviewListing(uid)) {
           return next();
         }
 

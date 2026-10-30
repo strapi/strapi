@@ -12,6 +12,10 @@ describe('toDigitalSourceType', () => {
     );
   });
 
+  it('makes no claim of human creation from an admin session', () => {
+    expect(toDigitalSourceType('human-entered')).toBeNull();
+  });
+
   it('has no term for unknown or automated content', () => {
     expect(toDigitalSourceType('unattributed')).toBeNull();
     expect(toDigitalSourceType('automated')).toBeNull();

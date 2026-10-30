@@ -9,7 +9,7 @@ import type { BadgeProps } from '@strapi/design-system';
 const SOURCE_DISPLAY: Record<Source, { variant: BadgeProps['variant']; label: string }> = {
   'ai-generated': { variant: 'alternative', label: 'AI generated' },
   'ai-assisted': { variant: 'secondary', label: 'AI assisted' },
-  'human-entered': { variant: 'success', label: 'Human' },
+  'human-entered': { variant: 'neutral', label: 'Entered by admin user' },
   automated: { variant: 'primary', label: 'Integration' },
   unattributed: { variant: 'neutral', label: 'Unattributed' },
 };

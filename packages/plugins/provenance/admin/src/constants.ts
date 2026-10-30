@@ -32,30 +32,14 @@ export interface EntryProvenance {
   publishRequiresReview: boolean;
 }
 
-export interface WorkflowRules {
-  approvalStageId: number | null;
-  reworkStageId: number | null;
-  aiReviewStageId: number | null;
-}
-
 export interface Settings {
   requireReviewBeforePublish: boolean;
-  workflows: Record<string, WorkflowRules>;
-}
-
-export interface WorkflowSummary {
-  id: string;
-  name: string;
-  contentTypes: string[];
-  stageRequiredToPublishId: number | null;
-  stages: Array<{ id: number; name: string; color: string | null }>;
 }
 
 export interface TokenWithProfile {
   id: string;
   name: string;
   description: string | null;
-  kind: 'content-api' | 'admin';
   type: string | null;
   profile: TokenProfile | null;
 }
@@ -63,10 +47,9 @@ export interface TokenWithProfile {
 export const isAiSource = (source: Source) => source === 'ai-generated' || source === 'ai-assisted';
 
 /**
- * License feature of the governance part (Enterprise): publish guard, Review Workflows rules,
- * "AI to review" filter and proof export.
+ * License feature of the plugin. Without it the plugin adds nothing to the admin panel.
  */
-export const GOVERNANCE_FEATURE = 'cms-ai-governance';
+export const LICENSE_FEATURE = 'cms-ai-governance';
 
-export const isGovernanceEnabled = () =>
-  window.strapi?.features?.isEnabled(GOVERNANCE_FEATURE) === true;
+export const isProvenanceEnabled = () =>
+  window.strapi?.features?.isEnabled(LICENSE_FEATURE) === true;

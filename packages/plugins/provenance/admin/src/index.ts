@@ -1,5 +1,5 @@
 import { ProvenancePanel } from './components/ProvenancePanel';
-import { PERMISSIONS, PLUGIN_ID } from './constants';
+import { isProvenanceEnabled, PERMISSIONS, PLUGIN_ID } from './constants';
 import { AiReviewFilter } from './content-manager/AiReviewFilter';
 import { mutateEditViewHook } from './content-manager/EditViewLayout';
 import { addColumnToTableHook } from './content-manager/ListViewColumn';
@@ -16,6 +16,10 @@ export default {
       id: PLUGIN_ID,
       name: PLUGIN_ID,
     });
+
+    if (!isProvenanceEnabled()) {
+      return;
+    }
 
     const contentManagerPluginApis = app.getPlugin('content-manager').apis;
 
@@ -59,6 +63,10 @@ export default {
   },
 
   bootstrap(app: StrapiApp) {
+    if (!isProvenanceEnabled()) {
+      return;
+    }
+
     // In bootstrap, like i18n: its hook replaces `labelAction`, ours keeps the existing one
     app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewHook);
   },

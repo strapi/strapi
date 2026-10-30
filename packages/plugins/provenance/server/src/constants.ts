@@ -5,11 +5,9 @@ export const TOKEN_PROFILE_UID = 'plugin::provenance.token-profile';
 export const DOCUMENT_LOCK_UID = 'plugin::provenance.document-lock';
 
 /**
- * License feature of the governance part (Enterprise): the publish guard, the Review Workflows
- * rules, the "AI to review" filter and the proof export. Recording, labels and reviews are
- * available to every edition.
+ * License feature of the plugin. Without it the plugin records nothing and shows nothing.
  */
-export const GOVERNANCE_FEATURE = 'cms-ai-governance';
+export const LICENSE_FEATURE = 'cms-ai-governance';
 
 export const PROVENANCE_HEADER = 'strapi-provenance';
 
@@ -19,8 +17,8 @@ export const PROVENANCE_HEADER = 'strapi-provenance';
  * - `ai-generated`: written by an AI (IPTC `trainedAlgorithmicMedia`)
  * - `ai-assisted`: AI output edited by a human, or the other way around
  *   (IPTC `compositeWithTrainedAlgorithmicMedia`)
- * - `human-entered`: typed or pasted by an authenticated admin user. Entered, not
- *   necessarily written: we attest the channel, we do not detect AI text.
+ * - `human-entered`: entered by an authenticated admin user. Entered, not necessarily
+ *   written: we attest the channel, we do not detect AI text. No IPTC term, on purpose.
  * - `automated`: written by an API token the admin qualified as a classic integration
  * - `unattributed`: no reliable signal. This is the default, never "human".
  */
@@ -36,6 +34,7 @@ export const SOURCES = [
  * How the source was established, strongest first.
  */
 export const SIGNALS = [
+  'agent-identity',
   'strapi-channel',
   'token',
   'client-declared',

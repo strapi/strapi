@@ -26,7 +26,7 @@ export const createValuesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Tracked values of one version of an entry, or `null` when it does not exist.
-     * `extra` adds fields and populate that are returned as is, for instance the stage.
+     * `extra` adds fields and populate that are returned as is, for instance the locale.
      */
     async read(
       target: Target,

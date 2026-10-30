@@ -16,20 +16,13 @@ export type TokenWithProfile = {
   kind: 'content-api' | 'admin';
   type: string | null;
   profile: TokenProfile | null;
-  /** Admin tokens belong to an admin user */
-  ownerId: string | null;
 };
 
-const toToken = (token: Record<string, any>) => {
-  const owner = token.adminUserOwner;
-
-  return {
-    id: String(token.id),
-    // Tokens created before kinds existed are content API tokens
-    kind: (token.kind as TokenWithProfile['kind'] | null) ?? 'content-api',
-    ownerId: owner === null || owner === undefined ? null : String(owner.id ?? owner),
-  };
-};
+const toToken = (token: Record<string, any>) => ({
+  id: String(token.id),
+  // Tokens created before kinds existed are content API tokens
+  kind: (token.kind as TokenWithProfile['kind'] | null) ?? 'content-api',
+});
 
 export const createTokenProfileService = ({ strapi }: { strapi: Core.Strapi }) => {
   const cache = new Map<string, CachedProfile>();
@@ -67,13 +60,12 @@ export const createTokenProfileService = ({ strapi }: { strapi: Core.Strapi }) =
     },
 
     /**
-     * Every API token (admin and content API kinds) with its profile.
+     * Every Content API token with its profile.
      */
     async list(): Promise<TokenWithProfile[]> {
       const [tokens, profiles] = await Promise.all([
         strapi.db.query('admin::api-token').findMany({
           select: ['id', 'name', 'description', 'kind', 'type'],
-          populate: { adminUserOwner: { select: ['id'] } },
           orderBy: { name: 'asc' },
         }),
         strapi.db.query(TOKEN_PROFILE_UID).findMany({ select: ['tokenId', 'profile'] }),
@@ -86,7 +78,11 @@ export const createTokenProfileService = ({ strapi }: { strapi: Core.Strapi }) =
         ])
       );
 
-      return tokens.map((token: Record<string, any>) => ({
+      const contentApiTokens = tokens.filter(
+        (token: Record<string, any>) => toToken(token).kind === 'content-api'
+      );
+
+      return contentApiTokens.map((token: Record<string, any>) => ({
         ...toToken(token),
         name: token.name as string,
         description: (token.description as string | null) ?? null,
@@ -99,7 +95,6 @@ export const createTokenProfileService = ({ strapi }: { strapi: Core.Strapi }) =
       const token = await strapi.db.query('admin::api-token').findOne({
         select: ['id', 'kind'],
         where: { id: tokenId },
-        populate: { adminUserOwner: { select: ['id'] } },
       });
 
       return token ? toToken(token) : null;

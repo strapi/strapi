@@ -1,24 +1,9 @@
 import type { Core } from '@strapi/types';
 
 import { DOCUMENT_LOCK_UID, FIELD_PROVENANCE_UID, TOKEN_PROFILE_UID } from './constants';
-import { createDocumentServiceMiddleware } from './middlewares/document-service';
 import { isProvenanceReadRoute, QUERY_PARAM } from './middlewares/query-provenance';
-import { getService } from './utils';
 
 export const register = ({ strapi }: { strapi: Core.Strapi }) => {
-  strapi.documents.use(
-    createDocumentServiceMiddleware({
-      strapi,
-      getDependencies: () => ({
-        provenance: getService(strapi, 'provenance'),
-        request: getService(strapi, 'request'),
-        settings: getService(strapi, 'settings'),
-        reviewWorkflows: getService(strapi, 'reviewWorkflows'),
-        values: getService(strapi, 'values'),
-      }),
-    })
-  );
-
   // GraphQL would expose the plugin's tables to API tokens: an agent could forge a review or
   // change its own token profile
   if (strapi.plugin('graphql')) {

@@ -11,7 +11,7 @@ import { useDocumentRBAC } from '@strapi/content-manager/strapi-admin';
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { isAiSource, isGovernanceEnabled, PLUGIN_ID } from '../constants';
+import { isAiSource, PLUGIN_ID } from '../constants';
 import { usePasteDetection } from '../hooks/usePasteDetection';
 import { fieldsStore } from '../store/fields';
 import { containsPaste } from '../utils/paste';
@@ -82,9 +82,6 @@ const ProvenancePanelContent = ({
   // The published tab is read-only, and so is the entry without the update permission
   const canEdit = activeTab !== 'published' && canUpdate;
   const updatedAt = document?.updatedAt as string | undefined;
-  // Moving a review workflow stage leaves `updatedAt` as is, but approving reviews the fields
-  const stageId = (document?.strapi_stage as { id?: number } | null | undefined)?.id;
-  const previousStageId = React.useRef(stageId);
   const basePath = `/${PLUGIN_ID}/entries/${model}/${documentId}`;
 
   const notifyError = React.useCallback(
@@ -170,13 +167,6 @@ const ProvenancePanelContent = ({
 
     run();
   }, [load, declareAi, notifyError, updatedAt]);
-
-  React.useEffect(() => {
-    if (previousStageId.current !== stageId) {
-      previousStageId.current = stageId;
-      load();
-    }
-  }, [load, stageId]);
 
   // Read on demand: selecting `values` would render the panel on every keystroke
   const getValues = useForm('ProvenancePanel', (state) => state.getValues);
@@ -381,7 +371,7 @@ const ProvenancePanelContent = ({
             )
           : formatMessage({
               id: getTranslation('panel.no-pending-ai'),
-              defaultMessage: 'No AI content awaiting review',
+              defaultMessage: 'No declared AI content awaiting review',
             })}
       </Typography>
 
@@ -420,7 +410,6 @@ const ProvenancePanelContent = ({
         isSubmitting={isSubmitting}
         onDeclareAi={markAsAi}
         onQualifyPaste={(field, decision) => qualifyPaste([field], decision)}
-        canExport={isGovernanceEnabled()}
         onExport={exportProof}
         onReviewAll={() =>
           submit(() =>

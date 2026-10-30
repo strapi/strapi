@@ -8,37 +8,9 @@ import { getService } from '../utils';
 
 import type { TokenProfile } from '../domain/types';
 
-const SUPER_ADMIN_CODE = 'strapi-super-admin';
-
-/**
- * Admin tokens follow the core rules: the admin tokens permission, and only their owner or
- * a super admin. Content API tokens only need the routes' API tokens permissions.
- */
-const canAccess = (
-  ctx: Context,
-  action: 'read' | 'update',
-  token: { kind: string; ownerId: string | null }
-) => {
-  if (token.kind !== 'admin') {
-    return true;
-  }
-
-  const { user, userAbility } = ctx.state;
-  const isSuperAdmin = (user?.roles ?? []).some(
-    (role: { code?: string }) => role.code === SUPER_ADMIN_CODE
-  );
-
-  return (
-    userAbility?.can(`admin::admin-tokens.${action}`) === true &&
-    (isSuperAdmin || token.ownerId === String(user?.id))
-  );
-};
-
 export const createTokensController = ({ strapi }: { strapi: Core.Strapi }) => ({
   async find(ctx: Context) {
-    const tokens = await getService(strapi, 'tokenProfiles').list();
-
-    ctx.body = { data: tokens.filter((token) => canAccess(ctx, 'read', token)) };
+    ctx.body = { data: await getService(strapi, 'tokenProfiles').list() };
   },
 
   async update(ctx: Context) {
@@ -56,12 +28,9 @@ export const createTokensController = ({ strapi }: { strapi: Core.Strapi }) => (
     // Token ids are integers: anything else would be a database error on Postgres
     const token = /^[1-9]\d{0,9}$/.test(String(id)) ? await tokenProfiles.find(id) : null;
 
-    if (token === null) {
+    // Only Content API tokens have a profile: agents replace it for the admin side
+    if (token === null || token.kind !== 'content-api') {
       throw new errors.NotFoundError('API token not found');
-    }
-
-    if (!canAccess(ctx, 'update', token)) {
-      throw new errors.ForbiddenError();
     }
 
     await tokenProfiles.set(id, profile as TokenProfile | null);

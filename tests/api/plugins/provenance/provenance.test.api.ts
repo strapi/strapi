@@ -3,9 +3,6 @@
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest, createContentAPIRequest, createRequest } from 'api-tests/request';
 import { createTestBuilder } from 'api-tests/builder';
-import { describeOnCondition } from 'api-tests/utils';
-
-const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const UID = 'api::prov-article.prov-article';
 const SEO_UID = 'prov.seo';
@@ -32,6 +29,32 @@ const article = {
   },
 };
 
+// Stands in for the approval queue of Agent Governance
+let parkPublish = false;
+
+/**
+ * Stands in for the auth strategy of Agent Governance: an admin user of kind `agent`.
+ */
+const agentStrategy = (strapi) => ({
+  name: 'agent',
+  async authenticate(ctx) {
+    const name = ctx.request.headers['x-test-agent'];
+
+    if (name === undefined) {
+      return { authenticated: false };
+    }
+
+    const user = await strapi.db.query('admin::user').findOne({ populate: ['roles'] });
+
+    ctx.state.user = { ...user, kind: 'agent', firstname: name, username: null };
+    ctx.state.userAbility = await strapi
+      .service('admin::permission')
+      .engine.generateUserAbility(user);
+
+    return { authenticated: true, credentials: ctx.state.user };
+  },
+});
+
 /**
  * The plugin is not a dependency of the test app: it is enabled for this suite only, the way
  * an installed dependency is found, so other suites keep running without it.
@@ -40,6 +63,15 @@ const enableProvenance = ({ strapi }) => {
   strapi.config.set('info.dependencies', {
     ...strapi.config.get('info.dependencies', {}),
     '@strapi/plugin-provenance': '*',
+  });
+
+  strapi.get('auth').register('admin', agentStrategy(strapi));
+  strapi.documents.use(async (ctx, next) => {
+    if (parkPublish && ctx.action === 'publish') {
+      return { status: 'pending_approval', pendingActionId: 'queued' };
+    }
+
+    return next();
   });
 };
 
@@ -50,8 +82,9 @@ describe('Provenance plugin', () => {
   let agentApi;
   let plainApi;
   let plainToken;
-  // No license includes the AI governance feature yet: the suite switches the plugin's own gate
-  let governance = true;
+  // No license includes the feature yet: the suite switches the plugin's own gate
+  let licensed = true;
+  let reviewerId: number;
   const tokenIds: string[] = [];
 
   const createToken = async (name: string) => {
@@ -74,9 +107,19 @@ describe('Provenance plugin', () => {
 
   // Changes some settings and keeps the others
   const setSettings = async (settings: Record<string, unknown>) => {
-    const { body } = await admin.get('/provenance/settings');
+    const wasLicensed = licensed;
 
-    return admin.put('/provenance/settings', { body: { ...body.data.settings, ...settings } });
+    // The settings routes only exist with the license feature
+    licensed = true;
+
+    const { body } = await admin.get('/provenance/settings');
+    const response = await admin.put('/provenance/settings', {
+      body: { ...body.data.settings, ...settings },
+    });
+
+    licensed = wasLicensed;
+
+    return response;
   };
 
   const agentCreate = async (data: Record<string, unknown>) => {
@@ -93,7 +136,9 @@ describe('Provenance plugin', () => {
 
     strapi = await createStrapiInstance({ bypassAuth: false, register: enableProvenance });
     admin = await createAuthRequest({ strapi });
-    strapi.plugin('provenance').service('settings').isGovernanceEnabled = () => governance;
+    strapi.plugin('provenance').service('settings').isProvenanceEnabled = () => licensed;
+
+    reviewerId = (await strapi.db.query('admin::user').findOne({})).id;
 
     const agent = await createToken('provenance agent');
     plainToken = await createToken('provenance plain');
@@ -216,42 +261,128 @@ describe('Provenance plugin', () => {
     body.meta.provenance.forEach((fields) => expect(fields).not.toHaveProperty('secret'));
   });
 
-  describe('without the AI governance license feature', () => {
-    beforeAll(() => {
-      governance = false;
+  describe('without the license feature', () => {
+    let documentId: string;
+
+    beforeAll(async () => {
+      documentId = await agentCreate({ title: 'Written with the license' });
+      licensed = false;
     });
 
     afterAll(() => {
-      governance = true;
+      licensed = true;
     });
 
-    test('refuses to save the publish guard', async () => {
-      const { status } = await admin.put('/provenance/settings', {
-        body: { requireReviewBeforePublish: true, workflows: {} },
-      });
+    test('has no routes', async () => {
+      const responses = await Promise.all([
+        admin.get(`/provenance/entries/${UID}/${documentId}`),
+        admin.get(`/provenance/entries/${UID}/${documentId}/export`, { qs: { status: 'draft' } }),
+        admin.get('/provenance/settings'),
+        admin.get('/provenance/tokens'),
+      ]);
 
-      expect(status).toBe(403);
+      responses.forEach(({ status }) => expect(status).toBe(404));
     });
 
-    test('lets AI content be published and keeps labelling it', async () => {
-      const documentId = await agentCreate({ title: 'Community edition' });
+    test('records nothing, and the guard does not apply', async () => {
+      await setSettings({ requireReviewBeforePublish: true });
 
+      const created = await agentCreate({ title: 'Written without the license' });
       const published = await admin.post(
-        `/content-manager/collection-types/${UID}/${documentId}/actions/publish`
+        `/content-manager/collection-types/${UID}/${created}/actions/publish`
       );
 
       expect(published.status).toBe(200);
-      expect((await getProvenance(documentId, 'published')).title.source).toBe('ai-generated');
+
+      const rows = await strapi.db
+        .query('plugin::provenance.field-provenance')
+        .findMany({ where: { targetDocumentId: created } });
+
+      expect(rows).toHaveLength(0);
     });
 
-    test('does not export the proof', async () => {
-      const documentId = await agentCreate({ title: 'No export' });
-
-      const { status } = await admin.get(`/provenance/entries/${UID}/${documentId}/export`, {
-        qs: { status: 'draft' },
+    test('adds nothing to Content API reads', async () => {
+      const { status, body } = await agentApi.get(`/prov-articles`, {
+        qs: { provenance: 'true', status: 'draft' },
       });
 
-      expect(status).toBe(403);
+      expect(status).toBe(200);
+      expect(body.meta.provenance).toBeUndefined();
+    });
+  });
+
+  describe('with concurrent requests on one document', () => {
+    const rowsOf = (documentId: string, status: string) =>
+      strapi.db.query('plugin::provenance.field-provenance').findMany({
+        where: { targetDocumentId: documentId, targetStatus: status, fieldPath: 'title' },
+      });
+
+    test('creates documents in parallel', async () => {
+      const responses = await Promise.all(
+        Array.from({ length: 20 }, (_, index) =>
+          agentApi.post('/prov-articles', {
+            body: { data: { title: `Parallel ${index}` } },
+            qs: { status: 'draft' },
+          })
+        )
+      );
+
+      responses.forEach(({ status }) => expect(status).toBe(201));
+    });
+
+    test('keeps one row per field, describing the value that won', async () => {
+      const documentId = await agentCreate({ title: 'Race' });
+
+      await Promise.all(
+        Array.from({ length: 20 }, (_, index) =>
+          agentApi.put(`/prov-articles/${documentId}`, {
+            body: { data: { title: `Race ${index}` } },
+            qs: { status: 'draft' },
+          })
+        )
+      );
+
+      expect(await rowsOf(documentId, 'draft')).toHaveLength(1);
+      expect((await getProvenance(documentId)).title).toMatchObject({
+        source: 'ai-generated',
+        drifted: false,
+      });
+    });
+
+    test('never publishes an AI value without a review of that value', async () => {
+      await setSettings({ requireReviewBeforePublish: true });
+
+      const documentIds = await Promise.all(
+        Array.from({ length: 5 }, (_, index) => agentCreate({ title: `Guarded ${index}` }))
+      );
+
+      await Promise.all(
+        documentIds.flatMap((documentId) => [
+          admin.post(`/provenance/entries/${UID}/${documentId}/review`, { body: {} }),
+          ...Array.from({ length: 3 }, (_, index) =>
+            agentApi.put(`/prov-articles/${documentId}`, {
+              body: { data: { title: `Edited ${index}` } },
+              qs: { status: 'draft' },
+            })
+          ),
+          ...Array.from({ length: 2 }, () =>
+            admin.post(`/content-manager/collection-types/${UID}/${documentId}/actions/publish`)
+          ),
+        ])
+      );
+
+      for (const documentId of documentIds) {
+        const published = await strapi.documents(UID).findOne({ documentId, status: 'published' });
+
+        if (published !== null) {
+          const { title } = await getProvenance(documentId, 'published');
+
+          expect(title.drifted).toBe(false);
+          expect(title.review).not.toBeNull();
+        }
+
+        expect(await rowsOf(documentId, 'draft')).toHaveLength(1);
+      }
     });
   });
 
@@ -286,73 +417,175 @@ describe('Provenance plugin', () => {
     expect(body.errors?.length).toBeGreaterThan(0);
   });
 
-  describeOnCondition(edition === 'EE')('with Review Workflows', () => {
-    let stages: Record<string, { id: number }>;
-    let workflowId: number;
+  describe('with an agent identity', () => {
+    const agentHeaders = { 'x-test-agent': 'Blog Drafter' };
 
-    beforeAll(async () => {
-      const { body } = await admin.post('/review-workflows/workflows', {
-        body: {
-          data: {
-            name: 'Provenance workflow',
-            stages: [{ name: 'To do' }, { name: 'AI review' }, { name: 'Approved' }],
-            contentTypes: [UID],
-          },
-        },
-      });
-      const workflow = body.data;
-      workflowId = workflow.id;
+    const agentCreateAsItself = async (data: Record<string, unknown>, headers = {}) => {
+      const { status, body } = await createRequest({ strapi }).post(
+        `/content-manager/collection-types/${UID}`,
+        { headers: { ...agentHeaders, ...headers }, body: data }
+      );
 
-      stages = Object.fromEntries(workflow.stages.map((stage) => [stage.name, stage]));
-      await setSettings({
-        workflows: {
-          [workflow.id]: {
-            approvalStageId: stages.Approved.id,
-            aiReviewStageId: stages['AI review'].id,
-            reworkStageId: stages['To do'].id,
-          },
-        },
-      });
-    });
+      expect(status).toBe(201);
 
-    afterAll(async () => {
-      // Other suites count the workflows
-      await admin.delete(`/review-workflows/workflows/${workflowId}`);
-      await setSettings({ workflows: {} });
-    });
-
-    const getStage = async (documentId: string) => {
-      const { body } = await admin.get(`/content-manager/collection-types/${UID}/${documentId}`);
-
-      return body.data.strapi_stage?.name;
+      return body.data.documentId as string;
     };
 
-    test('sends AI writes to AI review and keeps agents out of the approval stage', async () => {
-      const documentId = await agentCreate({ title: 'Workflow' });
+    // The request of a reviewer: the session of a person, not the agent's
+    const asReviewer = <T>(run: () => Promise<T>) => {
+      let output!: T;
 
-      expect(await getStage(documentId)).toBe('AI review');
+      return strapi.requestContext
+        .run(
+          {
+            state: { auth: { strategy: { name: 'admin' } }, user: { id: reviewerId } },
+            request: { headers: {}, body: {}, url: '' },
+          },
+          async () => {
+            output = await run();
+          }
+        )
+        .then(() => output);
+    };
 
-      const refused = await agentApi.put(`/prov-articles/${documentId}`, {
-        body: { data: { strapi_stage: { connect: [stages.Approved.id] } } },
-        qs: { status: 'draft' },
+    const agent = { id: 123, name: 'Blog Drafter' };
+    const approvals = () => strapi.plugin('provenance').service('approvals');
+
+    test('names the agent as the writer, whatever the client claims', async () => {
+      const documentId = await agentCreateAsItself(
+        { title: 'Written by an agent' },
+        { 'Strapi-Provenance': 'source=ai; model="test-model"; agent="Someone else"' }
+      );
+
+      expect((await getProvenance(documentId)).title).toMatchObject({
+        source: 'ai-generated',
+        signal: 'agent-identity',
+        agent: 'Blog Drafter',
+        model: 'test-model',
+        actor: { type: 'agent' },
       });
-
-      expect(refused.status).toBe(403);
-      expect(await getStage(documentId)).toBe('AI review');
     });
 
-    test('reviews every field when a person approves the entry', async () => {
-      const documentId = await agentCreate({ title: 'To approve', body: 'Generated' });
+    test('does not let an agent review or declare', async () => {
+      const documentId = await agentCreateAsItself({ title: 'Self review' });
 
-      const moved = await admin.put(
-        `/review-workflows/content-manager/collection-types/${UID}/${documentId}/stage`,
-        { body: { data: { id: stages.Approved.id } } }
+      const review = await createRequest({ strapi }).post(
+        `/provenance/entries/${UID}/${documentId}/review`,
+        { headers: agentHeaders, body: {} }
       );
-      expect(moved.status).toBe(200);
+      const declare = await createRequest({ strapi }).post(
+        `/provenance/entries/${UID}/${documentId}/declare`,
+        { headers: agentHeaders, body: { fields: ['title'] } }
+      );
+
+      expect(review.status).toBe(403);
+      expect(declare.status).toBe(403);
+    });
+
+    test('lets a queue registered in `register` park a publish before the guard', async () => {
+      await setSettings({ requireReviewBeforePublish: true });
+      const documentId = await agentCreateAsItself({ title: 'Parked' });
+
+      parkPublish = true;
+
+      const output = await strapi.documents(UID).publish({ documentId });
+
+      parkPublish = false;
+
+      expect(output).toEqual({ status: 'pending_approval', pendingActionId: 'queued' });
+      expect((await getProvenance(documentId)).title.source).toBe('ai-generated');
+    });
+
+    test('records an approved edit as the agent, reviewed by the person', async () => {
+      const documentId = await agentCreateAsItself({ title: 'Before', body: 'Unchanged' });
+
+      await asReviewer(() =>
+        approvals().executeApproved(
+          { uid: UID, documentId, action: 'update', agent, decidedBy: reviewerId, hashes: {} },
+          () => strapi.documents(UID).update({ documentId, data: { title: 'The queued edit' } })
+        )
+      );
 
       const fields = await getProvenance(documentId);
-      expect(fields.title.review).not.toBeNull();
-      expect(fields.body.review).not.toBeNull();
+
+      expect(fields.title).toMatchObject({
+        source: 'ai-generated',
+        signal: 'agent-identity',
+        agent: 'Blog Drafter',
+        actor: { type: 'agent', id: '123' },
+      });
+      expect(fields.title.review.byId).toBe(String(reviewerId));
+      expect(fields.body.review).toBeNull();
+    });
+
+    test('refuses an approved publish of values that changed since the diff', async () => {
+      await setSettings({ requireReviewBeforePublish: true });
+      const documentId = await agentCreateAsItself({ title: 'Shown' });
+      const { fields } = await approvals().getReviewState({ uid: UID, documentId });
+
+      await agentCreateAsItself({ title: 'Unrelated' });
+      await createRequest({ strapi }).put(
+        `/content-manager/collection-types/${UID}/${documentId}`,
+        { headers: agentHeaders, body: { title: 'Changed after the diff' } }
+      );
+
+      await expect(
+        asReviewer(() =>
+          approvals().executeApproved(
+            {
+              uid: UID,
+              documentId,
+              action: 'publish',
+              agent,
+              decidedBy: reviewerId,
+              hashes: { title: fields.title.hash },
+            },
+            () => strapi.documents(UID).publish({ documentId })
+          )
+        )
+      ).rejects.toMatchObject({ name: 'StaleApprovalError', details: { fields: ['title'] } });
+
+      expect(await strapi.documents(UID).findOne({ documentId, status: 'published' })).toBeNull();
+    });
+
+    test('publishes what was shown past the guard, with the review', async () => {
+      await setSettings({ requireReviewBeforePublish: true });
+      const documentId = await agentCreateAsItself({ title: 'Approved', body: 'Also AI' });
+      const state = await approvals().getReviewState({ uid: UID, documentId });
+
+      expect(state.toReview.sort()).toEqual(['body', 'title']);
+
+      await asReviewer(() =>
+        approvals().executeApproved(
+          {
+            uid: UID,
+            documentId,
+            action: 'publish',
+            agent,
+            decidedBy: reviewerId,
+            hashes: Object.fromEntries(
+              state.toReview.map((field: string) => [field, state.fields[field].hash])
+            ),
+          },
+          () => strapi.documents(UID).publish({ documentId })
+        )
+      );
+
+      const published = await getProvenance(documentId, 'published');
+
+      expect(published.title).toMatchObject({ source: 'ai-generated', agent: 'Blog Drafter' });
+      expect(published.title.review.byId).toBe(String(reviewerId));
+    });
+
+    test('still stops a person publishing an agent draft without a review', async () => {
+      await setSettings({ requireReviewBeforePublish: true });
+      const documentId = await agentCreateAsItself({ title: 'Not reviewed' });
+
+      const { status } = await admin.post(
+        `/content-manager/collection-types/${UID}/${documentId}/actions/publish`
+      );
+
+      expect(status).toBe(400);
     });
   });
 });

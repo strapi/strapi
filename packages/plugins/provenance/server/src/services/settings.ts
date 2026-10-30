@@ -1,7 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { GOVERNANCE_FEATURE } from '../constants';
-import { NO_RULES, parseStageId, type WorkflowRules } from '../domain/workflow';
+import { LICENSE_FEATURE } from '../constants';
 
 // Settings are read on every write; other instances pick up a change within this delay
 const CACHE_TTL_MS = 30_000;
@@ -9,32 +8,14 @@ const CACHE_TTL_MS = 30_000;
 export type Settings = {
   /** Publishing fails while an AI field of the entry has no valid human review */
   requireReviewBeforePublish: boolean;
-  /** Review workflow rules, by workflow id */
-  workflows: Record<string, WorkflowRules>;
 };
 
-const DEFAULT_SETTINGS: Settings = { requireReviewBeforePublish: false, workflows: {} };
-
-const normalizeRules = (value: unknown): WorkflowRules => {
-  const raw = (value ?? {}) as Record<string, unknown>;
-
-  return {
-    approvalStageId: parseStageId(raw.approvalStageId),
-    reworkStageId: parseStageId(raw.reworkStageId),
-    aiReviewStageId: parseStageId(raw.aiReviewStageId),
-  };
-};
+const DEFAULT_SETTINGS: Settings = { requireReviewBeforePublish: false };
 
 export const normalizeSettings = (value: unknown): Settings => {
   const raw = (value ?? {}) as Record<string, unknown>;
-  const workflows = (raw.workflows ?? {}) as Record<string, unknown>;
 
-  return {
-    requireReviewBeforePublish: raw.requireReviewBeforePublish === true,
-    workflows: Object.fromEntries(
-      Object.entries(workflows).map(([id, rules]) => [id, normalizeRules(rules)])
-    ),
-  };
+  return { requireReviewBeforePublish: raw.requireReviewBeforePublish === true };
 };
 
 export const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => {
@@ -63,43 +44,18 @@ export const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
-     * Whether the license includes the governance features. Read on every use, so a license
-     * change applies without a restart.
+     * Whether the license includes the plugin. Read on every use, so a license change applies
+     * without a restart. A lapse stops recording: writes made meanwhile have no provenance.
      */
-    isGovernanceEnabled() {
-      return strapi.ee?.features?.isEnabled(GOVERNANCE_FEATURE) === true;
+    isProvenanceEnabled() {
+      return strapi.ee?.features?.isEnabled(LICENSE_FEATURE) === true;
     },
 
     /**
-     * Whether publishing waits for a human review of AI content. Saved settings stay inactive
-     * without the license feature.
+     * Whether publishing waits for a human review of AI content.
      */
     async requiresReview() {
-      return this.isGovernanceEnabled() && (await this.get()).requireReviewBeforePublish;
-    },
-
-    /**
-     * The rules of a workflow, or `null` without the license feature. Rules saved before
-     * conflicts were validated may reuse the approval stage: those rules are ignored rather
-     * than refusing every AI write.
-     */
-    async getRules(workflowId: string | number): Promise<WorkflowRules | null> {
-      if (!this.isGovernanceEnabled()) {
-        return null;
-      }
-
-      const rules = (await this.get()).workflows[String(workflowId)] ?? NO_RULES;
-      const { approvalStageId } = rules;
-
-      if (approvalStageId === null) {
-        return rules;
-      }
-
-      return {
-        approvalStageId,
-        reworkStageId: rules.reworkStageId === approvalStageId ? null : rules.reworkStageId,
-        aiReviewStageId: rules.aiReviewStageId === approvalStageId ? null : rules.aiReviewStageId,
-      };
+      return this.isProvenanceEnabled() && (await this.get()).requireReviewBeforePublish;
     },
   };
 };

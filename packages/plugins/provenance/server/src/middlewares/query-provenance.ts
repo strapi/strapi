@@ -32,7 +32,11 @@ export const createQueryProvenanceMiddleware = ({ strapi }: { strapi: Core.Strap
   return async (ctx: Context, next: Next) => {
     await next();
 
-    if (ctx.query?.[QUERY_PARAM] !== 'true' || ctx.status !== 200) {
+    if (
+      ctx.query?.[QUERY_PARAM] !== 'true' ||
+      ctx.status !== 200 ||
+      !getService(strapi, 'settings').isProvenanceEnabled()
+    ) {
       return;
     }
 

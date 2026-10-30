@@ -1,12 +1,14 @@
 import { claimsAi, claimsEdit } from './header';
 
-import type { Actor, ClientClaim, Declaration, TokenProfile } from './types';
+import type { Actor, AgentPrincipal, ClientClaim, Declaration, TokenProfile } from './types';
 
 /**
  * What the plugin knows about the request that triggered a write, extracted from the Koa
  * context so the rules below stay free of Strapi and Koa.
  */
 export type RequestSnapshot = {
+  /** Set when the write comes from an agent, or runs on its behalf after an approval */
+  agent?: AgentPrincipal | null;
   auditSource?: string;
   strategy?: string;
   userId?: string | number;
@@ -37,12 +39,23 @@ const tokenDeclaration = (snapshot: RequestSnapshot): Declaration => {
 
 /**
  * The declaration that applies to every field of the request, from the signals the server
- * controls (strongest first): Strapi's own AI channels, the token profile, the admin session.
+ * controls (strongest first): the agent identity, Strapi's own AI channels, the token profile,
+ * the admin session.
  */
 export const resolveBaseDeclaration = (snapshot: RequestSnapshot | null): Declaration => {
   if (snapshot === null) {
     // Scripts, cron jobs, bootstrap code: no request, nothing to attest
     return NO_SIGNAL;
+  }
+
+  // Before the MCP marker: an agent connected through the MCP server keeps its name
+  if (snapshot.agent) {
+    return {
+      origin: 'ai',
+      signal: 'agent-identity',
+      agent: snapshot.agent.name,
+      actor: { type: 'agent', id: snapshot.agent.id },
+    };
   }
 
   if (snapshot.auditSource === 'mcp') {
@@ -83,6 +96,14 @@ export const resolveBaseDeclaration = (snapshot: RequestSnapshot | null): Declar
 };
 
 /**
+ * Reviews and AI declarations speak for a person: an admin session, not a token, an agent or
+ * the MCP server, even one acting for an admin user.
+ */
+export const isHumanSession = (snapshot: RequestSnapshot | null) => {
+  return snapshot?.strategy === 'admin' && resolveBaseDeclaration(snapshot).origin === 'human';
+};
+
+/**
  * Applies the client claim for one field on top of the base declaration.
  *
  * The rule is asymmetric: a client can declare AI or add details (model, agent), it can
@@ -104,7 +125,8 @@ export const resolveFieldDeclaration = (
       ...base,
       edited: base.edited || edited,
       model: claim?.model ?? base.model,
-      agent: claim?.agent ?? base.agent,
+      // A name the server knows cannot be replaced by a claim
+      agent: base.signal === 'agent-identity' ? base.agent : (claim?.agent ?? base.agent),
     };
   }
 

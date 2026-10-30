@@ -1,13 +1,14 @@
-import { contentTypes, errors } from '@strapi/utils';
+import { contentTypes, emitAudit, errors } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
 import type { Context } from 'koa';
 
-import { resolveBaseDeclaration } from '../domain/declaration';
+import { isHumanSession } from '../domain/declaration';
 import { getPermissionPaths, isTrackedContentType, type Schema } from '../domain/fields';
 import { hashValue } from '../domain/hash';
 import { toDigitalSourceType } from '../domain/iptc';
 import { isAiSource } from '../domain/transitions';
+import { AUDIT_EVENTS } from '../audit-logs';
 import { getService } from '../utils';
 
 import { toPublicView, type FieldView, type Status, type Target } from '../services/provenance';
@@ -158,14 +159,8 @@ const permittedFields = (
 const pick = <T>(record: Record<string, T>, fields: string[]) =>
   Object.fromEntries(Object.entries(record).filter(([name]) => fields.includes(name)));
 
-/**
- * Reviews and AI declarations speak for a person: an admin session, not a token or the MCP
- * server, even one acting for an admin user.
- */
 const assertHumanSession = async (strapi: Core.Strapi) => {
-  const snapshot = await getService(strapi, 'request').getSnapshot();
-
-  if (snapshot?.strategy !== 'admin' || resolveBaseDeclaration(snapshot).origin !== 'human') {
+  if (!isHumanSession(await getService(strapi, 'request').getSnapshot())) {
     throw new errors.ForbiddenError('Only an admin user in the admin panel can do this');
   }
 };
@@ -257,7 +252,7 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
   },
 
   /**
-   * Admin: the current user takes editorial responsibility for the current values.
+   * Admin: the current user states they reviewed the current values.
    */
   async review(ctx: Context) {
     const { uid, documentId } = ctx.params;
@@ -269,7 +264,7 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
     const provenance = getService(strapi, 'provenance');
 
     // The review must be of the value as committed: lock, then read, then write
-    const fields = await strapi.db.transaction(async () => {
+    const { target, fields } = await strapi.db.transaction(async () => {
       await provenance.lockDocument(uid, documentId);
 
       const { target, tracked, entry } = await loadEntry(strapi, {
@@ -291,8 +286,10 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
       });
       await provenance.syncAcrossLocales(target, reviewed);
 
-      return reviewed;
+      return { target, fields: reviewed };
     });
+
+    await emitAudit({ strapi }, AUDIT_EVENTS.FIELDS_REVIEWED, { target, fields });
 
     ctx.body = { data: { reviewed: fields } };
   },
@@ -369,18 +366,12 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
   },
 
   /**
-   * Admin: proof of editorial responsibility for a version of an entry, the published one by
-   * default. Each field gives its source with its IPTC term, the hash of its value and who
-   * reviewed that exact value.
+   * Admin: the provenance record of a version of an entry, the published one by default. Each
+   * field gives its source with its IPTC term, the hash of its value and who reviewed that
+   * exact value. Not signed, so it is a record rather than a proof.
    */
   async export(ctx: Context) {
     const { uid, documentId } = ctx.params;
-
-    if (!getService(strapi, 'settings').isGovernanceEnabled()) {
-      throw new errors.ForbiddenError(
-        'The proof export requires the AI governance license feature'
-      );
-    }
 
     const checker = getPermissionChecker(strapi, ctx, uid);
     const { target, tracked, entry } = await loadEntry(strapi, {
@@ -458,7 +449,7 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
     const provenance = getService(strapi, 'provenance');
 
     // Lock, then read, then write: the declaration describes the value as committed
-    const fields = await strapi.db.transaction(async () => {
+    const { target, fields } = await strapi.db.transaction(async () => {
       await provenance.lockDocument(uid, documentId);
 
       const { target, tracked, entry } = await loadEntry(strapi, {
@@ -485,8 +476,10 @@ export const createEntriesController = ({ strapi }: { strapi: Core.Strapi }) => 
       });
       await provenance.syncAcrossLocales(target, declared);
 
-      return declared;
+      return { target, fields: declared };
     });
+
+    await emitAudit({ strapi }, AUDIT_EVENTS.FIELDS_DECLARED, { target, fields });
 
     ctx.body = { data: { declared: fields } };
   },

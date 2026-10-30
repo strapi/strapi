@@ -139,7 +139,6 @@ export const FieldsModal = ({
   isSubmitting,
   onDeclareAi,
   onQualifyPaste,
-  canExport,
   onExport,
   onReviewAll,
 }: {
@@ -151,8 +150,6 @@ export const FieldsModal = ({
   isSubmitting: boolean;
   onDeclareAi: (field: string) => void;
   onQualifyPaste: (field: string, decision: 'ai' | 'other' | 'undo') => void;
-  /** The proof export is part of the governance license feature */
-  canExport: boolean;
   onExport: () => void;
   onReviewAll: () => void;
 }) => {
@@ -223,7 +220,7 @@ export const FieldsModal = ({
             </Button>
           </Modal.Close>
           <Flex gap={2}>
-            {canExport && fields.length > 0 ? (
+            {fields.length > 0 ? (
               <Button
                 variant="secondary"
                 startIcon={<Download />}
@@ -231,20 +228,29 @@ export const FieldsModal = ({
                 title={formatMessage({
                   id: getTranslation('modal.export.hint'),
                   defaultMessage:
-                    "JSON file with each field's source, its IPTC term and who reviewed it",
+                    "JSON file with each field's source, its IPTC term and who reviewed it. Not signed.",
                 })}
               >
                 {formatMessage({
                   id: getTranslation('modal.export'),
-                  defaultMessage: 'Download proof',
+                  defaultMessage: 'Export provenance record',
                 })}
               </Button>
             ) : null}
             {canEdit && fields.length > 0 ? (
-              <Button startIcon={<CheckCircle />} loading={isSubmitting} onClick={onReviewAll}>
+              <Button
+                startIcon={<CheckCircle />}
+                loading={isSubmitting}
+                onClick={onReviewAll}
+                title={formatMessage({
+                  id: getTranslation('panel.review-all.hint'),
+                  defaultMessage:
+                    'Records you as the reviewer of these exact values. Changing a value cancels the review.',
+                })}
+              >
                 {formatMessage({
                   id: getTranslation('panel.review-all'),
-                  defaultMessage: 'Mark all as reviewed',
+                  defaultMessage: 'Confirm I reviewed all fields',
                 })}
               </Button>
             ) : null}

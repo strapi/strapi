@@ -4,8 +4,14 @@ export type Source = (typeof SOURCES)[number];
 export type Signal = (typeof SIGNALS)[number];
 export type TokenProfile = (typeof TOKEN_PROFILES)[number];
 
+/**
+ * An agent known to the server through its own identity, not through a client claim.
+ */
+export type AgentPrincipal = { id: string | number; name: string };
+
 export type Actor =
   | { type: 'admin-user'; id: string | number }
+  | { type: 'agent'; id: string | number }
   | { type: 'api-token'; id: string | number }
   | { type: 'end-user'; id: string | number }
   | { type: 'system' };
