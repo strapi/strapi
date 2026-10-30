@@ -2,7 +2,7 @@ import path from 'node:path';
 import assert from 'node:assert';
 import * as ts from 'typescript';
 import fse from 'fs-extra';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 
 const { factory } = ts;
 
@@ -139,7 +139,7 @@ export const createLogger = (options: CreateLoggerOptions = {}) => {
         return;
       }
 
-      console.log(chalk.cyan(`[DEBUG]\t[${new Date().toISOString()}] (Typegen)`), ...args);
+      console.log(styleText('cyan', `[DEBUG]\t[${new Date().toISOString()}] (Typegen)`), ...args);
     },
 
     info(...args: any[]) {
@@ -147,7 +147,7 @@ export const createLogger = (options: CreateLoggerOptions = {}) => {
         return;
       }
 
-      console.info(chalk.blue(`[INFO]\t[${new Date().toISOString()}] (Typegen)`), ...args);
+      console.info(styleText('blue', `[INFO]\t[${new Date().toISOString()}] (Typegen)`), ...args);
     },
 
     warn(...args: any[]) {
@@ -157,7 +157,7 @@ export const createLogger = (options: CreateLoggerOptions = {}) => {
         return;
       }
 
-      console.warn(chalk.yellow(`[WARN]\t[${new Date().toISOString()}] (Typegen)`), ...args);
+      console.warn(styleText('yellow', `[WARN]\t[${new Date().toISOString()}] (Typegen)`), ...args);
     },
 
     error(...args: any[]) {
@@ -167,7 +167,7 @@ export const createLogger = (options: CreateLoggerOptions = {}) => {
         return;
       }
 
-      console.error(chalk.red(`[ERROR]\t[${new Date().toISOString()}] (Typegen)`), ...args);
+      console.error(styleText('red', `[ERROR]\t[${new Date().toISOString()}] (Typegen)`), ...args);
     },
   };
 };

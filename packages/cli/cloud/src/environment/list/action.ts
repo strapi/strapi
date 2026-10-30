@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import type { CLIContext } from '../../types';
 import { cloudApiFactory, tokenServiceFactory } from '../../services';
 import { promptLogin } from '../../login/action';
@@ -39,7 +39,8 @@ export default async (ctx: CLIContext) => {
     if (e.response && e.response.status === 404) {
       spinner.succeed();
       logger.warn(
-        `\nThe project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+        `\nThe project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${styleText(
+          'cyan',
           'link'
         )} command`
       );

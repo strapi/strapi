@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 
 import { AbortedError } from '../modules/error';
 
@@ -10,7 +10,7 @@ export const handleError = (err: unknown, isSilent: boolean) => {
 
   if (!isSilent) {
     console.error(
-      chalk.red(`[ERROR]\t[${new Date().toISOString()}]`),
+      styleText('red', `[ERROR]\t[${new Date().toISOString()}]`),
       err instanceof Error ? err.message : err
     );
   }

@@ -1,6 +1,6 @@
 import { createCommand } from 'commander';
 import CLITable from 'cli-table3';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { toUpper } from 'lodash';
 
 import { createStrapi, compileStrapi } from '@strapi/core';
@@ -15,7 +15,7 @@ const action = async () => {
   const list = app.server.mount().listRoutes();
 
   const infoTable = new CLITable({
-    head: [chalk.blue('Method'), chalk.blue('Path')],
+    head: [styleText('blue', 'Method'), styleText('blue', 'Path')],
     colWidths: [20],
   });
 

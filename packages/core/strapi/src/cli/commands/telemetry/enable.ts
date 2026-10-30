@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { randomUUID } from 'crypto';
 import fse from 'fs-extra';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { createCommand } from 'commander';
 
 import type { StrapiCommand } from '../../types';
@@ -22,7 +22,7 @@ const readPackageJSON = async (path: string) => {
     return packageObj;
   } catch (err) {
     if (err instanceof Error) {
-      console.error(`${chalk.red('Error')}: ${err.message}`);
+      console.error(`${styleText('red', 'Error')}: ${err.message}`);
     } else {
       throw err;
     }
@@ -35,9 +35,10 @@ const writePackageJSON = async (path: string, file: object, spacing: number) => 
     return true;
   } catch (err) {
     if (err instanceof Error) {
-      console.error(`${chalk.red('Error')}: ${err.message}`);
+      console.error(`${styleText('red', 'Error')}: ${err.message}`);
       console.log(
-        `${chalk.yellow(
+        `${styleText(
+          'yellow',
           'Warning'
         )}: There has been an error, please set "telemetryDisabled": false in the "strapi" object of your package.json manually.`
       );
@@ -74,7 +75,7 @@ const action = async () => {
   const exists = await fse.pathExists(packageJSONPath);
 
   if (!exists) {
-    console.log(`${chalk.yellow('Warning')}: could not find package.json`);
+    console.log(`${styleText('yellow', 'Warning')}: could not find package.json`);
     process.exit(0);
   }
 
@@ -82,7 +83,7 @@ const action = async () => {
 
   if (packageObj.strapi && packageObj.strapi.uuid) {
     if (packageObj.strapi.telemetryDisabled === false) {
-      console.log(`${chalk.yellow('Warning:')} telemetry is already enabled`);
+      console.log(`${styleText('yellow', 'Warning:')} telemetry is already enabled`);
       process.exit(0);
     }
   }
@@ -100,7 +101,7 @@ const action = async () => {
     updatedPackageJSON.strapi.uuid,
     updatedPackageJSON.strapi?.installId
   );
-  console.log(`${chalk.green('Successfully opted into and enabled Strapi telemetry')}`);
+  console.log(`${styleText('green', 'Successfully opted into and enabled Strapi telemetry')}`);
   process.exit(0);
 };
 

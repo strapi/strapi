@@ -73,7 +73,6 @@
     "@vercel/stega": "0.1.2",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
-    "chalk": "4.1.2",
     "ci-info": "4.0.0",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",

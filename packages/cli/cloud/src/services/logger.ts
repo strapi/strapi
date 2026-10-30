@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import stringify from 'fast-safe-stringify';
 
 import ora from 'ora';
@@ -50,7 +50,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       console.log(
-        chalk.cyan(`[DEBUG]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        styleText('cyan', `[DEBUG]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
         ...args.map(stringifyArg)
       );
     },
@@ -61,7 +61,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       console.info(
-        chalk.blue(`[INFO]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        styleText('blue', `[INFO]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
         ...args.map(stringifyArg)
       );
     },
@@ -72,7 +72,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       console.info(
-        chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        styleText('blue', `${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
         ...args.map(stringifyArg)
       );
     },
@@ -83,7 +83,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       console.info(
-        chalk.green(`[SUCCESS]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        styleText('green', `[SUCCESS]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
         ...args.map(stringifyArg)
       );
     },
@@ -96,7 +96,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       console.warn(
-        chalk.yellow(`[WARN]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        styleText('yellow', `[WARN]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
         ...args.map(stringifyArg)
       );
     },
@@ -109,7 +109,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       console.error(
-        chalk.red(`[ERROR]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        styleText('red', `[ERROR]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
         ...args.map(stringifyArg)
       );
     },
@@ -151,7 +151,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       const progressBar = new cliProgress.SingleBar({
-        format: `${text ? `${text} |` : ''}${chalk.green('{bar}')}| {percentage}%`,
+        format: `${text ? `${text} |` : ''}${styleText('green', '{bar}')}| {percentage}%`,
         barCompleteChar: '\u2588',
         barIncompleteChar: '\u2591',
         hideCursor: true,

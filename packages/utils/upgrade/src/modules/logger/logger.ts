@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 
 import type { Logger as LoggerInterface, LoggerOptions } from './types';
 
@@ -55,7 +55,7 @@ export class Logger implements LoggerInterface {
     const isDebugEnabled = this.isNotSilent && this.isDebug;
 
     if (isDebugEnabled) {
-      console.log(chalk.cyan(`[DEBUG]\t[${nowAsISO()}]`), ...args);
+      console.log(styleText('cyan', `[DEBUG]\t[${nowAsISO()}]`), ...args);
     }
 
     return this;
@@ -65,7 +65,7 @@ export class Logger implements LoggerInterface {
     this.nbErrorsCalls += 1;
 
     if (this.isNotSilent) {
-      console.error(chalk.red(`[ERROR]\t[${nowAsISO()}]`), ...args);
+      console.error(styleText('red', `[ERROR]\t[${nowAsISO()}]`), ...args);
     }
 
     return this;
@@ -73,7 +73,7 @@ export class Logger implements LoggerInterface {
 
   info(...args: unknown[]): this {
     if (this.isNotSilent) {
-      console.info(chalk.blue(`[INFO]\t[${new Date().toISOString()}]`), ...args);
+      console.info(styleText('blue', `[INFO]\t[${new Date().toISOString()}]`), ...args);
     }
 
     return this;
@@ -91,7 +91,7 @@ export class Logger implements LoggerInterface {
     this.nbWarningsCalls += 1;
 
     if (this.isNotSilent) {
-      console.warn(chalk.yellow(`[WARN]\t[${new Date().toISOString()}]`), ...args);
+      console.warn(styleText('yellow', `[WARN]\t[${new Date().toISOString()}]`), ...args);
     }
 
     return this;

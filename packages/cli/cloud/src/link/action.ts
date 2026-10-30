@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 
 import type { Answers } from 'inquirer';
 import type { CLIContext } from '../types';
@@ -50,7 +50,8 @@ async function promptForRelink(
       {
         type: 'confirm',
         name: 'shouldRelink',
-        message: `A project named ${chalk.cyan(
+        message: `A project named ${styleText(
+          'cyan',
           existingConfig.project.displayName
             ? existingConfig.project.displayName
             : existingConfig.project.name
@@ -126,7 +127,7 @@ async function getUserSelection(
         type: 'list',
         name: 'linkProject',
         message: 'Which project do you want to link?',
-        choices: [...projects, { name: chalk.grey(`(${QUIT_OPTION})`), value: null }],
+        choices: [...projects, { name: styleText('grey', `(${QUIT_OPTION})`), value: null }],
       },
     ]);
 
@@ -199,7 +200,7 @@ export default async (ctx: CLIContext) => {
 
     await local.save({ project: answer.linkProject });
     logger.log(
-      ` You have successfully linked your project to ${chalk.cyan(answer.linkProject.displayName)}. You are now able to deploy your project.`
+      ` You have successfully linked your project to ${styleText('cyan', answer.linkProject.displayName)}. You are now able to deploy your project.`
     );
     await trackEvent(ctx, cloudApiService, 'didLinkProject', {
       projectInternalName: answer.linkProject,

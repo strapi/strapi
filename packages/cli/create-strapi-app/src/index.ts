@@ -1,6 +1,6 @@
 import { join, basename } from 'node:path';
 import os from 'node:os';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import commander from 'commander';
 import crypto from 'crypto';
 import fse from 'fs-extra';
@@ -80,7 +80,7 @@ async function run(args: string[]): Promise<void> {
 
   logger.title(
     'Strapi',
-    `${chalk.green(chalk.bold(`v${version}`))} ${chalk.bold("🚀 Let's create your new project")}\n`
+    `${styleText('green', styleText('bold', `v${version}`))} ${styleText('bold', "🚀 Let's create your new project")}\n`
   );
 
   if (
@@ -88,40 +88,42 @@ async function run(args: string[]): Promise<void> {
     options.template !== undefined
   ) {
     logger.fatal(
-      `You cannot use ${chalk.bold('--javascript')} or ${chalk.bold('--typescript')} with ${chalk.bold('--template')}`
+      `You cannot use ${styleText('bold', '--javascript')} or ${styleText('bold', '--typescript')} with ${styleText('bold', '--template')}`
     );
   }
 
   if (options.javascript === true && options.typescript === true) {
     logger.fatal(
-      `You cannot use both ${chalk.bold('--typescript')} (--ts) and ${chalk.bold('--javascript')} (--js) flags together`
+      `You cannot use both ${styleText('bold', '--typescript')} (--ts) and ${styleText('bold', '--javascript')} (--js) flags together`
     );
   }
 
   // Only prompt the example app option if there is no template option
   if (options.example === true && options.template !== undefined) {
-    logger.fatal(`You cannot use ${chalk.bold('--example')} with ${chalk.bold('--template')}`);
+    logger.fatal(
+      `You cannot use ${styleText('bold', '--example')} with ${styleText('bold', '--template')}`
+    );
   }
 
   if (options.template !== undefined && options.template.startsWith('-')) {
-    logger.fatal(`Template name ${chalk.bold(`"${options.template}"`)} is invalid`);
+    logger.fatal(`Template name ${styleText('bold', `"${options.template}"`)} is invalid`);
   }
 
   if ([options.useNpm, options.usePnpm, options.useYarn].filter(Boolean).length > 1) {
     logger.fatal(
-      `You cannot specify multiple package managers at the same time ${chalk.bold('(--use-npm, --use-pnpm, --use-yarn)')}`
+      `You cannot specify multiple package managers at the same time ${styleText('bold', '(--use-npm, --use-pnpm, --use-yarn)')}`
     );
   }
 
   if (options.quickstart && !directory) {
     logger.fatal(
-      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--quickstart')}`
+      `Please specify the ${styleText('bold', '<directory>')} of your project when using ${styleText('bold', '--quickstart')}`
     );
   }
 
   if (options.nonInteractive && !directory) {
     logger.fatal(
-      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--non-interactive')}`
+      `Please specify the ${styleText('bold', '<directory>')} of your project when using ${styleText('bold', '--non-interactive')}`
     );
   }
 

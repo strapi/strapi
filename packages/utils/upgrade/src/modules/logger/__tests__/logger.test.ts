@@ -1,10 +1,8 @@
 import { Logger, loggerFactory } from '../logger';
 
-jest.mock('chalk', () => ({
-  cyan: jest.fn((text) => text),
-  red: jest.fn((text) => text),
-  blue: jest.fn((text) => text),
-  yellow: jest.fn((text) => text),
+jest.mock('node:util', () => ({
+  ...jest.requireActual('node:util'),
+  styleText: jest.fn((_format, text) => text),
 }));
 
 describe('Logger', () => {

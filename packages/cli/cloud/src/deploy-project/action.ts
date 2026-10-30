@@ -1,7 +1,7 @@
 import fse from 'fs-extra';
 import boxen from 'boxen';
 import path from 'path';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { AxiosError } from 'axios';
 import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
@@ -57,7 +57,7 @@ async function promptForEnvironment(environments: string[]): Promise<string> {
       type: 'list',
       name: 'selectedEnvironment',
       message: 'Select the environment to deploy:',
-      choices: [...choices, { name: chalk.grey(`(${QUIT_OPTION})`), value: null }],
+      choices: [...choices, { name: styleText('grey', `(${QUIT_OPTION})`), value: null }],
     },
   ]);
   if (selectedEnvironment === null) {
@@ -141,7 +141,7 @@ async function upload(
 
       progressBar.update(100);
       progressBar.stop();
-      ctx.logger.log(`${chalk.green.bold('✔')} Upload finished!\n`);
+      ctx.logger.log(`${styleText(['green', 'bold'], '✔')} Upload finished!\n`);
       return data.build_id;
     } catch (e: any) {
       progressBar.stop();
@@ -293,14 +293,15 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
       ctx.logger.log(
         '\n Oops! This project has been suspended. \n\n Please reactivate it from the dashboard to continue deploying: '
       );
-      ctx.logger.log(chalk.underline(`${metadata.dashboardUrls.project}`));
+      ctx.logger.log(styleText('underline', `${metadata.dashboardUrls.project}`));
       return;
     }
   } catch (e: Error | unknown) {
     if (e instanceof AxiosError && e.response?.data) {
       if (e.response.status === 404) {
         ctx.logger.warn(
-          `The project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+          `The project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${styleText(
+            'cyan',
             'link'
           )} command before deploying.`
         );
@@ -353,7 +354,7 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
         {
           type: 'confirm',
           name: 'confirm',
-          message: `Do you want to proceed with deployment to ${chalk.cyan(projectData.displayName)} on ${chalk.cyan(project.targetEnvironment)} environment?`,
+          message: `Do you want to proceed with deployment to ${styleText('cyan', projectData.displayName)} on ${styleText('cyan', project.targetEnvironment)} environment?`,
         },
       ]);
       if (!confirm) {
@@ -372,7 +373,7 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
 
   try {
     ctx.logger.log(
-      `∷ Deploying project to ${chalk.cyan(project.targetEnvironment ?? `production`)} environment...`
+      `∷ Deploying project to ${styleText('cyan', project.targetEnvironment ?? `production`)} environment...`
     );
 
     notifications = notificationService(
@@ -383,8 +384,11 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
 
     await buildLogsService(`${apiConfig.apiBaseUrl}/${VERSION}/logs/${buildId}`, token, cliConfig);
     const dashboardUrlLine =
-      chalk.cyan(' →  ') +
-      chalk.cyan.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments`);
+      styleText('cyan', ' →  ') +
+      styleText(
+        ['cyan', 'underline'],
+        `${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments`
+      );
     ctx.logger.log(
       boxen(`Project and deployment logs ready at:\n${dashboardUrlLine}`, {
         padding: 1,

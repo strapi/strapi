@@ -2,7 +2,7 @@ import path from 'path';
 import Configstore from 'configstore';
 import semver from 'semver';
 import boxen from 'boxen';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { env } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
@@ -19,9 +19,9 @@ const boxenOptions: boxen.Options = {
 };
 
 const getUpdateMessage = (newVersion: string, currentVersion: string) => {
-  const currentVersionLog = chalk.dim(currentVersion);
-  const newVersionLog = chalk.green(newVersion);
-  const releaseLink = chalk.bold('https://github.com/strapi/strapi/releases');
+  const currentVersionLog = styleText('dim', currentVersion);
+  const newVersionLog = styleText('green', newVersion);
+  const releaseLink = styleText('bold', 'https://github.com/strapi/strapi/releases');
 
   return `
 A new version of Strapi is available ${currentVersionLog} → ${newVersionLog}

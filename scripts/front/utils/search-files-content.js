@@ -1,12 +1,11 @@
 'use strict';
 
-const { promisify } = require('util');
+const { promisify, styleText } = require('util');
 const path = require('path');
 const readFile = promisify(require('fs').readFile);
 const { readFileSync, writeFileSync } = require('fs');
 const _ = require('lodash');
 const { glob } = require('glob');
-const chalk = require('chalk');
 
 const findFilesInDirectories = async (
   directories = [],
@@ -38,7 +37,7 @@ const getMatches = (content, matchedString) => {
   for (const line of lines) {
     if (line.includes(matchedString)) {
       highlightedLines.push(
-        line.split(matchedString).join(chalk.bgMagentaBright(matchedString)).trim()
+        line.split(matchedString).join(styleText('bgMagentaBright', matchedString)).trim()
       );
     }
   }

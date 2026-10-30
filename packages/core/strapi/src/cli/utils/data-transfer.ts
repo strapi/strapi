@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import path from 'node:path';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
@@ -25,12 +25,13 @@ const exitMessageText = (process: string, error = false) => {
   const processCapitalized = process[0].toUpperCase() + process.slice(1);
 
   if (!error) {
-    return chalk.bold(
-      chalk.green(`${processCapitalized} process has been completed successfully!`)
+    return styleText(
+      'bold',
+      styleText('green', `${processCapitalized} process has been completed successfully!`)
     );
   }
 
-  return chalk.bold(chalk.red(`${processCapitalized} process failed.`));
+  return styleText('bold', styleText('red', `${processCapitalized} process failed.`));
 };
 
 const pad = (n: number) => {
@@ -66,7 +67,7 @@ const buildTransferTable = (resultData: ResultData) => {
 
   // Build pretty table
   const table = new Table({
-    head: ['Type', 'Count', 'Size'].map((text) => chalk.bold.blue(text)),
+    head: ['Type', 'Count', 'Size'].map((text) => styleText(['bold', 'blue'], text)),
   });
 
   let totalBytes = 0;
@@ -79,7 +80,7 @@ const buildTransferTable = (resultData: ResultData) => {
     }
 
     table.push([
-      { hAlign: 'left', content: chalk.bold(stage) },
+      { hAlign: 'left', content: styleText('bold', stage) },
       { hAlign: 'right', content: item.count },
       { hAlign: 'right', content: `${readableBytes(item.bytes, 1, 11)} ` },
     ]);
@@ -97,17 +98,23 @@ const buildTransferTable = (resultData: ResultData) => {
           const subitem = item.aggregates[subkey];
 
           table.push([
-            { hAlign: 'left', content: `-- ${chalk.bold.grey(subkey)}` },
-            { hAlign: 'right', content: chalk.grey(subitem.count) },
-            { hAlign: 'right', content: chalk.grey(`(${readableBytes(subitem.bytes, 1, 11)})`) },
+            { hAlign: 'left', content: `-- ${styleText(['bold', 'grey'], String(subkey))}` },
+            { hAlign: 'right', content: styleText('grey', String(subitem.count)) },
+            {
+              hAlign: 'right',
+              content: styleText('grey', `(${readableBytes(subitem.bytes, 1, 11)})`),
+            },
           ]);
         });
     }
   });
   table.push([
-    { hAlign: 'left', content: chalk.bold.green('Total') },
-    { hAlign: 'right', content: chalk.bold.green(totalItems) },
-    { hAlign: 'right', content: `${chalk.bold.green(readableBytes(totalBytes, 1, 11))} ` },
+    { hAlign: 'left', content: styleText(['bold', 'green'], 'Total') },
+    { hAlign: 'right', content: styleText(['bold', 'green'], String(totalItems)) },
+    {
+      hAlign: 'right',
+      content: `${styleText(['bold', 'green'], readableBytes(totalBytes, 1, 11))} `,
+    },
   ]);
 
   return table;
@@ -336,9 +343,9 @@ const buildTransferTransforms = (opts: TransferCliFilterOptions) => ({
 });
 
 const errorColors = {
-  fatal: chalk.red,
-  error: chalk.red,
-  silly: chalk.yellow,
+  fatal: 'red',
+  error: 'red',
+  silly: 'yellow',
 } as const;
 
 const formatDiagnostic = (
@@ -378,8 +385,10 @@ const formatDiagnostic = (
       if (kind === 'error') {
         const { message, severity = 'fatal' } = details;
 
-        const colorizeError = errorColors[severity];
-        const errorMessage = colorizeError(`[${severity.toUpperCase()}] ${message}`);
+        const errorMessage = styleText(
+          errorColors[severity],
+          `[${severity.toUpperCase()}] ${message}`
+        );
 
         getLogger().error(errorMessage);
       }
@@ -562,24 +571,33 @@ const getDiffHandler = (
         }
         // handle generic cases
         else if (diff.kind === 'added') {
-          engine.reportWarning(chalk.red(`${chalk.bold(path)} does not exist on source`), source);
+          engine.reportWarning(
+            styleText('red', `${styleText('bold', path)} does not exist on source`),
+            source
+          );
         } else if (diff.kind === 'deleted') {
           engine.reportWarning(
-            chalk.red(`${chalk.bold(path)} does not exist on destination`),
+            styleText('red', `${styleText('bold', path)} does not exist on destination`),
             source
           );
         } else if (diff.kind === 'modified') {
-          engine.reportWarning(chalk.red(`${chalk.bold(path)} has a different data type`), source);
+          engine.reportWarning(
+            styleText('red', `${styleText('bold', path)} has a different data type`),
+            source
+          );
         }
       }
     });
 
     // output the known feature warnings
     if (workflowsStatus === 'added') {
-      engine.reportWarning(chalk.red(`Review workflows feature does not exist on source`), source);
+      engine.reportWarning(
+        styleText('red', `Review workflows feature does not exist on source`),
+        source
+      );
     } else if (workflowsStatus === 'deleted') {
       engine.reportWarning(
-        chalk.red(`Review workflows feature does not exist on destination`),
+        styleText('red', `Review workflows feature does not exist on destination`),
         source
       );
     } else if (workflowsStatus === 'modified') {
@@ -738,7 +756,7 @@ const logTransferFilterSummary = (opts: Partial<TransferCliFilterOptions>) => {
   }
 
   if (parts.length) {
-    console.log(chalk.dim(`Transfer filters: ${parts.join('; ')}.`));
+    console.log(styleText('dim', `Transfer filters: ${parts.join('; ')}.`));
   }
 
   // When `--only` omits stages, say so — destination data for those stages is preserved.
@@ -746,7 +764,8 @@ const logTransferFilterSummary = (opts: Partial<TransferCliFilterOptions>) => {
     const omittedStages = TRANSFER_STAGE_PRESETS.filter((stage) => !only.includes(stage));
     if (omittedStages.length) {
       console.log(
-        chalk.dim(
+        styleText(
+          'dim',
           `Stages not transferred (destination data preserved): ${omittedStages.join(', ')}.`
         )
       );
@@ -762,12 +781,13 @@ const logTransferFilterSummary = (opts: Partial<TransferCliFilterOptions>) => {
   }
 
   if (contentTypeParts.length) {
-    console.log(chalk.dim(`Content type filters: ${contentTypeParts.join('; ')}.`));
+    console.log(styleText('dim', `Content type filters: ${contentTypeParts.join('; ')}.`));
   }
 
   if (opts.filesAutoExcluded) {
     console.log(
-      chalk.dim(
+      styleText(
+        'dim',
         'Skipping files stage: upload content types are not in transfer scope (plugin::upload.file, plugin::upload.folder).'
       )
     );
@@ -780,7 +800,8 @@ const logTransferFilterSummary = (opts: Partial<TransferCliFilterOptions>) => {
     !opts.filesAutoExcluded
   ) {
     console.log(
-      chalk.dim(
+      styleText(
+        'dim',
         'Note: Media library records (plugin::upload.file, plugin::upload.folder) are still transferred with the rest of your content (the entities stage). Sync upload binaries separately (e.g. rsync public/uploads).'
       )
     );

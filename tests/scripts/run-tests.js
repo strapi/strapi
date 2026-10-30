@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('node:fs/promises');
 const yargs = require('yargs');
-const chalk = require('chalk');
+const { styleText } = require('node:util');
 const dotenv = require('dotenv');
 
 const {
@@ -163,13 +163,14 @@ yargs
 
         if (wasSetup) {
           console.log(
-            `${chalk.green('Successfully')} setup test apps for the following domains: ${chalk.bold(
+            `${styleText('green', 'Successfully')} setup test apps for the following domains: ${styleText(
+              'bold',
               selectedDomains.join(', ')
             )}`
           );
         } else {
           console.log(
-            `Skipping setting up test apps, use ${chalk.bold('--setup')} to force the setup process`
+            `Skipping setting up test apps, use ${styleText('bold', '--setup')} to force the setup process`
           );
         }
 
@@ -290,7 +291,7 @@ module.exports = config
           }
         }
       } catch (err) {
-        console.error(chalk.red(`Error running ${type} tests:`));
+        console.error(styleText('red', `Error running ${type} tests:`));
         if (err.shortMessage) {
           console.error(err.shortMessage);
           process.exit(1);
@@ -328,12 +329,12 @@ module.exports = config
 
         await Promise.all(
           currentTestApps.map(async (appPath) => {
-            console.log(`Cleaning test app at path: ${chalk.bold(appPath)}`);
+            console.log(`Cleaning test app at path: ${styleText('bold', appPath)}`);
             await cleanTestApp(appPath);
           })
         );
       } catch (err) {
-        console.error(chalk.red('Error cleaning test apps:'));
+        console.error(styleText('red', 'Error cleaning test apps:'));
         console.error(err);
         process.exit(1);
       }

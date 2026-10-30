@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { createCommand } from 'commander';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import fse from 'fs-extra';
 
 import { createStrapi, compileStrapi } from '@strapi/core';
@@ -50,7 +50,7 @@ const action = async (uid: string, oldName: string, newName: string) => {
       );
     }
 
-    console.log(chalk.green(`Renamed "${oldName}" to "${newName}" on ${uid}.`));
+    console.log(styleText('green', `Renamed "${oldName}" to "${newName}" on ${uid}.`));
 
     created.forEach((file) => {
       console.log(`Generated migration ${path.join(migrationsDir, file)}`);

@@ -10,7 +10,7 @@
 const { join, dirname } = require('path');
 const fs = require('fs-extra');
 const { glob } = require('glob');
-const chalk = require('chalk');
+const { styleText } = require('node:util');
 
 const updateMissingKeysToJSON = async (filePath) => {
   // Read translation file
@@ -66,7 +66,8 @@ const addMissingKeys = async (lang) => {
 if (require.main === module) {
   if (process.argv.length < 3) {
     console.warn(
-      chalk.yellow(
+      styleText(
+        'yellow',
         'Please provide a language. For example:\nnode scripts/front/add-missing-keys-to-other-language.js vi'
       )
     );

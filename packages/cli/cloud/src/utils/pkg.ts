@@ -2,7 +2,7 @@ import * as fse from 'fs-extra';
 import os from 'os';
 import pkgUp from 'pkg-up';
 import * as yup from 'yup';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { Logger } from '../services/logger';
 
 interface Export {
@@ -88,7 +88,8 @@ const validatePkg = async ({ pkg }: { pkg: object }): Promise<PackageJson> => {
         case 'required':
           if (err.path) {
             throw new Error(
-              `'${err.path}' in 'package.json' is required as type '${chalk.magenta(
+              `'${err.path}' in 'package.json' is required as type '${styleText(
+                'magenta',
                 yup.reach(packageJsonSchema, err.path).type
               )}'`
             );
@@ -101,9 +102,11 @@ const validatePkg = async ({ pkg }: { pkg: object }): Promise<PackageJson> => {
         case 'noUnknown':
           if (err.path && err.params && 'unknown' in err.params) {
             throw new Error(
-              `'${err.path}' in 'package.json' contains the unknown key ${chalk.magenta(
-                err.params.unknown
-              )}, for compatibility only the following keys are allowed: ${chalk.magenta(
+              `'${err.path}' in 'package.json' contains the unknown key ${styleText(
+                'magenta',
+                String(err.params.unknown)
+              )}, for compatibility only the following keys are allowed: ${styleText(
+                'magenta',
                 "['types', 'source', 'import', 'require', 'default']"
               )}`
             );
@@ -112,9 +115,10 @@ const validatePkg = async ({ pkg }: { pkg: object }): Promise<PackageJson> => {
         default:
           if (err.path && err.params && 'type' in err.params && 'value' in err.params) {
             throw new Error(
-              `'${err.path}' in 'package.json' must be of type '${chalk.magenta(
-                err.params.type
-              )}' (received '${chalk.magenta(typeof err.params.value)}')`
+              `'${err.path}' in 'package.json' must be of type '${styleText(
+                'magenta',
+                String(err.params.type)
+              )}' (received '${styleText('magenta', typeof err.params.value)}')`
             );
           }
       }

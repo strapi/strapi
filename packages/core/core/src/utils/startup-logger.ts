@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import CLITable from 'cli-table3';
 
 import type { Core } from '@strapi/types';
@@ -26,7 +26,7 @@ export const createStartupLogger = (app: Core.Strapi) => {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;
       console.log();
-      console.log(chalk.black.bgWhite(' Project information'.padEnd(columns)));
+      console.log(styleText(['black', 'bgWhite'], ' Project information'.padEnd(columns)));
       console.log();
 
       const infoTable = new CLITable({
@@ -45,23 +45,23 @@ export const createStartupLogger = (app: Core.Strapi) => {
       };
 
       infoTable.push(
-        [chalk.blue('Time'), `${new Date()}`],
-        [chalk.blue('Launched in'), `${Date.now() - app.config.launchedAt} ms`],
-        [chalk.blue('Environment'), app.config.environment],
-        [chalk.blue('Process PID'), process.pid],
-        [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
-        [chalk.blue('Plan'), getPlan()],
-        [chalk.blue('Database'), dbInfo?.client],
-        [chalk.blue('Database name'), dbInfo?.displayName]
+        [styleText('blue', 'Time'), `${new Date()}`],
+        [styleText('blue', 'Launched in'), `${Date.now() - app.config.launchedAt} ms`],
+        [styleText('blue', 'Environment'), app.config.environment],
+        [styleText('blue', 'Process PID'), process.pid],
+        [styleText('blue', 'Version'), `${app.config.info.strapi} (node ${process.version})`],
+        [styleText('blue', 'Plan'), getPlan()],
+        [styleText('blue', 'Database'), dbInfo?.client],
+        [styleText('blue', 'Database name'), dbInfo?.displayName]
       );
 
       if (dbInfo?.schema) {
-        infoTable.push([chalk.blue('Database schema'), dbInfo.schema]);
+        infoTable.push([styleText('blue', 'Database schema'), dbInfo.schema]);
       }
 
       console.log(infoTable.toString());
       console.log();
-      console.log(chalk.black.bgWhite(' Actions available'.padEnd(columns)));
+      console.log(styleText(['black', 'bgWhite'], ' Actions available'.padEnd(columns)));
       console.log();
     },
 
@@ -72,16 +72,19 @@ export const createStartupLogger = (app: Core.Strapi) => {
 
       this.logStats();
 
-      console.log(chalk.bold('One more thing...'));
+      console.log(styleText('bold', 'One more thing...'));
       console.log(
-        chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
+        styleText(
+          'grey',
+          'Create your first administrator 💻 by going to the administration panel at:'
+        )
       );
       console.log();
 
       const addressTable = new CLITable();
 
       const adminUrl = strapi.config.get('admin.absoluteUrl');
-      addressTable.push([chalk.bold(adminUrl)]);
+      addressTable.push([styleText('bold', String(adminUrl))]);
 
       console.log(`${addressTable.toString()}`);
       console.log();
@@ -93,18 +96,20 @@ export const createStartupLogger = (app: Core.Strapi) => {
       }
       this.logStats();
 
-      console.log(chalk.bold('Welcome back!'));
+      console.log(styleText('bold', 'Welcome back!'));
 
       if (app.config.get('admin.serveAdminPanel') === true) {
-        console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
+        console.log(
+          styleText('grey', 'To manage your project 🚀, go to the administration panel at:')
+        );
         const adminUrl = strapi.config.get('admin.absoluteUrl');
-        console.log(chalk.bold(adminUrl));
+        console.log(styleText('bold', String(adminUrl)));
         console.log();
       }
 
-      console.log(chalk.grey('To access the server ⚡️, go to:'));
+      console.log(styleText('grey', 'To access the server ⚡️, go to:'));
       const serverUrl = strapi.config.get('server.absoluteUrl');
-      console.log(chalk.bold(serverUrl));
+      console.log(styleText('bold', String(serverUrl)));
       console.log();
     },
 

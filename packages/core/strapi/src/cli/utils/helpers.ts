@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { has, isString } from 'lodash';
 import boxen from 'boxen';
 import type { Command } from 'commander';
@@ -87,9 +87,9 @@ const exitWith = (code: number, message?: string | string[], options: ExitWithOp
 
   const log = (message: string) => {
     if (code === 0) {
-      logger.log(chalk.green(message));
+      logger.log(styleText('green', message));
     } else {
-      logger.error(chalk.red(message));
+      logger.error(styleText('red', message));
     }
   };
 
@@ -157,7 +157,8 @@ const ifOptions = (
 const assertCwdContainsStrapiProject = (name: string) => {
   const logErrorAndExit = () => {
     console.log(
-      `You need to run ${chalk.yellow(
+      `You need to run ${styleText(
+        'yellow',
         `strapi ${name}`
       )} in a Strapi project. Make sure you are in the right directory.`
     );
@@ -208,8 +209,9 @@ const runAction =
 const notifyExperimentalCommand = async (name: string, { force }: { force?: boolean } = {}) => {
   console.log(
     boxen(
-      `The ${chalk.bold(
-        chalk.underline(name)
+      `The ${styleText(
+        'bold',
+        styleText('underline', name)
       )} command is considered experimental, use at your own risk.`,
       {
         title: 'Warning',

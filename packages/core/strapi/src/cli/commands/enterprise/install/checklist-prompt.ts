@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 
 import { PromptCancelledError } from './errors';
 
@@ -41,20 +41,22 @@ export const promptChecklist = ({
 
     const renderChoice = (choice: ChecklistChoice, index: number): string => {
       if (choice.disabled !== undefined) {
-        return chalk.dim(fitWidth(`  - ${choice.name} (${choice.disabled})`, width()));
+        return styleText('dim', fitWidth(`  - ${choice.name} (${choice.disabled})`, width()));
       }
 
       const isActive = stops[cursor] === index;
-      const box = checked[index] ? chalk.green('◉') : '◯';
+      const box = checked[index] ? styleText('green', '◉') : '◯';
       const name = fitWidth(choice.name, width() - 4);
 
-      return isActive ? `${chalk.cyan('❯')} ${box} ${chalk.cyan(name)}` : `  ${box} ${name}`;
+      return isActive
+        ? `${styleText('cyan', '❯')} ${box} ${styleText('cyan', name)}`
+        : `  ${box} ${name}`;
     };
 
     const renderSubmit = () =>
       stops[cursor] === submitIndex
-        ? `${chalk.cyan('❯')} ${chalk.cyan.bold(SUBMIT_LABEL)}`
-        : `  ${chalk.bold(SUBMIT_LABEL)}`;
+        ? `${styleText('cyan', '❯')} ${styleText(['cyan', 'bold'], SUBMIT_LABEL)}`
+        : `  ${styleText('bold', SUBMIT_LABEL)}`;
 
     const draw = (lines: string[]) => {
       if (renderedLineCount > 0) {
@@ -67,7 +69,7 @@ export const promptChecklist = ({
       renderedLineCount = lines.length;
     };
 
-    const question = chalk.bold(message);
+    const question = styleText('bold', message);
     const render = () => draw([question, ...choices.map(renderChoice), '', renderSubmit()]);
 
     const stop = () => {
@@ -85,7 +87,7 @@ export const promptChecklist = ({
       );
       const answer = selected.map((choice) => choice.short ?? choice.name).join(', ');
 
-      draw([`${question} ${chalk.cyan(answer || 'none')}`]);
+      draw([`${question} ${styleText('cyan', answer || 'none')}`]);
       stop();
       resolve(selected.flatMap((choice) => (choice.value === undefined ? [] : [choice.value])));
     };

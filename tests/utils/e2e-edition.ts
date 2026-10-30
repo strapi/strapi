@@ -1,6 +1,6 @@
 'use strict';
 
-const chalk = require('chalk');
+const { styleText } = require('node:util');
 
 function hasStrapiLicense() {
   return Boolean(process.env.STRAPI_LICENSE?.trim());
@@ -66,8 +66,9 @@ function applyE2eEditionEnv() {
 
   if (lifecycle === 'test:e2e:ee' && !hasStrapiLicense()) {
     console.error(
-      chalk.red.bold('[e2e]'),
-      chalk.red(
+      styleText(['red', 'bold'], '[e2e]'),
+      styleText(
+        'red',
         'yarn test:e2e:ee requires STRAPI_LICENSE (e.g. in tests/e2e/.env or export STRAPI_LICENSE=…).'
       )
     );
@@ -78,8 +79,9 @@ function applyE2eEditionEnv() {
 
   if (edition === 'ce' && explicitBefore === 'ee' && !hasStrapiLicense()) {
     console.warn(
-      chalk.yellow('[e2e]'),
-      chalk.yellow(
+      styleText('yellow', '[e2e]'),
+      styleText(
+        'yellow',
         'STRAPI_E2E_EDITION=ee was set but STRAPI_LICENSE is missing — running Community Edition.'
       )
     );

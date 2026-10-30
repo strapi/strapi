@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 import { isObject } from 'lodash';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 
 import fs from 'fs-extra';
 
@@ -106,7 +106,7 @@ export default async (opts: CmdOptions) => {
   };
 
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
-  destination.onWarning = (message) => console.warn(`\n${chalk.yellow('warn')}: ${message}`);
+  destination.onWarning = (message) => console.warn(`\n${styleText('yellow', 'warn')}: ${message}`);
 
   const engine = createTransferEngine(source, destination, engineOptions);
 

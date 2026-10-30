@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import fse from 'fs-extra';
 import { logger } from './logger';
 
@@ -12,7 +12,8 @@ export async function checkInstallPath(directory: string): Promise<string> {
 
     if (!stat.isDirectory()) {
       logger.fatal(
-        `${chalk.green(
+        `${styleText(
+          'green',
           rootPath
         )} is not a directory. Make sure to create a Strapi application in an empty directory.`
       );
@@ -22,7 +23,7 @@ export async function checkInstallPath(directory: string): Promise<string> {
     if (files.length > 1) {
       logger.fatal([
         'You can only create a Strapi app in an empty directory',
-        `Make sure ${chalk.green(rootPath)} is empty.`,
+        `Make sure ${styleText('green', rootPath)} is empty.`,
       ]);
     }
   }

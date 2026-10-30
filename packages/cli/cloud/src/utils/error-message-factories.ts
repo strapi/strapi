@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import boxen from 'boxen';
 import { apiConfig } from '../config/api';
 
@@ -14,11 +14,11 @@ export const environmentErrorMessageFactory = ({
   secondLine,
 }: EnvironmentErrorMessage) => {
   return [
-    chalk.yellow(firstLine),
+    styleText('yellow', firstLine),
     '',
-    chalk.cyan(secondLine),
-    chalk.blue(' →  ') +
-      chalk.blue.underline(`${apiConfig.dashboardBaseUrl}/projects/${projectName}`),
+    styleText('cyan', secondLine),
+    styleText('blue', ' →  ') +
+      styleText(['blue', 'underline'], `${apiConfig.dashboardBaseUrl}/projects/${projectName}`),
   ].join('\n');
 };
 

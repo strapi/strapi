@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import fse from 'fs-extra';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { createCommand } from 'commander';
 
 import type { StrapiCommand } from '../../types';
@@ -16,7 +16,7 @@ const readPackageJSON = async (path: string) => {
     return { uuid, installId, packageObj };
   } catch (err) {
     if (err instanceof Error) {
-      console.error(`${chalk.red('Error')}: ${err.message}`);
+      console.error(`${styleText('red', 'Error')}: ${err.message}`);
     }
   }
 };
@@ -27,7 +27,7 @@ const writePackageJSON = async (path: string, file: object, spacing: number) => 
     return true;
   } catch (err) {
     if (err instanceof Error) {
-      console.error(`${chalk.red('Error')}: ${err.message}`);
+      console.error(`${styleText('red', 'Error')}: ${err.message}`);
     }
   }
 };
@@ -37,14 +37,14 @@ const action = async () => {
   const exists = await fse.pathExists(packageJSONPath);
 
   if (!exists) {
-    console.log(`${chalk.yellow('Warning')}: could not find package.json`);
+    console.log(`${styleText('yellow', 'Warning')}: could not find package.json`);
     process.exit(0);
   }
 
   const { uuid, installId, packageObj } = (await readPackageJSON(packageJSONPath)) ?? {};
 
   if ((packageObj.strapi && packageObj.strapi.telemetryDisabled) || !uuid) {
-    console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);
+    console.log(`${styleText('yellow', 'Warning:')} telemetry is already disabled`);
     process.exit(0);
   }
 
@@ -60,7 +60,8 @@ const action = async () => {
 
   if (!write) {
     console.log(
-      `${chalk.yellow(
+      `${styleText(
+        'yellow',
         'Warning'
       )}: There has been an error, please set "telemetryDisabled": true in the "strapi" object of your package.json manually.`
     );
@@ -68,7 +69,7 @@ const action = async () => {
   }
 
   await sendEvent('didOptOutTelemetry', uuid, installId);
-  console.log(`${chalk.green('Successfully opted out of Strapi telemetry')}`);
+  console.log(`${styleText('green', 'Successfully opted out of Strapi telemetry')}`);
   process.exit(0);
 };
 
