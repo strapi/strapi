@@ -1,5 +1,4 @@
 import path from 'path';
-import crypto from 'crypto';
 import fs from 'fs';
 import fse from 'fs-extra';
 import _ from 'lodash';
@@ -234,24 +233,28 @@ describe('Image manipulation - animated images', () => {
 });
 
 describe('Image manipulation - AVIF', () => {
-  jest.setTimeout(20000);
-
   const avifDir = path.join(__dirname, 'tmp-avif');
   const avifPath = path.join(avifDir, 'image.avif');
-  const AVIF_WIDTH = 400;
-  const AVIF_HEIGHT = 300;
+  // Just above the 245×156 thumbnail breakpoint. A 400×300 noise frame at
+  // quality 100 is an AV1 stress case and exceeds Jest's 5s limit on slower
+  // CI runners. These tests only check format, dimensions, and that
+  // optimize/thumbnail write a new AV1 file.
+  const AVIF_WIDTH = 256;
+  const AVIF_HEIGHT = 192;
 
   beforeAll(async () => {
     await fse.ensureDir(avifDir);
-    // sharp reports AVIF files as `heif` with `av1` compression.
-    // Noise at quality 100 stays larger than the quality-80 optimize output.
-    // effort 0 keeps that encode inside the hook limit on CI.
-    await sharp(crypto.randomBytes(AVIF_WIDTH * AVIF_HEIGHT * 3), {
-      raw: { width: AVIF_WIDTH, height: AVIF_HEIGHT, channels: 3 },
+    await sharp({
+      create: {
+        width: AVIF_WIDTH,
+        height: AVIF_HEIGHT,
+        channels: 3,
+        background: { r: 180, g: 40, b: 40 },
+      },
     })
-      .avif({ quality: 100, effort: 0 })
+      .avif({ quality: 50 })
       .toFile(avifPath);
-  }, 20000);
+  });
 
   afterAll(async () => {
     await fse.remove(avifDir);

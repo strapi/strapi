@@ -22,6 +22,7 @@ const settingsFields = [
   'defaultSortBy',
   'defaultSortOrder',
   'relationOpenMode',
+  'customOrder',
 ];
 
 const getModelSettings = (model: unknown) =>

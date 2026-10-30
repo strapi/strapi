@@ -39,6 +39,7 @@ const createSettingsSchema = (schema: any) => {
         .default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
       relationOpenMode: yup.string().oneOf(['modal', 'page', 'newTab']).default('modal'),
+      customOrder: yup.boolean().nullable(),
     })
     .noUnknown();
 };
