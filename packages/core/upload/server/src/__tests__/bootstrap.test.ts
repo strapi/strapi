@@ -19,14 +19,18 @@ const createStrapiMock = ({
   isStrapiManagedAiEnabled = false,
   hasProvider = jest.fn(() => false),
   registerStrapiManagedProvider = jest.fn(),
+  auditLogsLifecycle = undefined as { registerEvent: jest.Mock } | undefined,
 } = {}) =>
   ({
+    has: jest.fn((name: string) => name === 'audit-logs-lifecycle' && !!auditLogsLifecycle),
     get(name: string) {
       switch (name) {
         case 'webhookStore':
           return {
             addAllowedEvent: jest.fn(),
           };
+        case 'audit-logs-lifecycle':
+          return auditLogsLifecycle;
         default:
           return null;
       }
@@ -164,5 +168,24 @@ describe('Upload plugin bootstrap function', () => {
     await bootstrap({ strapi });
 
     expect(registerStrapiManagedProvider).not.toHaveBeenCalled();
+  });
+
+  test('registers the audit log events when audit logs are available', async () => {
+    const auditLogsLifecycle = { registerEvent: jest.fn() };
+
+    global.strapi = createStrapiMock({ auditLogsLifecycle });
+
+    await bootstrap({ strapi });
+
+    expect(auditLogsLifecycle.registerEvent.mock.calls.map(([name]) => name)).toEqual([
+      'upload-settings.update',
+      'media.create',
+      'media.update.audit',
+      'media.delete',
+      'media-folder.create',
+      'media-folder.update',
+      'media-folder.delete.audit',
+      'media.move',
+    ]);
   });
 });
