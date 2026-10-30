@@ -78,6 +78,7 @@
   },
   "devDependencies": {
     "@types/node": "22.20.0",
+    "@types/nodemailer": "7.0.11",
     "eslint-config-custom": "5.60.0",
     "tsconfig": "5.60.0",
     "vitest": "catalog:",
