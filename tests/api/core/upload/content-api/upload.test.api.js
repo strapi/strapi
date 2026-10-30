@@ -61,10 +61,27 @@ const todoComponent = {
   },
 };
 
+const catModel = {
+  displayName: 'Cat',
+  singularName: 'cat',
+  pluralName: 'cats',
+  kind: 'collectionType',
+  draftAndPublish: true,
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    picture: {
+      type: 'media',
+    },
+  },
+};
+
 describe('Upload plugin', () => {
   beforeAll(async () => {
     await builder
       .addContentType(dogModel)
+      .addContentType(catModel)
       .addComponent(todoComponent)
       .addContentType(todoListModel)
       .build();
@@ -735,6 +752,122 @@ describe('Upload plugin', () => {
           })
         );
       });
+    });
+  });
+
+  describe('Upload with refId', () => {
+    const ref = 'api::dog.dog';
+    const field = 'profilePicture';
+
+    const uploadFor = (refId) =>
+      rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          refId,
+          ref,
+          field,
+        },
+      });
+
+    const findDog = (documentId, params = '') =>
+      rq({ method: 'GET', url: `/dogs/${documentId}?populate=${field}${params}` });
+
+    const countFiles = () => strapi.db.query('plugin::upload.file').count();
+
+    let dog;
+
+    beforeEach(async () => {
+      const res = await rq({ method: 'POST', url: '/dogs', body: { data: {} } });
+      dog = res.body.data;
+    });
+
+    afterEach(async () => {
+      await rq({ method: 'DELETE', url: `/dogs/${dog.documentId}` });
+    });
+
+    test('A numeric refId links the file to the entry', async () => {
+      const res = await uploadFor(dog.id);
+
+      expect(res.statusCode).toBe(201);
+
+      const dogRes = await findDog(dog.documentId);
+
+      expect(dogRes.statusCode).toBe(200);
+      expect(dogRes.body.data[field]).toMatchObject({ id: res.body[0].id });
+
+      await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+    });
+
+    test('A documentId refId links the file to the entry', async () => {
+      const res = await uploadFor(dog.documentId);
+
+      expect(res.statusCode).toBe(201);
+
+      const dogRes = await findDog(dog.documentId);
+
+      expect(dogRes.statusCode).toBe(200);
+      expect(dogRes.body.data[field]).toMatchObject({
+        id: res.body[0].id,
+        documentId: res.body[0].documentId,
+      });
+
+      await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+    });
+
+    test('An unknown documentId refId returns 404 and persists no file', async () => {
+      const filesBefore = await countFiles();
+
+      const res = await uploadFor('unknowndocumentid0000000');
+
+      expect(res.statusCode).toBe(404);
+      expect(await countFiles()).toBe(filesBefore);
+
+      const dogRes = await findDog(dog.documentId);
+
+      expect(dogRes.body.data[field]).toBeNull();
+    });
+  });
+
+  describe('Upload with refId on a draft & publish content type', () => {
+    const ref = 'api::cat.cat';
+    const field = 'picture';
+
+    test('A documentId refId links the file to both the draft and the published entry', async () => {
+      const catRes = await rq({
+        method: 'POST',
+        url: '/cats?status=published',
+        body: { data: { name: 'Tom' } },
+      });
+
+      expect(catRes.statusCode).toBe(201);
+
+      const { documentId } = catRes.body.data;
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          refId: documentId,
+          ref,
+          field,
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+
+      const [published, draft] = await Promise.all([
+        rq({ method: 'GET', url: `/cats/${documentId}?populate=${field}` }),
+        rq({ method: 'GET', url: `/cats/${documentId}?populate=${field}&status=draft` }),
+      ]);
+
+      expect(published.body.data[field]).toMatchObject({ id: res.body[0].id });
+      expect(draft.body.data[field]).toMatchObject({ id: res.body[0].id });
+
+      await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+      await rq({ method: 'DELETE', url: `/cats/${documentId}` });
     });
   });
 

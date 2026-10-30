@@ -63,6 +63,29 @@ const queueConcurrentOperation = <T>(queue: Promise<T>[], operation: Promise<T>)
   queue.push(operation);
 };
 
+/**
+ * An all-digit value is a numeric id; anything else is a documentId. A documentId can
+ * start with a digit (e.g. `'3d52c864df72fcc68ab62ebe'`), so `parseInt` must not be used.
+ */
+const isNumericId = (id: ID) => /^\d+$/.test(String(id));
+
+/**
+ * Files can be addressed by numeric id or documentId (1:1, files have no draft & publish).
+ * A numeric id passes through untouched; a documentId resolves to the file's numeric id,
+ * or `undefined` when no file has it.
+ */
+export const resolveFileId = async (strapi: Core.Strapi, id: ID) => {
+  if (isNumericId(id)) {
+    return id;
+  }
+
+  const file = await strapi.db
+    .query(FILE_MODEL_UID)
+    .findOne({ where: { documentId: id }, select: ['id'] });
+
+  return file?.id;
+};
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const fileService = getService('file');
 
@@ -132,6 +155,29 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.eventHub.emit(event, { media: sanitizedData });
   }
 
+  /**
+   * `refId` is either the numeric id of one entry row or an entry's documentId. A documentId
+   * maps to every row of `ref` that carries it — draft and published, every locale — the
+   * way the document service links a non-draft-and-publish source to a draft-and-publish
+   * target. Resolved before the file is persisted so an unknown documentId orphans nothing.
+   * `ref` is user input: it is only looked up when it names a registered model.
+   */
+  async function resolveRefIds(ref: string, refId: ID): Promise<ID[]> {
+    if (isNumericId(refId) || !strapi.getModel(ref as UID.Schema)) {
+      return [refId];
+    }
+
+    const entries = await strapi.db
+      .query(ref as UID.Schema)
+      .findMany({ where: { documentId: refId }, select: ['id'] });
+
+    if (entries.length === 0) {
+      throw new NotFoundError(`No ${ref} entry found with documentId "${refId}"`);
+    }
+
+    return entries.map((entry) => entry.id);
+  }
+
   async function formatFileInfo(
     { filename, type, size }: { filename: string; type: string; size: number },
     fileInfo: Partial<FileInfo> = {},
@@ -179,13 +225,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const { refId, ref, field } = metas;
 
     if (refId && ref && field) {
-      entity.related = [
-        {
-          id: refId,
-          __type: ref,
-          __pivot: { field },
-        },
-      ];
+      const ids = await resolveRefIds(ref, refId);
+
+      entity.related = ids.map((id) => ({
+        id,
+        __type: ref,
+        __pivot: { field },
+      }));
     }
 
     if (metas.path) {

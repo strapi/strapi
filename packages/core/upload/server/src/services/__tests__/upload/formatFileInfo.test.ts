@@ -125,4 +125,93 @@ describe('formatFileInfo', () => {
       path: expect.stringContaining('folder'),
     });
   });
+
+  describe('refId / ref / field', () => {
+    const fileData = {
+      filename: 'File Name.png',
+      type: 'image/png',
+      size: 1000 * 1000,
+    };
+    const ref = 'api::dog.dog';
+    const field = 'pic';
+    const documentId = 'qovkpekciob2wt8qyd51mg8k';
+
+    let findMany: jest.Mock;
+    let getModel: jest.Mock;
+    let service: ReturnType<typeof createUploadService>;
+
+    beforeEach(() => {
+      findMany = jest.fn();
+      getModel = jest.fn().mockReturnValue({ uid: ref });
+
+      service = createUploadService({
+        strapi: { getModel, db: { query: jest.fn().mockReturnValue({ findMany }) } },
+      } as any);
+    });
+
+    test('A numeric refId links the file to that entry without a lookup', async () => {
+      const result = await service.formatFileInfo(fileData, {}, { refId: '3', ref, field });
+
+      expect(findMany).not.toHaveBeenCalled();
+      expect(result.related).toEqual([{ id: '3', __type: ref, __pivot: { field } }]);
+    });
+
+    test('A documentId refId links the file to every entry row with that documentId', async () => {
+      findMany.mockResolvedValue([{ id: 3 }, { id: 4 }]);
+
+      const result = await service.formatFileInfo(fileData, {}, { refId: documentId, ref, field });
+
+      expect(findMany).toHaveBeenCalledWith({ where: { documentId }, select: ['id'] });
+      expect(result.related).toEqual([
+        { id: 3, __type: ref, __pivot: { field } },
+        { id: 4, __type: ref, __pivot: { field } },
+      ]);
+    });
+
+    test('A digit-leading documentId refId is looked up as a documentId', async () => {
+      findMany.mockResolvedValue([{ id: 3 }]);
+
+      const result = await service.formatFileInfo(
+        fileData,
+        {},
+        { refId: '1abcdefghijklmnopqrstuvw', ref, field }
+      );
+
+      expect(findMany).toHaveBeenCalledWith({
+        where: { documentId: '1abcdefghijklmnopqrstuvw' },
+        select: ['id'],
+      });
+      expect(result.related).toEqual([{ id: 3, __type: ref, __pivot: { field } }]);
+    });
+
+    test('An unknown documentId refId throws a NotFoundError', async () => {
+      findMany.mockResolvedValue([]);
+
+      await expect(
+        service.formatFileInfo(fileData, {}, { refId: 'unknowndocumentid0000000', ref, field })
+      ).rejects.toMatchObject({ name: 'NotFoundError' });
+    });
+
+    test('A refId for an unknown ref is kept as is', async () => {
+      getModel.mockReturnValue(undefined);
+
+      const result = await service.formatFileInfo(
+        fileData,
+        {},
+        { refId: documentId, ref: 'api::unknown.unknown', field }
+      );
+
+      expect(findMany).not.toHaveBeenCalled();
+      expect(result.related).toEqual([
+        { id: documentId, __type: 'api::unknown.unknown', __pivot: { field } },
+      ]);
+    });
+
+    test('Without ref and field the file is not linked', async () => {
+      const result = await service.formatFileInfo(fileData, {}, { refId: documentId });
+
+      expect(findMany).not.toHaveBeenCalled();
+      expect(result.related).toBeUndefined();
+    });
+  });
 });

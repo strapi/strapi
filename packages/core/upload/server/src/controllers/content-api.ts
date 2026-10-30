@@ -6,6 +6,7 @@ import type { Core } from '@strapi/types';
 
 import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
+import { resolveFileId } from '../services/upload';
 import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
@@ -32,19 +33,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const { auth, route } = ctx.state;
 
     return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
-  };
-
-  // Files can be addressed by numeric id or documentId (1:1, files have no draft & publish)
-  const resolveFileId = async (id: string | number) => {
-    if (/^\d+$/.test(String(id))) {
-      return id;
-    }
-
-    const file = await strapi.db
-      .query(FILE_MODEL_UID)
-      .findOne({ where: { documentId: id }, select: ['id'] });
-
-    return file?.id;
   };
 
   return {
@@ -74,7 +62,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await validateQuery(ctx.query, ctx);
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-      const id = await resolveFileId(ctx.params.id);
+      const id = await resolveFileId(strapi, ctx.params.id);
       const file = id ? await getService('upload').findOne(id, sanitizedQuery.populate!) : null;
 
       if (!file) {
@@ -87,7 +75,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async destroy(ctx: Context) {
-      const id = await resolveFileId(ctx.params.id);
+      const id = await resolveFileId(strapi, ctx.params.id);
       const file = id ? await getService('upload').findOne(id) : null;
 
       if (!file) {
@@ -112,7 +100,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const fileId = await resolveFileId(id);
+      const fileId = await resolveFileId(strapi, id);
 
       if (!fileId) {
         throw new NotFoundError();
@@ -151,7 +139,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const fileId = await resolveFileId(id);
+      const fileId = await resolveFileId(strapi, id);
 
       if (!fileId) {
         throw new NotFoundError();
