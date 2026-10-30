@@ -57,14 +57,9 @@ describe('getStylesheet', () => {
 });
 
 describe('getEntryModule', () => {
-  const ctx = (nextDesignSystem: boolean) =>
-    ({ nextDesignSystem, plugins: [] }) as unknown as BuildContext;
+  test('imports the host stylesheet', () => {
+    const ctx = { plugins: [] } as unknown as BuildContext;
 
-  test('imports the host stylesheet when the next design system is on', () => {
-    expect(getEntryModule(ctx(true))).toContain("import './styles.css';");
-  });
-
-  test('imports no stylesheet when the next design system is off', () => {
-    expect(getEntryModule(ctx(false))).not.toContain('styles.css');
+    expect(getEntryModule(ctx)).toContain("import './styles.css';");
   });
 });
