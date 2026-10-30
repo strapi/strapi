@@ -288,7 +288,7 @@ test.describe('Home as super admin — key statistics', () => {
       ]);
 
       // Go back to the home page and wait for refreshed statistics.
-      // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
+      // Don't wait for network idle: the homepage SPA often never reaches it.
       // Wait for key-statistics (Home-only query). Do NOT wait for count-documents: CM pages
       // keep that RTK query warm, so Home remount often serves cache and no GET is issued
       // (waitForResponse then times out). Entries still come from count-documents — assert
