@@ -10,6 +10,7 @@ import {
 } from '../constants';
 import { RELEASE_STATUSES } from '../../../shared/constants';
 import type { ReleaseFailureReason, ReleaseStatus } from '../../../shared/constants';
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type {
   GetReleases,
   CreateRelease,
@@ -20,7 +21,6 @@ import type {
   Release,
   DeleteRelease,
 } from '../../../shared/contracts/releases';
-import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
 import {
   getErrorName,
