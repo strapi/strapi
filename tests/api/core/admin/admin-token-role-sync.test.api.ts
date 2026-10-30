@@ -71,7 +71,12 @@ describe('Admin Token Role Sync (api)', () => {
         pluralName: 'sync-articles',
         displayName: 'SyncArticle',
         draftAndPublish: false,
-        attributes: { title: { type: 'string' } },
+        // Localized so that locales are enforced (T1-6); they are ignored on other types
+        pluginOptions: { i18n: { localized: true } },
+        attributes: {
+          title: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+          body: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+        },
       })
       .build();
 
@@ -348,7 +353,7 @@ describe('Admin Token Role Sync (api)', () => {
           ]);
 
           // user has SYNC_ACTION from roleX (conditioned) AND roleY (unconditional)
-          // → anyUserPermIsUnconditional = true → enforcedConditions = [] → token updated
+          // → the unconditional permission covers the token → conditions [] → token updated
           const afterPerms = await getAdminPermissionsFromDB(tempToken.id);
           const afterPerm = afterPerms.find((p) => p.action === SYNC_ACTION);
           expect(afterPerm).toBeDefined();
@@ -361,6 +366,63 @@ describe('Admin Token Role Sync (api)', () => {
         await strapi.db.query('admin::role').delete({ where: { id: roleX.id } });
         await strapi.db.query('admin::role').delete({ where: { id: roleY.id } });
       }
+    });
+
+    describe('T1-6 Fields and locales are re-clamped per permission', () => {
+      const ownerPermission = (fields: string[], locales: string[], conditions: string[] = []) => ({
+        action: SYNC_ACTION,
+        subject: SYNC_SUBJECT,
+        conditions,
+        properties: { fields, locales },
+      });
+
+      let tokenFieldsLocales: { id: number };
+
+      beforeEach(async () => {
+        const utils = createUtils(strapi);
+
+        await utils.assignPermissionsToRole(roleA.id, [
+          ownerPermission(['title', 'body'], ['en']),
+          ...ADMIN_TOKEN_PERMS,
+        ]);
+
+        const res = await rqSync({
+          url: '/admin/admin-tokens',
+          method: 'POST',
+          body: {
+            name: 'sync-token-fields-locales',
+            adminPermissions: [ownerPermission(['title', 'body'], ['en'])],
+          },
+        });
+        expect(res.status).toBe(201);
+        tokenFieldsLocales = res.body.data;
+      });
+
+      test('One field becomes conditional → token inherits the condition', async () => {
+        const utils = createUtils(strapi);
+
+        await utils.assignPermissionsToRole(roleA.id, [
+          ownerPermission(['title'], ['en']),
+          ownerPermission(['body'], ['en'], ['admin::is-creator']),
+          ...ADMIN_TOKEN_PERMS,
+        ]);
+
+        const perms = await getAdminPermissionsFromDB(tokenFieldsLocales.id);
+        expect(perms).toStrictEqual([{ action: SYNC_ACTION, conditions: ['admin::is-creator'] }]);
+      });
+
+      test('One field moves to another locale → token permission deleted', async () => {
+        const utils = createUtils(strapi);
+
+        await utils.assignPermissionsToRole(roleA.id, [
+          ownerPermission(['title'], ['en']),
+          ownerPermission(['body'], ['fr']),
+          ...ADMIN_TOKEN_PERMS,
+        ]);
+
+        const perms = await getAdminPermissionsFromDB(tokenFieldsLocales.id);
+        expect(perms).toStrictEqual([]);
+      });
     });
   });
 
@@ -579,6 +641,95 @@ describe('Admin Token Role Sync (api)', () => {
       } finally {
         await utils.deleteUserById(saUser.id);
       }
+    });
+  });
+
+  /**
+   * Token permissions stored under an earlier rule, or edited while the server was down, are
+   * re-clamped to the owner's ceiling when the server starts, without a role or user change.
+   * Kept last: it replaces the Strapi instance the request helpers above were created against.
+   */
+  describe('T4 — Server start', () => {
+    test('T4-1 Re-clamps existing admin token permissions on startup', async () => {
+      const utils = createUtils(strapi);
+
+      // `title` and `body` are held under different conditions, so no single condition covers both
+      await utils.assignPermissionsToRole(roleA.id, [
+        {
+          action: SYNC_ACTION,
+          subject: SYNC_SUBJECT,
+          conditions: ['admin::is-creator'],
+          properties: { fields: ['title'] },
+        },
+        {
+          action: SYNC_ACTION,
+          subject: SYNC_SUBJECT,
+          conditions: ['admin::has-same-role-as-creator'],
+          properties: { fields: ['body'] },
+        },
+        // With fields and locales: on a localized type, the startup cleanup removes role
+        // permissions that have neither
+        {
+          action: SYNC_ACTION_2,
+          subject: SYNC_SUBJECT,
+          conditions: [],
+          properties: { fields: ['title'], locales: null },
+        },
+        ...ADMIN_TOKEN_PERMS,
+      ]);
+
+      // Start from an empty token so the role sync above does not pre-empt the startup pass
+      await strapi.db.query('admin::permission').deleteMany({ where: { apiToken: tokenA.id } });
+
+      const forge = (permission: {
+        action: string;
+        properties: Record<string, unknown>;
+        conditions: string[];
+      }) =>
+        strapi.db.query('admin::permission').create({
+          data: { ...permission, subject: SYNC_SUBJECT, actionParameters: {}, apiToken: tokenA.id },
+        });
+
+      // Recombined: no owner condition covers both fields
+      const recombined = await forge({
+        action: SYNC_ACTION,
+        properties: { fields: ['title', 'body'] },
+        conditions: [],
+      });
+      // Drifted: the owner holds it unconditionally, so it inherits no condition
+      const drifted = await forge({
+        action: SYNC_ACTION_2,
+        properties: { fields: ['title'], locales: null },
+        conditions: ['admin::is-creator'],
+      });
+      // Held as is by the owner
+      const held = await forge({
+        action: SYNC_ACTION,
+        properties: { fields: ['title'] },
+        conditions: ['admin::is-creator'],
+      });
+
+      expect(await getAdminPermissionsFromDB(tokenA.id)).toHaveLength(3);
+
+      await strapi.destroy();
+      strapi = await createStrapiInstance();
+      strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key');
+
+      const findPermission = (id: number) =>
+        strapi.db.query('admin::permission').findOne({ where: { id } });
+
+      expect(await findPermission(recombined.id)).toBeNull();
+      expect(await findPermission(drifted.id)).toMatchObject({
+        action: SYNC_ACTION_2,
+        properties: { fields: ['title'], locales: null },
+        conditions: [],
+      });
+      expect(await findPermission(held.id)).toMatchObject({
+        action: SYNC_ACTION,
+        properties: { fields: ['title'] },
+        conditions: ['admin::is-creator'],
+      });
+      expect(await getAdminPermissionsFromDB(tokenA.id)).toHaveLength(2);
     });
   });
 });

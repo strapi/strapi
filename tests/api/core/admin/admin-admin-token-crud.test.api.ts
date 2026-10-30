@@ -1,5 +1,5 @@
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createAuthRequest } from 'api-tests/request';
+import { createAuthRequest, createRequest } from 'api-tests/request';
 import { createAgent } from 'api-tests/agent';
 import { createUtils } from 'api-tests/utils';
 import type { Core } from '@strapi/types';
@@ -893,6 +893,677 @@ describe('Admin Admin Token CRUD (api)', () => {
       );
       expect(perm).toBeDefined();
       expect(perm.conditions).toStrictEqual([]);
+    });
+  });
+
+  /**
+   * Token permissions follow the same per-permission rule as roles: a requested permission must
+   * be covered, field by locale, by one owner permission, and its conditions are inherited from
+   * that rule. The owner holds `username` on `en` unconditionally and `email` on `fr` only for
+   * entries they created.
+   */
+  describe('D2 — Owner locales on a type that is not localized', () => {
+    // Per-permission locale rules on a localized type: permission-ceiling-localized.test.api.ts
+    const READ_ACTION = 'plugin::content-manager.explorer.read';
+    const SUBJECT = 'plugin::users-permissions.user';
+
+    let localeRoleId: number;
+    let localeUserId: number;
+    let rqLocale: Awaited<ReturnType<typeof createAuthRequest>>;
+
+    const read = (properties: Record<string, unknown>) => ({
+      action: READ_ACTION,
+      subject: SUBJECT,
+      properties,
+      conditions: [],
+    });
+
+    beforeAll(async () => {
+      const utils = createUtils(strapi);
+
+      // Stale locales, as left after the localization of a type is turned off: the engine
+      // ignores them on a type that is not localized
+      const localeRole = await utils.createRole({
+        name: 'token-locale-ceiling-test-role',
+        description: 'Holds locales on a type that is not localized',
+      });
+      localeRoleId = localeRole.id;
+
+      await utils.assignPermissionsToRole(localeRole.id, [
+        { action: 'admin::admin-tokens.create', subject: null, conditions: [], properties: {} },
+        { action: 'admin::admin-tokens.read', subject: null, conditions: [], properties: {} },
+        read({ fields: ['username'], locales: ['en'] }),
+      ]);
+
+      const localeUser = await utils.createUser({
+        email: 'token-locale-ceiling@test.com',
+        firstname: 'Locale',
+        lastname: 'Ceiling',
+        isActive: true,
+        roles: [localeRole.id],
+      });
+      localeUserId = localeUser.id;
+
+      rqLocale = await createAuthRequest({
+        strapi,
+        userInfo: {
+          email: 'token-locale-ceiling@test.com',
+          firstname: 'Locale',
+          lastname: 'Ceiling',
+          password: 'Password123',
+        },
+      });
+    });
+
+    afterAll(async () => {
+      if (localeUserId !== undefined)
+        await strapi.db.query('admin::user').delete({ where: { id: localeUserId } });
+      if (localeRoleId !== undefined)
+        await strapi.db.query('admin::role').delete({ where: { id: localeRoleId } });
+    });
+
+    test('Omitted locales against owner locales the engine ignores → 201, kept as sent', async () => {
+      const res = await rqLocale({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_d2-no-locales',
+          adminPermissions: [read({ fields: ['username'] })],
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.adminPermissions).toMatchObject([read({ fields: ['username'] })]);
+      expect(res.body.data.adminPermissions[0].properties).not.toHaveProperty('locales');
+
+      // The owner's next re-clamp keeps it
+      await (
+        strapi.service('admin::api-token-admin') as {
+          syncPermissionsForUser(id: number): Promise<void>;
+        }
+      ).syncPermissionsForUser(localeUserId);
+
+      const rows = await strapi.db
+        .query('admin::permission')
+        .findMany({ where: { apiToken: { id: res.body.data.id } } });
+      expect(rows).toHaveLength(1);
+    });
+  });
+
+  describe('D3 — Owner permission under an unregistered condition', () => {
+    const READ_ACTION = 'plugin::content-manager.explorer.read';
+    const SUBJECT = 'plugin::users-permissions.user';
+    const TOKEN_NAME = 'admin-token_d3-unknown-condition';
+
+    let conditionRoleId: number;
+    let conditionUserId: number;
+    let rqCondition: Awaited<ReturnType<typeof createAuthRequest>>;
+
+    beforeAll(async () => {
+      const utils = createUtils(strapi);
+
+      // The owner's only read on SUBJECT is under a condition the engine does not know
+      const conditionRole = await utils.createRole({
+        name: 'token-unknown-condition-test-role',
+        description: 'Holds a permission only under an unregistered condition',
+      });
+      conditionRoleId = conditionRole.id;
+
+      await utils.assignPermissionsToRole(conditionRole.id, [
+        { action: 'admin::admin-tokens.create', subject: null, conditions: [], properties: {} },
+        { action: 'admin::admin-tokens.read', subject: null, conditions: [], properties: {} },
+      ]);
+
+      // Inserted directly: saving through the API strips unregistered conditions
+      await strapi.db.query('admin::permission').create({
+        data: {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'] },
+          conditions: ['admin::does-not-exist'],
+          actionParameters: {},
+          role: conditionRole.id,
+        },
+      });
+
+      const conditionUser = await utils.createUser({
+        email: 'token-unknown-condition@test.com',
+        firstname: 'Unknown',
+        lastname: 'Condition',
+        isActive: true,
+        roles: [conditionRole.id],
+      });
+      conditionUserId = conditionUser.id;
+
+      rqCondition = await createAuthRequest({
+        strapi,
+        userInfo: {
+          email: 'token-unknown-condition@test.com',
+          firstname: 'Unknown',
+          lastname: 'Condition',
+          password: 'Password123',
+        },
+      });
+    });
+
+    afterAll(async () => {
+      if (conditionUserId !== undefined)
+        await strapi.db.query('admin::user').delete({ where: { id: conditionUserId } });
+      if (conditionRoleId !== undefined) {
+        await strapi.db.query('admin::permission').deleteMany({
+          where: { role: { id: conditionRoleId } },
+        });
+        await strapi.db.query('admin::role').delete({ where: { id: conditionRoleId } });
+      }
+    });
+
+    test('A permission held only under an unregistered condition → 400, no token', async () => {
+      const res = await rqCondition({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: TOKEN_NAME,
+          adminPermissions: [
+            {
+              action: READ_ACTION,
+              subject: SUBJECT,
+              properties: { fields: ['username'] },
+              conditions: ['admin::does-not-exist'],
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain(
+        'Cannot assign admin permissions that exceed your own'
+      );
+
+      const tokens = await strapi.db
+        .query('admin::api-token')
+        .findMany({ where: { name: TOKEN_NAME } });
+      expect(tokens).toHaveLength(0);
+    });
+  });
+
+  /**
+   * A request made with an admin token acts as its owner, but cannot grant more than the token
+   * itself holds: the same two ceilings as a role update (the token, and the owner unless they
+   * are a super admin). Conditions are inherited from both.
+   */
+  describe('E — Permission ceiling with a token-authenticated request', () => {
+    const READ_ACTION = 'plugin::content-manager.explorer.read';
+    const SUBJECT = 'plugin::users-permissions.user';
+    const IS_CREATOR = 'admin::is-creator';
+
+    const TOKEN_ACTIONS = ['admin::admin-tokens.create', 'admin::admin-tokens.update'];
+    const tokenActions = TOKEN_ACTIONS.map((action) => ({
+      action,
+      subject: null,
+      conditions: [],
+      properties: {},
+    }));
+    const read = (fields: string[]) => ({
+      action: READ_ACTION,
+      subject: SUBJECT,
+      properties: { fields },
+      conditions: [],
+    });
+
+    let ownerRoleId: number;
+    let ownerUserId: number;
+    let rqOwner: Awaited<ReturnType<typeof createAuthRequest>>;
+
+    beforeAll(async () => {
+      const utils = createUtils(strapi);
+
+      const ownerRole = await utils.createRole({
+        name: 'admin-token_e-owner-role',
+        description: 'Owns admin tokens that create and update admin tokens',
+      });
+      ownerRoleId = ownerRole.id;
+
+      await utils.assignPermissionsToRole(ownerRole.id, [
+        ...tokenActions,
+        { action: 'admin::admin-tokens.read', subject: null, conditions: [], properties: {} },
+        read(['username', 'email']),
+      ]);
+
+      const ownerUser = await utils.createUser({
+        email: 'admin-token_e-owner@test.com',
+        firstname: 'Token',
+        lastname: 'CeilingOwner',
+        isActive: true,
+        roles: [ownerRole.id],
+      });
+      ownerUserId = ownerUser.id;
+
+      rqOwner = await createAuthRequest({
+        strapi,
+        userInfo: {
+          email: 'admin-token_e-owner@test.com',
+          firstname: 'Token',
+          lastname: 'CeilingOwner',
+          password: 'Password123',
+        },
+      });
+    });
+
+    afterAll(async () => {
+      if (ownerUserId !== undefined)
+        await strapi.db.query('admin::user').delete({ where: { id: ownerUserId } });
+      if (ownerRoleId !== undefined)
+        await strapi.db.query('admin::role').delete({ where: { id: ownerRoleId } });
+    });
+
+    /** Mints a token as `rqMinter` and returns it with a request authenticated by it. */
+    const mintToken = async (
+      rqMinter: Awaited<ReturnType<typeof createAuthRequest>>,
+      name: string,
+      adminPermissions: object[]
+    ) => {
+      const res = await rqMinter({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: { name, adminPermissions },
+      });
+
+      expect(res.statusCode).toBe(201);
+
+      return {
+        token: res.body.data,
+        rqToken: createRequest({ strapi }).setToken(res.body.data.accessKey),
+      };
+    };
+
+    const findTokensByName = (name: string) =>
+      strapi.db.query('admin::api-token').findMany({ where: { name } });
+
+    const findReadPermissions = async (tokenId: number) =>
+      (
+        await strapi.db
+          .query('admin::permission')
+          .findMany({ where: { apiToken: { id: tokenId }, action: READ_ACTION } })
+      ).map((permission: { properties: object; conditions: string[] }) => ({
+        properties: permission.properties,
+        conditions: permission.conditions,
+      }));
+
+    test('Limited owner: a field the owner holds but the calling token does not → 400, no token', async () => {
+      const { rqToken } = await mintToken(rqOwner, 'admin-token_e-limited', [
+        ...tokenActions,
+        read(['username']),
+      ]);
+
+      const res = await rqToken({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: { name: 'admin-token_e-limited-child', adminPermissions: [read(['email'])] },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.name).toBe('ValidationError');
+      expect(res.body.error.message).toContain('not held by the calling token');
+      expect(await findTokensByName('admin-token_e-limited-child')).toHaveLength(0);
+    });
+
+    test('Limited owner: a field the calling token holds → 201, stored as requested', async () => {
+      const { rqToken } = await mintToken(rqOwner, 'admin-token_e-limited', [
+        ...tokenActions,
+        read(['username']),
+      ]);
+
+      const res = await rqToken({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: { name: 'admin-token_e-limited-child', adminPermissions: [read(['username'])] },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(await findReadPermissions(res.body.data.id)).toEqual([
+        { properties: { fields: ['username'] }, conditions: [] },
+      ]);
+    });
+
+    test('Super-admin owner does not lift the calling token check → 400, no token', async () => {
+      const { rqToken } = await mintToken(rq, 'admin-token_e-super-admin', [
+        tokenActions[0],
+        read(['username']),
+      ]);
+
+      const res = await rqToken({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_e-super-admin-child',
+          adminPermissions: [read(['username', 'email'])],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain('not held by the calling token');
+      expect(await findTokensByName('admin-token_e-super-admin-child')).toHaveLength(0);
+    });
+
+    test('Super-admin owner: a field the calling token holds → 201', async () => {
+      const { rqToken } = await mintToken(rq, 'admin-token_e-super-admin', [
+        tokenActions[0],
+        read(['username']),
+      ]);
+
+      const res = await rqToken({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_e-super-admin-child',
+          adminPermissions: [read(['username'])],
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+    });
+
+    test('Limited owner: updating a sibling token beyond the calling token → 400, sibling unchanged', async () => {
+      const { rqToken } = await mintToken(rqOwner, 'admin-token_e-updater', [
+        ...tokenActions,
+        read(['username']),
+      ]);
+      const { token: sibling } = await mintToken(rqOwner, 'admin-token_e-sibling', [
+        read(['username']),
+      ]);
+
+      const res = await rqToken({
+        url: `/admin/admin-tokens/${sibling.id}`,
+        method: 'PUT',
+        body: { adminPermissions: [read(['username']), read(['email'])] },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain('not held by the calling token');
+      expect(await findReadPermissions(sibling.id)).toEqual([
+        { properties: { fields: ['username'] }, conditions: [] },
+      ]);
+    });
+
+    /**
+     * Creates an owner holding the token actions and one role per entry of `rolePermissions`,
+     * runs `fn` with a request authenticated as that owner, then removes the owner and roles.
+     */
+    const withOwner = async (
+      name: string,
+      rolePermissions: object[][],
+      fn: (rqLimitedOwner: Awaited<ReturnType<typeof createAuthRequest>>) => Promise<void>
+    ) => {
+      const utils = createUtils(strapi);
+      const roleIds: number[] = [];
+      let userId: number | undefined;
+
+      try {
+        for (const [index, permissions] of rolePermissions.entries()) {
+          const role = await utils.createRole({ name: `${name}-role-${index}`, description: name });
+          roleIds.push(role.id);
+          await utils.assignPermissionsToRole(role.id, [
+            ...(index === 0 ? tokenActions : []),
+            ...permissions,
+          ]);
+        }
+
+        const email = `${name}@test.com`;
+        const user = await utils.createUser({
+          email,
+          firstname: 'Token',
+          lastname: 'Owner',
+          isActive: true,
+          roles: roleIds,
+        });
+        userId = user.id;
+
+        await fn(
+          await createAuthRequest({
+            strapi,
+            userInfo: { email, firstname: 'Token', lastname: 'Owner', password: 'Password123' },
+          })
+        );
+      } finally {
+        if (userId !== undefined)
+          await strapi.db.query('admin::user').delete({ where: { id: userId } });
+        for (const roleId of roleIds)
+          await strapi.db.query('admin::role').delete({ where: { id: roleId } });
+      }
+    };
+
+    // The owner re-sync makes a token's conditions follow its owner, so a child stored with the
+    // calling token's stricter condition would be widened on the owner's next role change
+    test('The owner holds the field unconditionally and the calling token under a condition → 400, no token', async () => {
+      const { token, rqToken } = await mintToken(rqOwner, 'admin-token_e-conditional', [
+        tokenActions[0],
+        read(['username']),
+      ]);
+
+      await strapi.db.query('admin::permission').updateMany({
+        where: { apiToken: { id: token.id }, action: READ_ACTION },
+        data: { conditions: [IS_CREATOR] },
+      });
+
+      const res = await rqToken({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_e-conditional-child',
+          adminPermissions: [read(['username'])],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.name).toBe('ValidationError');
+      expect(res.body.error.message).toContain(
+        "not held by the calling token under the owner's conditions"
+      );
+      expect(await findTokensByName('admin-token_e-conditional-child')).toHaveLength(0);
+    });
+
+    test('The owner holds the field unconditionally and the calling token under a condition, update path → 400, sibling unchanged', async () => {
+      const { token, rqToken } = await mintToken(rqOwner, 'admin-token_e-conditional-updater', [
+        ...tokenActions,
+        read(['username']),
+      ]);
+      const { token: sibling } = await mintToken(rqOwner, 'admin-token_e-conditional-sibling', [
+        tokenActions[0],
+      ]);
+
+      await strapi.db.query('admin::permission').updateMany({
+        where: { apiToken: { id: token.id }, action: READ_ACTION },
+        data: { conditions: [IS_CREATOR] },
+      });
+
+      const res = await rqToken({
+        url: `/admin/admin-tokens/${sibling.id}`,
+        method: 'PUT',
+        body: { adminPermissions: [tokenActions[0], read(['username'])] },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toContain(
+        "not held by the calling token under the owner's conditions"
+      );
+      expect(await findReadPermissions(sibling.id)).toEqual([]);
+    });
+
+    test('A field the calling token got under a condition only because of another field → 400, no token', async () => {
+      await withOwner(
+        'admin-token_e-two-roles',
+        [[read(['username'])], [{ ...read(['email']), conditions: [IS_CREATOR] }]],
+        async (rqLimitedOwner) => {
+          const { token, rqToken } = await mintToken(rqLimitedOwner, 'admin-token_e-two-roles', [
+            tokenActions[0],
+            read(['username', 'email']),
+          ]);
+
+          // `email` is held under is-creator only, so a token for both fields inherits it
+          expect(await findReadPermissions(token.id)).toEqual([
+            { properties: { fields: ['username', 'email'] }, conditions: [IS_CREATOR] },
+          ]);
+
+          const res = await rqToken({
+            url: '/admin/admin-tokens',
+            method: 'POST',
+            body: {
+              name: 'admin-token_e-two-roles-child',
+              adminPermissions: [read(['username'])],
+            },
+          });
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.error.message).toContain(
+            "not held by the calling token under the owner's conditions"
+          );
+          expect(await findTokensByName('admin-token_e-two-roles-child')).toHaveLength(0);
+        }
+      );
+    });
+
+    test('Limited owner: the owner conditions within the calling token → 201, stored with the owner conditions', async () => {
+      await withOwner(
+        'admin-token_e-conditional-owner',
+        [[{ ...read(['username']), conditions: [IS_CREATOR] }]],
+        async (rqLimitedOwner) => {
+          const { rqToken } = await mintToken(rqLimitedOwner, 'admin-token_e-conditional-owner', [
+            tokenActions[0],
+            read(['username']),
+          ]);
+
+          const res = await rqToken({
+            url: '/admin/admin-tokens',
+            method: 'POST',
+            body: {
+              name: 'admin-token_e-conditional-owner-child',
+              adminPermissions: [read(['username'])],
+            },
+          });
+
+          expect(res.statusCode).toBe(201);
+          expect(await findReadPermissions(res.body.data.id)).toEqual([
+            { properties: { fields: ['username'] }, conditions: [IS_CREATOR] },
+          ]);
+        }
+      );
+    });
+
+    test('Super-admin owner: the calling token condition is inherited → 201, and the re-sync keeps it', async () => {
+      const { token, rqToken } = await mintToken(rq, 'admin-token_e-super-admin-conditional', [
+        tokenActions[0],
+        read(['username']),
+      ]);
+
+      // Only the owner's conditions can be inherited through the API, so narrow the token here
+      await strapi.db.query('admin::permission').updateMany({
+        where: { apiToken: { id: token.id }, action: READ_ACTION },
+        data: { conditions: [IS_CREATOR] },
+      });
+
+      const res = await rqToken({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: {
+          name: 'admin-token_e-super-admin-conditional-child',
+          adminPermissions: [read(['username'])],
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      const childId = res.body.data.id;
+      const stored = [{ properties: { fields: ['username'] }, conditions: [IS_CREATOR] }];
+      expect(await findReadPermissions(childId)).toEqual(stored);
+
+      // A role change and a full re-clamp skip super-admin owners
+      await createUtils(strapi).assignPermissionsToRole(ownerRoleId, [
+        ...tokenActions,
+        { action: 'admin::admin-tokens.read', subject: null, conditions: [], properties: {} },
+        read(['username', 'email']),
+        { action: EDITOR_ACTION, subject: null, conditions: [], properties: {} },
+      ]);
+      await (
+        strapi.service('admin::api-token-admin') as { syncPermissionsForAllUsers(): Promise<void> }
+      ).syncPermissionsForAllUsers();
+
+      expect(await findReadPermissions(childId)).toEqual(stored);
+    });
+  });
+
+  /**
+   * A request made with an admin token may read the key of, or regenerate, only the token it was
+   * made with, not the other tokens of its owner.
+   */
+  describe('F — token-authenticated key read and regenerate', () => {
+    const KEY_ACTIONS = ['admin::admin-tokens.read', 'admin::admin-tokens.regenerate'].map(
+      (action) => ({ action, subject: null, conditions: [], properties: {} })
+    );
+
+    const mintToken = async (name: string, adminPermissions: object[] = KEY_ACTIONS) => {
+      const res = await rqEditor({
+        url: '/admin/admin-tokens',
+        method: 'POST',
+        body: { name, adminPermissions },
+      });
+
+      expect(res.statusCode).toBe(201);
+
+      return {
+        token: res.body.data,
+        rqToken: createRequest({ strapi }).setToken(res.body.data.accessKey),
+      };
+    };
+
+    test("Reading a sibling token's key → no accessKey", async () => {
+      const { rqToken } = await mintToken('admin-token_f-caller');
+      const { token: sibling } = await mintToken('admin-token_f-sibling');
+
+      const res = await rqToken({ url: `/admin/admin-tokens/${sibling.id}`, method: 'GET' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.id).toBe(sibling.id);
+      expect(res.body.data.accessKey).toBeUndefined();
+    });
+
+    test('Reading its own key → accessKey', async () => {
+      const { token, rqToken } = await mintToken('admin-token_f-caller');
+
+      const res = await rqToken({ url: `/admin/admin-tokens/${token.id}`, method: 'GET' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.accessKey).toBe(token.accessKey);
+    });
+
+    test('Regenerating a sibling token → 403, key unchanged', async () => {
+      const { rqToken } = await mintToken('admin-token_f-caller');
+      const { token: sibling } = await mintToken('admin-token_f-sibling');
+      const before = await strapi.db
+        .query('admin::api-token')
+        .findOne({ where: { id: sibling.id }, select: ['accessKey'] });
+
+      const res = await rqToken({
+        url: `/admin/admin-tokens/${sibling.id}/regenerate`,
+        method: 'POST',
+      });
+
+      expect(res.statusCode).toBe(403);
+      const after = await strapi.db
+        .query('admin::api-token')
+        .findOne({ where: { id: sibling.id }, select: ['accessKey'] });
+      expect(after.accessKey).toBe(before.accessKey);
+    });
+
+    test('Regenerating itself → 201 with a new key', async () => {
+      const { token, rqToken } = await mintToken('admin-token_f-caller');
+
+      const res = await rqToken({
+        url: `/admin/admin-tokens/${token.id}/regenerate`,
+        method: 'POST',
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.accessKey).toEqual(expect.any(String));
+      expect(res.body.data.accessKey).not.toBe(token.accessKey);
     });
   });
 

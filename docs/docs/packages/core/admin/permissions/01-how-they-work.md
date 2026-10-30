@@ -148,3 +148,21 @@ The permissions are modified in the admin panel (on the [edit page](http://local
 | **conditions**       | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
 
 A permission contains all needed information for the backend and the frontend to prevent users to perform non-permitted action.
+
+### Permission ceiling
+
+A user's permissions are the ceiling on what they can hand on to someone else. The rules live in `server/src/domain/permission/ceiling.ts`.
+
+The engine registers each stored permission as its own rule, so holding `title@en` and `body@fr` does not give `title@fr`. The ceiling works the same way: a requested permission is split into atoms (one per combination of a field, a locale and a condition), and it is within the ceiling when a held permission has the same `action` and `subject` and **one held permission covers every atom**. A held permission covers a value when it does not restrict that property or lists the value (`seo` covers `seo.title`), and covers a condition when it is unconditional or lists it. Omitting a restricted property, sending `null`, or dropping the conditions is therefore rejected.
+
+Held permissions are read as the engine enforces them:
+
+- `fields: []` grants nothing. On a localized subject, a missing `locales` is the same as `locales: []` (no locale), even for a super admin's token.
+- A permission with action parameters is not held, and neither is one whose conditions are all unknown to the condition provider.
+- Unions on one dimension are fine (`title` and `body` held separately allow `[title, body]`); mixing dimensions is not.
+
+Where it applies:
+
+- **Roles**: `PUT /admin/roles/:id/permissions` rejects permissions outside the requester's ceiling with a 403 listing them in `error.details.permissions`. Super admins are exempt. A request made with an admin token is checked against the token's permissions and, unless its owner is a super admin, the owner's too (`findRequesterCeilings` in `server/src/services/permission/ceiling-requester.ts`). Permissions the role already carries are not checked, whatever the order of their arrays. Creating or duplicating a role uses the same endpoint, so the duplicate page drops source permissions outside the user's ceiling first.
+- **Admin tokens**: `enforceAdminPermissionsCeiling` in `server/src/services/api-token.ts` rejects (400) a permission the owner does not cover, and sets its conditions from the owner's rather than from the request. Super-admin owners are not limited. A request made with an admin token is also limited by that token, using the same two ceilings as a role update, and may only read the key of, or regenerate, the token it was made with. Token permissions are re-clamped at startup and on every later change to the owner's roles (`reconcileTokenPermissionsToUserCeiling`): anything the owner no longer covers is deleted, and conditions are updated to follow the owner, with a warning in the log for each.
+- **Role editor**: `admin/src/pages/Settings/pages/Roles/utils/createPermissionChecker.ts` mirrors the rule, disabling values and conditions that cannot be added to what is already ticked. A bulk tick picks one held permission and never mixes fields held under different conditions. A component checkbox is enabled when any field under it can be granted, since roles store a component's fields, not its path.

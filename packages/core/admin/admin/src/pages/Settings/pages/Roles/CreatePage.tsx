@@ -19,9 +19,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
 
+import { SUPER_ADMIN_CODE } from '../../../../../../shared/utils/super-admin';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -36,6 +38,7 @@ import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
+import { isPermissionWithinCeiling, toEnforcedPermissions } from './utils/createPermissionChecker';
 
 /* -------------------------------------------------------------------------------------------------
  * CreatePage
@@ -71,6 +74,16 @@ const CreatePage = () => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
 
+  /**
+   * An admin cannot grant a permission they do not hold themselves, so the permissions
+   * tree is restricted to the current user's own permissions unless they are a super admin.
+   */
+  const currentUserPermissions = useAuth('CreatePage', (state) => state.permissions);
+  const currentUser = useAuth('CreatePage', (state) => state.user);
+  const isCurrentUserSuperAdmin =
+    currentUser?.roles.some((role) => role.code === SUPER_ADMIN_CODE) ?? false;
+  const userPermissions = isCurrentUserSuperAdmin ? undefined : currentUserPermissions;
+
   const { isLoading: isLoadingPermissionsLayout, currentData: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
       /**
@@ -93,6 +106,28 @@ const CreatePage = () => {
       refetchOnMountOrArgChange: true,
     }
   );
+
+  /**
+   * A duplicated role can only carry what the user may grant: the new role has no permissions
+   * yet, so nothing is exempt from the ceiling, and the server rejects the whole update when one
+   * copied permission is outside it. Permissions outside it are left unticked.
+   */
+  const permissionsToCopy = React.useMemo(() => {
+    if (userPermissions === undefined) {
+      return rolePermissions;
+    }
+
+    // The form is not shown before the layout loads
+    if (permissionsLayout === undefined) {
+      return undefined;
+    }
+
+    const heldPermissions = toEnforcedPermissions(userPermissions, permissionsLayout);
+
+    return rolePermissions?.filter((permission) =>
+      isPermissionWithinCeiling(heldPermissions, permission)
+    );
+  }, [permissionsLayout, rolePermissions, userPermissions]);
 
   const [createRole] = useCreateRoleMutation();
   const [updateRolePermissions] = useUpdateRolePermissionsMutation();
@@ -164,7 +199,8 @@ const CreatePage = () => {
     }
   };
 
-  if ((isLoadingPermissionsLayout && isLoadingRole) || !permissionsLayout) {
+  // The permissions form reads its initial permissions once, when it mounts
+  if (isLoadingPermissionsLayout || isLoadingRole || !permissionsLayout) {
     return <Page.Loading />;
   }
 
@@ -313,8 +349,9 @@ const CreatePage = () => {
                       isFormDisabled={false}
                       onLocaleValidationChange={setHasLocaleValidationErrors}
                       ref={permissionsRef}
-                      permissions={rolePermissions}
+                      permissions={permissionsToCopy}
                       layout={permissionsLayout}
+                      userPermissions={userPermissions}
                     />
                   </Box>
                 </Flex>

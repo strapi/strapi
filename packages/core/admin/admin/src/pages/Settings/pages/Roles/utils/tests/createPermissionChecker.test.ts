@@ -1,282 +1,931 @@
 import {
-  createFieldPermissionChecker,
-  createDynamicActionPermissionChecker,
+  canTick,
+  coversAtom,
+  coversCondition,
+  coversPropertyValue,
+  createBulkPermissionChecker,
+  createSubjectBulkPermissionChecker,
+  findActionForm,
+  getActionSelection,
+  getAllowedConditions,
+  isPermissionHeld,
+  isPermissionWithinCeiling,
+  isValueSelected,
+  listGroupLeaves,
+  toEnforcedPermissions,
 } from '../createPermissionChecker';
+import { updateValuesWithPermissions } from '../updateValues';
 
+import type * as PermissionContracts from '../../../../../../../../shared/contracts/permissions';
 import type { Permission as AuthPermission } from '../../../../../../features/Auth';
 
-const ACTION_ID = 'plugin::content-manager.explorer.create';
+const READ = 'plugin::content-manager.explorer.read';
+const CREATE = 'plugin::content-manager.explorer.create';
 const SUBJECT = 'api::article.article';
+const IS_CREATOR = 'admin::is-creator';
+const SAME_ROLE = 'admin::has-same-role-as-creator';
 
-const makePermission = (
+const permission = (
   action: string,
-  subject?: string | null,
-  fields?: string[] | undefined
-): AuthPermission => ({
-  action,
-  subject,
-  properties: fields !== undefined ? { fields } : {},
+  subject: string | null,
+  properties: AuthPermission['properties'] = {},
+  conditions: string[] = []
+): AuthPermission => ({ action, subject, properties, conditions });
+
+const read = (properties: AuthPermission['properties'], conditions?: string[]) =>
+  permission(READ, SUBJECT, properties, conditions);
+
+// `fields: null` (unrestricted) is stored by the server but not allowed by the contract type
+const readAnyField = () => read({ fields: null } as unknown as AuthPermission['properties']);
+
+// Two held permissions that must not be recombined
+const titleEn = read({ fields: ['title'], locales: ['en'] });
+const bodyFr = read({ fields: ['body'], locales: ['fr'] });
+const titleAlways = read({ fields: ['title'] });
+const bodyIfCreator = read({ fields: ['body'] }, [IS_CREATOR]);
+
+const selection = (properties: Record<string, string[]>, conditions: string[] = []) => ({
+  properties,
+  conditions,
 });
 
-// ---------------------------------------------------------------------------
-// createFieldPermissionChecker
-// ---------------------------------------------------------------------------
+describe('createPermissionChecker', () => {
+  describe('isPermissionHeld', () => {
+    it('checks the action and subject, treating null and undefined subjects alike', () => {
+      const permissions = [permission('admin::roles.read', null)];
 
-describe('createFieldPermissionChecker', () => {
-  describe('Role editing mode (userPermissions === undefined)', () => {
-    it('returns undefined', () => {
-      const result = createFieldPermissionChecker(ACTION_ID, SUBJECT, undefined);
-      expect(result).toBeUndefined();
+      expect(isPermissionHeld(permissions, 'admin::roles.read', null)).toBe(true);
+      expect(isPermissionHeld(permissions, 'admin::roles.read', undefined)).toBe(true);
+      expect(isPermissionHeld(permissions, 'admin::roles.update', null)).toBe(false);
+    });
+
+    it('checks a value against any matching permission', () => {
+      expect(isPermissionHeld([titleEn, bodyFr], READ, SUBJECT, 'fields', 'body')).toBe(true);
+      expect(isPermissionHeld([titleEn, bodyFr], READ, SUBJECT, 'locales', 'fr')).toBe(true);
+      expect(isPermissionHeld([titleEn, bodyFr], READ, SUBJECT, 'locales', 'de')).toBe(false);
+    });
+
+    it('covers nested fields by their parent, but not other properties', () => {
+      const permissions = [read({ fields: ['seo'], locales: ['en'] })];
+
+      expect(isPermissionHeld(permissions, READ, SUBJECT, 'fields', 'seo.title')).toBe(true);
+      expect(isPermissionHeld(permissions, READ, SUBJECT, 'fields', 'seoTitle')).toBe(false);
+      expect(isPermissionHeld(permissions, READ, SUBJECT, 'locales', 'en.US')).toBe(false);
+    });
+
+    it('allows every value of a property the permission does not restrict', () => {
+      expect(isPermissionHeld([read({ locales: null })], READ, SUBJECT, 'locales', 'fr')).toBe(
+        true
+      );
+      expect(isPermissionHeld([read({})], READ, SUBJECT, 'fields', 'body')).toBe(true);
+    });
+
+    it('ignores a permission with no fields, which grants nothing', () => {
+      expect(isPermissionHeld([read({ fields: [] })], READ, SUBJECT)).toBe(false);
+      expect(
+        isPermissionHeld([read({ fields: [] }), titleAlways], READ, SUBJECT, 'fields', 'title')
+      ).toBe(true);
     });
   });
 
-  describe('returns a checker function when userPermissions is provided', () => {
-    it('returns a function', () => {
-      const result = createFieldPermissionChecker(ACTION_ID, SUBJECT, []);
-      expect(typeof result).toBe('function');
+  describe('coversAtom', () => {
+    it('requires one permission to cover every dimension present', () => {
+      const held = read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR]);
+
+      expect(
+        coversAtom(held, { properties: { fields: 'title', locales: 'en' }, condition: IS_CREATOR })
+      ).toBe(true);
+      expect(coversAtom(held, { properties: { fields: 'title', locales: 'fr' } })).toBe(false);
+      expect(coversAtom(held, { properties: { fields: 'title' }, condition: SAME_ROLE })).toBe(
+        false
+      );
+      // A dimension that is absent does not constrain the permission
+      expect(coversAtom(held, { properties: { fields: 'title' } })).toBe(true);
+    });
+
+    it('needs an unrestricted holder for an unrestricted dimension', () => {
+      expect(coversPropertyValue(read({ fields: ['title'] }), 'fields', null)).toBe(false);
+      expect(coversPropertyValue(read({ locales: null }), 'locales', null)).toBe(true);
+      expect(coversPropertyValue(read({}), 'fields', null)).toBe(true);
+
+      expect(coversCondition(read({}, [IS_CREATOR]), null)).toBe(false);
+      expect(coversCondition(read({}), null)).toBe(true);
     });
   });
 
-  describe('checker function - no matching permission', () => {
-    it('returns false when no permission matches the action', () => {
-      const permissions: AuthPermission[] = [makePermission('other.action', SUBJECT)];
-      const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-      expect(check(['fields', 'title'])).toBe(false);
+  /**
+   * Mirrors the `isPermissionWithinCeiling` cases of the server
+   * (`server/src/domain/permission/__tests__/ceiling.test.ts`), so the duplicate filter and the
+   * server agree.
+   */
+  describe('isPermissionWithinCeiling', () => {
+    const titleFr = read({ fields: ['title'], locales: ['fr'] });
+    const bodyAlways = read({ fields: ['body'] });
+
+    it('checks the action and subject', () => {
+      const held = [read({})];
+
+      expect(isPermissionWithinCeiling(held, read({}))).toBe(true);
+      expect(isPermissionWithinCeiling(held, permission(READ, 'api::author.author'))).toBe(false);
+      expect(isPermissionWithinCeiling(held, permission(CREATE, SUBJECT))).toBe(false);
+      expect(
+        isPermissionWithinCeiling([permission('admin::roles.read', null)], {
+          action: 'admin::roles.read',
+        })
+      ).toBe(true);
     });
 
-    it('returns false when permission action matches but subject differs', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, 'api::other.other')];
-      const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-      expect(check(['fields', 'title'])).toBe(false);
+    it('allows any fields when the holder is not restricted on fields', () => {
+      expect(isPermissionWithinCeiling([read({})], read({ fields: ['title', 'body'] }))).toBe(true);
+      expect(isPermissionWithinCeiling([readAnyField()], read({ fields: ['title', 'body'] }))).toBe(
+        true
+      );
     });
 
-    it('returns false when permission subject is null but expected subject is not', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, null)];
-      const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-      expect(check(['fields', 'title'])).toBe(false);
+    it('always allows requesting no fields, and ignores a held permission with no fields', () => {
+      expect(isPermissionWithinCeiling([titleAlways], read({ fields: [] }))).toBe(true);
+      expect(isPermissionWithinCeiling([], read({ fields: [] }))).toBe(true);
+      expect(isPermissionWithinCeiling([read({ fields: [] })], read({}))).toBe(false);
+      expect(isPermissionWithinCeiling([read({ fields: [] })], read({ fields: ['title'] }))).toBe(
+        false
+      );
     });
 
-    it('returns true when action and subject both match (positive anchor)', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['title'])];
-      const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-      expect(check(['fields', 'title'])).toBe(true);
+    it('allows a subset of the held fields, including nested fields by their parent', () => {
+      const held = [read({ fields: ['title', 'seo'] })];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title', 'seo.description'] }))).toBe(
+        true
+      );
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title', 'body'] }))).toBe(false);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['seoTitle'] }))).toBe(false);
+      expect(
+        isPermissionWithinCeiling([read({ locales: ['en'] })], read({ locales: ['en.US'] }))
+      ).toBe(false);
+    });
+
+    it('rejects an omitted or null property when the holder is restricted on it', () => {
+      expect(isPermissionWithinCeiling([titleAlways], read({}))).toBe(false);
+      expect(isPermissionWithinCeiling([titleAlways], readAnyField())).toBe(false);
+      // Restricted on the request only, against an unrestricted holder
+      expect(
+        isPermissionWithinCeiling([titleAlways], read({ fields: ['title'], locales: ['en'] }))
+      ).toBe(true);
+    });
+
+    it('applies the same rule to locales', () => {
+      const held = [read({ fields: ['title'], locales: ['en', 'fr'] })];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['fr'] }))).toBe(
+        true
+      );
+      expect(
+        isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['fr', 'de'] }))
+      ).toBe(false);
+      expect(
+        isPermissionWithinCeiling(
+          [read({ fields: ['title'], locales: null })],
+          read({ fields: ['title'], locales: ['en', 'fr', 'de'] })
+        )
+      ).toBe(true);
+    });
+
+    it('needs an unrestricted holder for omitted or null locales', () => {
+      const restricted = [titleEn, titleFr];
+
+      expect(isPermissionWithinCeiling(restricted, read({ fields: ['title'] }))).toBe(false);
+      expect(
+        isPermissionWithinCeiling(restricted, read({ fields: ['title'], locales: null }))
+      ).toBe(false);
+      expect(
+        isPermissionWithinCeiling(
+          [read({ fields: ['title'], locales: null })],
+          read({ fields: ['title'], locales: null })
+        )
+      ).toBe(true);
+    });
+
+    it('treats empty locales as no locales, still checking fields and conditions', () => {
+      const held = [read({ fields: ['title'], locales: [] })];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: [] }))).toBe(true);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['en'] }))).toBe(
+        false
+      );
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'] }))).toBe(false);
+      expect(isPermissionWithinCeiling([titleEn], read({ fields: ['body'], locales: [] }))).toBe(
+        false
+      );
+      expect(
+        isPermissionWithinCeiling(
+          [read({ fields: ['title'] }, [IS_CREATOR])],
+          read({ fields: ['title'], locales: [] })
+        )
+      ).toBe(false);
+    });
+
+    it('allows a non-empty subset of the held conditions', () => {
+      const held = [read({}, [IS_CREATOR, SAME_ROLE])];
+
+      expect(isPermissionWithinCeiling(held, read({}, [IS_CREATOR, SAME_ROLE]))).toBe(true);
+      expect(isPermissionWithinCeiling(held, read({}, [IS_CREATOR]))).toBe(true);
+      expect(
+        isPermissionWithinCeiling([read({}, [IS_CREATOR])], read({}, [IS_CREATOR, SAME_ROLE]))
+      ).toBe(false);
+    });
+
+    it('allows any conditions when the permission is held unconditionally', () => {
+      const held = [read({}, [IS_CREATOR]), read({})];
+
+      expect(isPermissionWithinCeiling(held, read({}))).toBe(true);
+      expect(isPermissionWithinCeiling(held, read({}, [IS_CREATOR, SAME_ROLE]))).toBe(true);
+    });
+
+    it('rejects no conditions when the permission is only held with conditions', () => {
+      expect(isPermissionWithinCeiling([read({}, [IS_CREATOR])], read({}))).toBe(false);
+      expect(isPermissionWithinCeiling([read({}, [IS_CREATOR])], read({}, []))).toBe(false);
+    });
+
+    it('does not mix the fields of one permission with the locales of another', () => {
+      const held = [titleEn, bodyFr];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['fr'] }))).toBe(
+        false
+      );
+      expect(isPermissionWithinCeiling(held, read({ fields: ['body'], locales: ['en'] }))).toBe(
+        false
+      );
+      expect(
+        isPermissionWithinCeiling(held, read({ fields: ['title', 'body'], locales: ['en', 'fr'] }))
+      ).toBe(false);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['en'] }))).toBe(
+        true
+      );
+    });
+
+    it('does not lift the conditions of one permission with an unconditional one', () => {
+      const held = [titleAlways, bodyIfCreator];
+
+      expect(isPermissionWithinCeiling(held, read({ fields: ['body'] }))).toBe(false);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title', 'body'] }))).toBe(false);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['body'] }, [IS_CREATOR]))).toBe(true);
+      expect(
+        isPermissionWithinCeiling(held, read({ fields: ['title', 'body'] }, [IS_CREATOR]))
+      ).toBe(true);
+    });
+
+    it('still allows unions on one dimension across held permissions', () => {
+      expect(
+        isPermissionWithinCeiling([titleAlways, bodyAlways], read({ fields: ['title', 'body'] }))
+      ).toBe(true);
+      expect(
+        isPermissionWithinCeiling(
+          [titleEn, titleFr],
+          read({ fields: ['title'], locales: ['en', 'fr'] })
+        )
+      ).toBe(true);
+      expect(
+        isPermissionWithinCeiling(
+          [read({ fields: ['title'] }, [IS_CREATOR]), read({ fields: ['title'] }, [SAME_ROLE])],
+          read({ fields: ['title'] }, [IS_CREATOR, SAME_ROLE])
+        )
+      ).toBe(true);
+    });
+
+    it('does not mix a condition held on one locale with another locale', () => {
+      const held = [
+        read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR]),
+        read({ fields: ['title'], locales: ['fr'] }, [SAME_ROLE]),
+      ];
+
+      expect(
+        isPermissionWithinCeiling(
+          held,
+          read({ fields: ['title'], locales: ['en', 'fr'] }, [IS_CREATOR, SAME_ROLE])
+        )
+      ).toBe(false);
+      expect(
+        isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR]))
+      ).toBe(true);
+    });
+
+    it('drops a partially held permission as a whole', () => {
+      expect(isPermissionWithinCeiling([titleAlways], read({ fields: ['title', 'body'] }))).toBe(
+        false
+      );
     });
   });
 
-  describe('checker function - matching permission found', () => {
-    describe('non-field paths (no "fields" segment)', () => {
-      it('returns true for a path without "fields"', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check(['contentType', 'enabled'])).toBe(true);
+  describe('toEnforcedPermissions', () => {
+    const USER = 'plugin::users-permissions.user';
+
+    // Articles are localized (their layout lists `locales`), users are not
+    const layout = {
+      conditions: [],
+      sections: {
+        collectionTypes: {
+          actions: [],
+          subjects: [
+            {
+              uid: SUBJECT,
+              label: 'Article',
+              properties: [
+                { label: 'Fields', value: 'fields' },
+                { label: 'Locales', value: 'locales' },
+              ],
+            },
+            { uid: USER, label: 'User', properties: [{ label: 'Fields', value: 'fields' }] },
+          ],
+        },
+        singleTypes: { actions: [], subjects: [] },
+        plugins: [],
+        settings: [],
+      },
+    } as PermissionContracts.GetAll.Response['data'];
+
+    it('reads a missing locales key on a localized subject as no locale', () => {
+      const held = toEnforcedPermissions([read({ fields: ['title'] })], layout);
+
+      expect(held).toEqual([read({ fields: ['title'], locales: [] })]);
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: null }))).toBe(
+        false
+      );
+      expect(isPermissionWithinCeiling(held, read({ fields: ['title'], locales: ['fr'] }))).toBe(
+        false
+      );
+      expect(canTick(held, READ, SUBJECT, selection({}), 'locales', 'fr')).toBe(false);
+      expect(canTick(held, READ, SUBJECT, selection({}), 'fields', 'title')).toBe(true);
+    });
+
+    it('keeps every locale, listed locales, and subjects that are not localized', () => {
+      const permissions = [
+        read({ fields: ['title'], locales: null }),
+        read({ fields: ['title'], locales: ['en'] }),
+        permission(READ, USER, { fields: ['username'] }),
+        permission('plugin::upload.read', null),
+      ];
+
+      expect(toEnforcedPermissions(permissions, layout)).toEqual(permissions);
+    });
+
+    it('removes locales where they are not enforced, and permissions with action parameters', () => {
+      expect(
+        toEnforcedPermissions(
+          [
+            permission(READ, USER, { fields: ['username'], locales: ['en'] }),
+            { ...read({ fields: ['title'], locales: ['en'] }), actionParameters: { from: 1 } },
+          ],
+          layout
+        )
+      ).toEqual([permission(READ, USER, { fields: ['username'] })]);
+    });
+
+    describe('conditions', () => {
+      const UNKNOWN = 'admin::does-not-exist';
+      const layoutWithConditions = {
+        ...layout,
+        conditions: [{ id: IS_CREATOR, displayName: 'Is creator', category: 'default' }],
+      };
+
+      it('does not count a permission held only under an unregistered condition', () => {
+        const held = toEnforcedPermissions(
+          [read({ fields: ['title'], locales: ['en'] }, [UNKNOWN])],
+          layoutWithConditions
+        );
+
+        expect(held).toEqual([]);
+        expect(canTick(held, READ, SUBJECT, selection({}), 'fields', 'title')).toBe(false);
+        expect(isPermissionHeld(held, READ, SUBJECT)).toBe(false);
       });
 
-      it('returns true for an empty path', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check([])).toBe(true);
-      });
+      it('offers only the registered conditions of a held permission', () => {
+        const held = toEnforcedPermissions(
+          [read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR, UNKNOWN])],
+          layoutWithConditions
+        );
 
-      it('returns true when "fields" is the last segment (no field name follows)', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check(['contentType', 'fields'])).toBe(true);
+        expect(held).toEqual([read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR])]);
+        expect(getAllowedConditions(held, READ, SUBJECT)).toEqual([IS_CREATOR]);
+      });
+    });
+  });
+
+  describe('getActionSelection', () => {
+    it('flattens the ticked properties and conditions of an action form', () => {
+      expect(
+        getActionSelection({
+          properties: {
+            fields: { title: true, body: false, seo: { title: true, description: false } },
+            locales: { en: true, fr: false },
+          },
+          conditions: { [IS_CREATOR]: true, [SAME_ROLE]: false },
+        })
+      ).toEqual(selection({ fields: ['title', 'seo.title'], locales: ['en'] }, [IS_CREATOR]));
+    });
+
+    it('ignores the enabled switch and empty properties', () => {
+      expect(
+        getActionSelection({
+          properties: { enabled: true, locales: { en: false } },
+          conditions: {},
+        })
+      ).toEqual(selection({}));
+      expect(getActionSelection(undefined)).toEqual(selection({}));
+    });
+  });
+
+  describe('findActionForm', () => {
+    it('looks the subject up in collection types and single types', () => {
+      const modifiedData = {
+        collectionTypes: { [SUBJECT]: { [READ]: 'collection' } },
+        singleTypes: { 'api::home.home': { [READ]: 'single' } },
+      };
+
+      expect(findActionForm(modifiedData, SUBJECT, READ)).toBe('collection');
+      expect(findActionForm(modifiedData, 'api::home.home', READ)).toBe('single');
+      expect(findActionForm(modifiedData, 'api::other.other', READ)).toBeUndefined();
+      expect(findActionForm(modifiedData, null, READ)).toBeUndefined();
+    });
+  });
+
+  describe('isValueSelected', () => {
+    it('matches a value or one of its nested fields', () => {
+      const current = selection({ fields: ['seo.title'] });
+
+      expect(isValueSelected(current, 'fields', 'seo.title')).toBe(true);
+      expect(isValueSelected(current, 'fields', 'seo')).toBe(true);
+      expect(isValueSelected(current, 'fields', 'title')).toBe(false);
+      expect(isValueSelected(current, 'locales', 'en')).toBe(false);
+    });
+  });
+
+  describe('canTick', () => {
+    it('rejects a value that no matching permission holds', () => {
+      expect(canTick([titleEn, bodyFr], READ, SUBJECT, selection({}), 'fields', 'seo')).toBe(false);
+      expect(canTick([titleEn, bodyFr], CREATE, SUBJECT, selection({}), 'fields', 'title')).toBe(
+        false
+      );
+    });
+
+    it('does not mix the fields of one permission with the locales of another', () => {
+      const held = [titleEn, bodyFr];
+
+      // Nothing ticked yet: any held value goes
+      expect(canTick(held, READ, SUBJECT, selection({}), 'fields', 'title')).toBe(true);
+      expect(canTick(held, READ, SUBJECT, selection({}), 'locales', 'fr')).toBe(true);
+
+      // `title` is ticked: only `en` can follow, and `body` cannot join it
+      const title = selection({ fields: ['title'] });
+      expect(canTick(held, READ, SUBJECT, title, 'locales', 'en')).toBe(true);
+      expect(canTick(held, READ, SUBJECT, title, 'locales', 'fr')).toBe(false);
+      expect(canTick(held, READ, SUBJECT, title, 'fields', 'body')).toBe(true);
+
+      // `title` and `en` are ticked: `body` and `fr` are out
+      const titleOnEn = selection({ fields: ['title'], locales: ['en'] });
+      expect(canTick(held, READ, SUBJECT, titleOnEn, 'fields', 'body')).toBe(false);
+      expect(canTick(held, READ, SUBJECT, titleOnEn, 'locales', 'fr')).toBe(false);
+    });
+
+    it('still allows unions on one dimension', () => {
+      expect(
+        canTick(
+          [titleAlways, read({ fields: ['body'] })],
+          READ,
+          SUBJECT,
+          selection({ fields: ['title'] }),
+          'fields',
+          'body'
+        )
+      ).toBe(true);
+      expect(
+        canTick(
+          [titleEn, read({ fields: ['title'], locales: ['fr'] })],
+          READ,
+          SUBJECT,
+          selection({ fields: ['title'], locales: ['en'] }),
+          'locales',
+          'fr'
+        )
+      ).toBe(true);
+    });
+
+    it('keeps the selected conditions covered', () => {
+      const held = [titleAlways, bodyIfCreator];
+
+      expect(canTick(held, READ, SUBJECT, selection({ fields: ['title'] }), 'fields', 'body')).toBe(
+        true
+      );
+      expect(
+        canTick(
+          held,
+          READ,
+          SUBJECT,
+          selection({ fields: ['title'] }, [IS_CREATOR]),
+          'fields',
+          'body'
+        )
+      ).toBe(true);
+      expect(
+        canTick(
+          held,
+          READ,
+          SUBJECT,
+          selection({ fields: ['title'] }, [SAME_ROLE]),
+          'fields',
+          'body'
+        )
+      ).toBe(false);
+    });
+  });
+
+  describe('getAllowedConditions', () => {
+    it('is undefined for super admins', () => {
+      expect(getAllowedConditions(undefined, READ, SUBJECT)).toBeUndefined();
+    });
+
+    it('is undefined when an unconditional permission covers the selection', () => {
+      const held = [titleAlways, bodyIfCreator];
+
+      expect(
+        getAllowedConditions(held, READ, SUBJECT, selection({ fields: ['title'] }))
+      ).toBeUndefined();
+      expect(getAllowedConditions(held, READ, SUBJECT, selection({}))).toBeUndefined();
+    });
+
+    it('lists the conditions under which every combination is covered', () => {
+      const held = [titleAlways, bodyIfCreator];
+
+      expect(getAllowedConditions(held, READ, SUBJECT, selection({ fields: ['body'] }))).toEqual([
+        IS_CREATOR,
+      ]);
+      expect(
+        getAllowedConditions(held, READ, SUBJECT, selection({ fields: ['title', 'body'] }))
+      ).toEqual([IS_CREATOR]);
+    });
+
+    it('is the union of the conditions held on the same selection', () => {
+      const held = [read({}, [IS_CREATOR]), read({}, [SAME_ROLE])];
+
+      expect(getAllowedConditions(held, READ, SUBJECT, selection({ fields: ['title'] }))).toEqual([
+        IS_CREATOR,
+        SAME_ROLE,
+      ]);
+    });
+
+    it('drops a condition held on another locale only', () => {
+      const held = [
+        read({ fields: ['title'], locales: ['en'] }, [IS_CREATOR]),
+        read({ fields: ['title'], locales: ['fr'] }, [SAME_ROLE]),
+      ];
+
+      expect(
+        getAllowedConditions(held, READ, SUBJECT, selection({ fields: ['title'], locales: ['en'] }))
+      ).toEqual([IS_CREATOR]);
+      expect(
+        getAllowedConditions(
+          held,
+          READ,
+          SUBJECT,
+          selection({ fields: ['title'], locales: ['en', 'fr'] })
+        )
+      ).toEqual([]);
+    });
+
+    it('works without properties for plugin and settings permissions', () => {
+      const held = [permission('plugin::i18n.locale.create', null, {}, [IS_CREATOR])];
+
+      expect(getAllowedConditions(held, 'plugin::i18n.locale.create', null)).toEqual([IS_CREATOR]);
+      expect(getAllowedConditions(held, 'plugin::i18n.locale.read', null)).toEqual([]);
+    });
+  });
+
+  describe('createBulkPermissionChecker', () => {
+    const actionForm = {
+      properties: {
+        fields: { title: false, body: false },
+        locales: { en: false, fr: false },
+      },
+      conditions: { [IS_CREATOR]: false },
+    };
+
+    const tickAll = (userPermissions: AuthPermission[] | undefined, form = actionForm) =>
+      updateValuesWithPermissions(
+        form,
+        true,
+        createBulkPermissionChecker({
+          userPermissions,
+          action: READ,
+          subject: SUBJECT,
+          actionForm: form,
+          scope: form,
+          scopePath: [],
+          value: true,
+        })
+      );
+
+    it('is undefined for super admins', () => {
+      expect(
+        createBulkPermissionChecker({
+          userPermissions: undefined,
+          action: READ,
+          subject: SUBJECT,
+          actionForm,
+          scope: actionForm,
+          scopePath: [],
+          value: true,
+        })
+      ).toBeUndefined();
+      expect(tickAll(undefined).properties).toEqual({
+        fields: { title: true, body: true },
+        locales: { en: true, fr: true },
       });
     });
 
-    describe('field paths - unrestricted permission (fields null/undefined)', () => {
-      it('returns true when properties.fields is null', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check(['fields', 'title'])).toBe(true);
+    it('ticks everything the user holds when nothing conflicts', () => {
+      expect(tickAll([read({ locales: ['en', 'fr'] })]).properties).toEqual({
+        fields: { title: true, body: true },
+        locales: { en: true, fr: true },
       });
-
-      it('returns true when properties.fields is undefined (no properties key)', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, undefined)];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check(['fields', 'title'])).toBe(true);
+      expect(tickAll([titleAlways, read({ fields: ['body'] })]).properties).toEqual({
+        fields: { title: true, body: true },
+        locales: { en: true, fr: true },
       });
     });
 
-    describe('field paths - restricted permission (fields is an array)', () => {
-      it('returns false when fields array is empty', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, [])];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check(['fields', 'title'])).toBe(false);
+    it('anchors on one permission instead of mixing two', () => {
+      expect(tickAll([titleEn, bodyFr]).properties).toEqual({
+        fields: { title: true, body: false },
+        locales: { en: true, fr: false },
+      });
+      // The widest permission wins
+      expect(
+        tickAll([titleEn, read({ fields: ['body'], locales: ['en', 'fr'] })]).properties
+      ).toEqual({
+        fields: { title: false, body: true },
+        locales: { en: true, fr: true },
+      });
+    });
+
+    describe('conditions', () => {
+      const C1 = 'admin::c1';
+      const C2 = 'admin::c2';
+      const fieldsForm = (fields: Record<string, boolean>, conditions = {}) => ({
+        properties: { fields },
+        conditions,
+      });
+      const tickFields = (userPermissions: AuthPermission[], form: object) =>
+        (tickAll(userPermissions, form as typeof actionForm) as typeof actionForm).properties
+          .fields as Record<string, boolean>;
+      const ticked = (fields: Record<string, boolean>) =>
+        Object.keys(fields).filter((field) => fields[field]);
+
+      const emptyForm = fieldsForm({ title: false, body: false });
+
+      it('does not mix fields held under different conditions', () => {
+        const fields = tickFields(
+          [read({ fields: ['title'] }, [IS_CREATOR]), read({ fields: ['body'] }, [SAME_ROLE])],
+          emptyForm
+        );
+
+        expect(ticked(fields)).toHaveLength(1);
       });
 
-      it('returns true for an exact field match', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['title'])];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check(['fields', 'title'])).toBe(true);
+      it('does not add a field held only under a condition to an unconditional anchor', () => {
+        expect(
+          tickFields(
+            [read({ fields: ['title'] }), read({ fields: ['body'] }, [IS_CREATOR])],
+            emptyForm
+          )
+        ).toEqual({ title: true, body: false });
       });
 
-      it('returns false for a field not in the allowed list', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['title'])];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check(['fields', 'body'])).toBe(false);
+      it('mixes fields held under the same condition', () => {
+        expect(
+          tickFields(
+            [read({ fields: ['title'] }, [IS_CREATOR]), read({ fields: ['body'] }, [IS_CREATOR])],
+            emptyForm
+          )
+        ).toEqual({ title: true, body: true });
       });
 
-      it('returns true for a nested field that starts with an allowed prefix', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['author'])];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        // path: ['fields', 'author', 'name'] → fieldPath = 'author.name'
-        expect(check(['fields', 'author', 'name'])).toBe(true);
+      it('does not add a field not held under every condition of the anchor', () => {
+        expect(
+          tickFields(
+            [read({ fields: ['title'] }, [C1, C2]), read({ fields: ['body'] }, [C1])],
+            emptyForm
+          )
+        ).toEqual({ title: true, body: false });
       });
 
-      it('returns false for a field that is a prefix of an allowed field (not a descendant)', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['authorName'])];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        // 'author' !== 'authorName' and 'author' does not start with 'authorName.'
-        expect(check(['fields', 'author'])).toBe(false);
+      it('anchors on the widest permission and keeps its condition', () => {
+        expect(
+          tickFields(
+            [
+              read({ fields: ['title', 'body'] }, [IS_CREATOR]),
+              read({ fields: ['body', 'slug'] }, [SAME_ROLE]),
+            ],
+            fieldsForm({ title: false, body: false, slug: false })
+          )
+        ).toEqual({ title: true, body: true, slug: false });
       });
 
-      it('returns true when multiple fields are allowed and the queried one matches', () => {
-        const permissions: AuthPermission[] = [
-          makePermission(ACTION_ID, SUBJECT, ['title', 'body', 'author']),
+      it('keeps the ticked conditions', () => {
+        expect(
+          tickFields(
+            [read({ fields: ['title'] }, [IS_CREATOR]), read({ fields: ['body'] }, [SAME_ROLE])],
+            fieldsForm({ title: true, body: false }, { [IS_CREATOR]: true })
+          )
+        ).toEqual({ title: true, body: false });
+      });
+
+      it('leaves a selection the user can grant under one condition', () => {
+        const userPermissions = [
+          read({ fields: ['title'] }, [IS_CREATOR]),
+          read({ fields: ['body'] }, [SAME_ROLE]),
         ];
-        const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
-        expect(check(['fields', 'body'])).toBe(true);
+        const fields = tickFields(userPermissions, emptyForm);
+
+        expect(
+          getAllowedConditions(userPermissions, READ, SUBJECT, {
+            properties: { fields: ticked(fields) },
+            conditions: [],
+          })
+        ).toHaveLength(1);
       });
     });
 
-    describe('subject === null (plugins/settings)', () => {
-      it('matches when subject is null', () => {
-        const permissions: AuthPermission[] = [makePermission(ACTION_ID, null, ['title'])];
-        const check = createFieldPermissionChecker(ACTION_ID, null, permissions)!;
-        expect(check(['fields', 'title'])).toBe(true);
+    it('extends the current selection rather than replacing it', () => {
+      const form = {
+        ...actionForm,
+        properties: { ...actionForm.properties, locales: { en: false, fr: true } },
+      };
+
+      expect(tickAll([titleEn, bodyFr], form).properties).toEqual({
+        fields: { title: false, body: true },
+        locales: { en: false, fr: true },
       });
     });
-  });
-});
 
-// ---------------------------------------------------------------------------
-// createDynamicActionPermissionChecker
-// ---------------------------------------------------------------------------
+    it('checks a scoped path within the action form', () => {
+      const scope = { en: false, fr: false };
+      const checker = createBulkPermissionChecker({
+        userPermissions: [titleEn, bodyFr],
+        action: READ,
+        subject: SUBJECT,
+        actionForm: {
+          ...actionForm,
+          properties: { ...actionForm.properties, fields: { title: true, body: false } },
+        },
+        scope,
+        scopePath: ['properties', 'locales'],
+        value: true,
+      })!;
 
-describe('createDynamicActionPermissionChecker', () => {
-  describe('Role editing mode / undefined subject', () => {
-    it('returns undefined when userPermissions is undefined', () => {
-      const result = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, undefined);
-      expect(result).toBeUndefined();
+      expect(updateValuesWithPermissions(scope, true, checker)).toEqual({ en: true, fr: false });
     });
 
-    it('returns undefined when subject is undefined', () => {
-      const result = createDynamicActionPermissionChecker(undefined, ACTION_ID, []);
-      expect(result).toBeUndefined();
-    });
-  });
+    it('lets the user untick any value they hold', () => {
+      const ticked = {
+        properties: { fields: { title: true, body: true }, locales: { en: true, fr: true } },
+        conditions: {},
+      };
+      const result = updateValuesWithPermissions(
+        ticked,
+        false,
+        createBulkPermissionChecker({
+          userPermissions: [titleEn],
+          action: READ,
+          subject: SUBJECT,
+          actionForm: ticked,
+          scope: ticked,
+          scopePath: [],
+          value: false,
+        })
+      );
 
-  describe('returns a checker function when both subject and userPermissions are provided', () => {
-    it('returns a function', () => {
-      const result = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, []);
-      expect(typeof result).toBe('function');
-    });
-  });
-
-  describe('checker function - action resolved from context', () => {
-    it('returns false when no matching permission exists for the contextual actionId', () => {
-      const permissions: AuthPermission[] = [makePermission('other.action', SUBJECT)];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check(['someField'])).toBe(false);
-    });
-
-    it('returns true for a non-field path when permission matches', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check(['enabled'])).toBe(true);
-    });
-
-    it('returns true for an empty path when permission matches', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check([])).toBe(true);
-    });
-  });
-
-  describe('checker function - action extracted from path (actionIdFromContext is undefined)', () => {
-    it('extracts a plugin:: action from path[0] and allows a non-field path', () => {
-      const pluginAction = 'plugin::content-manager.explorer.read';
-      const permissions: AuthPermission[] = [makePermission(pluginAction, SUBJECT)];
-      const check = createDynamicActionPermissionChecker(SUBJECT, undefined, permissions)!;
-      expect(check([pluginAction, 'enabled'])).toBe(true);
-    });
-
-    it('extracts an admin:: action from path[0] and allows a non-field path', () => {
-      const adminAction = 'admin::roles.create';
-      const permissions: AuthPermission[] = [makePermission(adminAction, SUBJECT)];
-      const check = createDynamicActionPermissionChecker(SUBJECT, undefined, permissions)!;
-      expect(check([adminAction, 'enabled'])).toBe(true);
-    });
-
-    it('returns false when path[0] is not a plugin:: or admin:: action and no contextual action', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-      const check = createDynamicActionPermissionChecker(SUBJECT, undefined, permissions)!;
-      // path[0] is plain text - cannot extract an action
-      expect(check(['regularField'])).toBe(false);
-    });
-
-    it('returns false when path is empty and no contextual action', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-      const check = createDynamicActionPermissionChecker(SUBJECT, undefined, permissions)!;
-      expect(check([])).toBe(false);
-    });
-  });
-
-  describe('checker function - field-level restrictions', () => {
-    it('returns true when fields is null (unrestricted)', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT)];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check(['fields', 'title'])).toBe(true);
-    });
-
-    it('returns false when fields is an empty array', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, [])];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check(['fields', 'title'])).toBe(false);
-    });
-
-    it('returns true for an exact field match', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['title'])];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check(['fields', 'title'])).toBe(true);
-    });
-
-    it('returns false for a field not in the allowed list', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['title'])];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check(['fields', 'body'])).toBe(false);
-    });
-
-    it('returns true for a nested field that starts with an allowed prefix', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['author'])];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check(['fields', 'author', 'name'])).toBe(true);
-    });
-
-    it('returns true when "fields" is the last segment (no field name follows)', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, SUBJECT, ['title'])];
-      const check = createDynamicActionPermissionChecker(SUBJECT, ACTION_ID, permissions)!;
-      expect(check(['fields'])).toBe(true);
-    });
-
-    describe('action extracted from path with field checking', () => {
-      it('checks fields against the adjusted path (after slicing the action segment)', () => {
-        const pluginAction = 'plugin::content-manager.explorer.read';
-        const permissions: AuthPermission[] = [makePermission(pluginAction, SUBJECT, ['title'])];
-        const check = createDynamicActionPermissionChecker(SUBJECT, undefined, permissions)!;
-        // path: [pluginAction, 'fields', 'title'] → adjustedPath = ['fields', 'title']
-        expect(check([pluginAction, 'fields', 'title'])).toBe(true);
-        expect(check([pluginAction, 'fields', 'body'])).toBe(false);
+      expect(result.properties).toEqual({
+        fields: { title: false, body: true },
+        locales: { en: false, fr: true },
       });
     });
+
+    it('treats the enabled switch as the action itself', () => {
+      const form = { properties: { enabled: false }, conditions: {} };
+      const checker = createBulkPermissionChecker({
+        userPermissions: [permission('plugin::i18n.locale.create', null)],
+        action: 'plugin::i18n.locale.create',
+        subject: null,
+        actionForm: form,
+        scope: form,
+        scopePath: [],
+        value: true,
+      })!;
+
+      expect(checker(['properties', 'enabled'])).toBe(true);
+    });
   });
 
-  describe('subject is null (plugins/settings)', () => {
-    it('matches when subject is null', () => {
-      const permissions: AuthPermission[] = [makePermission(ACTION_ID, null, ['title'])];
-      const check = createDynamicActionPermissionChecker(null, ACTION_ID, permissions)!;
-      expect(check(['fields', 'title'])).toBe(true);
+  describe('createSubjectBulkPermissionChecker', () => {
+    it('anchors every action separately', () => {
+      const subjectForm = {
+        [READ]: {
+          properties: { fields: { title: false, body: false }, locales: { en: false, fr: false } },
+          conditions: {},
+        },
+        [CREATE]: {
+          properties: { fields: { title: false, body: false }, locales: { en: false, fr: false } },
+          conditions: {},
+        },
+      };
+      const checker = createSubjectBulkPermissionChecker({
+        userPermissions: [
+          titleEn,
+          bodyFr,
+          permission(CREATE, SUBJECT, { fields: ['body'], locales: ['fr'] }),
+        ],
+        subject: SUBJECT,
+        subjectForm,
+        value: true,
+      });
+
+      expect(updateValuesWithPermissions(subjectForm, true, checker)).toEqual({
+        [READ]: {
+          properties: { fields: { title: true, body: false }, locales: { en: true, fr: false } },
+          conditions: {},
+        },
+        [CREATE]: {
+          properties: { fields: { title: false, body: true }, locales: { en: false, fr: true } },
+          conditions: {},
+        },
+      });
+    });
+
+    it('ticks plugin and settings actions held under different conditions', () => {
+      // Each action is its own permission, so their conditions never need to agree
+      const subjectForm = {
+        'plugin::i18n.locale.create': { properties: { enabled: false }, conditions: {} },
+        'plugin::i18n.locale.read': { properties: { enabled: false }, conditions: {} },
+      };
+      const checker = createSubjectBulkPermissionChecker({
+        userPermissions: [
+          permission('plugin::i18n.locale.create', null, {}, [IS_CREATOR]),
+          permission('plugin::i18n.locale.read', null, {}, [SAME_ROLE]),
+        ],
+        subject: null,
+        subjectForm,
+        value: true,
+      });
+
+      expect(updateValuesWithPermissions(subjectForm, true, checker)).toEqual({
+        'plugin::i18n.locale.create': { properties: { enabled: true }, conditions: {} },
+        'plugin::i18n.locale.read': { properties: { enabled: true }, conditions: {} },
+      });
+    });
+
+    it('checks plugin and settings actions by their id', () => {
+      const subjectForm = {
+        'plugin::i18n.locale.create': { properties: { enabled: false }, conditions: {} },
+        'plugin::i18n.locale.read': { properties: { enabled: false }, conditions: {} },
+      };
+      const checker = createSubjectBulkPermissionChecker({
+        userPermissions: [permission('plugin::i18n.locale.create', null)],
+        subject: null,
+        subjectForm,
+        value: true,
+      });
+
+      expect(updateValuesWithPermissions(subjectForm, true, checker)).toEqual({
+        'plugin::i18n.locale.create': { properties: { enabled: true }, conditions: {} },
+        'plugin::i18n.locale.read': { properties: { enabled: false }, conditions: {} },
+      });
+    });
+
+    it('is undefined for super admins', () => {
+      expect(
+        createSubjectBulkPermissionChecker({
+          userPermissions: undefined,
+          subject: SUBJECT,
+          subjectForm: {},
+          value: true,
+        })
+      ).toBeUndefined();
+    });
+  });
+
+  describe('listGroupLeaves', () => {
+    it('lists the fields under a group, nested ones by their path', () => {
+      expect(
+        listGroupLeaves({
+          title: false,
+          meta: { robots: true, canonical: false },
+          conditions: false,
+        })
+      ).toEqual(['title', 'meta.robots', 'meta.canonical', 'conditions']);
+    });
+
+    it('lists nothing for a group that is missing or a single field', () => {
+      expect(listGroupLeaves(undefined)).toEqual([]);
+      expect(listGroupLeaves(false)).toEqual([]);
     });
   });
 });
