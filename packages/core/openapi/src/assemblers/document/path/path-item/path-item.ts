@@ -70,11 +70,6 @@ export class PathItemAssembler implements Assembler.Path {
     return routes.reduce<Record<string, Core.Route[]>>((acc, route) => {
       const { path } = route;
 
-      // RegExp paths have no OpenAPI path template equivalent
-      if (typeof path !== 'string') {
-        return acc;
-      }
-
       if (!Array.isArray(acc[path])) {
         acc[path] = [];
       }

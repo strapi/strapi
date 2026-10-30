@@ -7,7 +7,7 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /uploads/{*path}                                                                │
 │ HEAD|GET           │ /plugins/documentation/{*path}                                                  │
 │ HEAD|GET           │ /                                                                               │
-│ HEAD|GET           │ /^\\/(?!uploads\\/).+/                                                            │
+│ HEAD|GET           │ /*path                                                                          │
 │ HEAD|ACL|BIND|CHE… │ /graphql                                                                        │
 │ HEAD|GET           │ /api/articles                                                                   │
 │ HEAD|GET           │ /api/articles/:id                                                               │

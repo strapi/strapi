@@ -17,10 +17,6 @@ const getMethod = (route: Core.Route) => {
 };
 
 const getPath = (route: Core.Route, strapi: Core.Strapi) => {
-  if (typeof route.path !== 'string') {
-    return { path: route.path, constraints: [] };
-  }
-
   const path = trim(route.path);
   const translated = translateRoutePath(path);
 
@@ -36,7 +32,10 @@ const getPath = (route: Core.Route, strapi: Core.Strapi) => {
 const createRoutePathConstraintMiddleware =
   (constraints: RoutePathConstraint[]): Core.MiddlewareHandler =>
   async (ctx, next) => {
-    if (constraints.some(({ name, pattern }) => !pattern.test(ctx.params[name]))) {
+    const fails = ({ name, pattern }: RoutePathConstraint) =>
+      ctx.params[name] !== undefined && !pattern.test(ctx.params[name]);
+
+    if (constraints.some(fails)) {
       return ctx.notFound();
     }
 
@@ -114,7 +113,7 @@ export default (strapi: Core.Strapi) => {
 
       const routeHandler = compose([
         createRouteInfoMiddleware(route),
-        createRoutePathConstraintMiddleware(constraints),
+        ...(constraints.length > 0 ? [createRoutePathConstraintMiddleware(constraints)] : []),
         authenticate,
         authorize,
         createPolicicesMiddleware(route, strapi),
@@ -126,7 +125,7 @@ export default (strapi: Core.Strapi) => {
       try {
         router[method](path, routeHandler);
       } catch (error) {
-        if (typeof route.path === 'string' && error instanceof Error) {
+        if (error instanceof Error) {
           throw new RoutePathMigrationError(
             route.path,
             `path-to-regexp v8 rejected the translated path "${path}": ${error.message}`

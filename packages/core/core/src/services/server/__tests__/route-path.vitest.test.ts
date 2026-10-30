@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import Router from '@koa/router';
 import { RoutePathMigrationError, translateRoutePath } from '../route-path';
 
@@ -8,6 +9,7 @@ describe('translateRoutePath', () => {
     ['/users/:id(\\d+)', '/users/:id'],
     ['/posts/:slug([a-z-]+)', '/posts/:slug'],
     ['/users/:id?', '/users{/:id}'],
+    ['/users/:id(\\d+)?', '/users{/:id}'],
     ['/files/:path*', '/files{/*path}'],
     ['/files/:path+', '/files/*path'],
     ['/literal(foo)[bar]?+!', '/literal\\(foo\\)\\[bar\\]\\?\\+\\!'],

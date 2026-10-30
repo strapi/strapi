@@ -14,6 +14,11 @@ export const publicStatic: Core.MiddlewareFactory = (
 ) => {
   const { maxAge } = defaultsDeep({}, config, defaults);
 
+  const serveStatic = koaStatic(strapi.dirs.static.public, {
+    maxage: maxAge,
+    defer: true,
+  });
+
   strapi.server.routes([
     {
       method: 'GET',
@@ -26,11 +31,14 @@ export const publicStatic: Core.MiddlewareFactory = (
     // All other public GET-routes except /uploads/{*path} which is handled in upload middleware
     {
       method: 'GET',
-      path: /^\/(?!uploads\/).+/,
-      handler: koaStatic(strapi.dirs.static.public, {
-        maxage: maxAge,
-        defer: true,
-      }),
+      path: '/*path',
+      handler(ctx, next) {
+        if (ctx.path.startsWith('/uploads/')) {
+          return next();
+        }
+
+        return serveStatic(ctx, next);
+      },
       config: { auth: false },
     },
   ]);
