@@ -111,6 +111,7 @@ export const singleCreateOrUpdate = async (
         data: sanitizedData,
         ...sanitizedQuery,
         locale: resolvedLocale,
+        populate,
       });
     } else {
       doc = await documentManager.update(documentId, typedUid, {
@@ -314,6 +315,10 @@ export const createSinglePublishHandler =
       const sanitizedQuery = await permissionChecker.sanitizedQuery.publish({ locale });
       const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
+      const populate = await getService('populate-builder')(typedUid)
+        .populateFromQuery(sanitizedQuery)
+        .build();
+
       const publishFindQuery: McpDocumentQuery = {
         ...sanitizedQuery,
         locale: resolvedLocale,
@@ -333,6 +338,7 @@ export const createSinglePublishHandler =
 
       const publishResult = await documentManager.publish(document.documentId, typedUid, {
         locale: resolvedLocale,
+        populate,
       });
 
       return publishResult?.at(0);
@@ -374,6 +380,10 @@ export const createSingleUnpublishHandler =
     const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish({ locale });
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
+    const populate = await getService('populate-builder')(typedUid)
+      .populateFromQuery(sanitizedQuery)
+      .build();
+
     const unpublishFindQuery: McpDocumentQuery = { ...sanitizedQuery, locale: resolvedLocale };
     const document = await getService('document-manager')
       .findMany(unpublishFindQuery as McpFindManyParams, typedUid)
@@ -395,12 +405,16 @@ export const createSingleUnpublishHandler =
       if (discardDraft === true) {
         await documentManager.discardDraft(document.documentId, typedUid, {
           locale: resolvedLocale,
+          populate,
         });
       }
 
       return asyncPipe.pipe(
         (doc: any) =>
-          documentManager.unpublish(doc.documentId, typedUid, { locale: resolvedLocale }),
+          documentManager.unpublish(doc.documentId, typedUid, {
+            locale: resolvedLocale,
+            populate,
+          }),
         (doc: unknown) => sanitizeFormatShape(permissionChecker, typedUid, doc)
       )(document);
     });
@@ -434,6 +448,10 @@ export const createSingleDiscardDraftHandler =
     const sanitizedQuery = await permissionChecker.sanitizedQuery.discard({ locale });
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
+    const populate = await getService('populate-builder')(typedUid)
+      .populateFromQuery(sanitizedQuery)
+      .build();
+
     const discardFindQuery: McpDocumentQuery = {
       ...sanitizedQuery,
       locale: resolvedLocale,
@@ -453,7 +471,10 @@ export const createSingleDiscardDraftHandler =
 
     const discardedDocument = await asyncPipe.pipe(
       (doc: any) =>
-        documentManager.discardDraft(doc.documentId, typedUid, { locale: resolvedLocale }),
+        documentManager.discardDraft(doc.documentId, typedUid, {
+          locale: resolvedLocale,
+          populate,
+        }),
       (doc: unknown) => sanitizeFormatShape(permissionChecker, typedUid, doc)
     )(document);
 
