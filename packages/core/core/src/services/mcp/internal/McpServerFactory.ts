@@ -9,6 +9,8 @@ import type { McpCapabilityRegistryReadonly } from './McpCapabilityRegistry';
 import { canUseMcpCapability, syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
 import type { McpToolSchemaScope } from './resolveToolSchemaScope';
 
+export const MCP_MAX_TOOL_INPUT_ELEMENTS = 10_000;
+
 export type McpCapabilityDefinitions = {
   tools: McpCapabilityDefinitionRegistry<'tool', Modules.MCP.McpToolDefinition>;
   prompts: McpCapabilityDefinitionRegistry<'prompt', Modules.MCP.McpPromptDefinition>;
@@ -73,6 +75,7 @@ export const createMcpServerWithRegistries = ({
     },
     {
       capabilities,
+      maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS,
     }
   );
 
