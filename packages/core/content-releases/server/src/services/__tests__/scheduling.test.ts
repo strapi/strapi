@@ -192,7 +192,10 @@ describe('Scheduling service', () => {
         return jobs;
       });
 
-      await Promise.resolve();
+      // Drain microtasks so an un-awaited set() can resolve before the assertion.
+      await new Promise((resolve) => {
+        setImmediate(resolve);
+      });
       expect(settled).toBe(false);
 
       resolveFindOne({ id: 1 });
