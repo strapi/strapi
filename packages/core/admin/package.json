@@ -144,7 +144,7 @@
     "sonner": "2.0.7",
     "typescript": "5.9.3",
     "yup": "0.32.9",
-    "zod": "4.4.3"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@strapi/admin-test-utils": "5.60.0",
