@@ -1,4 +1,4 @@
-import _, { has, toNumber } from 'lodash';
+import _, { toNumber } from 'lodash';
 import { errors, pagination as paginationUtils } from '@strapi/utils';
 
 import type { Core, UID } from '@strapi/types';
@@ -8,7 +8,7 @@ import type { Core, UID } from '@strapi/types';
  * Defaults to the `api.rest.withCount` config (true) when not specified on the request.
  */
 const resolveWithCount = (strapi: Core.Strapi, pagination: Record<string, unknown>): boolean => {
-  if (has(pagination, 'withCount')) {
+  if (Object.hasOwn(pagination, 'withCount')) {
     const withCount = pagination.withCount;
 
     if (typeof withCount === 'boolean') {
@@ -55,7 +55,7 @@ export const findAndCountRestPage = async (
   const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;
 
   // Whether the consumer used page-based pagination (default) vs offset-based.
-  const isOffset = has(pagination, 'start') || has(pagination, 'limit');
+  const isOffset = Object.hasOwn(pagination, 'start') || Object.hasOwn(pagination, 'limit');
   const isPaged = !isOffset;
 
   // Resolve start/limit applying defaults and the maxLimit cap.
