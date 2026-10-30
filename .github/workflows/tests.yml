@@ -492,7 +492,7 @@ jobs:
           YARN_NM_MODE: 'hardlinks-local'
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        run: yarn playwright install --with-deps chromium
 
       - name: Restore build cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
