@@ -1,9 +1,11 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import tailwindcss from '@tailwindcss/postcss';
 import { EsbuildPlugin } from 'esbuild-loader';
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
 import { Configuration, DefinePlugin, HotModuleReplacementPlugin } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
@@ -48,6 +50,8 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
     'process.version': JSON.stringify(''),
   });
   strapiProcessEnvPlugins.add(definePlugin);
+
+  const cssLoaders = [require.resolve('style-loader'), require.resolve('css-loader')];
 
   return {
     experiments: {
@@ -121,7 +125,29 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
         },
         {
           test: /\.css$/i,
-          use: [require.resolve('style-loader'), require.resolve('css-loader')],
+          oneOf: [
+            {
+              // Only the generated admin stylesheet holds Tailwind at-rules. Webpack matches the
+              // real path, so a symlinked application directory needs the realpath here
+              include: path.join(fs.realpathSync(ctx.runtimeDir), 'styles.css'),
+              use: [
+                ...cssLoaders,
+                {
+                  loader: require.resolve('postcss-loader'),
+                  options: {
+                    postcssOptions: {
+                      plugins: [
+                        tailwindcss({
+                          optimize: nodeEnv === 'production' && Boolean(ctx.options.minify),
+                        }),
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+            { use: cssLoaders },
+          ],
         },
         {
           test: /\.(svg|eot|otf|ttf|woff|woff2)$/,

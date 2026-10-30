@@ -84,7 +84,6 @@
       "require": "./dist/admin-test.js",
       "default": "./dist/admin-test.js"
     },
-    "./admin/styles.css": "./admin-styles.css",
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
@@ -93,7 +92,6 @@
   "types": "./dist/index.d.ts",
   "bin": "./bin/strapi.js",
   "files": [
-    "admin-styles.css",
     "dist/",
     "bin/",
     "resources/",
@@ -131,6 +129,7 @@
     "@strapi/typescript-utils": "5.61.0",
     "@strapi/upload": "5.61.0",
     "@strapi/utils": "5.61.0",
+    "@tailwindcss/postcss": "4.3.3",
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react-swc": "3.11.0",
     "boxen": "5.1.2",
@@ -157,6 +156,8 @@
     "outdent": "0.8.0",
     "path-browserify": "1.0.1",
     "pkg-up": "3.1.0",
+    "postcss": "8.5.32",
+    "postcss-loader": "8.2.1",
     "prettier": "3.9.9",
     "react-refresh": "0.14.0",
     "read-pkg-up": "7.0.1",

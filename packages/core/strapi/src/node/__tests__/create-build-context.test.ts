@@ -91,29 +91,17 @@ describe('createBuildContext', () => {
     jest.clearAllMocks();
   });
 
-  it('holds the Tailwind scan roots and warns nothing under Vite', async () => {
-    const args = buildArgs(buildStrapiMock());
+  it.each(['vite', 'webpack'] as const)(
+    'holds the Tailwind scan roots and warns nothing under %s',
+    async (bundler) => {
+      const args = { ...buildArgs(buildStrapiMock()), options: { bundler } };
 
-    const ctx = await createBuildContext(args);
+      const ctx = await createBuildContext(args);
 
-    expect(ctx.scanRoots).toEqual([mockScanRoot]);
-    expect(args.logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('holds no scan root and warns once under webpack', async () => {
-    const args = { ...buildArgs(buildStrapiMock()), options: { bundler: 'webpack' as const } };
-
-    const ctx = await createBuildContext(args);
-
-    expect(ctx.scanRoots).toEqual([]);
-    expect(args.logger.debug).not.toHaveBeenCalledWith(
-      'Tailwind scan roots',
-      expect.anything(),
-      []
-    );
-    expect(args.logger.warn).toHaveBeenCalledTimes(1);
-    expect(args.logger.warn).toHaveBeenCalledWith(expect.stringContaining('need Vite'));
-  });
+      expect(ctx.scanRoots).toEqual([mockScanRoot]);
+      expect(args.logger.warn).not.toHaveBeenCalled();
+    }
+  );
 
   it('transports admin.auth.cookie.name into STRAPI_ADMIN_AUTH_COOKIE_NAME', async () => {
     const strapi = buildStrapiMock('my_admin_jwt');

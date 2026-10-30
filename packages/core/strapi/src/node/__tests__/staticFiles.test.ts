@@ -9,8 +9,22 @@ import type { BuildContext } from '../create-build-context';
 // Prettier loads its plugins with a dynamic import, which Jest cannot run without --experimental-vm-modules
 jest.mock('prettier', () => ({ format: async (source: string) => source }));
 
+// The exports-map target of the fixture design system, so no test depends on the installed copy
+const sourceTarget = '/fixture/@strapi/design-system/src/next/source.css';
+
+jest.mock('../core/admin-vite-aliases', () => ({
+  getSubpathEntries: () => [
+    ['@strapi/design-system', '/fixture/@strapi/design-system/dist/index.mjs'],
+    ['@strapi/design-system/next/source.css', sourceTarget],
+  ],
+}));
+
 describe('getStylesheet', () => {
   const ctx = (scanRoots: string[]) => ({ scanRoots }) as unknown as BuildContext;
+
+  test('imports the design system source that @strapi/admin resolves', () => {
+    expect(getStylesheet(ctx([]))).toContain(`@import "${sourceTarget}";`);
+  });
 
   test('quotes a path that holds an apostrophe, and adds no backslash', () => {
     const sheet = getStylesheet(ctx(["/Users/o'brien/app/src/admin"]));
@@ -67,12 +81,8 @@ describe('getEntryModule', () => {
   const ctx = (bundler: BuildContext['bundler']) =>
     ({ bundler, plugins: [] }) as unknown as BuildContext;
 
-  test('imports the host stylesheet under Vite', () => {
-    expect(getEntryModule(ctx('vite'))).toContain("import './styles.css';");
-  });
-
-  test('imports no stylesheet under webpack', () => {
-    expect(getEntryModule(ctx('webpack'))).not.toContain('styles.css');
+  test.each(['vite', 'webpack'] as const)('imports the admin stylesheet under %s', (bundler) => {
+    expect(getEntryModule(ctx(bundler))).toContain("import './styles.css';");
   });
 });
 
@@ -87,16 +97,17 @@ describe('writeStaticClientFiles', () => {
     await fs.rm(runtimeDir, { recursive: true, force: true });
   });
 
-  test('writes no stylesheet under webpack', async () => {
+  test('writes the admin stylesheet under webpack', async () => {
     const ctx = {
       bundler: 'webpack',
       runtimeDir,
       plugins: [],
+      scanRoots: [],
       logger: { debug: jest.fn() },
     } as unknown as BuildContext;
 
     await writeStaticClientFiles(ctx);
 
-    expect((await fs.readdir(runtimeDir)).sort()).toEqual(['app.js', 'index.html']);
+    expect((await fs.readdir(runtimeDir)).sort()).toEqual(['app.js', 'index.html', 'styles.css']);
   });
 });

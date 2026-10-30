@@ -46,7 +46,7 @@ interface BuildContext extends BaseContext {
 interface CreateBuildContextArgs extends CLIContext {
   strapi?: Core.Strapi;
   options?: BaseOptions;
-  /** If true, Tailwind scans source and not `dist`. E.g. for Vite development server, which serves `admin/src` */
+  /** If true, Tailwind scans source and not `dist`. E.g. for the development server, which serves `admin/src` */
   dev?: boolean;
 }
 
@@ -168,21 +168,11 @@ const createBuildContext = async ({
 
   const { bundler = 'vite', ...restOptions } = options;
 
-  let scanRoots: string[] = [];
-
-  if (bundler === 'vite') {
-    scanRoots = await getScanRoots(
-      { cwd, runtimeDir, plugins: pluginsWithFront, customisations },
-      dev
-    );
-    logger.debug('Tailwind scan roots', os.EOL, scanRoots);
-  }
-
-  if (bundler === 'webpack') {
-    logger.warn(
-      'The next design system components, such as the Drawer on the release pages, need Vite. Under webpack, they render without styles.'
-    );
-  }
+  const scanRoots = await getScanRoots(
+    { cwd, runtimeDir, plugins: pluginsWithFront, customisations },
+    dev
+  );
+  logger.debug('Tailwind scan roots', os.EOL, scanRoots);
 
   const buildContext: BuildContext = {
     appDir,
