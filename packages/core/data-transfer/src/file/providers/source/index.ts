@@ -1,5 +1,5 @@
 import type { Stats } from 'node:fs';
-import type { Readable } from 'stream';
+import type { Duplex, Readable } from 'stream';
 
 import zip from 'zlib';
 import path from 'path';
@@ -8,8 +8,6 @@ import { finished } from 'stream/promises';
 import fs from 'fs-extra';
 import { Parser, type ReadEntry } from 'tar';
 import { isEmpty, keyBy } from 'lodash';
-import { chain } from 'stream-chain';
-import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
 import type {
@@ -24,6 +22,7 @@ import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 import {
   ProviderInitializationError,
   ProviderTransferError,
@@ -36,7 +35,7 @@ import {
   validateAssetMetadata,
 } from './utils';
 
-type StreamItemArray = Parameters<typeof chain>[0];
+type StreamItemArray = Array<Readable | Duplex>;
 
 /**
  * Constant for the metadata file path
@@ -129,6 +128,10 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#diagnostics = diagnostics;
     const { path: filePath } = this.options.file;
 
+    // The catch below maps every failure to a bad file or key. Load the stream
+    // packages first so a missing dependency keeps its own message and stack.
+    await loadStreamDeps();
+
     try {
       // Read the metadata to ensure the file can be parsed
       await this.#loadMetadata();
@@ -148,12 +151,12 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async #loadMetadata() {
-    const backupStream = this.#getBackupStream();
+    const backupStream = await this.#getBackupStream();
     this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
   async #loadAssetMetadata(sidecarPath: string) {
-    const backupStream = this.#getBackupStream();
+    const backupStream = await this.#getBackupStream();
     const filename = path.posix.basename(sidecarPath).replace(/\.json$/, '');
     return validateAssetMetadata(
       await this.#parseJSONFile<IFile>(backupStream, sidecarPath),
@@ -173,7 +176,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   async getSchemas() {
     this.#reportInfo('getting schemas');
     const schemaCollection = await utils.stream.collect<Struct.Schema>(
-      this.createSchemasReadStream()
+      await this.createSchemasReadStream()
     );
 
     if (isEmpty(schemaCollection)) {
@@ -194,7 +197,7 @@ class LocalFileSourceProvider implements ISourceProvider {
 
     const uploads = new Set<string>();
     const sidecars = new Map<string, Buffer>();
-    const inStream = this.#getBackupStream();
+    const inStream = await this.#getBackupStream();
 
     await new Promise<void>((resolve, reject) => {
       let activeEntries = 0;
@@ -315,12 +318,21 @@ class LocalFileSourceProvider implements ISourceProvider {
     return this.#streamJsonlDirectory('configuration');
   }
 
-  createAssetsReadStream(): Readable | Promise<Readable> {
-    const inStream = this.#getBackupStream();
+  createAssetsReadStream(): Readable {
     const outStream = new PassThrough({ objectMode: true });
+    this.#reportInfo('creating assets read stream');
+    this.#pipeAssets(outStream).catch((error: unknown) => {
+      if (!outStream.destroyed) {
+        outStream.destroy(error instanceof Error ? error : new Error(String(error)));
+      }
+    });
+    return outStream;
+  }
+
+  async #pipeAssets(outStream: PassThrough): Promise<void> {
+    const inStream = await this.#getBackupStream();
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
     const assetMetadata = this.#assetMetadata;
-    this.#reportInfo('creating assets read stream');
 
     let activeAsyncEntries = 0;
     const runReadEntry = async (fn: () => Promise<void>) => {
@@ -367,11 +379,10 @@ class LocalFileSourceProvider implements ISourceProvider {
       ],
       (err) => this.#endPassThroughWhenTarIdle(outStream, () => activeAsyncEntries, err)
     );
-
-    return outStream;
   }
 
-  #getBackupStream() {
+  async #getBackupStream() {
+    const { chain } = await loadStreamDeps();
     const { file, encryption, compression } = this.options;
 
     const streams: StreamItemArray = [];
@@ -394,10 +405,19 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   // `directory` must be posix formatted path
-  #streamJsonlDirectory(directory: string) {
-    const inStream = this.#getBackupStream();
-
+  #streamJsonlDirectory(directory: string): Readable {
     const outStream = new PassThrough({ objectMode: true });
+    this.#pipeJsonlDirectory(outStream, directory).catch((error: unknown) => {
+      if (!outStream.destroyed) {
+        outStream.destroy(error instanceof Error ? error : new Error(String(error)));
+      }
+    });
+    return outStream;
+  }
+
+  async #pipeJsonlDirectory(outStream: PassThrough, directory: string): Promise<void> {
+    const { chain, parser } = await loadStreamDeps();
+    const inStream = await this.#getBackupStream();
 
     let activeAsyncEntries = 0;
     const runReadEntry = async (fn: () => Promise<void>) => {
@@ -425,14 +445,13 @@ class LocalFileSourceProvider implements ISourceProvider {
             await runReadEntry(async () => {
               const transforms = [
                 // JSONL parser to read the data chunks one by one (line by line)
-                parser({
-                  checkErrors: true,
-                }),
+                parser(),
                 // The JSONL parser returns each line as key/value
                 (line: { key: string; value: object }) => line.value,
               ];
 
-              const stream = entry.pipe(chain(transforms));
+              const stream = chain(transforms);
+              entry.pipe(stream);
 
               try {
                 for await (const chunk of stream) {
@@ -458,8 +477,6 @@ class LocalFileSourceProvider implements ISourceProvider {
       ],
       (err) => this.#endPassThroughWhenTarIdle(outStream, () => activeAsyncEntries, err)
     );
-
-    return outStream;
   }
 
   // For collecting an entire JSON file then parsing it, not for streaming JSONL

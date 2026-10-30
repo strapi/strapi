@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 
 import fs from 'fs-extra';
 import { tmpdir } from 'os';
@@ -37,6 +38,39 @@ describe('Directory destination provider', () => {
     await provider.close();
 
     expect(await fs.pathExists(dir)).toBe(false);
+  });
+
+  test.each([
+    ['schemas', 'createSchemasWriteStream'],
+    ['entities', 'createEntitiesWriteStream'],
+    ['links', 'createLinksWriteStream'],
+    ['configuration', 'createConfigurationWriteStream'],
+  ] as const)('%s write stream writes JSONL files', async (stage, method) => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), `dts-dest-${stage}-`));
+    const provider = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: {},
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+
+    const items = [{ id: 1 }, { id: 2, title: 'two' }];
+    await pipeline(Readable.from(items), provider[method]());
+
+    // chain() finishes once its first stream ends; the JSONL writer flushes to disk after that.
+    const filePath = path.join(dir, stage, `${stage}_00001.jsonl`);
+    for (let i = 0; i < 50 && !(await fs.pathExists(filePath)); i += 1) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+    }
+
+    const content = await fs.readFile(filePath, 'utf8');
+    const lines = content
+      .split('\n')
+      .filter((line) => line !== '')
+      .map((line) => JSON.parse(line));
+    expect(lines).toEqual(items);
   });
 
   test('createAssetsWriteStream surfaces sync fs errors as ProviderTransferError (engine-reportable)', async () => {

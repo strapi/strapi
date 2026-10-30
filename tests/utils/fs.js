@@ -4,8 +4,6 @@ const path = require('node:path');
 const { pipeline } = require('node:stream');
 const fs = require('node:fs');
 const zlib = require('node:zlib');
-const { parser: jsonlParser } = require('stream-json/jsonl/Parser');
-const { chain } = require('stream-chain');
 const tar = require('tar');
 
 // COLLECTORS
@@ -49,16 +47,13 @@ const stringCollector = async (entry) => {
  * @returns {Promise<unknown[]>} A promise that resolves to the collected data.
  */
 const jsonlCollector = async (entry) => {
-  const transforms = [
-    // JSONL parser to read the data chunks one by one (line by line)
-    jsonlParser({ checkErrors: true }),
-    // The JSONL parser returns each line as key/value
-    (line) => line.value,
-  ];
+  const chunks = await rawCollector(entry);
 
-  const stream = entry.pipe(chain(transforms));
-
-  return rawCollector(stream);
+  return Buffer.concat(chunks)
+    .toString('utf8')
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .map((line) => JSON.parse(line));
 };
 
 /**

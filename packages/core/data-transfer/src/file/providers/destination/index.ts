@@ -3,10 +3,10 @@ import zlib from 'zlib';
 import { Readable, Writable } from 'stream';
 import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
-import { stringer } from 'stream-json/jsonl/Stringer';
-import { chain } from 'stream-chain';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
+import { deferWritable } from '../../../utils/defer-writable';
+import { loadStreamDeps } from '../../../utils/esm-deps';
 import type {
   IAsset,
   IDestinationProvider,
@@ -61,6 +61,10 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   #archive: { stream?: tar.Pack; pipeline?: Stream } = {};
 
+  #archiveReady: Promise<void> = Promise.resolve();
+
+  #archiveError?: Error;
+
   #diagnostics?: IDiagnosticReporter;
 
   #closed = false;
@@ -107,7 +111,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return zlib.createGzip();
   }
 
-  bootstrap(diagnostics: IDiagnosticReporter): void | Promise<void> {
+  bootstrap(diagnostics: IDiagnosticReporter): void {
     this.#diagnostics = diagnostics;
     this.#closed = false;
     const { compression, encryption } = this.options;
@@ -139,7 +143,15 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       archiveTransforms.push(createEncryptionCipher(encryption.key));
     }
 
-    this.#archive.pipeline = chain([this.#archive.stream, ...archiveTransforms, outStream]);
+    const archiveStream = this.#archive.stream;
+    this.#archiveError = undefined;
+    this.#archiveReady = loadStreamDeps()
+      .then(({ chain }) => {
+        this.#archive.pipeline = chain([archiveStream, ...archiveTransforms, outStream]);
+      })
+      .catch((error: unknown) => {
+        this.#archiveError = error instanceof Error ? error : new Error(String(error));
+      });
 
     this.results.file = { path: this.#archivePath };
   }
@@ -150,6 +162,11 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     this.#closed = true;
+    await this.#archiveReady;
+    if (this.#archiveError) {
+      throw this.#archiveError;
+    }
+
     const { stream, pipeline } = this.#archive;
 
     if (!stream) {
@@ -200,68 +217,39 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return createTarEntryStream(stream, () => 'metadata.json');
   }
 
-  createSchemasWriteStream() {
-    if (!this.#archive.stream) {
-      throw new Error('Archive stream is unavailable');
-    }
-    this.#reportInfo('creating schemas write stream');
-    const filePathFactory = createFilePathFactory('schemas');
-
-    const entryStream = createTarEntryStream(
-      this.#archive.stream,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-
-    return chain([stringer(), entryStream]);
+  createSchemasWriteStream(): Writable {
+    return this.#createJsonlWriteStream('schemas');
   }
 
   createEntitiesWriteStream(): Writable {
-    if (!this.#archive.stream) {
-      throw new Error('Archive stream is unavailable');
-    }
-    this.#reportInfo('creating entities write stream');
-    const filePathFactory = createFilePathFactory('entities');
-
-    const entryStream = createTarEntryStream(
-      this.#archive.stream,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('entities');
   }
 
   createLinksWriteStream(): Writable {
-    if (!this.#archive.stream) {
-      throw new Error('Archive stream is unavailable');
-    }
-    this.#reportInfo('creating links write stream');
-    const filePathFactory = createFilePathFactory('links');
-
-    const entryStream = createTarEntryStream(
-      this.#archive.stream,
-      filePathFactory,
-      this.options.file.maxSizeJsonl
-    );
-
-    return chain([stringer(), entryStream]);
+    return this.#createJsonlWriteStream('links');
   }
 
   createConfigurationWriteStream(): Writable {
+    return this.#createJsonlWriteStream('configuration');
+  }
+
+  #createJsonlWriteStream(stage: string): Writable {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-    this.#reportInfo('creating configuration write stream');
-    const filePathFactory = createFilePathFactory('configuration');
 
+    this.#reportInfo(`creating ${stage} write stream`);
+    const filePathFactory = createFilePathFactory(stage);
     const entryStream = createTarEntryStream(
       this.#archive.stream,
       filePathFactory,
       this.options.file.maxSizeJsonl
     );
 
-    return chain([stringer(), entryStream]);
+    return deferWritable(async () => {
+      const { chain, stringer } = await loadStreamDeps();
+      return chain([stringer(), entryStream]);
+    });
   }
 
   createAssetsWriteStream(): Writable {

@@ -2,7 +2,7 @@ import path, { posix, win32 } from 'path';
 import os from 'os';
 import fs from 'fs-extra';
 import { cloneDeep, get, set } from 'lodash';
-import { Readable, Writable } from 'stream-chain';
+import { Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { Struct } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
@@ -19,8 +19,19 @@ import type {
 } from '../../types';
 
 import { extendExpectForDataTransferTests, getStrapiFactory } from '../../__tests__/test-utils';
+import * as esmDeps from '../../utils/esm-deps';
 import { createLocalStrapiDestinationProvider } from '../../strapi/providers';
 import { TransferEngineValidationError } from '../errors';
+
+jest.mock('../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 /**
  * Parallel Jest + V8 can move `heapUsed` by tens of MB unrelated to transfer payload.
@@ -418,6 +429,9 @@ describe('Transfer engine', () => {
 
   beforeEach(() => {
     jest.restoreAllMocks();
+    // restoreAllMocks clears the esm-deps jest.fn. Put the real loader back.
+    const actual = jest.requireActual<typeof esmDeps>('../../utils/esm-deps');
+    (esmDeps.loadStreamDeps as jest.Mock).mockImplementation(() => actual.loadStreamDeps());
     completeSource = createSource();
     completeDestination = createDestination();
   });
@@ -475,6 +489,40 @@ describe('Transfer engine', () => {
 
       expect(completeSource).toHaveAllSourceStagesCalledTimes(1);
       expect(completeDestination).toHaveAllDestinationStagesCalledTimes(1);
+    });
+
+    test('stops before provider bootstrap when stream dependencies fail to load', async () => {
+      const loadError = new Error("Cannot find module 'stream-chain'");
+      const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+        typeof esmDeps.loadStreamDeps
+      >;
+      loadStreamDeps.mockRejectedValueOnce(loadError);
+
+      const sourceBootstrap = jest.fn();
+      const source = {
+        ...minimalSource,
+        bootstrap: sourceBootstrap,
+      };
+      const beforeTransfer = jest.fn();
+      const destinationBootstrap = jest.fn();
+      const destination = createDestination({
+        beforeTransfer,
+        bootstrap: destinationBootstrap,
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      try {
+        await expect(engine.transfer()).rejects.toBe(loadError);
+
+        expect(sourceBootstrap).not.toHaveBeenCalled();
+        expect(destinationBootstrap).not.toHaveBeenCalled();
+        expect(beforeTransfer).not.toHaveBeenCalled();
+      } finally {
+        loadStreamDeps.mockReset();
+        loadStreamDeps.mockImplementation(() =>
+          jest.requireActual<typeof esmDeps>('../../utils/esm-deps').loadStreamDeps()
+        );
+      }
     });
 
     test('validates included source stages before preparing the destination', async () => {

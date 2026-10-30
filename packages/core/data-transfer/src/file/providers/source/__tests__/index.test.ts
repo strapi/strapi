@@ -7,6 +7,7 @@ import { pipeline } from 'stream/promises';
 import type { ILocalFileSourceProviderOptions } from '..';
 
 import { createLocalFileSourceProvider } from '..';
+import * as esmDeps from '../../../../utils/esm-deps';
 import {
   isFilePathInDirname,
   isPathEquivalent,
@@ -15,6 +16,16 @@ import {
 } from '../utils';
 import { assertReadStreamBackpressure } from '../../../../__tests__/test-utils';
 import { createEncryptionCipher } from '../../../../utils/encryption';
+
+jest.mock('../../../../utils/esm-deps', () => {
+  const actual = jest.requireActual('../../../../utils/esm-deps') as typeof esmDeps;
+  return {
+    ...actual,
+    loadStreamDeps: jest.fn((...args: Parameters<typeof actual.loadStreamDeps>) =>
+      actual.loadStreamDeps(...args)
+    ),
+  };
+});
 
 describe('File source provider', () => {
   const createTar = async (
@@ -29,6 +40,29 @@ describe('File source provider', () => {
     await pipeline(pack, fs.createWriteStream(tarPath));
     return tarPath;
   };
+
+  test('bootstrap surfaces a stream dependency load failure', async () => {
+    const loadError = new Error("Cannot find module 'stream-chain'");
+    const loadStreamDeps = esmDeps.loadStreamDeps as jest.MockedFunction<
+      typeof esmDeps.loadStreamDeps
+    >;
+    loadStreamDeps.mockRejectedValueOnce(loadError);
+
+    const provider = createLocalFileSourceProvider({
+      file: { path: './test-file' },
+      compression: { enabled: false },
+      encryption: { enabled: true, key: 'secret' },
+    });
+
+    try {
+      await expect(provider.bootstrap({ report: jest.fn() } as never)).rejects.toBe(loadError);
+    } finally {
+      loadStreamDeps.mockReset();
+      loadStreamDeps.mockImplementation(() =>
+        jest.requireActual<typeof esmDeps>('../../../../utils/esm-deps').loadStreamDeps()
+      );
+    }
+  });
 
   test('exposes createAssetsReadStream (starting the stream opens the backup file on disk)', () => {
     const options: ILocalFileSourceProviderOptions = {
@@ -441,7 +475,7 @@ describe('File source provider', () => {
       });
       await provider.bootstrap();
 
-      const stream = provider.createEntitiesReadStream();
+      const stream = await provider.createEntitiesReadStream();
       const { sourcePaused, chunks } = await assertReadStreamBackpressure(stream, {
         delayMs: 12,
         minChunksForBackpressure: 10,
