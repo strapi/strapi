@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 import * as strapiUtils from '@strapi/utils';
 import { Validators } from '../validators';
 import { customBlockValidators } from '../blocks-validator';
@@ -684,7 +684,7 @@ describe('Blocks validator', () => {
         expect(await validator(input)).toEqual(input);
       });
 
-      it('should reject a custom block that does not match its registered schema', () => {
+      it('should reject a custom block that does not match its registered schema', async () => {
         const calloutValidator = yup.object().shape({
           type: yup.string().equals(['callout']).required(),
           children: yup.array().min(1).required(),
@@ -702,10 +702,10 @@ describe('Blocks validator', () => {
 
         // Missing required children
         const input = [{ type: 'callout' }];
-        expect(validator(input)).rejects.toThrow(errors.YupValidationError);
+        await expect(validator(input)).rejects.toThrow(errors.YupValidationError);
       });
 
-      it('should still reject a completely unknown block type', () => {
+      it('should still reject a completely unknown block type', async () => {
         const validator = strapiUtils.validateYupSchema(
           Validators.blocks(
             {
@@ -722,10 +722,10 @@ describe('Blocks validator', () => {
           },
         ];
 
-        expect(validator(input)).rejects.toThrow(errors.YupValidationError);
+        await expect(validator(input)).rejects.toThrow(errors.YupValidationError);
       });
 
-      it('should reject a custom block with invalid nested children', () => {
+      it('should reject a custom block with invalid nested children', async () => {
         // Register a validator that requires children to be text nodes
         const calloutValidator = yup.object().shape({
           type: yup.string().equals(['callout']).required(),
@@ -759,7 +759,7 @@ describe('Blocks validator', () => {
           },
         ];
 
-        expect(validator(input)).rejects.toThrow(errors.YupValidationError);
+        await expect(validator(input)).rejects.toThrow(errors.YupValidationError);
       });
     });
   });
