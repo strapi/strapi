@@ -450,7 +450,7 @@ jobs:
   #   installed in $RUNNER_TEMP, outside the paths that caches and artifacts use.
   e2e_enterprise_plugins:
     if: >-
-      ${{ (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
+      ${{ (github.event_name == 'push' || needs.conditions.outputs.is_local == 'true')
       && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true') }}
     timeout-minutes: 30
     needs: [conditions, build]
