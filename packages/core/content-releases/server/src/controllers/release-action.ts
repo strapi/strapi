@@ -15,7 +15,6 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import { getService } from '../utils';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
-import { AlreadyOnReleaseError } from '../services/validation';
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -40,40 +39,15 @@ const releaseActionController = {
       releaseActionsArgs.map((releaseActionArgs) => validateReleaseAction(releaseActionArgs))
     );
 
-    const releaseActionService = getService('release-action', { strapi });
-    const releaseService = getService('release', { strapi });
-
-    const releaseActions = await strapi.db.transaction(async () => {
-      const releaseActions = await Promise.all(
-        releaseActionsArgs.map(async (releaseActionArgs) => {
-          try {
-            const action = await releaseActionService.create(releaseId, releaseActionArgs, {
-              disableUpdateReleaseStatus: true,
-            });
-            return action;
-          } catch (error) {
-            // If the entry is already in the release, we don't want to throw an error, so we catch and ignore it
-            if (error instanceof AlreadyOnReleaseError) {
-              return null;
-            }
-            throw error;
-          }
-        })
-      );
-      return releaseActions;
-    });
-
-    const newReleaseActions = releaseActions.filter((action) => action !== null);
-
-    if (newReleaseActions.length > 0) {
-      releaseService.updateReleaseStatus(releaseId);
-    }
+    const { created, alreadyInRelease } = await getService('release-action', {
+      strapi,
+    }).createMany(releaseId, releaseActionsArgs);
 
     ctx.created({
-      data: newReleaseActions,
+      data: created,
       meta: {
-        entriesAlreadyInRelease: releaseActions.length - newReleaseActions.length,
-        totalEntries: releaseActions.length,
+        entriesAlreadyInRelease: alreadyInRelease,
+        totalEntries: releaseActionsArgs.length,
       },
     });
   },
@@ -96,6 +70,8 @@ const releaseActionController = {
     ctx.query.sort = ctx.query.groupBy === 'action' ? 'type' : ctx.query.groupBy;
     delete ctx.query.groupBy;
 
+    // `filter` passes the sanitizer untouched: it's validated above, and the service builds the
+    // condition it stands for
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const releaseActionService = getService('release-action', { strapi });
@@ -133,7 +109,7 @@ const releaseActionController = {
       ...action,
       entry: action.entry
         ? await contentTypeOutputSanitizers[action.contentType](action.entry)
-        : {},
+        : null,
     }));
 
     const groupedData = await releaseActionService.groupActions(sanitizedResults, query.sort);

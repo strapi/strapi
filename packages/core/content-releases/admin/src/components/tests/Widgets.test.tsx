@@ -66,6 +66,20 @@ describe('ChartEntriesWidget', () => {
     );
   });
 
+  it('renders "Not scheduled" as written, without capitalizing it', () => {
+    jest.mocked(useGetUpcomingReleasesQuery).mockReturnValue({
+      data: mockReleases,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    render(<UpcomingReleasesWidget />);
+
+    const notScheduled = screen.getByText('Not scheduled');
+    expect(notScheduled).not.toHaveStyle({ textTransform: 'capitalize' });
+  });
+
   it('renders loading state', () => {
     jest.mocked(useGetUpcomingReleasesQuery).mockReturnValue({
       isLoading: true,

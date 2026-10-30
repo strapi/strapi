@@ -64,8 +64,8 @@
     "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
-    "@strapi/design-system": "2.2.4",
-    "@strapi/icons": "2.2.4",
+    "@strapi/design-system": "2.3.0-alpha.1",
+    "@strapi/icons": "2.3.0-alpha.1",
     "@strapi/provider-email-sendmail": "5.60.0",
     "@strapi/utils": "5.60.0",
     "koa2-ratelimit": "^1.1.3",

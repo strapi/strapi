@@ -9,10 +9,12 @@ import {
 import type {
   GetReleaseActions,
   UpdateReleaseAction,
+  ReleaseActionFilter,
   ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import type {
   CreateRelease,
+  CreateReleaseFromSkippedEntries,
   DeleteRelease,
   GetReleases,
   GetReleasesByDocumentAttached,
@@ -27,11 +29,14 @@ import type { EndpointDefinitions } from '@reduxjs/toolkit/query';
 export interface GetReleasesQueryParams {
   page?: number;
   pageSize?: number;
+  sort?: NonNullable<GetReleases.Request['query']>['sort'];
   filters?: {
     releasedAt?: {
       // TODO: this should be a boolean, find a way to avoid strings
       $notNull?: boolean | 'true' | 'false';
     };
+    // The releases page filters, with its date filters turned into bounds
+    $and?: Array<Record<string, unknown>>;
   };
 }
 
@@ -39,13 +44,8 @@ export interface GetReleaseActionsQueryParams {
   page?: number;
   pageSize?: number;
   groupBy?: ReleaseActionGroupBy;
+  filter?: ReleaseActionFilter;
 }
-
-type GetReleasesTabResponse = GetReleases.Response & {
-  meta: {
-    activeTab: 'pending' | 'done';
-  };
-};
 
 type AnyEndpointDefinition = EndpointDefinitions[string];
 
@@ -77,6 +77,14 @@ const extendInvalidatesTags = (
   Object.assign(endpoint, { invalidatesTags: newInvalidatesTags });
 };
 
+/**
+ * Invalidated by review-workflows when an entry's stage or a workflow changes. Readiness depends on
+ * the stage required to publish, so the queries that report it provide this tag. Extending those
+ * mutations instead would depend on the plugins' load order: review-workflows injects them after
+ * this file runs, and `enhanceEndpoints` skips endpoints that aren't injected yet.
+ */
+const REVIEW_WORKFLOW_STAGES_TAG = 'ReviewWorkflowStages';
+
 const releaseApi = adminApi
   .enhanceEndpoints({
     addTagTypes: [
@@ -86,6 +94,7 @@ const releaseApi = adminApi
       'ReleaseSettings',
       'Document',
       'UpcomingReleasesList',
+      REVIEW_WORKFLOW_STAGES_TAG,
     ],
     endpoints: {
       updateDocument(endpoint: AnyEndpointDefinition) {
@@ -107,24 +116,6 @@ const releaseApi = adminApi
         ]);
       },
       discardDocument(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      createWorkflow(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      updateWorkflow(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      deleteWorkflow(endpoint: AnyEndpointDefinition) {
         extendInvalidatesTags(endpoint, [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
@@ -156,17 +147,10 @@ const releaseApi = adminApi
                 ]
               : [],
         }),
-        getReleases: build.query<GetReleasesTabResponse, GetReleasesQueryParams | void>({
+        getReleases: build.query<GetReleases.Response, GetReleasesQueryParams | void>({
+          // Without arguments only pending releases are returned, e.g. for the release pickers
           query(
-            { page, pageSize, filters } = {
-              page: 1,
-              pageSize: 16,
-              filters: {
-                releasedAt: {
-                  $notNull: false,
-                },
-              },
-            }
+            { page, pageSize, sort, filters } = { filters: { releasedAt: { $notNull: false } } }
           ) {
             return {
               url: '/content-releases',
@@ -175,35 +159,20 @@ const releaseApi = adminApi
                 params: {
                   page: page || 1,
                   pageSize: pageSize || 16,
-                  filters: filters || {
-                    releasedAt: {
-                      $notNull: false,
-                    },
-                  },
+                  sort,
+                  filters,
                 },
               },
             };
-          },
-          transformResponse(response: GetReleasesTabResponse, meta, arg) {
-            const releasedAtValue = arg?.filters?.releasedAt?.$notNull;
-            const isActiveDoneTab = releasedAtValue === 'true';
-            const newResponse: GetReleasesTabResponse = {
-              ...response,
-              meta: {
-                ...response.meta,
-                activeTab: isActiveDoneTab ? 'done' : 'pending',
-              },
-            };
-
-            return newResponse;
           },
           providesTags: (result) =>
             result
               ? [
                   ...result.data.map(({ id }) => ({ type: 'Release' as const, id })),
                   { type: 'Release', id: 'LIST' },
+                  REVIEW_WORKFLOW_STAGES_TAG,
                 ]
-              : [{ type: 'Release', id: 'LIST' }],
+              : [{ type: 'Release', id: 'LIST' }, REVIEW_WORKFLOW_STAGES_TAG],
         }),
         getRelease: build.query<GetRelease.Response, GetRelease.Request['params']>({
           query({ id }) {
@@ -215,6 +184,7 @@ const releaseApi = adminApi
           providesTags: (result, error, arg) => [
             { type: 'Release', id: 'LIST' },
             { type: 'Release' as const, id: arg.id },
+            REVIEW_WORKFLOW_STAGES_TAG,
           ],
         }),
         getReleaseActions: build.query<
@@ -230,7 +200,7 @@ const releaseApi = adminApi
               },
             };
           },
-          providesTags: [{ type: 'ReleaseAction', id: 'LIST' }],
+          providesTags: [{ type: 'ReleaseAction', id: 'LIST' }, REVIEW_WORKFLOW_STAGES_TAG],
         }),
         createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
           query(data) {
@@ -241,6 +211,24 @@ const releaseApi = adminApi
             };
           },
           invalidatesTags: [{ type: 'Release', id: 'LIST' }, 'UpcomingReleasesList'],
+        }),
+        createReleaseFromSkippedEntries: build.mutation<
+          CreateReleaseFromSkippedEntries.Response,
+          CreateReleaseFromSkippedEntries.Request['params'] &
+            CreateReleaseFromSkippedEntries.Request['body']
+        >({
+          query({ id, ...data }) {
+            return {
+              url: `/content-releases/${id}/create-from-skipped-entries`,
+              method: 'POST',
+              data,
+            };
+          },
+          invalidatesTags: [
+            { type: 'Release', id: 'LIST' },
+            { type: 'EntriesInRelease' },
+            'UpcomingReleasesList',
+          ],
         }),
         updateRelease: build.mutation<
           void,
@@ -368,6 +356,7 @@ const releaseApi = adminApi
           },
           invalidatesTags: (result, error, arg) => [
             { type: 'Release', id: arg.id },
+            { type: 'ReleaseAction', id: 'LIST' },
             { type: 'Document' },
             'UpcomingReleasesList',
           ],
@@ -427,6 +416,7 @@ const {
   useGetReleaseQuery,
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
+  useCreateReleaseFromSkippedEntriesMutation,
   useCreateReleaseActionMutation,
   useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
@@ -445,6 +435,7 @@ export {
   useGetReleaseQuery,
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
+  useCreateReleaseFromSkippedEntriesMutation,
   useCreateReleaseActionMutation,
   useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
