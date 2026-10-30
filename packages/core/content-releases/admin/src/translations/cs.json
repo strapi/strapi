@@ -72,7 +72,6 @@
   "pages.ReleaseDetails.groupBy.option.locales": "Lokalizace",
   "pages.ReleaseDetails.groupBy.option.actions": "Akce",
   "pages.ReleaseDetails.header-subtitle.scheduled": "Naplánováno na {date} v {time} ({offset})",
-  "pages.ReleaseDetails.entry-validation.fields": "Pole",
   "pages.Settings.releases.description": "Vytvářejte a spravujte aktualizace obsahu",
   "pages.Settings.releases.preferences.title": "Předvolby",
   "pages.Settings.releases.timezone.label": "Výchozí časové pásmo",

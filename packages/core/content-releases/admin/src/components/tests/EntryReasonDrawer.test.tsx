@@ -54,10 +54,13 @@ const details = (id: number, overrides: Partial<EntryReasonDetails> = {}): Entry
   ...overrides,
 });
 
-const RAN_RELEASE: Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason'> = {
+type ReleaseDates = Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason' | 'timezone'>;
+
+const RAN_RELEASE: ReleaseDates = {
   releasedAt: '2026-09-30T09:00:00.000Z',
   scheduledAt: '2026-09-30T09:00:00.000Z',
   failureReason: null,
+  timezone: 'Europe/Paris',
 };
 
 const renderDrawer = (
@@ -67,7 +70,7 @@ const renderDrawer = (
     release = RAN_RELEASE,
   }: {
     selectedId?: EntryReasonDetails['id'];
-    release?: Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason'>;
+    release?: ReleaseDates;
   } = {}
 ) => {
   const onSelect = jest.fn();
@@ -107,19 +110,53 @@ describe('EntryReasonDrawer', () => {
     expect(within(dialog).getByText('seo.metaTitle')).toBeInTheDocument();
     expect(within(dialog).getByText('Too long: at most 60 characters')).toBeInTheDocument();
 
-    expect(within(dialog).getByText(/^Captured when the release ran on/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/^State captured when the release ran on/)).toBeInTheDocument();
   });
 
-  it('folds a section of issues away', async () => {
-    const { user } = renderDrawer([details(1)]);
+  it('lists every issue in one box, with nothing to fold', async () => {
+    renderDrawer([
+      details(1, {
+        reason: {
+          validation: { errors: [{ path: ['title'], message: 'title must be defined.' }] },
+          stage: {
+            entryStage: { id: 1, name: 'In review' },
+            requiredStage: { id: 2, name: 'Approved' },
+          },
+        },
+      }),
+    ]);
 
-    const toggle = await screen.findByRole('button', { name: /^Fields/ });
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    const box = await screen.findByRole('region', { name: '2 issues' });
+    expect(within(box).getAllByRole('listitem')).toHaveLength(2);
+    expect(within(box).getByText('Title')).toBeInTheDocument();
+    expect(within(box).getByText('Review stage')).toBeInTheDocument();
+    expect(
+      within(box).getByText('At In review, needs Approved to be published')
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { expanded: true })).not.toBeInTheDocument();
+  });
 
-    await user.click(toggle);
+  it.each([
+    [null, 'Not ready'],
+    ['skipped_invalid', 'Skipped'],
+  ] as const)("doesn't name one reason for an entry with several (%s)", async (outcome, title) => {
+    renderDrawer([
+      details(1, {
+        outcome,
+        reason: {
+          validation: { errors: [{ path: ['title'], message: 'title must be defined.' }] },
+          stage: {
+            entryStage: { id: 1, name: 'In review' },
+            requiredStage: { id: 2, name: 'Approved' },
+          },
+        },
+      }),
+    ]);
 
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('Title')).not.toBeInTheDocument();
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText(title)).toBeInTheDocument();
+    expect(within(dialog).getByText('2 issues')).toBeInTheDocument();
+    expect(within(dialog).queryByText(/Validation error/)).not.toBeInTheDocument();
   });
 
   it('shows the stage a planned entry is missing', async () => {
@@ -141,7 +178,8 @@ describe('EntryReasonDrawer', () => {
     expect(
       within(dialog).getByText('At To do, needs Approved to be published')
     ).toBeInTheDocument();
-    expect(within(dialog).getByText(/^Checked when the entry was last saved/)).toBeInTheDocument();
+    // A planned entry's reasons are live: no capture date
+    expect(within(dialog).queryByText(/captured/i)).not.toBeInTheDocument();
   });
 
   it('says an entry was never checked, rather than listing nothing', async () => {
@@ -186,33 +224,29 @@ describe('EntryReasonDrawer', () => {
       /requires every entry to be ready.*another entry wasn’t ready or couldn’t be released/,
     ],
     ['skipped_missed', 'Server unavailable', /server was down at the scheduled time/],
-  ] as const)('explains %s in a sentence, with no issues to list', async (outcome, title, text) => {
+  ] as const)('explains %s as its one issue', async (outcome, title, text) => {
     renderDrawer([details(1, { outcome, reason: null })]);
 
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText(`Skipped: ${title}`)).toBeInTheDocument();
-    expect(within(dialog).getByText(text)).toBeInTheDocument();
-    expect(within(dialog).queryByText(/issues?$/)).not.toBeInTheDocument();
+    const box = within(dialog).getByRole('region', { name: '1 issue' });
+    expect(within(box).getByRole('listitem')).toHaveTextContent(text);
   });
 
-  const formatDate = (date: string) =>
-    new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(
-      new Date(date)
-    );
-
-  it('dates a release that ran by its run', async () => {
+  it('dates a release that ran by its run, as the page header does', async () => {
     renderDrawer([details(1)], {
       release: {
         releasedAt: '2026-09-30T09:12:00.000Z',
         scheduledAt: '2026-09-30T09:00:00.000Z',
         failureReason: null,
+        timezone: 'Europe/Paris',
       },
     });
 
     const dialog = await screen.findByRole('dialog');
     expect(
       within(dialog).getByText(
-        `Captured when the release ran on ${formatDate('2026-09-30T09:12:00.000Z')}. The entry may have changed since.`
+        'State captured when the release ran on Wednesday, September 30, 2026 at 11:12 (UTC+02:00).'
       )
     ).toBeInTheDocument();
   });
@@ -225,18 +259,17 @@ describe('EntryReasonDrawer', () => {
           releasedAt: '2026-09-30T11:54:00.000Z',
           scheduledAt: '2026-09-30T10:53:00.000Z',
           failureReason,
+          timezone: 'Europe/Paris',
         },
       });
 
       const dialog = await screen.findByRole('dialog');
       expect(
         within(dialog).getByText(
-          `Scheduled for ${formatDate('2026-09-30T10:53:00.000Z')}. The entry may have changed since.`
+          'State captured for the run scheduled on Wednesday, September 30, 2026 at 12:53 (UTC+02:00).'
         )
       ).toBeInTheDocument();
-      expect(
-        within(dialog).queryByText(new RegExp(formatDate('2026-09-30T11:54:00.000Z')))
-      ).not.toBeInTheDocument();
+      expect(within(dialog).queryByText(/13:54/)).not.toBeInTheDocument();
     }
   );
 
@@ -246,12 +279,15 @@ describe('EntryReasonDrawer', () => {
         releasedAt: '2026-09-30T11:54:00.000Z',
         scheduledAt: null,
         failureReason: 'failed_before_upgrade',
+        timezone: null,
       },
     });
 
     const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByText('The entry may have changed since.')).toBeInTheDocument();
-    expect(within(dialog).queryByText(/Captured when the release ran/)).not.toBeInTheDocument();
+    expect(
+      within(dialog).getByText('State captured before the release could run.')
+    ).toBeInTheDocument();
+    expect(within(dialog).queryByText(/captured when the release ran/i)).not.toBeInTheDocument();
   });
 
   it('steps through the entries with a reason', async () => {

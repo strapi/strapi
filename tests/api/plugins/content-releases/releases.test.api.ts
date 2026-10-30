@@ -3539,6 +3539,65 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       ).toEqual([later.id]);
     });
 
+    test('sorts by schedule with the unscheduled releases last, most recently updated first', async () => {
+      // Straight to the database: the default license caps pending releases at three
+      const insert = async (name: string, scheduledAt: string | null, updatedAt: string) => {
+        const release = await strapi.db.query('plugin::content-releases.release').create({
+          data: {
+            name,
+            scheduledAt,
+            updatedAt,
+            status: 'empty',
+            releaseCondition: 'all_or_nothing',
+          },
+        });
+
+        return release.id;
+      };
+      // Only read these releases: released ones from earlier tests can't be deleted
+      const ids = [
+        await insert('Unscheduled, updated last', null, '2024-01-03T00:00:00.000Z'),
+        await insert('Later', '2024-03-01T00:00:00.000Z', '2024-01-01T00:00:00.000Z'),
+        await insert('Unscheduled, updated first', null, '2024-01-02T00:00:00.000Z'),
+        await insert('Sooner', '2024-02-01T00:00:00.000Z', '2024-01-01T00:00:00.000Z'),
+        await insert('Latest', '2024-04-01T00:00:00.000Z', '2024-01-01T00:00:00.000Z'),
+      ];
+      // Pages of two: the second one holds the last scheduled release and the first unscheduled
+      const findNames = async (sort: string, filters: Record<string, unknown> = {}) => {
+        const pages = await Promise.all(
+          [1, 2, 3].map((page) =>
+            rq({
+              method: 'GET',
+              url: '/content-releases',
+              qs: { sort, page, pageSize: 2, filters: { id: { $in: ids }, ...filters } },
+            })
+          )
+        );
+        pages.forEach((res) => expect(res.statusCode).toBe(200));
+
+        return {
+          names: pages.flatMap((res) => res.body.data.map((release) => release.name)),
+          pagination: pages[0].body.meta.pagination,
+        };
+      };
+
+      const unscheduled = ['Unscheduled, updated last', 'Unscheduled, updated first'];
+      expect(await findNames('scheduledAt:asc')).toEqual({
+        names: ['Sooner', 'Later', 'Latest', ...unscheduled],
+        pagination: { page: 1, pageSize: 2, pageCount: 3, total: 5 },
+      });
+      expect((await findNames('scheduledAt:desc')).names).toEqual([
+        'Latest',
+        'Later',
+        'Sooner',
+        ...unscheduled,
+      ]);
+      expect(await findNames('scheduledAt:asc', { name: { $ne: 'Later' } })).toEqual({
+        names: ['Sooner', 'Latest', ...unscheduled],
+        pagination: { page: 1, pageSize: 2, pageCount: 2, total: 4 },
+      });
+    });
+
     test('Find many releases with an entry attached', async () => {
       const createFirstReleaseRes = await createRelease();
       const release = createFirstReleaseRes.body.data;

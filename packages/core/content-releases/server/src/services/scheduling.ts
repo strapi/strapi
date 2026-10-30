@@ -48,18 +48,18 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   // What the run the release missed would have sent: a release that froze as done (an empty one)
-  // reports success; one that missed its schedule, its failure. A release that failed before the
-  // upgrade reported its failure then.
+  // reports success, without telemetry since it published nothing; one that missed its schedule,
+  // its failure. A release that failed before the upgrade reported its failure then.
   const reportFrozenRelease = async (release: FrozenRelease) => {
     const releaseService = getService('release', { strapi });
 
     if (release.status === 'done') {
-      await releaseService.reportReleasedRun(release);
+      await releaseService.reportReleasedRun(release, { trigger: 'sweep' });
     } else if (release.failureReason === 'missed_schedule') {
       const error = new Error(`Release ${release.name} wasn't released at its scheduled time`);
       error.name = 'MissedSchedule';
 
-      await releaseService.reportFailedRun(release, error);
+      await releaseService.reportFailedRun(release, error, { trigger: 'sweep' });
     }
   };
 

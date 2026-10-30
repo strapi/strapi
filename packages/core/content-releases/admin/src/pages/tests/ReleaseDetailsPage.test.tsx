@@ -686,6 +686,33 @@ describe('Release details tabs, header and rows', () => {
     expect(header).not.toHaveTextContent('Scheduled for');
   });
 
+  it('says a run released nothing, not that it released 0 entries', async () => {
+    mockRelease(
+      {
+        ...partialRelease,
+        status: 'failed',
+        scheduledAt: '2026-10-30T10:00:00.000Z',
+        timezone: 'Europe/Paris',
+        releasedAt: '2026-10-29T14:03:00.000Z',
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 2,
+        actions: { meta: { count: 2 } },
+      },
+      [action(1, { outcome: 'skipped_invalid' }), action(2, { outcome: 'skipped_invalid' })]
+    );
+
+    renderPage();
+
+    const header = await findHeader();
+    await waitFor(() =>
+      expect(header).toHaveTextContent(
+        'Ran on Thursday, October 29, 2026 at 15:03 (UTC+01:00) • Nothing was released • 2 skipped'
+      )
+    );
+    expect(header).not.toHaveTextContent(/Released on|Released 0 of/);
+  });
+
   it('says when an unscheduled release that ran was released', async () => {
     mockRelease({ ...partialRelease, scheduledAt: null, timezone: null }, [
       action(1, { outcome: 'published' }),
