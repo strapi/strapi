@@ -1,4 +1,4 @@
-import type { File } from '../types';
+import type { File, UploadableFile } from '../types';
 
 /**
  * The upload service (`findOne`, `findMany`, `findPage`, `findAndCountPage`, ...) returns the
@@ -96,6 +96,9 @@ const documentRowWithoutPopulate = {
 // After `replace` with a file that has no formats, the row keeps an empty `formats` object
 const replacedRow = { ...documentRowWithoutPopulate, formats: {} };
 
+// Every stored row has `width`, `height`, `formats`, `previewUrl` and `provider_metadata`
+const { width: _width, ...rowWithoutWidth } = documentRowWithoutPopulate;
+
 describe('File type', () => {
   test('accepts an image row with populated folder, related and creator', () => {
     const file: File = imageRowWithPopulate;
@@ -117,5 +120,24 @@ describe('File type', () => {
     const file: File = replacedRow;
 
     expect(file.formats).toEqual({});
+  });
+
+  test('rejects a row without one of its nullable keys', () => {
+    // @ts-expect-error -- `width` is on every stored row, with a null value for non-image files
+    const file: File = rowWithoutWidth;
+
+    expect(file).not.toHaveProperty('width');
+  });
+});
+
+describe('UploadableFile type', () => {
+  test('accepts an input without the stored-row keys', () => {
+    const input: UploadableFile = {
+      name: 'notes.txt',
+      hash: 'notes_456',
+      getStream: () => process.stdin,
+    };
+
+    expect(input).not.toHaveProperty('width');
   });
 });
