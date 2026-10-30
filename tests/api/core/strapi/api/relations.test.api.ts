@@ -1293,6 +1293,60 @@ describe('Relations', () => {
       expect(updatedShop.data).toMatchObject(expectedShop);
     });
 
+    test.each([
+      ['start', () => ({ start: true })],
+      ['before the first relation', () => ({ before: docid1 })],
+    ])('Move an existing relation to the start using %s', async (_, getPosition) => {
+      const shop = await createShop({
+        anyToManyRel: [{ documentId: docid1 }, { documentId: docid2 }],
+      });
+
+      const updatedShop = await updateShop(shop.data, {
+        anyToManyRel: [{ documentId: docid2, position: getPosition() }],
+      });
+
+      const expectedShop = shopFactory({
+        anyToManyRel: [{ documentId: docid2 }, { documentId: docid1 }],
+      });
+      expect(updatedShop.data).toMatchObject(expectedShop);
+    });
+
+    test('Move morphToMany relations to the start repeatedly', async () => {
+      const shop = await createEntry('shops', {
+        name: 'Cazotte Shop',
+        products_morphtomany: {
+          connect: [docid1, docid2, docid3].map((documentId) => ({
+            documentId,
+            __type: 'api::product.product',
+          })),
+        },
+      });
+
+      let expected = [docid1, docid2, docid3];
+
+      for (let i = 0; i < 5; i += 1) {
+        const last = expected[expected.length - 1];
+
+        const updatedShop = await updateEntry(
+          'shops',
+          shop.data.documentId,
+          {
+            products_morphtomany: {
+              connect: [
+                { documentId: last, __type: 'api::product.product', position: { start: true } },
+              ],
+            },
+          },
+          populateShop
+        );
+
+        expected = [last, ...expected.slice(0, -1)];
+        expect(
+          updatedShop.data.products_morphtomany.map((relation) => relation.documentId)
+        ).toEqual(expected);
+      }
+    });
+
     test('Update polymorphic relations with different types using before and after', async () => {
       const shop = await createEntry('shops', {
         name: 'Cazotte Shop',
