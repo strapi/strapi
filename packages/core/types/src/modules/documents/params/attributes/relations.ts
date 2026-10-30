@@ -1,7 +1,7 @@
 import type * as Schema from '../../../../schema';
 
 import type * as UID from '../../../../uid';
-import type { If } from '../../../../utils';
+import type { Constants, If } from '../../../../utils';
 
 import type { ID, DocumentID } from './id';
 
@@ -33,6 +33,20 @@ export type RelationInputValue<TRelationKind extends Schema.Attribute.RelationKi
   Schema.Attribute.IsManyRelation<TRelationKind>,
   XManyInput,
   XOneInput
+>;
+
+/**
+ * Media attributes are relations to upload files, and accept the same input formats as relations.
+ *
+ * The previous loose values (`any` for single media, `any[]` for multiple media) stay accepted,
+ * so code that compiles today keeps compiling.
+ */
+// TODO @Nico narrow to XOneInput / XManyInput behind strict types. It breaks code that compiles
+// today: arrays or connect on single media, mixed ID/object arrays, file literals with extra fields
+export type MediaInputValue<TMultiple extends Constants.BooleanValue = Constants.False> = If<
+  TMultiple,
+  XManyInput | any[],
+  any
 >;
 
 type RelationsKeysWithoutTarget<TSchemaUID extends UID.Schema> = Exclude<

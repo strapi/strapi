@@ -98,6 +98,8 @@ export interface ListBlockNode extends BaseNode {
 
 interface ImageBlockNode extends BaseNode {
   type: 'image';
-  image: Attribute.MediaValue<false>;
+  // Image nodes store a snapshot of the file's fields, not a populated file document
+  // TODO @Nico type the snapshot (see IMAGE_SCHEMA_FIELDS in the content-manager blocks input)
+  image: any;
   children: [{ type: 'text'; text: '' }];
 }

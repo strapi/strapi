@@ -12,7 +12,7 @@ import type {
 } from '../../../../utils';
 
 import type { ID, DocumentID } from './id';
-import type { OmitRelationsWithoutTarget, RelationInputValue } from './relations';
+import type { MediaInputValue, OmitRelationsWithoutTarget, RelationInputValue } from './relations';
 
 export type NonFilterableKind = Extract<Schema.Attribute.Kind, 'password' | 'dynamiczone'>;
 export type FilterableKind = Exclude<Schema.Attribute.Kind, NonFilterableKind>;
@@ -100,6 +100,16 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
   IsNotNever<TAttribute>,
   MatchFirst<
     [
+      // Media
+      [
+        Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
+        TAttribute extends Schema.Attribute.Media<
+          Schema.Attribute.MediaKind | undefined,
+          infer TMultiple
+        >
+          ? MediaInputValue<TMultiple>
+          : never,
+      ],
       // Relation
       [
         Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
