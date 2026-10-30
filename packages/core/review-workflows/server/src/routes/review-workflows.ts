@@ -108,7 +108,16 @@ export default {
     },
     {
       method: 'PUT',
-      path: '/content-manager/(collection|single)-types/:model_uid/:id/stage',
+      path: '/content-manager/collection-types/:model_uid/:id/stage',
+      handler: 'stages.updateEntity',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/content-manager/single-types/:model_uid/:id/stage',
       handler: 'stages.updateEntity',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
@@ -117,7 +126,16 @@ export default {
     },
     {
       method: 'GET',
-      path: '/content-manager/(collection|single)-types/:model_uid/:id/stages',
+      path: '/content-manager/collection-types/:model_uid/:id/stages',
+      handler: 'stages.listAvailableStages',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/content-manager/single-types/:model_uid/:id/stages',
       handler: 'stages.listAvailableStages',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
@@ -126,7 +144,24 @@ export default {
     },
     {
       method: 'PUT',
-      path: '/content-manager/(collection|single)-types/:model_uid/:id/assignee',
+      path: '/content-manager/collection-types/:model_uid/:id/assignee',
+      handler: 'assignees.updateEntity',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::users.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/content-manager/single-types/:model_uid/:id/assignee',
       handler: 'assignees.updateEntity',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],

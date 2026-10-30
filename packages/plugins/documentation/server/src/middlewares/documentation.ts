@@ -8,7 +8,7 @@ export const addDocumentMiddlewares = async ({ strapi }: { strapi: Core.Strapi }
   strapi.server.routes([
     {
       method: 'GET',
-      path: '/plugins/documentation/(.*)',
+      path: '/plugins/documentation/{*path}',
       async handler(ctx, next) {
         ctx.url = path.basename(ctx.url);
 

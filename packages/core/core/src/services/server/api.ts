@@ -1,4 +1,4 @@
-import Router from '@koa/router';
+import Router, { type RouterMiddleware } from '@koa/router';
 import type { Core } from '@strapi/types';
 
 import { createRouteManager } from './routing';
@@ -20,7 +20,7 @@ const createAPI = (strapi: Core.Strapi, opts: Options = {}) => {
       return [...api.stack];
     },
 
-    use(fn: Router.Middleware) {
+    use(fn: RouterMiddleware) {
       api.use(fn);
       return this;
     },

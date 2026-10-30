@@ -22,7 +22,7 @@ const action = async () => {
   list
     .filter((route) => route.methods.length)
     .forEach((route) => {
-      infoTable.push([route.methods.map(toUpper).join('|'), route.path]);
+      infoTable.push([route.methods.map(toUpper).join('|'), String(route.path)]);
     });
 
   console.log(infoTable.toString());

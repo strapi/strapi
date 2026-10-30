@@ -8,7 +8,7 @@ module.exports = (strapi) => {
   return [
     {
       method: 'GET',
-      path: '/connect/(.*)',
+      path: '/connect/{*path}',
       handler: 'auth.connect',
       config: {
         middlewares: ['plugin::users-permissions.rateLimit'],

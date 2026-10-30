@@ -42,7 +42,7 @@ const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.server.routes([
     {
       method: 'GET',
-      path: `${strapi.config.admin.path}/:path*`,
+      path: `${strapi.config.admin.path}{/*path}`,
       handler: [
         serveAdminMiddleware,
         serveStatic(buildDir, {
