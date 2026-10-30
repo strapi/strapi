@@ -268,10 +268,12 @@ const BaseInputRenderer = ({
      * Enumerations are a special case because they require options.
      */
     case 'enumeration':
+      // `attribute` is only needed for the options, the generic renderer would leak it to the DOM.
+      const { attribute: _enumAttribute, ...restEnumProps } = props;
       return (
         <FormInputRenderer
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...restEnumProps}
           {...previewProps}
           hint={hint}
           options={props.attribute.enum.map((value) => ({ value }))}
@@ -282,7 +284,7 @@ const BaseInputRenderer = ({
       );
     default:
       // These props are not needed for the generic form input renderer.
-      const { unique: _unique, mainField: _mainField, ...restProps } = props;
+      const { unique: _unique, mainField: _mainField, attribute: _attribute, ...restProps } = props;
       return (
         <FormInputRenderer
           key={`input-${props.name}-${localeKey}`}
