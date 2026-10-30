@@ -86,7 +86,7 @@ yarn test:e2e --domains admin -- login.spec.ts --debug
 
 ### Concurrency / parallelization
 
-The runner uses `min(number of selected domains, concurrency)` **test apps** (`test-apps/e2e/test-app-*`), each bound to a port `8000 + index` within a batch. **`concurrency` defaults** to the number of domain folders under `tests/e2e/tests/` (not the count after `--domains`). Domains are chunked into batches of that size: domains in a batch run **in parallel**, batches run **one after another**. Spec files **inside** a domain are **serial** (`workers: 1`, `fullyParallel: false` in `playwright.base.config.js`).
+The runner uses `min(number of selected domains, concurrency)` **test apps** (`test-apps/e2e/test-app-*`), each bound to port `E2E_PORT_BASE + index` within a batch. `E2E_PORT_BASE` defaults to `8000`; set another base (for example `E2E_PORT_BASE=8300`) to run two e2e runs on one machine, such as from two worktrees. **`concurrency` defaults** to the number of domain folders under `tests/e2e/tests/` (not the count after `--domains`). Domains are chunked into batches of that size: domains in a batch run **in parallel**, batches run **one after another**. Spec files **inside** a domain are **serial** (`workers: 1`, `fullyParallel: false` in `playwright.base.config.js`).
 
 ```shell
 # run at most one domain at a time (simplest logs; fully serial domains)
