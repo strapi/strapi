@@ -35,6 +35,10 @@ The `errors` namespace defines `ApplicationError` and its subclasses, for exampl
 
 `traverseEntity` walks a data entity along its schema. It calls a `Visitor` for each attribute, and it recurses into relations, media, components and dynamic zones. The `traverse` namespace does the same for query parameters: fields, filters, sort and populate. See [traverseEntity](./traverse-entity.md).
 
+`traverseQueryPopulate` recurses into relations, media, components, `on` fragments of dynamic zones and polymorphic relations, and nested `populate` keys. It does not recurse into `sort`, `filters` and `fields` keys. A visitor that checks them runs the matching traversal itself, as the default validators and sanitizers do. A visitor must not recurse into a nested `populate`, because the traversal already visits it with the same visitor. The exception is a schema that also has an attribute named `populate`: the traversal then walks the value as that attribute, so the default validator checks it as a nested populate itself.
+
+`traverseQueryPopulate` deep-copies the populate it is given once, before it walks it. The levels below are not copied again, and neither is a value a visitor sets. So a visitor changes the populate with `set` and `remove`, never writes into the value it is handed, and sets a fresh value rather than one it shares with anything else.
+
 ### Sanitize and validate
 
 `sanitize.createAPISanitizers` and `validate.createAPIValidators` build the Content API input, output and query checks from `traverseEntity` visitors. The `sanitize` visitors (`remove-*`) drop what is not allowed. The `validate` visitors (`throw-*`) throw a `ValidationError` instead. `@strapi/core` creates both in its `content-api` service.

@@ -152,7 +152,10 @@ const populate = traverseFactory()
   })
   // Parse object values
   .parse(isObj, () => ({
-    transform: cloneDeep,
+    // Copied once, where the traversal is handed the caller's populate, rather than at every
+    // nested level: a deep copy at every level cost the size of the populate times its depth.
+    clone: cloneDeep,
+    transform: identity,
 
     remove(key, data) {
       // eslint-disable-next-line no-unused-vars

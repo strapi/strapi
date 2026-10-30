@@ -570,21 +570,37 @@ export const validatePopulate = asyncCurry(
             return;
           }
 
-          // Handle recursive nested `populate` validation with the same include object
+          // Nested `populate`. The populate traversal walks into it with this same visitor
+          // (the `isKeyword('populate')` handler in traverse/query-populate.ts), and the private
+          // attribute pass below walks into it the same way. Validating it here as well walked
+          // every nested level twice, so the work doubled with each level of nesting.
           if (key === 'populate') {
-            set(
-              key,
-              await validatePopulate(
-                {
-                  schema,
-                  getModel,
-                  parent: { key, path, schema, attribute },
-                  path,
-                },
-                value, // pass the nested populate value
-                includes // pass down the same includes object
-              )
-            );
+            // `populate` is also an attribute of this schema, so the traversal walks the value
+            // as that attribute and not as a nested populate. Validate it as a nested populate
+            // here.
+            if (attribute) {
+              set(
+                key,
+                await validatePopulate(
+                  {
+                    schema,
+                    getModel,
+                    parent: { key, path, schema, attribute },
+                    path,
+                  },
+                  value,
+                  includes
+                )
+              );
+              return;
+            }
+
+            // The traversal turns a dot-notation string into an object before it walks it, so
+            // the path checks `validatePopulate` runs on a string have to run here.
+            if (isDotNotationPopulate(value)) {
+              validatePopulateDotPaths({ schema, getModel }, value);
+            }
+
             return;
           }
 
