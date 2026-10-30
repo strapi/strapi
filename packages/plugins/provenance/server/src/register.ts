@@ -1,0 +1,24 @@
+import type { Core } from '@strapi/types';
+
+import { DOCUMENT_LOCK_UID, FIELD_PROVENANCE_UID, TOKEN_PROFILE_UID } from './constants';
+import { isProvenanceReadRoute, QUERY_PARAM } from './middlewares/query-provenance';
+
+export const register = ({ strapi }: { strapi: Core.Strapi }) => {
+  // GraphQL would expose the plugin's tables to API tokens: an agent could forge a review or
+  // change its own token profile
+  if (strapi.plugin('graphql')) {
+    const extension = strapi.plugin('graphql').service('extension');
+
+    extension.shadowCRUD(FIELD_PROVENANCE_UID).disable();
+    extension.shadowCRUD(TOKEN_PROFILE_UID).disable();
+    extension.shadowCRUD(DOCUMENT_LOCK_UID).disable();
+  }
+
+  // `?provenance=true` on Content API reads; the Content API rejects unknown query params
+  strapi.contentAPI.addQueryParams({
+    [QUERY_PARAM]: {
+      schema: (z) => z.enum(['true', 'false']).optional(),
+      matchRoute: isProvenanceReadRoute,
+    },
+  });
+};
