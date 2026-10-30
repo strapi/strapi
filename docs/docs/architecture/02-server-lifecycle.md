@@ -119,6 +119,7 @@ The `admin` `register` runs before any plugin or API `register`, because provide
 13. It runs the `bootstrap` function of each module.
 14. It runs the `bootstrap` function of each provider.
 15. It runs `strapi.app.bootstrap({ strapi })`, if the application defines it.
+16. It calls the `strapi::app.afterBootstrap` hook. The admin uses it to reset the super admin permissions and to delete stored permissions whose action is not registered.
 
 :::note
 The sync hooks run in steps 5 and 9, before module `bootstrap`. Add sync hook handlers in `register`. A handler that a module adds in `bootstrap` does not run during the current boot.
