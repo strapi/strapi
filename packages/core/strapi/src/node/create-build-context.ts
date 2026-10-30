@@ -168,12 +168,21 @@ const createBuildContext = async ({
 
   const { bundler = 'vite', ...restOptions } = options;
 
-  const scanRoots =
-    bundler === 'vite'
-      ? await getScanRoots({ cwd, runtimeDir, plugins: pluginsWithFront, customisations }, dev)
-      : [];
+  let scanRoots: string[] = [];
 
-  logger.debug('Tailwind scan roots', os.EOL, scanRoots);
+  if (bundler === 'vite') {
+    scanRoots = await getScanRoots(
+      { cwd, runtimeDir, plugins: pluginsWithFront, customisations },
+      dev
+    );
+    logger.debug('Tailwind scan roots', os.EOL, scanRoots);
+  }
+
+  if (bundler === 'webpack') {
+    logger.warn(
+      'The next design system components, such as the Drawer on the release pages, need Vite. Under webpack, they render without styles.'
+    );
+  }
 
   const buildContext: BuildContext = {
     appDir,
