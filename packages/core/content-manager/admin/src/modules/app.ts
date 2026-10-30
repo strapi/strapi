@@ -1,10 +1,12 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { adminApi } from '@strapi/admin/strapi-admin';
 
 import { GetInitData } from '../../../shared/contracts/init';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 
 interface AppState {
+  adminUserId?: string | number;
   collectionTypeLinks: ContentManagerLink[];
   components: GetInitData.Response['data']['components'];
   contentStructure?: GetInitData.Response['data']['contentStructure'];
@@ -15,6 +17,7 @@ interface AppState {
 }
 
 const initialState: AppState = {
+  adminUserId: undefined,
   collectionTypeLinks: [],
   components: [],
   contentStructure: undefined,
@@ -31,6 +34,7 @@ const appSlice = createSlice({
     setInitialData(
       state,
       action: PayloadAction<{
+        adminUserId?: AppState['adminUserId'];
         authorizedCollectionTypeLinks: AppState['collectionTypeLinks'];
         authorizedSingleTypeLinks: AppState['singleTypeLinks'];
         components: AppState['components'];
@@ -40,6 +44,7 @@ const appSlice = createSlice({
       }>
     ) {
       const {
+        adminUserId,
         authorizedCollectionTypeLinks,
         authorizedSingleTypeLinks,
         components,
@@ -47,6 +52,7 @@ const appSlice = createSlice({
         contentTypeSchemas,
         fieldSizes,
       } = action.payload;
+      state.adminUserId = adminUserId;
       state.collectionTypeLinks = authorizedCollectionTypeLinks.filter(
         ({ isDisplayed }) => isDisplayed
       );
@@ -58,10 +64,13 @@ const appSlice = createSlice({
       state.isLoading = false;
     },
   },
+  extraReducers(builder) {
+    builder.addMatcher(adminApi.util.resetApiState.match, () => initialState);
+  },
 });
 
 const { actions, reducer } = appSlice;
 const { setInitialData } = actions;
 
-export { reducer, setInitialData };
+export { initialState, reducer, setInitialData };
 export type { AppState };

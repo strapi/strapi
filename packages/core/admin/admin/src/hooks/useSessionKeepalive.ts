@@ -22,7 +22,7 @@ interface UseSessionKeepaliveOptions {
    * server-confirmed end of session, so it SHOULD broadcast a global logout to
    * every tab.
    */
-  onSessionDead?: () => void;
+  onSessionDead?: (expiredToken: string) => void;
   /**
    * Read the access token currently in shared storage (localStorage/cookie).
    * Because every open tab shares the same refresh cookie, an active tab that
@@ -132,7 +132,7 @@ const useSessionKeepalive = ({
       renewSession!().then((renewed) => {
         if (!renewed) {
           // Server rejected the refresh: the session is truly over.
-          onSessionDead?.();
+          onSessionDead?.(token);
         }
         // On success, storeToken -> setToken updates the token prop, which
         // re-runs this effect and re-arms against the new exp.

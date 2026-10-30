@@ -1,4 +1,5 @@
-import { render, waitFor, screen } from '@tests/utils';
+import { render, waitFor, screen, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { useConfiguration, ConfigurationProvider } from '../Configuration';
 
@@ -33,6 +34,29 @@ const TestComponent = () => {
 describe('ConfigurationProvider', () => {
   beforeAll(() => {
     window.localStorage.setItem('jwtToken', JSON.stringify('test-token'));
+    // A stored token fetches /users/me/permissions. The default handler returns
+    // none, and useRBAC re-checks when that response arrives, which skips
+    // project settings. This page needs the read permission to load the logo.
+    server.use(
+      http.get('/admin/users/me/permissions', () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: 1,
+              action: 'admin::project-settings.read',
+              subject: null,
+              actionParameters: {},
+              conditions: [],
+              properties: {},
+            },
+          ],
+        })
+      )
+    );
+  });
+
+  afterAll(() => {
+    server.restoreHandlers();
   });
 
   it('should not crash', async () => {

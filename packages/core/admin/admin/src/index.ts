@@ -52,7 +52,7 @@ export {
   NotificationsProvider,
 } from './features/Notifications';
 export { useAppInfo, type AppInfoContextValue } from './features/AppInfo';
-export { type Permission, useAuth, type AuthContextValue } from './features/Auth';
+export { type Permission, getAdminUserId, useAuth, type AuthContextValue } from './features/Auth';
 export { useHistory } from './features/BackButton';
 
 /**
