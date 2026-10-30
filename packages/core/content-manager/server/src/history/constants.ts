@@ -7,4 +7,5 @@ export const FIELDS_TO_IGNORE = [
   'updatedBy',
   'strapi_stage',
   'strapi_assignee',
+  'strapi_position',
 ];
