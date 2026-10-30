@@ -7,6 +7,16 @@ backend:
   - 'packages/core/*/{lib,bin,ee,src}/**'
   - 'packages/core/database/**'
   - 'jest-preset.unit.js'
+  - 'tests/helpers/**'
+  - 'tests/setup/unit.setup.js'
+  - 'tests/setup/timezone-environment.js'
+# Unit test setup shared by every package. No Nx project owns these files, so `nx affected` runs
+# no unit tests for a change to them: unit_back runs all of them instead.
+unit_shared:
+  - 'jest-preset.unit.js'
+  - 'tests/helpers/**'
+  - 'tests/setup/unit.setup.js'
+  - 'tests/setup/timezone-environment.js'
 frontend:
   - 'packages/**/admin/src/**'
   - 'packages/**/admin/ee/admin/**'
@@ -18,15 +28,29 @@ api:
   - 'tests/scripts/run-api-tests.js'
   - 'tests/scripts/generate-test-app.js'
   - 'tests/api/**'
+  - 'tests/helpers/**'
+  - 'tests/setup/jest-api.setup.js'
+  - 'jest.config.api.js'
 e2e:
   - 'tests/scripts/run-e2e-tests.js'
   - 'tests/scripts/run-tests.js'
   - 'tests/e2e/**'
   - 'playwright.base.config.js'
+  - 'tests/utils/**'
+  - 'tests/helpers/**'
+  - 'tests/app-template/**'
+  - 'tests/scripts/generate-test-app.js'
+  - '.github/actions/run-e2e-tests/**'
 cli:
   - 'tests/scripts/run-cli-tests.js'
   - 'tests/scripts/run-tests.js'
   - 'tests/cli/**'
+  - 'tests/utils/**'
+  - 'tests/helpers/**'
+  - 'tests/app-template/**'
+  - 'tests/scripts/generate-test-app.js'
+  - 'tests/setup/jest-cli.setup.js'
+  - 'jest.config.cli.js'
 # Umzug migration sources + v4→v5 integration harness (fixture app at examples/complex; runner at tests/migration/)
 # Fixture paths may move under tests/migration/ later; keep both globs in sync until then (see tests/migration/README.md).
 migrations:
@@ -50,5 +74,7 @@ global:
   - '.github/actions/draft-release/**'
   - '.github/actions/yarn-nm-install/*.yml'
   - '.github/workflows/**'
+  - '.github/actions/run-build/**'
+  - '.github/filters.yaml'
   - 'yarn.lock'
   - 'package.json'
