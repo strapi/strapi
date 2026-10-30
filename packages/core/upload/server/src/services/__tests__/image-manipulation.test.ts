@@ -234,6 +234,8 @@ describe('Image manipulation - animated images', () => {
 });
 
 describe('Image manipulation - AVIF', () => {
+  jest.setTimeout(20000);
+
   const avifDir = path.join(__dirname, 'tmp-avif');
   const avifPath = path.join(avifDir, 'image.avif');
   const AVIF_WIDTH = 400;
@@ -241,14 +243,15 @@ describe('Image manipulation - AVIF', () => {
 
   beforeAll(async () => {
     await fse.ensureDir(avifDir);
-    // sharp reports AVIF files as `heif` with `av1` compression
-    // noise at max quality, so the optimize step (quality 80) produces a smaller file
+    // sharp reports AVIF files as `heif` with `av1` compression.
+    // Noise at quality 100 stays larger than the quality-80 optimize output.
+    // effort 0 keeps that encode inside the hook limit on CI.
     await sharp(crypto.randomBytes(AVIF_WIDTH * AVIF_HEIGHT * 3), {
       raw: { width: AVIF_WIDTH, height: AVIF_HEIGHT, channels: 3 },
     })
-      .avif({ quality: 100 })
+      .avif({ quality: 100, effort: 0 })
       .toFile(avifPath);
-  });
+  }, 20000);
 
   afterAll(async () => {
     await fse.remove(avifDir);
