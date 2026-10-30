@@ -36,6 +36,12 @@ import { emitAuditOnCommit, getReleaseChanges } from '../audit-logs';
 import { createReleaseRun } from './release-run';
 import type { PublishTrigger, RunTotals } from './release-run';
 
+// What reports a frozen release: its run, or the overdue sweep for a release that never ran
+type ReportTrigger = PublishTrigger | 'sweep';
+
+type ReportedRelease = Pick<Release, 'id' | 'name' | 'releaseCondition' | 'failureReason'> &
+  RunTotals;
+
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
     event: string,
@@ -52,12 +58,35 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  // The webhook and audit event of a release that froze as failed, so they always agree
-  const reportFailedRun = async (release: Pick<Release, 'id' | 'name'>, error: Error) => {
+  const getRunEventProperties = (release: ReportedRelease, trigger: ReportTrigger) => ({
+    releaseCondition: release.releaseCondition,
+    // A release the sweep froze was scheduled: its failure reason says it never ran
+    trigger: trigger === 'sweep' ? 'scheduled' : trigger,
+    totalEntries:
+      release.totalPublishedEntries + release.totalUnpublishedEntries + release.totalSkippedEntries,
+    totalPublishedEntries: release.totalPublishedEntries,
+    totalUnpublishedEntries: release.totalUnpublishedEntries,
+    totalSkippedEntries: release.totalSkippedEntries,
+  });
+
+  // The webhook, telemetry and audit event of a release that froze as failed, so they always agree
+  const reportFailedRun = async (
+    release: ReportedRelease,
+    error: Error,
+    { trigger }: { trigger: ReportTrigger }
+  ) => {
     dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
       isPublished: false,
       error,
       release,
+    });
+    strapi.telemetry.send('didPublishContentRelease', {
+      eventProperties: {
+        ...getRunEventProperties(release, trigger),
+        status: 'failed',
+        // A run that failed stores no reason: only a release that never ran has one
+        failureReason: release.failureReason ?? 'run_failed',
+      },
     });
 
     await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
@@ -70,10 +99,17 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   // The webhook, telemetry and audit event of a release that froze as done or partial
   const reportReleasedRun = async (
-    release: Pick<Release, 'id' | 'name' | 'status'> & RunTotals
+    release: ReportedRelease & Pick<Release, 'status'>,
+    { trigger }: { trigger: ReportTrigger }
   ) => {
     dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: true, release });
-    strapi.telemetry.send('didPublishContentRelease');
+
+    // The sweep only freezes as done an empty release, which published nothing
+    if (trigger !== 'sweep') {
+      strapi.telemetry.send('didPublishContentRelease', {
+        eventProperties: { ...getRunEventProperties(release, trigger), status: release.status },
+      });
+    }
 
     // The audit's `failed` is the release's skipped entries
     await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
@@ -131,12 +167,21 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     return release;
   };
 
-  const scheduleCreatedRelease = async (release: Release) => {
+  const scheduleCreatedRelease = async (
+    release: Release,
+    { fromSkipped }: { fromSkipped: boolean }
+  ) => {
     if (release.scheduledAt) {
       await getService('scheduling', { strapi }).set(release.id, release.scheduledAt);
     }
 
-    strapi.telemetry.send('didCreateContentRelease');
+    strapi.telemetry.send('didCreateContentRelease', {
+      eventProperties: {
+        releaseCondition: release.releaseCondition,
+        isScheduled: Boolean(release.scheduledAt),
+        fromSkipped,
+      },
+    });
 
     return release;
   };
@@ -186,11 +231,67 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const { runLocked } = createReleaseRun({ strapi, updateReleaseStatus });
 
+  /**
+   * Each database sorts nulls its own way: the scheduled releases fill the pages first, so the
+   * unscheduled ones come last whatever the direction
+   */
+  const findPageByScheduledAt = async (
+    { where, orderBy, ...params }: { where?: object; orderBy?: object | object[] },
+    { page = 1, pageSize = 10 }: { page?: number; pageSize?: number }
+  ) => {
+    const query = strapi.db.query(RELEASE_MODEL_UID);
+    // Ties, and the unscheduled releases, go most recently updated first: the id keeps one order
+    // from page to page
+    const order = [
+      ...(Array.isArray(orderBy) ? orderBy : [orderBy]),
+      { updatedAt: 'desc' },
+      { id: 'desc' },
+    ];
+    const withSchedule = (isScheduled: boolean) => ({
+      $and: [...(where ? [where] : []), { scheduledAt: { $notNull: isScheduled } }],
+    });
+
+    const [scheduledCount, unscheduledCount] = await Promise.all([
+      query.count({ where: withSchedule(true) }),
+      query.count({ where: withSchedule(false) }),
+    ]);
+    const offset = (page - 1) * pageSize;
+    const scheduledLimit = Math.min(Math.max(scheduledCount - offset, 0), pageSize);
+    const unscheduledLimit = pageSize - scheduledLimit;
+
+    const [scheduled, unscheduled] = await Promise.all([
+      scheduledLimit > 0
+        ? query.findMany({
+            ...params,
+            where: withSchedule(true),
+            orderBy: order,
+            offset,
+            limit: scheduledLimit,
+          })
+        : [],
+      unscheduledLimit > 0
+        ? query.findMany({
+            ...params,
+            where: withSchedule(false),
+            orderBy: order,
+            offset: Math.max(offset - scheduledCount, 0),
+            limit: unscheduledLimit,
+          })
+        : [],
+    ]);
+    const total = scheduledCount + unscheduledCount;
+
+    return {
+      results: [...scheduled, ...unscheduled],
+      pagination: { page, pageSize, pageCount: Math.ceil(total / pageSize), total },
+    };
+  };
+
   return {
     async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
       const release = await insertRelease(await validateNewRelease(releaseData, { user }));
 
-      return scheduleCreatedRelease(release);
+      return scheduleCreatedRelease(release, { fromSkipped: false });
     },
 
     /**
@@ -251,7 +352,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         return strapi.db.query(RELEASE_MODEL_UID).findOne({ where: { id: createdRelease.id } });
       });
 
-      return { release: await scheduleCreatedRelease(release), actionsCount: prepared.length };
+      return {
+        release: await scheduleCreatedRelease(release, { fromSkipped: true }),
+        actionsCount: prepared.length,
+      };
     },
 
     async findOne(id: GetRelease.Request['params']['id'], query = {}) {
@@ -265,16 +369,17 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     findPage(query?: GetReleases.Request['query']) {
-      const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query ?? {});
+      const { page, pageSize, ...dbQuery } = strapi
+        .get('query-params')
+        .transform(RELEASE_MODEL_UID, query ?? {});
+      const params = { ...dbQuery, populate: { actions: { count: true } } };
+      const [firstOrder] = Array.isArray(dbQuery.orderBy) ? dbQuery.orderBy : [dbQuery.orderBy];
 
-      return strapi.db.query(RELEASE_MODEL_UID).findPage({
-        ...dbQuery,
-        populate: {
-          actions: {
-            count: true,
-          },
-        },
-      });
+      if (!firstOrder || Object.keys(firstOrder)[0] !== 'scheduledAt') {
+        return strapi.db.query(RELEASE_MODEL_UID).findPage({ ...params, page, pageSize });
+      }
+
+      return findPageByScheduledAt(params, { page, pageSize });
     },
 
     // One grouped query: a status no release has counts 0
@@ -366,7 +471,12 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         schedulingService.cancel(id);
       }
 
-      strapi.telemetry.send('didUpdateContentRelease');
+      strapi.telemetry.send('didUpdateContentRelease', {
+        eventProperties: {
+          releaseConditionChanged: release.releaseCondition !== updatedRelease.releaseCondition,
+          isScheduledChanged: Boolean(release.scheduledAt) !== Boolean(updatedRelease.scheduledAt),
+        },
+      });
 
       return updatedRelease;
     },
@@ -458,7 +568,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Webhook and audit only once the outcome is committed: a run that rolled back sends neither
       if (result.kind === 'failed') {
         const { error, release } = result;
-        await reportFailedRun(release, error);
+        await reportFailedRun(release, error, { trigger });
 
         // The frozen release comes with the error, telling a run that failed from a refused publish
         if (error instanceof errors.ValidationError) {
@@ -483,7 +593,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const { release } = result;
-      await reportReleasedRun(release);
+      await reportReleasedRun(release, { trigger });
 
       return release;
     },

@@ -1,3 +1,5 @@
+import type { IntlShape } from 'react-intl';
+
 export const getTimezoneOffset = (timezone: string, date: Date) => {
   try {
     const offsetPart = new Intl.DateTimeFormat('en', {
@@ -22,6 +24,31 @@ export const getTimezoneOffset = (timezone: string, date: Date) => {
     // When timezone is invalid we catch the error and return empty to don't break the app
     return '';
   }
+};
+
+/**
+ * A release's date as its pages show it: in the release's timezone (the browser's for an
+ * unscheduled release, which has none), with a 24-hour time and the UTC offset, for a
+ * `{date} at {time} ({offset})` message
+ */
+export const getReleaseDateParts = (
+  { formatDate, formatTime }: Pick<IntlShape, 'formatDate' | 'formatTime'>,
+  date: Date,
+  timezone?: string | null
+) => {
+  const timeZone = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  return {
+    date: formatDate(date, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone,
+    }),
+    time: formatTime(date, { timeZone, hourCycle: 'h23' }),
+    offset: getTimezoneOffset(timeZone, date),
+  };
 };
 
 interface ITimezoneOption {

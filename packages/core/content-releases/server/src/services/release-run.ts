@@ -35,7 +35,11 @@ export type RunTotals = {
   >;
 };
 
-export type RecordedRelease = Pick<Release, 'id' | 'name' | 'releasedAt' | 'status'> & RunTotals;
+export type RecordedRelease = Pick<
+  Release,
+  'id' | 'name' | 'releasedAt' | 'status' | 'releaseCondition' | 'failureReason'
+> &
+  RunTotals;
 
 type RunOutcome = Exclude<ReleaseActionOutcome, 'skipped_missed'>;
 

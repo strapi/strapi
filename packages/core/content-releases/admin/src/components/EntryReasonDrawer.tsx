@@ -9,14 +9,15 @@ import {
   DrawerTitle,
   cn,
 } from '@strapi/design-system/next';
-import { CaretDown, CaretUp, Cross } from '@strapi/icons';
+import { Cross } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { getFieldLabel, getProblem } from '../utils/fieldErrors';
+import { getReleaseDateParts } from '../utils/time';
 
 import { getEntryLinkProps, useCanReadEntry, type EntryLocation } from './EntryLinkButton';
-import { InlineBadge, SKIPPED_REASONS, isSkippedOutcome } from './ReleaseActionStatus';
+import { SKIPPED_REASONS, isSkippedOutcome } from './ReleaseActionStatus';
 import { RELEASE_DRAWER_CLASS_NAME } from './ReleaseDrawer';
 
 import type { ReleaseActionOutcome } from '../../../shared/constants';
@@ -54,7 +55,7 @@ interface EntryReasonDrawerProps {
   release?: ReleaseDates | null;
 }
 
-type ReleaseDates = Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason'>;
+type ReleaseDates = Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason' | 'timezone'>;
 
 /* -------------------------------------------------------------------------------------------------
  * Building blocks
@@ -70,13 +71,31 @@ const REVIEW_STAGE_TITLE = {
   defaultMessage: 'Review stage',
 };
 
+/**
+ * The reason the badge names. An entry with several kinds of issue gets none: naming the first
+ * would hide the others, which the issue box lists.
+ */
 const getReasonTitle = ({
   outcome,
   reason,
   missingReason,
 }: EntryReasonDetails): MessageDescriptor | null => {
-  if (outcome && isSkippedOutcome(outcome)) {
-    return SKIPPED_REASONS[outcome].title;
+  const skippedReason: { title: MessageDescriptor; description?: MessageDescriptor } | null =
+    outcome && isSkippedOutcome(outcome) ? SKIPPED_REASONS[outcome] : null;
+
+  // A held or missed entry has one issue: the sentence that explains it
+  if (skippedReason?.description) {
+    return skippedReason.title;
+  }
+
+  const issueKinds = [reason?.error, reason?.validation || missingReason, reason?.stage];
+
+  if (issueKinds.filter(Boolean).length > 1) {
+    return null;
+  }
+
+  if (skippedReason) {
+    return skippedReason.title;
   }
 
   if (missingReason === 'unchecked') {
@@ -100,47 +119,34 @@ const useEntryLink = (details: EntryReasonDetails) => {
   return !details.isDeleted && canReadEntry ? getEntryLinkProps(details.location) : null;
 };
 
-interface IssueSectionProps {
-  title: string;
-  count: number;
-}
-
 /**
- * A group of issues the user can fold away
+ * Every issue of the entry, one card each, under their count
  */
-const IssueSection = ({ title, count, children }: IssueSectionProps & React.PropsWithChildren) => {
-  const [isOpen, setIsOpen] = React.useState(true);
-  const contentId = React.useId();
+const IssueBox = ({ count, children }: { count: number } & React.PropsWithChildren) => {
+  const { formatMessage } = useIntl();
+  const titleId = React.useId();
 
   return (
-    <div className="overflow-hidden rounded-md border border-warning/40 bg-background">
-      <button
-        type="button"
-        className="flex w-full cursor-pointer items-center justify-between bg-warning/10 p-3 text-warning aria-expanded:border-b aria-expanded:border-warning/40"
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-expanded={isOpen}
-        aria-controls={contentId}
-      >
-        <span className="font-semibold">{title}</span>
-        {/* Spans: a button holds inline content only */}
-        <span className="flex items-center gap-2 [&>svg]:size-3 [&>svg]:fill-current">
-          <InlineBadge textColor="warning700" backgroundColor="neutral0" borderColor="warning200">
-            {count}
-          </InlineBadge>
-          {isOpen ? <CaretUp aria-hidden /> : <CaretDown aria-hidden />}
-        </span>
-      </button>
-      {isOpen && (
-        <ul id={contentId} className="flex flex-col gap-2 p-3">
-          {children}
-        </ul>
-      )}
-    </div>
+    <section
+      aria-labelledby={titleId}
+      className="overflow-hidden rounded-md border border-border bg-background"
+    >
+      <h3 id={titleId} className="border-b border-border bg-muted p-3 font-semibold">
+        {formatMessage(
+          {
+            id: 'content-releases.reason-drawer.issues',
+            defaultMessage: '{count, plural, one {# issue} other {# issues}}',
+          },
+          { count }
+        )}
+      </h3>
+      <ul className="flex flex-col gap-2 p-3">{children}</ul>
+    </section>
   );
 };
 
 interface IssueCardProps {
-  label: string;
+  label?: string;
   fieldKey?: string;
   problem: string;
 }
@@ -149,9 +155,8 @@ const IssueCard = ({ label, fieldKey, problem }: IssueCardProps) => {
   return (
     <li className="flex items-start justify-between gap-2 rounded-md border border-border bg-background p-3">
       <div className="flex min-w-0 flex-col gap-1">
-        <span className="font-semibold">{label}</span>
-        {/* Orange, like its section: the status badge above is the one red */}
-        <span className="text-warning">{problem}</span>
+        {label && <span className="font-semibold">{label}</span>}
+        <span className="text-destructive">{problem}</span>
       </div>
       {fieldKey && (
         <span
@@ -170,43 +175,45 @@ const IssueCard = ({ label, fieldKey, problem }: IssueCardProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 /**
- * When the reasons were captured. A release that froze without running (it missed its schedule, or
- * failed before the upgrade) is dated by its schedule, not by when it froze.
+ * When the reasons of a release that ran were captured. A release that froze without running (it
+ * missed its schedule, or failed before the upgrade) is dated by its schedule, not by when it froze.
+ * A planned release's reasons are live: no note.
  */
 const useCapturedNote = (isFrozen: boolean, release?: ReleaseDates | null) => {
-  const { formatMessage, formatDate } = useIntl();
-  const formatReleaseDate = (date: string) =>
-    formatDate(new Date(date), { dateStyle: 'medium', timeStyle: 'short' });
+  const { formatMessage, formatDate, formatTime } = useIntl();
+  // As the page header dates the release
+  const getDateParts = (date: string) =>
+    getReleaseDateParts({ formatDate, formatTime }, new Date(date), release?.timezone);
 
-  if (isFrozen && release?.failureReason) {
+  if (!isFrozen) {
+    return null;
+  }
+
+  if (release?.failureReason) {
     return formatMessage(
       {
         id: 'content-releases.reason-drawer.captured.not-run',
         defaultMessage:
-          '{hasDate, select, true {Scheduled for {date}. } other {}}The entry may have changed since.',
+          '{hasDate, select, true {State captured for the run scheduled on {date} at {time} ({offset}).} other {State captured before the release could run.}}',
       },
       {
         hasDate: Boolean(release.scheduledAt),
-        date: release.scheduledAt ? formatReleaseDate(release.scheduledAt) : '',
+        ...(release.scheduledAt
+          ? getDateParts(release.scheduledAt)
+          : { date: '', time: '', offset: '' }),
       }
     );
   }
 
-  if (isFrozen && release?.releasedAt) {
-    return formatMessage(
-      {
-        id: 'content-releases.reason-drawer.captured',
-        defaultMessage:
-          'Captured when the release ran on {date}. The entry may have changed since.',
-      },
-      { date: formatReleaseDate(release.releasedAt) }
-    );
-  }
-
-  return formatMessage({
-    id: 'content-releases.reason-drawer.checked',
-    defaultMessage: 'Checked when the entry was last saved. Saving it again checks it again.',
-  });
+  return release?.releasedAt
+    ? formatMessage(
+        {
+          id: 'content-releases.reason-drawer.captured',
+          defaultMessage: 'State captured when the release ran on {date} at {time} ({offset}).',
+        },
+        getDateParts(release.releasedAt)
+      )
+    : null;
 };
 
 const ReasonBody = ({
@@ -227,8 +234,15 @@ const ReasonBody = ({
   const isFieldsUnreadable =
     (Boolean(reason?.validation) && errors.length === 0) || Boolean(missingReason);
   const fieldIssueCount = errors.length || (isFieldsUnreadable ? 1 : 0);
-  const issueCount = fieldIssueCount + (reason?.stage ? 1 : 0) + (reason?.error ? 1 : 0);
+  // A held or missed entry has one issue: the sentence that explains it
+  const issueCount = description
+    ? 1
+    : fieldIssueCount + (reason?.stage ? 1 : 0) + (reason?.error ? 1 : 0);
   const capturedNote = useCapturedNote(isFrozen, release);
+  const entryLabel = formatMessage({
+    id: 'content-releases.pages.ReleaseDetails.field-error.entry',
+    defaultMessage: 'Entry',
+  });
 
   return (
     <div className="flex flex-col gap-5">
@@ -282,116 +296,77 @@ const ReasonBody = ({
         </Badge>
       </div>
 
-      {description ? (
-        <p>{formatMessage(description)}</p>
-      ) : (
-        <div className="flex flex-col gap-3">
-          <span className="font-semibold">
-            {formatMessage(
-              {
-                id: 'content-releases.reason-drawer.issues',
-                defaultMessage: '{count, plural, one {# issue} other {# issues}}',
-              },
-              { count: issueCount }
-            )}
-          </span>
+      {issueCount > 0 && (
+        <IssueBox count={issueCount}>
+          {description && <IssueCard problem={formatMessage(description)} />}
 
-          {reason?.error && (
-            <IssueSection title={formatMessage(SKIPPED_REASONS.skipped_error.title)} count={1}>
-              <IssueCard
-                label={formatMessage(
-                  {
-                    id: 'content-releases.pages.ReleaseDetails.entry-validation.error',
-                    defaultMessage:
-                      '{step, select, publish {Couldn’t be published} unpublish {Couldn’t be unpublished} other {Couldn’t be checked}}: {name}',
-                  },
-                  { step: isFrozen ? details.action : 'check', name: reason.error.name }
-                )}
-                // The server keeps the message of an error meant for the user only
-                problem={
-                  reason.error.message ||
-                  formatMessage({
-                    id: 'content-releases.reason-drawer.error.hint',
-                    defaultMessage: 'Something on the server stopped it, not the entry’s content.',
-                  })
-                }
-              />
-            </IssueSection>
-          )}
-          {fieldIssueCount > 0 && (
-            <IssueSection
-              title={formatMessage({
-                id: 'content-releases.pages.ReleaseDetails.entry-validation.fields',
-                defaultMessage: 'Fields',
-              })}
-              count={fieldIssueCount}
-            >
-              {errors.length > 0 ? (
-                errors.map((error) => (
-                  <IssueCard
-                    key={`${error.path.join('.')}-${error.message}`}
-                    label={
-                      error.path.length > 0
-                        ? getFieldLabel(error.path)
-                        : formatMessage({
-                            id: 'content-releases.pages.ReleaseDetails.field-error.entry',
-                            defaultMessage: 'Entry',
-                          })
-                    }
-                    fieldKey={error.path.length > 0 ? error.path.join('.') : undefined}
-                    problem={getProblem(error, formatMessage)}
-                  />
-                ))
-              ) : (
-                <IssueCard
-                  label={formatMessage({
-                    id: 'content-releases.pages.ReleaseDetails.field-error.entry',
-                    defaultMessage: 'Entry',
-                  })}
-                  problem={formatMessage(
-                    {
-                      id: 'content-releases.reason-drawer.fields.unreadable',
-                      defaultMessage:
-                        '{missingReason, select, unchecked {This entry hasn’t been checked yet. Saving it checks it.} unrecorded {Why it isn’t ready wasn’t recorded. Saving the entry checks it again.} other {The entry couldn’t be validated}}',
-                    },
-                    { missingReason: missingReason ?? 'none' }
-                  )}
-                />
+          {!description && reason?.error && (
+            <IssueCard
+              label={formatMessage(
+                {
+                  id: 'content-releases.pages.ReleaseDetails.entry-validation.error',
+                  defaultMessage:
+                    '{step, select, publish {Couldn’t be published} unpublish {Couldn’t be unpublished} other {Couldn’t be checked}}: {name}',
+                },
+                { step: isFrozen ? details.action : 'check', name: reason.error.name }
               )}
-            </IssueSection>
+              // The server keeps the message of an error meant for the user only
+              problem={
+                reason.error.message ||
+                formatMessage({
+                  id: 'content-releases.reason-drawer.error.hint',
+                  defaultMessage: 'Something on the server stopped it, not the entry’s content.',
+                })
+              }
+            />
           )}
 
-          {reason?.stage && (
-            <IssueSection
-              title={formatMessage({
-                id: 'content-releases.pages.ReleaseDetails.entry-validation.review-stage',
-                defaultMessage: 'Review stage',
-              })}
-              count={1}
-            >
+          {!description &&
+            errors.map((error) => (
               <IssueCard
-                label={formatMessage({
-                  id: 'content-releases.pages.ReleaseDetails.entry-validation.review-stage',
-                  defaultMessage: 'Review stage',
-                })}
-                problem={formatMessage(
-                  {
-                    id: 'content-releases.reason-drawer.stage',
-                    defaultMessage:
-                      'At {entryStage, select, none {no stage} other {{entryStage}}}, needs {requiredStage} to be published',
-                  },
-                  {
-                    entryStage: reason.stage.entryStage?.name ?? 'none',
-                    requiredStage: reason.stage.requiredStage.name,
-                  }
-                )}
+                key={`${error.path.join('.')}-${error.message}`}
+                label={error.path.length > 0 ? getFieldLabel(error.path) : entryLabel}
+                fieldKey={error.path.length > 0 ? error.path.join('.') : undefined}
+                problem={getProblem(error, formatMessage)}
               />
-            </IssueSection>
+            ))}
+
+          {!description && isFieldsUnreadable && errors.length === 0 && (
+            <IssueCard
+              label={entryLabel}
+              problem={formatMessage(
+                {
+                  id: 'content-releases.reason-drawer.fields.unreadable',
+                  defaultMessage:
+                    '{missingReason, select, unchecked {This entry hasn’t been checked yet. Saving it checks it.} unrecorded {Why it isn’t ready wasn’t recorded. Saving the entry checks it again.} other {The entry couldn’t be validated}}',
+                },
+                { missingReason: missingReason ?? 'none' }
+              )}
+            />
           )}
-        </div>
+
+          {!description && reason?.stage && (
+            <IssueCard
+              label={formatMessage(REVIEW_STAGE_TITLE)}
+              problem={formatMessage(
+                {
+                  id: 'content-releases.reason-drawer.stage',
+                  defaultMessage:
+                    'At {entryStage, select, none {no stage} other {{entryStage}}}, needs {requiredStage} to be published',
+                },
+                {
+                  entryStage: reason.stage.entryStage?.name ?? 'none',
+                  requiredStage: reason.stage.requiredStage.name,
+                }
+              )}
+            />
+          )}
+        </IssueBox>
       )}
 
-      <p className="rounded-md bg-muted p-3 text-xs text-muted-foreground">{capturedNote}</p>
+      {capturedNote && (
+        <p className="rounded-md bg-muted p-3 text-xs text-muted-foreground">{capturedNote}</p>
+      )}
     </div>
   );
 };
