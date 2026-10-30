@@ -72,7 +72,6 @@
   "pages.ReleaseDetails.groupBy.option.locales": "Języki",
   "pages.ReleaseDetails.groupBy.option.actions": "Akcje",
   "pages.ReleaseDetails.header-subtitle.scheduled": "Zaplanowane na {date} o {time} ({offset})",
-  "pages.ReleaseDetails.entry-validation.fields": "Pola",
   "pages.Settings.releases.description": "Twórz i zarządzaj aktualizacjami treści",
   "pages.Settings.releases.preferences.title": "Preferencje",
   "pages.Settings.releases.timezone.label": "Domyślna strefa czasowa",

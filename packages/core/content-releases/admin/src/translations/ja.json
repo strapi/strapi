@@ -57,7 +57,6 @@
   "pages.PurchaseRelease.perks2": "エラーを含むエントリーを素早く特定",
   "pages.PurchaseRelease.perks3": "公開のスケジュール設定または手動公開",
   "pages.PurchaseRelease.subTitle": "コンテンツ更新とリリースを管理します。",
-  "pages.ReleaseDetails.entry-validation.fields": "フィールド",
   "pages.ReleaseDetails.groupBy.aria-label": "グループ化",
   "pages.ReleaseDetails.groupBy.label": "{groupBy}でグループ化",
   "pages.ReleaseDetails.groupBy.option.actions": "アクション",
