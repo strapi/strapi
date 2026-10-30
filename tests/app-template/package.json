@@ -14,14 +14,14 @@
     "@strapi/data-transfer": "latest",
     "@strapi/plugin-users-permissions": "latest",
     "@strapi/strapi": "latest",
-    "better-sqlite3": "12.11.1",
+    "better-sqlite3": "13.0.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.6",
     "styled-components": "6.4.1"
   },
   "engines": {
-    "node": ">=22.0.0 <=26.x.x",
+    "node": ">=22.12.0 <=26.x.x",
     "npm": ">=6.0.0"
   }
 }
