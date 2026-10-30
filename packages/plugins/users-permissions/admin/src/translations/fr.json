@@ -80,5 +80,8 @@
   "popUpWarning.button.cancel": "Annuler",
   "popUpWarning.button.confirm": "Confirmer",
   "popUpWarning.title": "Veuillez confirmer",
-  "popUpWarning.warning.cancel": "Voulez-vous vraiment annuler vos modifications ?"
+  "popUpWarning.warning.cancel": "Voulez-vous vraiment annuler vos modifications ?",
+  "notification.error": "Une erreur s'est produite",
+  "notification.success.saved": "Enregistré",
+  "List.button.roles": "Ajouter un nouveau rôle"
 }

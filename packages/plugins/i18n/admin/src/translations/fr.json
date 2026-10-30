@@ -69,6 +69,7 @@
   "Settings.locales.modal.create.name.description": "La locale sera affichée sous ce nom dans le panneau d'administration.",
   "Settings.locales.modal.create.name.label.error": "Le nom d'affichage de la locale doit avoir moins de 50 caractères.",
   "Settings.locales.modal.locales.label": "Locales",
+  "actions.publish.dialog.title": "Confirmation",
   "Settings.locales.modal.title": "Configurations",
   "Settings.locales.row.default-locale": "Locale par défaut",
   "Settings.locales.row.displayName": "Nom d'affichage",
@@ -85,5 +86,6 @@
   "plugin.schema.i18n.localized.description-field": "Le champ peut avoir des valeurs différentes dans chaque locale",
   "plugin.schema.i18n.localized.label-content-type": "Activer la localisation pour ce type de contenu",
   "plugin.schema.i18n.localized.label-field": "Activer la localisation pour ce champ",
-  "list-view.table.header.label": "Disponible en"
+  "list-view.table.header.label": "Disponible en",
+  "CheckboxConfirmation.Modal.title": "Désactiver la localisation"
 }

@@ -80,5 +80,8 @@
   "popUpWarning.button.cancel": "Cancel",
   "popUpWarning.button.confirm": "Confirm",
   "popUpWarning.title": "Please confirm",
-  "popUpWarning.warning.cancel": "Are you sure you want to cancel your modifications?"
+  "popUpWarning.warning.cancel": "Are you sure you want to cancel your modifications?",
+  "notification.error": "An error occurred",
+  "notification.success.saved": "Saved",
+  "List.button.roles": "Add new role"
 }
