@@ -73,9 +73,10 @@ const tagModel = {
   singularName: 'tag',
   pluralName: 'tags',
   description: '',
+  // Without draft and publish, relations to tags are kept when a category is published
+  draftAndPublish: false,
   options: {
     reviewWorkflows: false,
-    draftAndPublish: true,
   },
   pluginOptions: {
     i18n: {
@@ -210,7 +211,7 @@ describe('i18n', () => {
 
   afterAll(async () => {
     // Delete all locales that have been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
 
     await strapi.destroy();
     await builder.cleanup();

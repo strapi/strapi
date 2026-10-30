@@ -7,9 +7,11 @@ export const actionTypes = {
   'media.create': 'Create media',
   'media.update': 'Update media',
   'media.delete': 'Delete media',
+  'media.move': 'Move media',
   'media-folder.create': 'Create media folder',
   'media-folder.update': 'Update media folder',
   'media-folder.delete': 'Delete media folder',
+  'upload-settings.update': 'Update media library settings',
   'user.create': 'Create user',
   'user.update': 'Update user',
   'user.delete': 'Delete user',
@@ -56,11 +58,15 @@ export const actionTypes = {
   'webhook.create': 'Create webhook',
   'webhook.update': 'Update webhook',
   'webhook.delete': 'Delete webhook',
+  'sso-settings.update': 'Update SSO settings',
+  'project-settings.update': 'Update project settings',
   'workflow.create': 'Create workflow',
   'workflow.update': 'Update workflow',
   'workflow.delete': 'Delete workflow',
   'review-workflows.updateEntryStage': 'Change entry stage',
   'entry.assignee.update': 'Change entry assignee',
+  'entry.draft-discard': 'Discard entry draft',
+  'entry.history.restore': 'Restore entry version',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {

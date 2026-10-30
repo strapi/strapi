@@ -1,22 +1,18 @@
 import type { Core } from '@strapi/types';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import weeklyMetrics from '../weekly-metrics';
 
-const { find, send, setStore } = vi.hoisted(() => ({
+const { find } = vi.hoisted(() => ({
   find: vi.fn(),
-  send: vi.fn(),
-  setStore: vi.fn(),
 }));
 
-vi.mock('@strapi/types', () => ({}));
-
 vi.mock('../../../utils', async () => {
-  const metrics = await vi.importActual<typeof import('../index')>('../index');
+  const workflowMetrics = (await vi.importActual<typeof import('../index')>('../index')).default;
 
   return {
     getService(name: string) {
       if (name === 'workflow-metrics') {
-        return metrics.default;
+        return workflowMetrics;
       }
       if (name === 'workflows') {
         return { find };
@@ -26,17 +22,7 @@ vi.mock('../../../utils', async () => {
   };
 });
 
-const strapiMock = {
-  telemetry: { send },
-  store: { get: vi.fn(async () => ({})), set: setStore },
-} as unknown as Core.Strapi;
-
 describe('weekly review workflow metrics', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    global.strapi = strapiMock;
-  });
-
   it('counts stages and content types per workflow, including empty collections', async () => {
     find.mockResolvedValue([
       { stages: [{ id: 1 }, { id: 2 }], contentTypes: ['api::article.article'] },
@@ -54,46 +40,66 @@ describe('weekly review workflow metrics', () => {
     expect(find).toHaveBeenCalledWith({ populate: 'stages' });
   });
 
-  it('sends each computed metric as its own group property', async () => {
-    find.mockResolvedValue([
-      { stages: [{}, {}], contentTypes: ['api::a.a'] },
-      { stages: [{}, {}, {}, {}], contentTypes: ['api::b.b', 'api::c.c'] },
-    ]);
+  describe('sendMetrics', () => {
+    const send = vi.fn();
+    const setStore = vi.fn();
 
-    await weeklyMetrics({ strapi: strapiMock }).sendMetrics();
+    const strapiMock = {
+      telemetry: { send },
+      store: { get: vi.fn(async () => ({})), set: setStore },
+    } as unknown as Core.Strapi;
 
-    expect(send).toHaveBeenCalledWith('didSendReviewWorkflowPropertiesOnceAWeek', {
-      groupProperties: {
-        numberOfActiveWorkflows: 2,
-        avgStagesCount: 3,
-        maxStagesCount: 4,
-        activatedContentTypes: 3,
-      },
+    beforeEach(() => {
+      vi.clearAllMocks();
+      // The telemetry helpers in `../index` read the global `strapi`
+      vi.stubGlobal('strapi', strapiMock);
     });
-    expect(setStore).toHaveBeenCalledWith(
-      expect.objectContaining({ value: { lastWeeklyUpdate: expect.any(Number) } })
-    );
-  });
 
-  it('stores lastWeeklyUpdate only after the telemetry send settles', async () => {
-    find.mockResolvedValue([{ stages: [{}], contentTypes: [] }]);
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
 
-    let resolveSend: (value: boolean) => void = () => {};
-    send.mockReturnValueOnce(
-      new Promise<boolean>((resolve) => {
-        resolveSend = resolve;
-      })
-    );
+    it('sends each computed metric as its own group property', async () => {
+      find.mockResolvedValue([
+        { stages: [{}, {}], contentTypes: ['api::a.a'] },
+        { stages: [{}, {}, {}, {}], contentTypes: ['api::b.b', 'api::c.c'] },
+      ]);
 
-    const sending = weeklyMetrics({ strapi: strapiMock }).sendMetrics();
+      await weeklyMetrics({ strapi: strapiMock }).sendMetrics();
 
-    await new Promise(setImmediate);
-    expect(send).toHaveBeenCalledTimes(1);
-    expect(setStore).not.toHaveBeenCalled();
+      expect(send).toHaveBeenCalledWith('didSendReviewWorkflowPropertiesOnceAWeek', {
+        groupProperties: {
+          numberOfActiveWorkflows: 2,
+          avgStagesCount: 3,
+          maxStagesCount: 4,
+          activatedContentTypes: 3,
+        },
+      });
+      expect(setStore).toHaveBeenCalledWith(
+        expect.objectContaining({ value: { lastWeeklyUpdate: expect.any(Number) } })
+      );
+    });
 
-    resolveSend(true);
-    await sending;
+    it('stores lastWeeklyUpdate only after the telemetry send settles', async () => {
+      find.mockResolvedValue([{ stages: [{}], contentTypes: [] }]);
 
-    expect(setStore).toHaveBeenCalledTimes(1);
+      let resolveSend: (value: boolean) => void = () => {};
+      send.mockReturnValueOnce(
+        new Promise<boolean>((resolve) => {
+          resolveSend = resolve;
+        })
+      );
+
+      const sending = weeklyMetrics({ strapi: strapiMock }).sendMetrics();
+
+      await new Promise(setImmediate);
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(setStore).not.toHaveBeenCalled();
+
+      resolveSend(true);
+      await sending;
+
+      expect(setStore).toHaveBeenCalledTimes(1);
+    });
   });
 });
