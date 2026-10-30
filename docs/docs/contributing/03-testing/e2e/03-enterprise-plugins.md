@@ -8,43 +8,28 @@ tags:
 
 ## Overview
 
-Some Enterprise plugins, such as `@strapi-enterprise/plugin-byok`, live in a private repository. They use Strapi APIs, so a change in this repository can break them. The `e2e_enterprise_plugins` job in [`tests.yml`](https://github.com/strapi/strapi/blob/develop/.github/workflows/tests.yml) runs a small e2e suite against the latest published plugin to catch these breaks.
-
-The suite is the `enterprise-plugins` domain in [`tests/e2e/tests/enterprise-plugins`](https://github.com/strapi/strapi/blob/develop/tests/e2e/tests/enterprise-plugins). It checks that:
-
-- Strapi starts with the BYOK plugin, and the plugin shows in the list of plugins.
-- The AI features show as available in their settings pages.
-- AI Translation works from the admin, against a mock provider.
-
-The tests make no real AI call. A small OpenAI-compatible server in the test process answers instead.
+The Enterprise plugins live in a private repository. They use Strapi APIs, so a change in this repository can break them. The `e2e_enterprise_plugins` job in [`tests.yml`](https://github.com/strapi/strapi/blob/develop/.github/workflows/tests.yml) runs the [`enterprise-plugins`](https://github.com/strapi/strapi/blob/develop/tests/e2e/tests/enterprise-plugins) e2e domain against the latest published version of each plugin.
 
 ## When the job runs
 
 - On pull requests from a branch of `strapi/strapi`.
 - On pushes to `develop` and `main`.
 
-Pull requests from forks skip the job. GitHub gives no secrets to fork runs, so the job cannot install the plugins. The push run on `develop` reports what a fork pull request broke, after the merge.
-
-The job is part of the required `aggregate_test_result` check, so a failure blocks the merge. A skipped job does not block it.
+Pull requests from forks skip the job because GitHub gives no secrets to fork runs, so the job cannot install the plugins.
 
 ## Keep the code of the plugins private
 
-The code of the Enterprise plugins is not public: not their source, not their built files, and not the prompts they send to AI providers. The job follows these rules. Keep them when you change it.
+The code of the Enterprise plugins is not public. Keep these rules when you change the job:
 
-- Never run the job, or any pull request code with the license, from `pull_request_target` or `workflow_run`. Fork code could then read the license and the plugins.
-- The job restores caches but never saves them. The plugins are installed in `$RUNNER_TEMP`, outside the repository, with a temporary npm cache.
-- The license never goes to disk. The npm configuration only references `${STRAPI_LICENSE}`.
-- The mock provider never logs, stores, or returns the request body. Assertions only use the request path and the model name.
-- Do not print the installed plugin files, the npm configuration, or the environment in the logs.
+- Never allow the job to run on third-party code: fork code could then read the license and the plugins.
+- Never save the plugins in caches or artifacts: that would make their code public.
 
-Test names, logs from Strapi, screenshots, traces, and the Trunk report can be public. They hold no plugin code.
+## Run the tests locally
 
-## Reproduce a failure locally
-
-You need a Strapi license that includes the features of the Enterprise plugins, such as `cms-byok-ai` for BYOK, and access to the Enterprise registry. Strapi employees can ask the Enterprise squad for one.
+You need a Strapi license that includes the features of the Enterprise plugins, such as `cms-byok-ai` for BYOK.
 
 1. Put the license in `tests/e2e/.env` as `STRAPI_LICENSE` (see [Setup](./00-setup.md#running-enterprise-ee-tests-locally)).
-2. Install the Enterprise plugins outside the repository:
+2. Install the plugins once, in any directory:
 
    ```shell
    export STRAPI_LICENSE="<your license>"
@@ -58,12 +43,10 @@ You need a Strapi license that includes the features of the Enterprise plugins, 
    yarn test:e2e:ee --setup --domains enterprise-plugins -- --project=chromium
    ```
 
-When `STRAPI_ENTERPRISE_PLUGINS_PATH` is set, [`tests/app-template/config/plugins.js`](https://github.com/strapi/strapi/blob/develop/tests/app-template/config/plugins.js) loads the Enterprise plugins from that directory and points BYOK to the mock provider.
+[`tests/app-template/config/plugins.js`](https://github.com/strapi/strapi/blob/develop/tests/app-template/config/plugins.js) loads them from `STRAPI_ENTERPRISE_PLUGINS_PATH`.
 
-To add an Enterprise plugin, add its package to [`tests/scripts/install-enterprise-plugins.sh`](https://github.com/strapi/strapi/blob/develop/tests/scripts/install-enterprise-plugins.sh), add its configuration to `tests/app-template/config/plugins.js`, and add its tests to the `enterprise-plugins` domain.
+## Add an Enterprise plugin
 
-## When the job fails
-
-1. Read the Strapi logs in the job output (lines that start with `[WebServer]`). BYOK logs why it stays off, for example a missing license feature or a missing Strapi API.
-2. Open the Playwright trace from the job artifacts.
-3. If your change breaks the Enterprise plugins on purpose, or you cannot find the cause, contact the Enterprise squad before you merge. The code of the plugins is private, so the squad may need to change it.
+1. Add its package to [`tests/scripts/install-enterprise-plugins.sh`](https://github.com/strapi/strapi/blob/develop/tests/scripts/install-enterprise-plugins.sh).
+2. Add its configuration to `tests/app-template/config/plugins.js`.
+3. Add its tests to the `enterprise-plugins` domain.

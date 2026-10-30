@@ -9,7 +9,7 @@ enterprise_plugin_packages=(
 )
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 <install directory outside the repository>" >&2
+  echo "Usage: $0 <install directory>" >&2
   exit 1
 fi
 
