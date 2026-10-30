@@ -22,9 +22,9 @@ import {
   TextButton,
 } from '@strapi/design-system';
 import { Check, Sparkle } from '@strapi/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
 
 import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
 import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
@@ -164,25 +164,26 @@ export const SettingsPage = () => {
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
-  const { data, isLoading, refetch } = useSettings();
+  const { data, isInitialLoading: isLoading, refetch } = useSettings();
   const isAIAvailable = useAIMetadataAvailability();
 
-  const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
-    GetAIMetadataPendingCount.Response['data'],
-    GetAIMetadataPendingCount.Response['error']
-  >(
-    ['ai-metadata-count'],
-    async () => {
-      const { data } = await get<GetAIMetadataPendingCount.Response['data']>(
-        '/upload/ai-metadata-jobs/pending-count'
-      );
-      return data;
-    },
-    {
-      enabled: isAIAvailable && !!data?.aiMetadata,
-      retry: false,
-    }
-  );
+  const { data: imageCountResponse, isInitialLoading: isLoadingImagesWithoutMetadataCount } =
+    useQuery<
+      GetAIMetadataPendingCount.Response['data'],
+      GetAIMetadataPendingCount.Response['error']
+    >(
+      ['ai-metadata-count'],
+      async () => {
+        const { data } = await get<GetAIMetadataPendingCount.Response['data']>(
+          '/upload/ai-metadata-jobs/pending-count'
+        );
+        return data;
+      },
+      {
+        enabled: isAIAvailable && !!data?.aiMetadata,
+        retry: false,
+      }
+    );
 
   const imagesWithoutMetadataCount = imageCountResponse?.imagesWithoutMetadataCount ?? 0;
 

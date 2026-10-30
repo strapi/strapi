@@ -12,8 +12,8 @@ import {
   useRBAC,
   Layouts,
 } from '@strapi/strapi/admin';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
@@ -40,7 +40,7 @@ const AdvancedSettingsPage = () => {
     allowedActions: { canUpdate },
   } = useRBAC({ update: PERMISSIONS.updateAdvancedSettings });
 
-  const { isLoading: isLoadingData, data } = useQuery(
+  const { isInitialLoading: isLoadingData, data } = useQuery(
     ['users-permissions', 'advanced'],
     async () => {
       const { data } = await get('/users-permissions/advanced');

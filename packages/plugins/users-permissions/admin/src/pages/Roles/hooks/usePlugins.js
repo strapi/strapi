@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
-import { useQueries } from 'react-query';
+import { useQueries } from '@tanstack/react-query';
 
 import { cleanPermissions, getTrad } from '../../../utils';
 
@@ -13,33 +13,35 @@ export const usePlugins = () => {
   const [
     {
       data: permissions,
-      isLoading: isLoadingPermissions,
+      isInitialLoading: isLoadingPermissions,
       error: permissionsError,
       refetch: refetchPermissions,
     },
-    { data: routes, isLoading: isLoadingRoutes, error: routesError, refetch: refetchRoutes },
-  ] = useQueries([
-    {
-      queryKey: ['users-permissions', 'permissions'],
-      async queryFn() {
-        const {
-          data: { permissions },
-        } = await get(`/users-permissions/permissions`);
+    { data: routes, isInitialLoading: isLoadingRoutes, error: routesError, refetch: refetchRoutes },
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ['users-permissions', 'permissions'],
+        async queryFn() {
+          const {
+            data: { permissions },
+          } = await get(`/users-permissions/permissions`);
 
-        return permissions;
+          return permissions;
+        },
       },
-    },
-    {
-      queryKey: ['users-permissions', 'routes'],
-      async queryFn() {
-        const {
-          data: { routes },
-        } = await get(`/users-permissions/routes`);
+      {
+        queryKey: ['users-permissions', 'routes'],
+        async queryFn() {
+          const {
+            data: { routes },
+          } = await get(`/users-permissions/routes`);
 
-        return routes;
+          return routes;
+        },
       },
-    },
-  ]);
+    ],
+  });
 
   const refetchQueries = async () => {
     await Promise.all([refetchPermissions(), refetchRoutes()]);

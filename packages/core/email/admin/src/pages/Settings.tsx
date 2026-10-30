@@ -14,8 +14,8 @@ import {
   Badge,
 } from '@strapi/design-system';
 import { Mail, Check, Cross } from '@strapi/icons';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useQuery, useMutation } from 'react-query';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
@@ -231,7 +231,7 @@ const SettingsPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formErrors, setFormErrors] = React.useState<Record<string, any>>({});
 
-  const { data, isLoading } = useQuery(['email', 'settings'], async () => {
+  const { data, isInitialLoading: isLoading } = useQuery(['email', 'settings'], async () => {
     const res = await get<EmailSettings>('/email/settings');
     const {
       data: { config, supportsVerify, capabilities, isIdle },

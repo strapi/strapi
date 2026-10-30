@@ -222,7 +222,9 @@ mutation occurs as well as handling various intermittent states and events durin
 lifecycle.
 
 :::note
-We're using `react-query` version 3, see the specific docs – https://tanstack.com/query/v3/docs/react/overview
+We're using `@tanstack/react-query` version 4, see the specific docs – https://tanstack.com/query/v4/docs/framework/react/overview
+
+A disabled query that has no data yet has `isLoading: true` in version 4. Read `isInitialLoading` to show a loader only while the query is actually fetching.
 :::
 
 There are a few guidelines to keep in mind when writing your query-keys
@@ -231,7 +233,7 @@ There are a few guidelines to keep in mind when writing your query-keys
 - All ee calls should be prefixed with ee, to be able to invalidate it all at once
 - All dynamic variables need to be part of the dependency array
 
-You can read more on query-keys for `react-query` [here](https://tanstack.com/query/v3/docs/react/guides/query-keys).
+You can read more on query-keys for `react-query` [here](https://tanstack.com/query/v4/docs/framework/react/guides/query-keys).
 
 #### Example
 

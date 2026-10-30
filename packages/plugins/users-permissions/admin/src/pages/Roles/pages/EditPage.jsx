@@ -19,9 +19,9 @@ import {
   useFetchClient,
   Layouts,
 } from '@strapi/strapi/admin';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { useQuery, useMutation } from 'react-query';
 import { useMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
@@ -40,7 +40,7 @@ export const EditPage = () => {
   const { isLoading: isLoadingPlugins, routes } = usePlugins();
   const {
     data: role,
-    isLoading: isLoadingRole,
+    isInitialLoading: isLoadingRole,
     refetch: refetchRole,
   } = useQuery(['users-permissions', 'role', id], async () => {
     // TODO: why doesn't this endpoint follow the admin API conventions?

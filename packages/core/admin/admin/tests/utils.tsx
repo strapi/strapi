@@ -5,6 +5,7 @@ import * as React from 'react';
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   fireEvent,
   renderHook as renderHookRTL,
@@ -21,7 +22,6 @@ import {
 import { userEvent } from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-router-dom';
 
@@ -41,12 +41,6 @@ import { server } from './server';
 import { initialState } from './store';
 
 const EMPTY_PERMISSIONS: NonNullable<ProvidersProps['permissions']> = [];
-
-setLogger({
-  log: () => {},
-  warn: () => {},
-  error: () => {},
-});
 
 /**
  * RTL's `rerender()` updates the `children` passed to our test `render()` helper.
@@ -119,6 +113,11 @@ const Providers = ({
         queries: {
           retry: false,
         },
+      },
+      logger: {
+        log: () => {},
+        warn: () => {},
+        error: () => {},
       },
     });
   }

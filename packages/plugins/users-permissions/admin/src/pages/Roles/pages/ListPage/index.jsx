@@ -26,8 +26,8 @@ import {
   useRBAC,
   Layouts,
 } from '@strapi/strapi/admin';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
 import { NavLink } from 'react-router-dom';
 
 import { PERMISSIONS } from '../../../../constants';
@@ -57,11 +57,11 @@ export const RolesListPage = () => {
   });
 
   const {
-    isLoading: isLoadingForData,
+    isInitialLoading: isLoadingForData,
     data: { roles },
     isFetching,
     refetch,
-  } = useQuery('get-roles', () => fetchData(toggleNotification, formatMessage, notifyStatus), {
+  } = useQuery(['get-roles'], () => fetchData(toggleNotification, formatMessage, notifyStatus), {
     initialData: {},
     enabled: canRead,
   });

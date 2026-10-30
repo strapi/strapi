@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Provider } from 'react-redux';
 
 import { AuthProvider } from '../features/Auth';
@@ -20,7 +20,11 @@ import type { StrapiApp } from '../StrapiApp';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      networkMode: 'always',
       refetchOnWindowFocus: false,
+    },
+    mutations: {
+      networkMode: 'always',
     },
   },
 });

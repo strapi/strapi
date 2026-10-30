@@ -21,9 +21,9 @@ import {
   useFetchClient,
   useRBAC,
 } from '@strapi/strapi/admin';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import FormModal from '../../components/FormModal';
 import { PERMISSIONS } from '../../constants';
@@ -49,7 +49,7 @@ export const ProvidersPage = () => {
     allowedActions: { canUpdate },
   } = useRBAC({ update: PERMISSIONS.updateProviders });
 
-  const { isLoading: isLoadingData, data } = useQuery(
+  const { isInitialLoading: isLoadingData, data } = useQuery(
     ['users-permissions', 'get-providers'],
     async () => {
       const { data } = await get('/users-permissions/providers');

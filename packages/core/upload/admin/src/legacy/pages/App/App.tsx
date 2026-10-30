@@ -18,8 +18,10 @@ const ConfigureTheView = React.lazy(async () =>
 
 export const Upload = () => {
   const {
-    config: { isLoading, isError, data: config },
-  } = useConfig() as { config: { isLoading: boolean; isError: boolean; data: Configuration } };
+    config: { isInitialLoading: isLoading, isError, data: config },
+  } = useConfig() as {
+    config: { isInitialLoading: boolean; isError: boolean; data: Configuration };
+  };
 
   const [{ rawQuery }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();

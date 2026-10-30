@@ -19,9 +19,9 @@ import {
   Layouts,
   BackButton,
 } from '@strapi/strapi/admin';
+import { useMutation } from '@tanstack/react-query';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
