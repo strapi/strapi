@@ -789,15 +789,21 @@ export const AssetDetails = ({
 
   const isImage = asset.mime?.includes(ASSET_TYPES.Image);
 
-  const initialValues: AssetFormState = {
-    name: asset.name ?? '',
-    caption: asset.caption ?? '',
-    alternativeText: asset.alternativeText ?? '',
-    folder:
-      typeof asset.folder === 'object' && asset.folder !== null
-        ? ((asset.folder as { id: number }).id ?? null)
-        : ((asset.folder as number | null | undefined) ?? null),
-  };
+  // Stable until the asset changes: <Form> resets its values whenever this
+  // object does, which on every render would throw away the baseline a save
+  // sets and show the pre-save values until the refetch lands.
+  const initialValues = React.useMemo<AssetFormState>(
+    () => ({
+      name: asset.name ?? '',
+      caption: asset.caption ?? '',
+      alternativeText: asset.alternativeText ?? '',
+      folder:
+        typeof asset.folder === 'object' && asset.folder !== null
+          ? ((asset.folder as { id: number }).id ?? null)
+          : ((asset.folder as number | null | undefined) ?? null),
+    }),
+    [asset.name, asset.caption, asset.alternativeText, asset.folder]
+  );
 
   const handleSubmit = async (
     values: AssetFormState,
@@ -1554,8 +1560,9 @@ export const AssetDetailsDrawer = ({
         <Dialog.Root open={isConfirmingClose} onOpenChange={setIsConfirmingClose}>
           <ConfirmDialog onConfirm={onClose} variant="danger">
             {formatMessage({
-              id: 'global.prompt.unsaved',
-              defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+              id: getTranslationKey('asset-details.unsaved.confirm'),
+              defaultMessage:
+                "You have unsaved changes, are you sure you want to close this file's details? Your changes will be lost.",
             })}
           </ConfirmDialog>
         </Dialog.Root>

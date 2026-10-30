@@ -983,7 +983,8 @@ describe('AssetDetailsDrawer unsaved changes', () => {
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
-  // Saved edits are no longer unsaved, even before the refetched asset lands.
+  // Saved edits are no longer unsaved, and stay on screen, even before the
+  // refetched asset lands.
   it('closes without asking right after a save', async () => {
     const saved = { ...baseAsset, caption: 'Edited caption' };
     let releaseRefetch = () => {};
@@ -1002,12 +1003,13 @@ describe('AssetDetailsDrawer unsaved changes', () => {
         return HttpResponse.json(baseAsset);
       })
     );
-    const { user, onClose } = await renderDirtyDrawer();
+    const { user, onClose, caption } = await renderDirtyDrawer();
 
     const save = screen.getByRole('button', { name: 'Save changes' });
     await waitFor(() => expect(save).toBeEnabled());
     fireEvent.click(save);
     await screen.findByText('File updated');
+    expect(caption).toHaveValue('Edited caption');
     // The in-drawer toast brings its own "Close"; the panel's comes first.
     await user.click(screen.getAllByRole('button', { name: 'Close' })[0]);
 
