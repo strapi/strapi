@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { useIsMobile, useQueryParams } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@tests/utils';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { usePersistentPartialQueryParams } from '../hooks/usePersistentQueryParams';
@@ -136,6 +136,34 @@ describe('Content Manager | Layout', () => {
     expect(await screen.findByText('List page')).toBeInTheDocument();
     expect(screen.getByTestId('sort')).toHaveTextContent('title:ASC');
     expect(screen.getByTestId('page-size')).toHaveTextContent('10');
+  });
+
+  it('redirects to the first collection type again after re-navigating to the base route', async () => {
+    mockInitData({ models: [ARTICLE_MODEL], collectionTypeLinks: [ARTICLE_LINK] });
+
+    let navigateFn: ReturnType<typeof useNavigate>;
+    const NavigationProbe = () => {
+      navigateFn = useNavigate();
+      return <button type="button" onClick={() => navigateFn('/content-manager')}>Re-navigate</button>;
+    };
+
+    render(
+      <>
+        <NavigationProbe />
+        <Routes>
+          <Route path="/content-manager" element={<Layout />}>
+            <Route path=":collectionType/:slug" element={<ListPageProbe />} />
+          </Route>
+        </Routes>
+      </>,
+      { initialEntries: ['/content-manager'] }
+    );
+
+    expect(await screen.findByText('List page')).toBeInTheDocument();
+
+    navigateFn!('/content-manager');
+
+    expect(await screen.findByText('List page')).toBeInTheDocument();
   });
 
   it('keeps explicit collection URL parameters ahead of saved list preferences', async () => {
