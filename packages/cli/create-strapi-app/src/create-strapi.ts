@@ -1,6 +1,6 @@
 import { isAbsolute, join, relative, sep } from 'node:path';
 
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import execa from 'execa';
 import fse from 'fs-extra';
 import semver from 'semver';
@@ -102,7 +102,7 @@ async function createApp(scope: Scope) {
 
   await trackUsage({ event: 'willCreateProject', scope });
 
-  logger.title('Strapi', `Creating a new application at ${chalk.green(rootPath)}`);
+  logger.title('Strapi', `Creating a new application at ${styleText('green', rootPath)}`);
 
   if (!isQuickstart) {
     await trackUsage({ event: 'didChooseCustomDatabase', scope });
@@ -123,7 +123,7 @@ async function createApp(scope: Scope) {
     }
   } else {
     try {
-      logger.info(`${chalk.cyan('Installing template')} ${template}`);
+      logger.info(`${styleText('cyan', 'Installing template')} ${template}`);
 
       await copyTemplate(scope, rootPath);
 
@@ -137,7 +137,7 @@ async function createApp(scope: Scope) {
     }
 
     if (!fse.existsSync(join(rootPath, 'package.json'))) {
-      logger.fatal(`Missing ${chalk.bold('package.json')} in template`);
+      logger.fatal(`Missing ${styleText('bold', 'package.json')} in template`);
     }
   }
 
@@ -188,7 +188,7 @@ async function createApp(scope: Scope) {
 
   if (installDependencies) {
     try {
-      logger.title('deps', `Installing dependencies with ${chalk.cyan(packageManager)}`);
+      logger.title('deps', `Installing dependencies with ${styleText('cyan', packageManager)}`);
 
       await trackUsage({ event: 'willInstallProjectDependencies', scope });
 
@@ -207,7 +207,8 @@ async function createApp(scope: Scope) {
       });
 
       logger.fatal([
-        chalk.bold(
+        styleText(
+          'bold',
           'Oh, it seems that you encountered an error while installing dependencies in your project'
         ),
         '',
@@ -215,7 +216,7 @@ async function createApp(scope: Scope) {
         '',
         `Fix the issues mentioned in the installation errors and try to run the following command:`,
         '',
-        `cd ${chalk.green(rootPath)} && ${chalk.cyan(packageManager)} install`,
+        `cd ${styleText('green', rootPath)} && ${styleText('cyan', packageManager)} install`,
       ]);
     }
   }
@@ -252,7 +253,7 @@ async function createApp(scope: Scope) {
     }
   }
 
-  const cmd = chalk.cyan(`${packageManager} run`);
+  const cmd = styleText('cyan', `${packageManager} run`);
 
   logger.title('Strapi', `Your application was created!`);
 
@@ -267,15 +268,15 @@ async function createApp(scope: Scope) {
     logger.log([
       'To get started run',
       '',
-      `${chalk.cyan('cd')} ${projectFolder}`,
+      `${styleText('cyan', 'cd')} ${projectFolder}`,
       !shouldRunSeed && useExample ? `${cmd} seed:example && ${cmd} develop` : `${cmd} develop`,
     ]);
   } else {
     logger.log([
       'To get started run',
       '',
-      `${chalk.cyan('cd')} ${projectFolder}`,
-      `${chalk.cyan(packageManager)} install`,
+      `${styleText('cyan', 'cd')} ${projectFolder}`,
+      `${styleText('cyan', packageManager)} install`,
       !shouldRunSeed && useExample ? `${cmd} seed:example && ${cmd} develop` : `${cmd} develop`,
     ]);
   }

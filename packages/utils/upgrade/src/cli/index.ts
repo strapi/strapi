@@ -1,5 +1,5 @@
 import os from 'os';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { program } from 'commander';
 
 import { register as registerUpgradeCommands } from './commands/upgrade';
@@ -14,7 +14,8 @@ program
   .usage('<command> [options]')
   .on('command:*', ([invalidCmd]) => {
     console.error(
-      chalk.red(
+      styleText(
+        'red',
         `[ERROR] Invalid command: ${invalidCmd}.${os.EOL} See --help for a list of available commands.`
       )
     );

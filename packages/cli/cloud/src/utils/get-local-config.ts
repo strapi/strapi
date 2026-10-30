@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import type { CLIContext } from '../types';
 import { local } from '../services';
 import { LocalSave } from '../services/strapi-info-save';
@@ -18,7 +18,8 @@ async function getLocalProject(ctx: CLIContext) {
 
   if (!localConfig || !localConfig.project) {
     ctx.logger.warn(
-      `\nWe couldn't find a valid local project config.\nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+      `\nWe couldn't find a valid local project config.\nPlease link your local project to an existing Strapi Cloud project using the ${styleText(
+        'cyan',
         'link'
       )} command.`
     );

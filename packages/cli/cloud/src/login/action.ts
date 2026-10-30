@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
 import type { CloudCliConfig, CLIContext } from '../types';
 import { apiConfig } from '../config/api';
@@ -50,7 +50,7 @@ export default async function loginAction(
           logger.log(
             'To access your dashboard, please copy and paste the following URL into your web browser:'
           );
-          logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
+          logger.log(styleText('underline', `${apiConfig.dashboardBaseUrl}/projects`));
         }
         return true;
       } catch (e) {
@@ -194,7 +194,7 @@ export default async function loginAction(
       logger.log(
         'To access your dashboard, please copy and paste the following URL into your web browser:'
       );
-      logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
+      logger.log(styleText('underline', `${apiConfig.dashboardBaseUrl}/projects`));
     }
     await trackEvent(ctx, cloudApiService, 'didLogin', {
       loginMethod: 'cli',

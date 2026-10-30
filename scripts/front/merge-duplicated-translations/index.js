@@ -3,7 +3,7 @@
 'use strict';
 
 const path = require('path');
-const chalk = require('chalk');
+const { styleText } = require('node:util');
 const { kebabCase } = require('lodash');
 const FilesContentSearch = require('../utils/search-files-content');
 const { readAllTranslationFiles, writeAllTranslationFiles } = require('../utils/translation-files');
@@ -26,7 +26,7 @@ const mapDuplicateValues = async (pkgs, fn) => {
 };
 
 const printToMerge = (valueGroup) => {
-  console.log(`Value: "${chalk.yellow(valueGroup[0].value)}"`);
+  console.log(`Value: "${styleText('yellow', valueGroup[0].value)}"`);
 
   console.table(
     valueGroup.map((keyGroup) => ({

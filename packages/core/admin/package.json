@@ -101,7 +101,6 @@
     "axios": "1.20.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
-    "chalk": "^4.1.2",
     "codemirror5": "npm:codemirror@^5.65.11",
     "cross-env": "^7.0.3",
     "date-fns": "2.30.0",

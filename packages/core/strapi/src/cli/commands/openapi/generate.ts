@@ -3,7 +3,7 @@ import * as openapi from '@strapi/openapi';
 
 import type { Core } from '@strapi/types';
 
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import fse from 'fs-extra';
 import path from 'path';
 
@@ -18,11 +18,14 @@ interface StrapiInfoConfig {
   version: string;
 }
 
-const EXPERIMENTAL_MSG = chalk.yellow(`
+const EXPERIMENTAL_MSG = styleText(
+  'yellow',
+  `
 ⚠️  The OpenAPI generation feature is currently experimental.
     Its behavior and output might change in future releases without following semver.
     Please report any issues you encounter on https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.yml.
-`);
+`
+);
 
 /**
  * @experimental
@@ -70,13 +73,14 @@ const summarize = (app: Core.Strapi, durationMs: number, filePath: string): void
   const relativeFilePath = path.relative(cwd, filePath);
   const { name, version } = app.config.get<StrapiInfoConfig>('info');
 
-  const fName = chalk.cyan(name);
-  const fVersion = chalk.cyan(`v${version}`);
-  const fFile = chalk.magenta(relativeFilePath);
-  const fTime = chalk.green(`${durationMs}ms`);
+  const fName = styleText('cyan', name);
+  const fVersion = styleText('cyan', `v${version}`);
+  const fFile = styleText('magenta', relativeFilePath);
+  const fTime = styleText('green', `${durationMs}ms`);
 
   console.log(
-    chalk.bold(
+    styleText(
+      'bold',
       `Generated an OpenAPI specification for "${fName} ${fVersion}" at ${fFile} in ${fTime}`
     )
   );

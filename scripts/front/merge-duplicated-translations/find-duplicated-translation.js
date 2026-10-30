@@ -1,6 +1,6 @@
 'use strict';
 
-const chalk = require('chalk');
+const { styleText } = require('node:util');
 const { merge } = require('lodash');
 const { readAllTranslationFiles } = require('../utils/translation-files');
 const allowedKeys = require('./allowed-keys');
@@ -12,7 +12,7 @@ const printResults = (results) => {
   Object.entries(results).forEach(([value, pkgs]) => {
     Object.entries(pkgs).forEach(([packageName, keys]) => {
       keys.forEach((key) => {
-        console.log(`"${chalk.yellow(value)}" ${packageName} ${chalk.blue(key)}`);
+        console.log(`"${styleText('yellow', value)}" ${packageName} ${styleText('blue', key)}`);
         keysCount += 1;
       });
     });

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { rm } from 'node:fs/promises';
 
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import semver from 'semver';
 import { packageManager } from '@strapi/utils';
 
@@ -286,7 +286,7 @@ export class Upgrader implements UpgraderInterface {
     const updatedPackageJSON = json.root();
 
     if (this.isDry) {
-      this.logger?.debug?.(`Skipping dependencies update (${chalk.italic('dry mode')})`);
+      this.logger?.debug?.(`Skipping dependencies update (${styleText('italic', 'dry mode')})`);
       return;
     }
 
@@ -319,7 +319,9 @@ export class Upgrader implements UpgraderInterface {
     this.logger?.debug?.(`Using ${f.highlight(packageManagerName)} as package manager`);
 
     if (this.isDry) {
-      this.logger?.debug?.(`Skipping dependencies installation (${chalk.italic('dry mode')})`);
+      this.logger?.debug?.(
+        `Skipping dependencies installation (${styleText('italic', 'dry mode')})`
+      );
       return;
     }
 
@@ -346,11 +348,11 @@ export class Upgrader implements UpgraderInterface {
       (await this.confirm(
         [
           'Remove the Strapi admin dev cache',
-          chalk.dim('(node_modules/.strapi/vite)'),
+          styleText('dim', '(node_modules/.strapi/vite)'),
           '?',
           'Recommended after dependency changes to avoid stale bundles;',
           'the next',
-          chalk.bold('strapi develop'),
+          styleText('bold', 'strapi develop'),
           'may take longer once while Vite re-optimizes.',
         ].join(' ')
       ));

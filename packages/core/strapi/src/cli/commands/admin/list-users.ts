@@ -1,6 +1,6 @@
 import { createCommand } from 'commander';
 import CLITable from 'cli-table3';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
@@ -21,13 +21,13 @@ const action = async () => {
 
   const infoTable = new CLITable({
     head: [
-      chalk.blue('ID'),
-      chalk.blue('Email'),
-      chalk.blue('First Name'),
-      chalk.blue('Last Name'),
-      chalk.blue('Active'),
-      chalk.blue('Blocked'),
-      chalk.blue('Roles'),
+      styleText('blue', 'ID'),
+      styleText('blue', 'Email'),
+      styleText('blue', 'First Name'),
+      styleText('blue', 'Last Name'),
+      styleText('blue', 'Active'),
+      styleText('blue', 'Blocked'),
+      styleText('blue', 'Roles'),
     ],
   });
 
@@ -38,9 +38,9 @@ const action = async () => {
       user.email,
       user.firstname,
       user.lastname,
-      user.isActive === true ? chalk.green('true') : chalk.red('false'),
-      user.blocked === true ? chalk.red('true') : chalk.green('false'),
-      roles.length > 0 ? roles : chalk.yellow('No roles assigned'),
+      user.isActive === true ? styleText('green', 'true') : styleText('red', 'false'),
+      user.blocked === true ? styleText('red', 'true') : styleText('green', 'false'),
+      roles.length > 0 ? roles : styleText('yellow', 'No roles assigned'),
     ]);
   });
 

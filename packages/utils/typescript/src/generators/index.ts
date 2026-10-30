@@ -1,5 +1,5 @@
 import path from 'node:path';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 
 import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
 import { saveDefinitionToFileSystem, createLogger, timer } from './utils';
@@ -43,10 +43,13 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
   const generatorConfig = { strapi, pwd: registryPwd, logger };
 
   const returnWithMessage = () => {
-    const nbWarnings = chalk.yellow(`${logger.warnings} warning(s)`);
-    const nbErrors = chalk.red(`${logger.errors} error(s)`);
+    const nbWarnings = styleText('yellow', `${logger.warnings} warning(s)`);
+    const nbErrors = styleText('red', `${logger.errors} error(s)`);
 
-    const status = logger.errors > 0 ? chalk.red('errored') : chalk.green('completed successfully');
+    const status =
+      logger.errors > 0
+        ? styleText('red', 'errored')
+        : styleText('green', 'completed successfully');
 
     psTimer.end();
 
@@ -63,7 +66,7 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
   logger.debug(`Enabled artifacts: ${enabledArtifacts.join(', ')}`);
 
   for (const artifact of enabledArtifacts) {
-    const boldArtifact = chalk.bold(artifact); // used for log messages
+    const boldArtifact = styleText('bold', artifact); // used for log messages
 
     logger.info(`Generating types for ${boldArtifact}`);
 
@@ -90,7 +93,7 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
   }
 
   for (const artifact of Object.keys(reports)) {
-    const boldArtifact = chalk.bold(artifact); // used for log messages
+    const boldArtifact = styleText('bold', artifact); // used for log messages
 
     const artifactFsTimer = timer().start();
 
@@ -103,7 +106,7 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
 
       artifactFsTimer.end();
 
-      logger.info(`Saved ${boldArtifact} types in ${chalk.bold(relativeOutPath)}`);
+      logger.info(`Saved ${boldArtifact} types in ${styleText('bold', relativeOutPath)}`);
       logger.debug(`Saved ${boldArtifact} in ${artifactFsTimer.duration}s`);
     } catch (e) {
       logger.error(

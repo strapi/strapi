@@ -57,7 +57,6 @@
     "@strapi/logger": "5.60.0",
     "@strapi/types": "5.60.0",
     "@strapi/utils": "5.60.0",
-    "chalk": "4.1.2",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
     "fs-extra": "11.3.4",

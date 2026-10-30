@@ -1,6 +1,6 @@
 import { createCommand } from 'commander';
 import CLITable from 'cli-table3';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
@@ -13,7 +13,7 @@ const action = async () => {
   const list = app.get('hooks').keys();
 
   const infoTable = new CLITable({
-    head: [chalk.blue('Name')],
+    head: [styleText('blue', 'Name')],
   });
 
   list.forEach((name: string) => infoTable.push([name]));

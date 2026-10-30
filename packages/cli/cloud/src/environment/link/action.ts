@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import type { Answers } from 'inquirer';
 import { EnvironmentDetails, ProjectInput } from '../../services/cli-api';
 import type { CLIContext, CloudApiService } from '../../types';
@@ -76,7 +76,7 @@ export default async (ctx: CLIContext) => {
   }
 
   logger.log(
-    ` You have successfully linked your project to ${chalk.cyan(answer.targetEnvironment)}, on ${chalk.cyan(project.displayName)}. You are now able to deploy your project.`
+    ` You have successfully linked your project to ${styleText('cyan', String(answer.targetEnvironment))}, on ${styleText('cyan', String(project.displayName))}. You are now able to deploy your project.`
   );
   await trackEvent(ctx, cloudApiService, 'didLinkEnvironment', {
     projectName: project.name,
@@ -97,7 +97,7 @@ async function promptUserForEnvironment(
         type: 'list',
         name: 'targetEnvironment',
         message: 'Which environment do you want to link?',
-        choices: [...environments, { name: chalk.grey(`(${QUIT_OPTION})`), value: null }],
+        choices: [...environments, { name: styleText('grey', `(${QUIT_OPTION})`), value: null }],
       },
     ]);
 
@@ -136,7 +136,8 @@ async function getEnvironmentsList(
     if (e.response && e.response.status === 404) {
       spinner.succeed();
       ctx.logger.warn(
-        `\nThe project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+        `\nThe project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${styleText(
+          'cyan',
           'link'
         )} command.`
       );

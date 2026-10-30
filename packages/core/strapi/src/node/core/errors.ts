@@ -1,5 +1,5 @@
 import boxen from 'boxen';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import os from 'node:os';
 import { errors } from '@strapi/utils';
 
@@ -13,17 +13,21 @@ const isError = (err: unknown): err is Error => err instanceof Error;
  */
 const handleUnexpectedError = (err: unknown) => {
   console.error(
-    chalk.red(
-      `[ERROR] `,
-      'There seems to be an unexpected error, try again with --debug for more information',
-      os.EOL
+    styleText(
+      'red',
+      [
+        `[ERROR] `,
+        'There seems to be an unexpected error, try again with --debug for more information',
+        os.EOL,
+      ].join(' ')
     )
   );
 
   if (isError(err) && err.stack) {
     // eslint-disable-next-line no-console
     console.log(
-      chalk.red(
+      styleText(
+        'red',
         boxen(err.stack, {
           padding: 1,
           align: 'left',
@@ -51,7 +55,8 @@ const handleUnexpectedError = (err: unknown) => {
     }
 
     console.log(
-      chalk.red(
+      styleText(
+        'red',
         boxen(['Details:', message.join('\n\n')].join('\n'), {
           padding: 1,
           align: 'left',

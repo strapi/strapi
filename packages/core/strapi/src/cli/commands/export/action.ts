@@ -1,7 +1,7 @@
 import path from 'path';
 import { isObject, isString, toNumber } from 'lodash';
 import fs from 'fs-extra';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import type { Core } from '@strapi/types';
 
 import {
@@ -149,7 +149,7 @@ export default async (opts: CmdOptions) => {
       console.error('There was an error displaying the results of the transfer.');
     }
 
-    console.log(`Export archive is in ${chalk.green(outFile)}`);
+    console.log(`Export archive is in ${styleText('green', outFile)}`);
     exitWith(0, exitMessageText('export'));
   } catch {
     await strapi.telemetry.send('didDEITSProcessFail', getTransferTelemetryPayload(engine));

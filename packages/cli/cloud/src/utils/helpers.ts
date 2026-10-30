@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { has } from 'lodash';
 
 // TODO: Remove duplicated code by extracting to a shared package
@@ -6,7 +6,8 @@ import { has } from 'lodash';
 const assertCwdContainsStrapiProject = (name: string) => {
   const logErrorAndExit = () => {
     console.log(
-      `You need to run ${chalk.yellow(
+      `You need to run ${styleText(
+        'yellow',
         `strapi ${name}`
       )} in a Strapi project. Make sure you are in the right directory.`
     );

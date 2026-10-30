@@ -43,6 +43,8 @@ describe('codemods task', () => {
   });
 
   (projectFactory as jest.Mock).mockReturnValue({
+    type: 'application',
+    cwd: '/mock/path',
     paths: [],
     dry: jest.fn().mockReturnThis(),
     onSelectCodemods: jest.fn().mockReturnThis(),
