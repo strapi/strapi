@@ -72,7 +72,6 @@
   "pages.ReleaseDetails.groupBy.option.locales": "로케일",
   "pages.ReleaseDetails.groupBy.option.actions": "작업",
   "pages.ReleaseDetails.header-subtitle.scheduled": "{date} {time} ({offset})에 예약됨",
-  "pages.ReleaseDetails.entry-validation.fields": "필드",
   "pages.Settings.releases.description": "콘텐츠 업데이트를 생성하고 관리하세요",
   "pages.Settings.releases.preferences.title": "환경설정",
   "pages.Settings.releases.timezone.label": "기본 시간대",

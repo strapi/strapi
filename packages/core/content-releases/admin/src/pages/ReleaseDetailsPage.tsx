@@ -6,7 +6,6 @@ import {
   Table,
   BackButton,
   ConfirmDialog,
-  useTracking,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
@@ -74,7 +73,7 @@ import {
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
 import { isBaseQueryError } from '../utils/api';
-import { getTimezoneOffset } from '../utils/time';
+import { getReleaseDateParts } from '../utils/time';
 
 import type {
   ReleaseAction,
@@ -104,6 +103,14 @@ const getRunTotals = (release: ReleaseDataResponse) => {
     skipped: release.totalSkippedEntries,
     total: released + release.totalSkippedEntries,
   };
+};
+
+// A run that skipped every entry ran, but released nothing. A release that froze without running
+// (`failureReason`) isn't one: it never ran.
+const hasRunReleasedNothing = (release: ReleaseDataResponse) => {
+  const totals = getRunTotals(release);
+
+  return !release.failureReason && totals !== null && totals.total > 0 && totals.released === 0;
 };
 
 type ReleaseTabValue = 'all' | ReleaseActionFilter;
@@ -208,7 +215,6 @@ const ReleaseDetailsLayout = ({
   const { allowedActions } = useRBAC(PERMISSIONS);
   const { canCreate, canCreateAction, canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
-  const { trackUsage } = useTracking();
   const [isSkippedDrawerOpen, setIsSkippedDrawerOpen] = React.useState(false);
 
   const release = data?.data;
@@ -257,12 +263,6 @@ const ReleaseDetailsLayout = ({
           }),
         });
       }
-
-      trackUsage('didPublishRelease', {
-        totalEntries,
-        totalPublishedEntries,
-        totalUnpublishedEntries,
-      });
     } else if (isBaseQueryError(response.error)) {
       const error = response.error;
       const apiError = formatAPIError(error);
@@ -364,13 +364,17 @@ const ReleaseDetailsLayout = ({
   const getHeaderDate = () => {
     if (release.releasedAt && !release.failureReason) {
       return {
-        message: {
-          id: 'content-releases.pages.ReleaseDetails.header-subtitle.released-on',
-          defaultMessage: 'Released on {date} at {time} ({offset})',
-        },
+        message: hasRunReleasedNothing(release)
+          ? {
+              id: 'content-releases.pages.ReleaseDetails.header-subtitle.ran-on',
+              defaultMessage: 'Ran on {date} at {time} ({offset})',
+            }
+          : {
+              id: 'content-releases.pages.ReleaseDetails.header-subtitle.released-on',
+              defaultMessage: 'Released on {date} at {time} ({offset})',
+            },
         date: new Date(release.releasedAt),
-        // An unscheduled release has no timezone of its own
-        timeZone: release.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timeZone: release.timezone,
       };
     }
 
@@ -390,17 +394,10 @@ const ReleaseDetailsLayout = ({
 
   const headerDate = getHeaderDate();
   const dateText = headerDate
-    ? formatMessage(headerDate.message, {
-        date: formatDate(headerDate.date, {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-          timeZone: headerDate.timeZone,
-        }),
-        time: formatTime(headerDate.date, { timeZone: headerDate.timeZone, hourCycle: 'h23' }),
-        offset: getTimezoneOffset(headerDate.timeZone, headerDate.date),
-      })
+    ? formatMessage(
+        headerDate.message,
+        getReleaseDateParts({ formatDate, formatTime }, headerDate.date, headerDate.timeZone)
+      )
     : '';
 
   // Blocked means running now would release nothing. A stale Ready is still refused by the run,
@@ -592,6 +589,13 @@ const ReleaseSubtitle = ({ release, dateText, numberOfEntriesText }: ReleaseSubt
       return formatMessage({
         id: 'content-releases.pages.ReleaseDetails.ran-empty',
         defaultMessage: 'This release ran with no entries.',
+      });
+    }
+
+    if (hasRunReleasedNothing(release)) {
+      return formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.header-subtitle.nothing-released',
+        defaultMessage: 'Nothing was released',
       });
     }
 

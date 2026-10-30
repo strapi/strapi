@@ -56,7 +56,12 @@ const ReleasesTable = ({ items }: { items: Release[] }) => {
               </Box>
             </Td>
             <Td>
-              <Typography variant="omega" textTransform="capitalize" textColor="neutral600">
+              <Typography
+                variant="omega"
+                // Capitalize the relative date only; the fallback matches the releases list as written
+                textTransform={item.scheduledAt ? 'capitalize' : undefined}
+                textColor="neutral600"
+              >
                 {item.scheduledAt ? (
                   <RelativeTime timestamp={new Date(item.scheduledAt)} />
                 ) : (

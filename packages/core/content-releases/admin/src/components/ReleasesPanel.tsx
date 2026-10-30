@@ -96,14 +96,19 @@ const Panel: PanelComponent = ({
                 variant="pi"
                 textColor={getReleaseColorVariant(release.actions[0].type, '600')}
               >
-                {formatMessage(
-                  {
-                    id: 'content-releases.content-manager-edit-view.list-releases.title',
-                    defaultMessage:
-                      '{isPublish, select, true {Will be published in} other {Will be unpublished in}}',
-                  },
-                  { isPublish: release.actions[0].type === 'publish' }
-                )}
+                {release.actions[0].type === 'publish' && release.actions[0].isEntryValid === false
+                  ? formatMessage({
+                      id: 'content-releases.content-manager-edit-view.list-releases.not-ready',
+                      defaultMessage: 'Not ready to be published in',
+                    })
+                  : formatMessage(
+                      {
+                        id: 'content-releases.content-manager-edit-view.list-releases.title',
+                        defaultMessage:
+                          '{isPublish, select, true {Will be published in} other {Will be unpublished in}}',
+                      },
+                      { isPublish: release.actions[0].type === 'publish' }
+                    )}
               </Typography>
             </Box>
             <Flex padding={4} direction="column" gap={2} width="100%" alignItems="flex-start">

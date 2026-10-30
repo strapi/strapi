@@ -4,7 +4,6 @@ import {
   Filters,
   Page,
   Pagination,
-  useTracking,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
@@ -593,7 +592,6 @@ const ReleasesPage = () => {
   const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
     maximumReleases: number;
   };
-  const { trackUsage } = useTracking();
   const {
     allowedActions: { canCreate },
   } = useRBAC(PERMISSIONS);
@@ -652,7 +650,6 @@ const ReleasesPage = () => {
         }),
       });
 
-      trackUsage('didCreateRelease');
       navigate(response.data.data.id.toString());
     } else if (isBaseQueryError(response.error)) {
       // The API's error, e.g. a pending release already has this name

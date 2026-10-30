@@ -39,10 +39,17 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
 
     // Go back to the homepage
     await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
-    const nextReleaseRow = upcomingReleasesWidget.getByRole('row').nth(1);
+    // Scheduled releases are listed before undated ones
+    const nextReleaseRow = upcomingReleasesWidget.getByRole('row').nth(0);
     await expect(nextReleaseRow).toBeVisible();
     await expect(nextReleaseRow.getByRole('gridcell', { name: nextReleaseName })).toBeVisible();
     await expect(nextReleaseRow.getByRole('gridcell', { name: /empty/i })).toBeVisible();
+    await expect(
+      upcomingReleasesWidget
+        .getByRole('row')
+        .nth(1)
+        .getByRole('gridcell', { name: /trent crimm: the independent/i })
+    ).toBeVisible();
 
     // Add an entry to the release
     await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
