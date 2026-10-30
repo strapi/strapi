@@ -65,6 +65,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Relations](https://contributor.strapi.io/packages/core/content-manager/relations): Conceptual guide to relations in the Content Manager focussing on the technical decisions taken.
 - [Blocks editor](https://contributor.strapi.io/packages/core/content-manager/blocks): The modern JSON-based rich text editor
 - [Live preview](https://contributor.strapi.io/packages/core/content-manager/preview): Frontend-agnostic preview with visual editing
+- [Custom order](https://contributor.strapi.io/packages/core/content-manager/custom-order): Entries arranged by hand in the list view, and returned in that order by the API
 - [useDocumentActions](https://contributor.strapi.io/packages/core/content-manager/hooks/use-document-actions): API reference for the useDocumentActions hook from Strapi's Content Manager
 - [useDocument](https://contributor.strapi.io/packages/core/content-manager/hooks/use-document): API reference for the useDocument hook from Strapi's Content Manager
 - [useDragAndDrop](https://contributor.strapi.io/packages/core/content-manager/hooks/use-drag-and-drop): API reference for the useDragAndDrop hook in Strapi's Content Manager
