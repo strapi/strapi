@@ -1,5 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { unstable_useHasDefaultLocaleEntry as useHasDefaultLocaleEntry } from '@strapi/content-manager/strapi-admin';
 import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';
 import { Earth, Lock } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -157,6 +158,7 @@ const LabelAction = ({ title, icon = 'earth' }: LabelActionProps) => {
 const NonLocalizedLabelAction = ({ title }: Pick<LabelActionProps, 'title'>) => {
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { data: locales = [] } = useGetLocalesQuery();
+  const hasDefaultLocaleEntry = useHasDefaultLocaleEntry();
 
   // History rewrites this title via cloneElement. Honor that copy so the
   // restore-replaces-all-locales warning renders instead of the edit-view lock tooltip.
@@ -168,7 +170,11 @@ const NonLocalizedLabelAction = ({ title }: Pick<LabelActionProps, 'title'>) => 
   const defaultLocale = Array.isArray(locales)
     ? locales.find((locale) => locale.isDefault)?.code
     : undefined;
-  const locked = Boolean(currentLocale && defaultLocale && currentLocale !== defaultLocale);
+  // No Lock when this document has no default-locale entry. The tooltip would
+  // point at an entry that does not exist, and the field stays editable.
+  const locked = Boolean(
+    currentLocale && defaultLocale && currentLocale !== defaultLocale && hasDefaultLocaleEntry
+  );
 
   // Default locale: no icon on shared fields (regression of #24890 if we show Earth).
   // Secondary locale: Lock + tooltip pointing editors at the default locale.

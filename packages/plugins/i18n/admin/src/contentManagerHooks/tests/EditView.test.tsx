@@ -16,11 +16,13 @@ jest.mock('react-router-dom', () => {
 
 // Mock CM hooks used by tests
 const mockUseDocumentLayout = jest.fn(() => ({ edit: undefined as unknown as EditLayout }));
+const mockUseHasDefaultLocaleEntry = jest.fn(() => true);
 jest.mock('@strapi/content-manager/strapi-admin', () => {
   const actual = jest.requireActual('@strapi/content-manager/strapi-admin');
   return {
     ...actual,
     unstable_useDocumentLayout: () => mockUseDocumentLayout(),
+    unstable_useHasDefaultLocaleEntry: () => mockUseHasDefaultLocaleEntry(),
   };
 });
 
@@ -43,6 +45,7 @@ jest.mock('@strapi/admin/strapi-admin', () => {
 
 afterEach(() => {
   jest.clearAllMocks();
+  mockUseHasDefaultLocaleEntry.mockReturnValue(true);
 });
 
 describe('mutateEditViewHook – label action injection and localization', () => {
@@ -194,6 +197,29 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(
       screen.getByText(/This value is common to all locales. Edit it in the default locale./i)
     ).toBeInTheDocument();
+  });
+
+  it('does not show a lock icon when the document has no default-locale entry', () => {
+    const titleField = makeEditField({
+      attribute: { type: 'string', pluginOptions: { i18n: { localized: false } } },
+    });
+
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[titleField]] });
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
+    mockUseHasDefaultLocaleEntry.mockReturnValue(false);
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
+
+    render(action);
+    expect(screen.queryByText(/This value is common to all locales/i)).not.toBeInTheDocument();
   });
 
   it('renders the history restore warning when a shared-field title is rewritten', () => {

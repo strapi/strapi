@@ -240,7 +240,7 @@ describe('useI18nFieldLock', () => {
       expect(result.current).toBe(true);
     });
 
-    it('locks shared fields on create when meta.defaultLocale is missing but locales list is known', () => {
+    it('does not lock shared fields on create when there is no default-locale entry', () => {
       mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
       mockUseDocumentContext.mockReturnValue({
         currentDocument: {
@@ -259,6 +259,52 @@ describe('useI18nFieldLock', () => {
       const { result } = renderHook(() =>
         useShouldLockNonLocalizedField({
           type: 'boolean',
+          pluginOptions: { i18n: { localized: false } },
+        })
+      );
+
+      expect(result.current).toBe(false);
+    });
+
+    it('does not lock shared fields when the document exists only in the secondary locale', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [], defaultLocale: 'en' },
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'boolean',
+          pluginOptions: { i18n: { localized: false } },
+        })
+      );
+
+      expect(result.current).toBe(false);
+    });
+
+    it('locks when meta omits defaultLocale but availableLocales contains the locales-list default', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }] },
+        },
+      });
+      mockUseGetI18nLocalesQuery.mockReturnValue({
+        data: [
+          { code: 'en', isDefault: true },
+          { code: 'fr', isDefault: false },
+        ],
+      });
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'string',
           pluginOptions: { i18n: { localized: false } },
         })
       );
