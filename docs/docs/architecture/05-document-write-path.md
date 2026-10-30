@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - 'Deadlock retry: the outermost transaction runs the handler up to 3 times. Commit callbacks are awaited, a failing callback rejects the call, and a hook failure does not retry the write.'
+  - 'Deadlock retry: the outermost transaction runs the handler at most 3 times in total (up to 2 retries). Commit callbacks are awaited, a failing callback rejects the call, and a hook failure does not retry the write.'
   - 'update locks the document rows with FOR NO KEY UPDATE on Postgres and FOR UPDATE on MySQL. Checked against repository.ts, query-builder.ts and transaction-context.ts.'
   - The webhook runner paragraph describes `contentTypeEvents`. That claim was checked against `webhook-runner.ts` and `webhook-store.ts`. The rest of this page was not re-verified.
 ---
@@ -132,7 +132,7 @@ Database lifecycles run after the entity validator. Data that a `beforeCreate` o
 
 Each public repository method runs inside `strapi.db.transaction()`. The transaction context uses `AsyncLocalStorage`. A nested call reuses the open transaction and does not commit it. Only the outermost call commits or rolls back.
 
-Database lifecycles run inside the transaction. If the transaction rolls back later, a side effect in a lifecycle subscriber, such as an HTTP call, is not undone. A deadlock aborts the transaction and the outermost `strapi.db.transaction` runs the handler again, up to 3 times, with a short wait between tries, so those subscribers can run again too.
+Database lifecycles run inside the transaction. If the transaction rolls back later, a side effect in a lifecycle subscriber, such as an HTTP call, is not undone. A deadlock aborts the transaction and the outermost `strapi.db.transaction` runs the handler again, at most 3 times in total (up to 2 retries), with a short wait between tries, so those subscribers can run again too.
 
 ## Events and webhooks
 

@@ -6,6 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and verified against the code on develop; needs a maintainer review.
   - Knex behavior per dialect was not checked. Open points are how SQLite applies `alterTable` and foreign keys added after `CREATE TABLE`, and whether a failed schema update rolls back on MySQL and MariaDB.
   - No test or local run confirms that user migrations run before internal migrations. The claim comes from the order of the `providers` array in `packages/core/database/src/migrations/index.ts`.
+  - On PostgreSQL, before a removed table is dropped, schema sync drops foreign keys that kept tables are removing or replacing. Checked against `schema/builder.ts` `updateSchema`. This is not `DROP TABLE ... CASCADE`.
 ---
 
 At each boot, Strapi compares the content-type and component schemas with the database and changes the tables to match. This page explains the inputs, the conversion to database metadata, the diff, the hooks around it and the migrations. It also lists what Strapi never does automatically. Read it before you change the schema code of `@strapi/database`, the content-type transform in `@strapi/core`, or a sync hook handler.
@@ -115,7 +116,7 @@ When the status is `CHANGED`, [`schema/builder.ts`](https://github.com/strapi/st
 1. It calls `dialect.startSchemaUpdate()`.
 2. It reads the current indexes and foreign keys of the updated tables. On PostgreSQL, it also reads the current column types. It does this before the transaction. The code comment says this avoids transaction timeouts on PostgreSQL.
 3. In one Knex transaction, it creates the added tables, then their foreign keys. It adds foreign keys after all tables exist, so a foreign key can point to a table that the same run creates.
-4. If `forceMigration` is on, it drops the foreign keys of the removed tables, then the tables.
+4. If `forceMigration` is on, it drops the foreign keys of the removed tables. On PostgreSQL, it then drops foreign keys that kept tables are removing or replacing. A kept table can still reference a table that is about to be dropped, and PostgreSQL refuses that drop while the constraint exists. Strapi removes those foreign keys itself. It does not use `DROP TABLE ... CASCADE`, which would also drop views and constraints Strapi does not manage. It then drops the removed tables.
 5. For each updated table, it drops foreign keys, drops indexes, drops columns, alters columns, adds columns, and then recreates the indexes and foreign keys. It drops foreign keys first to avoid foreign key errors when columns change.
 6. It calls `dialect.endSchemaUpdate()`.
 
