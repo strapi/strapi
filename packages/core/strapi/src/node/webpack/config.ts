@@ -16,7 +16,7 @@ import { getUserConfig } from '../core/config';
 import { getLinkedDesignSystemPath } from '../core/linked-packages';
 import { getMonorepoAliases } from '../core/aliases';
 import { getModulePath } from '../core/resolve-module';
-import { buildSingletonAliasEntries } from '../core/admin-vite-aliases';
+import { buildSingletonAliasEntries, getSubpathEntries } from '../core/admin-vite-aliases';
 
 // esbuild's support table does not recognize current browserslist versions, so the
 // intersection of those targets is reported as missing arbitrary module namespace
@@ -67,6 +67,10 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
         'styled-components': getModulePath('styled-components'),
         'react-router-dom': getModulePath('react-router-dom'),
         // Force single instance so plugin custom field chunks inherit root DesignSystemProvider context
+        // Exact `$` keys reach each exports subpath; the bare key matches subpath imports, so it comes last
+        ...Object.fromEntries(
+          getSubpathEntries('@strapi/design-system').map(([key, file]) => [`${key}$`, file])
+        ),
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         // Force a single CodeMirror instance (resolved from design-system's closure) so the JSON
         // custom field does not crash on cross-copy instanceof checks. Tolerant: unresolvable

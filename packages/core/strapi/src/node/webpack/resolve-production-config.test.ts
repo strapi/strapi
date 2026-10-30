@@ -8,8 +8,15 @@ import { webpack, type Configuration, type DefinePlugin, type Stats } from 'webp
 
 import tailwindcss from '@tailwindcss/postcss';
 
-import { mergeConfigWithUserConfig, resolveProductionConfig } from './config';
+import {
+  mergeConfigWithUserConfig,
+  resolveDevelopmentConfig,
+  resolveProductionConfig,
+} from './config';
 import type { BuildContext } from '../create-build-context';
+import { getSubpathEntries } from '../core/admin-vite-aliases';
+import { getMonorepoAliases } from '../core/aliases';
+import { loadStrapiMonorepo } from '../core/monorepo';
 
 jest.mock('@tailwindcss/postcss', () => ({
   __esModule: true,
@@ -160,6 +167,42 @@ describe('Webpack admin configuration', () => {
       NODE_ENV: 'production',
     });
   });
+
+  // Webpack takes the first matching key. A bare key `x` matches `x` and `x/…`, a key `x$` only `x`
+  it.each([
+    ['production', resolveProductionConfig, false],
+    ['development', resolveDevelopmentConfig, true],
+  ])(
+    'aliases every design system export subpath in the %s config, with no key shadowed',
+    async (_, resolveConfig, withMonorepo) => {
+      const config = await resolveConfig(createContext({ minify: true, sourcemap: false }));
+      const aliasOption = config.resolve?.alias;
+      const alias = aliasOption && !Array.isArray(aliasOption) ? aliasOption : {};
+      const keys = Object.keys(alias);
+      const matches = (key: string, request: string) =>
+        key.endsWith('$')
+          ? request === key.slice(0, -1)
+          : request === key || request.startsWith(`${key}/`);
+
+      const entries = getSubpathEntries('@strapi/design-system');
+      expect(entries.length).toBeGreaterThan(0);
+
+      for (const [key, file] of entries) {
+        expect(alias[`${key}$`]).toBe(file);
+      }
+
+      const monorepoAliases = withMonorepo
+        ? getMonorepoAliases({ monorepo: await loadStrapiMonorepo(process.cwd()) })
+        : {};
+      expect(Object.keys(monorepoAliases).length > 0).toBe(withMonorepo);
+      expect(alias).toMatchObject(monorepoAliases);
+
+      keys.forEach((key, index) => {
+        const request = key.replace(/\$$/, '');
+        expect(keys.slice(0, index).filter((earlier) => matches(earlier, request))).toEqual([]);
+      });
+    }
+  );
 
   // The Content-Type Builder bundles micromatch, whose picomatch reads `process.platform` on load.
   it('bundles micromatch so it runs without a `process` global', async () => {
