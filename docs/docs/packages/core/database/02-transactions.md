@@ -27,6 +27,8 @@ await strapi.db.transaction(async ({ trx, rollback, commit, onCommit, onRollback
 
 After the transaction handler is executed, the transaction is committed if all operations succeed. If any of the operations throws, the transaction is rolled back and the data is restored to its previous state.
 
+Postgres and MySQL abort a transaction on deadlock and require the caller to run it again. A top-level `strapi.db.transaction` runs the handler at most 3 times in total (up to 2 retries), waiting briefly between tries. An error counts as a deadlock when its code is `40P01` or `ER_LOCK_DEADLOCK`, or its errno is 1213, including on a nested `original` or `cause`. A driver error that kept the SQL text and the deadlock message counts too. A plain error that only mentions a deadlock does not. The handler can therefore run more than once, and it must be safe to repeat: database work from the failed attempt has been rolled back, but other side effects (an email, an HTTP call) have not. Do that kind of work in `onCommit`. Nested `strapi.db.transaction` calls are not retried on their own; the outermost handler runs again. `onCommit` and `onRollback` callbacks are awaited in order before `strapi.db.transaction` resolves. A callback that throws or rejects makes `strapi.db.transaction` reject with that error, and the remaining callbacks do not run. `onCommit` runs once, after a successful commit, and is never retried. `onRollback` runs after every rolled-back attempt, and a failure there cancels the remaining retries.
+
 :::note
 Every `strapi.db.query` operation performed in a transaction block will implicitly use the transaction.
 :::
@@ -91,7 +93,9 @@ await strapi.db.transaction(async ({ trx, rollback, commit }) => {
 
 ## When to use transactions
 
-Transactions should be used in cases where multiple operations should be executed together and their execution is dependent on each other. For example, when creating a new user, the user should be created in the database and a welcome email should be sent to the user. If the email fails to send, the user should not be created in the database.
+Transactions should be used when several database operations must succeed or fail together. For example, creating a user and the profile row that belongs to them. If creating the profile throws, the user insert is rolled back too.
+
+A side effect that must not repeat, such as a welcome email, does not belong in the handler. The handler can run more than once after a deadlock. Register the email with `onCommit`. It is sent once, after the commit. If the handler fails, the email is not sent. If the email fails, the user row stays, because the commit has already happened.
 
 ## When not to use transactions
 

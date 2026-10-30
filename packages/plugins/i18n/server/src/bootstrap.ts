@@ -1,6 +1,7 @@
 import type { Schema } from '@strapi/types';
 import { isEqual } from 'lodash';
 import { registerAuditEvents } from './audit-logs';
+import { localeForOriginalLookup } from './services/original-locale';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
@@ -32,14 +33,40 @@ const registerModelsHooks = () => {
       getService('content-types');
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
 
-    // Get original data before the update to compare what actually changed
-    const originalData =
+    // Compare the draft of the locale being changed. An unscoped findOne can
+    // return the published row or another locale; Postgres does not keep
+    // SQLite's insertion order, so discard then looked unchanged and skipped
+    // syncing non-localized fields. `*` is not a stored locale, so a wildcard
+    // discard stays unscoped and still limited to the draft row.
+    const locale = localeForOriginalLookup(context.params.locale);
+    const documentId =
       'documentId' in context.params && context.params.documentId
-        ? await strapi.db.query(schema.uid).findOne({
-            where: { documentId: context.params.documentId },
-            populate: attributesToPopulate,
-          })
-        : null;
+        ? context.params.documentId
+        : undefined;
+    const draftOnly = schema.options?.draftAndPublish ? { publishedAt: { $null: true } } : {};
+    let originalData = documentId
+      ? await strapi.db.query(schema.uid).findOne({
+          where: {
+            documentId,
+            ...(locale ? { locale } : {}),
+            ...draftOnly,
+          },
+          populate: attributesToPopulate,
+        })
+      : null;
+
+    // A new locale has no row yet. Compare a sibling draft so copied
+    // non-localized values do not count as a change and rewrite every locale.
+    if (!originalData && documentId && locale) {
+      originalData = await strapi.db.query(schema.uid).findOne({
+        where: {
+          documentId,
+          locale: { $ne: locale },
+          ...draftOnly,
+        },
+        populate: attributesToPopulate,
+      });
+    }
 
     // Get the result of the document service action
     const result = (await next()) as any;

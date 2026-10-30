@@ -13,6 +13,16 @@ export interface SessionProvider {
     status?: SessionData['status'];
   }): Promise<SessionData[]>;
   updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void>;
+  /**
+   * Atomically mark an active session rotated and point it at `childId`.
+   * Returns false when another request already claimed the session.
+   */
+  claimRotation(sessionId: string, childId: string): Promise<boolean>;
+  /**
+   * Run `fn` in one database transaction. Custom providers can omit this.
+   * The database provider uses it so a failed child insert restores the parent.
+   */
+  runInTransaction?<T>(fn: () => Promise<T>): Promise<T>;
   deleteBySessionId(sessionId: string): Promise<void>;
   deleteExpired(): Promise<void>;
   deleteBy(criteria: { userId?: string; origin?: string; deviceId?: string }): Promise<void>;
@@ -109,6 +119,21 @@ class DatabaseSessionProvider implements SessionProvider {
 
   async updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void> {
     await this.db.query(this.contentType).update({ where: { sessionId }, data });
+  }
+
+  async claimRotation(sessionId: string, childId: string): Promise<boolean> {
+    const result = await this.db.query(this.contentType).updateMany({
+      where: { sessionId, status: 'active' },
+      data: { status: 'rotated', childId },
+    });
+
+    return result?.count === 1;
+  }
+
+  runInTransaction<T>(fn: () => Promise<T>): Promise<T> {
+    // The declared return type wraps the callback result in a second Promise.
+    // The implementation returns the callback's value.
+    return this.db.transaction(fn) as Promise<T>;
   }
 
   async deleteBySessionId(sessionId: string): Promise<void> {
@@ -671,24 +696,42 @@ class SessionManager {
         return { error: 'max_window_elapsed' };
       }
 
-      // Create child token
+      // Claim the parent before inserting the child. Two overlapping exchanges
+      // otherwise both observe status=active and both return a new token.
+      // Both writes share one transaction when the provider has one, so a
+      // failed insert leaves the parent active and the client can retry.
       const childSessionId = this.generateSessionId();
       const childExpiresAt = new Date(now + idleLifespan * 1000);
 
-      const childRecord = await this.provider.create({
-        userId: current.userId,
-        sessionId: childSessionId,
-        ...(current.deviceId && { deviceId: current.deviceId }),
-        origin: current.origin,
-        childId: null,
-        type: tokenType,
-        status: 'active',
-        // Preserve origin-defined metadata (e.g. deviceName, loginAt) across rotation so the
-        // active record always reflects the original session details.
-        ...(current.metadata ? { metadata: current.metadata } : {}),
-        expiresAt: childExpiresAt,
-        absoluteExpiresAt: current.absoluteExpiresAt ?? new Date(absolute),
-      });
+      const claimAndCreate = async () => {
+        const claimed = await this.provider.claimRotation(current.sessionId, childSessionId);
+        if (!claimed) {
+          return null;
+        }
+
+        return this.provider.create({
+          userId: current.userId,
+          sessionId: childSessionId,
+          ...(current.deviceId && { deviceId: current.deviceId }),
+          origin: current.origin,
+          childId: null,
+          type: tokenType,
+          status: 'active',
+          // Preserve origin-defined metadata (e.g. deviceName, loginAt) across rotation so the
+          // active record always reflects the original session details.
+          ...(current.metadata ? { metadata: current.metadata } : {}),
+          expiresAt: childExpiresAt,
+          absoluteExpiresAt: current.absoluteExpiresAt ?? new Date(absolute),
+        });
+      };
+
+      const childRecord = this.provider.runInTransaction
+        ? await this.provider.runInTransaction(claimAndCreate)
+        : await claimAndCreate();
+
+      if (!childRecord) {
+        return { error: 'invalid_refresh_token' };
+      }
 
       const childIat = Math.floor(new Date(childRecord.createdAt ?? new Date()).getTime() / 1000);
       const childExp = Math.floor(new Date(childRecord.expiresAt).getTime() / 1000);
@@ -704,11 +747,6 @@ class SessionManager {
         algorithm,
         noTimestamp: true,
         ...jwtSignOptions,
-      });
-
-      await this.provider.updateBySessionId(current.sessionId, {
-        status: 'rotated',
-        childId: childSessionId,
       });
 
       let absoluteExpiresAt;

@@ -38,4 +38,15 @@ export class Container implements Core.Container {
 
     throw new Error(`Could not resolve service ${name}`);
   }
+
+  /**
+   * Drop registered services so a destroyed instance can be collected.
+   * API tests keep the instance reference after destroy(); the service map
+   * otherwise retains every plugin, schema, and database object for the
+   * whole Jest process.
+   */
+  release() {
+    this.registerMap.clear();
+    this.serviceMap.clear();
+  }
 }

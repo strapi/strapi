@@ -4,6 +4,7 @@ description: How the Strapi container stores core subsystems, how registries sto
 status: draft
 review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
+  - '`release()` clears the container on `Strapi.destroy()`. Checked against `container.ts` and `Strapi.ts`.'
   - The container key list reflects releases/5.56.0. It changes when a provider or an internal service is added.
 ---
 
@@ -11,13 +12,16 @@ The `Strapi` instance is a container. The container holds core subsystems and re
 
 ## The container
 
-`Strapi` extends `Container`. The container is a small service locator with three methods.
+`Strapi` extends `Container`. The container is a small service locator with four methods.
 
 | Method                | Behavior                                                                                                                                                                                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `add(name, resolver)` | Stores the resolver under `name`. Throws `Cannot register already registered service <name>` if `name` exists. Returns the container, so calls can chain.                                                                                                                                  |
 | `get(name, args?)`    | Returns the cached value if `name` was resolved before. Otherwise, if the resolver is a function, calls `resolver(container, args)` once and caches the result. If the resolver is not a function, caches it as the value. Throws `Could not resolve service <name>` if `name` is unknown. |
 | `has(name)`           | Returns `true` if `name` is registered or resolved.                                                                                                                                                                                                                                        |
+| `release()`           | Clears every registered and resolved service. A later `get(name)` throws `Could not resolve service <name>`.                                                                                                                                                                               |
+
+`Strapi.destroy()` calls `release()` after the database closes, then registers `logger` and `telemetry` again. A second `destroy()` returns immediately. `get()` for any other service throws after the first destroy.
 
 The container has no `set` and no `remove`. After `add`, nothing can replace an entry. Every resolved value is a singleton. A `TODO` comment in `container.ts` notes that there is no per-call instantiation.
 

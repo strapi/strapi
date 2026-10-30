@@ -10,7 +10,14 @@ import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
-import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import {
+  Callback,
+  isDeadlockError,
+  isTransactionHookError,
+  transactionCtx,
+  TransactionObject,
+  waitForDeadlockRetry,
+} from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
@@ -247,6 +254,39 @@ class Database {
   transaction(): Promise<TransactionObject>;
   transaction<TCallback extends Callback>(c: TCallback): Promise<ReturnType<TCallback>>;
   async transaction<TCallback extends Callback>(
+    cb?: TCallback
+  ): Promise<ReturnType<TCallback> | TransactionObject> {
+    // Postgres and MySQL abort one transaction when two of them deadlock, and
+    // the caller has to run it again. Nested work is not retried on its own:
+    // the outer transaction is already aborted, so the outermost callback
+    // runs again. A commit or rollback hook that fails is not retried: the
+    // transaction is already finalised when it runs.
+    const nested = !!transactionCtx.get();
+    const attempts = nested ? 1 : 3;
+
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        return await this.runTransaction(cb);
+      } catch (error) {
+        lastError = error;
+        if (
+          nested ||
+          attempt === attempts ||
+          isTransactionHookError(error) ||
+          !isDeadlockError(error)
+        ) {
+          throw error;
+        }
+
+        await waitForDeadlockRetry(attempt);
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async runTransaction<TCallback extends Callback>(
     cb?: TCallback
   ): Promise<ReturnType<TCallback> | TransactionObject> {
     const notNestedTransaction = !transactionCtx.get();

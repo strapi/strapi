@@ -39,10 +39,12 @@ describe('SessionManager JWT Configuration', () => {
       delete: vi.fn(),
       deleteMany: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     };
 
     mockDb = {
       query: vi.fn().mockReturnValue(mockQuery),
+      transaction: vi.fn(async (fn: () => Promise<unknown>) => fn()),
     };
 
     // Mock database query to return valid session data
