@@ -1,6 +1,7 @@
 import { errors } from '@strapi/utils';
 
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
+import type { ParameterizedContext } from 'koa';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import { RELEASED_OUTCOME_BY_TYPE } from '../../../shared/constants';
@@ -138,13 +139,60 @@ export const createReleaseRun = ({
     return [...actions].sort((a, b) => rank(a) - rank(b));
   };
 
-  const releaseEntry = async (action: ReleaseAction) => {
+  // With `server.webhooks.deduplicateReleaseWebhooks`, the entry is released in a request context
+  // that marks it as part of the release, so webhooks subscribed to `releases.publish` skip its
+  // entry event
+  const runReleaseAction = async (
+    releaseId: Release['id'],
+    releaseAction: Modules.WebhookRunner.ReleaseAction,
+    work: () => Promise<void>
+  ) => {
+    const deduplicateReleaseWebhooks =
+      strapi.config.get<boolean>('server.webhooks.deduplicateReleaseWebhooks', false) === true;
+    if (!deduplicateReleaseWebhooks) {
+      return work();
+    }
+
+    const locale = strapi.localization.isLocalizedContentType(
+      strapi.contentTypes[releaseAction.uid]
+    )
+      ? releaseAction.locale || (await strapi.localization.getDefaultLocale())
+      : undefined;
+    const context = strapi.requestContext.get();
+
+    return strapi.requestContext.run(
+      {
+        ...context,
+        request: context?.request ?? { url: '' },
+        state: {
+          ...context?.state,
+          releaseId,
+          releaseAction: { ...releaseAction, locale: locale ?? undefined },
+        },
+      } as ParameterizedContext,
+      work
+    );
+  };
+
+  const releaseEntry = async (releaseId: Release['id'], action: ReleaseAction) => {
     const params = { documentId: action.entryDocumentId, locale: action.locale };
 
     if (action.type === 'publish') {
-      await strapi.documents(action.contentType).publish(params);
+      await runReleaseAction(
+        releaseId,
+        { uid: action.contentType, ...params, event: 'entry.publish' },
+        async () => {
+          await strapi.documents(action.contentType).publish(params);
+        }
+      );
     } else {
-      await strapi.documents(action.contentType).unpublish(params);
+      await runReleaseAction(
+        releaseId,
+        { uid: action.contentType, ...params, event: 'entry.unpublish' },
+        async () => {
+          await strapi.documents(action.contentType).unpublish(params);
+        }
+      );
     }
   };
 
@@ -212,14 +260,14 @@ export const createReleaseRun = ({
   // published version restored, and the others still go out. Not after a MySQL deadlock: it
   // rolled back the whole run, so the run fails with it and records nothing.
   const releaseEachEntry = async (
-    releaseName: string,
+    release: Pick<Release, 'id' | 'name'>,
     actions: ReleaseAction[],
     outcomes: Outcomes
   ) => {
     // Serialized: concurrent publishes of related documents can race on shared join tables
     for (const action of actions) {
       try {
-        await strapi.db.savepoint(() => releaseEntry(action));
+        await strapi.db.savepoint(() => releaseEntry(release.id, action));
         outcomes.set(action.id, getReleasedOutcome(action));
       } catch (actionError) {
         if (isMySqlDeadlock(actionError)) {
@@ -227,7 +275,7 @@ export const createReleaseRun = ({
         }
         outcomes.set(action.id, getErrorOutcome(actionError));
         strapi.log.warn(
-          `[Content Releases] Release ${releaseName}: skipped an entry that failed to ${action.type} (${getErrorName(actionError)})`
+          `[Content Releases] Release ${release.name}: skipped an entry that failed to ${action.type} (${getErrorName(actionError)})`
         );
       }
     }
@@ -236,6 +284,7 @@ export const createReleaseRun = ({
   // `all_or_nothing`: one savepoint for every entry, so the first error rolls back the ones
   // before it. Returns that error, unless it's a MySQL deadlock, which rolled back the whole run.
   const releaseAllEntries = async (
+    releaseId: Release['id'],
     actions: ReleaseAction[],
     outcomes: Outcomes
   ): Promise<{ error: unknown } | null> => {
@@ -244,7 +293,7 @@ export const createReleaseRun = ({
       await strapi.db.savepoint(async () => {
         for (const action of actions) {
           inFlight = action;
-          await releaseEntry(action);
+          await releaseEntry(releaseId, action);
           inFlight = undefined;
         }
       });
@@ -354,9 +403,9 @@ export const createReleaseRun = ({
     const releasable = actions.filter((action) => !outcomes.has(action.id));
 
     if (allowPartial) {
-      await releaseEachEntry(release.name, releasable, outcomes);
+      await releaseEachEntry({ id: releaseId, name: release.name }, releasable, outcomes);
     } else {
-      const failure = await releaseAllEntries(releasable, outcomes);
+      const failure = await releaseAllEntries(releaseId, releasable, outcomes);
       if (failure) {
         holdUnrecorded(actions, outcomes);
         return fail(failure.error);
