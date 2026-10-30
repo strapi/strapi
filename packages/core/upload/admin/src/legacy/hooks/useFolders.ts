@@ -20,7 +20,10 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const { folder, _q, ...paramsExceptFolderAndQ } = query;
+  // The modal and the legacy list page carry `page`/`pageSize` for their files,
+  // but this hook wants every folder of the location. GET /upload/folders only
+  // paginates when those two are sent, so they must not be forwarded.
+  const { folder, _q, page: _page, pageSize: _pageSize, ...paramsExceptFolderAndQ } = query;
   const { get } = useFetchClient();
 
   let params: Query;
@@ -28,17 +31,11 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
   if (_q) {
     params = {
       ...paramsExceptFolderAndQ,
-      pagination: {
-        pageSize: -1,
-      },
       _q,
     };
   } else {
     params = {
       ...paramsExceptFolderAndQ,
-      pagination: {
-        pageSize: -1,
-      },
       filters: {
         $and: [
           ...(paramsExceptFolderAndQ?.filters?.$and ?? []),

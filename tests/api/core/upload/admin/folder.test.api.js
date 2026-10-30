@@ -247,6 +247,150 @@ describe('Folder', () => {
         ])
       );
     });
+
+    test('Returns every folder and no pagination metadata unless a page is requested', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { sort: 'id:ASC' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.pagination).toBeUndefined();
+      expect(res.body.data.length).toBeGreaterThanOrEqual(data.folders.length);
+    });
+
+    test('Can read folders page by page', async () => {
+      const all = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { sort: 'id:ASC' },
+      });
+      const total = all.body.data.length;
+
+      const firstPage = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 1, pageSize: 1, sort: 'id:ASC' },
+      });
+
+      expect(firstPage.statusCode).toBe(200);
+      expect(firstPage.body.data).toEqual([all.body.data[0]]);
+      expect(firstPage.body.pagination).toEqual({ page: 1, pageSize: 1, pageCount: total, total });
+
+      const secondPage = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 2, pageSize: 1, sort: 'id:ASC' },
+      });
+
+      expect(secondPage.statusCode).toBe(200);
+      expect(secondPage.body.data).toEqual([all.body.data[1]]);
+      expect(secondPage.body.pagination).toEqual({ page: 2, pageSize: 1, pageCount: total, total });
+    });
+
+    test('Can paginate a folder search', async () => {
+      // Both fixture folders ('folder 1', 'folder-2') match, so a page of 1
+      // proves that `total` counts the matches rather than the page.
+      const all = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { _q: 'folder', sort: 'id:ASC' },
+      });
+      const total = all.body.data.length;
+
+      expect(total).toBeGreaterThanOrEqual(2);
+
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { _q: 'folder', page: 1, pageSize: 1, sort: 'id:ASC' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toEqual([all.body.data[0]]);
+      expect(res.body.pagination).toEqual({ page: 1, pageSize: 1, pageCount: total, total });
+    });
+
+    test('Rejects an invalid pageSize', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 1, pageSize: -1 },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Rejects a pageSize or offset past the safe integer range', async () => {
+      const hugePageSize = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 1, pageSize: '99999999999999999999' },
+      });
+
+      expect(hugePageSize.statusCode).toBe(400);
+      expect(hugePageSize.body.error.name).toBe('PaginationError');
+
+      const hugeOffset = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 1000000000, pageSize: 1000000000 },
+      });
+
+      expect(hugeOffset.statusCode).toBe(400);
+      expect(hugeOffset.body.error.name).toBe('PaginationError');
+    });
+
+    test('Can slice folders with start and limit, without pagination metadata', async () => {
+      const all = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { sort: 'id:ASC' },
+      });
+
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { start: 1, limit: 1, sort: 'id:ASC' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toEqual([all.body.data[1]]);
+      expect(res.body.pagination).toBeUndefined();
+    });
+
+    test('Rejects a limit or start past the safe integer range', async () => {
+      const hugeLimit = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { limit: '99999999999999999999' },
+      });
+
+      expect(hugeLimit.statusCode).toBe(400);
+      expect(hugeLimit.body.error.name).toBe('PaginationError');
+
+      const hugeStart = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { start: '99999999999999999999', limit: 1 },
+      });
+
+      expect(hugeStart.statusCode).toBe(400);
+      expect(hugeStart.body.error.name).toBe('PaginationError');
+    });
+
+    test('Returns an empty page for a large offset within range', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: { page: 100000, pageSize: 100000 },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toEqual([]);
+      expect(res.body.pagination).toMatchObject({ page: 100000, pageSize: 100000 });
+    });
   });
 
   describe('update', () => {
