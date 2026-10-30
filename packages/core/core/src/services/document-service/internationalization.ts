@@ -151,9 +151,14 @@ const normalizeMediaIds = (
 export type CopyNonLocalizedFieldsOptions = {
   /**
    * Which publication status to copy from. Locale insert of a draft must not
-   * pick an older published row.
+   * pick an older published row; first publish of a locale must not pick the draft.
    */
   status?: 'draft' | 'published';
+  /**
+   * `fill` inherits only unset/empty shared fields (create-locale).
+   * `replace` overwrites shared fields from the sibling (first publish of a locale).
+   */
+  strategy?: 'fill' | 'replace';
 };
 
 const statusWhere = (
@@ -182,6 +187,7 @@ const copyNonLocalizedFields = async (
   }
 
   const status = options.status ?? 'draft';
+  const strategy = options.strategy ?? 'fill';
 
   // Select the default-locale sibling of the status being written. Ordering by
   // publishedAt is database-dependent because drafts store NULL.
@@ -211,6 +217,17 @@ const copyNonLocalizedFields = async (
 
   if (!existingEntry) {
     return dataToCreate;
+  }
+
+  if (strategy === 'replace') {
+    // The localization provider fills only unset fields. Copy onto an empty
+    // object, then overlay, so a first publish replaces draft shared values
+    // with the published sibling without a separate copy API.
+    const copied: Record<string, any> = {};
+    strapi.localization.fillNonLocalizedAttributes(copied, existingEntry, {
+      model: contentType.uid,
+    });
+    return normalizeMediaIds(contentType, { ...dataToCreate, ...copied });
   }
 
   const mergedData = { ...dataToCreate };

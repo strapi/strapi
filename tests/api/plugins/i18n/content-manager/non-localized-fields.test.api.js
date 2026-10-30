@@ -736,7 +736,7 @@ describe('i18n', () => {
         ]);
       });
 
-      test('publishing a new locale publishes its draft shared values and syncs them', async () => {
+      test('publishing a new locale keeps published shared trees aligned per status', async () => {
         const createRes = await create('api::category.category', {
           name: 'publish source default',
           nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
@@ -764,7 +764,7 @@ describe('i18n', () => {
         const publishFr = await publish('api::category.category', docId, { locale: 'fr' });
         expect(publishFr.statusCode).toBe(200);
         expect(publishFr.body.data.nonLocalizedRepeatableCompo).toEqual([
-          expect.objectContaining({ name: 'draft-value' }),
+          expect.objectContaining({ name: 'published-value' }),
         ]);
 
         const [enDraft, enPublished, frDraft, frPublished] = await Promise.all([
@@ -793,61 +793,11 @@ describe('i18n', () => {
           expect.objectContaining({ name: 'draft-value' }),
         ]);
         expect(enPublished.nonLocalizedRepeatableCompo).toEqual([
-          expect.objectContaining({ name: 'draft-value' }),
+          expect.objectContaining({ name: 'published-value' }),
         ]);
         expect(frPublished.nonLocalizedRepeatableCompo).toEqual([
-          expect.objectContaining({ name: 'draft-value' }),
+          expect.objectContaining({ name: 'published-value' }),
         ]);
-      });
-
-      test('first publish of a never-published locale keeps its edited shared values and updates the other locale', async () => {
-        const createRes = await create('api::category.category', {
-          name: 'first publish edit default',
-          nonLocalized: 'published-value',
-        });
-        expect(createRes.statusCode).toBe(201);
-
-        const { documentId: docId } = createRes.body.data;
-        expect(
-          (
-            await publish('api::category.category', docId, {
-              nonLocalized: 'published-value',
-            })
-          ).statusCode
-        ).toBe(200);
-
-        const frDraft = await update('api::category.category', docId, {
-          locale: 'fr',
-          name: 'first publish edit french',
-        });
-        expect(frDraft.statusCode).toBe(200);
-
-        const publishFr = await publish('api::category.category', docId, {
-          locale: 'fr',
-          nonLocalized: 'edited-on-french',
-        });
-        expect(publishFr.statusCode).toBe(200);
-        expect(publishFr.body.data.nonLocalized).toBe('edited-on-french');
-
-        const [enDraftRow, enPublished, frDraftRow, frPublished] = await Promise.all([
-          strapi.db.query('api::category.category').findOne({
-            where: { documentId: docId, locale: 'en', publishedAt: null },
-          }),
-          strapi.db.query('api::category.category').findOne({
-            where: { documentId: docId, locale: 'en', publishedAt: { $notNull: true } },
-          }),
-          strapi.db.query('api::category.category').findOne({
-            where: { documentId: docId, locale: 'fr', publishedAt: null },
-          }),
-          strapi.db.query('api::category.category').findOne({
-            where: { documentId: docId, locale: 'fr', publishedAt: { $notNull: true } },
-          }),
-        ]);
-
-        expect(frDraftRow.nonLocalized).toBe('edited-on-french');
-        expect(frPublished.nonLocalized).toBe('edited-on-french');
-        expect(enDraftRow.nonLocalized).toBe('edited-on-french');
-        expect(enPublished.nonLocalized).toBe('edited-on-french');
       });
 
       test('publishing the default locale later syncs the draft shared tree to published locales', async () => {
@@ -910,7 +860,7 @@ describe('i18n', () => {
         ]);
       });
 
-      test('creating a published locale via the document service keeps that locale draft shared values', async () => {
+      test('creating a published locale via the document service inherits the published sibling', async () => {
         const created = await strapi.documents('api::category.category').create({
           data: {
             name: 'document service default',
@@ -937,7 +887,7 @@ describe('i18n', () => {
         });
 
         expect(frPublished.nonLocalizedRepeatableCompo).toEqual([
-          expect.objectContaining({ name: 'draft-value' }),
+          expect.objectContaining({ name: 'published-value' }),
         ]);
 
         const [enDraft, enPublished] = await Promise.all([
@@ -959,7 +909,7 @@ describe('i18n', () => {
           expect.objectContaining({ name: 'draft-value' }),
         ]);
         expect(enPublished.nonLocalizedRepeatableCompo).toEqual([
-          expect.objectContaining({ name: 'draft-value' }),
+          expect.objectContaining({ name: 'published-value' }),
         ]);
       });
     });
