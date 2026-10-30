@@ -1,8 +1,15 @@
+import * as React from 'react';
+
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../../../constants';
-import { AssetDetails, AssetDetailsDrawer, getBusyMessage } from '../AssetDetailsDrawer';
+import {
+  AssetDetails,
+  AssetDetailsDrawer,
+  AssetDetailsDrawerFromUrl,
+  getBusyMessage,
+} from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
 
@@ -206,8 +213,9 @@ describe('AssetDetails (asset details drawer body)', () => {
     expect(fileInfo.folder).toBeNull();
   });
 
-  it('deletes the asset, closes the drawer, and toasts the parent folder name', async () => {
+  it('deletes the asset, reports it, closes the drawer, and toasts the parent folder name', async () => {
     const closeDetails = jest.fn();
+    const onAssetDelete = jest.fn();
     const assetInFolder = { ...baseAsset, folder: 2 };
     let deleteId: string | null = null;
     server.use(
@@ -217,7 +225,13 @@ describe('AssetDetails (asset details drawer body)', () => {
       })
     );
 
-    const { user } = render(<AssetDetails asset={assetInFolder} closeDetails={closeDetails} />);
+    const { user } = render(
+      <AssetDetails
+        asset={assetInFolder}
+        closeDetails={closeDetails}
+        onAssetDelete={onAssetDelete}
+      />
+    );
 
     // Wait for folders query so the toast can resolve the folder name.
     await screen.findByRole('combobox');
@@ -231,6 +245,7 @@ describe('AssetDetails (asset details drawer body)', () => {
 
     await waitFor(() => expect(deleteId).toBe('1'));
     await waitFor(() => expect(closeDetails).toHaveBeenCalledTimes(1));
+    expect(onAssetDelete).toHaveBeenCalledWith(1);
   });
 
   it('deletes the asset currently shown after the drawer switches assets', async () => {
@@ -732,6 +747,298 @@ describe('icon button tooltips', () => {
 });
 
 /* -------------------------------------------------------------------------------------------------
+ * Controlled drawer
+ * -----------------------------------------------------------------------------------------------*/
+
+describe('AssetDetailsDrawer (controlled)', () => {
+  beforeEach(() => {
+    server.use(
+      buildFoldersHandler(),
+      buildSettingsHandler(),
+      http.get('/upload/files/:id', ({ params }) =>
+        HttpResponse.json(
+          params.id === '2'
+            ? { ...baseAsset, id: 2, name: 'other.png', url: '/uploads/other.png' }
+            : baseAsset
+        )
+      )
+    );
+  });
+
+  // No `?assetId=` in the URL: the prop alone drives it.
+  it('opens on the given asset', async () => {
+    render(<AssetDetailsDrawer assetId={1} onClose={jest.fn()} />);
+
+    expect(await screen.findByRole('dialog')).toHaveAttribute('data-state', 'open');
+    expect(await screen.findByRole('heading', { name: 'photo.png' })).toBeInTheDocument();
+  });
+
+  // jsdom runs no slide-out, so the portal drops the closed panel at once.
+  it('closes once the parent clears the asset', async () => {
+    const { rerender } = render(<AssetDetailsDrawer assetId={1} onClose={jest.fn()} />);
+
+    await screen.findByRole('dialog');
+
+    rerender(<AssetDetailsDrawer assetId={null} onClose={jest.fn()} />);
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('switches to another asset when the parent changes it', async () => {
+    const { rerender } = render(<AssetDetailsDrawer assetId={1} onClose={jest.fn()} />);
+
+    await screen.findByRole('heading', { name: 'photo.png' });
+
+    rerender(<AssetDetailsDrawer assetId={2} onClose={jest.fn()} />);
+
+    expect(await screen.findByRole('heading', { name: 'other.png' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * Focus on close
+ * -----------------------------------------------------------------------------------------------*/
+
+describe('AssetDetailsDrawer focus on close', () => {
+  beforeEach(() => {
+    server.use(
+      buildFoldersHandler(),
+      buildSettingsHandler(),
+      http.get('/upload/files/:id', () => HttpResponse.json(baseAsset))
+    );
+  });
+
+  // Stands in for a host: a button that opens the drawer, as a card or a
+  // field's edit button does.
+  const Host = () => {
+    const [assetId, setAssetId] = React.useState<number | null>(null);
+
+    return (
+      <>
+        <button type="button" onClick={() => setAssetId(1)}>
+          Open details
+        </button>
+        <input aria-label="Elsewhere" />
+        <AssetDetailsDrawer assetId={assetId} onClose={() => setAssetId(null)} />
+      </>
+    );
+  };
+
+  const openFromButton = async () => {
+    const result = render(<Host />);
+    const opener = screen.getByRole('button', { name: 'Open details' });
+
+    await result.user.click(opener);
+    await screen.findByRole('heading', { name: 'photo.png' });
+
+    return { ...result, opener };
+  };
+
+  it.each([
+    [
+      'the close button',
+      async (user: ReturnType<typeof render>['user']) => {
+        await user.click(screen.getByRole('button', { name: 'Close' }));
+      },
+    ],
+    [
+      'Escape',
+      async (user: ReturnType<typeof render>['user']) => {
+        await user.keyboard('{Escape}');
+      },
+    ],
+  ])('gives focus back to what opened it when closed from %s', async (_label, close) => {
+    const { user, opener } = await openFromButton();
+
+    expect(opener).not.toHaveFocus();
+    await close(user);
+
+    await waitFor(() => expect(opener).toHaveFocus());
+  });
+
+  // Pressing another control is how the user dismissed it, and where they went.
+  it('leaves focus where the user moved it', async () => {
+    const { user } = await openFromButton();
+    const elsewhere = screen.getByRole('textbox', { name: 'Elsewhere' });
+
+    await user.click(elsewhere);
+
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { name: 'photo.png' })).not.toBeInTheDocument()
+    );
+    expect(elsewhere).toHaveFocus();
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * Unsaved changes
+ * -----------------------------------------------------------------------------------------------*/
+
+describe('AssetDetailsDrawer unsaved changes', () => {
+  beforeEach(() => {
+    server.use(
+      buildFoldersHandler(),
+      buildSettingsHandler(),
+      http.get('/upload/files/:id', () => HttpResponse.json(baseAsset))
+    );
+  });
+
+  const renderDirtyDrawer = async (onClose = jest.fn()) => {
+    const result = render(
+      <>
+        <div data-testid="page-background">Background</div>
+        <AssetDetailsDrawer assetId={1} onClose={onClose} />
+      </>
+    );
+
+    const drawer = await screen.findByRole('dialog');
+    const caption = await screen.findByRole('textbox', { name: 'Caption' });
+    // The field starts disabled until the RBAC check resolves.
+    await waitFor(() => expect(caption).toBeEnabled());
+    await result.user.clear(caption);
+    await result.user.type(caption, 'Edited caption');
+
+    return { ...result, onClose, drawer, caption };
+  };
+
+  // Closing belongs to the parent: the drawer asks it, and stays open until told.
+  it('asks the parent to close, without confirming, when nothing was edited', async () => {
+    const onClose = jest.fn();
+    const { user } = render(<AssetDetailsDrawer assetId={1} onClose={onClose} />);
+
+    await screen.findByRole('textbox', { name: 'Caption' });
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'open');
+  });
+
+  it.each([
+    [
+      'the close button',
+      async ({ user }: { user: ReturnType<typeof render>['user'] }) => {
+        await user.click(screen.getByRole('button', { name: 'Close' }));
+      },
+    ],
+    [
+      'Escape',
+      async ({ user }: { user: ReturnType<typeof render>['user'] }) => {
+        await user.keyboard('{Escape}');
+      },
+    ],
+    [
+      'a press outside the panel',
+      async ({ user }: { user: ReturnType<typeof render>['user'] }) => {
+        await user.click(screen.getByTestId('page-background'));
+      },
+    ],
+  ])('asks before closing from %s with unsaved edits', async (_label, close) => {
+    const { user, onClose } = await renderDirtyDrawer();
+
+    await close({ user });
+
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent(/unsaved changes/i);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('keeps the drawer and the edits when the user cancels', async () => {
+    const { user, onClose, drawer, caption } = await renderDirtyDrawer();
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(await screen.findByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+    expect(onClose).not.toHaveBeenCalled();
+    expect(drawer).toHaveAttribute('data-state', 'open');
+    expect(caption).toHaveValue('Edited caption');
+  });
+
+  it('closes when the user confirms', async () => {
+    const { user, onClose } = await renderDirtyDrawer();
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  // The edits went with the form: an error panel in its place has nothing to
+  // lose, so closing it must not ask.
+  it('stops asking once the edited form is gone', async () => {
+    server.use(http.get('/upload/files/404', () => new HttpResponse(null, { status: 404 })));
+    const { user, onClose, rerender } = await renderDirtyDrawer();
+
+    rerender(
+      <>
+        <div data-testid="page-background">Background</div>
+        <AssetDetailsDrawer assetId={404} onClose={onClose} />
+      </>
+    );
+    await screen.findByText('Failed to load file details.');
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  // Saved edits are no longer unsaved, and stay on screen, even before the
+  // refetched asset lands.
+  it('closes without asking right after a save', async () => {
+    const saved = { ...baseAsset, caption: 'Edited caption' };
+    let releaseRefetch = () => {};
+    const refetchGate = new Promise<void>((resolve) => {
+      releaseRefetch = resolve;
+    });
+    let gets = 0;
+    server.use(
+      http.put('/upload/files/:id', () => HttpResponse.json(saved)),
+      http.get('/upload/files/:id', async () => {
+        gets += 1;
+        if (gets > 1) {
+          await refetchGate;
+          return HttpResponse.json(saved);
+        }
+        return HttpResponse.json(baseAsset);
+      })
+    );
+    const { user, onClose, caption } = await renderDirtyDrawer();
+
+    const save = screen.getByRole('button', { name: 'Save changes' });
+    await waitFor(() => expect(save).toBeEnabled());
+    fireEvent.click(save);
+    await screen.findByText('File updated');
+    expect(caption).toHaveValue('Edited caption');
+    // The in-drawer toast brings its own "Close"; the panel's comes first.
+    await user.click(screen.getAllByRole('button', { name: 'Close' })[0]);
+
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(onClose).toHaveBeenCalledTimes(1);
+    releaseRefetch();
+  });
+
+  // With the URL wrapper every close path is a navigation, which <Blocker>
+  // guards: the drawer must not ask on top of it.
+  it('asks only once when closing the URL-driven drawer', async () => {
+    const { user } = render(<AssetDetailsDrawerFromUrl />, {
+      initialEntries: ['/?assetId=1'],
+    });
+
+    const caption = await screen.findByRole('textbox', { name: 'Caption' });
+    await waitFor(() => expect(caption).toBeEnabled());
+    await user.clear(caption);
+    await user.type(caption, 'Edited caption');
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
  * Outside-click dismissal
  * -----------------------------------------------------------------------------------------------*/
 
@@ -744,8 +1051,8 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
     );
   });
 
-  // jsdom never runs the slide-out animation, so "closed" is read off the
-  // state attribute rather than the element disappearing.
+  // jsdom runs no slide-out, so the portal drops a closing panel at once: the
+  // "closed" checks below read the state attribute off the detached node.
   const renderOpenDrawer = async () => {
     const result = render(
       <>
@@ -776,7 +1083,7 @@ describe('AssetDetailsDrawer outside-click dismissal', () => {
         <div role="menuitem" data-testid="menu-option">
           Name (A to Z)
         </div>
-        <AssetDetailsDrawer />
+        <AssetDetailsDrawerFromUrl />
       </>,
       { initialEntries: ['/?assetId=1'] }
     );
