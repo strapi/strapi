@@ -76,6 +76,34 @@ describe('Link', () => {
     expect(link).toHaveAttribute('target', '');
   });
 
+  it('renders a fragment-only URL as a clickable link', () => {
+    render(
+      linkBlocks.link.renderElement({
+        children: 'Some link',
+        element: {
+          type: 'link',
+          url: '#anchor',
+          rel: '',
+          target: '',
+          children: [{ type: 'text', text: 'Some link' }],
+        },
+        attributes: {
+          'data-slate-node': 'element',
+          ref: null,
+        },
+      }),
+      {
+        renderOptions: {
+          wrapper: Wrapper,
+        },
+      }
+    );
+
+    const link = screen.getByRole('link', { name: 'Some link' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '#anchor');
+  });
+
   it('toggles the popover when clicking on a link', async () => {
     const { user } = render(
       linkBlocks.link.renderElement({
@@ -193,6 +221,36 @@ describe('Link', () => {
 
     await user.type(screen.getByPlaceholderText('noopener, nofollow, noreferrer'), 'noopener');
     expect(saveButton).toBeDisabled();
+  });
+
+  it.each(['#anchor', '#section-2'])('allows saving a fragment-only link URL: %s', async (url) => {
+    const { user } = render(
+      linkBlocks.link.renderElement({
+        children: 'Some link',
+        element: {
+          type: 'link',
+          url: 'https://example.com',
+          rel: '',
+          target: '',
+          children: [{ type: 'text', text: 'Some link' }],
+        },
+        attributes: {
+          'data-slate-node': 'element',
+          ref: null,
+        },
+      }),
+      {
+        renderOptions: {
+          wrapper: Wrapper,
+        },
+      }
+    );
+
+    await user.click(screen.getByRole('link', { name: 'Some link' }));
+    await user.clear(await screen.findByPlaceholderText('Paste link'));
+    await user.type(screen.getByPlaceholderText('Paste link'), url);
+
+    expect(await screen.findByRole('button', { name: /save/i })).toBeEnabled();
   });
 
   it('does not allow a historical unsafe link to be saved after changing only its text', async () => {
