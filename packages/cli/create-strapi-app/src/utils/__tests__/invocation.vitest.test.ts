@@ -1,16 +1,17 @@
 import { determineAgent } from '@vercel/detect-agent';
 import ciInfo from 'ci-info';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { detectInvocation } from '../invocation';
 import { isTelemetryDisabled } from '../usage';
 
-jest.mock('@vercel/detect-agent', () => ({
-  ...jest.requireActual('@vercel/detect-agent'),
-  determineAgent: jest.fn(),
+vi.mock('@vercel/detect-agent', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@vercel/detect-agent')>()),
+  determineAgent: vi.fn(),
 }));
-jest.mock('ci-info', () => ({ __esModule: true, default: { isCI: false } }));
+vi.mock('ci-info', () => ({ default: { isCI: false } }));
 
-const mockedDetermineAgent = determineAgent as jest.Mock;
+const mockedDetermineAgent = determineAgent as unknown as Mock;
 const mockedCiInfo = ciInfo as { isCI: boolean };
 
 const setTty = (stream: NodeJS.ReadStream | NodeJS.WriteStream, value: boolean | undefined) => {
