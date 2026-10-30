@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import {
   resetDatabaseAndImportDataFromPath,
   resyncSuperAdminPermissionsAfterImport,
@@ -35,8 +35,8 @@ test.describe('Publish draft-relations warning — bidirectional M2M regression'
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resyncSuperAdminPermissionsAfterImport();
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('shows the M2M warning when authors link to a draft-only entry', async ({ page }) => {
@@ -128,8 +128,8 @@ test.describe('Publish draft-relations warning — xToOne-style relations', () =
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resyncSuperAdminPermissionsAfterImport();
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   for (const field of XTOONE_LAB_FIELDS) {

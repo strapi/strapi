@@ -1,6 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { ContentManagerPage } from './page-objects/ContentManagerPage';
 import { ReleasesPage } from './page-objects/ReleasesPage';
 import { ReleaseDetailsPage } from './page-objects/ReleaseDetailsPage';
@@ -43,8 +43,8 @@ export const test = base.extend<ReleaseFixtures>({
   releasePageSetup: [
     async ({ page, releases }, use) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
+      await loginWithApi({ page });
       await page.goto('/admin');
-      await login({ page });
       await releases.goto();
       await releases.openRelease(releaseName);
       await use();
