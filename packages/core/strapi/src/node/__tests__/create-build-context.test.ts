@@ -91,10 +91,19 @@ describe('createBuildContext', () => {
     jest.clearAllMocks();
   });
 
-  it('holds the Tailwind scan roots', async () => {
+  it('holds the Tailwind scan roots under Vite', async () => {
     const ctx = await createBuildContext(buildArgs(buildStrapiMock()));
 
     expect(ctx.scanRoots).toEqual([mockScanRoot]);
+  });
+
+  it('holds no scan root under webpack', async () => {
+    const ctx = await createBuildContext({
+      ...buildArgs(buildStrapiMock()),
+      options: { bundler: 'webpack' },
+    });
+
+    expect(ctx.scanRoots).toEqual([]);
   });
 
   it('transports admin.auth.cookie.name into STRAPI_ADMIN_AUTH_COOKIE_NAME', async () => {
