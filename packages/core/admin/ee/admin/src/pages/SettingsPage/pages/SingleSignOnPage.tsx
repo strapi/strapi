@@ -66,10 +66,10 @@ export const SingleSignOnPage = () => {
   const {
     isLoading: isLoadingPermissions,
     allowedActions: { canUpdate, canRead: canReadRoles },
-  } = useRBAC({
-    ...permissions.settings?.sso,
-    readRoles: permissions.settings?.roles.read ?? [],
-  });
+  } = useRBAC([
+    ...Object.values(permissions.settings?.sso ?? {}).flat(),
+    ...(permissions.settings?.roles.read ?? []),
+  ]);
 
   const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, {
     skip: !canReadRoles,

@@ -60,10 +60,10 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
   const contentPermissions = getContentPermissions(model);
   const {
     allowedActions: { canPublish },
-  } = useRBAC(contentPermissions);
+  } = useRBAC(Object.values(contentPermissions).flat());
   const {
     allowedActions: { canCreate },
-  } = useRBAC(releasePermissions);
+  } = useRBAC(Object.values(releasePermissions).flat());
   const { hasDraftAndPublish } = useContentManagerContext();
 
   // Get all the releases not published

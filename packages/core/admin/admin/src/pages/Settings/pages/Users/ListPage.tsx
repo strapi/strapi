@@ -36,7 +36,7 @@ const ListPageCE = () => {
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const {
     allowedActions: { canCreate, canDelete, canRead },
-  } = useRBAC(permissions.settings?.users);
+  } = useRBAC(Object.values(permissions.settings?.users ?? {}).flat());
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();

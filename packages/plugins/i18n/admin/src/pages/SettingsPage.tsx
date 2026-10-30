@@ -57,7 +57,7 @@ const SettingsPage = () => {
   const {
     isLoading: isLoadingRBAC,
     allowedActions: { canUpdate, canCreate, canDelete },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(Object.values(PERMISSIONS).flat());
   const isAIAvailable = useAITranslationsAvailability();
 
   // Settings state management

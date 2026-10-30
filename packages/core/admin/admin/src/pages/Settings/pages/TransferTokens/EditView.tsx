@@ -67,7 +67,7 @@ const EditView = () => {
   );
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
   const match = useMatch('/settings/transfer-tokens/:id');
 
   const id = match?.params?.id;

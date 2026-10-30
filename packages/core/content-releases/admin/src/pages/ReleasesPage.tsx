@@ -203,7 +203,7 @@ const ReleasesPage = () => {
   const { trackUsage } = useTracking();
   const {
     allowedActions: { canCreate },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(Object.values(PERMISSIONS).flat());
 
   const { isLoading: isLoadingReleases, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';

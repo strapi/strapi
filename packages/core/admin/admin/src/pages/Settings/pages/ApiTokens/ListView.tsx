@@ -65,7 +65,7 @@ export const ListView = () => {
   );
   const {
     allowedActions: { canRead, canCreate, canDelete, canUpdate },
-  } = useRBAC(permissions);
+  } = useRBAC(Object.values(permissions ?? {}).flat());
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
 
