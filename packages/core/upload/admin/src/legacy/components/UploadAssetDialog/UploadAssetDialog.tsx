@@ -1,7 +1,7 @@
 import * as React from 'react';
 
+import { UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import { Modal } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
 
 import { EditAssetContent } from '../EditAssetDialog/EditAssetContent';
 
@@ -58,7 +58,6 @@ export const UploadAssetDialog = ({
   open,
   validateAssetsTypes = DEFAULT_VALIDATE_ASSETS_TYPES,
 }: UploadAssetDialogProps) => {
-  const { formatMessage } = useIntl();
   const [step, setStep] = React.useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
   const [assets, setAssets] = React.useState(initialAssetsToAdd || []);
   const [assetToEdit, setAssetToEdit] = React.useState<File | Asset | undefined>(undefined);
@@ -102,35 +101,21 @@ export const UploadAssetDialog = ({
     setAssetToEdit(undefined);
   };
 
-  const handleClose = () => {
-    if (step === Steps.PendingAsset && assets.length > 0) {
-      // eslint-disable-next-line no-alert
-      const confirm = window.confirm(
-        formatMessage({
-          id: 'window.confirm.close-modal.files',
-          defaultMessage: 'Are you sure? You have some files that have not been uploaded yet.',
-        })
-      );
-
-      if (confirm) {
-        onClose();
-      }
-    } else {
-      onClose();
-    }
-  };
-
   const handleRemoveAsset = (assetToRemove: File) => {
     const nextAssets = assets.filter((asset) => asset !== assetToRemove);
     setAssets(nextAssets);
   };
 
   return (
-    <Modal.Root open={open} onOpenChange={handleClose}>
+    <UnsavedChangesModal
+      open={open}
+      onOpenChange={onClose}
+      // Files waiting in the list have not been uploaded yet.
+      hasUnsavedChanges={step === Steps.PendingAsset && assets.length > 0}
+    >
       {step === Steps.AddAsset && (
         <Modal.Content>
           <AddAssetStep
-            onClose={onClose}
             onAddAsset={(assets: FileWithRawFile[]) =>
               handleAddToPendingAssets(assets as unknown as Asset[])
             }
@@ -142,7 +127,6 @@ export const UploadAssetDialog = ({
       {step === Steps.PendingAsset && (
         <Modal.Content>
           <PendingAssetStep
-            onClose={handleClose}
             assets={assets}
             onEditAsset={setAssetToEdit}
             onRemoveAsset={handleRemoveAsset}
@@ -170,6 +154,6 @@ export const UploadAssetDialog = ({
           />
         </Modal.Content>
       )}
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

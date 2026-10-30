@@ -66,7 +66,5 @@
   "sort.name_asc": "ลำดับตามตัวอักษร (A ถึง Z)",
   "sort.name_desc": "เรียงลำดับตัวอักษรย้อนกลับ (Z ถึง A)",
   "sort.updated_at_asc": "อัพเดตที่เก่าที่สุด",
-  "sort.updated_at_desc": "การอัพเดตล่าสุด",
-  "window.confirm.close-modal.file": "คุณแน่ใจนะ การเปลี่ยนแปลงของคุณจะสูญหาย",
-  "window.confirm.close-modal.files": "คุณแน่ใจนะ คุณมีไฟล์บางไฟล์ที่ยังไม่ถูกอัพโหลด"
+  "sort.updated_at_desc": "การอัพเดตล่าสุด"
 }

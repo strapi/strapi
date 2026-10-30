@@ -10,6 +10,7 @@ import {
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
   useIsDesktop,
+  UnsavedChangesModal,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -646,8 +647,13 @@ const DocumentActionModal = ({
     onModalClose();
   };
 
+  /**
+   * Dismissing the modal (Escape, outside click, close button, `Modal.Close`) asks for
+   * confirmation when the content registered unsaved changes. The `onClose` handed to `content`
+   * and `footer` stays an unguarded close so that actions can close the modal after they succeed.
+   */
   return (
-    <Modal.Root open={isOpen} onOpenChange={handleClose}>
+    <UnsavedChangesModal open={isOpen ?? false} onOpenChange={handleClose}>
       <Modal.Content>
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
@@ -659,7 +665,7 @@ const DocumentActionModal = ({
         )}
         {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 

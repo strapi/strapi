@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import { Button, Modal } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -39,7 +40,7 @@ export const BulkMoveButton = ({
   };
 
   return (
-    <Modal.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+    <UnsavedChangesModal open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
       <Modal.Trigger>
         <Button variant="secondary" size="S" startIcon={<Folder />}>
           {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
@@ -50,6 +51,6 @@ export const BulkMoveButton = ({
         onClose={handleConfirmMove}
         selected={selected}
       />
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

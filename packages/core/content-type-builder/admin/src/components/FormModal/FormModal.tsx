@@ -7,6 +7,7 @@ import {
   ConfirmDialog,
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
+  UnsavedChangesModal,
 } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@strapi/design-system';
 import get from 'lodash/get';
@@ -1093,30 +1094,11 @@ export const FormModal = () => {
     await continueSubmit(e, shouldContinue);
   };
 
-  const handleConfirmClose = () => {
-    // eslint-disable-next-line no-alert
-    const confirm = window.confirm(
-      formatMessage({
-        id: 'window.confirm.close-modal.file',
-        defaultMessage: 'Are you sure? Your changes will be lost.',
-      })
-    );
-
-    if (confirm) {
-      onCloseModal();
-      dispatch(actions.resetProps());
-    }
-  };
-
+  // Runs once UnsavedChangesModal has confirmed the close when there are unsaved changes.
   const handleClosed = () => {
-    // Close the modal
-    if (!isEqual(modifiedData, initialData)) {
-      handleConfirmClose();
-    } else {
-      onCloseModal();
-      // Reset the reducer
-      dispatch(actions.resetProps());
-    }
+    onCloseModal();
+    // Reset the reducer
+    dispatch(actions.resetProps());
   };
 
   const sendAdvancedTabEvent = (tab: string) => {
@@ -1268,7 +1250,11 @@ export const FormModal = () => {
   };
 
   return (
-    <Modal.Root open={isOpen} onOpenChange={handleClosed}>
+    <UnsavedChangesModal
+      open={isOpen}
+      onOpenChange={handleClosed}
+      hasUnsavedChanges={!isEqual(modifiedData, initialData)}
+    >
       <Modal.Content>
         <Dialog.Root open={showWarningDialog} onOpenChange={setShowWarningDialog}>
           <Dialog.Trigger />
@@ -1454,16 +1440,11 @@ export const FormModal = () => {
               </Tabs.Root>
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                type="button"
-                variant="tertiary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleClosed();
-                }}
-              >
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-              </Button>
+              <Modal.Close>
+                <Button type="button" variant="tertiary">
+                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+                </Button>
+              </Modal.Close>
               {/* TODO: refactor this component. Nuf said. */}
               <FormModalEndActions
                 deleteContentType={() => deleteContentType(targetUid as Internal.UID.ContentType)}
@@ -1499,6 +1480,6 @@ export const FormModal = () => {
           </FormComponent>
         )}
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };

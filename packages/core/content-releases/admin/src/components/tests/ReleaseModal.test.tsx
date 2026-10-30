@@ -82,4 +82,47 @@ describe('ReleaseModal', () => {
     });
     expect(timezone).toBeInTheDocument();
   });
+
+  it('closes on Escape without asking while the form is untouched', async () => {
+    const handleClose = jest.fn();
+    const { user } = render(
+      <ReleaseModal
+        open
+        handleClose={handleClose}
+        handleSubmit={jest.fn()}
+        initialValues={{ name: '', time: '', timezone: '', scheduledAt: null }}
+        isLoading={false}
+      />
+    );
+
+    await user.keyboard('[Escape]');
+
+    expect(handleClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('asks for confirmation before closing with unsaved changes', async () => {
+    const handleClose = jest.fn();
+    const { user } = render(
+      <ReleaseModal
+        open
+        handleClose={handleClose}
+        handleSubmit={jest.fn()}
+        initialValues={{ name: '', time: '', timezone: '', scheduledAt: null }}
+        isLoading={false}
+      />
+    );
+
+    await user.type(screen.getByRole('textbox', { name: /name/i }), 'My release');
+    await user.keyboard('[Escape]');
+
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+      'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.'
+    );
+    expect(handleClose).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => expect(handleClose).toHaveBeenCalledTimes(1));
+  });
 });

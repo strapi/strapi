@@ -6,6 +6,7 @@ import {
   useQueryParams,
   useRBAC,
   isFetchError,
+  useUnsavedChangesModalDirty,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content-manager/strapi-admin';
 import {
@@ -61,6 +62,7 @@ interface AddActionToReleaseModalProps {
   documentId?: string;
   onInputChange: (field: keyof FormValues, value: string | number) => void;
   values: FormValues;
+  hasUnsavedChanges?: boolean;
 }
 
 export const NoReleases = () => {
@@ -97,8 +99,11 @@ const AddActionToReleaseModal = ({
   documentId,
   onInputChange,
   values,
+  hasUnsavedChanges = false,
 }: AddActionToReleaseModalProps) => {
   const { formatMessage } = useIntl();
+
+  useUnsavedChangesModalDirty(hasUnsavedChanges);
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale;
 
@@ -179,9 +184,16 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
   const locale = query.plugins?.i18n?.locale;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, onClose: () => void) => {
+    e.preventDefault();
+
     try {
-      await formik.handleSubmit(e);
-      onClose();
+      // `formik.handleSubmit` doesn't return the submit promise, so closing after it would reset
+      // the form while the submit is still reading its values.
+      const isAdded = await formik.submitForm();
+
+      if (isAdded) {
+        onClose();
+      }
     } catch (error) {
       if (isFetchError(error)) {
         // Handle axios error
@@ -230,7 +242,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
           }),
         });
 
-        return;
+        return true;
       }
 
       if ('error' in response) {
@@ -273,16 +285,21 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
           documentId={documentId}
           onInputChange={formik.setFieldValue}
           values={formik.values}
+          hasUnsavedChanges={formik.dirty && !formik.isSubmitting}
         />
       ),
+      // The form state lives in this hook, which outlives the modal, so start fresh next time.
+      onClose: () => formik.resetForm(),
       footer: ({ onClose }) => (
         <Modal.Footer>
-          <Button onClick={onClose} variant="tertiary" name="cancel">
-            {formatMessage({
-              id: 'content-releases.content-manager-edit-view.add-to-release.cancel-button',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
+          <Modal.Close>
+            <Button variant="tertiary" name="cancel">
+              {formatMessage({
+                id: 'content-releases.content-manager-edit-view.add-to-release.cancel-button',
+                defaultMessage: 'Cancel',
+              })}
+            </Button>
+          </Modal.Close>
           <Button
             type="submit"
             // @ts-expect-error - formik ReactEvent types don't match button onClick types as they expect a MouseEvent

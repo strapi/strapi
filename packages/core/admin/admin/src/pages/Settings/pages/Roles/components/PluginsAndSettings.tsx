@@ -18,6 +18,7 @@ import {
   SettingPermission,
   PluginPermission,
 } from '../../../../../../../shared/contracts/permissions';
+import { UnsavedChangesModal } from '../../../../../components/UnsavedChangesModal';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -262,12 +263,7 @@ const SubCategory = ({
               );
             })}
           </Grid.Root>
-          <Modal.Root
-            open={isConditionModalOpen}
-            onOpenChange={() => {
-              setIsConditionModalOpen((prev) => !prev);
-            }}
-          >
+          <UnsavedChangesModal open={isConditionModalOpen} onOpenChange={setIsConditionModalOpen}>
             <Modal.Trigger>
               <ConditionsButton hasConditions={doesButtonHasCondition} />
             </Modal.Trigger>
@@ -280,7 +276,7 @@ const SubCategory = ({
                 setIsConditionModalOpen(false);
               }}
             />
-          </Modal.Root>
+          </UnsavedChangesModal>
         </Flex>
       </Box>
     </>

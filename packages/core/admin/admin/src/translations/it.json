@@ -859,8 +859,6 @@
   "list.table.header.sort": "Ordina per {label}",
   "list.table.content.empty-label": "Questo campo è vuoto",
   "tabs.title": "Come vuoi caricare le tue risorse?",
-  "window.confirm.close-modal.file": "Sei sicuro? Le tue modifiche andranno perse.",
-  "window.confirm.close-modal.files": "Sei sicuro? Alcuni file non sono stati ancora caricati.",
   "config.back": "Indietro",
   "config.subtitle": "Definisci le impostazioni di visualizzazione della libreria multimediale.",
   "config.entries.title": "Elementi per pagina",

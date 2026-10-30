@@ -66,7 +66,5 @@
   "sort.name_asc": "Ordine alfabetico (da A a Z)",
   "sort.name_desc": "Ordine alfabetico inverso (da Z ad A)",
   "sort.updated_at_asc": "Aggiornamenti più vecchi",
-  "sort.updated_at_desc": "Aggiornamenti recenti",
-  "window.confirm.close-modal.file": "Sei sicuro? I tuoi cambiamenti verranno perduti.",
-  "window.confirm.close-modal.files": "Sei sicuro? Ci sono dei file che non sono stati ancora caricati."
+  "sort.updated_at_desc": "Aggiornamenti recenti"
 }

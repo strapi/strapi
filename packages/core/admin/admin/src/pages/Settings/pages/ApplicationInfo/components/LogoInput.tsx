@@ -31,6 +31,10 @@ import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import {
+  UnsavedChangesModal,
+  useUnsavedChangesModalDirty,
+} from '../../../../../components/UnsavedChangesModal';
 import { ConfigurationContextValue } from '../../../../../features/Configuration';
 import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../utils/constants';
 import { ImageAsset, ParsingFileError, parseFileMetadatas } from '../utils/files';
@@ -80,7 +84,7 @@ const LogoInput = ({
   };
 
   return (
-    <Modal.Root
+    <UnsavedChangesModal
       open={!!currentStep}
       onOpenChange={(state) => {
         if (state === false) {
@@ -175,7 +179,7 @@ const LogoInput = ({
           )}
         </Modal.Content>
       </LogoInputContextProvider>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 
@@ -227,7 +231,9 @@ const URLForm = () => {
   const { formatMessage } = useIntl();
   const [logoUrl, setLogoUrl] = React.useState('');
   const [error, setError] = React.useState<string>();
-  const { setLocalImage, goToStep, onClose } = useLogoInputContext('URLForm');
+  const { setLocalImage, goToStep } = useLogoInputContext('URLForm');
+
+  useUnsavedChangesModalDirty(logoUrl !== '');
 
   const handleChange: TextInputProps['onChange'] = (e) => {
     setLogoUrl(e.target.value);
@@ -297,9 +303,11 @@ const URLForm = () => {
         </Field.Root>
       </Box>
       <Modal.Footer>
-        <Button onClick={onClose} variant="tertiary">
-          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-        </Button>
+        <Modal.Close>
+          <Button variant="tertiary">
+            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+          </Button>
+        </Modal.Close>
         <Button type="submit">
           {formatMessage({
             id: 'Settings.application.customization.modal.upload.next',
@@ -322,7 +330,7 @@ const ComputerForm = () => {
   const inputRef = React.useRef<HTMLInputElement>(null!);
   const id = React.useId();
 
-  const { setLocalImage, goToStep, onClose } = useLogoInputContext('ComputerForm');
+  const { setLocalImage, goToStep } = useLogoInputContext('ComputerForm');
 
   const handleDragEnter = () => {
     setDragOver(true);
@@ -424,9 +432,11 @@ const ComputerForm = () => {
         </Box>
       </form>
       <Modal.Footer>
-        <Button onClick={onClose} variant="tertiary">
-          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-        </Button>
+        <Modal.Close>
+          <Button variant="tertiary">
+            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+          </Button>
+        </Modal.Close>
       </Modal.Footer>
     </>
   );
@@ -453,6 +463,8 @@ interface PendingLogoDialogProps {
 const PendingLogoDialog = ({ onChangeLogo }: PendingLogoDialogProps) => {
   const { formatMessage } = useIntl();
   const { localImage, setLocalImage, goToStep, onClose } = useLogoInputContext('PendingLogoDialog');
+
+  useUnsavedChangesModalDirty(Boolean(localImage));
 
   const handleGoBack = () => {
     setLocalImage(undefined);
@@ -499,7 +511,7 @@ const PendingLogoDialog = ({ onChangeLogo }: PendingLogoDialogProps) => {
       </Modal.Body>
       <Modal.Footer>
         <Modal.Close>
-          <Button onClick={onClose} variant="tertiary">
+          <Button variant="tertiary">
             {formatMessage({
               id: 'Settings.application.customization.modal.cancel',
               defaultMessage: 'Cancel',
