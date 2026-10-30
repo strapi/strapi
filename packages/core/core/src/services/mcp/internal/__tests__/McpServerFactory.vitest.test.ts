@@ -5,7 +5,7 @@ import { z } from '@strapi/utils';
 import type { ServerContext } from '@modelcontextprotocol/server';
 import type { RegisteredCapability } from '../McpCapabilityRegistry';
 import { McpCapabilityDefinitionRegistry } from '../McpCapabilityDefinitionRegistry';
-import { createMcpServerWithRegistries } from '../McpServerFactory';
+import { createMcpServerWithRegistries, MCP_MAX_TOOL_INPUT_ELEMENTS } from '../McpServerFactory';
 
 // Mock registered capability for testing
 class MockRegisteredCapability implements RegisteredCapability {
@@ -149,6 +149,26 @@ describe('createMcpServerWithRegistries', () => {
     expect(result.registries.tools).toBeDefined();
     expect(result.registries.prompts).toBeDefined();
     expect(result.registries.resources).toBeDefined();
+  });
+
+  test('should limit the number of elements in tool call arguments', () => {
+    createMcpServerWithRegistries({
+      strapi: mockStrapi as Core.Strapi,
+      definitions: {
+        tools: toolDefinitions,
+        prompts: promptDefinitions,
+        resources: resourceDefinitions,
+      },
+      isDevMode: false,
+      ability: mockAbility,
+      user: mockUser,
+    });
+
+    const { McpServer } = vi.mocked(mcpServerSdk) as any;
+
+    expect(McpServer.mock.calls.at(-1)[1]).toEqual(
+      expect.objectContaining({ maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS })
+    );
   });
 
   test('should enable devModeOnly capabilities when in dev mode', () => {
