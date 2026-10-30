@@ -432,7 +432,6 @@
   "Settings.review-workflows.workflow.contentTypes.singleTypes.label": "Types uniques",
   "Settings.review-workflows.workflow.contentTypes.assigned.notice": "{label} {name, select, undefined {} other {<i>(assigné au workflow <em>{name}</em>)</i>}}",
   "Settings.review-workflows.stage.add": "Ajouter une étape",
-  "Settings.review-workflows.stage.delete": "Dupliquer l'étape",
   "Settings.review-workflows.stage.drag": "Déplacer",
   "Settings.review-workflows.stage.name.label": "Nom de l'étape",
   "Settings.review-workflows.stage.permissions.label": "Rôles pouvant quitter cette étape",
