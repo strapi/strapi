@@ -231,3 +231,102 @@ describe('Image manipulation - animated images', () => {
     });
   });
 });
+
+describe('Image manipulation - AVIF', () => {
+  const avifDir = path.join(__dirname, 'tmp-avif');
+  const avifPath = path.join(avifDir, 'image.avif');
+  // Just above the 245×156 thumbnail breakpoint. A 400×300 noise frame at
+  // quality 100 is an AV1 stress case and exceeds Jest's 5s limit on slower
+  // CI runners. These tests only check format, dimensions, and that
+  // optimize/thumbnail write a new AV1 file.
+  const AVIF_WIDTH = 256;
+  const AVIF_HEIGHT = 192;
+
+  beforeAll(async () => {
+    await fse.ensureDir(avifDir);
+    await sharp({
+      create: {
+        width: AVIF_WIDTH,
+        height: AVIF_HEIGHT,
+        channels: 3,
+        background: { r: 180, g: 40, b: 40 },
+      },
+    })
+      .avif({ quality: 50 })
+      .toFile(avifPath);
+  });
+
+  afterAll(async () => {
+    await fse.remove(avifDir);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const makeAvifFile = () => ({
+    ...makeFile(avifPath, '.avif', 'image/avif', AVIF_WIDTH, AVIF_HEIGHT),
+    tmpWorkingDirectory: avifDir,
+  });
+
+  test('sharp reports AVIF as heif with av1 compression', async () => {
+    const meta = await sharp(avifPath).metadata();
+
+    expect(meta.format).toBe('heif');
+    expect(meta.compression).toBe('av1');
+  });
+
+  test('isImage is true for AVIF', async () => {
+    expect(await imageManipulation.isImage(makeAvifFile())).toBe(true);
+  });
+
+  test('isResizableImage is true for AVIF', async () => {
+    expect(await imageManipulation.isResizableImage(makeAvifFile())).toBe(true);
+  });
+
+  test('isOptimizableImage is true for AVIF', async () => {
+    expect(await imageManipulation.isOptimizableImage(makeAvifFile())).toBe(true);
+  });
+
+  test('getDimensions reads AVIF dimensions', async () => {
+    expect(await imageManipulation.getDimensions(makeAvifFile())).toEqual({
+      width: AVIF_WIDTH,
+      height: AVIF_HEIGHT,
+    });
+  });
+
+  test('generateThumbnail resizes AVIF and keeps AV1 encoding', async () => {
+    const thumb = await imageManipulation.generateThumbnail(makeAvifFile());
+
+    expect(thumb).not.toBeNull();
+    expect(thumb!.width).toBeLessThanOrEqual(245);
+    expect(thumb!.height).toBeLessThanOrEqual(156);
+
+    const meta = await sharp(thumb!.filepath).metadata();
+    expect(meta.format).toBe('heif');
+    expect(meta.compression).toBe('av1');
+  });
+
+  test('optimize re-encodes AVIF as AV1', async () => {
+    const result = await imageManipulation.optimize(makeAvifFile());
+
+    expect(result.filepath).not.toBe(avifPath);
+
+    const meta = await sharp(result.filepath).metadata();
+    expect(meta.format).toBe('heif');
+    expect(meta.compression).toBe('av1');
+  });
+
+  test('HEIC (heif with hevc compression) is not processed', async () => {
+    const proto = Object.getPrototypeOf(sharp(avifPath));
+    jest
+      .spyOn(proto, 'metadata')
+      .mockResolvedValue({ format: 'heif', compression: 'hevc', width: 10, height: 10 });
+
+    const file = makeFile(avifPath, '.heic', 'image/heic', 10, 10);
+
+    expect(await imageManipulation.isImage(file)).toBe(false);
+    expect(await imageManipulation.isResizableImage(file)).toBe(false);
+    expect(await imageManipulation.isOptimizableImage(file)).toBe(false);
+  });
+});
