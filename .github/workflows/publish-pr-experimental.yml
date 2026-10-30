@@ -12,8 +12,10 @@ permissions:
   contents: read
   pull-requests: write
 
+# A `labeled` event for another label gets a unique group. Without it, the event joins the
+# PR group and cancels the publish in progress, then its own job is skipped by the `if` below.
 concurrency:
-  group: experimental-pr-${{ github.event.pull_request.number }}
+  group: experimental-pr-${{ github.event.pull_request.number }}${{ (github.event.action == 'labeled' && github.event.label.name != 'publish-experimental') && format('-noop-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 jobs:
