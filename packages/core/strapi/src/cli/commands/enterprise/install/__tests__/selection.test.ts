@@ -2,12 +2,14 @@ import { promptChecklist } from '../checklist-prompt';
 import type { PackumentLookup } from '../registry';
 import {
   buildPluginRow,
+  describeLockedGroup,
+  describeLockedRows,
   orderVisibleRows,
   promptForPlugins,
   toCheckboxChoice,
   type PluginRow,
 } from '../selection';
-import { createPackument } from './test-helpers';
+import { createPackument, NOT_LICENSED_MESSAGE } from './test-helpers';
 
 jest.mock('../checklist-prompt', () => ({ promptChecklist: jest.fn() }));
 
@@ -33,6 +35,14 @@ const threeVersions = availableLookup([
 const rowFor = (lookup: PackumentLookup, installedVersion?: string, strapiVersion = '5.54.1') =>
   buildPluginRow({ entry: aiByokEntry, lookup, installedVersion, strapiVersion });
 
+const choiceFor = (row: PluginRow) => {
+  if (row.state === 'locked' || row.state === 'hidden') {
+    throw new Error(`A ${row.state} row is not a checklist line`);
+  }
+
+  return toCheckboxChoice(row);
+};
+
 describe('buildPluginRow', () => {
   it('offers to install a licensed plugin, noting a newer version that needs a newer Strapi', () => {
     expect(rowFor(threeVersions)).toMatchObject({
@@ -55,7 +65,23 @@ describe('buildPluginRow', () => {
   });
 
   it('flags an installed plugin that the license no longer includes', () => {
-    expect(rowFor({ status: 'not-licensed' }, '1.2.0')).toMatchObject({ state: 'not-licensed' });
+    expect(rowFor({ status: 'not-licensed' }, '1.2.0')).toEqual({
+      entry: aiByokEntry,
+      state: 'not-licensed',
+      installedVersion: '1.2.0',
+      listedOutsideLicense: false,
+    });
+  });
+
+  it('keeps that the catalog lists an installed plugin outside the license', () => {
+    expect(
+      buildPluginRow({
+        entry: aiByokEntry,
+        lookup: { status: 'not-licensed' },
+        installedVersion: '1.2.0',
+        listedOutsideLicense: true,
+      })
+    ).toMatchObject({ state: 'not-licensed', listedOutsideLicense: true });
   });
 
   it.each([[{ status: 'not-licensed' } as const], [{ status: 'not-found' } as const]])(
@@ -80,8 +106,9 @@ describe('buildPluginRow', () => {
 });
 
 describe('orderVisibleRows', () => {
-  it('puts upgrades first and drops hidden rows', () => {
+  it('puts upgrades first, locked rows last, and drops hidden rows', () => {
     const rows: PluginRow[] = [
+      { entry: aiByokEntry, state: 'locked' },
       { entry: aiByokEntry, state: 'installed', installedVersion: '1.2.0' },
       { entry: aiByokEntry, state: 'hidden' },
       { entry: aiByokEntry, state: 'install', targetVersion: '1.2.0' },
@@ -98,6 +125,7 @@ describe('orderVisibleRows', () => {
       'upgrade',
       'install',
       'installed',
+      'locked',
     ]);
   });
 });
@@ -110,14 +138,14 @@ describe('toCheckboxChoice', () => {
       strapiVersion: '5.54.1',
     });
 
-    expect(toCheckboxChoice(providerRow).name).toContain(
+    expect(choiceFor(providerRow).name).toContain(
       'S3 Upload (@strapi-enterprise/plugin-ai-byok) [provider]'
     );
-    expect(toCheckboxChoice(rowFor(threeVersions)).name).not.toContain('[plugin]');
+    expect(choiceFor(rowFor(threeVersions)).name).not.toContain('[plugin]');
   });
 
   it('selects upgrades by default, with an [upgrade] tag and an exact version', () => {
-    expect(toCheckboxChoice(rowFor(threeVersions, '1.1.0'))).toMatchObject({
+    expect(choiceFor(rowFor(threeVersions, '1.1.0'))).toMatchObject({
       name: expect.stringContaining('1.1.0 → 1.2.0 [upgrade]'),
       value: '@strapi-enterprise/plugin-ai-byok@1.2.0',
       checked: true,
@@ -125,20 +153,20 @@ describe('toCheckboxChoice', () => {
   });
 
   it('offers a major upgrade without selecting it, with a [major upgrade] tag', () => {
-    expect(toCheckboxChoice(rowFor(threeVersions, '0.9.0'))).toMatchObject({
+    expect(choiceFor(rowFor(threeVersions, '0.9.0'))).toMatchObject({
       name: expect.stringContaining('0.9.0 → 1.2.0 [major upgrade]'),
       checked: false,
     });
   });
 
   it('adds the newer incompatible version after the summary, as its own sentence', () => {
-    expect(toCheckboxChoice(rowFor(threeVersions)).name).toMatch(
+    expect(choiceFor(rowFor(threeVersions)).name).toMatch(
       /1\.2\.0 {2}.+\. {2}1\.3\.0 is available but requires Strapi \^5\.56\.0\.$/
     );
   });
 
   it('offers the stable release over an installed prerelease without selecting it', () => {
-    expect(toCheckboxChoice(rowFor(threeVersions, '0.0.0-experimental.8be2653'))).toMatchObject({
+    expect(choiceFor(rowFor(threeVersions, '0.0.0-experimental.8be2653'))).toMatchObject({
       name: expect.stringContaining('0.0.0-experimental.8be2653 → 1.2.0 [stable release]'),
       checked: false,
     });
@@ -152,16 +180,66 @@ describe('toCheckboxChoice', () => {
   });
 
   it('says which Strapi version a plugin with no compatible version requires', () => {
-    expect(toCheckboxChoice(rowFor(threeVersions, undefined, '5.50.0')).disabled).toBe(
+    expect(choiceFor(rowFor(threeVersions, undefined, '5.50.0')).disabled).toBe(
       'requires Strapi ^5.56.0'
     );
   });
 
   it('shows installed and unlicensed plugins as not selectable', () => {
-    expect(toCheckboxChoice(rowFor(threeVersions, '1.2.0')).disabled).toContain('installed');
-    expect(toCheckboxChoice(rowFor({ status: 'not-licensed' }, '1.2.0')).disabled).toBe(
+    expect(choiceFor(rowFor(threeVersions, '1.2.0')).disabled).toContain('installed');
+    expect(choiceFor(rowFor({ status: 'not-licensed' }, '1.2.0')).disabled).toBe(
       'not in your license'
     );
+  });
+});
+
+describe('describeLockedGroup', () => {
+  it('is the server message', () => {
+    expect(describeLockedGroup(NOT_LICENSED_MESSAGE)).toBe(NOT_LICENSED_MESSAGE);
+  });
+
+  it.each([undefined, ''])('is the default heading for %j', (message) => {
+    expect(describeLockedGroup(message)).toBe('Not in your license.');
+  });
+});
+
+describe('describeLockedRows', () => {
+  it('shows the locked rows under the heading, as the prompt does', () => {
+    expect(
+      describeLockedRows(
+        [{ entry: aiByokEntry, state: 'locked' }, rowFor(threeVersions, '1.2.0')],
+        NOT_LICENSED_MESSAGE
+      )
+    ).toBe(
+      [
+        NOT_LICENSED_MESSAGE,
+        `  ✕ AI BYOK (@strapi-enterprise/plugin-ai-byok)  ${aiByokEntry.summary}`,
+      ].join('\n')
+    );
+  });
+
+  it('uses the default heading when the server sends no message', () => {
+    expect(describeLockedRows([{ entry: aiByokEntry, state: 'locked' }])).toMatch(
+      /^Not in your license\.\n/
+    );
+  });
+
+  it('ends a line with the label when there is no summary', () => {
+    expect(describeLockedRows([{ entry: { ...aiByokEntry, summary: '' }, state: 'locked' }])).toBe(
+      'Not in your license.\n  ✕ AI BYOK (@strapi-enterprise/plugin-ai-byok)'
+    );
+  });
+
+  it('shows the kind of a locked row that is not a plugin', () => {
+    expect(
+      describeLockedRows([
+        { entry: { ...aiByokEntry, summary: '', kind: 'tool' }, state: 'locked' },
+      ])
+    ).toBe('Not in your license.\n  ✕ AI BYOK (@strapi-enterprise/plugin-ai-byok) [tool]');
+  });
+
+  it('is undefined when no row is locked', () => {
+    expect(describeLockedRows([rowFor(threeVersions, '1.2.0')], 'Contact Sales.')).toBeUndefined();
   });
 });
 
@@ -183,5 +261,35 @@ describe('promptForPlugins', () => {
         }),
       ],
     });
+    expect(promptChecklistMock.mock.lastCall[0].footer).toBeUndefined();
+  });
+
+  it('shows the locked rows apart, under the server message', async () => {
+    const promptChecklistMock = promptChecklist as jest.Mock;
+    promptChecklistMock.mockResolvedValueOnce([]);
+    const lockedEntry = { ...aiByokEntry, packageName: '@strapi-enterprise/plugin-locked' };
+
+    await promptForPlugins(
+      [{ entry: lockedEntry, state: 'locked' }, rowFor(threeVersions)],
+      NOT_LICENSED_MESSAGE
+    );
+
+    expect(promptChecklistMock).toHaveBeenCalledWith({
+      message: 'Which Enterprise plugins do you want to install or upgrade?',
+      choices: [expect.objectContaining({ value: '@strapi-enterprise/plugin-ai-byok@1.2.0' })],
+      footer: {
+        heading: NOT_LICENSED_MESSAGE,
+        lines: [`  ✕ AI BYOK (@strapi-enterprise/plugin-locked)  ${aiByokEntry.summary}`],
+      },
+    });
+  });
+
+  it('shows the default heading when the server sends no message', async () => {
+    const promptChecklistMock = promptChecklist as jest.Mock;
+    promptChecklistMock.mockResolvedValueOnce([]);
+
+    await promptForPlugins([{ entry: aiByokEntry, state: 'locked' }, rowFor(threeVersions)]);
+
+    expect(promptChecklistMock.mock.lastCall[0].footer.heading).toBe('Not in your license.');
   });
 });

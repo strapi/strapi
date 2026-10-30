@@ -5,6 +5,12 @@ import fse from 'fs-extra';
 import type { Logger } from '../../../../utils/logger';
 import type { StrapiPackageMetadata } from '../registry';
 
+export const REGISTRY_URL = 'https://packages.strapi.io';
+
+export const CONTACT_SALES_URL = 'https://strapi.io/contact-sales';
+
+export const NOT_LICENSED_MESSAGE = `Not in your license. To get access, please contact Sales: ${CONTACT_SALES_URL}`;
+
 export const createTemporaryDirectory = (): Promise<string> =>
   fse.mkdtemp(path.join(os.tmpdir(), 'strapi-enterprise-install-'));
 
@@ -79,25 +85,24 @@ export const createPackument = (
 });
 
 /**
- * A fake registry for `fetch`. The search answers with the given names, or with an HTTP status.
- * Each package answers with its packument, or with an HTTP status, and a missing one with 404.
+ * A fake registry for `fetch`. Each package answers with its packument, or with an HTTP status, and
+ * a missing one with 404. The plugin catalog answers with its body, or with an HTTP status, and 404
+ * when it is not given, like an older registry.
  */
 export const createRegistryFetch = ({
-  searchResult,
   packuments,
+  catalog = 404,
 }: {
-  searchResult: string[] | number;
   packuments: Record<string, unknown>;
+  catalog?: unknown;
 }) =>
   jest.fn(async (input: Parameters<typeof fetch>[0]) => {
     const { pathname } = new URL(input instanceof Request ? input.url : input);
 
-    if (pathname === '/-/v1/search') {
-      return typeof searchResult === 'number'
-        ? createFetchResponse(searchResult)
-        : createFetchResponse(200, {
-            objects: searchResult.map((packageName) => ({ package: { name: packageName } })),
-          });
+    if (pathname === '/-/strapi/plugins') {
+      return typeof catalog === 'number'
+        ? createFetchResponse(catalog)
+        : createFetchResponse(200, catalog);
     }
 
     const packument = packuments[decodeURIComponent(pathname.slice(1))];

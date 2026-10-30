@@ -7,11 +7,21 @@ import { discoverEnterprisePlugins } from './discovery';
 import { EnterpriseInstallError, PackageManagerError, PromptCancelledError } from './errors';
 import { buildInstallCommand, installPackages } from './install-packages';
 import { promptForLicense, resolveLicense } from './license';
+import { isValidPackageName } from './package-name';
 import { detectPackageManager } from './package-manager';
 import { resolvePluginStatus } from './plugin-status';
 import { prepareRegistryAccess } from './registry-access';
-import { fetchPackument } from './registry';
-import { buildPluginRow, isSelectable, orderVisibleRows, promptForPlugins } from './selection';
+import { prepareRegistryOverride } from './registry-override';
+import { fetchPackument, fetchPluginCatalog } from './registry';
+import { resolveRegistryTarget } from './registry-url';
+import {
+  buildPluginRow,
+  describeLockedRows,
+  isSelectable,
+  orderVisibleRows,
+  promptForPlugins,
+  type PluginRow,
+} from './selection';
 import { printSetupLinks } from './setup-links';
 import {
   canCheckStrapiCompatibility,
@@ -43,6 +53,7 @@ const describeStrapiMismatch = (
   `${packageName} requires Strapi ${requiredStrapiRange} and this app uses ${strapiVersion}. Upgrade Strapi first.`;
 
 interface InstallContext {
+  registryUrl: string;
   appDir: string;
   license: string;
   strapiVersion?: string;
@@ -50,11 +61,32 @@ interface InstallContext {
   dependencies: InstallDependencies;
 }
 
-const ENTERPRISE_PACKAGE_NAME = new RegExp(`^${ENTERPRISE_SCOPE}/[a-z0-9-][a-z0-9._-]*$`);
-const MAX_PACKAGE_NAME_LENGTH = 214;
+const LIST_PLUGINS_HINT =
+  'Run strapi enterprise install without a name to see the plugins you can install.';
 
-const isValidPackageName = (packageName: string) =>
-  packageName.length <= MAX_PACKAGE_NAME_LENGTH && ENTERPRISE_PACKAGE_NAME.test(packageName);
+const describeNotLicensed = async (
+  packageName: string,
+  { registryUrl, license, dependencies }: InstallContext
+): Promise<string> => {
+  const catalogResult = await fetchPluginCatalog({
+    registryUrl,
+    license,
+    fetchImplementation: dependencies.fetchImplementation,
+  });
+  const isListedOutsideLicense =
+    catalogResult.status === 'available' &&
+    catalogResult.plugins.some(({ name, licensed }) => name === packageName && !licensed);
+
+  if (!isListedOutsideLicense) {
+    return `Your license does not include ${packageName}, or it does not exist. ${LIST_PLUGINS_HINT}`;
+  }
+
+  const { notLicensedMessage } = catalogResult;
+
+  return notLicensedMessage
+    ? `${packageName}: ${notLicensedMessage}`
+    : `Your license does not include ${packageName}. ${LIST_PLUGINS_HINT}`;
+};
 
 interface RequestedPackage {
   packageName: string;
@@ -87,12 +119,14 @@ export const parsePackageArgument = (packageArgument: string): RequestedPackage 
 
 const resolveNamedPackages = async (
   requestedPackages: RequestedPackage[],
-  { appDir, license, strapiVersion, logger, dependencies }: InstallContext
+  context: InstallContext
 ): Promise<string[]> => {
+  const { registryUrl, appDir, license, strapiVersion, logger, dependencies } = context;
   const installSpecs: string[] = [];
 
   for (const { packageName, requestedVersion } of requestedPackages) {
     const lookup = await fetchPackument({
+      registryUrl,
       packageName,
       license,
       fetchImplementation: dependencies.fetchImplementation,
@@ -137,12 +171,10 @@ const resolveNamedPackages = async (
 
     switch (status.state) {
       case 'not-licensed':
-        throw new EnterpriseInstallError(
-          `Your license does not include ${packageName}, or it does not exist. Run strapi enterprise install without a name to see the plugins you can install.`
-        );
+        throw new EnterpriseInstallError(await describeNotLicensed(packageName, context));
       case 'not-found':
         throw new EnterpriseInstallError(
-          `No Enterprise package named ${packageName}. Run strapi enterprise install without a name to see the plugins you can install.`
+          `No Enterprise package named ${packageName}. ${LIST_PLUGINS_HINT}`
         );
       case 'no-stable-release':
         throw new EnterpriseInstallError(describeNoStableRelease(packageName));
@@ -182,31 +214,52 @@ const resolveNamedPackages = async (
 };
 
 const selectPlugins = async ({
+  registryUrl,
   appDir,
   license,
   strapiVersion,
   logger,
   dependencies,
 }: InstallContext): Promise<string[]> => {
-  const discoveredPlugins = await discoverEnterprisePlugins({
+  const {
+    plugins: discoveredPlugins,
+    lockedPlugins,
+    notLicensedMessage,
+  } = await discoverEnterprisePlugins({
+    registryUrl,
     appDir,
     license,
     logger,
     fetchImplementation: dependencies.fetchImplementation,
   });
 
-  const rows = discoveredPlugins.map(({ entry, lookup, installedVersion }) =>
-    buildPluginRow({ entry, lookup, installedVersion, strapiVersion })
-  );
+  const rows: PluginRow[] = [
+    ...discoveredPlugins.map(({ entry, lookup, installedVersion, listedOutsideLicense }) =>
+      buildPluginRow({ entry, lookup, installedVersion, strapiVersion, listedOutsideLicense })
+    ),
+    ...lockedPlugins.map((entry): PluginRow => ({ entry, state: 'locked' })),
+  ];
   const isAnyPluginLicensed = discoveredPlugins.some(({ lookup }) => lookup.status === 'available');
 
-  rows
-    .filter((row) => row.state === 'not-licensed')
-    .forEach((row) =>
-      logger.warn(`${row.entry.packageName} is installed but is not included in your license.`)
-    );
+  rows.forEach((row) => {
+    if (row.state !== 'not-licensed') {
+      return;
+    }
 
-  if (!isAnyPluginLicensed && !rows.some((row) => row.state === 'not-licensed')) {
+    const { packageName } = row.entry;
+
+    logger.warn(
+      notLicensedMessage && row.listedOutsideLicense
+        ? `${packageName} (installed): ${notLicensedMessage}`
+        : `${packageName} is installed but is not included in your license.`
+    );
+  });
+
+  if (
+    !isAnyPluginLicensed &&
+    !rows.some((row) => row.state === 'not-licensed') &&
+    lockedPlugins.length === 0
+  ) {
     throw new EnterpriseInstallError('Your license does not include any Enterprise plugins.');
   }
 
@@ -226,14 +279,26 @@ const selectPlugins = async ({
       }
     });
 
-    if (visibleRows.every((row) => row.state === 'installed' || row.state === 'not-licensed')) {
+    if (!isAnyPluginLicensed) {
+      logger.info('Your license does not include any Enterprise plugins yet.');
+    } else if (
+      visibleRows.every(
+        (row) => row.state === 'installed' || row.state === 'not-licensed' || row.state === 'locked'
+      )
+    ) {
       logger.info('The Enterprise plugins in your license are installed and up to date.');
+    }
+
+    const lockedRows = describeLockedRows(visibleRows, notLicensedMessage);
+
+    if (lockedRows) {
+      logger.info(lockedRows);
     }
 
     return [];
   }
 
-  return dependencies.promptForPlugins(rows);
+  return dependencies.promptForPlugins(rows, notLicensedMessage);
 };
 
 const warnWhenCompatibilityIsUnknown = (strapiVersion: string | undefined, logger: Logger) => {
@@ -251,11 +316,13 @@ const warnWhenCompatibilityIsUnknown = (strapiVersion: string | undefined, logge
 export const runInstall = async ({
   appDir,
   packageArguments,
+  registry,
   logger,
   dependencies,
 }: {
   appDir: string;
   packageArguments: string[];
+  registry?: string;
   logger: Logger;
   dependencies: InstallDependencies;
 }): Promise<void> => {
@@ -269,6 +336,8 @@ export const runInstall = async ({
     );
   }
 
+  const registryTarget = resolveRegistryTarget({ registry, logger });
+  const registryUrl = registryTarget.url;
   const packageManager = await detectPackageManager(appDir);
 
   const { license, source: licenseSource } = await resolveLicense({
@@ -279,20 +348,31 @@ export const runInstall = async ({
     prompt: dependencies.promptForLicense,
   });
 
-  const registryAccess = await prepareRegistryAccess({
+  const registryOptions = {
+    registryUrl,
     appDir,
     packageManager,
     license,
-    licenseSource,
     logger,
     env: dependencies.env,
     homeDir: dependencies.homeDir,
-  });
+  };
+  const registrySetup =
+    registryTarget.kind === 'production'
+      ? await prepareRegistryAccess({ ...registryOptions, licenseSource })
+      : await prepareRegistryOverride(registryOptions);
 
   const strapiVersion = await readInstalledVersion(appDir, STRAPI_PACKAGE_NAME);
   warnWhenCompatibilityIsUnknown(strapiVersion, logger);
 
-  const context: InstallContext = { appDir, license, strapiVersion, logger, dependencies };
+  const context: InstallContext = {
+    registryUrl,
+    appDir,
+    license,
+    strapiVersion,
+    logger,
+    dependencies,
+  };
   const installSpecs =
     requestedPackages.length > 0
       ? await resolveNamedPackages(requestedPackages, context)
@@ -303,7 +383,7 @@ export const runInstall = async ({
     return;
   }
 
-  await registryAccess.apply();
+  await registrySetup.apply();
 
   const { command, args } = buildInstallCommand(packageManager, installSpecs);
   logger.info(`Running ${command} ${args.join(' ')}`);
@@ -317,7 +397,9 @@ export const runInstall = async ({
     })
   );
 
-  await dependencies.installPackages({ appDir, packageManager, installSpecs });
+  await registrySetup.install((env) =>
+    dependencies.installPackages({ appDir, packageManager, installSpecs, env })
+  );
 
   await printSetupLinks({ appDir, installedPackages, logger });
 };
@@ -347,6 +429,7 @@ export const reportInstallError = (error: unknown, logger: Logger): number => {
 
 export const action = async (
   packageArguments: string[],
+  { registry }: { registry?: string },
   { logger }: { logger: Logger }
 ): Promise<void> => {
   const appDir = process.cwd();
@@ -358,6 +441,7 @@ export const action = async (
     await runInstall({
       appDir,
       packageArguments,
+      registry,
       logger,
       dependencies: {
         isInteractive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
