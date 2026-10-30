@@ -295,6 +295,38 @@ describe('Content Manager | Layout', () => {
     ).toBeInTheDocument();
   });
 
+  it('redirects to an accessible locale and warns the user when no locale is specified and the default locale is not permitted', async () => {
+    // Simulate the i18n RBAC middleware: the links are only authorized while
+    // the URL carries a locale the user has access to. Landing with no locale
+    // resolves the default locale, which this user cannot access.
+    jest.mocked(useContentManagerInitData).mockImplementation(() => {
+      const { search } = useLocation();
+      const isAllowedLocale = search.includes('fr');
+
+      return {
+        isLoading: false,
+        collectionTypeLinks: isAllowedLocale ? [ARTICLE_LINK] : [],
+        singleTypeLinks: [],
+        components: [],
+        fieldSizes: {},
+        models: [ARTICLE_MODEL],
+      };
+    });
+
+    renderLayout('/content-manager/collection-types/api::article.article/1', [
+      { ...EN_ONLY_READ_PERMISSION, id: 1003, properties: { locales: ['fr'] } },
+    ]);
+
+    expect(await screen.findByText('Edit page')).toBeInTheDocument();
+    expect(screen.getByTestId('search')).toHaveTextContent('plugins[i18n][locale]=fr');
+    expect(
+      screen.getByText(
+        "You don't have the permissions to access this content for the requested locale"
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText('No permissions page')).not.toBeInTheDocument();
+  });
+
   it('renders the route instead of redirecting when the requested locale is accessible but the links are stale', async () => {
     // The links are authorized asynchronously against the previous URL: an
     // accessible locale with no authorised links means they are out of date.
