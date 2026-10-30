@@ -132,7 +132,7 @@ interface BuildContext {
 
 ### Static Files
 
-The next step is to create a `runtime` folder in the root of the strapi project, a generic name `.strapi` is used and the build specifically uses a subfolder called `client`. This leaves more space for us to expand as and when we require it. We only generate two files for this – an `index.html` which is a static rendered React Component from the `@strapi/admin` package (DefaultDocument) & an `app.js` file which calls the `renderAdmin` function & provides a mount point & plugin object.
+The next step is to create a `runtime` folder in the root of the strapi project, a generic name `.strapi` is used and the build specifically uses a subfolder called `client`. This leaves more space for us to expand as and when we require it. The build writes these files to this folder. The `index.html` file is a static render of the DefaultDocument React component from the `@strapi/admin` package. The `app.js` file calls the `renderAdmin` function and gives it a mount point and the plugin object. The `styles.css` file imports the admin stylesheet and lists the directories that Tailwind scans. The build writes `styles.css` only under Vite. Only then does `app.js` import it. Under webpack, Tailwind does not compile, so the build writes only `index.html` and `app.js`.
 
 ### Bundling
 

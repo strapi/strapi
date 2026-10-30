@@ -1,6 +1,13 @@
-import { getEntryModule, getStylesheet } from '../staticFiles';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+
+import { getEntryModule, getStylesheet, writeStaticClientFiles } from '../staticFiles';
 
 import type { BuildContext } from '../create-build-context';
+
+// Prettier loads its plugins with a dynamic import, which Jest cannot run without --experimental-vm-modules
+jest.mock('prettier', () => ({ format: async (source: string) => source }));
 
 describe('getStylesheet', () => {
   const ctx = (scanRoots: string[]) => ({ scanRoots }) as unknown as BuildContext;
@@ -57,14 +64,39 @@ describe('getStylesheet', () => {
 });
 
 describe('getEntryModule', () => {
-  const ctx = (nextDesignSystem: boolean) =>
-    ({ nextDesignSystem, plugins: [] }) as unknown as BuildContext;
+  const ctx = (bundler: BuildContext['bundler']) =>
+    ({ bundler, plugins: [] }) as unknown as BuildContext;
 
-  test('imports the host stylesheet when the next design system is on', () => {
-    expect(getEntryModule(ctx(true))).toContain("import './styles.css';");
+  test('imports the host stylesheet under Vite', () => {
+    expect(getEntryModule(ctx('vite'))).toContain("import './styles.css';");
   });
 
-  test('imports no stylesheet when the next design system is off', () => {
-    expect(getEntryModule(ctx(false))).not.toContain('styles.css');
+  test('imports no stylesheet under webpack', () => {
+    expect(getEntryModule(ctx('webpack'))).not.toContain('styles.css');
+  });
+});
+
+describe('writeStaticClientFiles', () => {
+  let runtimeDir: string;
+
+  beforeEach(async () => {
+    runtimeDir = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-client-'));
+  });
+
+  afterEach(async () => {
+    await fs.rm(runtimeDir, { recursive: true, force: true });
+  });
+
+  test('writes no stylesheet under webpack', async () => {
+    const ctx = {
+      bundler: 'webpack',
+      runtimeDir,
+      plugins: [],
+      logger: { debug: jest.fn() },
+    } as unknown as BuildContext;
+
+    await writeStaticClientFiles(ctx);
+
+    expect((await fs.readdir(runtimeDir)).sort()).toEqual(['app.js', 'index.html']);
   });
 });
