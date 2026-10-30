@@ -57,9 +57,14 @@ describe('getStylesheet', () => {
 });
 
 describe('getEntryModule', () => {
-  test('imports the host stylesheet', () => {
-    const ctx = { plugins: [] } as unknown as BuildContext;
+  const ctx = (bundler: BuildContext['bundler']) =>
+    ({ bundler, plugins: [] }) as unknown as BuildContext;
 
-    expect(getEntryModule(ctx)).toContain("import './styles.css';");
+  test('imports the host stylesheet under Vite', () => {
+    expect(getEntryModule(ctx('vite'))).toContain("import './styles.css';");
+  });
+
+  test('imports no stylesheet under webpack', () => {
+    expect(getEntryModule(ctx('webpack'))).not.toContain('styles.css');
   });
 });
