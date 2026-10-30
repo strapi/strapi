@@ -1,6 +1,11 @@
 import { logout } from '../../reducer';
 import { fetchBaseQuery, isBaseQueryError } from '../baseQuery';
-import { FetchError, getFetchClient, triggerSessionExpired } from '../getFetchClient';
+import {
+  FetchError,
+  getFetchClient,
+  setFailedRequestSessionToken,
+  triggerSessionExpired,
+} from '../getFetchClient';
 
 import type { BaseQueryApi } from '@reduxjs/toolkit/query';
 
@@ -149,7 +154,7 @@ describe('baseQuery', () => {
     it('triggers session expiry on a non-auth path without clearing auth state directly', async () => {
       const post = jest.fn().mockResolvedValue({});
       const unauthorizedError = buildUnauthorizedError();
-      unauthorizedError.sessionToken = 'expired-token';
+      setFailedRequestSessionToken(unauthorizedError, 'expired-token');
       (getFetchClient as jest.Mock).mockReturnValue({
         get: jest.fn().mockRejectedValue(unauthorizedError),
         post,

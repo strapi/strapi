@@ -346,7 +346,6 @@ class FetchError extends Error {
   public response?: ErrorResponse;
   public code?: number;
   public status?: number;
-  public sessionToken?: string | null;
 
   constructor(message: string, response?: ErrorResponse) {
     super(message);
@@ -365,6 +364,20 @@ class FetchError extends Error {
 
 const isFetchError = (error: unknown): error is FetchError => {
   return error instanceof FetchError;
+};
+
+/**
+ * Access token the failed request actually sent. Kept off `FetchError` so
+ * logs and error reporters cannot pick the bearer token up from the object.
+ */
+const failedRequestSessionTokens = new WeakMap<FetchError, string | null>();
+
+const setFailedRequestSessionToken = (error: FetchError, token: string | null): void => {
+  failedRequestSessionTokens.set(error, token);
+};
+
+const getFailedRequestSessionToken = (error: FetchError): string | null | undefined => {
+  return failedRequestSessionTokens.get(error);
 };
 
 export type AbortError = DOMException & {
@@ -545,7 +558,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
           await attemptTokenRefresh(tokenUsedByFailedRequest);
         } catch {
           // If refresh fails, throw the original error
-          error.sessionToken = tokenUsedByFailedRequest;
+          setFailedRequestSessionToken(error, tokenUsedByFailedRequest);
           throw error;
         }
 
@@ -555,7 +568,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
           return await executeRequest();
         } catch (retryError) {
           if (isFetchError(retryError) && retryError.status === 401) {
-            retryError.sessionToken = getRequestToken();
+            setFailedRequestSessionToken(retryError, getRequestToken());
           }
           throw retryError;
         }
@@ -730,6 +743,8 @@ export {
   getFetchClient,
   isFetchError,
   FetchError,
+  getFailedRequestSessionToken,
+  setFailedRequestSessionToken,
   attemptTokenRefresh,
   refreshAccessToken,
   storeToken,

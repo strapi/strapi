@@ -2,6 +2,7 @@ import {
   ADMIN_REFRESH_LOCK,
   attemptTokenRefresh,
   FetchError,
+  getFailedRequestSessionToken,
   getFetchClient,
   refreshAccessToken,
   resetSessionExpiredNotification,
@@ -424,7 +425,9 @@ describe('getFetchClient', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(FetchError);
         expect(error).toMatchObject({ message: 'Refreshed token rejected' });
-        expect((error as FetchError).sessionToken).toBe('new-token');
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('new-token');
+        expect(Object.keys(error as object)).not.toContain('sessionToken');
+        expect(JSON.stringify(error)).not.toContain('new-token');
       }
     });
 
@@ -480,10 +483,16 @@ describe('getFetchClient', () => {
 
       const fetchClient = getFetchClient();
 
-      await expect(fetchClient.get('/api/test')).rejects.toMatchObject({
-        message: 'Token expired',
-        sessionToken: 'token-a',
-      });
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Token expired' });
+        expect(getFailedRequestSessionToken(error as FetchError)).toBe('token-a');
+        expect(Object.keys(error as object)).not.toContain('sessionToken');
+        expect(JSON.stringify(error)).not.toContain('token-a');
+      }
 
       // Original request plus one access-token attempt
       expect(window.fetch).toHaveBeenCalledTimes(2);
