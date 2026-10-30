@@ -4,6 +4,7 @@ import adminFolderFile from './admin-folder-file';
 import adminSettings from './admin-settings';
 import adminUpload from './admin-upload';
 import contentApi from './content-api';
+import contentApiFolder from './content-api-folder';
 import viewConfiguration from './view-configuration';
 
 export const controllers = {
@@ -13,5 +14,6 @@ export const controllers = {
   'admin-settings': adminSettings,
   'admin-upload': adminUpload,
   'content-api': contentApi,
+  folder: contentApiFolder,
   'view-configuration': viewConfiguration,
 };

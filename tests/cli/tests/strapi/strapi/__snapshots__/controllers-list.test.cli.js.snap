@@ -23,6 +23,7 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ plugin::upload.admin-settings                        │
 │ plugin::upload.admin-upload                          │
 │ plugin::upload.content-api                           │
+│ plugin::upload.folder                                │
 │ plugin::upload.view-configuration                    │
 │ plugin::i18n.locales                                 │
 │ plugin::i18n.iso-locales                             │
