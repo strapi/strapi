@@ -149,6 +149,8 @@ describe('createMcpServerWithRegistries', () => {
     expect(result.registries.tools).toBeDefined();
     expect(result.registries.prompts).toBeDefined();
     expect(result.registries.resources).toBeDefined();
+    const { McpServer } = vi.mocked(mcpServerSdk) as any;
+    expect(McpServer.mock.calls.at(-1)[1]).toMatchObject({ maxToolInputElements: 10_000 });
   });
 
   test('should enable devModeOnly capabilities when in dev mode', () => {
