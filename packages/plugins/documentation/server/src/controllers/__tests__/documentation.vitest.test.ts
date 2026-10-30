@@ -76,10 +76,10 @@ describe('Documentation plugin | Documentation controller', () => {
     ])('returns 404 for non-numeric version params %o', async (params) => {
       const ctx = {
         params,
-        notFound: jest.fn(),
-      } as unknown as Koa.Context & { notFound: jest.Mock };
+        notFound: vi.fn(),
+      } as unknown as Koa.Context & { notFound: Mock };
 
-      await documentation.index(ctx, jest.fn());
+      await documentation.index(ctx, vi.fn());
 
       expect(ctx.notFound).toHaveBeenCalled();
     });
