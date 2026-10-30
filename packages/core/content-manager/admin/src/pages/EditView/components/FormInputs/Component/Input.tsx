@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { InputProps, useField } from '@strapi/admin/strapi-admin';
-import { Button, Field, Flex, IconButton } from '@strapi/design-system';
+import { Badge, Button, Field, Flex, IconButton } from '@strapi/design-system';
 import { Duplicate, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -14,6 +14,7 @@ import { createDefaultForm } from '../../../utils/forms';
 import { type InputRendererProps } from '../../InputRenderer';
 
 import { ComponentCopyModal } from './ComponentCopyModal';
+import { useCopiedComponent } from './CopiedComponents';
 import { Initializer } from './Initializer';
 import { NonRepeatableComponent } from './NonRepeatable';
 import { RepeatableComponent } from './Repeatable';
@@ -44,6 +45,7 @@ const ComponentInput = ({
   const { formatMessage } = useIntl();
   const field = useField<AnyData | AnyData[] | null>(name);
   const [isCopyModalOpen, setIsCopyModalOpen] = React.useState(false);
+  const { isCopied, insertCopy } = useCopiedComponent(name);
 
   const {
     currentDocumentMeta,
@@ -73,7 +75,7 @@ const ComponentInput = ({
    * the replaced component (relations) drop it, see `RelationsField`.
    */
   const handleCopyComponent = ([componentData]: AnyData[]) => {
-    field.onChange(name, componentData);
+    insertCopy(componentData);
 
     return true;
   };
@@ -81,12 +83,22 @@ const ComponentInput = ({
   return (
     <Field.Root error={field.error} required={required}>
       <Flex justifyContent="space-between" alignItems="center" gap={2}>
-        <Field.Label action={labelAction}>
-          {label}
-          {attribute.repeatable && (
-            <>&nbsp;({Array.isArray(field.value) ? field.value.length : 0})</>
+        <Flex gap={2}>
+          <Field.Label action={labelAction}>
+            {label}
+            {attribute.repeatable && (
+              <>&nbsp;({Array.isArray(field.value) ? field.value.length : 0})</>
+            )}
+          </Field.Label>
+          {hasComponent && isCopied && (
+            <Badge variant="success" size="S">
+              {formatMessage({
+                id: getTranslation('components.Component.copied'),
+                defaultMessage: 'Copied',
+              })}
+            </Badge>
           )}
-        </Field.Label>
+        </Flex>
 
         {showResetComponent && (
           <Flex gap={1}>

@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { ComponentProvider } from '../../ComponentContext';
 import { RelationsInput } from '../../Relations/Relations';
+import { CopiedComponentsProvider } from '../CopiedComponents';
 import { ComponentInput, type ComponentInputProps } from '../Input';
 
 import type { ComponentCopyModalProps } from '../ComponentCopyModal';
@@ -156,7 +157,7 @@ describe('ComponentInput', () => {
                 path="/content-manager/:collectionType/:slug/:id"
                 element={
                   <Form initialValues={initialFormValues} method="PUT" onSubmit={jest.fn()}>
-                    {children}
+                    <CopiedComponentsProvider>{children}</CopiedComponentsProvider>
                   </Form>
                 }
               />
@@ -183,6 +184,28 @@ describe('ComponentInput', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByText('seo.title: Copied title')).toBeInTheDocument();
     expect(await screen.findByText('Relation Z')).toBeInTheDocument();
+    expect(screen.getByText('Copied')).toBeInTheDocument();
+  });
+
+  it('should drop the flag of the copy when the field is reset', async () => {
+    const { user } = render({ [FIELD_NAME]: null });
+
+    await user.click(screen.getByRole('button', { name: /No entry yet/ }));
+    await user.click(screen.getByRole('menuitem', { name: /Use existing content/ }));
+    await user.click(screen.getByRole('button', { name: 'Insert copy' }));
+
+    expect(screen.getByText('Copied')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Reset Entry' }));
+
+    expect(screen.queryByText('Copied')).not.toBeInTheDocument();
+
+    // an empty component added in its place isn't a copy
+    await user.click(screen.getByRole('button', { name: /No entry yet/ }));
+    await user.click(screen.getByRole('menuitem', { name: /Empty entry/ }));
+
+    expect(screen.getByRole('button', { name: 'Use existing content…' })).toBeInTheDocument();
+    expect(screen.queryByText('Copied')).not.toBeInTheDocument();
   });
 
   it('should offer to use existing content while the component only holds its defaults', () => {
@@ -201,6 +224,11 @@ describe('ComponentInput', () => {
     await user.click(screen.getByRole('button', { name: 'Replace content…' }));
 
     expect(mockModalProps).toHaveBeenCalledWith(expect.objectContaining({ replacesContent: true }));
+    expect(screen.queryByText('Copied')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Insert copy' }));
+
+    expect(screen.getByText('Copied')).toBeInTheDocument();
   });
 
   it('should only show the relations of the copy once the content is replaced', async () => {

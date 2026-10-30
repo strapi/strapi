@@ -117,7 +117,11 @@ const CopiedComponentsProvider = ({ children }: CopiedComponentsProviderProps) =
   }, [values]);
 
   const markCopied = React.useCallback((keyPaths: string[]) => {
-    setCopiedPaths((paths) => [...paths, ...keyPaths]);
+    setCopiedPaths((paths) => {
+      const added = keyPaths.filter((keyPath) => !paths.includes(keyPath));
+
+      return added.length > 0 ? [...paths, ...added] : paths;
+    });
   }, []);
 
   return (
@@ -184,5 +188,50 @@ const useCopiedComponents = (name: string) => {
   return { isCopied, insertCopies };
 };
 
-export { CopiedComponentsProvider, useCopiedComponents, getFieldKeyPath, hasComponentAt };
+/* -------------------------------------------------------------------------------------------------
+ * useCopiedComponent
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @description Puts a copied component in a non-repeatable component field and tells whether the
+ * field holds a copy. The flag is set on the field itself: resetting the field drops it, so a
+ * component added afterwards isn't flagged. Without a `CopiedComponentsProvider` the copy is still
+ * put in place, it's just not flagged.
+ */
+const useCopiedComponent = (name: string) => {
+  const copiedPaths = useCopiedComponentsContext(
+    'useCopiedComponent',
+    (state) => state.copiedPaths,
+    false
+  );
+  const markCopied = useCopiedComponentsContext(
+    'useCopiedComponent',
+    (state) => state.markCopied,
+    false
+  );
+  const { onChange } = useField<AnyData | null>(name);
+  const fieldKeyPath = useForm('useCopiedComponent', (state) =>
+    getFieldKeyPath(state.values, name)
+  );
+
+  const isCopied = copiedPaths?.includes(fieldKeyPath) ?? false;
+
+  const insertCopy = React.useCallback(
+    (item: AnyData) => {
+      onChange(name, item);
+      markCopied?.([fieldKeyPath]);
+    },
+    [fieldKeyPath, markCopied, name, onChange]
+  );
+
+  return { isCopied, insertCopy };
+};
+
+export {
+  CopiedComponentsProvider,
+  useCopiedComponents,
+  useCopiedComponent,
+  getFieldKeyPath,
+  hasComponentAt,
+};
 export type { CopiedComponentsProviderProps };
