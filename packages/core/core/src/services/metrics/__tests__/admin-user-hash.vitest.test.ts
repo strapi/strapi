@@ -15,7 +15,7 @@ describe('user email hash', () => {
     const ctx = createContext({}, { state });
 
     const strapi = {
-      has: jest.fn(() => true),
+      has: vi.fn(() => true),
       requestContext: {
         get: vi.fn(() => ctx),
       },
@@ -31,7 +31,7 @@ describe('user email hash', () => {
     const ctx = createContext({}, {});
 
     const strapi = {
-      has: jest.fn(() => true),
+      has: vi.fn(() => true),
       requestContext: {
         get: vi.fn(() => ctx),
       },
@@ -43,7 +43,7 @@ describe('user email hash', () => {
 
   test('returns empty string after request context has been released', () => {
     const strapi = {
-      has: jest.fn(() => false),
+      has: vi.fn(() => false),
       get requestContext() {
         throw new Error('Could not resolve service requestContext');
       },

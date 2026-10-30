@@ -309,7 +309,7 @@ describe('metrics', () => {
   });
 
   test('sends after the fetch service has been released', async () => {
-    const fetch = jest.fn(() => Promise.resolve({ ok: true }));
+    const fetch = vi.fn(() => Promise.resolve({ ok: true }));
     const strapi = {
       config: {
         get(path: string | string[]) {
@@ -330,7 +330,7 @@ describe('metrics', () => {
         },
       },
       cron: {
-        add: jest.fn(),
+        add: vi.fn(),
       },
       fetch,
     };
