@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@strapi/blocks-react-renderer": "1.0.2",
-    "@strapi/icons": "2.2.4",
+    "@strapi/icons": "0.0.0-experimental.a2322e642c3270f02386cf133830439ab0ddb2ed",
     "@strapi/plugin-color-picker": "workspace:*",
     "@strapi/plugin-documentation": "workspace:*",
     "@strapi/plugin-graphql": "workspace:*",
