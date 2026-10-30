@@ -186,6 +186,62 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const { runLocked } = createReleaseRun({ strapi, updateReleaseStatus });
 
+  /**
+   * Each database sorts nulls its own way: the scheduled releases fill the pages first, so the
+   * unscheduled ones come last whatever the direction
+   */
+  const findPageByScheduledAt = async (
+    { where, orderBy, ...params }: { where?: object; orderBy?: object | object[] },
+    { page = 1, pageSize = 10 }: { page?: number; pageSize?: number }
+  ) => {
+    const query = strapi.db.query(RELEASE_MODEL_UID);
+    // Ties, and the unscheduled releases, go most recently updated first: the id keeps one order
+    // from page to page
+    const order = [
+      ...(Array.isArray(orderBy) ? orderBy : [orderBy]),
+      { updatedAt: 'desc' },
+      { id: 'desc' },
+    ];
+    const withSchedule = (isScheduled: boolean) => ({
+      $and: [...(where ? [where] : []), { scheduledAt: { $notNull: isScheduled } }],
+    });
+
+    const [scheduledCount, unscheduledCount] = await Promise.all([
+      query.count({ where: withSchedule(true) }),
+      query.count({ where: withSchedule(false) }),
+    ]);
+    const offset = (page - 1) * pageSize;
+    const scheduledLimit = Math.min(Math.max(scheduledCount - offset, 0), pageSize);
+    const unscheduledLimit = pageSize - scheduledLimit;
+
+    const [scheduled, unscheduled] = await Promise.all([
+      scheduledLimit > 0
+        ? query.findMany({
+            ...params,
+            where: withSchedule(true),
+            orderBy: order,
+            offset,
+            limit: scheduledLimit,
+          })
+        : [],
+      unscheduledLimit > 0
+        ? query.findMany({
+            ...params,
+            where: withSchedule(false),
+            orderBy: order,
+            offset: Math.max(offset - scheduledCount, 0),
+            limit: unscheduledLimit,
+          })
+        : [],
+    ]);
+    const total = scheduledCount + unscheduledCount;
+
+    return {
+      results: [...scheduled, ...unscheduled],
+      pagination: { page, pageSize, pageCount: Math.ceil(total / pageSize), total },
+    };
+  };
+
   return {
     async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
       const release = await insertRelease(await validateNewRelease(releaseData, { user }));
@@ -265,16 +321,17 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     findPage(query?: GetReleases.Request['query']) {
-      const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query ?? {});
+      const { page, pageSize, ...dbQuery } = strapi
+        .get('query-params')
+        .transform(RELEASE_MODEL_UID, query ?? {});
+      const params = { ...dbQuery, populate: { actions: { count: true } } };
+      const [firstOrder] = Array.isArray(dbQuery.orderBy) ? dbQuery.orderBy : [dbQuery.orderBy];
 
-      return strapi.db.query(RELEASE_MODEL_UID).findPage({
-        ...dbQuery,
-        populate: {
-          actions: {
-            count: true,
-          },
-        },
-      });
+      if (!firstOrder || Object.keys(firstOrder)[0] !== 'scheduledAt') {
+        return strapi.db.query(RELEASE_MODEL_UID).findPage({ ...params, page, pageSize });
+      }
+
+      return findPageByScheduledAt(params, { page, pageSize });
     },
 
     // One grouped query: a status no release has counts 0

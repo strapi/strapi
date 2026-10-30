@@ -67,6 +67,7 @@ packages/core/content-releases/server/src/routes/release.ts
   }
   ```
 - response `meta`: `pagination`, `pendingReleasesCount` (releases without `releasedAt`) and `statusCounts` (how many releases have each status, whatever the filters)
+- a sort starting with `scheduledAt` lists the unscheduled releases last in either direction. Each database places nulls its own way, so `findPage` counts the scheduled and unscheduled releases matching the filters, then fills the page from the scheduled ones first and the unscheduled ones after. Ties, and the unscheduled releases, go most recently updated first, then by `id`.
 
 **Get all releases with/without an entry**:
 
