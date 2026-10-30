@@ -23,9 +23,6 @@ export interface CreateContentOptions {
 }
 
 /**
- * Fill a single field based on its type.
- */
-/**
  * Clicks a button that adds a component. On a collection type the button opens a menu offering
  * an empty component or a copy of an existing one; on a single type it adds the component directly.
  */
@@ -43,6 +40,9 @@ const clickAddComponentButton = async (
   }
 };
 
+/**
+ * Fill a single field based on its type.
+ */
 export const fillField = async (page: Page, field: FieldValue): Promise<void> => {
   const { name, type, value } = field;
 
