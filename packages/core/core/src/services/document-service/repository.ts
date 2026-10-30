@@ -28,6 +28,7 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
+import { lockDocumentForUpdate } from './document-update-lock';
 import {
   applyDeferredCloneRelationCopies,
   applyPostCloneRelationUpdates,
@@ -540,20 +541,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function update(opts = {} as any) {
     const { documentId, ...params } = opts;
 
-    // Two requests can both observe "locale missing" and insert a second row.
-    // Lock the document's rows so the loser updates the row the winner created.
-    // Postgres takes FOR NO KEY UPDATE: writers still serialize, and a relation
-    // insert can take the FOR KEY SHARE lock its foreign key needs. MySQL has
-    // no equivalent, so the query builder uses FOR UPDATE there.
-    if (documentId) {
-      await strapi.db
-        .queryBuilder(uid)
-        .select(['id'])
-        .where({ documentId })
-        .forNoKeyUpdate()
-        .execute();
-    }
-
     const queryParams = await async.pipe(
       validateParams,
       DP.filterDataPublishedAt,
@@ -566,6 +553,22 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToLookup(contentType),
       i18n.localeToData(contentType)
     )(params);
+
+    // Two requests can both observe "locale missing" and insert a second row.
+    // Lock the draft of the locale being written. When that row does not exist
+    // yet, lock one existing row of the document so the loser updates the row
+    // the winner created. Locking every locale deadlocks MySQL cross-links:
+    // Postgres takes FOR NO KEY UPDATE, which still lets a relation insert
+    // take the FOR KEY SHARE lock its foreign key needs. MySQL has no
+    // equivalent, so the query builder uses FOR UPDATE on that same row.
+    if (documentId) {
+      await lockDocumentForUpdate({
+        queryBuilder: (modelUid) => strapi.db.queryBuilder(modelUid),
+        uid,
+        documentId,
+        lookup: queryParams?.lookup,
+      });
+    }
 
     const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);

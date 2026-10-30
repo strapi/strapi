@@ -7,7 +7,7 @@ review_notes:
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
   - 'Deadlock retry: the outermost transaction runs the handler at most 3 times in total (up to 2 retries). Commit callbacks are awaited, a failing callback rejects the call, and a hook failure does not retry the write.'
-  - 'update locks the document rows with FOR NO KEY UPDATE on Postgres and FOR UPDATE on MySQL. Checked against repository.ts, query-builder.ts and transaction-context.ts.'
+  - 'update locks the draft row of the locale being written with FOR NO KEY UPDATE on Postgres and FOR UPDATE on MySQL. A missing locale locks one existing row of the document. Checked against repository.ts, document-update-lock.ts, query-builder.ts and transaction-context.ts.'
   - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release.ts`. The rest of this page was not re-verified.
 ---
 
@@ -92,7 +92,7 @@ Read methods use the same idea. `statusToLookup` and `localeToLookup` write cond
 
 **`create`** writes one row. On a D&P content type, this is always the draft. The repository schedules `entry.create`. If the caller passed `status: 'published'`, it then calls the inner `publish` function and returns the published row.
 
-**`update`** locks every row with that `documentId`, then targets the draft row on a D&P content type. On Postgres the lock is `FOR NO KEY UPDATE`: a second update of the same document waits, and a relation insert can still check its foreign key. MySQL and MariaDB use `FOR UPDATE`. SQLite does not lock the row. It looks for the row with the `documentId` and the requested locale.
+**`update`** locks the draft row of the requested locale, then looks that row up. When the locale does not exist yet, it locks one existing row of the document (`ORDER BY id LIMIT 1`) so two creates of that locale cannot both insert. On Postgres the lock is `FOR NO KEY UPDATE`: a second update of the same row waits, and a relation insert can still check its foreign key. MySQL and MariaDB use `FOR UPDATE` on that same row. Locking every locale of the document deadlocks a cross-link on those databases, because the foreign-key check needs a shared lock on a row the other transaction holds. SQLite does not lock the row.
 
 - If the row exists, the entries service updates it, and the repository schedules `entry.update`.
 - If the row does not exist, but the document exists in another locale, the repository creates a row for the new locale. It copies the non-localized fields from an existing row. It schedules `entry.create`, not `entry.update`.
