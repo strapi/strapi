@@ -37,6 +37,7 @@ jobs:
       docs: ${{ steps.filter.outputs.docs }}
       global: ${{ steps.filter.outputs.global }}
       is_local: ${{ github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
+      playwright: ${{ steps.playwright.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -45,6 +46,16 @@ jobs:
         id: filter
         with:
           filters: .github/filters.yaml
+      # E2E jobs run in the Playwright image matching this version (see `e2e_ce`).
+      - name: Read Playwright version
+        id: playwright
+        run: |
+          version="$(node -p "require('./package.json').devDependencies['@playwright/test']")"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "@playwright/test must be pinned to an exact x.y.z version, got: $version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
   # Always run build in case an unrecognized file change could affect it
   # Build must complete before any other step that uses build, so that it gets cached here and doesn't build multiple times
@@ -265,6 +276,12 @@ jobs:
     needs: [conditions, build]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    # Browsers and their system libraries are preinstalled in the Playwright image, so the
+    # job never runs `playwright install --with-deps`, whose apt step can stall for most of
+    # the job timeout on a slow Ubuntu mirror.
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      options: --ipc=host --init
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
@@ -277,9 +294,6 @@ jobs:
           node-version: 22
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Install Playwright Browsers
-        # globalSetup always launches Chromium to write storage state, even for WebKit shards.
-        run: npx playwright install --with-deps chromium ${{ matrix.project }}
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
@@ -334,6 +348,10 @@ jobs:
     needs: [conditions, build]
     name: '[CE] e2e media library (browser: chromium)'
     runs-on: ubuntu-latest
+    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      options: --ipc=host --init
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -343,9 +361,6 @@ jobs:
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-
-      - name: Install Playwright Browsers
-        run: node_modules/.bin/playwright install --with-deps chromium
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
@@ -389,6 +404,10 @@ jobs:
     needs: [conditions, build]
     name: '[CE] e2e media library (legacy) (browser: chromium)'
     runs-on: ubuntu-latest
+    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      options: --ipc=host --init
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -398,9 +417,6 @@ jobs:
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-
-      - name: Install Playwright Browsers
-        run: node_modules/.bin/playwright install --with-deps chromium
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
@@ -444,6 +460,10 @@ jobs:
     needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      options: --ipc=host --init
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -460,10 +480,6 @@ jobs:
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-
-      - name: Install Playwright Browsers
-        # globalSetup always launches Chromium to write storage state, even for WebKit shards.
-        run: npx playwright install --with-deps chromium ${{ matrix.project }}
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
