@@ -79,9 +79,15 @@ const RecentDocumentsTable = ({
               </Box>
             </Td>
             <Td>
-              <Typography textColor="neutral600">
-                <RelativeTime timestamp={new Date(document.updatedAt)} />
-              </Typography>
+              {document.updatedAt ? (
+                <Typography textColor="neutral600">
+                  <RelativeTime timestamp={new Date(document.updatedAt)} />
+                </Typography>
+              ) : (
+                <Typography textColor="neutral600" aria-hidden>
+                  -
+                </Typography>
+              )}
             </Td>
             <Td>
               {document.strapi_stage === null || document.strapi_stage === undefined ? (

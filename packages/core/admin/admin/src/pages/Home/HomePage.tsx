@@ -11,6 +11,7 @@ import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { WidgetResizeHandle } from '../../components/ResizeIndicator';
+import { WidgetErrorBoundary } from '../../components/WidgetErrorBoundary';
 import { Widget } from '../../components/WidgetHelpers';
 import { WidgetRoot } from '../../components/WidgetRoot';
 import { useEnterprise } from '../../ee';
@@ -80,16 +81,40 @@ export const WidgetComponent = ({
   const [loadedComponent, setLoadedComponent] = React.useState<React.ComponentType<{
     columnWidth?: number;
   }> | null>(null);
+  const [hasLoadError, setHasLoadError] = React.useState(false);
 
   React.useEffect(() => {
+    let active = true;
+
+    // A changed module should not stay stuck on a previous failure.
+    setHasLoadError(false);
+
     const loadComponent = async () => {
       const resolvedComponent = await component();
 
-      setLoadedComponent(() => resolvedComponent);
+      if (active) {
+        setLoadedComponent(() => resolvedComponent);
+      }
     };
 
-    loadComponent();
+    // A rejected module load used to be unhandled, so the widget never left Widget.Loading.
+    loadComponent().catch((error) => {
+      if (!active) {
+        return;
+      }
+
+      console.error(error);
+      setHasLoadError(true);
+    });
+
+    return () => {
+      active = false;
+    };
   }, [component]);
+
+  if (hasLoadError) {
+    return <Widget.Error />;
+  }
 
   const Component = loadedComponent;
 
@@ -97,7 +122,11 @@ export const WidgetComponent = ({
     return <Widget.Loading />;
   }
 
-  return <Component {...({ columnWidth } as Record<string, unknown>)} />;
+  return (
+    <WidgetErrorBoundary>
+      <Component {...({ columnWidth } as Record<string, unknown>)} />
+    </WidgetErrorBoundary>
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
