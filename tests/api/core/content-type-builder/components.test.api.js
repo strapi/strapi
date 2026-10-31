@@ -250,6 +250,27 @@ describe('Content Type Builder - Components', () => {
       });
     });
 
+    test('Returns the error message when the validation throws a native error', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/content-type-builder/components/default.some-component',
+        body: {
+          component: {
+            category: '',
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        error: {
+          name: 'TypeError',
+          message: expect.stringContaining('undefined'),
+          details: {},
+        },
+      });
+    });
+
     test('Updates a component properly', async () => {
       const res = await rq({
         method: 'PUT',

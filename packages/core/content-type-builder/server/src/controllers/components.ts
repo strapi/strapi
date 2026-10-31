@@ -2,6 +2,7 @@ import _ from 'lodash';
 import type { Context } from 'koa';
 import type { UID } from '@strapi/types';
 import { getService } from '../utils';
+import { formatValidationError } from '../utils/errors';
 import { validateComponentInput, validateUpdateComponentInput } from './validation/component';
 
 /**
@@ -55,7 +56,7 @@ export default {
     try {
       await validateComponentInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     try {
@@ -93,7 +94,7 @@ export default {
     try {
       await validateUpdateComponentInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     try {
