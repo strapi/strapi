@@ -334,6 +334,5 @@ describe('export', () => {
     expect(entities.some((entity) => entity.type === 'plugin::upload.file')).toBe(true);
   });
   test.todo('export with compression (.tar.gz) and verify tar contents');
-  test.todo('export with encryption (.tar.gz.enc) and verify prompt/key and tar not plaintext');
   test.todo('export table counts match actual tar entry counts per stage');
 });
