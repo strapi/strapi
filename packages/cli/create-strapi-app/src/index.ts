@@ -11,6 +11,7 @@ import { createStrapi } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
 import { installID } from './utils/install-id';
+import { shouldSkipCloudLogin } from './utils/should-skip-cloud-login';
 import { trackError } from './utils/usage';
 import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
@@ -134,7 +135,7 @@ async function run(args: string[]): Promise<void> {
   const rootPath = await checkInstallPath(appDirectory);
 
   let shouldCreateGrowthSsoTrial = false;
-  if (!options.skipCloud && !options.nonInteractive) {
+  if (!shouldSkipCloudLogin(options)) {
     shouldCreateGrowthSsoTrial = await handleCloudLogin();
   }
 
