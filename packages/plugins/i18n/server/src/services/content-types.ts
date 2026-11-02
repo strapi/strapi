@@ -179,7 +179,6 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
       isPresentObject(value)
     ) {
       fillNonLocalizedAttributes(entry[field], value, { model: attr.component });
-      continue;
     }
   }
 };
