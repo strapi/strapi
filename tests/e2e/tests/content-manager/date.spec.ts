@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { clickAndWait } from '../../../utils/shared';
 import { createContent } from '../../../utils/content-creation';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { loginWithApi } from '../../../utils/login';
@@ -17,9 +16,8 @@ test.describe('Date field tests', () => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await loginWithApi({ page });
     await page.goto('/admin');
-
-    // Navigate to Content Manager
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    // No Content Manager click here: createContent opens it. A second click on that link while
+    // the first is still redirecting to the first content type leaves the main area empty.
   });
 
   test('should select the current date from the UI datepicker', async ({ page }) => {
