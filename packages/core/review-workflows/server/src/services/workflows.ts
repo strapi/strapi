@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { isString, map } from 'lodash';
 import { errors, emitAudit } from '@strapi/utils';
 import { ERRORS, WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
@@ -60,7 +60,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * @param {number} [workflowId] - ID of the workflow being updated, excluded from the check.
    * @throws {ValidationError} - If another workflow already uses the name.
    */
-  const assertWorkflowNameIsUnique = async (name: string, workflowId?: number) => {
+  const assertWorkflowNameIsUnique = async (name: string, workflowId?: Data.ID) => {
     const where = workflowId === undefined ? { name } : { name, id: { $ne: workflowId } };
     const existingWorkflow = await strapi.db
       .query(WORKFLOW_MODEL_UID)
@@ -107,7 +107,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @param {object} opts - Options for the query.
      * @returns {Promise<object>} - Workflow object matching the requested ID.
      */
-    findById(id: any, opts: { populate?: any } = {}) {
+    findById(id: Data.ID, opts: { populate?: any } = {}) {
       const populate = processPopulate(opts.populate);
 
       const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, { populate });
@@ -204,7 +204,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
       let updatedStages: ReplacedStage[] | undefined;
-      let updatedStageIds: any;
+      let updatedStageIds: Data.ID[];
 
       await workflowValidator.validateWorkflowCount();
 
@@ -412,7 +412,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @returns
      * @throws {ApplicationError} - If the stage does not belong to the specified workflow.
      */
-    assertStageBelongsToWorkflow(stageId: any, workflow: any) {
+    assertStageBelongsToWorkflow(stageId: Data.ID, workflow: any) {
       if (!stageId) {
         return;
       }

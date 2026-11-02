@@ -1,4 +1,4 @@
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Data, Modules } from '@strapi/types';
 
 import { getDisplayName } from '../utils';
 
@@ -83,7 +83,7 @@ const getEventMap = (events: string[]) => {
 
 const getActor = (
   systemOrigin: Modules.AuditLogs.SystemOrigin | undefined,
-  user: { id: string | number; email: string; firstname?: string; lastname?: string } | undefined
+  user: { id: Data.ID; email: string; firstname?: string; lastname?: string } | undefined
 ): Modules.AuditLogs.Actor => {
   if (systemOrigin) {
     return { type: 'system' };

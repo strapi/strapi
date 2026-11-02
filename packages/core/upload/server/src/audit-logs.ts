@@ -1,5 +1,5 @@
 import { emitAudit } from '@strapi/utils';
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Data, Modules } from '@strapi/types';
 
 import type { Settings } from './controllers/validation/admin/settings';
 
@@ -52,13 +52,13 @@ export const getUploadSettingsChanges = (
 };
 
 interface FolderRef {
-  id: number;
+  id: Data.ID;
   name: string | null;
 }
 
 export interface MediaMoveEvent {
   kind: 'file' | 'folder';
-  id: number;
+  id: Data.ID;
   name: string;
   from: FolderRef | null;
   to: FolderRef | null;
@@ -69,18 +69,18 @@ export interface MoveDetails {
   to: FolderRef | null;
 }
 
-const toFolderRef = (folder: { id: number | string; name?: string | null } | null | undefined) =>
+const toFolderRef = (folder: { id: Data.ID; name?: string | null } | null | undefined) =>
   folder ? { id: Number(folder.id), name: folder.name ?? null } : null;
 
 interface MediaFile {
-  id: number;
+  id: Data.ID;
   name: string;
   mime?: string;
   size?: number;
   alternativeText?: string | null;
   caption?: string | null;
   focalPoint?: { x: number; y: number } | null;
-  folder?: { id: number; name: string | null } | null;
+  folder?: { id: Data.ID; name: string | null } | null;
 }
 
 /** The payload of media.create and media.delete, which are also webhook events. */
@@ -169,9 +169,9 @@ export const getMediaChanges = ({
 };
 
 interface MediaFolder {
-  id: number;
+  id: Data.ID;
   name: string;
-  parent?: { id: number; name: string | null } | null;
+  parent?: { id: Data.ID; name: string | null } | null;
 }
 
 /** The payload of the media-folder.* events. They are not webhook events. */
@@ -243,9 +243,9 @@ export const readMediaMoves = async (
     folderParentJoinTable,
     folderTable,
   }: {
-    files: Array<{ id: number | string; name: string }>;
-    folders: Array<{ id: number | string; name: string }>;
-    destinationFolderId: number | string | null;
+    files: Array<{ id: Data.ID; name: string }>;
+    folders: Array<{ id: Data.ID; name: string }>;
+    destinationFolderId: Data.ID | null;
     fileFolderJoinTable: JoinTable;
     folderParentJoinTable: JoinTable;
     folderTable: string | undefined;

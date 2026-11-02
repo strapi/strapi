@@ -14,7 +14,7 @@ type SanitizedAdminRoleWithUsersCount = SanitizedAdminRole & { usersCount?: numb
  */
 export declare namespace GetPermissions {
   export interface Request {
-    params: { id: string };
+    params: { id: Data.ID };
     query: {};
     body: {};
   }
@@ -51,7 +51,7 @@ export declare namespace UpdatePermissions {
  */
 export declare namespace FindRole {
   export interface Request {
-    params: { id: string };
+    params: { id: Data.ID };
     query: {};
     body: {};
   }
@@ -100,7 +100,7 @@ export declare namespace Create {
  */
 export declare namespace Update {
   export interface Request {
-    params: { id: string };
+    params: { id: Data.ID };
     query: {};
     body: {
       name?: string;
@@ -119,7 +119,7 @@ export declare namespace Update {
  */
 export declare namespace Delete {
   export interface Request {
-    params: { id: string };
+    params: { id: Data.ID };
     query: {};
     body: {};
   }
@@ -137,7 +137,7 @@ export declare namespace BatchDelete {
   export interface Request {
     query: {};
     body: {
-      ids: string[]; // Min length: 1
+      ids: Data.ID[]; // Min length: 1
     };
   }
 

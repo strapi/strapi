@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import { async } from '@strapi/utils';
 import { getService } from '../utils';
@@ -209,10 +209,10 @@ export default {
     }
 
     const otherStages = workflowStages.filter(
-      (stage: { id: number; permissions?: unknown[] }) => stage.id !== entityStageId
+      (stage: { id: Data.ID; permissions?: unknown[] }) => stage.id !== entityStageId
     );
 
-    const data = otherStages.filter((stage: { id: number; permissions?: unknown[] }) =>
+    const data = otherStages.filter((stage: { id: Data.ID; permissions?: unknown[] }) =>
       stagePermissions.canTransitionToStageWithPermissions(stage)
     );
 

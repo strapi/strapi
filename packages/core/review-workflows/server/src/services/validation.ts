@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { ERRORS, MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../constants/workflows';
@@ -42,7 +42,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
 
-    async validateWorkflowCountStages(workflowId: any, countAddedStages = 0) {
+    async validateWorkflowCountStages(workflowId: Data.ID, countAddedStages = 0) {
       const stagesService = getService('stages', { strapi });
       const countWorkflowStages = await stagesService.count({ workflowId });
 

@@ -2,7 +2,7 @@ import { Writable, Readable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
-import type { Core, Struct } from '@strapi/types';
+import type { Core, Data, Struct } from '@strapi/types';
 import type { IDestinationProvider, IMetadata, ProviderType, Transaction } from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
@@ -49,7 +49,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   /**
    * The entities mapper is used to map old entities to their new IDs
    */
-  #entitiesMapper: { [type: string]: { [id: number]: number } };
+  #entitiesMapper: { [type: string]: { [id: Data.ID]: Data.ID } };
 
   constructor(options: ILocalStrapiDestinationProviderOptions) {
     this.options = options;
@@ -227,7 +227,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     this.#reportInfo('creating entities stream');
     const { strategy } = this.options;
 
-    const updateMappingTable = (type: string, oldID: number, newID: number) => {
+    const updateMappingTable = (type: string, oldID: Data.ID, newID: Data.ID) => {
       if (!this.#entitiesMapper[type]) {
         this.#entitiesMapper[type] = {};
       }
@@ -356,7 +356,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     const { strategy } = this.options;
-    const mapID = (uid: string, id: number): number | undefined => this.#entitiesMapper[uid]?.[id];
+    const mapID = (uid: string, id: Data.ID): Data.ID | undefined =>
+      this.#entitiesMapper[uid]?.[id];
 
     if (strategy === 'restore') {
       return restore.createLinksWriteStream(mapID, this.strapi, this.transaction, this.onWarning);

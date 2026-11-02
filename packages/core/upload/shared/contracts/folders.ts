@@ -1,4 +1,5 @@
 import { errors } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 
 export type SortOrder = 'ASC' | 'DESC';
 
@@ -11,7 +12,7 @@ export interface FolderDefinition extends Omit<Folder, 'children' | 'files' | 'p
     count: number;
   };
   createdAt?: string;
-  documentId?: string;
+  documentId?: Data.DocumentID;
   files?: {
     count: number;
   };
@@ -34,7 +35,7 @@ export interface Folder {
   /**
    * children ids
    */
-  children?: number[];
+  children?: Data.ID[];
   path?: string;
   files?: File[];
   createdAt?: string;
@@ -55,7 +56,7 @@ type FolderNodeWithValue = Omit<FolderNode, 'children'> & {
  */
 export declare namespace GetFolder {
   export interface Request {
-    params: { id: number };
+    params: { id: Data.ID };
     query: {};
   }
 
@@ -103,11 +104,11 @@ export declare namespace CreateFolders {
  */
 export declare namespace UpdateFolder {
   export interface Request {
-    params: { id: number };
+    params: { id: Data.ID };
     query: {};
     body: {
       name: string;
-      parent: number | null;
+      parent: Data.ID | null;
     };
   }
 
@@ -141,7 +142,7 @@ export declare namespace GetFolderStructure {
 export declare namespace BulkDeleteFolders {
   export interface Request {
     body: {
-      folderIds: number[];
+      folderIds: Data.ID[];
     };
   }
 
@@ -162,8 +163,8 @@ export declare namespace BulkDeleteFolders {
 export declare namespace BulkMoveFolders {
   export interface Request {
     body: {
-      folderIds: number[];
-      destinationFolderId: number | null; // null = Media Library root
+      folderIds: Data.ID[];
+      destinationFolderId: Data.ID | null; // null = Media Library root
     };
   }
 

@@ -1,4 +1,5 @@
 import { errors } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 
 type SortOrder = 'ASC' | 'DESC';
 
@@ -88,18 +89,18 @@ export interface File {
   provider?: string;
   provider_metadata?: Record<string, unknown> | null;
   isUrlSigned?: boolean;
-  folder?: number | string | null;
+  folder?: Data.ID | null;
   folderPath?: string;
   related?: {
-    id: string | number;
+    id: Data.ID;
     __type: string;
     __pivot: { field: string };
   }[];
   createdAt?: string;
   updatedAt?: string;
-  createdBy?: number;
+  createdBy?: Data.ID;
   publishedAt?: string;
-  updatedBy?: number;
+  updatedBy?: Data.ID;
   isLocal?: boolean;
 }
 
@@ -131,7 +132,7 @@ export declare namespace GetFiles {
     query: {
       page?: string;
       pageSize?: string;
-      folder: number | null;
+      folder: Data.ID | null;
       sort?: `${SortKey}:${SortOrder}`;
     };
   }
@@ -150,7 +151,7 @@ export declare namespace GetFiles {
  */
 export declare namespace GetFile {
   export interface Request {
-    params: { id: number };
+    params: { id: Data.ID };
     query: {};
   }
 
@@ -166,7 +167,7 @@ export declare namespace GetFile {
 export declare namespace BulkDeleteFiles {
   export interface Request {
     body: {
-      fileIds: number[];
+      fileIds: Data.ID[];
     };
   }
 
@@ -187,8 +188,8 @@ export declare namespace BulkDeleteFiles {
 export declare namespace BulkMoveFiles {
   export interface Request {
     body: {
-      fileIds: number[];
-      destinationFolderId: number;
+      fileIds: Data.ID[];
+      destinationFolderId: Data.ID;
     };
   }
 
@@ -208,7 +209,7 @@ export declare namespace BulkMoveFiles {
  */
 export declare namespace DeleteFile {
   export interface Request {
-    params: { id: number };
+    params: { id: Data.ID };
     query: {};
   }
 
@@ -337,7 +338,7 @@ export declare namespace CreateFilesStreamEvents {
 export declare namespace UpdateFile {
   export interface Request {
     body: FormData;
-    params: { id: number };
+    params: { id: Data.ID };
   }
   export interface Response {
     data: File;
@@ -352,13 +353,13 @@ export declare namespace BulkUpdateFiles {
   export interface Request {
     body: {
       updates: Array<{
-        id: number;
+        id: Data.ID;
         fileInfo: {
           name?: string;
           alternativeText?: string | null;
           caption?: string | null;
           focalPoint?: FocalPoint | null;
-          folder?: number | null;
+          folder?: Data.ID | null;
         };
       }>;
     };
@@ -398,7 +399,7 @@ export declare namespace CreateAIMetadataJob {
   export interface Response {
     data:
       | {
-          jobId: number;
+          jobId: Data.ID;
           status: 'pending';
         }
       | {
@@ -421,14 +422,14 @@ export declare namespace GenerateAIMetadata {
   export type FileStatus = 'success' | 'skipped' | 'error';
 
   export interface FileResult {
-    id: number;
+    id: Data.ID;
     status: FileStatus;
     error?: string;
   }
 
   export interface Request {
     body: {
-      fileIds: number[];
+      fileIds: Data.ID[];
     };
   }
 
@@ -440,7 +441,7 @@ export declare namespace GenerateAIMetadata {
 
 /** User object returned when createdBy is populated (GET /upload/files/:id) */
 export interface PopulatedCreatedBy {
-  id: number;
+  id: Data.ID;
   firstname?: string;
   lastname?: string;
   username?: string | null;

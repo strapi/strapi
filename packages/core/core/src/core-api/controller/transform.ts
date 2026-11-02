@@ -3,18 +3,18 @@ import type { UID, Struct, Data } from '@strapi/types';
 import { async } from '@strapi/utils';
 
 type TransformedEntry = {
-  id: string;
+  id: Data.ID;
   documentId?: Data.DocumentID | null;
   attributes: Record<string, unknown>;
 };
 
 type TransformedComponent = {
-  id: string;
+  id: Data.ID;
   [key: string]: unknown;
 };
 
 type Entry = {
-  id: string;
+  id: Data.ID;
   documentId: Data.DocumentID | null;
   [key: string]: Entry | Entry[] | string | number | null | boolean | Date;
 };

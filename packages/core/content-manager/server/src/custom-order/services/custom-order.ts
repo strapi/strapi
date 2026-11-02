@@ -1,4 +1,4 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import storeUtils from '../../services/utils/store';
@@ -145,7 +145,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
       .select(['id'])
       .where({ [POSITION_ATTRIBUTE]: { $null: true } })
       .first()
-      .execute<{ id: number } | undefined>();
+      .execute<{ id: Data.ID } | undefined>();
 
     return row !== undefined && row !== null;
   };
@@ -153,7 +153,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * Position of a document, or undefined if it has none (or does not exist).
    */
-  const getPosition = async (uid: UID.ContentType, documentId: string) => {
+  const getPosition = async (uid: UID.ContentType, documentId: Data.DocumentID) => {
     const row = await strapi.db
       .queryBuilder(uid)
       .select([POSITION_ATTRIBUTE])
@@ -323,7 +323,7 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
      * Makes sure every row of a document shares the document's position. Needed when a row
      * is created for an existing document, typically a new locale.
      */
-    async syncDocumentPosition(uid: UID.ContentType, documentId: string) {
+    async syncDocumentPosition(uid: UID.ContentType, documentId: Data.DocumentID) {
       await withOrderLock(uid, async () => {
         const position = (await getPosition(uid, documentId)) ?? (await getTopPosition(uid));
 
@@ -349,8 +349,8 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
       placement,
     }: {
       uid: UID.ContentType;
-      documentId: string;
-      anchorId: string;
+      documentId: Data.DocumentID;
+      anchorId: Data.DocumentID;
       placement: Placement;
     }) {
       const { positionColumn } = getTable(uid);

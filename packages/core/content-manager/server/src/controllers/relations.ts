@@ -12,7 +12,7 @@ const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 
 interface RelationEntity {
   id: Data.ID;
-  documentId: Modules.Documents.ID;
+  documentId: Data.DocumentID;
   updatedAt: string | Date;
   publishedAt?: string | Date;
   [key: string]: unknown;
@@ -86,7 +86,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
   const statusByDocumentId = indexByDocumentId(availableStatus);
 
   return relations.map((relation: RelationEntity) => {
-    const candidates = statusByDocumentId.get(relation.documentId as string) || [];
+    const candidates = statusByDocumentId.get(relation.documentId) || [];
     const availableStatuses = relation.locale
       ? candidates.filter((c) => c.locale === relation.locale)
       : candidates;
@@ -196,7 +196,7 @@ export default {
       }
     }
 
-    let entryId: string | number | null = null;
+    let entryId: Data.ID | null = null;
 
     if (id) {
       const where: Record<string, any> = {};

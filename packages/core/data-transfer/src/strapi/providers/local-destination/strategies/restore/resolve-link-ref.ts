@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import type { ILink } from '../../../../../types';
 
@@ -34,7 +34,7 @@ export const resolveLinkRef = (
   strapi: Core.Strapi,
   link: ILink,
   side: 'left' | 'right',
-  mapID: (uid: string, id: number) => number | undefined
+  mapID: (uid: string, id: Data.ID) => Data.ID | undefined
 ): number | string | undefined => {
   const { type, ref } = side === 'left' ? link.left : link.right;
 

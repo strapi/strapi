@@ -48,7 +48,7 @@ const getCounterparts = async (
   }
 
   const documentIds = [
-    ...new Set(drafts.map((entry: { document_id: Data.ID }) => entry.document_id)),
+    ...new Set(drafts.map((entry: { document_id: Data.DocumentID }) => entry.document_id)),
   ];
 
   const counterpartsQuery = strapi.db

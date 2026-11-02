@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { async } from '@strapi/utils';
 
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
@@ -40,8 +40,8 @@ function getWorkflowsPermissionChecker({ strapi }: { strapi: Core.Strapi }, user
 interface PopulatedPermission {
   action: string;
   subject?: string | null;
-  role: number | { id: number };
-  actionParameters?: { from?: number; to?: number };
+  role: Data.ID | { id: Data.ID };
+  actionParameters?: { from?: Data.ID; to?: Data.ID };
 }
 
 interface PopulatedStage {

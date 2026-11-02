@@ -4,7 +4,7 @@ import { errors } from '@strapi/utils';
 type PaginationQuery = Modules.EntityService.Params.Pagination.PageNotation;
 
 export interface RelationResult {
-  documentId: Modules.Documents.ID;
+  documentId: Data.DocumentID;
   id: Data.ID;
   status?: Modules.Documents.Params.PublicationStatus.Kind;
   locale?: Modules.Documents.Params.Locale.StringNotation;
@@ -47,8 +47,8 @@ export declare namespace FindAvailable {
       status?: Modules.Documents.Params.PublicationStatus.Kind;
       _filter?: string;
       _q?: string;
-      idsToOmit?: Modules.Documents.ID[];
-      idsToInclude?: Modules.Documents.ID[];
+      idsToOmit?: Data.ID[];
+      idsToInclude?: Data.ID[];
     };
   }
 
@@ -72,8 +72,8 @@ export declare namespace FindExisting {
       _filter?: string;
       _q?: string;
       status?: Modules.Documents.Params.PublicationStatus.Kind;
-      idsToOmit?: Modules.Documents.ID[];
-      idsToInclude?: Modules.Documents.ID[];
+      idsToOmit?: Data.ID[];
+      idsToInclude?: Data.ID[];
     };
   }
 

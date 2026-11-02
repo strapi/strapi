@@ -1,4 +1,5 @@
 import { z } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 
 /**
  * The exhaustive set of asset fields the MCP surface may expose — an allowlist, for the reasons
@@ -46,7 +47,7 @@ export const mediaListAssetsOutputSchema = z.object({
  * Folder tree node. `children` is recursive and unbounded in depth, so it is typed lazily.
  */
 export type MediaFolderNode = {
-  id: number;
+  id: Data.ID;
   name: string;
   children: MediaFolderNode[];
 };

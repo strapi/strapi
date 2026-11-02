@@ -1,6 +1,6 @@
 import { get, has, merge, set, unset } from 'lodash';
 
-import type { Core, Schema, UID } from '@strapi/types';
+import type { Core, Data, Schema, UID } from '@strapi/types';
 import { contentTypes, traverseEntity } from '@strapi/utils';
 import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
 import {
@@ -437,7 +437,7 @@ export const prepareCloneData = async (
 const resolveOwnerEntryId = (
   entryData: Record<string, unknown>,
   ownerPath: string | null,
-  fallbackId?: number
+  fallbackId?: Data.ID
 ) => {
   if (ownerPath == null) {
     return fallbackId;
@@ -481,8 +481,8 @@ export const copyCloneRelationRows = async (
   strapi: Core.Strapi,
   uid: UID.Schema,
   attributeName: string,
-  sourceEntryId: number,
-  targetEntryId: number
+  sourceEntryId: Data.ID,
+  targetEntryId: Data.ID
 ) => {
   const { attributes } = strapi.db.metadata.get(uid);
   const attribute = attributes[attributeName];
@@ -525,8 +525,8 @@ const copyFkColumnRelation = async (
   strapi: Core.Strapi,
   targetUid: UID.Schema,
   attributeName: string,
-  sourceEntryId: number,
-  targetEntryId: number,
+  sourceEntryId: Data.ID,
+  targetEntryId: Data.ID,
   sourceUid: UID.Schema = targetUid
 ) => {
   const meta = strapi.db.metadata.get(sourceUid);
@@ -573,8 +573,8 @@ const copyMorphToOneRelation = async (
   strapi: Core.Strapi,
   targetUid: UID.Schema,
   attributeName: string,
-  sourceEntryId: number,
-  targetEntryId: number,
+  sourceEntryId: Data.ID,
+  targetEntryId: Data.ID,
   sourceUid: UID.Schema = targetUid
 ) => {
   const sourceAttribute = strapi.db.metadata.get(sourceUid).attributes[attributeName];
@@ -623,8 +623,8 @@ const copyMorphToOneRelation = async (
 export const applyDeferredCloneRelationCopies = async (
   strapi: Core.Strapi,
   rootUid: UID.ContentType,
-  sourceRootId: number,
-  targetRootId: number,
+  sourceRootId: Data.ID,
+  targetRootId: Data.ID,
   originalData: Record<string, unknown>,
   clonedData: Record<string, unknown>,
   deferredCopies: DeferredRelationCopy[]
@@ -751,7 +751,7 @@ const resolveEntryIdsByRef = async (
   targetUid: UID.Schema,
   ref: Record<string, unknown>,
   opts: { locale?: string }
-): Promise<number[]> => {
+): Promise<Data.ID[]> => {
   if (typeof ref.id === 'number') {
     return [ref.id];
   }
@@ -789,7 +789,7 @@ const resolveEntryIdsByRef = async (
 
   const model = strapi.getModel(targetUid);
   const targetHasDP = contentTypes.hasDraftAndPublish(model);
-  const resolvedIds: number[] = [];
+  const resolvedIds: Data.ID[] = [];
 
   for (const status of statuses) {
     const where: Record<string, unknown> = { documentId: ref.documentId };
@@ -821,7 +821,7 @@ const resolveEntryIdByRef = async (
   targetUid: UID.Schema,
   ref: Record<string, unknown>,
   opts: { locale?: string }
-): Promise<number | undefined> => {
+): Promise<Data.ID | undefined> => {
   const resolvedIds = await resolveEntryIdsByRef(strapi, sourceUid, targetUid, ref, opts);
 
   // Single-column FK/morph storage can keep only one id; match entity-manager and
@@ -936,8 +936,8 @@ const resolveInlineRelationAssignment = async (
     sourceSchemaUid?: UID.Schema;
     sourceUid: UID.Schema;
     originalValue?: unknown;
-    sourceOwnerId?: number;
-    targetOwnerId: number;
+    sourceOwnerId?: Data.ID;
+    targetOwnerId: Data.ID;
     attributeName: string;
   }
 ): Promise<unknown> => {
@@ -1044,8 +1044,8 @@ const resolveInlineRelationAssignment = async (
 export const applyPostCloneRelationUpdates = async (
   strapi: Core.Strapi,
   rootUid: UID.ContentType,
-  sourceRootId: number,
-  clonedEntryId: number,
+  sourceRootId: Data.ID,
+  clonedEntryId: Data.ID,
   clonedData: Record<string, unknown>,
   originalData: Record<string, unknown>,
   postCloneUpdates: PostCloneRelationUpdate[]

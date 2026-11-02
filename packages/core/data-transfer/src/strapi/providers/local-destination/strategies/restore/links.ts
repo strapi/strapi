@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import type { Knex } from 'knex';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { ILink, Transaction } from '../../../../../types';
 import { createCappedWarningReporter } from '../../../../../utils/capped-warnings';
@@ -70,7 +70,7 @@ export const formatSkippedLinksRestoreSummary = (unmapped: number, foreignKey: n
 };
 
 export const createLinksWriteStream = (
-  mapID: (uid: string, id: number) => number | undefined,
+  mapID: (uid: string, id: Data.ID) => Data.ID | undefined,
   strapi: Core.Strapi,
   transaction?: Transaction,
   onWarning?: (message: string) => void

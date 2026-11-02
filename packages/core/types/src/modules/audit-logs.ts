@@ -1,3 +1,5 @@
+import type * as Data from '../data';
+
 /**
  * Where an audited action comes from.
  * 'scheduler' refers to the execution mechanism, so any scheduled job can use it.
@@ -18,7 +20,7 @@ export type SystemOrigin = 'scheduler';
  * for the events that allow it.
  */
 export type Actor =
-  | { type: 'admin-user'; user: { id: string | number; email: string; name: string } }
+  | { type: 'admin-user'; user: { id: Data.ID; email: string; name: string } }
   | { type: 'system' }
   | { type: 'unknown' };
 
@@ -31,7 +33,7 @@ export type Actor =
  */
 export interface Resource {
   type: string;
-  id?: string | number;
+  id?: Data.ID;
   name?: string;
 }
 

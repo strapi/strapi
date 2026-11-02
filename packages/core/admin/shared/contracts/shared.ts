@@ -78,7 +78,7 @@ export interface Pagination {
 export interface FieldContentSourceMap {
   path: string;
   type: Struct.SchemaAttributes[string]['type'];
-  documentId: string;
+  documentId: Data.DocumentID;
   locale: string | null;
   model?: UID.Schema;
   kind?: Struct.ContentTypeKind;

@@ -14,7 +14,7 @@ import {
   pagination as paginationUtils,
 } from '@strapi/utils';
 
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, FOLDER_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
@@ -25,17 +25,15 @@ import type { ViewConfiguration } from '../controllers/validation/admin/configur
 import type { Settings } from '../controllers/validation/admin/settings';
 
 type User = {
-  id: string | number;
+  id: Data.ID;
 };
-
-type ID = string | number;
 
 type CommonOptions = {
   user?: User;
 };
 
 type Metas = {
-  refId?: ID;
+  refId?: Data.ID;
   ref?: string;
   field?: string;
   path?: string;
@@ -136,7 +134,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     { filename, type, size }: { filename: string; type: string; size: number },
     fileInfo: Partial<FileInfo> = {},
     metas: {
-      refId?: ID;
+      refId?: Data.ID;
       ref?: string;
       field?: string;
       path?: string;
@@ -453,7 +451,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function updateFileInfo(
-    id: ID,
+    id: Data.ID,
     { name, alternativeText, caption, focalPoint, folder }: FileInfo,
     opts?: CommonOptions
   ) {
@@ -483,7 +481,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function replace(
-    id: ID,
+    id: Data.ID,
     { data, file }: { data: { fileInfo: FileInfo } & Metas; file: InputFile },
     opts?: CommonOptions
   ) {
@@ -566,7 +564,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return update(id, fileData, { user }, { replaced: true, previous: dbFile });
   }
 
-  type FolderRef = { id: number; name: string } | null;
+  type FolderRef = { id: Data.ID; name: string } | null;
 
   async function getFolderAfterUpdate(
     values: Partial<UploadableFile>,
@@ -578,7 +576,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return previousFolder;
     }
 
-    const value = values.folder as number | { id: number } | null;
+    const value = values.folder as Data.ID | { id: Data.ID } | null;
     const folderId = value !== null && typeof value === 'object' ? value.id : value;
 
     if (folderId == null) {
@@ -595,7 +593,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function update(
-    id: ID,
+    id: Data.ID,
     values: Partial<UploadableFile>,
     opts?: CommonOptions,
     {
@@ -658,7 +656,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  async function findOne(id: ID, populate = {}) {
+  async function findOne(id: Data.ID, populate = {}) {
     const query = strapi.get('query-params').transform(FILE_MODEL_UID, {
       populate,
     });

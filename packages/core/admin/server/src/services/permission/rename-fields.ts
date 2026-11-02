@@ -1,5 +1,5 @@
 import { invert, isEmpty, uniq, xor } from 'lodash';
-import type { Core, Struct } from '@strapi/types';
+import type { Core, Data, Struct } from '@strapi/types';
 
 import { getNestedFieldsWithIntermediate } from '../content-type';
 
@@ -10,7 +10,7 @@ type AttributeRenameHandler = Parameters<
 type AttributeRenames = Parameters<AttributeRenameHandler>[1];
 
 interface PermissionRow {
-  id: number | string;
+  id: Data.ID;
   subject: string | null;
   properties?: { fields?: unknown } | null;
 }

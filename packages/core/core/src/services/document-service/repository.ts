@@ -8,7 +8,7 @@ import {
   createModelCache,
 } from '@strapi/utils';
 
-import type { UID, Modules } from '@strapi/types';
+import type { Data, UID, Modules } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
@@ -465,7 +465,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const clonedEntries = await async.map(
       entriesToClone,
       async (entryToClone: Record<string, unknown>) => {
-        const sourceEntryId = entryToClone.id as number;
+        const sourceEntryId = entryToClone.id as Data.ID;
         const originalData = omit(entryToClone, ['id', 'createdAt', 'updatedAt']) as Record<
           string,
           unknown

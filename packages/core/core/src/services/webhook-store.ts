@@ -4,7 +4,7 @@
 
 import { errors } from '@strapi/utils';
 import type { Model, Database } from '@strapi/database';
-import type { Modules } from '@strapi/types';
+import type { Data, Modules } from '@strapi/types';
 
 const { ValidationError } = errors;
 
@@ -39,7 +39,7 @@ const webhookModel: Model = {
 
 type Webhook = Modules.WebhookStore.Webhook;
 type DBOutput = Omit<Webhook, 'id' | 'isEnabled' | 'contentTypeEvents'> & {
-  id: string | number;
+  id: Data.ID;
   enabled: boolean;
   // null for webhooks saved before events could be selected per content type
   contentTypeEvents?: Webhook['contentTypeEvents'] | null;
@@ -103,10 +103,10 @@ export interface WebhookStore {
   listAllowedEvents(): string[];
   getAllowedEvent(key: string): string | undefined;
   findWebhooks(): Promise<Webhook[]>;
-  findWebhook(id: string): Promise<Webhook | null>;
+  findWebhook(id: Data.ID): Promise<Webhook | null>;
   createWebhook(data: Webhook): Promise<Webhook>;
-  updateWebhook(id: string, data: Webhook): Promise<Webhook | null>;
-  deleteWebhook(id: string): Promise<Webhook | null>;
+  updateWebhook(id: Data.ID, data: Webhook): Promise<Webhook | null>;
+  deleteWebhook(id: Data.ID): Promise<Webhook | null>;
 }
 
 const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {

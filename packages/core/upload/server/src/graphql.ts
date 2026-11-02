@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import { FILE_MODEL_UID } from './constants';
 
@@ -53,7 +53,7 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
             info: FILE_INFO_INPUT_TYPE_NAME,
           },
 
-          async resolve(parent: unknown, args: { id: number; info: any }) {
+          async resolve(parent: unknown, args: { id: Data.ID; info: any }) {
             const { id, info } = args;
 
             return getUploadService('upload').updateFileInfo(id, info);
@@ -70,7 +70,7 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
             id: nonNull('ID'),
           },
 
-          async resolve(parent: unknown, args: { id: number }) {
+          async resolve(parent: unknown, args: { id: Data.ID }) {
             const { id } = args;
 
             const file = await getUploadService('upload').findOne(id);

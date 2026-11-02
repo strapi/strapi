@@ -1,14 +1,14 @@
 import { groupBy, pick } from 'lodash';
 
 import { async, contentTypes } from '@strapi/utils';
-import type { Core, UID, Modules } from '@strapi/types';
+import type { Core, Data, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
 const { getScalarAttributes, getMediaAttributes } = contentTypes;
 
 export interface DocumentVersion {
-  id: string | number;
+  id: Data.ID;
   documentId: Modules.Documents.ID;
   locale?: string;
   localizations?: DocumentVersion[];

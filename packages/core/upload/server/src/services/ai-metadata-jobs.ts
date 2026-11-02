@@ -1,10 +1,10 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 import { AI_METADATA_JOB_UID } from '../models/ai-metadata-job';
 
 export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi }) => ({
-  async createJob(): Promise<number> {
+  async createJob(): Promise<Data.ID> {
     const job = await strapi.db.query(AI_METADATA_JOB_UID).create({
       data: {
         status: 'processing',
@@ -15,14 +15,14 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     return job.id;
   },
 
-  async getJob(jobId: number): Promise<AIMetadataJob | null> {
+  async getJob(jobId: Data.ID): Promise<AIMetadataJob | null> {
     return strapi.db.query(AI_METADATA_JOB_UID).findOne({
       where: { id: jobId },
     });
   },
 
   async updateJob(
-    jobId: number,
+    jobId: Data.ID,
     updates: Partial<Omit<AIMetadataJob, 'id' | 'createdAt'>>
   ): Promise<void> {
     await strapi.db.query(AI_METADATA_JOB_UID).update({
@@ -31,7 +31,7 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     });
   },
 
-  async deleteJob(jobId: number): Promise<void> {
+  async deleteJob(jobId: Data.ID): Promise<void> {
     await strapi.db.query(AI_METADATA_JOB_UID).delete({
       where: { id: jobId },
     });

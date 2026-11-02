@@ -1,5 +1,5 @@
 import { traverseEntity } from '@strapi/utils';
-import type { UID } from '@strapi/types';
+import type { Data, UID } from '@strapi/types';
 
 // Relations whose cardinality is "many" — maps to Array output.
 // Includes non-owning variants and morph-many.
@@ -23,7 +23,7 @@ export const isManyRelationForMcp = (attribute: { relation?: string }): boolean 
   MANY_RELATION_TYPES.has(attribute.relation ?? '');
 
 type RelationIdentity = {
-  documentId: string;
+  documentId: Data.DocumentID;
   locale?: string;
   __type?: string;
   status?: string;

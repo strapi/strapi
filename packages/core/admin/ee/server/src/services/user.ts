@@ -1,4 +1,5 @@
 import _, { castArray, toNumber } from 'lodash';
+import type { Data } from '@strapi/types';
 
 import { arrays, errors } from '@strapi/utils';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
@@ -40,7 +41,7 @@ const getSessionManager = () => {
  * @param {string} id
  * @param {object} input
  */
-const updateEEDisabledUsersList = async (id: string, input: any) => {
+const updateEEDisabledUsersList = async (id: Data.ID, input: any) => {
   const disabledUsers = await getService('seat-enforcement').getDisabledUserList();
 
   if (!disabledUsers) {
@@ -62,9 +63,9 @@ const updateEEDisabledUsersList = async (id: string, input: any) => {
   }
 };
 
-const castNumberArray = (ids: unknown) => castArray(ids).map((id) => toNumber(id));
+const castNumberArray = (ids: Data.ID | Data.ID[]) => castArray(ids).map((id) => toNumber(id));
 
-const removeFromEEDisabledUsersList = async (ids: unknown) => {
+const removeFromEEDisabledUsersList = async (ids: Data.ID | Data.ID[]) => {
   let idsToCheck: any;
   if (typeof ids === 'object') {
     idsToCheck = castNumberArray(ids);
@@ -92,7 +93,7 @@ const removeFromEEDisabledUsersList = async (ids: unknown) => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const updateById = async (id: any, attributes: any) => {
+const updateById = async (id: Data.ID, attributes: any) => {
   // Check at least one super admin remains
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
@@ -156,7 +157,7 @@ const updateById = async (id: any, attributes: any) => {
  * @param id id of the user to delete
  * @returns {Promise<user>}
  */
-const deleteById = async (id: unknown) => {
+const deleteById = async (id: Data.ID) => {
   // Check at least one super admin remains
   const userToDelete = await strapi.db.query('admin::user').findOne({
     where: { id },
@@ -198,7 +199,7 @@ const deleteById = async (id: unknown) => {
  * @param ids ids of the users to delete
  * @returns {Promise<user>}
  */
-const deleteByIds = async (ids: any) => {
+const deleteByIds = async (ids: Data.ID[]) => {
   // Check at least one super admin remains
   const superAdminRole = await getSuperAdminRoleOrThrow();
   const nbOfSuperAdminToDelete = await strapi.db.query('admin::user').count({
@@ -247,7 +248,7 @@ const sanitizeUserRoles = (role: unknown) => _.pick(role, ['id', 'name', 'descri
  * Check if a user is the last super admin
  * @param {int|string} userId user's id to look for
  */
-const isLastSuperAdminUser = async (userId: unknown) => {
+const isLastSuperAdminUser = async (userId: Data.ID) => {
   const user = (await findOne(userId)) as any;
   const superAdminRole: AdminRoleWithUsersCount | null =
     await getService('role').getSuperAdminWithUsersCount();
@@ -280,7 +281,7 @@ const sanitizeUser = (user: any) => {
 /**
  * Find one user
  */
-const findOne = async (id: any, populate = ['roles']) => {
+const findOne = async (id: Data.ID, populate = ['roles']) => {
   return strapi.db.query('admin::user').findOne({ where: { id }, populate });
 };
 

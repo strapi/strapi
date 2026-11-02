@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
@@ -77,7 +77,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateFilesWithAIMetadata(
       files: File[],
       metadataResults: Array<{ altText: string; caption: string } | null>,
-      user: { id: string | number }
+      user: { id: Data.ID }
     ) {
       const uploadService = strapi.plugin('upload').service('upload');
 
@@ -116,7 +116,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Process existing files with job tracking for progress updates
      */
-    async processExistingFiles(jobId: number, user: { id: string | number }): Promise<void> {
+    async processExistingFiles(jobId: Data.ID, user: { id: Data.ID }): Promise<void> {
       const jobService = getService('aiMetadataJobs');
 
       try {
@@ -183,8 +183,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
      * @experimental
      */
     async generateForFiles(
-      fileIds: Array<number | string>,
-      user: { id: string | number }
+      fileIds: Data.ID[],
+      user: { id: Data.ID }
     ): Promise<AIMetadataFileResult[]> {
       // `yup.strapiID()` accepts both numbers and numeric strings without
       // coercing, so normalise here — otherwise a request sending `["1"]`
@@ -199,7 +199,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       const filesById = new Map(files.map((file) => [file.id, file]));
 
       // Keyed by input id so the response order matches the request order.
-      const resultsById = new Map<number, AIMetadataFileResult>();
+      const resultsById = new Map<Data.ID, AIMetadataFileResult>();
       const images: File[] = [];
 
       uniqueIds.forEach((id) => {

@@ -448,7 +448,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       if (releasesUpdated.length > 0) {
-        await async.map(releasesUpdated, async (releaseId: number) => {
+        await async.map(releasesUpdated, async (releaseId: Data.ID) => {
           await getService('release', { strapi }).updateReleaseStatus(releaseId);
         });
       }

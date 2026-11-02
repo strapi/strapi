@@ -1,4 +1,5 @@
 import { yup, validateYupSchema } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 import { getService } from '../../../utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
 import { folderExists } from './utils';
@@ -7,7 +8,7 @@ import { isFolderOrChild } from '../../utils/folders';
 const NO_SLASH_REGEX = /^[^/]+$/;
 const NO_SPACES_AROUND = /^(?! ).+(?<! )$/;
 
-const isNameUniqueInFolder = (id?: number): yup.TestFunction<string | undefined> => {
+const isNameUniqueInFolder = (id?: Data.ID): yup.TestFunction<string | undefined> => {
   return async function test(name?: string) {
     const { exists } = getService('folder');
     const filters: Record<string, unknown> = { name, parent: this.parent.parent || null };
@@ -43,7 +44,7 @@ const validateCreateFolderSchema = yup
   .noUnknown()
   .required();
 
-const validateUpdateFolderSchema = (id: number) =>
+const validateUpdateFolderSchema = (id: Data.ID) =>
   yup
     .object()
     .shape({
@@ -87,5 +88,5 @@ const validateUpdateFolderSchema = (id: number) =>
     .required();
 
 export const validateCreateFolder = validateYupSchema(validateCreateFolderSchema);
-export const validateUpdateFolder = (id: number) =>
+export const validateUpdateFolder = (id: Data.ID) =>
   validateYupSchema(validateUpdateFolderSchema(id));

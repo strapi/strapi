@@ -146,7 +146,7 @@ export declare namespace UpdateReleaseAction {
   export interface Request {
     params: {
       actionId: ReleaseAction['id'];
-      releaseId: ReleaseAction['id'];
+      releaseId: Release['id'];
     };
     body: {
       type: ReleaseAction['type'];
