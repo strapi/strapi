@@ -18,7 +18,7 @@ jest.mock('../../services/release', () => ({
   useGetReleasesForEntryQuery: jest.fn(),
 }));
 
-const renderPanel = (action: { type: 'publish' | 'unpublish'; isEntryValid?: boolean }) => {
+const renderPanel = (action: { type: 'publish' | 'unpublish'; isEntryValid?: boolean | null }) => {
   (useGetReleasesForEntryQuery as jest.Mock).mockReturnValue({
     data: {
       data: [
@@ -44,21 +44,22 @@ describe('ReleasesPanel', () => {
     window.strapi.isEE = true;
   });
 
-  it('says an invalid entry is not ready to be published in the release', () => {
-    renderPanel({ type: 'publish', isEntryValid: false });
+  // Like the details page and the server: an entry never validated isn't ready either
+  it.each([false, null, undefined])('says a publish entry with validity %s is not ready', (v) => {
+    renderPanel({ type: 'publish', isEntryValid: v });
 
     expect(screen.getByText('Not ready to be published in')).toBeInTheDocument();
     expect(screen.queryByText('Will be published in')).not.toBeInTheDocument();
   });
 
-  it.each([true, undefined])('says a publish entry with validity %s will be published', (v) => {
-    renderPanel({ type: 'publish', isEntryValid: v });
+  it('says a valid publish entry will be published', () => {
+    renderPanel({ type: 'publish', isEntryValid: true });
 
     expect(screen.getByText('Will be published in')).toBeInTheDocument();
   });
 
-  it('keeps the unpublish copy', () => {
-    renderPanel({ type: 'unpublish', isEntryValid: false });
+  it.each([false, null])('keeps the unpublish copy with validity %s', (v) => {
+    renderPanel({ type: 'unpublish', isEntryValid: v });
 
     expect(screen.getByText('Will be unpublished in')).toBeInTheDocument();
   });

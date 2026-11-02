@@ -96,7 +96,7 @@ const Panel: PanelComponent = ({
                 variant="pi"
                 textColor={getReleaseColorVariant(release.actions[0].type, '600')}
               >
-                {release.actions[0].type === 'publish' && release.actions[0].isEntryValid === false
+                {release.actions[0].type === 'publish' && release.actions[0].isEntryValid !== true
                   ? formatMessage({
                       id: 'content-releases.content-manager-edit-view.list-releases.not-ready',
                       defaultMessage: 'Not ready to be published in',

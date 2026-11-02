@@ -352,10 +352,11 @@ const ReasonBody = ({
                 {
                   id: 'content-releases.reason-drawer.stage',
                   defaultMessage:
-                    'At {entryStage, select, none {no stage} other {{entryStage}}}, needs {requiredStage} to be published',
+                    'At {hasEntryStage, select, true {{entryStage}} other {no stage}}, needs {requiredStage} to be published',
                 },
                 {
-                  entryStage: reason.stage.entryStage?.name ?? 'none',
+                  hasEntryStage: String(Boolean(reason.stage.entryStage)),
+                  entryStage: reason.stage.entryStage?.name,
                   requiredStage: reason.stage.requiredStage.name,
                 }
               )}
