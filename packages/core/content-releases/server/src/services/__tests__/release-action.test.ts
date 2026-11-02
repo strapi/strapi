@@ -836,14 +836,24 @@ describe('Release Action service', () => {
     };
 
     const setup = (
-      actions: { id: number; type: string; isEntryValid?: boolean; release: { id: number } }[]
+      actions: {
+        id: number;
+        type: string;
+        isEntryValid?: boolean;
+        release: { id: number };
+        contentType?: string;
+        entryDocumentId?: string;
+      }[]
     ) => {
       const actionFindMany = jest.fn().mockResolvedValue(actions);
       const actionUpdate = jest.fn();
       const actionUpdateMany = jest.fn();
+      // The draft's version, read when it's checked and again under the release lock
+      const draftFindOne = jest.fn().mockResolvedValue({ updatedAt: '2026-01-01T00:00:00.000Z' });
       const strapiMock = {
         ...baseStrapiMock,
         log: { error: jest.fn() },
+        documents: jest.fn(() => ({ findOne: draftFindOne, findFirst: draftFindOne })),
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
@@ -865,7 +875,14 @@ describe('Release Action service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseActionService = createReleaseActionService({ strapi: strapiMock });
 
-      return { releaseActionService, actionFindMany, actionUpdate, actionUpdateMany, strapiMock };
+      return {
+        releaseActionService,
+        actionFindMany,
+        actionUpdate,
+        actionUpdateMany,
+        draftFindOne,
+        strapiMock,
+      };
     };
 
     it("stores each planned action's validity and recalculates each release once", async () => {
@@ -907,6 +924,64 @@ describe('Release Action service', () => {
         [{ where: { id: { $in: [3] }, type: 'publish' }, data: INVALID }],
       ]);
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[30]]);
+    });
+
+    it('re-checks under the lock a draft saved since it was checked, and stores that result', async () => {
+      const VALID = { isEntryValid: true, reason: null };
+      const { releaseActionService, actionUpdateMany, draftFindOne } = setup([
+        {
+          id: 1,
+          type: 'publish',
+          release: { id: 10 },
+          contentType: 'api::a.a',
+          entryDocumentId: 'a',
+        },
+        {
+          id: 2,
+          type: 'publish',
+          release: { id: 10 },
+          contentType: 'api::a.a',
+          entryDocumentId: 'b',
+        },
+      ]);
+      // Draft `a` is saved between its check and the lock: the check saw an older version
+      draftFindOne.mockImplementation(async ({ documentId }) => ({
+        updatedAt:
+          documentId === 'a' && draftFindOne.mock.calls.length > 2
+            ? '2026-01-02T00:00:00.000Z'
+            : '2026-01-01T00:00:00.000Z',
+      }));
+      mockGetValidityForActions.mockImplementationOnce(
+        async (found) => new Map(found.map((action) => [action.id, VALID]))
+      );
+
+      await releaseActionService.revalidatePlannedActions({});
+
+      expect(mockGetValidityForActions).toHaveBeenLastCalledWith(
+        [expect.objectContaining({ id: 1 })],
+        expect.anything()
+      );
+      expect(actionUpdateMany.mock.calls).toStrictEqual([
+        [{ where: { id: { $in: [1] }, type: 'publish' }, data: VALID }],
+        [{ where: { id: { $in: [2] }, type: 'publish' }, data: INVALID }],
+      ]);
+    });
+
+    it('does not re-check a draft unchanged since it was checked', async () => {
+      const { releaseActionService } = setup([
+        {
+          id: 1,
+          type: 'publish',
+          release: { id: 10 },
+          contentType: 'api::a.a',
+          entryDocumentId: 'a',
+        },
+      ]);
+      mockGetValidityForActions.mockClear();
+
+      await releaseActionService.revalidatePlannedActions({});
+
+      expect(mockGetValidityForActions).toHaveBeenCalledTimes(1);
     });
 
     it('logs a release whose change fails and still changes the others', async () => {

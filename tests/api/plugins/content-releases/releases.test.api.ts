@@ -172,6 +172,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const documentIdsFailingToRead = new Set<string>();
   // Publishing one of these documents waits for its pause first, through the same middleware
   const publishPauses = new Map<string, () => Promise<void>>();
+  // Reading one of these drafts in full (as a validity check does) waits for its pause after
+  // the read, through the same middleware
+  const draftCheckPauses = new Map<string, () => Promise<void>>();
   // The next release-action query of this kind fails in the database
   const failNextActionQuery: { kind: 'findMany' | 'updateMany' | 'count' | null } = {
     kind: null,
@@ -379,6 +382,16 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       if (ctx.action === 'findOne' && documentIdsFailingToRead.has(ctx.params?.documentId)) {
         throw new Error('Test-only read failure');
+      }
+
+      const draftCheckPause =
+        ctx.action === 'findOne' && ctx.params?.populate
+          ? draftCheckPauses.get(ctx.params?.documentId)
+          : undefined;
+      if (draftCheckPause) {
+        const result = await next();
+        await draftCheckPause();
+        return result;
       }
 
       return next();
@@ -3797,6 +3810,55 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
     });
 
+    test('a revalidation that checked a draft before a newer save does not store its older result', async () => {
+      const documentId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('all_or_nothing', [{ documentId }]);
+
+      // The revalidation reads the invalid draft, then waits while the draft is fixed
+      let reachedPause: () => void;
+      const pauseReached = new Promise<void>((resolve) => {
+        reachedPause = resolve;
+      });
+      let resume: () => void;
+      const resumed = new Promise<void>((resolve) => {
+        resume = resolve;
+      });
+      draftCheckPauses.set(documentId, async () => {
+        draftCheckPauses.delete(documentId);
+        reachedPause();
+        await resumed;
+      });
+
+      const staleRevalidation = strapi
+        .plugin('content-releases')
+        .service('release-action')
+        .revalidatePlannedActions({ contentType: productUID, entryDocumentId: documentId });
+      // The suite's clock is frozen: without a tick, the save would keep the draft's `updatedAt`,
+      // which tells the revalidation the draft changed
+      const frozenAt = Date.now();
+      try {
+        await pauseReached;
+        jest.setSystemTime(frozenAt + 1000);
+
+        // The save's own revalidation stores the fixed draft's result first
+        expect((await fixProduct(documentId)).statusCode).toBe(200);
+        expect(
+          await waitFor(async () => (await getAction(release.id, documentId)).isEntryValid === true)
+        ).toBe(true);
+      } finally {
+        jest.setSystemTime(frozenAt);
+        draftCheckPauses.delete(documentId);
+        resume!();
+      }
+      await staleRevalidation;
+
+      expect(await getAction(release.id, documentId)).toMatchObject({
+        isEntryValid: true,
+        reason: null,
+      });
+      expect((await getRelease(release.id)).status).toBe('ready');
+    });
+
     test('an unpublish action has no reason and never counts as not ready', async () => {
       const invalidId = await createProduct({ valid: false });
       const unpublishRelease = await createReleaseWithActions('all_or_nothing', [
@@ -3812,7 +3874,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         reason: null,
       });
 
-      // Each edit revalidates in the background: wait for one before the next, so they don't race
+      // Each edit revalidates in the background
       expect(await fixProduct(invalidId)).toMatchObject({ statusCode: 200 });
       expect(
         await waitFor(
