@@ -6,7 +6,7 @@ import { isAuditLogsEnabled } from '../audit-logs/utils';
 
 import type { GetAll } from '../../../../shared/contracts/permissions';
 
-const AUDIT_LOGS_ACTION_IDS = actions.auditLogs.map(({ uid }) => `admin::${uid}`);
+const AUDIT_LOGS_ACTION_IDS = new Set(actions.auditLogs.map(({ uid }) => `admin::${uid}`));
 
 /**
  * The license includes audit logs but `admin.auditLogs.enabled` turns them off.
@@ -31,7 +31,7 @@ export default {
     const { sections } = (ctx.body as GetAll.Response).data;
 
     sections.settings = sections.settings.map((permission) =>
-      AUDIT_LOGS_ACTION_IDS.includes(permission.action)
+      AUDIT_LOGS_ACTION_IDS.has(permission.action)
         ? { ...permission, disabledByConfig: true }
         : permission
     );
