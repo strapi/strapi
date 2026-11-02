@@ -28,6 +28,8 @@ CTB does not store schemas in the database. A content type of an API lives in `s
 
 The admin panel does not save one attribute at a time. It sends the whole change set to `POST /content-type-builder/update-schema`. Each content type, component and attribute in the payload has an `action` (`create`, `update` or `delete`). The `schema` service applies the payload to the builder, writes the files, generates or clears API folders, and commits the folder groups last. On error, `rollbackSchemaMutation` restores the touched files. Code: [`services/schema.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-type-builder/server/src/services/schema.ts).
 
+After the files are written, CTB emits `content-type.create|update|delete` and `component.create|update|delete` on `strapi.eventHub`, one event per changed schema. It awaits each event before the controller triggers the reload. If a listener throws, `emitSchemaEvent` logs the error with `strapi.log.error` and the request still succeeds, because the schema change is already on disk. Code: [`utils/events.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-type-builder/server/src/utils/events.ts).
+
 ### Reload after a write
 
 After a successful update, the `schema` controller sets `strapi.reload.isWatching` to `false` and calls `strapi.reload()` in a `setImmediate`. The reloader sends a `reload` message to the parent process of `strapi develop`, which restarts the server. The route `GET /update-schema-status` returns `isUpdating`. The admin polls it with `useServerRestartWatcher` until the server is back.

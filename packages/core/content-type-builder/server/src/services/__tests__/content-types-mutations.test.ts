@@ -7,6 +7,7 @@ import {
   deleteContentTypes,
   editContentType,
 } from '../content-types';
+import { collectUnhandledRejections } from './unhandled-rejections';
 
 const files = {
   schemas: new Set<string>(),
@@ -138,7 +139,12 @@ describe('content type mutation compensation', () => {
         'content-type-builder': { services: { 'api-handler': apiHandler } },
       },
       eventHub: { emit: jest.fn() },
-      db: { query: jest.fn(() => ({ count: jest.fn().mockResolvedValue(0) })) },
+      db: {
+        query: jest.fn(() => ({
+          count: jest.fn().mockResolvedValue(0),
+          findOne: jest.fn().mockResolvedValue(null),
+        })),
+      },
       log: { error: jest.fn() },
     } as any;
   });
@@ -210,6 +216,69 @@ describe('content type mutation compensation', () => {
     expect(files.groups).toBe('before');
   });
 
+  it('emits the update event when a kind switch succeeds', async () => {
+    await editContentType(contentType.uid, {
+      contentType: { ...contentType, kind: 'singleType', attributes: {} },
+    });
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', {
+      contentType: { uid: contentType.uid, schema: { ...contentType, kind: 'singleType' } },
+    });
+  });
+
+  describe('collectionType to singleType entry guard', () => {
+    type Row = { documentId: string; locale?: string; publishedAt: string | null };
+
+    const mockRows = (rows: Row[]) => {
+      const matches = (row: Row, where?: { documentId?: { $ne: string } }) =>
+        where?.documentId === undefined || row.documentId !== where.documentId.$ne;
+
+      strapi.db.query = jest.fn(() => ({
+        count: jest.fn(async (params?: { where?: { documentId?: { $ne: string } } }) => {
+          return rows.filter((row) => matches(row, params?.where)).length;
+        }),
+        findOne: jest.fn(async () => rows[0] ?? null),
+      })) as any;
+    };
+
+    const switchToSingleType = () =>
+      editContentType(contentType.uid, {
+        contentType: { ...contentType, kind: 'singleType', attributes: {} },
+      });
+
+    it('allows the switch when the only document has a draft and a published row', async () => {
+      mockRows([
+        { documentId: 'doc-1', publishedAt: null },
+        { documentId: 'doc-1', publishedAt: '2026-01-01T00:00:00.000Z' },
+      ]);
+
+      await expect(switchToSingleType()).resolves.toBeDefined();
+    });
+
+    it('allows the switch when the only document exists in several locales', async () => {
+      mockRows([
+        { documentId: 'doc-1', locale: 'en', publishedAt: null },
+        { documentId: 'doc-1', locale: 'en', publishedAt: '2026-01-01T00:00:00.000Z' },
+        { documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { documentId: 'doc-1', locale: 'fr', publishedAt: '2026-01-01T00:00:00.000Z' },
+      ]);
+
+      await expect(switchToSingleType()).resolves.toBeDefined();
+    });
+
+    it('rejects the switch when several documents exist', async () => {
+      mockRows([
+        { documentId: 'doc-1', publishedAt: null },
+        { documentId: 'doc-2', publishedAt: null },
+      ]);
+
+      await expect(switchToSingleType()).rejects.toThrow(
+        'You cannot convert a collectionType to a singleType when having multiple entries in DB'
+      );
+      expect(builder.editContentType).not.toHaveBeenCalled();
+    });
+  });
+
   it('rejects a crafted protected plugin deletion before it mutates schema or API files', async () => {
     await expect(deleteContentType(pluginContentType.uid)).rejects.toThrow(/not managed by CTB/);
 
@@ -267,6 +336,27 @@ describe('content type mutation compensation', () => {
     expect(apiHandler.rollback).toHaveBeenCalledWith(contentType.uid);
     expect(apiHandler.rollback).not.toHaveBeenCalledWith(secondContentType.uid);
     expect(files.groups).toBe('before');
+  });
+
+  it('logs a failing event listener instead of leaving an unhandled rejection', async () => {
+    // A user listener that throws makes the event hub emit reject
+    jest.mocked(strapi.eventHub.emit).mockRejectedValue(new Error('listener failed'));
+
+    const rejections = await collectUnhandledRejections(async () => {
+      await editContentType(contentType.uid, {
+        contentType: { ...contentType, attributes: {} },
+      });
+      await deleteContentType(contentType.uid);
+    });
+
+    expect(rejections).toEqual([]);
+    expect(strapi.eventHub.emit).toHaveBeenCalledTimes(2);
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'A content-type.update listener failed: listener failed'
+    );
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'A content-type.delete listener failed: listener failed'
+    );
   });
 
   it('reports a committed deletion and emits its event when backup cleanup alone fails', async () => {
