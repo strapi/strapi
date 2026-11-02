@@ -1,4 +1,4 @@
-import { merge, map, pipe, reduce } from 'lodash/fp';
+import { merge } from 'lodash';
 import type { Core } from '@strapi/types';
 
 // Builders Factories
@@ -49,12 +49,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     new(name: string, registry: TypeRegistry) {
       const context = { strapi, registry };
 
-      const builders = pipe(
-        // Create a new instance of every builders
-        map((factory: any) => factory(context)),
-        // Merge every builder into the same object
-        reduce(merge, {})
-      ).call(null, buildersFactories);
+      const builders = buildersFactories.reduce((acc, factory) => merge(acc, factory(context)), {});
 
       buildersMap.set(name, builders);
 

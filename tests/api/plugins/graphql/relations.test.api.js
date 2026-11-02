@@ -1,7 +1,7 @@
 'use strict';
 
 // Helpers.
-const { pick } = require('lodash/fp');
+const { pick } = require('lodash');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
@@ -12,7 +12,7 @@ let rq;
 let graphqlQuery;
 
 // Utils
-const selectFields = pick(['name', 'color']);
+const selectFields = (value) => pick(value, ['name', 'color']);
 
 const rgbColorComponent = {
   attributes: {

@@ -52,6 +52,7 @@ describe('Upload plugin register', () => {
       global.strapi = {
         dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
         plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
         server: { app: { on: jest.fn() }, routes: registerRoute },
         admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
         config: {
@@ -72,6 +73,7 @@ describe('Upload plugin register', () => {
       global.strapi = {
         dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
         plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
         server: { app: { on: jest.fn() }, routes: jest.fn() },
         admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
         config: {
@@ -98,6 +100,7 @@ describe('Upload plugin register', () => {
       global.strapi = {
         dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
         plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
         server: { app: { on: jest.fn() }, routes: registerRoute },
         admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
         config: {
@@ -119,6 +122,7 @@ describe('Upload plugin register', () => {
       global.strapi = {
         dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
         plugins: { upload: {} },
+        db: { migrations: { providers: { internal: { register: jest.fn() } } } },
         server: { app: { on: jest.fn() }, routes: registerRoute },
         admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
         config: {
@@ -147,6 +151,7 @@ describe('Upload plugin register', () => {
         global.strapi = {
           dirs: { app: { root: process.cwd() }, static: { public: join(process.cwd(), 'public') } },
           plugins: { upload: {} },
+          db: { migrations: { providers: { internal: { register: jest.fn() } } } },
           server: { app: { on: jest.fn() }, routes: registerRoute },
           admin: { services: { permission: { actionProvider: { registerMany: jest.fn() } } } },
           config: {

@@ -1,0 +1,149 @@
+.header {
+  position: relative;
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem 1rem 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: var(--ifm-card-border-radius);
+  background: var(--ifm-background-surface-color);
+  font-size: 0.9rem;
+}
+
+/* Group color accent, see `--pkg-color` in custom.css. */
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--pkg-color);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.group {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Beats `.markdown :not(pre) > code` in custom.css, which adds a border to inline code. */
+.header .name {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 600;
+}
+
+.tag {
+  padding: 0 0.5em;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.private {
+  border-color: var(--ifm-color-warning-dark);
+  color: var(--ifm-color-warning-contrast-foreground);
+  background: var(--ifm-color-warning-contrast-background);
+}
+
+.source {
+  margin-left: auto;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.8rem;
+}
+
+.description {
+  margin: 0.5rem 0 0;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem 1.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.relations {
+  min-width: 0;
+}
+
+.relationsTitle {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+}
+
+.count {
+  margin-left: 0.25rem;
+  padding: 0 0.45em;
+  border-radius: 999px;
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.empty {
+  margin: 0;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  margin: 0;
+}
+
+.chip,
+.chip code {
+  font-size: 0.8rem;
+}
+
+.secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  margin: 0.5rem 0 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.8rem;
+}
+
+.secondaryLabel {
+  font-weight: 600;
+}
+
+.secondaryItem,
+.secondaryItem code {
+  font-size: 0.75rem;
+}
+
+.secondaryItem code {
+  opacity: 0.85;
+}
+
+.mapLink {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 600;
+}

@@ -49,7 +49,7 @@ export function pull(overrides: Partial<MergedPull> = {}): MergedPull {
     base: { ref: 'develop' },
     head: { ref: 'fix/ctb-private-searchable', sha: '2222222222222222222222222222222222222222' },
     user: { login: 'someone' },
-    milestone: { title: '5.52.4' },
+    milestone: { number: 430, title: '5.52.4' },
     ...overrides,
   };
 }
@@ -159,6 +159,7 @@ export function releasePlan(overrides: Partial<ReleasePlan> = {}): ReleasePlan {
         baseRef: 'develop',
         headRef: 'feat/audit-logs',
         milestone: '5.52.4',
+        milestoneNumber: 430,
         mergedAt: '2026-09-05T09:59:00Z',
         status: 'resolved',
         basis: 'exact-merge-sha',

@@ -1,4 +1,4 @@
-import { isString } from 'lodash/fp';
+import { isString } from 'lodash';
 import type { Database } from '..';
 import type { Repository, Params } from './types';
 

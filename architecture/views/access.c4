@@ -1,0 +1,53 @@
+views {
+  view access_boundaries {
+    title '01 Start here / Access boundaries'
+    link ../interface_overview/ 'Related: application interfaces and protocols'
+    description '''
+      **Audience:** everyone. **Type:** identity and credential map, not a runtime call sequence.
+      **Question:** who or what can access administration, content APIs or data transfer?
+      Each arrow means a permitted access path, subject to the destination\'s authorization rules.
+      Admin users, application users, Content API tokens, Admin API tokens and transfer tokens serve distinct purposes.
+      People sign in with accounts; automation can use tokens. A website visitor is not automatically an Admin user.
+      The application-user/public-role path requires Users & Permissions. Content API tokens are a separate path.
+      SSO requires configuration and its license feature; it is an alternative Admin login path.
+      Open Admin users for local login, Content API operations for a public-role example, or Data transfer for import/export and remote transfer. Use the related Application interfaces link to compare protocols, including MCP.
+    '''
+    include
+      admin_identity with { navigateTo admin_login_flow },
+      application_identity,
+      content_api_credential with { navigateTo auth_code },
+      admin_api_credential,
+      transfer_credential,
+      admin_access_scope with { navigateTo content_manager_components },
+      content_access_scope with { navigateTo content_api_request_flow },
+      transfer_access_scope with { navigateTo data_transfer }
+    autoLayout LeftRight 80 30
+  }
+
+  dynamic view admin_login_flow {
+    variant sequence
+    title '02 Journeys / Access / Admin login and authorized request'
+    description '''
+      **Scenario:** successful local Admin login followed by a protected request. **Audience:** technical readers.
+      **Question:** how does signing in allow a later Admin API request?
+      Login returns an access token and sets a refresh cookie. Later requests send the access token and require an active session and user.
+      Request access groups authentication and server policies; arrows show responsibility handoffs, not exact internal function calls.
+      Credential verification, user/session database reads, refresh rotation and logout are summarized. Failed checks stop the request.
+      SSO and Admin API tokens are alternative paths described in Access boundaries, not additional steps in this sequence.
+      **Outcome:** the requested operation is allowed only after authentication and its route policies succeed. A successful login alone does not grant every Admin action.
+    '''
+    strapi.admin_web_app -> strapi.server_runtime.admin_login 'Submits local login credentials'
+    strapi.server_runtime.admin_login -> strapi.server_runtime.admin_sessions 'After credential checks, creates session and tokens'
+    strapi.server_runtime.admin_login <- strapi.server_runtime.admin_sessions 'Refresh session and access token'
+    strapi.admin_web_app <- strapi.server_runtime.admin_login 'Access token and refresh cookie'
+    strapi.admin_web_app -> strapi.server_runtime.admin_request_access 'Later: protected request with bearer access token'
+    strapi.server_runtime.admin_request_access -> strapi.server_runtime.admin_sessions 'Checks token and active session'
+    strapi.server_runtime.admin_request_access -> strapi.server_runtime.admin_permission_engine 'Builds active Admin user ability'
+    strapi.server_runtime.admin_request_access -> strapi.server_runtime.admin_server_apis 'Route policies permit the requested action'
+    strapi.admin_web_app <- strapi.server_runtime.admin_server_apis 'Authorized response'
+    include
+      strapi.admin_web_app with { navigateTo content_workspace },
+      strapi.server_runtime.admin_request_access with { navigateTo access_boundaries }
+    autoLayout LeftRight 60 35
+  }
+}

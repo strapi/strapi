@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const { filter, map, pipe, prop } = require('lodash/fp');
 const urlJoin = require('url-join');
 const {
   template: { createStrictInterpolationRegExp },
@@ -193,10 +192,9 @@ module.exports = ({ strapi }) => ({
     if (permissionsFoundInDB.length === 0) {
       // create default permissions
       for (const role of roles) {
-        const toCreate = pipe(
-          filter(({ roleType }) => roleType === role.type || roleType === null),
-          map(prop('action'))
-        )(DEFAULT_PERMISSIONS);
+        const toCreate = DEFAULT_PERMISSIONS.filter(
+          ({ roleType }) => roleType === role.type || roleType === null
+        ).map(({ action }) => action);
 
         await Promise.all(
           toCreate.map((action) => {

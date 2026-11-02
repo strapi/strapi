@@ -1,4 +1,5 @@
 import components from './components';
+import contentStructure from './content-structure';
 import contentTypes from './content-types';
 import dataMapper from './data-mapper';
 import fieldSizes from './field-sizes';
@@ -10,11 +11,13 @@ import uid from './uid';
 import history from '../history';
 import preview from '../preview';
 import homepage from '../homepage';
+import customOrder from '../custom-order';
 import documentMetadata from './document-metadata';
 import documentManager from './document-manager';
 
 export default {
   components,
+  'content-structure': contentStructure,
   'content-types': contentTypes,
   'data-mapper': dataMapper,
   'document-metadata': documentMetadata,
@@ -27,5 +30,6 @@ export default {
   uid,
   ...(history.services ? history.services : {}),
   ...(preview.services ? preview.services : {}),
+  ...(customOrder.services ? customOrder.services : {}),
   ...homepage.services,
 };

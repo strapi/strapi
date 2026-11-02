@@ -1,6 +1,6 @@
 import { createRulesEngine } from '@strapi/admin/strapi-admin';
 import { generateNKeysBetween } from 'fractional-indexing';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 
 import { DOCUMENT_META_FIELDS } from '../../../constants/attributes';
 
@@ -24,7 +24,7 @@ type Transform = <TAttribute extends Schema.Attribute.AnyAttribute>(
 ) => unknown;
 type AnyData = Omit<Document, 'id'>;
 
-const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
+const BLOCK_LIST_ATTRIBUTE_KEYS = new Set(['__component', '__temp_key__']);
 
 /**
  * @internal
@@ -76,7 +76,7 @@ const traverseData =
          * If the attribute is a block list attribute, we don't want to transform it.
          * We also don't want to transform null or undefined values.
          */
-        if (BLOCK_LIST_ATTRIBUTE_KEYS.includes(key) || value === null || value === undefined) {
+        if (BLOCK_LIST_ATTRIBUTE_KEYS.has(key) || value === null || value === undefined) {
           acc[key] = value;
           return acc;
         }
@@ -230,7 +230,7 @@ const removeNullValues = (schema: PartialSchema, components: ComponentsDictionar
 const transformDocument =
   (schema: PartialSchema, components: ComponentsDictionary = {}) =>
   (document: AnyData) => {
-    const transformations = pipe(
+    const transformations = flow(
       removeFieldsThatDontExistOnSchema(schema),
       removeProhibitedFields(['password'])(schema, components),
       removeNullValues(schema, components),

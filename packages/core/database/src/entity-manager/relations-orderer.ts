@@ -1,5 +1,4 @@
-import { castArray, maxBy } from 'lodash/fp';
-import _ from 'lodash';
+import _, { castArray, maxBy } from 'lodash';
 
 import { InvalidRelationError } from '../errors';
 import type { ID } from '../types';
@@ -190,7 +189,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     'order'
   );
 
-  const maxOrder = maxBy('order', computedRelations)?.order || 0;
+  const maxOrder = maxBy(computedRelations, 'order')?.order || 0;
 
   const findRelation = (id: ID) => {
     const idx = computedRelations.findIndex((r) => r.id === id);

@@ -1,4 +1,4 @@
-import { toString } from 'lodash/fp';
+import { toString } from 'lodash';
 import Field from './field';
 
 export default class StringField extends Field {

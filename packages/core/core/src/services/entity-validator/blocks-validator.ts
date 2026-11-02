@@ -18,14 +18,16 @@ const textNodeValidator = yup.object().shape({
   code: yup.boolean(),
 });
 
+const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'ftp:', 'mailto:', 'tel:']);
+
 const checkValidLink = (link: string) => {
   try {
-    // eslint-disable-next-line no-new
-    new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
+    const url = new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
+
+    return ALLOWED_LINK_PROTOCOLS.has(url.protocol);
   } catch {
     return false;
   }
-  return true;
 };
 
 const linkNodeValidator = yup.object().shape({

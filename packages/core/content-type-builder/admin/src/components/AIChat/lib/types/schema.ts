@@ -1,4 +1,4 @@
-import type { AnyAttribute } from '../../../../types';
+import type { AnyAttribute, RenameHop } from '../../../../types';
 
 export type SchemaAttribute = Omit<AnyAttribute, 'name' | 'status'> & Record<string, unknown>;
 
@@ -19,6 +19,11 @@ export type Schema = {
     draftAndPublish?: boolean;
     localized?: boolean;
   };
+  /**
+   * Optional ordered rename hops for this schema. The AI server does not emit
+   * this today, but the CTB admin transform accepts it for forward compatibility.
+   */
+  renames?: RenameHop[];
   attributes: Record<string, SchemaAttribute>;
   sources?: unknown;
 };

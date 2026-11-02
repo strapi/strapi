@@ -17,6 +17,8 @@ import { styled, css } from 'styled-components';
 import { ContentApiPermission } from '../../../../../../../../shared/contracts/content-api/permissions';
 import { useApiTokenPermissions } from '../apiTokenPermissions';
 
+const EMPTY_CONTROLLERS: NonNullable<CollapsableContentTypeProps['controllers']> = [];
+
 const activeCheckboxWrapperStyles = css`
   background: ${(props) => props.theme.colors.primary100};
 
@@ -58,7 +60,7 @@ interface CollapsableContentTypeProps {
 }
 
 export const CollapsableContentType = ({
-  controllers = [],
+  controllers = EMPTY_CONTROLLERS,
   label,
   orderNumber = 0,
   disabled = false,

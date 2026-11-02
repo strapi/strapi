@@ -1,9 +1,7 @@
 export type Version = number;
 
 export type LiteralVersion =
-  | `${Version}`
-  | `${Version}.${Version}`
-  | `${Version}.${Version}.${Version}`;
+  `${Version}` | `${Version}.${Version}` | `${Version}.${Version}.${Version}`;
 
 export type LiteralSemVer = `${Version}.${Version}.${Version}`;
 

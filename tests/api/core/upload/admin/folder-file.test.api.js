@@ -6,9 +6,11 @@ const path = require('path');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
+const { createUtils } = require('api-tests/utils');
 
 let strapi;
 let rq;
+let utils;
 const data = {
   folders: [],
   files: [],
@@ -41,6 +43,7 @@ describe('Bulk actions for folders & files', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+    utils = createUtils(strapi);
   });
 
   afterAll(async () => {
@@ -57,6 +60,124 @@ describe('Bulk actions for folders & files', () => {
   });
 
   describe('delete', () => {
+    describe('permissions', () => {
+      let ownerReq;
+      let restrictedReq;
+      let mediaOwnerRole;
+      const users = [];
+
+      beforeAll(async () => {
+        mediaOwnerRole = await utils.createRole({
+          name: 'MediaOwner',
+          description: 'Can only manage assets they created',
+        });
+
+        await utils.assignPermissionsToRole(mediaOwnerRole.id, [
+          {
+            action: 'plugin::upload.read',
+            subject: null,
+            conditions: ['admin::is-creator'],
+            properties: {},
+          },
+          {
+            action: 'plugin::upload.assets.create',
+            subject: null,
+            conditions: [],
+            properties: {},
+          },
+          {
+            action: 'plugin::upload.assets.update',
+            subject: null,
+            conditions: ['admin::is-creator'],
+            properties: {},
+          },
+        ]);
+
+        const owner = await utils.createUser({
+          firstname: 'media-owner',
+          lastname: 'media-owner',
+          email: 'media-owner@strapi.io',
+          password: 'MediaOwner1!',
+          isActive: true,
+          roles: [mediaOwnerRole.id],
+        });
+        const restricted = await utils.createUser({
+          firstname: 'restricted-media-owner',
+          lastname: 'restricted-media-owner',
+          email: 'restricted-media-owner@strapi.io',
+          password: 'RestrictedMediaOwner1!',
+          isActive: true,
+          roles: [mediaOwnerRole.id],
+        });
+        users.push(owner, restricted);
+
+        ownerReq = await createAuthRequest({
+          strapi,
+          userInfo: { email: owner.email, password: 'MediaOwner1!' },
+        });
+        restrictedReq = await createAuthRequest({
+          strapi,
+          userInfo: { email: restricted.email, password: 'RestrictedMediaOwner1!' },
+        });
+      });
+
+      afterAll(async () => {
+        await utils.deleteUsersById(users.map(({ id }) => id));
+        await utils.deleteRolesById([mediaOwnerRole.id]);
+      });
+
+      test('Cannot delete a folder containing an asset created by another user', async () => {
+        const folderRes = await ownerReq({
+          method: 'POST',
+          url: '/upload/folders',
+          body: { name: 'folder-containing-foreign-assets', parent: null },
+        });
+        expect(folderRes.statusCode).toBe(201);
+        const folder = folderRes.body.data;
+        data.folders.push(folder);
+
+        const uploadToFolder = (request) =>
+          request({
+            method: 'POST',
+            url: '/upload',
+            formData: {
+              files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+              fileInfo: JSON.stringify({ folder: folder.id }),
+            },
+          });
+
+        const ownerUpload = await uploadToFolder(ownerReq);
+        const restrictedUpload = await uploadToFolder(restrictedReq);
+        expect(ownerUpload.statusCode).toBe(201);
+        expect(restrictedUpload.statusCode).toBe(201);
+
+        const ownerFile = ownerUpload.body[0];
+        const restrictedFile = restrictedUpload.body[0];
+
+        const res = await restrictedReq({
+          method: 'POST',
+          url: '/upload/actions/bulk-delete',
+          body: { folderIds: [folder.id] },
+        });
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error).toMatchObject({
+          name: 'PolicyError',
+          message: 'FolderContainsUnauthorizedAssetsError',
+        });
+
+        const [folderAfter, ownerFileAfter, restrictedFileAfter] = await Promise.all([
+          rq({ method: 'GET', url: `/upload/folders/${folder.id}` }),
+          rq({ method: 'GET', url: `/upload/files/${ownerFile.id}` }),
+          rq({ method: 'GET', url: `/upload/files/${restrictedFile.id}` }),
+        ]);
+
+        expect(folderAfter.statusCode).toBe(200);
+        expect(ownerFileAfter.statusCode).toBe(200);
+        expect(restrictedFileAfter.statusCode).toBe(200);
+      });
+    });
+
     test('Can delete folders and files', async () => {
       const folder1 = await createFolder('folder-a-1', null);
       const folder1a = await createFolder('folder-a-1a', folder1.id);

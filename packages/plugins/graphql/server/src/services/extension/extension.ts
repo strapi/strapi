@@ -1,5 +1,5 @@
 import * as nexus from 'nexus';
-import { merge } from 'lodash/fp';
+import { merge } from 'lodash';
 import type { Core } from '@strapi/types';
 import type * as Nexus from 'nexus';
 
@@ -80,13 +80,13 @@ const createExtension = ({ strapi }: { strapi: Core.Strapi }) => {
 
         // Register resolvers
         if (typeof resolvers === 'object') {
-          acc.resolvers = merge(acc.resolvers, resolvers);
+          acc.resolvers = merge({}, acc.resolvers, resolvers);
         }
 
         // Register resolvers configuration
         if (typeof resolversConfig === 'object') {
           // TODO: smarter merge for auth, middlewares & policies
-          acc.resolversConfig = merge(resolversConfig, acc.resolversConfig);
+          acc.resolversConfig = merge({}, resolversConfig, acc.resolversConfig);
         }
 
         return acc;

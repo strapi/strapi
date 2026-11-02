@@ -31,9 +31,7 @@ interface PanelDescription {
 interface PanelsItemsProps {
   panels: (PanelDescription & { id: string })[];
   setVisiblePanels:
-    | React.Dispatch<React.SetStateAction<(PanelDescription & { id: string })[]>>
-    | null
-    | undefined;
+    React.Dispatch<React.SetStateAction<(PanelDescription & { id: string })[]>> | null | undefined;
   visiblePanelsLength: number | undefined;
 }
 

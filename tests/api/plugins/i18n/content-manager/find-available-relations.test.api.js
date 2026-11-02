@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick } = require('lodash/fp');
+const { pick } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -110,7 +110,7 @@ describe('i18n - Find available relations', () => {
 
   afterAll(async () => {
     // Delete all locales that have been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
 
     await strapi.destroy();
     await builder.cleanup();
@@ -124,7 +124,7 @@ describe('i18n - Find available relations', () => {
     });
 
     const expectedObj = {
-      ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[1]),
+      ...pick(data.products[1], ['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt']),
     };
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(expectedObj);
@@ -138,7 +138,7 @@ describe('i18n - Find available relations', () => {
     });
 
     const expectedObj = {
-      ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[0]),
+      ...pick(data.products[0], ['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt']),
     };
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(expectedObj);

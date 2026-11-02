@@ -33,6 +33,8 @@ import { ConditionsModal } from './ConditionsModal';
 
 import type { GenericLayout } from '../utils/layouts';
 
+const EMPTY_ACTIONS: NonNullable<SubCategoryProps['actions']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * PluginsAndSettingsPermissions
  * -----------------------------------------------------------------------------------------------*/
@@ -72,8 +74,7 @@ const PluginsAndSettingsPermissions = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface RowProps
-  extends Pick<Layout[number], 'childrenForm'>,
-    Pick<Accordion.HeaderProps, 'variant'> {
+  extends Pick<Layout[number], 'childrenForm'>, Pick<Accordion.HeaderProps, 'variant'> {
   kind: Exclude<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
   name: string;
   isFormDisabled?: boolean;
@@ -138,7 +139,7 @@ interface SubCategoryProps {
 }
 
 const SubCategory = ({
-  actions = [],
+  actions = EMPTY_ACTIONS,
   categoryName,
   isFormDisabled,
   subCategoryName,

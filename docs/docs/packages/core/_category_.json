@@ -1,0 +1,9 @@
+{
+  "label": "Core",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "slug": "/packages/core",
+    "description": "Workspace packages under packages/core/ in the monorepo."
+  }
+}

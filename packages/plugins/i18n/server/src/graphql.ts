@@ -1,4 +1,4 @@
-import { propEq, identity } from 'lodash/fp';
+import { matchesProperty, identity } from 'lodash';
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
@@ -64,7 +64,7 @@ const getLocaleScalar = ({ nexus }: any) => {
         throw new ValidationError('Locale cannot represent non string type');
       }
 
-      const isValidLocale = ast.value === '*' || locales.find(propEq('code', ast.value));
+      const isValidLocale = ast.value === '*' || locales.find(matchesProperty('code', ast.value));
 
       if (!isValidLocale) {
         throw new ValidationError('Unknown locale supplied');

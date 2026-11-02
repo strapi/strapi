@@ -14,7 +14,7 @@ import { Navigate, useParams, NavLink } from 'react-router-dom';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
-import { DocumentRBAC } from '../../features/DocumentRBAC';
+import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
@@ -85,6 +85,8 @@ const HistoryPage = () => {
   const { data: configuration, isLoading: isLoadingConfiguration } =
     useGetContentTypeConfigurationQuery(slug!);
 
+  const isLoadingActionsRBAC = useDocumentRBAC('HistoryPage', (state) => state.isLoading);
+
   // Parse state from query params
   const [{ query }] = useQueryParams<{
     page?: number;
@@ -132,7 +134,8 @@ const HistoryPage = () => {
     isLoadingLayout ||
     versionsResponse.isFetching ||
     isStaleRequest ||
-    isLoadingConfiguration
+    isLoadingConfiguration ||
+    isLoadingActionsRBAC
   ) {
     return <Page.Loading />;
   }

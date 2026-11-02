@@ -1,4 +1,4 @@
-import { pickBy } from 'lodash/fp';
+import { pickBy } from 'lodash';
 import { addNamespace, hasNamespace } from './namespace';
 
 type Handler = (context: any) => any;
@@ -43,7 +43,7 @@ const hooksRegistry = () => {
      * Returns a map with all the hooks in a namespace
      */
     getAll(namespace: string) {
-      return pickBy((_, uid) => hasNamespace(uid, namespace))(hooks);
+      return pickBy(hooks, (_, uid) => hasNamespace(uid, namespace));
     },
 
     /**

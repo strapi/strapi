@@ -1,4 +1,4 @@
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
+import { get, has, cloneDeep, pick } from 'lodash';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 import { getService } from '../utils';
@@ -13,13 +13,13 @@ const {
 const { ApplicationError } = errors;
 
 const hasLocalizedOption = (modelOrAttribute: any) => {
-  return prop('pluginOptions.i18n.localized', modelOrAttribute) === true;
+  return get(modelOrAttribute, 'pluginOptions.i18n.localized') === true;
 };
 
 const getValidLocale = async (locale: any) => {
   const localesService = getService('locales');
 
-  if (isNil(locale)) {
+  if (locale == null) {
     return localesService.getDefaultLocale();
   }
 
@@ -65,7 +65,7 @@ const getNonLocalizedAttributes = (model: any) => {
 };
 
 const removeId = (value: any) => {
-  if (typeof value === 'object' && has('id', value)) {
+  if (typeof value === 'object' && has(value, 'id')) {
     delete value.id;
   }
 };
@@ -77,7 +77,7 @@ const removeIdsMut = (
   model: Struct.ComponentSchema | Struct.ContentTypeSchema,
   entry: any
 ): Record<string, any> => {
-  if (isNil(entry)) {
+  if (entry == null) {
     return entry as unknown as Record<string, any>;
   }
 
@@ -85,16 +85,16 @@ const removeIdsMut = (
 
   for (const [attrName, attr] of Object.entries(model.attributes)) {
     const value = entry[attrName];
-    if (attr.type === 'dynamiczone' && isArray(value)) {
+    if (attr.type === 'dynamiczone' && Array.isArray(value)) {
       value.forEach((compo) => {
-        if (has('__component', compo)) {
+        if (has(compo, '__component')) {
           const model = strapi.components[compo.__component];
           removeIdsMut(model, compo);
         }
       });
     } else if (attr.type === 'component') {
       const model = strapi.components[attr.component];
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         value.forEach((compo) => removeIdsMut(model, compo));
       } else {
         removeIdsMut(model, value);
@@ -117,7 +117,7 @@ const copyNonLocalizedAttributes = (
 ) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
+  return removeIds(model)(pick(entry, nonLocalizedAttributes));
 };
 
 /**
@@ -139,7 +139,7 @@ const getLocalizedAttributes = (model: any) => {
  * @param {Object} options.model corresponding model
  */
 const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: any) => {
-  if (isNil(relatedEntry)) {
+  if (relatedEntry == null) {
     return;
   }
 
@@ -147,7 +147,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
   for (const [field, value] of Object.entries(relatedEntryCopy)) {
-    if (isNil(entry[field])) {
+    if (entry[field] == null) {
       entry[field] = value;
     }
   }

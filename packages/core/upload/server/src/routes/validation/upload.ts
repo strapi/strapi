@@ -93,6 +93,13 @@ export class UploadRouteValidator extends AbstractRouteValidator {
   }
 
   /**
+   * Content API file lookup parameter: a numeric id or a documentId
+   */
+  get fileIdOrDocumentId() {
+    return z.union([this.fileId, z.string()]);
+  }
+
+  /**
    * Upload request body schema for single file uploads
    */
   get uploadBody() {

@@ -1,6 +1,6 @@
 import { detectSubjectType } from '@casl/ability';
 import { permittedFieldsOf } from '@casl/ability/extra';
-import { isEmpty, isNil, flatMap, some, prop } from 'lodash/fp';
+import { isEmpty } from 'lodash';
 
 import type { Ability } from '@casl/ability';
 
@@ -41,11 +41,11 @@ export const createPermissionFieldsCache = (ability: Ability) => {
 
     let result: PermissionFieldsResult;
 
-    const allFieldsAllowed = rules.some((r) => isNil(r.fields));
+    const allFieldsAllowed = rules.some((r) => r.fields == null);
     if (allFieldsAllowed) {
       result = {
         permittedFields: [],
-        hasAtLeastOneRegistered: rules.some((r) => !isNil(r.fields)),
+        hasAtLeastOneRegistered: rules.some((r) => r.fields != null),
         shouldIncludeAll: true,
       };
     } else {
@@ -54,10 +54,9 @@ export const createPermissionFieldsCache = (ability: Ability) => {
         fieldsFrom: (rule) => rule.fields || [],
       });
 
-      const hasAtLeastOneRegistered = some(
-        (fields) => !isNil(fields),
-        flatMap(prop('fields'), rules)
-      );
+      const hasAtLeastOneRegistered = rules
+        .flatMap((rule) => rule.fields)
+        .some((field) => field != null);
 
       result = {
         permittedFields,

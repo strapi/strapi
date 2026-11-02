@@ -60,6 +60,9 @@ describe('Scheduling service', () => {
 
       expect(strapiMock.cron.remove).toHaveBeenCalledWith(oldTaskName);
       expect(strapiMock.cron.add).toHaveBeenCalledTimes(2);
+      expect(strapiMock.cron.remove.mock.invocationCallOrder[0]).toBeLessThan(
+        strapiMock.cron.add.mock.invocationCallOrder[1]
+      );
     });
 
     it('should cancel the previous job when the release is created with a numeric id and updated with a string id', async () => {
@@ -88,6 +91,9 @@ describe('Scheduling service', () => {
 
       expect(strapiMock.cron.remove).toHaveBeenCalledWith('publishRelease_1');
       expect(strapiMock.cron.add).toHaveBeenCalledTimes(2);
+      expect(strapiMock.cron.remove.mock.invocationCallOrder[0]).toBeLessThan(
+        strapiMock.cron.add.mock.invocationCallOrder[1]
+      );
       expect(scheduledJobs.size).toBe(1);
     });
 

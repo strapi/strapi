@@ -36,8 +36,7 @@ export interface ILocalFileDestinationProviderOptions {
   };
 }
 
-export interface ILocalFileDestinationProviderTransferResults
-  extends IDestinationProviderTransferResults {
+export interface ILocalFileDestinationProviderTransferResults extends IDestinationProviderTransferResults {
   file?: {
     path?: string;
   };
@@ -63,6 +62,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   #archive: { stream?: tar.Pack; pipeline?: Stream } = {};
 
   #diagnostics?: IDiagnosticReporter;
+
+  #closed = false;
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
@@ -108,6 +109,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   bootstrap(diagnostics: IDiagnosticReporter): void | Promise<void> {
     this.#diagnostics = diagnostics;
+    this.#closed = false;
     const { compression, encryption } = this.options;
 
     if (encryption.enabled && !encryption.key) {
@@ -143,6 +145,11 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   async close() {
+    if (this.#closed) {
+      return;
+    }
+
+    this.#closed = true;
     const { stream, pipeline } = this.#archive;
 
     if (!stream) {

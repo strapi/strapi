@@ -1,4 +1,4 @@
-import { snakeCase } from 'lodash/fp';
+import { snakeCase } from 'lodash';
 import type { Database } from '../..';
 import type { Relation } from '../../types';
 import { identifiers } from '../../utils/identifiers';

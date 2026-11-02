@@ -37,17 +37,11 @@ const mockStrapi = {
         },
       },
     },
-    i18n: {
-      services: {
-        locales: {
-          getDefaultLocale: jest.fn().mockReturnValue('en'),
-          find: jest.fn().mockResolvedValue([]),
-        },
-        'content-types': {
-          isLocalizedContentType: jest.fn().mockReturnValue(false),
-        },
-      },
-    },
+  },
+  localization: {
+    getDefaultLocale: jest.fn().mockResolvedValue('en'),
+    getLocales: jest.fn().mockResolvedValue([]),
+    isLocalizedContentType: jest.fn().mockReturnValue(false),
   },
   // @ts-expect-error - Ignore
   plugin: (plugin: string) => mockStrapi.plugins[plugin],

@@ -5,6 +5,8 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const constants = {
   CONTENT_TYPE_SECTION: 'contentTypes',
   SUPER_ADMIN_CODE: 'strapi-super-admin',
+  // Role `name`, `code` and `description` are `string` attributes, stored as varchar(255)
+  ROLE_TEXT_MAX_LENGTH: 255,
   EDITOR_CODE: 'strapi-editor',
   AUTHOR_CODE: 'strapi-author',
   READ_ACTION: 'plugin::content-manager.explorer.read',
@@ -12,6 +14,8 @@ const constants = {
   UPDATE_ACTION: 'plugin::content-manager.explorer.update',
   DELETE_ACTION: 'plugin::content-manager.explorer.delete',
   PUBLISH_ACTION: 'plugin::content-manager.explorer.publish',
+  // API, admin and transfer token `name` and `description` are `string` attributes, stored as varchar(255)
+  TOKEN_TEXT_MAX_LENGTH: 255,
   API_TOKEN_TYPE: {
     READ_ONLY: 'read-only',
     FULL_ACCESS: 'full-access',

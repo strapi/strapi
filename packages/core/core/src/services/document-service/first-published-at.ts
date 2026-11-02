@@ -1,5 +1,5 @@
 import { contentTypes } from '@strapi/utils';
-import { assoc } from 'lodash/fp';
+
 import type { Modules, Schema } from '@strapi/types';
 
 type EntriesUpdate = (entryToUpdate: any, param?: any) => Promise<any>;
@@ -42,7 +42,7 @@ const addFirstPublishedAtToDraft = async (
 
 const filterDataFirstPublishedAt: ParamsTransform = (params) => {
   if (params?.data?.firstPublishedAt) {
-    return assoc(['data', 'firstPublishedAt'], null, params);
+    return { ...params, data: { ...params.data, firstPublishedAt: null } };
   }
 
   return params;

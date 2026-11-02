@@ -1,11 +1,10 @@
 import type { Core } from '@strapi/types';
-import { prop } from 'lodash/fp';
 import { async, errors } from '@strapi/utils';
 import { getAdminService } from '../utils';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
 
 const { ApplicationError } = errors;
-const validActions = [STAGE_TRANSITION_UID];
+const validActions = new Set([STAGE_TRANSITION_UID]);
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const roleService = getAdminService('role');
@@ -30,7 +29,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       action: string;
       fromStage: number;
     }) {
-      if (!validActions.includes(action)) {
+      if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
       const permissions = await roleService.addPermissions(roleId, [
@@ -57,7 +56,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       action: string;
       toStage: number;
     }) {
-      if (!validActions.includes(action)) {
+      if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
       const permissions = await roleService.addPermissions(roleId, [
@@ -75,7 +74,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return async.map(permissions, this.registerTo);
     },
     async unregister(permissions: { id: number }[]) {
-      const permissionIds = permissions.map(prop('id'));
+      const permissionIds = permissions.map((permission) => permission?.id);
       await permissionService.deleteByIds(permissionIds);
     },
     can(action: string, fromStage: number) {

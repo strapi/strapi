@@ -1,5 +1,5 @@
 import type { Struct } from '@strapi/types';
-import { isArray, isObject, reject } from 'lodash/fp';
+import { isObject, reject } from 'lodash';
 import type { Diff } from '../../../utils/json';
 import * as utils from '../../../utils';
 
@@ -27,7 +27,7 @@ const isOptionalAdminType = (diff: Diff) => {
   }
 
   // modified
-  if ('values' in diff && isArray(diff.values) && isObject(diff.values[0])) {
+  if ('values' in diff && Array.isArray(diff.values) && isObject(diff.values[0])) {
     const name = (diff?.values[0] as Struct.ContentTypeSchema)?.info?.singularName;
     return (OPTIONAL_CONTENT_TYPES as ReadonlyArray<string | undefined>).includes(name);
   }
@@ -35,7 +35,19 @@ const isOptionalAdminType = (diff: Diff) => {
   return false;
 };
 
-const isIgnorableStrict = (diff: Diff) => isAttributeIgnorable(diff) || isOptionalAdminType(diff);
+/**
+ * Position of a document in the custom order of its collection type (Content Manager). The
+ * attribute only exists while the `unstableCustomOrder` future flag is on, and the position
+ * is not content: a transfer between an instance with the flag and one without goes on
+ * without it, the destination orders the entries again when it needs to.
+ */
+const CUSTOM_ORDER_ATTRIBUTE = 'strapi_position';
+
+const isCustomOrderAttribute = (diff: Diff) =>
+  diff.path[0] === 'attributes' && diff.path[1] === CUSTOM_ORDER_ATTRIBUTE;
+
+const isIgnorableStrict = (diff: Diff) =>
+  isAttributeIgnorable(diff) || isCustomOrderAttribute(diff) || isOptionalAdminType(diff);
 
 const strategies = {
   // No diffs
@@ -47,7 +59,7 @@ const strategies = {
   // - the property within a content type is an ignorable one
   // - those that are (not transferrable and optionally available), for example EE features such as audit logs
   strict(diffs: Diff[]) {
-    return reject(isIgnorableStrict, diffs);
+    return reject(diffs, isIgnorableStrict);
   },
 };
 

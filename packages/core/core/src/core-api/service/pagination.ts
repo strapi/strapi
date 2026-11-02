@@ -1,4 +1,4 @@
-import { omit, has, toNumber, isNil } from 'lodash/fp';
+import { has, omit, toNumber } from 'lodash';
 
 import { errors, pagination } from '@strapi/utils';
 
@@ -37,13 +37,13 @@ const getLimitConfigDefaults = () => ({
 });
 
 const isOffsetPagination = (pagination?: PaginationParams): pagination is OffsetPagination =>
-  has('start', pagination) || has('limit', pagination);
+  has(pagination, 'start') || has(pagination, 'limit');
 
 const isPagedPagination = (pagination?: PaginationParams): pagination is PagedPagination =>
-  has('page', pagination) || has('pageSize', pagination) || !isOffsetPagination(pagination);
+  has(pagination, 'page') || has(pagination, 'pageSize') || !isOffsetPagination(pagination);
 
 const shouldCount = (params: { pagination?: PaginationParams }) => {
-  if (has('pagination.withCount', params)) {
+  if (has(params, 'pagination.withCount')) {
     const withCount = params.pagination?.withCount;
 
     if (typeof withCount === 'boolean') {
@@ -92,9 +92,9 @@ const transformPaginationResponse = (
 
   const paginationResponse = transform(paginationInfo, total!);
 
-  if (isNil(total)) {
+  if (total == null) {
     // Ignore total and pageCount if `total` value is not available.
-    return omit(['total', 'pageCount'], paginationResponse) as ReturnType<typeof transform>;
+    return omit(paginationResponse, ['total', 'pageCount']) as ReturnType<typeof transform>;
   }
 
   return paginationResponse;

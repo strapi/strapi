@@ -1,4 +1,4 @@
-import { eq, remove, cloneDeep } from 'lodash/fp';
+import { cloneDeep } from 'lodash';
 
 export type Handler = (...args: any[]) => any;
 
@@ -48,7 +48,7 @@ const createHook = <T extends Handler = Handler>(): Hook<T> => {
     },
 
     delete(handler: T) {
-      state.handlers = remove(eq(handler), state.handlers);
+      state.handlers = state.handlers.filter((registeredHandler) => registeredHandler !== handler);
 
       return this;
     },

@@ -16,6 +16,10 @@ import type { ApiToken, ContentApiApiToken } from '../../../../../../shared/cont
 import type { AdminTokenOwner } from '../../../../../../shared/contracts/shared';
 import type { AuthContextValue } from '../../../../features/Auth';
 
+const EMPTY_ERRORS: NonNullable<FormApiTokenContainerProps['errors']> = {};
+const EMPTY_VALUES: NonNullable<FormApiTokenContainerProps['values']> = {};
+const EMPTY_API_TOKEN: NonNullable<FormApiTokenContainerProps['apiToken']> = {};
+
 interface FormApiTokenContainerProps {
   errors?: FormikErrors<Pick<ContentApiApiToken, 'name' | 'description' | 'lifespan' | 'type'>>;
   onChange: ({ target: { name, value } }: { target: { name: string; value: string } }) => void;
@@ -40,12 +44,12 @@ const formatAdminUserName = (
 };
 
 export const FormApiTokenContainer = ({
-  errors = {},
+  errors = EMPTY_ERRORS,
   onChange,
   canEditInputs,
   isCreating,
-  values = {},
-  apiToken = {},
+  values = EMPTY_VALUES,
+  apiToken = EMPTY_API_TOKEN,
   kind,
   onDispatch,
   setHasChangedPermissions,

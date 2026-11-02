@@ -33,6 +33,18 @@ describe('applyWhere - LIKE operator escaping', () => {
     const isSqlite = client === 'better-sqlite3';
     const isPostgres = client === 'pg';
 
+    test.each(['$in', '$notIn'])('%s keeps a snapshot of the provided values', (operator) => {
+      const knex = createKnex({ client, useNullAsDefault: true });
+      instances.push(knex);
+      const values = [1, 2];
+      const qb = knex('t');
+
+      applyWhere(qb, { id: { [operator]: values } });
+      values.push(3);
+
+      expect(qb.toSQL().bindings).toEqual([1, 2]);
+    });
+
     test('$eqi compiles to case-insensitive equality, never LIKE', () => {
       const { sql, bindings } = compile(client, { handle: { $eqi: 'a_c' } });
 

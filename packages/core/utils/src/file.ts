@@ -16,7 +16,7 @@ const streamToBuffer = (stream: NodeJS.ReadableStream): Promise<Buffer> =>
   new Promise((resolve, reject) => {
     const chunks: Uint8Array[] = [];
     stream.on('data', (chunk) => {
-      chunks.push(chunk);
+      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
     });
     stream.on('end', () => {
       resolve(Buffer.concat(chunks));

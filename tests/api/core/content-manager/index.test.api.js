@@ -1,6 +1,6 @@
 'use strict';
 
-const { isEmpty } = require('lodash/fp');
+const { isEmpty } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');

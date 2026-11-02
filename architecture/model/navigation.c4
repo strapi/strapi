@@ -1,0 +1,50 @@
+// Reading-guide choices are not software components or runtime dependencies.
+model {
+  interface_guide = guide_topic 'Application interfaces' {
+    summary 'Choose a way to interact with this application.'
+  }
+  rest_guide = guide_topic 'REST content API' {
+    summary 'Content delivery and permitted mutations over HTTP.'
+  }
+  graphql_guide = guide_topic 'GraphQL content API' {
+    summary 'Optional schema and resolver-based content API.'
+  }
+  admin_guide = guide_topic 'Admin APIs' {
+    summary 'Editing and administration under Admin permissions.'
+  }
+  mcp_guide = guide_topic 'MCP capabilities' {
+    summary 'Configured tools, prompts and resources for MCP clients.'
+  }
+  transfer_guide = guide_topic 'Import export and transfer' {
+    summary 'Move selected data and assets between files or applications.'
+  }
+  extension_guide = guide_topic 'Extension mechanisms' {
+    summary 'Choose the behavior or integration you want to extend.'
+  }
+  plugin_guide = guide_topic 'Plugin entrypoints' {
+    summary 'Package browser and server contributions together.'
+  }
+  request_guide = guide_topic 'Routes and document middleware' {
+    summary 'Customize endpoint behavior or shared document operations.'
+  }
+  fields_guide = guide_topic 'Custom fields' {
+    summary 'Connect a custom editing input to a supported data type.'
+  }
+  providers_guide = guide_topic 'Providers and webhooks' {
+    summary 'Connect storage, email and external event receivers.'
+  }
+  startup_guide = guide_topic 'Registration and startup' {
+    summary 'Load application definitions and run lifecycle hooks.'
+  }
+
+  interface_guide -> rest_guide 'explore'
+  interface_guide -> graphql_guide 'explore'
+  interface_guide -> admin_guide 'explore'
+  interface_guide -> mcp_guide 'explore'
+  interface_guide -> transfer_guide 'explore'
+  extension_guide -> plugin_guide 'explore'
+  extension_guide -> request_guide 'explore'
+  extension_guide -> fields_guide 'explore'
+  extension_guide -> providers_guide 'explore'
+  extension_guide -> startup_guide 'explore'
+}

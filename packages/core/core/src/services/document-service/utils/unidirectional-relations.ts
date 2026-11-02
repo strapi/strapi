@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import { keyBy, omit } from 'lodash/fp';
+import { keyBy, omit } from 'lodash';
 
 import type { Data, UID, Schema } from '@strapi/types';
 
@@ -17,14 +17,16 @@ interface RelationUpdate {
 
 interface RelationFilterOptions {
   /**
-   * Function to determine if a relation should be propagated to new document versions
+   * Function returning which relations should be propagated to new document versions
    * This replaces the hardcoded component-specific logic
+   *
+   * It receives all the relations of a join table at once, so it can batch its lookups
    */
-  shouldPropagateRelation?: (
-    relation: Record<string, any>,
+  filterRelationsToPropagate?: (
+    relations: Record<string, any>[],
     model: Schema.Component | Schema.ContentType,
     trx: any
-  ) => Promise<boolean>;
+  ) => Promise<Record<string, any>[]>;
 }
 
 /**
@@ -125,16 +127,9 @@ const load = async (
             .whereIn(targetColumnName, ids)
             .transacting(trx);
 
-          let versionRelations = newVersionsRelations;
-          if (options.shouldPropagateRelation) {
-            const relationsToPropagate = [];
-            for (const relation of newVersionsRelations) {
-              if (await options.shouldPropagateRelation(relation, model, trx)) {
-                relationsToPropagate.push(relation);
-              }
-            }
-            versionRelations = relationsToPropagate;
-          }
+          const versionRelations = options.filterRelationsToPropagate
+            ? await options.filterRelationsToPropagate(newVersionsRelations, model, trx)
+            : newVersionsRelations;
 
           if (versionRelations.length > 0) {
             // when publishing a draft that doesn't have a published version yet,
@@ -148,7 +143,7 @@ const load = async (
 
                 return !matchingOldVersion;
               })
-              .map(omit(strapi.db.metadata.identifiers.ID_COLUMN));
+              .map((value) => omit(value, strapi.db.metadata.identifiers.ID_COLUMN));
 
             updates.push({ joinTable, relations: discardToAdd });
           }
@@ -181,7 +176,7 @@ const sync = async (
    *
    * Will be used to update the relation target ids
    */
-  const newEntryByLocale = keyBy('locale', newEntries);
+  const newEntryByLocale = keyBy(newEntries, 'locale');
   const oldEntriesMap = oldEntries.reduce(
     (acc, entry) => {
       const newEntry = newEntryByLocale[entry.locale];

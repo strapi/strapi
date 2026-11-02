@@ -1,4 +1,5 @@
 import { errors } from '@strapi/utils';
+import type { Modules } from '@strapi/types';
 import { Component } from './components';
 import { ContentType } from './content-types';
 
@@ -16,6 +17,7 @@ export declare namespace GetInitData {
       fieldSizes: Record<string, { default: number; isResizable: boolean }>;
       components: Component[];
       contentTypes: ContentType[];
+      contentStructure?: Modules.ContentStructure.ResolvedContentStructure;
     };
     error?: errors.ApplicationError;
   }

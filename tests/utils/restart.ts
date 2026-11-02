@@ -39,6 +39,7 @@ export const waitForRestart = async (page, timeout = 60000) => {
   // If modal is still visible after reloadTimeout, reload the page and wait again
   if (modalVisible) {
     console.log("Restart overlay didn't disappear after 15 seconds. Reloading page...");
+    await pollHealthCheck();
     await page.reload({ waitUntil: 'domcontentloaded' });
     // Optionally, wait again for the modal to disappear after reloading
   }

@@ -34,6 +34,7 @@ const loopContentTypeNames = (api: Api, callback: (info: ApiInfo) => any) => {
 
     const apiInfo = {
       ...api,
+      uid,
       routeInfo,
       attributes,
       uniqueName,

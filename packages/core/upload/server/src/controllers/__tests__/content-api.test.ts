@@ -35,6 +35,7 @@ describe('Content API Controller - find / findPage', () => {
       findOne: jest.fn(),
       remove: jest.fn(),
       replace: jest.fn(),
+      updateFileInfo: jest.fn(),
     };
 
     mockFileService = {
@@ -294,6 +295,134 @@ describe('Content API Controller - find / findPage', () => {
     });
   });
 
+  describe('findOne / destroy - by numeric id or documentId (GET/DELETE /files/:id)', () => {
+    let mockDbFindOne: jest.Mock;
+
+    const file = { id: 7, documentId: 'qovkpekciob2wt8qyd51mg8k', name: 'image.jpg' };
+
+    beforeEach(() => {
+      mockDbFindOne = jest.fn();
+      (globalThis.strapi as any).db = {
+        query: jest.fn().mockReturnValue({ findOne: mockDbFindOne }),
+      };
+    });
+
+    it('findOne passes a numeric id straight to the service without a documentId lookup', async () => {
+      mockContext.params = { id: '7' };
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().findOne(mockContext);
+
+      expect(mockDbFindOne).not.toHaveBeenCalled();
+      expect(mockUploadService.findOne).toHaveBeenCalledWith('7', undefined);
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('findOne resolves a documentId to the numeric id', async () => {
+      mockContext.params = { id: file.documentId };
+      mockDbFindOne.mockResolvedValue({ id: file.id });
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().findOne(mockContext);
+
+      expect(globalThis.strapi.db.query).toHaveBeenCalledWith('plugin::upload.file');
+      expect(mockDbFindOne).toHaveBeenCalledWith({
+        where: { documentId: file.documentId },
+        select: ['id'],
+      });
+      expect(mockUploadService.findOne).toHaveBeenCalledWith(file.id, undefined);
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('findOne treats a digit-leading documentId as a documentId', async () => {
+      mockContext.params = { id: '1abcdefghijklmnopqrstuvw' };
+      mockDbFindOne.mockResolvedValue({ id: file.id });
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().findOne(mockContext);
+
+      expect(mockDbFindOne).toHaveBeenCalledWith({
+        where: { documentId: '1abcdefghijklmnopqrstuvw' },
+        select: ['id'],
+      });
+      expect(mockUploadService.findOne).toHaveBeenCalledWith(file.id, undefined);
+    });
+
+    it('findOne returns notFound for an unknown documentId', async () => {
+      mockContext.params = { id: 'unknowndocumentid0000000' };
+      mockDbFindOne.mockResolvedValue(null);
+
+      await buildController().findOne(mockContext);
+
+      expect(mockUploadService.findOne).not.toHaveBeenCalled();
+      expect(mockContext.notFound).toHaveBeenCalledWith('file.notFound');
+    });
+
+    it('findOne returns notFound for an unknown numeric id', async () => {
+      mockContext.params = { id: '999' };
+      mockUploadService.findOne.mockResolvedValue(null);
+
+      await buildController().findOne(mockContext);
+
+      expect(mockUploadService.findOne).toHaveBeenCalledWith('999', undefined);
+      expect(mockContext.notFound).toHaveBeenCalledWith('file.notFound');
+    });
+
+    it('destroy passes a numeric id straight to the service without a documentId lookup', async () => {
+      mockContext.params = { id: '7' };
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().destroy(mockContext);
+
+      expect(mockDbFindOne).not.toHaveBeenCalled();
+      expect(mockUploadService.findOne).toHaveBeenCalledWith('7');
+      expect(mockUploadService.remove).toHaveBeenCalledWith(file);
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('destroy resolves a documentId to the numeric id and removes the file', async () => {
+      mockContext.params = { id: file.documentId };
+      mockDbFindOne.mockResolvedValue({ id: file.id });
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().destroy(mockContext);
+
+      expect(mockDbFindOne).toHaveBeenCalledWith({
+        where: { documentId: file.documentId },
+        select: ['id'],
+      });
+      expect(mockUploadService.findOne).toHaveBeenCalledWith(file.id);
+      expect(mockUploadService.remove).toHaveBeenCalledWith(file);
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('destroy treats a digit-leading documentId as a documentId', async () => {
+      mockContext.params = { id: '1abcdefghijklmnopqrstuvw' };
+      mockDbFindOne.mockResolvedValue({ id: file.id });
+      mockUploadService.findOne.mockResolvedValue(file);
+
+      await buildController().destroy(mockContext);
+
+      expect(mockDbFindOne).toHaveBeenCalledWith({
+        where: { documentId: '1abcdefghijklmnopqrstuvw' },
+        select: ['id'],
+      });
+      expect(mockUploadService.findOne).toHaveBeenCalledWith(file.id);
+      expect(mockUploadService.remove).toHaveBeenCalledWith(file);
+    });
+
+    it('destroy returns notFound for an unknown documentId and removes nothing', async () => {
+      mockContext.params = { id: 'unknowndocumentid0000000' };
+      mockDbFindOne.mockResolvedValue(null);
+
+      await buildController().destroy(mockContext);
+
+      expect(mockUploadService.findOne).not.toHaveBeenCalled();
+      expect(mockUploadService.remove).not.toHaveBeenCalled();
+      expect(mockContext.notFound).toHaveBeenCalledWith('file.notFound');
+    });
+  });
+
   describe('replaceFile', () => {
     it('accepts a single replacement file received as an array', async () => {
       const replacementFile = {
@@ -371,6 +500,90 @@ describe('Content API Controller - find / findPage', () => {
       );
 
       expect(mockPrepareUploadRequest).not.toHaveBeenCalled();
+      expect(mockUploadService.replace).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateFileInfo / replaceFile - by documentId (POST /upload?id=)', () => {
+    let mockDbFindOne: jest.Mock;
+
+    const file = { id: 7, documentId: 'qovkpekciob2wt8qyd51mg8k', name: 'image.jpg' };
+    const replacementFile = {
+      filepath: '/tmp/replacement.pdf',
+      originalFilename: 'replacement.pdf',
+      mimetype: 'application/pdf',
+    };
+
+    beforeEach(() => {
+      mockDbFindOne = jest.fn();
+      (globalThis.strapi as any).db = {
+        query: jest.fn().mockReturnValue({ findOne: mockDbFindOne }),
+      };
+
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [replacementFile],
+        filteredBody: { fileInfo: { name: 'replacement.pdf', folder: null } },
+        errors: [],
+      });
+    });
+
+    it('updateFileInfo resolves a documentId to the numeric id', async () => {
+      mockContext.query = { id: file.documentId } as any;
+      mockContext.request = { body: {} } as any;
+      mockDbFindOne.mockResolvedValue({ id: file.id });
+      mockUploadService.updateFileInfo.mockResolvedValue(file);
+
+      await buildController().updateFileInfo(mockContext);
+
+      expect(mockDbFindOne).toHaveBeenCalledWith({
+        where: { documentId: file.documentId },
+        select: ['id'],
+      });
+      expect(mockUploadService.updateFileInfo).toHaveBeenCalledWith(file.id, {
+        name: 'replacement.pdf',
+        folder: null,
+      });
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('updateFileInfo throws NotFoundError for an unknown documentId', async () => {
+      mockContext.query = { id: 'unknowndocumentid0000000' } as any;
+      mockContext.request = { body: {} } as any;
+      mockDbFindOne.mockResolvedValue(null);
+
+      await expect(buildController().updateFileInfo(mockContext)).rejects.toMatchObject({
+        name: 'NotFoundError',
+      });
+      expect(mockUploadService.updateFileInfo).not.toHaveBeenCalled();
+    });
+
+    it('replaceFile resolves a documentId to the numeric id', async () => {
+      mockContext.query = { id: file.documentId } as any;
+      mockContext.request = { body: {}, files: { files: replacementFile } } as any;
+      mockDbFindOne.mockResolvedValue({ id: file.id });
+      mockUploadService.replace.mockResolvedValue(file);
+
+      await buildController().replaceFile(mockContext);
+
+      expect(mockDbFindOne).toHaveBeenCalledWith({
+        where: { documentId: file.documentId },
+        select: ['id'],
+      });
+      expect(mockUploadService.replace).toHaveBeenCalledWith(file.id, {
+        data: { fileInfo: { name: 'replacement.pdf', folder: null } },
+        file: replacementFile,
+      });
+      expect(mockContext.body).toEqual(file);
+    });
+
+    it('replaceFile throws NotFoundError for an unknown documentId and replaces nothing', async () => {
+      mockContext.query = { id: 'unknowndocumentid0000000' } as any;
+      mockContext.request = { body: {}, files: { files: replacementFile } } as any;
+      mockDbFindOne.mockResolvedValue(null);
+
+      await expect(buildController().replaceFile(mockContext)).rejects.toMatchObject({
+        name: 'NotFoundError',
+      });
       expect(mockUploadService.replace).not.toHaveBeenCalled();
     });
   });

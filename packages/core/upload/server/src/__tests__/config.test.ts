@@ -36,5 +36,28 @@ describe('upload plugin config', () => {
         expect(() => config.validator({ [key]: value })).toThrow(new RegExp(key));
       });
     });
+
+    describe('sharp.limitInputPixels', () => {
+      test.each([
+        ['a pixel count', 100_000_000],
+        ['zero', 0],
+        ['true', true],
+        ['false', false],
+        ['null', null],
+        ['undefined', undefined],
+      ])('accepts %s', (_label, value) => {
+        expect(() => config.validator({ sharp: { limitInputPixels: value } })).not.toThrow();
+      });
+
+      test.each([
+        ['a string', '100000000'],
+        ['a negative', -1],
+        ['a fraction', 2.5],
+      ])('rejects %s', (_label, value) => {
+        expect(() => config.validator({ sharp: { limitInputPixels: value } })).toThrow(
+          /sharp\.limitInputPixels/
+        );
+      });
+    });
   });
 });

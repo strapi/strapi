@@ -5,13 +5,18 @@ import { http, HttpResponse } from 'msw';
 import { mockData } from '../../../tests/mockData';
 import { useDocumentActions } from '../useDocumentActions';
 
+const mockUseAIAvailability = jest.fn(() => false);
+
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useGetAiFeatureConfigQuery: () => ({ data: undefined }),
-  useAIAvailability: () => false,
+  useAIAvailability: () => mockUseAIAvailability(),
 }));
 
 describe('useDocumentActions', () => {
+  beforeEach(() => {
+    mockUseAIAvailability.mockReturnValue(false);
+  });
+
   it('should return an object with the correct methods', async () => {
     const { result } = renderHook(() => useDocumentActions());
 
@@ -719,6 +724,34 @@ describe('useDocumentActions', () => {
       });
 
       await screen.findByText("Couldn't unpublish entries.");
+    });
+  });
+
+  describe('AI feature config', () => {
+    const getAiFeatureConfig = jest.fn(() =>
+      HttpResponse.json({ data: { isAiI18nConfigured: true } })
+    );
+
+    beforeEach(() => {
+      getAiFeatureConfig.mockClear();
+      mockUseAIAvailability.mockReturnValue(false);
+      server.use(http.get('/admin/ai-feature-config', getAiFeatureConfig));
+    });
+
+    it('should not request the AI feature config when AI is not available', async () => {
+      const { result } = renderHook(() => useDocumentActions());
+
+      await waitFor(() => expect(result.current.update).toEqual(expect.any(Function)));
+
+      expect(getAiFeatureConfig).not.toHaveBeenCalled();
+    });
+
+    it('should request the AI feature config when AI is available', async () => {
+      mockUseAIAvailability.mockReturnValue(true);
+
+      renderHook(() => useDocumentActions());
+
+      await waitFor(() => expect(getAiFeatureConfig).toHaveBeenCalled());
     });
   });
 });

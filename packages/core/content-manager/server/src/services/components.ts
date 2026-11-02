@@ -1,4 +1,4 @@
-import { isNil, mapValues } from 'lodash/fp';
+import { mapValues } from 'lodash';
 
 import type { UID, Struct, Core } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
@@ -17,7 +17,7 @@ const configurationService = createConfigurationService({
   getModels() {
     const { toContentManagerModel } = getService('data-mapper');
 
-    return mapValues(toContentManagerModel, strapi.components);
+    return mapValues(strapi.components, (value) => toContentManagerModel(value));
   },
 });
 
@@ -33,7 +33,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const component = strapi.components[uid];
 
-    return isNil(component) ? component : toContentManagerModel(component);
+    return component == null ? component : toContentManagerModel(component);
   },
 
   async findConfiguration(component: Struct.ComponentSchema) {
@@ -64,8 +64,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async findComponentsConfigurations(model: Struct.ComponentSchema) {
     // Cache on request state so the same request can reuse configs
     const requestState = strapi.requestContext?.get?.()?.state as
-      | { __componentsConfigurationsCache?: Map<string, Record<string, Configuration>> }
-      | undefined;
+      { __componentsConfigurationsCache?: Map<string, Record<string, Configuration>> } | undefined;
     const requestCache = requestState?.__componentsConfigurationsCache;
 
     const componentUids = new Set<UID.Component>();

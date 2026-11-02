@@ -169,9 +169,9 @@ strapi.entityService.findOne(uid, entityId);
 
 */
 
-const movedFunctions = ['findOne', 'findMany', 'count', 'create', 'update', 'delete'];
+const movedFunctions = new Set(['findOne', 'findMany', 'count', 'create', 'update', 'delete']);
 
-const functionsWithEntityId = ['findOne', 'update', 'delete'];
+const functionsWithEntityId = new Set(['findOne', 'update', 'delete']);
 
 const transformDeclaration = (path: ASTPath<any>, name: any, j: JSCodeshift) => {
   const declaration = findClosestDeclaration(path, name, j);
@@ -315,7 +315,7 @@ const transform: Transform = (file, api) => {
         },
         property: {
           type: 'Identifier',
-          name: (name) => movedFunctions.includes(name),
+          name: (name) => movedFunctions.has(name),
         },
       },
     })
@@ -381,7 +381,7 @@ const transform: Transform = (file, api) => {
       // function with entityId as first argument
       if (
         j.Identifier.check(path.value.callee.property) &&
-        functionsWithEntityId.includes(path.value.callee.property.name)
+        functionsWithEntityId.has(path.value.callee.property.name)
       ) {
         rest.splice(0, 1);
 

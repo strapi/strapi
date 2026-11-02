@@ -158,8 +158,7 @@ describe('Remote Strapi destination provider — push assets write stream', () =
     await writeOneAsset(writable, asset);
 
     const endItem = streamBatches.flat().find((i) => (i as { action: string }).action === 'end') as
-      | { checksum?: { algorithm: string; value: string } }
-      | undefined;
+      { checksum?: { algorithm: string; value: string } } | undefined;
 
     const expected = createHash('sha256').update(Buffer.concat(payload)).digest('hex');
     expect(endItem?.checksum).toEqual({ algorithm: 'sha256', value: expected });
@@ -190,8 +189,7 @@ describe('Remote Strapi destination provider — push assets write stream', () =
     await writeOneAsset(writable, asset);
 
     const endItem = streamBatches.flat().find((i) => (i as { action: string }).action === 'end') as
-      | { checksum?: { algorithm: string; value: string } }
-      | undefined;
+      { checksum?: { algorithm: string; value: string } } | undefined;
 
     expect(endItem?.checksum).toBeUndefined();
   });

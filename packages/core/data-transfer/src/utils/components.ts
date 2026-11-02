@@ -1,5 +1,4 @@
-import _ from 'lodash';
-import { get, has, omit, pipe, assign } from 'lodash/fp';
+import _, { get, has, omit } from 'lodash';
 
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
 import type { Modules, UID, Data, Utils, Schema, Core } from '@strapi/types';
@@ -42,7 +41,7 @@ function omitComponentData(
     contentTypesUtils.isComponentAttribute(attributes[attributeName])
   );
 
-  return omit(componentAttributes, data);
+  return omit(data, componentAttributes);
 }
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
@@ -62,7 +61,7 @@ const createComponents = async <
   for (const attributeName of attributeNames) {
     const attribute = attributes[attributeName];
 
-    if (!has(attributeName, data) || !contentTypesUtils.isComponentAttribute(attribute)) {
+    if (!has(data, attributeName) || !contentTypesUtils.isComponentAttribute(attribute)) {
       continue;
     }
 
@@ -181,7 +180,7 @@ const updateComponents = async <
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
-    if (!has(attributeName, data)) {
+    if (!has(data, attributeName)) {
       continue;
     }
 
@@ -287,8 +286,12 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
     .query(uid)
     .load(entityToUpdate, attributeName)) as ComponentValue;
 
-  const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
-  const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
+  const idsToKeep = _.castArray(componentValue)
+    .filter((component) => has(component, 'id'))
+    .map(pickStringifiedId);
+  const allIds = _.castArray(previousValue)
+    .filter((component) => has(component, 'id'))
+    .map(pickStringifiedId);
 
   idsToKeep.forEach((id) => {
     if (!allIds.includes(id)) {
@@ -318,14 +321,14 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
     .load(entityToUpdate, attributeName)) as Schema.Attribute.Value<Schema.Attribute.DynamicZone>;
 
   const idsToKeep = _.castArray(dynamiczoneValues)
-    .filter(has('id'))
+    .filter((component) => has(component, 'id'))
     .map((v) => ({
       id: pickStringifiedId(v),
       __component: v.__component,
     }));
 
   const allIds = _.castArray(previousValue)
-    .filter(has('id'))
+    .filter((component) => has(component, 'id'))
     .map((v) => ({
       id: pickStringifiedId(v),
       __component: v.__component,
@@ -421,16 +424,12 @@ const createComponent = async <TUID extends UID.Component = UID.Component>(
   const model = strapi.getModel(uid) as Schema.Component;
 
   const componentData = await createComponents(uid, data);
-  const transform = pipe(
-    // Make sure we don't save the component with a pre-defined ID
-    omit('id'),
-    // Remove the component data from the original data object ...
-    (payload) => omitComponentData(model, payload),
-    // ... and assign the newly created component instead
-    assign(componentData)
-  );
+  // Remove predefined IDs and replace nested component data with the created components.
+  const dataWithoutComponents = omitComponentData(model, omit(data, 'id'));
 
-  return strapi.db.query(uid).create({ data: transform(data) });
+  return strapi.db.query(uid).create({
+    data: { ...componentData, ...dataWithoutComponents },
+  });
 };
 
 // components can have nested compos so this must be recursive
@@ -607,7 +606,7 @@ const resolveComponentUID = ({
     | Schema.Component
     | ((...opts: any[]) => Schema.ContentType | Schema.Component) = contentType;
   for (const path of paths) {
-    value = get(path, value);
+    value = get(value, path);
 
     // Needed when the value of cType should be computed
     // based on the next value (eg: dynamic zones)

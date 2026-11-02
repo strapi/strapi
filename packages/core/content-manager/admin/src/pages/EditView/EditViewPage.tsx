@@ -129,12 +129,11 @@ const EditViewPage = () => {
 
   const { isLazyLoading } = useLazyComponents([]);
 
-  const isLoading =
-    !isHydrated || isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
+  const isLoading = !isHydrated || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
   const initialValues = getInitialFormValues(isCreatingDocument);
 
-  if (isLoading && !document?.documentId) {
+  if (isLoadingActionsRBAC || (isLoading && !document?.documentId)) {
     return <Page.Loading />;
   }
 
@@ -262,10 +261,6 @@ const EditViewPage = () => {
                     <Panels withActions={false} />
                   </ActionsDrawer.Content>
                 </ActionsDrawer.Root>
-                {/* Adding a fixed height to the bottom of the page to prevent 
-                the actions drawer from covering the content
-                (40px button + 12px * 2 padding + 1px border) */}
-                <Box height="6.5rem" />
               </>
             )}
           </Layouts.Content>

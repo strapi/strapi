@@ -82,4 +82,5 @@ export interface FieldContentSourceMap {
   locale: string | null;
   model?: UID.Schema;
   kind?: Struct.ContentTypeKind;
+  fieldPath?: string;
 }

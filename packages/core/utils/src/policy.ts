@@ -1,5 +1,3 @@
-import { eq } from 'lodash/fp';
-
 interface Options {
   name: string;
   validator?(config: unknown): void;
@@ -29,7 +27,7 @@ const createPolicy = (options: Options) => {
 const createPolicyContext = (type: string, ctx: object) => {
   return Object.assign(
     {
-      is: eq(type),
+      is: (otherType: unknown) => type === otherType,
       get type() {
         return type;
       },

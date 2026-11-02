@@ -1,4 +1,5 @@
 import { traverseQueryPopulate } from '../traverse';
+import { removeRestrictedRelations } from '../sanitize/visitors';
 import {
   defaultValidatePopulate,
   POPULATE_TRAVERSALS,
@@ -253,6 +254,90 @@ describe('traverseQueryPopulate', () => {
           name: 'test',
         },
       },
+    });
+  });
+
+  test.each([
+    ['boolean populate', true],
+    ['count populate', { count: true }],
+  ])('allows visitors to remove morphToOne %s', async (_label, populateValue) => {
+    const schema = {
+      kind: 'collectionType' as const,
+      attributes: {
+        related: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+      },
+    };
+
+    const result = await traverseQueryPopulate(
+      ({ key }, { remove }) => {
+        if (key === 'related') {
+          remove(key);
+        }
+      },
+      {
+        schema,
+        getModel: jest.fn(() => schema),
+      }
+    )({
+      related: populateValue,
+    });
+
+    expect(result).toEqual({});
+  });
+
+  test('preserves authorized polymorphic fragments from string-array populate', async () => {
+    const allowedModel = {
+      uid: 'api::allowed.allowed',
+      kind: 'collectionType' as const,
+      attributes: {},
+    };
+    const deniedModel = {
+      uid: 'api::denied.denied',
+      kind: 'collectionType' as const,
+      attributes: {},
+    };
+    const schema = {
+      kind: 'collectionType' as const,
+      attributes: {
+        morphToOne: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+        morphToMany: {
+          type: 'relation' as const,
+          relation: 'morphToMany' as const,
+        },
+      },
+    };
+    const auth = {};
+
+    global.strapi = {
+      auth: {
+        verify(_auth: unknown, { scope }: { scope: string }) {
+          if (scope === 'api::denied.denied.find') {
+            throw new Error('Unauthorized');
+          }
+        },
+      },
+      contentTypes: {
+        allowed: allowedModel,
+        denied: deniedModel,
+      },
+    } as any;
+
+    const result = await traverseQueryPopulate(removeRestrictedRelations(auth), {
+      schema,
+      getModel: jest.fn((uid) => {
+        return uid === allowedModel.uid ? allowedModel : deniedModel;
+      }),
+    })(['morphToOne', 'morphToMany']);
+
+    expect(result).toEqual({
+      morphToOne: { on: { [allowedModel.uid]: true } },
+      morphToMany: { on: { [allowedModel.uid]: true } },
     });
   });
 

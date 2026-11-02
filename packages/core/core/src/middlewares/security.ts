@@ -1,4 +1,4 @@
-import { defaultsDeep, mergeWith } from 'lodash/fp';
+import { defaultsDeep, mergeWith } from 'lodash';
 import helmet, { KoaHelmet } from 'koa-helmet';
 import { CSP_DEFAULTS } from '@strapi/utils';
 
@@ -29,17 +29,15 @@ const defaults: Config = {
 };
 
 const mergeConfig = (existingConfig: Config, newConfig: Config) => {
-  return mergeWith(
-    (obj, src) => (Array.isArray(obj) && Array.isArray(src) ? obj.concat(src) : undefined),
-    existingConfig,
-    newConfig
+  return mergeWith({}, existingConfig, newConfig, (obj, src) =>
+    Array.isArray(obj) && Array.isArray(src) ? obj.concat(src) : undefined
   );
 };
 
 export const security: Core.MiddlewareFactory<Config> =
   (config, { strapi }) =>
   (ctx, next) => {
-    let helmetConfig: Config = defaultsDeep(defaults, config);
+    let helmetConfig: Config = defaultsDeep({}, config, defaults);
     const specialPaths = ['/documentation'];
 
     const directives: {

@@ -1,8 +1,10 @@
 /* eslint-disable check-file/filename-naming-convention */
+import { useIsMobile, useQueryParams } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
+import { usePersistentPartialQueryParams } from '../hooks/usePersistentQueryParams';
 import { Layout } from '../layout';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
@@ -10,6 +12,11 @@ import type { AppState } from '../modules/app';
 import type { Permission } from '@strapi/admin/strapi-admin';
 
 jest.mock('../hooks/useContentManagerInitData');
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useIsMobile: jest.fn().mockReturnValue(false),
+}));
 
 const ARTICLE_MODEL = {
   uid: 'api::article.article',
@@ -26,7 +33,7 @@ const ARTICLE_MODEL = {
 
 const ARTICLE_LINK: ContentManagerLink = {
   permissions: [],
-  search: null,
+  search: 'page=1&pageSize=10&sort=title:ASC',
   kind: 'collectionType',
   title: 'Article',
   to: '/content-manager/collection-types/api::article.article',
@@ -67,13 +74,32 @@ const EditPageProbe = () => {
   );
 };
 
+const LIST_SETTINGS_KEY = 'layout-list-settings';
+
+const ListPageProbe = () => {
+  const { isHydrated } = usePersistentPartialQueryParams({
+    [LIST_SETTINGS_KEY]: { paths: ['sort', 'pageSize'] },
+  });
+  const [{ query }] = useQueryParams({ sort: 'title:ASC', pageSize: '10' });
+
+  if (!isHydrated) return null;
+
+  return (
+    <>
+      <div>List page</div>
+      <div data-testid="sort">{query.sort}</div>
+      <div data-testid="page-size">{query.pageSize}</div>
+    </>
+  );
+};
+
 const renderLayout = (initialEntry: string, permissions: Permission[] = []) =>
   render(
     <Routes>
       <Route path="/content-manager" element={<Layout />}>
         <Route path="403" element={<div>No permissions page</div>} />
         <Route path="no-content-types" element={<div>No content types page</div>} />
-        <Route path=":collectionType/:slug" element={<div>List page</div>} />
+        <Route path=":collectionType/:slug" element={<ListPageProbe />} />
         <Route path=":collectionType/:slug/:id" element={<EditPageProbe />} />
       </Route>
       <Route path="*" element={<div>Not found page</div>} />
@@ -84,6 +110,56 @@ const renderLayout = (initialEntry: string, permissions: Permission[] = []) =>
 describe('Content Manager | Layout', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useIsMobile).mockReturnValue(false);
+    window.localStorage.removeItem(LIST_SETTINGS_KEY);
+  });
+
+  it('restores saved list preferences when redirecting from the base route', async () => {
+    mockInitData({ models: [ARTICLE_MODEL], collectionTypeLinks: [ARTICLE_LINK] });
+    window.localStorage.setItem(
+      LIST_SETTINGS_KEY,
+      JSON.stringify({ sort: 'title:DESC', pageSize: '20' })
+    );
+
+    renderLayout('/content-manager');
+
+    expect(await screen.findByText('List page')).toBeInTheDocument();
+    expect(screen.getByTestId('sort')).toHaveTextContent('title:DESC');
+    expect(screen.getByTestId('page-size')).toHaveTextContent('20');
+  });
+
+  it('uses list defaults after a base-route redirect when no preferences are saved', async () => {
+    mockInitData({ models: [ARTICLE_MODEL], collectionTypeLinks: [ARTICLE_LINK] });
+
+    renderLayout('/content-manager');
+
+    expect(await screen.findByText('List page')).toBeInTheDocument();
+    expect(screen.getByTestId('sort')).toHaveTextContent('title:ASC');
+    expect(screen.getByTestId('page-size')).toHaveTextContent('10');
+  });
+
+  it('keeps explicit collection URL parameters ahead of saved list preferences', async () => {
+    mockInitData({ models: [ARTICLE_MODEL], collectionTypeLinks: [ARTICLE_LINK] });
+    window.localStorage.setItem(
+      LIST_SETTINGS_KEY,
+      JSON.stringify({ sort: 'title:DESC', pageSize: '20' })
+    );
+
+    renderLayout(`${ARTICLE_LINK.to}?sort=title:ASC&pageSize=50`);
+
+    expect(await screen.findByText('List page')).toBeInTheDocument();
+    expect(screen.getByTestId('sort')).toHaveTextContent('title:ASC');
+    expect(screen.getByTestId('page-size')).toHaveTextContent('50');
+  });
+
+  it('shows the content type navigation on mobile without redirecting to a list', async () => {
+    jest.mocked(useIsMobile).mockReturnValue(true);
+    mockInitData({ models: [ARTICLE_MODEL], collectionTypeLinks: [ARTICLE_LINK] });
+
+    renderLayout('/content-manager');
+
+    expect(await screen.findByRole('navigation', { name: 'Content Manager' })).toBeInTheDocument();
+    expect(screen.queryByText('List page')).not.toBeInTheDocument();
   });
 
   it('redirects to the content-manager 403 page when no model is authorised for the user', async () => {

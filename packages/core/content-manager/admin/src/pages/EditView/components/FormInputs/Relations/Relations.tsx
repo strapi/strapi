@@ -37,6 +37,7 @@ import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { useContentTypeSchema } from '../../../../../hooks/useContentTypeSchema';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { useDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
@@ -46,6 +47,7 @@ import {
   UseDragAndDropOptions,
   useDragAndDrop,
 } from '../../../../../hooks/useDragAndDrop';
+import { useHasBeenNearViewport } from '../../../../../hooks/useHasBeenNearViewport';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
@@ -111,7 +113,13 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
  * -----------------------------------------------------------------------------------------------*/
 
 const RELATIONS_TO_DISPLAY = 5;
-const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
+const ONE_WAY_RELATIONS = new Set([
+  'oneWay',
+  'oneToOne',
+  'manyToOne',
+  'oneToManyMorph',
+  'oneToOneMorph',
+]);
 const EMPTY_RELATION_RESULTS: RelationResult[] = [];
 
 type RelationPosition =
@@ -139,7 +147,8 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
 }
 
 interface RelationsFieldProps
-  extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
+  extends
+    Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {}
 
 export interface RelationsFormValue {
@@ -226,7 +235,16 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { data, isLoading, isFetching } = useGetRelationsQuery(
+    const fieldRef = React.useRef<HTMLDivElement>(null);
+    const composedRefs = useComposedRefs(ref, fieldRef);
+    /**
+     * A large content type can have hundreds of relation fields. Only fetch the relations of the
+     * fields the user can see (or is about to), instead of all of them on load and again after
+     * every save.
+     */
+    const hasBeenNearViewport = useHasBeenNearViewport(fieldRef);
+
+    const { data, isLoading, isFetching, isError, refetch } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -240,12 +258,34 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id || !isRelatedToCurrentDocument,
+        skip: !id || !isRelatedToCurrentDocument || !hasBeenNearViewport,
       }
     );
 
+    /**
+     * Choosing a new entry for a single relation replaces the saved one, which `handleConnect`
+     * can only disconnect once it is loaded. Until then, the combobox stays disabled.
+     */
+    const shouldLoadSavedRelations = Boolean(id) && isRelatedToCurrentDocument;
+    const isWaitingForSavedRelation =
+      ONE_WAY_RELATIONS.has(props.attribute.relation) && shouldLoadSavedRelations && !data;
+
     const handleLoadMore = () => {
-      setCurrentPage((prev) => prev + 1);
+      /**
+       * The relations cache is shared by every instance of this field that targets the same
+       * document (e.g. the edit view and the same document opened again inside the relation
+       * modal), and another instance mounting resets it to page 1. Request the page that follows
+       * the one actually held by the cache rather than `currentPage + 1`, otherwise the pages in
+       * between would never be loaded.
+       */
+      const nextPage = (data?.pagination?.page ?? currentPage) + 1;
+
+      if (nextPage === currentPage) {
+        // Our query args already point at that page, so changing state would not fetch it
+        refetch();
+      } else {
+        setCurrentPage(nextPage);
+      }
     };
 
     const field = useField<RelationsFormValue>(props.name);
@@ -345,7 +385,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           href: `../${COLLECTION_TYPES}/${targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
         };
 
-        if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
+        if (ONE_WAY_RELATIONS.has(props.attribute.relation)) {
           // Remove any existing relation so they can be replaced with the new one
           field.value?.connect?.forEach(handleDisconnect);
           relations.forEach(handleDisconnect);
@@ -370,7 +410,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     return (
       <Flex
-        ref={ref}
+        ref={composedRefs}
         direction="column"
         gap={3}
         justifyContent="space-between"
@@ -379,7 +419,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       >
         <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
           <MemoizedRelationsComboboxInput
-            disabled={isDisabled}
+            disabled={isDisabled || isWaitingForSavedRelation}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
             id={id}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
@@ -415,6 +455,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           documentParams={currentDocumentMeta.params}
           mainField={props.mainField}
         />
+        {isError ? (
+          <Typography variant="pi" textColor="danger600">
+            {formatMessage({
+              id: 'anErrorOccurred',
+              defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+            })}
+          </Typography>
+        ) : null}
       </Flex>
     );
   }
@@ -530,11 +578,33 @@ const RelationsInput = ({
   const targetModel = props.attribute.targetModel;
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
-  const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
+  const [searchForTrigger, { data, isLoading, isFetching, isError, error: searchError }] =
+    useLazySearchRelationsQuery();
+  // Refetching a failed search reports `isError: false` and `isLoading: true` until it settles.
+  // Keep showing the previous error meanwhile instead of flashing the loading state.
+  const isRetryingFailedSearch = isFetching && searchError !== undefined;
+
+  /**
+   * The options are only needed once the combobox has been opened. Searching when the field
+   * mounts would send one request per relation field of the document on load.
+   */
+  const [hasBeenOpened, setHasBeenOpened] = React.useState(false);
+  const handleOpen = React.useCallback(
+    (search: string) => {
+      if (!hasBeenOpened) {
+        // Enabling the search sends it: searching again here would send the same request twice.
+        setHasBeenOpened(true);
+        return;
+      }
+
+      setSearchParams((params) => ({ ...params, _q: search, page: 1 }));
+    },
+    [hasBeenOpened]
+  );
 
   /**
    * Because we're using a lazy query, we need to trigger the search
-   * when the component mounts and when the search params change.
+   * when the combobox is first opened and when the search params change.
    * We also need to trigger the search when the field value changes
    * so that we can filter out the relations that are already connected.
    */
@@ -548,7 +618,7 @@ const RelationsInput = ({
     const [targetField] = name.split('.').slice(-1);
 
     // Return early if there is no relation to the document
-    if (!isRelatedToCurrentDocument) return;
+    if (!isRelatedToCurrentDocument || !hasBeenOpened) return;
 
     searchForTrigger({
       model,
@@ -571,6 +641,7 @@ const RelationsInput = ({
     searchForTrigger,
     searchParamsDebounced,
     isRelatedToCurrentDocument,
+    hasBeenOpened,
     currentDocumentMeta.params,
   ]);
 
@@ -610,6 +681,7 @@ const RelationsInput = ({
        *
        */
       onChange(relation);
+      setSearchParams({ _q: '', page: 1 });
     },
     [data, formatMessage, onChange, toggleNotification]
   );
@@ -660,9 +732,11 @@ const RelationsInput = ({
           placeholder={placeholder}
           hasNextPage={hasNextPage}
           isLoadingPermissions={isLoadingPermissions}
-          isLoadingSearchRelations={isLoading}
+          isLoadingSearchRelations={isLoading && !isRetryingFailedSearch}
+          isSearchRelationsError={isError || isRetryingFailedSearch}
           handleChange={handleChange}
           setSearchParams={setSearchParams}
+          onOpen={handleOpen}
           data={data}
           mainField={mainField}
           fieldValue={field.value}
@@ -677,13 +751,17 @@ const RelationsInput = ({
 
 const MemoizedRelationsComboboxInput = React.memo(RelationsInput);
 
-interface RelationModalWithContextProps
-  extends Omit<RelationsInputProps, 'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'> {
+interface RelationModalWithContextProps extends Omit<
+  RelationsInputProps,
+  'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'
+> {
   relation: DocumentMeta;
   hasNextPage: boolean;
   isLoadingSearchRelations: boolean;
+  isSearchRelationsError: boolean;
   isLoadingPermissions: boolean;
   handleChange: (relationId?: string) => void;
+  onOpen: (search: string) => void;
   data?: FindAvailable.Response;
   fieldValue?: RelationsFormValue;
   setSearchParams: React.Dispatch<
@@ -700,10 +778,12 @@ const RelationModalWithContext = ({
   placeholder,
   hasNextPage,
   isLoadingSearchRelations,
+  isSearchRelationsError,
   isLoadingPermissions,
   handleChange,
   mainField,
   setSearchParams,
+  onOpen,
   fieldValue,
   data,
   ...props
@@ -715,12 +795,15 @@ const RelationModalWithContext = ({
     defaultMessage: 'Untitled',
   });
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
+  const { schema: targetSchema } = useContentTypeSchema(relation.model);
+  const isTargetSingleType = targetSchema?.kind === 'singleType';
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const componentUID = useComponent('RelationsField', (state) => state.uid);
   const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
   const getParentFormValuesWithCurrentRelation = () => {
     return setIn(getParentFormValues(), name, fieldValue);
   };
+  const setParentFormValue = useForm('RelationModalWrapper', (state) => state.onChange);
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -744,7 +827,7 @@ const RelationModalWithContext = ({
       {({ dispatch }) => (
         <Combobox
           ref={fieldRef}
-          creatable="visible"
+          creatable={isTargetSingleType ? false : 'visible'}
           creatableDisabled={!canCreate}
           createMessage={() =>
             formatMessage({
@@ -753,7 +836,7 @@ const RelationModalWithContext = ({
             })
           }
           onCreateOption={() => {
-            if (canCreate) {
+            if (canCreate && !isTargetSingleType) {
               dispatch({
                 type: 'GO_TO_RELATION',
                 payload: {
@@ -762,6 +845,7 @@ const RelationModalWithContext = ({
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
                   getParentFormValues: getParentFormValuesWithCurrentRelation,
+                  setParentFormValue,
                 },
               });
             }
@@ -778,14 +862,23 @@ const RelationModalWithContext = ({
           }
           hasMoreItems={hasNextPage}
           loading={isLoadingSearchRelations || isLoadingPermissions}
-          onOpenChange={() => {
-            handleSearch(textValue ?? '');
+          onOpenChange={(isOpen) => {
+            // Selecting an option closes the list while `textValue` still holds its label.
+            // Searching on close would omit that option and cache an empty result.
+            if (isOpen) {
+              onOpen(textValue ?? '');
+            }
           }}
           noOptionsMessage={() =>
-            formatMessage({
-              id: getTranslation('relation.notAvailable'),
-              defaultMessage: 'No relations available',
-            })
+            isSearchRelationsError
+              ? formatMessage({
+                  id: 'anErrorOccurred',
+                  defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+                })
+              : formatMessage({
+                  id: getTranslation('relation.notAvailable'),
+                  defaultMessage: 'No relations available',
+                })
           }
           loadingMessage={formatMessage({
             id: getTranslation('relation.isLoading'),
@@ -1054,7 +1147,7 @@ const RelationsList = ({
    * These relation types will only ever have one item
    * in their list, so you can't reorder a single item!
    */
-  const canReorder = !ONE_WAY_RELATIONS.includes(relationType);
+  const canReorder = !ONE_WAY_RELATIONS.has(relationType);
 
   const dynamicListHeight =
     data.length > RELATIONS_TO_DISPLAY

@@ -1,4 +1,3 @@
-import { isFunction } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 
 const { ApplicationError } = errors;
@@ -44,7 +43,11 @@ const createTypeRegistry = (): TypeRegistry => {
      */
     registerMany(definitionsEntries, config = {}) {
       for (const [name, definition] of definitionsEntries) {
-        this.register(name, definition, isFunction(config) ? config(name, definition) : config);
+        this.register(
+          name,
+          definition,
+          typeof config === 'function' ? config(name, definition) : config
+        );
       }
 
       return this;

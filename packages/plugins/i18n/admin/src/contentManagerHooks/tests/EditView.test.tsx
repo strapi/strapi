@@ -80,7 +80,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(mutatedField.labelAction).toBeUndefined();
   });
 
-  it('injects a labelAction element when content type is localized (root-level field)', () => {
+  it('shows the localized tooltip without a native title tooltip (root-level field)', async () => {
     const titleField = makeEditField();
 
     const layout = makeEditLayout({ ctLocalized: true, topFields: [[titleField]] });
@@ -93,8 +93,17 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(React.isValidElement(action)).toBe(true);
 
     if (action) {
-      render(action);
+      const { user } = render(action);
       expect(screen.getByText(/This value is unique for the selected locale/i)).toBeInTheDocument();
+      const label = screen.getByText(
+        /This value is unique for the selected locale/i
+      ).parentElement!;
+      expect(label).not.toHaveAttribute('title');
+
+      await user.hover(label.lastElementChild!);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'This value is unique for the selected locale'
+      );
     }
   });
 

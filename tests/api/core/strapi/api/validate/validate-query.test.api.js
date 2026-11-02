@@ -1,6 +1,6 @@
 'use strict';
 
-const { values, zip, symmetricDifference } = require('lodash/fp');
+const { xor, zip } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -17,11 +17,11 @@ let rq;
 let publicRq;
 
 const addSchemas = () => {
-  for (const component of values(schemas.components)) {
+  for (const component of Object.values(schemas.components ?? {})) {
     builder.addComponent(component);
   }
 
-  builder.addContentTypes(values(schemas['content-types']));
+  builder.addContentTypes(Object.values(schemas['content-types'] ?? {}));
 };
 
 const addFixtures = () => {
@@ -83,7 +83,7 @@ function checkAPIResultFields(res, fields) {
 
   res.body.data
     .map((entity) => Object.keys(entity))
-    .map(symmetricDifference(fields))
+    .map((value) => xor(fields, value))
     .forEach((diff) => {
       expect(diff).toStrictEqual([]);
     });

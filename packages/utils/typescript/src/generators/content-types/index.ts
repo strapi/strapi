@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { values, pipe, map, sortBy } from 'lodash/fp';
+import { sortBy } from 'lodash';
 
 import { models } from '../common';
 import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
@@ -22,14 +22,13 @@ export const generateContentTypesDefinitions = async (
 
   const { contentTypes } = strapi;
 
-  const contentTypesDefinitions = pipe(
-    values,
-    sortBy('uid'),
-    map((contentType: any) => ({
-      uid: contentType.uid,
-      definition: models.schema.generateSchemaDefinition(contentType),
-    }))
-  )(contentTypes);
+  const contentTypesDefinitions = sortBy(
+    Object.values<models.utils.Schema>(contentTypes ?? {}),
+    'uid'
+  ).map((contentType) => ({
+    uid: contentType.uid,
+    definition: models.schema.generateSchemaDefinition(contentType),
+  }));
 
   options.logger.debug(`Found ${contentTypesDefinitions.length} content-types.`);
 

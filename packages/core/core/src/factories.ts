@@ -1,4 +1,4 @@
-import { pipe, omit, pick } from 'lodash/fp';
+import { omit, pick } from 'lodash';
 import type { Core, UID, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
@@ -101,10 +101,8 @@ function createCoreRouter<T extends UID.ContentType>(
           defaultRoute.config = (config[routeName] ?? {}) as Core.RouteConfig;
         });
 
-        const selectedRoutes = pipe(
-          (routes) => (except ? omit(except, routes) : routes),
-          (routes) => (only ? pick(only, routes) : routes)
-        )(defaultRoutes);
+        const availableRoutes = except ? omit(defaultRoutes, except) : defaultRoutes;
+        const selectedRoutes = only ? pick(availableRoutes, only) : availableRoutes;
 
         routes = Object.values(selectedRoutes);
       }

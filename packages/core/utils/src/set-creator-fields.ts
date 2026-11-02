@@ -1,4 +1,3 @@
-import { assign, assoc } from 'lodash/fp';
 import * as contentTypes from './content-types';
 
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypes.constants;
@@ -16,13 +15,14 @@ const setCreatorFields =
   <TData extends object>({ user, isEdition = false }: Options) =>
   <TDataInner extends object = TData>(data: TDataInner) => {
     if (isEdition) {
-      return assoc(UPDATED_BY_ATTRIBUTE, user.id, data);
+      return { ...data, [UPDATED_BY_ATTRIBUTE]: user.id };
     }
 
-    return assign(data, {
+    return {
+      ...data,
       [CREATED_BY_ATTRIBUTE]: user.id,
       [UPDATED_BY_ATTRIBUTE]: user.id,
-    });
+    };
   };
 
 export default setCreatorFields;

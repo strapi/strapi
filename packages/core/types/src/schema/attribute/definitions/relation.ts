@@ -240,9 +240,7 @@ export namespace RelationKind {
   export type Any = RelationKind.BiDirectional | RelationKind.Morph | RelationKind.XWay;
 
   export type WithTarget =
-    | RelationKind.BiDirectional
-    | RelationKind.XWay
-    | RelationKind.MorphReference;
+    RelationKind.BiDirectional | RelationKind.XWay | RelationKind.MorphReference;
 
   export type WithoutTarget = RelationKind.MorphOwner;
 

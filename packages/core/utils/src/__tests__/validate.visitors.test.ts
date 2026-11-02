@@ -271,6 +271,30 @@ describe('Validate visitors util', () => {
       );
     });
 
+    test.each([
+      ['status', 'draft'],
+      ['publicationFilter', 'never-published'],
+      ['hasPublishedVersion', 'false'],
+    ])('explains that %s is root-only when used inside a nested populate', async (key, value) => {
+      const populate = { category: { [key]: value } };
+
+      const error = await validators.defaultValidatePopulate(ctx, populate).catch((e) => e);
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error.message).toBe(
+        `Invalid key ${key} at category: ${key} is only accepted at the root of the query, and it also applies to populated relations`
+      );
+      expect(error.details).toEqual({ key, path: 'category' });
+    });
+
+    test('keeps the plain message for other unrecognized keys inside a nested populate', async () => {
+      const populate = { category: { unknownOption: true } };
+
+      await expect(validators.defaultValidatePopulate(ctx, populate)).rejects.toThrow(
+        /^Invalid key unknownOption at category$/
+      );
+    });
+
     test('throws ValidationError for invalid populate in polymorphic structures (dynamic zone)', async () => {
       const dynamicZoneModel: any = {
         uid: 'api::article.article',

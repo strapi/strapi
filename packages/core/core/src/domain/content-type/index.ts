@@ -1,5 +1,4 @@
-import { cloneDeep } from 'lodash/fp';
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import { yup, contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import { validateContentTypeDefinition } from './validator';
@@ -161,6 +160,8 @@ const pickSchema = (model: Schema.ContentType) => {
       'pluginOptions',
       'attributes',
       'kind',
+      'indexes',
+      'foreignKeys',
     ])
   );
 

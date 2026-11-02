@@ -16,7 +16,10 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
-import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
+import {
+  useHasInputPopoverParent,
+  usePreviewPopoverBlockIndex,
+} from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 import {
   getConditionDependencyPaths,
@@ -38,6 +41,8 @@ import type { DistributiveOmit } from 'react-redux';
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
   document?: ReturnType<UseDocument>;
+  /** The field's width in the edit layout, out of 12. */
+  size?: number;
 };
 
 /**
@@ -52,6 +57,8 @@ const BaseInputRenderer = ({
   visible,
   hint: providedHint,
   document: providedDocument,
+  // Not spread with the rest: design-system inputs have a `size` prop of their own.
+  size: layoutSize,
   ...inputProps
 }: InputRendererProps) => {
   const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
@@ -69,6 +76,7 @@ const BaseInputRenderer = ({
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
   const isInPreviewPopover = useHasInputPopoverParent();
+  const blockIndex = usePreviewPopoverBlockIndex();
   const shouldIgnorePermissions = isInDynamicZone || isInPreviewPopover;
 
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
@@ -173,6 +181,7 @@ const BaseInputRenderer = ({
         {...props}
         // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
         hint={hint}
+        layoutSize={layoutSize}
         disabled={fieldIsDisabled}
       />
     );
@@ -191,6 +200,9 @@ const BaseInputRenderer = ({
           hint={hint}
           type={props.type}
           disabled={fieldIsDisabled}
+          autoFocus={isInPreviewPopover && blockIndex == null}
+          livePreviewSync={isInPreviewPopover}
+          blockIndex={blockIndex}
         />
       );
     case 'component':

@@ -17,8 +17,8 @@ module.exports = ({ strapi }) => {
    * @param {String}   provider
    */
 
-  const getProfile = async (provider, query) => {
-    const accessToken = query.access_token || query.code || query.oauth_token;
+  const getProfile = async (provider, oauthData, { grantResponse } = {}) => {
+    const accessToken = oauthData.access_token || oauthData.code || oauthData.oauth_token;
 
     const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
@@ -26,9 +26,10 @@ module.exports = ({ strapi }) => {
 
     return getService('providers-registry').run({
       provider,
-      query,
+      query: oauthData,
       accessToken,
       providers,
+      grantResponse,
     });
   };
 
@@ -42,15 +43,16 @@ module.exports = ({ strapi }) => {
    * @return  {*}
    */
 
-  const connect = async (provider, query) => {
-    const accessToken = query.access_token || query.code || query.oauth_token;
+  const connect = async (provider, oauthData, { grantResponse } = {}) => {
+    const accessToken = oauthData.access_token || oauthData.code || oauthData.oauth_token;
+    const idToken = oauthData.id_token;
 
-    if (!accessToken) {
+    if (!accessToken && !idToken) {
       throw new Error('No access_token.');
     }
 
     // Get the profile.
-    const profile = await getProfile(provider, query);
+    const profile = await getProfile(provider, oauthData, { grantResponse });
 
     const email = _.toLower(profile.email);
 

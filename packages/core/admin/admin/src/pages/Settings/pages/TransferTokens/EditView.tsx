@@ -33,6 +33,9 @@ import type {
   SanitizedTransferToken,
 } from '../../../../../../shared/contracts/transfer';
 
+const EMPTY_ERRORS: NonNullable<FormTransferTokenContainerProps['errors']> = {};
+const EMPTY_TRANSFER_TOKEN: NonNullable<FormTransferTokenContainerProps['transferToken']> = {};
+
 const schema = yup.object().shape({
   name: yup.string().max(100).required(translatedErrors.required.id),
   description: yup.string().nullable(),
@@ -326,12 +329,12 @@ interface FormTransferTokenContainerProps {
 }
 
 const FormTransferTokenContainer = ({
-  errors = {},
+  errors = EMPTY_ERRORS,
   onChange,
   canEditInputs,
   isCreating,
   values,
-  transferToken = {},
+  transferToken = EMPTY_TRANSFER_TOKEN,
 }: FormTransferTokenContainerProps) => {
   const { formatMessage } = useIntl();
 

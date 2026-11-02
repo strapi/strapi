@@ -1,4 +1,5 @@
-import { pick, getOr } from 'lodash/fp';
+import { pick, get } from 'lodash';
+
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { Schema, Struct } from '@strapi/types';
@@ -34,7 +35,7 @@ export default () => ({
     };
   },
 
-  toDto: pick(dtoFields),
+  toDto: <T extends object>(model: T) => pick(model, dtoFields),
 });
 
 const formatAttributes = (contentType: Struct.ComponentSchema) => {
@@ -77,4 +78,4 @@ const toRelation = (attribute: Schema.Attribute.Relation) => {
 };
 
 const isVisible = (model: Struct.ComponentSchema): boolean =>
-  getOr(true, 'pluginOptions.content-manager.visible', model) === true;
+  get(model, 'pluginOptions.content-manager.visible', true) === true;

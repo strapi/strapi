@@ -1,4 +1,4 @@
-import { toString } from 'lodash/fp';
+import { toString } from 'lodash';
 import { errors } from '@strapi/utils';
 
 const { ApplicationError } = errors;

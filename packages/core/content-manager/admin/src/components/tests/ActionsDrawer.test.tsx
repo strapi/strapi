@@ -2,6 +2,13 @@ import { render, screen, waitFor } from '@tests/utils';
 
 import { ActionsDrawer } from '../ActionsDrawer';
 
+const mockUseMeasure = jest.fn(() => [jest.fn(), { height: 0 }]);
+
+jest.mock('@strapi/design-system', () => ({
+  ...jest.requireActual('@strapi/design-system'),
+  useMeasure: () => mockUseMeasure(),
+}));
+
 describe('ActionsDrawer', () => {
   const defaultHeaderContent = <div>Header Content</div>;
   const defaultDrawerContent = <div>Drawer Children</div>;
@@ -15,6 +22,18 @@ describe('ActionsDrawer', () => {
       );
 
       expect(screen.getByText('Header Content')).toBeInTheDocument();
+    });
+
+    it('should reserve the full height of the fixed header', () => {
+      mockUseMeasure.mockReturnValueOnce([jest.fn(), { height: 180 }]);
+
+      render(
+        <ActionsDrawer.Root hasContent={false}>
+          <ActionsDrawer.Header>{defaultHeaderContent}</ActionsDrawer.Header>
+        </ActionsDrawer.Root>
+      );
+
+      expect(screen.getByTestId('actions-drawer-spacer')).toHaveStyle({ height: '180px' });
     });
 
     it('should render drawer content when provided', () => {

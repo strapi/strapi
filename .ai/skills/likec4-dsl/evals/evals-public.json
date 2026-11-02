@@ -1,0 +1,167 @@
+{
+  "skill_name": "likec4-dsl",
+  "artifact_type": "evals-public",
+  "schema_version": 2,
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I just edited `projects/template/system-model.c4` and I only want syntax and semantic validation for that file, not layout drift. What exact LikeC4 CLI command should I run from the repo root, and which JSON fields tell me whether only my file failed versus the whole project being broken?",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "I’m creating `projects/template/likec4.config.json` and I want that project to reuse shared specs from `projects/shared/`. Show a minimal JSON config snippet and explain how LikeC4 decides which project a `.c4` file belongs to when multiple config files exist in the workspace.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I want to export only views matching `overview*` as dark PNGs into `./images`, flattened, for the current project. What exact LikeC4 CLI command should I run? (If a project path is optional in this context, make that explicit.)",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Give me a minimal LikeC4 dynamic view snippet that renders as a UML-style sequence for `client -> gateway -> orders -> db`, and includes response arrows back out to the client.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I only want `cloud.backend.*` highlighted in one view while everything else stays muted. Do not move this styling into the model or specification. Answer in two parts: (1) one explicit sentence saying where this styling belongs, and (2) one minimal LikeC4 view snippet that uses `include *`, `style * { color muted }`, and a dedicated rule for `cloud.backend.*`.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Assume `deploymentNode vm` already exists and `cloud.api` already exists in the logical model. Show a minimal deployment snippet that creates two separately named instances of `cloud.api` inside one VM node. Do not use two anonymous `instanceOf cloud.api` lines; I specifically need two named instances in the same node.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "In a view scoped `of cloud.backend`, I want to show only the direct children of `cloud.backend` that have at least one relationship with the elements already included in the view — not ALL children. Which predicate should I use: `cloud.backend.*`, `cloud.backend._`, or `cloud.backend.**`? Give me a minimal view snippet using the right one and explain what the other two would have selected instead.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "I have this base view:\n```likec4\nview backend-overview of cloud.backend {\n  include *\n}\n```\nWrite a `detail` view that: (1) extends `backend-overview`, (2) adds just `include api` — relying on scope inheritance so I don't need the full FQN `cloud.backend.api`, and (3) adds all incoming relationships to `cloud.backend` from the rest of the model using a relationship predicate. Show the DSL and explain what scope inheritance means here.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "I want to define a reusable predicate group called `core-services` that includes all `service`-kind elements from `cloud.*` but excludes those tagged `#deprecated`. Use the exact reusable-predicate mechanism `global { predicateGroup ... }` and, in each view, apply it with the exact keyword form `global predicate core-services` (do not replace this with some other reusable-style mechanism). Then show two different views that both apply it: one that adds a per-view style rule on top, and another that adds an extra `include` rule.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Write a dynamic view `checkout-flow` that satisfies all of the following:\n- The chain `customer -> frontend -> api` is written using LikeC4's chained step syntax (a single compound expression, not three separate lines).\n- The `frontend -> api` step has a body block with `technology 'HTTPS'` and `navigateTo payment-detail`.\n- After the chain, `api` fans out simultaneously to `payments`, `inventory`, and `notifications` using the parallel blocks syntax.\nKeep the snippet minimal and immediately usable.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "I want a minimal LikeC4 fixture that *proves* deployment-instance tags are cumulative for `source.tag` filtering. Assume logical `frontend` has tag `#next`, deployment instance `prod.eu.web.frontend` adds `#gamma`, and `db` is the target. Write one paste-ready `.c4` file containing: (1) minimal `specification`, `model`, and `deployment`; and (2) three `deployment view`s named `rel_only_next`, `rel_only_gamma`, and `rel_only_missing`, each using only a relationship include with `where source.tag is ...`. The first two views should render the `reads` relation; the third should render empty.",
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "My `base.c4` defines:\n```likec4\nmodel {\n  cloud = system 'Cloud' {\n    api = service 'API' {\n      metadata { port '8080' }\n    }\n  }\n}\n```\nIn `ops.c4` I use `extend cloud.api` to add `metadata { port '9090'; region 'us-east-1' }` and a nested `health = component 'Health Check'`. Show the correct `ops.c4` snippet and state exactly what value `port` holds in the merged model, and why. Be explicit about whether the original `port '8080'` is overwritten or merged.",
+      "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "In a `deployment view`, can I use `include * with { color red }` and `global style myTheme` to style nodes the same way as in element views? Answer in three parts: (1) say explicitly whether each construct is supported, (2) if you propose any local `style` rule as an alternative, make clear that it is a separate supported deployment-view construct rather than `with { ... }` or `global style`, and (3) provide a minimal corrected snippet that stays within supported deployment-view syntax.",
+      "files": []
+    },
+    {
+      "id": 13,
+      "prompt": "Fix this invalid LikeC4 snippet and explain why it is invalid:\n```likec4\nmodel {\n  api = service 'API' {\n    technology 'Node.js'\n    #critical\n  }\n}\n```\nKeep the corrected snippet minimal. Do not change the element kind or remove either field; only fix what is necessary.",
+      "files": []
+    },
+    {
+      "id": 14,
+      "prompt": "Someone proposed this file:\n```likec4\nstyles {\n  theme dark\n}\n```\nExplain why this fails. Then provide (1) a minimal valid `.c4` alternative using only allowed top-level DSL statements for styling inside DSL scope, and (2) a minimal `likec4.config.json` snippet if the intent is a project-level dark theme.",
+      "files": []
+    },
+    {
+      "id": 15,
+      "prompt": "Which identifiers are valid in LikeC4 and why: `payment.api`, `1backend`, `payment_api`, `payment-api`? Then rewrite the invalid ones into valid identifiers while preserving meaning.",
+      "files": []
+    },
+    {
+      "id": 16,
+      "prompt": "Is this relationship valid in LikeC4? Start your answer with `Valid.` or `Invalid.` exactly.\n```likec4\nmodel {\n  cloud = system 'Cloud' {\n    backend = container 'Backend'\n    cloud -> backend 'contains traffic'\n  }\n}\n```\nIf invalid, explicitly say in one sentence that containment is modeled by nesting, not by a relationship. Then provide the smallest valid rewrite that keeps the hierarchy unchanged and adds exactly one valid non-parent/child relationship elsewhere.",
+      "files": []
+    },
+    {
+      "id": 17,
+      "prompt": "`base.c4` defines `cloud = system { backend = container { api = service } }`. In `ops.c4` I wrote `backend.api -> cloud.db` and validation says unresolved reference. Do not fix this with import statements. Explain exactly why this happens across files and provide the corrected cross-file relationship using FQNs.",
+      "files": []
+    },
+    {
+      "id": 18,
+      "prompt": "Assume these two relationships already exist: `frontend -[async]-> api 'streams'` and `frontend -> api 'streams'`. Can I extend the async one with `extend frontend -> api 'streams' { metadata { qos 'high' } }`? Explain why or why not in terms of relationship identity matching — source, target, title, and kind — and explicitly say whether omitting the kind is ambiguous or wrong here. Then provide the exact extension snippet that unambiguously targets the async relationship.",
+      "files": []
+    },
+    {
+      "id": 19,
+      "prompt": "In `view backend of cloud.backend { include * }`, what exactly does `*` include in scoped view semantics? Do not answer with only `the whole model` or only `the local subtree`. In your first bullet, you must explicitly use the phrase `direct children`. Answer in two short bullets: (1) the base include set, and (2) what neighboring or derived elements/relationships can still become visible because of that scoped include. Then provide a minimal snippet that keeps `include *` and adds only incoming and outgoing relationships around `cloud.backend`.",
+      "files": []
+    },
+    {
+      "id": 20,
+      "prompt": "I need to validate only two edited files in one command: `projects/template/system-model.c4` and `projects/template/system-views.c4`, without layout drift checks. Give the exact command and explain how to confirm both files were actually filtered in JSON output.",
+      "files": []
+    },
+    {
+      "id": 21,
+      "prompt": "Given this base view:\n```likec4\nview backend-overview of cloud.backend {\n  include *\n}\n```\nIs the following child view valid as written, or does it need `of cloud.backend` again?\n```likec4\nview backend-detail extends backend-overview {\n  include api\n}\n```\nAnswer first with `Valid as written.` or `Needs scope redeclared.` Then explain why in one short paragraph and show the smallest final snippet that also adds incoming relationships to `cloud.backend`.",
+      "files": []
+    },
+    {
+      "id": 22,
+      "prompt": "Write a minimal `dynamic view checkout-flow` snippet that simultaneously tests three tricky points: (1) `customer -> frontend -> api` must be a single chained expression, (2) only the `frontend -> api` hop carries a body with `technology 'HTTPS'` and `navigateTo payment-detail`, and (3) `api` fans out in `parallel { ... }` to `payments`, `inventory`, and `notifications`. After the snippet, add one sentence saying why rewriting the chain as separate standalone steps would not satisfy the request.",
+      "files": []
+    },
+    {
+      "id": 23,
+      "prompt": "A deployment instance `prod.eu.frontend` comes from `instanceOf frontend` and adds `#gamma`; the logical `frontend` element already has `#next`. For each filter below, answer on its own line in the form `<filter>: matches` or `<filter>: does not match`:\n- `where source.tag is #next`\n- `where source.tag is #gamma`\n- `where source.tag is #missing`\nThen add exactly one sentence stating the tag rule, including whether deployment-instance tags are cumulative, replacement-only, or isolated from the logical tags.",
+      "files": []
+    },
+    {
+      "id": 24,
+      "prompt": "Assume both of these relationships already exist: `frontend -[async]-> api 'streams'` and `frontend -[sync]-> api 'streams'`. Start your answer with exactly this line: `Correct matcher: extend frontend -[async]-> api 'streams'`. Then explain why `extend frontend -> api 'streams'` is insufficient here and why `extend frontend -[sync]-> api 'streams'` targets the wrong relationship. Then provide the exact extension snippet.",
+      "files": []
+    },
+    {
+      "id": 25,
+      "prompt": "I edited exactly three files in the template project: `projects/template/system-model.c4`, `projects/template/system-views.c4`, and `projects/template/likec4.config.json`. I want one syntax/semantic-only validation command from repo root, no layout drift. Put the command on the first line by itself, using repeated `--file` flags. Then say what `filteredFiles`, `filteredErrors`, and `totalErrors` each tell me. Also say what it means if `filteredFiles` comes back as `2` instead of `3`.",
+      "files": []
+    },
+    {
+      "id": 26,
+      "prompt": "I need the exact reusable-predicate form for LikeC4 — not a style group, not a custom include alias. Define `core-services` in a `global { predicateGroup ... }` block so it includes `cloud.*` elements whose kind is `service` and excludes `#deprecated`. Then show one minimal view that applies it with the exact line `global predicate core-services`. Keep the answer to one DSL snippet only.",
+      "files": []
+    },
+    {
+      "id": 27,
+      "prompt": "In a scoped view `view backend of cloud.backend { include * }`, choose exactly one statement and justify it in one sentence: (A) `include *` means the whole recursive subtree of `cloud.backend`, (B) `include *` means `cloud.backend` plus its direct children as the base include set, or (C) `include *` means the whole model. Start your answer with exactly `B` if that is the right choice. Then give one minimal snippet that keeps `include *` and adds only incoming relationships around `cloud.backend`.",
+      "files": []
+    },
+    {
+      "id": 28,
+      "prompt": "Assume these two relationships already exist: `frontend -[async]-> api 'streams'` and `frontend -> api 'streams'`. Start your answer with exactly `Wrong: extend frontend -> api 'streams'`. Then explain in one short paragraph why omitting the kind is wrong here, and finish with the exact `extend frontend -[async]-> api 'streams' { metadata { qos 'high' } }` snippet.",
+      "files": []
+    },
+    {
+      "id": 29,
+      "prompt": "Choose exactly one valid option and start your answer with only `A`, `B`, `C`, or `D` on the first line. Requirement: keep `customer -> frontend -> api` as one chained dynamic expression, attach a body only to the `frontend -> api` hop, then keep a parallel fan-out from `api`. Options: (A) `customer -> frontend -> api { technology 'HTTPS' navigateTo payment-detail }` then `parallel { api -> payments; api -> inventory; api -> notifications }`; (B) `customer -> frontend { technology 'HTTPS' } -> api` then `parallel { ... }`; (C) `customer -> frontend -> api` and separately `frontend -> api { technology 'HTTPS' navigateTo payment-detail }`; (D) `customer -> frontend; frontend -> api { technology 'HTTPS' navigateTo payment-detail }` then `parallel { ... }`. After the first-line letter, add one sentence only explaining why the others violate the chained-hop requirement.",
+      "files": []
+    },
+    {
+      "id": 30,
+      "prompt": "Assume logical `frontend` has tags `#next` and `#web`. Deployment has two instances: `prod.frontend = instanceOf frontend` with extra tag `#gamma`, and `canary.frontend = instanceOf frontend` with extra tag `#canary`. For each filter below, answer exactly in this format: `<filter> => prod:<match|no> canary:<match|no>` on its own line. Filters: `where source.tag is #next`, `where source.tag is #web`, `where source.tag is #gamma`, `where source.tag is #canary`, `where source.tag is #missing`. Then add exactly one sentence that explicitly uses the word `cumulative` to state the deployment-instance tag rule.",
+      "files": []
+    },
+    {
+      "id": 31,
+      "prompt": "Assume existing relationships: `api -[async]-> service 'GetData'`, `api -[sync]-> service 'GetData'`, and `api -[async]-> service 'PostData'`. Classify each matcher as `correct`, `ambiguous`, or `wrong` (one line each): (1) `extend api -[async]-> service 'GetData' { metadata { timeout '5s' } }`; (2) `extend api -[async]-> service { metadata { timeout '5s' } }`; (3) `extend api -> service 'GetData' { metadata { timeout '5s' } }`. After classification lines, provide the single exact unambiguous extension snippet.",
+      "files": []
+    }
+  ]
+}

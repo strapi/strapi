@@ -17,6 +17,7 @@ export type PluginConfig = OpenAPIV3.Document & {
 };
 
 export interface ApiInfo {
+  uid: string;
   routeInfo: Core.Router;
   attributes: Struct.SchemaAttributes;
   uniqueName: string;

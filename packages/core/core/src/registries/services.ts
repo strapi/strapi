@@ -1,4 +1,4 @@
-import { pickBy, has } from 'lodash/fp';
+import { has, pickBy } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
@@ -38,7 +38,7 @@ const servicesRegistry = (strapi: Core.Strapi) => {
      * Returns a map with all the services in a namespace
      */
     getAll(namespace: string): ServiceMap {
-      const filteredServices = pickBy((_, uid) => hasNamespace(uid, namespace))(services);
+      const filteredServices = pickBy(services, (_, uid) => hasNamespace(uid, namespace));
 
       // create lazy accessor to avoid instantiating the services;
       const map = {};
@@ -71,7 +71,7 @@ const servicesRegistry = (strapi: Core.Strapi) => {
         const service = newServices[serviceName];
         const uid = addNamespace(serviceName, namespace);
 
-        if (has(uid, services)) {
+        if (has(services, uid)) {
           throw new Error(`Service ${uid} has already been registered.`);
         }
         services[uid] = service;

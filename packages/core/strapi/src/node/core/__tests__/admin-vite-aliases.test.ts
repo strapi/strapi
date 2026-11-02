@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+import fs from 'node:fs';
+
 import readPkgUp from 'read-pkg-up';
 
 import {
@@ -8,10 +9,8 @@ import {
   ADMIN_VITE_DEDUPE_ONLY_MODULES,
   ADMIN_VITE_SINGLETON_MODULES,
 } from '../admin-vite-alias-modules';
-import { buildAdminViteResolveAliases } from '../admin-vite-aliases';
+import { buildAdminViteResolveAliases, getSubpathEntries } from '../admin-vite-aliases';
 import { getModulePath, getModulePathFrom } from '../resolve-module';
-
-const adminDeps = require('@strapi/admin/package.json').dependencies as Record<string, string>;
 
 /** CJS/UMD deps on optimizeDeps.include must stay aliased for pnpm (#27014). */
 const PNPM_OPTIMIZE_ALIAS_MODULES = ['invariant', 'prismjs', 'lodash'] as const;
@@ -94,6 +93,15 @@ describe('ADMIN_VITE_DEDUPE_ONLY_MODULES contract (#22946)', () => {
 });
 
 describe('buildAdminViteResolveAliases', () => {
+  it('returns a plain object, so a custom vite.config can spread config.resolve.alias', () => {
+    const alias = buildAdminViteResolveAliases();
+
+    expect(Array.isArray(alias)).toBe(false);
+    for (const replacement of Object.values(alias)) {
+      expect(typeof replacement).toBe('string');
+    }
+  });
+
   it('sets an alias for every admin vite alias module via getModulePath', () => {
     const alias = buildAdminViteResolveAliases();
 
@@ -129,13 +137,44 @@ describe('buildAdminViteResolveAliases', () => {
     }
   );
 
-  it.each(ADMIN_PINNED_ALIAS_MODULES)(
-    'aliases %s to the version pinned by @strapi/admin',
-    (mod) => {
-      const alias = buildAdminViteResolveAliases();
-      const pkg = readPkgUp.sync({ cwd: alias[mod] });
+  it.each(ADMIN_PINNED_ALIAS_MODULES)('aliases %s to its own package root', (mod) => {
+    const alias = buildAdminViteResolveAliases();
+    expect(alias[mod]).toBeDefined();
 
-      expect(pkg?.packageJson?.version).toBe(adminDeps[mod]);
+    const pkg = readPkgUp.sync({ cwd: alias[mod] });
+
+    expect(pkg?.packageJson?.name).toBe(mod);
+  });
+});
+
+/** A string alias key matches the exact importee, or a prefix of it on a slash boundary */
+const matches = (key: string, importee: string): boolean =>
+  importee === key || importee.startsWith(`${key}/`);
+
+describe('exports subpath aliases', () => {
+  it.each(ADMIN_VITE_ALIAS_MODULES)('gives %s a key for every exports subpath', (mod) => {
+    const alias = buildAdminViteResolveAliases();
+
+    for (const [key, target] of getSubpathEntries(mod)) {
+      expect(alias[key]).toBe(target);
     }
-  );
+  });
+
+  it.each(ADMIN_VITE_ALIAS_MODULES)('puts every %s subpath key ahead of what shadows it', (mod) => {
+    const keys = Object.keys(buildAdminViteResolveAliases());
+
+    for (const [key] of getSubpathEntries(mod)) {
+      for (const other of keys.filter((k) => k !== key && matches(k, key))) {
+        expect(keys.indexOf(key)).toBeLessThan(keys.indexOf(other));
+      }
+    }
+  });
+
+  it('points every alias at a path that exists on disk', () => {
+    const missing = Object.entries(buildAdminViteResolveAliases()).filter(
+      ([, target]) => !fs.existsSync(target)
+    );
+
+    expect(missing).toEqual([]);
+  });
 });

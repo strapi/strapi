@@ -1,4 +1,5 @@
-import { isEmpty, pick, pipe, propOr, isEqual } from 'lodash/fp';
+import { get, pick, isEmpty, isEqual } from 'lodash';
+
 import { traverse } from '@strapi/utils';
 import qs from 'qs';
 import { isSortable, getDefaultMainField, getSortableAttributes } from './attributes';
@@ -21,9 +22,11 @@ const settingsFields = [
   'defaultSortBy',
   'defaultSortOrder',
   'relationOpenMode',
+  'customOrder',
 ];
 
-const getModelSettings = pipe([propOr({}, 'config.settings'), pick(settingsFields)]);
+const getModelSettings = (model: unknown) =>
+  pick(get(model, 'config.settings', {}), settingsFields);
 
 async function isValidDefaultSort(schema: any, value: any) {
   const parsedValue = qs.parse(value);

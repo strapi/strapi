@@ -9,7 +9,6 @@ import {
   Layouts,
   BaseQueryError,
 } from '@strapi/admin/strapi-admin';
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import {
   Box,
   EmptyStateLayout,
@@ -26,6 +25,7 @@ import { useIntl } from 'react-intl';
 import { CreateLocale } from '../components/CreateLocale';
 import { LocaleTable } from '../components/LocaleTable';
 import { PERMISSIONS } from '../constants';
+import { useAITranslationsAvailability } from '../hooks/useAITranslations';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetSettingsQuery, useUpdatei18nSettingsMutation } from '../services/settings';
 import { getTranslation } from '../utils/getTranslation';
@@ -58,7 +58,7 @@ const SettingsPage = () => {
     isLoading: isLoadingRBAC,
     allowedActions: { canUpdate, canCreate, canDelete },
   } = useRBAC(PERMISSIONS);
-  const isAIAvailable = useAIAvailability();
+  const isAIAvailable = useAITranslationsAvailability();
 
   // Settings state management
   const {

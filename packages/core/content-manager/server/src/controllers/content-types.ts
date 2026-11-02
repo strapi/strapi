@@ -1,13 +1,17 @@
-import { has, assoc, mapValues, prop } from 'lodash/fp';
+import { objects } from '@strapi/utils';
+import { has, get, mapValues, omit } from 'lodash';
+
 import { getService } from '../utils';
+import {
+  getService as getCustomOrderService,
+  isFeatureEnabled as isCustomOrderFeatureEnabled,
+} from '../custom-order/utils';
 import { createModelConfigurationSchema, validateKind } from './validation';
 
-const hasEditMainField = has('edit.mainField');
-const getEditMainField = prop('edit.mainField');
-const assocListMainField = assoc('list.mainField');
-
 const assocMainField = (metadata: any) =>
-  hasEditMainField(metadata) ? assocListMainField(getEditMainField(metadata), metadata) : metadata;
+  has(metadata, 'edit.mainField')
+    ? objects.set(metadata, 'list.mainField', get(metadata, 'edit.mainField'))
+    : metadata;
 
 export default {
   async findContentTypes(ctx: any) {
@@ -57,7 +61,7 @@ export default {
     const confWithUpdatedMetadata = {
       ...configuration,
       metadatas: {
-        ...mapValues(assocMainField, configuration.metadatas),
+        ...mapValues(configuration.metadatas, (value) => assocMainField(value)),
         documentId: {
           edit: {},
           list: {
@@ -111,13 +115,30 @@ export default {
       });
     }
 
+    const customOrder = isCustomOrderFeatureEnabled(strapi)
+      ? getCustomOrderService(strapi, 'custom-order')
+      : null;
+
+    if (input.settings && 'customOrder' in input.settings) {
+      if (!customOrder) {
+        input.settings = omit(input.settings, 'customOrder');
+      } else if (input.settings.customOrder === true && !customOrder.isOrderable(uid)) {
+        return ctx.badRequest(null, {
+          name: 'validationError',
+          errors: ['settings.customOrder is only available on collection types'],
+        });
+      }
+    }
+
     const newConfiguration = await contentTypeService.updateConfiguration(contentType, input);
+
+    await customOrder?.applySettings(uid, newConfiguration.settings);
 
     await metricsService.sendDidConfigureListView(contentType, newConfiguration);
 
     const confWithUpdatedMetadata = {
       ...newConfiguration,
-      metadatas: mapValues(assocMainField, newConfiguration.metadatas),
+      metadatas: mapValues(newConfiguration.metadatas, (value) => assocMainField(value)),
     };
 
     const components = await contentTypeService.findComponentsConfigurations(contentType);

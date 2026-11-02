@@ -1,5 +1,5 @@
+import { isEqual, differenceWith } from 'lodash';
 import type { Core } from '@strapi/types';
-import { differenceWith, isEqual } from 'lodash/fp';
 
 export interface PersistedTable {
   name: string;
@@ -39,19 +39,18 @@ async function addPersistTables(
   const tables = tableNames.map(transformTableName);
 
   // Get new tables to be persisted, remove tables if they already were persisted
-  const notPersistedTableNames = differenceWith(isEqual, tables, persistedTables);
+  const notPersistedTableNames = differenceWith(tables, persistedTables, isEqual);
   // Remove tables that are going to be changed
   const tablesToPersist = differenceWith(
-    (t1: any, t2: any) => t1.name === t2.name,
     persistedTables,
-    notPersistedTableNames
+    notPersistedTableNames,
+    (t1: any, t2: any) => t1.name === t2.name
   );
 
   if (!notPersistedTableNames.length) {
     return;
   }
 
-  // @ts-expect-error lodash types
   tablesToPersist.push(...notPersistedTableNames);
   await strapi.store.set({
     type: 'core',

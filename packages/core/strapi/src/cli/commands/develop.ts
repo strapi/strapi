@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import cluster from 'node:cluster';
 import type { StrapiCommand } from '../types';
-import { develop as nodeDevelop, DevelopOptions } from '../../node/develop';
+import type { DevelopOptions } from '../../node/develop';
 import { handleUnexpectedError } from '../../node/core/errors';
 
 type DevelopCLIOptions = DevelopOptions;
@@ -16,6 +16,9 @@ const action = async (options: DevelopCLIOptions) => {
       }
     }
 
+    // Loaded lazily: every command is registered on CLI startup, so a static import would make
+    // `strapi start` load the whole admin build toolchain (including admin source via staticFiles).
+    const { develop: nodeDevelop } = await import('../../node/develop');
     await nodeDevelop(options);
   } catch (err) {
     handleUnexpectedError(err);

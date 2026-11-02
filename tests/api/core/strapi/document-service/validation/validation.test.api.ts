@@ -37,6 +37,18 @@ describe('Document Service Validations', () => {
     'count',
   ];
 
+  // Publication actions reject calls without a documentId. A non-existent id keeps them
+  // side-effect free (no entries match) while still exercising param validation.
+  const methodsRequiringDocumentId = ['publish', 'unpublish', 'discardDraft'];
+
+  const callMethod = (methodName: string, params: Record<string, unknown>) => {
+    const args = methodsRequiringDocumentId.includes(methodName)
+      ? { documentId: 'validation-test-nonexistent', ...params }
+      : params;
+
+    return strapi.documents(ARTICLE_UID)[methodName](args);
+  };
+
   // Helper to verify result has correct type and basic structure
   const expectValidResult = (result: any, methodName: string) => {
     expect(result).toBeDefined();
@@ -83,29 +95,29 @@ describe('Document Service Validations', () => {
   describe.each(methods)('%s method', (methodName) => {
     describe('sort', () => {
       it('should not throw on existing attribute name', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'title' });
+        const result = await callMethod(methodName, { sort: 'title' });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on private attribute', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'private' });
+        const result = await callMethod(methodName, { sort: 'private' });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on password attribute', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'password' });
+        const result = await callMethod(methodName, { sort: 'password' });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on existing nested (object) key', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           populate: { categories: { sort: { name: 'asc' } } },
         });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on existing nested (dot separated) key', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           sort: 'categories.name',
           populate: 'categories',
         });
@@ -113,15 +125,15 @@ describe('Document Service Validations', () => {
       });
 
       it('should throw ValidationError on invalid key', async () => {
-        await expect(
-          strapi.documents(ARTICLE_UID)[methodName]({ sort: 'fakekey' })
-        ).rejects.toThrow(errors.ValidationError);
+        await expect(callMethod(methodName, { sort: 'fakekey' })).rejects.toThrow(
+          errors.ValidationError
+        );
       });
     });
 
     describe('filters', () => {
       it('should not throw on existing attribute equality', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           filters: {
             title: 'Article1-Draft-EN',
           },
@@ -130,7 +142,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should not throw on private attribute', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           filters: {
             private: 'private',
           },
@@ -139,7 +151,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should not throw on password attribute', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           filters: {
             password: { $notNull: true },
           },
@@ -148,7 +160,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should not throw on existing nested conditions', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           filters: {
             title: {
               $not: {
@@ -162,7 +174,7 @@ describe('Document Service Validations', () => {
 
       it('should throw ValidationError on invalid key', async () => {
         await expect(
-          strapi.documents(ARTICLE_UID)[methodName]({
+          callMethod(methodName, {
             filters: {
               fakekey: 'Hello World',
             },
@@ -173,21 +185,21 @@ describe('Document Service Validations', () => {
 
     describe('fields', () => {
       it('should not throw on existing attribute equality', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           fields: ['title'],
         });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on private attribute', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           fields: ['private'],
         });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on password attribute', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           fields: ['password'],
         });
         expectValidResult(result, methodName);
@@ -195,50 +207,50 @@ describe('Document Service Validations', () => {
 
       it('should throw ValidationError on invalid key', async () => {
         await expect(
-          strapi.documents(ARTICLE_UID)[methodName]({
+          callMethod(methodName, {
             fields: ['title', 'fakekey'],
           })
         ).rejects.toThrow(errors.ValidationError);
       });
 
       it('should not throw on valid comma separated keys', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           fields: 'title,password,private',
         });
         expectValidResult(result, methodName);
       });
 
       it('should throw on invalid comma separated keys', async () => {
-        await expect(
-          strapi.documents(ARTICLE_UID)[methodName]({ fields: 'title,invalid' })
-        ).rejects.toThrow(errors.ValidationError);
+        await expect(callMethod(methodName, { fields: 'title,invalid' })).rejects.toThrow(
+          errors.ValidationError
+        );
       });
     });
 
     describe('populate', () => {
       it('should not throw on populatable attribute', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           populate: ['categories'],
         });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on private attribute', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           populate: ['categories_private'],
         });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on wildcard *', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           populate: '*',
         });
         expectValidResult(result, methodName);
       });
 
       it('should not throw on dz (boolean)', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           populate: {
             identifiersDz: true,
           },
@@ -247,7 +259,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should not throw on dz - comp (boolean)', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           populate: {
             identifiersDz: {
               on: {
@@ -260,7 +272,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should not throw on dz', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           populate: {
             identifiersDz: {
               on: {
@@ -275,7 +287,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should not throw on nested wildcard populate', async () => {
-        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+        const result = await callMethod(methodName, {
           populate: {
             identifiersDz: {
               on: {
@@ -292,7 +304,7 @@ describe('Document Service Validations', () => {
       // TODO: functionality is not yet implemented
       it('should throw ValidationError on invalid dz component', async () => {
         await expect(
-          strapi.documents(ARTICLE_UID)[methodName]({
+          callMethod(methodName, {
             populate: {
               identifiersDz: {
                 on: {
@@ -306,7 +318,7 @@ describe('Document Service Validations', () => {
 
       it('should throw ValidationError on non-populatable attribute', async () => {
         await expect(
-          strapi.documents(ARTICLE_UID)[methodName]({
+          callMethod(methodName, {
             populate: ['title'],
           })
         ).rejects.toThrow(errors.ValidationError);
@@ -314,7 +326,7 @@ describe('Document Service Validations', () => {
 
       it('should throw ValidationError on invalid key', async () => {
         await expect(
-          strapi.documents(ARTICLE_UID)[methodName]({
+          callMethod(methodName, {
             populate: ['categories', 'fakekey'],
           })
         ).rejects.toThrow(errors.ValidationError);
@@ -328,7 +340,7 @@ describe('Document Service Validations', () => {
     describe('lookup', () => {
       it('should throw ValidationError', async () => {
         await expect(
-          strapi.documents(ARTICLE_UID)[methodName]({
+          callMethod(methodName, {
             lookup: {
               title: 'Hello World',
             },

@@ -1,4 +1,4 @@
-import { toNumber } from 'lodash/fp';
+import { toNumber } from 'lodash';
 import Field from './field';
 
 export default class NumberField extends Field {

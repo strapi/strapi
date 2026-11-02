@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import CLITable from 'cli-table3';
 import chalk from 'chalk';
-import { toUpper } from 'lodash/fp';
+import { toUpper } from 'lodash';
 
 import { createStrapi, compileStrapi } from '@strapi/core';
 

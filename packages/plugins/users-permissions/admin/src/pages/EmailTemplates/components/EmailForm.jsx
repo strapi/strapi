@@ -8,7 +8,9 @@ import { useIntl } from 'react-intl';
 import { getTrad } from '../../../utils';
 import schema from '../utils/schema';
 
-const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
+const EMPTY_TEMPLATE = {};
+
+const EmailForm = ({ template = EMPTY_TEMPLATE, onToggle, open, onSubmit }) => {
   const { formatMessage } = useIntl();
 
   return (

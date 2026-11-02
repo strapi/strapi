@@ -3,18 +3,28 @@ import type { Readable } from 'stream';
 import { PassThrough } from 'stream';
 
 import fs from 'fs-extra';
-import { isEmpty, keyBy } from 'lodash/fp';
+import { isEmpty, keyBy } from 'lodash';
 import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
-import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../types';
+import type {
+  IAsset,
+  IMetadata,
+  ISourceProvider,
+  ProviderType,
+  TransferStage,
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { write } from '../../../utils/writable-async-write';
-import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
-import { unknownPathToPosix } from '../../../file/providers/source/utils';
+import {
+  ProviderInitializationError,
+  ProviderTransferError,
+  ProviderValidationError,
+} from '../../../errors/providers';
+import { unknownPathToPosix, validateAssetMetadata } from '../../../file/providers/source/utils';
 
 const METADATA_FILE_PATH = 'metadata.json';
 
@@ -46,6 +56,8 @@ class LocalDirectorySourceProvider implements ISourceProvider {
   #rootResolved: string;
 
   #metadata?: IMetadata;
+
+  #assetMetadata?: Map<string, IAsset['metadata']>;
 
   #diagnostics?: IDiagnosticReporter;
 
@@ -128,8 +140,41 @@ class LocalDirectorySourceProvider implements ISourceProvider {
       throw new ProviderInitializationError('Could not load schemas from Strapi data export.');
     }
 
-    const schemas = keyBy('uid', schemaCollection);
+    const schemas = keyBy(schemaCollection, 'uid');
     return utils.schema.schemasToValidJSON(schemas);
+  }
+
+  async validateStage(stage: TransferStage) {
+    if (stage !== 'assets') {
+      return;
+    }
+
+    const uploadsDir = this.#safePath('assets', 'uploads');
+    if (!(await fs.pathExists(uploadsDir))) {
+      this.#assetMetadata = new Map();
+      return;
+    }
+
+    const metadata = new Map<string, IAsset['metadata']>();
+    const names = (await fs.readdir(uploadsDir)).sort();
+    for (const name of names) {
+      const uploadPath = path.join(uploadsDir, name);
+      if (!(await fs.stat(uploadPath)).isFile()) {
+        continue;
+      }
+
+      try {
+        metadata.set(name, await this.#readAssetMetadata(name));
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        throw new ProviderValidationError(
+          `Asset metadata preflight failed for "${name}": ${reason}. The destination was not modified; re-export and try again.`,
+          { error }
+        );
+      }
+    }
+
+    this.#assetMetadata = metadata;
   }
 
   createEntitiesReadStream(): Readable {
@@ -177,16 +222,18 @@ class LocalDirectorySourceProvider implements ISourceProvider {
       const absUpload = path.join(uploadsDir, name);
       const stat = await fs.stat(absUpload);
       if (stat.isFile()) {
-        let metadata: IAsset['metadata'];
-        try {
-          metadata = await this.#readAssetMetadata(name);
-        } catch (error) {
-          outStream.destroy(
-            new ProviderTransferError(`Failed to read metadata for ${name}`, {
-              details: { error },
-            })
-          );
-          return;
+        let metadata = this.#assetMetadata?.get(name);
+        if (!metadata) {
+          try {
+            metadata = await this.#readAssetMetadata(name);
+          } catch (error) {
+            outStream.destroy(
+              new ProviderTransferError(`Failed to read metadata for ${name}`, {
+                details: { error },
+              })
+            );
+            return;
+          }
         }
 
         const normalizedPath = unknownPathToPosix(path.posix.join('assets', 'uploads', name));
@@ -205,7 +252,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
 
   async #readAssetMetadata(filename: string): Promise<IAsset['metadata']> {
     const metadataPath = this.#safePath('assets', 'metadata', `${filename}.json`);
-    return fs.readJson(metadataPath);
+    return validateAssetMetadata(await fs.readJson(metadataPath), filename);
   }
 
   async #listJsonlFiles(posixSubdir: string): Promise<string[]> {

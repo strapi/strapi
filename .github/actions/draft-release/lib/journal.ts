@@ -1,20 +1,29 @@
-import type { Clock, Journal, JournalEntry, JournalEntryState } from './types.ts';
+import type { Clock, Journal, JournalEntry, JournalEntryState, JournalSnapshot } from './types.ts';
+
+const MUTATION_FAILURE_OUTCOMES = ['refused', 'unknown'] as const;
+
+type MutationFailureOutcome = (typeof MUTATION_FAILURE_OUTCOMES)[number];
+
+/**
+ * Creates an adapter error that states whether a rejected mutation is known not to have landed.
+ */
+export function mutationFailure(message: string, outcome: MutationFailureOutcome): Error {
+  return Object.assign(new Error(message), { mutationFailureOutcome: outcome });
+}
 
 /**
  * Whether a rejected write proves that nothing was mutated.
  *
- * Both adapters attach the numeric status they got back, and each one means the operation ran to a
- * verdict: a GitHub response status is the server refusing the write, and a git exit code is git
- * reporting a ref it did not update, which it does atomically. An error carrying no status proves
- * nothing either way. A socket closed after the request left is the case that matters, because the
- * mutation may well have been applied on the other side.
+ * Adapters mark only failures that prove the mutation was refused. An untyped error, or a typed
+ * failure whose remote outcome is unknown, remains indeterminate.
  */
 export function classifyFailure(
   error: unknown
 ): Extract<JournalEntryState, 'failed' | 'indeterminate'> {
-  const status = (error as { status?: unknown } | null | undefined)?.status;
+  const outcome = (error as { mutationFailureOutcome?: unknown } | null | undefined)
+    ?.mutationFailureOutcome;
 
-  return typeof status === 'number' ? 'failed' : 'indeterminate';
+  return outcome === 'refused' ? 'failed' : 'indeterminate';
 }
 
 /**
@@ -33,15 +42,21 @@ export function classifyFailure(
  * line-by-line list of every milestone rename, pull request reassignment and ref push the real run
  * would perform. Its entries stay `planned`.
  */
-export function createJournal(options: { apply: boolean; clock?: Clock }): Journal {
+export function createJournal(options: {
+  apply: boolean;
+  clock?: Clock;
+  persist?: (snapshot: JournalSnapshot) => void;
+}): Journal {
   const clock = options.clock ?? ((): string => new Date().toISOString());
   const mode = options.apply === true ? 'applied' : 'planned';
   const entries: JournalEntry[] = [];
+  const snapshot = (): JournalSnapshot => ({ mode, entries: entries.slice() });
+  const persist = (): void => options.persist?.(snapshot());
 
   return {
     mode,
 
-    async write(intent, perform) {
+    async write(intent, perform, recordResult) {
       const entry: JournalEntry = {
         op: intent.op,
         target: intent.target,
@@ -54,6 +69,7 @@ export function createJournal(options: { apply: boolean; clock?: Clock }): Journ
       };
 
       entries.push(entry);
+      persist();
 
       if (options.apply === false) {
         return null;
@@ -62,12 +78,18 @@ export function createJournal(options: { apply: boolean; clock?: Clock }): Journ
       try {
         const result = await perform();
 
+        if (recordResult !== undefined) {
+          Object.assign(entry, recordResult(result));
+        }
+
         entry.state = 'applied';
+        persist();
 
         return result;
       } catch (error) {
         entry.state = classifyFailure(error);
         entry.error = error instanceof Error ? error.message : String(error);
+        persist();
 
         throw error;
       }
@@ -78,7 +100,7 @@ export function createJournal(options: { apply: boolean; clock?: Clock }): Journ
     },
 
     toJSON() {
-      return { mode, entries: entries.slice() };
+      return snapshot();
     },
   };
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-const { merge } = require('lodash/fp');
+const { merge } = require('lodash');
 
 const getDefaultState = () => ({ actions: [], models: [], fixtures: {} });
 
@@ -23,7 +23,7 @@ const createContext = (initialState) => {
     },
 
     addFixtures(modelName, entries) {
-      state.fixtures = merge(state.fixtures, { [modelName]: entries });
+      state.fixtures = merge({}, state.fixtures, { [modelName]: entries });
       return this;
     },
 

@@ -1,4 +1,4 @@
-import { defaultsDeep } from 'lodash/fp';
+import { defaultsDeep } from 'lodash';
 
 import type { Context } from 'koa';
 
@@ -21,20 +21,17 @@ export default {
     const { results } = await strapi.db.query(FOLDER_MODEL_UID).findPage(
       strapi.get('query-params').transform(
         FOLDER_MODEL_UID,
-        defaultsDeep(
-          {
-            filters: { id },
-            populate: {
-              children: {
-                count: true,
-              },
-              files: {
-                count: true,
-              },
+        defaultsDeep({}, query, {
+          filters: { id },
+          populate: {
+            children: {
+              count: true,
+            },
+            files: {
+              count: true,
             },
           },
-          query
-        )
+        })
       )
     );
 
@@ -59,19 +56,16 @@ export default {
     const results = await strapi.db.query(FOLDER_MODEL_UID).findMany(
       strapi.get('query-params').transform(
         FOLDER_MODEL_UID,
-        defaultsDeep(
-          {
-            populate: {
-              children: {
-                count: true,
-              },
-              files: {
-                count: true,
-              },
+        defaultsDeep({}, query, {
+          populate: {
+            children: {
+              count: true,
+            },
+            files: {
+              count: true,
             },
           },
-          query
-        )
+        })
       )
     );
 

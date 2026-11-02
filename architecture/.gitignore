@@ -1,0 +1,7 @@
+node_modules/
+.yarn/
+Library/
+dist/
+build/
+exports/
+.likec4/

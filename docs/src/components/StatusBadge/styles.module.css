@@ -1,0 +1,51 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.1em 0.55em;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: '';
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.8;
+}
+
+.stub {
+  background: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-800);
+}
+
+.draft {
+  background: var(--ifm-color-info-contrast-background);
+  border-color: var(--ifm-color-info-dark);
+  color: var(--ifm-color-info-contrast-foreground);
+}
+
+.needs-review {
+  background: var(--ifm-color-warning-contrast-background);
+  border-color: var(--ifm-color-warning-dark);
+  color: var(--ifm-color-warning-contrast-foreground);
+}
+
+.documented {
+  background: var(--ifm-color-success-contrast-background);
+  border-color: var(--ifm-color-success-dark);
+  color: var(--ifm-color-success-contrast-foreground);
+}
+
+.missing {
+  background: var(--ifm-color-danger-contrast-background);
+  border-color: var(--ifm-color-danger-dark);
+  color: var(--ifm-color-danger-contrast-foreground);
+}

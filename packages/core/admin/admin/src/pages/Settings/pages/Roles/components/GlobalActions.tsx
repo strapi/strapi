@@ -13,13 +13,15 @@ import { cellWidth, firstRowWidth } from '../utils/constants';
 import { RecursiveRecordOfBooleans, getCheckboxState } from '../utils/getCheckboxState';
 import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData';
 
+const EMPTY_ACTIONS: NonNullable<GlobalActionsProps['actions']> = [];
+
 interface GlobalActionsProps {
   actions: Action[];
   isFormDisabled?: boolean;
   kind: Extract<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
 }
 
-const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProps) => {
+const GlobalActions = ({ actions = EMPTY_ACTIONS, isFormDisabled, kind }: GlobalActionsProps) => {
   const { formatMessage } = useIntl();
   const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox, checkUserHasPermission } =
     usePermissionsDataManager();

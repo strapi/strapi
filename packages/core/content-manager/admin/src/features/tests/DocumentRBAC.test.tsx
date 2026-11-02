@@ -1,4 +1,4 @@
-import { renderHook as renderRTLHook, waitFor } from '@tests/utils';
+import { render, renderHook as renderRTLHook, screen, waitFor } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
 import { DocumentRBAC, DocumentRBACProps, useDocumentRBAC } from '../DocumentRBAC';
@@ -93,6 +93,33 @@ const makeRenderHook = (permissions: DocumentRBACProps['permissions']) => () =>
 const ACTIONS = ['canCreate', 'canRead', 'canUpdate', 'canDelete', 'canPublish'] as const;
 
 describe('DocumentRBAC', () => {
+  it('renders children immediately instead of a page-level loader while permissions are resolving', async () => {
+    const Child = () => {
+      const isLoading = useDocumentRBAC('TEST', (state) => state.isLoading);
+      return <div>{isLoading ? 'permissions loading' : 'permissions ready'}</div>;
+    };
+
+    render(
+      <Routes>
+        <Route
+          path="/content-manager/:collectionType/:slug"
+          element={
+            <DocumentRBAC permissions={ALL_PERMISSIONS}>
+              <Child />
+            </DocumentRBAC>
+          }
+        />
+      </Routes>,
+      { initialEntries: ['/content-manager/collection-type/api::address.address'] }
+    );
+
+    // Children render synchronously; no page-level loader takes their place.
+    expect(screen.getByText(/permissions/)).toBeInTheDocument();
+    expect(screen.queryByText('Loading content.')).not.toBeInTheDocument();
+
+    await screen.findByText('permissions ready');
+  });
+
   describe('can CRUDP', () => {
     const renderHook = makeRenderHook(ALL_PERMISSIONS);
 

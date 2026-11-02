@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { packageManager } from '@strapi/utils';
-import { vol, fs } from 'memfs';
+import { vol } from 'memfs';
 
 import { codemodRunnerFactory } from '../../codemod-runner';
 import { assertAppProject, projectFactory } from '../../project';
@@ -12,7 +12,7 @@ import { upgraderFactory } from '../upgrader';
 
 import type { NPM } from '../../npm';
 
-jest.mock('fs', () => fs);
+jest.mock('fs', () => jest.requireActual('memfs').fs);
 
 jest.mock('../../codemod-runner', () => ({
   codemodRunnerFactory: jest.fn(() => ({
@@ -23,6 +23,7 @@ jest.mock('../../codemod-runner', () => ({
 }));
 
 jest.mock('@strapi/utils', () => ({
+  objects: jest.requireActual('@strapi/utils').objects,
   packageManager: {
     getPreferred: jest.fn().mockResolvedValue('yarn'),
     installDependencies: jest.fn().mockResolvedValue(undefined),

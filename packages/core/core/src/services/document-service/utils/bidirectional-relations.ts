@@ -1,4 +1,4 @@
-import { keyBy, omit } from 'lodash/fp';
+import { keyBy, omit } from 'lodash';
 import type { UID, Schema } from '@strapi/types';
 import type { JoinTable } from '@strapi/database';
 
@@ -311,7 +311,7 @@ const sync = async (
   newEntries: { id: string; locale: string }[],
   existingRelations: RelationEntry[]
 ) => {
-  const newEntriesByLocale = keyBy('locale', newEntries);
+  const newEntriesByLocale = keyBy(newEntries, 'locale');
 
   const entryIdMapping = oldEntries.reduce(
     (acc, oldEntry) => {
@@ -391,7 +391,7 @@ const sync = async (
             !existingSet.has(`${newSourceId}:${targetId}`) && !isRepublishedEntry(newSourceId)
         )
         .map(({ relation, newSourceId, originalOrder }) => ({
-          ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
+          ...omit(relation, strapi.db.metadata.identifiers.ID_COLUMN),
           [sourceColumn]: newSourceId,
           [orderColumn]: originalOrder,
         }));

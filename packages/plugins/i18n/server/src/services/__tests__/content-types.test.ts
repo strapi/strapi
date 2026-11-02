@@ -1,3 +1,4 @@
+import type { Struct } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import contentTypesServiceFactory from '../content-types';
 
@@ -233,7 +234,7 @@ describe('content-types service', () => {
             visible: false,
           },
         },
-      };
+      } as unknown as Struct.ContentTypeSchema;
 
       const input = {
         id: 1,
@@ -272,7 +273,7 @@ describe('content-types service', () => {
             type: 'string',
           },
         },
-      };
+      } as unknown as Struct.ContentTypeSchema;
 
       const input = {
         id: 1,
@@ -321,7 +322,7 @@ describe('content-types service', () => {
             component: 'compo',
           },
         },
-      };
+      } as unknown as Struct.ContentTypeSchema;
 
       const input = {
         id: 1,

@@ -1,10 +1,9 @@
-import { pickBy, has } from 'lodash/fp';
+import { has, pickBy } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
 export type ControllerFactory =
-  | ((params: { strapi: Core.Strapi }) => Core.Controller)
-  | Core.Controller;
+  ((params: { strapi: Core.Strapi }) => Core.Controller) | Core.Controller;
 export type ControllerFactoryMap = Record<UID.Controller, ControllerFactory>;
 export type ControllerMap = Record<UID.Controller, Core.Controller>;
 export type ControllerExtendFn = (service: Core.Controller) => Core.Controller;
@@ -41,7 +40,7 @@ const controllersRegistry = (strapi: Core.Strapi) => {
      * Returns a map with all the controller in a namespace
      */
     getAll(namespace: string) {
-      const filteredControllers = pickBy((_, uid) => hasNamespace(uid, namespace))(controllers);
+      const filteredControllers = pickBy(controllers, (_, uid) => hasNamespace(uid, namespace));
 
       const map = {};
       for (const uid of Object.keys(filteredControllers) as UID.Controller[]) {
@@ -73,7 +72,7 @@ const controllersRegistry = (strapi: Core.Strapi) => {
         const controller = newControllers[controllerName];
         const uid = addNamespace(controllerName, namespace) as UID.Controller;
 
-        if (has(uid, controllers)) {
+        if (has(controllers, uid)) {
           throw new Error(`Controller ${uid} has already been registered.`);
         }
 

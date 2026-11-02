@@ -108,14 +108,26 @@ globalThis.console = patchedConsole as any;
  * Strapi
  * -----------------------------------------------------------------------------------------------*/
 
-window.strapi = {
+const browserStrapi: Window['strapi'] = {
   backendURL: 'http://localhost:1337',
   isEE: false,
+  isTrial: false,
+  isTrialLicense: false,
+  ai: {
+    enabled: false,
+  },
   features: {
     SSO: 'sso',
+    REVIEW_WORKFLOWS: 'review-workflows',
+    AUDIT_LOGS: 'audit-logs',
     isEnabled: () => false,
   },
   future: {
+    isEnabled: () => false,
+  },
+  // Defaults to false, so tests see the shipped configuration: no flag set, which
+  // at GA means the current Media Library rather than the legacy one.
+  featureFlags: {
     isEnabled: () => false,
   },
   projectType: 'Community',
@@ -125,6 +137,9 @@ window.strapi = {
     promoteEE: true,
   },
 };
+
+// @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
+window.strapi = browserStrapi;
 
 /* -------------------------------------------------------------------------------------------------
  * matchMedia
