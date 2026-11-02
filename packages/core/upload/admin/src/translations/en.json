@@ -35,6 +35,7 @@
   "asset-details.field.empty": "{label} is currently empty.",
   "asset-details.location.root": "Media Library",
   "asset-details.saveChanges": "Save changes",
+  "asset-details.unsaved.confirm": "You have unsaved changes, are you sure you want to close this file's details? Your changes will be lost.",
   "asset-details.delete.trigger": "Delete this file",
   "asset-details.delete.title": "Delete this media file?",
   "asset-details.delete.description": "This file cannot be recovered once deleted. If it is currently in use, linked content will break and image containers will be empty.",
