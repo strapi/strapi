@@ -1,0 +1,33 @@
+diff --git a/tests/utils/login.ts b/tests/utils/login.ts
+index 2a37bb2053..181e603371 100644
+--- a/tests/utils/login.ts
++++ b/tests/utils/login.ts
+@@ -58,25 +58,7 @@ export const loginWithApi = async ({
+   username?: string;
+   password?: string;
+ }) => {
+-  const response = await page.request.post('/admin/login', {
+-    data: { email: username, password, rememberMe: false },
+-  });
+-
+-  if (!response.ok()) {
+-    throw new Error(
+-      `API login as ${username} failed: HTTP ${response.status()} ${await response.text()}`
+-    );
+-  }
+-
+-  const { data } = await response.json();
+-  const { hostname } = new URL(test.info().project.use.baseURL!);
+-
+-  await page.context().addCookies([
+-    {
+-      name: 'jwtToken',
+-      value: encodeURIComponent(data.token),
+-      domain: hostname,
+-      path: '/admin',
+-    },
+-  ]);
++  // Repro variant: sign in through the form, as before #28309.
++  await page.goto('/admin');
++  await login({ page, username, password });
+ };

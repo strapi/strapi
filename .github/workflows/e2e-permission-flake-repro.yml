@@ -1,8 +1,13 @@
 name: 'E2E permission flake repro'
 
 # Temporary, do not merge. Runs the permission specs that failed on develop on Nov 2 (run
-# 41509664490) many times without retries, to get a failure rate before and after a fix.
-# Every failure keeps its Playwright trace.
+# 41509664490) many times without retries, keeping a trace for every failure. Each variant
+# applies one patch from .github/repro/ on top of develop, so their failure rates can be compared
+# in a single run:
+# - develop: no patch
+# - revert-27368: develop without #27368 (session handling on sign-in)
+# - form-login: loginWithApi signs in through the form, as before #28309
+# - settle-before-login: login() waits for the login page and its requests to settle
 
 on:
   pull_request:
@@ -25,7 +30,7 @@ jobs:
 
   repro:
     needs: build
-    name: '${{ matrix.suite.name }} (${{ matrix.suite.project }}) #${{ matrix.copy }}'
+    name: '${{ matrix.variant }}: ${{ matrix.suite.name }} (${{ matrix.suite.project }}) #${{ matrix.copy }}'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     container:
@@ -34,7 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        copy: [1, 2, 3]
+        copy: [1, 2]
+        variant: [develop, revert-27368, form-login, settle-before-login]
         suite:
           - name: media-library-permissions
             domains: media-library
@@ -48,22 +54,10 @@ jobs:
             project: webkit
             repeat: 10
             filter: permissions.spec.ts:23
-          - name: i18n-permissions
-            domains: i18n
-            mediaLibrarySuite: ''
-            project: chromium
-            repeat: 10
-            filter: permissions.spec.ts:23
           - name: cm-edit-view-errors
             domains: content-manager
             mediaLibrarySuite: ''
             project: webkit
-            repeat: 10
-            filter: collection-type-edit-view-errors.spec.ts:33
-          - name: cm-edit-view-errors
-            domains: content-manager
-            mediaLibrarySuite: ''
-            project: chromium
             repeat: 10
             filter: collection-type-edit-view-errors.spec.ts:33
     steps:
@@ -75,6 +69,15 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
+      - name: Apply the variant's patch
+        if: ${{ matrix.variant != 'develop' }}
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: git apply ".github/repro/$VARIANT.patch"
+      # The revert changes package sources, so the build restored from the build job is stale.
+      - name: Rebuild the packages
+        if: ${{ matrix.variant == 'revert-27368' }}
+        run: yarn nx run-many --targets build --nx-ignore-cycles --skip-nx-cache
       - name: Run the spec repeatedly
         id: e2e
         continue-on-error: true
@@ -87,7 +90,7 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ steps.e2e.outcome == 'failure' }}
         with:
-          name: repro-${{ matrix.suite.name }}-${{ matrix.suite.project }}-${{ matrix.copy }}
+          name: repro-${{ matrix.variant }}-${{ matrix.suite.name }}-${{ matrix.suite.project }}-${{ matrix.copy }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 3
       - name: Fail when any repetition failed

@@ -1,0 +1,16 @@
+diff --git a/tests/utils/login.ts b/tests/utils/login.ts
+index 2a37bb2053..21cc75ae3f 100644
+--- a/tests/utils/login.ts
++++ b/tests/utils/login.ts
+@@ -15,6 +15,11 @@ export const login = async ({
+   password?: string;
+   rememberMe?: boolean;
+ }) => {
++  // Right after a logout the panel can still end the old session (a token refresh that fails and
++  // logs out again) and render the login page anew, which empties a form filled in meanwhile.
++  await page.waitForURL((url) => url.pathname.endsWith('/auth/login'));
++  await page.waitForLoadState('networkidle');
++
+   await page.getByLabel('Email').fill(username);
+   await page
+     .getByLabel('Password*', {

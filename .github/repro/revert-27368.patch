@@ -1,0 +1,4933 @@
+diff --git a/docs/docs/packages/core/admin/permissions/02-frontend/fetching-permissions.md b/docs/docs/packages/core/admin/permissions/02-frontend/fetching-permissions.md
+index aaa0492b19..31816df35e 100644
+--- a/docs/docs/packages/core/admin/permissions/02-frontend/fetching-permissions.md
++++ b/docs/docs/packages/core/admin/permissions/02-frontend/fetching-permissions.md
+@@ -6,7 +6,7 @@ tags:
+   - frontend
+ status: needs-review
+ review_notes:
+-  - 'The RBACProvider data-flow section still describes the former provider architecture.'
++  - '`admin/src/AuthenticatedApp` no longer exists.'
+ ---
+ 
+ This document lays out the code-flow of fetching the permissions in the CMS and how the data is then injected in to the app
+@@ -21,13 +21,9 @@ At the very root of the entire admin panel we handle 4 routes:
+ - Collecting information from a first time user
+ - The authenticated application (where you use the CMS)
+ 
+-The `AuthProvider` component in
+-[`packages/core/admin/admin/src/features/Auth.tsx`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/features/Auth.tsx)
+-fetches the current user and their permissions through Redux Toolkit Query. The `getMyPermissions`
+-endpoint is defined in
+-[`packages/core/admin/admin/src/services/auth.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/services/auth.ts).
+-The query is cached by its endpoint and arguments. Establishing a new admin session clears the
+-admin API cache before loading data for the new credential.
++Permissions, along with other vital application information is fetched in the `AuthenticatedApp` component, located
++in the `packages/core/admin/admin/src/AuthenticatedApp` folder. The cache key (used with `react-query`'s `useQueries` hook)
++for the particular call is `admin-users-permission`.
+ 
+ ## What do we fetch?
+ 
+diff --git a/packages/core/admin/admin/src/components/Providers.tsx b/packages/core/admin/admin/src/components/Providers.tsx
+index 5ab5d740da..31ec0b3cb6 100644
+--- a/packages/core/admin/admin/src/components/Providers.tsx
++++ b/packages/core/admin/admin/src/components/Providers.tsx
+@@ -52,9 +52,9 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
+         <QueryClientProvider client={queryClient}>
+           <LanguageProvider messages={strapi.configurations.translations}>
+             <Theme themes={strapi.configurations.themes}>
+-              <NotificationsProvider>
+-                <AuthProvider>
+-                  <HistoryProvider>
++              <AuthProvider>
++                <HistoryProvider>
++                  <NotificationsProvider>
+                     <TrackingProvider>
+                       <GuidedTourProvider>
+                         <ConfigurationProvider
+@@ -66,9 +66,9 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
+                         </ConfigurationProvider>
+                       </GuidedTourProvider>
+                     </TrackingProvider>
+-                  </HistoryProvider>
+-                </AuthProvider>
+-              </NotificationsProvider>
++                  </NotificationsProvider>
++                </HistoryProvider>
++              </AuthProvider>
+             </Theme>
+           </LanguageProvider>
+         </QueryClientProvider>
+diff --git a/packages/core/admin/admin/src/features/Auth.tsx b/packages/core/admin/admin/src/features/Auth.tsx
+index ed7984f0e2..3d4985eb8b 100644
+--- a/packages/core/admin/admin/src/features/Auth.tsx
++++ b/packages/core/admin/admin/src/features/Auth.tsx
+@@ -7,12 +7,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
+ import { Login } from '../../../shared/contracts/authentication';
+ import { ConfirmDialog } from '../components/ConfirmDialog';
+ import { createContext } from '../components/Context';
+-import { useTypedDispatch, useTypedSelector, useTypedStore } from '../core/store/hooks';
++import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
+ import { useStrapiApp } from '../features/StrapiApp';
+ import { useQueryParams } from '../hooks/useQueryParams';
+ import { useSessionKeepalive } from '../hooks/useSessionKeepalive';
+-import { getStoredToken, logout as logoutAction, setLocale, setToken } from '../reducer';
+-import { resetAdminApiState } from '../services/admin';
++import {
++  getStoredToken,
++  login as loginAction,
++  logout as logoutAction,
++  setLocale,
++  setToken,
++} from '../reducer';
+ import { adminApi } from '../services/api';
+ import {
+   useGetMeQuery,
+@@ -22,9 +27,7 @@ import {
+   useLogoutMutation,
+ } from '../services/auth';
+ import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
+-import { subscribeToAdminSessionChanges } from '../utils/adminSessionSync';
+ import { getOrCreateDeviceId } from '../utils/deviceId';
+-import { establishAdminSession } from '../utils/establishAdminSession';
+ import {
+   attemptTokenRefresh,
+   getFetchClient,
+@@ -34,8 +37,6 @@ import {
+ } from '../utils/getFetchClient';
+ import { hasUnsavedChanges } from '../utils/unsavedChangesRegistry';
+ 
+-import { useNotification } from './Notifications';
+-
+ import type {
+   Permission as PermissionContract,
+   SanitizedAdminUser,
+@@ -53,15 +54,6 @@ interface User
+     Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
+     Partial<Omit<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>> {}
+ 
+-type AdminUserRef = Pick<User, 'id' | 'email'> | null;
+-type AdminUserId = string | number | undefined;
+-
+-/**
+- * Which admin is signed in. Id wins, and email covers a profile that has no id
+- * yet. Session-switch guards compare this, so they have to share one definition.
+- */
+-const getAdminUserId = (user?: AdminUserRef): AdminUserId => user?.id ?? user?.email;
+-
+ interface AuthContextValue {
+   login: (
+     body: Login.Request['body'] & { rememberMe: boolean }
+@@ -161,21 +153,13 @@ const LOGOUT_PROMPTS = {
+   },
+ } satisfies Record<LogoutReason, { title?: MessageDescriptor; body: MessageDescriptor }>;
+ 
+-const REPLACED_SESSION_UNSAVED = {
+-  id: 'app.session.replaced.unsaved',
+-  defaultMessage:
+-    'You were signed in as another admin in a different tab. Unsaved changes were discarded.',
+-} satisfies MessageDescriptor;
+-
+ const AuthProvider = ({
+   children,
+   _defaultPermissions = EMPTY_DEFAULT_PERMISSIONS,
+   _disableRenewToken = false,
+ }: AuthProviderProps) => {
+   const { formatMessage } = useIntl();
+-  const { toggleNotification } = useNotification();
+   const dispatch = useTypedDispatch();
+-  const store = useTypedStore();
+   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
+   const location = useLocation();
+   const [{ rawQuery }] = useQueryParams();
+@@ -189,11 +173,7 @@ const AuthProvider = ({
+ 
+   const token = useTypedSelector((state) => state.admin_app.token ?? null);
+ 
+-  const {
+-    data: user,
+-    isLoading: isLoadingUser,
+-    isError: isUserError,
+-  } = useGetMeQuery(undefined, {
++  const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
+     /**
+      * If there's no token, we don't try to fetch
+      * the user data because it will fail.
+@@ -273,27 +253,6 @@ const AuthProvider = ({
+     runLogoutWithGuard(performGlobalLogout, 'session-dead');
+   }, [performGlobalLogout, runLogoutWithGuard]);
+ 
+-  const handleSessionDead = React.useCallback(
+-    (expiredToken?: string | null) => {
+-      // Requests send the shared token, which can be ahead of this tab's Redux
+-      // copy after another tab refreshes. A rejected credential is still current
+-      // when it matches either one; ignoring it records the token as already
+-      // handled and later 401s never log the tab out.
+-      const currentToken = store.getState().admin_app.token ?? null;
+-      const storedToken = getStoredToken();
+-      if (
+-        expiredToken !== undefined &&
+-        expiredToken !== currentToken &&
+-        expiredToken !== storedToken
+-      ) {
+-        return;
+-      }
+-
+-      clearStateAndLogout();
+-    },
+-    [clearStateAndLogout, store]
+-  );
+-
+   const handleConfirmSessionLogout = React.useCallback(() => {
+     logoutGuardOpenRef.current = false;
+     logoutGuardReasonRef.current = 'voluntary';
+@@ -327,14 +286,6 @@ const AuthProvider = ({
+     [handleCancelSessionLogout]
+   );
+ 
+-  const discardPendingLogout = React.useCallback(() => {
+-    logoutGuardOpenRef.current = false;
+-    logoutGuardReasonRef.current = 'voluntary';
+-    pendingLogoutRef.current = null;
+-    setIsSessionLogoutDialogOpen(false);
+-    setSessionLogoutReason('voluntary');
+-  }, []);
+-
+   const resyncToken = React.useCallback(
+     (newToken: string) => {
+       dispatch(setToken(newToken));
+@@ -409,12 +360,14 @@ const AuthProvider = ({
+    * a stale page until they click something.
+    */
+   React.useEffect(() => {
+-    setOnSessionExpired(handleSessionDead);
++    setOnSessionExpired(() => {
++      clearStateAndLogout();
++    });
+ 
+     return () => {
+       setOnSessionExpired(null);
+     };
+-  }, [handleSessionDead]);
++  }, [clearStateAndLogout]);
+ 
+   /**
+    * Session keepalive around access-token expiry. The timer fires per-tab; the
+@@ -427,7 +380,7 @@ const AuthProvider = ({
+    */
+   useSessionKeepalive({
+     token,
+-    onSessionDead: handleSessionDead,
++    onSessionDead: clearStateAndLogout,
+     getStoredToken,
+     onResync: resyncToken,
+     getLastActivityAt,
+@@ -452,65 +405,6 @@ const AuthProvider = ({
+     };
+   });
+ 
+-  /**
+-   * Another tab can replace the shared credential. Adopt the new token and
+-   * clear data cached for the previous admin before rendering that session.
+-   * Logout is handled by the `isLoggedIn` storage listener above.
+-   */
+-  const lastResetTokenRef = React.useRef<string | null>(null);
+-  const adminUserIdRef = React.useRef<AdminUserId>(undefined);
+-  const discardedEditsAdminIdRef = React.useRef<AdminUserId>(undefined);
+-  const adminUserId = getAdminUserId(user);
+-  adminUserIdRef.current = adminUserId;
+-
+-  React.useEffect(() => {
+-    let disposed = false;
+-
+-    const reconcileSharedSession = (forceReset: boolean = false) => {
+-      if (disposed) {
+-        return;
+-      }
+-
+-      const nextToken = getStoredToken();
+-      if (!nextToken) {
+-        return;
+-      }
+-
+-      const currentToken = store.getState().admin_app.token ?? null;
+-      if (currentToken === nextToken && !forceReset) {
+-        return;
+-      }
+-
+-      // Broadcast and storage notices for one change arrive as separate tasks.
+-      // Resetting again for the token just adopted only repeats identity fetches.
+-      if (lastResetTokenRef.current === nextToken && currentToken === nextToken) {
+-        return;
+-      }
+-
+-      // The new token's admin is unknown until their profile loads. Remember
+-      // unsaved edits so we can say they were discarded if the admin changes.
+-      if (hasUnsavedChanges() && adminUserIdRef.current !== undefined) {
+-        discardedEditsAdminIdRef.current = adminUserIdRef.current;
+-      }
+-
+-      discardPendingLogout();
+-      resetSessionExpiredNotification();
+-      if (currentToken !== nextToken) {
+-        dispatch(setToken(nextToken));
+-      }
+-      resetAdminApiState(dispatch);
+-      lastResetTokenRef.current = nextToken;
+-    };
+-
+-    const unsubscribe = subscribeToAdminSessionChanges(() => reconcileSharedSession(true));
+-    queueMicrotask(reconcileSharedSession);
+-
+-    return () => {
+-      disposed = true;
+-      unsubscribe();
+-    };
+-  }, [discardPendingLogout, dispatch, store]);
+-
+   const login = React.useCallback<AuthContextValue['login']>(
+     async ({ rememberMe, ...body }) => {
+       const res = await loginMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
+@@ -523,10 +417,12 @@ const AuthProvider = ({
+         const { token } = res.data;
+ 
+         resetSessionExpiredNotification();
+-        establishAdminSession(dispatch, {
+-          token,
+-          persist: rememberMe,
+-        });
++        dispatch(
++          loginAction({
++            token,
++            persist: rememberMe,
++          })
++        );
+       }
+ 
+       return res;
+@@ -633,23 +529,7 @@ const AuthProvider = ({
+     [checkPermissions, rawQuery, runRbacMiddleware, user, userPermissions]
+   );
+ 
+-  const isLoading =
+-    isLoadingUser || isLoadingPermissions || (Boolean(token) && !user && !isUserError);
+-
+-  React.useEffect(() => {
+-    const previousAdminId = discardedEditsAdminIdRef.current;
+-    if (previousAdminId === undefined || isLoading || adminUserId === undefined) {
+-      return;
+-    }
+-
+-    discardedEditsAdminIdRef.current = undefined;
+-    if (previousAdminId !== adminUserId) {
+-      toggleNotification({
+-        type: 'info',
+-        message: formatMessage(REPLACED_SESSION_UNSAVED),
+-      });
+-    }
+-  }, [adminUserId, formatMessage, isLoading, toggleNotification]);
++  const isLoading = isLoadingUser || isLoadingPermissions;
+ 
+   return (
+     <>
+@@ -687,5 +567,5 @@ const AuthProvider = ({
+   );
+ };
+ 
+-export { AuthProvider, getAdminUserId, useAuth, STORAGE_KEYS };
++export { AuthProvider, useAuth, STORAGE_KEYS };
+ export type { AuthContextValue, Permission, User };
+diff --git a/packages/core/admin/admin/src/features/tests/Auth.test.tsx b/packages/core/admin/admin/src/features/tests/Auth.test.tsx
+index 8b57cb1979..e19c905058 100644
+--- a/packages/core/admin/admin/src/features/tests/Auth.test.tsx
++++ b/packages/core/admin/admin/src/features/tests/Auth.test.tsx
+@@ -1,23 +1,6 @@
+-import type { ReactElement } from 'react';
++import { act, render, screen, waitFor } from '@tests/utils';
+ 
+-import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
+-import { http, HttpResponse } from 'msw';
+-import { useNavigate } from 'react-router-dom';
+-
+-import { Page } from '../../components/PageHelpers';
+-import { useTypedDispatch } from '../../core/store/hooks';
+-import { useMenu } from '../../hooks/useMenu';
+-import { useRBAC } from '../../hooks/useRBAC';
+ import { useSessionKeepalive } from '../../hooks/useSessionKeepalive';
+-import { useSettingsMenu } from '../../hooks/useSettingsMenu';
+-import { useInitQuery } from '../../services/admin';
+-import {
+-  ADMIN_SESSION_CHANNEL,
+-  ADMIN_SESSION_MESSAGE_TYPE,
+-  ADMIN_SESSION_STORAGE_KEY,
+-} from '../../utils/adminSessionSync';
+-import { establishAdminSession } from '../../utils/establishAdminSession';
+-import { triggerSessionExpired } from '../../utils/getFetchClient';
+ import {
+   clearUnsavedChangesChecks,
+   registerUnsavedChangesCheck,
+@@ -26,862 +9,6 @@ import { useAuth } from '../Auth';
+ 
+ jest.mock('../../hooks/useSessionKeepalive');
+ 
+-const TOKEN_A = 'token-user-a';
+-const TOKEN_B = 'token-user-b';
+-const REPLACED_SESSION_NOTICE =
+-  'You were signed in as another admin in a different tab. Unsaved changes were discarded.';
+-
+-const USER_A = {
+-  id: 1,
+-  email: 'role-a@example.com',
+-  firstname: 'Role',
+-  lastname: 'A',
+-  username: 'role-a',
+-  preferedLanguage: 'en',
+-  roles: [{ id: 1 }],
+-};
+-
+-const USER_B = {
+-  id: 2,
+-  email: 'role-b@example.com',
+-  firstname: 'Role',
+-  lastname: 'B',
+-  username: 'role-b',
+-  preferedLanguage: 'en',
+-  roles: [{ id: 2 }],
+-};
+-
+-const PERMISSION_A = {
+-  action: 'plugin::content-manager.explorer.read',
+-  subject: 'api::featured.featured',
+-};
+-
+-const PERMISSION_B = {
+-  action: 'admin::marketplace.read',
+-  subject: null,
+-};
+-
+-const CONDITIONAL_PERMISSION = {
+-  action: 'admin::roles.update',
+-  subject: null,
+-  conditions: ['is-author'],
+-};
+-
+-/**
+- * Identity is derived only from the bearer token. A refetch that still sends
+- * token A cannot satisfy assertions for user B.
+- */
+-const identityForAuthorization = (authorization: string | null) => {
+-  if (authorization === `Bearer ${TOKEN_B}`) {
+-    return 'b' as const;
+-  }
+-
+-  return 'a' as const;
+-};
+-
+-const mockIdentityHandlers = () => {
+-  server.use(
+-    http.get('/admin/users/me', ({ request }) => {
+-      const who = identityForAuthorization(request.headers.get('Authorization'));
+-
+-      return HttpResponse.json({
+-        data: who === 'a' ? USER_A : USER_B,
+-      });
+-    }),
+-    http.get('/admin/users/me/permissions', ({ request }) => {
+-      const who = identityForAuthorization(request.headers.get('Authorization'));
+-
+-      return HttpResponse.json({
+-        data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B],
+-      });
+-    })
+-  );
+-};
+-
+-const setAuthCookie = (token: string) => {
+-  document.cookie = `jwtToken=${encodeURIComponent(token)}; Path=/admin`;
+-};
+-
+-const clearAuthCookie = () => {
+-  document.cookie = 'jwtToken=; Path=/admin; Expires=Thu, 01 Jan 1970 00:00:01 GMT';
+-  document.cookie = 'jwtToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT';
+-};
+-
+-/** What another document publishes after it has already written the new session. */
+-const emitExternalSessionBroadcast = () => {
+-  const channel = new BroadcastChannel(ADMIN_SESSION_CHANNEL);
+-  channel.postMessage({
+-    type: ADMIN_SESSION_MESSAGE_TYPE,
+-    tabId: 'external-tab',
+-  });
+-  channel.close();
+-};
+-
+-const emitExternalStorageSignal = () => {
+-  window.dispatchEvent(
+-    new StorageEvent('storage', {
+-      key: ADMIN_SESSION_STORAGE_KEY,
+-      newValue: `external-${Date.now()}`,
+-    })
+-  );
+-};
+-
+-const IdentityProbe = () => {
+-  const permissions = useAuth('IdentityProbe', (state) => state.permissions);
+-  const user = useAuth('IdentityProbe', (state) => state.user);
+-  const login = useAuth('IdentityProbe', (state) => state.login);
+-  const isLoading = useAuth('IdentityProbe', (state) => state.isLoading);
+-  const token = useAuth('IdentityProbe', (state) => state.token);
+-
+-  return (
+-    <div>
+-      <div data-testid="identity-loading">{String(isLoading)}</div>
+-      <div data-testid="identity-token">{token ?? ''}</div>
+-      <div data-testid="identity-email">{user?.email ?? ''}</div>
+-      <div data-testid="identity-actions">
+-        {permissions.map((permission) => permission.action).join(',')}
+-      </div>
+-      <button
+-        type="button"
+-        onClick={() => {
+-          void login({
+-            email: USER_B.email,
+-            password: 'Testing123!',
+-            rememberMe: true,
+-          });
+-        }}
+-      >
+-        login-as-b
+-      </button>
+-    </div>
+-  );
+-};
+-
+-const EstablishSessionProbe = () => {
+-  const dispatch = useTypedDispatch();
+-
+-  return (
+-    <>
+-      <IdentityProbe />
+-      <button
+-        type="button"
+-        onClick={() => {
+-          establishAdminSession(dispatch, { token: TOKEN_B });
+-        }}
+-      >
+-        establish-session-b
+-      </button>
+-    </>
+-  );
+-};
+-
+-const InitProbe = () => {
+-  const { data } = useInitQuery();
+-
+-  return <div data-testid="has-admin">{String(data?.hasAdmin)}</div>;
+-};
+-
+-const RbacProbe = () => {
+-  const { allowedActions, isLoading } = useRBAC([CONDITIONAL_PERMISSION]);
+-
+-  return (
+-    <div data-testid="rbac-result">{isLoading ? 'loading' : String(allowedActions.canUpdate)}</div>
+-  );
+-};
+-
+-const QueryStringMenuProbe = () => {
+-  const navigate = useNavigate();
+-  const mainMenu = useMenu(false);
+-  const settingsMenu = useSettingsMenu();
+-
+-  return (
+-    <>
+-      <div data-testid="main-menu-loading">{String(mainMenu.isLoading)}</div>
+-      <div data-testid="settings-menu-loading">{String(settingsMenu.isLoading)}</div>
+-      <button type="button" onClick={() => navigate('?page=2')}>
+-        change-query
+-      </button>
+-    </>
+-  );
+-};
+-
+-const waitForUserA = async () => {
+-  await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('false'));
+-  expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_A.email);
+-  expect(screen.getByTestId('identity-actions')).toHaveTextContent(PERMISSION_A.action);
+-  expect(screen.getByTestId('identity-actions')).not.toHaveTextContent(PERMISSION_B.action);
+-};
+-
+-const waitForUserB = async () => {
+-  await waitFor(() => expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_B.email));
+-  expect(screen.getByTestId('identity-actions')).toHaveTextContent(PERMISSION_B.action);
+-  expect(screen.getByTestId('identity-actions')).not.toHaveTextContent(PERMISSION_A.action);
+-};
+-
+-const bearer = (token: string) => `Bearer ${token}`;
+-
+-/**
+- * Keep the first bearer-A `getMe` / `getMyPermissions` responses pending.
+- * This proves that a response started for the previous credential cannot
+- * repopulate the cache after the session changes.
+- */
+-const holdInFlightOldBearer = () => {
+-  const authorizations: { me: Array<string | null>; permissions: Array<string | null> } = {
+-    me: [],
+-    permissions: [],
+-  };
+-  let released = false;
+-  let releaseGate: () => void = () => {};
+-  const gate = new Promise<void>((resolve) => {
+-    releaseGate = () => {
+-      if (!released) {
+-        released = true;
+-        resolve();
+-      }
+-    };
+-  });
+-
+-  const identityResponse = (authorization: string | null, kind: 'me' | 'permissions') => {
+-    const who = identityForAuthorization(authorization);
+-
+-    if (kind === 'me') {
+-      return HttpResponse.json({ data: who === 'a' ? USER_A : USER_B });
+-    }
+-
+-    return HttpResponse.json({
+-      data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B],
+-    });
+-  };
+-
+-  server.use(
+-    http.get('/admin/users/me', async ({ request }) => {
+-      const authorization = request.headers.get('Authorization');
+-      authorizations.me.push(authorization);
+-      if (authorization === bearer(TOKEN_A)) {
+-        await gate;
+-      }
+-      return identityResponse(authorization, 'me');
+-    }),
+-    http.get('/admin/users/me/permissions', async ({ request }) => {
+-      const authorization = request.headers.get('Authorization');
+-      authorizations.permissions.push(authorization);
+-      if (authorization === bearer(TOKEN_A)) {
+-        await gate;
+-      }
+-      return identityResponse(authorization, 'permissions');
+-    })
+-  );
+-
+-  return { authorizations, release: releaseGate };
+-};
+-
+-const renderIdentity = (ui: ReactElement = <IdentityProbe />) =>
+-  render(ui, {
+-    providerOptions: {
+-      permissions: () => [],
+-    },
+-  });
+-
+-describe('AuthProvider session identity', () => {
+-  beforeEach(() => {
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_A));
+-    window.localStorage.setItem('isLoggedIn', 'true');
+-    mockIdentityHandlers();
+-  });
+-
+-  afterEach(() => {
+-    clearUnsavedChangesChecks();
+-    window.localStorage.clear();
+-    clearAuthCookie();
+-  });
+-
+-  it('refetches warm identity with the new bearer token after password login', async () => {
+-    server.use(
+-      http.post('/admin/login', () =>
+-        HttpResponse.json({
+-          data: {
+-            token: TOKEN_B,
+-            user: USER_B,
+-          },
+-        })
+-      )
+-    );
+-
+-    const { user } = renderIdentity();
+-
+-    await waitForUserA();
+-
+-    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+-
+-    await waitForUserB();
+-    expect(window.localStorage.getItem('jwtToken')).toBe(JSON.stringify(TOKEN_B));
+-  });
+-
+-  it('does not expose the previous identity while the new identity is loading', async () => {
+-    let releaseIdentity: () => void = () => {};
+-    const identityGate = new Promise<void>((resolve) => {
+-      releaseIdentity = resolve;
+-    });
+-
+-    server.use(
+-      http.post('/admin/login', () =>
+-        HttpResponse.json({
+-          data: {
+-            token: TOKEN_B,
+-            user: USER_B,
+-          },
+-        })
+-      ),
+-      http.get('/admin/users/me', async ({ request }) => {
+-        const who = identityForAuthorization(request.headers.get('Authorization'));
+-        if (who === 'b') {
+-          await identityGate;
+-        }
+-        return HttpResponse.json({ data: who === 'a' ? USER_A : USER_B });
+-      }),
+-      http.get('/admin/users/me/permissions', async ({ request }) => {
+-        const who = identityForAuthorization(request.headers.get('Authorization'));
+-        if (who === 'b') {
+-          await identityGate;
+-        }
+-        return HttpResponse.json({ data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B] });
+-      })
+-    );
+-
+-    const { user } = renderIdentity();
+-    await waitForUserA();
+-
+-    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+-
+-    await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('true'));
+-    expect(screen.getByTestId('identity-email')).toBeEmptyDOMElement();
+-    expect(screen.getByTestId('identity-actions')).toBeEmptyDOMElement();
+-
+-    releaseIdentity();
+-    await waitForUserB();
+-  });
+-
+-  it('loads identity after password login when no user was cached', async () => {
+-    window.localStorage.removeItem('jwtToken');
+-    window.localStorage.removeItem('isLoggedIn');
+-
+-    server.use(
+-      http.post('/admin/login', () =>
+-        HttpResponse.json({
+-          data: {
+-            token: TOKEN_B,
+-            user: USER_B,
+-          },
+-        })
+-      )
+-    );
+-
+-    const { user } = renderIdentity();
+-
+-    expect(screen.getByTestId('identity-email')).toHaveTextContent('');
+-
+-    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+-
+-    await waitForUserB();
+-  });
+-
+-  it('stops loading when the current-user request fails', async () => {
+-    server.use(
+-      http.get('/admin/users/me', () =>
+-        HttpResponse.json({ error: { message: 'identity failed' } }, { status: 500 })
+-      )
+-    );
+-
+-    renderIdentity();
+-
+-    await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('false'));
+-    expect(screen.getByTestId('identity-email')).toBeEmptyDOMElement();
+-  });
+-
+-  it('refetches the current user and permissions after a new session is established without persist', async () => {
+-    const { user } = renderIdentity(<EstablishSessionProbe />);
+-
+-    await waitForUserA();
+-
+-    await user.click(screen.getByRole('button', { name: 'establish-session-b' }));
+-
+-    await waitForUserB();
+-    expect(window.localStorage.getItem('jwtToken')).toBe(null);
+-  });
+-
+-  it('retains the cached init response when the session changes', async () => {
+-    let initRequests = 0;
+-    server.use(
+-      http.get('/admin/init', () => {
+-        initRequests += 1;
+-        return HttpResponse.json({ data: { hasAdmin: true } });
+-      })
+-    );
+-
+-    const { user } = renderIdentity(
+-      <>
+-        <EstablishSessionProbe />
+-        <InitProbe />
+-      </>
+-    );
+-
+-    await waitForUserA();
+-    await waitFor(() => expect(screen.getByTestId('has-admin')).toHaveTextContent('true'));
+-
+-    await user.click(screen.getByRole('button', { name: 'establish-session-b' }));
+-
+-    await waitForUserB();
+-    expect(screen.getByTestId('has-admin')).toHaveTextContent('true');
+-    expect(initRequests).toBe(1);
+-  });
+-
+-  it('does not reuse a conditional permission result from the previous admin', async () => {
+-    const checkedBearers: Array<string | null> = [];
+-    server.use(
+-      http.post('/admin/login', () =>
+-        HttpResponse.json({
+-          data: {
+-            token: TOKEN_B,
+-            user: USER_B,
+-          },
+-        })
+-      ),
+-      http.get('/admin/users/me/permissions', () =>
+-        HttpResponse.json({ data: [CONDITIONAL_PERMISSION] })
+-      ),
+-      http.post('/admin/permissions/check', ({ request }) => {
+-        const authorization = request.headers.get('Authorization');
+-        checkedBearers.push(authorization);
+-
+-        return HttpResponse.json({ data: [authorization === bearer(TOKEN_A)] });
+-      })
+-    );
+-
+-    const { user } = renderIdentity(
+-      <>
+-        <IdentityProbe />
+-        <Page.Protect permissions={[CONDITIONAL_PERMISSION]}>
+-          <div>Conditionally protected content</div>
+-        </Page.Protect>
+-        <RbacProbe />
+-      </>
+-    );
+-
+-    await screen.findByText('Conditionally protected content');
+-    await waitFor(() => expect(screen.getByTestId('rbac-result')).toHaveTextContent('true'));
+-
+-    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+-
+-    await screen.findByText("You don't have the permissions to access that content");
+-    await waitFor(() => expect(screen.getByTestId('rbac-result')).toHaveTextContent('false'));
+-    expect(checkedBearers).toContain(bearer(TOKEN_A));
+-    expect(checkedBearers).toContain(bearer(TOKEN_B));
+-  });
+-
+-  it('does not put permission-derived menus back into loading on a query-string change', async () => {
+-    renderIdentity(
+-      <>
+-        <IdentityProbe />
+-        <QueryStringMenuProbe />
+-        <RbacProbe />
+-      </>
+-    );
+-
+-    await waitForUserA();
+-    await waitFor(() => expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('false'));
+-    await waitFor(() =>
+-      expect(screen.getByTestId('settings-menu-loading')).toHaveTextContent('false')
+-    );
+-    await waitFor(() => expect(screen.getByTestId('rbac-result')).toHaveTextContent('false'));
+-
+-    fireEvent.click(screen.getByRole('button', { name: 'change-query' }));
+-
+-    expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('false');
+-    expect(screen.getByTestId('settings-menu-loading')).toHaveTextContent('false');
+-    expect(screen.getByTestId('rbac-result')).toHaveTextContent('false');
+-  });
+-
+-  it('keeps menus loading until the new admin permissions arrive', async () => {
+-    let releasePermissions = () => {};
+-    const permissionsGate = new Promise<void>((resolve) => {
+-      releasePermissions = resolve;
+-    });
+-
+-    server.use(
+-      http.get('/admin/users/me/permissions', async ({ request }) => {
+-        const authorization = request.headers.get('Authorization');
+-        if (authorization === bearer(TOKEN_B)) {
+-          await permissionsGate;
+-        }
+-
+-        const who = identityForAuthorization(authorization);
+-
+-        return HttpResponse.json({
+-          data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B],
+-        });
+-      })
+-    );
+-
+-    renderIdentity(
+-      <>
+-        <IdentityProbe />
+-        <QueryStringMenuProbe />
+-      </>
+-    );
+-
+-    await waitForUserA();
+-    await waitFor(() => expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('false'));
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-    });
+-
+-    await waitFor(() =>
+-      expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_B.email)
+-    );
+-    expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('true');
+-    expect(screen.getByTestId('settings-menu-loading')).toHaveTextContent('true');
+-
+-    await act(async () => {
+-      releasePermissions();
+-    });
+-
+-    await waitFor(() => expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('false'));
+-    await waitFor(() =>
+-      expect(screen.getByTestId('settings-menu-loading')).toHaveTextContent('false')
+-    );
+-  });
+-
+-  it('refetches identity once when a session notice arrives twice', async () => {
+-    let meRequests = 0;
+-    server.use(
+-      http.get('/admin/users/me', ({ request }) => {
+-        meRequests += 1;
+-        const who = identityForAuthorization(request.headers.get('Authorization'));
+-
+-        return HttpResponse.json({
+-          data: who === 'a' ? USER_A : USER_B,
+-        });
+-      })
+-    );
+-
+-    renderIdentity();
+-    await waitForUserA();
+-    const requestsAfterLoad = meRequests;
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-      emitExternalStorageSignal();
+-    });
+-
+-    await waitForUserB();
+-    await act(async () => {
+-      await new Promise((resolve) => {
+-        setTimeout(resolve, 20);
+-      });
+-    });
+-
+-    expect(meRequests - requestsAfterLoad).toBe(1);
+-  });
+-
+-  it('says unsaved edits were discarded once the other tab is a different admin', async () => {
+-    let releaseIdentity: () => void = () => {};
+-    const identityGate = new Promise<void>((resolve) => {
+-      releaseIdentity = resolve;
+-    });
+-
+-    server.use(
+-      http.get('/admin/users/me', async ({ request }) => {
+-        const who = identityForAuthorization(request.headers.get('Authorization'));
+-        if (who === 'b') {
+-          await identityGate;
+-        }
+-
+-        return HttpResponse.json({ data: who === 'a' ? USER_A : USER_B });
+-      }),
+-      http.get('/admin/users/me/permissions', async ({ request }) => {
+-        const who = identityForAuthorization(request.headers.get('Authorization'));
+-        if (who === 'b') {
+-          await identityGate;
+-        }
+-
+-        return HttpResponse.json({ data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B] });
+-      })
+-    );
+-
+-    registerUnsavedChangesCheck('form', () => true);
+-    renderIdentity();
+-    await waitForUserA();
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-      emitExternalStorageSignal();
+-    });
+-
+-    await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('true'));
+-    expect(screen.queryByText(REPLACED_SESSION_NOTICE)).not.toBeInTheDocument();
+-
+-    releaseIdentity();
+-    await waitForUserB();
+-    expect(await screen.findByText(REPLACED_SESSION_NOTICE)).toBeInTheDocument();
+-    expect(screen.getAllByText(REPLACED_SESSION_NOTICE)).toHaveLength(1);
+-  });
+-
+-  it('stays quiet when another tab switches admins and nothing is unsaved', async () => {
+-    renderIdentity();
+-    await waitForUserA();
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-    });
+-
+-    await waitForUserB();
+-    await act(async () => {
+-      await new Promise((resolve) => {
+-        setTimeout(resolve, 50);
+-      });
+-    });
+-    expect(screen.queryByText(REPLACED_SESSION_NOTICE)).not.toBeInTheDocument();
+-  });
+-
+-  it('stays quiet when another tab refreshes the same admin', async () => {
+-    registerUnsavedChangesCheck('form', () => true);
+-    renderIdentity();
+-    await waitForUserA();
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify('token-same-admin'));
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-    });
+-
+-    await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('false'));
+-    expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_A.email);
+-    await act(async () => {
+-      await new Promise((resolve) => {
+-        setTimeout(resolve, 50);
+-      });
+-    });
+-    expect(screen.queryByText(REPLACED_SESSION_NOTICE)).not.toBeInTheDocument();
+-  });
+-
+-  it('stays quiet when this tab signs in as another admin', async () => {
+-    server.use(
+-      http.post('/admin/login', () =>
+-        HttpResponse.json({
+-          data: {
+-            token: TOKEN_B,
+-            user: USER_B,
+-          },
+-        })
+-      )
+-    );
+-
+-    registerUnsavedChangesCheck('form', () => true);
+-    const { user } = renderIdentity();
+-    await waitForUserA();
+-
+-    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+-
+-    await waitForUserB();
+-    await act(async () => {
+-      await new Promise((resolve) => {
+-        setTimeout(resolve, 50);
+-      });
+-    });
+-    expect(screen.queryByText(REPLACED_SESSION_NOTICE)).not.toBeInTheDocument();
+-  });
+-
+-  it('refetches identity under the new persisted token when another tab changes the session', async () => {
+-    renderIdentity();
+-
+-    await waitForUserA();
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-    });
+-
+-    await waitForUserB();
+-  });
+-
+-  it('resets cached identity when keepalive adopts the token before the session notice arrives', async () => {
+-    renderIdentity();
+-
+-    await waitForUserA();
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-    act(() => {
+-      getKeepaliveOptions().onResync?.(TOKEN_B);
+-    });
+-    expect(screen.getByTestId('identity-token')).toHaveTextContent(TOKEN_B);
+-    expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_A.email);
+-
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-    });
+-
+-    await waitForUserB();
+-  });
+-
+-  it('reconciles a session replacement that happens before the subscription effect starts', async () => {
+-    let replaced = false;
+-    const ReplaceSessionDuringRender = () => {
+-      if (!replaced) {
+-        replaced = true;
+-        window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-      }
+-
+-      return <IdentityProbe />;
+-    };
+-
+-    renderIdentity(<ReplaceSessionDuringRender />);
+-
+-    await waitForUserB();
+-  });
+-
+-  it('refetches identity under a cookie session when another tab drops the persisted token', async () => {
+-    renderIdentity();
+-
+-    await waitForUserA();
+-
+-    window.localStorage.removeItem('jwtToken');
+-    setAuthCookie(TOKEN_B);
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-    });
+-
+-    await waitForUserB();
+-    expect(window.localStorage.getItem('jwtToken')).toBe(null);
+-  });
+-
+-  it('refetches a cookie-only session from a storage signal when BroadcastChannel is unavailable', async () => {
+-    const originalBroadcastChannel = globalThis.BroadcastChannel;
+-    Object.defineProperty(globalThis, 'BroadcastChannel', {
+-      configurable: true,
+-      writable: true,
+-      value: undefined,
+-    });
+-
+-    window.localStorage.removeItem('jwtToken');
+-    setAuthCookie(TOKEN_A);
+-
+-    try {
+-      expect(typeof BroadcastChannel).toBe('undefined');
+-
+-      renderIdentity();
+-
+-      await waitForUserA();
+-
+-      setAuthCookie(TOKEN_B);
+-      act(() => {
+-        emitExternalStorageSignal();
+-      });
+-
+-      await waitForUserB();
+-      expect(window.localStorage.getItem('jwtToken')).toBe(null);
+-    } finally {
+-      Object.defineProperty(globalThis, 'BroadcastChannel', {
+-        configurable: true,
+-        writable: true,
+-        value: originalBroadcastChannel,
+-      });
+-    }
+-  });
+-});
+-
+-describe('AuthProvider in-flight identity race', () => {
+-  let releaseOldBearer: () => void = () => {};
+-  let authorizations: { me: Array<string | null>; permissions: Array<string | null> } = {
+-    me: [],
+-    permissions: [],
+-  };
+-
+-  beforeEach(() => {
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_A));
+-    window.localStorage.setItem('isLoggedIn', 'true');
+-    const held = holdInFlightOldBearer();
+-    releaseOldBearer = held.release;
+-    authorizations = held.authorizations;
+-  });
+-
+-  afterEach(() => {
+-    releaseOldBearer();
+-    window.localStorage.clear();
+-    clearAuthCookie();
+-  });
+-
+-  const waitForOldBearerInFlight = () =>
+-    waitFor(() => {
+-      expect({
+-        me: authorizations.me.includes(bearer(TOKEN_A)),
+-        permissions: authorizations.permissions.includes(bearer(TOKEN_A)),
+-      }).toEqual({ me: true, permissions: true });
+-    });
+-
+-  const expectBearerBRefetch = () => {
+-    expect({
+-      me: authorizations.me.includes(bearer(TOKEN_B)),
+-      permissions: authorizations.permissions.includes(bearer(TOKEN_B)),
+-    }).toEqual({ me: true, permissions: true });
+-  };
+-
+-  it('refetches identity as the new user after login while old bearer requests are in flight', async () => {
+-    server.use(
+-      http.post('/admin/login', () =>
+-        HttpResponse.json({
+-          data: {
+-            token: TOKEN_B,
+-            user: USER_B,
+-          },
+-        })
+-      )
+-    );
+-
+-    const { user } = renderIdentity();
+-
+-    await waitForOldBearerInFlight();
+-
+-    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+-
+-    await waitFor(() => {
+-      expect(window.localStorage.getItem('jwtToken')).toBe(JSON.stringify(TOKEN_B));
+-    });
+-
+-    await waitFor(expectBearerBRefetch);
+-
+-    releaseOldBearer();
+-
+-    await waitForUserB();
+-    expectBearerBRefetch();
+-  });
+-
+-  it('refetches identity as the foreign session after old bearer requests are in flight', async () => {
+-    renderIdentity();
+-
+-    await waitForOldBearerInFlight();
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-    act(() => {
+-      emitExternalSessionBroadcast();
+-    });
+-
+-    await waitFor(() => {
+-      expect(screen.getByTestId('identity-token')).toHaveTextContent(TOKEN_B);
+-    });
+-
+-    await waitFor(expectBearerBRefetch);
+-
+-    releaseOldBearer();
+-
+-    await waitForUserB();
+-    expectBearerBRefetch();
+-  });
+-});
+-
+ const TOKEN = 'test-access-token';
+ 
+ const AuthProbe = () => {
+@@ -921,7 +48,7 @@ describe('AuthProvider', () => {
+       render(<AuthProbe />);
+ 
+       act(() => {
+-        getKeepaliveOptions().onSessionDead?.(TOKEN);
++        getKeepaliveOptions().onSessionDead?.();
+       });
+ 
+       const dialog = await screen.findByRole('alertdialog');
+@@ -930,70 +57,16 @@ describe('AuthProvider', () => {
+       expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+     });
+ 
+-    it('logs out when the stored token dies while Redux still has the previous one', async () => {
+-      render(<AuthProbe />);
+-
+-      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent(TOKEN));
+-
+-      const refreshedToken = 'refreshed-access-token';
+-      window.localStorage.setItem('jwtToken', JSON.stringify(refreshedToken));
+-      expect(screen.getByTestId('token')).toHaveTextContent(TOKEN);
+-
+-      act(() => {
+-        getKeepaliveOptions().onSessionDead?.(refreshedToken);
+-      });
+-
+-      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent('logged-out'));
+-    });
+-
+     it('logs out without prompting when there is nothing unsaved', async () => {
+       render(<AuthProbe />);
+ 
+       act(() => {
+-        getKeepaliveOptions().onSessionDead?.(TOKEN);
++        getKeepaliveOptions().onSessionDead?.();
+       });
+ 
+       await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent('logged-out'));
+       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+     });
+-
+-    it('discards a pending forced logout when another tab establishes a new session', async () => {
+-      registerUnsavedChangesCheck('form', () => true);
+-
+-      render(<AuthProbe />);
+-
+-      act(() => {
+-        getKeepaliveOptions().onSessionDead?.(TOKEN);
+-      });
+-      await screen.findByRole('alertdialog');
+-
+-      window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+-      act(() => {
+-        emitExternalSessionBroadcast();
+-      });
+-
+-      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent(TOKEN_B));
+-      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+-
+-      act(() => {
+-        getKeepaliveOptions().onSessionDead?.(TOKEN);
+-      });
+-      expect(screen.getByTestId('token')).toHaveTextContent(TOKEN_B);
+-      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+-
+-      act(() => {
+-        triggerSessionExpired(TOKEN);
+-      });
+-      expect(screen.getByTestId('token')).toHaveTextContent(TOKEN_B);
+-      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+-
+-      act(() => {
+-        triggerSessionExpired(TOKEN_B);
+-      });
+-      expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+-        /session has ended and can't be resumed/i
+-      );
+-    });
+   });
+ 
+   describe('voluntary logout with unsaved changes', () => {
+diff --git a/packages/core/admin/admin/src/features/tests/ConfigurationProvider.test.tsx b/packages/core/admin/admin/src/features/tests/ConfigurationProvider.test.tsx
+index 5496940201..a7c2fecf14 100644
+--- a/packages/core/admin/admin/src/features/tests/ConfigurationProvider.test.tsx
++++ b/packages/core/admin/admin/src/features/tests/ConfigurationProvider.test.tsx
+@@ -1,5 +1,4 @@
+-import { render, waitFor, screen, server } from '@tests/utils';
+-import { http, HttpResponse } from 'msw';
++import { render, waitFor, screen } from '@tests/utils';
+ 
+ import { useConfiguration, ConfigurationProvider } from '../Configuration';
+ 
+@@ -34,29 +33,6 @@ const TestComponent = () => {
+ describe('ConfigurationProvider', () => {
+   beforeAll(() => {
+     window.localStorage.setItem('jwtToken', JSON.stringify('test-token'));
+-    // A stored token fetches /users/me/permissions. The default handler returns
+-    // none, and useRBAC re-checks when that response arrives, which skips
+-    // project settings. This page needs the read permission to load the logo.
+-    server.use(
+-      http.get('/admin/users/me/permissions', () =>
+-        HttpResponse.json({
+-          data: [
+-            {
+-              id: 1,
+-              action: 'admin::project-settings.read',
+-              subject: null,
+-              actionParameters: {},
+-              conditions: [],
+-              properties: {},
+-            },
+-          ],
+-        })
+-      )
+-    );
+-  });
+-
+-  afterAll(() => {
+-    server.restoreHandlers();
+   });
+ 
+   it('should not crash', async () => {
+diff --git a/packages/core/admin/admin/src/hooks/tests/useSessionKeepalive.test.ts b/packages/core/admin/admin/src/hooks/tests/useSessionKeepalive.test.ts
+index 57d2ca4835..2755809760 100644
+--- a/packages/core/admin/admin/src/hooks/tests/useSessionKeepalive.test.ts
++++ b/packages/core/admin/admin/src/hooks/tests/useSessionKeepalive.test.ts
+@@ -358,7 +358,6 @@ describe('useSessionKeepalive', () => {
+ 
+     expect(renewSession).toHaveBeenCalledTimes(1);
+     expect(onSessionDead).toHaveBeenCalledTimes(1);
+-    expect(onSessionDead).toHaveBeenCalledWith(token);
+   });
+ 
+   it('prefers cross-tab re-sync over renewal when a newer shared token exists', async () => {
+diff --git a/packages/core/admin/admin/src/hooks/useMenu.ts b/packages/core/admin/admin/src/hooks/useMenu.ts
+index 02fdf568a4..dd2a4824b1 100644
+--- a/packages/core/admin/admin/src/hooks/useMenu.ts
++++ b/packages/core/admin/admin/src/hooks/useMenu.ts
+@@ -4,7 +4,7 @@ import { Cog, ShoppingCart, House } from '@strapi/icons';
+ import cloneDeep from 'lodash/cloneDeep';
+ 
+ import { useTypedSelector } from '../core/store/hooks';
+-import { getAdminUserId, useAuth, type AuthContextValue } from '../features/Auth';
++import { useAuth, AuthContextValue } from '../features/Auth';
+ import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
+ import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
+ 
+@@ -35,10 +35,8 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
+     (state) => state.checkUserHasPermissions,
+     true
+   );
+-  const adminUserId = useAuth('useMenu', (state) => getAdminUserId(state.user));
+   const rawMenu = useStrapiApp('useMenu', (state) => state.menu);
+   const menu = React.useMemo(() => normalizeMenuLinks(rawMenu), [rawMenu]);
+-  const isLoadingAuth = useAuth('useMenu', (state) => state.isLoading);
+   const permissions = useTypedSelector((state) => state.admin_app.permissions);
+   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
+     generalSectionLinks: [
+@@ -100,16 +98,8 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
+     isLoading: true,
+   });
+   const generalSectionLinksRef = React.useRef(menuWithUserPermissions.generalSectionLinks);
+-  const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
+-  const resolvedPermissionsRef = React.useRef(permissions);
+ 
+   React.useEffect(() => {
+-    if (isLoadingAuth) {
+-      return undefined;
+-    }
+-
+-    let cancelled = false;
+-
+     async function applyMenuPermissions() {
+       const authorizedPluginSectionLinks = await getPluginSectionLinks(
+         menu,
+@@ -122,26 +112,18 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
+         checkUserHasPermissions
+       );
+ 
+-      if (!cancelled) {
+-        resolvedAdminUserIdRef.current = adminUserId;
+-        resolvedPermissionsRef.current = permissions;
+-        setMenuWithUserPermissions((state) => ({
+-          ...state,
+-          generalSectionLinks: authorizedGeneralSectionLinks,
+-          pluginsSectionLinks: hideCloudDeployMenuLinkInProduction(
+-            authorizedPluginSectionLinks,
+-            currentEnvironment
+-          ),
+-          isLoading: false,
+-        }));
+-      }
++      setMenuWithUserPermissions((state) => ({
++        ...state,
++        generalSectionLinks: authorizedGeneralSectionLinks,
++        pluginsSectionLinks: hideCloudDeployMenuLinkInProduction(
++          authorizedPluginSectionLinks,
++          currentEnvironment
++        ),
++        isLoading: false,
++      }));
+     }
+ 
+-    void applyMenuPermissions();
+-
+-    return () => {
+-      cancelled = true;
+-    };
++    applyMenuPermissions();
+   }, [
+     setMenuWithUserPermissions,
+     generalSectionLinksRef,
+@@ -150,23 +132,8 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
+     shouldUpdateStrapi,
+     checkUserHasPermissions,
+     currentEnvironment,
+-    adminUserId,
+-    isLoadingAuth,
+   ]);
+ 
+-  if (
+-    isLoadingAuth ||
+-    resolvedAdminUserIdRef.current !== adminUserId ||
+-    resolvedPermissionsRef.current !== permissions
+-  ) {
+-    return {
+-      ...menuWithUserPermissions,
+-      generalSectionLinks: [],
+-      pluginsSectionLinks: [],
+-      isLoading: true,
+-    };
+-  }
+-
+   return menuWithUserPermissions;
+ };
+ 
+diff --git a/packages/core/admin/admin/src/hooks/useRBAC.ts b/packages/core/admin/admin/src/hooks/useRBAC.ts
+index 51e9de9058..40b654f926 100644
+--- a/packages/core/admin/admin/src/hooks/useRBAC.ts
++++ b/packages/core/admin/admin/src/hooks/useRBAC.ts
+@@ -2,7 +2,7 @@ import * as React from 'react';
+ 
+ import isEqual from 'lodash/isEqual';
+ 
+-import { getAdminUserId, useAuth, Permission } from '../features/Auth';
++import { useAuth, Permission } from '../features/Auth';
+ import { once } from '../utils/once';
+ import { capitalise } from '../utils/strings';
+ 
+@@ -55,8 +55,6 @@ const useRBAC = (
+   const [isLoading, setIsLoading] = React.useState(true);
+   const [error, setError] = React.useState<unknown>();
+   const [data, setData] = React.useState<Record<string, boolean>>();
+-  const [checkedAdminUserId, setCheckedAdminUserId] = React.useState<string | number>();
+-  const permissionCheckIdRef = React.useRef(0);
+ 
+   const warnOnce = React.useMemo(() => once(console.warn), []);
+ 
+@@ -90,31 +88,23 @@ const useRBAC = (
+     (state) => state.checkUserHasPermissions,
+     true
+   );
+-  const adminUserId = useAuth('useRBAC', (state) => getAdminUserId(state.user));
+-  const userPermissions = useAuth('useRBAC', (state) => state.permissions);
+ 
+   const permssionsChecked = usePrev(actualPermissionsToCheck);
+   const contextChecked = usePrev(rawQueryContext);
+-  const previousAdminUserId = usePrev(adminUserId);
+-  const previousUserPermissions = usePrev(userPermissions);
+ 
+   React.useEffect(() => {
+     if (
+       !isEqual(permssionsChecked, actualPermissionsToCheck) ||
+       // TODO: also run this when the query context changes
+-      contextChecked !== rawQueryContext ||
+-      previousAdminUserId !== adminUserId ||
+-      !isEqual(previousUserPermissions, userPermissions)
++      contextChecked !== rawQueryContext
+     ) {
+       setIsLoading(true);
+       setData(undefined);
+       setError(undefined);
+-      setCheckedAdminUserId(undefined);
+-      const permissionCheckId = ++permissionCheckIdRef.current;
+ 
+       checkUserHasPermissions(actualPermissionsToCheck, passedPermissions, rawQueryContext)
+         .then((res) => {
+-          if (res && permissionCheckId === permissionCheckIdRef.current) {
++          if (res) {
+             setData(
+               res.reduce<Record<string, boolean>>((acc, permission) => {
+                 return {
+@@ -126,29 +116,20 @@ const useRBAC = (
+           }
+         })
+         .catch((err) => {
+-          if (permissionCheckId === permissionCheckIdRef.current) {
+-            setError(err);
+-          }
++          setError(err);
+         })
+         .finally(() => {
+-          if (permissionCheckId === permissionCheckIdRef.current) {
+-            setCheckedAdminUserId(adminUserId);
+-            setIsLoading(false);
+-          }
++          setIsLoading(false);
+         });
+     }
+   }, [
+-    adminUserId,
+     actualPermissionsToCheck,
+     checkUserHasPermissions,
+     passedPermissions,
+     permissionsToCheck,
+     permssionsChecked,
+     contextChecked,
+-    previousAdminUserId,
+-    previousUserPermissions,
+     rawQueryContext,
+-    userPermissions,
+   ]);
+ 
+   /**
+@@ -157,7 +138,7 @@ const useRBAC = (
+    */
+   const allowedActions = Object.entries({
+     ...defaultAllowedActions,
+-    ...(checkedAdminUserId === adminUserId ? data : undefined),
++    ...data,
+   }).reduce((acc, [name, allowed]) => {
+     acc[`can${capitalise(name)}`] = allowed;
+ 
+@@ -167,7 +148,7 @@ const useRBAC = (
+   return {
+     allowedActions,
+     permissions: actualPermissionsToCheck,
+-    isLoading: isLoading || isLoadingAuth || checkedAdminUserId !== adminUserId,
++    isLoading: isLoading || isLoadingAuth,
+     error,
+   };
+ };
+diff --git a/packages/core/admin/admin/src/hooks/useSessionKeepalive.ts b/packages/core/admin/admin/src/hooks/useSessionKeepalive.ts
+index 6544f4b46a..d5d241106d 100644
+--- a/packages/core/admin/admin/src/hooks/useSessionKeepalive.ts
++++ b/packages/core/admin/admin/src/hooks/useSessionKeepalive.ts
+@@ -22,7 +22,7 @@ interface UseSessionKeepaliveOptions {
+    * server-confirmed end of session, so it SHOULD broadcast a global logout to
+    * every tab.
+    */
+-  onSessionDead?: (expiredToken: string) => void;
++  onSessionDead?: () => void;
+   /**
+    * Read the access token currently in shared storage (localStorage/cookie).
+    * Because every open tab shares the same refresh cookie, an active tab that
+@@ -132,7 +132,7 @@ const useSessionKeepalive = ({
+       renewSession!().then((renewed) => {
+         if (!renewed) {
+           // Server rejected the refresh: the session is truly over.
+-          onSessionDead?.(token);
++          onSessionDead?.();
+         }
+         // On success, storeToken -> setToken updates the token prop, which
+         // re-runs this effect and re-arms against the new exp.
+diff --git a/packages/core/admin/admin/src/hooks/useSettingsMenu.ts b/packages/core/admin/admin/src/hooks/useSettingsMenu.ts
+index c922c2cf36..a839099887 100644
+--- a/packages/core/admin/admin/src/hooks/useSettingsMenu.ts
++++ b/packages/core/admin/admin/src/hooks/useSettingsMenu.ts
+@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
+ 
+ import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
+ import { useAppInfo } from '../features/AppInfo';
+-import { getAdminUserId, useAuth } from '../features/Auth';
++import { useAuth } from '../features/Auth';
+ import { useStrapiApp } from '../features/StrapiApp';
+ import { selectAdminPermissions } from '../selectors';
+ import { PermissionMap } from '../types/permissions';
+@@ -66,18 +66,14 @@ const useSettingsMenu = (): {
+     isLoading: true,
+     menu: [],
+   });
+-  const isLoadingAuth = useAuth('useSettingsMenu', (state) => state.isLoading);
+   const checkUserHasPermission = useAuth(
+     'useSettingsMenu',
+     (state) => state.checkUserHasPermissions
+   );
+-  const adminUserId = useAuth('useSettingsMenu', (state) => getAdminUserId(state.user));
+   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
+   const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
+   const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
+   const permissions = useSelector(selectAdminPermissions);
+-  const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
+-  const resolvedPermissionsRef = React.useRef(permissions);
+ 
+   /**
+    * memoize the return value of this function to avoid re-computing it on every render
+@@ -117,12 +113,6 @@ const useSettingsMenu = (): {
+   );
+ 
+   React.useEffect(() => {
+-    if (isLoadingAuth) {
+-      return undefined;
+-    }
+-
+-    let cancelled = false;
+-
+     const getData = async () => {
+       interface MenuLinkPermission {
+         hasPermission: boolean;
+@@ -145,30 +135,26 @@ const useSettingsMenu = (): {
+ 
+       const menuPermissions = await buildMenuPermissions(sections);
+ 
+-      if (!cancelled) {
+-        resolvedAdminUserIdRef.current = adminUserId;
+-        resolvedPermissionsRef.current = permissions;
+-        setData((prev) => {
+-          return {
+-            ...prev,
+-            isLoading: false,
+-            menu: sections.map((section, sectionIndex) => ({
+-              ...section,
+-              links: section.links.map((link, linkIndex) => {
+-                const permission = menuPermissions.find(
+-                  (permission) =>
+-                    permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
+-                );
+-
+-                return {
+-                  ...link,
+-                  isDisplayed: Boolean(permission?.hasPermission),
+-                };
+-              }),
+-            })),
+-          };
+-        });
+-      }
++      setData((prev) => {
++        return {
++          ...prev,
++          isLoading: false,
++          menu: sections.map((section, sectionIndex) => ({
++            ...section,
++            links: section.links.map((link, linkIndex) => {
++              const permission = menuPermissions.find(
++                (permission) =>
++                  permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
++              );
++
++              return {
++                ...link,
++                isDisplayed: Boolean(permission?.hasPermission),
++              };
++            }),
++          })),
++        };
++      });
+     };
+ 
+     const { global, ...otherSections } = settings;
+@@ -190,11 +176,7 @@ const useSettingsMenu = (): {
+       ...Object.values(otherSections),
+     ]);
+ 
+-    void getData();
+-
+-    return () => {
+-      cancelled = true;
+-    };
++    getData();
+   }, [
+     adminLinks,
+     globalLinks,
+@@ -202,22 +184,8 @@ const useSettingsMenu = (): {
+     shouldUpdateStrapi,
+     addPermissions,
+     checkUserHasPermission,
+-    adminUserId,
+-    isLoadingAuth,
+-    permissions,
+   ]);
+ 
+-  if (
+-    isLoadingAuth ||
+-    resolvedAdminUserIdRef.current !== adminUserId ||
+-    resolvedPermissionsRef.current !== permissions
+-  ) {
+-    return {
+-      isLoading: true,
+-      menu: [],
+-    };
+-  }
+-
+   return {
+     isLoading,
+     menu: menu.map((menuItem) => ({
+diff --git a/packages/core/admin/admin/src/index.ts b/packages/core/admin/admin/src/index.ts
+index e55957f47e..608be62ed7 100644
+--- a/packages/core/admin/admin/src/index.ts
++++ b/packages/core/admin/admin/src/index.ts
+@@ -55,7 +55,7 @@ export {
+   NotificationsProvider,
+ } from './features/Notifications';
+ export { useAppInfo, type AppInfoContextValue } from './features/AppInfo';
+-export { type Permission, getAdminUserId, useAuth, type AuthContextValue } from './features/Auth';
++export { type Permission, useAuth, type AuthContextValue } from './features/Auth';
+ export { useHistory } from './features/BackButton';
+ 
+ /**
+diff --git a/packages/core/admin/admin/src/layouts/AuthenticatedLayout.tsx b/packages/core/admin/admin/src/layouts/AuthenticatedLayout.tsx
+index 2ed2d10f2f..fd86a6d322 100644
+--- a/packages/core/admin/admin/src/layouts/AuthenticatedLayout.tsx
++++ b/packages/core/admin/admin/src/layouts/AuthenticatedLayout.tsx
+@@ -20,16 +20,16 @@ import { useAuth } from '../features/Auth';
+ import { useConfiguration } from '../features/Configuration';
+ import { useMenu } from '../hooks/useMenu';
+ import { useInformationQuery } from '../services/admin';
++import { hashAdminUserEmail } from '../utils/users';
+ 
+ import { useAuthenticatedAccessTracking } from './useAuthenticatedAccessTracking';
+-import { useHashedAdminUserId } from './useHashedAdminUserId';
+ 
+ const { version: strapiVersion } = packageInfo;
+ 
+ const AdminLayout = () => {
+   const { formatMessage } = useIntl();
+   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
+-  const userId = useHashedAdminUserId(userInfo);
++  const [userId, setUserId] = React.useState<string>();
+   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
+ 
+   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
+@@ -59,6 +59,14 @@ const AdminLayout = () => {
+     }
+   }, [showReleaseNotification]);
+ 
++  React.useEffect(() => {
++    hashAdminUserEmail(userInfo).then((id) => {
++      if (id) {
++        setUserId(id);
++      }
++    });
++  }, [userInfo]);
++
+   const {
+     isLoading: isLoadingMenu,
+     generalSectionLinks,
+diff --git a/packages/core/admin/admin/src/layouts/tests/useHashedAdminUserId.test.ts b/packages/core/admin/admin/src/layouts/tests/useHashedAdminUserId.test.ts
+deleted file mode 100644
+index 8b5a05eba4..0000000000
+--- a/packages/core/admin/admin/src/layouts/tests/useHashedAdminUserId.test.ts
++++ /dev/null
+@@ -1,76 +0,0 @@
+-import { act, renderHook, waitFor } from '@tests/utils';
+-
+-import { hashAdminUserEmail } from '../../utils/users';
+-import { useHashedAdminUserId } from '../useHashedAdminUserId';
+-
+-jest.mock('../../utils/users', () => ({
+-  hashAdminUserEmail: jest.fn(),
+-}));
+-
+-const deferred = <T>() => {
+-  let resolve: (value: T) => void = () => {};
+-  const promise = new Promise<T>((resolver) => {
+-    resolve = resolver;
+-  });
+-
+-  return { promise, resolve };
+-};
+-
+-type AdminUser = Parameters<typeof hashAdminUserEmail>[0];
+-
+-const user = (email: string) => ({ email }) as AdminUser;
+-
+-describe('useHashedAdminUserId', () => {
+-  it('clears the previous id and ignores a stale hash completion after the admin changes', async () => {
+-    const hashes = new Map<string, ReturnType<typeof deferred<string | null>>>();
+-
+-    jest.mocked(hashAdminUserEmail).mockImplementation((admin) => {
+-      const email = admin?.email ?? '';
+-      const hash = deferred<string | null>();
+-      hashes.set(email, hash);
+-
+-      return hash.promise;
+-    });
+-
+-    const { result, rerender } = renderHook(
+-      ({ admin }: { admin: AdminUser }) => useHashedAdminUserId(admin),
+-      { initialProps: { admin: user('a@example.com') } }
+-    );
+-
+-    await act(async () => {
+-      hashes.get('a@example.com')?.resolve('hash-a');
+-    });
+-    await waitFor(() => expect(result.current).toBe('hash-a'));
+-
+-    rerender({ admin: user('b@example.com') });
+-    expect(result.current).toBeUndefined();
+-
+-    rerender({ admin: user('c@example.com') });
+-    await act(async () => {
+-      hashes.get('b@example.com')?.resolve('hash-b');
+-    });
+-    expect(result.current).toBeUndefined();
+-
+-    await act(async () => {
+-      hashes.get('c@example.com')?.resolve('hash-c');
+-    });
+-    await waitFor(() => expect(result.current).toBe('hash-c'));
+-  });
+-
+-  it('keeps the id when the same admin is refetched as a new object', async () => {
+-    jest.mocked(hashAdminUserEmail).mockImplementation(() => new Promise(() => {}));
+-
+-    const { result, rerender } = renderHook(
+-      ({ admin }: { admin: AdminUser }) => useHashedAdminUserId(admin),
+-      { initialProps: { admin: user('a@example.com') } }
+-    );
+-
+-    jest.mocked(hashAdminUserEmail).mockResolvedValueOnce('hash-a');
+-    rerender({ admin: user('a@example.com') });
+-    await waitFor(() => expect(result.current).toBe('hash-a'));
+-
+-    jest.mocked(hashAdminUserEmail).mockImplementation(() => new Promise(() => {}));
+-    rerender({ admin: user('a@example.com') });
+-    expect(result.current).toBe('hash-a');
+-  });
+-});
+diff --git a/packages/core/admin/admin/src/layouts/useHashedAdminUserId.ts b/packages/core/admin/admin/src/layouts/useHashedAdminUserId.ts
+deleted file mode 100644
+index e452029bf7..0000000000
+--- a/packages/core/admin/admin/src/layouts/useHashedAdminUserId.ts
++++ /dev/null
+@@ -1,32 +0,0 @@
+-import * as React from 'react';
+-
+-import { hashAdminUserEmail } from '../utils/users';
+-
+-type AdminUser = Parameters<typeof hashAdminUserEmail>[0];
+-
+-const useHashedAdminUserId = (user: AdminUser) => {
+-  const email = user?.email;
+-  const [hashedUser, setHashedUser] = React.useState<{ email?: string; id?: string }>({});
+-
+-  React.useEffect(() => {
+-    let current = true;
+-
+-    // A refetch returns a new user object for the same email. Keep the hash
+-    // already shown for that email until the next digest finishes.
+-    setHashedUser((previous) => (previous.email === email ? previous : { email }));
+-
+-    void hashAdminUserEmail(user).then((id) => {
+-      if (current && id) {
+-        setHashedUser({ email, id });
+-      }
+-    });
+-
+-    return () => {
+-      current = false;
+-    };
+-  }, [email, user]);
+-
+-  return hashedUser.email === email ? hashedUser.id : undefined;
+-};
+-
+-export { useHashedAdminUserId };
+diff --git a/packages/core/admin/admin/src/pages/Auth/components/Register.tsx b/packages/core/admin/admin/src/pages/Auth/components/Register.tsx
+index 793a2da951..ab82d063e3 100644
+--- a/packages/core/admin/admin/src/pages/Auth/components/Register.tsx
++++ b/packages/core/admin/admin/src/pages/Auth/components/Register.tsx
+@@ -21,6 +21,7 @@ import { useNotification } from '../../../features/Notifications';
+ import { useTracking } from '../../../features/Tracking';
+ import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
+ import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
++import { login } from '../../../reducer';
+ import {
+   useGetRegistrationInfoQuery,
+   useRegisterAdminMutation,
+@@ -28,7 +29,6 @@ import {
+ } from '../../../services/auth';
+ import { isBaseQueryError } from '../../../utils/baseQuery';
+ import { getOrCreateDeviceId } from '../../../utils/deviceId';
+-import { establishAdminSession } from '../../../utils/establishAdminSession';
+ import { getByteSize } from '../../../utils/strings';
+ import { translatedErrors } from '../../../utils/translatedErrors';
+ 
+@@ -303,17 +303,9 @@ const Register = ({ hasAdmin }: RegisterProps) => {
+   const { setNpsSurveySettings } = useNpsSurveySettings();
+ 
+   const registrationToken = query.get('registrationToken');
+-  // Once registration succeeds the token is consumed. Skipping here stops the
+-  // session reset from refetching registration-info and toasting that 400.
+-  const [hasRegistered, setHasRegistered] = React.useState(false);
+-  const pendingRegistrationRef = React.useRef<{
+-    token: string;
+-    news: boolean;
+-    hasAdmin?: boolean;
+-  } | null>(null);
+ 
+   const { data: userInfo, error } = useGetRegistrationInfoQuery(registrationToken as string, {
+-    skip: !registrationToken || hasRegistered,
++    skip: !registrationToken,
+   });
+ 
+   React.useEffect(() => {
+@@ -331,35 +323,9 @@ const Register = ({ hasAdmin }: RegisterProps) => {
+     }
+   }, [error, formatAPIError, navigate, toggleNotification]);
+ 
+-  const dispatch = useTypedDispatch();
+-
+-  // The reset re-renders subscribed queries before a setState in the submit
+-  // handler is committed, so establish the session only after this skip has
+-  // unsubscribed registration-info.
+-  React.useEffect(() => {
+-    const pending = pendingRegistrationRef.current;
+-    if (!hasRegistered || !pending) {
+-      return;
+-    }
+-
+-    pendingRegistrationRef.current = null;
+-    establishAdminSession(dispatch, { token: pending.token });
+-
+-    if (pending.news) {
+-      // Only enable EE survey if user accepted the newsletter
+-      setNpsSurveySettings((s) => ({ ...s, enabled: true }));
+-
+-      navigate({
+-        pathname: '/usecase',
+-        search: `?hasAdmin=${pending.hasAdmin}`,
+-      });
+-    } else {
+-      navigate('/');
+-    }
+-  }, [dispatch, hasRegistered, navigate, setNpsSurveySettings]);
+-
+   const [registerAdmin] = useRegisterAdminMutation();
+   const [registerUser] = useRegisterUserMutation();
++  const dispatch = useTypedDispatch();
+ 
+   const handleRegisterAdmin = async (
+     { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
+@@ -368,8 +334,19 @@ const Register = ({ hasAdmin }: RegisterProps) => {
+     const res = await registerAdmin({ ...body, deviceId: getOrCreateDeviceId() });
+ 
+     if ('data' in res) {
+-      pendingRegistrationRef.current = { token: res.data.token, news, hasAdmin: true };
+-      setHasRegistered(true);
++      dispatch(login({ token: res.data.token }));
++
++      if (news) {
++        // Only enable EE survey if user accepted the newsletter
++        setNpsSurveySettings((s) => ({ ...s, enabled: true }));
++
++        navigate({
++          pathname: '/usecase',
++          search: `?hasAdmin=${true}`,
++        });
++      } else {
++        navigate('/');
++      }
+     } else {
+       if (isBaseQueryError(res.error)) {
+         trackUsage('didNotCreateFirstAdmin');
+@@ -391,8 +368,19 @@ const Register = ({ hasAdmin }: RegisterProps) => {
+     const res = await registerUser({ ...body, deviceId: getOrCreateDeviceId() });
+ 
+     if ('data' in res) {
+-      pendingRegistrationRef.current = { token: res.data.token, news, hasAdmin };
+-      setHasRegistered(true);
++      dispatch(login({ token: res.data.token }));
++
++      if (news) {
++        // Only enable EE survey if user accepted the newsletter
++        setNpsSurveySettings((s) => ({ ...s, enabled: true }));
++
++        navigate({
++          pathname: '/usecase',
++          search: `?hasAdmin=${hasAdmin}`,
++        });
++      } else {
++        navigate('/');
++      }
+     } else {
+       if (isBaseQueryError(res.error)) {
+         trackUsage('didNotCreateFirstAdmin');
+diff --git a/packages/core/admin/admin/src/pages/Auth/components/ResetPassword.tsx b/packages/core/admin/admin/src/pages/Auth/components/ResetPassword.tsx
+index 3fdcafe944..d21c880667 100644
+--- a/packages/core/admin/admin/src/pages/Auth/components/ResetPassword.tsx
++++ b/packages/core/admin/admin/src/pages/Auth/components/ResetPassword.tsx
+@@ -16,9 +16,9 @@ import {
+   LayoutContent,
+   UnauthenticatedLayout,
+ } from '../../../layouts/UnauthenticatedLayout';
++import { login } from '../../../reducer';
+ import { useResetPasswordMutation } from '../../../services/auth';
+ import { isBaseQueryError } from '../../../utils/baseQuery';
+-import { establishAdminSession } from '../../../utils/establishAdminSession';
+ import { getByteSize } from '../../../utils/strings';
+ import { translatedErrors } from '../../../utils/translatedErrors';
+ 
+@@ -109,7 +109,7 @@ const ResetPassword = () => {
+     const res = await resetPassword(body);
+ 
+     if ('data' in res) {
+-      establishAdminSession(dispatch, { token: res.data.token });
++      dispatch(login({ token: res.data.token }));
+       navigate('/');
+     }
+   };
+diff --git a/packages/core/admin/admin/src/pages/Auth/components/tests/Register.test.tsx b/packages/core/admin/admin/src/pages/Auth/components/tests/Register.test.tsx
+index 01635c5576..f342e91570 100644
+--- a/packages/core/admin/admin/src/pages/Auth/components/tests/Register.test.tsx
++++ b/packages/core/admin/admin/src/pages/Auth/components/tests/Register.test.tsx
+@@ -1,5 +1,4 @@
+-import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
+-import { http, HttpResponse } from 'msw';
++import { render } from '@tests/utils';
+ 
+ import { Register, formatValidationMessage } from '../Register';
+ 
+@@ -47,68 +46,6 @@ describe('Register', () => {
+     });
+   });
+ 
+-  it('does not refetch registration-info after a successful invite', async () => {
+-    let registrationInfoRequests = 0;
+-
+-    server.use(
+-      http.get('/admin/registration-info', () => {
+-        registrationInfoRequests += 1;
+-
+-        if (registrationInfoRequests > 1) {
+-          return HttpResponse.json(
+-            {
+-              error: {
+-                name: 'ValidationError',
+-                message: 'Invalid registrationToken',
+-                status: 400,
+-              },
+-            },
+-            { status: 400 }
+-          );
+-        }
+-
+-        return HttpResponse.json({
+-          data: {
+-            email: 'invitee@example.com',
+-            firstname: 'Invitee',
+-            lastname: 'User',
+-          },
+-        });
+-      }),
+-      http.post('/admin/register', () =>
+-        HttpResponse.json({
+-          data: {
+-            token: 'registered-token',
+-            user: {
+-              id: 2,
+-              email: 'invitee@example.com',
+-              firstname: 'Invitee',
+-              lastname: 'User',
+-            },
+-          },
+-        })
+-      )
+-    );
+-
+-    render(<Register />, {
+-      initialEntries: ['/auth/register?registrationToken=invite-token'],
+-    });
+-
+-    await waitFor(() => expect(screen.getByLabelText(/^Firstname/i)).toHaveValue('Invitee'));
+-
+-    fireEvent.change(screen.getByLabelText(/^Password/i), { target: { value: 'Testing123!' } });
+-    fireEvent.change(screen.getByLabelText(/^Confirm Password/i), {
+-      target: { value: 'Testing123!' },
+-    });
+-    fireEvent.submit(document.querySelector('form')!);
+-
+-    await waitFor(() =>
+-      expect(screen.queryByRole('heading', { name: 'Welcome to Strapi!' })).not.toBeInTheDocument()
+-    );
+-    expect(registrationInfoRequests).toBe(1);
+-    expect(screen.queryByText('Invalid registrationToken')).not.toBeInTheDocument();
+-  });
+-
+   it('should enable all fields on the register-admin route', () => {
+     const { getByLabelText } = render(<Register />, {
+       initialEntries: ['/auth/register-admin'],
+diff --git a/packages/core/admin/admin/src/reducer.ts b/packages/core/admin/admin/src/reducer.ts
+index 5e768151b3..8a2484989d 100644
+--- a/packages/core/admin/admin/src/reducer.ts
++++ b/packages/core/admin/admin/src/reducer.ts
+@@ -76,12 +76,8 @@ const adminSlice = createSlice({
+ 
+       if (!persist) {
+         setCookie(AUTH_COOKIE_NAME, token);
+-        // Drop a previous "remember me" token so getToken() cannot keep
+-        // authenticating as the last persisted user after a new session.
+-        window.localStorage.removeItem(STORAGE_KEYS.TOKEN);
+       } else {
+         window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+-        deleteCookie(AUTH_COOKIE_NAME);
+       }
+       window.localStorage.setItem(STORAGE_KEYS.STATUS, 'true');
+       state.token = token;
+diff --git a/packages/core/admin/admin/src/services/admin.ts b/packages/core/admin/admin/src/services/admin.ts
+index 5428b9f40d..e63077e5c1 100644
+--- a/packages/core/admin/admin/src/services/admin.ts
++++ b/packages/core/admin/admin/src/services/admin.ts
+@@ -13,9 +13,6 @@ import { prefixFileUrlWithBackendUrl } from '../utils/urls';
+ 
+ import { adminApi } from './api';
+ 
+-import type { Dispatch } from '../core/store/configure';
+-import type { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
+-
+ interface ConfigurationLogo {
+   custom?: {
+     name?: string;
+@@ -140,28 +137,6 @@ const admin = adminApi
+     overrideExisting: false,
+   });
+ 
+-/**
+- * Clear data cached for the previous admin while retaining `/admin/init`.
+- *
+- * AuthPage uses `init.hasAdmin` to route first-admin registration. Refetching
+- * it immediately after registration observes the newly created admin and can
+- * redirect away before the registration flow reaches `/usecase`.
+- */
+-const resetAdminApiState = (dispatch: Dispatch): void => {
+-  type InitState = Parameters<ReturnType<typeof admin.endpoints.init.select>>[0];
+-  type AdminThunkDispatch = ThunkDispatch<InitState, unknown, AnyAction>;
+-
+-  (dispatch as AdminThunkDispatch)((thunkDispatch, getState) => {
+-    const init = admin.endpoints.init.select()(getState()).data;
+-
+-    thunkDispatch(adminApi.util.resetApiState());
+-
+-    if (init) {
+-      thunkDispatch(admin.util.upsertQueryData('init', undefined, init));
+-    }
+-  });
+-};
+-
+ const {
+   useInitQuery,
+   useTelemetryPropertiesQuery,
+@@ -186,7 +161,6 @@ export {
+   useGetLicenseTrialTimeLeftQuery,
+   useGetGuidedTourMetaQuery,
+   useLazyGetDebugDumpQuery,
+-  resetAdminApiState,
+ };
+ 
+ export type { ConfigurationLogo };
+diff --git a/packages/core/admin/admin/src/services/auth.ts b/packages/core/admin/admin/src/services/auth.ts
+index 65a7de3d52..0fc2a53f54 100644
+--- a/packages/core/admin/admin/src/services/auth.ts
++++ b/packages/core/admin/admin/src/services/auth.ts
+@@ -113,6 +113,7 @@ const authService = adminApi
+         transformResponse(res: Login.Response) {
+           return res.data;
+         },
++        invalidatesTags: ['Me'],
+       }),
+       logout: builder.mutation<void, { deviceId?: string } | void>({
+         query: (body) => ({
+diff --git a/packages/core/admin/admin/src/tests/reducer.test.ts b/packages/core/admin/admin/src/tests/reducer.test.ts
+index f6b597cefd..5dd226e66e 100644
+--- a/packages/core/admin/admin/src/tests/reducer.test.ts
++++ b/packages/core/admin/admin/src/tests/reducer.test.ts
+@@ -131,25 +131,9 @@ describe('admin_app reducer', () => {
+       expect(deleteCookie).toHaveBeenCalledWith('jwtToken');
+     });
+ 
+-    it('login persist=false should not persist a token in localStorage', () => {
++    it('login persist=false should not touch localStorage token', () => {
+       reducer(undefined, login({ token: 'abcd', persist: false }));
+       expect(localStorage.getItem('jwtToken')).toBe(null);
+     });
+-
+-    it('login persist=false should clear a previously persisted token', () => {
+-      localStorage.setItem('jwtToken', JSON.stringify('old-token'));
+-
+-      const result = reducer(undefined, login({ token: 'abcd', persist: false }));
+-
+-      expect(result.token).toBe('abcd');
+-      expect(localStorage.getItem('jwtToken')).toBe(null);
+-      expect(setCookie).toHaveBeenCalledWith('jwtToken', 'abcd');
+-    });
+-
+-    it('login persist=true should clear a previous session cookie', () => {
+-      reducer(undefined, login({ token: 'abcd', persist: true }));
+-
+-      expect(deleteCookie).toHaveBeenCalledWith('jwtToken');
+-    });
+   });
+ });
+diff --git a/packages/core/admin/admin/src/translations/en.json b/packages/core/admin/admin/src/translations/en.json
+index d473d325d6..aade28bcc1 100644
+--- a/packages/core/admin/admin/src/translations/en.json
++++ b/packages/core/admin/admin/src/translations/en.json
+@@ -661,7 +661,6 @@
+   "app.page.not.found": "Oops! We can't seem to find the page you're looking for...",
+   "app.session.ended.title": "Session ended",
+   "app.session.ended.unsaved": "Your session has ended and can't be resumed. Your unsaved changes will be lost when you log out.",
+-  "app.session.replaced.unsaved": "You were signed in as another admin in a different tab. Unsaved changes were discarded.",
+   "app.static.links.cheatsheet": "CheatSheet",
+   "app.utils.SelectOption.defaultMessage": " ",
+   "app.utils.add-filter": "Add filter",
+diff --git a/packages/core/admin/admin/src/utils/adminSessionSync.ts b/packages/core/admin/admin/src/utils/adminSessionSync.ts
+deleted file mode 100644
+index 77cf674a4e..0000000000
+--- a/packages/core/admin/admin/src/utils/adminSessionSync.ts
++++ /dev/null
+@@ -1,181 +0,0 @@
+-/**
+- * Cross-tab notice that the shared admin session (localStorage token and/or
+- * auth cookie) changed. Identity queries are not keyed by token, so other
+- * tabs keep the previous user until they refetch.
+- *
+- * BroadcastChannel covers cookie-only switches, which do not change
+- * `jwtToken` and therefore do not fire a useful `storage` event. The storage
+- * key covers browsers without BroadcastChannel. Listeners must not write the
+- * key or post again — that ping-pongs. The publishing tab ignores its own
+- * broadcast; `storage` events do not fire in the document that wrote them.
+- */
+-
+-const ADMIN_SESSION_CHANNEL = 'strapi-admin-session';
+-const ADMIN_SESSION_STORAGE_KEY = 'strapi.admin.session-change';
+-const ADMIN_SESSION_MESSAGE_TYPE = 'session-change';
+-
+-let ephemeralIdFallback = 0;
+-let ownTabId: string | undefined;
+-
+-/**
+- * Distinguish this document, and each storage ping, from other tabs.
+- * The value is not a credential and must not include the access token.
+- * `randomUUID` exists in browsers and in Node ≥ 19; admin tests run on Node ≥ 22.
+- * `getRandomValues` covers hosts that have Web Crypto without `randomUUID`.
+- * The counter is only for test shims that lack both, so importing this module
+- * during SSR does not throw.
+- */
+-const createEphemeralId = (): string => {
+-  const webCrypto = globalThis.crypto;
+-
+-  if (typeof webCrypto?.randomUUID === 'function') {
+-    return webCrypto.randomUUID();
+-  }
+-
+-  if (typeof webCrypto?.getRandomValues === 'function') {
+-    const bytes = new Uint8Array(16);
+-    webCrypto.getRandomValues(bytes);
+-    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+-    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+-
+-    const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+-
+-    return [
+-      hex.slice(0, 8),
+-      hex.slice(8, 12),
+-      hex.slice(12, 16),
+-      hex.slice(16, 20),
+-      hex.slice(20),
+-    ].join('-');
+-  }
+-
+-  ephemeralIdFallback += 1;
+-
+-  return `strapi-admin-${Date.now().toString(36)}-${ephemeralIdFallback.toString(36)}`;
+-};
+-
+-const getOwnTabId = (): string => {
+-  if (!ownTabId) {
+-    ownTabId = createEphemeralId();
+-  }
+-
+-  return ownTabId;
+-};
+-
+-interface AdminSessionChangeMessage {
+-  type: typeof ADMIN_SESSION_MESSAGE_TYPE;
+-  tabId: string;
+-}
+-
+-const canUseDom = (): boolean => typeof window !== 'undefined';
+-
+-const notifyOtherTabsOfAdminSessionChange = (): void => {
+-  if (!canUseDom()) {
+-    return;
+-  }
+-
+-  try {
+-    window.localStorage.setItem(ADMIN_SESSION_STORAGE_KEY, createEphemeralId());
+-    window.localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+-  } catch {
+-    // Private mode and some tests disable storage. The in-tab refetch still runs.
+-  }
+-
+-  if (typeof BroadcastChannel === 'undefined') {
+-    return;
+-  }
+-
+-  try {
+-    const channel = new BroadcastChannel(ADMIN_SESSION_CHANNEL);
+-    const message: AdminSessionChangeMessage = {
+-      type: ADMIN_SESSION_MESSAGE_TYPE,
+-      tabId: getOwnTabId(),
+-    };
+-    channel.postMessage(message);
+-    channel.close();
+-  } catch {
+-    // Construction can fail in a detached document. The storage signal remains.
+-  }
+-};
+-
+-const isForeignSessionChange = (data: unknown): boolean => {
+-  if (typeof data !== 'object' || data === null) {
+-    return false;
+-  }
+-
+-  const message = data as Partial<AdminSessionChangeMessage>;
+-  if (message.type !== ADMIN_SESSION_MESSAGE_TYPE) {
+-    return false;
+-  }
+-
+-  // Missing tabId is treated as external. Our own publish always sets one.
+-  return message.tabId !== getOwnTabId();
+-};
+-
+-/**
+- * Run `onChange` after a session-change notice from another document.
+- * A broadcast and a storage event are separate tasks, so this only collapses
+- * notices that land in the same turn. Callers still skip a second reset for a
+- * token they have already adopted.
+- */
+-const subscribeToAdminSessionChanges = (onChange: () => void): (() => void) => {
+-  if (!canUseDom()) {
+-    return () => {};
+-  }
+-
+-  let disposed = false;
+-  let pending = false;
+-
+-  const scheduleRefresh = () => {
+-    if (disposed || pending) {
+-      return;
+-    }
+-
+-    pending = true;
+-    queueMicrotask(() => {
+-      pending = false;
+-      if (!disposed) {
+-        onChange();
+-      }
+-    });
+-  };
+-
+-  const handleStorage = (event: StorageEvent) => {
+-    if (event.key !== ADMIN_SESSION_STORAGE_KEY || event.newValue === null) {
+-      return;
+-    }
+-
+-    scheduleRefresh();
+-  };
+-
+-  window.addEventListener('storage', handleStorage);
+-
+-  let channel: BroadcastChannel | undefined;
+-
+-  if (typeof BroadcastChannel !== 'undefined') {
+-    try {
+-      channel = new BroadcastChannel(ADMIN_SESSION_CHANNEL);
+-      channel.addEventListener('message', (event: MessageEvent) => {
+-        if (isForeignSessionChange(event.data)) {
+-          scheduleRefresh();
+-        }
+-      });
+-    } catch {
+-      channel = undefined;
+-    }
+-  }
+-
+-  return () => {
+-    disposed = true;
+-    window.removeEventListener('storage', handleStorage);
+-    channel?.close();
+-  };
+-};
+-
+-export {
+-  ADMIN_SESSION_CHANNEL,
+-  ADMIN_SESSION_MESSAGE_TYPE,
+-  ADMIN_SESSION_STORAGE_KEY,
+-  notifyOtherTabsOfAdminSessionChange,
+-  subscribeToAdminSessionChanges,
+-};
+diff --git a/packages/core/admin/admin/src/utils/baseQuery.ts b/packages/core/admin/admin/src/utils/baseQuery.ts
+index 7ca460f75e..11de923ecd 100644
+--- a/packages/core/admin/admin/src/utils/baseQuery.ts
++++ b/packages/core/admin/admin/src/utils/baseQuery.ts
+@@ -2,7 +2,6 @@ import { SerializedError } from '@reduxjs/toolkit';
+ import { BaseQueryFn } from '@reduxjs/toolkit/query';
+ 
+ import {
+-  getFailedRequestSessionToken,
+   getFetchClient,
+   triggerSessionExpired,
+   type FetchOptions,
+@@ -70,7 +69,7 @@ const simpleQuery: BaseQueryFn<
+         if (!isAuthPath(url)) {
+           // Defer clearing auth state to AuthProvider so unsaved-change guards
+           // can run before token removal (which unmounts edit forms).
+-          triggerSessionExpired(getFailedRequestSessionToken(err));
++          triggerSessionExpired();
+         }
+       }
+ 
+diff --git a/packages/core/admin/admin/src/utils/establishAdminSession.ts b/packages/core/admin/admin/src/utils/establishAdminSession.ts
+deleted file mode 100644
+index 583fafe90f..0000000000
+--- a/packages/core/admin/admin/src/utils/establishAdminSession.ts
++++ /dev/null
+@@ -1,25 +0,0 @@
+-import { login } from '../reducer';
+-import { resetAdminApiState } from '../services/admin';
+-
+-import { notifyOtherTabsOfAdminSessionChange } from './adminSessionSync';
+-
+-import type { Dispatch } from '../core/store/configure';
+-
+-/**
+- * Establish a new admin session without exposing data cached for the previous
+- * admin. Store the token first so queries restarted by the reset use the new
+- * bearer. `/admin/init` is retained because first-admin registration still
+- * needs its pre-registration value while it navigates to `/usecase`.
+- *
+- * @see https://github.com/strapi/strapi/issues/27367
+- */
+-const establishAdminSession = (
+-  dispatch: Dispatch,
+-  payload: { token: string; persist?: boolean }
+-): void => {
+-  dispatch(login(payload));
+-  notifyOtherTabsOfAdminSessionChange();
+-  resetAdminApiState(dispatch);
+-};
+-
+-export { establishAdminSession };
+diff --git a/packages/core/admin/admin/src/utils/getFetchClient.ts b/packages/core/admin/admin/src/utils/getFetchClient.ts
+index 57a0208962..a593f90e66 100644
+--- a/packages/core/admin/admin/src/utils/getFetchClient.ts
++++ b/packages/core/admin/admin/src/utils/getFetchClient.ts
+@@ -41,7 +41,7 @@ let onTokenUpdate: ((token: string) => void) | null = null;
+  * session expired). The React layer registers a handler that clears local
+  * auth state and navigates to /auth/login.
+  */
+-let onSessionExpired: ((expiredToken?: string | null) => void) | null = null;
++let onSessionExpired: (() => void) | null = null;
+ 
+ /**
+  * A 401 after a failed refresh is delivered twice in the common RTK path
+@@ -50,7 +50,6 @@ let onSessionExpired: ((expiredToken?: string | null) => void) | null = null;
+  * token is stored (refresh or login).
+  */
+ let sessionExpiredNotified = false;
+-let sessionExpiredToken: string | null | undefined;
+ 
+ /**
+  * Set the callback that will be called when the token is refreshed.
+@@ -76,7 +75,7 @@ const setOnTokenUpdate = (callback: ((token: string) => void) | null): void => {
+  *
+  * @param callback - Function to call when the session ends, or null to clear
+  */
+-const setOnSessionExpired = (callback: ((expiredToken?: string | null) => void) | null): void => {
++const setOnSessionExpired = (callback: (() => void) | null): void => {
+   onSessionExpired = callback;
+   if (callback === null) {
+     resetSessionExpiredNotification();
+@@ -89,7 +88,6 @@ const setOnSessionExpired = (callback: ((expiredToken?: string | null) => void)
+  */
+ const resetSessionExpiredNotification = (): void => {
+   sessionExpiredNotified = false;
+-  sessionExpiredToken = undefined;
+ };
+ 
+ /**
+@@ -99,20 +97,17 @@ const resetSessionExpiredNotification = (): void => {
+  * instead of leaving the user on a dead page. Subsequent calls during the same
+  * dead session return `true` without invoking the handler again.
+  */
+-const triggerSessionExpired = (expiredToken?: string | null): boolean => {
++const triggerSessionExpired = (): boolean => {
+   if (!onSessionExpired) {
+     return false;
+   }
+ 
+   if (sessionExpiredNotified) {
+-    if (expiredToken === undefined || expiredToken === sessionExpiredToken) {
+-      return true;
+-    }
++    return true;
+   }
+ 
+   sessionExpiredNotified = true;
+-  sessionExpiredToken = expiredToken;
+-  onSessionExpired(expiredToken);
++  onSessionExpired();
+   return true;
+ };
+ 
+@@ -366,20 +361,6 @@ const isFetchError = (error: unknown): error is FetchError => {
+   return error instanceof FetchError;
+ };
+ 
+-/**
+- * Access token the failed request actually sent. Kept off `FetchError` so
+- * logs and error reporters cannot pick the bearer token up from the object.
+- */
+-const failedRequestSessionTokens = new WeakMap<FetchError, string | null>();
+-
+-const setFailedRequestSessionToken = (error: FetchError, token: string | null): void => {
+-  failedRequestSessionTokens.set(error, token);
+-};
+-
+-const getFailedRequestSessionToken = (error: FetchError): string | null | undefined => {
+-  return failedRequestSessionTokens.get(error);
+-};
+-
+ export type AbortError = DOMException & {
+   name: 'AbortError' | 'TimeoutError';
+ };
+@@ -552,26 +533,14 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
+     } catch (error) {
+       // Only attempt refresh for 401 errors on non-auth paths
+       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
+-        const tokenUsedByFailedRequest = getRequestToken();
+-
+         try {
+-          await attemptTokenRefresh(tokenUsedByFailedRequest);
++          await attemptTokenRefresh(getRequestToken());
++          // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
++          return await executeRequest();
+         } catch {
+           // If refresh fails, throw the original error
+-          setFailedRequestSessionToken(error, tokenUsedByFailedRequest);
+           throw error;
+         }
+-
+-        // Retry outside the refresh catch so a second 401 is attributed to the
+-        // refreshed token instead of the token used by the original request.
+-        try {
+-          return await executeRequest();
+-        } catch (retryError) {
+-          if (isFetchError(retryError) && retryError.status === 401) {
+-            setFailedRequestSessionToken(retryError, getRequestToken());
+-          }
+-          throw retryError;
+-        }
+       }
+       throw error;
+     }
+@@ -743,8 +712,6 @@ export {
+   getFetchClient,
+   isFetchError,
+   FetchError,
+-  getFailedRequestSessionToken,
+-  setFailedRequestSessionToken,
+   attemptTokenRefresh,
+   refreshAccessToken,
+   storeToken,
+diff --git a/packages/core/admin/admin/src/utils/tests/adminSessionSync.test.ts b/packages/core/admin/admin/src/utils/tests/adminSessionSync.test.ts
+deleted file mode 100644
+index 605b1fa0d8..0000000000
+--- a/packages/core/admin/admin/src/utils/tests/adminSessionSync.test.ts
++++ /dev/null
+@@ -1,102 +0,0 @@
+-import {
+-  ADMIN_SESSION_CHANNEL,
+-  ADMIN_SESSION_MESSAGE_TYPE,
+-  ADMIN_SESSION_STORAGE_KEY,
+-  notifyOtherTabsOfAdminSessionChange,
+-  subscribeToAdminSessionChanges,
+-} from '../adminSessionSync';
+-
+-const flush = () =>
+-  new Promise<void>((resolve) => {
+-    setImmediate(resolve);
+-  });
+-
+-describe('adminSessionSync', () => {
+-  afterEach(() => {
+-    jest.restoreAllMocks();
+-    window.localStorage.clear();
+-  });
+-
+-  it('does not retain the session-change signal', () => {
+-    window.localStorage.setItem('jwtToken', '"secret-admin-token"');
+-
+-    notifyOtherTabsOfAdminSessionChange();
+-    expect(window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY)).toBeNull();
+-    expect(window.localStorage.getItem('jwtToken')).toBe('"secret-admin-token"');
+-  });
+-
+-  it('prefers globalThis.crypto.randomUUID when the host provides it', () => {
+-    const generated = '12345678-1234-4234-8234-123456789abc';
+-    const randomUUID = jest.fn(() => generated);
+-    const previous = Object.getOwnPropertyDescriptor(globalThis.crypto, 'randomUUID');
+-
+-    Object.defineProperty(globalThis.crypto, 'randomUUID', {
+-      configurable: true,
+-      writable: true,
+-      value: randomUUID,
+-    });
+-
+-    try {
+-      notifyOtherTabsOfAdminSessionChange();
+-
+-      expect(randomUUID).toHaveBeenCalled();
+-      expect(window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY)).toBeNull();
+-    } finally {
+-      if (previous) {
+-        Object.defineProperty(globalThis.crypto, 'randomUUID', previous);
+-      } else {
+-        Reflect.deleteProperty(globalThis.crypto, 'randomUUID');
+-      }
+-    }
+-  });
+-
+-  it('ignores this document and refreshes on a foreign session notice', async () => {
+-    const onChange = jest.fn();
+-    const unsubscribe = subscribeToAdminSessionChanges(onChange);
+-
+-    notifyOtherTabsOfAdminSessionChange();
+-    await flush();
+-    expect(onChange).not.toHaveBeenCalled();
+-
+-    const channel = new BroadcastChannel(ADMIN_SESSION_CHANNEL);
+-    channel.postMessage({
+-      type: ADMIN_SESSION_MESSAGE_TYPE,
+-      tabId: 'another-document',
+-    });
+-    channel.close();
+-
+-    await flush();
+-    expect(onChange).toHaveBeenCalledTimes(1);
+-
+-    unsubscribe();
+-  });
+-
+-  it('uses getRandomValues when randomUUID is unavailable', () => {
+-    const previous = Object.getOwnPropertyDescriptor(globalThis.crypto, 'randomUUID');
+-    const getRandomValues = jest.spyOn(globalThis.crypto, 'getRandomValues');
+-
+-    Object.defineProperty(globalThis.crypto, 'randomUUID', {
+-      configurable: true,
+-      value: undefined,
+-    });
+-
+-    try {
+-      jest.isolateModules(() => {
+-        const isolated = jest.requireActual(
+-          '../adminSessionSync'
+-        ) as typeof import('../adminSessionSync');
+-
+-        isolated.notifyOtherTabsOfAdminSessionChange();
+-
+-        expect(getRandomValues).toHaveBeenCalled();
+-        expect(window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY)).toBeNull();
+-      });
+-    } finally {
+-      if (previous) {
+-        Object.defineProperty(globalThis.crypto, 'randomUUID', previous);
+-      } else {
+-        Reflect.deleteProperty(globalThis.crypto, 'randomUUID');
+-      }
+-    }
+-  });
+-});
+diff --git a/packages/core/admin/admin/src/utils/tests/baseQuery.test.ts b/packages/core/admin/admin/src/utils/tests/baseQuery.test.ts
+index 01d9ff03f2..ad79fe49ab 100644
+--- a/packages/core/admin/admin/src/utils/tests/baseQuery.test.ts
++++ b/packages/core/admin/admin/src/utils/tests/baseQuery.test.ts
+@@ -1,11 +1,6 @@
+ import { logout } from '../../reducer';
+ import { fetchBaseQuery, isBaseQueryError } from '../baseQuery';
+-import {
+-  FetchError,
+-  getFetchClient,
+-  setFailedRequestSessionToken,
+-  triggerSessionExpired,
+-} from '../getFetchClient';
++import { FetchError, getFetchClient, triggerSessionExpired } from '../getFetchClient';
+ 
+ import type { BaseQueryApi } from '@reduxjs/toolkit/query';
+ 
+@@ -153,10 +148,8 @@ describe('baseQuery', () => {
+   describe('401 handling', () => {
+     it('triggers session expiry on a non-auth path without clearing auth state directly', async () => {
+       const post = jest.fn().mockResolvedValue({});
+-      const unauthorizedError = buildUnauthorizedError();
+-      setFailedRequestSessionToken(unauthorizedError, 'expired-token');
+       (getFetchClient as jest.Mock).mockReturnValue({
+-        get: jest.fn().mockRejectedValue(unauthorizedError),
++        get: jest.fn().mockRejectedValue(buildUnauthorizedError()),
+         post,
+         del: jest.fn(),
+         put: jest.fn(),
+@@ -170,7 +163,6 @@ describe('baseQuery', () => {
+       expect(logout).not.toHaveBeenCalled();
+       expect(dispatch).not.toHaveBeenCalledWith({ type: 'LOGOUT', payload: undefined });
+       expect(triggerSessionExpired).toHaveBeenCalledTimes(1);
+-      expect(triggerSessionExpired).toHaveBeenCalledWith('expired-token');
+     });
+ 
+     it('does not log out on auth paths', async () => {
+diff --git a/packages/core/admin/admin/src/utils/tests/getFetchClient.test.ts b/packages/core/admin/admin/src/utils/tests/getFetchClient.test.ts
+index f0bb9f1dad..d0a600846b 100644
+--- a/packages/core/admin/admin/src/utils/tests/getFetchClient.test.ts
++++ b/packages/core/admin/admin/src/utils/tests/getFetchClient.test.ts
+@@ -1,8 +1,6 @@
+ import {
+   ADMIN_REFRESH_LOCK,
+   attemptTokenRefresh,
+-  FetchError,
+-  getFailedRequestSessionToken,
+   getFetchClient,
+   refreshAccessToken,
+   resetSessionExpiredNotification,
+@@ -387,50 +385,6 @@ describe('getFetchClient', () => {
+       );
+     });
+ 
+-    it('attributes a failed retry to the refreshed token instead of the original token', async () => {
+-      (window.fetch as jest.Mock)
+-        .mockImplementationOnce(() =>
+-          Promise.resolve({
+-            status: 401,
+-            ok: false,
+-            json: () =>
+-              Promise.resolve({
+-                error: { message: 'Original token expired', status: 401 },
+-              }),
+-          })
+-        )
+-        .mockImplementationOnce(() =>
+-          Promise.resolve({
+-            status: 200,
+-            ok: true,
+-            json: () => Promise.resolve({ data: { token: 'new-token' } }),
+-          })
+-        )
+-        .mockImplementationOnce(() =>
+-          Promise.resolve({
+-            status: 401,
+-            ok: false,
+-            json: () =>
+-              Promise.resolve({
+-                error: { message: 'Refreshed token rejected', status: 401 },
+-              }),
+-          })
+-        );
+-
+-      const fetchClient = getFetchClient();
+-
+-      try {
+-        await fetchClient.get('/api/test');
+-        throw new Error('Expected the retried request to fail');
+-      } catch (error) {
+-        expect(error).toBeInstanceOf(FetchError);
+-        expect(error).toMatchObject({ message: 'Refreshed token rejected' });
+-        expect(getFailedRequestSessionToken(error as FetchError)).toBe('new-token');
+-        expect(Object.keys(error as object)).not.toContain('sessionToken');
+-        expect(JSON.stringify(error)).not.toContain('new-token');
+-      }
+-    });
+-
+     it('should not refresh token for auth paths', async () => {
+       // Call to login endpoint returns 401
+       (window.fetch as jest.Mock).mockImplementationOnce(() =>
+@@ -455,8 +409,6 @@ describe('getFetchClient', () => {
+     });
+ 
+     it('should throw original error if token refresh fails', async () => {
+-      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('token-a'));
+-
+       // First call returns 401
+       (window.fetch as jest.Mock)
+         .mockImplementationOnce(() =>
+@@ -483,16 +435,7 @@ describe('getFetchClient', () => {
+ 
+       const fetchClient = getFetchClient();
+ 
+-      try {
+-        await fetchClient.get('/api/test');
+-        throw new Error('Expected the request to fail');
+-      } catch (error) {
+-        expect(error).toBeInstanceOf(FetchError);
+-        expect(error).toMatchObject({ message: 'Token expired' });
+-        expect(getFailedRequestSessionToken(error as FetchError)).toBe('token-a');
+-        expect(Object.keys(error as object)).not.toContain('sessionToken');
+-        expect(JSON.stringify(error)).not.toContain('token-a');
+-      }
++      await expect(fetchClient.get('/api/test')).rejects.toThrow('Token expired');
+ 
+       // Original request plus one access-token attempt
+       expect(window.fetch).toHaveBeenCalledTimes(2);
+@@ -956,20 +899,6 @@ describe('getFetchClient', () => {
+       expect(callback).toHaveBeenCalledTimes(2);
+     });
+ 
+-    it('deduplicates one expired token without suppressing a newer session expiry', () => {
+-      const callback = jest.fn();
+-      setOnSessionExpired(callback);
+-
+-      triggerSessionExpired('token-a');
+-      triggerSessionExpired();
+-      triggerSessionExpired('token-a');
+-      triggerSessionExpired('token-b');
+-
+-      expect(callback).toHaveBeenNthCalledWith(1, 'token-a');
+-      expect(callback).toHaveBeenNthCalledWith(2, 'token-b');
+-      expect(callback).toHaveBeenCalledTimes(2);
+-    });
+-
+     it('should report that nothing handled the expiry when no callback is registered', () => {
+       // Explicit clear in case any prior test left one set.
+       setOnSessionExpired(null);
+diff --git a/packages/core/admin/admin/tests/utils.tsx b/packages/core/admin/admin/tests/utils.tsx
+index f24b4bde2d..eb5d787d82 100644
+--- a/packages/core/admin/admin/tests/utils.tsx
++++ b/packages/core/admin/admin/tests/utils.tsx
+@@ -198,10 +198,10 @@ const Providers = ({
+                       light: lightTheme,
+                     }}
+                   >
+-                    <NotificationsProvider>
+-                      <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
+-                        <QueryClientProvider client={queryClientRef.current!}>
+-                          <DndProvider backend={HTML5Backend}>
++                    <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
++                      <QueryClientProvider client={queryClientRef.current!}>
++                        <DndProvider backend={HTML5Backend}>
++                          <NotificationsProvider>
+                             <GuidedTourContext enabled={false}>
+                               <ConfigurationContextProvider
+                                 showReleaseNotification={false}
+@@ -226,10 +226,10 @@ const Providers = ({
+                                 </AppInfoProvider>
+                               </ConfigurationContextProvider>
+                             </GuidedTourContext>
+-                          </DndProvider>
+-                        </QueryClientProvider>
+-                      </AuthProvider>
+-                    </NotificationsProvider>
++                          </NotificationsProvider>
++                        </DndProvider>
++                      </QueryClientProvider>
++                    </AuthProvider>
+                   </Theme>
+                 </LanguageProvider>
+               </Provider>
+diff --git a/packages/core/admin/ee/admin/src/pages/AuthResponse.tsx b/packages/core/admin/ee/admin/src/pages/AuthResponse.tsx
+index 474e7b8786..8a913edd6f 100644
+--- a/packages/core/admin/ee/admin/src/pages/AuthResponse.tsx
++++ b/packages/core/admin/ee/admin/src/pages/AuthResponse.tsx
+@@ -5,8 +5,8 @@ import { useNavigate, useMatch } from 'react-router-dom';
+ 
+ import { Page } from '../../../../admin/src/components/PageHelpers';
+ import { useTypedDispatch } from '../../../../admin/src/core/store/hooks';
++import { login } from '../../../../admin/src/reducer';
+ import { AUTH_COOKIE_NAME, getCookieValue } from '../../../../admin/src/utils/cookies';
+-import { establishAdminSession } from '../../../../admin/src/utils/establishAdminSession';
+ 
+ const AuthResponse = () => {
+   const match = useMatch('/auth/login/:authResponse');
+@@ -35,9 +35,11 @@ const AuthResponse = () => {
+       const jwtToken = getCookieValue(AUTH_COOKIE_NAME);
+ 
+       if (jwtToken) {
+-        establishAdminSession(dispatch, {
+-          token: jwtToken,
+-        });
++        dispatch(
++          login({
++            token: jwtToken,
++          })
++        );
+ 
+         navigate('/auth/login');
+       } else {
+diff --git a/packages/core/admin/ee/admin/src/pages/tests/AuthResponse.test.tsx b/packages/core/admin/ee/admin/src/pages/tests/AuthResponse.test.tsx
+index 362eccea4b..36a13ff387 100644
+--- a/packages/core/admin/ee/admin/src/pages/tests/AuthResponse.test.tsx
++++ b/packages/core/admin/ee/admin/src/pages/tests/AuthResponse.test.tsx
+@@ -3,8 +3,8 @@ import React from 'react';
+ import { render } from '@testing-library/react';
+ import { useMatch, useNavigate } from 'react-router-dom';
+ 
++import { login } from '../../../../../admin/src/reducer';
+ import { getCookieValue } from '../../../../../admin/src/utils/cookies';
+-import { establishAdminSession } from '../../../../../admin/src/utils/establishAdminSession';
+ import { AuthResponse } from '../AuthResponse';
+ 
+ jest.mock('react-router-dom', () => ({
+@@ -29,8 +29,8 @@ jest.mock('../../../../../admin/src/features/Auth', () => ({
+   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+ }));
+ 
+-jest.mock('../../../../../admin/src/utils/establishAdminSession', () => ({
+-  establishAdminSession: jest.fn(),
++jest.mock('../../../../../admin/src/reducer', () => ({
++  login: jest.fn(),
+ }));
+ 
+ jest.mock('../../../../../admin/src/utils/cookies', () => ({
+@@ -65,16 +65,18 @@ describe('<AuthResponse />', () => {
+     );
+   });
+ 
+-  it('establishes an admin session and redirects on success with token', () => {
++  it('dispatches login and redirects on success with token', () => {
+     (useMatch as jest.Mock).mockReturnValue({ params: { authResponse: 'success' } });
+     (useNavigate as jest.Mock).mockReturnValue(navigateMock);
+     (getCookieValue as jest.Mock).mockReturnValue('fake-token');
+ 
+     render(<AuthResponse />);
+ 
+-    expect(establishAdminSession).toHaveBeenCalledWith(dispatchMock, {
+-      token: 'fake-token',
+-    });
++    expect(dispatchMock).toHaveBeenCalledWith(
++      login({
++        token: 'fake-token',
++      })
++    );
+     expect(navigateMock).toHaveBeenCalledWith('/auth/login');
+   });
+ 
+diff --git a/packages/core/content-manager/admin/src/components/tests/Widgets.test.tsx b/packages/core/content-manager/admin/src/components/tests/Widgets.test.tsx
+index 6ead929806..9a4e15d019 100644
+--- a/packages/core/content-manager/admin/src/components/tests/Widgets.test.tsx
++++ b/packages/core/content-manager/admin/src/components/tests/Widgets.test.tsx
+@@ -11,9 +11,6 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
+         useGetRecentDocumentsQuery: jest.fn(),
+       })),
+     })),
+-    util: {
+-      resetApiState: { match: jest.fn(() => false) },
+-    },
+   },
+   Widget: {
+     Loading: () => <div>Loading widget content...</div>,
+diff --git a/packages/core/content-manager/admin/src/hooks/tests/useContentManagerInitData.test.tsx b/packages/core/content-manager/admin/src/hooks/tests/useContentManagerInitData.test.tsx
+index 6e56bfaa22..b7c5fb9788 100644
+--- a/packages/core/content-manager/admin/src/hooks/tests/useContentManagerInitData.test.tsx
++++ b/packages/core/content-manager/admin/src/hooks/tests/useContentManagerInitData.test.tsx
+@@ -1,7 +1,6 @@
+ /* eslint-disable check-file/filename-naming-convention */
+ import { ConfigureStoreOptions } from '@reduxjs/toolkit';
+ import {
+-  act,
+   defaultTestStoreConfig,
+   renderHook,
+   server,
+@@ -9,8 +8,6 @@ import {
+ } from '@strapi/admin/strapi-admin/test';
+ import { http, HttpResponse } from 'msw';
+ 
+-import { establishAdminSession } from '../../../../../admin/admin/src/utils/establishAdminSession';
+-import { useTypedDispatch } from '../../modules/hooks';
+ import { reducer } from '../../modules/reducers';
+ import { useContentManagerInitData } from '../useContentManagerInitData';
+ 
+@@ -52,119 +49,6 @@ const createStoreConfig = (): ConfigureStoreOptions => {
+ };
+ 
+ describe('useContentManagerInitData', () => {
+-  it('hides the previous admin links until the new session permissions are resolved', async () => {
+-    const tokenA = 'content-manager-user-a';
+-    const tokenB = 'content-manager-user-b';
+-    const contentTypes = createContentTypes().slice(0, 2);
+-    let initRequests = 0;
+-    let releaseSecondInit: () => void = () => {};
+-    const secondInitGate = new Promise<void>((resolve) => {
+-      releaseSecondInit = resolve;
+-    });
+-
+-    window.localStorage.setItem('jwtToken', JSON.stringify(tokenA));
+-    window.localStorage.setItem('isLoggedIn', 'true');
+-
+-    server.use(
+-      http.get('/admin/users/me', ({ request }) => {
+-        const isUserB = request.headers.get('Authorization') === `Bearer ${tokenB}`;
+-
+-        return HttpResponse.json({
+-          data: {
+-            id: isUserB ? 2 : 1,
+-            email: isUserB ? 'user-b@example.com' : 'user-a@example.com',
+-            firstname: isUserB ? 'User B' : 'User A',
+-            lastname: 'Admin',
+-            username: isUserB ? 'user-b' : 'user-a',
+-            preferedLanguage: 'en',
+-            roles: [{ id: isUserB ? 2 : 1 }],
+-          },
+-        });
+-      }),
+-      http.get('/admin/users/me/permissions', ({ request }) => {
+-        const isUserB = request.headers.get('Authorization') === `Bearer ${tokenB}`;
+-        const contentType = isUserB ? contentTypes[1] : contentTypes[0];
+-
+-        return HttpResponse.json({
+-          data: [
+-            {
+-              id: isUserB ? 2 : 1,
+-              action: 'plugin::content-manager.explorer.read',
+-              actionParameters: {},
+-              subject: contentType.uid,
+-              properties: {},
+-              conditions: [],
+-            },
+-          ],
+-        });
+-      }),
+-      http.get('/content-manager/init', async () => {
+-        initRequests += 1;
+-        if (initRequests > 1) {
+-          await secondInitGate;
+-        }
+-
+-        return HttpResponse.json({
+-          data: {
+-            components: [],
+-            contentTypes,
+-            fieldSizes: {},
+-          },
+-        });
+-      }),
+-      http.get('/content-manager/content-types-settings', () =>
+-        HttpResponse.json({
+-          data: [],
+-        })
+-      )
+-    );
+-
+-    const { result } = renderHook(
+-      () => {
+-        const dispatch = useTypedDispatch();
+-
+-        return {
+-          data: useContentManagerInitData(),
+-          switchSession: () =>
+-            establishAdminSession(dispatch, {
+-              token: tokenB,
+-              persist: true,
+-            }),
+-        };
+-      },
+-      {
+-        providerOptions: {
+-          storeConfig: createStoreConfig(),
+-          permissions: [],
+-        },
+-      }
+-    );
+-
+-    await waitFor(() =>
+-      expect(result.current.data.collectionTypeLinks.map(({ uid }) => uid)).toEqual([
+-        contentTypes[0].uid,
+-      ])
+-    );
+-
+-    act(() => {
+-      result.current.switchSession();
+-    });
+-
+-    await waitFor(() => expect(initRequests).toBe(2));
+-    expect(result.current.data.isLoading).toBe(true);
+-    expect(result.current.data.collectionTypeLinks).toEqual([]);
+-
+-    releaseSecondInit();
+-
+-    await waitFor(() =>
+-      expect(result.current.data.collectionTypeLinks.map(({ uid }) => uid)).toEqual([
+-        contentTypes[1].uid,
+-      ])
+-    );
+-
+-    window.localStorage.clear();
+-  });
+-
+   it('batches conditional permission checks for visible content types', async () => {
+     let permissionCheckCalls = 0;
+     const contentTypes = createContentTypes();
+diff --git a/packages/core/content-manager/admin/src/hooks/useContentManagerInitData.ts b/packages/core/content-manager/admin/src/hooks/useContentManagerInitData.ts
+index d3a34a045f..cec87e5336 100644
+--- a/packages/core/content-manager/admin/src/hooks/useContentManagerInitData.ts
++++ b/packages/core/content-manager/admin/src/hooks/useContentManagerInitData.ts
+@@ -1,7 +1,6 @@
+ import { useCallback, useEffect } from 'react';
+ 
+ import {
+-  getAdminUserId,
+   useAuth,
+   type Permission,
+   useNotification,
+@@ -14,7 +13,7 @@ import { useIntl } from 'react-intl';
+ 
+ import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
+ import { HOOKS } from '../constants/hooks';
+-import { AppState, initialState, setInitialData } from '../modules/app';
++import { AppState, setInitialData } from '../modules/app';
+ import { useTypedDispatch, useTypedSelector } from '../modules/hooks';
+ import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
+ import { useGetInitialDataQuery } from '../services/init';
+@@ -74,8 +73,6 @@ const useContentManagerInitData = (): AppState => {
+     'useContentManagerInitData',
+     (state) => state.checkUserHasPermissions
+   );
+-  const isLoadingAuth = useAuth('useContentManagerInitData', (state) => state.isLoading);
+-  const adminUserId = useAuth('useContentManagerInitData', (state) => getAdminUserId(state.user));
+ 
+   const state = useTypedSelector((state) => state['content-manager'].app);
+ 
+@@ -171,22 +168,21 @@ const useContentManagerInitData = (): AppState => {
+         models: contentTypes,
+       });
+ 
+-      return {
+-        adminUserId,
+-        authorizedCollectionTypeLinks: ctLinks,
+-        authorizedSingleTypeLinks: stLinks,
+-        components,
+-        contentStructure,
+-        contentTypeSchemas: contentTypes,
+-        fieldSizes,
+-      };
++      dispatch(
++        setInitialData({
++          authorizedCollectionTypeLinks: ctLinks,
++          authorizedSingleTypeLinks: stLinks,
++          components,
++          contentStructure,
++          contentTypeSchemas: contentTypes,
++          fieldSizes,
++        })
++      );
+     },
+-    [adminUserId, checkUserHasPermissions, runHookWaterfall]
++    [checkUserHasPermissions, dispatch, runHookWaterfall]
+   );
+ 
+   useEffect(() => {
+-    let cancelled = false;
+-
+     if (initialDataQuery.data && contentTypeSettingsQuery.data) {
+       formatData(
+         initialDataQuery.data.components,
+@@ -194,27 +190,14 @@ const useContentManagerInitData = (): AppState => {
+         initialDataQuery.data.fieldSizes,
+         contentTypeSettingsQuery.data,
+         initialDataQuery.data.contentStructure
+-      )
+-        .then((data) => {
+-          if (!cancelled) {
+-            dispatch(setInitialData(data));
+-          }
+-        })
+-        .catch((error) => {
+-          if (!cancelled) {
+-            toggleNotification({
+-              type: 'danger',
+-              message: formatAPIError(error),
+-            });
+-          }
++      ).catch((error) => {
++        toggleNotification({
++          type: 'danger',
++          message: formatAPIError(error),
+         });
++      });
+     }
+-
+-    return () => {
+-      cancelled = true;
+-    };
+   }, [
+-    dispatch,
+     formatAPIError,
+     formatData,
+     initialDataQuery.data,
+@@ -222,10 +205,6 @@ const useContentManagerInitData = (): AppState => {
+     toggleNotification,
+   ]);
+ 
+-  if (isLoadingAuth || state.adminUserId !== adminUserId) {
+-    return { ...initialState };
+-  }
+-
+   return { ...state };
+ };
+ 
+diff --git a/packages/core/content-manager/admin/src/modules/app.ts b/packages/core/content-manager/admin/src/modules/app.ts
+index 7759df9700..7882c348e4 100644
+--- a/packages/core/content-manager/admin/src/modules/app.ts
++++ b/packages/core/content-manager/admin/src/modules/app.ts
+@@ -1,12 +1,10 @@
+ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+-import { adminApi } from '@strapi/admin/strapi-admin';
+ 
+ import { GetInitData } from '../../../shared/contracts/init';
+ 
+ import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
+ 
+ interface AppState {
+-  adminUserId?: string | number;
+   collectionTypeLinks: ContentManagerLink[];
+   components: GetInitData.Response['data']['components'];
+   contentStructure?: GetInitData.Response['data']['contentStructure'];
+@@ -17,7 +15,6 @@ interface AppState {
+ }
+ 
+ const initialState: AppState = {
+-  adminUserId: undefined,
+   collectionTypeLinks: [],
+   components: [],
+   contentStructure: undefined,
+@@ -34,7 +31,6 @@ const appSlice = createSlice({
+     setInitialData(
+       state,
+       action: PayloadAction<{
+-        adminUserId?: AppState['adminUserId'];
+         authorizedCollectionTypeLinks: AppState['collectionTypeLinks'];
+         authorizedSingleTypeLinks: AppState['singleTypeLinks'];
+         components: AppState['components'];
+@@ -44,7 +40,6 @@ const appSlice = createSlice({
+       }>
+     ) {
+       const {
+-        adminUserId,
+         authorizedCollectionTypeLinks,
+         authorizedSingleTypeLinks,
+         components,
+@@ -52,7 +47,6 @@ const appSlice = createSlice({
+         contentTypeSchemas,
+         fieldSizes,
+       } = action.payload;
+-      state.adminUserId = adminUserId;
+       state.collectionTypeLinks = authorizedCollectionTypeLinks.filter(
+         ({ isDisplayed }) => isDisplayed
+       );
+@@ -64,13 +58,10 @@ const appSlice = createSlice({
+       state.isLoading = false;
+     },
+   },
+-  extraReducers(builder) {
+-    builder.addMatcher(adminApi.util.resetApiState.match, () => initialState);
+-  },
+ });
+ 
+ const { actions, reducer } = appSlice;
+ const { setInitialData } = actions;
+ 
+-export { initialState, reducer, setInitialData };
++export { reducer, setInitialData };
+ export type { AppState };
+diff --git a/packages/core/content-manager/admin/src/modules/tests/app.test.ts b/packages/core/content-manager/admin/src/modules/tests/app.test.ts
+deleted file mode 100644
+index 5dec9fc2fb..0000000000
+--- a/packages/core/content-manager/admin/src/modules/tests/app.test.ts
++++ /dev/null
+@@ -1,24 +0,0 @@
+-import { adminApi } from '@strapi/admin/strapi-admin';
+-
+-import { initialState, reducer, setInitialData } from '../app';
+-
+-describe('content-manager app state', () => {
+-  it('clears derived data when the admin API cache is reset', () => {
+-    const populatedState = reducer(
+-      undefined,
+-      setInitialData({
+-        adminUserId: 1,
+-        authorizedCollectionTypeLinks: [],
+-        authorizedSingleTypeLinks: [],
+-        components: [],
+-        contentTypeSchemas: [],
+-        fieldSizes: {},
+-      })
+-    );
+-
+-    expect(populatedState.isLoading).toBe(false);
+-    expect(populatedState.adminUserId).toBe(1);
+-
+-    expect(reducer(populatedState, adminApi.util.resetApiState())).toEqual(initialState);
+-  });
+-});
+diff --git a/packages/core/content-type-builder/server/src/utils/uid-target.ts b/packages/core/content-type-builder/server/src/utils/uid-target.ts
+index 6c68e24b2f..da5fb642e5 100644
+--- a/packages/core/content-type-builder/server/src/utils/uid-target.ts
++++ b/packages/core/content-type-builder/server/src/utils/uid-target.ts
+@@ -32,7 +32,5 @@ export const resolveStorageType = (attribute: AttributeLike): string | undefined
+  */
+ export const isValidUidTarget = (attribute: AttributeLike): boolean => {
+   const type = resolveStorageType(attribute);
+-  const validUidTargets: readonly string[] = VALID_UID_TARGETS;
+-
+-  return type !== undefined && validUidTargets.includes(type);
++  return VALID_UID_TARGETS.some((validType) => validType === type);
+ };
+diff --git a/packages/core/core/src/services/document-service/utils/__tests__/clone-relations.vitest.test.ts b/packages/core/core/src/services/document-service/utils/__tests__/clone-relations.vitest.test.ts
+deleted file mode 100644
+index f63b104ea2..0000000000
+--- a/packages/core/core/src/services/document-service/utils/__tests__/clone-relations.vitest.test.ts
++++ /dev/null
+@@ -1,667 +0,0 @@
+-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+-
+-import type { Core } from '@strapi/types';
+-
+-import {
+-  applyDeferredCloneRelationCopies,
+-  applyPostCloneRelationUpdates,
+-  prepareCloneData,
+-  type PostCloneRelationUpdate,
+-} from '../clone-relations';
+-
+-const ARTICLE = 'api::article.article';
+-const TAG = 'api::tag.tag';
+-const DETAILS = 'default.details';
+-const BLOCK = 'default.block';
+-const OTHER = 'default.other';
+-
+-const tagModel = {
+-  uid: TAG,
+-  modelType: 'contentType',
+-  options: { draftAndPublish: true },
+-  pluginOptions: { i18n: { localized: true } },
+-  attributes: { name: { type: 'string' } },
+-};
+-
+-const detailsModel = {
+-  uid: DETAILS,
+-  modelType: 'component',
+-  attributes: {
+-    label: { type: 'string' },
+-    tag: {
+-      type: 'relation',
+-      relation: 'oneToOne',
+-      target: TAG,
+-      inversedBy: 'article',
+-    },
+-  },
+-};
+-
+-const articleModel = {
+-  uid: ARTICLE,
+-  modelType: 'contentType',
+-  options: { draftAndPublish: false },
+-  pluginOptions: { i18n: { localized: true } },
+-  attributes: {
+-    title: { type: 'string' },
+-    author: {
+-      type: 'relation',
+-      relation: 'oneToOne',
+-      target: TAG,
+-      inversedBy: 'article',
+-    },
+-    legacyAuthor: {
+-      type: 'relation',
+-      relation: 'oneToOne',
+-      target: TAG,
+-      inversedBy: 'legacyArticle',
+-      useJoinTable: false,
+-    },
+-    picture: { type: 'relation', relation: 'morphToOne' },
+-    caption: { type: 'relation', relation: 'morphToOne' },
+-    kids: {
+-      type: 'relation',
+-      relation: 'oneToMany',
+-      target: TAG,
+-      mappedBy: 'parent',
+-    },
+-    category: { type: 'relation', relation: 'manyToOne', target: TAG },
+-    note: {
+-      type: 'relation',
+-      relation: 'oneToOne',
+-      target: TAG,
+-      useJoinTable: false,
+-    },
+-    details: { type: 'component', component: DETAILS, repeatable: false },
+-  },
+-};
+-
+-const models: Record<string, unknown> = {
+-  [ARTICLE]: articleModel,
+-  [TAG]: tagModel,
+-  [DETAILS]: detailsModel,
+-  [BLOCK]: {
+-    uid: BLOCK,
+-    modelType: 'component',
+-    attributes: {
+-      tag: {
+-        type: 'relation',
+-        relation: 'oneToOne',
+-        target: TAG,
+-        useJoinTable: false,
+-      },
+-    },
+-  },
+-  [OTHER]: {
+-    uid: OTHER,
+-    modelType: 'component',
+-    attributes: { tag: { type: 'string' } },
+-  },
+-};
+-
+-const getModel = (uid: string) => models[uid];
+-
+-type QueryMocks = {
+-  findOne: Mock;
+-  update: Mock;
+-};
+-
+-const createStrapi = (attributesByUid: Record<string, Record<string, unknown>>) => {
+-  const findOne = vi.fn(async ({ where }: { where: { documentId?: string } }) => {
+-    if (where.documentId === 'missing') {
+-      return undefined;
+-    }
+-
+-    if (where.documentId === 'other') {
+-      return { id: 9 };
+-    }
+-
+-    if (where.documentId === 'match') {
+-      return { id: 5 };
+-    }
+-
+-    return { id: 7 };
+-  });
+-  const update = vi.fn(async () => ({}));
+-  const strapi = {
+-    getModel,
+-    localization: {
+-      isLocalizedContentType: (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+-        model?.pluginOptions?.i18n?.localized === true,
+-      getDefaultLocale: () => 'en',
+-    },
+-    db: {
+-      metadata: {
+-        get: (uid: string) => ({
+-          tableName: 'entries',
+-          attributes: attributesByUid[uid] ?? {},
+-        }),
+-        identifiers: { ID_COLUMN: 'id' },
+-      },
+-      dialect: { getBatchInsertSize: () => 100 },
+-      transaction: vi.fn(async (run: (ctx: { trx: object }) => Promise<void>) => run({ trx: {} })),
+-      getConnection: vi.fn(),
+-      query: vi.fn(() => ({ findOne, update })),
+-    },
+-  };
+-
+-  return { strapi: strapi as unknown as Core.Strapi, findOne, update };
+-};
+-
+-const installStrapi = (attributesByUid: Record<string, Record<string, unknown>>): QueryMocks => {
+-  const created = createStrapi(attributesByUid);
+-  (global as unknown as { strapi: Core.Strapi }).strapi = created.strapi;
+-  return { findOne: created.findOne, update: created.update };
+-};
+-
+-describe('clone relations', () => {
+-  describe('prepareCloneData', () => {
+-    it('defers unchanged owning relations, omits inverse lists, and keeps explicit edits', async () => {
+-      const result = await prepareCloneData(
+-        {
+-          title: 'Original',
+-          author: { id: 1, documentId: 'author' },
+-          legacyAuthor: { id: 3, documentId: 'legacy' },
+-          picture: null,
+-          caption: null,
+-          kids: [{ id: 4, documentId: 'kid' }],
+-          category: { id: 5, documentId: 'category' },
+-          details: { id: 11, label: 'Details', tag: { id: 2, documentId: 'nested' } },
+-        },
+-        {
+-          title: 'Clone',
+-          category: { connect: [] },
+-          note: { set: 4 },
+-          picture: { connect: [{ id: 9, __type: TAG }] },
+-          details: { label: 'Renamed' },
+-        },
+-        articleModel as never,
+-        getModel as never
+-      );
+-
+-      expect(result.data.title).toBe('Clone');
+-      expect(result.data.category).toMatchObject({ id: 5, connect: [] });
+-      expect(result.data).not.toHaveProperty('author');
+-      expect(result.data).not.toHaveProperty('legacyAuthor');
+-      expect(result.data).not.toHaveProperty('picture');
+-      expect(result.data).not.toHaveProperty('caption');
+-      expect(result.data).not.toHaveProperty('kids');
+-      expect(result.data).not.toHaveProperty('note');
+-      expect(result.data.details).toEqual({ id: 11, label: 'Renamed' });
+-
+-      expect(result.deferredCopies).toEqual([
+-        { schemaUid: ARTICLE, attributeName: 'author', kind: 'joinTable', ownerPath: null },
+-        { schemaUid: ARTICLE, attributeName: 'legacyAuthor', kind: 'fkColumn', ownerPath: null },
+-        { schemaUid: ARTICLE, attributeName: 'caption', kind: 'morphToOne', ownerPath: null },
+-        { schemaUid: DETAILS, attributeName: 'tag', kind: 'joinTable', ownerPath: 'details' },
+-      ]);
+-      expect(result.postCloneUpdates).toEqual([
+-        {
+-          dataPath: 'picture',
+-          value: { connect: [{ id: 9, __type: TAG }] },
+-          schemaUid: ARTICLE,
+-          ownerPath: null,
+-        },
+-        {
+-          dataPath: 'note',
+-          value: { set: 4 },
+-          schemaUid: ARTICLE,
+-          ownerPath: null,
+-        },
+-      ]);
+-    });
+-  });
+-
+-  describe('applyDeferredCloneRelationCopies', () => {
+-    const attributes = {
+-      [ARTICLE]: { author: { type: 'string' } },
+-    };
+-
+-    beforeEach(() => {
+-      installStrapi(attributes);
+-    });
+-
+-    it('does nothing when there is nothing to copy', async () => {
+-      const { strapi } = createStrapi(attributes);
+-      await applyDeferredCloneRelationCopies(strapi, ARTICLE as never, 1, 2, {}, {}, []);
+-      expect(strapi.db.transaction).not.toHaveBeenCalled();
+-    });
+-
+-    it('skips identical or replaced owners and copies the other kinds', async () => {
+-      const { strapi } = createStrapi(attributes);
+-      const original = {
+-        same: { id: 8 },
+-        replaced: { id: 1, __component: BLOCK },
+-        fkOwner: { id: 3 },
+-        morphOwner: { id: 5 },
+-      };
+-      const cloned = {
+-        same: { id: 8 },
+-        replaced: { id: 2, __component: OTHER },
+-        fkOwner: { id: 4 },
+-        morphOwner: { id: 6 },
+-      };
+-
+-      await applyDeferredCloneRelationCopies(strapi, ARTICLE as never, 10, 20, original, cloned, [
+-        {
+-          schemaUid: ARTICLE as never,
+-          attributeName: 'author',
+-          kind: 'joinTable',
+-          ownerPath: null,
+-        },
+-        {
+-          schemaUid: ARTICLE as never,
+-          attributeName: 'author',
+-          kind: 'joinTable',
+-          ownerPath: 'same',
+-        },
+-        {
+-          schemaUid: ARTICLE as never,
+-          attributeName: 'author',
+-          kind: 'joinTable',
+-          ownerPath: 'replaced',
+-        },
+-        {
+-          schemaUid: ARTICLE as never,
+-          attributeName: 'legacyAuthor',
+-          kind: 'fkColumn',
+-          ownerPath: 'fkOwner',
+-        },
+-        {
+-          schemaUid: ARTICLE as never,
+-          attributeName: 'picture',
+-          kind: 'morphToOne',
+-          ownerPath: 'morphOwner',
+-        },
+-      ]);
+-
+-      expect(strapi.db.transaction).not.toHaveBeenCalled();
+-    });
+-
+-    it('throws when a nested owner has no id on the source or the clone', async () => {
+-      const { strapi } = createStrapi(attributes);
+-      const task = {
+-        schemaUid: ARTICLE as never,
+-        attributeName: 'author',
+-        kind: 'joinTable' as const,
+-        ownerPath: 'details',
+-      };
+-
+-      await expect(
+-        applyDeferredCloneRelationCopies(
+-          strapi,
+-          ARTICLE as never,
+-          10,
+-          20,
+-          { details: {} },
+-          { details: { id: 2 } },
+-          [task]
+-        )
+-      ).rejects.toThrow('Unable to resolve clone relation owner for "author" at path "details"');
+-
+-      await expect(
+-        applyDeferredCloneRelationCopies(
+-          strapi,
+-          ARTICLE as never,
+-          10,
+-          20,
+-          { details: { id: 1 } },
+-          { details: {} },
+-          [task]
+-        )
+-      ).rejects.toThrow('Unable to resolve clone relation owner for "author" at path "details"');
+-    });
+-  });
+-
+-  describe('applyPostCloneRelationUpdates', () => {
+-    const fkAttribute = {
+-      type: 'relation',
+-      relation: 'oneToOne',
+-      target: TAG,
+-      useJoinTable: false,
+-    };
+-    const morphAttribute = { type: 'relation', relation: 'morphToOne' };
+-    const attributes = {
+-      [ARTICLE]: {
+-        legacyAuthor: fkAttribute,
+-        picture: morphAttribute,
+-        title: { type: 'string' },
+-      },
+-      [DETAILS]: { tag: fkAttribute },
+-      [BLOCK]: { tag: fkAttribute },
+-      [OTHER]: { tag: { type: 'string' } },
+-      [TAG]: { name: { type: 'string' } },
+-    };
+-
+-    const clonedRoot = { locale: 'fr' };
+-
+-    beforeEach(() => {
+-      installStrapi(attributes);
+-    });
+-
+-    const apply = (
+-      updates: PostCloneRelationUpdate[],
+-      data: {
+-        original?: Record<string, unknown>;
+-        cloned?: Record<string, unknown>;
+-      } = {}
+-    ) => {
+-      const created = createStrapi(attributes);
+-      (global as unknown as { strapi: Core.Strapi }).strapi = created.strapi;
+-      return {
+-        ...created,
+-        result: applyPostCloneRelationUpdates(
+-          created.strapi,
+-          ARTICLE as never,
+-          10,
+-          20,
+-          { ...clonedRoot, ...data.cloned },
+-          data.original ?? {},
+-          updates
+-        ),
+-      };
+-    };
+-
+-    it('does nothing when there are no updates', async () => {
+-      const { update, result } = apply([]);
+-      await result;
+-      expect(update).not.toHaveBeenCalled();
+-    });
+-
+-    it('resolves a documentId set against the target draft and published rows', async () => {
+-      const { findOne, update, result } = apply([
+-        {
+-          dataPath: 'legacyAuthor',
+-          value: { set: ['doc-1'] },
+-          schemaUid: ARTICLE as never,
+-          ownerPath: null,
+-        },
+-      ]);
+-
+-      await result;
+-
+-      expect(findOne).toHaveBeenCalledWith({
+-        where: { documentId: 'doc-1', publishedAt: null, locale: 'fr' },
+-        select: ['id'],
+-      });
+-      expect(findOne).toHaveBeenCalledWith({
+-        where: { documentId: 'doc-1', publishedAt: { $ne: null }, locale: 'fr' },
+-        select: ['id'],
+-      });
+-      expect(update).toHaveBeenCalledWith({
+-        where: { id: 20 },
+-        data: { legacyAuthor: 7 },
+-      });
+-    });
+-
+-    it('uses the last connected id and clears an explicit empty set', async () => {
+-      const connected = apply([
+-        {
+-          dataPath: 'legacyAuthor',
+-          value: { connect: [{ id: 4 }, 6] },
+-          schemaUid: ARTICLE as never,
+-          ownerPath: null,
+-        },
+-      ]);
+-      await connected.result;
+-      expect(connected.update).toHaveBeenCalledWith({
+-        where: { id: 20 },
+-        data: { legacyAuthor: 6 },
+-      });
+-
+-      const cleared = apply([
+-        {
+-          dataPath: 'legacyAuthor',
+-          value: { set: null },
+-          schemaUid: ARTICLE as never,
+-          ownerPath: null,
+-        },
+-      ]);
+-      await cleared.result;
+-      expect(cleared.update).toHaveBeenCalledWith({
+-        where: { id: 20 },
+-        data: { legacyAuthor: null },
+-      });
+-    });
+-
+-    it('keeps the original association when a disconnect does not match it', async () => {
+-      const { update, result } = apply(
+-        [
+-          {
+-            dataPath: 'legacyAuthor',
+-            value: { disconnect: [true, 8, 'abc'] },
+-            schemaUid: ARTICLE as never,
+-            ownerPath: null,
+-          },
+-        ],
+-        { original: { legacyAuthor: { id: 5 } } }
+-      );
+-
+-      await result;
+-      expect(update).not.toHaveBeenCalled();
+-    });
+-
+-    it('stops checking disconnect items after one match', async () => {
+-      const { update, result } = apply(
+-        [
+-          {
+-            dataPath: 'legacyAuthor',
+-            value: { disconnect: [{ id: 5 }, true] },
+-            schemaUid: ARTICLE as never,
+-            ownerPath: null,
+-          },
+-        ],
+-        { original: { legacyAuthor: { id: 5 } } }
+-      );
+-
+-      await result;
+-      expect(update).toHaveBeenCalledWith({
+-        where: { id: 20 },
+-        data: { legacyAuthor: null },
+-      });
+-    });
+-
+-    it('clears a morph association when the disconnected target matches', async () => {
+-      const { update, result } = apply(
+-        [
+-          {
+-            dataPath: 'picture',
+-            value: { disconnect: [{ __type: TAG, documentId: 'match' }] },
+-            schemaUid: ARTICLE as never,
+-            ownerPath: null,
+-          },
+-        ],
+-        { original: { picture: { id: 5, __type: TAG } } }
+-      );
+-
+-      await result;
+-      expect(update).toHaveBeenCalledWith({
+-        where: { id: 20 },
+-        data: { picture: null },
+-      });
+-    });
+-
+-    it('ignores a morph disconnect aimed at a different type or missing a type', async () => {
+-      const wrongType = apply(
+-        [
+-          {
+-            dataPath: 'picture',
+-            value: { disconnect: [{ __type: OTHER, id: 5 }] },
+-            schemaUid: ARTICLE as never,
+-            ownerPath: null,
+-          },
+-        ],
+-        { original: { picture: { id: 5, __type: TAG } } }
+-      );
+-      await wrongType.result;
+-
+-      const missingType = apply(
+-        [
+-          {
+-            dataPath: 'picture',
+-            value: { disconnect: [{ id: 5 }] },
+-            schemaUid: ARTICLE as never,
+-            ownerPath: null,
+-          },
+-        ],
+-        { original: { picture: { id: 5, __type: TAG } } }
+-      );
+-      await missingType.result;
+-
+-      expect(wrongType.update).not.toHaveBeenCalled();
+-      expect(missingType.update).not.toHaveBeenCalled();
+-    });
+-
+-    it('ignores a disconnect on a relation that has no target', async () => {
+-      const created = createStrapi({
+-        [ARTICLE]: {
+-          legacyAuthor: { type: 'relation', relation: 'oneToOne' },
+-        },
+-      });
+-      (global as unknown as { strapi: Core.Strapi }).strapi = created.strapi;
+-
+-      await applyPostCloneRelationUpdates(
+-        created.strapi,
+-        ARTICLE as never,
+-        10,
+-        20,
+-        clonedRoot,
+-        { legacyAuthor: { id: 5 } },
+-        [
+-          {
+-            dataPath: 'legacyAuthor',
+-            value: { disconnect: [{ id: 1 }] },
+-            schemaUid: ARTICLE as never,
+-            ownerPath: null,
+-          },
+-        ]
+-      );
+-
+-      expect(created.update).not.toHaveBeenCalled();
+-    });
+-
+-    it('leaves the relation untouched when the disconnect list is empty', async () => {
+-      const { update, result } = apply([
+-        {
+-          dataPath: 'legacyAuthor',
+-          value: { disconnect: [] },
+-          schemaUid: ARTICLE as never,
+-          ownerPath: null,
+-        },
+-      ]);
+-
+-      await result;
+-      expect(update).not.toHaveBeenCalled();
+-    });
+-
+-    it('throws when an unmatched disconnect has no source row to copy from', async () => {
+-      const { result } = apply(
+-        [
+-          {
+-            dataPath: 'details.tag',
+-            value: { disconnect: [8] },
+-            schemaUid: DETAILS as never,
+-            ownerPath: 'details',
+-          },
+-        ],
+-        {
+-          original: { details: { tag: { id: 5 } } },
+-          cloned: { details: { id: 2, tag: { id: 5 } } },
+-        }
+-      );
+-
+-      await expect(result).rejects.toThrow(
+-        'Unable to restore clone relation "tag" after unmatched disconnect'
+-      );
+-    });
+-
+-    it('throws when the cloned owner cannot be resolved', async () => {
+-      const { result } = apply(
+-        [
+-          {
+-            dataPath: 'details.tag',
+-            value: { set: 1 },
+-            schemaUid: DETAILS as never,
+-            ownerPath: 'details',
+-          },
+-        ],
+-        { cloned: { details: {} }, original: { details: { id: 1 } } }
+-      );
+-
+-      await expect(result).rejects.toThrow(
+-        'Unable to resolve clone relation owner for "tag" at path "details"'
+-      );
+-    });
+-
+-    it('rejects an inline morph connect that does not name its target type', async () => {
+-      const { result } = apply([
+-        {
+-          dataPath: 'picture',
+-          value: { connect: { id: 1 } },
+-          schemaUid: ARTICLE as never,
+-          ownerPath: null,
+-        },
+-      ]);
+-
+-      await expect(result).rejects.toThrow('Inline morphToOne clone update requires __type');
+-    });
+-
+-    it('rejects an update whose attribute is not a relation', async () => {
+-      const { result } = apply([
+-        {
+-          dataPath: 'title',
+-          value: { set: 1 },
+-          schemaUid: ARTICLE as never,
+-          ownerPath: null,
+-        },
+-      ]);
+-
+-      await expect(result).rejects.toThrow(
+-        `Unable to resolve clone relation attribute "title" on "${ARTICLE}"`
+-      );
+-    });
+-
+-    it('skips an update when the replacement component no longer has that relation', async () => {
+-      const { update, result } = apply(
+-        [
+-          {
+-            dataPath: 'sections.0.tag',
+-            value: { set: 1 },
+-            schemaUid: BLOCK as never,
+-            ownerPath: 'sections.0',
+-          },
+-        ],
+-        {
+-          original: { sections: [{ id: 1, __component: BLOCK }] },
+-          cloned: { sections: [{ id: 2, __component: OTHER }] },
+-        }
+-      );
+-
+-      await result;
+-      expect(update).not.toHaveBeenCalled();
+-    });
+-
+-    it('applies the update on the replacement component when that component has the relation', async () => {
+-      const { update, result } = apply(
+-        [
+-          {
+-            dataPath: 'sections.0.tag',
+-            value: { set: null },
+-            schemaUid: OTHER as never,
+-            ownerPath: 'sections.0',
+-          },
+-        ],
+-        {
+-          original: { sections: [{ id: 1, __component: OTHER, tag: { id: 5 } }] },
+-          cloned: { sections: [{ id: 2, __component: BLOCK }] },
+-        }
+-      );
+-
+-      await result;
+-      expect(update).toHaveBeenCalledWith({
+-        where: { id: 2 },
+-        data: { tag: null },
+-      });
+-    });
+-  });
+-});
+diff --git a/packages/core/core/src/services/document-service/utils/clone-relations.ts b/packages/core/core/src/services/document-service/utils/clone-relations.ts
+index e99e355cc4..5899310351 100644
+--- a/packages/core/core/src/services/document-service/utils/clone-relations.ts
++++ b/packages/core/core/src/services/document-service/utils/clone-relations.ts
+@@ -52,12 +52,13 @@ const isRelationAttribute = (attribute: unknown): attribute is CloneRelationAttr
+ 
+ const isRelationOperationPayload = (value: unknown): value is Record<string, unknown> => {
+   return (
+-    isRecord(value) && RELATION_OPERATIONS.some((operation) => Object.hasOwn(value, operation))
++    isRecord(value) &&
++    RELATION_OPERATIONS.some((operation) => Object.prototype.hasOwnProperty.call(value, operation))
+   );
+ };
+ 
+ const hasMeaningfulRelationOperations = (value: Record<string, unknown>) => {
+-  if (Object.hasOwn(value, 'set')) {
++  if (Object.prototype.hasOwnProperty.call(value, 'set')) {
+     return true;
+   }
+ 
+@@ -142,7 +143,7 @@ const isOwnerExplicitlyRemoved = (submitted: Record<string, unknown>, ownerPath:
+       }
+ 
+       current = current[index];
+-    } else if (isRecord(current) && Object.hasOwn(current, segment)) {
++    } else if (isRecord(current) && Object.prototype.hasOwnProperty.call(current, segment)) {
+       current = current[segment];
+     } else {
+       return false;
+@@ -161,16 +162,16 @@ const isOwnerExplicitlyRemoved = (submitted: Record<string, unknown>, ownerPath:
+  * and `morphToOne`). Clone follow-up must see those relations; the shared transform
+  * helper intentionally skips them because they are handled in processData.
+  */
+-const traverseAllEntityRelations = (
++const traverseAllEntityRelations = async (
+   visitor: TraverseVisitor,
+   options: Parameters<typeof traverseEntity>[1],
+   data: TraversableData
+ ) => {
+   return traverseEntity(
+-    (visitorOptions, utils) => {
++    async (visitorOptions, utils) => {
+       const { attribute } = visitorOptions;
+ 
+-      if (attribute?.type !== 'relation') {
++      if (!attribute || attribute.type !== 'relation') {
+         return;
+       }
+ 
+@@ -317,71 +318,6 @@ const collectNestedCloneRelationAdjustments = async (
+   return { data: adjustedData, deferredCopies, postCloneUpdates };
+ };
+ 
+-const planRootCloneRelation = (
+-  attributeName: string,
+-  attribute: unknown,
+-  submitted: Record<string, unknown>,
+-  originalData: Record<string, unknown>
+-):
+-  | { kind: 'keep' }
+-  | { kind: 'omit' }
+-  | { kind: 'defer'; copyKind: DeferredRelationCopy['kind'] }
+-  | { kind: 'postClone'; value: Record<string, unknown> } => {
+-  if (!isRelationAttribute(attribute)) {
+-    return { kind: 'keep' };
+-  }
+-
+-  const submittedValue = submitted[attributeName];
+-  const relationWasSubmitted = Object.hasOwn(submitted, attributeName);
+-  const isOperationPayload = isRelationOperationPayload(submittedValue);
+-  const hasMeaningfulOperations =
+-    isOperationPayload && hasMeaningfulRelationOperations(submittedValue);
+-  const relationIsUnchanged =
+-    !relationWasSubmitted || (isOperationPayload && !hasMeaningfulOperations);
+-
+-  if (
+-    relationIsUnchanged &&
+-    isBidirectionalOneToOne(attribute) &&
+-    usesJoinTable(attribute) &&
+-    hasPopulatedRelation(originalData[attributeName])
+-  ) {
+-    return { kind: 'defer', copyKind: 'joinTable' };
+-  }
+-
+-  if (
+-    relationIsUnchanged &&
+-    isBidirectionalOneToOne(attribute) &&
+-    !usesJoinTable(attribute) &&
+-    hasPopulatedRelation(originalData[attributeName])
+-  ) {
+-    return { kind: 'defer', copyKind: 'fkColumn' };
+-  }
+-
+-  // Always defer morphToOne: populate can be null even when morph columns are set.
+-  if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
+-    return { kind: 'defer', copyKind: 'morphToOne' };
+-  }
+-
+-  if (
+-    relationIsUnchanged &&
+-    isBidirectionalOneToManyMappedBy(attribute) &&
+-    hasPopulatedRelationList(originalData[attributeName])
+-  ) {
+-    return { kind: 'omit' };
+-  }
+-
+-  if (
+-    !relationIsUnchanged &&
+-    isOperationPayload &&
+-    hasMeaningfulOperations &&
+-    (!usesJoinTable(attribute) || isMorphToOneAttribute(attribute))
+-  ) {
+-    return { kind: 'postClone', value: submittedValue };
+-  }
+-
+-  return { kind: 'keep' };
+-};
+-
+ export const prepareCloneData = async (
+   originalData: Record<string, unknown>,
+   submittedData: Record<string, unknown> | undefined,
+@@ -399,28 +335,81 @@ export const prepareCloneData = async (
+   const postCloneUpdates: PostCloneRelationUpdate[] = [];
+ 
+   for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
+-    const plan = planRootCloneRelation(attributeName, attribute, submitted, originalData);
++    if (!isRelationAttribute(attribute)) {
++      continue;
++    }
+ 
+-    if (plan.kind === 'keep') {
++    const submittedValue = submitted[attributeName];
++    const relationWasSubmitted = Object.prototype.hasOwnProperty.call(submitted, attributeName);
++    const isOperationPayload = isRelationOperationPayload(submittedValue);
++    const hasMeaningfulOperations =
++      isOperationPayload && hasMeaningfulRelationOperations(submittedValue);
++    const relationIsUnchanged =
++      !relationWasSubmitted || (isOperationPayload && !hasMeaningfulOperations);
++
++    if (
++      relationIsUnchanged &&
++      isBidirectionalOneToOne(attribute) &&
++      usesJoinTable(attribute) &&
++      hasPopulatedRelation(originalData[attributeName])
++    ) {
++      delete data[attributeName];
++      deferredCopies.push({
++        schemaUid: contentType.uid as UID.Schema,
++        attributeName,
++        kind: 'joinTable',
++        ownerPath: null,
++      });
+       continue;
+     }
+ 
+-    delete data[attributeName];
++    if (
++      relationIsUnchanged &&
++      isBidirectionalOneToOne(attribute) &&
++      !usesJoinTable(attribute) &&
++      hasPopulatedRelation(originalData[attributeName])
++    ) {
++      delete data[attributeName];
++      deferredCopies.push({
++        schemaUid: contentType.uid as UID.Schema,
++        attributeName,
++        kind: 'fkColumn',
++        ownerPath: null,
++      });
++      continue;
++    }
+ 
+-    if (plan.kind === 'defer') {
++    // Always defer morphToOne: populate can be null even when morph columns are set.
++    if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
++      delete data[attributeName];
+       deferredCopies.push({
+         schemaUid: contentType.uid as UID.Schema,
+         attributeName,
+-        kind: plan.copyKind,
++        kind: 'morphToOne',
+         ownerPath: null,
+       });
+       continue;
+     }
+ 
+-    if (plan.kind === 'postClone') {
++    if (
++      relationIsUnchanged &&
++      isBidirectionalOneToManyMappedBy(attribute) &&
++      hasPopulatedRelationList(originalData[attributeName])
++    ) {
++      delete data[attributeName];
++      continue;
++    }
++
++    if (
++      !relationIsUnchanged &&
++      isRelationOperationPayload(submittedValue) &&
++      hasMeaningfulOperations &&
++      (!usesJoinTable(attribute) || isMorphToOneAttribute(attribute))
++    ) {
++      delete data[attributeName];
+       postCloneUpdates.push({
+         dataPath: attributeName,
+-        value: plan.value,
++        value: submittedValue,
+         schemaUid: contentType.uid as UID.Schema,
+         ownerPath: null,
+       });
+@@ -631,71 +620,6 @@ const copyMorphToOneRelation = async (
+   });
+ };
+ 
+-const runInOrder = async <T>(items: readonly T[], run: (item: T) => Promise<void>) => {
+-  await items.reduce((previous, item) => previous.then(() => run(item)), Promise.resolve());
+-};
+-
+-const applyOneDeferredCloneRelationCopy = async (
+-  strapi: Core.Strapi,
+-  originalData: Record<string, unknown>,
+-  clonedData: Record<string, unknown>,
+-  sourceRootId: number,
+-  targetRootId: number,
+-  task: DeferredRelationCopy
+-) => {
+-  // Root owners (ownerPath === null) resolve via the fallback root IDs.
+-  // Nested owners must resolve explicitly — falling back to the root ID would
+-  // copy component-schema relation rows using an unrelated document ID.
+-  const sourceEntryId = resolveOwnerEntryId(originalData, task.ownerPath, sourceRootId);
+-  const targetEntryId = resolveOwnerEntryId(clonedData, task.ownerPath, targetRootId);
+-
+-  if (sourceEntryId == null || targetEntryId == null) {
+-    throw new Error(
+-      `Unable to resolve clone relation owner for "${task.attributeName}" at path "${task.ownerPath ?? '<root>'}"`
+-    );
+-  }
+-
+-  if (ownerComponentWasReplaced(originalData, clonedData, task.ownerPath)) {
+-    return;
+-  }
+-
+-  if (sourceEntryId === targetEntryId) {
+-    return;
+-  }
+-
+-  if (task.kind === 'joinTable') {
+-    await copyCloneRelationRows(
+-      strapi,
+-      task.schemaUid,
+-      task.attributeName,
+-      sourceEntryId,
+-      targetEntryId
+-    );
+-    return;
+-  }
+-
+-  if (task.kind === 'fkColumn') {
+-    await copyFkColumnRelation(
+-      strapi,
+-      task.schemaUid,
+-      task.attributeName,
+-      sourceEntryId,
+-      targetEntryId
+-    );
+-    return;
+-  }
+-
+-  if (task.kind === 'morphToOne') {
+-    await copyMorphToOneRelation(
+-      strapi,
+-      task.schemaUid,
+-      task.attributeName,
+-      sourceEntryId,
+-      targetEntryId
+-    );
+-  }
+-};
+-
+ export const applyDeferredCloneRelationCopies = async (
+   strapi: Core.Strapi,
+   rootUid: UID.ContentType,
+@@ -709,16 +633,53 @@ export const applyDeferredCloneRelationCopies = async (
+     return;
+   }
+ 
+-  await runInOrder(deferredCopies, (task) =>
+-    applyOneDeferredCloneRelationCopy(
+-      strapi,
+-      originalData,
+-      clonedData,
+-      sourceRootId,
+-      targetRootId,
+-      task
+-    )
+-  );
++  for (const task of deferredCopies) {
++    // Root owners (ownerPath === null) resolve via the fallback root IDs.
++    // Nested owners must resolve explicitly — falling back to the root ID would
++    // copy component-schema relation rows using an unrelated document ID.
++    const sourceEntryId = resolveOwnerEntryId(originalData, task.ownerPath, sourceRootId);
++    const targetEntryId = resolveOwnerEntryId(clonedData, task.ownerPath, targetRootId);
++
++    if (sourceEntryId == null || targetEntryId == null) {
++      throw new Error(
++        `Unable to resolve clone relation owner for "${task.attributeName}" at path "${task.ownerPath ?? '<root>'}"`
++      );
++    }
++
++    if (ownerComponentWasReplaced(originalData, clonedData, task.ownerPath)) {
++      continue;
++    }
++
++    if (sourceEntryId === targetEntryId) {
++      continue;
++    }
++
++    if (task.kind === 'joinTable') {
++      await copyCloneRelationRows(
++        strapi,
++        task.schemaUid,
++        task.attributeName,
++        sourceEntryId,
++        targetEntryId
++      );
++    } else if (task.kind === 'fkColumn') {
++      await copyFkColumnRelation(
++        strapi,
++        task.schemaUid,
++        task.attributeName,
++        sourceEntryId,
++        targetEntryId
++      );
++    } else if (task.kind === 'morphToOne') {
++      await copyMorphToOneRelation(
++        strapi,
++        task.schemaUid,
++        task.attributeName,
++        sourceEntryId,
++        targetEntryId
++      );
++    }
++  }
+ };
+ 
+ const toRelationRef = (value: unknown): Record<string, unknown> | undefined => {
+@@ -753,7 +714,7 @@ const relationOperationList = (value: unknown): unknown[] => {
+ const pickInlineRelationTargetRef = (
+   value: Record<string, unknown>
+ ): Record<string, unknown> | null | undefined => {
+-  if (Object.hasOwn(value, 'set')) {
++  if (Object.prototype.hasOwnProperty.call(value, 'set')) {
+     const setValue = value.set;
+     if (setValue == null) {
+       return null;
+@@ -764,7 +725,7 @@ const pickInlineRelationTargetRef = (
+       return null;
+     }
+ 
+-    return toRelationRef(list.at(-1));
++    return toRelationRef(list[list.length - 1]);
+   }
+ 
+   const connect = value.connect;
+@@ -777,39 +738,13 @@ const pickInlineRelationTargetRef = (
+     return undefined;
+   }
+ 
+-  return toRelationRef(list.at(-1));
++  return toRelationRef(list[list.length - 1]);
+ };
+ 
+ const toRelationStatus = (value: unknown): 'draft' | 'published' | undefined => {
+   return value === 'draft' || value === 'published' ? value : undefined;
+ };
+ 
+-const relationEntryIdForStatus = async (
+-  strapi: Core.Strapi,
+-  targetUid: UID.Schema,
+-  documentId: string,
+-  status: 'draft' | 'published',
+-  targetHasDP: boolean,
+-  targetLocale: string | null | undefined
+-) => {
+-  const where: Record<string, unknown> = { documentId };
+-
+-  if (targetHasDP) {
+-    where.publishedAt = status === 'draft' ? null : { $ne: null };
+-  }
+-
+-  if (targetLocale) {
+-    where.locale = targetLocale;
+-  }
+-
+-  const row = await strapi.db.query(targetUid).findOne({
+-    where,
+-    select: ['id'],
+-  });
+-
+-  return typeof row?.id === 'number' ? row.id : undefined;
+-};
+-
+ const resolveEntryIdsByRef = async (
+   strapi: Core.Strapi,
+   sourceUid: UID.Schema,
+@@ -825,9 +760,8 @@ const resolveEntryIdsByRef = async (
+     return [];
+   }
+ 
+-  const documentId = ref.documentId;
+   let relation = {
+-    documentId,
++    documentId: ref.documentId,
+     locale: typeof ref.locale === 'string' ? ref.locale : undefined,
+     status: toRelationStatus(ref.status),
+   };
+@@ -855,30 +789,26 @@ const resolveEntryIdsByRef = async (
+ 
+   const model = strapi.getModel(targetUid);
+   const targetHasDP = contentTypes.hasDraftAndPublish(model);
+-  const ids: Array<number | undefined> = [];
+-
+-  await statuses.reduce(
+-    (previous, status) =>
+-      previous.then(async () => {
+-        ids.push(
+-          await relationEntryIdForStatus(
+-            strapi,
+-            targetUid,
+-            documentId,
+-            status,
+-            targetHasDP,
+-            targetLocale
+-          )
+-        );
+-      }),
+-    Promise.resolve()
+-  );
+-
+   const resolvedIds: number[] = [];
+ 
+-  for (const id of ids) {
+-    if (typeof id === 'number' && !resolvedIds.includes(id)) {
+-      resolvedIds.push(id);
++  for (const status of statuses) {
++    const where: Record<string, unknown> = { documentId: ref.documentId };
++
++    if (targetHasDP) {
++      where.publishedAt = status === 'draft' ? null : { $ne: null };
++    }
++
++    if (targetLocale) {
++      where.locale = targetLocale;
++    }
++
++    const row = await strapi.db.query(targetUid).findOne({
++      where,
++      select: ['id'],
++    });
++
++    if (typeof row?.id === 'number' && !resolvedIds.includes(row.id)) {
++      resolvedIds.push(row.id);
+     }
+   }
+ 
+@@ -926,67 +856,6 @@ const currentAssociationId = (current: unknown): number | undefined => {
+   return undefined;
+ };
+ 
+-const disconnectItemRef = (item: unknown): Record<string, unknown> | undefined => {
+-  if (isRecord(item)) {
+-    return item;
+-  }
+-
+-  if (typeof item === 'number' || typeof item === 'string') {
+-    return { id: item };
+-  }
+-
+-  return undefined;
+-};
+-
+-type DisconnectMatch = {
+-  currentId: number;
+-  currentType: string | undefined;
+-  typeField: string;
+-  opts: { locale?: string };
+-};
+-
+-const disconnectItemMatchesCurrent = async (
+-  strapi: Core.Strapi,
+-  sourceUid: UID.Schema,
+-  attribute: CloneRelationAttribute,
+-  item: unknown,
+-  match: DisconnectMatch
+-) => {
+-  const { currentId, currentType, typeField, opts } = match;
+-  const ref = disconnectItemRef(item);
+-
+-  if (!ref) {
+-    return false;
+-  }
+-
+-  if (isMorphToOneAttribute(attribute)) {
+-    const targetUid = ref[typeField];
+-    if (typeof targetUid !== 'string') {
+-      return false;
+-    }
+-
+-    if (currentType != null && currentType !== targetUid) {
+-      return false;
+-    }
+-
+-    const ids = await resolveEntryIdsByRef(strapi, sourceUid, targetUid as UID.Schema, ref, opts);
+-    return ids.includes(currentId);
+-  }
+-
+-  if (!hasRelationTarget(attribute)) {
+-    return false;
+-  }
+-
+-  const ids = await resolveEntryIdsByRef(
+-    strapi,
+-    sourceUid,
+-    attribute.target as UID.Schema,
+-    ref,
+-    opts
+-  );
+-  return ids.includes(currentId);
+-};
+-
+ const disconnectMatchesCurrent = async (
+   strapi: Core.Strapi,
+   sourceUid: UID.Schema,
+@@ -1007,103 +876,123 @@ const disconnectMatchesCurrent = async (
+       ? current[typeField]
+       : undefined;
+ 
+-  return disconnect.reduce<Promise<boolean>>(
+-    (previous, item) =>
+-      previous.then((alreadyMatched) => {
+-        if (alreadyMatched) {
+-          return true;
+-        }
+-
+-        return disconnectItemMatchesCurrent(strapi, sourceUid, attribute, item, {
+-          currentId,
+-          currentType,
+-          typeField,
+-          opts,
+-        });
+-      }),
+-    Promise.resolve(false)
+-  );
+-};
++  for (const item of disconnect) {
++    let ref: Record<string, unknown> | null = null;
++    if (isRecord(item)) {
++      ref = item;
++    } else if (typeof item === 'number' || typeof item === 'string') {
++      ref = { id: item };
++    }
+ 
+-type InlineRelationAssignmentOptions = {
+-  locale?: string;
+-  ownerUid: UID.Schema;
+-  /** Schema to read the current association from. Differs from ownerUid after a dynamic-zone component swap. */
+-  sourceSchemaUid?: UID.Schema;
+-  sourceUid: UID.Schema;
+-  originalValue?: unknown;
+-  sourceOwnerId?: number;
+-  targetOwnerId: number;
+-  attributeName: string;
+-};
++    if (!ref) {
++      continue;
++    }
+ 
+-const restoreUnmatchedInlineRelation = async (
+-  strapi: Core.Strapi,
+-  attribute: CloneRelationAttribute,
+-  value: Record<string, unknown>,
+-  opts: InlineRelationAssignmentOptions
+-): Promise<null | undefined> => {
+-  const disconnect = relationOperationList(value.disconnect);
+-  if (disconnect.length === 0) {
+-    return undefined;
+-  }
++    if (isMorphToOneAttribute(attribute)) {
++      const targetUid = ref[typeField];
++      if (typeof targetUid !== 'string') {
++        continue;
++      }
+ 
+-  const matches = await disconnectMatchesCurrent(
+-    strapi,
+-    opts.sourceUid,
+-    attribute,
+-    disconnect,
+-    opts.originalValue,
+-    { locale: opts.locale }
+-  );
++      if (currentType != null && currentType !== targetUid) {
++        continue;
++      }
+ 
+-  if (matches) {
+-    return null;
+-  }
++      const ids = await resolveEntryIdsByRef(strapi, sourceUid, targetUid as UID.Schema, ref, opts);
++      if (ids.includes(currentId)) {
++        return true;
++      }
+ 
+-  // Unmatched disconnect must keep the original association. The clone was
+-  // created without the relation (stripped from create data), so copy it now.
+-  if (opts.sourceOwnerId == null) {
+-    throw new Error(
+-      `Unable to restore clone relation "${opts.attributeName}" after unmatched disconnect`
+-    );
+-  }
++      continue;
++    }
+ 
+-  const readUid = opts.sourceSchemaUid ?? opts.ownerUid;
++    if (!hasRelationTarget(attribute)) {
++      continue;
++    }
+ 
+-  if (isMorphToOneAttribute(attribute)) {
+-    await copyMorphToOneRelation(
++    const ids = await resolveEntryIdsByRef(
+       strapi,
+-      opts.ownerUid,
+-      opts.attributeName,
+-      opts.sourceOwnerId,
+-      opts.targetOwnerId,
+-      readUid
++      sourceUid,
++      attribute.target as UID.Schema,
++      ref,
++      opts
+     );
+-    return undefined;
++    if (ids.includes(currentId)) {
++      return true;
++    }
+   }
+ 
+-  await copyFkColumnRelation(
+-    strapi,
+-    opts.ownerUid,
+-    opts.attributeName,
+-    opts.sourceOwnerId,
+-    opts.targetOwnerId,
+-    readUid
+-  );
+-  return undefined;
++  return false;
+ };
+ 
+ const resolveInlineRelationAssignment = async (
+   strapi: Core.Strapi,
+   attribute: CloneRelationAttribute,
+   value: Record<string, unknown>,
+-  opts: InlineRelationAssignmentOptions
++  opts: {
++    locale?: string;
++    ownerUid: UID.Schema;
++    /** Schema to read the current association from. Differs from ownerUid after a dynamic-zone component swap. */
++    sourceSchemaUid?: UID.Schema;
++    sourceUid: UID.Schema;
++    originalValue?: unknown;
++    sourceOwnerId?: number;
++    targetOwnerId: number;
++    attributeName: string;
++  }
+ ): Promise<unknown> => {
+   const targetRef = pickInlineRelationTargetRef(value);
+ 
+   if (targetRef === undefined) {
+-    return restoreUnmatchedInlineRelation(strapi, attribute, value, opts);
++    const disconnect = relationOperationList(value.disconnect);
++    if (disconnect.length === 0) {
++      return undefined;
++    }
++
++    const matches = await disconnectMatchesCurrent(
++      strapi,
++      opts.sourceUid,
++      attribute,
++      disconnect,
++      opts.originalValue,
++      { locale: opts.locale }
++    );
++
++    if (matches) {
++      return null;
++    }
++
++    // Unmatched disconnect must keep the original association. The clone was
++    // created without the relation (stripped from create data), so copy it now.
++    if (opts.sourceOwnerId == null) {
++      throw new Error(
++        `Unable to restore clone relation "${opts.attributeName}" after unmatched disconnect`
++      );
++    }
++
++    const readUid = opts.sourceSchemaUid ?? opts.ownerUid;
++
++    if (isMorphToOneAttribute(attribute)) {
++      await copyMorphToOneRelation(
++        strapi,
++        opts.ownerUid,
++        opts.attributeName,
++        opts.sourceOwnerId,
++        opts.targetOwnerId,
++        readUid
++      );
++    } else {
++      await copyFkColumnRelation(
++        strapi,
++        opts.ownerUid,
++        opts.attributeName,
++        opts.sourceOwnerId,
++        opts.targetOwnerId,
++        readUid
++      );
++    }
++
++    return undefined;
+   }
+ 
+   if (targetRef === null) {
+@@ -1115,7 +1004,7 @@ const resolveInlineRelationAssignment = async (
+     const targetUid = targetRef[typeField];
+ 
+     if (typeof targetUid !== 'string') {
+-      throw new TypeError(`Inline morphToOne clone update requires ${typeField}`);
++      throw new Error(`Inline morphToOne clone update requires ${typeField}`);
+     }
+ 
+     const id = await resolveEntryIdByRef(
+@@ -1152,100 +1041,6 @@ const resolveInlineRelationAssignment = async (
+   return id;
+ };
+ 
+-const schemaUidForPostCloneUpdate = (
+-  strapi: Core.Strapi,
+-  originalData: Record<string, unknown>,
+-  clonedData: Record<string, unknown>,
+-  update: PostCloneRelationUpdate,
+-  attributeName: string
+-): UID.Schema | undefined => {
+-  if (!ownerComponentWasReplaced(originalData, clonedData, update.ownerPath)) {
+-    return update.schemaUid;
+-  }
+-
+-  const cloneComponent = ownerComponentUid(get(clonedData, update.ownerPath!));
+-  const cloneAttribute = cloneComponent
+-    ? (strapi.db.metadata.get(cloneComponent).attributes[attributeName] as
+-        CloneRelationAttribute | undefined)
+-    : undefined;
+-
+-  // The submitted operation belongs to the new block. Do not apply it with the
+-  // source component UID, or the new row id will match an unrelated row.
+-  if (!cloneComponent || cloneAttribute?.type !== 'relation') {
+-    return undefined;
+-  }
+-
+-  return cloneComponent as UID.Schema;
+-};
+-
+-type PostCloneRelationContext = {
+-  rootUid: UID.ContentType;
+-  sourceRootId: number;
+-  clonedEntryId: number;
+-  clonedData: Record<string, unknown>;
+-  originalData: Record<string, unknown>;
+-  locale: string | undefined;
+-};
+-
+-const applyOnePostCloneRelationUpdate = async (
+-  strapi: Core.Strapi,
+-  update: PostCloneRelationUpdate,
+-  context: PostCloneRelationContext
+-) => {
+-  const { rootUid, sourceRootId, clonedEntryId, clonedData, originalData, locale } = context;
+-  const attributeName = update.dataPath.split('.').pop()!;
+-  const ownerEntryId = resolveOwnerEntryId(clonedData, update.ownerPath, clonedEntryId);
+-  const sourceOwnerId = resolveOwnerEntryId(originalData, update.ownerPath, sourceRootId);
+-
+-  if (ownerEntryId == null) {
+-    throw new Error(
+-      `Unable to resolve clone relation owner for "${attributeName}" at path "${update.ownerPath ?? '<root>'}"`
+-    );
+-  }
+-
+-  const schemaUid = schemaUidForPostCloneUpdate(
+-    strapi,
+-    originalData,
+-    clonedData,
+-    update,
+-    attributeName
+-  );
+-
+-  if (schemaUid === undefined) {
+-    return;
+-  }
+-
+-  const attribute = strapi.db.metadata.get(schemaUid).attributes[attributeName] as
+-    CloneRelationAttribute | undefined;
+-
+-  if (attribute?.type !== 'relation') {
+-    throw new Error(
+-      `Unable to resolve clone relation attribute "${attributeName}" on "${schemaUid}"`
+-    );
+-  }
+-
+-  const assignment = await resolveInlineRelationAssignment(strapi, attribute, update.value, {
+-    locale,
+-    ownerUid: schemaUid,
+-    sourceSchemaUid: update.schemaUid,
+-    sourceUid: rootUid,
+-    originalValue: get(originalData, update.dataPath),
+-    sourceOwnerId,
+-    targetOwnerId: ownerEntryId,
+-    attributeName,
+-  });
+-
+-  if (assignment === undefined) {
+-    return;
+-  }
+-
+-  // processData accepts attribute names (FK id / morph { id, __type }), not operation payloads.
+-  await strapi.db.query(schemaUid).update({
+-    where: { id: ownerEntryId },
+-    data: { [attributeName]: assignment },
+-  });
+-};
+-
+ export const applyPostCloneRelationUpdates = async (
+   strapi: Core.Strapi,
+   rootUid: UID.ContentType,
+@@ -1261,14 +1056,63 @@ export const applyPostCloneRelationUpdates = async (
+ 
+   const locale = clonedData.locale as string | undefined;
+ 
+-  await runInOrder(postCloneUpdates, (update) =>
+-    applyOnePostCloneRelationUpdate(strapi, update, {
+-      rootUid,
+-      sourceRootId,
+-      clonedEntryId,
+-      clonedData,
+-      originalData,
++  for (const update of postCloneUpdates) {
++    const attributeName = update.dataPath.split('.').pop()!;
++    const ownerEntryId = resolveOwnerEntryId(clonedData, update.ownerPath, clonedEntryId);
++    const sourceOwnerId = resolveOwnerEntryId(originalData, update.ownerPath, sourceRootId);
++
++    if (ownerEntryId == null) {
++      throw new Error(
++        `Unable to resolve clone relation owner for "${attributeName}" at path "${update.ownerPath ?? '<root>'}"`
++      );
++    }
++
++    let schemaUid = update.schemaUid;
++
++    if (ownerComponentWasReplaced(originalData, clonedData, update.ownerPath)) {
++      const cloneComponent = ownerComponentUid(get(clonedData, update.ownerPath!));
++      const cloneAttribute = cloneComponent
++        ? (strapi.db.metadata.get(cloneComponent).attributes[attributeName] as
++            CloneRelationAttribute | undefined)
++        : undefined;
++
++      // The submitted operation belongs to the new block. Do not apply it with the
++      // source component UID, or the new row id will match an unrelated row.
++      if (!cloneComponent || cloneAttribute?.type !== 'relation') {
++        continue;
++      }
++
++      schemaUid = cloneComponent as UID.Schema;
++    }
++
++    const attribute = strapi.db.metadata.get(schemaUid).attributes[attributeName] as
++      CloneRelationAttribute | undefined;
++
++    if (!attribute || attribute.type !== 'relation') {
++      throw new Error(
++        `Unable to resolve clone relation attribute "${attributeName}" on "${schemaUid}"`
++      );
++    }
++
++    const assignment = await resolveInlineRelationAssignment(strapi, attribute, update.value, {
+       locale,
+-    })
+-  );
++      ownerUid: schemaUid,
++      sourceSchemaUid: update.schemaUid,
++      sourceUid: rootUid,
++      originalValue: get(originalData, update.dataPath),
++      sourceOwnerId,
++      targetOwnerId: ownerEntryId,
++      attributeName,
++    });
++
++    if (assignment === undefined) {
++      continue;
++    }
++
++    // processData accepts attribute names (FK id / morph { id, __type }), not operation payloads.
++    await strapi.db.query(schemaUid).update({
++      where: { id: ownerEntryId },
++      data: { [attributeName]: assignment },
++    });
++  }
+ };
