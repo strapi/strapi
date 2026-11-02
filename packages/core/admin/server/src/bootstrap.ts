@@ -5,7 +5,7 @@ import { async } from '@strapi/utils';
 import { getService } from './utils';
 import {
   getTokenOptions,
-  expiresInToSeconds,
+  getLegacyExpiresInSeconds,
   hasUserConfiguredAuthOptionsExpiresIn,
 } from './services/token';
 import adminActions from './config/admin-actions';
@@ -135,10 +135,9 @@ const createDefaultAPITokensIfNeeded = async () => {
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Get the merged token options (includes defaults merged with user config)
   const { options } = getTokenOptions();
-  const legacyMaxRefreshFallback =
-    expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
-  const legacyMaxSessionFallback =
-    expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_SESSION_LIFESPAN;
+  const legacyExpiresIn = getLegacyExpiresInSeconds();
+  const legacyMaxRefreshFallback = legacyExpiresIn ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
+  const legacyMaxSessionFallback = legacyExpiresIn ?? DEFAULT_MAX_SESSION_LIFESPAN;
 
   // Warn only when the user set legacy admin.auth.options.expiresIn. Merged JWT options always
   // include the default expiresIn ('30d'), so reading merged options alone is a false positive.
