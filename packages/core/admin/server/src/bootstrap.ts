@@ -1,7 +1,6 @@
 import { map, merge, difference } from 'lodash';
 
 import type { Core } from '@strapi/types';
-import { async } from '@strapi/utils';
 import { getService } from './utils';
 import {
   getTokenOptions,
@@ -92,19 +91,41 @@ const syncAuthSettings = async () => {
   await adminStore.set({ key: 'auth', value: newAuthSettings });
 };
 
-const syncAPITokensPermissions = async () => {
-  const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
-  const permissionsInDB = await async.pipe(
-    strapi.db.query('admin::api-token-permission').findMany,
-    (permissions) => map(permissions, 'action')
-  )();
+type APITokenPermissionRow = {
+  action: string;
+  token?: { id: number | string; name?: string } | null;
+};
 
-  const unknownPermissions = [...new Set(difference(permissionsInDB, validPermissions))];
+export const syncAPITokensPermissions = async () => {
+  const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
+  const permissionsInDB: APITokenPermissionRow[] = await strapi.db
+    .query('admin::api-token-permission')
+    .findMany({ populate: { token: { select: ['id', 'name'] } } });
+
+  const unknownPermissions = [
+    ...new Set(difference(map(permissionsInDB, 'action'), validPermissions)),
+  ];
 
   if (unknownPermissions.length > 0) {
     await strapi.db
       .query('admin::api-token-permission')
       .deleteMany({ where: { action: { $in: unknownPermissions } } });
+
+    const removedPermissions = permissionsInDB.filter((permission) =>
+      unknownPermissions.includes(permission.action)
+    );
+    const tokens = new Map(
+      removedPermissions
+        .map((permission) => permission.token)
+        .filter((token): token is NonNullable<APITokenPermissionRow['token']> => token != null)
+        .map((token) => [token.id, `"${token.name}" (id ${token.id})`])
+    );
+
+    strapi.log.warn(
+      `Removed ${removedPermissions.length} stored API token permission(s) whose action is no longer registered. ` +
+        `Actions: ${unknownPermissions.join(', ')}. ` +
+        `API tokens: ${tokens.size === 0 ? 'none' : Array.from(tokens.values()).join(', ')}.`
+    );
   }
 };
 

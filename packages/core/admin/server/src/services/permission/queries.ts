@@ -127,11 +127,55 @@ const filterPermissionsToRemove = async (permissions: Permission[]) => {
   return permissionsToRemove;
 };
 
+type PermissionOwner = { id: Data.ID; name?: string };
+
+const formatOwners = (owners: PermissionOwner[]) => {
+  const uniqueOwners = Array.from(new Map(owners.map((owner) => [owner.id, owner])).values());
+
+  if (uniqueOwners.length === 0) {
+    return 'none';
+  }
+
+  return uniqueOwners.map((owner) => `"${owner.name}" (id ${owner.id})`).join(', ');
+};
+
+/**
+ * Warns about the stored permissions the boot cleanup deleted, so a lost grant leaves a trace
+ */
+const logRemovedPermissions = (removedPermissions: Permission[]) => {
+  if (removedPermissions.length === 0) {
+    return;
+  }
+
+  const ownerOf = (permission: Permission, key: 'role' | 'apiToken') =>
+    get(permission, key) as PermissionOwner | null | undefined;
+
+  const actions = Array.from(new Set(removedPermissions.map((permission) => permission.action)));
+  const roles = removedPermissions
+    .map((permission) => ownerOf(permission, 'role'))
+    .filter((owner): owner is PermissionOwner => owner != null);
+  const tokens = removedPermissions
+    .map((permission) => ownerOf(permission, 'apiToken'))
+    .filter((owner): owner is PermissionOwner => owner != null);
+  const withoutOwnerCount = removedPermissions.filter(
+    (permission) => ownerOf(permission, 'role') == null && ownerOf(permission, 'apiToken') == null
+  ).length;
+
+  strapi.log.warn(
+    `Removed ${removedPermissions.length} stored admin permission(s) that no longer match a registered action, subject or owner. ` +
+      `Actions: ${actions.join(', ')}. ` +
+      `Roles: ${formatOwners(roles)}. ` +
+      `Admin tokens: ${formatOwners(tokens)}. ` +
+      `Without role or admin token: ${withoutOwnerCount}.`
+  );
+};
+
 /**
  * Removes permissions in database that don't exist anymore
  */
 export const cleanPermissionsInDatabase = async (): Promise<void> => {
   const pageSize = 200;
+  const removedPermissions: Permission[] = [];
 
   const contentTypeService = getService('content-type');
 
@@ -156,6 +200,10 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
 
     const permissionsIdToRemove = Array.from(
       new Set([...permissionsToRemove, ...orphanedPermissions].map((p) => p.id))
+    );
+
+    removedPermissions.push(
+      ...permissions.filter((permission) => permissionsIdToRemove.includes(permission.id))
     );
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
@@ -189,6 +237,8 @@ export const cleanPermissionsInDatabase = async (): Promise<void> => {
       }),
     ]);
   }
+
+  logRemovedPermissions(removedPermissions);
 };
 
 export default {

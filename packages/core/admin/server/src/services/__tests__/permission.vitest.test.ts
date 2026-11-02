@@ -12,6 +12,7 @@ import { toPermission } from '../../domain/permission';
 describe('Permission Service', () => {
   beforeEach(() => {
     global.strapi = {
+      log: { warn: vi.fn() },
       admin: {
         services: {
           condition: {
@@ -314,6 +315,91 @@ describe('Permission Service', () => {
       expect(deletedIds).toContain(1);
       expect(deletedIds).not.toContain(2);
       expect(update).not.toHaveBeenCalled();
+    });
+
+    describe('logging', () => {
+      const setupCleanup = (permsInDb: unknown[], registeredActions: string[]) => {
+        const warn = vi.fn();
+        const dbDelete = vi.fn(() => Promise.resolve());
+
+        global.strapi = merge({}, global.strapi, {
+          log: { warn },
+          db: {
+            query: () => ({
+              findMany: vi.fn(() => Promise.resolve(permsInDb)),
+              delete: dbDelete,
+              update: vi.fn(() => Promise.resolve()),
+              count: vi.fn(() => Promise.resolve(permsInDb.length)),
+            }),
+          },
+          admin: {
+            services: {
+              'content-type': { cleanPermissionFields: vi.fn((perms: unknown[]) => perms) },
+              permission: {
+                actionProvider: {
+                  has: vi.fn((id: string) => registeredActions.includes(id)),
+                  get: vi.fn(() => undefined),
+                },
+              },
+            },
+          },
+          eventHub: { emit: vi.fn() },
+        });
+
+        return { warn, dbDelete };
+      };
+
+      const perm = (id: number, action: string, owner: Record<string, unknown>) => ({
+        id,
+        action,
+        actionParameters: {},
+        subject: null,
+        properties: {},
+        conditions: [],
+        role: null,
+        apiToken: null,
+        ...owner,
+      });
+
+      test('warns with the count, actions, roles and admin tokens of the removed permissions', async () => {
+        const auditor = { id: 3, name: 'QA Auditor' };
+        const siemToken = { id: 7, name: 'qa-siem-token' };
+        const { warn, dbDelete } = setupCleanup(
+          [
+            perm(1, 'admin::audit-logs.read', { role: auditor }),
+            perm(2, 'admin::audit-logs.export', { role: auditor }),
+            perm(3, 'admin::audit-logs.read', { apiToken: siemToken }),
+            perm(4, 'admin::audit-logs.export', { apiToken: siemToken }),
+            perm(5, 'admin::users.read', { role: auditor }),
+            perm(6, 'admin::users.read', {}),
+          ],
+          ['admin::users.read']
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).toHaveBeenCalledTimes(5);
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn).toHaveBeenCalledWith(
+          'Removed 5 stored admin permission(s) that no longer match a registered action, subject or owner. ' +
+            'Actions: admin::audit-logs.read, admin::audit-logs.export, admin::users.read. ' +
+            'Roles: "QA Auditor" (id 3). ' +
+            'Admin tokens: "qa-siem-token" (id 7). ' +
+            'Without role or admin token: 1.'
+        );
+      });
+
+      test('does not warn when nothing is removed', async () => {
+        const { warn, dbDelete } = setupCleanup(
+          [perm(1, 'admin::users.read', { role: { id: 1, name: 'Editor' } })],
+          ['admin::users.read']
+        );
+
+        await cleanPermissionsInDatabase();
+
+        expect(dbDelete).not.toHaveBeenCalled();
+        expect(warn).not.toHaveBeenCalled();
+      });
     });
   });
 });
