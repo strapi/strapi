@@ -81,7 +81,7 @@ Core defines three hooks. The `registries` provider creates them in its `registe
 
 - `strapi::content-types.beforeSync` runs before the database schema sync. It is a parallel hook.
 - `strapi::content-types.afterSync` runs after it. It is a parallel hook.
-- `strapi::app.afterBootstrap` runs after the app `bootstrap`, before `strapi.isLoaded` is `true`. It is a series hook and receives no context. The admin adds a handler in its `bootstrap` to clean the stored permissions once every action is registered.
+- `strapi::app.afterBootstrap` runs after the app `bootstrap`, before `strapi.isLoaded` is `true`. It is a series hook and receives no context. The admin adds a handler in its `bootstrap` that cleans the stored permissions. Handlers run in the order they are added, so a handler that the app adds in its `bootstrap` runs after the admin one. The admin handler locks the action provider first, so registering an admin action in a later handler throws.
 
 The two sync hooks receive `{ oldContentTypes, contentTypes }`. Core uses them to migrate data when draft and publish or i18n is turned on or off for a content type. The i18n, content-releases and review-workflows plugins also add handlers. Add handlers in `register`, because the hooks run before module `bootstrap`.
 

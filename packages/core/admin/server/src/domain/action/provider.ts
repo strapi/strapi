@@ -19,6 +19,21 @@ const createActionProvider = (options?: Options) => {
     appliesPropertyToSubject: hooks.createAsyncParallelHook(),
   };
 
+  // Set once the admin cleaned the stored permissions against the registered actions
+  let isLocked = false;
+
+  const assertCanRegister = () => {
+    if (strapi.isLoaded === true) {
+      throw new Error(`You can't register new actions outside of the bootstrap function.`);
+    }
+
+    if (isLocked === true) {
+      throw new Error(
+        `You can't register new actions once the admin cleaned the stored permissions. Register actions in a register or bootstrap function.`
+      );
+    }
+  };
+
   return {
     ...provider,
 
@@ -28,9 +43,7 @@ const createActionProvider = (options?: Options) => {
     },
 
     async register(actionAttributes: CreateActionPayload) {
-      if (strapi.isLoaded) {
-        throw new Error(`You can't register new actions outside of the bootstrap function.`);
-      }
+      assertCanRegister();
 
       validateRegisterProviderAction([actionAttributes]);
 
@@ -39,10 +52,23 @@ const createActionProvider = (options?: Options) => {
       return provider.register(action.actionId, action);
     },
 
+    /**
+     * Prevents new registrations. The admin calls it before it deletes the stored permissions
+     * whose action is not registered, so an action registered later can't lose its permissions.
+     */
+    lock() {
+      isLocked = true;
+    },
+
+    async clear() {
+      isLocked = false;
+      await provider.clear();
+
+      return this;
+    },
+
     async registerMany(actionsAttributes: CreateActionPayload[]) {
-      if (strapi.isLoaded) {
-        throw new Error(`You can't register new actions outside of the bootstrap function.`);
-      }
+      assertCanRegister();
 
       validateRegisterProviderAction(actionsAttributes);
 

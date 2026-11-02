@@ -202,6 +202,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Actions can still be registered in the app bootstrap, which runs after the admin one
   strapi.hook('strapi::app.afterBootstrap').register(async () => {
+    // An action registered after the cleanup would lose its permissions, so registering throws
+    permissionService.actionProvider.lock();
+
     await roleService.resetSuperAdminPermissions();
     await permissionService.cleanPermissionsInDatabase();
   });

@@ -18,8 +18,16 @@ const bootstrapPhaseAction = {
   category: 'app bootstrap test',
 };
 
+const removedAction = {
+  uid: 'app-removed.read',
+  displayName: 'Read (removed from the app on the next start)',
+  section: 'settings',
+  category: 'app bootstrap test',
+};
+
 const registerPhaseActionId = `api::${registerPhaseAction.uid}`;
 const bootstrapPhaseActionId = `api::${bootstrapPhaseAction.uid}`;
+const removedActionId = `api::${removedAction.uid}`;
 
 const getActionProvider = (strapi: StrapiInstance) =>
   strapi.service('admin::permission').actionProvider;
@@ -28,7 +36,7 @@ const getActionProvider = (strapi: StrapiInstance) =>
  * Starts Strapi with one action registered in the app `register` and one registered in the app
  * `bootstrap`, the phase the contributor docs recommend.
  */
-const startStrapi = () =>
+const startStrapi = ({ withRemovedAction = false }: { withRemovedAction?: boolean } = {}) =>
   createStrapiInstance({
     async register({ strapi }: { strapi: StrapiInstance }) {
       // Runs the app lifecycles exactly where Strapi runs `src/index` register and bootstrap
@@ -43,6 +51,10 @@ const startStrapi = () =>
 
         if (lifecycleName === 'bootstrap') {
           await getActionProvider(strapi).register(bootstrapPhaseAction);
+
+          if (withRemovedAction === true) {
+            await getActionProvider(strapi).register(removedAction);
+          }
         }
       };
     },
@@ -97,6 +109,35 @@ describe('Admin permissions of actions registered in the app lifecycles', () => 
     const superAdminRole = await strapi.service('admin::role').getSuperAdmin();
 
     expect(await findPermissionActions(strapi, superAdminRole.id)).toEqual(
+      expect.arrayContaining([registerPhaseActionId, bootstrapPhaseActionId])
+    );
+  });
+
+  test('Stored permission of an action that is no longer registered is deleted after a restart', async () => {
+    await strapi.destroy();
+    strapi = await startStrapi({ withRemovedAction: true });
+
+    await strapi.db.query('admin::permission').create({
+      data: {
+        action: removedActionId,
+        subject: null,
+        properties: {},
+        conditions: [],
+        role: roleId,
+      },
+    });
+
+    expect(await findPermissionActions(strapi, roleId)).toEqual(
+      expect.arrayContaining([removedActionId])
+    );
+
+    await strapi.destroy();
+    strapi = await startStrapi();
+
+    const actions = await findPermissionActions(strapi, roleId);
+
+    expect(actions).not.toContain(removedActionId);
+    expect(actions).toEqual(
       expect.arrayContaining([registerPhaseActionId, bootstrapPhaseActionId])
     );
   });
