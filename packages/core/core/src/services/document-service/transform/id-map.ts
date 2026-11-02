@@ -31,18 +31,18 @@ const encodeKey = (obj: any) => {
 
 interface KeyFields {
   uid: string;
-  documentId: Data.ID;
+  documentId: Data.DocumentID;
   locale?: string | null;
   status?: 'draft' | 'published';
 }
 
 export interface IdMap {
-  loadedIds: Map<string, string>;
+  loadedIds: Map<string, Data.ID>;
   toLoadIds: Map<string, KeyFields>;
   // Make the Keys type to be the params of add
   add(keys: KeyFields): void;
   load(): Promise<void>;
-  get(keys: KeyFields): string | undefined;
+  get(keys: KeyFields): Data.ID | undefined;
   clear(): void;
 }
 

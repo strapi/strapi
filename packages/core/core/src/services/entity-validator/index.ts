@@ -6,7 +6,7 @@
 import { uniqBy, castArray, isNil, mergeWith, get, has, isEmpty, isObject } from 'lodash';
 import jsonLogic from 'json-logic-js';
 import * as strapiUtils from '@strapi/utils';
-import type { Modules, UID, Struct, Schema } from '@strapi/types';
+import type { Data, Modules, UID, Struct, Schema } from '@strapi/types';
 import { Validators, ValidatorMetas } from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';
@@ -16,16 +16,16 @@ const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUti
 const { isAnyToOne } = strapiUtils.relations;
 const { ValidationError } = strapiUtils.errors;
 
-type ID = { id: string | number };
+type ID = { id: Data.ID };
 
-type RelationSource = string | number | ID;
+type RelationSource = Data.ID | ID;
 
 export type ComponentContext = {
   parentContent: {
     // The model of the parent content type that contains the current component.
     model: Struct.Schema;
     // The numeric id of the parent entity that contains the component.
-    id?: number;
+    id?: Data.ID;
     // The options passed to the entity validator. From which we can extract
     // entity dimensions such as locale and publication state.
     options?: ValidatorContext;

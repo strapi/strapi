@@ -1,4 +1,5 @@
 import type { Context } from 'koa';
+import type { Data } from '@strapi/types';
 
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
@@ -33,7 +34,7 @@ export const checkExpiry = (apiToken: {
 };
 
 export const updateLastUsedAt = async (apiToken: {
-  id: number | string;
+  id: Data.ID;
   lastUsedAt?: string | null;
 }): Promise<void> => {
   const currentDate = new Date();

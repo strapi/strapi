@@ -1,5 +1,5 @@
 import { errors, contentTypes, async as asyncPipe, setCreatorFields } from '@strapi/utils';
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Core, Data, Modules, UID } from '@strapi/types';
 
 import { getService } from '../../utils';
 import { getDocumentLocaleAndStatus } from '../../controllers/validation/dimensions';
@@ -41,7 +41,7 @@ type CollectionListArgs = {
 };
 
 type DocumentLocaleArgs = {
-  documentId: string;
+  documentId: Data.DocumentID;
   locale?: string;
 };
 

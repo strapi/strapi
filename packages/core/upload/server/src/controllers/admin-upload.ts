@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { errors, async } from '@strapi/utils';
 
 import type { Context } from 'koa';
+import type { Data } from '@strapi/types';
 
 import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
@@ -36,7 +37,7 @@ export default {
 
     const results = await async.map(
       updates,
-      async ({ id, fileInfo }: { id: number; fileInfo: FileInfo }) => {
+      async ({ id, fileInfo }: { id: Data.ID; fileInfo: FileInfo }) => {
         const { pm } = await findEntityAndCheckPermissions(
           userAbility,
           ACTIONS.update,
@@ -347,7 +348,7 @@ export default {
     }
 
     // Parse and validate request body
-    const { urls, folderId } = body as { urls?: string[]; folderId?: number | null };
+    const { urls, folderId } = body as { urls?: string[]; folderId?: Data.ID | null };
 
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
       throw new errors.ApplicationError('URLs are required');

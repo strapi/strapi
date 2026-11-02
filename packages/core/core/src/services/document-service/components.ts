@@ -1116,7 +1116,7 @@ const PARENT_LOOKUP_BATCH_SIZE = 500;
  */
 const findComponentParents = async (
   componentSchema: Schema.Component,
-  componentIds: (number | string)[],
+  componentIds: Data.ID[],
   parentSchemasForComponent: (Schema.ContentType | Schema.Component)[],
   opts?: { trx?: any }
 ): Promise<Map<string, ComponentParent>> => {
@@ -1187,7 +1187,7 @@ const findComponentParents = async (
  */
 const findComponentParent = async (
   componentSchema: Schema.Component,
-  componentId: number | string,
+  componentId: Data.ID,
   parentSchemasForComponent: (Schema.ContentType | Schema.Component)[],
   opts?: { trx?: any }
 ): Promise<ComponentParent | null> => {
@@ -1233,7 +1233,7 @@ const getParentSchemasForComponent = (
  */
 const findInstancesOwnedByDraftAndPublishEntries = async (
   componentSchema: Schema.Component,
-  componentIds: (number | string)[],
+  componentIds: Data.ID[],
   trx: any
 ): Promise<Set<string>> => {
   const ownedIds = new Set<string>();
@@ -1250,7 +1250,7 @@ const findInstancesOwnedByDraftAndPublishEntries = async (
   // Instances nested in another component, grouped by that component and its instance id
   const nestedInstances = new Map<
     UID.Component,
-    Map<string, { parentId: number | string; componentIds: string[] }>
+    Map<string, { parentId: Data.ID; componentIds: string[] }>
   >();
 
   for (const [componentId, parent] of parents) {

@@ -1,9 +1,10 @@
 import { toString } from 'lodash';
 import { errors } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
-const ssoCheckRolesIdForDeletion = async (ids: any) => {
+const ssoCheckRolesIdForDeletion = async (ids: Data.ID[]) => {
   const adminStore = await strapi.store({ type: 'core', name: 'admin' });
 
   const {

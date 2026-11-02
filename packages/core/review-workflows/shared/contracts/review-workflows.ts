@@ -1,4 +1,4 @@
-import type { UID, Modules } from '@strapi/types';
+import type { Data, UID, Modules } from '@strapi/types';
 import type { Permission } from '@strapi/admin/strapi-admin';
 import type { errors } from '@strapi/utils';
 
@@ -32,7 +32,7 @@ interface StagePermission extends Omit<
   Permission,
   'createdAt' | 'updatedAt' | 'properties' | 'conditions'
 > {
-  role: number;
+  role: Data.ID;
 }
 
 interface Stage extends Entity {

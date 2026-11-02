@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { getAdminService } from '../utils';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
@@ -16,7 +16,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return null;
     }
 
-    return (requestState.user?.roles as { id: number; code: string }[] | undefined) ?? null;
+    return (requestState.user?.roles as { id: Data.ID; code: string }[] | undefined) ?? null;
   };
 
   return {
@@ -25,9 +25,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       action,
       fromStage,
     }: {
-      roleId: number;
+      roleId: Data.ID;
       action: string;
-      fromStage: number;
+      fromStage: Data.ID;
     }) {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
@@ -44,7 +44,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // TODO: Filter response
       return permissions;
     },
-    async registerMany(permissions: { roleId: number; action: string; fromStage: number }[]) {
+    async registerMany(permissions: { roleId: Data.ID; action: string; fromStage: Data.ID }[]) {
       return async.map(permissions, this.register);
     },
     async registerTo({
@@ -52,9 +52,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       action,
       toStage,
     }: {
-      roleId: number;
+      roleId: Data.ID;
       action: string;
-      toStage: number;
+      toStage: Data.ID;
     }) {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
@@ -70,14 +70,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       return permissions;
     },
-    async registerManyTo(permissions: { roleId: number; action: string; toStage: number }[]) {
+    async registerManyTo(permissions: { roleId: Data.ID; action: string; toStage: Data.ID }[]) {
       return async.map(permissions, this.registerTo);
     },
-    async unregister(permissions: { id: number }[]) {
+    async unregister(permissions: { id: Data.ID }[]) {
       const permissionIds = permissions.map((permission) => permission?.id);
       await permissionService.deleteByIds(permissionIds);
     },
-    can(action: string, fromStage: number) {
+    can(action: string, fromStage: Data.ID) {
       const requestState = strapi.requestContext.get()?.state;
 
       if (!requestState) {
@@ -98,7 +98,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         params: { from: fromStage },
       });
     },
-    async canTransitionToStage(toStageId: number) {
+    async canTransitionToStage(toStageId: Data.ID) {
       const userRoles = getUserRoles();
       if (!userRoles) {
         return false;
@@ -124,7 +124,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * The stage must already have its permissions populated with roles.
      */
     canTransitionToStageWithPermissions(stage: {
-      permissions?: { actionParameters?: { to?: number }; role?: { id: number } | number }[];
+      permissions?: { actionParameters?: { to?: Data.ID }; role?: { id: Data.ID } | Data.ID }[];
     }) {
       const userRoles = getUserRoles();
       if (!userRoles) {
@@ -136,12 +136,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const toPermissions = (stage.permissions || []).filter(
-        (p: { actionParameters?: { to?: number } }) => p.actionParameters?.to
+        (p: { actionParameters?: { to?: Data.ID } }) => p.actionParameters?.to
       );
 
       const userRoleIds = new Set(userRoles.map((role) => role.id));
 
-      return toPermissions.some((p: { role?: { id: number } | number }) => {
+      return toPermissions.some((p: { role?: { id: Data.ID } | Data.ID }) => {
         const roleId = typeof p.role === 'object' ? p.role?.id : p.role;
         return roleId !== undefined && userRoleIds.has(roleId);
       });

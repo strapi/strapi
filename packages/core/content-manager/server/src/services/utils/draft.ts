@@ -1,7 +1,7 @@
 import { castArray } from 'lodash';
 
 import * as strapiUtils from '@strapi/utils';
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 
 import { type DraftRelationCounts, isBidirectionalManyToMany } from './draft-relations';
 
@@ -9,7 +9,7 @@ const { isVisibleAttribute, hasDraftAndPublish } = strapiUtils.contentTypes;
 
 type DraftRelationLinkRef = {
   targetUid: UID.Schema;
-  documentId: string;
+  documentId: Data.DocumentID;
   locale?: string | null;
 };
 
@@ -18,7 +18,7 @@ type CollectedDraftRelationLinks = {
   xToOneLinks: DraftRelationLinkRef[];
 };
 
-const toPublishedDocumentKey = (documentId: string, locale?: string | null) =>
+const toPublishedDocumentKey = (documentId: Data.DocumentID, locale?: string | null) =>
   `${documentId}:${locale ?? ''}`;
 
 const mergeCollectedLinks = (
@@ -30,7 +30,7 @@ const mergeCollectedLinks = (
 });
 
 const toDraftRelationLink = (
-  entry: { documentId?: string; locale?: string | null },
+  entry: { documentId?: Data.DocumentID; locale?: string | null },
   targetUid: UID.Schema,
   targetIsLocalized: boolean,
   documentLocale?: string | null

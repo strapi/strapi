@@ -1,5 +1,5 @@
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Data, Schema } from '@strapi/types';
 
 import { getBatchToDiscard } from './database/5.0.0-discard-drafts';
 
@@ -36,7 +36,7 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) =
         !contentTypesUtils.hasDraftAndPublish(oldContentType) &&
         contentTypesUtils.hasDraftAndPublish(contentType)
       ) {
-        const discardDraft = async (entry: { documentId: string; locale: string }) =>
+        const discardDraft = async (entry: { documentId: Data.DocumentID; locale: string }) =>
           strapi
             .documents(uid as any)
             // Discard draft by referencing the documentId and locale

@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { Database } from '@strapi/database';
+import type { Data } from '@strapi/types';
 
 import {
   AI_METADATA_JOB_HEARTBEAT_INTERVAL_MS,
@@ -23,7 +24,7 @@ describe('AI metadata jobs service', () => {
   const log = { warn: jest.fn(), error: jest.fn() };
 
   /** A job left `processing`, whose server last wrote its heartbeat `ageMs` ago */
-  const createProcessingJob = async (ageMs: number | null): Promise<number> => {
+  const createProcessingJob = async (ageMs: number | null): Promise<Data.ID> => {
     const jobId = await service.createJob();
     await service.updateJob(jobId, {
       heartbeatAtMs: ageMs === null ? null : Date.now() - ageMs,
@@ -180,7 +181,7 @@ describe('AI metadata jobs service', () => {
       jest.useRealTimers();
     });
 
-    const heartbeatOf = async (jobId: number) =>
+    const heartbeatOf = async (jobId: Data.ID) =>
       Number(((await service.getJob(jobId)) as AIMetadataJob).heartbeatAtMs);
 
     it('writes the heartbeat of a running job at each interval, and stops when told to', async () => {

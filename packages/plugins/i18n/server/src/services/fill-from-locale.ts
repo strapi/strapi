@@ -1,5 +1,5 @@
 import { contentTypes } from '@strapi/utils';
-import type { UID, Schema, Core } from '@strapi/types';
+import type { UID, Schema, Core, Data } from '@strapi/types';
 
 const READ_ACTION = 'plugin::content-manager.explorer.read';
 const TEMP_KEY_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -113,17 +113,17 @@ const normalizeToArray = (value: unknown): unknown[] => {
  */
 const isValidRelation = (
   rel: unknown
-): rel is { documentId: string; id?: number; locale?: string } =>
+): rel is { documentId: Data.DocumentID; id?: Data.ID; locale?: string } =>
   typeof rel === 'object' && rel !== null && 'documentId' in rel && !!(rel as any).documentId;
 
 /**
  * Maps relations from the source locale to target locale (batched for better performance).
  */
 const resolveRelationsForLocaleBatch = async (
-  relations: Array<{ documentId: string; id?: number; locale?: string }>,
+  relations: Array<{ documentId: Data.DocumentID; id?: Data.ID; locale?: string }>,
   targetUid: UID.Schema,
   targetLocale: string
-): Promise<Array<{ documentId: string; id: number | string; locale?: string } | null>> => {
+): Promise<Array<{ documentId: Data.DocumentID; id: Data.ID; locale?: string } | null>> => {
   const i18nContentTypesService = strapi.plugin('i18n')?.service('content-types');
   const isTargetLocalized = i18nContentTypesService?.isLocalizedContentType(
     strapi.getModel(targetUid)
@@ -142,7 +142,7 @@ const resolveRelationsForLocaleBatch = async (
     select: [...STATUS_FIELDS],
   };
   const targetEntries = await strapi.db.query(targetUid).findMany(targetEntriesQuery);
-  const byDocumentId = new Map<string, (typeof targetEntries)[0]>();
+  const byDocumentId = new Map<Data.DocumentID, (typeof targetEntries)[0]>();
   for (const e of targetEntries) {
     const existing = byDocumentId.get(e.documentId);
     if (!existing || (e.publishedAt === null && existing.publishedAt !== null)) {
@@ -165,11 +165,11 @@ const resolveRelationsForLocaleBatch = async (
  * Builds the where clause for relation queries: documentIds + locales (when target model is localized).
  */
 const buildWhereForRelations = (
-  relations: Array<{ documentId: string; locale?: string }>,
-  documentIds: string[],
+  relations: Array<{ documentId: Data.DocumentID; locale?: string }>,
+  documentIds: Data.DocumentID[],
   targetUid: UID.Schema
-): { documentId: { $in: string[] }; locale?: { $in: string[] } } => {
-  const where: { documentId: { $in: string[] }; locale?: { $in: string[] } } = {
+): { documentId: { $in: Data.DocumentID[] }; locale?: { $in: string[] } } => {
+  const where: { documentId: { $in: Data.DocumentID[] }; locale?: { $in: string[] } } = {
     documentId: { $in: documentIds },
   };
   const i18nContentTypesService = strapi.plugin('i18n')?.service('content-types');
@@ -189,15 +189,15 @@ const buildWhereForRelations = (
 // Batch pre-resolution
 // ---------------------------------------------------------------------------
 
-type ValidRelation = { documentId: string; id?: number; locale?: string };
-type ResolvedRelation = { documentId: string; id: number | string; locale?: string };
+type ValidRelation = { documentId: Data.DocumentID; id?: Data.ID; locale?: string };
+type ResolvedRelation = { documentId: Data.DocumentID; id: Data.ID; locale?: string };
 type RelationsByUid = Map<string, ValidRelation[]>;
 
 interface UidResolutionData {
   blocked: boolean;
   mainField: string;
   /** sourceDocumentId → resolved entry in targetLocale (null if not found) */
-  bySourceDocumentId: Map<string, ResolvedRelation | null>;
+  bySourceDocumentId: Map<Data.DocumentID, ResolvedRelation | null>;
   /** resolvedEntry.id → status string */
   statusById: Map<number | string, string | undefined>;
   /** resolvedEntry.id → mainField value */
@@ -299,7 +299,7 @@ const resolveAllRelationsBatched = async (
         targetLocale
       );
 
-      const bySourceDocumentId = new Map<string, ResolvedRelation | null>();
+      const bySourceDocumentId = new Map<Data.DocumentID, ResolvedRelation | null>();
       for (let i = 0; i < uniqueRels.length; i += 1) {
         bySourceDocumentId.set(uniqueRels[i].documentId, resolvedList[i]);
       }
@@ -340,7 +340,7 @@ const resolveAllRelationsBatched = async (
             .plugin('i18n')
             ?.service('content-types')
             ?.isLocalizedContentType(model);
-          const groupKey = (e: { documentId: string; locale?: string }) =>
+          const groupKey = (e: { documentId: Data.DocumentID; locale?: string }) =>
             isLocalized && e.locale ? `${e.documentId}:${e.locale}` : e.documentId;
 
           const byGroup = new Map<string, typeof allStatusEntries>();
@@ -522,7 +522,11 @@ export const createFillFromLocaleService = ({ strapi }: { strapi: Core.Strapi })
      * Fetch the raw populated document for the given locale without any transformation.
      * The caller is responsible for sanitizing the output before passing it to transformDocument.
      */
-    async fetchRawDocument(model: UID.ContentType, sourceLocale: string, documentId?: string) {
+    async fetchRawDocument(
+      model: UID.ContentType,
+      sourceLocale: string,
+      documentId?: Data.DocumentID
+    ) {
       const populateBuilderService = strapi
         .plugin('content-manager')
         .service('populate-builder') as (uid: UID.ContentType) => {

@@ -19,6 +19,7 @@ import type { Migration } from '../common';
 import { createHeartbeatLogger, type HeartbeatLogger } from '../heartbeat';
 import type { Database } from '../..';
 import type { Meta } from '../../metadata';
+import type { ID } from '../../types';
 
 function getBatchSize(trx: Knex, defaultSize: number = 1000): number {
   const client = trx.client.config.client;
@@ -29,16 +30,16 @@ function getBatchSize(trx: Knex, defaultSize: number = 1000): number {
 
 // Union-find (disjoint-set) helpers used to cluster localization-linked rows in memory.
 // Path-compressing `find` keeps repeated lookups close to O(1) amortized.
-const find = (parent: Map<number, number>, start: number): number => {
+const find = (parent: Map<ID, ID>, start: ID): ID => {
   let current = start;
   while (parent.get(current) !== current) {
-    parent.set(current, parent.get(parent.get(current) as number) as number);
-    current = parent.get(current) as number;
+    parent.set(current, parent.get(parent.get(current) as ID) as ID);
+    current = parent.get(current) as ID;
   }
   return current;
 };
 
-const union = (parent: Map<number, number>, a: number, b: number): void => {
+const union = (parent: Map<ID, ID>, a: ID, b: ID): void => {
   const rootA = find(parent, a);
   const rootB = find(parent, b);
   if (rootA !== rootB) {
@@ -79,9 +80,9 @@ const migrateDocumentIdsWithLocalizations = async (
   const joinTableName = snakeCase(`${meta.tableName}_localizations_links`);
   const batchSize = getBatchSize(knex);
 
-  const pendingIds: number[] = (
-    await knex(meta.tableName).select('id').whereNull('document_id')
-  ).map((row: { id: number }) => row.id);
+  const pendingIds: ID[] = (await knex(meta.tableName).select('id').whereNull('document_id')).map(
+    (row: { id: ID }) => row.id
+  );
 
   if (pendingIds.length === 0) {
     return;
@@ -93,7 +94,7 @@ const migrateDocumentIdsWithLocalizations = async (
   // row's sibling may already be migrated, in which case it appears as the other column.
   // Batched because passing all ids in a single `whereIn` can exceed the database
   // driver's bound-parameter limit on large tables.
-  const links: Array<Record<string, number>> = [];
+  const links: Array<Record<string, ID>> = [];
   for (let i = 0; i < pendingIds.length; i += batchSize) {
     const idChunk = pendingIds.slice(i, i + batchSize);
     const chunkLinks = await knex(joinTableName)
@@ -105,7 +106,7 @@ const migrateDocumentIdsWithLocalizations = async (
 
   // Ids referenced by a link that aren't pending are already-migrated neighbors — look up
   // their document_id so a retry can adopt it instead of minting a new one.
-  const neighborIds = new Set<number>();
+  const neighborIds = new Set<ID>();
   for (const link of links) {
     const a = link[joinColumn];
     const b = link[inverseJoinColumn];
@@ -113,11 +114,11 @@ const migrateDocumentIdsWithLocalizations = async (
     if (!pendingIdSet.has(b)) neighborIds.add(b);
   }
 
-  const existingDocumentIds = new Map<number, string>();
+  const existingDocumentIds = new Map<ID, string>();
   const neighborIdList = [...neighborIds];
   for (let i = 0; i < neighborIdList.length; i += batchSize) {
     const idChunk = neighborIdList.slice(i, i + batchSize);
-    const rows: Array<{ id: number; document_id: string | null }> = await knex(meta.tableName)
+    const rows: Array<{ id: ID; document_id: string | null }> = await knex(meta.tableName)
       .select('id', 'document_id')
       .whereIn('id', idChunk);
     for (const row of rows) {
@@ -127,7 +128,7 @@ const migrateDocumentIdsWithLocalizations = async (
     }
   }
 
-  const parent = new Map<number, number>();
+  const parent = new Map<ID, ID>();
   for (const id of pendingIds) {
     parent.set(id, id);
   }
@@ -142,7 +143,7 @@ const migrateDocumentIdsWithLocalizations = async (
     }
   }
 
-  const clusters = new Map<number, number[]>();
+  const clusters = new Map<ID, ID[]>();
   for (const id of parent.keys()) {
     const root = find(parent, id);
     const cluster = clusters.get(root);
@@ -155,7 +156,7 @@ const migrateDocumentIdsWithLocalizations = async (
 
   // Group pending writes by target document_id — one write per cluster instead of one
   // per row shrinks the window for a crash to leave a cluster half-written.
-  const writeGroups = new Map<string, number[]>();
+  const writeGroups = new Map<string, ID[]>();
   for (const members of clusters.values()) {
     const existingIdsInCluster = new Set<string>();
     for (const id of members) {

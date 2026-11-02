@@ -1,7 +1,7 @@
 import { Writable } from 'stream';
 import { omit } from 'lodash';
 import chalk from 'chalk';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { IConfiguration, Transaction } from '../../../../../types';
 import { restoreProjectSettingsRow } from '../../../../utils/project-settings-logos';
@@ -44,7 +44,7 @@ export const createConfigurationWriteStream = async (
 ) => {
   return new Writable({
     objectMode: true,
-    async write<T extends { id: number }>(
+    async write<T extends { id: Data.ID }>(
       config: IConfiguration<T>,
       _encoding: BufferEncoding,
       callback: (error?: Error | null) => void

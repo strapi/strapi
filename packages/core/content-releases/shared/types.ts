@@ -20,7 +20,7 @@ export interface UserInfo extends Entity {
 }
 
 export interface Entity {
-  documentId: string;
+  documentId: Data.DocumentID;
   id: Data.ID;
   createdAt: string;
   updatedAt: string;

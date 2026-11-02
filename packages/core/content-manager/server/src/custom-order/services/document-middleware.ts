@@ -1,4 +1,4 @@
-import type { Modules, UID } from '@strapi/types';
+import type { Data, Modules, UID } from '@strapi/types';
 import { omit } from 'lodash';
 
 import { POSITION_ATTRIBUTE } from '../constants';
@@ -9,14 +9,14 @@ type Context = Modules.Documents.Middleware.Context;
 interface Params {
   sort?: unknown;
   data?: Record<string, unknown>;
-  documentId?: string;
+  documentId?: Modules.Documents.ID;
 }
 
 interface CustomOrder {
   isOrderable(uid: string): boolean;
   isEnabled(uid: string): boolean;
   getTopPosition(uid: UID.ContentType): Promise<number>;
-  syncDocumentPosition(uid: UID.ContentType, documentId: string): Promise<void>;
+  syncDocumentPosition(uid: UID.ContentType, documentId: Data.DocumentID): Promise<void>;
   withOrderLock<T>(uid: UID.ContentType, fn: () => Promise<T>): Promise<T>;
 }
 

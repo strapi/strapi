@@ -752,7 +752,7 @@ const flattenTokenPermissions = (permissions: { action: string }[] | undefined):
 };
 
 type WhereParams = {
-  id?: string | number;
+  id?: Data.ID;
   name?: string;
   lastUsedAt?: number;
   description?: string;
@@ -1049,7 +1049,7 @@ const create = async <K extends AnyApiToken['kind']>(
   } as any;
 };
 
-const regenerate = async (id: string | number): Promise<ContentApiApiToken | AdminApiToken> => {
+const regenerate = async (id: Data.ID): Promise<ContentApiApiToken | AdminApiToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
   const encryptionService = getService('encryption');
   const encryptedKey = encryptionService.encrypt(accessKey);
@@ -1165,7 +1165,7 @@ const list = async <K extends AnyApiToken['kind']>(
 /**
  * Revoke (delete) a token
  */
-const revoke = async (id: string | number): Promise<AnyApiToken> => {
+const revoke = async (id: Data.ID): Promise<AnyApiToken> => {
   const token = await strapi.db.query('admin::api-token').findOne({
     where: { id },
     select: ['id'],
@@ -1221,7 +1221,7 @@ const revoke = async (id: string | number): Promise<AnyApiToken> => {
 /**
  * Retrieve a token by id
  */
-const getById = async (id: string | number, options?: GetByOptions) => {
+const getById = async (id: Data.ID, options?: GetByOptions) => {
   return getBy({ id }, options);
 };
 
@@ -1237,7 +1237,7 @@ const getByName = async (name: string, options?: GetByOptions) => {
  * token the request is made with, if any: an admin token cannot grant more than it holds.
  */
 const update = async (
-  id: string | number,
+  id: Data.ID,
   attributes: Update.Request['body'],
   callingTokenPermissions?: CeilingPermission[]
 ): Promise<AnyApiToken> => {
@@ -1521,14 +1521,11 @@ interface SharedTokenMethods {
 export interface ContentApiTokenService extends SharedTokenMethods {
   create(attributes: ContentApiApiTokenBody, callingUser?: AdminUser): Promise<ContentApiApiToken>;
   list(callingUser: AdminUser): Promise<ContentApiApiToken[]>;
-  getById(id: string | number, options?: GetByOptions): Promise<ContentApiApiToken | null>;
+  getById(id: Data.ID, options?: GetByOptions): Promise<ContentApiApiToken | null>;
   getByName(name: string, options?: GetByOptions): Promise<ContentApiApiToken | null>;
-  update(
-    id: string | number,
-    attributes: Partial<ContentApiApiTokenBody>
-  ): Promise<ContentApiApiToken>;
-  revoke(id: string | number): Promise<ContentApiApiToken>;
-  regenerate(id: string | number): Promise<ContentApiApiToken>;
+  update(id: Data.ID, attributes: Partial<ContentApiApiTokenBody>): Promise<ContentApiApiToken>;
+  revoke(id: Data.ID): Promise<ContentApiApiToken>;
+  regenerate(id: Data.ID): Promise<ContentApiApiToken>;
   exists(where: WhereParams): Promise<boolean>;
   count(where?: object): Promise<number>;
 }
@@ -1541,15 +1538,15 @@ export interface AdminTokenService extends SharedTokenMethods {
     callingTokenPermissions?: CeilingPermission[]
   ): Promise<AdminApiToken>;
   list(callingUser: AdminUser): Promise<AdminApiToken[]>;
-  getById(id: string | number, options?: GetByOptions): Promise<AdminApiToken | null>;
+  getById(id: Data.ID, options?: GetByOptions): Promise<AdminApiToken | null>;
   getByName(name: string, options?: GetByOptions): Promise<AdminApiToken | null>;
   update(
-    id: string | number,
+    id: Data.ID,
     attributes: Partial<AdminTokenBody>,
     callingTokenPermissions?: CeilingPermission[]
   ): Promise<AdminApiToken>;
-  revoke(id: string | number): Promise<AdminApiToken>;
-  regenerate(id: string | number): Promise<AdminApiToken>;
+  revoke(id: Data.ID): Promise<AdminApiToken>;
+  regenerate(id: Data.ID): Promise<AdminApiToken>;
   exists(where: WhereParams): Promise<boolean>;
   count(where?: object): Promise<number>;
   assignAdminPermissionsToToken(
@@ -1589,7 +1586,7 @@ function createTokenService(
         create({ ...attributes, kind: 'content-api' }, callingUser) as Promise<ContentApiApiToken>,
       list: (callingUser: AdminUser) =>
         list(callingUser, { filter: { kind: 'content-api' } }) as Promise<ContentApiApiToken[]>,
-      getById: (id: string | number, options?: GetByOptions) =>
+      getById: (id: Data.ID, options?: GetByOptions) =>
         getBy(
           {
             $and: [{ id }, { $or: [{ kind: 'content-api' }, { kind: { $null: true } }] }],
@@ -1603,10 +1600,10 @@ function createTokenService(
           } as any,
           options
         ) as Promise<ContentApiApiToken | null>,
-      update: (id: string | number, attributes: Partial<ContentApiApiTokenBody>) =>
+      update: (id: Data.ID, attributes: Partial<ContentApiApiTokenBody>) =>
         update(id, attributes) as Promise<ContentApiApiToken>,
-      revoke: (id: string | number) => revoke(id) as Promise<ContentApiApiToken>,
-      regenerate: (id: string | number) => regenerate(id) as Promise<ContentApiApiToken>,
+      revoke: (id: Data.ID) => revoke(id) as Promise<ContentApiApiToken>,
+      regenerate: (id: Data.ID) => regenerate(id) as Promise<ContentApiApiToken>,
       exists,
       count,
     };
@@ -1628,17 +1625,17 @@ function createTokenService(
       ) as Promise<AdminApiToken>,
     list: (callingUser: AdminUser) =>
       list(callingUser, { filter: { kind: 'admin' } }) as Promise<AdminApiToken[]>,
-    getById: (id: string | number, options?: GetByOptions) =>
+    getById: (id: Data.ID, options?: GetByOptions) =>
       getBy({ id, kind: 'admin' }, options) as Promise<AdminApiToken | null>,
     getByName: (name: string, options?: GetByOptions) =>
       getBy({ name, kind: 'admin' }, options) as Promise<AdminApiToken | null>,
     update: (
-      id: string | number,
+      id: Data.ID,
       attributes: Partial<AdminTokenBody>,
       callingTokenPermissions?: CeilingPermission[]
     ) => update(id, attributes, callingTokenPermissions) as Promise<AdminApiToken>,
-    revoke: (id: string | number) => revoke(id) as Promise<AdminApiToken>,
-    regenerate: (id: string | number) => regenerate(id) as Promise<AdminApiToken>,
+    revoke: (id: Data.ID) => revoke(id) as Promise<AdminApiToken>,
+    regenerate: (id: Data.ID) => regenerate(id) as Promise<AdminApiToken>,
     exists,
     count,
     assignAdminPermissionsToToken,

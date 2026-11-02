@@ -8,6 +8,7 @@ import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 import fse from 'fs-extra';
 import { cloneDeep } from 'lodash';
 import { async, errors, file as fileUtils } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
@@ -269,7 +270,7 @@ const fetchUrlToInputFile = async (
   return { file: fetchedFile };
 };
 
-const getFolderPath = async (folderId?: number | null) => {
+const getFolderPath = async (folderId?: Data.ID | null) => {
   if (!folderId) return '/';
 
   const parentFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id: folderId } });
@@ -283,7 +284,7 @@ const getFolderPath = async (folderId?: number | null) => {
   return parentFolder.path;
 };
 
-const deleteByIds = async (ids: number[] = []) => {
+const deleteByIds = async (ids: Data.ID[] = []) => {
   const filesToDelete = await strapi.db
     .query(FILE_MODEL_UID)
     .findMany({ where: { id: { $in: ids } } });

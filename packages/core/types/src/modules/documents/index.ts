@@ -1,4 +1,4 @@
-import type { UID } from '../..';
+import type { Data, UID } from '../..';
 import type * as Middleware from './middleware';
 import type { ServiceInstance } from './service-instance';
 import type { AnyDocument } from './result';
@@ -10,7 +10,7 @@ export * from './plugin';
 export * from './result';
 export * from './service-instance';
 
-export type ID = string;
+export type ID = Data.DocumentID;
 
 type ServiceUtils = {
   transformData: (data: any, opts: any) => Promise<AnyDocument>;

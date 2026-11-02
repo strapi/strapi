@@ -1,5 +1,5 @@
 import { Writable, Readable } from 'stream';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import type { IAsset, IFile } from '../../../types';
 import type { Transaction } from '../../../types/utils';
@@ -7,7 +7,7 @@ import type { Transaction } from '../../../types/utils';
 export interface CreateAssetsDestinationWritableOptions {
   strapi: Core.Strapi;
   transaction: Transaction;
-  resolveUploadFileId: (metadata: { id: number }) => number | undefined;
+  resolveUploadFileId: (metadata: { id: Data.ID }) => Data.ID | undefined;
   restoreMediaEntitiesContent: boolean;
   removeAssetsBackup: () => Promise<void>;
 }

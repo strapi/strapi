@@ -1,4 +1,5 @@
 import '@strapi/types';
+import type { Data } from '@strapi/types';
 
 export const sendDidCreateStage = async () => {
   strapi.telemetry.send('didCreateStage', {});
@@ -17,20 +18,20 @@ export const sendDidChangeEntryStage = async () => {
 };
 
 export const sendDidCreateWorkflow = async (
-  workflowId: string,
+  workflowId: Data.ID,
   hasRequiredStageToPublish: boolean
 ) => {
   strapi.telemetry.send('didCreateWorkflow', { workflowId, hasRequiredStageToPublish });
 };
 
 export const sendDidEditWorkflow = async (
-  workflowId: string,
+  workflowId: Data.ID,
   hasRequiredStageToPublish: boolean
 ) => {
   strapi.telemetry.send('didEditWorkflow', { workflowId, hasRequiredStageToPublish });
 };
 
-export const sendDidEditAssignee = async (fromId: any, toId: any) => {
+export const sendDidEditAssignee = async (fromId: Data.ID | null, toId: Data.ID | null) => {
   strapi.telemetry.send('didEditAssignee', { from: fromId, to: toId });
 };
 

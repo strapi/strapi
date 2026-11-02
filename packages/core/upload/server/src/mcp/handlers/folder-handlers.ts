@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Data, Modules } from '@strapi/types';
 
 import { getFolderService } from '../ambient-instance';
 import { ACTIONS, FOLDER_MODEL_UID, FILE_MODEL_UID } from '../../constants';
@@ -21,21 +21,21 @@ import type { Folder } from '../../types';
 // input schema before the handler runs, so unknown keys never reach here.
 type CreateFolderArgs = {
   name: string;
-  parent?: number | null;
+  parent?: Data.ID | null;
 };
 
 type RenameFolderArgs = {
-  id: number;
+  id: Data.ID;
   name: string;
 };
 
 type MoveFolderArgs = {
-  id: number;
-  parent: number | null;
+  id: Data.ID;
+  parent: Data.ID | null;
 };
 
 type DeleteFolderArgs = {
-  ids: number[];
+  ids: Data.ID[];
   dryRun?: boolean;
 };
 
@@ -49,9 +49,9 @@ type FolderRow = Pick<Folder, 'id' | 'name' | 'path'>;
  */
 const findFolderById = async (
   strapi: Core.Strapi,
-  id: number,
+  id: Data.ID,
   { withParent = false }: { withParent?: boolean } = {}
-): Promise<(FolderRow & { parent?: { id: number } | null }) | null> =>
+): Promise<(FolderRow & { parent?: { id: Data.ID } | null }) | null> =>
   strapi.db.query(FOLDER_MODEL_UID).findOne({
     select: ['id', 'name', 'path'],
     where: { id },
@@ -67,7 +67,7 @@ const findFolderById = async (
  */
 const readFolderForOutput = async (
   strapi: Core.Strapi,
-  id: number,
+  id: Data.ID,
   fallback: Record<string, unknown>
 ) => {
   const row = await strapi.db.query(FOLDER_MODEL_UID).findOne({
@@ -85,7 +85,7 @@ const readFolderForOutput = async (
  *
  * null is the media library root and always valid, so only a numeric id is looked up.
  */
-const assertParentExists = async (strapi: Core.Strapi, parent: number | null | undefined) => {
+const assertParentExists = async (strapi: Core.Strapi, parent: Data.ID | null | undefined) => {
   if (parent === null || parent === undefined) {
     return;
   }
@@ -107,8 +107,8 @@ const assertParentExists = async (strapi: Core.Strapi, parent: number | null | u
 const assertNameAvailable = async (
   strapi: Core.Strapi,
   name: string,
-  parent: number | null,
-  excludeId?: number
+  parent: Data.ID | null,
+  excludeId?: Data.ID
 ) => {
   const filters: Record<string, unknown> = { name, parent: parent ?? null };
 
@@ -130,7 +130,7 @@ const assertNameAvailable = async (
 const assertNotMovedIntoOwnSubtree = async (
   strapi: Core.Strapi,
   folder: FolderRow,
-  parent: number | null
+  parent: Data.ID | null
 ) => {
   if (parent === null) {
     return;

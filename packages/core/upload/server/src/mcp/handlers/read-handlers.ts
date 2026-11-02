@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Data, Modules } from '@strapi/types';
 
 import { getService } from '../../utils';
 import { getFolderService } from '../ambient-instance';
@@ -16,7 +16,7 @@ const DEFAULT_SORT = 'createdAt:DESC';
 // schema before the handler runs, so handlers accept the erased `Record<string, unknown>` the
 // registry hands them and narrow it here.
 type ListMediaArgs = {
-  folderId?: number | null;
+  folderId?: Data.ID | null;
   mime?: string;
   name?: string;
   page?: number;
@@ -25,7 +25,7 @@ type ListMediaArgs = {
 };
 
 type GetMediaArgs = {
-  id: number;
+  id: Data.ID;
 };
 
 /**

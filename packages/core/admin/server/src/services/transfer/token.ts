@@ -4,6 +4,7 @@ import { omit, difference, isEmpty, isNumber } from 'lodash';
 
 import { errors, emitAudit } from '@strapi/utils';
 import '@strapi/types';
+import type { Data } from '@strapi/types';
 import constants from '../constants';
 import { getService } from '../../utils';
 import { AUDITED_EVENTS, getTokenChanges, toActionRefs } from '../../audit-logs/tokens';
@@ -132,7 +133,7 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
  * Update a token and its permissions
  */
 const update = async (
-  id: string | number,
+  id: Data.ID,
   attributes: TokenUpdatePayload
 ): Promise<SanitizedTransferToken> => {
   // Populated with its permissions: the audit row for this update lists what changed,
@@ -227,7 +228,7 @@ const update = async (
 /**
  * Revoke (delete) a token
  */
-const revoke = async (id: string | number): Promise<SanitizedTransferToken> => {
+const revoke = async (id: Data.ID): Promise<SanitizedTransferToken> => {
   const deleted = (await strapi.db.transaction(async () =>
     strapi.db
       .query(TRANSFER_TOKEN_UID)
@@ -250,7 +251,7 @@ const revoke = async (id: string | number): Promise<SanitizedTransferToken> => {
  */
 const getBy = async (
   whereParams = {} as {
-    id?: string | number;
+    id?: Data.ID;
     name?: string;
     lastUsedAt?: number;
     description?: string;
@@ -275,7 +276,7 @@ const getBy = async (
 /**
  * Retrieve a token by id
  */
-const getById = async (id: string | number): Promise<SanitizedTransferToken | null> => {
+const getById = async (id: Data.ID): Promise<SanitizedTransferToken | null> => {
   return getBy({ id });
 };
 
@@ -291,7 +292,7 @@ const getByName = async (name: string): Promise<SanitizedTransferToken | null> =
  */
 const exists = async (
   whereParams = {} as {
-    id?: string | number;
+    id?: Data.ID;
     name?: string;
     lastUsedAt?: number;
     description?: string;
@@ -303,7 +304,7 @@ const exists = async (
   return !!transferToken;
 };
 
-const regenerate = async (id: string | number): Promise<TransferToken> => {
+const regenerate = async (id: Data.ID): Promise<TransferToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
   const transferToken = (await strapi.db.transaction(async () =>
     strapi.db.query(TRANSFER_TOKEN_UID).update({

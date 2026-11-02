@@ -1,3 +1,4 @@
+import type { Data } from '@strapi/types';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
 import { getService } from '../utils';
 
@@ -25,7 +26,7 @@ async function migrateReviewWorkflowStagesTransferToRoles({ oldContentTypes, con
     // Collect the permissions to add and group them by stage id.
     const groupedPermissions = {} as Record<
       number,
-      { roleId: number; toStage: number; action: string }[]
+      { roleId: Data.ID; toStage: Data.ID; action: string }[]
     >;
     roles
       .map((role) => role.id)
@@ -65,11 +66,11 @@ async function migrateReviewWorkflowStagesTransferToRoles({ oldContentTypes, con
       });
 
       const existingPermissionIds = (existingStage?.permissions || []).map(
-        (p: { id: number }) => p.id
+        (p: { id: Data.ID }) => p.id
       );
       const newPermissionIds = stageToPermissions
         .flat()
-        .map((permission: { id: number }) => permission.id);
+        .map((permission: { id: Data.ID }) => permission.id);
 
       // Update the stage with merged permissions (existing "from" + new "to")
       await strapi.db.query(STAGE_MODEL_UID).update({
