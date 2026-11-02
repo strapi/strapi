@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 import Koa from 'koa';
 import request from 'supertest';
 import { errors as utilsErrors } from '@strapi/utils';
@@ -45,17 +45,27 @@ describe('Errors middleware', () => {
   });
 
   test('formats application errors created by another copy of @strapi/utils', async () => {
-    let DuplicateApplicationError: typeof import('@strapi/utils').errors.ApplicationError;
+    // Model an ApplicationError from a second @strapi/utils instance without relying
+    // on Vitest's shared module cache for external packages.
+    class DuplicateApplicationError extends Error {
+      name = 'ApplicationError';
 
-    jest.isolateModules(() => {
-      DuplicateApplicationError =
-        jest.requireActual<typeof import('@strapi/utils')>('@strapi/utils').errors.ApplicationError;
-    });
+      details = {};
+
+      constructor(message: string) {
+        super(message);
+        Object.defineProperty(this, Symbol.for('strapi.ApplicationError'), { value: true });
+      }
+    }
+
+    expect(new DuplicateApplicationError(PLUGIN_ERROR_MESSAGE)).not.toBeInstanceOf(
+      utilsErrors.ApplicationError
+    );
 
     const app = new Koa();
     global.strapi = {
       log: {
-        error: jest.fn(),
+        error: vi.fn(),
       },
     } as typeof global.strapi;
 
@@ -82,7 +92,7 @@ describe('Errors middleware', () => {
     const app = new Koa();
     global.strapi = {
       log: {
-        error: jest.fn(),
+        error: vi.fn(),
       },
     } as typeof global.strapi;
 
@@ -116,6 +126,11 @@ describe('Errors middleware', () => {
 
   test('formats third-party application errors as opaque internal errors', async () => {
     const app = new Koa();
+    global.strapi = {
+      log: {
+        error: vi.fn(),
+      },
+    } as typeof global.strapi;
 
     app.use(errorMiddleware());
     app.use(async () => {
