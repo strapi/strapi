@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 import type { Core } from '@strapi/types';
 
 import {
@@ -100,12 +102,12 @@ const models: Record<string, unknown> = {
 const getModel = (uid: string) => models[uid];
 
 type QueryMocks = {
-  findOne: jest.Mock;
-  update: jest.Mock;
+  findOne: Mock;
+  update: Mock;
 };
 
 const createStrapi = (attributesByUid: Record<string, Record<string, unknown>>) => {
-  const findOne = jest.fn(async ({ where }: { where: { documentId?: string } }) => {
+  const findOne = vi.fn(async ({ where }: { where: { documentId?: string } }) => {
     if (where.documentId === 'missing') {
       return undefined;
     }
@@ -120,7 +122,7 @@ const createStrapi = (attributesByUid: Record<string, Record<string, unknown>>) 
 
     return { id: 7 };
   });
-  const update = jest.fn(async () => ({}));
+  const update = vi.fn(async () => ({}));
   const strapi = {
     getModel,
     localization: {
@@ -137,11 +139,9 @@ const createStrapi = (attributesByUid: Record<string, Record<string, unknown>>) 
         identifiers: { ID_COLUMN: 'id' },
       },
       dialect: { getBatchInsertSize: () => 100 },
-      transaction: jest.fn(async (run: (ctx: { trx: object }) => Promise<void>) =>
-        run({ trx: {} })
-      ),
-      getConnection: jest.fn(),
-      query: jest.fn(() => ({ findOne, update })),
+      transaction: vi.fn(async (run: (ctx: { trx: object }) => Promise<void>) => run({ trx: {} })),
+      getConnection: vi.fn(),
+      query: vi.fn(() => ({ findOne, update })),
     },
   };
 
