@@ -36,13 +36,9 @@ describe('addOutcomesToReleasedReleases', () => {
       where: {
         releasedAt: { $notNull: true },
         totalSkippedEntries: null,
-        $or: [
-          { status: { $in: ['done', 'ready', 'blocked', 'empty'] } },
-          { status: null },
-          { status: 'failed', failureReason: 'failed_before_upgrade' },
-        ],
+        $or: [{ status: { $in: ['done', 'ready', 'blocked', 'empty'] } }, { status: null }],
       },
-      select: ['id', 'status'],
+      select: ['id'],
     });
   });
 
@@ -68,22 +64,6 @@ describe('addOutcomesToReleasedReleases', () => {
         totalUnpublishedEntries: 1,
         totalSkippedEntries: 0,
       },
-    });
-  });
-
-  it('records every entry of a release frozen before upgrade as skipped', async () => {
-    releaseFindMany.mockResolvedValue([{ id: 30, status: 'failed' }]);
-    actionCount.mockResolvedValue(3);
-
-    await addOutcomesToReleasedReleases({ strapi });
-
-    expect(actionUpdateMany.mock.calls).toStrictEqual([
-      [{ where: { release: 30, outcome: null }, data: { outcome: 'skipped_missed' } }],
-    ]);
-    expect(actionCount).toHaveBeenCalledWith({ where: { release: 30 } });
-    expect(releaseUpdate).toHaveBeenCalledWith({
-      where: { id: 30 },
-      data: { totalPublishedEntries: 0, totalUnpublishedEntries: 0, totalSkippedEntries: 3 },
     });
   });
 

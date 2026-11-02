@@ -111,13 +111,11 @@ export async function addReasonsToInvalidActions({ strapi }: { strapi: Core.Stra
   );
 }
 
-// Backfills outcomes and totals for releases that ran before they were recorded:
-// - a release that ran released every entry (a failed run left it planned): each action is marked
-//   released and the release done
-// - a release frozen as `failed_before_upgrade` (by a migration since removed) gets what a missed
-//   run records: every entry skipped
+// Backfills outcomes and totals for releases that ran before they were recorded: a release that
+// ran released every entry (a failed run left it planned), so each action is marked released and
+// the release done
 export async function addOutcomesToReleasedReleases({ strapi }: { strapi: Core.Strapi }) {
-  let releases: Pick<Release, 'id' | 'status'>[];
+  let releases: Pick<Release, 'id'>[];
 
   // Startup waits for this migration: a failed scan is logged instead of stopping it
   try {
@@ -129,10 +127,9 @@ export async function addOutcomesToReleasedReleases({ strapi }: { strapi: Core.S
           // Entry changes used to recalculate a released release's status as if it were planned
           { status: { $in: ['done', 'ready', 'blocked', 'empty'] } },
           { status: null },
-          { status: 'failed', failureReason: 'failed_before_upgrade' },
         ],
       },
-      select: ['id', 'status'],
+      select: ['id'],
     });
   } catch (error: unknown) {
     strapi.log.error('Error while finding releases to add outcomes to', { error });
@@ -162,29 +159,9 @@ export async function addOutcomesToReleasedReleases({ strapi }: { strapi: Core.S
     });
   };
 
-  const addSkippedOutcomes = async (id: Release['id']) => {
-    await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-      where: { release: id, outcome: null },
-      data: { outcome: 'skipped_missed' },
-    });
-
-    await strapi.db.query(RELEASE_MODEL_UID).update({
-      where: { id },
-      data: {
-        totalPublishedEntries: 0,
-        totalUnpublishedEntries: 0,
-        totalSkippedEntries: await strapi.db
-          .query(RELEASE_ACTION_MODEL_UID)
-          .count({ where: { release: id } }),
-      },
-    });
-  };
-
-  for (const { id, status } of releases) {
+  for (const { id } of releases) {
     try {
-      await strapi.db.transaction(() =>
-        status === 'failed' ? addSkippedOutcomes(id) : addReleasedOutcomes(id)
-      );
+      await strapi.db.transaction(() => addReleasedOutcomes(id));
     } catch (error: unknown) {
       strapi.log.error(`Error while adding outcomes to release ${id}`, { error });
     }
