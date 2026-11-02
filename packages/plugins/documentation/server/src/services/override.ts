@@ -37,6 +37,7 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
       const { pluginOrigin, excludeFromGeneration = [] } = opts ?? {};
 
       const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(
+        strapi,
         strapi.config.get('plugin::documentation')
       );
       // Don't apply the override if the plugin is not in the list of plugins that need documentation

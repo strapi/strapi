@@ -342,7 +342,8 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const status = ((): HeaderStatusProps['status'] => {
     if (isAllErrored) return 'error';
     if (isSuccess) return 'success';
-    if (hasCancelledFiles) return 'canceled';
+    // A single file can be cancelled while the rest of the batch keeps going.
+    if (hasCancelledFiles && isComplete) return 'canceled';
 
     return 'uploading';
   })();

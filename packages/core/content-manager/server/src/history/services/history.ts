@@ -1,5 +1,5 @@
 import type { Core, Data, Modules, Schema } from '@strapi/types';
-import { errors, traverseEntity } from '@strapi/utils';
+import { emitAudit, errors, traverseEntity } from '@strapi/utils';
 import { omit } from 'lodash';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
@@ -10,6 +10,7 @@ import type {
 } from '../../../../shared/contracts/history-versions';
 import { createServiceUtils } from './utils';
 import { getService as getContentManagerService } from '../../utils';
+import { AUDITED_EVENTS, type HistoryRestoreEvent } from '../../audit-logs';
 
 // Needed because the query engine doesn't return any types yet
 type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
@@ -181,6 +182,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
+
+      if (version === null) {
+        throw new errors.NotFoundError('History version not found');
+      }
+
       const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
       const schemaDiff = serviceUtils.getSchemaAttributesDiff(
         version.schema,
@@ -265,6 +271,14 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!restoredDocument) {
         throw new errors.ApplicationError('Failed to restore version');
       }
+
+      await emitAudit({ strapi }, AUDITED_EVENTS.ENTRY_HISTORY_RESTORE, {
+        uid: version.contentType,
+        documentId: restoredDocument.documentId,
+        locale: version.locale ?? null,
+        versionId: version.id,
+        versionCreatedAt: new Date(version.createdAt).toISOString(),
+      } satisfies HistoryRestoreEvent);
 
       return restoredDocument;
     },
