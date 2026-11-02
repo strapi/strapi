@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   Accordion,
+  Badge,
   Box,
   BoxComponent,
   Checkbox,
@@ -96,6 +97,12 @@ const Row = ({
   const categoryName = name.split('::').pop() ?? '';
   const categoryDisplayName =
     categoryName === 'upload' ? 'Media Library' : capitalise(categoryName.replace(/-/g, ' '));
+  // The section stays visible and editable: hiding it would drop its grants on the next save
+  const isDisabledByConfig =
+    childrenForm.length > 0 &&
+    childrenForm.every(({ actions }) =>
+      actions.every((action) => 'disabledByConfig' in action && action.disabledByConfig === true)
+    );
 
   return (
     <Accordion.Item value={name}>
@@ -109,6 +116,16 @@ const Row = ({
         >
           {categoryDisplayName}
         </Accordion.Trigger>
+        {isDisabledByConfig === true && (
+          <Accordion.Actions>
+            <Badge>
+              {formatMessage({
+                id: 'Settings.permissions.category.disabled-by-config',
+                defaultMessage: 'Disabled by configuration',
+              })}
+            </Badge>
+          </Accordion.Actions>
+        )}
       </Accordion.Header>
       <Accordion.Content>
         <Box padding={6}>

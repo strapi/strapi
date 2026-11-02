@@ -120,6 +120,50 @@ describe('Permissions', () => {
       screen.getByRole('checkbox', { name: 'Access the Email Settings page' })
     ).toBeInTheDocument();
   });
+
+  it('should keep a settings section disabled by config visible, editable and marked', async () => {
+    const layoutWithAuditLogs = {
+      ...layout,
+      sections: {
+        ...layout.sections,
+        settings: [
+          ...layout.sections.settings,
+          {
+            displayName: 'Read',
+            category: 'audit logs',
+            subCategory: 'options',
+            action: 'admin::audit-logs.read',
+            disabledByConfig: true,
+          },
+          {
+            displayName: 'Export',
+            category: 'audit logs',
+            subCategory: 'options',
+            action: 'admin::audit-logs.export',
+            disabledByConfig: true,
+          },
+        ],
+      },
+    };
+
+    const { user } = render(<Permissions layout={layoutWithAuditLogs} />);
+
+    await user.click(screen.getByRole('tab', { name: 'Settings' }));
+    await screen.findByRole('tabpanel', { name: 'Settings' });
+
+    // Only the audit logs section carries the marker
+    expect(screen.getAllByText('Disabled by configuration')).toHaveLength(1);
+
+    await user.click(screen.getByRole('button', { name: 'Audit logs audit logs settings' }));
+
+    const readCheckbox = await screen.findByRole('checkbox', { name: 'Read' });
+    expect(readCheckbox).toBeEnabled();
+    expect(screen.getByRole('checkbox', { name: 'Export' })).toBeEnabled();
+
+    await user.click(readCheckbox);
+
+    expect(readCheckbox).toBeChecked();
+  });
 });
 
 // ---------------------------------------------------------------------------

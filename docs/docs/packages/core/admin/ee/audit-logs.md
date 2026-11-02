@@ -58,6 +58,10 @@ Audit logs can be exported as a single CSV file from the list view. The export h
 
 By default, the export refuses to start when the matching set exceeds the maximum number of rows: 1,000,000. Self-hosted projects can change this limit with the `admin.auditLogs.exportMaxRows` configuration variable in the Admin Panel API config file (`./config/admin.js`).
 
+### Permission editors when the config disables audit logs
+
+When the license includes the `audit-logs` feature but `admin.auditLogs.enabled` is `false`, the EE `permission.getAll` controller (`packages/core/admin/ee/server/src/controllers/permission.ts`) adds `disabledByConfig: true` to the audit-log entries of the `settings` section of `GET /admin/permissions`. The role and admin-token permission editors keep the section visible and editable, and show a "Disabled by configuration" badge on it. The section is not hidden on purpose: a role or admin-token update replaces the full permission set, so hiding the section would delete its grants on the next save. The flag is only visible when the actions are registered while the config disables audit logs.
+
 ### Audit Logs format
 
 Every Audit Log has the following format:
