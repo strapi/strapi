@@ -1,0 +1,95 @@
+name: 'E2E permission flake repro'
+
+# Temporary, do not merge. Runs the permission specs that failed on develop on Nov 2 (run
+# 41509664490) many times without retries, to get a failure rate before and after a fix.
+# Every failure keeps its Playwright trace.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+  repro:
+    needs: build
+    name: '${{ matrix.suite.name }} (${{ matrix.suite.project }}) #${{ matrix.copy }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host --init
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: [1, 2, 3]
+        suite:
+          - name: media-library-permissions
+            domains: media-library
+            mediaLibrarySuite: current
+            project: chromium
+            repeat: 6
+            filter: media-library-permissions.spec.ts
+          - name: i18n-permissions
+            domains: i18n
+            mediaLibrarySuite: ''
+            project: webkit
+            repeat: 10
+            filter: permissions.spec.ts:23
+          - name: i18n-permissions
+            domains: i18n
+            mediaLibrarySuite: ''
+            project: chromium
+            repeat: 10
+            filter: permissions.spec.ts:23
+          - name: cm-edit-view-errors
+            domains: content-manager
+            mediaLibrarySuite: ''
+            project: webkit
+            repeat: 10
+            filter: collection-type-edit-view-errors.spec.ts:33
+          - name: cm-edit-view-errors
+            domains: content-manager
+            mediaLibrarySuite: ''
+            project: chromium
+            repeat: 10
+            filter: collection-type-edit-view-errors.spec.ts:33
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run the spec repeatedly
+        id: e2e
+        continue-on-error: true
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: false
+          domains: ${{ matrix.suite.domains }}
+          mediaLibrarySuite: ${{ matrix.suite.mediaLibrarySuite }}
+          jestOptions: '--project=${{ matrix.suite.project }} --repeat-each=${{ matrix.suite.repeat }} --retries=0 --trace=retain-on-failure ${{ matrix.suite.filter }}'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ steps.e2e.outcome == 'failure' }}
+        with:
+          name: repro-${{ matrix.suite.name }}-${{ matrix.suite.project }}-${{ matrix.copy }}
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 3
+      - name: Fail when any repetition failed
+        if: ${{ steps.e2e.outcome == 'failure' }}
+        run: exit 1
