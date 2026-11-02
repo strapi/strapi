@@ -59,18 +59,6 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 }));
 
 describe('Releases home page', () => {
-  beforeAll(() => {
-    window.strapi.future = {
-      isEnabled: () => true,
-    };
-  });
-
-  afterAll(() => {
-    window.strapi.future = {
-      isEnabled: () => false,
-    };
-  });
-
   // Answers like the API: a status filter finds nothing, anything else finds every release
   const captureRequests = () => {
     const requests: URLSearchParams[] = [];

@@ -198,7 +198,7 @@
   "reason-drawer.status": "{isFrozen, select, true {Skipped} other {Not ready}}{hasReason, select, true {: {reason}} other {}}",
   "reason-drawer.issues": "{count, plural, one {# issue} other {# issues}}",
   "reason-drawer.error.hint": "Something on the server stopped it, not the entry’s content.",
-  "reason-drawer.stage": "At {entryStage, select, none {no stage} other {{entryStage}}}, needs {requiredStage} to be published",
+  "reason-drawer.stage": "At {hasEntryStage, select, true {{entryStage}} other {no stage}}, needs {requiredStage} to be published",
   "reason-drawer.captured": "State captured when the release ran on {date} at {time} ({offset}).",
   "reason-drawer.captured.not-run": "{hasDate, select, true {State captured for the run scheduled on {date} at {time} ({offset}).} other {State captured before the release could run.}}",
   "reason-drawer.go-to-entry": "Go to entry",

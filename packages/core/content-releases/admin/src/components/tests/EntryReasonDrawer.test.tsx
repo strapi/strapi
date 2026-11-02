@@ -182,6 +182,21 @@ describe('EntryReasonDrawer', () => {
     expect(within(dialog).queryByText(/captured/i)).not.toBeInTheDocument();
   });
 
+  it.each([
+    [{ id: 1, name: 'none' }, 'At none, needs Approved to be published'],
+    [null, 'At no stage, needs Approved to be published'],
+  ])('names the stage %j the entry is at', async (entryStage, text) => {
+    renderDrawer([
+      details(1, {
+        outcome: null,
+        reason: { stage: { entryStage, requiredStage: { id: 2, name: 'Approved' } } },
+      }),
+    ]);
+
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText(text)).toBeInTheDocument();
+  });
+
   it('says an entry was never checked, rather than listing nothing', async () => {
     renderDrawer([details(1, { outcome: null, reason: null, missingReason: 'unchecked' })]);
 
