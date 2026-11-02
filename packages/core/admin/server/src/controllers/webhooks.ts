@@ -18,6 +18,29 @@ import {
   GetWebhooks,
 } from '../../../shared/contracts/webhooks';
 
+// What fetch accepts when it sends the webhook. Anything else makes every delivery fail.
+const headerNameRegex = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
+const headerValueRegex = /^[\t\x20-\x7e\x80-\xff]*$/;
+// fetch refuses these, or sets them itself from the request body.
+const unsupportedHeaders = new Set([
+  'content-length',
+  'expect',
+  'keep-alive',
+  'transfer-encoding',
+  'upgrade',
+]);
+
+const isSupportedHeader = (name: string, value?: string) => {
+  const lowerCaseName = name.toLowerCase();
+
+  // Connection is the only one of these with values that work
+  if (lowerCaseName === 'connection') {
+    return /^(close|keep-alive)$/i.test(value ?? '');
+  }
+
+  return !unsupportedHeaders.has(lowerCaseName);
+};
+
 const urlRegex =
   /^(?:([a-z0-9+.-]+):\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)(?:\.(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/;
 
@@ -52,10 +75,19 @@ const webhookValidator = yup
 
       return yup
         .object(
-          // @ts-expect-error lodash types
-          _.mapValues(data, () => {
-            yup.string().min(1).required();
-          })
+          _.mapValues(data, (_value, headerName) =>
+            yup
+              .string()
+              .min(1)
+              .required()
+              .matches(headerValueRegex, `The value of header ${headerName} is not valid`)
+              .test('is-valid-header-name', `${headerName} is not a valid header name`, () =>
+                headerNameRegex.test(headerName)
+              )
+              .test('is-supported-header', `${headerName} can't be set on a webhook`, (value) =>
+                isSupportedHeader(headerName, value)
+              )
+          )
         )
         .required();
     }),
@@ -212,9 +244,11 @@ export default {
 
     const webhook = await strapi.get('webhookStore').findWebhook(id);
 
-    const response = await strapi
-      .get('webhookRunner')
-      .run(webhook as Modules.WebhookStore.Webhook, 'trigger-test', {});
+    if (!webhook) {
+      return ctx.notFound('webhook.notFound');
+    }
+
+    const response = await strapi.get('webhookRunner').run(webhook, 'trigger-test', {});
 
     ctx.body = { data: response } satisfies TriggerWebhook.Response;
   },
