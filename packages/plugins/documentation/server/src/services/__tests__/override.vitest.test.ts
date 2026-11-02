@@ -1,9 +1,9 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import override from '../override';
 
 const strapiMock = {
   log: {
-    warn: jest.fn(),
+    warn: vi.fn(),
   },
   plugin: () => ({}),
   config: {
@@ -20,7 +20,7 @@ describe('Documentation plugin | Override service', () => {
   afterEach(() => {
     // Reset strapi after each test
     strapi = strapiMock;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should register an override', () => {
