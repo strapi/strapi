@@ -2563,9 +2563,9 @@ Configuration:
 - `admin.auth.sessions.options.publicKey` — Public key for asymmetric algorithms (RS256, RS512, ES256, etc.)
 - `admin.auth.sessions.options.*` — Any other JWT options (issuer, audience, subject, etc.)
 - `admin.auth.sessions.accessTokenLifespan` (default 1800)
-- `admin.auth.sessions.maxRefreshTokenLifespan` (default 30 days)
+- `admin.auth.sessions.maxRefreshTokenLifespan` (default 30 days, or a user-set `expiresIn`)
 - `admin.auth.sessions.idleRefreshTokenLifespan` (default 14 days)
-- `admin.auth.sessions.maxSessionLifespan` (default 1 day)
+- `admin.auth.sessions.maxSessionLifespan` (default 30 days, or a user-set `expiresIn`)
 - `admin.auth.sessions.idleSessionLifespan` (default 2 hours)
 
 **Deprecated:**
