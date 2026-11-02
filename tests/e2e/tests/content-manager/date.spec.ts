@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { clickAndWait } from '../../../utils/shared';
 import { createContent } from '../../../utils/content-creation';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';

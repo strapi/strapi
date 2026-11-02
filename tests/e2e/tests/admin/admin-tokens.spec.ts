@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { test, expect } from '../../../fixtures';
 import { navToHeader } from '../../../utils/shared';
 import { sharedSetup } from '../../../utils/setup';
 import { login } from '../../../utils/login';

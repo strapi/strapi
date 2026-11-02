@@ -92,6 +92,19 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
           ),
         },
       ],
+      // Piwi Dashboard reporter, opt-in: only active when PIWI_DASHBOARD_URL is set
+      // (put it, and PIWI_API_KEY, in tests/e2e/.env)
+      ...(process.env.PIWI_DASHBOARD_URL
+        ? /** @type {import('@playwright/test').ReporterDescription[]} */ ([
+            [
+              '@piwitests/reporter',
+              {
+                serverUrl: process.env.PIWI_DASHBOARD_URL,
+                projectName: getEnvString(process.env.PIWI_PROJECT_NAME, 'strapi'),
+              },
+            ],
+          ])
+        : []),
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
