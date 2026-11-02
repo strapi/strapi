@@ -69,6 +69,7 @@ export interface Proxy {
 
 export interface Webhooks {
   populateRelations?: boolean;
+  deduplicateReleaseWebhooks?: boolean;
   [key: string]: unknown;
 }
 
@@ -139,6 +140,11 @@ export interface McpConfig {
   connectTimeoutMs?: number;
   /** Maximum time (ms) to wait for a single MCP request to complete. Defaults to 60 000. */
   requestTimeoutMs?: number;
+  /**
+   * Maximum array elements and object keys combined in one tool call's arguments.
+   * Must be an integer >= 1. Set to `Infinity` to disable (JS/TS config only). Defaults to 10 000.
+   */
+  maxToolInputElements?: number;
 }
 
 export interface Server {

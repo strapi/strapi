@@ -7,6 +7,7 @@ import {
   deleteContentTypes,
   editContentType,
 } from '../content-types';
+import { collectUnhandledRejections } from './unhandled-rejections';
 
 const files = {
   schemas: new Set<string>(),
@@ -215,18 +216,49 @@ describe('content type mutation compensation', () => {
     expect(files.groups).toBe('before');
   });
 
+  it('emits the update event when a kind switch succeeds', async () => {
+    await editContentType(contentType.uid, {
+      contentType: { ...contentType, kind: 'singleType', attributes: {} },
+    });
+
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', {
+      contentType: { uid: contentType.uid, schema: { ...contentType, kind: 'singleType' } },
+    });
+  });
+
   describe('collectionType to singleType entry guard', () => {
     type Row = { documentId: string; locale?: string; publishedAt: string | null };
+    type Where = {
+      documentId?: { $ne?: string; $null?: boolean; $notNull?: boolean };
+      $or?: Where[];
+    };
+
+    // Rows here always carry a documentId, so `$null` never matches and `$notNull` always does
+    const matches = (row: Row, where?: Where): boolean => {
+      if (where === undefined) {
+        return true;
+      }
+      if (where.$or !== undefined) {
+        return where.$or.some((subWhere) => matches(row, subWhere));
+      }
+      const filter = where.documentId;
+      if (filter === undefined || filter.$notNull === true) {
+        return true;
+      }
+      if (filter.$null === true) {
+        return false;
+      }
+      return row.documentId !== filter.$ne;
+    };
 
     const mockRows = (rows: Row[]) => {
-      const matches = (row: Row, where?: { documentId?: { $ne: string } }) =>
-        where?.documentId === undefined || row.documentId !== where.documentId.$ne;
-
       strapi.db.query = jest.fn(() => ({
-        count: jest.fn(async (params?: { where?: { documentId?: { $ne: string } } }) => {
+        count: jest.fn(async (params?: { where?: Where }) => {
           return rows.filter((row) => matches(row, params?.where)).length;
         }),
-        findOne: jest.fn(async () => rows[0] ?? null),
+        findOne: jest.fn(async (params?: { where?: Where }) => {
+          return rows.find((row) => matches(row, params?.where)) ?? null;
+        }),
       })) as any;
     };
 
@@ -325,6 +357,27 @@ describe('content type mutation compensation', () => {
     expect(apiHandler.rollback).toHaveBeenCalledWith(contentType.uid);
     expect(apiHandler.rollback).not.toHaveBeenCalledWith(secondContentType.uid);
     expect(files.groups).toBe('before');
+  });
+
+  it('logs a failing event listener instead of leaving an unhandled rejection', async () => {
+    // A user listener that throws makes the event hub emit reject
+    jest.mocked(strapi.eventHub.emit).mockRejectedValue(new Error('listener failed'));
+
+    const rejections = await collectUnhandledRejections(async () => {
+      await editContentType(contentType.uid, {
+        contentType: { ...contentType, attributes: {} },
+      });
+      await deleteContentType(contentType.uid);
+    });
+
+    expect(rejections).toEqual([]);
+    expect(strapi.eventHub.emit).toHaveBeenCalledTimes(2);
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'A content-type.update listener failed: listener failed'
+    );
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'A content-type.delete listener failed: listener failed'
+    );
   });
 
   it('reports a committed deletion and emits its event when backup cleanup alone fails', async () => {

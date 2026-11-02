@@ -17,6 +17,7 @@ import { registerAdminUserAuditEvents } from '../../../server/src/audit-logs/adm
 import { registerWebhookAuditEvents } from '../../../server/src/audit-logs/webhooks';
 import { registerAuthAuditEvents } from '../../../server/src/audit-logs/auth';
 import { registerSsoSettingsAuditEvents } from '../../../server/src/audit-logs/sso-settings';
+import { registerProjectSettingsAuditEvents } from '../../../server/src/audit-logs/project-settings';
 
 const getAdminEE = () => {
   const eeAdmin = {
@@ -70,6 +71,7 @@ const getAdminEE = () => {
         registerWebhookAuditEvents(auditLogsLifecycle);
         registerAuthAuditEvents(auditLogsLifecycle);
         registerSsoSettingsAuditEvents(auditLogsLifecycle);
+        registerProjectSettingsAuditEvents(auditLogsLifecycle);
 
         await auditLogsLifecycle.register();
       }
