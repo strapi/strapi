@@ -50,17 +50,20 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.documents.use(createRevalidateActionsOnDraftChange({ strapi }));
 
     const schedulingService = getService('scheduling', { strapi });
-    const freezeOverdueReleases = () =>
-      schedulingService.freezeOverdueReleases().catch((error: unknown) => {
+    const freezeOverdueReleases = (now = new Date()) =>
+      schedulingService.freezeOverdueReleases({ now }).catch((error: unknown) => {
         strapi.log.error('Error while freezing overdue releases in the content-releases plugin', {
           error,
         });
       });
 
     // Overdue releases are frozen before the jobs are armed: a release that failed before the
-    // upgrade must not be armed for a date it won't run on
-    freezeOverdueReleases()
-      .then(() => schedulingService.syncFromDatabase())
+    // upgrade must not be armed for a date it won't run on. Both use the same instant, so a release
+    // still within the grace period for the sweep is run right away by the sync, not left to the
+    // next sweep to freeze.
+    const startedAt = new Date();
+    freezeOverdueReleases(startedAt)
+      .then(() => schedulingService.syncFromDatabase({ now: startedAt }))
       .catch((error: unknown) => {
         strapi.log.error(
           'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.',
@@ -71,7 +74,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     // Then every minute: a release whose scheduled run didn't happen leaves Pending
     strapi.cron.add({
       'content-releases::freezeOverdueReleases': {
-        task: freezeOverdueReleases,
+        task: () => freezeOverdueReleases(),
         options: OVERDUE_SWEEP_CRON_RULE,
       },
     });

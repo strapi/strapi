@@ -175,31 +175,53 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
-     * On bootstrap, we can use this function to make sure to sync the scheduled jobs from the database that are not yet released
-     * This is useful in case the server was restarted and the scheduled jobs were lost
-     * This also could be used to sync different Strapi instances in case of a cluster
+     * On bootstrap, arms the jobs of the planned releases, lost when the server stopped. A release
+     * whose date passed while it was down, by less than the grace period, runs right away instead:
+     * the sweep freezes only older ones. Each instance of a cluster does this; the release lock
+     * lets one run it, the others find it already published.
      */
-    async syncFromDatabase() {
-      const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-        where: {
-          scheduledAt: {
-            $gte: new Date(),
+    async syncFromDatabase({ now = new Date() }: { now?: Date } = {}) {
+      const releases: Pick<Release, 'id' | 'scheduledAt'>[] = await strapi.db
+        .query(RELEASE_MODEL_UID)
+        .findMany({
+          where: {
+            scheduledAt: {
+              $gte: new Date(now.getTime() - OVERDUE_GRACE_PERIOD_MS),
+            },
+            releasedAt: null,
+            // A release that failed before the upgrade is frozen by the sweep, never armed.
+            // `$ne` alone would drop rows whose status is null.
+            $or: [{ status: { $ne: 'failed' } }, { status: null }],
           },
-          releasedAt: null,
-          // A release that failed before the upgrade is frozen by the sweep, never armed.
-          // `$ne` alone would drop rows whose status is null.
-          $or: [{ status: { $ne: 'failed' } }, { status: null }],
-        },
-      });
+        });
 
-      for (const release of releases) {
-        await this.set(release.id, release.scheduledAt).catch((error: unknown) => {
+      const overdue = releases.filter(({ scheduledAt }) => new Date(scheduledAt!) < now);
+
+      for (const release of releases.filter((release) => !overdue.includes(release))) {
+        await this.set(release.id, new Date(release.scheduledAt!)).catch((error: unknown) => {
           // A release deleted or frozen since the read has nothing left to arm
           if (error instanceof errors.NotFoundError) {
             return;
           }
 
           strapi.log.error(`[Content Releases] Couldn't schedule release ${release.id}`, { error });
+        });
+      }
+
+      // After arming the others, as these runs can take a while
+      for (const { id } of overdue) {
+        await runAsSystem({ strapi }, 'scheduler', () =>
+          getService('release', { strapi }).publish(id, { trigger: 'scheduled' })
+        ).catch((error: unknown) => {
+          // Another instance ran it, or it was published by hand, since the read
+          if (
+            error instanceof errors.ValidationError &&
+            error.message === 'Release already published'
+          ) {
+            return;
+          }
+
+          strapi.log.error(`[Content Releases] Couldn't run release ${id}`, { error });
         });
       }
 

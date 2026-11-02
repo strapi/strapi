@@ -4402,6 +4402,33 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
     });
 
+    test('two nodes booting run a release overdue by less than the grace period once', async () => {
+      const productId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('all_or_nothing', [{ documentId: productId }]);
+      await setReleaseState(release.id, { scheduledAt: minutesFromNow(-2) });
+
+      const onPublishEvent = jest.fn();
+      const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
+      // Each node has its own scheduling service, and boots as bootstrap does: sweep, then sync
+      const boot = async () => {
+        const node = createSchedulingService({ strapi });
+        const now = new Date();
+        await node.freezeOverdueReleases({ now });
+        await node.syncFromDatabase({ now });
+      };
+      try {
+        await Promise.all([boot(), boot()]);
+      } finally {
+        stopListening();
+      }
+
+      expect(await getRelease(release.id)).toMatchObject({ status: 'done', failureReason: null });
+      expect(await hasPublishedVersion(productUID, productId)).toBe(true);
+      expect(
+        onPublishEvent.mock.calls.filter(([payload]) => payload.release?.id === release.id)
+      ).toEqual([[expect.objectContaining({ isPublished: true })]]);
+    });
+
     test('a release overdue by less than the grace period can still be published by hand', async () => {
       const productId = await createProduct({ valid: true });
       const release = await createReleaseWithActions('all_or_nothing', [{ documentId: productId }]);
