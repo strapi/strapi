@@ -177,10 +177,13 @@ const useOmitLockedSharedFieldsOnLocaleCreate = () => {
     'useOmitLockedSharedFieldsOnLocaleCreate',
     (state) => state.isUnlocked
   );
-  const values = useForm('useOmitLockedSharedFieldsOnLocaleCreate', (state) => state.values);
+  const values = useForm(
+    'useOmitLockedSharedFieldsOnLocaleCreate',
+    (state) => state.values as Record<string, unknown>
+  );
   const initialValues = useForm(
     'useOmitLockedSharedFieldsOnLocaleCreate',
-    (state) => state.initialValues
+    (state) => state.initialValues as Record<string, unknown>
   );
   const isCreatingLocale = !currentDocument.document?.id;
   const attributes = currentDocument.schema?.attributes;
