@@ -17,6 +17,7 @@ import {
   update as apiTokenUpdate,
   getByName,
   reconcileTokenPermissionsToUserCeiling,
+  reconcileParameterizedTokenPermissions,
   syncApiTokenPermissionsForUser,
   syncApiTokenPermissionsForAllUsers,
   enforceAdminPermissionsCeiling,
@@ -2826,6 +2827,90 @@ describe('API Token', () => {
     });
   });
 
+  describe('reconcileParameterizedTokenPermissions', () => {
+    const PUBLISH = 'plugin::cm.publish';
+    const ARTICLE = 'api::article.article';
+
+    const perm = (overrides: Record<string, unknown> = {}) => ({
+      action: PUBLISH,
+      subject: ARTICLE,
+      conditions: [],
+      properties: {},
+      actionParameters: { x: 1 },
+      ...overrides,
+    });
+    const tokenPerm = (overrides: Record<string, unknown> = {}) => perm({ id: 1, ...overrides });
+
+    const reconcile = (userPerms: object[], tokenPerms: object[]) =>
+      reconcileParameterizedTokenPermissions(userPerms as any, tokenPerms as any);
+
+    test('Keeps a token permission the owner holds with the same action, subject and parameters', () => {
+      const { toDelete, toUpdate } = reconcile([perm()], [tokenPerm()]);
+
+      expect(toDelete).toHaveLength(0);
+      expect(toUpdate).toHaveLength(0);
+    });
+
+    test('Deletes it when the owner only holds the plain action', () => {
+      const { toDelete } = reconcile([perm({ actionParameters: {} })], [tokenPerm()]);
+
+      expect(toDelete.map((p) => p.id)).toEqual([1]);
+    });
+
+    test('Deletes it when the owner holds other parameters', () => {
+      const { toDelete } = reconcile([perm({ actionParameters: { x: 2 } })], [tokenPerm()]);
+
+      expect(toDelete.map((p) => p.id)).toEqual([1]);
+    });
+
+    test('Deletes it when the owner holds the same parameters on another subject', () => {
+      const { toDelete } = reconcile([perm({ subject: 'api::author.author' })], [tokenPerm()]);
+
+      expect(toDelete.map((p) => p.id)).toEqual([1]);
+    });
+
+    test('Deletes it when the owner holds the same parameters on another action', () => {
+      const { toDelete } = reconcile([perm({ action: 'plugin::cm.read' })], [tokenPerm()]);
+
+      expect(toDelete.map((p) => p.id)).toEqual([1]);
+    });
+
+    test('Compares array parameters as sets', () => {
+      const { toDelete } = reconcile(
+        [perm({ actionParameters: { ids: ['a', 'b'] } })],
+        [tokenPerm({ actionParameters: { ids: ['b', 'a'] } })]
+      );
+
+      expect(toDelete).toHaveLength(0);
+    });
+
+    test('Deletes it when a field is not covered by the owner permission with the same parameters', () => {
+      const { toDelete } = reconcile(
+        [perm({ properties: { fields: ['title'] } })],
+        [tokenPerm({ properties: { fields: ['title', 'body'] } })]
+      );
+
+      expect(toDelete.map((p) => p.id)).toEqual([1]);
+    });
+
+    test('Updates the inherited conditions like a plain permission', () => {
+      const { toDelete, toUpdate } = reconcile(
+        [perm({ conditions: ['admin::is-creator'] })],
+        [tokenPerm()]
+      );
+
+      expect(toDelete).toHaveLength(0);
+      expect(toUpdate).toEqual([{ id: 1, conditions: ['admin::is-creator'] }]);
+    });
+
+    test('Ignores token permissions without parameters', () => {
+      const { toDelete, toUpdate } = reconcile([], [tokenPerm({ actionParameters: {} })]);
+
+      expect(toDelete).toHaveLength(0);
+      expect(toUpdate).toHaveLength(0);
+    });
+  });
+
   describe('assignAdminPermissionsToToken', () => {
     test('Does not delete and recreate a permission that only changed order', async () => {
       const superAdmin = { id: 1, roles: [{ code: 'strapi-super-admin' }] } as any;
@@ -3029,6 +3114,48 @@ describe('API Token', () => {
       await syncApiTokenPermissionsForUser(1);
 
       expect(deleteByIdsMock).not.toHaveBeenCalled();
+    });
+
+    describe('token permissions with action parameters', () => {
+      const user = { id: 1, roles: [{ code: 'strapi-editor' }] };
+      const PUBLISH = 'plugin::cm.publish';
+      const ARTICLE = 'api::article.article';
+      const parameterized = {
+        id: 101,
+        action: PUBLISH,
+        subject: ARTICLE,
+        conditions: [],
+        properties: {},
+        actionParameters: { x: 1 },
+      };
+      const tokens = [{ id: 10, name: 'my-token', adminPermissions: [parameterized] }];
+
+      test('Deletes one the owner no longer holds and names it in the warning', async () => {
+        const { deleteByIdsMock, warnMock } = buildStrapi({
+          user,
+          // The owner still holds the plain action, not the parameterized one
+          userPermissions: [{ action: PUBLISH, subject: ARTICLE, conditions: [], properties: {} }],
+          tokens,
+        });
+
+        await syncApiTokenPermissionsForUser(1);
+
+        expect(deleteByIdsMock).toHaveBeenCalledWith([101]);
+        expect(warnMock).toHaveBeenCalledWith(expect.stringContaining(`101 ${PUBLISH}`));
+      });
+
+      test('Keeps one the owner holds with the same action, subject and parameters', async () => {
+        const { deleteByIdsMock, updateMock } = buildStrapi({
+          user,
+          userPermissions: [{ ...parameterized, id: undefined }],
+          tokens,
+        });
+
+        await syncApiTokenPermissionsForUser(1);
+
+        expect(deleteByIdsMock).not.toHaveBeenCalled();
+        expect(updateMock).not.toHaveBeenCalled();
+      });
     });
 
     test('Deletes token permissions that are no longer in the user scope', async () => {

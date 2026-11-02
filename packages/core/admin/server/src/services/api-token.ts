@@ -25,7 +25,10 @@ import constants from './constants';
 import { getService } from '../utils';
 import permissionDomain from '../domain/permission';
 import { validatePermissionsExist } from '../validation/permission';
-import { toEnforcedCeilingPermissions } from './permission/enforced-permissions';
+import {
+  toEnforcedCeilingPermissions,
+  toEnforcedParameterizedPermissions,
+} from './permission/enforced-permissions';
 import { findRequesterCeilings } from './permission/ceiling-requester';
 import type { CeilingPermission } from '../domain/permission/ceiling';
 import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
@@ -565,10 +568,57 @@ const reconcileTokenPermissionsToUserCeiling = (
 };
 
 /**
+ * Reconcile the token permissions that carry action parameters. The engine registers them as
+ * `<action>?<parameters>`, a separate ability from the plain action, so only the owner's
+ * permissions with the same action, subject and action parameters can cover one. Against those,
+ * the rule is the one of `reconcileTokenPermissionsToUserCeiling`: a token permission no single
+ * owner permission covers is deleted, and inherited conditions that drifted are updated.
+ * Permissions without action parameters are ignored here.
+ *
+ * Pure / sync — no DB calls. Both lists are read as the engine enforces them, apart from the
+ * action parameters (`toEnforcedParameterizedPermissions`).
+ */
+const reconcileParameterizedTokenPermissions = (
+  userPermissions: Permission[],
+  tokenPermissions: Permission[]
+): { toDelete: Permission[]; toUpdate: { id: Data.ID; conditions: string[] }[] } => {
+  const toDelete: Permission[] = [];
+  const toUpdate: { id: Data.ID; conditions: string[] }[] = [];
+  const withoutParameters = (permission: Permission) =>
+    ({ ...permission, actionParameters: {} }) as Permission;
+
+  tokenPermissions
+    .filter((tokenPerm) => !isEmpty(tokenPerm.actionParameters))
+    .forEach((tokenPerm) => {
+      const sameParameters = userPermissions
+        .filter(
+          (userPerm) =>
+            !isEmpty(userPerm.actionParameters) &&
+            permissionDomain.ceiling.haveSameActionParameters(userPerm, tokenPerm)
+        )
+        .map(withoutParameters);
+
+      const result = reconcileTokenPermissionsToUserCeiling(sameParameters, [
+        withoutParameters(tokenPerm),
+      ]);
+
+      if (result.toDelete.length > 0) {
+        toDelete.push(tokenPerm);
+      }
+
+      toUpdate.push(...result.toUpdate);
+    });
+
+  return { toDelete, toUpdate };
+};
+
+/**
  * Re-sync all admin token permissions for a given user against their current effective ceiling.
  *
  * Skips super-admins (no ceiling). For each admin token owned by the user:
- *   - Deletes permissions that are no longer within the user's scope
+ *   - Deletes permissions that are no longer within the user's scope. A permission with action
+ *     parameters is only within it while the user holds the same action, subject and parameters
+ *     (`reconcileParameterizedTokenPermissions`)
  *   - Updates conditions on permissions whose conditions have drifted from the role's current set
  */
 const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> => {
@@ -583,10 +633,16 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
   // Both sides as the engine enforces them. Only compared: deletes and updates use the ids.
   // Unregistered conditions are kept: this also runs at startup, before the app's `bootstrap()`
   // registers custom conditions. An unregistered id written back here is skipped by the engine.
-  const userEffectivePermissions = await toEnforcedCeilingPermissions(
-    await getService('permission').findUserPermissions(user as AdminUser),
-    { conditions: false }
+  const userPermissions: Permission[] = await getService('permission').findUserPermissions(
+    user as AdminUser
   );
+  const userEffectivePermissions = await toEnforcedCeilingPermissions(userPermissions, {
+    conditions: false,
+  });
+  // Enforcing drops the permissions with action parameters, so they are reconciled on their own
+  const userParameterizedPermissions = await toEnforcedParameterizedPermissions(userPermissions, {
+    conditions: false,
+  });
 
   const tokens = await strapi.db.query('admin::api-token').findMany({
     where: { kind: 'admin', adminUserOwner: { id: userId } },
@@ -601,10 +657,16 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
   for (const token of tokensWithPermissions) {
     const tokenPermissions: Permission[] = token.adminPermissions as Permission[];
 
-    const { toDelete, toUpdate } = reconcileTokenPermissionsToUserCeiling(
+    const plain = reconcileTokenPermissionsToUserCeiling(
       userEffectivePermissions,
       await toEnforcedCeilingPermissions(tokenPermissions, { conditions: false })
     );
+    const parameterized = reconcileParameterizedTokenPermissions(
+      userParameterizedPermissions,
+      await toEnforcedParameterizedPermissions(tokenPermissions, { conditions: false })
+    );
+    const toDelete = [...plain.toDelete, ...parameterized.toDelete];
+    const toUpdate = [...plain.toUpdate, ...parameterized.toUpdate];
 
     const tokenLabel = `Admin token ${token.id} (${token.name}) of user ${userId}`;
     const describePermission = (id: Data.ID) =>
@@ -1450,6 +1512,10 @@ interface SharedTokenMethods {
     userPermissions: Permission[],
     tokenPermissions: Permission[]
   ): { toDelete: Permission[]; toUpdate: { id: Data.ID; conditions: string[] }[] };
+  reconcileParameterizedTokenPermissions(
+    userPermissions: Permission[],
+    tokenPermissions: Permission[]
+  ): { toDelete: Permission[]; toUpdate: { id: Data.ID; conditions: string[] }[] };
 }
 
 export interface ContentApiTokenService extends SharedTokenMethods {
@@ -1513,6 +1579,7 @@ function createTokenService(
     getByAccessKey: (accessKeyHash, options) => getBy({ accessKey: accessKeyHash }, options),
     countAll: count,
     reconcileTokenPermissionsToUserCeiling,
+    reconcileParameterizedTokenPermissions,
   };
 
   if (kind === 'content-api') {
@@ -1603,6 +1670,7 @@ export {
   assignAdminPermissionsToToken,
   enforceAdminPermissionsCeiling,
   reconcileTokenPermissionsToUserCeiling,
+  reconcileParameterizedTokenPermissions,
   syncApiTokenPermissionsForUser,
   syncApiTokenPermissionsForRole,
   syncApiTokenPermissionsForAllUsers,

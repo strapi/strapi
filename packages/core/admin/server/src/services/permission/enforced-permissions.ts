@@ -1,3 +1,5 @@
+import { isEmpty } from 'lodash';
+
 import { getService } from '../../utils';
 import permissionDomain from '../../domain/permission';
 import type { CeilingPermission } from '../../domain/permission/ceiling';
@@ -50,4 +52,30 @@ export const toEnforcedCeilingPermissions = async <T extends CeilingPermission>(
       ? (condition) => conditionProvider.has(condition)
       : () => true,
   });
+};
+
+/**
+ * The permissions with action parameters, read the way the engine enforces their properties and
+ * conditions (`toEnforcedCeilingPermissions`). That function drops every permission with action
+ * parameters, since the plain action does not match them, so the parameters are set aside while
+ * it runs and put back after. Permissions without action parameters are left out.
+ */
+export const toEnforcedParameterizedPermissions = async <T extends CeilingPermission>(
+  permissions: T[],
+  options: EnforcedPermissionsOptions = {}
+): Promise<T[]> => {
+  const parameterized = permissions
+    .filter((permission) => !isEmpty(permission.actionParameters))
+    .map((permission) => ({
+      ...permission,
+      actionParameters: {},
+      setAsideActionParameters: permission.actionParameters,
+    }));
+
+  const enforced = await toEnforcedCeilingPermissions(parameterized, options);
+
+  return enforced.map(
+    ({ setAsideActionParameters, ...permission }) =>
+      ({ ...permission, actionParameters: setAsideActionParameters }) as unknown as T
+  );
 };

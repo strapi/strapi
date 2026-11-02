@@ -6,7 +6,10 @@ import type { CeilingPermission } from '../../domain/permission/ceiling';
 import adminTokenStrategy from '../../strategies/admin-token';
 import constants from '../constants';
 import { getService } from '../../utils';
-import { toEnforcedCeilingPermissions } from './enforced-permissions';
+import {
+  toEnforcedCeilingPermissions,
+  toEnforcedParameterizedPermissions,
+} from './enforced-permissions';
 
 /**
  * Who grants permissions, which decides the permissions they can grant: an admin user grants up
@@ -70,16 +73,14 @@ export const getCeilingRequester = (ctx: Context): CeilingRequester => {
 const isSuperAdmin = (user: AdminUser): boolean =>
   (user?.roles ?? []).some((role) => role?.code === constants.SUPER_ADMIN_CODE);
 
-/**
- * The permission sets a granted permission must stay within, all of them, as the engine
- * enforces them. A requester with a token gets the token's first. Empty when the requester is
- * not limited (a super admin).
- */
-export const findRequesterCeilings = async (
-  requester: CeilingRequester
+type Enforce = (permissions: CeilingPermission[]) => Promise<CeilingPermission[]>;
+
+const findCeilings = async (
+  requester: CeilingRequester,
+  enforce: Enforce
 ): Promise<CeilingPermission[][]> => {
   if ('tokenPermissions' in requester) {
-    const tokenPermissions = await toEnforcedCeilingPermissions(requester.tokenPermissions);
+    const tokenPermissions = await enforce(requester.tokenPermissions);
 
     // A token can carry permissions its owner lost since it was written
     if (isSuperAdmin(requester.owner)) {
@@ -88,7 +89,7 @@ export const findRequesterCeilings = async (
 
     const ownerPermissions = await getService('permission').findUserPermissions(requester.owner);
 
-    return [tokenPermissions, await toEnforcedCeilingPermissions(ownerPermissions)];
+    return [tokenPermissions, await enforce(ownerPermissions)];
   }
 
   if (isSuperAdmin(requester.user)) {
@@ -97,5 +98,24 @@ export const findRequesterCeilings = async (
 
   const userPermissions = await getService('permission').findUserPermissions(requester.user);
 
-  return [await toEnforcedCeilingPermissions(userPermissions)];
+  return [await enforce(userPermissions)];
 };
+
+/**
+ * The permission sets a granted permission must stay within, all of them, as the engine
+ * enforces them. A requester with a token gets the token's first. Empty when the requester is
+ * not limited (a super admin).
+ */
+export const findRequesterCeilings = async (
+  requester: CeilingRequester
+): Promise<CeilingPermission[][]> =>
+  findCeilings(requester, (permissions) => toEnforcedCeilingPermissions(permissions));
+
+/**
+ * The same sets as `findRequesterCeilings`, holding only the permissions with action parameters,
+ * which `findRequesterCeilings` leaves out (`toEnforcedParameterizedPermissions`).
+ */
+export const findRequesterParameterizedCeilings = async (
+  requester: CeilingRequester
+): Promise<CeilingPermission[][]> =>
+  findCeilings(requester, (permissions) => toEnforcedParameterizedPermissions(permissions));

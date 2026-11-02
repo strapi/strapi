@@ -3,6 +3,7 @@ import _, {
   pick,
   differenceWith,
   differenceBy,
+  isEmpty,
   isEqual,
   isPlainObject,
   mapValues,
@@ -20,7 +21,12 @@ import type { Action } from '../domain/action';
 import { validatePermissionsExist } from '../validation/permission';
 import roleConstants from './constants';
 import { getService } from '../utils';
-import { findRequesterCeilings, type CeilingRequester } from './permission/ceiling-requester';
+import {
+  findRequesterCeilings,
+  findRequesterParameterizedCeilings,
+  type CeilingRequester,
+} from './permission/ceiling-requester';
+import { toEnforcedCeilingPermissions } from './permission/enforced-permissions';
 
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION, ROLE_TEXT_MAX_LENGTH } = roleConstants;
 
@@ -424,8 +430,14 @@ const assignPermissions = async (
  * Make sure a requester cannot grant a role permissions they do not hold themselves. A request
  * made with an admin token is limited by the token's permissions and, unless the token owner is
  * a super admin, by the owner's.
- * Only permissions that are new to the role are checked: permissions the role already
- * carries are preserved as they are, and removing them is always allowed.
+ * Permissions the role already carries, or narrower versions of one of them, are not checked:
+ * they grant nothing new, and removing them is always allowed. A narrower version is covered,
+ * atom by atom (field × locale × condition), by one of the role's own rows read the way the
+ * engine enforces them, so fewer fields, locales or conditions are accepted, but recombining two
+ * rows or dropping the last condition (unconditional) is checked against the requester.
+ * A permission with action parameters is a separate ability for the engine
+ * (`<action>?<parameters>`): it is only covered by held permissions with the same action, subject
+ * and action parameters.
  * @param requester - the admin user or admin token performing the update
  * @param roleId - the role being updated
  * @param permissions - the permissions requested for the role
@@ -455,23 +467,44 @@ const checkPermissionsCeiling = async (
   const isOnRole = (permission: Permission) =>
     existingPermissions.some((existing) => arePermissionsEqual(permission, existing));
 
+  const existingEnforced = await toEnforcedCeilingPermissions(existingPermissions);
+
+  // Parameterized permissions are registered as `<action>?<parameters>`, which the atom rule
+  // does not describe, so they are never treated as a narrowing
+  const narrowsRolePermission = (stored: Permission) =>
+    isEmpty(stored.actionParameters) &&
+    permissionDomain.ceiling.isPermissionWithinCeiling(stored, existingEnforced);
+
   // The requested locales need no rewrite: i18n's `willValidateUpdatePermissions` hook has already
   // turned a missing or empty `locales` on a localized subject into the default locale.
   // The requested conditions are checked as they will be stored, without the unregistered ones.
-  // A permission equal to a row of the role, as sent or as stored, leaves that row unchanged.
-  const rejectedPermissions = permissions
+  // A permission equal to a row of the role, as sent or as stored, leaves that row unchanged, and
+  // one covered by the role's own rows only narrows them.
+  const newPermissions = permissions
     .map((permission) => permissionDomain.create(permission))
-    .filter((permission) => {
-      const stored = sanitizeConditions(permission);
+    .map((permission) => ({ permission, stored: sanitizeConditions(permission) as Permission }))
+    .filter(
+      ({ permission, stored }) =>
+        !isOnRole(permission) && !isOnRole(stored) && !narrowsRolePermission(stored)
+    );
 
-      if (isOnRole(permission) || isOnRole(stored)) {
-        return false;
-      }
+  // The held permissions with action parameters, only loaded when a new permission has some
+  const parameterizedCeilings = newPermissions.some(
+    ({ stored }) => !isEmpty(stored.actionParameters)
+  )
+    ? await findRequesterParameterizedCeilings(requester)
+    : [];
 
-      return ceilings.some(
-        (held) => !permissionDomain.ceiling.isPermissionWithinCeiling(stored, held)
-      );
-    });
+  const isWithinCeilings = (stored: Permission) =>
+    isEmpty(stored.actionParameters)
+      ? ceilings.every((held) => permissionDomain.ceiling.isPermissionWithinCeiling(stored, held))
+      : parameterizedCeilings.every((held) =>
+          permissionDomain.ceiling.isParameterizedPermissionWithinCeiling(stored, held)
+        );
+
+  const rejectedPermissions = newPermissions
+    .filter(({ stored }) => !isWithinCeilings(stored))
+    .map(({ permission }) => permission);
 
   if (rejectedPermissions.length > 0) {
     throw new ForbiddenError('You cannot grant permissions you do not hold yourself', {

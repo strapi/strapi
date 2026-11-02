@@ -965,7 +965,7 @@ describe('Role CRUD End to End', () => {
         action: OUT_OF_SCOPE_ACTION,
         subject: null,
         properties: {},
-        conditions: [],
+        conditions: ['admin::is-creator'],
       };
       const inScopePermission = {
         action: READ_ACTION,
@@ -989,14 +989,14 @@ describe('Role CRUD End to End', () => {
       expect(unchangedRes.statusCode).toBe(200);
       expect(await getTargetRolePermissions()).toHaveLength(2);
 
-      // Changing it is not
+      // Widening it is not: without its condition it grants more than the role holds
       const changedRes = await updateTargetRolePermissions(rqRequester, [
-        { ...outOfScopePermission, conditions: ['admin::is-creator'] },
+        { ...outOfScopePermission, conditions: [] },
         inScopePermission,
       ]);
       expect(changedRes.statusCode).toBe(403);
       expect(changedRes.body.error.details.permissions).toEqual([
-        { ...outOfScopePermission, conditions: ['admin::is-creator'] },
+        { ...outOfScopePermission, conditions: [] },
       ]);
 
       // Removing it is allowed
@@ -1006,6 +1006,64 @@ describe('Role CRUD End to End', () => {
       const rolePermissions = await getTargetRolePermissions();
       expect(rolePermissions).toHaveLength(1);
       expect(rolePermissions[0]).toMatchObject(inScopePermission);
+    });
+
+    test('Accepts narrowing a permission the role holds, which the requester does not fully hold', async () => {
+      const inScopePermission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'] },
+        conditions: [],
+      };
+      // The requester holds `username` but not `password`
+      const rolePermission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username', 'password'] },
+        conditions: [],
+      };
+      const narrowed = { ...rolePermission, properties: { fields: ['password'] } };
+
+      const superAdminRes = await updateTargetRolePermissions(rq, [rolePermission]);
+      expect(superAdminRes.statusCode).toBe(200);
+
+      // Unticking the held field leaves a subset of the role's own permission
+      const narrowedRes = await updateTargetRolePermissions(rqRequester, [narrowed]);
+      expect(narrowedRes.statusCode).toBe(200);
+
+      const afterNarrowing = await getTargetRolePermissions();
+      expect(afterNarrowing).toHaveLength(1);
+      expect(afterNarrowing[0]).toMatchObject(narrowed);
+
+      // A field neither the requester nor the role holds is still a grant
+      const widened = { ...rolePermission, properties: { fields: ['password', 'confirmed'] } };
+      const widenedRes = await updateTargetRolePermissions(rqRequester, [widened]);
+      expect(widenedRes.statusCode).toBe(403);
+      expect(widenedRes.body.error.details.permissions).toEqual([widened]);
+      expect(await getTargetRolePermissions()).toEqual(afterNarrowing);
+
+      // Leave the role as the previous test did
+      const resetRes = await updateTargetRolePermissions(rq, [inScopePermission]);
+      expect(resetRes.statusCode).toBe(200);
+    });
+
+    test('Cannot grant a held action with action parameters the requester does not hold', async () => {
+      const rolePermissionsBefore = await getTargetRolePermissions();
+      // The engine registers it as `<action>?x=1`, a different ability from the plain action
+      const permission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'] },
+        conditions: [],
+      };
+
+      const res = await updateTargetRolePermissions(rqRequester, [
+        { ...permission, actionParameters: { x: 1 } },
+      ]);
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error.details.permissions).toEqual([permission]);
+      expect(await getTargetRolePermissions()).toEqual(rolePermissionsBefore);
     });
 
     test('Treats a reordered existing permission as unchanged', async () => {
@@ -1345,6 +1403,38 @@ describe('Role CRUD End to End', () => {
         expect(res.statusCode).toBe(403);
         expect(res.body.error.details.permissions).toEqual([permission]);
         expect(await findConditionTargetPermissions()).toEqual(before);
+      });
+
+      test('Can grant a permission with the same action parameters it is held with', async () => {
+        const permission = {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['blocked'] },
+          conditions: [],
+          actionParameters: { from: 1 },
+        };
+
+        const res = await rqConditionRequester({
+          url: `/admin/roles/${conditionTargetRole.id}/permissions`,
+          method: 'PUT',
+          body: { permissions: [permission] },
+        });
+
+        expect(res.statusCode).toBe(200);
+
+        const after = await findConditionTargetPermissions();
+        expect(after).toHaveLength(1);
+        expect(after[0]).toMatchObject(permission);
+
+        // Other parameters are another ability
+        const otherRes = await rqConditionRequester({
+          url: `/admin/roles/${conditionTargetRole.id}/permissions`,
+          method: 'PUT',
+          body: { permissions: [{ ...permission, actionParameters: { from: 2 } }] },
+        });
+
+        expect(otherRes.statusCode).toBe(403);
+        expect(await findConditionTargetPermissions()).toEqual(after);
       });
     });
   });

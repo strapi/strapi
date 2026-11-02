@@ -1601,6 +1601,230 @@ describe('Role', () => {
         await expect(checkPermissionsCeiling({ user }, ROLE_ID, [])).resolves.toBeUndefined();
       });
     });
+
+    // The requester holds `read [title]` unconditionally
+    describe('narrowing a permission the role already holds', () => {
+      const IS_CREATOR = 'admin::is-creator';
+      const SAME_ROLE = 'admin::has-same-role-as-creator';
+
+      const rolePermission = (id: number, overrides: Record<string, unknown>) => ({
+        id,
+        role: ROLE_ID,
+        action: READ,
+        subject: ARTICLE,
+        ...overrides,
+      });
+
+      const setupRole = (rolePermissions: any[], localizedSubjects: string[] = []) =>
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }],
+          rolePermissions,
+          localizedSubjects,
+        });
+
+      test('Allows removing a field from a row', async () => {
+        setupRole([rolePermission(1, { properties: { fields: ['title', 'body'] } })]);
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Rejects a narrowed row that adds a field', async () => {
+        setupRole([rolePermission(1, { properties: { fields: ['title', 'body'] } })]);
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['body', 'secret'] } },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['body', 'secret'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+
+      test('Does not combine the fields of one row with the locales of another', async () => {
+        setupRole(
+          [
+            rolePermission(1, { properties: { fields: ['title'], locales: ['en'] } }),
+            rolePermission(2, { properties: { fields: ['body'], locales: ['fr'] } }),
+          ],
+          [ARTICLE]
+        );
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['fr'] } },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'], locales: ['fr'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+
+      test('Allows removing one of several conditions', async () => {
+        setupRole([
+          rolePermission(1, {
+            properties: { fields: ['body'] },
+            conditions: [IS_CREATOR, SAME_ROLE],
+          }),
+        ]);
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['body'] },
+              conditions: [IS_CREATOR],
+            },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Rejects removing the last condition, which makes the row unconditional', async () => {
+        setupRole([
+          rolePermission(1, { properties: { fields: ['body'] }, conditions: [IS_CREATOR] }),
+        ]);
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['body'] }, conditions: [] },
+          ]),
+          [{ action: READ, subject: ARTICLE, properties: { fields: ['body'] }, conditions: [] }]
+        );
+      });
+
+      test('Allows resending a row without the stale locales of a type no longer localized', async () => {
+        setupRole([rolePermission(1, { properties: { fields: ['body'], locales: ['en'] } })]);
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Does not treat a parameterized permission as a narrowing', async () => {
+        setupRole([
+          rolePermission(1, {
+            properties: { fields: ['title', 'body'] },
+            actionParameters: { x: 1 },
+          }),
+        ]);
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['body'] },
+              actionParameters: { x: 1 },
+            },
+          ]),
+          [{ action: READ, subject: ARTICLE, properties: { fields: ['body'] }, conditions: [] }]
+        );
+      });
+    });
+
+    describe('permissions with action parameters', () => {
+      const PARAMETERS = { x: 1, ids: ['a', 'b'] };
+      const request = { action: READ, subject: ARTICLE, actionParameters: PARAMETERS };
+      const rejected = [{ action: READ, subject: ARTICLE, properties: {}, conditions: [] }];
+
+      test('Allows one the requester holds with the same parameters', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, actionParameters: { ids: ['b', 'a'], x: 1 } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling({ user }, ROLE_ID, [request])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Rejects one the requester only holds as the plain action', async () => {
+        setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [request]), rejected);
+      });
+
+      test('Rejects one the requester holds with other parameters', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, actionParameters: { x: 2 } }],
+        });
+
+        await expectForbidden(checkPermissionsCeiling({ user }, ROLE_ID, [request]), rejected);
+      });
+
+      test('Rejects one wider than the permission held with the same parameters', async () => {
+        setupStrapi({
+          userPermissions: [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'] },
+              actionParameters: PARAMETERS,
+            },
+          ],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [
+            { ...request, properties: { fields: ['title', 'body'] } },
+          ]),
+          [{ ...rejected[0], properties: { fields: ['title', 'body'] } }]
+        );
+      });
+
+      test('Does not let a plain permission be covered by a parameterized one', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, actionParameters: PARAMETERS }],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling({ user }, ROLE_ID, [{ action: READ, subject: ARTICLE }]),
+          rejected
+        );
+      });
+
+      test('Checks the token and its owner for a token requester', async () => {
+        setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+        await expectForbidden(
+          checkPermissionsCeiling(
+            {
+              tokenPermissions: [{ action: READ, subject: ARTICLE, actionParameters: PARAMETERS }],
+              owner: user,
+            },
+            ROLE_ID,
+            [request]
+          ),
+          rejected
+        );
+      });
+
+      test('Allows it for super admins', async () => {
+        setupStrapi();
+
+        await expect(
+          checkPermissionsCeiling({ user: superAdminUser }, ROLE_ID, [request])
+        ).resolves.toBeUndefined();
+      });
+    });
   });
 
   describe('addPermissions', () => {

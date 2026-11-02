@@ -427,6 +427,82 @@ describe('Admin Token Role Sync (api)', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // T1-7 — Token permissions with action parameters
+  // ---------------------------------------------------------------------------
+
+  /**
+   * The engine registers a permission with action parameters as `<action>?<parameters>`. Token
+   * create forces `actionParameters: {}`, so the row is inserted directly, as a token stored
+   * before that rule could carry.
+   */
+  describe('T1-7 Token permissions with action parameters', () => {
+    const PARAMETERS = { x: 1 };
+
+    const insertParameterizedTokenPermission = async (tokenId: number) =>
+      strapi.db.query('admin::permission').create({
+        data: {
+          action: SYNC_ACTION_2,
+          subject: SYNC_SUBJECT,
+          properties: {},
+          conditions: [],
+          actionParameters: PARAMETERS,
+          apiToken: tokenId,
+        },
+      });
+
+    const findTokenPermission = (id: number) =>
+      strapi.db.query('admin::permission').findOne({ where: { id } });
+
+    test('Owner loses the action → parameterized token permission deleted', async () => {
+      const utils = createUtils(strapi);
+      const inserted = await insertParameterizedTokenPermission(tokenA.id);
+
+      await utils.assignPermissionsToRole(roleA.id, [
+        { action: SYNC_ACTION, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+        ...ADMIN_TOKEN_PERMS,
+      ]);
+
+      expect(await findTokenPermission(inserted.id)).toBeNull();
+      expect((await getAdminPermissionsFromDB(tokenA.id)).map((p) => p.action)).toContain(
+        SYNC_ACTION
+      );
+    });
+
+    test('Owner holds the same action, subject and parameters → kept', async () => {
+      const utils = createUtils(strapi);
+      const parameterizedRolePermission = {
+        action: SYNC_ACTION_2,
+        subject: SYNC_SUBJECT,
+        conditions: [],
+        properties: {},
+        actionParameters: PARAMETERS,
+      };
+
+      await utils.assignPermissionsToRole(roleA.id, [
+        { action: SYNC_ACTION, subject: SYNC_SUBJECT, conditions: [], properties: {} },
+        parameterizedRolePermission,
+        ...ADMIN_TOKEN_PERMS,
+      ]);
+
+      const inserted = await insertParameterizedTokenPermission(tokenA.id);
+
+      // Any role change re-syncs the token
+      await utils.assignPermissionsToRole(roleA.id, [
+        parameterizedRolePermission,
+        ...ADMIN_TOKEN_PERMS,
+      ]);
+
+      expect(await findTokenPermission(inserted.id)).toMatchObject({
+        action: SYNC_ACTION_2,
+        actionParameters: PARAMETERS,
+      });
+      expect((await getAdminPermissionsFromDB(tokenA.id)).map((p) => p.action)).not.toContain(
+        SYNC_ACTION
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // T2 — User-role binding changed (admin::user afterUpdate lifecycle)
   // ---------------------------------------------------------------------------
 

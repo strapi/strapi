@@ -26,7 +26,7 @@
  * `locales` is not enforced it is ignored. A condition the condition provider does not know is not
  * held, since the engine skips it.
  */
-import { isEmpty, omit, uniq } from 'lodash';
+import { isEmpty, isEqual, isPlainObject, mapValues, omit, uniq } from 'lodash';
 
 export interface CeilingPermission {
   action: string;
@@ -112,6 +112,61 @@ export const toEnforcedPermissions = <T extends CeilingPermission>(
 
     return [toEnforcedLocales(enforced, context)];
   });
+
+/**
+ * Arrays of strings are compared as sets, and keys with an `undefined` value are ignored.
+ */
+const normalizeActionParameters = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.every((item) => typeof item === 'string') ? [...new Set(value)].sort() : value;
+  }
+
+  if (isPlainObject(value)) {
+    const defined = Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).filter(([, item]) => item !== undefined)
+    );
+
+    return mapValues(defined, normalizeActionParameters);
+  }
+
+  return value;
+};
+
+/**
+ * Whether two permissions carry the same action parameters. The engine registers a permission
+ * with action parameters as the action `<action>?<parameters>`, so only a permission with the
+ * same parameters grants the same ability. Missing parameters are the same as `{}`.
+ */
+export const haveSameActionParameters = (p1: CeilingPermission, p2: CeilingPermission): boolean =>
+  isEqual(
+    normalizeActionParameters(p1.actionParameters ?? {}),
+    normalizeActionParameters(p2.actionParameters ?? {})
+  );
+
+/**
+ * Whether `requested`, which carries action parameters, is covered by the `held` permissions with
+ * the same action parameters: the rule of `isPermissionWithinCeiling`, applied to those only.
+ * `held` is read as the engine enforces it apart from the action parameters
+ * (`toEnforcedParameterizedPermissions` in `services/permission/enforced-permissions.ts`).
+ */
+export const isParameterizedPermissionWithinCeiling = (
+  requested: CeilingPermission,
+  held: CeilingPermission[]
+): boolean => {
+  const withoutParameters = <T extends CeilingPermission>(permission: T): T => ({
+    ...permission,
+    actionParameters: {},
+  });
+
+  const sameParameters = held
+    .filter(
+      (permission) =>
+        !isEmpty(permission.actionParameters) && haveSameActionParameters(permission, requested)
+    )
+    .map(withoutParameters);
+
+  return isPermissionWithinCeiling(withoutParameters(requested), sameParameters);
+};
 
 /**
  * The permission engine drops permissions with an empty `fields` list (access to no field),
@@ -373,5 +428,7 @@ export default {
   coversCondition,
   coversAtom,
   isPermissionWithinCeiling,
+  haveSameActionParameters,
+  isParameterizedPermissionWithinCeiling,
   getInheritedConditions,
 };
