@@ -1,5 +1,9 @@
 {
   "extends": "tsconfig/server.json",
+  "compilerOptions": {
+    // Unit tests run with vitest and import its globals: no jest types.
+    "types": ["node", "@strapi/types/strict"]
+  },
   "include": ["src", "vitest.config.ts"],
   "exclude": ["**/__tests__/**"]
 }
