@@ -8,6 +8,11 @@ interface I18nSharedFieldsLockContextValue {
   relock: () => void;
 }
 
+/**
+ * @alpha
+ * @public
+ * Reads or changes whether the editor unlocked shared fields on a secondary locale.
+ */
 const [I18nSharedFieldsLockProvider, useI18nSharedFieldsLock] =
   createContext<I18nSharedFieldsLockContextValue>('I18nSharedFieldsLock', {
     isUnlocked: false,

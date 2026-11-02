@@ -1,6 +1,10 @@
 import { renderHook } from '@testing-library/react';
 
-import { useIsEditingDefaultLocale, useShouldLockNonLocalizedField } from '../useI18nFieldLock';
+import {
+  useIsEditingDefaultLocale,
+  useOmitLockedSharedFieldsOnLocaleCreate,
+  useShouldLockNonLocalizedField,
+} from '../useI18nFieldLock';
 
 type I18nLocalesQueryResult = {
   data: Array<{ code: string; isDefault: boolean }> | undefined;
@@ -14,9 +18,16 @@ const mockUseI18nSharedFieldsLock = jest.fn(
     selector({ isUnlocked: false })
 );
 
+const mockFormState: { values: Record<string, unknown>; initialValues: Record<string, unknown> } = {
+  values: {},
+  initialValues: {},
+};
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useQueryParams: () => mockUseQueryParams(),
+  useForm: (_name: string, selector: (state: typeof mockFormState) => unknown) =>
+    selector(mockFormState),
 }));
 
 jest.mock('../useDocumentContext', () => ({
@@ -402,6 +413,79 @@ describe('useI18nFieldLock', () => {
       );
 
       expect(result.current).toBe(false);
+    });
+  });
+
+  describe('useOmitLockedSharedFieldsOnLocaleCreate', () => {
+    const attributes = {
+      title: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+      shared: { type: 'component', pluginOptions: { i18n: { localized: false } } },
+      blocks: { type: 'dynamiczone' },
+      slug: { type: 'uid' },
+    };
+    const payload = {
+      title: 'Bonjour',
+      shared: { name: 'kept on the server', tag: { connect: [], disconnect: [] } },
+      blocks: [],
+      slug: 'bonjour',
+    };
+
+    const mockSecondaryLocale = (document: { id?: number; locale: string } | undefined) => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } }, attributes },
+          document,
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
+        },
+      });
+    };
+
+    it('drops locked shared fields when the save creates a missing locale', () => {
+      mockSecondaryLocale(undefined);
+
+      const { result } = renderHook(() => useOmitLockedSharedFieldsOnLocaleCreate());
+
+      expect(result.current(payload)).toEqual({ title: 'Bonjour', slug: 'bonjour' });
+    });
+
+    it('keeps the payload when the locale already exists', () => {
+      mockSecondaryLocale({ id: 4, locale: 'fr' });
+
+      const { result } = renderHook(() => useOmitLockedSharedFieldsOnLocaleCreate());
+
+      expect(result.current(payload)).toBe(payload);
+    });
+
+    it('keeps the payload when the document has no default-locale entry', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } }, attributes },
+          document: undefined,
+          meta: { availableLocales: [{ locale: 'es' }], defaultLocale: 'en' },
+        },
+      });
+
+      const { result } = renderHook(() => useOmitLockedSharedFieldsOnLocaleCreate());
+
+      expect(result.current(payload)).toBe(payload);
+    });
+
+    it('keeps only the shared fields the editor changed after unlocking', () => {
+      mockSecondaryLocale(undefined);
+      mockUseI18nSharedFieldsLock.mockImplementation((_name, selector) =>
+        selector({ isUnlocked: true })
+      );
+      mockFormState.initialValues = { shared: { name: 'inherited' }, blocks: [] };
+      mockFormState.values = { shared: { name: 'inherited' }, blocks: [{ name: 'added' }] };
+
+      const { result } = renderHook(() => useOmitLockedSharedFieldsOnLocaleCreate());
+
+      expect(result.current(payload)).toEqual({ title: 'Bonjour', blocks: [], slug: 'bonjour' });
+
+      mockFormState.initialValues = {};
+      mockFormState.values = {};
     });
   });
 });

@@ -212,6 +212,7 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     await page.getByRole('button', { name: 'Save' }).click();
     await findAndClose(page, 'Saved');
     await expect(isAvailable).toBeChecked();
+    await expect(isAvailable).not.toBeDisabled();
 
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'English (en)' }).click();

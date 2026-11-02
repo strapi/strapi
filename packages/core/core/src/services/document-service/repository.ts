@@ -692,6 +692,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const publishedLocales = new Set(
       (publishedVersions as Array<{ locale?: string }>).map((entry) => entry.locale)
     );
+    // Republishing a locale in the same call publishes its draft shared values,
+    // and its old published row (an inheritance source) was deleted above.
+    const republishesALocale = updatedDraft.some((draft: any) =>
+      publishedLocales.has(draft.locale)
+    );
 
     // Transform draft entry data and create published versions
     const publishedEntries = await async.map(updatedDraft, async (draft: any) => {
@@ -699,7 +704,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       const hasPublishedSibling = [...publishedLocales].some((locale) => locale !== draft.locale);
 
       let entryToPublish = draft;
-      if (hasDraftAndPublish && isFirstPublishForLocale && hasPublishedSibling) {
+      if (
+        hasDraftAndPublish &&
+        isFirstPublishForLocale &&
+        hasPublishedSibling &&
+        !republishesALocale
+      ) {
         entryToPublish = await copyNonLocalizedFields(contentType, documentId, draft, {
           status: 'published',
           strategy: 'replace',
