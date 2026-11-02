@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'strapi/strapi'
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: app-token
         with:
           app-id: ${{ secrets.DRAFT_RELEASE_APP_ID }}
