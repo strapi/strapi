@@ -1,8 +1,8 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { errors, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export type HandlerParams = {
-  documentId: string;
+  documentId: Data.DocumentID;
   locale: string;
   status: 'published' | 'draft';
 };

@@ -153,7 +153,7 @@ export const cleanMorphToManyOrderColumn = async ({
  * to have a unique identifier for the relation. (e.g. relations reordering)
  */
 
-export const encodePolymorphicId = (id: number | string, __type: string) => {
+export const encodePolymorphicId = (id: ID, __type: string) => {
   return `${id}:::${__type}`;
 };
 

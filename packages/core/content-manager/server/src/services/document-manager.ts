@@ -1,7 +1,7 @@
 import { omit, flow } from 'lodash';
 
 import { contentTypes, errors, pagination } from '@strapi/utils';
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Core, Data, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
@@ -30,7 +30,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async findOne(
-      id: string,
+      id: Modules.Documents.ID,
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'findOne'>, 'documentId'> = {}
     ) {
@@ -41,7 +41,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
      * Find multiple (or all) locales for a document
      */
     async findLocales(
-      id: string | string[] | undefined,
+      id: Data.DocumentID | Data.DocumentID[] | undefined,
       uid: UID.CollectionType,
       opts: {
         populate?: Modules.Documents.Params.Pick<any, 'populate'>;
@@ -139,7 +139,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      *  Check if a document exists
      */
-    async exists(uid: UID.CollectionType, id?: string) {
+    async exists(uid: UID.CollectionType, id?: Data.DocumentID) {
       // Collection type
       if (id) {
         const count = await strapi.db.query(uid).count({ where: { documentId: id } });
@@ -192,7 +192,11 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         .then((result) => result?.entries);
     },
 
-    async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
+    async publishMany(
+      uid: UID.ContentType,
+      documentIds: Modules.Documents.ID[],
+      locale?: string | string[]
+    ) {
       assertDraftAndPublish(uid);
 
       return strapi.db.transaction(async () => {
@@ -261,7 +265,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         .then((result) => result?.entries.at(0));
     },
 
-    async countDraftRelations(id: string, uid: UID.ContentType, locale: string) {
+    async countDraftRelations(id: Modules.Documents.ID, uid: UID.ContentType, locale: string) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {

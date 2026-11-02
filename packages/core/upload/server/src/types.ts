@@ -1,4 +1,5 @@
 import type { File as FormidableFile } from 'formidable';
+import type { Data } from '@strapi/types';
 
 export type InputFile = FormidableFile & {
   path?: string;
@@ -15,7 +16,7 @@ export interface FocalPoint {
  * Admin user that created or updated a file, when the relation is populated
  */
 export interface FileCreator {
-  id: number;
+  id: Data.ID;
   firstname?: string | null;
   lastname?: string | null;
   username?: string | null;
@@ -26,8 +27,8 @@ export interface FileCreator {
  * A `plugin::upload.file` row, as the upload service returns it
  */
 export interface File {
-  id: number;
-  documentId: string;
+  id: Data.ID;
+  documentId: Data.DocumentID;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
@@ -76,7 +77,7 @@ export interface File {
    * Present only when populated: the related entries, with their `__type`
    */
   related?: {
-    id: string | number;
+    id: Data.ID;
     __type: string;
   }[];
   createdAt?: string;
@@ -86,22 +87,22 @@ export interface File {
   /**
    * Present only when populated: the admin user, or null when no admin user is set
    */
-  createdBy?: number | FileCreator | null;
-  updatedBy?: number | FileCreator | null;
+  createdBy?: Data.ID | FileCreator | null;
+  updatedBy?: Data.ID | FileCreator | null;
 }
 
 export interface Folder {
-  id: number;
+  id: Data.ID;
   name: string;
   pathId: number;
   /**
    * parent id, or null when the folder sits at the media library root
    */
-  parent?: number | null;
+  parent?: Data.ID | null;
   /**
    * children ids
    */
-  children?: number[];
+  children?: Data.ID[];
   path: string;
   files?: File[];
 }
@@ -127,9 +128,9 @@ export interface Config {
 }
 
 export interface UploadableFile extends Omit<File, 'id' | 'documentId' | 'folder' | 'related'> {
-  folder?: number | null;
+  folder?: Data.ID | null;
   related?: {
-    id: string | number;
+    id: Data.ID;
     __type: string;
     __pivot: { field: string };
   }[];
@@ -145,5 +146,5 @@ export type FileInfo = {
   alternativeText?: string | null;
   caption?: string | null;
   focalPoint?: FocalPoint | null;
-  folder?: number | null;
+  folder?: Data.ID | null;
 };

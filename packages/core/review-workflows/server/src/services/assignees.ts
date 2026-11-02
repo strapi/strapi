@@ -1,4 +1,4 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { errors, emitAudit } from '@strapi/utils';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';
 import { AUDITED_EVENTS } from '../audit-logs';
@@ -10,7 +10,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('workflow-metrics', { strapi });
 
   return {
-    async findEntityAssigneeId(id: string | number, model: UID.ContentType) {
+    async findEntityAssigneeId(id: Data.ID, model: UID.ContentType) {
       const entity = await strapi.db.query(model).findOne({
         where: { id },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
@@ -25,13 +25,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      */
     async updateEntityAssignee(
       entityToUpdate: {
-        id: number | string;
-        documentId: string;
+        id: Data.ID;
+        documentId: Data.DocumentID;
         locale: string;
         updatedAt: string;
       },
       model: UID.ContentType,
-      assigneeId: string | null
+      assigneeId: Data.ID | null
     ) {
       const { documentId, locale } = entityToUpdate;
 

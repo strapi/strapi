@@ -1,4 +1,4 @@
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Core, Data, Modules, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
 import { omit, castArray } from 'lodash';
@@ -176,7 +176,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
                 limit: BATCH_SIZE,
               });
 
-              const ids = expiredVersions.map((v: { id: number | string }) => v.id);
+              const ids = expiredVersions.map((v: { id: Data.ID }) => v.id);
               deleted = ids.length;
 
               // Delete this batch by ID

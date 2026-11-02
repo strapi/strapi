@@ -154,7 +154,7 @@ const normalizeMediaIds = (
  */
 const copyNonLocalizedFields = async (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
-  documentId: string,
+  documentId: Modules.Documents.ID,
   dataToCreate: Record<string, any>
 ): Promise<Record<string, any>> => {
   if (!strapi.localization.isLocalizedContentType(contentType)) {

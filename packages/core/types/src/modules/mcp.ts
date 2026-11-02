@@ -1,6 +1,7 @@
 import type { Ability } from '@casl/ability';
 import { z } from '@strapi/utils';
 import type * as Core from '../core';
+import type * as Data from '../data';
 
 /** A single CASL permission check: action + optional subject. */
 export type McpAuthPolicy = {
@@ -24,7 +25,7 @@ export type McpCapabilityAuth = {
  */
 export type McpHandlerContext = {
   userAbility: Ability;
-  user: { id: string | number };
+  user: { id: Data.ID };
 };
 
 /** Access variant for dev-mode-only capabilities (no auth policies). */

@@ -1,4 +1,4 @@
-import type { Data, Modules } from '@strapi/types';
+import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 /**
@@ -29,7 +29,7 @@ export declare namespace GetNonLocalizedFields {
  */
 export interface FillFromLocaleParams {
   model: string;
-  documentId?: string;
+  documentId?: Data.DocumentID;
   sourceLocale: string;
   targetLocale: string;
   collectionType: 'collection-types' | 'single-types';
@@ -43,7 +43,7 @@ export declare namespace FillFromLocale {
 
   export interface Params {
     model: string;
-    documentId?: string;
+    documentId?: Data.DocumentID;
     sourceLocale: string;
     targetLocale: string;
     collectionType: 'collection-types' | 'single-types';
@@ -64,7 +64,7 @@ export declare namespace CountManyEntriesDraftRelations {
     query: {
       // We can use this endpoint to count the draft relations across multiple
       // entities (documents + locales).
-      documentIds?: Modules.Documents.ID[];
+      documentIds?: Data.DocumentID[];
       locale?: string | string[] | null;
     };
   }

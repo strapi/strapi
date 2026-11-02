@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Data, Modules } from '@strapi/types';
 
 import { getService } from '../../utils';
 import { ACTIONS, FILE_MODEL_UID, FOLDER_MODEL_UID } from '../../constants';
@@ -22,19 +22,19 @@ import { ok } from '../utils';
 // Type-level only: the MCP SDK validates `args` against the tool's strict Zod input schema
 // before the handler runs, so unknown keys never reach here.
 type MediaUpdateAssetArgs = {
-  id: number;
+  id: Data.ID;
   name?: string;
   alternativeText?: string | null;
   caption?: string | null;
 };
 
 type MediaMoveAssetsArgs = {
-  ids: number[];
-  folder: number | null;
+  ids: Data.ID[];
+  folder: Data.ID | null;
 };
 
 type MediaDeleteAssetsArgs = {
-  ids: number[];
+  ids: Data.ID[];
   dryRun?: boolean;
 };
 
@@ -136,7 +136,7 @@ export const createMediaUpdateAssetHandler =
  * id: it is a property of the request, not of any single asset, so every id would fail for the
  * same reason and a per-id report would say nothing the agent could act on.
  */
-const resolveDestinationFolder = async (strapi: Core.Strapi, folder: number | null) => {
+const resolveDestinationFolder = async (strapi: Core.Strapi, folder: Data.ID | null) => {
   if (folder === null) {
     return null;
   }
@@ -187,7 +187,7 @@ export const createMediaMoveAssetsHandler =
     const destinationFolder = await resolveDestinationFolder(strapi, folder);
 
     const moved: ReturnType<typeof sanitizeMediaAsset>[] = [];
-    const failed: { id: number; reason: string }[] = [];
+    const failed: { id: Data.ID; reason: string }[] = [];
 
     // `ids` can repeat an id; de-duplicating keeps the report one entry per id rather than
     // reporting the same asset twice for a request that moved it once.
@@ -298,7 +298,7 @@ export const createMediaDeleteAssetsHandler =
     assertMediaPermission(strapi, context, ACTIONS.update, FILE_MODEL_UID);
 
     const deleted: ReturnType<typeof sanitizeMediaAsset>[] = [];
-    const failed: { id: number; reason: string }[] = [];
+    const failed: { id: Data.ID; reason: string }[] = [];
 
     // `ids` can repeat an id; de-duplicating keeps the report one entry per id, and stops the
     // second occurrence of an already-deleted asset from being reported as a missing one.

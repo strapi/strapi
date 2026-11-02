@@ -422,7 +422,7 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
 /** Delete a user
  * @param ids ids of the users to delete
  */
-const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
+const deleteByIds = async (ids: Data.ID[]): Promise<AdminUser[]> => {
   // Check at least one super admin remains
   const superAdminRole = await getSuperAdminRoleOrThrow();
   const nbOfSuperAdminToDelete = await strapi.db.query('admin::user').count({

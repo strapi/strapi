@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { async, errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
@@ -35,7 +35,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   // Files can be addressed by numeric id or documentId (1:1, files have no draft & publish)
-  const resolveFileId = async (id: string | number) => {
+  const resolveFileId = async (id: Data.ID | Data.DocumentID) => {
     if (/^\d+$/.test(String(id))) {
       return id;
     }

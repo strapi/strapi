@@ -1,4 +1,4 @@
-import type { Modules, Schema, UID } from '@strapi/types';
+import type { Data, Modules, Schema, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
 import { isEntryValid, updateAffectedReleaseStatuses } from '../utils';
@@ -9,7 +9,7 @@ type LocaleFilter = { locale?: string | null | { $in: string[] } };
 
 interface ReleaseActionsParams extends LocaleFilter {
   contentType: UID.ContentType;
-  entryDocumentId?: Modules.Documents.ID;
+  entryDocumentId?: Data.DocumentID;
 }
 
 /**

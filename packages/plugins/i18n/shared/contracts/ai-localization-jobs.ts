@@ -1,9 +1,10 @@
+import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { Entity } from './shared';
 
 export interface AILocalizationJobs extends Entity {
   contentType: string;
-  relatedDocumentId: string;
+  relatedDocumentId: Data.DocumentID;
   sourceLocale: string;
   targetLocales: string[];
   status: 'processing' | 'completed' | 'failed';
@@ -19,7 +20,7 @@ export declare namespace GetAILocalizationJobsByDocument {
   }
 
   export interface Params {
-    documentId: string;
+    documentId: Data.DocumentID;
   }
 
   export type Response =

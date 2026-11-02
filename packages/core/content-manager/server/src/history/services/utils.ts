@@ -317,7 +317,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const buildRelationReponse = async (
     values: {
-      documentId: string;
+      documentId: Data.DocumentID;
       locale: string | null;
     }[],
     attributeSchema: Schema.Attribute.RelationWithTarget

@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import type { Modules } from '@strapi/types';
+import type { Data, Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
@@ -15,7 +15,7 @@ type Middleware = Modules.Documents.Middleware.Middleware;
  * @param {Number} id
  * @returns {Object}
  */
-const getEntityStage = async (uid: any, id: any, params: any) => {
+const getEntityStage = async (uid: any, id: Data.DocumentID, params: any) => {
   const entity = await strapi.documents(uid).findOne({
     ...params,
     documentId: id,

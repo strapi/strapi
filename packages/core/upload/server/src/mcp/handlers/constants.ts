@@ -1,3 +1,5 @@
+import type { Data } from '@strapi/types';
+
 export const MCP_NOT_FOUND_ASSET = 'Media asset not found.';
 
 export const MCP_UPDATE_ASSET_NO_FIELDS =
@@ -23,7 +25,7 @@ export const MCP_FOLDER_MOVE_INTO_SELF =
  * first — but a deleted or never-existent folder id looks the same from here, so the message
  * covers both rather than asserting one.
  */
-export const MCP_DELETE_FOLDER_UNRESOLVED_IDS = (ids: number[]) =>
+export const MCP_DELETE_FOLDER_UNRESOLVED_IDS = (ids: Data.ID[]) =>
   `These ids do not match any media folder: ${ids.join(', ')}. Nothing was deleted — media_delete_folder rejects the whole request rather than deleting the folders that did match, because folder ids and asset ids are indistinguishable integers. If these are asset ids, use media_delete_assets instead; otherwise the folders may already be gone. Use media_list_folders to discover valid folder ids.`;
 
 export const MCP_MOVE_ASSETS_DESTINATION_NOT_FOUND =

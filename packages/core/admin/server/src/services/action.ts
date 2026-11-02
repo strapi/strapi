@@ -1,3 +1,4 @@
+import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import constants from './constants';
@@ -13,7 +14,7 @@ const { NotFoundError } = errors;
  * @param {string|number} roleId
  * @returns {object[]}
  */
-const getAllowedActionsForRole = async (roleId?: string) => {
+const getAllowedActionsForRole = async (roleId?: Data.ID) => {
   const { actionProvider } = getService('permission');
 
   if (roleId != null) {

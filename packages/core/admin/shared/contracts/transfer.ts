@@ -1,13 +1,14 @@
 import { errors } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 
 export interface TransferTokenPermission {
-  id: number | `${number}`;
+  id: Data.ID;
   action: 'push' | 'pull' | 'push-pull';
-  token: TransferToken | number;
+  token: TransferToken | Data.ID;
 }
 
 export interface DatabaseTransferToken {
-  id: number | string;
+  id: Data.ID;
   name: string;
   description: string;
   accessKey: string;
@@ -82,7 +83,7 @@ export declare namespace TokenGetById {
   }
 
   export interface Params {
-    id: string | number;
+    id: Data.ID;
   }
 
   export interface Response {
@@ -121,7 +122,7 @@ export declare namespace TokenUpdate {
   }
 
   export interface Params {
-    id: string | number;
+    id: Data.ID;
   }
 
   export interface Response {
@@ -140,7 +141,7 @@ export declare namespace TokenRevoke {
   }
 
   export interface Params {
-    id: string | number;
+    id: Data.ID;
   }
 
   export interface Response {
@@ -159,7 +160,7 @@ export declare namespace TokenRegenerate {
   }
 
   export interface Params {
-    id: string | number;
+    id: Data.ID;
   }
 
   export interface Response {

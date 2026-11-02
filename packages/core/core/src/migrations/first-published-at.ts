@@ -1,10 +1,11 @@
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 import _ from 'lodash';
 import { Input } from './draft-publish';
 
 interface ContentTypeData {
-  id: number;
-  documentId: string;
+  id: Data.ID;
+  documentId: Data.DocumentID;
   publishedAt: Date;
   firstPublishedAt: Date;
   locale: string;

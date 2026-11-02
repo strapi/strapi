@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { AI_LOCALIZATION_JOB_UID } from '../models/ai-localization-job';
 import type { AILocalizationJobs } from '../../../shared/contracts/ai-localization-jobs';
 
@@ -14,7 +14,7 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
     targetLocales,
     status = 'processing',
   }: {
-    documentId: string;
+    documentId: Data.DocumentID;
     contentType: string;
     sourceLocale: string;
     targetLocales: string[];
@@ -60,7 +60,7 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
   /**
    * Get job by document ID
    */
-  async getJobByDocument(contentType: string, documentId: string) {
+  async getJobByDocument(contentType: string, documentId: Data.DocumentID) {
     return strapi.db.query(AI_LOCALIZATION_JOB_UID).findOne({
       where: {
         relatedDocumentId: documentId,

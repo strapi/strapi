@@ -1,3 +1,5 @@
+import type * as Data from '../../data';
+
 export interface ApiToken {
   salt: string;
 }
@@ -111,7 +113,7 @@ export interface Flags {
 }
 
 export interface PreviewHandlerParams {
-  documentId: string;
+  documentId: Data.DocumentID;
   locale?: string;
   status?: string;
   [key: string]: unknown;

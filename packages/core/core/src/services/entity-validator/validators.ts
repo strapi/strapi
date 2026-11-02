@@ -10,7 +10,7 @@
  */
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
-import type { Schema, Struct, Modules } from '@strapi/types';
+import type { Data, Schema, Struct, Modules } from '@strapi/types';
 import { blocksValidator } from './blocks-validator';
 
 import type { ComponentContext } from '.';
@@ -356,7 +356,7 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       select: string[];
       where: {
         published_at?: { $eq: null } | { $ne: null };
-        id?: { $ne: number };
+        id?: { $ne: Data.ID };
         locale?: string;
       };
       populate: {

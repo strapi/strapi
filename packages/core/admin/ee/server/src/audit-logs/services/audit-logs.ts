@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import {
   AUDIT_LOG_EXPORT_EVENT,
@@ -29,12 +29,12 @@ interface Event {
   action: string;
   date: Date;
   // Null for actions no person performed, such as a scheduled job
-  userId: string | number | null;
+  userId: Data.ID | null;
   payload: Record<string, unknown>;
 }
 
 interface Log extends Omit<Event, 'userId'> {
-  user: string | number | null;
+  user: Data.ID | null;
 }
 
 const getSanitizedUser = (user: any) => {
@@ -333,7 +333,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       };
     },
 
-    async findOne(id: unknown) {
+    async findOne(id: Data.ID) {
       const result: any = await strapi.db.query('admin::audit-log').findOne({
         where: { id },
         populate: ['user'],

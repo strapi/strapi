@@ -1,5 +1,6 @@
 import { map, sortBy } from 'lodash';
 import { strings, setCreatorFields } from '@strapi/utils';
+import type { Data } from '@strapi/types';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
 import { AUDITED_EVENTS } from '../audit-logs';
@@ -45,7 +46,7 @@ const setPathIdAndPath = async (folder: Pick<Folder, 'parent'>) => {
 
 const create = async (
   folderData: Pick<Folder, 'name' | 'parent'>,
-  opts?: { user: { id: string | number } }
+  opts?: { user: { id: Data.ID } }
 ) => {
   const folderService = getService('folder');
 
@@ -68,7 +69,7 @@ const create = async (
  * @param ids ids of the folders to delete
  * @returns {Promise<Object[]>}
  */
-const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOptions = {}) => {
+const deleteByIds = async (ids: Data.ID[] = [], { validateFiles }: DeleteByIdsOptions = {}) => {
   const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({ where: { id: { $in: ids } } });
   if (folders.length === 0) {
     return {
@@ -122,7 +123,7 @@ const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOpt
  * Update name and location of a folder and its belonging folders and files
  */
 const update = async (
-  id: number,
+  id: Data.ID,
   {
     name,
     parent,
@@ -132,9 +133,9 @@ const update = async (
      * Omit to rename in place: the name-only branch skips the transaction that rewrites
      * descendant paths. Pass a number to re-parent, or null to move to the root.
      */
-    parent?: number | null;
+    parent?: Data.ID | null;
   },
-  { user }: { user: { id: string | number } }
+  { user }: { user: { id: Data.ID } }
 ) => {
   // only name is updated
   if (parent === undefined) {

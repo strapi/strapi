@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable no-continue */
-import type { UID } from '@strapi/types';
+import type { Data, UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { createId } from '@paralleldrive/cuid2';
 import { contentTypes } from '@strapi/utils';
@@ -41,7 +41,7 @@ import {
 } from '../../utils/transform-content-types-to-models';
 import { serializeJsonColumns } from './serialize-json-columns';
 
-type DocumentVersion = { documentId: string; locale: string };
+type DocumentVersion = { documentId: Data.DocumentID; locale: string };
 type Knex = Parameters<Migration['up']>[0];
 
 type MetadataWithOptionalPrimaryKey = {

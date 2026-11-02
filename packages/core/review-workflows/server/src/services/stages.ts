@@ -1,4 +1,4 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { pick, map, isEqual } from 'lodash';
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
@@ -6,9 +6,9 @@ import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../constants/wo
 import { getService } from '../utils';
 
 interface PopulatedPermission {
-  role: number | { id: number };
+  role: Data.ID | { id: Data.ID };
   action: string;
-  actionParameters?: { from?: number; to?: number };
+  actionParameters?: { from?: Data.ID; to?: Data.ID };
 }
 
 const { ApplicationError, ValidationError } = errors;
@@ -41,7 +41,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
-    findById(id: string | number, { workflowId, populate }: any = {}) {
+    findById(id: Data.ID, { workflowId, populate }: any = {}) {
       return strapi.db.query(STAGE_MODEL_UID).findOne({
         where: workflowId === undefined ? { id } : { id, workflow: workflowId },
         populate,
@@ -62,7 +62,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       await async.reduce(stagesList)(async (_, stage, idx) => {
         const stageId = stages[idx].id;
-        const allPermissionIds: number[] = [];
+        const allPermissionIds: Data.ID[] = [];
 
         // Register "from" permissions
         if (stage.fromPermissions && stage.fromPermissions.length > 0) {
@@ -75,7 +75,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
                 fromStage: stageId,
               })
           );
-          allPermissionIds.push(...fromPermissions.flat().map((p: { id: number }) => p.id));
+          allPermissionIds.push(...fromPermissions.flat().map((p: { id: Data.ID }) => p.id));
         }
 
         // Register "to" permissions
@@ -89,7 +89,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
                 toStage: stageId,
               })
           );
-          allPermissionIds.push(...toPermissions.flat().map((p: { id: number }) => p.id));
+          allPermissionIds.push(...toPermissions.flat().map((p: { id: Data.ID }) => p.id));
         }
 
         if (allPermissionIds.length > 0) {
@@ -111,7 +111,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const stageId = destStage.id;
       const hasPermissionChanges = destStage.fromPermissions || destStage.toPermissions;
 
-      let allPermissionIds: number[];
+      let allPermissionIds: Data.ID[];
 
       if (hasPermissionChanges) {
         // Delete all old permissions (both from and to) when either type changes
@@ -119,7 +119,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         allPermissionIds = [];
 
-        const extractRoleId = (p: PopulatedPermission): number =>
+        const extractRoleId = (p: PopulatedPermission): Data.ID =>
           typeof p.role === 'object' ? p.role.id : p.role;
 
         // Re-register "from" permissions (fall back to existing "from" entries from DB)
@@ -137,7 +137,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
               fromStage: stageId,
             })
           );
-          allPermissionIds.push(...registered.flat().map((p: { id: number }) => p.id));
+          allPermissionIds.push(...registered.flat().map((p: { id: Data.ID }) => p.id));
         }
 
         // Re-register "to" permissions (fall back to existing "to" entries from DB)
@@ -155,11 +155,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
               toStage: stageId,
             })
           );
-          allPermissionIds.push(...registered.flat().map((p: { id: number }) => p.id));
+          allPermissionIds.push(...registered.flat().map((p: { id: Data.ID }) => p.id));
         }
       } else {
         allPermissionIds = (srcStage?.permissions ?? [])
-          .map((p: { id: number }) => p.id)
+          .map((p: { id: Data.ID }) => p.id)
           .filter(Boolean);
       }
 
@@ -270,13 +270,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      */
     async updateEntity(
       entityToUpdate: {
-        id: number | string;
-        documentId: string;
+        id: Data.ID;
+        documentId: Data.DocumentID;
         locale: string;
         updatedAt: string;
       },
       model: UID.ContentType,
-      stageId: any
+      stageId: Data.ID
     ) {
       const stage = await this.findById(stageId);
       const { documentId, locale } = entityToUpdate;
