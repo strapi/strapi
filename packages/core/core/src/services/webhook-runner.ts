@@ -8,7 +8,7 @@ import type { Logger } from '@strapi/logger';
 
 import type { Modules } from '@strapi/types';
 import WorkerQueue from './worker-queue';
-import { renderWebhookBody } from './webhook-body';
+import { createSampleEvent, renderWebhookBody } from './webhook-body';
 import type { EventHub } from './event-hub';
 import type { Fetch } from '../utils/fetch';
 
@@ -26,6 +26,8 @@ interface ConstructorParameters {
   logger: Logger;
   configuration?: Record<string, unknown>;
   fetch: Fetch;
+  isBodyTemplateEnabled?: () => boolean;
+  getContentTypes?: () => Parameters<typeof createSampleEvent>[1];
 }
 
 type Listener = (info: Record<string, unknown>) => Promise<void>;
@@ -35,23 +37,6 @@ const debug = createdDebugger('strapi:webhook');
 const defaultConfiguration: Config = {
   defaultHeaders: {},
   deduplicateReleaseWebhooks: false,
-};
-
-/**
- * The default payload with the rendered body template of the webhook added to it, a rendered
- * key overriding the default key of the same name, or the rendered template alone when the
- * webhook replaces the default payload.
- */
-const getRequestBody = (webhook: Webhook, payload: Record<string, unknown>) => {
-  const { body, bodyMode } = webhook;
-
-  if (!body) {
-    return payload;
-  }
-
-  const rendered = renderWebhookBody(body, payload);
-
-  return bodyMode === 'replace' ? rendered : { ...payload, ...rendered };
 };
 
 /**
@@ -97,18 +82,26 @@ class WebhookRunner {
 
   private fetch: Fetch;
 
+  private isBodyTemplateEnabled: () => boolean;
+
+  private getContentTypes: () => Parameters<typeof createSampleEvent>[1];
+
   constructor({
     eventHub,
     requestContext,
     logger,
     configuration = {},
     fetch,
+    isBodyTemplateEnabled = () => false,
+    getContentTypes = () => ({}),
   }: ConstructorParameters) {
     debug('Initialized webhook runner');
     this.eventHub = eventHub;
     this.requestContext = requestContext;
     this.logger = logger;
     this.fetch = fetch;
+    this.isBodyTemplateEnabled = isBodyTemplateEnabled;
+    this.getContentTypes = getContentTypes;
 
     if (typeof configuration !== 'object') {
       throw new Error(
@@ -189,6 +182,41 @@ class WebhookRunner {
     }
   }
 
+  /**
+   * The default payload, or the rendered body template of the webhook in place of it. A variable
+   * without a value would silently be sent empty, so it is logged.
+   */
+  private getRequestBody(webhook: Webhook, payload: Record<string, unknown>) {
+    if (!webhook.body || !this.isBodyTemplateEnabled()) {
+      return payload;
+    }
+
+    const missing = new Set<string>();
+    const rendered = renderWebhookBody(webhook.body, payload, (variable) => missing.add(variable));
+
+    if (missing.size > 0) {
+      this.logger.warn(
+        `Webhook "${webhook.name}": no value for ${[...missing].join(', ')} in the body template on event ${payload.event}`
+      );
+    }
+
+    return rendered;
+  }
+
+  /**
+   * Sends a test event. A body template is rendered against a sample event, as the test event
+   * itself has no entry for its variables.
+   */
+  trigger(webhook: Webhook) {
+    const hasBodyTemplate = Boolean(webhook.body) && this.isBodyTemplateEnabled();
+
+    return this.run(
+      webhook,
+      'trigger-test',
+      hasBodyTemplate ? createSampleEvent(webhook, this.getContentTypes()) : {}
+    );
+  }
+
   run(webhook: Webhook, event: string, info = {}) {
     const { url, headers } = webhook;
 
@@ -200,7 +228,7 @@ class WebhookRunner {
 
     return this.fetch(url, {
       method: 'post',
-      body: JSON.stringify(getRequestBody(webhook, payload)),
+      body: JSON.stringify(this.getRequestBody(webhook, payload)),
       headers: {
         ...this.config.defaultHeaders,
         ...headers,

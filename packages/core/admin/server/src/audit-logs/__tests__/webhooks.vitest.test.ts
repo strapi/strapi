@@ -42,7 +42,6 @@ describe('webhook audit events', () => {
         contentTypeEvents: {},
         headers: ['Authorization', 'X-Env'],
         body: null,
-        bodyMode: 'merge',
         isEnabled: true,
       },
     });
@@ -87,14 +86,8 @@ describe('toAuditedWebhook', () => {
       contentTypeEvents: {},
       headers: ['Authorization', 'X-Env'],
       body: null,
-      bodyMode: 'merge',
       isEnabled: true,
     });
-  });
-
-  test('records the body mode, merge by default', () => {
-    expect(toAuditedWebhook(webhook).bodyMode).toBe('merge');
-    expect(toAuditedWebhook({ ...webhook, bodyMode: 'replace' }).bodyMode).toBe('replace');
   });
 
   test('keeps the sorted top-level keys of the body template only', () => {
@@ -205,30 +198,22 @@ describe('getWebhookChanges', () => {
     const custom = { ...webhook, body: { ref: 'main', token: 's3cret' } };
 
     expect(getWebhookChanges(webhook, custom)).toEqual({
-      body: { before: null, after: ['ref', 'token'] },
+      body: { added: ['ref', 'token'], removed: [], changed: [] },
     });
     expect(getWebhookChanges(custom, webhook)).toEqual({
-      body: { before: ['ref', 'token'], after: null },
+      body: { added: [], removed: ['ref', 'token'], changed: [] },
     });
     expect(JSON.stringify(getWebhookChanges(webhook, custom))).not.toMatch(/s3cret|main/);
   });
 
-  test('records a body value change with the same keys, without the values', () => {
+  test('records a rotated body value by key, without the values', () => {
     const changes = getWebhookChanges(
-      { ...webhook, body: { ref: 'main' } },
-      { ...webhook, body: { ref: 'release' } }
+      { ...webhook, body: { token: 'old-s3cret', ref: 'main', inputs: { a: 1 } } },
+      { ...webhook, body: { token: 'new-s3cret', ref: 'main', inputs: { a: 2 } } }
     );
 
-    expect(changes).toEqual({ body: { before: ['ref'], after: ['ref'] } });
-    expect(JSON.stringify(changes)).not.toMatch(/main|release/);
-  });
-
-  test('records a body mode change', () => {
-    const custom = { ...webhook, body: { ref: 'main' } };
-
-    expect(getWebhookChanges(custom, { ...custom, bodyMode: 'replace' })).toEqual({
-      bodyMode: { before: 'merge', after: 'replace' },
-    });
+    expect(changes).toEqual({ body: { added: [], removed: [], changed: ['inputs', 'token'] } });
+    expect(JSON.stringify(changes)).not.toMatch(/s3cret|main/);
   });
 
   test('returns an empty object when only the key order of the body differs', () => {

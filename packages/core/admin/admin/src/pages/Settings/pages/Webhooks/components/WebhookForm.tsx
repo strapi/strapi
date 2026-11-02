@@ -12,7 +12,7 @@ import { Layouts } from '../../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../../features/BackButton';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 
-import { BodyInput } from './BodyInput';
+import { BodyInput, isBodyTemplateEnabled } from './BodyInput';
 import { EventTableCE } from './EventsTable';
 import { HeadersInput } from './HeadersInput';
 import { TriggerContainer } from './TriggerContainer';
@@ -28,7 +28,6 @@ interface WebhookFormValues {
    * The body template as JSON text. An empty text means the default payload.
    */
   body: string;
-  bodyMode: Modules.WebhookStore.BodyMode;
   contentTypeEvents: NonNullable<Modules.WebhookStore.Webhook['contentTypeEvents']>;
 }
 
@@ -86,7 +85,6 @@ const WebhookForm = ({
         headers: mapHeaders(data?.headers || {}),
         events: data?.events || [],
         body: data?.body ? JSON.stringify(data.body, null, 2) : '',
-        bodyMode: data?.bodyMode || 'merge',
         contentTypeEvents: data?.contentTypeEvents || {},
       }}
       method={isCreating ? 'POST' : 'PUT'}
@@ -188,7 +186,7 @@ const WebhookForm = ({
                     ))}
                   </Grid.Root>
                   <HeadersInput />
-                  <BodyInput />
+                  {isBodyTemplateEnabled() && <BodyInput />}
                   <EventTable />
                 </Flex>
               </Box>
@@ -306,7 +304,6 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
         }
       }
     ),
-    bodyMode: yup.string().oneOf(['merge', 'replace']),
     contentTypeEvents: yup.object(),
   });
 

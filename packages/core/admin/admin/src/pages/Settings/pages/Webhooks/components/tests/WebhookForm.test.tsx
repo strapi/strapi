@@ -82,14 +82,8 @@ describe('WebhookForm', () => {
 
     expect(screen.getByRole('button', { name: 'Create new header' })).toBeInTheDocument();
 
-    expect(screen.getByText('Request body')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Leave empty to send the default payload. Insert event data with {{ entry.title }}.'
-      )
-    ).toBeInTheDocument();
-    // The body mode only matters once there is a body
-    expect(screen.queryByRole('combobox', { name: 'Default payload' })).not.toBeInTheDocument();
+    // Behind the unstableWebhookBodyTemplate future flag
+    expect(screen.queryByText('Request body')).not.toBeInTheDocument();
 
     expect(screen.getByRole('grid', { name: 'Events' })).toBeInTheDocument();
 
@@ -125,7 +119,6 @@ describe('WebhookForm', () => {
       contentTypeEvents: {},
       headers: [{ key: '', value: '' }],
       body: '',
-      bodyMode: 'merge',
     });
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
@@ -143,47 +136,11 @@ describe('WebhookForm', () => {
       headers: {},
       events: [],
       body: { ref: 'main' },
-      bodyMode: 'merge' as const,
       isEnabled: true,
     };
 
-    it('shows the saved body template and its mode', () => {
-      const { container } = render(
-        <WebhookForm
-          data={{ ...webhook, bodyMode: 'replace' }}
-          handleSubmit={jest.fn()}
-          isCreating={false}
-          isTriggering={false}
-          triggerWebhook={jest.fn()}
-        />
-      );
-
-      expect(getEditorText(container)).toContain('"ref": "main"');
-      expect(screen.getByRole('combobox', { name: 'Default payload' })).toHaveTextContent(
-        'Replace it with the request body'
-      );
-    });
-
-    it('adds the body to the default payload by default', () => {
+    const renderForm = (handleSubmit = jest.fn()) =>
       render(
-        <WebhookForm
-          data={{ ...webhook, bodyMode: undefined }}
-          handleSubmit={jest.fn()}
-          isCreating={false}
-          isTriggering={false}
-          triggerWebhook={jest.fn()}
-        />
-      );
-
-      expect(screen.getByRole('combobox', { name: 'Default payload' })).toHaveTextContent(
-        'Add the request body to it'
-      );
-    });
-
-    it('switches the body mode and submits it with the body template', async () => {
-      const handleSubmit = jest.fn();
-
-      const { user } = render(
         <WebhookForm
           data={webhook}
           handleSubmit={handleSubmit}
@@ -193,16 +150,51 @@ describe('WebhookForm', () => {
         />
       );
 
-      await user.click(screen.getByRole('combobox', { name: 'Default payload' }));
-      await user.click(screen.getByRole('option', { name: 'Replace it with the request body' }));
+    let isFutureFlagEnabled: jest.SpyInstance;
 
+    beforeEach(() => {
+      isFutureFlagEnabled = jest
+        .spyOn(window.strapi.future, 'isEnabled')
+        .mockImplementation((name) => name === 'unstableWebhookBodyTemplate');
+    });
+
+    afterEach(() => {
+      isFutureFlagEnabled.mockRestore();
+    });
+
+    it('shows the saved body template and the available variables', () => {
+      const { container } = renderForm();
+
+      expect(screen.getByText('Request body')).toBeInTheDocument();
+      expect(getEditorText(container)).toContain('"ref": "main"');
+      expect(
+        screen.getByText(
+          'Sent in place of the default payload, leave empty to keep it. Available variables: {{ event }}, {{ createdAt }}. For entry events: {{ model }}, {{ uid }}, {{ documentId }}, {{ entry }}, and {{ entry.title }} when the events are selected per content type.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('submits the body template', async () => {
+      const handleSubmit = jest.fn();
+      renderForm(handleSubmit);
+
+      fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), {
+        target: { value: 'Renamed' },
+      });
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
       await waitFor(() => expect(handleSubmit).toHaveBeenCalledTimes(1));
       expect(handleSubmit.mock.calls[0][0]).toMatchObject({
         body: JSON.stringify({ ref: 'main' }, null, 2),
-        bodyMode: 'replace',
       });
+    });
+
+    it('hides the input when the future flag is off', () => {
+      isFutureFlagEnabled.mockReturnValue(false);
+
+      renderForm();
+
+      expect(screen.queryByText('Request body')).not.toBeInTheDocument();
     });
   });
 

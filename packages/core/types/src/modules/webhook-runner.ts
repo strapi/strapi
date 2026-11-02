@@ -23,6 +23,7 @@ export interface WebhookRunner {
     event: string,
     info?: Record<string, unknown>
   ): Promise<{ statusCode: number; message?: string }>;
+  trigger(webhook: Webhook): Promise<{ statusCode: number; message?: string }>;
   add(webhook: Webhook): void;
   update(webhook: Webhook): void;
   remove(webhook: Webhook): void;

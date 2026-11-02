@@ -26,25 +26,16 @@ export interface AuditedWebhook extends WebhookEvent {
   contentTypeEvents: Record<string, string[]>;
   headers: string[];
   body: string[] | null;
-  bodyMode: Modules.WebhookStore.BodyMode;
   isEnabled: boolean;
 }
 
-const AUDITED_FIELDS = [
-  'name',
-  'url',
-  'events',
-  'contentTypeEvents',
-  'body',
-  'bodyMode',
-  'isEnabled',
-] as const;
+const AUDITED_FIELDS = ['name', 'url', 'events', 'contentTypeEvents', 'isEnabled'] as const;
 
 /**
- * Header values are secrets, so the diff lists names only. `changed`: headers whose
- * value changed.
+ * Header and body template values can be secrets, so the diff lists keys only. `changed`: keys
+ * whose value changed.
  */
-export interface HeaderChanges {
+export interface KeyChanges {
   added: string[];
   removed: string[];
   changed: string[];
@@ -55,9 +46,8 @@ export type WebhookChanges = Partial<{
   url: Modules.AuditLogs.FieldChange<string>;
   events: Modules.AuditLogs.FieldChange<string[]>;
   contentTypeEvents: Modules.AuditLogs.FieldChange<Record<string, string[]>>;
-  headers: HeaderChanges;
-  body: Modules.AuditLogs.FieldChange<string[] | null>;
-  bodyMode: Modules.AuditLogs.FieldChange<Modules.WebhookStore.BodyMode>;
+  headers: KeyChanges;
+  body: KeyChanges;
   isEnabled: Modules.AuditLogs.FieldChange<boolean>;
 }>;
 
@@ -97,25 +87,23 @@ export const toAuditedWebhook = (webhook: Webhook): AuditedWebhook => ({
   ),
   headers: sortStrings(Object.keys(webhook.headers ?? {})),
   body: webhook.body ? sortStrings(Object.keys(webhook.body)) : null,
-  bodyMode: webhook.bodyMode ?? 'merge',
   isEnabled: webhook.isEnabled,
 });
 
-const getHeaderChanges = (
-  previous: Webhook['headers'],
-  next: Webhook['headers']
-): HeaderChanges | undefined => {
+const getKeyChanges = (
+  previous: Record<string, unknown> | null | undefined,
+  next: Record<string, unknown> | null | undefined
+): KeyChanges | undefined => {
   const before = previous ?? {};
   const after = next ?? {};
-  const names = sortStrings([...new Set([...Object.keys(before), ...Object.keys(after)])]);
+  const keys = sortStrings([...new Set([...Object.keys(before), ...Object.keys(after)])]);
 
-  const has = (headers: Webhook['headers'], name: string) => Object.hasOwn(headers, name);
-
-  const changes: HeaderChanges = {
-    added: names.filter((name) => !has(before, name)),
-    removed: names.filter((name) => !has(after, name)),
-    changed: names.filter(
-      (name) => has(before, name) && has(after, name) && before[name] !== after[name]
+  const changes: KeyChanges = {
+    added: keys.filter((key) => !Object.hasOwn(before, key)),
+    removed: keys.filter((key) => !Object.hasOwn(after, key)),
+    changed: keys.filter(
+      (key) =>
+        Object.hasOwn(before, key) && Object.hasOwn(after, key) && !isEqual(before[key], after[key])
     ),
   };
 
@@ -123,22 +111,14 @@ const getHeaderChanges = (
 };
 
 /**
- * The url and the body are compared as stored, so a change to their stripped part
- * (the url path, a body value) is recorded too.
+ * The url is compared as stored, so a change to its stripped part (the path) is recorded too.
  */
 const hasChanged = (
   field: (typeof AUDITED_FIELDS)[number],
   [previous, next]: [Webhook, Webhook],
   [before, after]: [AuditedWebhook, AuditedWebhook]
 ): boolean => {
-  switch (field) {
-    case 'url':
-      return previous.url !== next.url;
-    case 'body':
-      return !isEqual(previous.body ?? null, next.body ?? null);
-    default:
-      return !isEqual(before[field], after[field]);
-  }
+  return field === 'url' ? previous.url !== next.url : !isEqual(before[field], after[field]);
 };
 
 export const getWebhookChanges = (previous: Webhook, next: Webhook): WebhookChanges => {
@@ -152,10 +132,15 @@ export const getWebhookChanges = (previous: Webhook, next: Webhook): WebhookChan
     }
   }
 
-  const headers = getHeaderChanges(previous.headers, next.headers);
+  const headers = getKeyChanges(previous.headers, next.headers);
+  const body = getKeyChanges(previous.body, next.body);
 
   if (headers) {
     changes.headers = headers;
+  }
+
+  if (body) {
+    changes.body = body;
   }
 
   return changes;
@@ -189,7 +174,6 @@ export const registerWebhookAuditEvents = (auditLogsLifecycle: AuditLogsLifecycl
         contentTypeEvents: event.contentTypeEvents,
         headers: event.headers,
         body: event.body,
-        bodyMode: event.bodyMode,
         isEnabled: event.isEnabled,
       },
     })

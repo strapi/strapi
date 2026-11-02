@@ -165,7 +165,7 @@ module.exports = ({ env }) => ({
 });
 ```
 
-A webhook whose body template replaces the default payload only sends the values its template references. Use one when a receiver needs a few fields of an entry, not the whole entry. See [Events and webhooks](../../../../architecture/05-document-write-path.md#events-and-webhooks).
+A webhook with a body template (`unstableWebhookBodyTemplate` future flag) only sends the values its template references. Use one when a receiver needs a few fields of an entry, not the whole entry. See [Events and webhooks](../../../../architecture/05-document-write-path.md#events-and-webhooks).
 
 ## CORS in production
 

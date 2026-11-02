@@ -60,7 +60,8 @@ const webhookValidator = yup
         .required();
     }),
     events: yup.array().of(yup.string()).required(),
-    // The body template: a JSON object, or null to send the default payload
+    // The body template: a JSON object, or null to send the default payload. What it holds is
+    // validated by the webhook store.
     body: yup
       .mixed()
       .nullable()
@@ -69,7 +70,6 @@ const webhookValidator = yup
         'body must be a JSON object',
         (value) => value === undefined || value === null || _.isPlainObject(value)
       ),
-    bodyMode: yup.string().oneOf(['merge', 'replace']),
     contentTypeEvents: yup.lazy((data) =>
       yup.object(
         _.isPlainObject(data)
@@ -224,7 +224,7 @@ export default {
 
     const response = await strapi
       .get('webhookRunner')
-      .run(webhook as Modules.WebhookStore.Webhook, 'trigger-test', {});
+      .trigger(webhook as Modules.WebhookStore.Webhook);
 
     ctx.body = { data: response } satisfies TriggerWebhook.Response;
   },
