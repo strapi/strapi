@@ -374,6 +374,30 @@ describe('transactions', () => {
       expect(await getKey()).toEqual('after error');
     });
 
+    test('fails the transaction when the database already rolled it back', async () => {
+      await setKey('before transaction');
+
+      await expect(
+        strapi.db.transaction(async () => {
+          await setKey('in transaction');
+
+          await strapi.db.savepoint(async () => {
+            // What MySQL does on a deadlock: the savepoint is gone with the whole transaction
+            const { get } = await strapi.db.transaction();
+            await strapi.db.connection.raw('ROLLBACK').transacting(get());
+          });
+
+          // Would otherwise run without a transaction, and be kept
+          await setKey('after savepoint');
+        })
+      ).rejects.toMatchObject({
+        name: 'SavepointError',
+        message: 'Failed to release the savepoint',
+      });
+
+      expect(await getKey()).toEqual('before transaction');
+    });
+
     test('commit callbacks of a failed savepoint are dropped, those of a released one kept', async () => {
       const committed = [];
       const rolledBack = [];
