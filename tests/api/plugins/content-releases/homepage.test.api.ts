@@ -109,15 +109,51 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     // Assert the response
     expect(response.statusCode).toBe(200);
     expect(response.body.data).toHaveLength(2);
-    // Assert the releases data
-    // Not scheduled release
-    expect(response.body.data[0].name).toBe('Not scheduled release');
-    expect(response.body.data[0].scheduledAt).toBeNull();
-    expect(response.body.data[0].status).toBe('ready');
-    // Next week release
-    expect(response.body.data[1].name).toBe('Next week release');
-    expect(response.body.data[1].scheduledAt).toBeDefined();
-    expect(response.body.data[1].timezone).toBe('Europe/Madrid');
-    expect(response.body.data[1].status).toBe('empty');
+    // Scheduled releases come first (soonest first), undated ones fill the remaining slots
+    expect(response.body.data[0].name).toBe('Next week release');
+    expect(response.body.data[0].scheduledAt).toBeDefined();
+    expect(response.body.data[0].timezone).toBe('Europe/Madrid');
+    expect(response.body.data[0].status).toBe('empty');
+    expect(response.body.data[1].name).toBe('Not scheduled release');
+    expect(response.body.data[1].scheduledAt).toBeNull();
+    expect(response.body.data[1].status).toBe('ready');
+  });
+
+  test('fills the remaining slots with undated releases, then drops them once scheduled ones fill all slots', async () => {
+    const getNames = async () => {
+      const res = await rq({ method: 'GET', url: '/content-releases/homepage/upcoming-releases' });
+      expect(res.statusCode).toBe(200);
+      return res.body.data.map((release: { name: string }) => release.name);
+    };
+
+    await createRelease('Later release', {
+      scheduledAt: new Date('2024-01-10T00:00:00.000Z'),
+      timezone: 'Europe/Madrid',
+    });
+    await createRelease('Soonest release', {
+      scheduledAt: new Date('2024-01-03T00:00:00.000Z'),
+      timezone: 'Europe/Madrid',
+    });
+
+    // 3 scheduled + 1 undated fill the 4 slots
+    expect(await getNames()).toEqual([
+      'Soonest release',
+      'Next week release',
+      'Later release',
+      'Not scheduled release',
+    ]);
+
+    await createRelease('Mid release', {
+      scheduledAt: new Date('2024-01-05T00:00:00.000Z'),
+      timezone: 'Europe/Madrid',
+    });
+
+    // 4 scheduled releases take every slot, the undated one is dropped
+    expect(await getNames()).toEqual([
+      'Soonest release',
+      'Mid release',
+      'Next week release',
+      'Later release',
+    ]);
   });
 });

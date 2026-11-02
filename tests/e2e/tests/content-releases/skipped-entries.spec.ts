@@ -29,7 +29,7 @@ describeOnCondition(edition === 'EE')('Release page - skipped entries', () => {
   });
 
   test('the page shows what the run did to each entry', async ({ page, details }) => {
-    await expect(page.getByText('Released 1 of 3 entries')).toBeVisible();
+    await expect(page.getByText('Released 1 of 3 entries', { exact: true })).toBeVisible();
     await expect(page.getByText('2 skipped', { exact: true })).toBeVisible();
     await expect(details.tab('All', 3)).toBeVisible();
     await expect(details.tab('Released', 1)).toBeVisible();
