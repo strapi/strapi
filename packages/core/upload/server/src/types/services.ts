@@ -394,14 +394,15 @@ declare global {
       /**
        * Events the upload plugin emits on the event hub, also forwarded to webhooks. `media` is the
        * file sanitized as a default output (private fields removed), `folder` the folder row.
-       * `media-folder.delete` passes every deleted folder, nested ones included.
+       * `media-folder.update` also passes the folder as it was before the update, `null` when it was
+       * not found. `media-folder.delete` passes every deleted folder, nested ones included.
        */
       interface Events {
         'media.create': [{ media: File }];
         'media.update': [{ media: File }];
         'media.delete': [{ media: File }];
         'media-folder.create': [{ folder: Folder }];
-        'media-folder.update': [{ folder: Folder }];
+        'media-folder.update': [{ folder: Folder; previous?: Folder | null }];
         'media-folder.delete': [{ folders: Folder[] }];
       }
 
