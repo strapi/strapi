@@ -31,20 +31,51 @@ vi.mock('../../utils', () => ({
   ),
 }));
 
-type Row = { documentId: string; locale?: string; publishedAt: string | null };
-type Where = { documentId?: { $ne: string } };
+type Row = { documentId: string | null; locale?: string; publishedAt: string | null };
+type DocumentIdFilter = { $ne?: string | null; $null?: boolean; $notNull?: boolean };
+type Where = { documentId?: DocumentIdFilter; $or?: Where[] };
 
 const uid = 'api::article.article';
 
-const mockRows = (rows: Row[]) => {
-  const matches = (row: Row, where?: Where) =>
-    where?.documentId === undefined || row.documentId !== where.documentId.$ne;
+/**
+ * Mirrors how the database layer turns these filters into SQL: `$ne: value` becomes
+ * `<> value`, which never matches a NULL column, and `findOne` returns the first row
+ * in storage order since the guard does not sort.
+ */
+const matchesDocumentId = (documentId: string | null, filter: DocumentIdFilter) => {
+  if (filter.$null === true) {
+    return documentId === null;
+  }
+  if (filter.$notNull === true) {
+    return documentId !== null;
+  }
+  if (filter.$ne === null) {
+    return documentId !== null;
+  }
+  return documentId !== null && documentId !== filter.$ne;
+};
 
+const matches = (row: Row, where?: Where): boolean => {
+  if (where === undefined) {
+    return true;
+  }
+  if (where.$or !== undefined) {
+    return where.$or.some((subWhere) => matches(row, subWhere));
+  }
+  if (where.documentId !== undefined) {
+    return matchesDocumentId(row.documentId, where.documentId);
+  }
+  return true;
+};
+
+const mockRows = (rows: Row[]) => {
   strapi.db.query = vi.fn(() => ({
     count: vi.fn(async (params?: { where?: Where }) => {
       return rows.filter((row) => matches(row, params?.where)).length;
     }),
-    findOne: vi.fn(async () => rows[0] ?? null),
+    findOne: vi.fn(async (params?: { where?: Where }) => {
+      return rows.find((row) => matches(row, params?.where)) ?? null;
+    }),
   })) as any;
 };
 
@@ -119,5 +150,43 @@ describe('updateSchema collectionType to singleType entry guard', () => {
     expect(builder.editContentType).not.toHaveBeenCalled();
     expect(builder.writeFiles).not.toHaveBeenCalled();
     expect(contentStructure.commitFromUpdate).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      name: 'a row without documentId comes after a document',
+      rows: [
+        { documentId: 'doc-1', publishedAt: null },
+        { documentId: null, publishedAt: null },
+      ],
+    },
+    {
+      name: 'a row without documentId comes before a document',
+      rows: [
+        { documentId: null, publishedAt: null },
+        { documentId: 'doc-1', publishedAt: null },
+      ],
+    },
+    {
+      name: 'several rows have no documentId',
+      rows: [
+        { documentId: null, publishedAt: null },
+        { documentId: null, publishedAt: null },
+      ],
+    },
+  ])('rejects the switch when $name', async ({ rows }) => {
+    mockRows(rows);
+
+    await expect(switchToSingleType()).rejects.toThrow(
+      'You cannot convert a collectionType to a singleType when having multiple entries in DB'
+    );
+    expect(builder.writeFiles).not.toHaveBeenCalled();
+  });
+
+  it('allows the switch when the only row has no documentId', async () => {
+    mockRows([{ documentId: null, publishedAt: null }]);
+
+    await expect(switchToSingleType()).resolves.toBeUndefined();
+    expect(builder.writeFiles).toHaveBeenCalledTimes(1);
   });
 });
