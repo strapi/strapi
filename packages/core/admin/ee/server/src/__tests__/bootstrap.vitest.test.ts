@@ -1,14 +1,18 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 import bootstrap from '../bootstrap';
 import actions from '../config/admin-actions';
 
-const registerMany = jest.fn();
-const persistTablesWithPrefix = jest.fn();
-const seatEnforcementWorkflow = jest.fn();
+const { registerMany, persistTablesWithPrefix, seatEnforcementWorkflow } = vi.hoisted(() => ({
+  registerMany: vi.fn(),
+  persistTablesWithPrefix: vi.fn(),
+  seatEnforcementWorkflow: vi.fn(),
+}));
 
-jest.mock('../../../../server/src/bootstrap', () => jest.fn());
+vi.mock('../../../../server/src/bootstrap', () => ({ default: vi.fn() }));
 
-jest.mock('../utils', () => ({
-  getService: jest.fn((name: string) => {
+vi.mock('../utils', () => ({
+  getService: vi.fn((name: string) => {
     switch (name) {
       case 'permission':
         return { actionProvider: { registerMany } };
@@ -30,9 +34,9 @@ const mockStrapi = ({
   auditLogsEnabled?: boolean;
 }) => {
   global.strapi = {
-    ee: { features: { isEnabled: jest.fn((name: string) => features.includes(name)) } },
+    ee: { features: { isEnabled: vi.fn((name: string) => features.includes(name)) } },
     config: {
-      get: jest.fn((path: string, defaultValue?: unknown) => {
+      get: vi.fn((path: string, defaultValue?: unknown) => {
         if (path === 'admin.auditLogs.enabled') {
           return auditLogsEnabled ?? defaultValue;
         }
@@ -45,7 +49,7 @@ const mockStrapi = ({
 
 describe('EE admin bootstrap', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('audit logs permission actions', () => {

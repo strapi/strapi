@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import contentTypes from '..';
 
 describe('Admin content types', () => {
