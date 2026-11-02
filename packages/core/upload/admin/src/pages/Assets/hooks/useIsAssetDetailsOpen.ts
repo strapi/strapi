@@ -16,12 +16,8 @@ export const parseAssetDetailsId = (raw: string | undefined): number | null => {
 };
 
 /**
- * Whether the asset details drawer is open, derived purely from the URL.
- *
- * Deliberately separate from `useAssetDetailsParam`, which additionally owns the
- * drawer's mount lifecycle: its `shouldRenderDrawer` only stays correct in the
- * component wired to the close animation, so a second caller would strand it at
- * `true`. Anything that just needs the answer reads this instead.
+ * Whether the asset details drawer is open, derived purely from the URL — so it
+ * turns false as soon as closing starts, while the drawer is still sliding out.
  */
 export const useIsAssetDetailsOpen = (): boolean => {
   const [{ query }] = useQueryParams<{ [ASSET_DETAILS_URL_PARAM]?: string }>();
