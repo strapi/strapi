@@ -73,6 +73,7 @@ describe('Documentation plugin | Documentation controller', () => {
       { major: '..', minor: '1', patch: '0' },
       { major: '1', minor: '../../secret', patch: '0' },
       { major: '1', minor: '0', patch: 'x' },
+      { major: '1', minor: '2', patch: '3foo' },
     ])('returns 404 for non-numeric version params %o', async (params) => {
       const ctx = {
         params,

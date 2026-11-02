@@ -10,9 +10,33 @@ export type RoutePathConstraint = {
   pattern: RegExp;
 };
 
+export type TranslatedRoutePath = {
+  path: string;
+  changed: boolean;
+  /** Custom parameter patterns, checked against the matched values. */
+  constraints: RoutePathConstraint[];
+  /** v6 exposed unnamed groups as `ctx.params[0]`, `ctx.params[1]`…: their new names, in order. */
+  positionalParams: string[];
+  /** Every parameter the path declares, so a rejected match can take its values back. */
+  paramNames: string[];
+};
+
+// v6 only made `/` and `.` optional along with a parameter.
+const OPTIONAL_PREFIXES = ['/', '.'];
+
 const isParameterNameCharacter = (character: string | undefined) =>
   character !== undefined && /[A-Za-z0-9_]/.test(character);
 
+const readParameterName = (path: string, start: number) => {
+  let end = start;
+  while (isParameterNameCharacter(path[end])) {
+    end += 1;
+  }
+
+  return path.slice(start, end);
+};
+
+/** Index of the `)` closing the group opened just before `start`, or -1. */
 const findPatternEnd = (path: string, start: number): number => {
   let depth = 1;
   let inCharacterClass = false;
@@ -52,141 +76,231 @@ const findPatternEnd = (path: string, start: number): number => {
   return -1;
 };
 
-const makeWildcard = (path: string, name: string) => {
-  const wildcard = `{*${name}}`;
-  if (path.endsWith('/')) {
-    return `${path.slice(0, -1)}/${wildcard}`;
-  }
+/**
+ * Whether a pattern may match text containing `/`, and so must span segments in v8.
+ * Errs towards yes: a wildcard plus the pattern as a constraint still matches the same paths.
+ */
+const canMatchSlash = (pattern: string) => {
+  let inCharacterClass = false;
+  let isNegated = false;
+  let classHasSlash = false;
 
-  return wildcard;
-};
-
-const translateCustomParameterPatterns = (path: string) => {
-  let translated = '';
-  let changed = false;
-  const constraints: RoutePathConstraint[] = [];
-
-  for (let index = 0; index < path.length; index += 1) {
-    if (path[index] !== ':' || !isParameterNameCharacter(path[index + 1])) {
-      translated += path[index];
-      continue;
-    }
-
-    const nameStart = index + 1;
-    let nameEnd = nameStart;
-    while (isParameterNameCharacter(path[nameEnd])) {
-      nameEnd += 1;
-    }
-
-    if (path[nameEnd] !== '(') {
-      translated += path[index];
-      continue;
-    }
-
-    const patternEnd = findPatternEnd(path, nameEnd + 1);
-    if (patternEnd === -1) {
-      throw new RoutePathMigrationError(
-        path,
-        `the custom pattern for ":${path.slice(nameStart, nameEnd)}" is unclosed`
-      );
-    }
-
-    const name = path.slice(nameStart, nameEnd);
-    const pattern = path.slice(nameEnd + 1, patternEnd);
-    changed = true;
-
-    if (pattern === '.*') {
-      translated = makeWildcard(translated, name);
-    } else {
-      try {
-        constraints.push({ name, pattern: new RegExp(`^(?:${pattern})$`) });
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
-        throw new RoutePathMigrationError(
-          path,
-          `the custom pattern for ":${name}" is invalid: ${reason}`
-        );
-      }
-      translated += `:${name}`;
-    }
-
-    index = patternEnd;
-  }
-
-  return { path: translated, changed, constraints };
-};
-
-const translateAnonymousWildcards = (path: string) => {
-  let wildcardNumber = 0;
-  let changed = false;
-  const translated = path.replace(/\(\.\*\)/g, () => {
-    wildcardNumber += 1;
-    changed = true;
-    return `{*splat${wildcardNumber === 1 ? '' : wildcardNumber}}`;
-  });
-
-  return { path: translated, changed };
-};
-
-const translateModifiers = (path: string) => {
-  let changed = false;
-  const translated = path.replace(
-    /([/.-]?)(:[A-Za-z0-9_]+)([?*+])/g,
-    (_, prefix, parameter, modifier) => {
-      changed = true;
-
-      if (modifier === '?') {
-        return `{${prefix}${parameter}}`;
-      }
-
-      if (modifier === '*') {
-        return `{${prefix}*${parameter.slice(1)}}`;
-      }
-
-      return `${prefix}*${parameter.slice(1)}`;
-    }
-  );
-
-  return { path: translated, changed };
-};
-
-const escapeReservedCharacters = (path: string) => {
-  let translated = '';
-  let changed = false;
-
-  for (let index = 0; index < path.length; index += 1) {
-    const character = path[index];
+  for (let index = 0; index < pattern.length; index += 1) {
+    const character = pattern[index];
 
     if (character === '\\') {
-      translated += character;
-      if (index + 1 < path.length) {
-        translated += path[index + 1];
+      const escaped = pattern[index + 1] ?? '';
+      const matchesSlash = ['/', 'W', 'S', 'D'].includes(escaped);
+      index += 1;
+
+      if (inCharacterClass) {
+        classHasSlash ||= matchesSlash;
+      } else if (matchesSlash) {
+        return true;
+      }
+      continue;
+    }
+
+    if (inCharacterClass) {
+      if (character === ']') {
+        inCharacterClass = false;
+        if (isNegated !== classHasSlash) {
+          return true;
+        }
+      } else if (character === '/') {
+        classHasSlash = true;
+      }
+      continue;
+    }
+
+    if (character === '[') {
+      inCharacterClass = true;
+      isNegated = pattern[index + 1] === '^';
+      classHasSlash = false;
+      if (isNegated) {
         index += 1;
       }
       continue;
     }
 
-    if ('()[]?+!'.includes(character)) {
-      translated += `\\${character}`;
-      changed = true;
-    } else {
-      translated += character;
+    if (character === '.' || character === '/') {
+      return true;
     }
   }
 
-  return { path: translated, changed };
+  return false;
 };
 
-export const translateRoutePath = (path: string) => {
-  const customPatterns = translateCustomParameterPatterns(path);
-  const anonymousWildcards = translateAnonymousWildcards(customPatterns.path);
-  const modifiers = translateModifiers(anonymousWildcards.path);
-  const escaped = escapeReservedCharacters(modifiers.path);
+/** An alternation outside any nested group, such as `a|b`. */
+const hasTopLevelAlternation = (pattern: string) => {
+  let depth = 0;
+  let inCharacterClass = false;
 
-  return {
-    path: escaped.path,
-    changed:
-      customPatterns.changed || anonymousWildcards.changed || modifiers.changed || escaped.changed,
-    constraints: customPatterns.constraints,
+  for (let index = 0; index < pattern.length; index += 1) {
+    const character = pattern[index];
+
+    if (character === '\\') {
+      index += 1;
+    } else if (inCharacterClass) {
+      inCharacterClass = character !== ']';
+    } else if (character === '[') {
+      inCharacterClass = true;
+    } else if (character === '(') {
+      depth += 1;
+    } else if (character === ')') {
+      depth -= 1;
+    } else if (character === '|' && depth === 0) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+export const translateRoutePath = (path: string): TranslatedRoutePath => {
+  let translated = '';
+  let changed = false;
+  const constraints: RoutePathConstraint[] = [];
+  const positionalParams: string[] = [];
+  const paramNames: string[] = [];
+
+  const fail = (reason: string): never => {
+    throw new RoutePathMigrationError(path, reason);
   };
+
+  const takeOptionalPrefix = () => {
+    const last = translated.at(-1);
+    if (last !== undefined && OPTIONAL_PREFIXES.includes(last) && translated.at(-2) !== '\\') {
+      translated = translated.slice(0, -1);
+      return last;
+    }
+
+    return '';
+  };
+
+  const addParameter = (name: string, pattern: string | undefined, modifier: string) => {
+    paramNames.push(name);
+
+    if (pattern === undefined) {
+      if (modifier === '?') {
+        const prefix = takeOptionalPrefix();
+        translated += `{${prefix}:${name}}`;
+      } else if (modifier === '*') {
+        const prefix = takeOptionalPrefix();
+        translated += `{${prefix}*${name}}`;
+      } else if (modifier === '+') {
+        translated += `*${name}`;
+      } else {
+        translated += `:${name}`;
+      }
+      return;
+    }
+
+    if (modifier === '*' || modifier === '+') {
+      fail(`the repeated parameter ":${name}" has a custom pattern`);
+    }
+
+    let matcher: RegExp;
+    try {
+      matcher = new RegExp(`^(?:${pattern})$`);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      return fail(`the custom pattern for ":${name}" is invalid: ${reason}`);
+    }
+
+    if (pattern !== '.*') {
+      constraints.push({ name, pattern: matcher });
+    }
+
+    const token = canMatchSlash(pattern) ? `*${name}` : `:${name}`;
+
+    if (modifier === '?') {
+      const prefix = takeOptionalPrefix();
+      translated += `{${prefix}${token}}`;
+    } else if (matcher.test('')) {
+      translated += `{${token}}`;
+    } else {
+      translated += token;
+    }
+  };
+
+  for (let index = 0; index < path.length; index += 1) {
+    const character = path[index];
+
+    if (character === '\\') {
+      translated += path.slice(index, index + 2);
+      index += 1;
+      continue;
+    }
+
+    const isParameter = character === ':' && isParameterNameCharacter(path[index + 1]);
+
+    if (isParameter || character === '(') {
+      let name = '';
+      let cursor = index;
+
+      if (isParameter) {
+        name = readParameterName(path, index + 1);
+        cursor = index + 1 + name.length;
+      }
+
+      let pattern: string | undefined;
+      if (path[cursor] === '(') {
+        const patternEnd = findPatternEnd(path, cursor + 1);
+        if (patternEnd === -1) {
+          fail(`the pattern opened at position ${cursor} is unclosed`);
+        }
+
+        pattern = path.slice(cursor + 1, patternEnd);
+        cursor = patternEnd + 1;
+      }
+
+      const modifier = '?*+'.includes(path[cursor] ?? '') ? path[cursor] : '';
+      if (modifier) {
+        cursor += 1;
+      }
+
+      if (!isParameter && pattern !== undefined) {
+        if (pattern.startsWith('?') || hasTopLevelAlternation(pattern)) {
+          fail(
+            `the group "(${pattern})" has no v8 equivalent, split the route or name the parameter`
+          );
+        }
+
+        name = positionalParams.length === 0 ? 'splat' : `splat${positionalParams.length + 1}`;
+        positionalParams.push(name);
+      }
+
+      if (isParameter && pattern === undefined && !modifier) {
+        paramNames.push(name);
+        translated += `:${name}`;
+      } else {
+        changed = true;
+        addParameter(name, pattern, modifier);
+      }
+
+      index = cursor - 1;
+      continue;
+    }
+
+    // v8 wildcards, such as `/*path`, were invalid in v6.
+    if (character === '*' && isParameterNameCharacter(path[index + 1])) {
+      translated += character;
+      continue;
+    }
+
+    if ('?*+)'.includes(character)) {
+      fail(`unexpected "${character}" at position ${index}`);
+    }
+
+    if ('[]!'.includes(character)) {
+      translated += `\\${character}`;
+      changed = true;
+      continue;
+    }
+
+    translated += character;
+  }
+
+  return { path: translated, changed, constraints, positionalParams, paramNames };
 };

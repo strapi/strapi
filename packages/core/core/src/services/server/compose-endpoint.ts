@@ -9,6 +9,7 @@ import { createPolicicesMiddleware } from './policy';
 import {
   RoutePathMigrationError,
   type RoutePathConstraint,
+  type TranslatedRoutePath,
   translateRoutePath,
 } from './route-path';
 
@@ -29,18 +30,34 @@ const getPath = (route: Core.Route, strapi: Core.Strapi) => {
   return translated;
 };
 
-const createRoutePathConstraintMiddleware =
-  (constraints: RoutePathConstraint[]): Core.MiddlewareHandler =>
-  async (ctx, next) => {
+/**
+ * Applies what v8 paths cannot express. A value its pattern rejects means the route did not
+ * match, so the request goes on to the next matching route, as it did in v6.
+ */
+const withTranslatedPathMatching = (
+  { constraints, positionalParams, paramNames }: TranslatedRoutePath,
+  routeHandler: Core.MiddlewareHandler
+): Core.MiddlewareHandler => {
+  if (constraints.length === 0 && positionalParams.length === 0) {
+    return routeHandler;
+  }
+
+  return (ctx, next) => {
     const fails = ({ name, pattern }: RoutePathConstraint) =>
       ctx.params[name] !== undefined && !pattern.test(ctx.params[name]);
 
     if (constraints.some(fails)) {
-      return ctx.notFound();
+      paramNames.forEach((name) => delete ctx.params[name]);
+      return next();
     }
 
-    return next();
+    positionalParams.forEach((name, index) => {
+      ctx.params[index] = ctx.params[name];
+    });
+
+    return routeHandler(ctx, next);
   };
+};
 
 const createRouteInfoMiddleware =
   (routeInfo: Core.Route): Core.MiddlewareHandler =>
@@ -105,7 +122,8 @@ export default (strapi: Core.Strapi) => {
   return (route: Core.Route, { router }: { router: Router }) => {
     try {
       const method = getMethod(route);
-      const { path, constraints } = getPath(route, strapi);
+      const translated = getPath(route, strapi);
+      const { path } = translated;
 
       const middlewares = resolveRouteMiddlewares(route, strapi);
 
@@ -113,7 +131,6 @@ export default (strapi: Core.Strapi) => {
 
       const routeHandler = compose([
         createRouteInfoMiddleware(route),
-        ...(constraints.length > 0 ? [createRoutePathConstraintMiddleware(constraints)] : []),
         authenticate,
         authorize,
         createPolicicesMiddleware(route, strapi),
@@ -123,7 +140,7 @@ export default (strapi: Core.Strapi) => {
       ]);
 
       try {
-        router[method](path, routeHandler);
+        router[method](path, withTranslatedPathMatching(translated, routeHandler));
       } catch (error) {
         if (error instanceof Error) {
           throw new RoutePathMigrationError(

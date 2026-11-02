@@ -36,7 +36,11 @@ export class OperationIDAssembler implements Assembler.Operation {
   }
 
   private _maybeAppendPath(path: string) {
-    const pathParts = path.split('/').filter(Boolean);
+    const pathParts = path
+      .split('/')
+      .filter(Boolean)
+      // Wildcards were written `(.*)` before path-to-regexp v8; keep the ids they produced.
+      .map((part) => (/^\{?\*\w+\}?$/.test(part) ? '(.*)' : part));
 
     return (operationId: string) => {
       if (!pathParts.length) {
