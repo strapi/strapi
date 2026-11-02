@@ -21,6 +21,26 @@ const {
 } = require('../utils/runners/cli-runner');
 const { createConfig } = require('../../playwright.base.config');
 
+/**
+ * Rough share of e2e time per domain, measured on CI (Oct 2026). Only the order matters:
+ * starting the heaviest domains first keeps parallel test apps finishing close together.
+ * Unknown domains go last.
+ */
+const DOMAIN_WEIGHTS = {
+  'content-manager': 102,
+  'content-type-builder': 71,
+  admin: 32,
+  i18n: 31,
+  'media-library': 16,
+  settings: 15,
+  'content-releases': 13,
+  'review-workflows': 12,
+  search: 9,
+};
+
+const sortDomainsByExpectedDuration = (domains) =>
+  [...domains].sort((a, b) => (DOMAIN_WEIGHTS[b] ?? 0) - (DOMAIN_WEIGHTS[a] ?? 0));
+
 const cwd = path.resolve(__dirname, '../..');
 
 /**
@@ -185,27 +205,24 @@ yargs
         if (type === 'e2e') {
           // Git baseline: single commit during `setupTestApps` when apps are generated (`commitE2eBaseline`).
           // Between tests, `resetFiles` → `git reset --hard` + `git clean -fd` only. No commits here.
-          const testAppsToSpawn = testAppPaths.length;
 
           // Every domain starts its app with `--no-build-admin`, so build the panel once here,
           // with the same environment (edition, feature flags) the app will run with.
           await Promise.all(testAppPaths.map((testAppPath) => buildAdmin({ testAppPath })));
 
-          // Now chunk domains and run tests
-          const chunkedDomains = selectedDomains.reduce((acc, _, i) => {
-            if (i % testAppsToSpawn === 0) acc.push(selectedDomains.slice(i, i + testAppsToSpawn));
-            return acc;
-          }, []);
+          // Each test app takes the next domain as soon as it is free, heaviest domains first,
+          // so one slow domain doesn't hold up a whole batch of apps. A failing domain doesn't
+          // stop the others: every domain runs and the run fails at the end, like the CLI runner.
+          const pendingDomains = sortDomainsByExpectedDuration(selectedDomains);
+          const failedDomains = [];
 
-          // eslint-disable-next-line no-plusplus
-          for (let i = 0; i < chunkedDomains.length; i++) {
-            const domainBatch = chunkedDomains[i];
+          await Promise.all(
+            testAppPaths.map(async (testAppPath, j) => {
+              const port = E2E_PORT_BASE + j;
+              const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
-            await Promise.all(
-              domainBatch.map(async (domain, j) => {
-                const testAppPath = testAppPaths[j];
-                const port = E2E_PORT_BASE + j;
-                const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
+              while (pendingDomains.length > 0) {
+                const domain = pendingDomains.shift();
 
                 console.log(
                   `Creating playwright config for domain: ${domain}, at path: ${testAppPath}`
@@ -235,16 +252,24 @@ module.exports = config
 
                 console.log(`Running ${domain} e2e tests`);
 
-                // Run Playwright - this is the only line that differs!
-                await runPlaywright({
-                  configPath: pathToPlaywrightConfig,
-                  cwd,
-                  port,
-                  testAppPath,
-                  testArgs: forwardedRunnerArgs,
-                });
-              })
-            );
+                try {
+                  await runPlaywright({
+                    configPath: pathToPlaywrightConfig,
+                    cwd,
+                    port,
+                    testAppPath,
+                    testArgs: forwardedRunnerArgs,
+                  });
+                } catch (err) {
+                  console.error(`${domain} e2e tests failed`);
+                  failedDomains.push(domain);
+                }
+              }
+            })
+          );
+
+          if (failedDomains.length > 0) {
+            throw new Error(`e2e tests failed for: ${failedDomains.join(', ')}`);
           }
         } else {
           // CLI orchestration: batch domains, assign test apps, then run tests
