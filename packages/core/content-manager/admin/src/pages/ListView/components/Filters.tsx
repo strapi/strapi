@@ -51,10 +51,17 @@ interface FiltersProps {
   children: React.ReactNode;
 }
 
-const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
-  const { attributes, uid: model, options } = schema;
+const NO_ATTRIBUTES: Schema['attributes'] = {};
+
+/**
+ * The filters of the list view. The API query reads them too (`toApiFilters`): a filter can take
+ * a value the API doesn't read as it is.
+ */
+const useListViewFilterOptions = (schema: Schema | undefined, layout: ListLayout) => {
+  const attributes = schema?.attributes ?? NO_ATTRIBUTES;
+  const model = schema?.uid;
+  const options = schema?.options;
   const { formatMessage, locale } = useIntl();
-  const { trackUsage } = useTracking();
   const allPermissions = useAuth('FiltersImpl', (state) => state.permissions);
   const [{ query }] = useQueryParams<Filters.Query>();
   const { schemas } = useContentTypeSchema();
@@ -293,6 +300,13 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     runHookWaterfall,
   ]);
 
+  return displayedFilters;
+};
+
+const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
+  const { trackUsage } = useTracking();
+  const displayedFilters = useListViewFilterOptions(schema, layout);
+
   const onOpenChange = (isOpen: boolean) => {
     if (isOpen) {
       trackUsage('willFilterEntries');
@@ -300,7 +314,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
   };
 
   const handleFilterChange: Filters.Props['onChange'] = (data) => {
-    const attribute = attributes[data.name];
+    const attribute = schema.attributes[data.name];
 
     if (attribute) {
       trackUsage('didFilterEntries', {
@@ -381,5 +395,5 @@ const listViewFilters = {
   List: Filters.List,
 };
 
-export { listViewFilters };
+export { listViewFilters, useListViewFilterOptions };
 export type { FiltersProps };
