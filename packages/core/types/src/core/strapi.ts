@@ -209,6 +209,11 @@ export interface Strapi extends Container {
 export interface Reloader {
   isReloading: boolean;
   isWatching: boolean;
+  /**
+   * Turns file watching back on without skipping the next reload.
+   * Setting `isWatching` from `false` to `true` skips the next `reload()` call instead.
+   */
+  resumeWatching(): void;
   (): void;
 }
 

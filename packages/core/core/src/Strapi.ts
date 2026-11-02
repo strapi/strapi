@@ -753,6 +753,11 @@ class Strapi extends Container implements Core.Strapi {
       await withStartupSpan(this as Core.Strapi, 'strapi.startup.user.lifecycle.bootstrap', () =>
         this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP)
       );
+
+      // Runs once every module, provider and the app have bootstrapped.
+      await withStartupSpan(this as Core.Strapi, 'strapi.startup.app.after_bootstrap', () =>
+        this.hook('strapi::app.afterBootstrap').call()
+      );
     });
 
     return this;
