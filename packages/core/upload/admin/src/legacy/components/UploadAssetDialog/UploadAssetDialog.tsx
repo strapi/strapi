@@ -110,8 +110,9 @@ export const UploadAssetDialog = ({
     <UnsavedChangesModal
       open={open}
       onOpenChange={onClose}
-      // Files waiting in the list have not been uploaded yet.
-      hasUnsavedChanges={step === Steps.PendingAsset && assets.length > 0}
+      // Files waiting in the list have not been uploaded yet. "Add new assets" returns to the
+      // add asset step with the list kept, so this applies on both steps.
+      hasUnsavedChanges={assets.length > 0}
     >
       {step === Steps.AddAsset && (
         <Modal.Content>
