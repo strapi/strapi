@@ -13,7 +13,9 @@ import * as errors from './errors';
 import {
   Callback,
   isDeadlockError,
+  isFinalisedTransactionError,
   isTransactionHookError,
+  recordErrorIfTransactorFinalised,
   transactionCtx,
   TransactionObject,
   waitForDeadlockRetry,
@@ -260,7 +262,8 @@ class Database {
     // the caller has to run it again. Nested work is not retried on its own:
     // the outer transaction is already aborted, so the outermost callback
     // runs again. A commit or rollback hook that fails is not retried: the
-    // transaction is already finalised when it runs.
+    // transaction is already finalised when it runs. The same applies when
+    // the handler itself has already called commit or rollback.
     const nested = !!transactionCtx.get();
     const attempts = nested ? 1 : 3;
 
@@ -274,6 +277,7 @@ class Database {
           nested ||
           attempt === attempts ||
           isTransactionHookError(error) ||
+          isFinalisedTransactionError(error) ||
           !isDeadlockError(error)
         ) {
           throw error;
@@ -323,6 +327,9 @@ class Database {
         await commit();
         return res;
       } catch (error) {
+        // Read this before rollback(). Rolling back an open transaction also
+        // completes it, and that path must stay retryable.
+        recordErrorIfTransactorFinalised(trx, error);
         await rollback();
         throw error;
       }

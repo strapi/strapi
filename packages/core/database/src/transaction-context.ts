@@ -81,9 +81,25 @@ const waitForDeadlockRetry = (attempt: number) =>
  * the transaction handler.
  */
 const hookErrors = new WeakSet<object>();
+const finalisedTransactionErrors = new WeakSet<object>();
 
 const isTransactionHookError = (error: unknown) =>
   !!error && typeof error === 'object' && hookErrors.has(error);
+
+/**
+ * True when this error was thrown after the handler had already committed or
+ * rolled back. Replaying that attempt would repeat work the database has kept.
+ */
+const isFinalisedTransactionError = (error: unknown) =>
+  !!error && typeof error === 'object' && finalisedTransactionErrors.has(error);
+
+const recordErrorIfTransactorFinalised = (trx: Knex.Transaction, error: unknown) => {
+  if (!isTransactorComplete(trx) || !error || typeof error !== 'object') {
+    return;
+  }
+
+  finalisedTransactionErrors.add(error);
+};
 
 const runCallbacks = async (callbacks: Callback[] | undefined) => {
   if (!callbacks) {
@@ -187,4 +203,11 @@ const transactionCtx = {
   },
 };
 
-export { isDeadlockError, isTransactionHookError, transactionCtx, waitForDeadlockRetry };
+export {
+  isDeadlockError,
+  isFinalisedTransactionError,
+  isTransactionHookError,
+  recordErrorIfTransactorFinalised,
+  transactionCtx,
+  waitForDeadlockRetry,
+};

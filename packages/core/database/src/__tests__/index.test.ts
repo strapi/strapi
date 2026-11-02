@@ -287,6 +287,46 @@ describe('Database', () => {
         await db.destroy();
       });
 
+      it(`does not retry a deadlock after the callback already committed with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+
+        let completed = false;
+        const commitSpy = jest.fn(async () => {
+          completed = true;
+        });
+        const trx = {
+          commit: commitSpy,
+          rollback: jest.fn(),
+          isCompleted: () => completed,
+        };
+        Object.defineProperty(db.connection, 'transaction', {
+          value: jest.fn(async () => trx),
+          configurable: true,
+        });
+
+        let runs = 0;
+        const calls: string[] = [];
+        const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+
+        await expect(
+          db.transaction(async ({ commit, onCommit }) => {
+            runs += 1;
+            onCommit(() => {
+              calls.push('onCommit');
+            });
+            await commit();
+            throw error;
+          })
+        ).rejects.toBe(error);
+
+        expect(runs).toBe(1);
+        expect(calls).toEqual(['onCommit']);
+        expect(commitSpy).toHaveBeenCalledTimes(1);
+
+        await db.destroy();
+      });
+
       it(`rejects without retrying when a commit hook fails with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
