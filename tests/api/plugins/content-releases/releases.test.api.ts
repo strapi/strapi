@@ -683,6 +683,28 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.meta.entriesAlreadyInRelease).toBe(1);
       expect(res.body.meta.totalEntries).toBe(2);
     });
+
+    test('An entry listed twice in the body is added once', async () => {
+      const release = (await createRelease()).body.data;
+      const documentId = validEntries[0].data.documentId;
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-releases/${release.id}/actions/bulk`,
+        body: [
+          { contentType: productUID, entryDocumentId: documentId, type: 'publish' },
+          { contentType: productUID, entryDocumentId: documentId, type: 'unpublish' },
+        ],
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.meta.entriesAlreadyInRelease).toBe(1);
+      expect(res.body.meta.totalEntries).toBe(2);
+      expect(await getActionsByEntry(release.id)).toEqual({
+        [documentId]: expect.objectContaining({ type: 'publish' }),
+      });
+      expect((await getRelease(release.id)).actions.meta.count).toBe(1);
+    });
   });
 
   describe('Find Many Release Actions', () => {

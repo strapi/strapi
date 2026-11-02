@@ -708,6 +708,41 @@ describe('Release Action service', () => {
       expect(serviceMock.release.updateReleaseStatus.mock.calls).toStrictEqual([[1]]);
     });
 
+    it('adds an entry listed twice in the batch once, counting the repeat as skipped', async () => {
+      const actionCreate = jest.fn(({ data }) => ({ id: 1, ...data }));
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            create: actionCreate,
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          }),
+        },
+      };
+      const entry = {
+        entryDocumentId: 'a',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      const result = await releaseActionService.createMany(1, [
+        { type: 'unpublish', ...entry, locale: 'en' },
+        { type: 'unpublish', ...entry, locale: 'fr' },
+        { type: 'publish', ...entry, locale: 'en' },
+      ]);
+
+      expect(result).toEqual({
+        created: [
+          expect.objectContaining({ type: 'unpublish', locale: 'en' }),
+          expect.objectContaining({ type: 'unpublish', locale: 'fr' }),
+        ],
+        alreadyInRelease: 1,
+      });
+      expect(actionCreate).toHaveBeenCalledTimes(2);
+    });
+
     it('fails the whole batch on any error other than an entry already in the release', async () => {
       const actionCreate = jest.fn();
       const strapiMock = {
