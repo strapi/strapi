@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import { Editor, Transforms, createEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
 
+import { withStrapiSchema } from '../../plugins/withStrapiSchema';
 import { listBlocks } from '../List';
 
 import { Wrapper } from './Wrapper';
@@ -476,6 +477,27 @@ describe('List', () => {
           },
         ],
       },
+    ]);
+  });
+
+  it('replaces the only empty list with a single paragraph', () => {
+    const baseEditor = withStrapiSchema(createEditor());
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: '' }] }],
+      },
+    ];
+    Transforms.select(baseEditor, { path: [0, 0, 0], offset: 0 });
+
+    listBlocks['list-unordered'].handleBackspaceKey?.(
+      baseEditor,
+      mockEvent as unknown as React.KeyboardEvent<HTMLDivElement>
+    );
+
+    expect(baseEditor.children).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: '' }] },
     ]);
   });
 

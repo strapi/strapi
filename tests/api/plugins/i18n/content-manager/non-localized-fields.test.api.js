@@ -73,9 +73,10 @@ const tagModel = {
   singularName: 'tag',
   pluralName: 'tags',
   description: '',
+  // Without draft and publish, relations to tags are kept when a category is published
+  draftAndPublish: false,
   options: {
     reviewWorkflows: false,
-    draftAndPublish: true,
   },
   pluginOptions: {
     i18n: {
