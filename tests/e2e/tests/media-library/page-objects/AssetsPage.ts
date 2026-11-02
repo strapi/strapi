@@ -420,6 +420,19 @@ export class AssetsPage {
   }
 
   /**
+   * Read the drawer's Dimensions detail ("5,616 × 3,744") as numbers.
+   */
+  async readDrawerDimensions() {
+    const [width, height] = (
+      (await this.getDrawerDetailValue('Dimensions').first().textContent()) ?? ''
+    )
+      .replace(/[,\s]/g, '')
+      .split(/[x×]/)
+      .map(Number);
+    return { width, height };
+  }
+
+  /**
    * Close the asset details drawer
    */
   async closeAssetDetailsDrawer() {
@@ -541,6 +554,16 @@ export class AssetsPage {
    */
   async saveCropAsCopy() {
     await this.page.getByRole('button', { name: 'Save as copy' }).click();
+  }
+
+  /**
+   * Read a number field of the crop editor. They render with the locale's group
+   * separator ("5,616"), so the value is parsed rather than compared as text.
+   */
+  async readCropEditorNumber(label: string) {
+    return Number(
+      (await this.page.getByLabel(label, { exact: true }).inputValue()).replace(/[^\d.-]/g, '')
+    );
   }
 
   /**

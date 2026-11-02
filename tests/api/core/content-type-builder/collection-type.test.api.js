@@ -413,6 +413,44 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
+    test('Keeps draftAndPublish when the update payload does not set it', async () => {
+      const uid = 'api::ct-with-dp.ct-with-dp';
+      let res = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/content-types/${uid}`,
+        body: {
+          contentType: {
+            displayName: 'new displayName',
+            singularName: 'ct-with-dp',
+            pluralName: 'ct-with-dps',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      });
+      expect(res.statusCode).toBe(201);
+
+      await restart();
+
+      res = await rq({
+        method: 'GET',
+        url: `/content-type-builder/content-types/${uid}`,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          uid,
+          schema: {
+            draftAndPublish: true,
+          },
+        },
+      });
+    });
+
     test.each([
       ['kebab-case', 'kebab-cases', true],
       ['Kebab-case', 'Kebab-cases', false],

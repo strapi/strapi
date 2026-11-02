@@ -9,14 +9,16 @@ import {
   sanitize,
   contentTypes as contentTypesUtils,
   errors,
+  emitAudit,
   file as fileUtils,
   pagination as paginationUtils,
 } from '@strapi/utils';
 
 import type { Core, UID } from '@strapi/types';
 
-import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
+import { FILE_MODEL_UID, FOLDER_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
+import { AUDITED_EVENTS, getUploadSettingsChanges, toAuditedFile } from '../audit-logs';
 
 import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
@@ -42,6 +44,9 @@ type Metas = {
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
+
+// The audit log records the folder of an updated file
+const FOLDER_REF_POPULATE = { folder: { fields: ['id', 'name'] } };
 
 const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
@@ -290,6 +295,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return uploadedFiles;
   }
 
+  // `_.set(fileData, ['formats', key], ...)` reads an all-digit key (a `breakpoints`
+  // entry like `{ 100: 100 }`) as an array index and builds an array when formats is
+  // unset, so build the object explicitly.
+  function setFormat(fileData: UploadableFile, key: string, format: UploadableFile) {
+    fileData.formats = { ...fileData.formats, [key]: format };
+  }
+
   /**
    * When uploading an image, an additional thumbnail is generated.
    * Also, if there are responsive formats defined, another set of images will be generated too.
@@ -313,14 +325,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // For performance reasons, all uploads are wrapped in a single Promise.all
     const uploadThumbnail = async (thumbnailFile: UploadableFile) => {
       await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
+      setFormat(fileData, 'thumbnail', thumbnailFile);
     };
 
     // Generate thumbnail and responsive formats
     const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
       const { key, file } = format;
       await getService('provider').upload(file);
-      _.set(fileData, ['formats', key], file);
+      setFormat(fileData, key, file);
     };
 
     const uploadPromises: Promise<void>[] = [];
@@ -372,7 +384,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       } else {
         await getService('provider').upload(newFormat);
       }
-      _.set(fileData, ['formats', key], newFormat);
+      setFormat(fileData, key, newFormat);
     };
 
     const promises: Promise<unknown>[] = [];
@@ -447,7 +459,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   ) {
     const { user } = opts ?? {};
 
-    const dbFile = await findOne(id);
+    const dbFile = await findOne(id, FOLDER_REF_POPULATE);
 
     if (!dbFile) {
       throw new NotFoundError();
@@ -461,13 +473,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
       focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
-      folder: _.isUndefined(folder) ? dbFile.folder : folder,
+      ...(_.isUndefined(folder) ? {} : { folder }),
       folderPath: _.isUndefined(folder)
         ? dbFile.folderPath
         : await fileService.getFolderPath(folder),
     };
 
-    return update(id, newInfos, { user });
+    return update(id, newInfos, { user }, { previous: dbFile });
   }
 
   async function replace(
@@ -481,7 +493,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const { isImage } = getService('image-manipulation');
 
-    const dbFile = await findOne(id);
+    const dbFile = await findOne(id, FOLDER_REF_POPULATE);
     if (!dbFile) {
       throw new NotFoundError();
     }
@@ -517,8 +529,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         _.assign(fileData, { folderPath: dbFile.folderPath });
       }
 
-      // clear old formats — replaceImage / replace will set new ones
-      _.set(fileData, 'formats', {});
+      // `update` only writes the keys it gets, so clear the old image values. A new
+      // image gets its own from replaceImage / uploadImage; a non-image keeps null,
+      // like a fresh upload of the same file.
+      _.assign(fileData, { width: null, height: null, formats: null });
 
       if (dbFile.provider === config.provider) {
         if (await isImage(fileData)) {
@@ -549,10 +563,46 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await fse.remove(tmpWorkingDirectory);
     }
 
-    return update(id, fileData, { user });
+    return update(id, fileData, { user }, { replaced: true, previous: dbFile });
   }
 
-  async function update(id: ID, values: Partial<UploadableFile>, opts?: CommonOptions) {
+  type FolderRef = { id: number; name: string } | null;
+
+  async function getFolderAfterUpdate(
+    values: Partial<UploadableFile>,
+    previous: { folder?: FolderRef } | null
+  ): Promise<FolderRef> {
+    const previousFolder = previous?.folder ?? null;
+
+    if (values.folder === undefined) {
+      return previousFolder;
+    }
+
+    const value = values.folder as number | { id: number } | null;
+    const folderId = value !== null && typeof value === 'object' ? value.id : value;
+
+    if (folderId == null) {
+      return null;
+    }
+
+    if (previousFolder && Number(previousFolder.id) === Number(folderId)) {
+      return previousFolder;
+    }
+
+    return strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id: folderId }, select: ['id', 'name'] });
+  }
+
+  async function update(
+    id: ID,
+    values: Partial<UploadableFile>,
+    opts?: CommonOptions,
+    {
+      replaced = false,
+      previous: knownPrevious,
+    }: { replaced?: boolean; previous?: Record<string, any> } = {}
+  ) {
     const { user } = opts ?? {};
 
     const fileValues = { ...values };
@@ -564,9 +614,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     await sendMediaMetrics(fileValues);
 
+    // Callers that already read the file pass it, with its folder
+    const previous =
+      knownPrevious ??
+      (await strapi.db
+        .query(FILE_MODEL_UID)
+        .findOne({ where: { id }, populate: { folder: { select: ['id', 'name'] } } }));
+
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
     await emitEvent(MEDIA_UPDATE, res);
+
+    // The webhook event above carries no folder (a private field) and not the file as it was
+    if (res && previous) {
+      const folder = await getFolderAfterUpdate(values, previous);
+      strapi.eventHub.emit(AUDITED_EVENTS.MEDIA_UPDATE_AUDIT, {
+        file: toAuditedFile({ ...res, folder }),
+        previous: toAuditedFile(previous),
+        replaced,
+      });
+    }
 
     return res;
   }
@@ -757,7 +824,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await getService('metrics').trackUsage('didDisableResponsiveDimensions');
     }
 
-    return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+    const previous = await getSettings();
+
+    await strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+
+    const changes = getUploadSettingsChanges(previous, value);
+
+    if (Object.keys(changes).length > 0) {
+      await emitAudit({ strapi }, AUDITED_EVENTS.UPLOAD_SETTINGS_UPDATE, { changes });
+    }
   }
 
   async function getConfiguration() {
