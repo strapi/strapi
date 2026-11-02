@@ -90,7 +90,7 @@ export interface Attribute<TKind extends Kind = Kind> {
 export interface Column {
   type?: string;
   name?: string;
-  args?: unknown[];
+  args?: readonly unknown[];
   defaultTo?: unknown;
   notNullable?: boolean;
   unsigned?: boolean;

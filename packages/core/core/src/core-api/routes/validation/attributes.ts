@@ -194,7 +194,9 @@ export const emailToSchema = (attribute: Schema.Attribute.Email): z.Schema => {
  * @param attribute - The Enumeration attribute object from the Strapi schema.
  * @returns A Zod schema representing the enumeration field.
  */
-export const enumToSchema = (attribute: Schema.Attribute.Enumeration<string[]>): z.Schema => {
+export const enumToSchema = (
+  attribute: Schema.Attribute.Enumeration<readonly string[]>
+): z.Schema => {
   const { writable, required, default: defaultValue, enum: enumValues } = attribute;
 
   const baseSchema = z.enum(enumValues);
@@ -552,7 +554,9 @@ export const emailToInputSchema = (attribute: Schema.Attribute.Email) => {
  * @param attribute - The Enumeration attribute object from the Strapi schema.
  * @returns A Zod schema for input validation of the enumeration field.
  */
-export const enumerationToInputSchema = (attribute: Schema.Attribute.Enumeration<string[]>) => {
+export const enumerationToInputSchema = (
+  attribute: Schema.Attribute.Enumeration<readonly string[]>
+) => {
   const { required, default: defaultValue, enum: enumValues } = attribute;
 
   const baseSchema = z.enum(enumValues);

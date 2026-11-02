@@ -12,7 +12,7 @@ export interface Table {
 export interface Column {
   type: string;
   name: string;
-  args?: unknown[];
+  args?: readonly unknown[];
   defaultTo?: any;
   notNullable?: boolean | null;
   unsigned?: boolean;

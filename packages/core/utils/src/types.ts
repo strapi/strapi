@@ -36,7 +36,7 @@ export interface ComponentAttribute extends Attribute {
 }
 export interface DynamicZoneAttribute extends Attribute {
   type: 'dynamiczone';
-  components: string[];
+  components: readonly string[];
 }
 
 export interface ScalarAttribute extends Attribute {

@@ -1,7 +1,7 @@
 import type { Array, Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
-export interface EnumerationProperties<TValues extends string[] = []> {
+export interface EnumerationProperties<TValues extends readonly string[] = []> {
   enum: TValues;
   enumName?: string;
 }
@@ -9,7 +9,7 @@ export interface EnumerationProperties<TValues extends string[] = []> {
 /**
  * Represents an enumeration Strapi attribute along with its options
  */
-export type Enumeration<TValues extends string[] = []> = Intersect<
+export type Enumeration<TValues extends readonly string[] = []> = Intersect<
   [
     Attribute.OfType<'enumeration'>,
     // Properties
@@ -24,7 +24,7 @@ export type Enumeration<TValues extends string[] = []> = Intersect<
   ]
 >;
 
-export type EnumerationValue<TValues extends string[]> = Array.Values<TValues>;
+export type EnumerationValue<TValues extends readonly string[]> = Array.Values<TValues>;
 
 export type GetEnumerationValue<TAttribute extends Attribute.Attribute> =
   TAttribute extends Enumeration<infer TValues> ? EnumerationValue<TValues> : never;

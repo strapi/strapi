@@ -20,7 +20,7 @@ export type AnyAttribute =
   | Attribute.Decimal
   | Attribute.DynamicZone
   | Attribute.Email
-  | Attribute.Enumeration<string[]>
+  | Attribute.Enumeration<readonly string[]>
   | Attribute.Float
   | Attribute.Integer
   | Attribute.JSON

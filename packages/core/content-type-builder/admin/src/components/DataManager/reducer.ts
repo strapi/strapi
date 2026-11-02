@@ -1,4 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
+import { castDraft } from 'immer';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 import uniq from 'lodash/uniq';
@@ -733,10 +734,10 @@ const slice = createUndoRedoSlice(
       init: (state, action: PayloadAction<InitPayload>) => {
         const { components, contentTypes, reservedNames, contentStructure } = action.payload;
 
-        state.components = components;
-        state.initialComponents = components;
-        state.initialContentTypes = contentTypes;
-        state.contentTypes = contentTypes;
+        state.components = castDraft(components);
+        state.initialComponents = castDraft(components);
+        state.initialContentTypes = castDraft(contentTypes);
+        state.contentTypes = castDraft(contentTypes);
         state.reservedNames = reservedNames;
 
         const structure = contentStructure ?? createEmptyContentStructure();
@@ -762,7 +763,7 @@ const slice = createUndoRedoSlice(
           modelType: 'component',
         };
 
-        state.components[uid as string] = newSchema;
+        state.components[uid as string] = castDraft(newSchema);
       },
       createSchema: (state, action: PayloadAction<CreateSchemaPayload>) => {
         const { uid, data, folder } = action.payload;
@@ -791,7 +792,7 @@ const slice = createUndoRedoSlice(
           pluginOptions,
         };
 
-        state.contentTypes[uid] = newSchema;
+        state.contentTypes[uid] = castDraft(newSchema);
 
         // File the new content type into a folder in the same transaction it is created,
         // so both are subject to the same undo/redo operatiion.
@@ -863,7 +864,9 @@ const slice = createUndoRedoSlice(
         const type = getType(state, { forTarget, targetUid });
 
         const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
-        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
+        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone<
+          Internal.UID.Component[]
+        >;
 
         componentsToAdd.forEach((componentUid: Internal.UID.Component) => {
           attr.components.push(componentUid);
@@ -881,7 +884,9 @@ const slice = createUndoRedoSlice(
         const type = getType(state, { forTarget, targetUid });
 
         const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
-        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
+        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone<
+          Internal.UID.Component[]
+        >;
         const currentDZComponents = attr.components;
 
         const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
@@ -1030,7 +1035,9 @@ const slice = createUndoRedoSlice(
         }
 
         const dzAttributeIndex = findAttributeIndex(type, dzName);
-        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
+        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone<
+          Internal.UID.Component[]
+        >;
 
         setStatus(type, 'CHANGED');
         setAttributeStatus(attr as AnyAttribute, 'CHANGED');
@@ -1516,9 +1523,9 @@ const slice = createUndoRedoSlice(
               const uid = schema.uid;
 
               if (schema.modelType === 'component') {
-                state.components[uid] = schema;
+                state.components[uid] = castDraft(schema);
               } else {
-                state.contentTypes[uid] = schema;
+                state.contentTypes[uid] = castDraft(schema);
               }
             }
             break;
@@ -1530,20 +1537,20 @@ const slice = createUndoRedoSlice(
 
               if (schema.modelType === 'component') {
                 const component = state.components[uid];
-                state.components[uid] = {
+                state.components[uid] = castDraft({
                   ...schema,
                   ...mergeRenameState(component, schema),
                   status: component?.status === 'NEW' ? 'NEW' : schema.status,
-                };
+                });
               } else {
                 const contentType = state.contentTypes[uid];
                 const previousKind = contentType?.kind;
 
-                state.contentTypes[uid] = {
+                state.contentTypes[uid] = castDraft({
                   ...schema,
                   ...mergeRenameState(contentType, schema),
                   status: contentType?.status === 'NEW' ? 'NEW' : schema.status,
-                };
+                });
 
                 if (previousKind && schema.kind && schema.kind !== previousKind) {
                   const oldSection =
