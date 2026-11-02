@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   Blocker,
+  ConfirmDialog,
   Form,
   useClipboard,
   useField,
@@ -10,6 +11,7 @@ import {
   useQueryParams,
   withEncodedUserParams,
   getDisplayName,
+  type FormHelpers,
 } from '@strapi/admin/strapi-admin';
 import {
   Alert,
@@ -121,7 +123,7 @@ const useAssetOperation = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * useAssetDetailsParam - sync drawer visibility with URL ?{ASSET_DETAILS_URL_PARAM}={id}
+ * useAssetDetailsParam - read and write the open asset in URL ?{ASSET_DETAILS_URL_PARAM}={id}
  * -----------------------------------------------------------------------------------------------*/
 
 export const useAssetDetailsParam = () => {
@@ -131,33 +133,9 @@ export const useAssetDetailsParam = () => {
   }>();
 
   const assetId = parseAssetDetailsId(query?.[ASSET_DETAILS_URL_PARAM]);
-  const hasValidId = assetId !== null;
 
   // Closing is driven by removing the URL param (a navigation), so navigation
-  // guards like <Blocker> can intercept it. `isMounted` keeps the drawer in the
-  // tree through the slide-out: it stays true once opened and only flips false
-  // when the close animation actually ends (see onCloseAnimationEnd), so the
-  // close duration lives entirely in CSS — no JS timer.
-  const [isMounted, setIsMounted] = React.useState(hasValidId);
-  const displayAssetId = React.useRef<number | null>(null);
-
-  React.useEffect(() => {
-    if (hasValidId) {
-      displayAssetId.current = assetId;
-      setIsMounted(true);
-    }
-  }, [hasValidId, assetId]);
-
-  const onCloseAnimationEnd = React.useCallback(
-    (event: React.AnimationEvent) => {
-      // Ignore animations bubbling up from descendants, and the slide-in.
-      if (event.target === event.currentTarget && !hasValidId) {
-        setIsMounted(false);
-      }
-    },
-    [hasValidId]
-  );
-
+  // guards like <Blocker> can intercept it.
   const openDetails = React.useCallback(
     (id: number) => {
       setQuery(
@@ -173,13 +151,45 @@ export const useAssetDetailsParam = () => {
     setQuery(withEncodedUserParams(query, { [ASSET_DETAILS_URL_PARAM]: undefined }), 'push', true);
   }, [query, setQuery]);
 
+  return { assetId, openDetails, closeDetails };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * useDrawerPresence - keep the drawer mounted through its slide-out
+ * -----------------------------------------------------------------------------------------------*/
+
+const useDrawerPresence = (assetId: number | null) => {
+  const isVisible = assetId !== null;
+
+  // `isMounted` stays true once opened and only flips false when the close
+  // animation actually ends (see onCloseAnimationEnd), so the close duration
+  // lives entirely in CSS — no JS timer. The last id is kept so the content
+  // doesn't go blank mid-slide.
+  const [isMounted, setIsMounted] = React.useState(isVisible);
+  const displayAssetId = React.useRef<number | null>(assetId);
+
+  React.useEffect(() => {
+    if (assetId !== null) {
+      displayAssetId.current = assetId;
+      setIsMounted(true);
+    }
+  }, [assetId]);
+
+  const onCloseAnimationEnd = React.useCallback(
+    (event: React.AnimationEvent) => {
+      // Ignore animations bubbling up from descendants, and the slide-in.
+      if (event.target === event.currentTarget && !isVisible) {
+        setIsMounted(false);
+      }
+    },
+    [isVisible]
+  );
+
   return {
-    assetId: hasValidId ? assetId : displayAssetId.current,
-    isVisible: hasValidId,
-    shouldRenderDrawer: isMounted,
+    displayAssetId: isVisible ? assetId : displayAssetId.current,
+    isVisible,
+    shouldRender: isMounted,
     onCloseAnimationEnd,
-    openDetails,
-    closeDetails,
   };
 };
 
@@ -310,13 +320,14 @@ const DetailField = ({ name, label, required, disabled }: DetailFieldProps) => {
   const field = useField<string>(name);
   const isSubmitting = useForm('DetailField', (state) => state.isSubmitting);
 
-  // The form context (use-context-selector) echoes changes back
-  // asynchronously — driving the input straight from `field.value` makes
-  // React rewrite the DOM value after the keystroke, which throws the cursor
-  // to the end of the field. The input is therefore controlled by local state
-  // (synchronous, cursor-safe) and the form follows; the effect below only
-  // matters for EXTERNAL value changes (discard/reset), where a cursor jump
-  // is fine because the user isn't typing.
+  // The input is controlled by local state (synchronous, cursor-safe) and the
+  // form follows. This was needed when the form context echoed changes back
+  // asynchronously: driving the input straight from `field.value` made React
+  // rewrite the DOM value after the keystroke, which threw the cursor to the
+  // end of the field. The form context now updates synchronously, but the
+  // local state is kept as a safe default. The effect below only matters for
+  // EXTERNAL value changes (discard/reset), where a cursor jump is fine
+  // because the user isn't typing.
   const fieldValue = field.value ?? '';
   const [value, setValue] = React.useState(fieldValue);
 
@@ -697,9 +708,43 @@ const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
  * AssetDetails
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Writes whether the form has unsaved edits into the drawer's ref. Only the
+ * drawer's close handlers read it, so a ref rather than state: toggling dirty
+ * doesn't re-render the drawer. A component, not a hook, because the form state
+ * is only reachable inside <Form>'s render prop.
+ */
+const ReportUnsavedEdits = ({
+  target,
+  hasUnsavedEdits,
+}: {
+  target: React.MutableRefObject<boolean>;
+  hasUnsavedEdits: boolean;
+}) => {
+  React.useLayoutEffect(() => {
+    target.current = hasUnsavedEdits;
+
+    return () => {
+      target.current = false;
+    };
+  }, [target, hasUnsavedEdits]);
+
+  return null;
+};
+
 interface AssetDetailsProps {
   asset: AssetWithPopulatedCreatedBy;
   closeDetails: () => void;
+  /** Receives whether the form has unsaved edits. */
+  hasUnsavedEditsRef?: React.MutableRefObject<boolean>;
+  /** Guard unsaved edits with <Blocker>, for a drawer whose closing is a navigation. */
+  guardNavigation?: boolean;
+  /** After the asset was updated, replaced or cropped in place, with the server's copy. */
+  onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
+  /** After the asset was deleted from the library. */
+  onAssetDelete?: (id: number) => void;
+  /** `location` stamped on the tracking events, for analytics to tell hosts apart. */
+  trackedLocation?: string;
 }
 
 interface AssetFormState {
@@ -709,7 +754,15 @@ interface AssetFormState {
   folder: number | null;
 }
 
-export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
+export const AssetDetails = ({
+  asset,
+  closeDetails,
+  hasUnsavedEditsRef,
+  guardNavigation = false,
+  onAssetChange,
+  onAssetDelete,
+  trackedLocation = MEDIA_LIBRARY_LOCATION,
+}: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
   const getErrorMessage = useApiErrorMessage();
   const { canCreate, canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions();
@@ -737,17 +790,26 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
 
   const isImage = asset.mime?.includes(ASSET_TYPES.Image);
 
-  const initialValues: AssetFormState = {
-    name: asset.name ?? '',
-    caption: asset.caption ?? '',
-    alternativeText: asset.alternativeText ?? '',
-    folder:
-      typeof asset.folder === 'object' && asset.folder !== null
-        ? ((asset.folder as { id: number }).id ?? null)
-        : ((asset.folder as number | null | undefined) ?? null),
-  };
+  // Stable until the asset changes: <Form> resets its values whenever this
+  // object does, which on every render would throw away the baseline a save
+  // sets and show the pre-save values until the refetch lands.
+  const initialValues = React.useMemo<AssetFormState>(
+    () => ({
+      name: asset.name ?? '',
+      caption: asset.caption ?? '',
+      alternativeText: asset.alternativeText ?? '',
+      folder:
+        typeof asset.folder === 'object' && asset.folder !== null
+          ? ((asset.folder as { id: number }).id ?? null)
+          : ((asset.folder as number | null | undefined) ?? null),
+    }),
+    [asset.name, asset.caption, asset.alternativeText, asset.folder]
+  );
 
-  const handleSubmit = async (values: AssetFormState) => {
+  const handleSubmit = async (
+    values: AssetFormState,
+    { resetForm }: FormHelpers<AssetFormState>
+  ) => {
     const fileInfo = {
       name: values.name,
       caption: values.caption,
@@ -771,8 +833,14 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       return;
     }
 
+    // What was saved is the new baseline. Otherwise the form stays "modified"
+    // until the refetched asset resets it, and closing in that gap asks about
+    // edits that are already saved.
+    resetForm(values);
+    onAssetChange?.(res.data);
+
     trackUsage('didEditMediaLibraryElements', {
-      location: MEDIA_LIBRARY_LOCATION,
+      location: trackedLocation,
       // Legacy sends the mime top-level type (image/video/audio/application…).
       type: asset.mime?.split('/')[0],
       changeLocation: values.folder !== initialValues.folder,
@@ -810,7 +878,8 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         });
         return;
       }
-      trackUsage('didReplaceMedia', { location: MEDIA_LIBRARY_LOCATION });
+      onAssetChange?.(res.data);
+      trackUsage('didReplaceMedia', { location: trackedLocation });
       notify({
         type: 'success',
         message: formatMessage({
@@ -819,7 +888,17 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         }),
       });
     },
-    [asset.id, asset.name, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
+    [
+      asset.id,
+      asset.name,
+      formatMessage,
+      getErrorMessage,
+      notify,
+      onAssetChange,
+      replaceMutation,
+      trackedLocation,
+      trackUsage,
+    ]
   );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
@@ -849,6 +928,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         { folderName }
       ),
     });
+    onAssetDelete?.(asset.id);
     closeDetails();
   }, [
     asset.id,
@@ -858,6 +938,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     formatMessage,
     getErrorMessage,
     notify,
+    onAssetDelete,
     toggleNotification,
   ]);
 
@@ -888,7 +969,8 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       notifyCropError(res.error);
       return;
     }
-    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: false });
+    onAssetChange?.(res.data);
+    trackUsage('didCropFile', { location: trackedLocation, duplicatedFile: false });
     notify({
       type: 'success',
       message: formatMessage({
@@ -899,6 +981,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   };
 
   // Save as copy: upload the cropped file as a new asset in the same folder.
+  // The original is untouched, so `onAssetChange` stays silent.
   const handleCropSaveAsCopy = async (file: globalThis.File, focalPoint: FocalPoint) => {
     setIsCropOpen(false);
     // Silent single-file upload (no global progress dialog). Carry over the
@@ -917,7 +1000,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       notifyCropError(res.error);
       return;
     }
-    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: true });
+    trackUsage('didCropFile', { location: trackedLocation, duplicatedFile: true });
     notify({
       type: 'success',
       message: formatMessage({
@@ -949,11 +1032,19 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
               const busyMessage = getBusyMessage({ isDeleting, isReplacing, isCropCopying });
               return (
                 <>
-                  {/* Guards every close path (X button, ESC, route change, browser
-                back) by intercepting the navigation when the form is dirty.
-                `onProceed` resets the form so the held navigation can complete.
-                Lives inside <Form> so it can read the form context. */}
-                  <Blocker onProceed={resetForm} />
+                  {/* With `guardNavigation`, every close path (X button, ESC, route
+                change, browser back) is a navigation, so <Blocker> intercepts it
+                when the form is dirty. `onProceed` resets the form so the held
+                navigation can complete. Lives inside <Form> so it can read the
+                form context. Without it, the drawer asks on its own close paths. */}
+                  {guardNavigation ? (
+                    <Blocker onProceed={resetForm} />
+                  ) : hasUnsavedEditsRef ? (
+                    <ReportUnsavedEdits
+                      target={hasUnsavedEditsRef}
+                      hasUnsavedEdits={modified && !isSubmitting}
+                    />
+                  ) : null}
                   {isCropOpen && isImage ? (
                     <AssetCropEditor
                       asset={asset}
@@ -1232,10 +1323,27 @@ const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
 
 interface DrawerContentProps {
   assetId: number;
+  /** Closes, asking first when there are unsaved edits. */
+  requestClose: () => void;
+  /** Closes unconditionally, for when the asset itself is gone. */
   closeDetails: () => void;
+  hasUnsavedEditsRef: React.MutableRefObject<boolean>;
+  guardNavigation: boolean;
+  onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
+  onAssetDelete?: (id: number) => void;
+  trackedLocation?: string;
 }
 
-const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
+const DrawerContent = ({
+  assetId,
+  requestClose,
+  closeDetails,
+  hasUnsavedEditsRef,
+  guardNavigation,
+  onAssetChange,
+  onAssetDelete,
+  trackedLocation,
+}: DrawerContentProps) => {
   const { formatMessage } = useIntl();
   const {
     data: asset,
@@ -1261,7 +1369,7 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
         <Alert
           variant="danger"
           closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
-          onClose={closeDetails}
+          onClose={requestClose}
         >
           {formatMessage({
             id: getTranslationKey('asset-details.error'),
@@ -1274,8 +1382,16 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
   return (
     <>
-      <DrawerHeader asset={asset} closeDetails={closeDetails} />
-      <AssetDetails asset={asset} closeDetails={closeDetails} />
+      <DrawerHeader asset={asset} closeDetails={requestClose} />
+      <AssetDetails
+        asset={asset}
+        closeDetails={closeDetails}
+        hasUnsavedEditsRef={hasUnsavedEditsRef}
+        guardNavigation={guardNavigation}
+        onAssetChange={onAssetChange}
+        onAssetDelete={onAssetDelete}
+        trackedLocation={trackedLocation}
+      />
     </>
   );
 };
@@ -1321,17 +1437,63 @@ const shouldKeepDrawerOpen = (
   );
 };
 
-export const AssetDetailsDrawer = () => {
-  const { formatMessage } = useIntl();
-  const { assetId, isVisible, shouldRenderDrawer, onCloseAnimationEnd, closeDetails } =
-    useAssetDetailsParam();
+interface AssetDetailsDrawerProps {
+  /** The asset to show, or `null` to close the drawer. */
+  assetId: number | null;
+  onClose: () => void;
+  /**
+   * Guard unsaved edits with <Blocker> instead of the drawer's own confirmation.
+   * Only for a drawer whose closing is itself a navigation, which <Blocker> then
+   * covers along with route changes and browser history. Not for a host that
+   * has its own <Blocker>: react-router allows one per page.
+   */
+  guardNavigation?: boolean;
+  /**
+   * After the asset was updated, replaced or cropped in place, with the server's
+   * copy, so a host holding the asset (e.g. a form field) can stay in sync.
+   */
+  onAssetChange?: (asset: AssetWithPopulatedCreatedBy) => void;
+  /** After the asset was deleted from the library, just before the drawer closes. */
+  onAssetDelete?: (id: number) => void;
+  /**
+   * `location` stamped on the tracking events, for analytics to tell hosts
+   * apart. Defaults to the Media Library page's.
+   */
+  trackedLocation?: string;
+}
 
-  if (!shouldRenderDrawer || assetId === null) {
+export const AssetDetailsDrawer = ({
+  assetId,
+  onClose,
+  guardNavigation = false,
+  onAssetChange,
+  onAssetDelete,
+  trackedLocation,
+}: AssetDetailsDrawerProps) => {
+  const { formatMessage } = useIntl();
+  const { displayAssetId, isVisible, shouldRender, onCloseAnimationEnd } =
+    useDrawerPresence(assetId);
+
+  const hasUnsavedEditsRef = React.useRef(false);
+  const [isConfirmingClose, setIsConfirmingClose] = React.useState(false);
+  // Where focus was when the drawer opened — the card or the field's edit
+  // button — so closing can hand it back instead of dropping it on <body>.
+  const returnFocusRef = React.useRef<HTMLElement | null>(null);
+
+  const requestClose = React.useCallback(() => {
+    if (hasUnsavedEditsRef.current) {
+      setIsConfirmingClose(true);
+      return;
+    }
+    onClose();
+  }, [onClose]);
+
+  if (!shouldRender || displayAssetId === null) {
     return null;
   }
 
   return (
-    <Drawer.Root isVisible={isVisible} onClose={closeDetails}>
+    <Drawer.Root isVisible={isVisible} onClose={requestClose}>
       {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
           VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
       <div>
@@ -1359,16 +1521,63 @@ export const AssetDetailsDrawer = () => {
         // off-screen. dvh tracks the actual visible height.
         height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
-        // Opt in to dismiss-on-outside-click; `closeDetails` is the same path
-        // as the header's close button, so unsaved edits are still guarded.
+        // Runs before focus moves in, so this is still the element that opened it.
+        onOpenAutoFocus={() => {
+          returnFocusRef.current =
+            document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        }}
+        // By now the panel is gone: focus is on <body> unless the user moved it
+        // somewhere — a press on another control dismissed the drawer — and that
+        // choice wins.
+        onCloseAutoFocus={(event) => {
+          const target = returnFocusRef.current;
+          const active = document.activeElement;
+          if (target?.isConnected && (active === null || active === document.body)) {
+            event.preventDefault();
+            target.focus();
+          }
+        }}
+        // Opt in to dismiss-on-outside-click; it goes through `requestClose`,
+        // like the header's close button, so unsaved edits are still guarded.
         onPointerDownOutside={(event) => {
           if (shouldKeepDrawerOpen(event, isVisible)) {
             event.preventDefault();
           }
         }}
       >
-        <DrawerContent assetId={assetId} closeDetails={closeDetails} />
+        <DrawerContent
+          assetId={displayAssetId}
+          requestClose={requestClose}
+          closeDetails={onClose}
+          hasUnsavedEditsRef={hasUnsavedEditsRef}
+          guardNavigation={guardNavigation}
+          onAssetChange={onAssetChange}
+          onAssetDelete={onAssetDelete}
+          trackedLocation={trackedLocation}
+        />
+        {/* Rendered from inside the panel so Radix counts presses on it as
+            inside, and the drawer stays put while it is open. The edits go
+            with the form, which unmounts once the drawer has closed. */}
+        <Dialog.Root open={isConfirmingClose} onOpenChange={setIsConfirmingClose}>
+          <ConfirmDialog onConfirm={onClose} variant="danger">
+            {formatMessage({
+              id: getTranslationKey('asset-details.unsaved.confirm'),
+              defaultMessage:
+                "You have unsaved changes, are you sure you want to close this file's details? Your changes will be lost.",
+            })}
+          </ConfirmDialog>
+        </Dialog.Root>
       </Drawer.Body>
     </Drawer.Root>
   );
+};
+
+/**
+ * The drawer bound to the URL's `?assetId=`, as the Media Library page uses it:
+ * linkable, survives a refresh, and closing is a navigation.
+ */
+export const AssetDetailsDrawerFromUrl = () => {
+  const { assetId, closeDetails } = useAssetDetailsParam();
+
+  return <AssetDetailsDrawer assetId={assetId} onClose={closeDetails} guardNavigation />;
 };
