@@ -26,6 +26,8 @@ import { createRepairManager, type RepairManager } from './repairs';
 import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
 import { withStrapiKnexLog } from './utils/knex-log';
 
+const DOCUMENT_LOCK_TABLE = 'strapi_document_locks';
+
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
 export { attributeNaming } from './metadata';
@@ -383,6 +385,35 @@ class Database {
 
   queryBuilder(uid: string) {
     return this.entityManager.createQueryBuilder(uid);
+  }
+
+  async lockDocumentId(documentId: string) {
+    if (this.dialect.client !== 'mysql') {
+      return;
+    }
+
+    const trx = transactionCtx.get();
+    const insert = this.getConnection(DOCUMENT_LOCK_TABLE)
+      .insert({ document_id: documentId })
+      .onConflict('document_id')
+      .ignore();
+
+    if (trx) {
+      insert.transacting(trx);
+    }
+
+    await insert;
+
+    const lock = this.getConnection(DOCUMENT_LOCK_TABLE)
+      .select('document_id')
+      .where({ document_id: documentId })
+      .forUpdate();
+
+    if (trx) {
+      lock.transacting(trx);
+    }
+
+    await lock;
   }
 
   async destroy() {

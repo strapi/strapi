@@ -555,14 +555,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     )(params);
 
     // Two requests can both observe "locale missing" and insert a second row.
-    // Lock the draft of the locale being written. When that row does not exist
-    // yet, lock one existing row of the document so the loser updates the row
-    // the winner created. Locking every locale deadlocks MySQL cross-links:
-    // Postgres takes FOR NO KEY UPDATE, which still lets a relation insert
-    // take the FOR KEY SHARE lock its foreign key needs. MySQL has no
-    // equivalent, so the query builder uses FOR UPDATE on that same row.
+    // MySQL serializes writers with an internal sentinel row. Postgres locks
+    // the draft row with FOR NO KEY UPDATE, which still lets a relation insert
+    // take the FOR KEY SHARE lock its foreign key needs.
     if (documentId) {
       await lockDocumentForUpdate({
+        db: strapi.db,
         queryBuilder: (modelUid) => strapi.db.queryBuilder(modelUid),
         uid,
         documentId,

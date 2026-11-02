@@ -7,6 +7,13 @@ interface LockBuilder {
   execute(): Promise<unknown>;
 }
 
+interface Database {
+  dialect: {
+    client: string;
+  };
+  lockDocumentId?(documentId: string): Promise<void>;
+}
+
 const hasLockedRow = (result: unknown) => {
   if (Array.isArray(result)) {
     return result.length > 0;
@@ -18,23 +25,32 @@ const hasLockedRow = (result: unknown) => {
 /**
  * Serialize two updates of the same document without locking every locale.
  *
- * The row being written is locked on its own. A missing locale has no row yet,
- * so one existing row of the document is locked instead and both creates wait
- * on that row. Locking every locale makes MySQL cross-links deadlock: the
- * foreign-key check needs a shared lock on a row the other transaction holds
- * exclusively.
+ * MySQL locks a row in its internal lock table. Nothing references that row,
+ * so its exclusive lock does not block foreign-key checks. Postgres locks the
+ * row being written with FOR NO KEY UPDATE. SQLite ignores row locks.
  */
 export const lockDocumentForUpdate = async ({
+  db,
   queryBuilder,
   uid,
   documentId,
   lookup,
 }: {
+  db: Database;
   queryBuilder: (uid: string) => LockBuilder;
   uid: string;
   documentId: string;
   lookup?: Record<string, unknown> | null;
 }) => {
+  if (db.dialect.client === 'mysql') {
+    if (!db.lockDocumentId) {
+      throw new Error('MySQL document lock is unavailable');
+    }
+
+    await db.lockDocumentId(documentId);
+    return;
+  }
+
   const specific: Record<string, unknown> = { documentId };
   const locale = lookup?.locale;
 

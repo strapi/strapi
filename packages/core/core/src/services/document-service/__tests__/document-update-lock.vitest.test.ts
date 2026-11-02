@@ -40,11 +40,27 @@ const createQueryBuilder = (results: unknown[]) => {
 
 const draftLookup = { locale: 'fr', publishedAt: { $null: true } };
 
+const createDatabase = (client = 'postgres') => {
+  const lockedDocumentIds: string[] = [];
+
+  return {
+    db: {
+      dialect: { client },
+      async lockDocumentId(documentId: string) {
+        lockedDocumentIds.push(documentId);
+      },
+    },
+    lockedDocumentIds,
+  };
+};
+
 describe('lockDocumentForUpdate', () => {
   it('locks only the draft row of the locale being written', async () => {
     const { queryBuilder, calls } = createQueryBuilder([[{ id: 4 }]]);
+    const { db } = createDatabase();
 
     await lockDocumentForUpdate({
+      db,
       queryBuilder,
       uid: 'api::article.article',
       documentId: 'doc',
@@ -64,8 +80,10 @@ describe('lockDocumentForUpdate', () => {
 
   it('locks one existing row when the locale does not exist yet', async () => {
     const { queryBuilder, calls } = createQueryBuilder([[], [{ id: 1 }]]);
+    const { db } = createDatabase();
 
     await lockDocumentForUpdate({
+      db,
       queryBuilder,
       uid: 'api::article.article',
       documentId: 'doc',
@@ -86,5 +104,21 @@ describe('lockDocumentForUpdate', () => {
         limit: 1,
       },
     ]);
+  });
+
+  it('locks the MySQL document sentinel without locking a locale row', async () => {
+    const { queryBuilder, calls } = createQueryBuilder([]);
+    const { db, lockedDocumentIds } = createDatabase('mysql');
+
+    await lockDocumentForUpdate({
+      db,
+      queryBuilder,
+      uid: 'api::article.article',
+      documentId: 'doc',
+      lookup: draftLookup,
+    });
+
+    expect(lockedDocumentIds).toEqual(['doc']);
+    expect(calls).toEqual([]);
   });
 });

@@ -8,6 +8,7 @@ const describeMysql = client === 'mysql' || client === 'mysql2' ? describe : des
 
 const ARTICLE_UID = 'api::link-article.link-article';
 const CATEGORY_UID = 'api::link-category.link-category';
+const TAG_UID = 'api::link-tag.link-tag';
 
 const categoryModel = {
   attributes: {
@@ -35,6 +36,12 @@ const articleModel = {
       target: CATEGORY_UID,
       targetAttribute: 'articles',
     },
+    tags: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: TAG_UID,
+      targetAttribute: 'articles',
+    },
   },
   draftAndPublish: true,
   displayName: 'Link article',
@@ -43,20 +50,38 @@ const articleModel = {
   pluginOptions: { i18n: { localized: true } },
 };
 
+const tagModel = {
+  attributes: {
+    name: {
+      type: 'string',
+    },
+  },
+  draftAndPublish: true,
+  displayName: 'Link tag',
+  singularName: 'link-tag',
+  pluralName: 'link-tags',
+};
+
 const builder = createTestBuilder();
 
 describeMysql('MySQL cross-locale relation connects', () => {
   let strapi;
 
   beforeAll(async () => {
-    await builder.addContentType(categoryModel).addContentType(articleModel).build();
+    await builder
+      .addContentType(categoryModel)
+      .addContentType(tagModel)
+      .addContentType(articleModel)
+      .build();
     strapi = await createStrapiInstance();
     await strapi.plugin('i18n').service('locales').create({ code: 'fr', name: 'French' });
   }, 120000);
 
   afterAll(async () => {
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
-    await strapi.destroy();
+    if (strapi) {
+      await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
+      await strapi.destroy();
+    }
     await builder.cleanup();
   });
 
@@ -102,5 +127,57 @@ describeMysql('MySQL cross-locale relation connects', () => {
       expect(results[0]).toBeTruthy();
       expect(results[1]).toBeTruthy();
     }
+  });
+
+  test('concurrent new-locale cross-locale connects both succeed', async () => {
+    const tag = await strapi.documents(TAG_UID).create({
+      data: { name: 'tag' },
+    });
+    const articleDocumentIds = [];
+
+    for (let round = 0; round < 8; round += 1) {
+      const article = await strapi.documents(ARTICLE_UID).create({
+        locale: 'en',
+        data: { title: `article-${round}` },
+      });
+      articleDocumentIds.push(article.documentId);
+
+      const results = await Promise.all([
+        strapi.documents(ARTICLE_UID).update({
+          documentId: article.documentId,
+          locale: 'fr',
+          data: {
+            title: `article-${round}-fr`,
+            tags: { connect: [{ documentId: tag.documentId }] },
+          },
+        }),
+        strapi.documents(TAG_UID).update({
+          documentId: tag.documentId,
+          data: {
+            articles: { connect: [{ documentId: article.documentId, locale: 'en' }] },
+          },
+        }),
+      ]);
+
+      expect(results[0]).toBeTruthy();
+      expect(results[1]).toBeTruthy();
+    }
+
+    const articleInFrench = await strapi.documents(ARTICLE_UID).findFirst({
+      locale: 'fr',
+      filters: { title: 'article-0-fr' },
+      populate: { tags: true },
+    });
+    const tagWithArticles = await strapi.documents(TAG_UID).findOne({
+      documentId: tag.documentId,
+      populate: { articles: true },
+    });
+
+    expect(articleInFrench.tags).toHaveLength(1);
+    expect(articleInFrench.tags[0].documentId).toBe(tag.documentId);
+    expect(tagWithArticles.articles).toHaveLength(16);
+    expect(new Set(tagWithArticles.articles.map((article) => article.documentId))).toEqual(
+      new Set(articleDocumentIds)
+    );
   });
 });
