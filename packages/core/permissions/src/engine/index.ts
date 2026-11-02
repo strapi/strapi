@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import qs from 'qs';
-import { Ability } from '@casl/ability';
+import type { Modules } from '@strapi/types';
 import { providerFactory } from '@strapi/utils';
 
 import {
@@ -9,7 +9,7 @@ import {
   createBeforeEvaluateContext,
   createValidateContext,
 } from './hooks';
-import type { PermissionEngineHooks, HookName } from './hooks';
+import type { HookName } from './hooks';
 
 import * as abilities from './abilities';
 import { Permission } from '../domain/permission';
@@ -24,15 +24,7 @@ type Provider = Omit<ReturnType<typeof providerFactory>, 'register'> & {
 type ActionProvider = Provider;
 type ConditionProvider = Provider;
 
-export interface Engine {
-  hooks: PermissionEngineHooks;
-  on(hook: HookName, handler: (...args: any[]) => any): Engine;
-  generateAbility(permissions: Permission[], options?: object): Promise<Ability>;
-  createRegisterFunction(
-    can: (permission: PermissionRule) => unknown,
-    options: Record<string, unknown>
-  ): (permission: PermissionRule) => Promise<unknown>;
-}
+export type Engine = Modules.Permissions.Engine;
 
 export interface EngineParams {
   providers: { action: ActionProvider; condition: ConditionProvider };

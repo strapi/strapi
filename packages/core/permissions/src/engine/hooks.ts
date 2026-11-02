@@ -1,19 +1,14 @@
 import { cloneDeep, has } from 'lodash';
+import type { Modules } from '@strapi/types';
 import { hooks } from '@strapi/utils';
 
 import * as domain from '../domain';
 import type { Permission } from '../domain/permission';
 import type { PermissionRule } from '../types';
 
-export interface PermissionEngineHooks {
-  'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
-  'format.permission': ReturnType<typeof hooks.createAsyncSeriesWaterfallHook>;
-  'after-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
-  'before-evaluate.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
-  'before-register.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
-}
+export type PermissionEngineHooks = Modules.Permissions.EngineHooks;
 
-export type HookName = keyof PermissionEngineHooks;
+export type HookName = Modules.Permissions.EngineHookName;
 
 /**
  * Create a hook map used by the permission Engine
