@@ -10,13 +10,6 @@ backend:
   - 'tests/helpers/**'
   - 'tests/setup/unit.setup.js'
   - 'tests/setup/timezone-environment.js'
-# Unit test setup shared by every package. No Nx project owns these files, so `nx affected` runs
-# no unit tests for a change to them: unit_back runs all of them instead.
-unit_shared:
-  - 'jest-preset.unit.js'
-  - 'tests/helpers/**'
-  - 'tests/setup/unit.setup.js'
-  - 'tests/setup/timezone-environment.js'
 frontend:
   - 'packages/**/admin/src/**'
   - 'packages/**/admin/ee/admin/**'
