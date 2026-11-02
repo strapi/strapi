@@ -391,6 +391,7 @@ const RepeatableComponentFields = React.memo(
                   >
                     {children({
                       ...field,
+                      size,
                       label: translatedLabel,
                       name: completeFieldName,
                     })}

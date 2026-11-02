@@ -57,35 +57,15 @@ const shouldCreateHistoryVersion = (
 };
 
 /**
- * Returns the content type schema (and its components schemas).
+ * Returns the content type schema.
  * Used to determine if changes were made in the content type builder since a history version was created.
  * And therefore which fields can be restored and which cannot.
  */
 const getSchemas = (uid: UID.CollectionType) => {
   const attributesSchema = strapi.getModel(uid).attributes;
 
-  // TODO: Handle nested components
-  const componentsSchemas = Object.keys(attributesSchema).reduce(
-    (currentComponentSchemas, key) => {
-      const fieldSchema = attributesSchema[key];
-
-      if (fieldSchema.type === 'component') {
-        const componentSchema = strapi.getModel(fieldSchema.component).attributes;
-        return {
-          ...currentComponentSchemas,
-          [fieldSchema.component]: componentSchema,
-        };
-      }
-
-      // Ignore anything that's not a component
-      return currentComponentSchemas;
-    },
-    {} as CreateHistoryVersion['componentsSchemas']
-  );
-
   return {
     schema: omit(attributesSchema, FIELDS_TO_IGNORE) as CreateHistoryVersion['schema'],
-    componentsSchemas,
   };
 };
 
