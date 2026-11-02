@@ -119,41 +119,22 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     expect(response.body.data[1].status).toBe('ready');
   });
 
-  test('fills the remaining slots with undated releases, then drops them once scheduled ones fill all slots', async () => {
-    const getNames = async () => {
-      const res = await rq({ method: 'GET', url: '/content-releases/homepage/upcoming-releases' });
-      expect(res.statusCode).toBe(200);
-      return res.body.data.map((release: { name: string }) => release.name);
-    };
-
-    await createRelease('Later release', {
-      scheduledAt: new Date('2024-01-10T00:00:00.000Z'),
-      timezone: 'Europe/Madrid',
-    });
-    await createRelease('Soonest release', {
+  // A license without `maximumReleases` allows 3 pending releases: this stays within it (the
+  // previous test left 2). Filling all 4 slots is covered by the service's unit tests.
+  test('lists scheduled releases by date, whatever order they were created in, then undated ones', async () => {
+    const created = await createRelease('Soonest release', {
       scheduledAt: new Date('2024-01-03T00:00:00.000Z'),
       timezone: 'Europe/Madrid',
     });
+    expect(created.statusCode).toBe(201);
 
-    // 3 scheduled + 1 undated fill the 4 slots
-    expect(await getNames()).toEqual([
+    const res = await rq({ method: 'GET', url: '/content-releases/homepage/upcoming-releases' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.map((release: { name: string }) => release.name)).toEqual([
       'Soonest release',
       'Next week release',
-      'Later release',
       'Not scheduled release',
-    ]);
-
-    await createRelease('Mid release', {
-      scheduledAt: new Date('2024-01-05T00:00:00.000Z'),
-      timezone: 'Europe/Madrid',
-    });
-
-    // 4 scheduled releases take every slot, the undated one is dropped
-    expect(await getNames()).toEqual([
-      'Soonest release',
-      'Mid release',
-      'Next week release',
-      'Later release',
     ]);
   });
 });
