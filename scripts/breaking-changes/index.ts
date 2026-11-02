@@ -20,15 +20,14 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { collectFindings } from './collect';
 import {
-  classifyPath,
-  diffManifest,
-  diffNamedExports,
-  diffRoutes,
-  diffSchema,
+  addPublishedFiles,
+  emptyPublishedFiles,
   type ChangedFile,
   type ChangeKind,
   type Finding,
+  type PublishedFiles,
   type Tier,
 } from './surfaces';
 
@@ -158,107 +157,47 @@ const readWorkingTree = (filePath: string): string | null => {
   }
 };
 
-const parseJson = (source: string | null): Record<string, unknown> | null => {
-  if (source === null) {
-    return null;
+const isManifest = (filePath: string): boolean =>
+  /^packages\/.*\/package\.json$/.test(filePath) === true &&
+  /(^|\/)(node_modules|templates)\//.test(filePath) === false;
+
+/**
+ * Entry and bin files from every package manifest, at the base and in the working tree,
+ * so a file that stops being published is still classified by what it was.
+ */
+const publishedFiles = (base: string): PublishedFiles => {
+  const published = emptyPublishedFiles();
+  const listings: Array<[string[], (filePath: string) => string | null]> = [
+    [
+      git(['ls-tree', '-r', '--name-only', base, '--', 'packages']).split('\n'),
+      (filePath) => readAt(base, filePath),
+    ],
+    [git(['ls-files', '--', 'packages']).split('\n'), readWorkingTree],
+  ];
+
+  for (const [paths, read] of listings) {
+    for (const manifestPath of paths.filter(isManifest)) {
+      try {
+        const manifest = JSON.parse(read(manifestPath) ?? 'null') as Record<string, unknown> | null;
+
+        if (manifest !== null) {
+          addPublishedFiles(published, manifestPath, manifest);
+        }
+      } catch {
+        // An unparsable manifest publishes nothing we can name.
+      }
+    }
   }
 
-  try {
-    return JSON.parse(source) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
+  return published;
 };
 
-const deepFindings = (
-  file: ChangedFile,
-  surfaceName: string,
-  base: string
-): Omit<Finding, 'path' | 'surface'>[] => {
-  const previousPath = file.oldPath ?? file.path;
-  const before = readAt(base, previousPath);
-  const after = readWorkingTree(file.path);
-
-  if (before === null || after === null) {
-    return [];
-  }
-
-  if (file.path.endsWith('package.json') === true) {
-    const beforeJson = parseJson(before);
-    const afterJson = parseJson(after);
-
-    return beforeJson === null || afterJson === null ? [] : diffManifest(beforeJson, afterJson);
-  }
-
-  if (file.path.endsWith('schema.json') === true) {
-    const beforeJson = parseJson(before);
-    const afterJson = parseJson(after);
-
-    return beforeJson === null || afterJson === null ? [] : diffSchema(beforeJson, afterJson);
-  }
-
-  if (/(^|\/)routes(\/|[.])/.test(file.path) === true) {
-    return diffRoutes(before, after);
-  }
-
-  if (surfaceName === 'package public exports' || surfaceName.includes('types') === true) {
-    return diffNamedExports(before, after);
-  }
-
-  return [];
-};
-
-const collect = (base: string): Finding[] => {
-  const findings: Finding[] = [];
-
-  for (const file of changedFiles(base)) {
-    const surface = classifyPath(file.path);
-
-    if (surface === null || surface.tier === 3) {
-      continue;
-    }
-
-    if (file.kind === 'deleted') {
-      findings.push({
-        path: file.path,
-        tier: surface.tier,
-        surface: surface.name,
-        rule: 'file:deleted',
-        detail: 'file removed from a public surface — anything it exported is gone',
-      });
-      continue;
-    }
-
-    if (file.kind === 'renamed') {
-      findings.push({
-        path: file.path,
-        tier: surface.tier,
-        surface: surface.name,
-        rule: 'file:renamed',
-        detail: `renamed from "${String(file.oldPath)}" — deep imports of the old path break`,
-      });
-    }
-
-    const deep = deepFindings(file, surface.name, base);
-
-    if (deep.length > 0) {
-      findings.push(...deep.map((entry) => ({ ...entry, path: file.path, surface: surface.name })));
-      continue;
-    }
-
-    if (file.kind === 'modified') {
-      findings.push({
-        path: file.path,
-        tier: surface.tier,
-        surface: surface.name,
-        rule: 'surface:touched',
-        detail: 'a public surface was modified — classify the behaviour change by hand',
-      });
-    }
-  }
-
-  return findings;
-};
+const collect = (base: string): Finding[] =>
+  collectFindings(changedFiles(base), {
+    readBefore: (filePath) => readAt(base, filePath),
+    readAfter: readWorkingTree,
+    published: publishedFiles(base),
+  });
 
 const TIER_LABEL: Record<Tier, string> = {
   1: 'TIER 1 — supported (majors only)',

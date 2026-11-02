@@ -16,14 +16,14 @@ Exit codes: `0` nothing on a public surface, `1` findings to classify, `2` bad u
 A **candidate detector**. It reports changes that _could_ carry a breaking change, with a
 candidate tier, so nothing on a public surface goes unexamined. It detects:
 
-| Surface                        | What it catches                                                                                 |
-| ------------------------------ | ----------------------------------------------------------------------------------------------- |
-| Export maps                    | removed or renamed `exports` subpaths, changed conditions                                       |
-| Manifests                      | narrowed `engines.node`, changed or removed `peerDependencies`, removed `bin`, renamed packages |
-| Published types & entry points | named exports that disappeared                                                                  |
-| Content-type schemas           | removed attributes, changed attribute types, newly required fields, `kind` changes              |
-| Routes                         | route paths that disappeared                                                                    |
-| Everything else classified     | the file was touched, so classify it by hand                                                    |
+| Surface                        | What it catches                                                                                          |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Export maps                    | removed or renamed `exports` subpaths, changed conditions                                                |
+| Manifests                      | narrowed `engines.node`, changed or removed `peerDependencies`, removed or moved `bin`, renamed packages |
+| Published types & entry points | named exports that disappeared                                                                           |
+| Content-type schemas           | removed attributes, changed attribute types, newly required fields, `kind` changes                       |
+| Routes                         | route paths that disappeared                                                                             |
+| Everything else classified     | the file was touched, so classify it by hand                                                             |
 
 ## What it is not
 
@@ -32,7 +32,12 @@ function body, a changed error message, a different default computed at runtime,
 narrowed type expressed through inference. A clean run means "nothing obvious" — not
 "not breaking".
 
-Tier labels are heuristics from file paths. **Tier 1 requires the behaviour to be
+Tier labels come from file paths, plus the entry and `bin` files that each package
+manifest publishes. A finding keeps its path tier unless its rule is more severe. For
+example, a removed `@strapi/types` export is Tier 1, and a removed Admin API route stays
+Tier 2. A renamed file is also reported under its old path.
+
+Tier labels are heuristics. **Tier 1 requires the behaviour to be
 documented at [docs.strapi.io](https://docs.strapi.io)**, which lives in another
 repository and cannot be checked from here. Confirm documentation status before treating
 a finding as a contract violation.
@@ -51,5 +56,6 @@ patterns and the escalation procedure: [`.ai/skills/breaking-changes/SKILL.md`](
 yarn check:breaking:test
 ```
 
-Layout follows `scripts/front/verify-translations`: pure logic in `surfaces.ts`, git
-plumbing and reporting in `index.ts`, `node:test` specs in `__tests__/`.
+Layout follows `scripts/front/verify-translations`: pure logic in `surfaces.ts`, findings
+assembly in `collect.ts` (git is injected, so it is tested too), git plumbing and
+reporting in `index.ts`, `node:test` specs in `__tests__/`.

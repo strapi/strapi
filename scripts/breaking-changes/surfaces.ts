@@ -7,6 +7,8 @@
  * See `.ai/skills/breaking-changes/SKILL.md` for the policy these rules encode.
  */
 
+import path from 'node:path';
+
 export type Tier = 1 | 2 | 3;
 
 export interface Surface {
@@ -47,6 +49,18 @@ const IGNORED = [
 ];
 
 /**
+ * Files a package publishes as an entry point, discovered from its manifest rather than
+ * guessed from the path: the `source` condition of each export-map subpath, the top-level
+ * `source` field, and each `bin` target. Keyed by repo-relative path.
+ */
+export interface PublishedFiles {
+  entries: Set<string>;
+  bins: Set<string>;
+}
+
+export const emptyPublishedFiles = (): PublishedFiles => ({ entries: new Set(), bins: new Set() });
+
+/**
  * Path-based surface classification. Ordered: first match wins, most specific first.
  *
  * This is a triage heuristic, not the policy itself. A Tier 1 label means "this file
@@ -55,44 +69,145 @@ const IGNORED = [
  */
 const RULES: Array<[RegExp, Surface]> = [
   [/^packages\/core\/types\//, { tier: 1, name: '@strapi/types published types' }],
-  [/^packages\/providers\//, { tier: 1, name: 'provider interface' }],
-  [/^packages\/cli\//, { tier: 1, name: 'CLI' }],
-  // Admin API routes must be checked before the generic routes rule below — they are
-  // Tier 2 ("the Admin API that powers the admin panel"), not Tier 1 HTTP routes.
-  [/^packages\/core\/admin\/server\//, { tier: 2, name: 'Admin API' }],
-  [/(^|\/)routes(\/|\.[cm]?[jt]s)/, { tier: 1, name: 'HTTP routes' }],
+  // Scaffolding for new projects. Changing it never touches an existing application.
+  [/^packages\/cli\/create-strapi-app\/templates\//, { tier: 3, name: 'project templates' }],
+  // Admin-panel implementation details are Tier 3. Its published entry files are lifted
+  // back to Tier 2 by the export map, see `classifyPath`.
+  [/(^|\/)admin\/src\//, { tier: 3, name: 'admin-panel implementation' }],
   [/(^|\/)content-types\/.*schema\.json$/, { tier: 1, name: 'content-type schema' }],
   [/(^|\/)schema\.json$/, { tier: 1, name: 'content-type schema' }],
   [/(^|\/)webhooks?(\/|[-.])/i, { tier: 1, name: 'webhook payload' }],
   [/(^|\/)lifecycles?(\/|[-.])/i, { tier: 1, name: 'lifecycle event payload' }],
   [/(^|\/)document-service\//, { tier: 1, name: 'Document Service API' }],
-  [/^packages\/plugins\/graphql\//, { tier: 1, name: 'GraphQL Content API' }],
-  [/(^|\/)config\//, { tier: 1, name: 'configuration' }],
-  [/(^|\/)migrations?\//, { tier: 1, name: 'data migration' }],
-  [/^packages\/.*\/package\.json$/, { tier: 2, name: 'package manifest / export map' }],
-  [
-    /^packages\/.*\/src\/(index|admin|strapi-server|strapi-admin)\.[cm]?[jt]sx?$/,
-    { tier: 2, name: 'package public exports' },
-  ],
+  // The configuration loader lives in `configuration/`, plugin defaults in `config/`.
+  [/(^|\/)config(uration)?\//, { tier: 1, name: 'configuration' }],
+  // Routes are split by the type Strapi gives them. A route file that names neither type
+  // stays Tier 1: when the surface cannot be determined, the skill says escalate.
+  [/(^|\/)routes?\/.*content-api|content-api\/routes/, { tier: 1, name: 'Content API routes' }],
+  [/^packages\/core\/admin\/(ee\/)?server\//, { tier: 2, name: 'Admin API' }],
+  [/(^|\/)routes\/(.*\/)?admin(\/|\.[cm]?[jt]s$)/, { tier: 2, name: 'Admin API routes' }],
+  [/(^|\/)routes(\/|\.[cm]?[jt]s)/, { tier: 1, name: 'HTTP routes (type not detected)' }],
   // Documented today (`strapi.db.query`), so treated as Tier 1 pending the open question
   // in the skill about whether it stays supported alongside the Document Service.
   [
     /^packages\/core\/database\/src\/query\//,
     { tier: 1, name: 'Query Engine API (strapi.db.query) — see open question in skill' },
   ],
+  // The database layer and the automatic data migrations Strapi runs on upgrade are Tier 3:
+  // a transparent migration requires no user action, so it is not breaking.
   [/^packages\/core\/database\//, { tier: 3, name: 'database layer' }],
+  [/^packages\/.*\/package\.json$/, { tier: 2, name: 'package manifest / export map' }],
+  // Only the entry file of a provider is its interface (see `classifyPath`).
+  [/^packages\/providers\//, { tier: 3, name: 'provider internals' }],
+  [
+    /^packages\/(cli\/|core\/strapi\/src\/cli\/)/,
+    {
+      tier: 2,
+      name: 'CLI internals — confirm documented commands, flags and output are unchanged',
+    },
+  ],
+  [
+    /^packages\/plugins\/graphql\//,
+    { tier: 2, name: 'GraphQL plugin internals — confirm the generated schema is unchanged' },
+  ],
+  [
+    /^packages\/.*\/src\/(index|admin|strapi-server|strapi-admin)\.[cm]?[jt]sx?$/,
+    { tier: 2, name: 'package public exports' },
+  ],
   [/^packages\//, { tier: 3, name: 'package internals' }],
 ];
 
-export const classifyPath = (filePath: string): Surface | null => {
+const PUBLIC_EXPORTS: Surface = { tier: 2, name: 'package public exports' };
+const PROVIDER_INTERFACE: Surface = { tier: 1, name: 'provider interface' };
+const CLI_ENTRY: Surface = { tier: 1, name: 'CLI binary' };
+
+export const classifyPath = (
+  filePath: string,
+  published: PublishedFiles = emptyPublishedFiles()
+): Surface | null => {
   if (IGNORED.some((pattern) => pattern.test(filePath)) === true) {
     return null;
   }
 
-  const match = RULES.find(([pattern]) => pattern.test(filePath));
+  if (published.bins.has(filePath) === true) {
+    return CLI_ENTRY;
+  }
 
-  return match === undefined ? null : match[1];
+  const match = RULES.find(([pattern]) => pattern.test(filePath));
+  const surface = match === undefined ? null : match[1];
+
+  if (published.entries.has(filePath) === false) {
+    return surface;
+  }
+
+  if (filePath.startsWith('packages/providers/') === true) {
+    return PROVIDER_INTERFACE;
+  }
+
+  // An entry file keeps a more severe path tier (e.g. @strapi/types) and is otherwise
+  // at least Tier 2: it is what consumers import.
+  return surface !== null && surface.tier <= PUBLIC_EXPORTS.tier ? surface : PUBLIC_EXPORTS;
 };
+
+const toRepoPath = (packageDir: string, relative: string): string =>
+  path.posix.normalize(path.posix.join(packageDir, relative));
+
+const collectSourceConditions = (value: unknown, into: string[]): void => {
+  if (typeof value !== 'object' || value === null) {
+    return;
+  }
+
+  for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+    if (key === 'source' && typeof nested === 'string') {
+      into.push(nested);
+    } else {
+      collectSourceConditions(nested, into);
+    }
+  }
+};
+
+/**
+ * Adds the entry and bin files a manifest publishes to `published`. Wildcard subpaths
+ * (`"./*"`) are skipped: they publish the whole tree, which the path rules already cover.
+ */
+export const addPublishedFiles = (
+  published: PublishedFiles,
+  manifestPath: string,
+  manifest: Record<string, unknown>
+): void => {
+  const packageDir = path.posix.dirname(manifestPath);
+  const sources: string[] = [];
+
+  if (typeof manifest.source === 'string') {
+    sources.push(manifest.source);
+  }
+
+  collectSourceConditions(manifest.exports, sources);
+
+  for (const source of sources) {
+    if (source.includes('*') === false) {
+      const entry = toRepoPath(packageDir, source);
+
+      published.entries.add(entry);
+      // The bundler resolves a `.js` source to its `.ts` sibling (e.g. @strapi/admin's
+      // `./strapi-server` names `server/src/index.js`, the file is `index.ts`).
+      if (/\.[cm]?js$/.test(entry) === true) {
+        published.entries.add(entry.replace(/\.([cm]?)js$/, '.$1ts'));
+      }
+    }
+  }
+
+  for (const binPath of binEntries(manifest).values()) {
+    published.bins.add(toRepoPath(packageDir, binPath));
+  }
+};
+
+/**
+ * Severity wins: a finding keeps its path tier unless the specific rule is more severe.
+ * Tier 1 is the most severe, so the lower number wins.
+ */
+export const mergeTier = (pathTier: Tier, ruleTier: Tier): Tier =>
+  Math.min(pathTier, ruleTier) as Tier;
 
 /* -------------------------------------------------------------------------- */
 /* package.json manifests                                                     */
@@ -192,17 +307,53 @@ const diffPeerDependencies = (before: Json, after: Json): Omit<Finding, 'path' |
   return findings;
 };
 
-const diffBins = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => {
-  const beforeBins = Object.keys((before.bin as Json | undefined) ?? {});
-  const afterBins = Object.keys((after.bin as Json | undefined) ?? {});
+/**
+ * `bin` is either a single path, published under the package name without its scope, or
+ * a map of command name to path. Normalise both to the map form.
+ */
+export const binEntries = (manifest: Json): Map<string, string> => {
+  const bin = manifest.bin;
 
-  return beforeBins
-    .filter((bin) => afterBins.includes(bin) === false)
-    .map((bin) => ({
-      tier: 1 as Tier,
-      rule: 'bin:removed',
-      detail: `CLI binary "${bin}" was removed — the CLI is documented and therefore Tier 1`,
-    }));
+  if (typeof bin === 'string') {
+    const name = typeof manifest.name === 'string' ? manifest.name.replace(/^@[^/]+\//, '') : '';
+
+    return new Map([[name, bin]]);
+  }
+
+  if (typeof bin !== 'object' || bin === null) {
+    return new Map();
+  }
+
+  return new Map(
+    Object.entries(bin as Json).filter((entry): entry is [string, string] => {
+      return typeof entry[1] === 'string';
+    })
+  );
+};
+
+const diffBins = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => {
+  const findings: Omit<Finding, 'path' | 'surface'>[] = [];
+  const afterBins = binEntries(after);
+
+  for (const [name, binPath] of binEntries(before)) {
+    const next = afterBins.get(name);
+
+    if (next === undefined) {
+      findings.push({
+        tier: 1,
+        rule: 'bin:removed',
+        detail: `CLI binary "${name}" was removed — the CLI is documented and therefore Tier 1`,
+      });
+    } else if (next !== binPath) {
+      findings.push({
+        tier: 2,
+        rule: 'bin:changed-path',
+        detail: `CLI binary "${name}" now points at "${next}" instead of "${binPath}" — confirm the new file is published and executable`,
+      });
+    }
+  }
+
+  return findings;
 };
 
 const diffPackageName = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => {
@@ -402,8 +553,10 @@ export const diffRoutes = (before: string, after: string): Omit<Finding, 'path' 
   return [...collectRoutePaths(before)]
     .filter((routePath) => afterPaths.has(routePath) === false)
     .map((routePath) => ({
-      tier: 1 as Tier,
+      // A served endpoint is at least Tier 2. The path rules decide whether it is a
+      // Content API route (Tier 1) or an Admin API route (Tier 2), see `mergeTier`.
+      tier: 2 as Tier,
       rule: 'routes:removed-path',
-      detail: `route "${routePath}" is gone — this tool can't tell Content API from Admin API routes; confirm the surface and documentation status on docs.strapi.io before deciding between Tier 1 and Tier 2`,
+      detail: `route "${routePath}" is gone — confirm the route type and its documentation status on docs.strapi.io`,
     }));
 };
