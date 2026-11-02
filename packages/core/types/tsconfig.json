@@ -5,5 +5,10 @@
     "types": ["node", "@strapi/types/strict"]
   },
   "include": ["src"],
-  "exclude": ["node_modules"]
+  // Declares its schemas in the `Public` registries, which strict mode ignores: the strict-off
+  // program checks it.
+  "exclude": [
+    "node_modules",
+    "src/modules/documents/params/__tests__/nullable-scalar-input.test.ts"
+  ]
 }

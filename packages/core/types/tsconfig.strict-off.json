@@ -1,6 +1,10 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["tests/strict-off.ts"],
+  "include": [
+    "tests/strict-off.ts",
+    "src/modules/documents/params/__tests__/nullable-scalar-input.test.ts"
+  ],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "types": ["node"]
   }
