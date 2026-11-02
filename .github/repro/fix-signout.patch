@@ -1,0 +1,19 @@
+diff --git a/packages/core/admin/admin/src/features/Auth.tsx b/packages/core/admin/admin/src/features/Auth.tsx
+index ed7984f0e2..e8cfcca8c3 100644
+--- a/packages/core/admin/admin/src/features/Auth.tsx
++++ b/packages/core/admin/admin/src/features/Auth.tsx
+@@ -281,6 +281,14 @@ const AuthProvider = ({
+       // handled and later 401s never log the tab out.
+       const currentToken = store.getState().admin_app.token ?? null;
+       const storedToken = getStoredToken();
++
++      // Already signed out, by this tab or another one: a request from the old session that
++      // fails now has no session left to end. Logging out again would reset the login page and
++      // the API state while the next admin is signing in.
++      if (currentToken === null && storedToken === null) {
++        return;
++      }
++
+       if (
+         expiredToken !== undefined &&
+         expiredToken !== currentToken &&

@@ -5,9 +5,8 @@ name: 'E2E permission flake repro'
 # applies one patch from .github/repro/ on top of develop, so their failure rates can be compared
 # in a single run:
 # - develop: no patch
-# - revert-27368: develop without #27368 (session handling on sign-in)
-# - form-login: loginWithApi signs in through the form, as before #28309
-# - settle-before-login: login() waits for the login page and its requests to settle
+# - fix-signout: the candidate fix for the sign-out race from #27368
+# (Earlier runs also compared revert-27368, form-login and settle-before-login.)
 
 on:
   pull_request:
@@ -39,27 +38,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        copy: [1, 2]
-        variant: [develop, revert-27368, form-login, settle-before-login]
+        copy: [1, 2, 3]
+        variant: [develop, fix-signout]
         suite:
-          - name: media-library-permissions
-            domains: media-library
-            mediaLibrarySuite: current
-            project: chromium
-            repeat: 6
-            filter: media-library-permissions.spec.ts
-          - name: i18n-permissions
-            domains: i18n
-            mediaLibrarySuite: ''
-            project: webkit
-            repeat: 10
-            filter: permissions.spec.ts:23
           - name: cm-edit-view-errors
             domains: content-manager
-            mediaLibrarySuite: ''
             project: webkit
             repeat: 10
             filter: collection-type-edit-view-errors.spec.ts:33
+          - name: i18n-permissions
+            domains: i18n
+            project: webkit
+            repeat: 10
+            filter: permissions.spec.ts:23
+          - name: admin-tokens-ownership
+            domains: admin
+            project: webkit
+            repeat: 10
+            filter: admin-tokens.spec.ts:173
+          - name: rbac-permissions-enforcement
+            domains: settings
+            project: webkit
+            repeat: 10
+            filter: permissions-enforcement.spec.ts:14
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -74,10 +75,10 @@ jobs:
         env:
           VARIANT: ${{ matrix.variant }}
         run: git apply ".github/repro/$VARIANT.patch"
-      # The revert changes package sources, so the build restored from the build job is stale.
-      - name: Rebuild the packages
-        if: ${{ matrix.variant == 'revert-27368' }}
-        run: yarn nx run-many --targets build --nx-ignore-cycles --skip-nx-cache
+      # The fix changes @strapi/admin, so its build restored from the build job is stale.
+      - name: Rebuild the admin package
+        if: ${{ matrix.variant == 'fix-signout' }}
+        run: yarn nx run @strapi/admin:build --nx-ignore-cycles --skip-nx-cache --excludeTaskDependencies
       - name: Run the spec repeatedly
         id: e2e
         continue-on-error: true
@@ -85,7 +86,6 @@ jobs:
         with:
           runEE: false
           domains: ${{ matrix.suite.domains }}
-          mediaLibrarySuite: ${{ matrix.suite.mediaLibrarySuite }}
           jestOptions: '--project=${{ matrix.suite.project }} --repeat-each=${{ matrix.suite.repeat }} --retries=0 --trace=retain-on-failure ${{ matrix.suite.filter }}'
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ steps.e2e.outcome == 'failure' }}
