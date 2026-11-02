@@ -52,9 +52,11 @@ export const ReleaseModal = ({
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
-  // Set default first timezone from the list if no system timezone detected
+  // Set default first timezone from the list if no system timezone detected.
+  // Offsets are computed from the same instant TimezoneComponent uses (UTC midnight of `date`),
+  // otherwise on a DST change day it rewrites the timezone on mount and the form looks dirty.
   const { timezoneList, systemTimezone = { value: 'UTC+00:00-Africa/Abidjan ' } } = getTimezones(
-    initialValues.scheduledAt ? new Date(initialValues.scheduledAt) : new Date()
+    initialValues.date ? new Date(initialValues.date) : new Date()
   );
 
   /**

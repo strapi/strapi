@@ -101,6 +101,35 @@ describe('ReleaseModal', () => {
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
+  it('closes without asking when an untouched scheduled release falls on a DST change day', async () => {
+    const handleClose = jest.fn();
+    const { user } = render(
+      <ReleaseModal
+        open
+        handleClose={handleClose}
+        handleSubmit={jest.fn()}
+        initialValues={{
+          name: 'Spring release',
+          isScheduled: true,
+          // Europe/Paris switches from UTC+01:00 to UTC+02:00 at 01:00 UTC on 2026-03-29,
+          // so midnight UTC of `date` and `scheduledAt` sit on different offsets.
+          date: '2026-03-29',
+          time: '10:00',
+          timezone: 'Europe/Paris',
+          scheduledAt: new Date('2026-03-29T08:00:00.000Z'),
+        }}
+        isLoading={false}
+      />
+    );
+
+    expect(await screen.findByRole('combobox', { name: /timezone/i })).toBeInTheDocument();
+
+    await user.keyboard('[Escape]');
+
+    expect(handleClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
   it('asks for confirmation before closing with unsaved changes', async () => {
     const handleClose = jest.fn();
     const { user } = render(
