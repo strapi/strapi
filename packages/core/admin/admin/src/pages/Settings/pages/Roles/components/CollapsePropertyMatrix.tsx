@@ -536,12 +536,15 @@ const SubActionRow = ({
                       ];
 
                       const checkboxValue = get(modifiedData, checkboxName, false);
+                      // `parentName` uses the '..' form-path separator; permission checks take a
+                      // dot-separated field path (e.g. `seo.meta.robots`).
+                      const fieldPath = [...parentName.split('..'), value].join('.');
 
                       if (!subChildrenForm) {
                         const userHasPermission = checkUserHasPermission(
                           actionId,
                           subject,
-                          `${parentName}.${value}`,
+                          fieldPath,
                           propertyName
                         );
 
@@ -587,7 +590,7 @@ const SubActionRow = ({
                       const userHasPermission = checkUserHasGroupPermission(
                         actionId,
                         subject,
-                        `${parentName}.${value}`,
+                        fieldPath,
                         propertyName
                       );
 

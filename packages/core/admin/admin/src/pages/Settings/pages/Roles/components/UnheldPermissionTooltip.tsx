@@ -11,8 +11,8 @@ interface UnheldPermissionTooltipProps {
 
 /**
  * Explains why a permission checkbox is disabled when the current user does not hold that
- * permission themselves. A disabled checkbox does not fire pointer events, so the tooltip is
- * attached to a wrapper around it.
+ * permission themselves. A disabled checkbox does not fire pointer events and cannot be focused,
+ * so the tooltip is attached to a focusable wrapper around it.
  */
 const UnheldPermissionTooltip = ({
   children,
@@ -26,14 +26,16 @@ const UnheldPermissionTooltip = ({
     return <>{children}</>;
   }
 
+  const label = formatMessage({
+    id: 'Settings.permissions.cannot-grant-unheld',
+    defaultMessage: "You can't grant a permission you don't have yourself",
+  });
+
+  // A disabled checkbox is skipped by the tab order, so the wrapper takes the focus instead: the
+  // tooltip opens on focus and the label is announced by screen readers
   return (
-    <Tooltip
-      label={formatMessage({
-        id: 'Settings.permissions.cannot-grant-unheld',
-        defaultMessage: "You can't grant a permission you don't have yourself",
-      })}
-    >
-      <Box tag="span" display="inline-flex">
+    <Tooltip label={label}>
+      <Box tag="span" display="inline-flex" tabIndex={0} role="group" aria-label={label}>
         {children}
       </Box>
     </Tooltip>

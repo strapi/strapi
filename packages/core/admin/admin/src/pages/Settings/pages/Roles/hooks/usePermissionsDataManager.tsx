@@ -14,6 +14,7 @@ import {
   isPermissionHeld,
   isValueSelected,
   listGroupLeaves,
+  toStoredPermissions,
 } from '../utils/createPermissionChecker';
 
 import type {
@@ -89,6 +90,12 @@ interface PermissionsDataManagerProviderProps extends Omit<
   'checkUserHasPermission' | 'checkUserHasGroupPermission' | 'getAllowedConditions'
 > {
   children: React.ReactNode;
+  /**
+   * The form as the role stores it on the server (`initialData` on the role edit page), or
+   * `undefined` when nothing is stored yet. A value can be ticked back when the row stays within
+   * the stored one, see `canTick`.
+   */
+  storedData?: State['initialData'];
 }
 
 const PermissionsDataManagerProvider = ({
@@ -97,6 +104,7 @@ const PermissionsDataManagerProvider = ({
   inheritConditions,
   availableConditions,
   modifiedData,
+  storedData,
   onChangeConditions,
   onChangeSimpleCheckbox,
   onChangeParentCheckbox,
@@ -119,9 +127,14 @@ const PermissionsDataManagerProvider = ({
         return isPermissionHeld(userPermissions, action, subject, property, value);
       }
 
-      return canTick(userPermissions, action, subject, selection, property, value);
+      const stored =
+        storedData === undefined
+          ? undefined
+          : toStoredPermissions(findActionForm(storedData, subject, action), action, subject);
+
+      return canTick(userPermissions, action, subject, selection, property, value, stored);
     },
-    [userPermissions, modifiedData]
+    [userPermissions, modifiedData, storedData]
   );
 
   const checkUserHasGroupPermission = React.useCallback(

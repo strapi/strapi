@@ -39,6 +39,7 @@ import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { isPermissionWithinCeiling, toEnforcedPermissions } from './utils/createPermissionChecker';
+import { isPermissionsCeilingError } from './utils/isPermissionsCeilingError';
 
 /* -------------------------------------------------------------------------------------------------
  * CreatePage
@@ -177,7 +178,13 @@ const CreatePage = () => {
           } else {
             toggleNotification({
               type: 'danger',
-              message: formatAPIError(updateRes.error),
+              message: isPermissionsCeilingError(updateRes.error)
+                ? formatMessage({
+                    id: 'Settings.permissions.cannot-grant-unheld.error',
+                    defaultMessage:
+                      "Some permissions could not be saved because you don't have them yourself.",
+                  })
+                : formatAPIError(updateRes.error),
             });
           }
 

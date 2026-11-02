@@ -1,5 +1,5 @@
 import { fixtures } from '@strapi/admin-test-utils';
-import { render, screen, server, waitFor } from '@tests/utils';
+import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { SUPER_ADMIN_CODE } from '../../../../../../../shared/utils/super-admin';
@@ -67,5 +67,84 @@ describe('Roles | EditPage', () => {
     await openEmailSettings(user);
 
     await waitFor(() => expect(getEmailSettingsCheckbox()).toBeEnabled());
+  });
+
+  describe('saving', () => {
+    const CEILING_ERROR_MESSAGE =
+      "Some permissions could not be saved because you don't have them yourself.";
+
+    const mockSaves = (permissionsResponse: () => Response) => {
+      const calls: string[] = [];
+
+      server.use(
+        http.put('/admin/roles/:id/permissions', () => {
+          calls.push('permissions');
+
+          return permissionsResponse();
+        }),
+        http.put('/admin/roles/:id', () => {
+          calls.push('role');
+
+          return HttpResponse.json({ data: { id: 1, code: 'strapi-editor', name: 'Renamed' } });
+        })
+      );
+
+      return calls;
+    };
+
+    const renameAndSave = async (user: ReturnType<typeof render>['user']) => {
+      await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
+
+      const name = await screen.findByRole('textbox', { name: 'Name' });
+      await user.clear(name);
+      await user.type(name, 'Renamed');
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    };
+
+    it('does not save the name when the permissions are rejected, and explains why', async () => {
+      const calls = mockSaves(() =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 403,
+              name: 'ForbiddenError',
+              message: 'You cannot grant permissions you do not hold yourself',
+              details: { permissions: [{ action: 'plugin::email.settings.read' }] },
+            },
+          },
+          { status: 403 }
+        )
+      );
+      const { user } = renderEditPage('strapi-editor');
+
+      await renameAndSave(user);
+
+      expect(await screen.findByText(CEILING_ERROR_MESSAGE)).toBeInTheDocument();
+      expect(calls).toEqual(['permissions']);
+    });
+
+    it('shows the server message for another forbidden error', async () => {
+      mockSaves(() =>
+        HttpResponse.json(
+          { error: { status: 403, name: 'ForbiddenError', message: 'Forbidden', details: {} } },
+          { status: 403 }
+        )
+      );
+      const { user } = renderEditPage('strapi-editor');
+
+      await renameAndSave(user);
+
+      expect(await screen.findByText('Forbidden')).toBeInTheDocument();
+      expect(screen.queryByText(CEILING_ERROR_MESSAGE)).not.toBeInTheDocument();
+    });
+
+    it('saves the permissions first, then the name', async () => {
+      const calls = mockSaves(() => HttpResponse.json({ data: [] }));
+      const { user } = renderEditPage('strapi-editor');
+
+      await renameAndSave(user);
+
+      await waitFor(() => expect(calls).toEqual(['permissions', 'role']));
+    });
   });
 });

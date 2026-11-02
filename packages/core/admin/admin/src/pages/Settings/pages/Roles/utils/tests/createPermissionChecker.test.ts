@@ -10,9 +10,11 @@ import {
   getAllowedConditions,
   isPermissionHeld,
   isPermissionWithinCeiling,
+  isSelectionCovered,
   isValueSelected,
   listGroupLeaves,
   toEnforcedPermissions,
+  toStoredPermissions,
 } from '../createPermissionChecker';
 import { updateValuesWithPermissions } from '../updateValues';
 
@@ -909,6 +911,217 @@ describe('createPermissionChecker', () => {
           value: true,
         })
       ).toBeUndefined();
+    });
+  });
+
+  /*
+   * The editor holds `title, author @en` and `slug @fr`. The role stores `title, slug @en`,
+   * so `slug @en` is a value of the row the editor does not hold.
+   */
+  describe('a row that keeps values the user does not hold', () => {
+    const held = [
+      read({ fields: ['title', 'author'], locales: ['en'] }),
+      read({ fields: ['slug'], locales: ['fr'] }),
+      read({ fields: ['title'], locales: ['fr'] }),
+    ];
+    const storedForm = {
+      properties: {
+        fields: { title: true, slug: true, author: false },
+        locales: { en: true, fr: false },
+      },
+      conditions: { [IS_CREATOR]: false },
+    };
+    const stored = toStoredPermissions(storedForm, READ, SUBJECT);
+    const storedRow = selection({ fields: ['title', 'slug'], locales: ['en'] });
+
+    describe('toStoredPermissions', () => {
+      it('lists a property with nothing ticked as empty', () => {
+        expect(
+          toStoredPermissions(
+            { properties: { fields: { title: true }, locales: { en: false } } },
+            READ,
+            SUBJECT
+          )
+        ).toEqual([
+          {
+            action: READ,
+            subject: SUBJECT,
+            properties: { fields: ['title'], locales: [] },
+            conditions: [],
+          },
+        ]);
+      });
+
+      it('is empty without a form', () => {
+        expect(toStoredPermissions(undefined, READ, SUBJECT)).toEqual([]);
+      });
+    });
+
+    describe('isSelectionCovered', () => {
+      it('needs every combination of the selection covered by one permission', () => {
+        expect(isSelectionCovered(held, READ, SUBJECT, storedRow)).toBe(false);
+        expect(
+          isSelectionCovered(
+            held,
+            READ,
+            SUBJECT,
+            selection({ fields: ['title'], locales: ['en', 'fr'] })
+          )
+        ).toBe(true);
+        expect(isSelectionCovered(stored, READ, SUBJECT, storedRow)).toBe(true);
+      });
+
+      it('checks the ticked conditions', () => {
+        expect(
+          isSelectionCovered(
+            [bodyIfCreator],
+            READ,
+            SUBJECT,
+            selection({ fields: ['body'] }, [IS_CREATOR])
+          )
+        ).toBe(true);
+        expect(
+          isSelectionCovered(
+            [bodyIfCreator],
+            READ,
+            SUBJECT,
+            selection({ fields: ['body'] }, [SAME_ROLE])
+          )
+        ).toBe(false);
+      });
+    });
+
+    describe('canTick', () => {
+      it('does not widen the row with a held value', () => {
+        expect(canTick(held, READ, SUBJECT, storedRow, 'fields', 'author')).toBe(false);
+        expect(canTick(held, READ, SUBJECT, storedRow, 'fields', 'author', stored)).toBe(false);
+        expect(canTick(held, READ, SUBJECT, storedRow, 'locales', 'fr', stored)).toBe(false);
+      });
+
+      it('allows ticking back a value of the stored row', () => {
+        const withoutTitle = selection({ fields: ['slug'], locales: ['en'] });
+
+        expect(canTick(held, READ, SUBJECT, withoutTitle, 'fields', 'title', stored)).toBe(true);
+        // Nothing stored (creating or duplicating a role): only what the user holds counts
+        expect(canTick(held, READ, SUBJECT, withoutTitle, 'fields', 'title')).toBe(false);
+      });
+
+      it('does not take a row stored with conditions as covering one without', () => {
+        const storedIfCreator = toStoredPermissions(
+          { ...storedForm, conditions: { [IS_CREATOR]: true } },
+          READ,
+          SUBJECT
+        );
+        const withoutTitle = selection({ fields: ['slug'], locales: ['en'] });
+
+        expect(canTick(held, READ, SUBJECT, withoutTitle, 'fields', 'title', storedIfCreator)).toBe(
+          false
+        );
+        expect(
+          canTick(
+            held,
+            READ,
+            SUBJECT,
+            selection({ fields: ['slug'], locales: ['en'] }, [IS_CREATOR]),
+            'fields',
+            'title',
+            storedIfCreator
+          )
+        ).toBe(true);
+      });
+
+      it('never allows a value the user does not hold, even when stored', () => {
+        const withoutSlug = selection({ fields: ['title'], locales: ['en'] });
+
+        expect(canTick(held, READ, SUBJECT, withoutSlug, 'fields', 'slug', stored)).toBe(true);
+        expect(
+          canTick(
+            [read({ fields: ['title'], locales: ['en'] })],
+            READ,
+            SUBJECT,
+            withoutSlug,
+            'fields',
+            'slug',
+            stored
+          )
+        ).toBe(false);
+      });
+    });
+
+    describe('getAllowedConditions', () => {
+      it('offers no condition, as none covers the value the user does not hold', () => {
+        expect(
+          getAllowedConditions(
+            [...held, read({ fields: ['title', 'author'], locales: ['en'] }, [IS_CREATOR])],
+            READ,
+            SUBJECT,
+            storedRow
+          )
+        ).toEqual([]);
+      });
+    });
+
+    describe('createBulkPermissionChecker', () => {
+      const tick = (storedActionForm?: unknown, form: typeof storedForm = storedForm) =>
+        updateValuesWithPermissions(
+          form,
+          true,
+          createBulkPermissionChecker({
+            userPermissions: held,
+            action: READ,
+            subject: SUBJECT,
+            actionForm: form,
+            scope: form,
+            scopePath: [],
+            value: true,
+            storedActionForm,
+          })
+        );
+
+      it('adds nothing to the row', () => {
+        expect(tick().properties).toEqual(storedForm.properties);
+        expect(tick(storedForm).properties).toEqual(storedForm.properties);
+      });
+
+      it('ticks back the values of the stored row', () => {
+        const withoutTitle = {
+          ...storedForm,
+          properties: {
+            ...storedForm.properties,
+            fields: { title: false, slug: true, author: false },
+          },
+        };
+
+        expect(tick(storedForm, withoutTitle).properties).toEqual(storedForm.properties);
+        expect(tick(undefined, withoutTitle).properties).toEqual(withoutTitle.properties);
+      });
+    });
+
+    describe('createSubjectBulkPermissionChecker', () => {
+      it('reads the stored form of each action', () => {
+        const withoutTitle = {
+          ...storedForm,
+          properties: {
+            ...storedForm.properties,
+            fields: { title: false, slug: true, author: false },
+          },
+        };
+        const subjectForm = { [READ]: withoutTitle };
+
+        expect(
+          updateValuesWithPermissions(
+            subjectForm,
+            true,
+            createSubjectBulkPermissionChecker({
+              userPermissions: held,
+              subject: SUBJECT,
+              subjectForm,
+              value: true,
+              storedSubjectForm: { [READ]: storedForm },
+            })
+          )
+        ).toEqual({ [READ]: storedForm });
+      });
     });
   });
 

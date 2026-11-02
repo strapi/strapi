@@ -28,6 +28,7 @@ import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
+import { isPermissionsCeilingError } from './utils/isPermissionsCeilingError';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required.id),
@@ -116,6 +117,38 @@ const EditPage = () => {
       const { permissionsToSend, didUpdateConditions } =
         permissionsRef.current?.getPermissions() ?? {};
 
+      // Save the permissions first: when the server rejects them (for instance a permission the
+      // user does not hold), the name and description are not saved either
+      if (role.code !== SUPER_ADMIN_CODE && permissionsToSend) {
+        const updateRes = await updateRolePermissions({
+          id,
+          permissions: permissionsToSend,
+        });
+
+        if ('error' in updateRes) {
+          if (isBaseQueryError(updateRes.error) && updateRes.error.name === 'ValidationError') {
+            formik.setErrors(formatValidationErrors(updateRes.error));
+          } else {
+            toggleNotification({
+              type: 'danger',
+              message: isPermissionsCeilingError(updateRes.error)
+                ? formatMessage({
+                    id: 'Settings.permissions.cannot-grant-unheld.error',
+                    defaultMessage:
+                      "Some permissions could not be saved because you don't have them yourself.",
+                  })
+                : formatAPIError(updateRes.error),
+            });
+          }
+
+          return;
+        }
+
+        if (didUpdateConditions) {
+          trackUsage('didUpdateConditions');
+        }
+      }
+
       const res = await updateRole({
         id,
         ...data,
@@ -132,30 +165,6 @@ const EditPage = () => {
         }
 
         return;
-      }
-
-      if (role.code !== SUPER_ADMIN_CODE && permissionsToSend) {
-        const updateRes = await updateRolePermissions({
-          id: res.data.id,
-          permissions: permissionsToSend,
-        });
-
-        if ('error' in updateRes) {
-          if (isBaseQueryError(updateRes.error) && updateRes.error.name === 'ValidationError') {
-            formik.setErrors(formatValidationErrors(updateRes.error));
-          } else {
-            toggleNotification({
-              type: 'danger',
-              message: formatAPIError(updateRes.error),
-            });
-          }
-
-          return;
-        }
-
-        if (didUpdateConditions) {
-          trackUsage('didUpdateConditions');
-        }
       }
 
       permissionsRef.current?.setFormAfterSubmit();
@@ -249,6 +258,7 @@ const EditPage = () => {
                     isFormDisabled={isFormDisabled}
                     onLocaleValidationChange={setHasLocaleValidationErrors}
                     permissions={permissions}
+                    permissionsAreStored
                     ref={permissionsRef}
                     layout={permissionsLayout}
                     userPermissions={isCurrentUserSuperAdmin ? undefined : currentUserPermissions}

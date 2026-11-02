@@ -363,9 +363,15 @@ export const isValueSelected = (selection: Selection, property: string, value: s
     (selected) => selected === value || selected.startsWith(`${value}.`)
   );
 
-const withValue = (selection: Selection, property: string, value: string): Selection => ({
+/**
+ * The selection once `value` of `property` is ticked too.
+ */
+const appendValue = (selection: Selection, property: string, value: string): Selection => ({
   ...selection,
-  properties: { ...selection.properties, [property]: [value] },
+  properties: {
+    ...selection.properties,
+    [property]: [...(selection.properties[property] ?? []), value],
+  },
 });
 
 /**
@@ -390,8 +396,79 @@ const isCoveredBy = (matching: AuthPermission[], atom: SelectionAtom): boolean =
   matching.some((perm) => coversAtom(perm, atom));
 
 /**
- * Whether `value` of `property` can be added to `selection`: every combination of the value
- * with the other ticked properties and conditions must be covered by one held permission.
+ * Whether every combination (field × locale × condition) of `selection` is covered by one
+ * permission of `permissions`. With no condition ticked, conditions are not checked: they are
+ * filled in from the user's permissions when a value is ticked (`inheritConditionsAtPath`).
+ */
+export const isSelectionCovered = (
+  permissions: AuthPermission[],
+  action: string,
+  subject: string | null | undefined,
+  selection: Selection
+): boolean => {
+  const matching = findMatchingPermissions(permissions, action, subject);
+
+  return getAtoms(selection).every((atom) => isCoveredBy(matching, atom));
+};
+
+/**
+ * Whether `selection` stays within the row the role stores (`stored`, from
+ * {@link toStoredPermissions}), so the server takes it as unchanged or narrower. Unlike
+ * {@link isSelectionCovered}, no ticked condition means unconditional: a row stored with
+ * conditions does not cover it.
+ */
+const isWithinStoredRow = (
+  stored: AuthPermission[],
+  action: string,
+  subject: string | null | undefined,
+  selection: Selection
+): boolean => {
+  const matching = findMatchingPermissions(stored, action, subject);
+
+  return getAtoms(selection).every((atom) =>
+    isCoveredBy(matching, { ...atom, condition: atom.condition ?? null })
+  );
+};
+
+/**
+ * The row a role stores for one action and subject, read from its form
+ * (`initialData.collectionTypes[subject][action]`), in the shape the checks above read. A
+ * property with nothing ticked is listed empty (`locales: []`), so it covers no value. Empty
+ * when there is no form.
+ */
+export const toStoredPermissions = (
+  actionForm: unknown,
+  action: string,
+  subject: string | null | undefined
+): AuthPermission[] => {
+  if (!isObject(actionForm)) {
+    return [];
+  }
+
+  const form = actionForm as { properties?: unknown };
+  const selection = getActionSelection(actionForm);
+  const properties = isObject(form.properties)
+    ? Object.fromEntries(
+        Object.keys(form.properties)
+          .filter((property) => property !== 'enabled')
+          .map((property) => [property, selection.properties[property] ?? []])
+      )
+    : {};
+
+  return [{ action, subject: subject ?? null, properties, conditions: selection.conditions }];
+};
+
+/**
+ * Whether `value` of `property` can be added to `selection`. The value must be held, and the
+ * row that results must pass the server ceiling as a whole, which is one of:
+ * 1. every combination of the row (the value with the other ticked properties and conditions,
+ *    and the combinations already ticked) is covered by one held permission;
+ * 2. the row stays within the one the role stores (`stored`), so the server takes it as
+ *    unchanged or narrower. This lets the user tick back a value they unticked on a row that
+ *    keeps values they do not hold. `undefined` when nothing is stored for the form yet
+ *    (creating or duplicating a role, admin tokens).
+ * Checking only the new value's combinations is not enough: on a row that keeps a value the
+ * user does not hold, adding a held one widens the row and the server re-checks all of it.
  */
 export const canTick = (
   userPermissions: AuthPermission[],
@@ -399,7 +476,8 @@ export const canTick = (
   subject: string | null | undefined,
   selection: Selection,
   property: string,
-  value: string
+  value: string,
+  stored?: AuthPermission[]
 ): boolean => {
   const matching = findMatchingPermissions(userPermissions, action, subject);
 
@@ -407,8 +485,11 @@ export const canTick = (
     return false;
   }
 
-  return getAtoms(withValue(selection, property, value)).every((atom) =>
-    isCoveredBy(matching, atom)
+  const next = appendValue(selection, property, value);
+
+  return (
+    isSelectionCovered(matching, action, subject, next) ||
+    (stored !== undefined && isWithinStoredRow(stored, action, subject, next))
   );
 };
 
@@ -507,6 +588,11 @@ interface BulkPermissionCheckerOptions {
   scope: unknown;
   scopePath: string[];
   value: boolean;
+  /**
+   * The form of the action as the role stores it (from `initialData`), or `undefined` when
+   * nothing is stored yet. See {@link canTick}.
+   */
+  storedActionForm?: unknown;
 }
 
 /**
@@ -525,6 +611,8 @@ interface BulkPermissionCheckerOptions {
  *    under those conditions. Unlike a single tick ({@link canTick}), a bulk tick never changes
  *    the conditions, so it cannot mix fields held under different conditions, which no
  *    condition would then cover.
+ * Like a single tick, a leaf is only added when the whole selection stays held, or stays within
+ * the row the role stores, so a row that keeps a value the user does not hold is not widened.
  */
 export const createBulkPermissionChecker = ({
   userPermissions,
@@ -534,6 +622,7 @@ export const createBulkPermissionChecker = ({
   scope,
   scopePath,
   value,
+  storedActionForm,
 }: BulkPermissionCheckerOptions): LeafChecker | undefined => {
   if (userPermissions === undefined) {
     return undefined;
@@ -588,18 +677,31 @@ export const createBulkPermissionChecker = ({
 
   const conditionDimension = getConditionDimension();
 
-  const canExtend = (leaf: Leaf) =>
-    getAtoms({ ...withValue(selection, leaf.property, leaf.value), conditions: [] }).every((atom) =>
-      conditionDimension.every((condition) => isCoveredBy(matching, { ...atom, condition }))
+  const stored =
+    storedActionForm === undefined
+      ? undefined
+      : toStoredPermissions(storedActionForm, action, subject);
+
+  const canExtend = (leaf: Leaf) => {
+    const next = appendValue(selection, leaf.property, leaf.value);
+
+    if (
+      getAtoms({ ...next, conditions: [] }).every((atom) =>
+        conditionDimension.every((condition) => isCoveredBy(matching, { ...atom, condition }))
+      )
+    ) {
+      return true;
+    }
+
+    return (
+      stored !== undefined &&
+      isPermissionHeld(userPermissions, action, subject, leaf.property, leaf.value) &&
+      isWithinStoredRow(stored, action, subject, next)
     );
+  };
 
   const select = (leaf: Leaf) => {
-    const values = selection.properties[leaf.property] ?? [];
-
-    selection = {
-      ...selection,
-      properties: { ...selection.properties, [leaf.property]: [...values, leaf.value] },
-    };
+    selection = appendValue(selection, leaf.property, leaf.value);
   };
 
   // The anchored leaves count as selected from the start, so the leaves walked before them
@@ -633,6 +735,8 @@ interface SubjectBulkPermissionCheckerOptions {
   /** The forms of every action of the subject, keyed by action id. */
   subjectForm: unknown;
   value: boolean;
+  /** The forms of every action of the subject as the role stores them, if stored. */
+  storedSubjectForm?: unknown;
 }
 
 /**
@@ -645,6 +749,7 @@ export const createSubjectBulkPermissionChecker = ({
   subject,
   subjectForm,
   value,
+  storedSubjectForm,
 }: SubjectBulkPermissionCheckerOptions): LeafChecker | undefined => {
   if (userPermissions === undefined) {
     return undefined;
@@ -652,6 +757,9 @@ export const createSubjectBulkPermissionChecker = ({
 
   const checkers: Record<string, LeafChecker> = {};
   const forms = isObject(subjectForm) ? (subjectForm as Record<string, unknown>) : {};
+  const storedForms = isObject(storedSubjectForm)
+    ? (storedSubjectForm as Record<string, unknown>)
+    : undefined;
 
   return ([action, ...path]) => {
     if (action === undefined) {
@@ -667,6 +775,7 @@ export const createSubjectBulkPermissionChecker = ({
         scope: forms[action],
         scopePath: [],
         value,
+        storedActionForm: storedForms?.[action],
       })!;
     }
 

@@ -352,6 +352,31 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(UNHELD_TOOLTIP);
   });
 
+  it('explains a disabled checkbox to keyboard users', async () => {
+    const userPermissions = [
+      permission('plugin::content-manager.explorer.read', 'api::address.address'),
+    ];
+
+    const { user } = render(
+      <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+    );
+
+    const createAddress = screen.getByRole('checkbox', {
+      name: 'Select Create address permission',
+    });
+    const wrapper = createAddress.closest('[role="group"]');
+
+    expect(wrapper).toHaveAccessibleName(UNHELD_TOOLTIP);
+
+    // Tab until the wrapper of the disabled checkbox has the focus
+    for (let i = 0; i < 20 && document.activeElement !== wrapper; i += 1) {
+      await user.tab();
+    }
+
+    expect(wrapper).toHaveFocus();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(UNHELD_TOOLTIP);
+  });
+
   it('keeps a permission the role already holds checked, disabled and sent on save', async () => {
     const ref = React.createRef<PermissionsAPI>();
     const userPermissions = [
@@ -1043,6 +1068,45 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
           expect(sent?.conditions).toEqual([IS_CREATOR]);
         });
       });
+
+      // Fields of a component inside a component are checked with a dot path (`seo.meta.robots`)
+      describe('component inside a component', () => {
+        const leafCheckbox = (parent: string, label: string) =>
+          screen.getByRole('checkbox', { name: `Select ${parent} ${label} Read permission` });
+
+        it('enables a held field two levels deep and disables its unheld siblings', async () => {
+          const { user } = renderWithSeo([
+            permission(READ, ADDRESS, { fields: ['seo.meta.robots'] }),
+          ]);
+
+          await user.click(screen.getByRole('button', { name: 'Address' }));
+          await user.click(screen.getByText('seo'));
+          await user.click(screen.getByText('meta'));
+
+          expect(leafCheckbox('seo..meta', 'robots')).toBeEnabled();
+          expect(leafCheckbox('seo..meta', 'canonical')).toBeDisabled();
+          expect(leafCheckbox('seo', 'title')).toBeDisabled();
+
+          await user.hover(leafCheckbox('seo..meta', 'canonical'));
+
+          expect(await screen.findByRole('tooltip')).toHaveTextContent(UNHELD_TOOLTIP);
+        });
+
+        it('enables a nested group and its fields when the group path is held', async () => {
+          const { user } = renderWithSeo([permission(READ, ADDRESS, { fields: ['seo.meta'] })]);
+
+          await user.click(screen.getByRole('button', { name: 'Address' }));
+          await user.click(screen.getByText('seo'));
+
+          expect(leafCheckbox('seo', 'meta')).toBeEnabled();
+
+          await user.click(screen.getByText('meta'));
+
+          expect(leafCheckbox('seo..meta', 'robots')).toBeEnabled();
+          expect(leafCheckbox('seo..meta', 'canonical')).toBeEnabled();
+          expect(leafCheckbox('seo', 'title')).toBeDisabled();
+        });
+      });
     });
 
     it('only lets the user select conditions they hold', async () => {
@@ -1189,6 +1253,295 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
 
       expect(findSent(ref, LOCALE_CREATE)?.conditions).toEqual([IS_CREATOR]);
       expect(findSent(ref, LOCALE_READ)?.conditions).toEqual([]);
+    });
+
+    describe('unticking held values on a row that keeps unheld ones', () => {
+      const READ = 'plugin::content-manager.explorer.read';
+      const ADDRESS = 'api::address.address';
+      const CATEGORY = 'api::category.category';
+      const HELD_FIELD = 'postal_code';
+      // `repeat_req_min` is a component: the role stores the field under it
+      const UNHELD_FIELDS = ['city', 'repeat_req_min.name'];
+
+      const rolePermissions = [
+        {
+          id: 1,
+          createdAt: '',
+          updatedAt: '',
+          action: READ,
+          actionParameters: {},
+          subject: ADDRESS,
+          properties: { fields: [HELD_FIELD, ...UNHELD_FIELDS] },
+          conditions: [IS_CREATOR],
+        },
+        {
+          id: 2,
+          createdAt: '',
+          updatedAt: '',
+          action: READ,
+          actionParameters: {},
+          subject: CATEGORY,
+          properties: { fields: ['name'], locales: ['en'] },
+          conditions: [],
+        },
+      ];
+
+      // The column checkbox needs the action on every subject
+      const everyOtherSubject = layout.sections.collectionTypes.actions
+        .find((action) => action.actionId === READ)!
+        .subjects.filter((subject) => subject !== ADDRESS)
+        .map((subject) =>
+          permission(
+            READ,
+            subject,
+            subject === CATEGORY ? { fields: ['name'], locales: ['en'] } : {}
+          )
+        );
+      const userPermissions = [
+        permission(READ, ADDRESS, { fields: [HELD_FIELD] }, [IS_CREATOR]),
+        ...everyOtherSubject,
+      ];
+
+      const renderRole = (withUserPermissions: AuthPermission[] | undefined) => {
+        const ref = React.createRef<PermissionsAPI>();
+        const result = render(
+          <Permissions
+            ref={ref}
+            layout={layout}
+            permissions={rolePermissions}
+            userPermissions={withUserPermissions}
+            isFormDisabled={false}
+          />
+        );
+
+        return { ref, ...result };
+      };
+
+      const fieldCheckbox = (field: string) =>
+        screen.getByRole('checkbox', { name: `Select ${field} Read permission` });
+
+      it('keeps the conditions when unticking an action column leaves unheld fields ticked', async () => {
+        const { ref, user } = renderRole(userPermissions);
+
+        await user.click(screen.getByRole('checkbox', { name: 'Select all Read permissions' }));
+        await user.click(screen.getByRole('button', { name: 'Address' }));
+
+        expect(fieldCheckbox(HELD_FIELD)).not.toBeChecked();
+        ['city', 'repeat_req_min'].forEach((field) => {
+          expect(fieldCheckbox(field)).toBeChecked();
+          expect(fieldCheckbox(field)).toBeDisabled();
+        });
+
+        expect(findSent(ref, READ, ADDRESS as never)).toEqual({
+          action: READ,
+          subject: ADDRESS,
+          properties: { fields: UNHELD_FIELDS },
+          conditions: [IS_CREATOR],
+        });
+        expect(findSent(ref, READ, CATEGORY as never)).toBeUndefined();
+      });
+
+      it('clears every value and condition when a super admin unticks an action column', async () => {
+        const { ref, user } = renderRole(undefined);
+
+        await user.click(screen.getByRole('checkbox', { name: 'Select all Read permissions' }));
+        await user.click(screen.getByRole('button', { name: 'Address' }));
+
+        ADDRESS_FIELDS.forEach((field) => expect(fieldCheckbox(field)).not.toBeChecked());
+        expect(findSent(ref, READ, ADDRESS as never)).toBeUndefined();
+        expect(findSent(ref, READ, CATEGORY as never)).toBeUndefined();
+      });
+
+      it('sends the narrowed permission when unticking a single held field', async () => {
+        const { ref, user } = renderRole(userPermissions);
+
+        await user.click(screen.getByRole('button', { name: 'Address' }));
+        await user.click(fieldCheckbox(HELD_FIELD));
+
+        // A subset of the role's own permission: the server accepts it as no grant
+        expect(findSent(ref, READ, ADDRESS as never)).toEqual({
+          action: READ,
+          subject: ADDRESS,
+          properties: { fields: UNHELD_FIELDS },
+          conditions: [IS_CREATOR],
+        });
+      });
+    });
+
+    describe('ticking held values on a row that keeps unheld ones', () => {
+      const READ = 'plugin::content-manager.explorer.read';
+      const CATEGORY = 'api::category.category';
+
+      // Category with the fields `name`, `slug`, `authorName` and the locales `en`, `fr`
+      const categoryLayout: typeof layout = JSON.parse(JSON.stringify(layout));
+      categoryLayout.sections.collectionTypes.subjects[1].properties[0].children.push(
+        { label: 'slug', value: 'slug', required: false },
+        { label: 'authorName', value: 'authorName', required: false }
+      );
+      categoryLayout.sections.collectionTypes.subjects[1].properties[1].children.push({
+        label: 'French (fr)',
+        value: 'fr',
+      });
+
+      // The editor holds `name, authorName @en` and `slug @fr`, not `slug @en`
+      const userPermissions = [
+        permission(READ, CATEGORY, { fields: ['name', 'authorName'], locales: ['en'] }),
+        permission(READ, CATEGORY, { fields: ['slug'], locales: ['fr'] }),
+      ];
+
+      const storedRead = (fields: string[]) => ({
+        id: 1,
+        createdAt: '',
+        updatedAt: '',
+        action: READ,
+        actionParameters: {},
+        subject: CATEGORY,
+        properties: { fields, locales: ['en'] },
+        conditions: [],
+      });
+
+      const renderRole = ({
+        stored = ['name', 'slug'],
+        held = userPermissions,
+        permissionsAreStored = true,
+      }: { stored?: string[]; held?: AuthPermission[]; permissionsAreStored?: boolean } = {}) => {
+        const ref = React.createRef<PermissionsAPI>();
+        const result = render(
+          <Permissions
+            ref={ref}
+            layout={categoryLayout}
+            permissions={[storedRead(stored)]}
+            userPermissions={held}
+            permissionsAreStored={permissionsAreStored}
+            isFormDisabled={false}
+          />
+        );
+
+        return { ref, ...result };
+      };
+
+      const openCategory = (user: ReturnType<typeof render>['user']) =>
+        user.click(screen.getByRole('button', { name: 'Category' }));
+
+      // The checkbox is re-mounted when its tooltip wrapper comes and goes, so query it each time
+      const readCheckbox = (label: string) =>
+        screen.getByRole('checkbox', { name: `Select ${label} Read permission` });
+
+      const findSentRead = (ref: React.RefObject<PermissionsAPI>) =>
+        ref
+          .current!.getPermissions()
+          .permissionsToSend.find((perm) => perm.action === READ && perm.subject === CATEGORY);
+
+      it('disables a held field while an unheld one is ticked on the same row', async () => {
+        const { user } = renderRole();
+
+        await openCategory(user);
+
+        expect(readCheckbox('slug')).toBeChecked();
+        expect(readCheckbox('authorName')).toBeDisabled();
+
+        await user.hover(readCheckbox('authorName'));
+        expect(await screen.findByRole('tooltip')).toHaveTextContent(UNHELD_TOOLTIP);
+      });
+
+      it('enables the held field once the unheld one is unticked', async () => {
+        const { ref, user } = renderRole();
+
+        await openCategory(user);
+        // `slug` is held on `fr`, so it can be unticked: the row only narrows
+        await user.click(readCheckbox('slug'));
+
+        expect(readCheckbox('authorName')).toBeEnabled();
+
+        await user.click(readCheckbox('authorName'));
+
+        expect(findSentRead(ref)?.properties).toEqual({
+          fields: ['name', 'authorName'],
+          locales: ['en'],
+        });
+        expect(isPermissionWithinCeiling(userPermissions, findSentRead(ref)!)).toBe(true);
+      });
+
+      it('lets the user tick back a value of the stored row', async () => {
+        const { ref, user } = renderRole();
+
+        await openCategory(user);
+        await user.click(readCheckbox('name'));
+
+        expect(readCheckbox('name')).not.toBeChecked();
+        expect(readCheckbox('name')).toBeEnabled();
+
+        await user.click(readCheckbox('name'));
+
+        expect(findSentRead(ref)?.properties).toEqual({
+          fields: ['name', 'slug'],
+          locales: ['en'],
+        });
+      });
+
+      it('does not count the copied permissions as stored (create and duplicate)', async () => {
+        const { user } = renderRole({ permissionsAreStored: false });
+
+        await openCategory(user);
+        await user.click(readCheckbox('name'));
+
+        expect(readCheckbox('name')).toBeDisabled();
+      });
+
+      it('disables a held locale that would widen the unheld field to it', async () => {
+        const { user } = renderRole({
+          held: [
+            ...userPermissions,
+            permission(READ, CATEGORY, { fields: ['name'], locales: ['fr'] }),
+          ],
+        });
+
+        await openCategory(user);
+
+        expect(readCheckbox('fr')).toBeDisabled();
+      });
+
+      it('adds nothing to the row when bulk ticking', async () => {
+        const held = [
+          ...userPermissions,
+          permission(READ, CATEGORY, { fields: ['name'], locales: ['fr'] }),
+        ];
+        const { ref, user } = renderRole({ held });
+        const stored = { fields: ['name', 'slug'], locales: ['en'] };
+
+        await openCategory(user);
+
+        await user.click(screen.getByRole('checkbox', { name: 'Select all Category permissions' }));
+        expect(findSentRead(ref)?.properties).toEqual(stored);
+
+        await user.click(screen.getByRole('checkbox', { name: 'Select Read category permission' }));
+        expect(findSentRead(ref)?.properties).toEqual(stored);
+
+        await user.click(
+          screen.getByRole('checkbox', { name: 'Select all authorName permissions' })
+        );
+        expect(findSentRead(ref)?.properties).toEqual(stored);
+
+        await user.click(
+          screen.getByRole('checkbox', { name: 'Select all French (fr) permissions' })
+        );
+        expect(findSentRead(ref)?.properties).toEqual(stored);
+      });
+
+      it('still ticks held values on a row with only held values', async () => {
+        const { ref, user } = renderRole({ stored: ['name'] });
+
+        await openCategory(user);
+
+        expect(readCheckbox('authorName')).toBeEnabled();
+
+        await user.click(screen.getByRole('checkbox', { name: 'Select Read category permission' }));
+
+        expect(findSentRead(ref)?.properties).toEqual({
+          fields: ['name', 'authorName'],
+          locales: ['en'],
+        });
+      });
     });
   });
 });

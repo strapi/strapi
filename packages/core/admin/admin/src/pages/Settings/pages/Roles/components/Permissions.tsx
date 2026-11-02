@@ -36,7 +36,7 @@ import { GenericLayout, formatLayout } from '../utils/layouts';
 import { hasLocaleValidationErrors } from '../utils/localePermissionValidation';
 import { formatPermissionsForAPI } from '../utils/permissions';
 import { updateConditionsToFalse } from '../utils/updateConditionsToFalse';
-import { updateValues, updateValuesWithPermissions } from '../utils/updateValues';
+import { updateValuesWithPermissions } from '../utils/updateValues';
 
 import { ContentTypes } from './ContentTypes';
 import { PluginsAndSettingsPermissions } from './PluginsAndSettings';
@@ -95,6 +95,13 @@ interface PermissionsProps {
    * enabled and the conditions modal is read-only.
    */
   inheritConditions?: boolean;
+  /**
+   * Whether `permissions` are what the role stores on the server (the role edit page). A value
+   * can then be ticked back when the row stays within the stored one, even if the row keeps
+   * values the user does not hold. Not on the create page: when duplicating, `permissions` are
+   * the source role's and nothing is stored for the new role yet.
+   */
+  permissionsAreStored?: boolean;
 }
 
 const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
@@ -106,6 +113,7 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
       permissions = EMPTY_PERMISSIONS,
       userPermissions: heldPermissions,
       inheritConditions = false,
+      permissionsAreStored = false,
     },
     api
   ) => {
@@ -117,7 +125,7 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
     const [{ initialData, layouts, modifiedData }, dispatch] = React.useReducer(
       reducer,
       initialState,
-      () => init(layout, permissions)
+      () => init(layout, permissions, permissionsAreStored)
     );
     const { formatMessage } = useIntl();
 
@@ -243,6 +251,7 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
       <PermissionsDataManagerProvider
         availableConditions={layout.conditions}
         modifiedData={modifiedData}
+        storedData={permissionsAreStored ? initialData : undefined}
         onChangeConditions={handleChangeConditions}
         onChangeSimpleCheckbox={handleChangeSimpleCheckbox}
         onChangeParentCheckbox={handleChangeParentCheckbox}
@@ -314,6 +323,11 @@ interface PermissionForms {
 interface State {
   initialData: PermissionForms;
   modifiedData: PermissionForms;
+  /**
+   * Whether `initialData` is what the role stores on the server, so the bulk ticks can tick back
+   * the values of the stored rows (see `permissionsAreStored`).
+   */
+  isInitialDataStored: boolean;
   layouts: {
     collectionTypes: PermissonContracts.ContentPermission;
     singleTypes: PermissonContracts.ContentPermission;
@@ -325,6 +339,7 @@ interface State {
 const initialState = {
   initialData: {},
   modifiedData: {},
+  isInitialDataStored: false,
   layouts: {},
 };
 
@@ -454,6 +469,13 @@ const inheritConditionsAtPath = (
   }
 };
 
+/**
+ * The part of the stored form at `path` (within `initialData`), or `undefined` when nothing is
+ * stored for the role yet.
+ */
+const getStoredForm = (state: State, path: string[]): unknown =>
+  state.isInitialDataStored ? get(state.initialData, path) : undefined;
+
 /* eslint-disable consistent-return */
 const reducer = (state: State, action: Action) =>
   produce(state, (draftState) => {
@@ -478,6 +500,11 @@ const reducer = (state: State, action: Action) =>
               scope: collectionTypeActionData,
               scopePath: [],
               value,
+              storedActionForm: getStoredForm(state, [
+                collectionTypeKind,
+                collectionType,
+                actionId,
+              ]),
             });
 
             let updatedValues = updateValuesWithPermissions(
@@ -497,11 +524,11 @@ const reducer = (state: State, action: Action) =>
               );
             }
 
-            if (value === false && updatedValues.conditions !== undefined) {
+            if (value === false) {
+              // Values the user does not hold stay ticked, so only clear the conditions when
+              // nothing is left selected on the action (same as the other untick paths)
               // @ts-expect-error – TODO: type better
-              const updatedConditions = updateValues(updatedValues.conditions, false);
-
-              updatedValues = { ...updatedValues, conditions: updatedConditions };
+              updatedValues = updateConditionsToFalse({ [actionId]: updatedValues })[actionId];
             }
 
             set(draftState, [...pathToData, collectionType, actionId], updatedValues);
@@ -547,6 +574,10 @@ const reducer = (state: State, action: Action) =>
               scope: objValue,
               scopePath: ['properties', propertyName, rowName],
               value,
+              storedActionForm: getStoredForm(state, [
+                ...pathToModifiedDataCollectionType,
+                actionId,
+              ]),
             });
 
             if (!isObject(objValue)) {
@@ -724,6 +755,7 @@ const reducer = (state: State, action: Action) =>
                 subject,
                 subjectForm: oldValues,
                 value,
+                storedSubjectForm: getStoredForm(state, pathToValue),
               })
             : createBulkPermissionChecker({
                 userPermissions,
@@ -733,6 +765,7 @@ const reducer = (state: State, action: Action) =>
                 scope: oldValues,
                 scopePath: pathToValue.slice(3),
                 value,
+                storedActionForm: getStoredForm(state, pathToValue.slice(0, 3)),
               });
 
         const updatedValues = updateValuesWithPermissions(oldValues, value, permissionChecker);
@@ -861,7 +894,8 @@ const restoreNullLocalesIfUnchanged = (
 
 const init = (
   layout: PermissionsProps['layout'],
-  permissions: PermissionsProps['permissions']
+  permissions: PermissionsProps['permissions'],
+  isInitialDataStored: boolean
 ): State => {
   const {
     conditions,
@@ -885,6 +919,7 @@ const init = (
   return {
     initialData: defaultForm,
     modifiedData: defaultForm,
+    isInitialDataStored,
     layouts,
   };
 };
