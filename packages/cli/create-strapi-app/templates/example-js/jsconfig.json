@@ -2,8 +2,8 @@
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "target": "ES2021",
-    "lib": ["ES2024"],
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "checkJs": true,
     "allowJs": true
   }

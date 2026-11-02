@@ -3,7 +3,7 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "lib": ["ES2024"],
-    "target": "ES2019",
+    "target": "ES2024",
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
