@@ -68,7 +68,22 @@ const render = (
     }
   );
 
+/**
+ * The global `IntersectionObserver` mock never reports an intersection, so fields are considered
+ * close to the viewport unless a test says otherwise.
+ */
+const mockHasBeenNearViewport = jest.fn(() => true);
+
+jest.mock('../../../../../../hooks/useHasBeenNearViewport', () => ({
+  ...jest.requireActual('../../../../../../hooks/useHasBeenNearViewport'),
+  useHasBeenNearViewport: () => mockHasBeenNearViewport(),
+}));
+
 describe('Relations', () => {
+  afterEach(() => {
+    mockHasBeenNearViewport.mockReturnValue(true);
+  });
+
   const renderRelationNavigation = (relation: {
     documentId: string;
     locale: string | null;
@@ -241,6 +256,106 @@ describe('Relations', () => {
     });
 
     expect(screen.getByText('This is a hint')).toBeInTheDocument();
+  });
+
+  describe('requests', () => {
+    let connectedRequests: number;
+    let searchRequests: number;
+
+    beforeEach(() => {
+      connectedRequests = 0;
+      searchRequests = 0;
+
+      server.use(
+        http.get('/content-manager/relations/:model/:id/:fieldName', () => {
+          connectedRequests += 1;
+
+          return HttpResponse.json({
+            results: [{ id: 1, documentId: 'abc', name: 'Relation entity 1', status: 'draft' }],
+            pagination: { page: 1, pageCount: 1, pageSize: 5, total: 1 },
+          });
+        }),
+        http.get('/content-manager/relations/:model/:fieldName', () => {
+          searchRequests += 1;
+
+          return HttpResponse.json({
+            results: [{ id: 2, documentId: 'def', name: 'Relation entity 2', status: 'draft' }],
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+          });
+        })
+      );
+    });
+
+    it('only lets a single relation be replaced once its saved relation is loaded', async () => {
+      let respond: () => void = () => {};
+      const isAnswered = new Promise<void>((resolve) => {
+        respond = resolve;
+      });
+
+      server.use(
+        http.get('/content-manager/relations/:model/:id/:fieldName', async () => {
+          await isAnswered;
+
+          return HttpResponse.json({
+            results: [{ id: 1, documentId: 'abc', name: 'Relation entity 1', status: 'draft' }],
+            pagination: { page: 1, pageCount: 1, pageSize: 5, total: 1 },
+          });
+        })
+      );
+
+      const { user } = render({
+        attribute: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: 'api::category.category',
+          // @ts-expect-error – this is what the API returns
+          targetModel: 'api::category.category',
+          relationType: 'manyToOne',
+        },
+        initialValues: { relations: { connect: [], disconnect: [] } },
+      });
+
+      // The saved relation isn't known yet: picking an entry couldn't disconnect it
+      expect(await screen.findByRole('combobox')).toBeDisabled();
+
+      respond();
+
+      await screen.findByRole('button', { name: 'Relation entity 1' });
+      await waitFor(() => expect(screen.getByRole('combobox')).toBeEnabled());
+
+      await user.click(screen.getByRole('combobox'));
+      await user.click(await screen.findByRole('option', { name: /Relation entity 2/ }));
+
+      expect(await screen.findByRole('button', { name: 'Relation entity 2' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Relation entity 1' })).not.toBeInTheDocument();
+    });
+
+    it('only searches for options once the combobox is opened', async () => {
+      const { user } = render({});
+
+      await screen.findByRole('button', { name: 'Relation entity 1' });
+      expect(searchRequests).toBe(0);
+
+      await user.click(screen.getByRole('combobox'));
+
+      expect(await screen.findByRole('option', { name: /Relation entity 2/ })).toBeInTheDocument();
+      // let the debounced search params settle (300ms)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(searchRequests).toBe(1);
+    });
+
+    it("doesn't fetch the connected relations while the field is far from the viewport", async () => {
+      mockHasBeenNearViewport.mockReturnValue(false);
+
+      render({});
+
+      await screen.findByRole('combobox');
+      // leave time for a request that should not be sent
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(connectedRequests).toBe(0);
+      expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
+    });
   });
 
   it.todo(
@@ -494,6 +609,74 @@ describe('Relations', () => {
       )
     ).toBeInTheDocument();
     expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+  });
+
+  it('keeps the error visible while opening the dropdown retries a failed search', async () => {
+    let searchRequests = 0;
+    let releaseRetry = () => {};
+    const retryGate = new Promise<void>((resolve) => {
+      releaseRetry = resolve;
+    });
+
+    server.use(
+      http.get('/content-manager/relations/:model/:fieldName', async () => {
+        searchRequests += 1;
+
+        if (searchRequests === 1) {
+          return HttpResponse.json(
+            {
+              data: null,
+              error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+            },
+            { status: 500 }
+          );
+        }
+
+        await retryGate;
+
+        return HttpResponse.json({
+          results: [
+            {
+              id: 1,
+              documentId: 'category-1',
+              locale: 'en',
+              status: 'published',
+              name: 'Category 1',
+            },
+          ],
+          pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+        });
+      })
+    );
+
+    const { user } = render({});
+
+    const combobox = await screen.findByRole('combobox', { name: /relations/i });
+    await user.click(combobox);
+
+    expect(
+      await screen.findByText('Whoops! Something went wrong. Please, try again.')
+    ).toBeInTheDocument();
+    expect(searchRequests).toBe(1);
+
+    // Reopening the dropdown retries the failed search.
+    await user.keyboard('{Escape}');
+    await user.click(combobox);
+
+    await waitFor(() => expect(searchRequests).toBe(2));
+
+    expect(
+      screen.getByText('Whoops! Something went wrong. Please, try again.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+    expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+
+    releaseRetry();
+
+    expect(await screen.findByRole('option', { name: /Category 1/ })).toBeInTheDocument();
+    expect(
+      screen.queryByText('Whoops! Something went wrong. Please, try again.')
+    ).not.toBeInTheDocument();
   });
 
   describe('reopening the dropdown after selecting a relation', () => {

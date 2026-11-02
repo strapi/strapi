@@ -10,7 +10,7 @@ const inputModifiers = [
     transform: (action: any) => ({ action }),
   },
   {
-    check: _.isArray,
+    check: Array.isArray,
     transform: (arr: any) => ({ action: arr[0], subject: arr[1] }),
   },
   {

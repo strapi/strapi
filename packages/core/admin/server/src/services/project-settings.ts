@@ -1,6 +1,8 @@
 import fs from 'fs';
 import { pick } from 'lodash';
+import { emitAudit } from '@strapi/utils';
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
+import { AUDITED_EVENTS, getProjectSettingsChanges } from '../audit-logs/project-settings';
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'] as const;
 
@@ -189,6 +191,12 @@ const updateProjectSettings = async (
     key: 'project-settings',
     value: { ...previousSettings, ...newSettings },
   });
+
+  const changes = getProjectSettingsChanges(previousSettings, newSettings);
+
+  if (Object.keys(changes).length > 0) {
+    await emitAudit({ strapi }, AUDITED_EVENTS.PROJECT_SETTINGS_UPDATE, { changes });
+  }
 
   return getProjectSettings();
 };

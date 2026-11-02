@@ -55,6 +55,38 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       await expect(assetsPage.getAssetRow('test-image.jpg')).not.toBeVisible();
     });
 
+    test('drops into a folder hidden by a deep branch', async ({ page }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
+
+      // Depth 4 is the first level whose branch folds: Depth 1 → 2 hide behind
+      // the summary row, Depth 3 stays visible as the open folder's parent.
+      for (const name of ['Depth 0', 'Depth 1', 'Depth 2', 'Depth 3', 'Depth 4']) {
+        await assetsPage.createFolder(name);
+        await assetsPage.waitForNotification();
+        await assetsPage.navigateIntoFolder(name);
+      }
+      await assetsPage.uploadFilesWithFilePicker(FIXTURE_IMAGE);
+      await assetsPage.completeUpload();
+
+      const summaryRow = assetsPage.getTreeHiddenAncestorsRow();
+      await expect(summaryRow).toHaveAttribute('aria-expanded', 'false');
+      await expect(assetsPage.getTreeFolderRow('Depth 1')).not.toBeVisible();
+
+      await assetsPage.switchToTableView();
+      await assetsPage.springLoadOnto('test-image.jpg', summaryRow);
+      await expect(summaryRow).toHaveAttribute('aria-expanded', 'true');
+      await assetsPage.dropDraggedItemOn(assetsPage.getTreeFolderRow('Depth 1'));
+
+      await assetsPage.waitForMoveSuccess();
+      await expect(assetsPage.getAssetRow('test-image.jpg')).not.toBeVisible();
+
+      await assetsPage.getHomeTreeRow().click();
+      await assetsPage.navigateIntoFolder('Depth 0');
+      await assetsPage.navigateIntoFolder('Depth 1');
+      await expect(assetsPage.getListItem('test-image.jpg')).toBeVisible();
+    });
+
     test('moves a nested item onto Home', async ({ page }) => {
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();
