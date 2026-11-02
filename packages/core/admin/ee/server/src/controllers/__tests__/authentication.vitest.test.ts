@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach, vi } from 'vitest';
+import { describe, test, expect, afterEach, beforeEach, vi } from 'vitest';
 import { emitAudit } from '@strapi/utils';
 
 import authenticationController from '../authentication';
@@ -64,8 +64,8 @@ describe('EE authentication controller', () => {
 
   describe('providers', () => {
     const providers = [
-      { uid: 'google', displayName: 'Google', icon: 'google.svg', createStrategy: jest.fn() },
-      { uid: 'okta', displayName: 'Okta', icon: null, createStrategy: jest.fn() },
+      { uid: 'google', displayName: 'Google', icon: 'google.svg', createStrategy: vi.fn() },
+      { uid: 'okta', displayName: 'Okta', icon: null, createStrategy: vi.fn() },
     ];
 
     beforeEach(() => {
@@ -90,7 +90,7 @@ describe('EE authentication controller', () => {
     test('providerLogin rejects a provider that is not registered', () => {
       const ctx = { params: { provider: 'github' } } as any;
 
-      expect(() => authenticationController.providerLogin(ctx, jest.fn())).toThrow(
+      expect(() => authenticationController.providerLogin(ctx, vi.fn())).toThrow(
         'Invalid provider supplied: github'
       );
     });

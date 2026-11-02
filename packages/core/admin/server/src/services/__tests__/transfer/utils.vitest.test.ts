@@ -1,3 +1,4 @@
+import { describe, test, expect, vi, afterEach } from 'vitest';
 import { hasValidTokenSalt, isRemoteTransferEnabled } from '../../transfer/utils';
 
 const setup = ({ salt, remoteEnabled }: { salt: unknown; remoteEnabled: boolean }) => {
@@ -5,7 +6,7 @@ const setup = ({ salt, remoteEnabled }: { salt: unknown; remoteEnabled: boolean 
     'admin.transfer.token.salt': salt,
     'server.transfer.remote.enabled': remoteEnabled,
   };
-  const warn = jest.fn();
+  const warn = vi.fn();
 
   global.strapi = {
     config: { get: (key: string, defaultValue?: unknown) => config[key] ?? defaultValue },

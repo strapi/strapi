@@ -1,3 +1,4 @@
+import { describe, test, expect, vi, type Mock } from 'vitest';
 import type { Context } from 'koa';
 
 import roleController from '../role';
@@ -9,16 +10,16 @@ import roleController from '../role';
 
 const setup = ({ sso = false, deletionError }: { sso?: boolean; deletionError?: string } = {}) => {
   const roleService = {
-    checkRolesIdForDeletion: jest.fn(async () => {
+    checkRolesIdForDeletion: vi.fn(async () => {
       if (deletionError !== undefined) {
         throw new Error(deletionError);
       }
     }),
-    ssoCheckRolesIdForDeletion: jest.fn(async () => {}),
-    deleteByIds: jest.fn(async (ids: number[]) =>
+    ssoCheckRolesIdForDeletion: vi.fn(async () => {}),
+    deleteByIds: vi.fn(async (ids: number[]) =>
       ids.map((id) => ({ id, name: `role-${id}`, users: [] }))
     ),
-    sanitizeRole: jest.fn(({ users: _, ...role }: { users: unknown[] }) => role),
+    sanitizeRole: vi.fn(({ users: _, ...role }: { users: unknown[] }) => role),
   };
 
   global.strapi = {
@@ -30,8 +31,8 @@ const setup = ({ sso = false, deletionError }: { sso?: boolean; deletionError?: 
 };
 
 const createCtx = ({ params = {}, body = {} }: { params?: object; body?: object } = {}) =>
-  ({ params, request: { body }, deleted: jest.fn((data) => data) }) as unknown as Context & {
-    deleted: jest.Mock;
+  ({ params, request: { body }, deleted: vi.fn((data) => data) }) as unknown as Context & {
+    deleted: Mock;
   };
 
 describe('EE role controller', () => {

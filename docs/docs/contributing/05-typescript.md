@@ -163,7 +163,7 @@ declare global {
   action the implementation has outside the contract is not reported, because the map's values
   are imported objects, not literals. Compare the action names of each controller with
   `Core.Assert<Core.SameNames<…>>` in a compile-only test to catch it, e.g. admin's
-  `server/src/types/__tests__/controller-contracts.test.ts`.
+  `server/src/types/__tests__/controller-contracts.vitest.test.ts`.
 - A controller factory (`({ strapi }) => ({ … })`) is checked in its own module with
   `satisfies Core.ControllerFactory<uid>`. The map check leaves it out, e.g.
   `satisfies Omit<Controllers, 'schema'> & { schema: unknown }`.

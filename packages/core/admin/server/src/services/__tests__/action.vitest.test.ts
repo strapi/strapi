@@ -97,7 +97,7 @@ describe('Action', () => {
     });
 
     test('throws a not found error if no role matches', async () => {
-      const findOneRoleMock = jest.fn(async () => null);
+      const findOneRoleMock = vi.fn(async () => null);
 
       global.strapi = {
         admin: {

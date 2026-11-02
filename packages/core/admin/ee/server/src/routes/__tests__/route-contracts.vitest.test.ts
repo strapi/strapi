@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import type { Core } from '@strapi/types';
 import type { Controllers } from '../../../../../server/src/types/controllers';
 import type { RouteControllers } from '../../types/controllers';

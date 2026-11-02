@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import type { Context } from 'koa';
 
 import userController from '../user';
@@ -9,12 +10,12 @@ import userController from '../user';
 
 const setup = ({ seats, activeUsers }: { seats: number | null; activeUsers: number }) => {
   const userService = {
-    getCurrentActiveUserCount: jest.fn(async () => activeUsers),
-    exists: jest.fn(async () => false),
-    findOne: jest.fn(async (id: string) => ({ id, isActive: false })),
-    updateById: jest.fn(async (id: string, data: object) => ({ id, ...data, password: 'hash' })),
-    sanitizeUser: jest.fn(({ password: _, ...user }: { password?: string }) => user),
-    create: jest.fn(),
+    getCurrentActiveUserCount: vi.fn(async () => activeUsers),
+    exists: vi.fn(async () => false),
+    findOne: vi.fn(async (id: string) => ({ id, isActive: false })),
+    updateById: vi.fn(async (id: string, data: object) => ({ id, ...data, password: 'hash' })),
+    sanitizeUser: vi.fn(({ password: _, ...user }: { password?: string }) => user),
+    create: vi.fn(),
   };
 
   global.strapi = {
@@ -27,7 +28,7 @@ const setup = ({ seats, activeUsers }: { seats: number | null; activeUsers: numb
 };
 
 const createCtx = ({ params = {}, body = {} }: { params?: object; body?: object }) =>
-  ({ params, request: { body }, notFound: jest.fn() }) as unknown as Context;
+  ({ params, request: { body }, notFound: vi.fn() }) as unknown as Context;
 
 describe('EE user controller', () => {
   describe('create', () => {

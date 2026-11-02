@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import type ceServices from '../../services';
 import type eeServices from '../../../../ee/server/src/services';
 

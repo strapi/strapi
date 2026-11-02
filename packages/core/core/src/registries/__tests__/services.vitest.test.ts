@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 import createServicesRegistry from '../services';
 import type { ServiceFactory } from '../services';
@@ -7,7 +8,7 @@ describe('Services registry', () => {
 
   test('Calls a factory once with strapi and returns its service', () => {
     const registry = createServicesRegistry(strapi);
-    const factory = jest.fn(() => ({ count: () => 1 }));
+    const factory = vi.fn(() => ({ count: () => 1 }));
 
     registry.set('api::test.factory', factory satisfies ServiceFactory);
 

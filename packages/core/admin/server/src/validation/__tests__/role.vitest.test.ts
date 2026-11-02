@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 
 /**
  * Role `name` and `description` are stored in varchar(255) columns. Without a max length the
@@ -62,7 +62,7 @@ describe('Role validation', () => {
 
   describe('role deletion', () => {
     const setup = (deletionError?: string) => {
-      const checkRolesIdForDeletion = jest.fn(async () => {
+      const checkRolesIdForDeletion = vi.fn(async () => {
         if (deletionError !== undefined) {
           throw new Error(deletionError);
         }
