@@ -64,6 +64,25 @@ describe('planShard', () => {
     expect(settings?.weight).toBe(100);
   });
 
+  test('counts the start of each domain run, so a short file joins a lane already running its domain', () => {
+    const plan = planShard({
+      weights: { 'a/long.spec.ts': 100, 'a/short.spec.ts': 15, 'b/other.spec.ts': 90 },
+      units: [
+        { domain: 'a', file: 'long.spec.ts' },
+        { domain: 'a', file: 'short.spec.ts' },
+        { domain: 'b', file: 'other.spec.ts' },
+      ],
+      shard: { index: 1, total: 1 },
+      lanes: 2,
+    });
+    // By test time alone, short.spec.ts would join the lighter lane (b), which then starts
+    // Strapi twice and finishes last.
+    expect(plan).toContainEqual([
+      { domain: 'a', files: ['long.spec.ts', 'short.spec.ts'], weight: 115 },
+    ]);
+    expect(plan).toContainEqual([{ domain: 'b', files: ['other.spec.ts'], weight: 90 }]);
+  });
+
   test('returns one plan per lane, heaviest domain first', () => {
     const plan = planShard({ weights, units, shard: { index: 1, total: 1 }, lanes: 2 });
     expect(plan).toHaveLength(2);

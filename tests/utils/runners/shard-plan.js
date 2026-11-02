@@ -8,9 +8,16 @@
  * Strapi most (content-type-builder) all land in shard 1, which ends up about 30% longer than
  * the others. Here every (domain, file) pair is one unit, weighted with its duration from
  * `tests/e2e/shard-weights.json`, and the units are packed into `shardTotal * lanes` bins,
- * heaviest first, each into the bin with the least time so far. Every shard computes the same
- * plan from the same file, so no file runs twice or not at all.
+ * heaviest first, each into the bin where it ends soonest. Every shard computes the same plan
+ * from the same file, so no file runs twice or not at all.
  */
+
+/**
+ * Seconds a lane spends on each domain it runs, outside the tests: starting Strapi for the
+ * domain (about 12 s in CI) and stopping it (about 6 s). A lane with five domains spends a
+ * minute and a half on this, so the plan counts it.
+ */
+const DOMAIN_RUN_SECONDS = 20;
 
 const parseShard = (value) => {
   const match = /^(\d+)\/(\d+)$/.exec(String(value ?? ''));
@@ -78,16 +85,25 @@ const planShard = ({ weights, units, shard, lanes }) => {
     );
 
   const binCount = shard.total * lanes;
-  const bins = Array.from({ length: binCount }, () => ({ load: 0, units: [] }));
+  const bins = Array.from({ length: binCount }, () => ({
+    load: 0,
+    domains: new Set(),
+    units: [],
+  }));
+
+  // A unit costs its weight, plus a domain start when the bin doesn't run its domain yet.
+  const loadWith = (bin, unit) =>
+    bin.load + unit.weight + (bin.domains.has(unit.domain) ? 0 : DOMAIN_RUN_SECONDS);
 
   for (const unit of weighted) {
     let target = 0;
     for (let b = 1; b < binCount; b += 1) {
-      if (bins[b].load < bins[target].load) {
+      if (loadWith(bins[b], unit) < loadWith(bins[target], unit)) {
         target = b;
       }
     }
-    bins[target].load += unit.weight;
+    bins[target].load = loadWith(bins[target], unit);
+    bins[target].domains.add(unit.domain);
     bins[target].units.push(unit);
   }
 
@@ -108,4 +124,4 @@ const planShard = ({ weights, units, shard, lanes }) => {
   });
 };
 
-module.exports = { extractShardArgs, parseShard, planShard };
+module.exports = { DOMAIN_RUN_SECONDS, extractShardArgs, parseShard, planShard };
