@@ -48,7 +48,7 @@ export default () => {
       } catch (error) {
         // The server will not restart, so hand file changes back to the watcher
         if (internals.isUpdating === true) {
-          strapi.reload.isWatching = true;
+          strapi.reload.resumeWatching();
         }
 
         internals.isUpdating = false;
