@@ -396,24 +396,18 @@ class Database {
     const insert = this.getConnection(DOCUMENT_LOCK_TABLE)
       .insert({ document_id: documentId })
       .onConflict('document_id')
-      .ignore();
+      // INSERT IGNORE leaves concurrent writers with a shared lock on a duplicate
+      // row. They then deadlock while both upgrade it in the SELECT FOR UPDATE below.
+      // A no-op duplicate-key update acquires the exclusive row lock immediately.
+      .merge({ document_id: documentId });
 
     if (trx) {
       insert.transacting(trx);
     }
 
+    // The insert or duplicate-key update already holds the exclusive lock
+    // until the transaction completes.
     await insert;
-
-    const lock = this.getConnection(DOCUMENT_LOCK_TABLE)
-      .select('document_id')
-      .where({ document_id: documentId })
-      .forUpdate();
-
-    if (trx) {
-      lock.transacting(trx);
-    }
-
-    await lock;
   }
 
   async destroy() {

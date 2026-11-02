@@ -7,7 +7,7 @@ const client = process.env.DATABASE_CLIENT ?? 'sqlite';
 const describeMysql = client === 'mysql' || client === 'mysql2' ? describe : describe.skip;
 
 const ARTICLE_UID = 'api::parallel-locale-article.parallel-locale-article';
-const locales = ['fr', 'de', 'es', 'it'];
+const locales = ['fr', 'de', 'es', 'it', 'nl', 'pt', 'sv', 'pl'];
 
 const articleModel = {
   attributes: {
@@ -45,7 +45,7 @@ describeMysql('MySQL document updates for new locales', () => {
     await builder.cleanup();
   });
 
-  test('creates every new locale requested in parallel', async () => {
+  test('creates more new locales in parallel than the transaction retry budget', async () => {
     const article = await strapi.documents(ARTICLE_UID).create({
       locale: 'en',
       data: { title: 'English article' },
@@ -68,6 +68,16 @@ describeMysql('MySQL document updates for new locales', () => {
       where: { documentId: article.documentId },
     });
 
-    expect(entries.map((entry) => entry.locale).sort()).toEqual(['de', 'en', 'es', 'fr', 'it']);
+    expect(entries.map((entry) => entry.locale).sort()).toEqual([
+      'de',
+      'en',
+      'es',
+      'fr',
+      'it',
+      'nl',
+      'pl',
+      'pt',
+      'sv',
+    ]);
   });
 });
