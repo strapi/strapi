@@ -2873,10 +2873,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body.error.message).toBe("An entry couldn't be checked (Error)");
-      expect(await getRelease(release.id)).toMatchObject({ releasedAt: null, status: 'blocked' });
+      // A check that threw found nothing about its entry: the validity stored before stays
+      expect(await getRelease(release.id)).toMatchObject({ releasedAt: null, status: 'ready' });
       expect((await getActionsByEntry(release.id))[uncheckableId]).toMatchObject({
-        isEntryValid: false,
-        reason: { error: { name: 'Error' } },
+        isEntryValid: true,
+        reason: null,
         outcome: null,
       });
     });

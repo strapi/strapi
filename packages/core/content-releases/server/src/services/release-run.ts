@@ -16,9 +16,11 @@ import {
   getService,
   getPublishOrderForContentTypes,
   getPublishabilityForActions,
+  getStageReason,
   isFailedBeforeUpgrade,
-  isMySqlDeadlock,
   isReleaseBlocked,
+  isRunConflict,
+  isStageError,
   toError,
   toErrorReason,
   toValidationReason,
@@ -51,12 +53,9 @@ interface RecordedOutcome {
   isEntryValid?: boolean;
 }
 
-// A validation error raised by the run (e.g. a unique clash between two of its entries) keeps
-// its field errors, like one found by the check before the run
-const getErrorOutcome = (error: unknown): RecordedOutcome =>
-  error instanceof errors.ValidationError
-    ? { outcome: 'skipped_invalid', reason: toValidationReason(error) }
-    : { outcome: 'skipped_error', reason: toErrorReason(error) };
+// Raised by the run for an unpublish of an entry that's gone (deleted after it was planned):
+// recorded like a publish of an entry that's gone. An entry already unpublished is released.
+const ENTRY_NOT_FOUND_MESSAGE = 'Entry not found';
 
 // The validity a run stores with each outcome, so the two never contradict each other (an
 // outcome may override it: an entry whose check threw is stored as not valid)
@@ -190,10 +189,36 @@ export const createReleaseRun = ({
         releaseId,
         { uid: action.contentType, ...params, event: 'entry.unpublish' },
         async () => {
-          await strapi.documents(action.contentType).unpublish(params);
+          const { entries } = await strapi.documents(action.contentType).unpublish(params);
+          if (
+            entries.length === 0 &&
+            !(await strapi.documents(action.contentType).findOne({ ...params, status: 'draft' }))
+          ) {
+            throw new errors.ValidationError(ENTRY_NOT_FOUND_MESSAGE);
+          }
         }
       );
     }
+  };
+
+  // A validation error raised by the run (e.g. a unique clash between two of its entries) keeps
+  // its field errors, like one found by the check before the run. A publish review-workflows
+  // refused on the stage is not approved, with the stages as the check records them (or, if they
+  // can't be read, the error).
+  const getErrorOutcome = async (
+    action: ReleaseAction,
+    error: unknown
+  ): Promise<RecordedOutcome> => {
+    if (isStageError(error)) {
+      return {
+        outcome: 'skipped_not_approved',
+        reason: (await getStageReason(action, { strapi })) ?? toErrorReason(error),
+      };
+    }
+
+    return error instanceof errors.ValidationError
+      ? { outcome: 'skipped_invalid', reason: toValidationReason(error) }
+      : { outcome: 'skipped_error', reason: toErrorReason(error) };
   };
 
   // Entries without a reason or validity override share one write per outcome; the others are
@@ -257,8 +282,8 @@ export const createReleaseRun = ({
   };
 
   // `allow_partial`: each entry in its own savepoint, so one that fails is skipped with its
-  // published version restored, and the others still go out. Not after a MySQL deadlock: it
-  // rolled back the whole run, so the run fails with it and records nothing.
+  // published version restored, and the others still go out. Not after a run conflict (see
+  // `isRunConflict`): the run fails with it and records nothing, the release stays planned.
   const releaseEachEntry = async (
     release: Pick<Release, 'id' | 'name'>,
     actions: ReleaseAction[],
@@ -270,10 +295,10 @@ export const createReleaseRun = ({
         await strapi.db.savepoint(() => releaseEntry(release.id, action));
         outcomes.set(action.id, getReleasedOutcome(action));
       } catch (actionError) {
-        if (isMySqlDeadlock(actionError)) {
+        if (isRunConflict(actionError)) {
           throw actionError;
         }
-        outcomes.set(action.id, getErrorOutcome(actionError));
+        outcomes.set(action.id, await getErrorOutcome(action, actionError));
         strapi.log.warn(
           `[Content Releases] Release ${release.name}: skipped an entry that failed to ${action.type} (${getErrorName(actionError)})`
         );
@@ -282,7 +307,7 @@ export const createReleaseRun = ({
   };
 
   // `all_or_nothing`: one savepoint for every entry, so the first error rolls back the ones
-  // before it. Returns that error, unless it's a MySQL deadlock, which rolled back the whole run.
+  // before it. Returns that error, unless it's a run conflict, which fails the run.
   const releaseAllEntries = async (
     releaseId: Release['id'],
     actions: ReleaseAction[],
@@ -298,11 +323,11 @@ export const createReleaseRun = ({
         }
       });
     } catch (error) {
-      if (isMySqlDeadlock(error)) {
+      if (isRunConflict(error)) {
         throw error;
       }
       if (inFlight) {
-        outcomes.set(inFlight.id, getErrorOutcome(error));
+        outcomes.set(inFlight.id, await getErrorOutcome(inFlight, error));
       }
       return { error };
     }
@@ -371,9 +396,15 @@ export const createReleaseRun = ({
       })
     ) {
       if (trigger === 'manual') {
-        // Not a run: the check is stored so the release reads blocked, then the publish is refused
+        // Not a run: each entry's check is stored so the release reads as checked, then the
+        // publish is refused. A check that threw (e.g. a transient read error) found nothing about
+        // its entry: what was stored before stays.
         await getService('release-action', { strapi }).storePublishValidities(
-          new Map([...checks].map(([id, check]) => [id, toEntryValidity(check)] as const))
+          new Map(
+            [...checks].flatMap(([id, check]) =>
+              check instanceof Error ? [] : [[id, toEntryValidity(check)] as const]
+            )
+          )
         );
         await updateReleaseStatus(releaseId);
 
