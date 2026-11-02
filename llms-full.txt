@@ -8342,7 +8342,7 @@ CTB does not store schemas in the database. A content type of an API lives in `s
 
 The admin panel does not save one attribute at a time. It sends the whole change set to `POST /content-type-builder/update-schema`. Each content type, component and attribute in the payload has an `action` (`create`, `update` or `delete`). The `schema` service applies the payload to the builder, writes the files, generates or clears API folders, and commits the folder groups last. On error, `rollbackSchemaMutation` restores the touched files. Code: [`services/schema.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-type-builder/server/src/services/schema.ts).
 
-After the files are written, CTB emits `content-type.create|update|delete` and `component.create|update|delete` on `strapi.eventHub`, one event per changed schema. It awaits each event before the controller triggers the reload. If a listener throws, `emitSchemaEvent` logs the error with `strapi.log.error` and the request still succeeds, because the schema change is already on disk. Code: [`utils/events.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-type-builder/server/src/utils/events.ts).
+After the files are written, CTB emits `content-type.create|update|delete` and `component.create|update|delete` on `strapi.eventHub`, one event per changed schema. It awaits each event before the controller triggers the reload, for at most 2.5 seconds: past that, `emitSchemaEvent` logs a warning with `strapi.log.warn`, leaves the listeners running and moves on, so a listener that never settles cannot hang the save. If a listener throws, `emitSchemaEvent` logs the error with `strapi.log.error` and the request still succeeds, because the schema change is already on disk. Code: [`utils/events.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/content-type-builder/server/src/utils/events.ts).
 
 #### Reload after a write
 
@@ -14860,7 +14860,7 @@ If we reach this step, we have no declared type and did not accept in 4, 6, or 7
 
 `@strapi/upload` is the plugin that stores files for a Strapi application. It provides the Media Library in the admin panel, the upload routes of the admin API and the Content API, and the file and folder content types. It processes images and hands the files to an upload provider.
 
-The plugin has a server part (`strapi-server`), an admin part (`strapi-admin`) and shared code (`shared/`, exported as `./_internal/shared`). The plugin loader always enables it. The `media` attribute of any content type points to its files. The provider packages under `packages/providers/upload-*` implement the storage.
+The plugin has a server part (`strapi-server`), an admin part (`strapi-admin`) and shared code (`shared/`, bundled into both parts and not exported). The plugin loader always enables it. The `media` attribute of any content type points to its files. The provider packages under `packages/providers/upload-*` implement the storage.
 
 ### Key concepts
 
@@ -15015,7 +15015,7 @@ The package runs on the server. The admin code imports only types from it, for e
 
 #### Provider factory
 
-`providerFactory` creates a keyed store with `register`, `get`, `delete`, `has`, `keys`, `values` and `clear`. Each provider has `hooks` (`willRegister`, `didRegister`, `willDelete`, `didDelete`). By default, `register` throws when the key already exists. The option `throwOnDuplicates: false` turns this off. The permission engine uses providers for its actions and conditions.
+`providerFactory` creates a keyed store with `register`, `get`, `delete`, `has`, `keys`, `values` and `clear`. Each provider has `hooks` (`willRegister`, `didRegister`, `willDelete`, `didDelete`). By default, `register` throws when the key already exists, or when another registration of the same key is still waiting on `willRegister`. The option `throwOnDuplicates: false` turns this off. The permission engine uses providers for its actions and conditions.
 
 #### Hooks
 
