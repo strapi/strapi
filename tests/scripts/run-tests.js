@@ -23,6 +23,12 @@ const { createConfig } = require('../../playwright.base.config');
 
 const cwd = path.resolve(__dirname, '../..');
 
+/**
+ * Test app `j` listens on `E2E_PORT_BASE + j` (default 8000). Set another base to run two e2e
+ * runs on one machine, for example from two worktrees.
+ */
+const E2E_PORT_BASE = Number.parseInt(process.env.E2E_PORT_BASE ?? '8000', 10);
+
 const pathExists = async (filePath) => {
   try {
     await fs.access(filePath);
@@ -194,7 +200,7 @@ yargs
             await Promise.all(
               domainBatch.map(async (domain, j) => {
                 const testAppPath = testAppPaths[j];
-                const port = 8000 + j;
+                const port = E2E_PORT_BASE + j;
                 const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
                 console.log(
@@ -210,7 +216,8 @@ yargs
                 });
 
                 // Sync `process.env.PORT` when Playwright loads this file (before globalSetup). The
-                // canonical port is `8000 + j` above — same as baseURL / webServer; helpers read PORT.
+                // canonical port is `E2E_PORT_BASE + j` above, the same as baseURL / webServer;
+                // helpers read PORT.
                 // `port` is always a safe integer here (never user-controlled). `JSON.stringify(port)`
                 // embeds a numeric literal; Node coerces env values to strings on read.
                 const configFileTemplate = `
