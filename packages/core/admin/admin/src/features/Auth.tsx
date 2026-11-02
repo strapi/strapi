@@ -42,12 +42,16 @@ import type {
   SanitizedAdminUser,
 } from '../../../shared/contracts/shared';
 
+const EMPTY_DEFAULT_PERMISSIONS: NonNullable<AuthProviderProps['_defaultPermissions']> = [];
+
 interface Permission
-  extends Pick<PermissionContract, 'action' | 'subject'>,
+  extends
+    Pick<PermissionContract, 'action' | 'subject'>,
     Partial<Omit<PermissionContract, 'action' | 'subject'>> {}
 
 interface User
-  extends Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
+  extends
+    Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
     Partial<Omit<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>> {}
 
 interface AuthContextValue {
@@ -151,7 +155,7 @@ const LOGOUT_PROMPTS = {
 
 const AuthProvider = ({
   children,
-  _defaultPermissions = [],
+  _defaultPermissions = EMPTY_DEFAULT_PERMISSIONS,
   _disableRenewToken = false,
 }: AuthProviderProps) => {
   const { formatMessage } = useIntl();

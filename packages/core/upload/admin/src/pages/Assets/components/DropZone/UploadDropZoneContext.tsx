@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type DragEvent,
@@ -63,9 +64,7 @@ export const UploadDropZoneProvider = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
 
-  const contextValue: UploadDropZoneContextValue = {
-    isDragging,
-  };
+  const contextValue = useMemo<UploadDropZoneContextValue>(() => ({ isDragging }), [isDragging]);
 
   useEffect(() => {
     const handleDragEnd = () => {

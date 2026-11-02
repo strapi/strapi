@@ -4,8 +4,8 @@ module.exports = {
   setupFilesAfterEnv: [__dirname + '/tests/setup/unit.setup.js'],
   modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
   testPathIgnorePatterns: [
-    '.testdata.{js,ts}',
-    '.test.utils.{js,ts}',
+    '\\.testdata\\.(js|ts)$',
+    '\\.test\\.utils\\.(js|ts)$',
     '\\.d\\.ts$',
     '__tests__/resources',
     'tests/resources',

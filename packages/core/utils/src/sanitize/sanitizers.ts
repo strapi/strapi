@@ -1,6 +1,7 @@
-import { curry, isEmpty, isPlainObject } from 'lodash';
+import { isEmpty, isPlainObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
+import { curry } from '../curry';
 import traverseEntity from '../traverse-entity';
 import { isScalarAttribute, constants } from '../content-types';
 

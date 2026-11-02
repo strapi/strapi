@@ -91,8 +91,7 @@ type SchemaMap = Utils.String.Dict<Struct.Schema>;
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider,
-> implements ITransferEngine
-{
+> implements ITransferEngine {
   sourceProvider: ISourceProvider;
 
   destinationProvider: IDestinationProvider;

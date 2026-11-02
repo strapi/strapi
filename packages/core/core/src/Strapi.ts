@@ -314,6 +314,7 @@ class Strapi extends Container implements Core.Strapi {
         return new Database(
           _.merge(this.config.get('database'), {
             logger,
+            getPhase: () => (this.isLoaded ? 'runtime' : 'boot'),
             settings: {
               migrations: {
                 dir: path.join(projectDir, 'database/migrations'),

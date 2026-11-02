@@ -28,6 +28,9 @@ import type {
 } from './FormInputs/types';
 import type * as Yup from 'yup';
 
+const DEFAULT_ON_PROCEED: NonNullable<BlockerProps['onProceed']> = () => {};
+const DEFAULT_ON_CANCEL: NonNullable<BlockerProps['onCancel']> = () => {};
+
 /* -------------------------------------------------------------------------------------------------
  * FormContext
  * -----------------------------------------------------------------------------------------------*/
@@ -65,8 +68,9 @@ const isMultipleSelectTarget = (target: FormFieldTarget): target is MultipleSele
   );
 };
 
-interface FormContextValue<TFormValues extends FormValues = FormValues>
-  extends FormState<TFormValues> {
+interface FormContextValue<
+  TFormValues extends FormValues = FormValues,
+> extends FormState<TFormValues> {
   disabled: boolean;
   getValues: () => TFormValues;
   initialValues: TFormValues;
@@ -147,11 +151,14 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
  * Form
  * -----------------------------------------------------------------------------------------------*/
 
-interface FormHelpers<TFormValues extends FormValues = FormValues>
-  extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues' | 'resetForm'> {}
+interface FormHelpers<TFormValues extends FormValues = FormValues> extends Pick<
+  FormContextValue<TFormValues>,
+  'setErrors' | 'setValues' | 'resetForm'
+> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
+  extends
+    Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
     Pick<BoxProps, 'width' | 'height'> {
   children:
     | React.ReactNode
@@ -851,7 +858,10 @@ interface BlockerProps {
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
+const Blocker = ({
+  onProceed = DEFAULT_ON_PROCEED,
+  onCancel = DEFAULT_ON_CANCEL,
+}: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);

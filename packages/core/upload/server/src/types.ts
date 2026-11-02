@@ -11,37 +11,83 @@ export interface FocalPoint {
   y: number;
 }
 
+/**
+ * Admin user that created or updated a file, when the relation is populated
+ */
+export interface FileCreator {
+  id: number;
+  firstname?: string | null;
+  lastname?: string | null;
+  username?: string | null;
+  email?: string;
+}
+
+/**
+ * A `plugin::upload.file` row, as the upload service returns it
+ */
 export interface File {
   id: number;
+  documentId: string;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
   focalPoint?: FocalPoint | null;
-  width?: number;
-  height?: number;
-  formats?: Record<string, unknown>;
+  /**
+   * null for non-image files
+   */
+  width?: number | null;
+  /**
+   * null for non-image files
+   */
+  height?: number | null;
+  /**
+   * null for non-image files
+   */
+  formats?: Record<string, unknown> | null;
   hash: string;
   ext?: string;
   mime?: string;
   size?: number;
+  /**
+   * Set on files sent to the provider, never stored on the row
+   */
   sizeInBytes?: number;
   url?: string;
-  previewUrl?: string;
+  /**
+   * Provider-dependent: null with the local provider
+   */
+  previewUrl?: string | null;
+  /**
+   * Set on files sent to the provider, never stored on the row
+   */
   path?: string | null;
   provider?: string;
-  provider_metadata?: Record<string, unknown>;
+  /**
+   * Provider-dependent: null with the local provider
+   */
+  provider_metadata?: Record<string, unknown> | null;
   isUrlSigned?: boolean;
-  folder?: number | null;
+  /**
+   * Present only when populated
+   */
+  folder?: Folder | null;
   folderPath?: string;
+  /**
+   * Present only when populated: the related entries, with their `__type`
+   */
   related?: {
     id: string | number;
     __type: string;
-    __pivot: { field: string };
   }[];
   createdAt?: string;
   updatedAt?: string;
-  createdBy?: number;
-  updatedBy?: number;
+  publishedAt?: string;
+  locale?: string | null;
+  /**
+   * Present only when populated: the admin user, or null when no admin user is set
+   */
+  createdBy?: number | FileCreator | null;
+  updatedBy?: number | FileCreator | null;
 }
 
 export interface Folder {
@@ -68,6 +114,7 @@ export interface Config {
   sharp?: {
     cache?: boolean;
     concurrency?: number;
+    limitInputPixels?: number | boolean;
   };
   /** Server-side ceiling: files processed in parallel within a single request. */
   concurrentUploadSize?: number;
@@ -79,7 +126,13 @@ export interface Config {
   };
 }
 
-export interface UploadableFile extends Omit<File, 'id'> {
+export interface UploadableFile extends Omit<File, 'id' | 'documentId' | 'folder' | 'related'> {
+  folder?: number | null;
+  related?: {
+    id: string | number;
+    __type: string;
+    __pivot: { field: string };
+  }[];
   filepath?: string;
   getStream: () => NodeJS.ReadableStream;
   stream?: NodeJS.ReadableStream;

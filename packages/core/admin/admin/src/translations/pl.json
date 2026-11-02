@@ -268,7 +268,7 @@
   "Settings.profile.form.section.experience.here": "tutaj",
   "Settings.profile.form.section.experience.interfaceLanguage": "Język aplikacji",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "Wyświetla aplikację w wybranym języku.",
-  "Settings.profile.form.section.experience.interfaceLanguageHelp": "Zmiany preferencji będą miały zastosowanie tylko do tego profilu. Więcej informacji {tutaj}.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "Zmiany preferencji będą miały zastosowanie tylko do tego profilu. Więcej informacji {here}.",
   "Settings.profile.form.section.experience.mode.label": "Motyw aplikacji",
   "Settings.profile.form.section.experience.mode.hint": "Wyświetla aplikację w wybranym motywie.",
   "Settings.profile.form.section.experience.mode.option-label": "{name} tryb",
