@@ -6,8 +6,13 @@ import type { AttributeNames, AttributeValueByName } from '../schema';
 
 /**
  * A type used as the identifier for a document.
+ * Applications can replace it through `Strapi.Registries.Identifiers['documentId']`.
  */
-export type DocumentID = string;
+export type DocumentID = Strapi.Registries.Identifiers extends {
+  documentId: infer T extends string;
+}
+  ? T
+  : string;
 
 /**
  * Represents a content-type entry.

@@ -54,6 +54,31 @@ declare global {
       interface Settings {}
 
       /**
+       * The types of entry and document identifiers, read by `Data.ID` and `Data.DocumentID`.
+       * Without an entry they stay `string | number` and `string`. Independent of `Settings`:
+       * adding an entry is the opt-in.
+       *
+       * @example
+       * ```ts
+       * declare const flavor: unique symbol;
+       * type Flavor<T, N extends string> = T & { readonly [flavor]?: N };
+       *
+       * declare global {
+       *   namespace Strapi {
+       *     namespace Registries {
+       *       interface Identifiers {
+       *         id: Flavor<string | number, 'ID'>;
+       *         documentId: Flavor<string, 'DocumentID'>;
+       *       }
+       *     }
+       *   }
+       * }
+       * ```
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface Identifiers {}
+
+      /**
        * The license features Strapi gates code on, keyed by the name a license lists. Each value is
        * the `options` object the feature's license entry may carry, typed from the readers of each
        * option. The license registry ships some numeric limits as numeric strings

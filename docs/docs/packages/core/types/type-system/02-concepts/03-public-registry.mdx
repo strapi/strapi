@@ -492,3 +492,27 @@ findOne('baz');
 </Tabs>
 
 {/* prettier-ignore-end */}
+
+###### Identifier types
+
+`Data.ID` (entry `id`) and `Data.DocumentID` (`documentId`) read `Strapi.Registries.Identifiers`. Without an entry they are `string | number` and `string`. The registry does not depend on `Settings`: adding an entry is the opt-in. `Modules.Documents.ID` and `Params.Attribute.ID` / `DocumentID` alias them, so the whole Document Service follows. An application can, for example, flavor both so that one kind is rejected where the other is expected, while plain literals stay accepted:
+
+```ts title="my-app/types/identifiers.d.ts"
+declare const flavor: unique symbol;
+type Flavor<T, N extends string> = T & { readonly [flavor]?: N };
+
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface Identifiers {
+        id: Flavor<string | number, 'ID'>;
+        documentId: Flavor<string, 'DocumentID'>;
+      }
+    }
+  }
+}
+
+export {};
+```
+
+An entry that does not extend `string | number` (`id`) or `string` (`documentId`) is ignored and the default applies. `strapi.db.query()` returns `any`, so ids read through it carry no flavor. `packages/core/types/tests/identifiers.ts` checks a flavored registry in its own program (`tsconfig.identifiers.json`).

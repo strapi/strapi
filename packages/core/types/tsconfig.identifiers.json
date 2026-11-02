@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  // Augments `Identifiers`, which would change the id types of every other test: checked in its own program.
+  "include": ["tests/identifiers.ts"],
+  "exclude": ["node_modules"]
+}
