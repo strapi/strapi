@@ -60,7 +60,8 @@ const mockSchedulingSet = jest.fn();
 const mockSchedulingCancel = jest.fn();
 const mockExecute = jest.fn();
 const mockPublish = jest.fn();
-const mockUnpublish = jest.fn();
+// Unpublishes the entry's published version, as the document service reports it
+const mockUnpublish = jest.fn(async () => ({ entries: [{ id: 1 }] }));
 const mockRequestStorage = new AsyncLocalStorage<ParameterizedContext>();
 
 const baseStrapiMock = {
@@ -788,6 +789,7 @@ describe('Release service', () => {
               }
             : state
         );
+        return { entries: [{ id: 2 }] };
       });
 
       const publishRelease = async () => {
@@ -1166,21 +1168,17 @@ describe('Release service', () => {
 
           expect(result).toMatchObject({ error: { message: 'Invalid entry' } });
           expect(publish).not.toHaveBeenCalled();
-          // Only each entry's check is stored, on publish actions only: no outcome, so no run
-          const reasons = {
-            invalid: { validation: { errors: [] } },
-            unreadable: { error: { name: 'TypeError' } },
-            'unreadable-validation': {
-              error: { name: 'ValidationError', message: 'Lookup failed' },
-            },
-          };
+          // Only the checks that found the entry invalid are stored, on publish actions only: no
+          // outcome, so no run. A check that threw found nothing about the entry: what was stored
+          // before stays.
+          const invalidIndex = entries.indexOf('invalid');
           expect(getUpdatedActions(actionUpdateMany)).toStrictEqual(
-            new Map(
-              entries.map((entry, index) => [
-                index + 1,
-                { type: 'publish', isEntryValid: false, reason: reasons[entry] },
-              ])
-            )
+            new Map([
+              [
+                invalidIndex + 1,
+                { type: 'publish', isEntryValid: false, reason: { validation: { errors: [] } } },
+              ],
+            ])
           );
           expect(actionUpdate).toHaveBeenCalledWith(RECALCULATED_AS_BLOCKED);
           expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
@@ -1194,7 +1192,7 @@ describe('Release service', () => {
       ] as const)(
         '%s, manual, blocked only by an unchecked entry: is refused as a validation error',
         async (releaseCondition, entries, errorName) => {
-          const { result, publish, actionUpdate, strapiMock } = await run({
+          const { result, publish, actionUpdate, actionUpdateMany, strapiMock } = await run({
             releaseCondition,
             trigger: 'manual',
             entries: [...entries],
@@ -1206,6 +1204,16 @@ describe('Release service', () => {
             `An entry couldn't be checked (${errorName})`
           );
           expect(publish).not.toHaveBeenCalled();
+          // The valid entry's check is stored; the one that threw isn't stored as invalid
+          expect(getUpdatedActions(actionUpdateMany)).toStrictEqual(
+            new Map(
+              entries.flatMap((entry, index) =>
+                entry === 'valid'
+                  ? [[index + 1, { type: 'publish', isEntryValid: true, reason: null }] as const]
+                  : []
+              )
+            )
+          );
           expect(actionUpdate).toHaveBeenCalledWith(RECALCULATED_AS_BLOCKED);
           expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
         }
@@ -1330,24 +1338,33 @@ describe('Release service', () => {
       ]);
     });
 
-    // InnoDB rolls back the whole transaction on a deadlock, the entries released before included
-    it.each(['allow_partial', 'all_or_nothing'] as const)(
-      '%s: a MySQL deadlock while releasing an entry fails the publish, and records nothing',
-      async (releaseCondition) => {
+    // The entry didn't fail on its own: InnoDB rolled back the whole transaction (the entries
+    // released before included), the savepoint couldn't be ended, or the run lost to another
+    // transaction. Nothing recorded, the release stays planned to run again.
+    it.each(
+      (['allow_partial', 'all_or_nothing'] as const).flatMap((releaseCondition) =>
+        [
+          ['a MySQL deadlock', { code: 'ER_LOCK_DEADLOCK', errno: 1213 }],
+          ['a MySQL lock wait timeout', { code: 'ER_LOCK_WAIT_TIMEOUT', errno: 1205 }],
+          ['a Postgres deadlock', { code: '40P01' }],
+          ['a Postgres serialization failure', { code: '40001' }],
+          ['a savepoint the database could not end', { name: 'SavepointError' }],
+        ].map(([conflictName, props]) => [releaseCondition, conflictName, props] as const)
+      )
+    )(
+      '%s: %s while releasing an entry fails the publish, and records nothing',
+      async (releaseCondition, _, props) => {
         mockExecute.mockReturnValueOnce({
           id: 1,
           name: 'March',
           releasedAt: null,
           releaseCondition,
         });
-        const deadlock = Object.assign(new Error('Deadlock found when trying to get lock'), {
-          code: 'ER_LOCK_DEADLOCK',
-          errno: 1213,
-        });
+        const conflict = Object.assign(new Error('Conflict with another transaction'), props);
         const publish = jest
           .fn()
           .mockResolvedValueOnce(undefined)
-          .mockRejectedValueOnce(deadlock)
+          .mockRejectedValueOnce(conflict)
           .mockResolvedValue(undefined);
         const update = jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data }));
         const updateMany = jest.fn();
@@ -1378,7 +1395,7 @@ describe('Release service', () => {
         // @ts-expect-error Ignore missing properties
         const releaseService = createReleaseService({ strapi: strapiMock });
 
-        await expect(releaseService.publish(1, { trigger: 'scheduled' })).rejects.toBe(deadlock);
+        await expect(releaseService.publish(1, { trigger: 'scheduled' })).rejects.toBe(conflict);
         // The run stops there: nothing after it can be kept
         expect(publish).toHaveBeenCalledTimes(2);
         expect(update).not.toHaveBeenCalled();
@@ -1386,6 +1403,193 @@ describe('Release service', () => {
         expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
       }
     );
+
+    describe('an entry the run could not release', () => {
+      const reviewStage = { id: 1, name: 'Review' };
+      const doneStage = { id: 2, name: 'Done' };
+
+      const run = async ({
+        releaseCondition,
+        actions,
+        publish = jest.fn(),
+        unpublish = jest.fn(async () => ({ entries: [{ id: 1 }] })),
+        findOne = jest.fn(),
+        getAssignedWorkflow = jest.fn().mockResolvedValue(null),
+      }: {
+        releaseCondition: 'allow_partial' | 'all_or_nothing';
+        actions: { type: 'publish' | 'unpublish'; entryDocumentId: string }[];
+        publish?: jest.Mock;
+        unpublish?: jest.Mock;
+        findOne?: jest.Mock;
+        getAssignedWorkflow?: jest.Mock;
+      }) => {
+        mockExecute.mockReturnValueOnce({
+          id: 1,
+          name: 'March',
+          releasedAt: null,
+          releaseCondition,
+        });
+        const update = jest.fn(async ({ data }) => ({ id: 1, name: 'March', ...data }));
+        const updateMany = jest.fn();
+        const strapiMock = {
+          ...baseStrapiMock,
+          eventHub: { emit: jest.fn() },
+          log: { info: jest.fn(), warn: jest.fn() },
+          documents: jest.fn().mockReturnValue({ publish, unpublish, findOne }),
+          plugin: jest.fn().mockReturnValue({
+            service: jest.fn().mockReturnValue({ getAssignedWorkflow }),
+          }),
+          db: {
+            ...baseStrapiMock.db,
+            inTransaction: jest.fn(() => true),
+            savepoint: jest.fn((cb: () => unknown) => cb()),
+            query: jest.fn().mockReturnValue({
+              findMany: jest.fn().mockReturnValue(
+                actions.map((action, index) => ({
+                  id: index + 1,
+                  contentType: 'collectionType',
+                  ...action,
+                }))
+              ),
+              update,
+              updateMany,
+            }),
+          },
+          contentTypes: { collectionType: { kind: 'collectionType' } },
+        };
+
+        // @ts-expect-error Ignore missing properties
+        const releaseService = createReleaseService({ strapi: strapiMock });
+        const result = await releaseService.publish(1, { trigger: 'scheduled' }).then(
+          (release) => ({ release }),
+          (error: Error) => ({ error })
+        );
+
+        return { result, update, updateMany };
+      };
+
+      // What a publish of an entry that's gone records (its check finds no draft)
+      const NOT_FOUND = {
+        outcome: 'skipped_invalid',
+        reason: { validation: { errors: [] } },
+        isEntryValid: false,
+      };
+
+      it('allow_partial: an unpublish with no published version to remove is not released', async () => {
+        const unpublish = jest.fn(async ({ documentId }: { documentId: string }) => ({
+          documentId,
+          entries: documentId === 'gone' ? [] : [{ id: 1 }],
+        }));
+
+        const { result, update } = await run({
+          releaseCondition: 'allow_partial',
+          actions: [
+            { type: 'unpublish', entryDocumentId: 'live' },
+            { type: 'unpublish', entryDocumentId: 'gone' },
+          ],
+          unpublish,
+        });
+
+        expect(result).toMatchObject({
+          release: {
+            status: 'partial',
+            totalUnpublishedEntries: 1,
+            totalSkippedEntries: 1,
+          },
+        });
+        expect(update).toHaveBeenCalledWith({ where: { id: 2 }, data: NOT_FOUND });
+      });
+
+      it('all_or_nothing: an unpublish with no published version to remove fails the run', async () => {
+        const { result, update, updateMany } = await run({
+          releaseCondition: 'all_or_nothing',
+          actions: [
+            { type: 'publish', entryDocumentId: 'a' },
+            { type: 'unpublish', entryDocumentId: 'gone' },
+          ],
+          unpublish: jest.fn(async () => ({ entries: [] })),
+        });
+
+        expect(result).toMatchObject({ error: { name: 'ValidationError' } });
+        expect(update).toHaveBeenCalledWith({ where: { id: 2 }, data: NOT_FOUND });
+        expect(updateMany).toHaveBeenCalledWith({
+          where: { id: { $in: [1] } },
+          data: { outcome: 'skipped_held', reason: null, isEntryValid: true },
+        });
+      });
+
+      it.each(['allow_partial', 'all_or_nothing'] as const)(
+        '%s: an unpublish of an entry already unpublished is released',
+        async (releaseCondition) => {
+          const { result, update } = await run({
+            releaseCondition,
+            actions: [{ type: 'unpublish', entryDocumentId: 'draft-only' }],
+            unpublish: jest.fn(async () => ({ entries: [] })),
+            findOne: jest.fn().mockResolvedValue({ documentId: 'draft-only' }),
+          });
+
+          expect(result).toMatchObject({
+            release: { status: 'done', totalUnpublishedEntries: 1, totalSkippedEntries: 0 },
+          });
+          expect(update).not.toHaveBeenCalledWith({ where: { id: 1 }, data: NOT_FOUND });
+        }
+      );
+
+      it.each(['allow_partial', 'all_or_nothing'] as const)(
+        '%s: a publish refused on the stage is not approved, with the stages',
+        async (releaseCondition) => {
+          const { update } = await run({
+            releaseCondition,
+            actions: [{ type: 'publish', entryDocumentId: 'in-review' }],
+            publish: jest
+              .fn()
+              .mockRejectedValue(
+                new errors.ValidationError('Entry is not at the required stage to publish')
+              ),
+            getAssignedWorkflow: jest.fn().mockResolvedValue({ stageRequiredToPublish: doneStage }),
+            findOne: jest
+              .fn()
+              .mockResolvedValue({ documentId: 'in-review', strapi_stage: reviewStage }),
+          });
+
+          expect(update).toHaveBeenCalledWith({
+            where: { id: 1 },
+            data: {
+              outcome: 'skipped_not_approved',
+              reason: { stage: { entryStage: reviewStage, requiredStage: doneStage } },
+              isEntryValid: false,
+            },
+          });
+        }
+      );
+
+      it("records a publish refused on the stage as not approved, with the error, when the stages can't be read", async () => {
+        const { update } = await run({
+          releaseCondition: 'allow_partial',
+          actions: [{ type: 'publish', entryDocumentId: 'in-review' }],
+          publish: jest
+            .fn()
+            .mockRejectedValue(
+              new errors.ValidationError('Entry is not at the required stage to publish')
+            ),
+          getAssignedWorkflow: jest.fn().mockRejectedValue(new TypeError('connection lost')),
+        });
+
+        expect(update).toHaveBeenCalledWith({
+          where: { id: 1 },
+          data: {
+            outcome: 'skipped_not_approved',
+            reason: {
+              error: {
+                name: 'ValidationError',
+                message: 'Entry is not at the required stage to publish',
+              },
+            },
+            isEntryValid: false,
+          },
+        });
+      });
+    });
 
     it('never lets a failing event listener fail the publish', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });

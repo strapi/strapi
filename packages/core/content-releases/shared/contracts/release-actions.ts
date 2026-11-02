@@ -26,10 +26,12 @@ export interface ReleaseActionReason {
   validation?: { errors: { path: string[]; message: string }[] };
   stage?: { entryStage: StageRef | null; requiredStage: StageRef };
   /**
-   * The error's name. Its message only for an application error, which is meant for the client:
-   * any other error's message can carry row contents.
+   * The error's name, and its database driver's code when it has one (e.g. `23505`,
+   * `ER_DUP_ENTRY`): a driver's error name can be as vague as `error`. Its message only for an
+   * application error, which is meant for the client: any other error's message can carry row
+   * contents.
    */
-  error?: { name: string; message?: string };
+  error?: { name: string; message?: string; code?: string };
 }
 
 export interface ReleaseAction extends Entity {
