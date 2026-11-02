@@ -44,10 +44,26 @@ export const password = yup
     // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
     '${path} does not comply with the password policy',
     async function checkPasswordPolicy(value) {
-      if (!value) return true;
+      // An empty string is a value: it has to break the policy instead of counting as absent
+      if (_.isNil(value)) return true;
 
       const passwordPolicyService = getService('password-policy');
-      const policy = await passwordPolicyService.getPolicy();
+
+      let policy;
+      try {
+        policy = await passwordPolicyService.getPolicy();
+      } catch (error) {
+        // yup does not handle the rejection of an async test: `validate()` would never settle and
+        // the rejection would be unhandled. Falling back to the defaults could accept a password
+        // the configured policy forbids, so refuse it instead.
+        strapi.log.error('Unable to read the password policy', error);
+
+        return this.createError({
+          // `\${path}` is the Yup interpolation placeholder, not a JS one
+          message: `\${path} could not be checked against the password policy`,
+        });
+      }
+
       const violations = passwordPolicyService.getViolations(value, policy);
 
       if (violations.length === 0) {

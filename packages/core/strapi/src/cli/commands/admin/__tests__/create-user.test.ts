@@ -1,4 +1,5 @@
 import inquirer from 'inquirer';
+import { errors } from '@strapi/utils';
 import { action as createAdminCommand } from '../create-user';
 
 const roleId = 1;
@@ -7,10 +8,12 @@ const load = jest.fn(() => mock) as any;
 const create = jest.fn();
 const getSuperAdmin = jest.fn(() => Promise.resolve({ id: roleId }));
 const exists = jest.fn();
+const assertPasswordIsValid = jest.fn();
 
 const admin = {
   services: {
     user: {
+      assertPasswordIsValid,
       create,
       exists,
     },
@@ -37,6 +40,7 @@ describe('admin:create command', () => {
     load.mockClear();
     create.mockClear();
     getSuperAdmin.mockClear();
+    assertPasswordIsValid.mockReset();
   });
 
   test('createAdminCommand accepts direct input', async () => {
@@ -312,136 +316,80 @@ describe('admin:create command', () => {
       consoleError.mockRestore();
     });
 
-    test('Handles short passwords', async () => {
-      const email = 'email.@email.fr';
+    test('Rejects a password breaking the policy read from the loaded app', async () => {
+      const email = 'email@email.fr';
       const password = '123';
       const firstname = 'John';
       const lastname = 'Doe';
+      const message = 'Invalid password. The password must be at least 12 characters.';
 
-      const mockInquiry = jest.spyOn(inquirer, 'prompt').mockReturnValue({
-        email,
-        password,
-        firstname,
-        lastname,
-        confirm: true,
-      } as any);
+      assertPasswordIsValid.mockRejectedValue(new errors.ValidationError(message));
 
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('exit');
       });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch((err) => {
+      await createAdminCommand({ email, password, firstname, lastname }).catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
-      expect(consoleError).toBeCalledWith('Password must be at least 8 characters long');
+      expect(load).toHaveBeenCalled();
+      expect(assertPasswordIsValid).toHaveBeenCalledWith(password);
+      expect(consoleError).toHaveBeenCalledWith(message);
       expect(mockExit).toHaveBeenCalledWith(1);
-      expect(load).not.toHaveBeenCalled();
+      expect(create).not.toHaveBeenCalled();
 
-      exists.mockRestore();
       mockExit.mockRestore();
-      mockInquiry.mockRestore();
       consoleError.mockRestore();
     });
 
-    test('Handles passwords without lowercase characters', async () => {
-      const email = 'email.@email.fr';
-      const password = '12345678';
-      const firstname = 'John';
-      const lastname = 'Doe';
-
-      const mockInquiry = jest.spyOn(inquirer, 'prompt').mockResolvedValue({
-        email,
-        password,
-        firstname,
-        lastname,
-        confirm: true,
-      });
+    test('Checks an empty password instead of treating it as absent', async () => {
+      assertPasswordIsValid.mockRejectedValue(new errors.ValidationError('Invalid password.'));
 
       const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('exit');
       });
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await createAdminCommand().catch((err) => {
+      await createAdminCommand({
+        email: 'email@email.fr',
+        password: '',
+        firstname: 'John',
+      }).catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
-      expect(consoleError).toBeCalledWith('Password must contain at least one lowercase character');
+      expect(assertPasswordIsValid).toHaveBeenCalledWith('');
       expect(mockExit).toHaveBeenCalledWith(1);
-      expect(load).not.toHaveBeenCalled();
+      expect(create).not.toHaveBeenCalled();
 
-      exists.mockRestore();
       mockExit.mockRestore();
-      mockInquiry.mockRestore();
       consoleError.mockRestore();
     });
 
-    test('Handles passwords without uppercase characters', async () => {
-      const email = 'email.@email.fr';
-      const password = '1234567a';
-      const firstname = 'John';
-      const lastname = 'Doe';
+    test('Does not check the policy when no password is passed', async () => {
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+      const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
-      const mockInquiry = jest.spyOn(inquirer, 'prompt').mockResolvedValue({
-        email,
-        password,
-        firstname,
-        lastname,
-        confirm: true,
-      });
+      await createAdminCommand({ email: 'email@email.fr', firstname: 'John' });
 
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('exit');
-      });
-      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      expect(assertPasswordIsValid).not.toHaveBeenCalled();
+      expect(create).toHaveBeenCalled();
 
-      await createAdminCommand().catch((err) => {
-        expect(err).toEqual(new Error('exit'));
-      });
-
-      expect(consoleError).toBeCalledWith('Password must contain at least one uppercase character');
-      expect(mockExit).toHaveBeenCalledWith(1);
-      expect(load).not.toHaveBeenCalled();
-
-      exists.mockRestore();
       mockExit.mockRestore();
-      mockInquiry.mockRestore();
-      consoleError.mockRestore();
+      consoleLog.mockRestore();
     });
 
-    test('Handles passwords without number', async () => {
-      const email = 'email.@email.fr';
-      const password = 'abcdefgH';
-      const firstname = 'John';
-      const lastname = 'Doe';
+    test('Does not swallow an unexpected error while checking the password', async () => {
+      const failure = new Error('database unavailable');
+      assertPasswordIsValid.mockRejectedValue(failure);
 
-      const mockInquiry = jest.spyOn(inquirer, 'prompt').mockResolvedValue({
-        email,
-        password,
-        firstname,
-        lastname,
-        confirm: true,
-      });
+      await expect(
+        createAdminCommand({ email: 'email@email.fr', password: 'abc', firstname: 'John' })
+      ).rejects.toBe(failure);
 
-      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('exit');
-      });
-      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-      await createAdminCommand().catch((err) => {
-        expect(err).toEqual(new Error('exit'));
-      });
-
-      expect(consoleError).toBeCalledWith('Password must contain at least one number');
-      expect(mockExit).toHaveBeenCalledWith(1);
-      expect(load).not.toHaveBeenCalled();
-
-      exists.mockRestore();
-      mockExit.mockRestore();
-      mockInquiry.mockRestore();
-      consoleError.mockRestore();
+      expect(create).not.toHaveBeenCalled();
     });
   });
 });

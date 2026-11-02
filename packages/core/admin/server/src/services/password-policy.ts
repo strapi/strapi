@@ -24,11 +24,7 @@ export const DEFAULT_PASSWORD_POLICY: Readonly<PasswordPolicy> = Object.freeze({
 const POLICY_KEYS = Object.keys(DEFAULT_PASSWORD_POLICY) as Array<keyof PasswordPolicy>;
 
 export type PasswordPolicyRule =
-  | 'minLength'
-  | 'lowercase'
-  | 'uppercase'
-  | 'number'
-  | 'specialCharacter';
+  'minLength' | 'lowercase' | 'uppercase' | 'number' | 'specialCharacter';
 
 export interface PasswordPolicyViolation {
   rule: PasswordPolicyRule;

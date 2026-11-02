@@ -1,5 +1,5 @@
 import { createCommand } from 'commander';
-import { yup } from '@strapi/utils';
+import { errors, yup } from '@strapi/utils';
 import _ from 'lodash';
 import type { QuestionCollection } from 'inquirer';
 import { createStrapi, compileStrapi } from '@strapi/core';
@@ -17,25 +17,9 @@ interface CmdOptions {
 
 const emailValidator = yup.string().email('Invalid email address').lowercase();
 
-const passwordValidator = yup
-  .string()
-  .min(8, 'Password must be at least 8 characters long')
-  .test('lowercase', 'Password must contain at least one lowercase character', (value) => {
-    if (!value) return true;
-    return /[a-z]/.test(value);
-  })
-  .test('uppercase', 'Password must contain at least one uppercase character', (value) => {
-    if (!value) return true;
-    return /[A-Z]/.test(value);
-  })
-  .test('number', 'Password must contain at least one number', (value) => {
-    if (!value) return true;
-    return /\d/.test(value);
-  });
-
 const adminCreateSchema = yup.object().shape({
   email: emailValidator,
-  password: passwordValidator,
+  password: yup.string(),
   firstname: yup.string().trim().required('First name is required'),
   lastname: yup.string(),
 });
@@ -67,10 +51,6 @@ const promptQuestions: QuestionCollection<Answers> = [
     type: 'password',
     name: 'password',
     message: 'Admin password?',
-    async validate(value: string) {
-      const validPassword = await passwordValidator.validate(value);
-      return validPassword === value || validPassword;
-    },
   },
   { type: 'input', name: 'firstname', message: 'First name?' },
   { type: 'input', name: 'lastname', message: 'Last name?' },
@@ -84,6 +64,20 @@ const promptQuestions: QuestionCollection<Answers> = [
 async function createAdmin({ email, password, firstname, lastname }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
+
+  // The password policy is stored in the database, so it can only be read once Strapi is loaded
+  if (password !== undefined) {
+    try {
+      await app.admin!.services.user.assertPasswordIsValid(password);
+    } catch (err) {
+      if (err instanceof errors.ValidationError) {
+        console.error(err.message);
+        process.exit(1);
+      }
+
+      throw err;
+    }
+  }
 
   const user = await app.admin!.services.user.exists({ email });
 

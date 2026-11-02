@@ -17,6 +17,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { yup } from '@strapi/utils';
 
 import { permission, password } from '../common-validators';
+import { validateProfileUpdateInput, validateUserUpdateInput } from '../user';
 import passwordPolicyService, { DEFAULT_PASSWORD_POLICY } from '../../services/password-policy';
 
 type ProviderResult =
@@ -155,6 +156,57 @@ describe('password validation — password policy', () => {
       { path: 'password', message: 'password must contain at least one special character' },
     ]);
     expect(await errorsOf('testing-12345')).toEqual([]);
+  });
+
+  test('rejects an empty password on the profile and user update schemas', async () => {
+    stubPasswordPolicy();
+
+    for (const validate of [validateProfileUpdateInput, validateUserUpdateInput]) {
+      await expect(
+        validate({ password: '', currentPassword: 'Testing1234' })
+      ).rejects.toMatchObject({
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({ message: 'password must be at least 8 characters' }),
+          ]),
+        },
+      });
+    }
+  });
+
+  test('still treats an absent password as valid', async () => {
+    stubPasswordPolicy();
+
+    await expect(password.validate(undefined)).resolves.toBeUndefined();
+  });
+
+  test('fails validation when the policy cannot be read, without leaving it pending', async () => {
+    const logError = vi.fn();
+    const failure = new Error('database unavailable');
+
+    (global as any).strapi = {
+      plugins: {},
+      api: {},
+      log: { error: logError },
+      admin: {
+        services: {
+          'password-policy': {
+            ...passwordPolicyService,
+            getPolicy: vi.fn(async () => {
+              throw failure;
+            }),
+          },
+        },
+      },
+    };
+
+    expect(await errorsOf('Testing1234')).toEqual([
+      {
+        path: 'password',
+        message: 'password could not be checked against the password policy',
+      },
+    ]);
+    expect(logError).toHaveBeenCalledWith('Unable to read the password policy', failure);
   });
 
   test('keeps rejecting passwords over 72 bytes whatever the policy says', async () => {

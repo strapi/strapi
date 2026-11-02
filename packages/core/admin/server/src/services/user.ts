@@ -226,6 +226,16 @@ const updateById = async (
  * @param email - user email
  * @param password - new password
  */
+const assertPasswordIsValid = async (password: string) => {
+  try {
+    await passwordValidator.label('The password').validate(password, { abortEarly: false });
+  } catch (error) {
+    const reasons = error instanceof yup.ValidationError ? `${error.errors.join('. ')}.` : '';
+
+    throw new ValidationError(`Invalid password. ${reasons}`.trim());
+  }
+};
+
 const resetPasswordByEmail = async (email: string, password: string) => {
   const user = await strapi.db
     .query('admin::user')
@@ -235,13 +245,7 @@ const resetPasswordByEmail = async (email: string, password: string) => {
     throw new Error(`User not found for email: ${email}`);
   }
 
-  try {
-    await passwordValidator.label('The password').validate(password, { abortEarly: false });
-  } catch (error) {
-    const reasons = error instanceof yup.ValidationError ? `${error.errors.join('. ')}.` : '';
-
-    throw new ValidationError(`Invalid password. ${reasons}`.trim());
-  }
+  await assertPasswordIsValid(password);
 
   await updateById(user.id, { password });
 };
@@ -538,6 +542,7 @@ export default {
   count,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
+  assertPasswordIsValid,
   resetPasswordByEmail,
   getLanguagesInUse,
   isFirstSuperAdminUser,
