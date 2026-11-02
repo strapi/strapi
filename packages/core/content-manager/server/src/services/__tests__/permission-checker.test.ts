@@ -56,29 +56,26 @@ describe('permission-checker', () => {
 
   test.each([
     ['read', 'plugin::content-manager.explorer.read'],
+    ['create', 'plugin::content-manager.explorer.create'],
     ['update', 'plugin::content-manager.explorer.update'],
     ['delete', 'plugin::content-manager.explorer.delete'],
     ['publish', 'plugin::content-manager.explorer.publish'],
+    ['unpublish', 'plugin::content-manager.explorer.publish'],
+    ['discard', 'plugin::content-manager.explorer.update'],
   ] as const)(
     'sanitizedQuery.%s sanitizes and restricts the query for %s',
     async (name, action) => {
       const permissionsManager = createPermissionsManagerMock();
       const strapi = createStrapiMock(permissionsManager);
       const userAbility = { rulesFor: jest.fn(() => []) } as unknown as Ability;
-      const query = { fields: ['title'] };
+      const query = { page: '1', sort: 'title:asc' };
 
       const permissionChecker = permissionCheckerService({ strapi } as any).create({
         userAbility,
         model: 'api::article.article',
       });
 
-      // The action shortcuts are attached at runtime and are not part of the inferred type
-      const shortcuts = permissionChecker.sanitizedQuery as unknown as Record<
-        typeof name,
-        (query: object) => Promise<unknown>
-      >;
-
-      await shortcuts[name](query);
+      await permissionChecker.sanitizedQuery[name](query);
 
       expect(permissionsManager.sanitizeQuery).toHaveBeenCalledWith(query, {
         subject: 'api::article.article',
@@ -108,6 +105,29 @@ describe('permission-checker', () => {
     expect(permissionsManager.addPermissionsQueryTo).toHaveBeenCalledWith(
       query,
       'plugin::content-manager.explorer.read'
+    );
+  });
+
+  test('sanitizedQuery accepts the action as a plain string', async () => {
+    const permissionsManager = createPermissionsManagerMock();
+    const strapi = createStrapiMock(permissionsManager);
+    const userAbility = { rulesFor: jest.fn(() => []) } as unknown as Ability;
+    const query = {};
+
+    const permissionChecker = permissionCheckerService({ strapi } as any).create({
+      userAbility,
+      model: 'api::article.article',
+    });
+
+    await permissionChecker.sanitizedQuery(query, 'plugin::content-manager.explorer.delete');
+
+    expect(permissionsManager.sanitizeQuery).toHaveBeenCalledWith(query, {
+      subject: 'api::article.article',
+      action: 'plugin::content-manager.explorer.delete',
+    });
+    expect(permissionsManager.addPermissionsQueryTo).toHaveBeenCalledWith(
+      query,
+      'plugin::content-manager.explorer.delete'
     );
   });
 });
