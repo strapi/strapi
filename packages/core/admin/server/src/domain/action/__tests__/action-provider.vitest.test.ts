@@ -15,6 +15,7 @@ const providerMethods = [
   'has',
   'size',
   'clear',
+  'lock',
   'unstable_aliases',
 ];
 
@@ -83,6 +84,52 @@ describe('Action Provider', () => {
         await expect(register()).rejects.toThrowError(
           `You can't register new actions outside of the bootstrap function.`
         );
+      });
+
+      test(`Can't register an action once the provider is locked`, async () => {
+        const attributes = {
+          section: 'settings',
+          displayName: 'Foo bar',
+          uid: 'foo',
+          pluginName: 'bar',
+          category: 'category',
+          subCategory: 'subcategory',
+        };
+
+        const actionProvider = createActionProvider();
+
+        actionProvider.lock();
+
+        await expect(actionProvider.register(attributes)).rejects.toThrowError(
+          `You can't register new actions once the admin cleaned the stored permissions.`
+        );
+        await expect(actionProvider.registerMany([attributes])).rejects.toThrowError(
+          `You can't register new actions once the admin cleaned the stored permissions.`
+        );
+        expect(actionProvider.size()).toBe(0);
+      });
+
+      test('Can register an action again once the locked provider is cleared', async () => {
+        const attributes = {
+          section: 'settings',
+          displayName: 'Foo bar',
+          uid: 'foo',
+          pluginName: 'bar',
+          category: 'category',
+          subCategory: 'subcategory',
+        };
+
+        const actionProvider = createActionProvider();
+
+        await actionProvider.register(attributes);
+        actionProvider.lock();
+        await actionProvider.clear();
+
+        expect(actionProvider.size()).toBe(0);
+
+        await actionProvider.register(attributes);
+
+        expect(actionProvider.has(domain.computeActionId(attributes))).toBe(true);
       });
 
       test(`Can't register an action with unknown attribute`, async () => {
