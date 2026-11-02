@@ -47,6 +47,7 @@ import {
   UseDragAndDropOptions,
   useDragAndDrop,
 } from '../../../../../hooks/useDragAndDrop';
+import { useHasBeenNearViewport } from '../../../../../hooks/useHasBeenNearViewport';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
@@ -146,8 +147,7 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
 }
 
 interface RelationsFieldProps
-  extends
-    Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
+  extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {}
 
 export interface RelationsFormValue {
@@ -234,6 +234,15 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
+    const fieldRef = React.useRef<HTMLDivElement>(null);
+    const composedRefs = useComposedRefs(ref, fieldRef);
+    /**
+     * A large content type can have hundreds of relation fields. Only fetch the relations of the
+     * fields the user can see (or is about to), instead of all of them on load and again after
+     * every save.
+     */
+    const hasBeenNearViewport = useHasBeenNearViewport(fieldRef);
+
     const { data, isLoading, isFetching, isError, refetch } = useGetRelationsQuery(
       {
         model,
@@ -248,9 +257,17 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id || !isRelatedToCurrentDocument,
+        skip: !id || !isRelatedToCurrentDocument || !hasBeenNearViewport,
       }
     );
+
+    /**
+     * Choosing a new entry for a single relation replaces the saved one, which `handleConnect`
+     * can only disconnect once it is loaded. Until then, the combobox stays disabled.
+     */
+    const shouldLoadSavedRelations = Boolean(id) && isRelatedToCurrentDocument;
+    const isWaitingForSavedRelation =
+      ONE_WAY_RELATIONS.has(props.attribute.relation) && shouldLoadSavedRelations && !data;
 
     const handleLoadMore = () => {
       /**
@@ -392,7 +409,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     return (
       <Flex
-        ref={ref}
+        ref={composedRefs}
         direction="column"
         gap={3}
         justifyContent="space-between"
@@ -401,7 +418,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       >
         <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
           <MemoizedRelationsComboboxInput
-            disabled={isDisabled}
+            disabled={isDisabled || isWaitingForSavedRelation}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
             id={id}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
@@ -560,11 +577,33 @@ const RelationsInput = ({
   const targetModel = props.attribute.targetModel;
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
-  const [searchForTrigger, { data, isLoading, isError }] = useLazySearchRelationsQuery();
+  const [searchForTrigger, { data, isLoading, isFetching, isError, error: searchError }] =
+    useLazySearchRelationsQuery();
+  // Refetching a failed search reports `isError: false` and `isLoading: true` until it settles.
+  // Keep showing the previous error meanwhile instead of flashing the loading state.
+  const isRetryingFailedSearch = isFetching && searchError !== undefined;
+
+  /**
+   * The options are only needed once the combobox has been opened. Searching when the field
+   * mounts would send one request per relation field of the document on load.
+   */
+  const [hasBeenOpened, setHasBeenOpened] = React.useState(false);
+  const handleOpen = React.useCallback(
+    (search: string) => {
+      if (!hasBeenOpened) {
+        // Enabling the search sends it: searching again here would send the same request twice.
+        setHasBeenOpened(true);
+        return;
+      }
+
+      setSearchParams((params) => ({ ...params, _q: search, page: 1 }));
+    },
+    [hasBeenOpened]
+  );
 
   /**
    * Because we're using a lazy query, we need to trigger the search
-   * when the component mounts and when the search params change.
+   * when the combobox is first opened and when the search params change.
    * We also need to trigger the search when the field value changes
    * so that we can filter out the relations that are already connected.
    */
@@ -578,7 +617,7 @@ const RelationsInput = ({
     const [targetField] = name.split('.').slice(-1);
 
     // Return early if there is no relation to the document
-    if (!isRelatedToCurrentDocument) return;
+    if (!isRelatedToCurrentDocument || !hasBeenOpened) return;
 
     searchForTrigger({
       model,
@@ -601,6 +640,7 @@ const RelationsInput = ({
     searchForTrigger,
     searchParamsDebounced,
     isRelatedToCurrentDocument,
+    hasBeenOpened,
     currentDocumentMeta.params,
   ]);
 
@@ -691,10 +731,11 @@ const RelationsInput = ({
           placeholder={placeholder}
           hasNextPage={hasNextPage}
           isLoadingPermissions={isLoadingPermissions}
-          isLoadingSearchRelations={isLoading}
-          isSearchRelationsError={isError}
+          isLoadingSearchRelations={isLoading && !isRetryingFailedSearch}
+          isSearchRelationsError={isError || isRetryingFailedSearch}
           handleChange={handleChange}
           setSearchParams={setSearchParams}
+          onOpen={handleOpen}
           data={data}
           mainField={mainField}
           fieldValue={field.value}
@@ -709,16 +750,15 @@ const RelationsInput = ({
 
 const MemoizedRelationsComboboxInput = React.memo(RelationsInput);
 
-interface RelationModalWithContextProps extends Omit<
-  RelationsInputProps,
-  'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'
-> {
+interface RelationModalWithContextProps
+  extends Omit<RelationsInputProps, 'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'> {
   relation: DocumentMeta;
   hasNextPage: boolean;
   isLoadingSearchRelations: boolean;
   isSearchRelationsError: boolean;
   isLoadingPermissions: boolean;
   handleChange: (relationId?: string) => void;
+  onOpen: (search: string) => void;
   data?: FindAvailable.Response;
   fieldValue?: RelationsFormValue;
   setSearchParams: React.Dispatch<
@@ -740,6 +780,7 @@ const RelationModalWithContext = ({
   handleChange,
   mainField,
   setSearchParams,
+  onOpen,
   fieldValue,
   data,
   ...props
@@ -822,7 +863,7 @@ const RelationModalWithContext = ({
             // Selecting an option closes the list while `textValue` still holds its label.
             // Searching on close would omit that option and cache an empty result.
             if (isOpen) {
-              handleSearch(textValue ?? '');
+              onOpen(textValue ?? '');
             }
           }}
           noOptionsMessage={() =>
