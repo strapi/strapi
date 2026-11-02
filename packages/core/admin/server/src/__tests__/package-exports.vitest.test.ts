@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
+import { describe, expect, test } from 'vitest';
+
 import packageJson from '../../../package.json';
 
 const packageRoot = path.resolve(__dirname, '../../..');
