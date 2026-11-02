@@ -12,7 +12,10 @@ export {
   useDocument as unstable_useDocument,
   useContentManagerContext as unstable_useContentManagerContext,
 } from './hooks/useDocument';
-export { useHasDefaultLocaleEntry as unstable_useHasDefaultLocaleEntry } from './hooks/useI18nFieldLock';
+export {
+  isSharedI18nAttribute as unstable_isSharedI18nAttribute,
+  useHasDefaultLocaleEntry as unstable_useHasDefaultLocaleEntry,
+} from './hooks/useI18nFieldLock';
 export { useDocumentActions as unstable_useDocumentActions } from './hooks/useDocumentActions';
 export { useDocumentLayout as unstable_useDocumentLayout } from './hooks/useDocumentLayout';
 export type {
@@ -24,7 +27,7 @@ export type {
 } from './hooks/useDocumentLayout';
 export type { InjectableListViewFilter } from './constants/hooks';
 export * from './features/DocumentRBAC';
-export { useI18nSharedFieldsLock } from './features/I18nSharedFieldsLock';
+export { useI18nSharedFieldsLock as unstable_useI18nSharedFieldsLock } from './features/I18nSharedFieldsLock';
 export type {
   EditViewContext,
   ListViewContext,

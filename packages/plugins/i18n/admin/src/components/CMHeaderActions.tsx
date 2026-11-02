@@ -13,9 +13,11 @@ import {
   type DocumentActionProps,
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
+  unstable_useHasDefaultLocaleEntry as useHasDefaultLocaleEntry,
+  unstable_useI18nSharedFieldsLock as useI18nSharedFieldsLock,
+  unstable_isSharedI18nAttribute as isSharedI18nAttribute,
   buildValidParams,
   HeaderActionProps,
-  useI18nSharedFieldsLock,
 } from '@strapi/content-manager/strapi-admin';
 import {
   Flex,
@@ -712,11 +714,17 @@ const UnlockSharedFieldsDialog = ({ onClose }: { onClose: () => void }) => {
  * UnlockSharedFieldsAction
  * -----------------------------------------------------------------------------------------------*/
 
-const UnlockSharedFieldsAction = ({ model, collectionType, documentId }: HeaderActionProps) => {
+const UnlockSharedFieldsAction = ({
+  activeTab,
+  model,
+  collectionType,
+  documentId,
+}: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { hasI18n, canUpdate } = useI18n();
   const { data: locales = [] } = useGetLocalesQuery();
+  const hasDefaultLocaleEntry = useHasDefaultLocaleEntry();
   const { isUnlocked, relock } = useI18nSharedFieldsLock(
     'UnlockSharedFieldsAction',
     (state) => state
@@ -752,34 +760,22 @@ const UnlockSharedFieldsAction = ({ model, collectionType, documentId }: HeaderA
     defaultLocale?.code && canUpdate.includes(defaultLocale.code)
   );
 
-  if (!hasI18n || !isSecondaryLocale || !canEditSharedFields) {
+  // Shared fields are only locked when a default-locale entry exists, and the
+  // published tab is read-only, so there is nothing to unlock in either case.
+  if (
+    !hasI18n ||
+    !isSecondaryLocale ||
+    !canEditSharedFields ||
+    !hasDefaultLocaleEntry ||
+    activeTab === 'published'
+  ) {
     return null;
   }
 
-  /**
-   * Root-level attributes that are "shared" (locked while reading a secondary
-   * locale). Mirrors `useShouldLockNonLocalizedField` in the content-manager
-   * (relations and uids are always locale-specific; everything else is shared
-   * unless explicitly `pluginOptions.i18n.localized === true`), so re-locking
-   * resets exactly the fields this action unlocks — nothing more.
-   */
   const sharedFieldNames = schema?.attributes
-    ? Object.keys(schema.attributes).filter((name) => {
-        const attribute = schema.attributes[name] as {
-          type?: string;
-          pluginOptions?: object;
-        };
-
-        if (attribute.type === 'relation' || attribute.type === 'uid') {
-          return false;
-        }
-
-        const i18nOptions = attribute.pluginOptions as
-          | { i18n?: { localized?: boolean } }
-          | undefined;
-
-        return i18nOptions?.i18n?.localized !== true;
-      })
+    ? Object.keys(schema.attributes).filter((name) =>
+        isSharedI18nAttribute(schema.attributes[name])
+      )
     : [];
 
   if (isUnlocked) {

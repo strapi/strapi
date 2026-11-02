@@ -162,7 +162,7 @@ const EditViewPage = () => {
   return (
     <Page.Main>
       <Page.Title>{pageTitle}</Page.Title>
-      <I18nSharedFieldsLock key={sharedFieldsLockKey} resetKey={sharedFieldsLockKey}>
+      <I18nSharedFieldsLock key={sharedFieldsLockKey}>
         {isSingleType && (
           <tours.contentManager.Introduction>
             {/* Invisible Anchor */}

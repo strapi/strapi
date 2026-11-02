@@ -15,25 +15,13 @@ const [I18nSharedFieldsLockProvider, useI18nSharedFieldsLock] =
     relock: () => undefined,
   });
 
-interface I18nSharedFieldsLockProps {
-  children: React.ReactNode;
-  /**
-   * Changing this key (document id + locale) clears an accepted unlock so a
-   * locale switch or a different entry starts locked again.
-   */
-  resetKey: string;
-}
-
 /**
  * Holds whether the editor accepted the warning to edit non-localized fields
- * on a secondary locale. Reset when the document or locale changes.
+ * on a secondary locale. Always starts locked: key the provider by document
+ * and locale so a locale switch or a different entry relocks.
  */
-const I18nSharedFieldsLock = ({ children, resetKey }: I18nSharedFieldsLockProps) => {
+const I18nSharedFieldsLock = ({ children }: { children: React.ReactNode }) => {
   const [isUnlocked, setIsUnlocked] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsUnlocked(false);
-  }, [resetKey]);
 
   const unlock = React.useCallback(() => setIsUnlocked(true), []);
   const relock = React.useCallback(() => setIsUnlocked(false), []);

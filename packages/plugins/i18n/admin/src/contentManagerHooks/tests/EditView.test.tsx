@@ -28,7 +28,7 @@ jest.mock('@strapi/content-manager/strapi-admin', () => {
     ...actual,
     unstable_useDocumentLayout: () => mockUseDocumentLayout(),
     unstable_useHasDefaultLocaleEntry: () => mockUseHasDefaultLocaleEntry(),
-    useI18nSharedFieldsLock: (
+    unstable_useI18nSharedFieldsLock: (
       _name: string,
       selector: (state: { isUnlocked: boolean }) => unknown
     ) => selector(mockSharedFieldsLock),

@@ -155,8 +155,13 @@ test.describe('Lock non-localized fields on secondary locales', () => {
         name: 'This value is common to all locales. Saving will update every locale.',
       })
     ).toBeVisible();
+
+    // Re-locking discards unsaved shared-field edits
+    await isAvailable.uncheck();
+    await expect(isAvailable).not.toBeChecked();
     await page.getByRole('button', { name: 'Keep shared fields locked' }).click();
     await expect(isAvailable).toBeDisabled();
+    await expect(isAvailable).toBeChecked();
 
     // Saving only the localized field must not wipe the default-locale shared value
     await nameField.fill('Camiseta Nike Masculina 23/24');
@@ -199,5 +204,21 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     ).toBeVisible();
     await expect(isAvailable).toBeDisabled();
     await expect(isAvailable).not.toBeChecked();
+
+    // Saving an unlocked shared field on a secondary locale updates the default locale
+    await page.getByRole('button', { name: 'Edit shared fields' }).click();
+    await page.getByRole('button', { name: 'Yes, edit shared fields' }).click();
+    await isAvailable.check();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved');
+    await expect(isAvailable).toBeChecked();
+
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'English (en)' }).click();
+    await page.waitForURL(EDIT_URL);
+    await expect(
+      page.getByRole('heading', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
+    ).toBeVisible();
+    await expect(isAvailable).toBeChecked();
   });
 });

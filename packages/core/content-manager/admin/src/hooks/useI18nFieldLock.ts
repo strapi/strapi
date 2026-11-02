@@ -100,6 +100,30 @@ const useHasDefaultLocaleEntry = (): boolean => {
 };
 
 /**
+ * @alpha
+ * @public
+ * Whether an attribute holds a value shared by every locale of the entry.
+ */
+const isSharedI18nAttribute = (
+  attribute: { pluginOptions?: object; type?: string } | undefined
+): boolean => {
+  if (!attribute) {
+    return false;
+  }
+
+  // Match server `isLocalizedAttribute`: relations and uids are always locale-specific
+  // even when they omit `pluginOptions.i18n.localized` (CTB never offers that checkbox).
+  if (attribute.type === 'relation' || attribute.type === 'uid') {
+    return false;
+  }
+
+  const i18nOptions = attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined;
+
+  // Only explicit `localized: true` is localizable for other attribute types.
+  return i18nOptions?.i18n?.localized !== true;
+};
+
+/**
  * @internal
  * True when a field should be locked because it is not locale-specific and the
  * editor is on a non-default locale that already has a default-locale entry.
@@ -121,20 +145,12 @@ const useShouldLockNonLocalizedField = (
     return false;
   }
 
-  if (!attribute) {
-    return false;
-  }
-
-  // Match server `isLocalizedAttribute`: relations and uids are always locale-specific
-  // even when they omit `pluginOptions.i18n.localized` (CTB never offers that checkbox).
-  if (attribute.type === 'relation' || attribute.type === 'uid') {
-    return false;
-  }
-
-  const i18nOptions = attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined;
-
-  // Only explicit `localized: true` is localizable for other attribute types.
-  return i18nOptions?.i18n?.localized !== true;
+  return isSharedI18nAttribute(attribute);
 };
 
-export { useHasDefaultLocaleEntry, useIsEditingDefaultLocale, useShouldLockNonLocalizedField };
+export {
+  isSharedI18nAttribute,
+  useHasDefaultLocaleEntry,
+  useIsEditingDefaultLocale,
+  useShouldLockNonLocalizedField,
+};

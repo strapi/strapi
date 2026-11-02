@@ -2,7 +2,7 @@
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import {
   unstable_useHasDefaultLocaleEntry as useHasDefaultLocaleEntry,
-  useI18nSharedFieldsLock,
+  unstable_useI18nSharedFieldsLock as useI18nSharedFieldsLock,
 } from '@strapi/content-manager/strapi-admin';
 import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';
 import { Earth, Lock } from '@strapi/icons';
