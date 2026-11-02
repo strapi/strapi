@@ -99,6 +99,7 @@ const mockDataManager = ({
   deleteFolderAndContent() {},
   assignContentTypeToFolder() {},
   reorderFolderChildren() {},
+  setContentTypeIndexes() {},
   ...overrides,
   history: {
     canUndo: true,

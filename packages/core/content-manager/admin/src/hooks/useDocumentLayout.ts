@@ -64,6 +64,8 @@ interface EditFieldSharedProps
   label: string;
   size: number;
   unique?: boolean;
+  /** True when this attribute is in the content type's custom unique indexes (shows Available/Unavailable). */
+  hasUniqueIndex?: boolean;
   visible?: boolean;
 }
 
@@ -356,7 +358,8 @@ const formatEditLayout = (
     schema?.attributes,
     data.contentType.metadatas,
     { configurations: data.components, schemas: components },
-    schemas
+    schemas,
+    schema?.indexes as ContentTypeIndex[] | undefined
   ).reduce<Array<EditFieldLayout[][]>>((panels, row) => {
     if (row.some((field) => field.type === 'dynamiczone')) {
       panels.push([row]);
@@ -435,6 +438,8 @@ const formatEditLayout = (
  * and formats it into a generic object that can be used to correctly render
  * the form fields.
  */
+type ContentTypeIndex = { type?: string; attributes?: string[] };
+
 const convertEditLayoutToFieldLayouts = (
   rows: LayoutData['contentType']['layouts']['edit'],
   attributes: Schema['attributes'] = {},
@@ -443,8 +448,17 @@ const convertEditLayoutToFieldLayouts = (
     configurations: Record<string, ComponentConfiguration>;
     schemas: ComponentsDictionary;
   },
-  schemas: Schema[] = []
+  schemas: Schema[] = [],
+  contentTypeIndexes?: ContentTypeIndex[]
 ) => {
+  const hasUniqueIndex = (fieldName: string) =>
+    !!contentTypeIndexes?.some(
+      (idx) =>
+        idx?.type === 'unique' &&
+        Array.isArray(idx?.attributes) &&
+        idx.attributes.includes(fieldName)
+    );
+
   return rows.map((row) =>
     row
       .map((field) => {
@@ -469,6 +483,7 @@ const convertEditLayoutToFieldLayouts = (
         return {
           attribute,
           disabled: !metadata.editable,
+          hasUniqueIndex: hasUniqueIndex(field.name),
           hint: metadata.description,
           label: metadata.label ?? '',
           name: field.name,

@@ -616,6 +616,10 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         dispatch(actions.updateSchema({ ...rest, folder: toFolderAssignment(folder) }));
       },
 
+      setContentTypeIndexes({ uid, indexes }) {
+        dispatch(actions.setContentTypeIndexes({ uid, indexes }));
+      },
+
       moveAttribute(args) {
         dispatch(actions.moveAttribute(args));
       },

@@ -217,6 +217,14 @@ class Database {
   }
 
   /**
+   * Returns the current transaction if the caller is running inside a transaction callback.
+   * Use this to run ad-hoc queries (e.g. on non-entity tables) in the same transaction.
+   */
+  getTransaction(): Knex.Transaction | undefined {
+    return transactionCtx.get() ?? undefined;
+  }
+
+  /**
    * Labels pool timeout reports raised while `fn` runs, for example "schema sync". Nested calls
    * restore the outer label. Calls that overlap without nesting can restore the wrong label; core
    * only nests them (schema sync, then a migration).
