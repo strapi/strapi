@@ -65,6 +65,8 @@ A nested transaction has no savepoint of its own: an error inside it that is cau
 
 To undo only part of a transaction, run it in `strapi.db.savepoint`. If the callback throws, its writes are rolled back, the `onCommit` callbacks registered inside it are dropped (its `onRollback` callbacks run), and the error is rethrown; the transaction stays usable, on Postgres also after a database error. On MySQL, a deadlock rolls back the whole transaction, not just the savepoint. If it resolves, its writes and callbacks join the transaction. It throws outside a transaction.
 
+If the database rejects releasing the savepoint or rolling back to it, typically because it already rolled back the whole transaction (a MySQL deadlock, or a lock wait timeout with `innodb_rollback_on_timeout`), `savepoint` throws a `SavepointError` (`errors.SavepointError` from `@strapi/database`), after running the savepoint's `onRollback` callbacks. Its `cause` is the database's error, and `details.error` what the callback threw, if it threw. Knex itself resolves a savepoint's `commit()`/`rollback()` in that case: only the transactor's `executionPromise` rejects, and on MySQL not even that for a savepoint that no longer exists (`ER_SP_DOES_NOT_EXIST`), which knex takes for an implicit commit by DDL and only logs as `Transaction was implicitly committed`. `savepoint` reads the error from the transactor's `query-error` event instead. Without this, the caller would go on as if the savepoint had ended, on MySQL outside any transaction. Don't catch it to carry on: let the transaction fail with it.
+
 ```js
 await strapi.db.transaction(async () => {
   for (const entry of entries) {
