@@ -86,14 +86,25 @@ yarn test:e2e --domains admin -- login.spec.ts --debug
 
 ### Concurrency / parallelization
 
-The runner uses `min(number of selected domains, concurrency)` **test apps** (`test-apps/e2e/test-app-*`), each bound to a port `8000 + index` within a batch. **`concurrency` defaults** to the number of domain folders under `tests/e2e/tests/` (not the count after `--domains`). Domains are chunked into batches of that size: domains in a batch run **in parallel**, batches run **one after another**. Spec files **inside** a domain are **serial** (`workers: 1`, `fullyParallel: false` in `playwright.base.config.js`).
+The runner uses `min(number of selected domains, concurrency)` **test apps** (`test-apps/e2e/test-app-*`), each bound to port `E2E_PORT_BASE + index`. `E2E_PORT_BASE` defaults to `8000`; set another base (for example `E2E_PORT_BASE=8300`) to run two e2e runs on one machine, such as from two worktrees. **`concurrency` defaults** to the number of domain folders under `tests/e2e/tests/` (not the count after `--domains`). The test apps run **in parallel**: each one takes the next domain as soon as it is free, heaviest domains first. A failing domain doesn't stop the others; the run fails at the end. CI runs two test apps per job (`--concurrency=2` in `.github/actions/run-e2e-tests/script.sh`). Spec files **inside** a domain are **serial** (`workers: 1`, `fullyParallel: false` in `playwright.base.config.js`).
 
 ```shell
 # run at most one domain at a time (simplest logs; fully serial domains)
 yarn test:e2e -c 1
 
-# example: at most three domains at once, then the next three, etc.
+# example: at most three domains at once
 yarn test:e2e -c 3
+```
+
+### Sharding by duration
+
+CI passes `--shard=i/n` after the inner `--`. When `tests/e2e/shard-weights.json` has weights for the edition and browser, the runner splits the spec files itself instead of letting Playwright split each domain by file count: `tests/utils/runners/shard-plan.js` packs every `(domain, spec file)` pair, weighted by its measured seconds, into `n × test apps` lanes, heaviest first. Each domain a lane runs also costs about 20 seconds to start and stop Strapi, so short files join a lane that already runs their domain. Every shard computes the same plan, so each file runs exactly once. A spec with no weight yet counts as a typical (median) file. Without weights, the runner falls back to Playwright's own `--shard`.
+
+The weights go stale as specs are added, split or sped up. The e2e jobs upload their JUnit reports as `<edition>-e2e-junit-<browser>-<job index>` artifacts (kept 7 days). To regenerate the file, download them from a few recent develop runs with no flaky retries and average them:
+
+```shell
+gh run download <run-id> --repo strapi/strapi --pattern '*-e2e-junit-*' --dir /tmp/junit-<run-id>
+node tests/scripts/e2e-shard-weights.js /tmp/junit-<run-id> /tmp/junit-<other-run-id>
 ```
 
 ### Env Variables to Control Test Config

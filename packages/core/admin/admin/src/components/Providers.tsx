@@ -52,9 +52,9 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
         <QueryClientProvider client={queryClient}>
           <LanguageProvider messages={strapi.configurations.translations}>
             <Theme themes={strapi.configurations.themes}>
-              <AuthProvider>
-                <HistoryProvider>
-                  <NotificationsProvider>
+              <NotificationsProvider>
+                <AuthProvider>
+                  <HistoryProvider>
                     <TrackingProvider>
                       <GuidedTourProvider>
                         <ConfigurationProvider
@@ -66,9 +66,9 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                         </ConfigurationProvider>
                       </GuidedTourProvider>
                     </TrackingProvider>
-                  </NotificationsProvider>
-                </HistoryProvider>
-              </AuthProvider>
+                  </HistoryProvider>
+                </AuthProvider>
+              </NotificationsProvider>
             </Theme>
           </LanguageProvider>
         </QueryClientProvider>
