@@ -85,11 +85,13 @@ jest.mock('../../FormModalHeader', () => ({
 jest.mock('../../FormModalSubHeader', () => ({ FormModalSubHeader: () => null }));
 jest.mock('../../FormModalEndActions', () => ({ FormModalEndActions: () => null }));
 
-const setup = ({ isDirty }: { isDirty: boolean }) => {
+const setup = ({ isDirty, state }: { isDirty?: boolean; state?: Partial<typeof initialState> }) => {
   mockReducerState = {
     ...initialState,
     initialData: { displayName: 'Article' },
+    pristineData: { displayName: 'Article' },
     modifiedData: { displayName: isDirty ? 'Post' : 'Article' },
+    ...state,
   };
 
   const user = userEvent.setup();
@@ -127,6 +129,39 @@ describe('FormModal unsaved changes', () => {
 
     expect(mockOnCloseModal).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('closes immediately when a new field only holds its type defaults', async () => {
+    // Create flows seed `modifiedData` with defaults while `initialData` stays empty.
+    const { user } = setup({
+      state: {
+        initialData: {},
+        pristineData: { type: 'string', default: null },
+        modifiedData: { type: 'string', default: null },
+      },
+    });
+
+    await screen.findByRole('dialog', { name: 'Edit Article' });
+    await user.keyboard('[Escape]');
+
+    expect(mockOnCloseModal).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('asks for confirmation once a new field is edited past its type defaults', async () => {
+    const { user } = setup({
+      state: {
+        initialData: {},
+        pristineData: { type: 'string', default: null },
+        modifiedData: { type: 'string', default: null, name: 'title' },
+      },
+    });
+
+    await screen.findByRole('dialog', { name: 'Edit Article' });
+    await user.keyboard('[Escape]');
+
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent(UNSAVED_MESSAGE);
+    expect(mockOnCloseModal).not.toHaveBeenCalled();
   });
 
   it('asks for confirmation from Cancel when something changed', async () => {

@@ -180,6 +180,7 @@ export const FormModal = () => {
     initialData,
     isCreatingComponentWhileAddingAField,
     modifiedData,
+    pristineData,
   } = reducerState;
 
   const type =
@@ -1253,7 +1254,7 @@ export const FormModal = () => {
     <UnsavedChangesModal
       open={isOpen}
       onOpenChange={handleClosed}
-      hasUnsavedChanges={!isEqual(modifiedData, initialData)}
+      hasUnsavedChanges={!isEqual(modifiedData, pristineData)}
     >
       <Modal.Content>
         <Dialog.Root open={showWarningDialog} onOpenChange={setShowWarningDialog}>
