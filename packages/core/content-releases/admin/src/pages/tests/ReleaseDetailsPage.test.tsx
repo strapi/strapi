@@ -235,7 +235,7 @@ describe('Create release from skipped entries', () => {
       ...mockReleaseDetailsPageData.withActionsAndPublishedHeaderData.data,
       status: 'partial',
       releaseCondition: 'allow_partial',
-      failureReason: null,
+      failureReason: null as string | null,
     },
   };
 
@@ -363,6 +363,51 @@ describe('Create release from skipped entries', () => {
     expect(
       screen.queryByRole('button', { name: 'Create release from skipped entries' })
     ).not.toBeInTheDocument();
+  });
+
+  describe('Delete after a run', () => {
+    const failedRelease = {
+      data: { ...partialRelease.data, status: 'failed', failureReason: 'missed_schedule' },
+    };
+
+    const allow = (canDelete: boolean) =>
+      jest.mocked(useRBAC).mockReturnValue({
+        isLoading: false,
+        allowedActions: { canCreate: true, canCreateAction: true, canDelete },
+      } as unknown as ReturnType<typeof useRBAC>);
+
+    it('offers to delete a release whose run failed, behind a confirmation', async () => {
+      allow(true);
+      mockRelease(failedRelease, []);
+
+      const { user } = renderPage();
+
+      const deleteButton = await screen.findByRole('button', { name: 'Delete' });
+      expect(deleteButton).toBeEnabled();
+      expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
+
+      await user.click(deleteButton);
+      expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+    });
+
+    it("disables it for a user who can't delete", async () => {
+      allow(false);
+      mockRelease(failedRelease, []);
+
+      renderPage();
+
+      expect(await screen.findByRole('button', { name: 'Delete' })).toBeDisabled();
+    });
+
+    it("doesn't offer it for a release that ran", async () => {
+      allow(true);
+      mockRelease(partialRelease, [skippedAction(1, { id: 1, documentId: 'doc-1' })]);
+
+      renderPage();
+
+      await screen.findByRole('button', { name: 'Create release from skipped entries' });
+      expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+    });
   });
 });
 

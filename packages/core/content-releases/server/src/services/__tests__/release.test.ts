@@ -1876,7 +1876,10 @@ describe('Release service', () => {
       jest.clearAllMocks();
     });
 
-    const setup = (locked: { releasedAt: Date | null } | undefined, stored = {}) => {
+    const setup = (
+      locked: { releasedAt: Date | null; status?: string } | undefined,
+      stored = {}
+    ) => {
       const queries = {
         findOne: jest.fn().mockResolvedValue({ id: 1, name: 'test', actions: [], ...stored }),
         deleteMany: jest.fn(),
@@ -1905,12 +1908,27 @@ describe('Release service', () => {
       expect(queries.delete).not.toHaveBeenCalled();
     });
 
-    it('throws an error, and deletes nothing, if the release is already published', async () => {
-      const { releaseService, queries } = setup({ releasedAt: new Date() });
+    it.each(['done', 'partial'])(
+      'throws an error, and deletes nothing, if the release ran as %s',
+      async (status) => {
+        const { releaseService, queries } = setup({ releasedAt: new Date(), status });
 
-      await expect(releaseService.delete(1)).rejects.toThrow('Release already published');
-      expect(queries.deleteMany).not.toHaveBeenCalled();
-      expect(queries.delete).not.toHaveBeenCalled();
+        await expect(releaseService.delete(1)).rejects.toThrow('Release already published');
+        expect(queries.deleteMany).not.toHaveBeenCalled();
+        expect(queries.delete).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      ['failed', { releasedAt: new Date(), status: 'failed' }],
+      ['failed before the upgrade', { releasedAt: null, status: 'failed' }],
+    ])('deletes a release that %s', async (_, locked) => {
+      const { releaseService, queries } = setup(locked, { actions: [{ id: 5 }] });
+
+      await releaseService.delete(1);
+
+      expect(queries.deleteMany).toHaveBeenCalledWith({ where: { id: { $in: [5] } } });
+      expect(queries.delete).toHaveBeenCalledWith({ where: { id: 1 } });
     });
 
     it('removes the scheduling if the release is scheduled', async () => {

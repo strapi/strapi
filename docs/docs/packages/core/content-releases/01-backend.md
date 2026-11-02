@@ -27,7 +27,7 @@ The `Release` content type stores all the information about a release and its as
 packages/core/content-releases/server/src/content-types/release/schema.ts
 ```
 
-`releasedAt` is when the release ran, or when the overdue sweep froze it without running (see [Overdue releases](#overdue-releases)). A release with `releasedAt` set is frozen: it can't be edited, deleted or published again, and it no longer counts as pending. On a "Failed" release nothing went live, except on one that failed before the upgrade, which may have released some entries.
+`releasedAt` is when the release ran, or when the overdue sweep froze it without running (see [Overdue releases](#overdue-releases)). A release with `releasedAt` set is frozen: it can't be edited, published again or gain, lose or change entries, and it no longer counts as pending. Only a "Failed" one can still be deleted (`DELETE` on a "Done" or "Partial" release is refused with `Release already published`), so a release that released nothing doesn't stay in the list for good. On a "Failed" release nothing went live, except on one that failed before the upgrade, which may have released some entries.
 
 ### Release Action
 
@@ -120,6 +120,7 @@ packages/core/content-releases/server/src/routes/release.ts
 
 - method: `DELETE`
 - endpoint: `/content-releases/:id`
+- a planned or "Failed" release (any `failureReason`) can be deleted; a "Done" or "Partial" one is refused with a 400: `Release already published`
 
 **Publish a release**:
 
@@ -308,7 +309,7 @@ Upon adding an entry to a release, its status is recalculated to either "Ready" 
 
 The recalculations below only apply to a planned release. `updateReleaseStatus` also leaves alone a `failed` release without `releasedAt`, which failed before the upgrade and is left for the overdue sweep. It reads the release under its row lock, so its counts are those of the last committed change and it can't overwrite a newer status. The stored validity has no such guarantee: two overlapping re-checks of an entry can leave the older draft's validity until the next one.
 
-Changing a release's entries through the API writes the change and the recalculated status in one transaction, under the release lock: if the recalculation fails, the change is rolled back, and a release that ran is refused (`Release already published`). Editing or deleting the release takes the same lock, so one frozen while the request was in flight is refused. Editing, discarding or deleting the entry recalculates in the background (see "Listening to events on entries").
+Changing a release's entries through the API writes the change and the recalculated status in one transaction, under the release lock: if the recalculation fails, the change is rolled back, and a release that ran is refused (`Release already published`). Editing or deleting the release takes the same lock, so one frozen while the request was in flight is refused (deleting only when it froze as "Done" or "Partial"). Editing, discarding or deleting the entry recalculates in the background (see "Listening to events on entries").
 
 #### Removing an entry from a release:
 
