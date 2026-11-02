@@ -44,7 +44,7 @@ In both cases, if we want to set a custom retention days we can modify the Admin
 
 ### Export
 
-Audit logs can be exported as a single CSV file from the list view. The export honours the active filters and requires both the `admin::audit-logs.read` and `admin::audit-logs.export` permissions. Every export also records an `audit-log.export` event.
+Audit logs can be exported as a single CSV file from the list view. The export honours the active filters and requires both the `admin::audit-logs.read` and `admin::audit-logs.export` permissions. Every export also records an `audit-log.export` event. A date filter matches a day, or a minute when a time is picked: the list and the export send it as bounds. Read [Filters](../filters.md).
 
 By default, the export refuses to start when the matching set exceeds the maximum number of rows: 1,000,000. Self-hosted projects can change this limit with the `admin.auditLogs.exportMaxRows` configuration variable in the Admin Panel API config file (`./config/admin.js`).
 
