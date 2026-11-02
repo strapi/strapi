@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Context } from 'koa';
 
 import createSchemaController from '../schema';
+import { createReloader, flushReload } from './reloader.test.utils';
 
 const schemaService = vi.hoisted(() => ({
   updateSchema: vi.fn(),
@@ -25,20 +26,14 @@ const createContext = () =>
     conflict: vi.fn(),
   }) as unknown as Context;
 
-// The controller schedules the reload in a `setImmediate` after a successful update
-const flushReload = () =>
-  new Promise((resolve) => {
-    setImmediate(resolve);
-  });
-
 describe('schema controller', () => {
-  let reload: ReturnType<typeof vi.fn> & { isWatching: boolean };
+  let reloader: ReturnType<typeof createReloader>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     validateUpdateSchema.mockResolvedValue({ data });
-    reload = Object.assign(vi.fn(), { isWatching: true });
-    (global as any).strapi = { reload };
+    reloader = createReloader();
+    (global as any).strapi = { reload: reloader.reload };
   });
 
   describe('updateSchema', () => {
@@ -50,21 +45,21 @@ describe('schema controller', () => {
       await controller.updateSchema(ctx);
 
       expect(ctx.send).toHaveBeenCalledWith({ error: 'refused' }, 400);
-      expect(reload.isWatching).toBe(true);
+      expect(reloader.reload.isWatching).toBe(true);
     });
 
-    it('accepts a new update after a refused one', async () => {
+    it('restarts the server after a valid update that follows a refused one', async () => {
       schemaService.updateSchema.mockRejectedValueOnce(new Error('refused'));
       const controller = createSchemaController();
 
       await controller.updateSchema(createContext());
       const ctx = createContext();
       await controller.updateSchema(ctx);
-
       await flushReload();
 
       expect(ctx.conflict).not.toHaveBeenCalled();
       expect(schemaService.updateSchema).toHaveBeenCalledTimes(2);
+      expect(reloader.send).toHaveBeenCalledWith('reload');
     });
 
     it('keeps the watcher off until the server restarts after a successful update', async () => {
@@ -76,12 +71,12 @@ describe('schema controller', () => {
       await flushReload();
 
       expect(ctx.body).toEqual({});
-      expect(reload.isWatching).toBe(false);
-      expect(reload).toHaveBeenCalledTimes(1);
+      expect(reloader.reload.isWatching).toBe(false);
+      expect(reloader.send).toHaveBeenCalledTimes(1);
     });
 
     it('leaves the watcher alone when the payload is invalid', async () => {
-      reload.isWatching = false;
+      reloader.reload.isWatching = false;
       validateUpdateSchema.mockRejectedValueOnce(new Error('invalid'));
       const controller = createSchemaController();
       const ctx = createContext();
@@ -90,7 +85,7 @@ describe('schema controller', () => {
 
       expect(ctx.send).toHaveBeenCalledWith({ error: 'invalid' }, 400);
       expect(schemaService.updateSchema).not.toHaveBeenCalled();
-      expect(reload.isWatching).toBe(false);
+      expect(reloader.reload.isWatching).toBe(false);
     });
   });
 });
