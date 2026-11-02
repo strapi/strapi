@@ -405,7 +405,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       return commitWithReleaseStatus(releaseId, (release) => writeAction(release, prepared));
     },
 
-    // Entries already in the release are skipped and counted
+    // Entries already in the release, or listed earlier in the batch, are skipped and counted
     async createMany(
       releaseId: CreateManyReleaseActions.Request['params']['releaseId'],
       actions: CreateManyReleaseActions.Request['body']
@@ -422,11 +422,26 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
           }
         })
       );
-      const prepared = preparedOrSkipped.filter((action) => action !== null);
+
+      // By the prepared entry: a single type's document is only known once prepared
+      const prepared = new Map<string, PreparedAction>();
+      for (const preparedAction of preparedOrSkipped) {
+        if (!preparedAction) {
+          continue;
+        }
+
+        const { contentType, entryDocumentId, locale } = preparedAction.action;
+        const key = getEntryKey(contentType, entryDocumentId, locale);
+        if (!prepared.has(key)) {
+          prepared.set(key, preparedAction);
+        }
+      }
 
       return commitWithReleaseStatus(releaseId, async (release) => ({
-        created: await Promise.all(prepared.map((action) => writeAction(release, action))),
-        alreadyInRelease: actions.length - prepared.length,
+        created: await Promise.all(
+          [...prepared.values()].map((action) => writeAction(release, action))
+        ),
+        alreadyInRelease: actions.length - prepared.size,
       }));
     },
 
