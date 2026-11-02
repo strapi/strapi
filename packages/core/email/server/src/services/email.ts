@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { difference, template as lodashTemplate } from 'lodash';
 import { objects, template } from '@strapi/utils';
 
 import type {
@@ -28,7 +28,7 @@ const sendTemplatedEmail = (
   data: EmailTemplateData
 ) => {
   const attributes = ['subject', 'text', 'html'];
-  const missingAttributes = _.difference(attributes, Object.keys(emailTemplate));
+  const missingAttributes = difference(attributes, Object.keys(emailTemplate));
 
   if (missingAttributes.length > 0) {
     throw new Error(
@@ -43,7 +43,7 @@ const sendTemplatedEmail = (
     (compiled, attribute) =>
       emailTemplate[attribute]
         ? Object.assign(compiled, {
-            [attribute]: _.template(emailTemplate[attribute], {
+            [attribute]: lodashTemplate(emailTemplate[attribute], {
               interpolate,
             })(data),
           })

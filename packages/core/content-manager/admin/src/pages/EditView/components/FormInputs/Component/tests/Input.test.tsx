@@ -20,6 +20,15 @@ jest.mock('../../../../../../hooks/useDocument', () => ({
 }));
 
 /**
+ * The global `IntersectionObserver` mock never reports an intersection, and the relations of a
+ * field are only fetched once it is close to the viewport.
+ */
+jest.mock('../../../../../../hooks/useHasBeenNearViewport', () => ({
+  ...jest.requireActual('../../../../../../hooks/useHasBeenNearViewport'),
+  useHasBeenNearViewport: () => true,
+}));
+
+/**
  * The copy itself is covered by the modal tests, here it hands the field a ready-made copy.
  */
 const mockCopy = {

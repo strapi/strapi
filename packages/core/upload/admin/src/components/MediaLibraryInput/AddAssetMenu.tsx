@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { Menu } from '@strapi/design-system';
 import { ChevronDown, Images, Link, Upload } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -6,6 +8,8 @@ import { styled } from 'styled-components';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { ActionsMenuContent } from '../../pages/Assets/components/ActionsMenuContent';
 import { getTranslationKey } from '../../utils/translations';
+
+import { FieldMenuItem } from './FieldControls';
 
 // The trigger reads as a link on the label row, not as a button: no padding, no
 // ghost background, primary text. `Menu.Trigger` takes no `textColor`, so the
@@ -62,6 +66,12 @@ const AddAssetTrigger = styled(Menu.Trigger)`
 
 interface AddAssetMenuProps {
   disabled?: boolean;
+  /**
+   * Ignore requests to open, without looking disabled. The press still reaches
+   * whatever listens for presses outside it, so an open drawer closes — or asks
+   * about unsaved edits — instead of having the menu stacked over it.
+   */
+  preventOpen?: boolean;
   onBrowseLibrary: () => void;
   onUploadFromDevice: () => void;
   onUploadFromUrl: () => void;
@@ -80,12 +90,14 @@ interface AddAssetMenuProps {
  */
 export const AddAssetMenu = ({
   disabled = false,
+  preventOpen = false,
   onBrowseLibrary,
   onUploadFromDevice,
   onUploadFromUrl,
 }: AddAssetMenuProps) => {
   const { formatMessage } = useIntl();
   const { canRead, canCreate, isLoading } = useMediaLibraryPermissions();
+  const [isOpen, setIsOpen] = useState(false);
 
   // `useRBAC` starts every instance at `isLoading: true` with the flags false.
   // Until it settles, every entry shows but none can be picked: hiding them
@@ -98,7 +110,7 @@ export const AddAssetMenu = ({
   }
 
   return (
-    <Menu.Root>
+    <Menu.Root open={isOpen} onOpenChange={(open) => setIsOpen(open && !preventOpen)}>
       <AddAssetTrigger variant="ghost" disabled={disabled} endIcon={<ChevronDown aria-hidden />}>
         {formatMessage({
           id: getTranslationKey('content-manager.input.add-asset'),
@@ -108,29 +120,33 @@ export const AddAssetMenu = ({
 
       <ActionsMenuContent popoverPlacement="bottom-end" zIndex={2} minWidth="22rem">
         {canBrowse && (
-          <Menu.Item startIcon={<Images />} disabled={isLoading} onSelect={onBrowseLibrary}>
+          <FieldMenuItem startIcon={<Images />} disabled={isLoading} onSelect={onBrowseLibrary}>
             {formatMessage({
               id: getTranslationKey('content-manager.input.add-asset.browse'),
               defaultMessage: 'Browse library',
             })}
-          </Menu.Item>
+          </FieldMenuItem>
         )}
 
         {canUpload && (
           <>
-            <Menu.Item startIcon={<Upload />} disabled={isLoading} onSelect={onUploadFromDevice}>
+            <FieldMenuItem
+              startIcon={<Upload />}
+              disabled={isLoading}
+              onSelect={onUploadFromDevice}
+            >
               {formatMessage({
                 id: getTranslationKey('content-manager.input.add-asset.device'),
                 defaultMessage: 'Upload from device',
               })}
-            </Menu.Item>
+            </FieldMenuItem>
 
-            <Menu.Item startIcon={<Link />} disabled={isLoading} onSelect={onUploadFromUrl}>
+            <FieldMenuItem startIcon={<Link />} disabled={isLoading} onSelect={onUploadFromUrl}>
               {formatMessage({
                 id: getTranslationKey('content-manager.input.add-asset.url'),
                 defaultMessage: 'Upload from URL',
               })}
-            </Menu.Item>
+            </FieldMenuItem>
           </>
         )}
       </ActionsMenuContent>
