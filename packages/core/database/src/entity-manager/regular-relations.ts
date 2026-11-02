@@ -182,7 +182,14 @@ const deleteRelations = async ({
   const { joinColumn, inverseJoinColumn } = joinTable;
   const all = relIdsToDelete === 'all';
 
-  if (hasOrderColumn(attribute) || hasInverseOrderColumn(attribute)) {
+  // Removing every relation of the entity leaves no row on its side to renumber, and the other
+  // side only has order values to fix when the relation is bidirectional. Everything else needs
+  // the batched deletion below, which renumbers the order columns as it goes.
+  const deletesEverything = all && isEmpty(relIdsToNotDelete);
+  const needsOrderCleanup =
+    hasInverseOrderColumn(attribute) || (hasOrderColumn(attribute) && !deletesEverything);
+
+  if (needsOrderCleanup) {
     let lastId: ID = 0;
     let done = false;
     const batchSize = 100;

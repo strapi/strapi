@@ -18,6 +18,21 @@ const withStrapiSchema = (editor: Editor) => {
   editor.normalizeNode = (entry) => {
     const [node, path] = entry;
 
+    /**
+     * A document with no block leaves nowhere to put the cursor, and every toolbar
+     * action and key handler acts on the selection. Deleting every block (e.g.
+     * several selected images) gets back the empty paragraph a new document starts with.
+     */
+    if (Editor.isEditor(node) && node.children.length === 0) {
+      Transforms.insertNodes(
+        editor,
+        { type: 'paragraph', children: [{ type: 'text', text: '' }] },
+        { at: [0], select: true }
+      );
+
+      return;
+    }
+
     if (!Element.isElement(node) && !isText(node)) {
       Transforms.setNodes(editor, { type: 'text' }, { at: path });
 

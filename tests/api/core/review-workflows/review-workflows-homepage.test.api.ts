@@ -129,4 +129,22 @@ describeOnCondition(edition === 'EE')('Review Workflows Homepage API', () => {
       'The mitochondria is the powerhouse of the cell'
     );
   });
+
+  test('returns a null stage for an assigned document whose workflow was deleted', async () => {
+    // The article from the previous test is still assigned to the current user
+    const deleteResponse = await rq({
+      method: 'DELETE',
+      url: `/review-workflows/workflows/${testWorkflow.id}`,
+    });
+    expect(deleteResponse.statusCode).toBe(200);
+
+    const response = await rq({
+      method: 'GET',
+      url: '/review-workflows/homepage/recently-assigned-documents',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].strapi_stage).toBeNull();
+  });
 });

@@ -1,9 +1,9 @@
 import type { Core, Schema } from '@strapi/types';
 
 import { contentTypes, contentTypes as contentTypeUtils } from '@strapi/utils';
-import * as z from 'zod/v4';
 import type { QueryParam } from './validation/content-type';
 
+import { collectionResponseSchema, documentResponseSchema } from './response';
 import { CoreContentTypeRouteValidator } from './validation';
 
 export const createRoutes = ({
@@ -37,7 +37,7 @@ const getSingleTypeRoutes = (
       request: {
         query: validator.queryParams(['fields', 'populate', 'filters', ...conditionalQueryParams]),
       },
-      response: z.object({ data: validator.document }),
+      response: documentResponseSchema(validator.document),
       config: {},
     },
     update: {
@@ -48,7 +48,7 @@ const getSingleTypeRoutes = (
         query: validator.queryParams(['fields', 'populate', ...conditionalQueryParams]),
         body: { 'application/json': validator.partialBody },
       },
-      response: z.object({ data: validator.document }),
+      response: documentResponseSchema(validator.document),
       config: {},
     },
     delete: {
@@ -58,7 +58,7 @@ const getSingleTypeRoutes = (
       request: {
         query: validator.queryParams(['fields', 'populate', ...conditionalQueryParams]),
       },
-      response: z.object({ data: validator.document }),
+      response: documentResponseSchema(validator.document),
       config: {},
     },
   };
@@ -89,7 +89,7 @@ const getCollectionTypeRoutes = (
           ...conditionalQueryParams,
         ]),
       },
-      response: z.object({ data: validator.documents }),
+      response: collectionResponseSchema(validator.documents),
       config: {},
     },
     findOne: {
@@ -106,7 +106,7 @@ const getCollectionTypeRoutes = (
           ...conditionalQueryParams,
         ]),
       },
-      response: z.object({ data: validator.document }),
+      response: documentResponseSchema(validator.document),
     },
     create: {
       method: 'POST',
@@ -116,7 +116,7 @@ const getCollectionTypeRoutes = (
         query: validator.queryParams(['fields', 'populate', ...conditionalQueryParams]),
         body: { 'application/json': validator.body },
       },
-      response: z.object({ data: validator.document }),
+      response: documentResponseSchema(validator.document),
       config: {},
     },
     update: {
@@ -128,7 +128,7 @@ const getCollectionTypeRoutes = (
         params: { id: validator.documentID },
         body: { 'application/json': validator.partialBody },
       },
-      response: z.object({ data: validator.document }),
+      response: documentResponseSchema(validator.document),
     },
     delete: {
       method: 'DELETE',
@@ -138,7 +138,7 @@ const getCollectionTypeRoutes = (
         query: validator.queryParams(['fields', 'populate', 'filters', ...conditionalQueryParams]),
         params: { id: validator.documentID },
       },
-      response: z.object({ data: validator.document }),
+      response: documentResponseSchema(validator.document),
     },
   };
 };

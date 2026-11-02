@@ -11,7 +11,13 @@ export const createMiddlewareManager = () => {
     use(middleware: Middleware) {
       middlewares.push(middleware);
 
-      return () => middlewares.splice(middlewares.indexOf(middleware), 1);
+      return () => {
+        const index = middlewares.indexOf(middleware);
+
+        if (index >= 0) {
+          middlewares.splice(index, 1);
+        }
+      };
     },
 
     async run(ctx: any, cb: () => void) {

@@ -66,6 +66,46 @@ describe('Configure the List View', () => {
     expect(screen.getByRole('button', { name: 'Add a field' })).toBeInTheDocument();
   });
 
+  describe('custom order', () => {
+    afterEach(() => {
+      window.strapi.future = {
+        isEnabled: () => false,
+      };
+    });
+
+    it('is not offered while its future flag is off', async () => {
+      render();
+
+      await screen.findByRole('heading', { name: 'Configure the view - Address' });
+
+      expect(
+        screen.queryByRole('checkbox', { name: 'Enable custom order' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('takes over the default sort when it is turned on', async () => {
+      window.strapi.future = {
+        isEnabled: () => true,
+      };
+
+      render();
+
+      await screen.findByRole('heading', { name: 'Configure the view - Address' });
+
+      const defaultSortBy = screen.getByRole('combobox', { name: 'Default sort attribute' });
+      const defaultSortOrder = screen.getByRole('combobox', { name: 'Default sort order' });
+
+      expect(defaultSortBy).not.toHaveAttribute('aria-disabled');
+      expect(defaultSortOrder).not.toHaveAttribute('aria-disabled');
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Enable custom order' }));
+
+      expect(screen.getByRole('checkbox', { name: 'Enable custom order' })).toBeChecked();
+      expect(defaultSortBy).toHaveAttribute('aria-disabled', 'true');
+      expect(defaultSortOrder).toHaveAttribute('aria-disabled', 'true');
+    });
+  });
+
   it('should add field', async () => {
     const { getByRole, user, findByRole } = render();
 
