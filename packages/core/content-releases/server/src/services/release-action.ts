@@ -190,6 +190,32 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   };
 
+  // When each publish action's draft was last saved, by entry: tells whether a draft changed
+  // between two reads
+  const readDraftVersions = async (actions: ReleaseAction[]) => {
+    const versions = new Map<string, string | null>();
+
+    for (const { type, contentType, entryDocumentId, locale } of actions) {
+      const key = getEntryKey(contentType, entryDocumentId, locale);
+      if (type !== 'publish' || versions.has(key)) {
+        continue;
+      }
+
+      const params = {
+        locale: locale ?? undefined,
+        status: 'draft' as const,
+        fields: ['updatedAt'],
+      };
+      const draft = entryDocumentId
+        ? await strapi.documents(contentType).findOne({ ...params, documentId: entryDocumentId })
+        : await strapi.documents(contentType).findFirst(params);
+
+      versions.set(key, draft?.updatedAt ? new Date(draft.updatedAt).toISOString() : null);
+    }
+
+    return versions;
+  };
+
   /**
    * Stores the current validity of the planned actions matching `where` (an unpublish action
    * stored as invalid by an earlier version becomes valid), then recalculates their releases'
@@ -203,13 +229,28 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         populate: { release: { select: ['id'] } },
       });
 
-    // The drafts are read before taking any lock
+    // The drafts are checked before taking any lock. Their versions are read first, so a save
+    // during the check shows as a change.
+    const checkedVersions = await readDraftVersions(actions);
     const publishValidities = await getValidityForActions(actions, { strapi });
 
     await changePlannedActionsByRelease(actions, async (releaseActions) => {
+      // A draft saved since its check, e.g. by a request whose own revalidation already stored
+      // its result, is checked again under the lock: storing the older result would undo it
+      const lockedVersions = await readDraftVersions(releaseActions);
+      const changedActions = releaseActions.filter(({ contentType, entryDocumentId, locale }) => {
+        const key = getEntryKey(contentType, entryDocumentId, locale);
+
+        return lockedVersions.has(key) && lockedVersions.get(key) !== checkedVersions.get(key);
+      });
+      const recheckedValidities =
+        changedActions.length > 0
+          ? await getValidityForActions(changedActions, { strapi })
+          : new Map<ReleaseAction['id'], EntryValidity>();
+
       const releaseValidities = new Map<ReleaseAction['id'], EntryValidity>();
       for (const action of releaseActions) {
-        const validity = publishValidities.get(action.id);
+        const validity = recheckedValidities.get(action.id) ?? publishValidities.get(action.id);
 
         if (validity) {
           releaseValidities.set(action.id, validity);
