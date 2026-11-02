@@ -2279,7 +2279,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(res.body.error.message).toBe('Release already published');
       });
 
-      test('cannot be edited or deleted', async () => {
+      test('cannot be edited, but can be deleted', async () => {
         const { release } = await createFailedRelease();
 
         const updateRes = await rq({
@@ -2291,8 +2291,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(updateRes.body.error.message).toBe('Release already published');
 
         const deleteRes = await rq({ method: 'DELETE', url: `/content-releases/${release.id}` });
-        expect(deleteRes.statusCode).toBe(400);
-        expect(deleteRes.body.error.message).toBe('Release already published');
+        expect(deleteRes.statusCode).toBe(200);
+        expect(
+          (await rq({ method: 'GET', url: `/content-releases/${release.id}` })).statusCode
+        ).toBe(404);
       });
 
       test('cannot gain, lose or change entries', async () => {
@@ -3655,6 +3657,25 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.statusCode).toBe(404);
       expect(res.body.error.message).toBe('No release found for id 999');
     });
+
+    test.each([
+      ['done', [{ valid: true }]],
+      ['partial', [{ valid: true }, { valid: false }]],
+    ])('cannot delete a release that ran as %s', async (status, products) => {
+      const entries = [];
+      for (const product of products) {
+        entries.push({ documentId: await createProduct(product) });
+      }
+      const release = await createReleaseWithActions('allow_partial', entries);
+      expect((await publishManually(release.id)).statusCode).toBe(200);
+      expect((await getRelease(release.id)).status).toBe(status);
+
+      const res = await rq({ method: 'DELETE', url: `/content-releases/${release.id}` });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toBe('Release already published');
+      expect((await getRelease(release.id)).status).toBe(status);
+    });
   });
   describe('Planned entries: why an entry is not publishable', () => {
     const getAction = async (releaseId, documentId) =>
@@ -4456,7 +4477,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
     });
 
-    test('a frozen release refuses a reschedule and a delete, and stays as the sweep left it', async () => {
+    test('a frozen release refuses a reschedule, and stays as the sweep left it, but can be deleted', async () => {
       const release = await createReleaseWithActions('all_or_nothing', [
         { documentId: await createProduct({ valid: true }) },
       ]);
@@ -4470,17 +4491,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         url: `/content-releases/${release.id}`,
         body: { name: frozen.name, scheduledAt: minutesFromNow(60), timezone: 'Europe/Paris' },
       });
-      const deleted = await rq({ method: 'DELETE', url: `/content-releases/${release.id}` });
 
       expect(rescheduled.statusCode).toBe(400);
       expect(rescheduled.body.error.message).toBe('Release already published');
-      expect(deleted.statusCode).toBe(400);
-      expect(deleted.body.error.message).toBe('Release already published');
       expect(await getRelease(release.id)).toMatchObject({
         status: 'failed',
         scheduledAt: frozen.scheduledAt,
         releasedAt: frozen.releasedAt,
       });
+
+      const deleted = await rq({ method: 'DELETE', url: `/content-releases/${release.id}` });
+      expect(deleted.statusCode).toBe(200);
     });
 
     test.each([
