@@ -49,7 +49,9 @@ describe('usePersistentPartialQueryParams', () => {
   const lastHydratedSearch = () => {
     const [lastCall] = mockNavigate.mock.calls.slice(-1);
 
-    return (lastCall?.[0] as { search: string }).search;
+    expect(lastCall).toBeDefined();
+
+    return (lastCall[0] as { search: string }).search;
   };
 
   beforeEach(() => {

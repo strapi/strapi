@@ -507,7 +507,7 @@ const TimezoneField = React.memo(
  * ReleaseModeField
  * -----------------------------------------------------------------------------------------------*/
 
-const ARROW_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
 
 const ReleaseModeField = () => {
   const { formatMessage } = useIntl();
@@ -523,7 +523,7 @@ const ReleaseModeField = () => {
     <div
       className="flex flex-col gap-4 p-4"
       onKeyDownCapture={(event) => {
-        isArrowKeyPressed.current = ARROW_KEYS.includes(event.key);
+        isArrowKeyPressed.current = ARROW_KEYS.has(event.key);
       }}
     >
       <h3 className="text-lg font-medium md:text-base" id="release-condition-label">
