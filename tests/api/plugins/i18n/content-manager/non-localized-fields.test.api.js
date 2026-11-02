@@ -690,6 +690,40 @@ describe('i18n', () => {
         ]);
       });
 
+      test('keeps relations inside shared components when the new-locale payload omits them', async () => {
+        const enTag = data.tags.find((tag) => tag.locale === 'en');
+        const createRes = await create('api::category.category', {
+          name: 'relation in shared compo default',
+          nonLocalizedCompo: { name: 'single', tag: { connect: [enTag] } },
+          nonLocalizedRepeatableCompo: [{ name: 'repeat', tag: { connect: [enTag] } }],
+        });
+        expect(createRes.statusCode).toBe(201);
+
+        const { documentId: docId } = createRes.body.data;
+
+        // The admin leaves locked shared fields out when it creates a locale
+        const frRes = await update('api::category.category', docId, {
+          locale: 'fr',
+          name: 'relation in shared compo french',
+        });
+        expect(frRes.statusCode).toBe(200);
+
+        for (const locale of ['en', 'fr']) {
+          const entry = await strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, publishedAt: null, locale },
+            populate: ['nonLocalizedCompo.tag', 'nonLocalizedRepeatableCompo.tag'],
+          });
+
+          const expectedTag = expect.objectContaining({ documentId: enTag.documentId, locale });
+          expect(entry.nonLocalizedCompo).toEqual(
+            expect.objectContaining({ name: 'single', tag: expectedTag })
+          );
+          expect(entry.nonLocalizedRepeatableCompo).toEqual([
+            expect.objectContaining({ name: 'repeat', tag: expectedTag }),
+          ]);
+        }
+      });
+
       test('copies the current default-locale draft instead of an older published value', async () => {
         const createRes = await create('api::category.category', {
           name: 'draft source default',
@@ -859,6 +893,48 @@ describe('i18n', () => {
         expect(frPublished.nonLocalizedRepeatableCompo).toEqual([
           expect.objectContaining({ name: 'draft-value' }),
         ]);
+      });
+
+      test('publishing a new locale together with the default locale publishes the draft shared tree', async () => {
+        const created = await strapi.documents('api::category.category').create({
+          data: {
+            name: 'batch publish default',
+            nonLocalizedRepeatableCompo: [{ name: 'published-value' }],
+          },
+        });
+        const docId = created.documentId;
+        const documents = strapi.documents('api::category.category');
+
+        await documents.publish({ documentId: docId, locale: 'en' });
+        await documents.update({
+          documentId: docId,
+          locale: 'it',
+          data: { name: 'batch publish italian' },
+        });
+        await documents.publish({ documentId: docId, locale: 'it' });
+        await documents.update({
+          documentId: docId,
+          locale: 'en',
+          data: { nonLocalizedRepeatableCompo: [{ name: 'draft-value' }] },
+        });
+        await documents.update({
+          documentId: docId,
+          locale: 'fr',
+          data: { name: 'batch publish french' },
+        });
+
+        await documents.publish({ documentId: docId, locale: ['en', 'fr'] });
+
+        for (const locale of ['en', 'fr']) {
+          const published = await strapi.db.query('api::category.category').findOne({
+            where: { documentId: docId, locale, publishedAt: { $notNull: true } },
+            populate: ['nonLocalizedRepeatableCompo'],
+          });
+
+          expect(published.nonLocalizedRepeatableCompo).toEqual([
+            expect.objectContaining({ name: 'draft-value' }),
+          ]);
+        }
       });
 
       test('creating a published locale via the document service inherits the published sibling', async () => {
