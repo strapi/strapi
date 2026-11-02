@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import {
   resetDatabaseAndImportDataFromPath,
   resyncSuperAdminPermissionsAfterImport,
@@ -24,8 +24,8 @@ test.describe('Publish draft-relations warning — xToOne-style relations', () =
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resyncSuperAdminPermissionsAfterImport();
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('relation-lab oneToMany warns when the target document is draft-only', async ({ page }) => {

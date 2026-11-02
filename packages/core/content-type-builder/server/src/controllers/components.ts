@@ -73,6 +73,10 @@ export default {
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
   },
@@ -112,6 +116,9 @@ export default {
     } catch (error) {
       strapi.log.error(error);
 
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
   },
@@ -140,6 +147,10 @@ export default {
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
   },

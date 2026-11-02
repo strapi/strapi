@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { describeOnCondition } from '../../../utils/shared';
 
@@ -9,8 +9,8 @@ import { AssetsPage } from './page-objects/AssetsPage';
 describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')('Media Library - Crop', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('crops an image and applies it to the original', async ({ page }) => {
