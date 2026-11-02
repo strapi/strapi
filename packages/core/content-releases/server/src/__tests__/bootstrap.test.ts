@@ -43,6 +43,10 @@ describe('content-releases bootstrap: overdue releases', () => {
     await setImmediate();
 
     expect(calls).toEqual(['freeze', 'sync']);
+    // At the same instant: a release the sweep left planned is one the sync runs or arms
+    const [[{ now }]] = freezeOverdueReleases.mock.calls as unknown as [[{ now: Date }]];
+    expect(now).toBeInstanceOf(Date);
+    expect(syncFromDatabase).toHaveBeenCalledWith({ now });
     expect(cronAdd).toHaveBeenCalledWith({
       'content-releases::freezeOverdueReleases': {
         task: expect.any(Function),
