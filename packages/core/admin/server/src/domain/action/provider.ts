@@ -62,9 +62,8 @@ const createActionProvider = (options?: Options) => {
 
     async clear() {
       isLocked = false;
-      await provider.clear();
 
-      return this;
+      return provider.clear();
     },
 
     async registerMany(actionsAttributes: CreateActionPayload[]) {
