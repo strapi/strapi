@@ -1,3 +1,4 @@
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 import { context, propagation, trace, type Span } from '@opentelemetry/api';
 
@@ -25,7 +26,7 @@ function mockStrapi(tracingEnabled: boolean): Core.Strapi {
 describe('withContentApiSpan', () => {
   it('runs fn directly when tracing is disabled', async () => {
     const strapi = mockStrapi(false);
-    const fn = jest.fn().mockResolvedValue('ok');
+    const fn = vi.fn().mockResolvedValue('ok');
 
     await expect(
       withContentApiSpan(strapi, 'strapi.content-api.test', { 'strapi.content_type.uid': 'x' }, fn)
@@ -35,14 +36,14 @@ describe('withContentApiSpan', () => {
   });
 
   it('runs fn when strapi is undefined', async () => {
-    const fn = jest.fn().mockResolvedValue(1);
+    const fn = vi.fn().mockResolvedValue(1);
     await expect(withContentApiSpan(undefined, 'strapi.content-api.test', {}, fn)).resolves.toBe(1);
     expect(fn).toHaveBeenCalled();
   });
 
   it('propagates errors when tracing is disabled', async () => {
     const strapi = mockStrapi(false);
-    const fn = jest.fn().mockRejectedValue(new Error('boom'));
+    const fn = vi.fn().mockRejectedValue(new Error('boom'));
 
     await expect(withContentApiSpan(strapi, 'strapi.content-api.test', {}, fn)).rejects.toThrow(
       'boom'
@@ -53,7 +54,7 @@ describe('withContentApiSpan', () => {
 describe('withStartupSpan', () => {
   it('runs fn when tracing is disabled', async () => {
     const strapi = mockStrapi(false);
-    const fn = jest.fn().mockResolvedValue('done');
+    const fn = vi.fn().mockResolvedValue('done');
 
     await expect(
       withStartupSpan(strapi, 'strapi.startup.register', fn, { root: true })
@@ -64,7 +65,7 @@ describe('withStartupSpan', () => {
 
   it('runs fn when tracing is enabled and no SDK is registered', async () => {
     const strapi = mockStrapi(true);
-    const fn = jest.fn().mockResolvedValue(42);
+    const fn = vi.fn().mockResolvedValue(42);
 
     await expect(withStartupSpan(strapi, 'strapi.startup.bootstrap', fn)).resolves.toBe(42);
     expect(fn).toHaveBeenCalled();
@@ -74,7 +75,7 @@ describe('withStartupSpan', () => {
 describe('withStartupTraceChildPhase', () => {
   it('runs fn when parent span is undefined', async () => {
     const strapi = mockStrapi(true);
-    const fn = jest.fn().mockResolvedValue('x');
+    const fn = vi.fn().mockResolvedValue('x');
 
     await expect(
       withStartupTraceChildPhase(undefined, strapi, 'strapi.startup.cli.test', fn)
@@ -84,7 +85,7 @@ describe('withStartupTraceChildPhase', () => {
 
   it('runs fn when tracing is disabled even if parent is set', async () => {
     const strapi = mockStrapi(false);
-    const fn = jest.fn().mockResolvedValue(1);
+    const fn = vi.fn().mockResolvedValue(1);
 
     await expect(
       withStartupTraceChildPhase({} as Span, strapi, 'strapi.startup.cli.test', fn)
@@ -94,12 +95,12 @@ describe('withStartupTraceChildPhase', () => {
 });
 
 describe('configureOpenTelemetryTracing', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   it('does not register a global provider, propagator, or context manager', async () => {
-    const setTracerProvider = jest.spyOn(trace, 'setGlobalTracerProvider');
-    const setPropagator = jest.spyOn(propagation, 'setGlobalPropagator');
-    const setContextManager = jest.spyOn(context, 'setGlobalContextManager');
+    const setTracerProvider = vi.spyOn(trace, 'setGlobalTracerProvider');
+    const setPropagator = vi.spyOn(propagation, 'setGlobalPropagator');
+    const setContextManager = vi.spyOn(context, 'setGlobalContextManager');
 
     configureOpenTelemetryTracing(mockStrapi(true));
     await shutdownOpenTelemetryTracing();

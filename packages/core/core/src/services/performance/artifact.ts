@@ -25,6 +25,13 @@ type BufferedPerfRow = {
 
 type ArtifactFingerprintAgg = { fingerprint: string; count: number; totalMs: number };
 
+type ArtifactRouteAgg = {
+  method: string;
+  route: string;
+  requestCount: number;
+  dbQueryCount: number;
+};
+
 export type PerformanceArtifactSummaryV1 = {
   /** Count of DB perf rows in this batch (slow + error events only in current producers). */
   totalQueriesObserved: number;
@@ -40,6 +47,10 @@ export type PerformanceArtifactSummaryV1 = {
   topFingerprints: ArtifactFingerprintAgg[];
   requestCount?: number;
   slowRequestCount?: number;
+  /** Sum of `dbQueryCount` on request summaries in this batch. */
+  dbQueryCount?: number;
+  /** Routes in this batch ranked by query count. Capped. */
+  topRoutesByQueryCount?: ArtifactRouteAgg[];
 };
 
 export type PerformanceArtifactEnvelopeV1 = {
@@ -126,6 +137,8 @@ export function summarizePerfArtifactBatch(
   let dbEventRows = 0;
   let requestCount = 0;
   let slowRequestCount = 0;
+  let dbQueryCount = 0;
+  const routes = new Map<string, ArtifactRouteAgg>();
 
   for (const row of rows) {
     if (
@@ -140,10 +153,24 @@ export function summarizePerfArtifactBatch(
     }
     if (row.kind === PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY) {
       requestCount += 1;
-      const ev = row.event as { durationMs?: number };
+      const ev = row.event as {
+        durationMs?: number;
+        dbQueryCount?: number;
+        method?: string;
+        route?: string;
+      };
       if (typeof ev.durationMs === 'number' && ev.durationMs >= opts.slowRequestMs) {
         slowRequestCount += 1;
       }
+      const queries = typeof ev.dbQueryCount === 'number' ? ev.dbQueryCount : 0;
+      dbQueryCount += queries;
+      const method = typeof ev.method === 'string' ? ev.method : '';
+      const route = typeof ev.route === 'string' && ev.route ? ev.route : '(unknown route)';
+      const key = `${method}\t${route}`;
+      const bucket = routes.get(key) ?? { method, route, requestCount: 0, dbQueryCount: 0 };
+      bucket.requestCount += 1;
+      bucket.dbQueryCount += queries;
+      routes.set(key, bucket);
     }
   }
 
@@ -158,6 +185,13 @@ export function summarizePerfArtifactBatch(
     topFingerprints: computeFingerprintRollup(rows),
     requestCount: requestCount > 0 ? requestCount : undefined,
     slowRequestCount: requestCount > 0 ? slowRequestCount : undefined,
+    dbQueryCount: requestCount > 0 ? dbQueryCount : undefined,
+    topRoutesByQueryCount:
+      requestCount > 0
+        ? [...routes.values()]
+            .sort((a, b) => b.dbQueryCount - a.dbQueryCount || b.requestCount - a.requestCount)
+            .slice(0, 10)
+        : undefined,
   };
 }
 

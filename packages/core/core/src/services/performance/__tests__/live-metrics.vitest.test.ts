@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest';
 import createEventHub from '../../event-hub';
 import { createPerformanceLiveMetrics } from '../live-metrics';
 import { PERFORMANCE_HUB_EVENT } from '../hub-events';
@@ -29,6 +30,7 @@ const emitSummary = (
   fields: Partial<{
     durationMs: number;
     dbTotalMs: number;
+    dbQueryCount: number;
     method: string;
     route: string;
     slowQueryCount: number;
@@ -41,7 +43,7 @@ describe('createPerformanceLiveMetrics', () => {
       'server.performance.requestTrackingEnabled': false,
       'database.performance.enabled': false,
     });
-    const onSpy = jest.spyOn(strapi.eventHub, 'on');
+    const onSpy = vi.spyOn(strapi.eventHub, 'on');
 
     const metrics = createPerformanceLiveMetrics(strapi);
 
@@ -101,10 +103,43 @@ describe('createPerformanceLiveMetrics', () => {
     metrics.dispose();
   });
 
+  it('keeps query counts per route and does not cap overlapping DB work at 100%', async () => {
+    const strapi = mockStrapi();
+    const metrics = createPerformanceLiveMetrics(strapi);
+
+    await emitSummary(strapi, {
+      durationMs: 100,
+      dbTotalMs: 250,
+      dbQueryCount: 40,
+      method: 'POST',
+      route: '/api/articles/:id/actions/publish',
+      slowQueryCount: 0,
+    });
+    await emitSummary(strapi, {
+      durationMs: 100,
+      dbTotalMs: 50,
+      dbQueryCount: 4,
+      method: 'POST',
+      route: '/api/articles/:id/actions/publish',
+      slowQueryCount: 0,
+    });
+
+    const snap = metrics.snapshot();
+    expect(snap.quickStats.avgDbQueriesPerRequest).toBeCloseTo(22);
+    expect(snap.quickStats.avgDbPercentOfWallTime).toBeCloseTo(150);
+    expect(snap.slowestRoutes[0]).toMatchObject({
+      route: '/api/articles/:id/actions/publish',
+      avgQueryCount: 22,
+    });
+    expect(snap.slowestRoutes[0].avgDbPercent).toBeCloseTo(150);
+
+    metrics.dispose();
+  });
+
   it('listens only for performance events', () => {
     const strapi = mockStrapi();
-    const subscribeSpy = jest.spyOn(strapi.eventHub, 'subscribe');
-    const onSpy = jest.spyOn(strapi.eventHub, 'on');
+    const subscribeSpy = vi.spyOn(strapi.eventHub, 'subscribe');
+    const onSpy = vi.spyOn(strapi.eventHub, 'on');
 
     const metrics = createPerformanceLiveMetrics(strapi);
 
@@ -157,7 +192,7 @@ describe('createPerformanceLiveMetrics', () => {
   });
 
   it('drops samples older than the rolling window', async () => {
-    const nowSpy = jest.spyOn(Date, 'now');
+    const nowSpy = vi.spyOn(Date, 'now');
     const base = 1_000_000_000_000;
     nowSpy.mockReturnValue(base);
 

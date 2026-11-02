@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { mergeQueryTelemetryIntoStats } from '../perf-query-stats';
 
 describe('mergeQueryTelemetryIntoStats', () => {

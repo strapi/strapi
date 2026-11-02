@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, type Mock } from 'vitest';
 import type { Context } from 'koa';
 
 import type { Core } from '@strapi/types';
@@ -14,7 +15,7 @@ function createCtxWithResHooks(): {
   const closeHandlers: Array<() => void> = [];
 
   const res = {
-    once: jest.fn((event: string, fn: () => void) => {
+    once: vi.fn((event: string, fn: () => void) => {
       if (event === 'finish') {
         finishHandlers.push(fn);
       }
@@ -49,7 +50,7 @@ function mockStrapi(opts: {
   slowRequestMs?: number;
   emitStageEvents?: boolean;
   perfStats: Map<string, { count: number; totalMs: number; slowOrErrorEvents: number }>;
-  emit: jest.Mock;
+  emit: Mock;
 }): Core.Strapi {
   const {
     requestTracking = false,
@@ -96,7 +97,7 @@ function mockStrapi(opts: {
 
 describe('runRequestPerformanceMiddleware', () => {
   it('emits versioned performance.request.summary on response finish with rollup stats', async () => {
-    const emit = jest.fn().mockResolvedValue(undefined);
+    const emit = vi.fn().mockResolvedValue(undefined);
     const perfStats = new Map<
       string,
       { count: number; totalMs: number; slowOrErrorEvents: number }
@@ -148,7 +149,7 @@ describe('runRequestPerformanceMiddleware', () => {
   });
 
   it('enables summaries when only requestTrackingEnabled is true', async () => {
-    const emit = jest.fn().mockResolvedValue(undefined);
+    const emit = vi.fn().mockResolvedValue(undefined);
     const perfStats = new Map();
 
     const strapi = mockStrapi({
@@ -172,8 +173,8 @@ describe('runRequestPerformanceMiddleware', () => {
   });
 
   it('skips hub timeline when sample misses and request is faster than slowRequestMs', async () => {
-    jest.spyOn(Math, 'random').mockReturnValue(0.99);
-    const emit = jest.fn().mockResolvedValue(undefined);
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    const emit = vi.fn().mockResolvedValue(undefined);
     const perfStats = new Map();
 
     const strapi = mockStrapi({
@@ -190,12 +191,12 @@ describe('runRequestPerformanceMiddleware', () => {
     fireFinish();
 
     expect(emit).not.toHaveBeenCalled();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('emits summary when sample misses but duration exceeds slowRequestMs', async () => {
-    jest.spyOn(Math, 'random').mockReturnValue(0.99);
-    const emit = jest.fn().mockResolvedValue(undefined);
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    const emit = vi.fn().mockResolvedValue(undefined);
     const perfStats = new Map();
 
     const strapi = mockStrapi({
@@ -209,7 +210,7 @@ describe('runRequestPerformanceMiddleware', () => {
     const { ctx, fireFinish } = createCtxWithResHooks();
 
     let now = 1_000;
-    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
 
     await runRequestPerformanceMiddleware(strapi, ctx, async () => {
       now += 20;
@@ -221,11 +222,11 @@ describe('runRequestPerformanceMiddleware', () => {
       expect.objectContaining({ durationMs: 20 })
     );
 
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('emits performance.request.stage entries after summary when emitStageEvents is true', async () => {
-    const emit = jest.fn().mockResolvedValue(undefined);
+    const emit = vi.fn().mockResolvedValue(undefined);
     const perfStats = new Map();
 
     const strapi = mockStrapi({
@@ -266,7 +267,7 @@ describe('runRequestPerformanceMiddleware', () => {
   });
 
   it('does not emit summary when tracking flags are off', async () => {
-    const emit = jest.fn().mockResolvedValue(undefined);
+    const emit = vi.fn().mockResolvedValue(undefined);
     const perfStats = new Map();
 
     const strapi = mockStrapi({
@@ -283,7 +284,7 @@ describe('runRequestPerformanceMiddleware', () => {
   });
 
   it('assigns strapiPerfRequestId when only database.performance.enabled is true', async () => {
-    const emit = jest.fn().mockResolvedValue(undefined);
+    const emit = vi.fn().mockResolvedValue(undefined);
     const perfStats = new Map();
 
     const strapi = mockStrapi({

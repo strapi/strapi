@@ -27,6 +27,7 @@ type RouteBucket = {
   route: string;
   durations: number[];
   dbTotals: number[];
+  queryCounts: number[];
   dbPercents: number[];
 };
 
@@ -37,6 +38,7 @@ function routeKey(method: string, route: string): string {
 function finalizeQuickStats(input: {
   durations: number[];
   dbTotals: number[];
+  queryCounts: number[];
   dbPercents: number[];
   slowDbEvents: number;
   slowQueriesInSummaries: number;
@@ -48,6 +50,7 @@ function finalizeQuickStats(input: {
     medianRequestDurationMs: percentileNearestSorted(sorted, 50),
     p95RequestDurationMs: percentileNearestSorted(sorted, 95),
     avgDbTimePerRequestMs: arithmeticMean(input.dbTotals),
+    avgDbQueriesPerRequest: arithmeticMean(input.queryCounts),
     avgDbPercentOfWallTime: arithmeticMean(input.dbPercents),
     slowDbEventsInWindow: input.slowDbEvents,
     slowOrErrorQueriesAttributedToRequests: input.slowQueriesInSummaries,
@@ -70,6 +73,7 @@ function finalizeRoutes(map: Map<string, RouteBucket>, limit: number): Performan
     if (b.durations.length > 0) {
       const avgDurationMs = arithmeticMean(b.durations) ?? 0;
       const avgDbMs = arithmeticMean(b.dbTotals) ?? 0;
+      const avgQueryCount = arithmeticMean(b.queryCounts) ?? 0;
       const avgDbPercent = arithmeticMean(b.dbPercents) ?? 0;
       rows.push({
         method: b.method,
@@ -77,6 +81,7 @@ function finalizeRoutes(map: Map<string, RouteBucket>, limit: number): Performan
         count: b.durations.length,
         avgDurationMs,
         avgDbMs,
+        avgQueryCount,
         avgDbPercent,
       });
     }
@@ -143,6 +148,7 @@ export async function buildPerformanceHomeMetrics(
       quickStats: finalizeQuickStats({
         durations: [],
         dbTotals: [],
+        queryCounts: [],
         dbPercents: [],
         slowDbEvents: 0,
         slowQueriesInSummaries: 0,
@@ -154,6 +160,7 @@ export async function buildPerformanceHomeMetrics(
 
   const durations: number[] = [];
   const dbTotals: number[] = [];
+  const queryCounts: number[] = [];
   const dbPercents: number[] = [];
   let slowDbEvents = 0;
   let slowQueriesInSummaries = 0;
@@ -208,25 +215,24 @@ export async function buildPerformanceHomeMetrics(
           const ev = cell.event as {
             durationMs?: number;
             dbTotalMs?: number;
+            dbQueryCount?: number;
             method?: string;
             route?: string;
             slowQueryCount?: number;
           };
           const durationMs = typeof ev.durationMs === 'number' ? ev.durationMs : 0;
           const dbTotalMs = typeof ev.dbTotalMs === 'number' ? ev.dbTotalMs : 0;
+          const dbQueryCount = typeof ev.dbQueryCount === 'number' ? ev.dbQueryCount : 0;
           const method = typeof ev.method === 'string' ? ev.method : '';
           const route = typeof ev.route === 'string' ? ev.route : '';
           const slowQ = typeof ev.slowQueryCount === 'number' ? ev.slowQueryCount : 0;
 
           durations.push(durationMs);
           dbTotals.push(dbTotalMs);
-          let dbWallPercent = 0;
+          queryCounts.push(dbQueryCount);
           if (durationMs > 0) {
-            dbWallPercent = Math.min(100, (dbTotalMs / durationMs) * 100);
-          } else if (dbTotalMs > 0) {
-            dbWallPercent = 100;
+            dbPercents.push((dbTotalMs / durationMs) * 100);
           }
-          dbPercents.push(dbWallPercent);
           slowQueriesInSummaries += slowQ;
 
           const key = routeKey(method, route || '(unknown route)');
@@ -237,13 +243,17 @@ export async function buildPerformanceHomeMetrics(
               route: route || '(unknown route)',
               durations: [],
               dbTotals: [],
+              queryCounts: [],
               dbPercents: [],
             };
             routeMap.set(key, bucket);
           }
           bucket.durations.push(durationMs);
           bucket.dbTotals.push(dbTotalMs);
-          bucket.dbPercents.push(dbWallPercent);
+          bucket.queryCounts.push(dbQueryCount);
+          if (durationMs > 0) {
+            bucket.dbPercents.push((dbTotalMs / durationMs) * 100);
+          }
         }
       }
     }
@@ -261,6 +271,7 @@ export async function buildPerformanceHomeMetrics(
     quickStats: finalizeQuickStats({
       durations,
       dbTotals,
+      queryCounts,
       dbPercents,
       slowDbEvents,
       slowQueriesInSummaries,

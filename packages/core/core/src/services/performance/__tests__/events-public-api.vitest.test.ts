@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest';
 import createEventHub from '../../event-hub';
 import { createPerformanceEventsPublicApi } from '../events-public-api';
 import { PERFORMANCE_HUB_EVENT } from '../hub-events';
@@ -7,7 +8,7 @@ describe('performance events public API', () => {
     const eventHub = createEventHub();
     const strapi = {
       eventHub,
-      log: { warn: jest.fn() },
+      log: { warn: vi.fn() },
     };
 
     const api = createPerformanceEventsPublicApi(strapi as any);
@@ -22,7 +23,7 @@ describe('performance events public API', () => {
       ])
     );
 
-    const listener = jest.fn().mockRejectedValue(new Error('plugin boom'));
+    const listener = vi.fn().mockRejectedValue(new Error('plugin boom'));
     const off = api.subscribe(PERFORMANCE_HUB_EVENT.DB_QUERY_SLOW, listener);
 
     await expect(

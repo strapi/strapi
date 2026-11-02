@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import homepageRoutes from '../homepage';
 
 describe('homepage routes', () => {

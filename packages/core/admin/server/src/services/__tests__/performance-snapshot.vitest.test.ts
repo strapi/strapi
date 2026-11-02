@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 
 import { isArtifactPathUnderAppRoot } from '../performance-snapshot';

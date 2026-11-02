@@ -57,8 +57,10 @@ the emitter. Core isolates errors only for listeners registered through
 Emitted when `database.performance.enabled` is true and the database layer records a slow or failed query.
 
 When `server.performance.requestTrackingEnabled` is true, the database also measures every query
-for the request summary's `dbTotalMs`, even if `database.performance.enabled` is false. This
-request-only telemetry does not emit database performance events.
+for the request summary's `dbQueryCount` and `dbTotalMs`, even if `database.performance.enabled`
+is false. `dbTotalMs` is the sum of those per-query durations. Queries that overlap make that sum
+larger than the time the request spent waiting on the database, and it can exceed `durationMs`.
+This request-only telemetry does not emit database performance events.
 
 Payload (**v1**): `schemaVersion`, `eventVersion`, plus
 
@@ -98,17 +100,17 @@ Emitted when **`server.performance.requestTrackingEnabled`** is true, after the 
 
 Payload (**v1**): `schemaVersion`, `eventVersion`, plus
 
-| Field            | Required | Notes                                            |
-| ---------------- | -------- | ------------------------------------------------ |
-| `requestId`      | yes      | Correlates with DB events when context exists    |
-| `durationMs`     | yes      | Wall time for the HTTP request                   |
-| `method`         | yes      |                                                  |
-| `route`          | yes      | Matched route pattern when available, else path  |
-| `path`           | yes      | Raw path (may be higher cardinality)             |
-| `statusCode`     | yes      | HTTP status at end of request                    |
-| `dbQueryCount`   | yes      | Queries attributed to this request               |
-| `dbTotalMs`      | yes      | Sum of DB time from telemetry hook               |
-| `slowQueryCount` | yes      | Slow or failed query **events** for this request |
+| Field            | Required | Notes                                                |
+| ---------------- | -------- | ---------------------------------------------------- |
+| `requestId`      | yes      | Correlates with DB events when context exists        |
+| `durationMs`     | yes      | Wall time for the HTTP request                       |
+| `method`         | yes      |                                                      |
+| `route`          | yes      | Matched route pattern when available, else path      |
+| `path`           | yes      | Raw path (may be higher cardinality)                 |
+| `statusCode`     | yes      | HTTP status at end of request                        |
+| `dbQueryCount`   | yes      | Queries attributed to this request                   |
+| `dbTotalMs`      | yes      | Sum of per-query durations (can exceed `durationMs`) |
+| `slowQueryCount` | yes      | Slow or failed query **events** for this request     |
 
 ## Rate limiting
 
@@ -118,7 +120,7 @@ When **`database.performance.output`** is **`artifact`** or **`both`** and **`da
 
 ## OpenTelemetry
 
-`server.observability.tracing.enabled` and `server.observability.metrics.enabled` turn on spans and metric instruments in core. Core only depends on **`@opentelemetry/api`** and never registers a tracer provider, meter provider, propagator, or exporter. The app owns the SDK and must load it before Strapi starts (for example `NODE_OPTIONS="--require ./otel.js"` or its own instrumentation entry point). Without an SDK, the API no-ops. Metrics use `eventHub.on` for `performance.request.summary`, `performance.db.query.slow`, and `performance.db.query.error`, so they need the same perf config as the listeners above. The admin performance widgets read the live in-process window and artifact, not OpenTelemetry, so they work without an SDK. See `examples/otel-local/README.md` for a local collector setup.
+`server.observability.tracing.enabled` and `server.observability.metrics.enabled` turn on spans and metric instruments in core. Core only depends on **`@opentelemetry/api`** and never registers a tracer provider, meter provider, propagator, or exporter. The app owns the SDK and must load it before Strapi starts (for example `NODE_OPTIONS="--require ./otel.js"` or its own instrumentation entry point). Without an SDK, the API no-ops. Metrics use `eventHub.on` for `performance.request.summary`, `performance.db.query.slow`, and `performance.db.query.error`, so they need the same perf config as the listeners above. Request summaries record duration, the sum of query durations (`db_total_ms`), and `db_query_count` (query count for that route). The admin performance widgets read the live in-process window and artifact, not OpenTelemetry, so they work without an SDK. See `examples/otel-local/README.md` for a local collector setup.
 
 ## See also
 

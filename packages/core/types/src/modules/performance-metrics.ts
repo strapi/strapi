@@ -15,7 +15,12 @@ export interface PerformanceLiveRoute {
   count: number;
   avgDurationMs: number;
   avgDbMs: number;
-  /** Mean of `min(100, dbTotalMs / durationMs * 100)` across requests in this bucket. */
+  /** Mean of `dbQueryCount` across requests in this bucket. */
+  avgQueryCount: number;
+  /**
+   * Mean of `(dbTotalMs / durationMs) * 100` for requests with a positive wall time.
+   * `dbTotalMs` is the sum of per-query durations, so this can exceed 100 when queries overlap.
+   */
   avgDbPercent: number;
 }
 
@@ -35,6 +40,12 @@ export interface PerformanceLiveQuickStats {
   /** p95 wall time, estimated from the latency histogram. */
   p95RequestDurationMs: number | null;
   avgDbTimePerRequestMs: number | null;
+  /** Mean of `dbQueryCount` across request summaries in the window. */
+  avgDbQueriesPerRequest: number | null;
+  /**
+   * Mean of `(dbTotalMs / durationMs) * 100` for summaries with a positive wall time.
+   * Can exceed 100 because `dbTotalMs` sums per-query durations, including overlapping queries.
+   */
   avgDbPercentOfWallTime: number | null;
   /** Count of slow/error DB query events observed in the window. */
   slowDbEventsInWindow: number;

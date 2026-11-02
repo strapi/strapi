@@ -26,10 +26,7 @@ async function collectNdjsonFiles(rootDir) {
       const full = path.join(dir, ent.name);
       if (ent.isDirectory()) {
         stack.push(full);
-      } else if (
-        ent.isFile() &&
-        (ent.name.endsWith('.jsonl') || ent.name.endsWith('.ndjson'))
-      ) {
+      } else if (ent.isFile() && (ent.name.endsWith('.jsonl') || ent.name.endsWith('.ndjson'))) {
         out.push(full);
       }
     }
@@ -54,13 +51,55 @@ function parseNdjsonLines(content) {
   return batches;
 }
 
+function routeKey(method, route) {
+  return `${method}\t${route}`;
+}
+
+function addRoute(routes, method, route, queries) {
+  const key = routeKey(method, route);
+  const cur = routes.get(key) ?? { method, route, requests: 0, dbQueryCount: 0 };
+  cur.requests += 1;
+  cur.dbQueryCount += queries;
+  routes.set(key, cur);
+}
+
+/**
+ * Query counts come from request-summary events when the batch still has them.
+ * Otherwise fall back to the batch summary total (no per-route split).
+ */
+function collectQueryCounts(batch, routes) {
+  if (Array.isArray(batch.events)) {
+    let dbQueryCount = 0;
+    let sawSummary = false;
+    for (const row of batch.events) {
+      if (row?.kind !== 'performance.request.summary') {
+        continue;
+      }
+      sawSummary = true;
+      const ev = row.event ?? {};
+      const queries = Number(ev.dbQueryCount) || 0;
+      dbQueryCount += queries;
+      const method = typeof ev.method === 'string' ? ev.method : '';
+      const route = typeof ev.route === 'string' && ev.route ? ev.route : '(unknown route)';
+      addRoute(routes, method, route, queries);
+    }
+    if (sawSummary) {
+      return dbQueryCount;
+    }
+  }
+
+  return Number(batch.summary?.dbQueryCount) || 0;
+}
+
 function aggregateBatches(batches) {
   let slowQueryCount = 0;
   let requestCount = 0;
   let slowRequestCount = 0;
+  let dbQueryCount = 0;
   let maxP95 = 0;
   let maxP99 = 0;
   let batchesOk = 0;
+  const routes = new Map();
 
   for (const b of batches) {
     if (!b || b.parseError || typeof b.summary !== 'object' || !b.summary) {
@@ -71,11 +110,21 @@ function aggregateBatches(batches) {
     slowQueryCount += Number(s.slowQueryCount) || 0;
     requestCount += Number(s.requestCount) || 0;
     slowRequestCount += Number(s.slowRequestCount) || 0;
+    dbQueryCount += collectQueryCounts(b, routes);
     maxP95 = Math.max(maxP95, Number(s.p95Ms) || 0);
     maxP99 = Math.max(maxP99, Number(s.p99Ms) || 0);
   }
 
-  return { slowQueryCount, requestCount, slowRequestCount, maxP95, maxP99, batchesOk };
+  return {
+    slowQueryCount,
+    requestCount,
+    slowRequestCount,
+    dbQueryCount,
+    maxP95,
+    maxP99,
+    batchesOk,
+    routes,
+  };
 }
 
 async function main() {
@@ -101,10 +150,12 @@ async function main() {
   }
 
   const rows = [];
+  const grandRoutes = new Map();
   let grand = {
     slowQueryCount: 0,
     requestCount: 0,
     slowRequestCount: 0,
+    dbQueryCount: 0,
     maxP95: 0,
     maxP99: 0,
     batchesOk: 0,
@@ -118,11 +169,28 @@ async function main() {
     grand.slowQueryCount += agg.slowQueryCount;
     grand.requestCount += agg.requestCount;
     grand.slowRequestCount += agg.slowRequestCount;
+    grand.dbQueryCount += agg.dbQueryCount;
     grand.maxP95 = Math.max(grand.maxP95, agg.maxP95);
     grand.maxP99 = Math.max(grand.maxP99, agg.maxP99);
     grand.batchesOk += agg.batchesOk;
+    for (const route of agg.routes.values()) {
+      const key = routeKey(route.method, route.route);
+      const cur = grandRoutes.get(key) ?? {
+        method: route.method,
+        route: route.route,
+        requests: 0,
+        dbQueryCount: 0,
+      };
+      cur.requests += route.requests;
+      cur.dbQueryCount += route.dbQueryCount;
+      grandRoutes.set(key, cur);
+    }
     rows.push({ file: rel, batches: batches.length, ...agg });
   }
+
+  const topRoutes = [...grandRoutes.values()]
+    .sort((a, b) => b.dbQueryCount - a.dbQueryCount || b.requests - a.requests)
+    .slice(0, 15);
 
   const lines = [
     '# API performance artifacts summary',
@@ -137,20 +205,38 @@ async function main() {
     `| Parsed batches (valid envelopes) | ${grand.batchesOk} |`,
     `| Slow / error DB events (sum of batch counts) | ${grand.slowQueryCount} |`,
     `| Request summaries (sum) | ${grand.requestCount} |`,
+    `| DB queries (sum of dbQueryCount) | ${grand.dbQueryCount} |`,
     `| Slow requests (sum) | ${grand.slowRequestCount} |`,
     `| Max batch p95 (ms) | ${grand.maxP95} |`,
     `| Max batch p99 (ms) | ${grand.maxP99} |`,
     '',
     '## Per file',
     '',
-    '| File | Lines (non-empty) | Batches OK | Slow DB events | Requests | Slow reqs | max p95 (ms) |',
-    '| --- | ---: | ---: | ---: | ---: | ---: | ---: |',
+    '| File | Lines (non-empty) | Batches OK | Slow DB events | Requests | DB queries | Slow reqs | max p95 (ms) |',
+    '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |',
   ];
 
   for (const r of rows) {
     lines.push(
-      `| ${r.file} | ${r.batches} | ${r.batchesOk} | ${r.slowQueryCount} | ${r.requestCount} | ${r.slowRequestCount} | ${r.maxP95} |`
+      `| ${r.file} | ${r.batches} | ${r.batchesOk} | ${r.slowQueryCount} | ${r.requestCount} | ${r.dbQueryCount} | ${r.slowRequestCount} | ${r.maxP95} |`
     );
+  }
+
+  if (topRoutes.length > 0) {
+    lines.push(
+      '',
+      '## Routes by query count',
+      '',
+      'Sum of `dbQueryCount` on `performance.request.summary` events. A route with many cheap queries shows up here even when none of them is a slow-query event.',
+      '',
+      '| Method | Route | Requests | DB queries |',
+      '| --- | --- | ---: | ---: |'
+    );
+    for (const route of topRoutes) {
+      lines.push(
+        `| ${route.method} | ${route.route} | ${route.requests} | ${route.dbQueryCount} |`
+      );
+    }
   }
 
   lines.push('', '_This job is informational (spec 05 phase 1); it does not gate merges._', '');

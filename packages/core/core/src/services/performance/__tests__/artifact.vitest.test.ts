@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -100,8 +101,8 @@ describe('Performance artifact writer', () => {
 
   it('subscribes only to performance events', async () => {
     const strapi = mockStrapi() as any;
-    const subscribeSpy = jest.spyOn(strapi.eventHub, 'subscribe');
-    const onSpy = jest.spyOn(strapi.eventHub, 'on');
+    const subscribeSpy = vi.spyOn(strapi.eventHub, 'subscribe');
+    const onSpy = vi.spyOn(strapi.eventHub, 'on');
 
     const dispose = attachPerformanceArtifactWriter(strapi);
 
@@ -234,5 +235,45 @@ describe('summarizePerfArtifactBatch', () => {
     expect(summary.requestCount).toBe(2);
     expect(summary.slowRequestCount).toBe(1);
     expect(summary.topFingerprints).toHaveLength(3);
+  });
+
+  it('rolls query counts up by route', () => {
+    const rows = [
+      {
+        kind: PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY,
+        emittedAt: 't',
+        event: {
+          durationMs: 1400,
+          method: 'POST',
+          route: '/content-manager/collection-types/api::article.article/:id/actions/publish',
+          dbQueryCount: 850,
+        },
+      },
+      {
+        kind: PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY,
+        emittedAt: 't',
+        event: { durationMs: 20, method: 'GET', route: '/api/articles', dbQueryCount: 3 },
+      },
+      {
+        kind: PERFORMANCE_HUB_EVENT.REQUEST_SUMMARY,
+        emittedAt: 't',
+        event: {
+          durationMs: 30,
+          method: 'POST',
+          route: '/content-manager/collection-types/api::article.article/:id/actions/publish',
+          dbQueryCount: 10,
+        },
+      },
+    ];
+
+    const summary = summarizePerfArtifactBatch(rows, { slowRequestMs: 500 });
+
+    expect(summary.dbQueryCount).toBe(863);
+    expect(summary.topRoutesByQueryCount?.[0]).toEqual({
+      method: 'POST',
+      route: '/content-manager/collection-types/api::article.article/:id/actions/publish',
+      requestCount: 2,
+      dbQueryCount: 860,
+    });
   });
 });

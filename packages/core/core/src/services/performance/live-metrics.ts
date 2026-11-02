@@ -39,7 +39,9 @@ type RouteAgg = {
   count: number;
   sumDuration: number;
   sumDb: number;
+  sumQueryCount: number;
   sumDbPercent: number;
+  dbPercentSamples: number;
 };
 
 type FingerprintAgg = { count: number; totalMs: number };
@@ -50,7 +52,9 @@ type Slice = {
   requestCount: number;
   sumDuration: number;
   sumDb: number;
+  sumQueryCount: number;
   sumDbPercent: number;
+  dbPercentSamples: number;
   slowQuerySum: number;
   slowDbEvents: number;
   histogram: number[];
@@ -64,7 +68,9 @@ function freshSlice(minute: number): Slice {
     requestCount: 0,
     sumDuration: 0,
     sumDb: 0,
+    sumQueryCount: 0,
     sumDbPercent: 0,
+    dbPercentSamples: 0,
     slowQuerySum: 0,
     slowDbEvents: 0,
     histogram: Array.from({ length: BUCKET_COUNT }, () => 0),
@@ -99,11 +105,15 @@ function percentileFromHistogram(histogram: number[], total: number, p: number):
   return HISTOGRAM_BOUNDS_MS[HISTOGRAM_BOUNDS_MS.length - 1];
 }
 
-function dbWallPercent(durationMs: number, dbTotalMs: number): number {
+/**
+ * `dbTotalMs / durationMs`, as a percent. Null when wall time is zero.
+ * Not capped: overlapping queries make the sum of durations larger than wall time.
+ */
+function dbWorkPercent(durationMs: number, dbTotalMs: number): number | null {
   if (durationMs > 0) {
-    return Math.min(100, (dbTotalMs / durationMs) * 100);
+    return (dbTotalMs / durationMs) * 100;
   }
-  return dbTotalMs > 0 ? 100 : 0;
+  return null;
 }
 
 function emptySnapshot(
@@ -124,6 +134,7 @@ function emptySnapshot(
       medianRequestDurationMs: null,
       p95RequestDurationMs: null,
       avgDbTimePerRequestMs: null,
+      avgDbQueriesPerRequest: null,
       avgDbPercentOfWallTime: null,
       slowDbEventsInWindow: 0,
       slowOrErrorQueriesAttributedToRequests: 0,
@@ -169,22 +180,28 @@ export function createPerformanceLiveMetrics(
   const recordRequestSummary = (event: {
     durationMs?: number;
     dbTotalMs?: number;
+    dbQueryCount?: number;
     method?: string;
     route?: string;
     slowQueryCount?: number;
   }) => {
     const durationMs = typeof event.durationMs === 'number' ? event.durationMs : 0;
     const dbTotalMs = typeof event.dbTotalMs === 'number' ? event.dbTotalMs : 0;
+    const dbQueryCount = typeof event.dbQueryCount === 'number' ? event.dbQueryCount : 0;
     const method = typeof event.method === 'string' ? event.method : '';
     const route = typeof event.route === 'string' && event.route ? event.route : '(unknown route)';
     const slowQueryCount = typeof event.slowQueryCount === 'number' ? event.slowQueryCount : 0;
-    const pct = dbWallPercent(durationMs, dbTotalMs);
+    const pct = dbWorkPercent(durationMs, dbTotalMs);
 
     const slice = sliceForWrite(currentMinute());
     slice.requestCount += 1;
     slice.sumDuration += durationMs;
     slice.sumDb += dbTotalMs;
-    slice.sumDbPercent += pct;
+    slice.sumQueryCount += dbQueryCount;
+    if (pct != null) {
+      slice.sumDbPercent += pct;
+      slice.dbPercentSamples += 1;
+    }
     slice.slowQuerySum += slowQueryCount;
     slice.histogram[bucketIndex(durationMs)] += 1;
 
@@ -194,13 +211,26 @@ export function createPerformanceLiveMetrics(
       if (slice.routes.size >= MAX_ROUTES_PER_SLICE) {
         return;
       }
-      bucket = { method, route, count: 0, sumDuration: 0, sumDb: 0, sumDbPercent: 0 };
+      bucket = {
+        method,
+        route,
+        count: 0,
+        sumDuration: 0,
+        sumDb: 0,
+        sumQueryCount: 0,
+        sumDbPercent: 0,
+        dbPercentSamples: 0,
+      };
       slice.routes.set(key, bucket);
     }
     bucket.count += 1;
     bucket.sumDuration += durationMs;
     bucket.sumDb += dbTotalMs;
-    bucket.sumDbPercent += pct;
+    bucket.sumQueryCount += dbQueryCount;
+    if (pct != null) {
+      bucket.sumDbPercent += pct;
+      bucket.dbPercentSamples += 1;
+    }
   };
 
   const recordDbQuery = (event: { queryFingerprint?: string; durationMs?: number }) => {
@@ -241,7 +271,9 @@ export function createPerformanceLiveMetrics(
     let requestCount = 0;
     let sumDuration = 0;
     let sumDb = 0;
+    let sumQueryCount = 0;
     let sumDbPercent = 0;
+    let dbPercentSamples = 0;
     let slowQuerySum = 0;
     let slowDbEvents = 0;
     const histogram = Array.from({ length: BUCKET_COUNT }, () => 0);
@@ -256,7 +288,9 @@ export function createPerformanceLiveMetrics(
       requestCount += slice.requestCount;
       sumDuration += slice.sumDuration;
       sumDb += slice.sumDb;
+      sumQueryCount += slice.sumQueryCount;
       sumDbPercent += slice.sumDbPercent;
+      dbPercentSamples += slice.dbPercentSamples;
       slowQuerySum += slice.slowQuerySum;
       slowDbEvents += slice.slowDbEvents;
       for (let i = 0; i < BUCKET_COUNT; i += 1) {
@@ -270,7 +304,9 @@ export function createPerformanceLiveMetrics(
           merged.count += agg.count;
           merged.sumDuration += agg.sumDuration;
           merged.sumDb += agg.sumDb;
+          merged.sumQueryCount += agg.sumQueryCount;
           merged.sumDbPercent += agg.sumDbPercent;
+          merged.dbPercentSamples += agg.dbPercentSamples;
         }
       }
       for (const [key, agg] of slice.fingerprints) {
@@ -291,7 +327,8 @@ export function createPerformanceLiveMetrics(
         count: r.count,
         avgDurationMs: r.count > 0 ? r.sumDuration / r.count : 0,
         avgDbMs: r.count > 0 ? r.sumDb / r.count : 0,
-        avgDbPercent: r.count > 0 ? r.sumDbPercent / r.count : 0,
+        avgQueryCount: r.count > 0 ? r.sumQueryCount / r.count : 0,
+        avgDbPercent: r.dbPercentSamples > 0 ? r.sumDbPercent / r.dbPercentSamples : 0,
       }))
       .sort((a, b) => b.avgDurationMs - a.avgDurationMs || b.count - a.count)
       .slice(0, TOP_ROUTES);
@@ -316,7 +353,8 @@ export function createPerformanceLiveMetrics(
         medianRequestDurationMs: percentileFromHistogram(histogram, requestCount, 50),
         p95RequestDurationMs: percentileFromHistogram(histogram, requestCount, 95),
         avgDbTimePerRequestMs: requestCount > 0 ? sumDb / requestCount : null,
-        avgDbPercentOfWallTime: requestCount > 0 ? sumDbPercent / requestCount : null,
+        avgDbQueriesPerRequest: requestCount > 0 ? sumQueryCount / requestCount : null,
+        avgDbPercentOfWallTime: dbPercentSamples > 0 ? sumDbPercent / dbPercentSamples : null,
         slowDbEventsInWindow: slowDbEvents,
         slowOrErrorQueriesAttributedToRequests: slowQuerySum,
       },

@@ -96,7 +96,8 @@ const GridCell = styled(Box)`
   &:nth-child(2n) {
     border-right: none;
   }
-  &:nth-last-child(-n + 2) {
+  &:last-child,
+  &:nth-last-child(2):nth-child(odd) {
     border-bottom: none;
   }
 `;
@@ -599,13 +600,14 @@ const PerformanceQuickStatsWidget = () => {
               <Typography variant="pi" fontWeight="bold" textColor="neutral700">
                 {formatMessage({
                   id: 'widget.performance-quick.db-share',
-                  defaultMessage: 'Avg DB % of wall',
+                  defaultMessage: 'DB work vs wall',
                 })}
               </Typography>
               <Typography variant="omega" textColor="neutral600">
                 {formatMessage({
                   id: 'widget.performance-quick.db-share-hint',
-                  defaultMessage: 'dbTotalMs ÷ duration per summary',
+                  defaultMessage:
+                    'Sum of query durations ÷ wall. Can exceed 100% when queries overlap',
                 })}
               </Typography>
               <Typography variant="alpha" fontWeight="bold">
@@ -624,11 +626,32 @@ const PerformanceQuickStatsWidget = () => {
               <Typography variant="omega" textColor="neutral600">
                 {formatMessage({
                   id: 'widget.performance-quick.db-ms-hint',
-                  defaultMessage: 'Mean dbTotalMs',
+                  defaultMessage: 'Mean sum of query durations',
                 })}
               </Typography>
               <Typography variant="alpha" fontWeight="bold">
                 {formatMs(q.avgDbTimePerRequestMs)}
+              </Typography>
+            </Flex>
+          </PerfStatCell>
+          <PerfStatCell>
+            <Flex direction="column" alignItems="flex-start" gap={1}>
+              <Typography variant="pi" fontWeight="bold" textColor="neutral700">
+                {formatMessage({
+                  id: 'widget.performance-quick.queries',
+                  defaultMessage: 'Avg queries / request',
+                })}
+              </Typography>
+              <Typography variant="omega" textColor="neutral600">
+                {formatMessage({
+                  id: 'widget.performance-quick.queries-hint',
+                  defaultMessage: 'Mean dbQueryCount',
+                })}
+              </Typography>
+              <Typography variant="alpha" fontWeight="bold">
+                {q.avgDbQueriesPerRequest == null
+                  ? '—'
+                  : formatInt(Math.round(q.avgDbQueriesPerRequest))}
               </Typography>
             </Flex>
           </PerfStatCell>
@@ -751,11 +774,12 @@ const PerformanceRoutesSqlWidget = () => {
                   {
                     id: 'widget.performance-routes.row-stats',
                     defaultMessage:
-                      '{count} requests · avg {wall} · DB {dbpct} of wall · {dbms} DB time',
+                      '{count} requests · avg {wall} · {queries} queries · DB work {dbpct} of wall · {dbms} query time',
                   },
                   {
                     count: formatInt(r.count),
                     wall: formatMs(r.avgDurationMs),
+                    queries: formatInt(Math.round(r.avgQueryCount)),
                     dbpct: formatPct(r.avgDbPercent),
                     dbms: formatMs(r.avgDbMs),
                   }

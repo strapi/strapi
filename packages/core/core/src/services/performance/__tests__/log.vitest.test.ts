@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { formatStrapiPerformanceHubLogRecord, STRAPI_PERF_LOG_SCHEMA_VERSION } from '../log';
 import { PERFORMANCE_HUB_EVENT } from '../hub-events';
 

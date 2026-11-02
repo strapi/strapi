@@ -1,3 +1,4 @@
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { metrics } from '@opentelemetry/api';
 
 import { PERFORMANCE_HUB_EVENT } from '../../performance/hub-events';
@@ -8,18 +9,18 @@ import {
 } from '../opentelemetry-performance-metrics';
 
 const mockStrapi = (metricsEnabled: boolean) => {
-  const unsubscribe = jest.fn();
+  const unsubscribe = vi.fn();
   return {
     unsubscribe,
     strapi: {
       config: {
-        get: jest.fn((key: string) =>
+        get: vi.fn((key: string) =>
           key === 'server.observability.metrics.enabled' ? metricsEnabled : undefined
         ),
       },
       eventHub: {
-        on: jest.fn(() => unsubscribe),
-        subscribe: jest.fn(),
+        on: vi.fn(() => unsubscribe),
+        subscribe: vi.fn(),
       },
     } as any,
   };
@@ -28,12 +29,12 @@ const mockStrapi = (metricsEnabled: boolean) => {
 describe('opentelemetry performance metrics', () => {
   afterEach(() => {
     shutdownOpenTelemetryPerformanceMetrics();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('uses the API meter without registering a global MeterProvider', () => {
-    const setGlobal = jest.spyOn(metrics, 'setGlobalMeterProvider');
-    const getMeter = jest.spyOn(metrics, 'getMeter');
+    const setGlobal = vi.spyOn(metrics, 'setGlobalMeterProvider');
+    const getMeter = vi.spyOn(metrics, 'getMeter');
     const { strapi } = mockStrapi(true);
 
     registerOpenTelemetryPerformanceMetrics(strapi);
@@ -60,10 +61,10 @@ describe('opentelemetry performance metrics', () => {
   });
 
   it('records request summaries on API instruments', async () => {
-    const record = jest.fn();
-    jest.spyOn(metrics, 'getMeter').mockReturnValue({
+    const record = vi.fn();
+    vi.spyOn(metrics, 'getMeter').mockReturnValue({
       createHistogram: () => ({ record }),
-      createCounter: () => ({ add: jest.fn() }),
+      createCounter: () => ({ add: vi.fn() }),
     } as any);
     const { strapi } = mockStrapi(true);
 
@@ -71,17 +72,27 @@ describe('opentelemetry performance metrics', () => {
     attachPerformanceMetricsHubListeners(strapi);
 
     const [, onSummary] = strapi.eventHub.on.mock.calls[0];
-    await onSummary({ method: 'get', route: '/api/articles', durationMs: 12, dbTotalMs: 4 });
+    await onSummary({
+      method: 'get',
+      route: '/api/articles',
+      durationMs: 12,
+      dbTotalMs: 4,
+      dbQueryCount: 7,
+    });
 
     expect(record).toHaveBeenCalledWith(
       12,
       expect.objectContaining({ 'http.route': '/api/articles' })
     );
     expect(record).toHaveBeenCalledWith(4, expect.anything());
+    expect(record).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ 'http.route': '/api/articles' })
+    );
   });
 
   it('does nothing when metrics are disabled', () => {
-    const getMeter = jest.spyOn(metrics, 'getMeter');
+    const getMeter = vi.spyOn(metrics, 'getMeter');
     const { strapi } = mockStrapi(false);
 
     registerOpenTelemetryPerformanceMetrics(strapi);

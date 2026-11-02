@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest';
 import { bridgeDatabasePerformanceEvents } from '../events';
 import { PERFORMANCE_HUB_EVENT } from '../hub-events';
 
@@ -5,19 +6,19 @@ describe('Performance events bridge', () => {
   it('bridges DB slow query events to event hub', () => {
     const subscribers: Array<(event: any) => void> = [];
     const db = {
-      subscribeToPerformanceEvents: jest.fn((subscriber) => {
+      subscribeToPerformanceEvents: vi.fn((subscriber) => {
         subscribers.push(subscriber);
         return () => {};
       }),
     } as any;
 
     const eventHub = {
-      emit: jest.fn().mockResolvedValue(undefined),
+      emit: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     const logger = {
-      warn: jest.fn(),
-      debug: jest.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
     } as any;
 
     bridgeDatabasePerformanceEvents({ db, eventHub, logger, output: 'none' });
@@ -48,19 +49,19 @@ describe('Performance events bridge', () => {
   it('logs slow queries at debug when logging output is enabled', () => {
     const subscribers: Array<(event: any) => void> = [];
     const db = {
-      subscribeToPerformanceEvents: jest.fn((subscriber) => {
+      subscribeToPerformanceEvents: vi.fn((subscriber) => {
         subscribers.push(subscriber);
         return () => {};
       }),
     } as any;
 
     const eventHub = {
-      emit: jest.fn().mockResolvedValue(undefined),
+      emit: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     const logger = {
-      warn: jest.fn(),
-      debug: jest.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
     } as any;
 
     bridgeDatabasePerformanceEvents({ db, eventHub, logger, output: 'log' });
@@ -84,19 +85,19 @@ describe('Performance events bridge', () => {
   it('logs and emits query error events when logging output is enabled', () => {
     const subscribers: Array<(event: any) => void> = [];
     const db = {
-      subscribeToPerformanceEvents: jest.fn((subscriber) => {
+      subscribeToPerformanceEvents: vi.fn((subscriber) => {
         subscribers.push(subscriber);
         return () => {};
       }),
     } as any;
 
     const eventHub = {
-      emit: jest.fn().mockResolvedValue(undefined),
+      emit: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     const logger = {
-      warn: jest.fn(),
-      debug: jest.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
     } as any;
 
     bridgeDatabasePerformanceEvents({ db, eventHub, logger, output: 'log' });

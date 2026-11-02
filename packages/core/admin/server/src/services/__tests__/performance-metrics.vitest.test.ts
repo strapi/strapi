@@ -1,14 +1,15 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import { buildPerformanceHomeMetrics } from '../performance-metrics';
 import { readPerformanceArtifactContext } from '../performance-snapshot';
 
-jest.mock('../performance-snapshot', () => ({
-  ...jest.requireActual('../performance-snapshot'),
-  readPerformanceArtifactContext: jest.fn(),
+vi.mock('../performance-snapshot', async () => ({
+  ...(await vi.importActual<typeof import('../performance-snapshot')>('../performance-snapshot')),
+  readPerformanceArtifactContext: vi.fn(),
 }));
 
-const mockedReadContext = jest.mocked(readPerformanceArtifactContext);
+const mockedReadContext = vi.mocked(readPerformanceArtifactContext);
 
 function minimalStrapi(config: Record<string, unknown> = {}): Core.Strapi {
   return {
@@ -59,7 +60,8 @@ describe('buildPerformanceHomeMetrics', () => {
               kind: 'performance.request.summary',
               event: {
                 durationMs: 200,
-                dbTotalMs: 50,
+                dbTotalMs: 250,
+                dbQueryCount: 40,
                 method: 'GET',
                 route: '/api/a',
                 slowQueryCount: 1,
@@ -80,6 +82,7 @@ describe('buildPerformanceHomeMetrics', () => {
               event: {
                 durationMs: 100,
                 dbTotalMs: 0,
+                dbQueryCount: 2,
                 method: 'POST',
                 route: '/api/b',
                 slowQueryCount: 0,
@@ -114,7 +117,11 @@ describe('buildPerformanceHomeMetrics', () => {
       method: 'GET',
       count: 1,
       avgDurationMs: 200,
+      avgQueryCount: 40,
+      avgDbPercent: 125,
     });
+    expect(result.quickStats.avgDbQueriesPerRequest).toBe(21);
+    expect(result.quickStats.avgDbPercentOfWallTime).toBeCloseTo((125 + 0) / 2);
   });
 
   it('skips malformed JSON lines without failing the batch', async () => {

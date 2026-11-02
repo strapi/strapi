@@ -15,6 +15,7 @@ const MAX_ATTR_LEN = 128;
 let metricsRegistered = false;
 let requestDurationMs: Histogram | null = null;
 let requestDbTotalMs: Histogram | null = null;
+let requestDbQueryCount: Histogram | null = null;
 let dbSlowOrErrorCounter: Counter | null = null;
 let contentApiPhaseDurationMs: Histogram | null = null;
 let documentServiceOperationDurationMs: Histogram | null = null;
@@ -32,7 +33,7 @@ function isMetricsFeatureEnabled(strapi: Core.Strapi): boolean {
 }
 
 function recordRequestSummary(ev: PublicRequestSummaryPayload): void {
-  if (!requestDurationMs || !requestDbTotalMs) {
+  if (!requestDurationMs || !requestDbTotalMs || !requestDbQueryCount) {
     return;
   }
   const attrs = {
@@ -42,6 +43,7 @@ function recordRequestSummary(ev: PublicRequestSummaryPayload): void {
   };
   requestDurationMs.record(ev.durationMs, attrs);
   requestDbTotalMs.record(ev.dbTotalMs, attrs);
+  requestDbQueryCount.record(ev.dbQueryCount, attrs);
 }
 
 function recordDbSlowOrError(ev: PublicDatabaseQueryPerformancePayload): void {
@@ -93,7 +95,11 @@ export function registerOpenTelemetryPerformanceMetrics(strapi: Core.Strapi): vo
   });
   requestDbTotalMs = meter.createHistogram('strapi.http.server.request.db_total_ms', {
     unit: 'ms',
-    description: 'Aggregated DB time per request from Strapi performance hub summaries',
+    description:
+      'Sum of per-query durations for the request. Can exceed request wall time when queries overlap.',
+  });
+  requestDbQueryCount = meter.createHistogram('strapi.http.server.request.db_query_count', {
+    description: 'Database queries attributed to the request, from performance.request.summary',
   });
   dbSlowOrErrorCounter = meter.createCounter('strapi.db.slow_or_error.events', {
     description: 'Slow or failed database queries from `database.performance` hub events',
@@ -213,6 +219,7 @@ export function shutdownOpenTelemetryPerformanceMetrics(): void {
   metricsRegistered = false;
   requestDurationMs = null;
   requestDbTotalMs = null;
+  requestDbQueryCount = null;
   dbSlowOrErrorCounter = null;
   contentApiPhaseDurationMs = null;
   documentServiceOperationDurationMs = null;

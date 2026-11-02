@@ -67,8 +67,19 @@ export const DEFAULT_DATABASE_PERFORMANCE_CONFIG: DatabaseResolvedPerformanceCon
 
 const NUMBER_LITERAL_REGEX = /\b\d+(?:\.\d+)?\b/g;
 const SINGLE_QUOTED_LITERAL_REGEX = /'([^'\\]|\\.)*'/g;
-const DOUBLE_QUOTED_LITERAL_REGEX = /"([^"\\]|\\.)*"/g;
+/** Knex Postgres bindings (`$1`, `$2`, …) before they are collapsed with `?`. */
+const POSTGRES_BINDING_REGEX = /\$\d+/g;
+/**
+ * One `IN` list is one query shape. Runs after literals and bindings are `?`,
+ * so `IN (1, 2)` and `IN ($1, $2, $3)` both become `in (?)`.
+ */
+const IN_LIST_REGEX = /\bin\s*\(\s*\?(?:\s*,\s*\?)*\s*\)/gi;
 
+/**
+ * Stable SQL shape for grouping. Double quotes and backticks are identifiers
+ * (Postgres, SQLite, MySQL), so they stay. Only single-quoted strings, numeric
+ * literals, and `$n` bindings are replaced.
+ */
 export const normalizeSqlFingerprint = (sql?: string) => {
   if (!sql) {
     return 'unknown';
@@ -76,8 +87,9 @@ export const normalizeSqlFingerprint = (sql?: string) => {
 
   return sql
     .replace(SINGLE_QUOTED_LITERAL_REGEX, '?')
-    .replace(DOUBLE_QUOTED_LITERAL_REGEX, '?')
+    .replace(POSTGRES_BINDING_REGEX, '?')
     .replace(NUMBER_LITERAL_REGEX, '?')
+    .replace(IN_LIST_REGEX, 'in (?)')
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
