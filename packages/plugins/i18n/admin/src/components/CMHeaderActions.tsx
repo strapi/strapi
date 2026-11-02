@@ -634,6 +634,81 @@ const FillFromAnotherLocaleAction = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * UnlockSharedFieldsDialog
+ * Defined outside the action so it is not a component created during render.
+ * -----------------------------------------------------------------------------------------------*/
+
+const UnlockSharedFieldsDialog = ({ onClose }: { onClose: () => void }) => {
+  const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<I18nBaseQuery>();
+  const { data: locales = [] } = useGetLocalesQuery();
+  const unlock = useI18nSharedFieldsLock('UnlockSharedFieldsDialog', (state) => state.unlock);
+
+  const currentLocaleCode = query.plugins?.i18n?.locale;
+  const defaultLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.isDefault)
+    : undefined;
+  const currentLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.code === currentLocaleCode)
+    : undefined;
+  const defaultLocaleLabel = defaultLocale
+    ? `${defaultLocale.name} (${defaultLocale.code})`
+    : formatMessage({
+        id: getTranslation('CMEditViewUnlockSharedFields.default-locale'),
+        defaultMessage: 'the default locale',
+      });
+  const currentLocaleLabel = currentLocale
+    ? `${currentLocale.name} (${currentLocale.code})`
+    : currentLocaleCode;
+
+  return (
+    <>
+      <Dialog.Body>
+        <Flex direction="column" gap={3}>
+          <WarningCircle width="24px" height="24px" fill="danger600" />
+          <Typography textAlign="center">
+            {formatMessage(
+              {
+                id: getTranslation('CMEditViewUnlockSharedFields.dialog.body'),
+                defaultMessage:
+                  'These values are shared across every locale. Saving changes will update {defaultLocale} and all other translations, not just {currentLocale}.',
+              },
+              {
+                defaultLocale: defaultLocaleLabel,
+                currentLocale: currentLocaleLabel,
+              }
+            )}
+          </Typography>
+        </Flex>
+      </Dialog.Body>
+      <Dialog.Footer>
+        <Flex gap={2} width="100%">
+          <Button flex="auto" variant="tertiary" onClick={onClose}>
+            {formatMessage({
+              id: getTranslation('CMEditViewUnlockSharedFields.cancel-text'),
+              defaultMessage: 'No, cancel',
+            })}
+          </Button>
+          <Button
+            flex="auto"
+            variant="danger"
+            onClick={() => {
+              unlock();
+              onClose();
+            }}
+          >
+            {formatMessage({
+              id: getTranslation('CMEditViewUnlockSharedFields.submit-text'),
+              defaultMessage: 'Yes, edit shared fields',
+            })}
+          </Button>
+        </Flex>
+      </Dialog.Footer>
+    </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * UnlockSharedFieldsAction
  * -----------------------------------------------------------------------------------------------*/
 
@@ -642,7 +717,7 @@ const UnlockSharedFieldsAction = ({ model, collectionType, documentId }: HeaderA
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { hasI18n, canUpdate } = useI18n();
   const { data: locales = [] } = useGetLocalesQuery();
-  const { isUnlocked, unlock, relock } = useI18nSharedFieldsLock(
+  const { isUnlocked, relock } = useI18nSharedFieldsLock(
     'UnlockSharedFieldsAction',
     (state) => state
   );
@@ -662,9 +737,6 @@ const UnlockSharedFieldsAction = ({ model, collectionType, documentId }: HeaderA
   const currentLocaleCode = query.plugins?.i18n?.locale;
   const defaultLocale = Array.isArray(locales)
     ? locales.find((locale) => locale.isDefault)
-    : undefined;
-  const currentLocale = Array.isArray(locales)
-    ? locales.find((locale) => locale.code === currentLocaleCode)
     : undefined;
   const isSecondaryLocale = Boolean(
     currentLocaleCode && defaultLocale?.code && currentLocaleCode !== defaultLocale.code
@@ -703,7 +775,8 @@ const UnlockSharedFieldsAction = ({ model, collectionType, documentId }: HeaderA
         }
 
         const i18nOptions = attribute.pluginOptions as
-          { i18n?: { localized?: boolean } } | undefined;
+          | { i18n?: { localized?: boolean } }
+          | undefined;
 
         return i18nOptions?.i18n?.localized !== true;
       })
@@ -734,16 +807,6 @@ const UnlockSharedFieldsAction = ({ model, collectionType, documentId }: HeaderA
     };
   }
 
-  const defaultLocaleLabel = defaultLocale
-    ? `${defaultLocale.name} (${defaultLocale.code})`
-    : formatMessage({
-        id: getTranslation('CMEditViewUnlockSharedFields.default-locale'),
-        defaultMessage: 'the default locale',
-      });
-  const currentLocaleLabel = currentLocale
-    ? `${currentLocale.name} (${currentLocale.code})`
-    : currentLocaleCode;
-
   return {
     type: 'icon' as const,
     icon: <Lock />,
@@ -757,51 +820,7 @@ const UnlockSharedFieldsAction = ({ model, collectionType, documentId }: HeaderA
         id: getTranslation('CMEditViewUnlockSharedFields.dialog.title'),
         defaultMessage: 'Edit fields common to all locales?',
       }),
-      content: ({ onClose }: { onClose: () => void }) => (
-        <>
-          <Dialog.Body>
-            <Flex direction="column" gap={3}>
-              <WarningCircle width="24px" height="24px" fill="danger600" />
-              <Typography textAlign="center">
-                {formatMessage(
-                  {
-                    id: getTranslation('CMEditViewUnlockSharedFields.dialog.body'),
-                    defaultMessage:
-                      'These values are shared across every locale. Saving changes will update {defaultLocale} and all other translations, not just {currentLocale}.',
-                  },
-                  {
-                    defaultLocale: defaultLocaleLabel,
-                    currentLocale: currentLocaleLabel,
-                  }
-                )}
-              </Typography>
-            </Flex>
-          </Dialog.Body>
-          <Dialog.Footer>
-            <Flex gap={2} width="100%">
-              <Button flex="auto" variant="tertiary" onClick={onClose}>
-                {formatMessage({
-                  id: getTranslation('CMEditViewUnlockSharedFields.cancel-text'),
-                  defaultMessage: 'No, cancel',
-                })}
-              </Button>
-              <Button
-                flex="auto"
-                variant="danger"
-                onClick={() => {
-                  unlock();
-                  onClose();
-                }}
-              >
-                {formatMessage({
-                  id: getTranslation('CMEditViewUnlockSharedFields.submit-text'),
-                  defaultMessage: 'Yes, edit shared fields',
-                })}
-              </Button>
-            </Flex>
-          </Dialog.Footer>
-        </>
-      ),
+      content: UnlockSharedFieldsDialog,
     },
   };
 };
