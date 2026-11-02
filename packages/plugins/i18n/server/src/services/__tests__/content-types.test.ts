@@ -784,6 +784,24 @@ describe('content-types service', () => {
         { __component: 'default.other', name: 'replacement' },
       ]);
     });
+
+    it('does nothing when the entry or the related entry is missing', () => {
+      const getModel = jest.fn();
+      global.strapi = { getModel } as any;
+
+      expect(fillNonLocalizedAttributes(null, { name: 'en' }, { model: 'model' })).toBeUndefined();
+      expect(fillNonLocalizedAttributes({ name: null }, null, { model: 'model' })).toBeUndefined();
+      expect(getModel).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when the model is unknown', () => {
+      const entry = { name: null };
+      global.strapi = { getModel: jest.fn(() => undefined) } as any;
+
+      fillNonLocalizedAttributes(entry, { name: 'en' }, { model: 'missing' });
+
+      expect(entry).toEqual({ name: null });
+    });
   });
 
   describe('getNestedPopulateOfNonLocalizedAttributes', () => {
