@@ -1,3 +1,6 @@
+// Must stay first: it patches yup's `.email()` before any module builds a schema.
+import './utils/yupEmail';
+
 /**
  * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
