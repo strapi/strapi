@@ -223,7 +223,16 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run Vitest unit tests
-        run: yarn test:unit:vitest
+        # Collect coverage on one node version only, the one that uploads the report
+        run: yarn test:unit:vitest ${{ matrix.node == 24 && '--coverage' || '' }}
+
+      - name: Upload coverage artifacts
+        if: matrix.node == 24 # Only upload from one node version to avoid conflicts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: unit-vitest-coverage-reports
+          path: coverage/
+          retention-days: 1
 
   unit_front:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.frontend == 'true'
@@ -786,7 +795,7 @@ jobs:
     if: >-
       ${{ (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
       && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
-    needs: [conditions, unit_back, unit_front]
+    needs: [conditions, unit_back, unit_back_vitest, unit_front]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -797,6 +806,13 @@ jobs:
         with:
           name: unit-coverage-reports
           path: unit-coverage
+        continue-on-error: true
+
+      - name: Download unit test coverage (Vitest)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: unit-vitest-coverage-reports
+          path: unit-vitest-coverage
         continue-on-error: true
 
       - name: Download frontend test coverage
