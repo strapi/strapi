@@ -1,4 +1,4 @@
-import { isEqual, pick } from 'lodash';
+import { isEqual, isPlainObject, mapValues, pick } from 'lodash';
 import type { Logger } from '@strapi/logger';
 import type { Core } from '@strapi/types';
 import { createStrapiFetch } from '../utils/fetch';
@@ -10,14 +10,16 @@ import {
   LICENSE_REGISTRY_URI,
   PLAN_FEATURE_CATALOG,
 } from './license';
-import { createEntitlementsRegistry } from './entitlements';
+import { createEntitlementsRegistry, parseNumericString } from './entitlements';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
 
+type LicenseFeature = { name: string; [key: string]: any };
+
 interface LicenseInfoState {
   licenseKey?: string;
-  features?: Array<{ name: string; [key: string]: any } | string>;
+  features?: Array<LicenseFeature | string>;
   expireAt?: string;
   seats?: number;
   type?: string;
@@ -309,12 +311,24 @@ const getTrialEndDate = async ({
   return data;
 };
 
+/**
+ * Lists a license feature as `{ name, options? }`. Numeric string options are read as numbers so
+ * readers comparing them with counts get the number the registry meant.
+ */
+const toFeature = (feature: LicenseFeature | string): LicenseFeature => {
+  if (typeof feature !== 'object') {
+    return { name: feature };
+  }
+
+  if (isPlainObject(feature.options) === false) {
+    return feature;
+  }
+
+  return { ...feature, options: mapValues(feature.options, parseNumericString) };
+};
+
 const list = () => {
-  return (
-    ee.licenseInfo.features?.map((feature) =>
-      typeof feature === 'object' ? feature : { name: feature }
-    ) || []
-  );
+  return ee.licenseInfo.features?.map(toFeature) || [];
 };
 
 const get = (featureName: string) => list().find((feature) => feature.name === featureName);
@@ -397,9 +411,7 @@ export default Object.freeze({
     // so a lapsed Plan card and the debug dump carry the defaults and clamps the plan enforced
     // instead of raw options. Only features the retained license listed are reported.
     listRetained() {
-      const retainedFeatures = (ee.retainedLicense?.features ?? []).map((feature) =>
-        typeof feature === 'object' ? feature : { name: feature }
-      );
+      const retainedFeatures = (ee.retainedLicense?.features ?? []).map(toFeature);
       const getRetained = (name: string) =>
         retainedFeatures.find((feature) => feature.name === name);
 
