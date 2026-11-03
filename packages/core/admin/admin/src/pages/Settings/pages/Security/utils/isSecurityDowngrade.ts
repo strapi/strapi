@@ -7,8 +7,14 @@ import type {
 
 const MODE_RANK: Record<MfaEnforcementMode, number> = { off: 0, optional: 1, required: 2 };
 
+/** The role flags that enforce anything. Under `off` the flags are kept but require nobody. Same
+ * rule as the server's `enforcedRoleIds`. */
+export const enforcedRoleIds = (settings: MfaEnforcementSettings): string[] =>
+  settings.mode === 'off' ? [] : settings.requiredRoles;
+
 /** The server is the authority; this only decides whether to ask for credentials first. A dropped
- * role relaxes nothing while the *resulting* mode is `required`. */
+ * role relaxes nothing while the *resulting* mode is `required`, or when the previous mode was
+ * `off`. */
 export const isSecurityDowngrade = (
   previous: MfaEnforcementSettings,
   next: MfaEnforcementSettings
@@ -17,7 +23,7 @@ export const isSecurityDowngrade = (
     return true;
   }
 
-  const removedRole = previous.requiredRoles.some((id) => !next.requiredRoles.includes(id));
+  const removedRole = enforcedRoleIds(previous).some((id) => !next.requiredRoles.includes(id));
   if (next.mode !== 'required' && removedRole) {
     return true;
   }

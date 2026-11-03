@@ -38,9 +38,10 @@ interface RoleTwoFactorRequirementProps {
  *
  * Shown only to a caller who may read and update the security settings, and only while the feature
  * is on: a 404 from `GET /admin/security-settings` is the feature-off signal, as on the Security
- * page. A per-role flag only means something under "Required for selected roles"; with nothing
- * required or everyone required the toggle shows the effective state, disabled, and says where it
- * is set.
+ * page. While nothing is required, turning it on moves the mode to "Required for selected roles"
+ * with this role alone, and turning off the last required role moves it back to "Not required".
+ * While everyone is required the toggle shows the effective state, disabled, and says where it is
+ * set.
  */
 const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => {
   const { formatMessage } = useIntl();
@@ -75,24 +76,34 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
 
   const id = String(roleId);
   const { mfa } = settings;
-  const perRole = mfa.mode === 'optional';
-  const checked = mfa.mode === 'required' || (perRole && mfa.requiredRoles.includes(id));
+  const everyone = mfa.mode === 'required';
+  const checked = everyone || (mfa.mode === 'optional' && mfa.requiredRoles.includes(id));
   const callerEnrolled = Boolean(mfaStatus?.enabled);
   // Same rule as the Security page: the server refuses to require two-factor authentication of a
   // caller who has none, so say so before the click.
   const mustEnrolFirst =
-    perRole &&
+    !everyone &&
     !checked &&
     !callerEnrolled &&
     Boolean(mfaStatus?.hasLocalPassword) &&
     callerRoleIds.includes(id);
 
-  const nextFor = (required: boolean): MfaEnforcementSettings => ({
-    ...mfa,
-    requiredRoles: required
-      ? [...mfa.requiredRoles.filter((roleIdInList) => roleIdInList !== id), id]
-      : mfa.requiredRoles.filter((roleIdInList) => roleIdInList !== id),
-  });
+  /**
+   * From "Not required", the role becomes the only one selected: flags kept from an earlier
+   * "Required for selected roles" are not brought back by a toggle on a different role. Dropping
+   * the last selected role saves "Not required", never "selected roles" with none selected.
+   */
+  const nextFor = (required: boolean): MfaEnforcementSettings => {
+    const others =
+      mfa.mode === 'optional'
+        ? mfa.requiredRoles.filter((roleIdInList) => roleIdInList !== id)
+        : [];
+    const requiredRoles = required ? [...others, id] : others;
+
+    return requiredRoles.length > 0
+      ? { mode: 'optional', graceDays: mfa.graceDays, requiredRoles }
+      : { mode: 'off', graceDays: mfa.graceDays, requiredRoles: [] };
+  };
 
   const submit = async (next: MfaEnforcementSettings, credentials?: DowngradeCredentials) => {
     const res = await updateSettings({ mfa: next, ...credentials });
@@ -146,13 +157,7 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
   };
 
   let hint: string;
-  if (mfa.mode === 'off') {
-    hint = formatMessage({
-      id: 'Settings.roles.form.mfa.hint.off',
-      defaultMessage:
-        'Choose "Required for selected roles" in Settings > Security to set this per role.',
-    });
-  } else if (mfa.mode === 'required') {
+  if (everyone) {
     hint = formatMessage({
       id: 'Settings.roles.form.mfa.hint.everyone',
       defaultMessage: 'Required for everyone in Settings > Security.',
@@ -162,6 +167,12 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
       id: 'Settings.security.mfa.enrolFirst',
       defaultMessage:
         'Set up two-factor authentication on your own account before requiring it for others.',
+    });
+  } else if (mfa.mode === 'off') {
+    hint = formatMessage({
+      id: 'Settings.roles.form.mfa.hint.off',
+      defaultMessage:
+        'Not required for any role yet. Turn this on to require it for users with this role.',
     });
   } else {
     hint = formatMessage(
@@ -200,7 +211,7 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
           </Field.Label>
           <Toggle
             checked={checked}
-            disabled={!perRole || mustEnrolFirst || isSaving || isFetching || isFetchingImpact}
+            disabled={everyone || mustEnrolFirst || isSaving || isFetching || isFetchingImpact}
             onLabel={formatMessage({
               id: 'app.components.ToggleCheckbox.enabled-label',
               defaultMessage: 'Enabled',

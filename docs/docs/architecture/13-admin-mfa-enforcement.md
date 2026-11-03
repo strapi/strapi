@@ -16,11 +16,11 @@ Policy lives in `core_store` under the admin store key `security-settings`, **no
 `config/admin.ts`: it is an organisation decision an administrator makes in the UI, not a
 deployment setting.
 
-| Mode                 | Who must enrol                                     |
-| -------------------- | -------------------------------------------------- |
-| `off`                | Nobody. No grace runs, existing locks stay dormant |
-| `optional` (default) | Members of roles flagged `mfaRequired`             |
-| `required`           | Everyone with a local password                     |
+| Mode            | Who must enrol                                     |
+| --------------- | -------------------------------------------------- |
+| `off` (default) | Nobody. No grace runs, existing locks stay dormant |
+| `optional`      | Members of roles flagged `mfaRequired`             |
+| `required`      | Everyone with a local password                     |
 
 `graceDays` (integer 1..30, default 7) is how long a required user has between their first session
 and the lock.
@@ -28,6 +28,15 @@ and the lock.
 The stored document holds `{ mfa: { mode, graceDays }, trustedDevices, passkeys }`. The per-role
 flag is **not** in it: `requiredRoles` is read from and written to `admin::role.mfaRequired`, and
 the endpoint presents both together.
+
+`optional` with no role flagged requires nobody, so `GET` reports it as `off` rather than as a
+configured state with nothing selected. This is normalised on read only (`getSettings`): the
+stored mode is left alone, and enforcement, which reads the stored mode, decides exactly as before.
+Installs that stored the former `optional` default therefore read as `off` with no migration.
+
+While the mode is `off`, role flags are kept so a later raise can bring them back, but they require
+nobody. The guard and the downgrade gate below treat them that way: turning one back on counts as
+adding it, and dropping one relaxes nothing.
 
 Anything unreadable in the stored document falls back to the default with a warning rather than
 failing the request, the same rule the config validator uses.
@@ -162,7 +171,8 @@ it stood when the request began. A role id in `requiredRoles` that does not exis
 
 The one write that sets policy may not require a second factor of a caller who does not have one.
 A caller who is neither exempt nor enrolled is refused when the save either raises the mode to
-`required` or adds a role they themselves hold to `requiredRoles`. Without this, an administrator
+`required` or, with the resulting mode `optional`, adds a role they themselves hold to
+`requiredRoles` (a flag kept under `off` counts as added). Without this, an administrator
 could lock themselves out with a single save. The refusal carries code `ENROL_FIRST`, and the UI
 shows a link to the profile page before the save is attempted.
 
@@ -173,9 +183,10 @@ save that **relaxes** protection requires the current password (and a code, when
 enrolled), exactly like `/mfa/disable`. The relaxing changes are:
 
 - A lower `mode`
-- A role removed from `requiredRoles`, **while the resulting mode is not `required`**. Once mode
-  alone covers every local-password user the per-role list is inert, so removing a role on the same
-  save that raises to `required` is not a downgrade
+- A role removed from `requiredRoles`, **while the resulting mode is not `required`** and the
+  previous mode was not `off`. Once mode alone covers every local-password user the per-role list
+  is inert, so removing a role on the same save that raises to `required` is not a downgrade, and
+  under `off` the flags required nobody to begin with
 - A longer `graceDays`
 - Enabling trusted devices, or a longer trust `days` while enabled
 - Disabling passkeys, which deletes every registered passkey in the same transaction
@@ -221,8 +232,9 @@ a dialog they cannot complete.
   a "Require two-factor authentication" toggle on `admin::role.mfaRequired`, shown to holders of
   `admin::security-settings.read` and `.update` while the feature is on. It saves on its own through
   `PUT /admin/security-settings` (`mfa.requiredRoles`), with the Security page's impact dialog on a
-  raise and `ConfirmDowngradeDialog` on a drop. It is disabled, with a hint, unless the mode is
-  "Required for selected roles"
+  raise and `ConfirmDowngradeDialog` on a drop. Under "Not required", turning it on saves
+  "Required for selected roles" with this role alone; turning off the last selected role saves
+  "Not required". It is disabled, with a hint, only while everyone is required
 - **A grace banner** (`components/MfaGraceBanner.tsx`) for a user inside their grace period
 
 `GET /admin/users` and `GET /admin/users/:id` append `mfaEnabledAt`, `mfaGraceUntil` and

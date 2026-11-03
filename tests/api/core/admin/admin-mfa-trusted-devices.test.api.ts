@@ -149,7 +149,7 @@ describe('Admin MFA trusted devices', () => {
 
   test('PUT is per object: each key replaces its own object and leaves the other alone', async () => {
     const mfaOnly = await putSettings({
-      mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
+      mfa: { mode: 'off', graceDays: 7, requiredRoles: [] },
     });
     expect(mfaOnly.statusCode).toBe(200);
     expect(mfaOnly.body.data.trustedDevices).toEqual({ enabled: true, days: 30 });
@@ -157,7 +157,7 @@ describe('Admin MFA trusted devices', () => {
     const lower = await putSettings({ trustedDevices: { enabled: true, days: 7 } });
     expect(lower.statusCode).toBe(200);
     expect(lower.body.data).toEqual({
-      mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
+      mfa: { mode: 'off', graceDays: 7, requiredRoles: [] },
       trustedDevices: { enabled: true, days: 7 },
       passkeys: { enabled: true },
     });

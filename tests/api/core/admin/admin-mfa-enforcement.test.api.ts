@@ -63,11 +63,11 @@ describe('Admin MFA enforcement', () => {
   const setGrace = (userId: number, when: Date | null) =>
     strapi.db.query('admin::user').update({ where: { id: userId }, data: { mfaGraceUntil: when } });
 
-  test('defaults: optional, 7 days, no required roles', async () => {
+  test('defaults: off, 7 days, no required roles', async () => {
     const res = await rq({ url: '/admin/security-settings', method: 'GET' });
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toEqual({
-      mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
+      mfa: { mode: 'off', graceDays: 7, requiredRoles: [] },
       trustedDevices: { enabled: true, days: 30 },
       passkeys: { enabled: true },
     });
@@ -243,6 +243,8 @@ describe('Admin MFA enforcement', () => {
       });
       expect(withAuth.statusCode).toBe(200);
       expect(withAuth.body.data.mfa.requiredRoles).toEqual([]);
+      // Required for selected roles with none selected requires nobody, so it reads as off.
+      expect(withAuth.body.data.mfa.mode).toBe('off');
     });
 
     test('increasing graceDays needs password and code', async () => {

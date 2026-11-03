@@ -29,7 +29,7 @@ describe('security-settings: readMfaEnforcement', () => {
     resetSecuritySettingsWarnings();
   });
 
-  test('defaults to optional / 7 days when nothing is stored', async () => {
+  test('defaults to off / 7 days when nothing is stored', async () => {
     const { strapi, store } = buildStrapi(null);
 
     await expect(readMfaEnforcement(strapi)).resolves.toEqual(DEFAULT_MFA_ENFORCEMENT);
@@ -348,6 +348,73 @@ describe('security-settings: service', () => {
     });
   });
 
+  test('nothing stored reads as off, with the role flags kept as they are', async () => {
+    const { service } = setup();
+    await expect(service.getSettings()).resolves.toMatchObject({
+      mfa: { mode: 'off', graceDays: 7, requiredRoles: ['2'] },
+    });
+  });
+
+  // `optional` with no role flagged requires nobody, so it is never presented as a configured
+  // state with nothing selected. Installs that stored the old `optional` default read the same.
+  test('a stored optional with no role flagged reads as off', async () => {
+    const { service, roles } = setup({ stored: { mfa: { mode: 'optional', graceDays: 5 } } });
+    roles[1].mfaRequired = false;
+
+    await expect(service.getSettings()).resolves.toMatchObject({
+      mfa: { mode: 'off', graceDays: 5, requiredRoles: [] },
+    });
+  });
+
+  test('saving off over a stored optional with no role flagged needs no re-authentication', async () => {
+    const { service, roles, storeSet } = setup({ stored: { mfa: { mode: 'optional' } } });
+    roles[1].mfaRequired = false;
+
+    await expect(
+      service.updateSettings({ mfa: { mode: 'off', graceDays: 7, requiredRoles: [] } }, actor)
+    ).resolves.toMatchObject({ mfa: { mode: 'off', requiredRoles: [] } });
+    expect(storeSet).toHaveBeenCalled();
+  });
+
+  // Under `off` the flags are kept but enforce nothing, so replacing them on the way back up
+  // relaxes nothing: it is a raise, with no credentials asked for.
+  test('dropping a flag kept under off while raising to optional is not a downgrade', async () => {
+    const { service, roles } = setup({ stored: { mfa: { mode: 'off' } }, enrolled: true });
+
+    await expect(
+      service.updateSettings(
+        { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['3'] } },
+        actor
+      )
+    ).resolves.toMatchObject({ mfa: { mode: 'optional', requiredRoles: ['3'] } });
+    expect(roles.map((r) => [r.id, r.mfaRequired])).toEqual([
+      [1, null],
+      [2, false],
+      [3, true],
+    ]);
+  });
+
+  test('turning a held role flag kept under off back on is refused unless the caller is enrolled', async () => {
+    const { service, roles, storeSet } = setup({ stored: { mfa: { mode: 'off' } } });
+    roles[0].mfaRequired = true;
+
+    await expect(
+      service.updateSettings(
+        { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['1'] } },
+        actor
+      )
+    ).rejects.toThrow(/Enrol in two-factor/);
+    expect(storeSet).not.toHaveBeenCalled();
+  });
+
+  test('a held role flag saved while the mode stays off requires nobody, so the guard lets it through', async () => {
+    const { service } = setup({ stored: { mfa: { mode: 'off' } } });
+
+    await expect(
+      service.updateSettings({ mfa: { mode: 'off', graceDays: 7, requiredRoles: ['1'] } }, actor)
+    ).resolves.toMatchObject({ mfa: { mode: 'off', requiredRoles: ['1'] } });
+  });
+
   test('raising to required is refused unless the caller is enrolled', async () => {
     const { service, storeSet } = setup();
     await expect(
@@ -440,7 +507,10 @@ describe('security-settings: service', () => {
   });
 
   test('an enrolled caller raises to required and the store and role flags are written together', async () => {
-    const { service, roles, storeSet, transaction, emit } = setup({ enrolled: true });
+    const { service, roles, storeSet, transaction, emit } = setup({
+      stored: { mfa: { mode: 'optional' } },
+      enrolled: true,
+    });
 
     const result = await service.updateSettings(
       { mfa: { mode: 'required', graceDays: 5, requiredRoles: ['1'] } },
@@ -503,7 +573,7 @@ describe('security-settings: service', () => {
   });
 
   test('removing a required role is a downgrade too', async () => {
-    const { service } = setup({ enrolled: true });
+    const { service } = setup({ stored: { mfa: { mode: 'optional' } }, enrolled: true });
     await expect(
       service.updateSettings({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] } }, actor)
     ).rejects.toThrow(/password is required/i);
@@ -574,7 +644,7 @@ describe('security-settings: service', () => {
   });
 
   test('optional → required clears nothing', async () => {
-    const { service, users } = setup({ enrolled: true });
+    const { service, users } = setup({ stored: { mfa: { mode: 'optional' } }, enrolled: true });
     await service.updateSettings(
       { mfa: { mode: 'required', graceDays: 7, requiredRoles: ['2'] } },
       actor

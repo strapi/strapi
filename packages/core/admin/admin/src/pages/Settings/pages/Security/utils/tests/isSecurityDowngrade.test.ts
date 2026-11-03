@@ -33,9 +33,12 @@ describe('isSecurityDowngrade (mirror of the server rule)', () => {
 
   it('removing a required role is a downgrade while the resulting mode is not required', () => {
     expect(isSecurityDowngrade(base, { ...base, requiredRoles: ['1'] })).toBe(true);
-    expect(
-      isSecurityDowngrade({ ...base, mode: 'off' }, { ...base, mode: 'off', requiredRoles: [] })
-    ).toBe(true);
+  });
+
+  it('dropping a flag kept under off is not a downgrade: under off it required nobody', () => {
+    const off = { ...base, mode: 'off' as const };
+    expect(isSecurityDowngrade(off, { ...off, requiredRoles: [] })).toBe(false);
+    expect(isSecurityDowngrade(off, { ...base, requiredRoles: ['3'] })).toBe(false);
   });
 
   it('removing a required role on the same move that raises to required is not a downgrade', () => {

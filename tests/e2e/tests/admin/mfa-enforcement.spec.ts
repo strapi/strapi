@@ -46,7 +46,7 @@ test.describe('Two-factor enforcement', () => {
     await page.goto('/admin/settings/security');
     await expect(page.getByRole('heading', { name: 'Security' })).toBeVisible();
     await expect(twoFactorCard(page).getByRole('combobox', { name: 'Requirement' })).toHaveText(
-      /Required for selected roles/
+      /Not required/
     );
 
     // Refused up front rather than after Save: the hint appears and Save stays disabled.

@@ -185,17 +185,56 @@ describe('RoleTwoFactorRequirement', () => {
     expect(screen.getByText('Required for everyone in Settings > Security.')).toBeInTheDocument();
   });
 
-  it('is disabled while nothing is required, and says where to change that', async () => {
-    handlers({ mode: 'off', graceDays: 7, requiredRoles: [] });
-    renderToggle();
+  it('while nothing is required, turning it on requires it for this role alone', async () => {
+    // Role 1 was flagged under an earlier "Required for selected roles"; the toggle on role 3 must
+    // not bring it back.
+    const puts = handlers({ mode: 'off', graceDays: 5, requiredRoles: ['1'] });
+    const { user } = renderToggle();
 
     const input = await toggle();
     expect(input).not.toBeChecked();
-    expect(input).toBeDisabled();
+    await waitFor(() => expect(input).toBeEnabled());
     expect(
       screen.getByText(
-        'Choose "Required for selected roles" in Settings > Security to set this per role.'
+        'Not required for any role yet. Turn this on to require it for users with this role.'
       )
     ).toBeInTheDocument();
+    fireEvent.click(input);
+
+    const dialog = await screen.findByRole('alertdialog', {
+      name: 'Require two-factor authentication?',
+    });
+    expect(dialog).toHaveTextContent(/Each has 5 days from their next login/);
+    expect(puts).toHaveLength(0);
+    await user.click(within(dialog).getByRole('button', { name: 'Require' }));
+
+    await waitFor(() =>
+      expect(puts).toEqual([{ mfa: { mode: 'optional', graceDays: 5, requiredRoles: ['3'] } }])
+    );
+  });
+
+  it('turning off the last required role saves "Not required", after the password', async () => {
+    const puts = handlers({ mode: 'optional', graceDays: 7, requiredRoles: ['3'] });
+    const { user } = renderToggle();
+
+    const input = await toggle();
+    expect(input).toBeChecked();
+    await waitFor(() => expect(input).toBeEnabled());
+    fireEvent.click(input);
+
+    const dialog = await screen.findByRole('dialog', { name: 'Lower two-factor requirements?' });
+    await user.type(within(dialog).getByLabelText('Current password*'), 'Testing123!');
+    await user.type(within(dialog).getByLabelText('Authentication code*'), '123456');
+    fireEvent.submit(within(dialog).getByLabelText('Authentication code*'));
+
+    await waitFor(() =>
+      expect(puts).toEqual([
+        {
+          mfa: { mode: 'off', graceDays: 7, requiredRoles: [] },
+          password: 'Testing123!',
+          code: '123456',
+        },
+      ])
+    );
   });
 });

@@ -16,7 +16,7 @@ export const SECURITY_SETTINGS_KEY = 'security-settings';
 
 export const MFA_ENFORCEMENT_MODES: readonly MfaEnforcementMode[] = ['off', 'optional', 'required'];
 
-export const DEFAULT_MFA_ENFORCEMENT: MfaEnforcement = { mode: 'optional', graceDays: 7 };
+export const DEFAULT_MFA_ENFORCEMENT: MfaEnforcement = { mode: 'off', graceDays: 7 };
 
 export const MIN_GRACE_DAYS = 1;
 export const MAX_GRACE_DAYS = 30;
@@ -91,7 +91,10 @@ export const resetSecuritySettingsWarnings = (): void => {
 
 /**
  * Read on every session issue, so it must never throw on a corrupt row: a bad value falls back to
- * the default for that key, which is `optional` rather than anything that could lock a user out.
+ * the default for that key, which is `off` rather than anything that could lock a user out.
+ *
+ * This is the stored mode, which enforcement acts on. `getSettings` is what reports it: there,
+ * `optional` with no role flagged reads as `off`.
  */
 export const readMfaEnforcement = async (strapi: Core.Strapi): Promise<MfaEnforcement> => {
   const stored = (await adminStore(strapi).get({ key: SECURITY_SETTINGS_KEY })) as
@@ -177,6 +180,14 @@ export const GUARD_MESSAGE = 'Enrol in two-factor authentication before requirin
 const MODE_RANK: Record<MfaEnforcementMode, number> = { off: 0, optional: 1, required: 2 };
 
 /**
+ * The role flags that enforce anything. Under `off` the flags are kept, so a later raise can bring
+ * them back, but they require nobody: dropping one relaxes nothing, and flagging one again puts
+ * its holders on the clock as if it were new.
+ */
+const enforcedRoleIds = (mfa: { mode: MfaEnforcementMode; requiredRoles: string[] }): string[] =>
+  mfa.mode === 'off' ? [] : mfa.requiredRoles;
+
+/**
  * Pure, so it is cheap to evaluate twice: once outside the transaction to decide which credentials
  * to demand, and again inside against a re-read document.
  *
@@ -194,8 +205,10 @@ const relaxingChanges = (
   }
 ) => {
   // A dropped role relaxes nothing while the *resulting* mode is `required`, where the mode alone
-  // covers every local-password user.
-  const removedRoles = previous.mfa.requiredRoles.filter((id) => !next.requiredRoles.includes(id));
+  // covers every local-password user, or when the previous mode was `off`, where it required nobody.
+  const removedRoles = enforcedRoleIds(previous.mfa).filter(
+    (id) => !next.requiredRoles.includes(id)
+  );
   const lowersEnforcement =
     MODE_RANK[next.mfa.mode] < MODE_RANK[previous.mfa.mode] ||
     (next.mfa.mode !== 'required' && removedRoles.length > 0) ||
@@ -256,11 +269,24 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     return roles.map((role: { id: Data.ID }) => String(role.id));
   };
 
-  const getSettings = async (): Promise<SecuritySettings> => ({
-    mfa: { ...(await readMfaEnforcement(strapi)), requiredRoles: await listRequiredRoleIds() },
-    trustedDevices: await readTrustedDeviceSettings(strapi),
-    passkeys: await readPasskeySettings(strapi),
-  });
+  /**
+   * `optional` with no role flagged requires nobody, exactly like `off`, so it is reported as `off`
+   * rather than as a configured state with nothing selected. Normalised here, on read, so a stored
+   * `optional` from an install that predates the `off` default behaves the same. The stored value
+   * is left alone: enforcement reads it, and nothing it decides changes.
+   */
+  const getSettings = async (): Promise<SecuritySettings> => {
+    const enforcement = await readMfaEnforcement(strapi);
+    const requiredRoles = await listRequiredRoleIds();
+    const mode =
+      enforcement.mode === 'optional' && requiredRoles.length === 0 ? 'off' : enforcement.mode;
+
+    return {
+      mfa: { ...enforcement, mode, requiredRoles },
+      trustedDevices: await readTrustedDeviceSettings(strapi),
+      passkeys: await readPasskeySettings(strapi),
+    };
+  };
 
   const updateSettings = async (
     input: UpdateSecuritySettings.Request['body'],
@@ -300,10 +326,13 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     const actorEnrolled = await mfa().isEnrolled(String(actorRow.id));
 
     // The self-lockout guard: this write may not require a second factor of a caller who has none,
-    // unless they are exempt from local login.
-    const addedRoles = requiredRoles.filter((id) => !previous.mfa.requiredRoles.includes(id));
+    // unless they are exempt from local login. A flag kept under `off` enforced nothing, so turning
+    // it back on counts as adding it; a flag saved under `off` enforces nothing yet.
+    const previouslyEnforced = enforcedRoleIds(previous.mfa);
+    const addedRoles = requiredRoles.filter((id) => !previouslyEnforced.includes(id));
     const raisesToRequired = nextMfa.mode === 'required' && previous.mfa.mode !== 'required';
-    const addsHeldRole = addedRoles.some((id) => actorRoleIds.has(id));
+    const addsHeldRole =
+      nextMfa.mode === 'optional' && addedRoles.some((id) => actorRoleIds.has(id));
     if (!actorExempt && !actorEnrolled && (raisesToRequired || addsHeldRole)) {
       throw new ValidationError(GUARD_MESSAGE, { code: MFA_ERROR_CODES.ENROL_FIRST });
     }

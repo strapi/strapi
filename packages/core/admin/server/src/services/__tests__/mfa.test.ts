@@ -3297,7 +3297,7 @@ describe('mfa service: enforcement policy', () => {
   });
 
   test('optional mode requires a user holding a flagged role and nobody else', async () => {
-    const { service } = setup();
+    const { service } = setup({ stored: { mfa: { mode: 'optional' } } });
     await expect(
       service.isMfaRequiredFor(user({ roles: [{ id: 2, mfaRequired: true }] }))
     ).resolves.toBe(true);
@@ -3307,7 +3307,7 @@ describe('mfa service: enforcement policy', () => {
   });
 
   test('roles are loaded when the row does not carry them (the login path user has none)', async () => {
-    const { service, users, userMocks } = setup();
+    const { service, users, userMocks } = setup({ stored: { mfa: { mode: 'optional' } } });
     users.set('1', { ...users.get('1')!, roleIds: [2] });
 
     await expect(service.isMfaRequiredFor(user())).resolves.toBe(true);
@@ -3317,7 +3317,11 @@ describe('mfa service: enforcement policy', () => {
   });
 
   test('roles are cached on the row after the first load, so the SSO check and the mode scan share one query', async () => {
-    const { service, users, userMocks } = setup({ ssoEnabled: true, ssoLockedRoles: ['9'] });
+    const { service, users, userMocks } = setup({
+      stored: { mfa: { mode: 'optional' } },
+      ssoEnabled: true,
+      ssoLockedRoles: ['9'],
+    });
     users.set('1', { ...users.get('1')!, roleIds: [2] });
 
     await expect(service.isMfaRequiredFor(user())).resolves.toBe(true);

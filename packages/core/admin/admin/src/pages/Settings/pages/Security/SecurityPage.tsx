@@ -35,6 +35,7 @@ import {
   isValidGraceDays,
 } from './components/TwoFactorEnforcementCard';
 import { useSecuritySettingsSave } from './hooks/useSecuritySettingsSave';
+import { enforcedRoleIds } from './utils/isSecurityDowngrade';
 
 import type {
   PasskeySettings,
@@ -175,7 +176,7 @@ const SecuritySettingsForm = ({
    * before the click -- the server stays the authority.
    */
   const addsHeldRole = next.mfa.requiredRoles.some(
-    (id) => !settings.mfa.requiredRoles.includes(id) && callerRoleIds.includes(id)
+    (id) => !enforcedRoleIds(settings.mfa).includes(id) && callerRoleIds.includes(id)
   );
   const mustEnrolFirst =
     changed.mfa &&
