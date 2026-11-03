@@ -1,5 +1,5 @@
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createContentAPIRequest } from 'api-tests/request';
+import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
 
 const validBody = {
   to: 'recipient@example.com',
@@ -7,15 +7,47 @@ const validBody = {
   text: 'Hello world',
 };
 
-describe('Email Content API - POST /email', () => {
+const acceptedBodies = [
+  ['a text body', validBody],
+  ['an html-only body', { to: 'recipient@example.com', subject: 'Hello', html: '<p>Hello</p>' }],
+  [
+    'recipient arrays',
+    {
+      ...validBody,
+      to: ['first@example.com', 'second@example.com'],
+      cc: ['cc@example.com'],
+      bcc: ['bcc@example.com'],
+    },
+  ],
+  [
+    'non-string provider options',
+    {
+      ...validBody,
+      attachments: [{ filename: 'hello.txt', content: 'Hello world' }],
+      headers: { 'X-Custom': 'value' },
+    },
+  ],
+] as const;
+
+const invalidBodies = [
+  ['no `to`', { subject: 'Hello', text: 'Hello world' }],
+  ['a numeric `subject`', { ...validBody, subject: 42 }],
+  ['an object `text`', { ...validBody, text: { value: 'Hello world' } }],
+  ['neither `text` nor `html`', { to: 'recipient@example.com', subject: 'Hello' }],
+] as const;
+
+describe('Email - POST /email', () => {
   let strapi;
-  let rq;
   let originalProvider;
   const send = jest.fn();
 
+  const routes = [
+    ['content API', '/email', () => createContentAPIRequest({ strapi })],
+    ['admin', '/email', () => createAuthRequest({ strapi })],
+  ] as const;
+
   beforeAll(async () => {
     strapi = await createStrapiInstance();
-    rq = await createContentAPIRequest({ strapi });
 
     // Replace the provider so no real email is sent
     originalProvider = strapi.plugin('email').provider;
@@ -32,26 +64,30 @@ describe('Email Content API - POST /email', () => {
     send.mockResolvedValue(undefined);
   });
 
-  test('sends a valid body to the provider', async () => {
-    const res = await rq({ method: 'POST', url: '/email', body: validBody });
+  describe.each(routes)('%s route', (_, url, createRequest) => {
+    let rq;
 
-    expect(res.statusCode).toBe(200);
-    expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(validBody);
-  });
+    beforeAll(async () => {
+      rq = await createRequest();
+    });
 
-  test.each([
-    ['no `to`', { subject: 'Hello', text: 'Hello world' }],
-    ['a numeric `subject`', { ...validBody, subject: 42 }],
-    ['an object `text`', { ...validBody, text: { value: 'Hello world' } }],
-  ])('answers 400 ValidationError for a body with %s', async (_, body) => {
-    // A real provider fails on such input, which the controller turns into a 500
-    send.mockRejectedValue(new Error('Invalid email options'));
+    test.each(acceptedBodies)('sends %s to the provider', async (__, body) => {
+      const res = await rq({ method: 'POST', url, body });
 
-    const res = await rq({ method: 'POST', url: '/email', body });
+      expect(res.statusCode).toBe(200);
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(send).toHaveBeenCalledWith(body);
+    });
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body.error).toMatchObject({ name: 'ValidationError', status: 400 });
-    expect(send).not.toHaveBeenCalled();
+    test.each(invalidBodies)('answers 400 ValidationError for a body with %s', async (__, body) => {
+      // A real provider fails on such input, which the controller turns into a 500
+      send.mockRejectedValue(new Error('Invalid email options'));
+
+      const res = await rq({ method: 'POST', url, body });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toMatchObject({ name: 'ValidationError', status: 400 });
+      expect(send).not.toHaveBeenCalled();
+    });
   });
 });

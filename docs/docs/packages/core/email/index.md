@@ -28,7 +28,7 @@ The `email` service has three functions: `send`, `sendTemplatedEmail` and `getPr
 
 ### Routes
 
-The plugin has two route sets. The `content-api` route `POST /` sends an email. Its request body and response schemas come from an `EmailRouteValidator` and feed the generated OpenAPI document. The `send` controller validates the body against the same `sendEmailInput` schema and answers `400 ValidationError` when it is not valid. The `admin` routes (`send`, `test`, `settings`, `verify`) serve the settings page. The `test`, `settings` and `verify` routes require the `plugin::email.settings.read` permission, which `bootstrap` registers in the admin action provider.
+The plugin has two route sets. The `content-api` route `POST /` sends an email. Its request body and response schemas come from an `EmailRouteValidator` and feed the generated OpenAPI document. The `send` controller validates the body against the same `sendEmailInput` schema and answers `400 ValidationError` when it is not valid. The schema requires `to` and `subject` plus `text` or `html`; `to`, `cc` and `bcc` take a string or an array of strings, and any other key passes through to the provider as is (attachments, headers, template data). The admin `POST /` route shares this controller and validation. The `admin` routes (`send`, `test`, `settings`, `verify`) serve the settings page. The `test`, `settings` and `verify` routes require the `plugin::email.settings.read` permission, which `bootstrap` registers in the admin action provider.
 
 ### Rate limit middleware
 

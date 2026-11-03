@@ -15,9 +15,11 @@ const { ApplicationError } = errors;
  */
 const emailController = {
   async send(ctx: Koa.Context) {
-    const options: SendOptions = validateZodSchema(new EmailRouteValidator(strapi).sendEmailInput)(
+    // TODO @Nico `SendOptions` is narrower than the validated body (recipient arrays,
+    // non-string provider options), which providers accept; widen the type separately.
+    const options = validateZodSchema(new EmailRouteValidator(strapi).sendEmailInput)(
       ctx.request.body
-    );
+    ) as SendOptions;
 
     try {
       await strapi.plugin('email').service('email').send(options);
