@@ -1288,6 +1288,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     },
     listPasskeys: passkeys.listPasskeys,
     countPasskeys: passkeys.countPasskeys,
+    countAllPasskeys: passkeys.countAllPasskeys,
     deletePasskey: passkeys.deletePasskey,
     clearPasskeys: passkeys.clearPasskeys,
     clearAllPasskeys: passkeys.clearAllPasskeys,

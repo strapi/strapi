@@ -6,6 +6,7 @@ import {
 } from '../validation/security-settings';
 import type {
   GetMfaImpact,
+  GetPasskeysImpact,
   GetSecuritySettings,
   UpdateSecuritySettings,
 } from '../../../shared/contracts/security-settings';
@@ -33,6 +34,12 @@ export default {
     ctx.body = {
       data: await getService('mfa').enforcementImpact({ mode: proposedMode, requiredRoles: roles }),
     } satisfies GetMfaImpact.Response;
+  },
+
+  async passkeysImpact(ctx: Context) {
+    ctx.body = {
+      data: { count: await getService('mfa').countAllPasskeys() },
+    } satisfies GetPasskeysImpact.Response;
   },
 
   async update(ctx: Context) {

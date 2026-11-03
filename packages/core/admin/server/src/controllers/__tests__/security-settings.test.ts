@@ -41,6 +41,19 @@ describe('security-settings controller', () => {
     expect(ctx.body).toEqual({ data: settings });
   });
 
+  test('passkeysImpact returns how many passkeys turning passkeys off would delete', async () => {
+    setStrapi({
+      admin: {
+        services: { mfa: { isEnabled: () => true, countAllPasskeys: jest.fn(async () => 4) } },
+      },
+    });
+    const { ctx } = buildCtx();
+
+    await controller.passkeysImpact(ctx);
+
+    expect(ctx.body).toEqual({ data: { count: 4 } });
+  });
+
   test('update validates the body and forwards it with the acting user', async () => {
     const updateSettings = jest.fn(() => Promise.resolve(settings));
     setStrapi({

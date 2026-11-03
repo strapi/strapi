@@ -4454,6 +4454,14 @@ describe('mfa service: passkey registration', () => {
     await expect(service.countPasskeys('1')).resolves.toBe(2);
   });
 
+  test("countAllPasskeys counts every user's passkeys: what turning the policy off would delete", async () => {
+    const { service, passkeyRows } = setup();
+    seedPasskeys(passkeyRows, '1', 2);
+    seedPasskeys(passkeyRows, '2', 3);
+
+    await expect(service.countAllPasskeys()).resolves.toBe(5);
+  });
+
   // `toIso(row.lastUsedAt)` was already guarded (only called when truthy); `toIso(row.createdAt)`
   // was not, and `new Date(undefined).toISOString()` throws a `RangeError` -- a 500 on the list
   // route for a row a migration never backfilled.

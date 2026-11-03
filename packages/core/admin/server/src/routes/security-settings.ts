@@ -24,6 +24,18 @@ export default [
     },
   },
   {
+    method: 'GET',
+    path: '/security-settings/passkeys-impact',
+    handler: 'security-settings.passkeysImpact',
+    config: {
+      policies: [
+        'admin::isMfaEnabled',
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::security-settings.read'] } },
+      ],
+    },
+  },
+  {
     method: 'PUT',
     path: '/security-settings',
     handler: 'security-settings.update',

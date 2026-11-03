@@ -77,3 +77,15 @@ export declare namespace GetMfaImpact {
     };
   }
 }
+
+/**
+ * GET /security-settings/passkeys-impact - how many passkeys, across every administrator, turning
+ * passkeys off would delete. Read before the off-transition is confirmed.
+ */
+export declare namespace GetPasskeysImpact {
+  export interface Response {
+    data: {
+      count: number;
+    };
+  }
+}

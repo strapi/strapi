@@ -950,6 +950,10 @@ export const createPasskeys = ({
     return countRows(userId);
   };
 
+  /** No policy check: this is what turning the policy off would delete, so it must count the rows
+   * whatever the policy currently says. */
+  const countAllPasskeys = async (): Promise<number> => query().count({});
+
   /** No policy check: removing a credential is never the dangerous direction, and TOTP survives it. */
   const deletePasskey = async (userId: string, id: string): Promise<boolean> => {
     const row = (await query().findOne({
@@ -1014,6 +1018,7 @@ export const createPasskeys = ({
     registerPasskey,
     listPasskeys,
     countPasskeys,
+    countAllPasskeys,
     deletePasskey,
     clearPasskeys,
     clearAllPasskeys,
