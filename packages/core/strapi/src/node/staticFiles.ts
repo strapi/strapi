@@ -51,8 +51,9 @@ const getSourceLines = (roots: string[]): string =>
 const DESIGN_SYSTEM_SOURCE = '@strapi/design-system/next/source.css';
 
 /**
- * The design system source in the copy `@strapi/admin` resolves. A bare import from the app can
- * reach another copy, for example through the pnpm private hoist folder
+ * Return the path of source.css in the design system copy that @strapi/admin resolves. The admin
+ * JavaScript uses that copy, so the CSS must use the same copy. A plain import from the app can
+ * find a different copy, for example through the pnpm folder node_modules/.pnpm/node_modules
  */
 const getDesignSystemSourcePath = (): string => {
   const entry = getSubpathEntries('@strapi/design-system').find(
