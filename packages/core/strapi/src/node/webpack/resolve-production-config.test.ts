@@ -100,6 +100,32 @@ describe('Webpack admin configuration', () => {
       });
     });
 
+    it('matches the stylesheet on the real path of a symlinked runtime directory', async () => {
+      const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-webpack-symlink-'));
+      const target = path.join(directory, 'target');
+      const link = path.join(directory, 'link');
+      fs.mkdirSync(target);
+      fs.symlinkSync(target, link, 'dir');
+
+      try {
+        const ctx = createContext({ minify: true });
+        ctx.runtimeDir = link;
+        const config = await resolveProductionConfig(ctx);
+        const cssRule = config.module?.rules?.find(
+          (rule) => rule && typeof rule === 'object' && String(rule.test) === String(/\.css$/i)
+        );
+        const [stylesheetRule] =
+          cssRule && typeof cssRule === 'object' ? (cssRule.oneOf ?? []) : [];
+
+        expect(stylesheetRule).toHaveProperty(
+          'include',
+          path.join(fs.realpathSync(target), 'styles.css')
+        );
+      } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+      }
+    });
+
     it.each([
       [true, true],
       [false, false],
