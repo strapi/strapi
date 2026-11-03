@@ -305,7 +305,10 @@ const getNamePaths = async (paths: string[]): Promise<Record<string, string>> =>
   return Object.fromEntries(
     paths.map((path, index) => [
       path,
-      `/${segmentsByPath[index].map((pathId) => nameByPathId.get(pathId) ?? '').join('/')}`,
+      `/${segmentsByPath[index]
+        .map((pathId) => nameByPathId.get(pathId))
+        .filter((name) => name !== undefined)
+        .join('/')}`,
     ])
   );
 };

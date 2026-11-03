@@ -99,9 +99,18 @@ export class UploadRouteValidator extends AbstractRouteValidator {
       id: z.number().int().positive(),
       documentId: z.string(),
       name: z.string(),
-      path: z.string(),
-      namePath: z.string(),
-      parent: parent.nullable(),
+      path: z
+        .string()
+        .describe(
+          'Made of pathIds. To filter a subtree, match this path, or paths that start with it followed by `/`'
+        ),
+      namePath: z
+        .string()
+        .describe('The path made of folder names. Computed, so it cannot be filtered or sorted on'),
+      parent: parent
+        .nullable()
+        .optional()
+        .describe('null at the library root. Left out when the token cannot list folders'),
       createdAt: z.string(),
       updatedAt: z.string(),
     });
