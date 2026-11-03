@@ -51,6 +51,7 @@ describe('SessionManager JWT Configuration', () => {
     mockQuery.findOne.mockImplementation(() => {
       // Return session data for refresh token validation
       return Promise.resolve({
+        id: 1,
         userId: 'user123',
         sessionId: 'session123',
         origin: 'test',

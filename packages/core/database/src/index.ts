@@ -410,6 +410,27 @@ class Database {
     await insert;
   }
 
+  /**
+   * Remove the lock row of a document that no longer exists, or never did.
+   * Without this, updates of made-up ids and deleted documents leave rows behind.
+   */
+  async deleteDocumentLock(documentId: string) {
+    if (this.dialect.client !== 'mysql') {
+      return;
+    }
+
+    const trx = transactionCtx.get();
+    const remove = this.getConnection(DOCUMENT_LOCK_TABLE)
+      .where({ document_id: documentId })
+      .delete();
+
+    if (trx) {
+      remove.transacting(trx);
+    }
+
+    await remove;
+  }
+
   async destroy() {
     try {
       await this.lifecycles.clear();

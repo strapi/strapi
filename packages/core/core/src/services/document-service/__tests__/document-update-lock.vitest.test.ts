@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { lockDocumentForUpdate } from '../document-update-lock';
+import { lockDocumentForUpdate, releaseDocumentLock } from '../document-update-lock';
 
 const createQueryBuilder = (results: unknown[]) => {
   const calls: Array<Record<string, unknown>> = [];
@@ -120,5 +120,47 @@ describe('lockDocumentForUpdate', () => {
 
     expect(lockedDocumentIds).toEqual(['doc']);
     expect(calls).toEqual([]);
+  });
+});
+
+describe('releaseDocumentLock', () => {
+  const createReleaseDatabase = (client: string) => {
+    const deleted: string[] = [];
+
+    return {
+      db: {
+        dialect: { client },
+        async deleteDocumentLock(documentId: string) {
+          deleted.push(documentId);
+        },
+      },
+      deleted,
+    };
+  };
+
+  it('deletes the MySQL lock row', async () => {
+    const { db, deleted } = createReleaseDatabase('mysql');
+
+    await releaseDocumentLock({ db, documentId: 'doc' });
+
+    expect(deleted).toEqual(['doc']);
+  });
+
+  it('keeps the MySQL lock row while the document still has rows', async () => {
+    const { db, deleted } = createReleaseDatabase('mysql');
+
+    await releaseDocumentLock({ db, documentId: 'doc', keepIf: async () => true });
+
+    expect(deleted).toEqual([]);
+  });
+
+  it('skips the row check on other dialects', async () => {
+    const { db, deleted } = createReleaseDatabase('postgres');
+    const keepIf = vi.fn(async () => false);
+
+    await releaseDocumentLock({ db, documentId: 'doc', keepIf });
+
+    expect(keepIf).not.toHaveBeenCalled();
+    expect(deleted).toEqual([]);
   });
 });

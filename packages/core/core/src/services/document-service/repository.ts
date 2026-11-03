@@ -28,7 +28,7 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
-import { lockDocumentForUpdate } from './document-update-lock';
+import { lockDocumentForUpdate, releaseDocumentLock } from './document-update-lock';
 import {
   applyDeferredCloneRelationCopies,
   applyPostCloneRelationUpdates,
@@ -410,6 +410,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     entriesToDelete.forEach(emitEvent('entry.delete'));
 
+    // Deleting one locale keeps the document. Drop its MySQL lock row only
+    // once no locale or status of the document is left.
+    if (documentId) {
+      await releaseDocumentLock({
+        db: strapi.db,
+        documentId,
+        keepIf: async () => (await strapi.db.query(uid).count({ where: { documentId } })) > 0,
+      });
+    }
+
     return { documentId, entries: deletedEntries };
   }
 
@@ -558,6 +568,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     // MySQL serializes writers with an internal sentinel row. Postgres locks
     // the draft row with FOR NO KEY UPDATE, which still lets a relation insert
     // take the FOR KEY SHARE lock its foreign key needs.
+    // On MySQL the lock must come before any read of the document: REPEATABLE
+    // READ keeps the snapshot of the first read, so a writer that checked first
+    // and then waited would still miss the locale the other writer created.
     if (documentId) {
       await lockDocumentForUpdate({
         db: strapi.db,
@@ -599,6 +612,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           data: mergedData,
         });
         emitEvent('entry.create', updatedDraft);
+      } else if (documentId) {
+        // The lock above inserted a row for an id with no document. Remove it
+        // in this transaction so a 404 leaves nothing behind.
+        await releaseDocumentLock({ db: strapi.db, documentId });
       }
     }
 

@@ -771,6 +771,7 @@ describe('SessionManager Factory', () => {
         iat: Math.floor(Date.now() / 1000),
       } as any);
       mockQuery.findOne.mockResolvedValue({
+        id: 7,
         userId: 'user123',
         sessionId: 'parent-session',
         origin: 'admin',
@@ -797,6 +798,7 @@ describe('SessionManager Factory', () => {
         iat: Math.floor(Date.now() / 1000),
       } as any);
       mockQuery.findOne.mockResolvedValue({
+        id: 7,
         userId: 'user123',
         sessionId: 'parent-session',
         origin: 'admin',
@@ -815,6 +817,35 @@ describe('SessionManager Factory', () => {
       expect(mockDb.transaction).toHaveBeenCalledTimes(1);
       expect(mockQuery.updateMany).toHaveBeenCalled();
       expect(mockQuery.create).toHaveBeenCalled();
+    });
+
+    it('claims the parent by primary key, not by session id', async () => {
+      mockJwt.verify.mockReturnValue({
+        userId: 'user123',
+        sessionId: 'parent-session',
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      } as any);
+      mockQuery.findOne.mockResolvedValue({
+        id: 7,
+        userId: 'user123',
+        sessionId: 'parent-session',
+        origin: 'admin',
+        status: 'active',
+        childId: null,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        absoluteExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+      });
+      mockQuery.updateMany.mockResolvedValue({ count: 0 });
+
+      await sessionManager('admin').rotateRefreshToken('parent-refresh-token');
+
+      expect(mockQuery.updateMany).toHaveBeenCalledWith({
+        where: { id: 7, status: 'active' },
+        data: { status: 'rotated', childId: expect.any(String) },
+      });
     });
   });
 

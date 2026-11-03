@@ -12,6 +12,7 @@ interface Database {
     client: string;
   };
   lockDocumentId?(documentId: string): Promise<void>;
+  deleteDocumentLock?(documentId: string): Promise<void>;
 }
 
 const hasLockedRow = (result: unknown) => {
@@ -75,4 +76,33 @@ export const lockDocumentForUpdate = async ({
     .limit(1)
     .forNoKeyUpdate()
     .execute();
+};
+
+/**
+ * Drop the MySQL lock row of a document that has no row left. Other dialects
+ * lock content rows, so they have nothing to clean up.
+ */
+export const releaseDocumentLock = async ({
+  db,
+  documentId,
+  keepIf,
+}: {
+  db: Database;
+  documentId: string;
+  /** Checked on MySQL only, so other dialects skip the extra query. */
+  keepIf?: () => Promise<boolean>;
+}) => {
+  if (db.dialect.client !== 'mysql') {
+    return;
+  }
+
+  if (keepIf && (await keepIf())) {
+    return;
+  }
+
+  if (!db.deleteDocumentLock) {
+    throw new Error('MySQL document lock is unavailable');
+  }
+
+  await db.deleteDocumentLock(documentId);
 };

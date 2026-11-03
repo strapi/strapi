@@ -15,9 +15,10 @@ export interface SessionProvider {
   updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void>;
   /**
    * Atomically mark an active session rotated and point it at `childId`.
+   * `id` is the session record's primary key, so the claim locks one row.
    * Returns false when another request already claimed the session.
    */
-  claimRotation(sessionId: string, childId: string): Promise<boolean>;
+  claimRotation(id: NonNullable<SessionData['id']>, childId: string): Promise<boolean>;
   /**
    * Run `fn` in one database transaction. Custom providers can omit this.
    * The database provider uses it so a failed child insert restores the parent.
@@ -121,9 +122,11 @@ class DatabaseSessionProvider implements SessionProvider {
     await this.db.query(this.contentType).update({ where: { sessionId }, data });
   }
 
-  async claimRotation(sessionId: string, childId: string): Promise<boolean> {
+  async claimRotation(id: NonNullable<SessionData['id']>, childId: string): Promise<boolean> {
+    // session_id has no database index. On MySQL a claim by session_id scans
+    // and locks every session row until the transaction commits.
     const result = await this.db.query(this.contentType).updateMany({
-      where: { sessionId, status: 'active' },
+      where: { id, status: 'active' },
       data: { status: 'rotated', childId },
     });
 
@@ -704,7 +707,11 @@ class SessionManager {
       const childExpiresAt = new Date(now + idleLifespan * 1000);
 
       const claimAndCreate = async () => {
-        const claimed = await this.provider.claimRotation(current.sessionId, childSessionId);
+        if (current.id == null) {
+          return null;
+        }
+
+        const claimed = await this.provider.claimRotation(current.id, childSessionId);
         if (!claimed) {
           return null;
         }
