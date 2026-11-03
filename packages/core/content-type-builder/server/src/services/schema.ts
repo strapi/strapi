@@ -762,7 +762,9 @@ export const updateSchema = async (schema: CTBSchema) => {
     // reflects the pre-rename schema (the controller triggers the reload after this).
     migrationFilePath = await generateRenameMigrations(schema);
 
-    const schemaFilesWritten = await builder.writeFiles();
+    // The rows of renamed components are rewritten separately below, so that a failure
+    // before that point leaves them untouched while the catch restores the files.
+    const schemaFilesWritten = await builder.writeFiles({ renameComponentRows: false });
 
     if (!schemaFilesWritten) {
       schemaAlreadyRolledBack = true;
@@ -772,6 +774,12 @@ export const updateSchema = async (schema: CTBSchema) => {
     for (const uid of APIsToDelete) {
       await apiHandler.clear(uid, { preserveBackup: true });
     }
+
+    // Rewrite the rows that store a renamed component uid. This is the only database
+    // write, and it is transactional: if it fails, the rows are unchanged and the catch
+    // restores the files. It runs before `commitFromUpdate` because groups.json cannot be
+    // restored once written. The rows are not restored if `commitFromUpdate` itself fails.
+    await builder.renameComponentRows();
 
     // Commit the single folder file last. Every preceding filesystem mutation can be restored.
     await getService('content-structure').commitFromUpdate({

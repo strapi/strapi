@@ -25,6 +25,7 @@ const builder = {
   editContentType: jest.fn(),
   deleteContentType: jest.fn(),
   writeFiles: jest.fn(),
+  renameComponentRows: jest.fn(),
   rollback: jest.fn(),
 };
 

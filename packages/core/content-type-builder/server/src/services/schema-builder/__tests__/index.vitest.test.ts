@@ -164,6 +164,37 @@ describe('createBuilder', () => {
       ]);
     });
 
+    it('writes only the files when asked to leave the rows to the caller', async () => {
+      const { db, updates } = createDb();
+      (global as any).strapi.db = db;
+
+      const builder = createBuilder();
+      builder.editComponent({ ...cardInfos, category: 'blocks' });
+
+      await expect(builder.writeFiles({ renameComponentRows: false })).resolves.toBe(true);
+      expect(db.transaction).not.toHaveBeenCalled();
+
+      await builder.renameComponentRows();
+      expect(updates).toHaveLength(2);
+    });
+
+    it('rolls the files back and rejects when the row rewrite fails', async () => {
+      const { db } = createDb();
+      db.transaction.mockRejectedValueOnce(new Error('SQLITE_BUSY'));
+      (global as any).strapi.db = db;
+      (global as any).strapi.log = { error: vi.fn() };
+
+      const builder = createBuilder();
+      const rollback = vi.spyOn(builder, 'rollback');
+      builder.editComponent({ ...cardInfos, category: 'blocks' });
+
+      await expect(builder.writeFiles()).rejects.toThrow('Invalid schema edition');
+
+      expect(rollback).toHaveBeenCalledTimes(1);
+      // the moved file is removed again
+      expect(fse.remove).toHaveBeenCalledWith(path.join(COMPONENTS_DIR, 'blocks', 'card.json'));
+    });
+
     it('issues no update when the category does not change', async () => {
       const { db, updates } = createDb();
       (global as any).strapi.db = db;

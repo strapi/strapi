@@ -25,6 +25,7 @@ const builder = {
   editComponent: jest.fn(),
   deleteComponent: jest.fn(),
   writeFiles: jest.fn(),
+  renameComponentRows: jest.fn(),
   rollback: jest.fn(),
 };
 
@@ -122,5 +123,79 @@ describe('batch schema mutation compensation', () => {
     expect(artifacts.apis).toEqual(new Set(['old']));
     expect(artifacts.groups).toBe('before');
     expect(strapi.eventHub.emit).not.toHaveBeenCalled();
+  });
+});
+
+describe('component uid change in a batch schema mutation', () => {
+  const moveCard = {
+    contentTypes: [{ action: 'delete', uid: 'api::old.old' }],
+    components: [
+      {
+        action: 'update',
+        uid: 'shared.card',
+        category: 'blocks',
+        displayName: 'Card',
+        icon: 'star',
+        attributes: [],
+      },
+    ],
+  } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    builder.writeFiles.mockResolvedValue(true);
+    builder.rollback.mockResolvedValue(undefined);
+    builder.renameComponentRows.mockResolvedValue(undefined);
+    apiHandler.backup.mockResolvedValue(undefined);
+    apiHandler.clear.mockResolvedValue(undefined);
+    apiHandler.rollback.mockResolvedValue(undefined);
+    contentStructure.validateFromUpdate.mockImplementation(() => {});
+    contentStructure.commitFromUpdate.mockResolvedValue(false);
+
+    global.strapi = {
+      eventHub: { emit: jest.fn() },
+      log: { error: jest.fn() },
+      plugins: {
+        'content-type-builder': {
+          config: (_key: string, defaultValue: unknown) => defaultValue,
+        },
+      },
+    } as any;
+  });
+
+  it('writes the files without the rows, then rewrites the rows before the folder commit', async () => {
+    await updateSchema(moveCard);
+
+    expect(builder.writeFiles).toHaveBeenCalledWith({ renameComponentRows: false });
+    expect(builder.renameComponentRows).toHaveBeenCalledTimes(1);
+
+    const [clearOrder] = apiHandler.clear.mock.invocationCallOrder;
+    const [renameOrder] = builder.renameComponentRows.mock.invocationCallOrder;
+    const [commitOrder] = contentStructure.commitFromUpdate.mock.invocationCallOrder;
+
+    expect(clearOrder).toBeLessThan(renameOrder);
+    expect(renameOrder).toBeLessThan(commitOrder);
+    expect(builder.rollback).not.toHaveBeenCalled();
+  });
+
+  it('leaves the rows on the old uid and restores the files when an API clear fails', async () => {
+    apiHandler.clear.mockRejectedValueOnce(new Error('clear failed'));
+
+    await expect(updateSchema(moveCard)).rejects.toThrow('clear failed');
+
+    expect(builder.renameComponentRows).not.toHaveBeenCalled();
+    expect(builder.rollback).toHaveBeenCalledTimes(1);
+    expect(apiHandler.rollback).toHaveBeenCalledWith('api::old.old');
+    expect(contentStructure.commitFromUpdate).not.toHaveBeenCalled();
+  });
+
+  it('restores the files and skips the folder commit when the row rewrite fails', async () => {
+    builder.renameComponentRows.mockRejectedValueOnce(new Error('rows failed'));
+
+    await expect(updateSchema(moveCard)).rejects.toThrow('rows failed');
+
+    expect(builder.rollback).toHaveBeenCalledTimes(1);
+    expect(apiHandler.rollback).toHaveBeenCalledWith('api::old.old');
+    expect(contentStructure.commitFromUpdate).not.toHaveBeenCalled();
   });
 });

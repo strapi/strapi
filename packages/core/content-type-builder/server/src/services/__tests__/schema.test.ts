@@ -15,6 +15,7 @@ const builderServiceMock = {
   editComponent: jest.fn(),
   deleteComponent: jest.fn(),
   writeFiles: jest.fn().mockResolvedValue(true),
+  renameComponentRows: jest.fn().mockResolvedValue(undefined),
   rollback: jest.fn().mockResolvedValue(undefined),
   contentTypes: new Map(),
   components: new Map(),
