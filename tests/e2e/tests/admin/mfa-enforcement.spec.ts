@@ -10,21 +10,25 @@ const LOCKED_MESSAGE =
 const twoFactorCard = (page: Page) =>
   page.getByRole('region', { name: 'Two-factor authentication' });
 
-/**
- * Sets the requirement to Required from the Security page (the caller must be enrolled). Each
- * card on that page is an accessible region named by its own heading, so its Save
- * button is selected by card rather than by position.
- */
+/** The Security page saves every card with the one Save in its header. */
+const saveSecuritySettings = (page: Page) => page.getByRole('button', { name: 'Save' });
+
+const chooseRequirement = async (page: Page, label: string) => {
+  await twoFactorCard(page).getByRole('combobox', { name: 'Requirement' }).click();
+  await page.getByRole('option', { name: label }).click();
+};
+
+/** Sets the requirement to "Required for everyone" (the caller must be enrolled). */
 const requireTwoFactorForEveryone = async (page: Page) => {
   await page.goto('/admin/settings/security');
-  await page.getByRole('radio', { name: /^Required/ }).check();
-  await twoFactorCard(page).getByRole('button', { name: 'Save' }).click();
+  await chooseRequirement(page, 'Required for everyone');
+  await saveSecuritySettings(page).click();
   // Raising enforcement is confirmed first, against the count of accounts it would affect.
   await page
     .getByRole('alertdialog', { name: 'Require two-factor authentication?' })
-    .getByRole('button', { name: 'Confirm' })
+    .getByRole('button', { name: 'Require' })
     .click();
-  await expect(page.getByText('Saved')).toBeVisible();
+  await expect(page.getByText('Security settings saved.')).toBeVisible();
 };
 
 test.describe('Two-factor enforcement', () => {
@@ -41,14 +45,16 @@ test.describe('Two-factor enforcement', () => {
   }) => {
     await page.goto('/admin/settings/security');
     await expect(page.getByRole('heading', { name: 'Security' })).toBeVisible();
-    await expect(page.getByRole('radio', { name: /^Optional/ })).toBeChecked();
+    await expect(twoFactorCard(page).getByRole('combobox', { name: 'Requirement' })).toHaveText(
+      /Required for selected roles/
+    );
 
     // Refused up front rather than after Save: the hint appears and Save stays disabled.
-    await page.getByRole('radio', { name: /^Required/ }).check();
+    await chooseRequirement(page, 'Required for everyone');
     await expect(
       twoFactorCard(page).getByText(/Set up two-factor authentication on your own account/)
     ).toBeVisible();
-    await expect(twoFactorCard(page).getByRole('button', { name: 'Save' })).toBeDisabled();
+    await expect(saveSecuritySettings(page)).toBeDisabled();
     await expect(
       twoFactorCard(page).getByRole('link', { name: 'Go to your profile' })
     ).toHaveAttribute('href', /\/me$/);

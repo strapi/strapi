@@ -127,21 +127,22 @@ test.describe('Passkeys', () => {
     await page.goto('/admin/settings/security');
     const passkeyCard = page.getByRole('region', { name: 'Passkeys' });
     const allow = passkeyCard.getByRole('checkbox', {
-      name: 'Allow users to sign in with a passkey',
+      name: 'Allow users to log in with a passkey',
     });
     await expect(allow).toBeChecked();
     await allow.uncheck();
-    await passkeyCard.getByRole('button', { name: 'Save' }).click();
+    // one Save, in the page header, for every card
+    await page.getByRole('button', { name: 'Save' }).click();
 
     const dialog = page.getByRole('dialog', { name: 'Turn passkeys off?' });
     await expect(dialog).toContainText(
-      'Turning passkeys off deletes every passkey your users have registered.'
+      'This deletes the 1 passkey your users registered. This cannot be undone.'
     );
     await dialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
     await waitForNextTotpStep();
     await dialog.getByLabel('Authentication code*').fill(totpFor(admin.secret));
-    await dialog.getByRole('button', { name: 'Confirm' }).click();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await dialog.getByRole('button', { name: 'Turn off' }).click();
+    await expect(page.getByText('Security settings saved.')).toBeVisible();
 
     // 2. The profile no longer offers passkeys at all -- `/mfa/me` reports the policy off.
     await page.goto('/admin/me');
@@ -161,13 +162,10 @@ test.describe('Passkeys', () => {
     await page.goto('/admin/settings/security');
     await page
       .getByRole('region', { name: 'Passkeys' })
-      .getByRole('checkbox', { name: 'Allow users to sign in with a passkey' })
+      .getByRole('checkbox', { name: 'Allow users to log in with a passkey' })
       .check();
-    await page
-      .getByRole('region', { name: 'Passkeys' })
-      .getByRole('button', { name: 'Save' })
-      .click();
-    await expect(page.getByText('Saved')).toBeVisible();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText('Security settings saved.')).toBeVisible();
     await page.goto('/admin/me');
     await expect(page.getByText(/^No passkeys\./)).toBeVisible();
   });
