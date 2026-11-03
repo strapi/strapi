@@ -398,6 +398,10 @@ const VersionInputRenderer = ({
     edit: { components: componentsLayout },
   } = useDocLayout();
 
+  // Pass field to Custom Fields for backward compatibility with value/onChange props
+  // (same contract as Edit View InputRenderer — see #21163 / #27137).
+  const field = useField(props.name);
+
   if (!visible) {
     return null;
   }
@@ -452,6 +456,7 @@ const VersionInputRenderer = ({
       return (
         <CustomInput
           {...props}
+          {...field}
           // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
           hint={hint}
           labelAction={customLabelAction}
