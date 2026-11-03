@@ -13,10 +13,21 @@ type I18nLocalesQueryResult = {
 const mockUseQueryParams = jest.fn(() => [{ query: {} }]);
 const mockUseDocumentContext = jest.fn();
 const mockUseGetI18nLocalesQuery = jest.fn((): I18nLocalesQueryResult => ({ data: undefined }));
+const mockUseI18nSharedFieldsLock = jest.fn(
+  (_name: string, selector: (state: { isUnlocked: boolean }) => unknown) =>
+    selector({ isUnlocked: false })
+);
+
+const mockFormState: { values: Record<string, unknown>; initialValues: Record<string, unknown> } = {
+  values: {},
+  initialValues: {},
+};
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useQueryParams: () => mockUseQueryParams(),
+  useForm: (_name: string, selector: (state: typeof mockFormState) => unknown) =>
+    selector(mockFormState),
 }));
 
 jest.mock('../useDocumentContext', () => ({
@@ -27,11 +38,19 @@ jest.mock('../../services/documents', () => ({
   useGetI18nLocalesQuery: () => mockUseGetI18nLocalesQuery(),
 }));
 
+jest.mock('../../features/I18nSharedFieldsLock', () => ({
+  useI18nSharedFieldsLock: (name: string, selector: (state: { isUnlocked: boolean }) => unknown) =>
+    mockUseI18nSharedFieldsLock(name, selector),
+}));
+
 describe('useI18nFieldLock', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryParams.mockReturnValue([{ query: {} }]);
     mockUseGetI18nLocalesQuery.mockReturnValue({ data: undefined });
+    mockUseI18nSharedFieldsLock.mockImplementation((_name, selector) =>
+      selector({ isUnlocked: false })
+    );
     mockUseDocumentContext.mockReturnValue({
       currentDocument: {
         schema: { pluginOptions: { i18n: { localized: true } } },
@@ -330,6 +349,29 @@ describe('useI18nFieldLock', () => {
       expect(result.current).toBe(false);
     });
 
+    it('does not lock shared fields after the editor accepts the unlock warning', () => {
+      mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+      mockUseDocumentContext.mockReturnValue({
+        currentDocument: {
+          schema: { pluginOptions: { i18n: { localized: true } } },
+          document: { locale: 'fr' },
+          meta: { availableLocales: [{ locale: 'en' }], defaultLocale: 'en' },
+        },
+      });
+      mockUseI18nSharedFieldsLock.mockImplementation((_name, selector) =>
+        selector({ isUnlocked: true })
+      );
+
+      const { result } = renderHook(() =>
+        useShouldLockNonLocalizedField({
+          type: 'boolean',
+          pluginOptions: { i18n: { localized: false } },
+        })
+      );
+
+      expect(result.current).toBe(false);
+    });
+
     it('does not lock when neither metadata nor the locales list names a default locale', () => {
       mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
       mockUseDocumentContext.mockReturnValue({
@@ -428,6 +470,22 @@ describe('useI18nFieldLock', () => {
       const { result } = renderHook(() => useOmitLockedSharedFieldsOnLocaleCreate());
 
       expect(result.current(payload)).toBe(payload);
+    });
+
+    it('keeps only the shared fields the editor changed after unlocking', () => {
+      mockSecondaryLocale(undefined);
+      mockUseI18nSharedFieldsLock.mockImplementation((_name, selector) =>
+        selector({ isUnlocked: true })
+      );
+      mockFormState.initialValues = { shared: { name: 'inherited' }, blocks: [] };
+      mockFormState.values = { shared: { name: 'inherited' }, blocks: [{ name: 'added' }] };
+
+      const { result } = renderHook(() => useOmitLockedSharedFieldsOnLocaleCreate());
+
+      expect(result.current(payload)).toEqual({ title: 'Bonjour', blocks: [], slug: 'bonjour' });
+
+      mockFormState.initialValues = {};
+      mockFormState.values = {};
     });
   });
 });

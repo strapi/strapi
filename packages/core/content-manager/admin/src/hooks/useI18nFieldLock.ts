@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useForm, useQueryParams } from '@strapi/admin/strapi-admin';
+import isEqual from 'lodash/isEqual';
 
+import { useI18nSharedFieldsLock } from '../features/I18nSharedFieldsLock';
 import { useGetI18nLocalesQuery } from '../services/documents';
 
 import { useDocumentContext } from './useDocumentContext';
@@ -101,7 +103,8 @@ const useHasDefaultLocaleEntry = (): boolean => {
 };
 
 /**
- * @internal
+ * @alpha
+ * @public
  * Whether an attribute holds a value shared by every locale of the entry.
  */
 const isSharedI18nAttribute = (
@@ -125,7 +128,8 @@ const isSharedI18nAttribute = (
 
 /**
  * Whether shared fields are locked for the document being edited: a non-default
- * locale of a document that already has a default-locale entry.
+ * locale of a document that already has a default-locale entry. The editor can
+ * still unlock them (see `I18nSharedFieldsLock`).
  */
 const useIsSharedFieldsLockActive = (): boolean => {
   const isDefaultLocale = useIsEditingDefaultLocale();
@@ -146,8 +150,12 @@ const useShouldLockNonLocalizedField = (
   options: { isInsideComponent?: boolean } = {}
 ): boolean => {
   const isLockActive = useIsSharedFieldsLockActive();
+  const isUnlocked = useI18nSharedFieldsLock(
+    'useShouldLockNonLocalizedField',
+    (state) => state.isUnlocked
+  );
 
-  if (!isLockActive || options.isInsideComponent) {
+  if (!isLockActive || isUnlocked || options.isInsideComponent) {
     return false;
   }
 
@@ -159,11 +167,24 @@ const useShouldLockNonLocalizedField = (
  * Returns a function that removes locked shared fields from the payload that
  * creates a missing locale, so the server copies them whole from the default
  * locale. The form only holds a prefilled copy of them, and relations nested
- * in components or dynamic zones are not carried in that copy.
+ * in components or dynamic zones are not carried in that copy. Once the editor
+ * unlocks shared fields, the ones they changed are kept.
  */
 const useOmitLockedSharedFieldsOnLocaleCreate = () => {
   const { currentDocument } = useDocumentContext('useOmitLockedSharedFieldsOnLocaleCreate');
   const isLockActive = useIsSharedFieldsLockActive();
+  const isUnlocked = useI18nSharedFieldsLock(
+    'useOmitLockedSharedFieldsOnLocaleCreate',
+    (state) => state.isUnlocked
+  );
+  const values = useForm(
+    'useOmitLockedSharedFieldsOnLocaleCreate',
+    (state) => state.values as Record<string, unknown>
+  );
+  const initialValues = useForm(
+    'useOmitLockedSharedFieldsOnLocaleCreate',
+    (state) => state.initialValues as Record<string, unknown>
+  );
   const isCreatingLocale = !currentDocument.document?.id;
   const attributes = currentDocument.schema?.attributes;
 
@@ -174,14 +195,19 @@ const useOmitLockedSharedFieldsOnLocaleCreate = () => {
       }
 
       return Object.fromEntries(
-        Object.entries(data).filter(([name]) => !isSharedI18nAttribute(attributes[name]))
+        Object.entries(data).filter(
+          ([name]) =>
+            !isSharedI18nAttribute(attributes[name]) ||
+            (isUnlocked && !isEqual(values?.[name], initialValues?.[name]))
+        )
       ) as TData;
     },
-    [attributes, isCreatingLocale, isLockActive]
+    [attributes, initialValues, isCreatingLocale, isLockActive, isUnlocked, values]
   );
 };
 
 export {
+  isSharedI18nAttribute,
   useHasDefaultLocaleEntry,
   useIsEditingDefaultLocale,
   useOmitLockedSharedFieldsOnLocaleCreate,
