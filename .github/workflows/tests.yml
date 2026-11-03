@@ -309,6 +309,14 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
       options: --ipc=host --init
+      # The image has no zstd, so actions/cache falls back to gzip there. A gzip cache is a
+      # different cache version, so these jobs missed every cache the build job saves with
+      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd works in the image
+      # (both are Ubuntu 24.04); actions/cache also calls it as unzstd and zstdmt.
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
@@ -394,10 +402,15 @@ jobs:
     needs: [conditions, build]
     name: '[CE] e2e media library (browser: chromium)'
     runs-on: ubuntu-latest
-    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    # Browsers and system libraries come from the Playwright image, zstd from the runner (see
+    # `e2e_ce`).
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
       options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -450,10 +463,15 @@ jobs:
     needs: [conditions, build]
     name: '[CE] e2e media library (legacy) (browser: chromium)'
     runs-on: ubuntu-latest
-    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    # Browsers and system libraries come from the Playwright image, zstd from the runner (see
+    # `e2e_ce`).
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
       options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -506,10 +524,15 @@ jobs:
     needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
+    # Browsers and system libraries come from the Playwright image, zstd from the runner (see
+    # `e2e_ce`).
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
       options: --ipc=host --init
+      volumes:
+        - /usr/bin/zstd:/usr/local/bin/zstd:ro
+        - /usr/bin/zstd:/usr/local/bin/unzstd:ro
+        - /usr/bin/zstd:/usr/local/bin/zstdmt:ro
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
