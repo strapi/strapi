@@ -139,6 +139,9 @@ const baseStrapiMock = {
         return serviceMock[service];
       }),
   }),
+  localization: {
+    isLocalizedContentType: jest.fn().mockReturnValue(false),
+  },
 };
 
 describe('Release Action service', () => {
@@ -415,6 +418,70 @@ describe('Release Action service', () => {
       expect(request).toEqual({ type: 'unpublish', contentType: 'api::homepage.homepage' });
     });
 
+    it('stores no locale for a content type that is not localized', async () => {
+      const { validateUniqueEntry } = serviceMock['release-validation'];
+      validateUniqueEntry.mockClear();
+      const actionCreate = jest.fn(({ data }) => ({ id: 1, ...data }));
+      const strapiMock = {
+        ...baseStrapiMock,
+        localization: {
+          isLocalizedContentType: jest.fn().mockReturnValue(false),
+        },
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            create: actionCreate,
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          }),
+        },
+      };
+      // The Content Manager sends the locale of its URL, whatever the content type
+      const request = {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+        locale: 'fr',
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      await releaseActionService.create(1, request);
+
+      expect(actionCreate.mock.calls[0][0].data.locale).toBeUndefined();
+      // Already in the release in any locale: the entry has only one
+      expect(validateUniqueEntry.mock.calls[0][1].locale).toBeUndefined();
+    });
+
+    it('keeps the locale of a localized content type', async () => {
+      const actionCreate = jest.fn(({ data }) => ({ id: 1, ...data }));
+      const strapiMock = {
+        ...baseStrapiMock,
+        localization: {
+          isLocalizedContentType: jest.fn().mockReturnValue(true),
+        },
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            create: actionCreate,
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+      await releaseActionService.create(1, {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+        locale: 'fr',
+      });
+
+      expect(actionCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ locale: 'fr' }) })
+      );
+    });
+
     it('throws an error if the release does not exist', async () => {
       const actionCreate = jest.fn();
       const strapiMock = {
@@ -455,6 +522,7 @@ describe('Release Action service', () => {
             { name: 'English (en)', code: 'en' },
             { name: 'French (fr)', code: 'fr' },
           ]),
+          isLocalizedContentType: jest.fn().mockReturnValue(true),
         },
       };
 
@@ -529,6 +597,40 @@ describe('Release Action service', () => {
       });
     });
 
+    it('shows no locale on an action of a content type that is not localized', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            findConfiguration: jest.fn().mockReturnValue({ settings: { mainField: 'name' } }),
+          }),
+        }),
+        localization: {
+          getLocales: jest.fn().mockResolvedValue([{ name: 'French (fr)', code: 'fr' }]),
+          isLocalizedContentType: jest.fn().mockReturnValue(false),
+        },
+      };
+
+      // Stored before the locale was dropped on write
+      const mockActions = [
+        {
+          id: 1,
+          contentType: 'api::contentTypeA.contentTypeA',
+          locale: 'fr',
+          entryDocumentId: '1',
+          entry: { name: 'test 1' },
+        },
+      ];
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+
+      // @ts-expect-error ignore missing properties
+      const groupedData = await releaseActionService.groupActions(mockActions, 'contentType');
+
+      expect(groupedData.contentTypeA[0].locale).toBeNull();
+    });
+
     it('should not resolve action locales without a localization plugin', async () => {
       const strapiMock = {
         ...baseStrapiMock,
@@ -540,6 +642,7 @@ describe('Release Action service', () => {
         // Inert default of `strapi.localization` when no provider is registered
         localization: {
           getLocales: jest.fn().mockResolvedValue([]),
+          isLocalizedContentType: jest.fn().mockReturnValue(false),
         },
       };
 
@@ -581,7 +684,7 @@ describe('Release Action service', () => {
               mainFieldValue: 'test 1',
               uid: 'api::contentTypeA.contentTypeA',
             },
-            locale: undefined,
+            locale: null,
             entryDocumentId: '1',
             entry: {
               name: 'test 1',
@@ -712,6 +815,7 @@ describe('Release Action service', () => {
       const actionCreate = jest.fn(({ data }) => ({ id: 1, ...data }));
       const strapiMock = {
         ...baseStrapiMock,
+        localization: { isLocalizedContentType: jest.fn().mockReturnValue(true) },
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
