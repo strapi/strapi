@@ -41,4 +41,28 @@ describe('folder', () => {
       });
     });
   });
+
+  describe('getNamePaths', () => {
+    beforeAll(() => {
+      global.strapi = {
+        db: {
+          query: () => ({
+            findMany: jest.fn(async () => [
+              { pathId: 1, name: 'Clients' },
+              { pathId: 2, name: 'Acme' },
+            ]),
+          }),
+        },
+      } as any;
+    });
+
+    test.each([
+      ['/1/2', '/Clients/Acme'],
+      ['/imported', '/'],
+      ['/legacy/nested', '/'],
+      ['/1/xx/2', '/Clients/Acme'],
+    ])('maps %s to %s', async (path, namePath) => {
+      expect(await folderService.getNamePaths([path])).toEqual({ [path]: namePath });
+    });
+  });
 });

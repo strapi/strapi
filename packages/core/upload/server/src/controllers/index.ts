@@ -14,6 +14,8 @@ export const controllers = {
   'admin-settings': adminSettings,
   'admin-upload': adminUpload,
   'content-api': contentApi,
+  // Named after the model, so the `parent` relation check (`plugin::upload.folder.find`)
+  // uses the same action as the folders list.
   folder: contentApiFolder,
   'view-configuration': viewConfiguration,
 };
