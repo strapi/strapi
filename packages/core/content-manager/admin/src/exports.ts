@@ -12,6 +12,7 @@ export {
   useDocument as unstable_useDocument,
   useContentManagerContext as unstable_useContentManagerContext,
 } from './hooks/useDocument';
+export { useHasDefaultLocaleEntry as unstable_useHasDefaultLocaleEntry } from './hooks/useI18nFieldLock';
 export { useDocumentActions as unstable_useDocumentActions } from './hooks/useDocumentActions';
 export { useDocumentLayout as unstable_useDocumentLayout } from './hooks/useDocumentLayout';
 export type {
