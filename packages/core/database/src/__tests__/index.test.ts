@@ -401,6 +401,43 @@ describe('Database', () => {
         expect(finished).toBe(true);
         await db.destroy();
       });
+
+      it(`takes a MySQL document lock once per transaction with ${title}`, async () => {
+        const db = new Database(config);
+        await db.init({ models });
+        (db.dialect as { client: string }).client = 'mysql';
+
+        const statements: string[] = [];
+        const chain = (statement: string) => {
+          const builder = {
+            insert: () => builder,
+            onConflict: () => builder,
+            merge: () => builder,
+            where: () => builder,
+            delete: () => builder,
+            transacting: () => builder,
+            then(resolve: (value: unknown) => unknown) {
+              statements.push(statement);
+              return Promise.resolve(resolve(undefined));
+            },
+          };
+          return builder;
+        };
+        let nextStatement = 'lock';
+        jest.spyOn(db, 'getConnection').mockImplementation((() => chain(nextStatement)) as any);
+
+        await db.transaction(async () => {
+          await db.lockDocumentId('doc');
+          await db.lockDocumentId('doc');
+          nextStatement = 'delete';
+          await db.deleteDocumentLock('doc');
+          nextStatement = 'lock';
+          await db.lockDocumentId('doc');
+        });
+
+        expect(statements).toEqual(['lock', 'delete', 'lock']);
+        await db.destroy();
+      });
     });
   });
 });

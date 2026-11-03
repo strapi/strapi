@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { lockDocumentForUpdate, releaseDocumentLock } from '../document-update-lock';
+import {
+  lockDocumentBeforeRead,
+  lockDocumentForUpdate,
+  releaseDocumentLock,
+} from '../document-update-lock';
 
 const createQueryBuilder = (results: unknown[]) => {
   const calls: Array<Record<string, unknown>> = [];
@@ -120,6 +124,24 @@ describe('lockDocumentForUpdate', () => {
 
     expect(lockedDocumentIds).toEqual(['doc']);
     expect(calls).toEqual([]);
+  });
+});
+
+describe('lockDocumentBeforeRead', () => {
+  it('locks the MySQL document sentinel', async () => {
+    const { db, lockedDocumentIds } = createDatabase('mysql');
+
+    await lockDocumentBeforeRead({ db, documentId: 'doc' });
+
+    expect(lockedDocumentIds).toEqual(['doc']);
+  });
+
+  it.each(['postgres', 'sqlite'])('does nothing on %s', async (client) => {
+    const { db, lockedDocumentIds } = createDatabase(client);
+
+    await lockDocumentBeforeRead({ db, documentId: 'doc' });
+
+    expect(lockedDocumentIds).toEqual([]);
   });
 });
 

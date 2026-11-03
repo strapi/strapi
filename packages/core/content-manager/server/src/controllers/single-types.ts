@@ -208,7 +208,19 @@ export default {
       return ctx.forbidden();
     }
 
+    // Read the document id outside the transaction below. MySQL fixes a
+    // transaction's snapshot at its first read, so the lock has to come first
+    // or a concurrent save of the same new locale stays invisible.
+    const existing =
+      strapi.db.dialect.client === 'mysql'
+        ? await strapi.db.query(model).findOne({ select: ['documentId'] })
+        : null;
+
     const publishedDocument = await strapi.db.transaction(async () => {
+      if (existing?.documentId) {
+        await strapi.db.lockDocumentId(existing.documentId);
+      }
+
       const sanitizedQuery = await permissionChecker.sanitizedQuery.publish(query);
       const populate = await buildPopulateFromQuery(sanitizedQuery, model);
       const { locale } = await getDocumentLocaleAndStatus(body, model);

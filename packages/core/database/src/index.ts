@@ -120,6 +120,9 @@ class Database {
 
   private phase?: string;
 
+  /** Document ids whose MySQL lock row each open transaction already holds. */
+  private heldDocumentLocks = new WeakMap<Knex.Transaction, Set<string>>();
+
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -387,12 +390,22 @@ class Database {
     return this.entityManager.createQueryBuilder(uid);
   }
 
+  /**
+   * Serialize MySQL writers of one document on a sentinel row. No-op on other
+   * dialects. REPEATABLE READ fixes a transaction's snapshot at its first read,
+   * so a transaction that reads the document and then writes it must call this
+   * before that first read. Later calls in the same transaction do nothing.
+   */
   async lockDocumentId(documentId: string) {
     if (this.dialect.client !== 'mysql') {
       return;
     }
 
     const trx = transactionCtx.get();
+    if (trx && this.heldDocumentLocks.get(trx)?.has(documentId)) {
+      return;
+    }
+
     const insert = this.getConnection(DOCUMENT_LOCK_TABLE)
       .insert({ document_id: documentId })
       .onConflict('document_id')
@@ -408,6 +421,12 @@ class Database {
     // The insert or duplicate-key update already holds the exclusive lock
     // until the transaction completes.
     await insert;
+
+    if (trx) {
+      const held = this.heldDocumentLocks.get(trx) ?? new Set<string>();
+      held.add(documentId);
+      this.heldDocumentLocks.set(trx, held);
+    }
   }
 
   /**
@@ -429,6 +448,11 @@ class Database {
     }
 
     await remove;
+
+    // The row is gone, so a later write in this transaction has to insert it again.
+    if (trx) {
+      this.heldDocumentLocks.get(trx)?.delete(documentId);
+    }
   }
 
   async destroy() {

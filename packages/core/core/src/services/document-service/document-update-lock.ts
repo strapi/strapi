@@ -24,11 +24,36 @@ const hasLockedRow = (result: unknown) => {
 };
 
 /**
+ * Take the MySQL lock row of a document before the transaction reads anything.
+ * REPEATABLE READ fixes the snapshot at the first read, even a read of another
+ * table, so a writer that read first and then waited would still miss rows the
+ * other writer committed. Other dialects lock in lockDocumentForUpdate.
+ */
+export const lockDocumentBeforeRead = async ({
+  db,
+  documentId,
+}: {
+  db: Database;
+  documentId: string;
+}) => {
+  if (db.dialect.client !== 'mysql') {
+    return;
+  }
+
+  if (!db.lockDocumentId) {
+    throw new Error('MySQL document lock is unavailable');
+  }
+
+  await db.lockDocumentId(documentId);
+};
+
+/**
  * Serialize two updates of the same document without locking every locale.
  *
  * MySQL locks a row in its internal lock table. Nothing references that row,
  * so its exclusive lock does not block foreign-key checks. Postgres locks the
  * row being written with FOR NO KEY UPDATE. SQLite ignores row locks.
+ * On MySQL this does nothing when the transaction already holds the lock.
  */
 export const lockDocumentForUpdate = async ({
   db,

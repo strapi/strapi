@@ -28,7 +28,11 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
-import { lockDocumentForUpdate, releaseDocumentLock } from './document-update-lock';
+import {
+  lockDocumentBeforeRead,
+  lockDocumentForUpdate,
+  releaseDocumentLock,
+} from './document-update-lock';
 import {
   applyDeferredCloneRelationCopies,
   applyPostCloneRelationUpdates,
@@ -551,6 +555,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function update(opts = {} as any) {
     const { documentId, ...params } = opts;
 
+    // On MySQL the lock must come before any read in this transaction,
+    // including the default locale lookup below. REPEATABLE READ keeps the
+    // snapshot of the first read, so a writer that read first and then waited
+    // would still miss the locale the other writer created.
+    if (documentId) {
+      await lockDocumentBeforeRead({ db: strapi.db, documentId });
+    }
+
     const queryParams = await async.pipe(
       validateParams,
       DP.filterDataPublishedAt,
@@ -565,12 +577,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     )(params);
 
     // Two requests can both observe "locale missing" and insert a second row.
-    // MySQL serializes writers with an internal sentinel row. Postgres locks
-    // the draft row with FOR NO KEY UPDATE, which still lets a relation insert
-    // take the FOR KEY SHARE lock its foreign key needs.
-    // On MySQL the lock must come before any read of the document: REPEATABLE
-    // READ keeps the snapshot of the first read, so a writer that checked first
-    // and then waited would still miss the locale the other writer created.
+    // MySQL serializes writers with the sentinel row locked above. Postgres
+    // locks the draft row with FOR NO KEY UPDATE, which still lets a relation
+    // insert take the FOR KEY SHARE lock its foreign key needs.
     if (documentId) {
       await lockDocumentForUpdate({
         db: strapi.db,
