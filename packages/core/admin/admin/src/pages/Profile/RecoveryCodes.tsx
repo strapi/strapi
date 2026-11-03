@@ -59,7 +59,7 @@ const RecoveryCodes = ({ codes, onAcknowledged, onSavedChange }: RecoveryCodesPr
         type: 'success',
         message: formatMessage({
           id: 'Settings.profile.form.section.mfa.codes.copied',
-          defaultMessage: 'Recovery codes copied',
+          defaultMessage: 'Recovery codes copied.',
         }),
       });
     } catch {
@@ -145,7 +145,7 @@ const RecoveryCodes = ({ codes, onAcknowledged, onSavedChange }: RecoveryCodesPr
         <Button disabled={!saved} loading={submitting} onClick={handleAcknowledge}>
           {formatMessage({
             id: 'Settings.profile.form.section.mfa.codes.done',
-            defaultMessage: 'I have saved my recovery codes',
+            defaultMessage: 'Done',
           })}
         </Button>
       </Flex>

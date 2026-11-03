@@ -520,7 +520,7 @@ describe('TwoFactorSection', () => {
     renderSection();
 
     expect(
-      await screen.findByText(/You sign in through single sign-on, so there is no password/)
+      await screen.findByText(/You log in through single sign-on, so there is no password/)
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Enable two-factor authentication' })

@@ -71,7 +71,7 @@ const RemovePasskeyDialog = ({ passkey, onClose }: RemovePasskeyDialogProps) => 
         type: 'success',
         message: formatMessage({
           id: 'Settings.profile.form.section.mfa.passkeys.delete.success',
-          defaultMessage: 'Passkey removed',
+          defaultMessage: 'Passkey removed.',
         }),
       });
       close();
@@ -108,7 +108,7 @@ const RemovePasskeyDialog = ({ passkey, onClose }: RemovePasskeyDialogProps) => 
                   {
                     id: 'Settings.profile.form.section.mfa.passkeys.delete.intro',
                     defaultMessage:
-                      '{name} will no longer sign you in. Your authenticator app is unaffected. Confirm your password and a code from it, or an unused recovery code.',
+                      '{name} will no longer log you in. Your authenticator app is unaffected. Confirm your password and a code from it, or an unused recovery code.',
                   },
                   { name: passkey?.name ?? '' }
                 )}

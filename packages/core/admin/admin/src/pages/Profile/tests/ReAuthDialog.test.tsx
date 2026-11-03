@@ -78,7 +78,7 @@ describe('ReAuthDialog', () => {
 
     for (const code of CODES) expect(await screen.findByText(code)).toBeInTheDocument();
     await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
-    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
 
     // the freshly issued recovery codes must not outlive the dialog in the Redux store (RTK
@@ -91,11 +91,16 @@ describe('ReAuthDialog', () => {
     const onClose = jest.fn();
     const { user } = renderDialog({ open: true, onClose, intent: 'disable' });
 
+    // Says what disabling takes away, not just that the password is left alone.
+    expect(
+      screen.getByText(/Your passkeys, recovery codes and trusted devices will be removed/)
+    ).toBeInTheDocument();
+
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
     await user.click(screen.getByRole('button', { name: 'Disable two-factor authentication' }));
 
-    expect(await screen.findByText('Two-factor authentication is disabled.')).toBeInTheDocument();
+    expect(await screen.findByText('Two-factor authentication disabled.')).toBeInTheDocument();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
@@ -197,14 +202,14 @@ describe('ReAuthDialog', () => {
 
     for (const code of CODES) expect(await screen.findByText(code)).toBeInTheDocument();
     await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
-    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
 
     expect(await screen.findByText('Could not save the acknowledgement')).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
     for (const code of CODES) expect(screen.getByText(code)).toBeInTheDocument();
 
     shouldFail = false;
-    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });

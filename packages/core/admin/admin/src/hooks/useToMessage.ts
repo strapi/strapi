@@ -26,17 +26,17 @@ const CODE_MESSAGES: Record<MfaErrorCode, MessageDescriptor> = {
   [MFA_ERROR_CODES.SECRET_UNREADABLE]: {
     id: 'Auth.form.mfa.error.secretUnreadable',
     defaultMessage:
-      'Your two-factor secret could not be read. Use a recovery code to sign in, or ask an administrator to reset two-factor authentication for your account.',
+      'Your two-factor secret could not be read. Use a recovery code to log in, or ask an administrator to reset two-factor authentication for your account.',
   },
   [MFA_ERROR_CODES.NO_LOCAL_PASSWORD]: {
     id: 'Settings.profile.form.section.mfa.error.noPassword',
     defaultMessage:
-      'You sign in through single sign-on, so two-factor authentication is managed by your identity provider.',
+      'You log in through single sign-on, so two-factor authentication is managed by your identity provider.',
   },
   [MFA_ERROR_CODES.NO_LOCAL_PASSWORD_DOWNGRADE]: {
     id: 'Settings.security.mfa.error.noPasswordDowngrade',
     defaultMessage:
-      'Your account has no password, so it cannot lower two-factor requirements. Ask an administrator who signs in with a password.',
+      'Your account has no password, so it cannot lower two-factor requirements. Ask an administrator who logs in with a password.',
   },
   [MFA_ERROR_CODES.ENROL_FIRST]: {
     id: 'Settings.security.mfa.enrolFirst',
@@ -59,18 +59,21 @@ const codeOf = (err: BaseQueryError): MfaErrorCode | undefined => {
   return typeof code === 'string' && code in CODE_MESSAGES ? (code as MfaErrorCode) : undefined;
 };
 
+type CodeMessageOverrides = Partial<Record<MfaErrorCode, MessageDescriptor>>;
+
 /** A `SerializedError` (a thrown exception, not a server response) carries nothing safe to show
- * verbatim, so it falls back to a generic message. */
+ * verbatim, so it falls back to a generic message. `overrides` lets one call site word a code
+ * for its own context, such as the setup step where a recovery code is no use. */
 const useToMessage = () => {
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  return (err: BaseQueryError | SerializedError) => {
+  return (err: BaseQueryError | SerializedError, overrides?: CodeMessageOverrides) => {
     if (!isBaseQueryError(err)) {
       return formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' });
     }
     const code = codeOf(err);
-    return code ? formatMessage(CODE_MESSAGES[code]) : formatAPIError(err);
+    return code ? formatMessage(overrides?.[code] ?? CODE_MESSAGES[code]) : formatAPIError(err);
   };
 };
 

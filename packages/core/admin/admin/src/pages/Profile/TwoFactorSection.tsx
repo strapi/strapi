@@ -270,7 +270,7 @@ const TwoFactorSection = () => {
             {formatMessage({
               id: 'Settings.profile.form.section.mfa.noPassword',
               defaultMessage:
-                'You sign in through single sign-on, so there is no password to protect with a second factor. Two-factor authentication is managed by your identity provider.',
+                'You log in through single sign-on, so there is no password to protect with a second factor. Two-factor authentication is managed by your identity provider.',
             })}
           </Typography>
         ) : !status.enabled ? (

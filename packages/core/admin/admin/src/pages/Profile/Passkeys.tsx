@@ -111,7 +111,7 @@ const Passkeys = () => {
         {formatMessage({
           id: 'Settings.profile.form.section.mfa.passkeys.description',
           defaultMessage:
-            'A passkey signs you in with your device instead of a code, and cannot be used on a look-alike site. Your password is still required every time.',
+            'A passkey logs you in with your device instead of a code, and cannot be used on a look-alike site. Your password is still required every time.',
         })}
       </Typography>
       {error ? <ErrorMessage error={toMessage(error)} /> : null}
@@ -119,7 +119,7 @@ const Passkeys = () => {
         <Typography textColor="neutral600">
           {formatMessage({
             id: 'Settings.profile.form.section.mfa.passkeys.empty',
-            defaultMessage: 'No passkeys. Add one to sign in with your device instead of a code.',
+            defaultMessage: 'No passkeys. Add one to log in with your device instead of a code.',
           })}
         </Typography>
       ) : null}

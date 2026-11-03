@@ -103,7 +103,7 @@ describe('Passkeys', () => {
     render(<Passkeys />);
 
     expect(
-      await screen.findByText('No passkeys. Add one to sign in with your device instead of a code.')
+      await screen.findByText('No passkeys. Add one to log in with your device instead of a code.')
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     // Adding one is still the point of the empty state
@@ -188,7 +188,7 @@ describe('Passkeys', () => {
 
     await confirmRemoval(user);
 
-    expect(await screen.findByText('Passkey removed')).toBeInTheDocument();
+    expect(await screen.findByText('Passkey removed.')).toBeInTheDocument();
     // Removing a credential costs what adding one does, so the credentials must actually reach
     // the server rather than the dialog merely collecting them.
     expect(body).toEqual({ id: '3', password: 'pw', code: '123456' });
@@ -299,7 +299,7 @@ describe('Passkeys', () => {
     expect(optionBodies[0]).toEqual({ password: 'Testing123!', code: '123456' });
     expect(jest.mocked(startRegistration)).toHaveBeenCalledWith({ optionsJSON: OPTIONS });
     expect(registerBodies[0]).toEqual({ name: 'MacBook Touch ID', registration: REGISTRATION });
-    expect(await screen.findByText('Passkey added')).toBeInTheDocument();
+    expect(await screen.findByText('Passkey added.')).toBeInTheDocument();
     await waitFor(() => expect(dialog).not.toBeInTheDocument());
     expect(await screen.findByText('MacBook Touch ID')).toBeInTheDocument();
   });
@@ -403,7 +403,7 @@ describe('Passkeys', () => {
 
     expect(await screen.findByText('The passkey could not be verified')).toBeInTheDocument();
     expect(screen.getByRole('dialog', { name: 'Add a passkey' })).toBeInTheDocument();
-    expect(screen.queryByText('Passkey added')).not.toBeInTheDocument();
+    expect(screen.queryByText('Passkey added.')).not.toBeInTheDocument();
     // The options request spent the code, so it is cleared for a fresh one.
     expect(screen.getByLabelText('Authentication code*')).toHaveValue('');
   });

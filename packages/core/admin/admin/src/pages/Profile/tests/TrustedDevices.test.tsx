@@ -1,3 +1,4 @@
+import { within } from '@testing-library/react';
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -71,9 +72,9 @@ describe('TrustedDevices', () => {
     expect(screen.getByRole('alertdialog', { name: 'Revoke this device?' })).toHaveTextContent(
       /This browser will ask for a code/
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke' }));
 
-    expect(await screen.findByText('Device no longer trusted')).toBeInTheDocument();
+    expect(await screen.findByText('Device revoked.')).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByText('Chrome on macOS')).not.toBeInTheDocument());
     expect(screen.getByText('Unknown device')).toBeInTheDocument();
   });
@@ -91,12 +92,10 @@ describe('TrustedDevices', () => {
     await screen.findByText('Chrome on macOS');
 
     await user.click(screen.getByRole('button', { name: 'Revoke all' }));
-    expect(
-      screen.getByRole('alertdialog', { name: 'Revoke every trusted device?' })
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    const dialog = screen.getByRole('alertdialog', { name: 'Revoke every trusted device?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Revoke all' }));
 
-    expect(await screen.findByText('No device is trusted any more')).toBeInTheDocument();
+    expect(await screen.findByText('All devices revoked.')).toBeInTheDocument();
     expect(await screen.findByText(/^No trusted devices\./)).toBeInTheDocument();
   });
 
@@ -143,7 +142,7 @@ describe('TrustedDevices', () => {
     await screen.findByText('Chrome on macOS');
 
     await user.click(screen.getAllByRole('button', { name: 'Revoke trust' })[0]);
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke' }));
 
     expect(await screen.findByText('Trusted device not found')).toBeInTheDocument();
     // Nothing optimistic: a refused revoke leaves the list truthful.
@@ -164,10 +163,12 @@ describe('TrustedDevices', () => {
     await screen.findByText('Chrome on macOS');
 
     await user.click(screen.getByRole('button', { name: 'Revoke all' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    fireEvent.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Revoke all' })
+    );
 
     expect(await screen.findByText('boom')).toBeInTheDocument();
-    expect(screen.queryByText('No device is trusted any more')).not.toBeInTheDocument();
+    expect(screen.queryByText('All devices revoked.')).not.toBeInTheDocument();
     expect(screen.getByText('Chrome on macOS')).toBeInTheDocument();
   });
 

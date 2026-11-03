@@ -89,9 +89,9 @@ describe('EnrolDialog', () => {
 
     // step 3: codes shown once, acknowledgement mandatory
     CODES.forEach((code) => expect(screen.getByText(code)).toBeInTheDocument());
-    expect(screen.getByRole('button', { name: 'I have saved my recovery codes' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Done' })).toBeDisabled();
     await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
-    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalled());
 
@@ -168,6 +168,37 @@ describe('EnrolDialog', () => {
     expect(await screen.findByText('Invalid code')).toBeInTheDocument();
     expect(screen.getByText(SECRET)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Verify' })).toBeEnabled();
+  });
+
+  it('words a refused setup code without suggesting a recovery code', async () => {
+    server.use(
+      http.post('/admin/mfa/enrol/verify', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'Invalid code',
+              details: { code: 'MFA_INVALID_CODE' },
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(await screen.findByLabelText('Authentication code*'), '000000');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    expect(
+      await screen.findByText(
+        'That code was not accepted. Codes change every 30 seconds. Wait for the next one and try again.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/use a recovery code/)).not.toBeInTheDocument();
   });
 
   it('trims surrounding whitespace off the code before sending it to verify', async () => {
@@ -329,15 +360,15 @@ describe('EnrolDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Verify' }));
 
     await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
-    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
 
     expect(await screen.findByText('Something went wrong')).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'I have saved my recovery codes' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Done' })).toBeEnabled();
     CODES.forEach((code) => expect(screen.getByText(code)).toBeInTheDocument());
 
     shouldFail = false;
-    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
@@ -494,7 +525,7 @@ describe('EnrolDialog', () => {
     expect(await screen.findByText('Save your recovery codes first')).toBeInTheDocument();
 
     await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
-    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
 
     // The parent closes it and later opens the same instance again.
@@ -545,7 +576,7 @@ describe('EnrolDialog', () => {
     expect(onClose).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
-    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+    await user.click(screen.getByRole('button', { name: 'Done' }));
     expect(await screen.findByText('boom')).toBeInTheDocument();
 
     await user.keyboard('{Escape}');

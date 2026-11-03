@@ -14,6 +14,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { useToMessage } from '../../hooks/useToMessage';
 import {
@@ -39,6 +40,16 @@ const ManualKey = styled(Typography)`
 
 /** These key `state.adminApi.mutations` store-globally, so any other component using the same
  * string shares -- and can clobber -- this dialog's cached result. */
+/** The scan step checks a code from the new authenticator, so the login challenge's hint to use
+ * a recovery code instead would send the user down a path that cannot work here. */
+const SETUP_CODE_MESSAGES = {
+  [MFA_ERROR_CODES.INVALID_CODE]: {
+    id: 'Settings.profile.form.section.mfa.enrol.error.invalidCode',
+    defaultMessage:
+      'That code was not accepted. Codes change every 30 seconds. Wait for the next one and try again.',
+  },
+};
+
 const MFA_ENROL_CACHE_KEYS = {
   password: 'mfa-enrol-password',
   verify: 'mfa-enrol-verify',
@@ -168,7 +179,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
     setError(undefined);
     const res = await verify({ code: code.trim() });
     if ('error' in res) {
-      setError(toMessage(res.error));
+      setError(toMessage(res.error, SETUP_CODE_MESSAGES));
       return;
     }
     setCode('');

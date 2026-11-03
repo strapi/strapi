@@ -60,7 +60,7 @@ const TrustedDevices = () => {
       type: 'success',
       message: formatMessage({
         id: 'Settings.profile.form.section.mfa.trustedDevices.revoke.success',
-        defaultMessage: 'Device no longer trusted',
+        defaultMessage: 'Device revoked.',
       }),
     });
   };
@@ -75,7 +75,7 @@ const TrustedDevices = () => {
       type: 'success',
       message: formatMessage({
         id: 'Settings.profile.form.section.mfa.trustedDevices.revokeAll.success',
-        defaultMessage: 'No device is trusted any more',
+        defaultMessage: 'All devices revoked.',
       }),
     });
   };
@@ -108,7 +108,16 @@ const TrustedDevices = () => {
                 id: 'Settings.profile.form.section.mfa.trustedDevices.revokeAll.title',
                 defaultMessage: 'Revoke every trusted device?',
               })}
-              onConfirm={handleRevokeAll}
+              endAction={
+                <Dialog.Action>
+                  <Button fullWidth variant="danger-light" onClick={handleRevokeAll}>
+                    {formatMessage({
+                      id: 'Settings.profile.form.section.mfa.trustedDevices.revokeAll',
+                      defaultMessage: 'Revoke all',
+                    })}
+                  </Button>
+                </Dialog.Action>
+              }
             >
               {devices.some((device) => device.current)
                 ? formatMessage({
@@ -238,7 +247,20 @@ const TrustedDevices = () => {
                           id: 'Settings.profile.form.section.mfa.trustedDevices.revoke.title',
                           defaultMessage: 'Revoke this device?',
                         })}
-                        onConfirm={() => handleRevoke(device)}
+                        endAction={
+                          <Dialog.Action>
+                            <Button
+                              fullWidth
+                              variant="danger-light"
+                              onClick={() => handleRevoke(device)}
+                            >
+                              {formatMessage({
+                                id: 'Settings.profile.form.section.mfa.trustedDevices.revoke.confirmButton',
+                                defaultMessage: 'Revoke',
+                              })}
+                            </Button>
+                          </Dialog.Action>
+                        }
                       >
                         {device.current
                           ? formatMessage({

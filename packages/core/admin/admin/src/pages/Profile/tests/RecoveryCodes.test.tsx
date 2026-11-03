@@ -37,7 +37,7 @@ describe('RecoveryCodes', () => {
 
     CODES.forEach((code) => expect(screen.getByText(code)).toBeInTheDocument());
 
-    const done = screen.getByRole('button', { name: 'I have saved my recovery codes' });
+    const done = screen.getByRole('button', { name: 'Done' });
     expect(done).toBeDisabled();
 
     await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));

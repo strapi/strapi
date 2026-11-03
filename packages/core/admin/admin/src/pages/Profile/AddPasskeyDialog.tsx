@@ -143,7 +143,7 @@ const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
         type: 'success',
         message: formatMessage({
           id: 'Settings.profile.form.section.mfa.passkeys.add.success',
-          defaultMessage: 'Passkey added',
+          defaultMessage: 'Passkey added.',
         }),
       });
       close();

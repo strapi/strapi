@@ -58,7 +58,7 @@ const COPY = {
     intro: {
       id: 'Settings.profile.form.section.mfa.disable.intro',
       defaultMessage:
-        'Your account will only be protected by your password. Every other device signed in to this account will be logged out. Confirm your password and a code from your authenticator app or an unused recovery code.',
+        'Your passkeys, recovery codes and trusted devices will be removed, and every other device signed in to this account will be logged out. Confirm your password and a code to continue.',
     },
     submit: {
       id: 'Settings.profile.form.section.mfa.disable.submit',
@@ -177,7 +177,7 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
         type: 'success',
         message: formatMessage({
           id: 'Settings.profile.form.section.mfa.disable.success',
-          defaultMessage: 'Two-factor authentication is disabled.',
+          defaultMessage: 'Two-factor authentication disabled.',
         }),
       });
       close();
