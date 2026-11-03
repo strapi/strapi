@@ -43,6 +43,13 @@ export default {
       private: true,
       searchable: false,
     },
+    // The session whose request caused the event; null for system and login-failure events.
+    sessionId: {
+      type: 'string',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
   },
   // Every query in `services/mfa*.ts` against this table narrows by user first, and
   // several run on the login path. Declared the way `upload`'s file content type

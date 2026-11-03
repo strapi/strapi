@@ -98,6 +98,7 @@ const buildResetStrapi = ({
       services: {
         auth: { resetPassword },
         mfa: {
+          claimRequestEvents: jest.fn(() => Promise.resolve()),
           isEnabled: jest.fn(() => true),
           isEnrolled,
           createChallenge,
@@ -182,6 +183,7 @@ const buildPath = (
           resetPassword: jest.fn(() => Promise.resolve(user)),
         },
         mfa: {
+          claimRequestEvents: jest.fn(() => Promise.resolve()),
           isEnabled: jest.fn(() => true),
           isEnrolled: jest.fn(() => Promise.resolve(false)),
           createChallenge: jest.fn(() =>

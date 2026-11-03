@@ -305,12 +305,18 @@ export const issueSession = async (
     const deviceId = options.deviceId ?? bodyParams.deviceId;
     const rememberMe = options.rememberMe ?? bodyParams.rememberMe;
 
-    const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
-      'admin'
-    ).generateRefreshToken(userId, deviceId, {
+    const {
+      token: refreshToken,
+      sessionId,
+      absoluteExpiresAt,
+    } = await sessionManager('admin').generateRefreshToken(userId, deviceId, {
       type: rememberMe ? 'refresh' : 'session',
       metadata: buildSessionMetadataFromContext(ctx),
     });
+
+    // Security events this login recorded (a recovery code, a trusted device) belong to the session
+    // it just created, which must not then notify about them.
+    await strapi.service('admin::mfa').claimRequestEvents(sessionId);
 
     const cookieOptions = buildCookieOptionsWithExpiry(
       rememberMe ? 'refresh' : 'session',

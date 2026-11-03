@@ -201,6 +201,38 @@ describe('Admin MFA: the TOTP factor end to end', () => {
     expect(after.body.data).toEqual([]);
   });
 
+  test("a session is not notified of its own login, and clearing its notices leaves the other session's", async () => {
+    // The previous test's session cleared only what it could see, which leaves its own login
+    // unseen for every other session; start from nothing.
+    await strapi.db
+      .query('admin::mfa-event')
+      .updateMany({ where: { userId: String(user.id) }, data: { seenAt: new Date() } });
+    // Each login spends a recovery code, so each records one `recovery_code_used`.
+    const sessionA = await bearer();
+    const sessionB = await bearer();
+    const typesFor = async (headers: Record<string, string>) =>
+      (await createRequest({ strapi }).get('/admin/mfa/notices', { headers })).body.data.map(
+        (n: any) => n.type
+      );
+
+    expect(await typesFor(sessionA)).toEqual(['recovery_code_used']);
+    expect(await typesFor(sessionB)).toEqual(['recovery_code_used']);
+
+    await createRequest({ strapi }).post('/admin/mfa/notices/seen', {
+      body: {},
+      headers: sessionA,
+    });
+
+    expect(await typesFor(sessionA)).toEqual([]);
+    // Session B still has to hear about session A's login.
+    expect(await typesFor(sessionB)).toEqual(['recovery_code_used']);
+
+    await createRequest({ strapi }).post('/admin/mfa/notices/seen', {
+      body: {},
+      headers: sessionB,
+    });
+  });
+
   test('disabling needs the password and a code, then login stops asking', async () => {
     const headers = await bearer();
 

@@ -366,12 +366,13 @@ describe('issueSession', () => {
   const user = { id: 11, email: 'admin@example.com' } as any;
   const sanitizedUser = { id: 11, email: 'admin@example.com' };
   const sanitizeUser = jest.fn(() => sanitizedUser);
+  const claimRequestEvents = jest.fn(() => Promise.resolve());
 
   const setStrapi = (sessionManagerFn?: jest.Mock) => {
     global.strapi = {
       config: { get: jest.fn(() => undefined) },
       log: { error: jest.fn(), warn: jest.fn() },
-      admin: { services: { user: { sanitizeUser } } },
+      admin: { services: { user: { sanitizeUser }, mfa: { claimRequestEvents } } },
       ...(sessionManagerFn ? { sessionManager: sessionManagerFn } : {}),
     } as any;
   };
@@ -382,7 +383,13 @@ describe('issueSession', () => {
   }) => {
     const generateRefreshToken =
       overrides.generateRefreshToken ??
-      jest.fn(() => Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined }));
+      jest.fn(() =>
+        Promise.resolve({
+          token: 'refresh-token',
+          sessionId: 'session-1',
+          absoluteExpiresAt: undefined,
+        })
+      );
     const generateAccessToken =
       overrides.generateAccessToken ?? jest.fn(() => Promise.resolve({ token: 'access-token' }));
     const sessionManagerFn = jest.fn(() => ({ generateRefreshToken, generateAccessToken }));
@@ -429,6 +436,8 @@ describe('issueSession', () => {
       data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
     });
     expect(sanitizeUser).toHaveBeenCalledWith(user);
+    // The events this login recorded go to the session it just minted.
+    expect(claimRequestEvents).toHaveBeenCalledWith('session-1');
   });
 
   test('honours rememberMe from the request body by minting a refresh-type session', async () => {

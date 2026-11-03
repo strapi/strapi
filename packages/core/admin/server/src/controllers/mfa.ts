@@ -56,6 +56,8 @@ const assertPasskeyRegistrationAllowed = async (mfa: MfaService, userId: string)
   }
 };
 
+const currentSessionIdOf = (ctx: Context) => (ctx.state.session as { id?: string } | undefined)?.id;
+
 export default {
   async me(ctx: Context) {
     const mfa = mfaService();
@@ -168,7 +170,7 @@ export default {
     //
     // If `ctx.state.session` is absent or no longer in `listSessions`, fail closed and evict every
     // device rather than guess which is the caller's.
-    const currentSessionId = (ctx.state.session as { id?: string } | undefined)?.id;
+    const currentSessionId = currentSessionIdOf(ctx);
     const sessions = currentSessionId ? await sessionManager('admin').listSessions(userId) : [];
     const currentSession = sessions.find((session) => session.sessionId === currentSessionId);
 
@@ -195,7 +197,7 @@ export default {
     const mfa = mfaService();
 
     ctx.body = {
-      data: await mfa.unseenEvents(String(ctx.state.user.id)),
+      data: await mfa.unseenEvents(String(ctx.state.user.id), currentSessionIdOf(ctx)),
     } satisfies Notices.Response;
   },
 
@@ -205,7 +207,7 @@ export default {
     await validateMfaNoticesSeenInput(ctx.request.body ?? {});
     const { ids } = ctx.request.body as MarkNoticesSeen.Request['body'];
 
-    await mfa.markEventsSeen(String(ctx.state.user.id), ids);
+    await mfa.markEventsSeen(String(ctx.state.user.id), ids, currentSessionIdOf(ctx));
     ctx.status = 204;
   },
 

@@ -2448,6 +2448,78 @@ describe('mfa service: challenge lifecycle', () => {
   });
 });
 
+describe('mfa service: events from the current session', () => {
+  /** `recordEvent` reads the session from the request context, as `strapi.requestContext` gives it. */
+  const setup = () => {
+    const fixture = buildMfaFixture();
+    const request: { state: Record<string, unknown> } = { state: {} };
+    (fixture.strapi as any).requestContext = { get: () => request };
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service, request };
+  };
+
+  test('recordEvent tags the event with the session of the request that caused it', async () => {
+    const { service, events, request } = setup();
+    request.state.session = { id: 'session-a' };
+
+    await service.recordEvent('1', 'disabled');
+
+    expect(events[0].sessionId).toBe('session-a');
+  });
+
+  test('an event recorded outside any request or session is left untagged', async () => {
+    const { service, events } = setup();
+
+    await service.recordEvent('1', 'locked');
+
+    expect(events[0].sessionId ?? null).toBeNull();
+  });
+
+  test("unseenEvents leaves out the caller's own session, and keeps every other session and untagged event", async () => {
+    const { service, request } = setup();
+    request.state.session = { id: 'session-a' };
+    await service.recordEvent('1', 'disabled');
+    request.state.session = { id: 'session-b' };
+    await service.recordEvent('1', 'enabled');
+    request.state.session = undefined;
+    await service.recordEvent('1', 'unlocked', { byUserId: '9' });
+
+    const notices = await service.unseenEvents('1', 'session-a');
+
+    expect(notices.map((n) => n.type).sort()).toEqual(['enabled', 'unlocked']);
+    expect(notices[0]).not.toHaveProperty('sessionId');
+  });
+
+  test('markEventsSeen with no ids leaves events this session cannot see for the other sessions', async () => {
+    const { service, events, request } = setup();
+    request.state.session = { id: 'session-a' };
+    await service.recordEvent('1', 'disabled');
+    request.state.session = { id: 'session-b' };
+    await service.recordEvent('1', 'enabled');
+
+    await service.markEventsSeen('1', undefined, 'session-a');
+
+    expect(events.find((e) => e.type === 'disabled')!.seenAt).toBeNull();
+    expect(events.find((e) => e.type === 'enabled')!.seenAt).not.toBeNull();
+  });
+
+  test('claimRequestEvents hands the events a login recorded to the session that login issues', async () => {
+    const { service, events, request } = setup();
+    // A recovery-code login: no session yet while the events are written.
+    await service.recordEvent('1', 'recovery_code_used');
+    await service.recordEvent('1', 'device_trusted', { days: 30 });
+
+    await service.claimRequestEvents('session-new');
+
+    expect(events.map((e) => e.sessionId)).toEqual(['session-new', 'session-new']);
+    // A later request with its own context starts clean.
+    const other: { state: Record<string, unknown> } = { state: {} };
+    (request as any).state = other.state;
+    await service.claimRequestEvents('session-other');
+    expect(events.map((e) => e.sessionId)).toEqual(['session-new', 'session-new']);
+  });
+});
+
 describe('mfa service: notices and acknowledgement', () => {
   const setup = () => {
     const fixture = buildMfaFixture();

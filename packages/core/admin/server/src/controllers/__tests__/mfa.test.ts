@@ -670,19 +670,31 @@ describe('mfa controller', () => {
     expect(issueRecoveryCodes).not.toHaveBeenCalled();
   });
 
+  test("notices leaves out what the caller's own session did", async () => {
+    const unseenEvents = jest.fn(() => Promise.resolve([]));
+    setStrapi({
+      admin: { services: { mfa: { isEnabled: jest.fn(() => true), unseenEvents } } },
+    });
+    const { ctx } = buildCtx({}, { id: 7 }, { session: { id: 'session-a' } });
+
+    await mfaController.notices(ctx);
+
+    expect(unseenEvents).toHaveBeenCalledWith('7', 'session-a');
+  });
+
   test('notices/seen only marks the calling user rows', async () => {
     const markEventsSeen = jest.fn(() => Promise.resolve());
     setStrapi({
       admin: { services: { mfa: { isEnabled: jest.fn(() => true), markEventsSeen } } },
     });
 
-    const { ctx } = buildCtx({ ids: [101, 202] }, { id: 7 });
+    const { ctx } = buildCtx({ ids: [101, 202] }, { id: 7 }, { session: { id: 'session-a' } });
 
     await mfaController.markNoticesSeen(ctx);
 
     // Scoped by the id the auth strategy put on `ctx.state.user`, never by anything the request
-    // body could carry.
-    expect(markEventsSeen).toHaveBeenCalledWith('7', [101, 202]);
+    // body could carry, and never touching what the caller's own session did.
+    expect(markEventsSeen).toHaveBeenCalledWith('7', [101, 202], 'session-a');
     expect(ctx.status).toBe(204);
 
     // A body that tries to smuggle a different owner in is rejected outright: `.noUnknown()` on

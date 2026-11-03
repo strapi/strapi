@@ -100,6 +100,7 @@ describe('authentication controller', () => {
         admin: {
           services: {
             mfa: {
+              claimRequestEvents: jest.fn(() => Promise.resolve()),
               enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
               trustedDeviceSettings,
               consumeTrustedDevice,
@@ -178,6 +179,7 @@ describe('authentication controller', () => {
         admin: {
           services: {
             mfa: {
+              claimRequestEvents: jest.fn(() => Promise.resolve()),
               isEnabled: jest.fn(() => true),
               isEnrolled,
               createChallenge,

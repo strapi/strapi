@@ -738,13 +738,29 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return { tableName, attemptsColumn };
   };
 
-  /** Metadata is neutral context only: these rows are readable wherever admin data is. */
+  /** Events a request recorded before it had a session, keyed by that request: a login writes them,
+   * then `claimRequestEvents` hands them to the session the login issues. */
+  const pendingRequestEvents = new WeakMap<object, Data.ID[]>();
+
+  const currentRequest = () =>
+    strapi.requestContext?.get?.() as { state?: { session?: { id?: string } } } | undefined;
+
+  /** Metadata is neutral context only: these rows are readable wherever admin data is. `sessionId`
+   * is the session whose request caused the event, so that session is not notified of its own
+   * actions. */
   const recordEvent = async (
     userId: string,
     type: MfaEventType,
     metadata: MfaEventMetadata = {}
   ): Promise<void> => {
-    await eventQuery().create({ data: { userId: String(userId), type, metadata, seenAt: null } });
+    const request = currentRequest();
+    const sessionId = request?.state?.session?.id ?? null;
+    const row = await eventQuery().create({
+      data: { userId: String(userId), type, metadata, seenAt: null, sessionId },
+    });
+    if (request && !sessionId && row?.id !== undefined) {
+      pendingRequestEvents.set(request, [...(pendingRequestEvents.get(request) ?? []), row.id]);
+    }
 
     // The prune is housekeeping against a soft cap, and it must never cost the caller its write.
     // Inside an ambient transaction it cannot be made safe by catching: on Postgres and MySQL a
@@ -939,9 +955,38 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   /** Only `acknowledgeCodes` may ever clear the marker, even if a caller passes its id in `ids`. */
   const NOT_ACKNOWLEDGEMENT_MARKER = { $ne: 'recovery_codes_issued' as const };
 
-  const unseenEvents = async (userId: string): Promise<MfaEventNotice[]> => {
+  /** Matches every event except the ones `sessionId` caused. Spelled with the null branch because
+   * SQL's `<>` never matches a NULL column. */
+  const notFromSession = (sessionId?: string) =>
+    sessionId ? { $or: [{ sessionId: null }, { sessionId: { $ne: sessionId } }] } : {};
+
+  /** Called once a login has issued its session: the events it recorded on the way (a recovery
+   * code, a device trusted) were caused by that session. */
+  const claimRequestEvents = async (sessionId: string): Promise<void> => {
+    const request = currentRequest();
+    const ids = request ? pendingRequestEvents.get(request) : undefined;
+    if (!request || !ids?.length) {
+      return;
+    }
+    pendingRequestEvents.delete(request);
+    await eventQuery().updateMany({
+      where: { id: { $in: ids }, sessionId: null },
+      data: { sessionId },
+    });
+  };
+
+  /** `currentSessionId` leaves out what the caller's own session did: it already knows. */
+  const unseenEvents = async (
+    userId: string,
+    currentSessionId?: string
+  ): Promise<MfaEventNotice[]> => {
     const rows = await eventQuery().findMany({
-      where: { userId: String(userId), seenAt: null, type: NOT_ACKNOWLEDGEMENT_MARKER },
+      where: {
+        userId: String(userId),
+        seenAt: null,
+        type: NOT_ACKNOWLEDGEMENT_MARKER,
+        ...notFromSession(currentSessionId),
+      },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
 
@@ -958,10 +1003,17 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * `userId` is always in the `where` and `ids` only narrows further, so a foreign id can never
    * reach another user's row. An *absent* `ids` marks everything; an *empty* array marks nothing.
    */
-  const markEventsSeen = async (userId: string, ids?: Data.ID[]): Promise<void> => {
+  const markEventsSeen = async (
+    userId: string,
+    ids?: Data.ID[],
+    currentSessionId?: string
+  ): Promise<void> => {
+    // The caller never saw its own session's events, so "everything" must not clear them for the
+    // other sessions that still should.
     const where: Record<string, unknown> = {
       userId: String(userId),
       type: NOT_ACKNOWLEDGEMENT_MARKER,
+      ...notFromSession(currentSessionId),
     };
     if (ids) {
       where.id = { $in: ids };
@@ -1258,6 +1310,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     sendNotice,
     pruneEvents,
     unseenEvents,
+    claimRequestEvents,
     markEventsSeen,
     areCodesAcknowledged,
     acknowledgeCodes,
