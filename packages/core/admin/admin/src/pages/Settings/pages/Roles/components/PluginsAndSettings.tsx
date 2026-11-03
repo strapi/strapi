@@ -31,6 +31,7 @@ import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData'
 
 import { ConditionsButton } from './ConditionsButton';
 import { ConditionsModal } from './ConditionsModal';
+import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
 
 import type { GenericLayout } from '../utils/layouts';
 
@@ -151,7 +152,7 @@ const SubCategory = ({
     onChangeParentCheckbox,
     onChangeSimpleCheckbox,
     checkUserHasPermission,
-    userPermissions,
+    inheritConditions,
   } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
@@ -242,22 +243,27 @@ const SubCategory = ({
                     $disabled={isFormDisabled || !userHasPermission}
                     $hasConditions={hasConditions}
                   >
-                    <Checkbox
-                      name={checkboxName}
-                      disabled={isFormDisabled || !userHasPermission}
-                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onCheckedChange={(value) => {
-                        onChangeSimpleCheckbox({
-                          target: {
-                            name: checkboxName,
-                            value: !!value,
-                          },
-                        });
-                      }}
-                      checked={value}
+                    <UnheldPermissionTooltip
+                      isFormDisabled={isFormDisabled}
+                      userHasPermission={userHasPermission}
                     >
-                      {displayName}
-                    </Checkbox>
+                      <Checkbox
+                        name={checkboxName}
+                        disabled={isFormDisabled || !userHasPermission}
+                        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                        onCheckedChange={(value) => {
+                          onChangeSimpleCheckbox({
+                            target: {
+                              name: checkboxName,
+                              value: !!value,
+                            },
+                          });
+                        }}
+                        checked={value}
+                      >
+                        {displayName}
+                      </Checkbox>
+                    </UnheldPermissionTooltip>
                   </CheckboxWrapper>
                 </Grid.Item>
               );
@@ -271,7 +277,7 @@ const SubCategory = ({
               headerBreadCrumbs={[categoryName, subCategoryName]}
               actions={formattedActions}
               isFormDisabled={isFormDisabled}
-              isReadOnly={userPermissions !== undefined}
+              isReadOnly={inheritConditions}
               onClose={() => {
                 setIsConditionModalOpen(false);
               }}

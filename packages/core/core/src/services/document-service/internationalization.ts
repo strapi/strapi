@@ -13,7 +13,7 @@ type AsyncTransform = (
 ) => Promise<Modules.Documents.Params.All>;
 
 const getDefaultLocale = async (): Promise<string | null> => {
-  return strapi.localization.getDefaultLocale();
+  return await strapi.localization.getDefaultLocale();
 };
 
 const defaultLocale: AsyncTransform = async (contentType, params) => {

@@ -1007,7 +1007,7 @@ const disconnectMatchesCurrent = async (
       ? current[typeField]
       : undefined;
 
-  return disconnect.reduce<Promise<boolean>>(
+  return await disconnect.reduce<Promise<boolean>>(
     (previous, item) =>
       previous.then((alreadyMatched) => {
         if (alreadyMatched) {
@@ -1103,7 +1103,7 @@ const resolveInlineRelationAssignment = async (
   const targetRef = pickInlineRelationTargetRef(value);
 
   if (targetRef === undefined) {
-    return restoreUnmatchedInlineRelation(strapi, attribute, value, opts);
+    return await restoreUnmatchedInlineRelation(strapi, attribute, value, opts);
   }
 
   if (targetRef === null) {
