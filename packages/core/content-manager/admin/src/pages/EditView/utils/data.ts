@@ -424,14 +424,25 @@ const filterDataByRemovedPaths = (
           );
         });
       } else {
-        result[attrName] = filterDataByRemovedPaths(
+        // A non-repeatable component value with no `id` is a freshly (re-)created
+        // instance — e.g. the component was reset (set to null) and re-added. It must
+        // not inherit the previous component's data (id, relations, …) from
+        // `initialValues`; otherwise the server updates the old component row in place
+        // and, given an empty relation diff, restores the previously connected
+        // relations on save (see https://github.com/strapi/strapi/issues/25030).
+        // Mirror the safeguard already applied to dynamic-zone items below.
+        const isNewComponent = value?.id === undefined || value?.id === null;
+
+        const cleaned = filterDataByRemovedPaths(
           value,
-          initialValue ?? {},
+          isNewComponent ? {} : (initialValue ?? {}),
           compSchema,
           components,
           removedPaths,
           [...currentPath, attrName]
         );
+
+        result[attrName] = isNewComponent ? { ...cleaned, id: undefined } : cleaned;
       }
 
       continue;
