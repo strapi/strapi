@@ -85,6 +85,21 @@ const extendInvalidatesTags = (
  */
 const REVIEW_WORKFLOW_STAGES_TAG = 'ReviewWorkflowStages';
 
+/**
+ * The Content Manager mutations that can change whether an entry is ready: its releases and their
+ * entries show a stale status until they refetch
+ */
+const ENTRY_MUTATIONS = [
+  'updateDocument',
+  'deleteDocument',
+  'deleteManyDocuments',
+  'discardDocument',
+  'publishDocument',
+  'publishManyDocuments',
+  'unpublishDocument',
+  'unpublishManyDocuments',
+] as const;
+
 const releaseApi = adminApi
   .enhanceEndpoints({
     addTagTypes: [
@@ -96,32 +111,16 @@ const releaseApi = adminApi
       'UpcomingReleasesList',
       REVIEW_WORKFLOW_STAGES_TAG,
     ],
-    endpoints: {
-      updateDocument(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      deleteDocument(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      deleteManyDocuments(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-      discardDocument(endpoint: AnyEndpointDefinition) {
-        extendInvalidatesTags(endpoint, [
-          { type: 'Release', id: 'LIST' },
-          { type: 'ReleaseAction', id: 'LIST' },
-        ]);
-      },
-    },
+    endpoints: Object.fromEntries(
+      ENTRY_MUTATIONS.map((name) => [
+        name,
+        (endpoint: AnyEndpointDefinition) =>
+          extendInvalidatesTags(endpoint, [
+            { type: 'Release', id: 'LIST' },
+            { type: 'ReleaseAction', id: 'LIST' },
+          ]),
+      ])
+    ),
   })
   .injectEndpoints({
     endpoints: (build) => {
