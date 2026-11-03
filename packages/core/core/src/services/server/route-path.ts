@@ -19,10 +19,12 @@ export type TranslatedRoutePath = {
   positionalParams: string[];
   /** Every parameter the path declares, so a rejected match can take its values back. */
   paramNames: string[];
+  /** Required parameters whose pattern matches nothing, which v6 set to `""` instead of leaving out. */
+  emptyParams: string[];
 };
 
 // v6 only made `/` and `.` optional along with a parameter.
-const OPTIONAL_PREFIXES = ['/', '.'];
+const OPTIONAL_PREFIXES = new Set(['/', '.']);
 
 const isParameterNameCharacter = (character: string | undefined) =>
   character !== undefined && /[A-Za-z0-9_]/.test(character);
@@ -163,6 +165,7 @@ export const translateRoutePath = (path: string): TranslatedRoutePath => {
   const constraints: RoutePathConstraint[] = [];
   const positionalParams: string[] = [];
   const paramNames: string[] = [];
+  const emptyParams: string[] = [];
 
   const fail = (reason: string): never => {
     throw new RoutePathMigrationError(path, reason);
@@ -170,7 +173,7 @@ export const translateRoutePath = (path: string): TranslatedRoutePath => {
 
   const takeOptionalPrefix = () => {
     const last = translated.at(-1);
-    if (last !== undefined && OPTIONAL_PREFIXES.includes(last) && translated.at(-2) !== '\\') {
+    if (last !== undefined && OPTIONAL_PREFIXES.has(last) && translated.at(-2) !== '\\') {
       translated = translated.slice(0, -1);
       return last;
     }
@@ -218,6 +221,7 @@ export const translateRoutePath = (path: string): TranslatedRoutePath => {
       const prefix = takeOptionalPrefix();
       translated += `{${prefix}${token}}`;
     } else if (matcher.test('')) {
+      emptyParams.push(name);
       translated += `{${token}}`;
     } else {
       translated += token;
@@ -302,5 +306,5 @@ export const translateRoutePath = (path: string): TranslatedRoutePath => {
     translated += character;
   }
 
-  return { path: translated, changed, constraints, positionalParams, paramNames };
+  return { path: translated, changed, constraints, positionalParams, paramNames, emptyParams };
 };

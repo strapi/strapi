@@ -35,14 +35,18 @@ const getPath = (route: Core.Route, strapi: Core.Strapi) => {
  * match, so the request goes on to the next matching route, as it did in v6.
  */
 const withTranslatedPathMatching = (
-  { constraints, positionalParams, paramNames }: TranslatedRoutePath,
+  { constraints, positionalParams, paramNames, emptyParams }: TranslatedRoutePath,
   routeHandler: Core.MiddlewareHandler
 ): Core.MiddlewareHandler => {
-  if (constraints.length === 0 && positionalParams.length === 0) {
+  if (constraints.length === 0 && positionalParams.length === 0 && emptyParams.length === 0) {
     return routeHandler;
   }
 
   return (ctx, next) => {
+    emptyParams.forEach((name) => {
+      ctx.params[name] ??= '';
+    });
+
     const fails = ({ name, pattern }: RoutePathConstraint) =>
       ctx.params[name] !== undefined && !pattern.test(ctx.params[name]);
 

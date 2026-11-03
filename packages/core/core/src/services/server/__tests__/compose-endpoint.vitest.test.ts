@@ -127,4 +127,20 @@ describe('compose endpoint', () => {
       .get('/files/a/b')
       .expect(200, { route: '/files/(.*)', params: { splat: 'a/b', 0: 'a/b' } });
   });
+
+  it.each([
+    ['/files/(.*)', '/files/', { splat: '', 0: '' }],
+    ['/files-:path(.*)', '/files-', { path: '' }],
+    ['/files/:path(.*)', '/files/', { path: '' }],
+  ])('sets %s to an empty string on an empty match', async (route, url, params) => {
+    const { server } = createServer(route);
+
+    await request(server).get(url).expect(200, { route, params });
+  });
+
+  it('leaves an omitted optional parameter undefined', async () => {
+    const { server } = createServer('/users/:id(\\d*)?');
+
+    await request(server).get('/users').expect(200, { route: '/users/:id(\\d*)?', params: {} });
+  });
 });
