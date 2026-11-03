@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
+    "@strapi/types": "5.60.0",
     "@strapi/utils": "5.60.0",
     "ajv": "8.20.0",
     "date-fns": "2.30.0",

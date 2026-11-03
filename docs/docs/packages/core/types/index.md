@@ -22,7 +22,7 @@ The package README marks it as internal. Application developers import the same 
 `src/index.ts` exports each area as a type namespace.
 
 - `Core`: the server runtime types. It holds `Strapi`, the container, controllers, services, policies, middlewares, routes, plugins and configuration.
-- `Modules`: the types of the core services, for example the Document Service, event hub, cron, core store, server and session manager.
+- `Modules`: the types of the core services, for example the Document Service, event hub, cron, core store, server and session manager. `Modules.Database` holds the contract of the database layer behind `strapi.db` (models, metadata, query builder, lifecycles, migrations). `@strapi/database` implements it and re-exports these types, which stay internal in `@strapi/types`.
 - `Data`: the shape of entities, content types and components as data.
 - `Struct`: the base schema types and the schema definitions.
 - `Schema`: the high-level schema types and `Schema.Attribute`. They read the public registries.

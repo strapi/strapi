@@ -1,53 +1,16 @@
 import path from 'node:path';
 import fse from 'fs-extra';
+import type { Modules } from '@strapi/types';
 
 import type { Database } from '..';
 
-export interface BuiltMigrationFile {
-  filename: string;
-  content: string;
-}
-
-export interface RenameColumnOperation {
-  table: string;
-  from: string;
-  to: string;
-  comment?: string;
-}
-
-export interface RenameTableOperation {
-  from: string;
-  to: string;
-  comment?: string;
-}
-
-export interface UpdateRowsOperation {
-  table: string;
-  where: Record<string, string>;
-  set: Record<string, string>;
-  guardColumn?: string;
-  comment?: string;
-}
-
-/**
- * One logical operation per generated file: the composed `origin -> final`
- * attribute renames of every model that received hops, keyed by model uid.
- * Dispatched at runtime to the handlers registered on `db.schema` (e.g. admin
- * field permissions); the database package itself stores nothing by attribute
- * name.
- */
-export interface AttributeRenamesOperation {
-  renames: Record<string, Record<string, string>>;
-  comment?: string;
-}
-
-export type MigrationFileOperation =
-  | ({ kind: 'renameColumn' } & RenameColumnOperation)
-  | ({ kind: 'renameTable' } & RenameTableOperation)
-  | ({ kind: 'updateRows' } & UpdateRowsOperation)
-  | ({ kind: 'attributeRenames' } & AttributeRenamesOperation);
-
-export type MigrationFileFormat = 'javascript' | 'typescript';
+export type BuiltMigrationFile = Modules.Database.BuiltMigrationFile;
+export type RenameColumnOperation = Modules.Database.RenameColumnOperation;
+export type RenameTableOperation = Modules.Database.RenameTableOperation;
+export type UpdateRowsOperation = Modules.Database.UpdateRowsOperation;
+export type AttributeRenamesOperation = Modules.Database.AttributeRenamesOperation;
+export type MigrationFileOperation = Modules.Database.MigrationFileOperation;
+export type MigrationFileFormat = Modules.Database.MigrationFileFormat;
 
 const FILE_EXTENSIONS: Record<MigrationFileFormat, string> = {
   javascript: 'js',
@@ -245,27 +208,8 @@ export const renderMigrationFile = ({
   return interpolate(TEMPLATES[format], { timestamp, body });
 };
 
-interface BuildOptions {
-  name: string;
-  /**
-   * Module format of the generated file. `typescript` emits an ES module with
-   * typed `up`/`down` signatures and a `.ts` extension so the app's `tsc` build
-   * compiles it into `dist/database/migrations`, which is where migrations are
-   * discovered when `useTypescriptMigrations` is enabled. Defaults to
-   * `javascript` (CommonJS).
-   */
-  format?: MigrationFileFormat;
-}
-
-interface WriteOptions extends BuildOptions {
-  /**
-   * Directory the migration file is written to. Defaults to the database's
-   * configured migrations directory. The Content-Type Builder passes the app's
-   * source `database/migrations` explicitly so the file is never written into
-   * build output (e.g. `dist/` when `useTypescriptMigrations` is enabled).
-   */
-  dir?: string;
-}
+type BuildOptions = Modules.Database.MigrationFileBuildOptions;
+type WriteOptions = Modules.Database.MigrationFileWriteOptions;
 
 const MAX_WRITE_ATTEMPTS = 1000;
 
@@ -273,7 +217,9 @@ interface MigrationFileBuilderDeps {
   db: Database;
 }
 
-export const createMigrationFileBuilder = ({ db }: MigrationFileBuilderDeps) => {
+export const createMigrationFileBuilder = ({
+  db,
+}: MigrationFileBuilderDeps): MigrationFileBuilder => {
   const operations: MigrationFileOperation[] = [];
 
   const resolveMigrationsDir = (): string => {
@@ -355,4 +301,4 @@ export const createMigrationFileBuilder = ({ db }: MigrationFileBuilderDeps) => 
   };
 };
 
-export type MigrationFileBuilder = ReturnType<typeof createMigrationFileBuilder>;
+export type MigrationFileBuilder = Modules.Database.MigrationFileBuilder;

@@ -1,4 +1,5 @@
 import type { Knex } from 'knex';
+import type { Modules } from '@strapi/types';
 
 import { getOperationComment } from '../migrations/file-builder';
 
@@ -39,28 +40,15 @@ import type {
 
 export type RenameSkipReason = 'source-missing' | 'target-exists';
 
-/**
- * Attribute renames of one save, composed per model: `uid -> { origin: final }`.
- */
-export interface AttributeRenames {
-  renames: Record<string, Record<string, string>>;
-  comment?: string;
-}
-
-/**
- * Updates a store keyed by attribute name (e.g. admin field permissions) for
- * the given renames. Runs inside the migration transaction `trx`.
- */
-export type AttributeRenameHandler = (
-  trx: Knex,
-  renames: AttributeRenames['renames']
-) => Promise<void>;
+export type AttributeRenames = Modules.Database.AttributeRenames;
+export type AttributeRenameHandler = Modules.Database.AttributeRenameHandler;
+export type RenameHelpers = Modules.Database.RenameHelpers;
 
 interface RenameHelpersDeps {
   db: Database;
 }
 
-export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
+export const createRenameHelpers = ({ db }: RenameHelpersDeps): RenameHelpers => {
   const { identifiers } = db.metadata;
 
   const logSkip = (comment: string, detail: string, reason: RenameSkipReason): void => {
@@ -303,5 +291,3 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
     },
   };
 };
-
-export type RenameHelpers = ReturnType<typeof createRenameHelpers>;

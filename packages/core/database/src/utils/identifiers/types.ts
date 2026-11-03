@@ -1,31 +1,19 @@
-export type NameInput = string | string[];
+import type { Modules } from '@strapi/types';
 
-export type CompressibleNameToken = {
-  compressible: true;
-  name: string;
-  allocatedLength?: number;
-};
+export type NameInput = Modules.Database.NameInput;
 
-export type IncompressibleNameToken = {
-  compressible: false;
-  name: string;
-  allocatedLength?: number;
-  shortName?: string;
-};
+export type CompressibleNameToken = Modules.Database.CompressibleNameToken;
 
-export type NameToken = CompressibleNameToken | IncompressibleNameToken;
+export type IncompressibleNameToken = Modules.Database.IncompressibleNameToken;
+
+export type NameToken = Modules.Database.NameToken;
 
 export type NameFromTokenOptions = {
   maxLength: number;
 };
 
-export type IdentifiersOptions = {
-  maxLength: number;
-};
+export type IdentifiersOptions = Modules.Database.IdentifiersOptions;
 
-export type NameOptions = {
-  suffix?: string;
-  prefix?: string;
-};
+export type NameOptions = Modules.Database.NameOptions;
 
 export type NameTokenWithAllocation = NameToken & { allocatedLength: number };

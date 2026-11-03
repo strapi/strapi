@@ -1,9 +1,8 @@
+import type { Modules } from '@strapi/types';
 import type { Database } from '../..';
 import type { Attribute, MorphRelationalAttribute } from '../../types';
 
-export interface RemoveOrphanMorphTypeOptions {
-  pivot: string;
-}
+export type RemoveOrphanMorphTypeOptions = Modules.Database.RemoveOrphanMorphTypeOptions;
 
 const isMorphRelationWithPivot = (
   attribute: Attribute,

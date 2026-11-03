@@ -1,4 +1,5 @@
 import type { Knex } from 'knex';
+import type { Modules } from '@strapi/types';
 
 import path from 'node:path';
 
@@ -33,7 +34,8 @@ export type {
 export type { Event } from './lifecycles';
 export type { Attribute, Model, JoinTable } from './types';
 export type { AttributeRenameHandler, AttributeRenames } from './schema';
-export type { Identifiers } from './utils/identifiers';
+// The contract, not the class: `strapi.db.metadata.identifiers` is typed with it.
+export type Identifiers = Modules.Database.Identifiers;
 export { POOL_TIMEOUT_CODE } from './pool-diagnostics';
 export type {
   EventLoopDelay,
@@ -42,34 +44,8 @@ export type {
   PoolTimeoutDetails,
 } from './pool-diagnostics';
 
-interface Settings {
-  forceMigration?: boolean;
-  runMigrations?: boolean;
-  /**
-   * Describe the pool on knex connection pool timeouts (details on the error, a docs link, one
-   * warning block per 30 s). Defaults to true; false leaves knex's error untouched. Must be a
-   * boolean (for example `env.bool('DATABASE_POOL_TIMEOUT_DIAGNOSTICS', true)`): a string is not
-   * read as false.
-   */
-  poolTimeoutDiagnostics?: boolean;
-  migrations: {
-    dir: string;
-  };
-  [key: string]: unknown;
-}
-
-export type Logger = Record<
-  'info' | 'warn' | 'error' | 'debug',
-  (message: string | Record<string, unknown>) => void
->;
-
-export interface DatabaseConfig {
-  connection: Knex.Config;
-  settings: Settings;
-  logger?: Logger;
-  /** Lifecycle phase of the host application, e.g. "boot" or "runtime", for pool timeout reports. */
-  getPhase?: () => string | undefined;
-}
+export type Logger = Modules.Database.Logger;
+export type DatabaseConfig = Modules.Database.DatabaseConfig;
 
 const afterCreate =
   (db: Database) =>
@@ -83,7 +59,7 @@ const afterCreate =
     });
   };
 
-class Database {
+class DatabaseImpl implements Modules.Database.Database {
   connection: Knex;
 
   dialect: Dialect;
@@ -348,5 +324,11 @@ class Database {
     await this.connection.destroy();
   }
 }
+
+// The value is the class; the type is the contract from `@strapi/types`, so `strapi.db` (typed with
+// the contract) stays assignable to `Database`. The class's private fields would make it nominal.
+const Database = DatabaseImpl;
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+type Database = Modules.Database.Database;
 
 export { Database, errors };
