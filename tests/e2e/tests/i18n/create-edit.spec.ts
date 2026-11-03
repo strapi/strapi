@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
@@ -11,8 +11,8 @@ test.describe('Create and Edit Operations', () => {
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test.afterAll(async () => {
