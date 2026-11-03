@@ -58,7 +58,9 @@ test.describe('Two-factor authentication', () => {
 
     await page.goto('/admin/me');
     await expect(page.getByText('9 recovery codes left')).toBeVisible();
-    await expect(page.getByText(/A recovery code was used to log in/)).toBeVisible();
+    // This session did the recovery-code login itself, so it is not notified of it; other sessions
+    // are (covered by the TOTP API suite).
+    await expect(page.getByText(/A recovery code was used to log in/)).toBeHidden();
   });
 
   test('disable journey: requires password and code, then password-only login works again', async ({

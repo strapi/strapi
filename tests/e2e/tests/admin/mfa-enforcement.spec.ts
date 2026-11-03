@@ -141,6 +141,7 @@ test.describe('Two-factor enforcement', () => {
     await codesDialog.getByRole('checkbox', { name: /saved these codes/i }).check();
     await codesDialog.getByRole('button', { name: 'Done' }).click();
     await codesDialog.waitFor({ state: 'hidden' });
-    await expect(page.getByText(/Your authenticator app was replaced/)).toBeVisible();
+    // The replacement was made in this session, so this session is not notified of it.
+    await expect(page.getByText(/Your authenticator app was replaced/)).toBeHidden();
   });
 });
