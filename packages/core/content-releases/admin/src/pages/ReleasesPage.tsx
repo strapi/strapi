@@ -27,7 +27,8 @@ import {
   Typography,
   Link,
 } from '@strapi/design-system';
-import { Calendar, ChartCircle, Clock, Plus, WarningCircle } from '@strapi/icons';
+import { Calendar, Clock, Plus, WarningCircle } from '@strapi/icons';
+import { CircleHalfIcon, ClockCountdownIcon } from '@strapi/icons/regular';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -67,14 +68,14 @@ const EMPTY_OPTIONS: NonNullable<Filters.ValueInputProps['options']> = [];
 
 const RELEASE_CONDITION_BADGES = {
   allow_partial: {
-    icon: ChartCircle,
+    icon: CircleHalfIcon,
     message: {
       id: 'content-releases.pages.Releases.release-condition.allow_partial',
       defaultMessage: 'Allow partial',
     },
   },
   all_or_nothing: {
-    icon: Clock,
+    icon: ClockCountdownIcon,
     message: {
       id: 'content-releases.pages.Releases.release-condition.all_or_nothing',
       defaultMessage: 'All required',
