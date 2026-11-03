@@ -151,6 +151,13 @@ const logRemovedPermissions = (removedPermissions: Permission[]) => {
     get(permission, key) as PermissionOwner | null | undefined;
 
   const actions = Array.from(new Set(removedPermissions.map((permission) => permission.action)));
+  const subjects = Array.from(
+    new Set(
+      removedPermissions
+        .map((permission) => permission.subject)
+        .filter((subject): subject is string => typeof subject === 'string')
+    )
+  );
   const roles = removedPermissions
     .map((permission) => ownerOf(permission, 'role'))
     .filter((owner): owner is PermissionOwner => owner != null);
@@ -162,8 +169,9 @@ const logRemovedPermissions = (removedPermissions: Permission[]) => {
   ).length;
 
   strapi.log.warn(
-    `Removed ${removedPermissions.length} stored admin permission(s) that no longer match a registered action, subject or owner. ` +
+    `Removed ${removedPermissions.length} stored admin permission(s) that no longer match a registered action, a valid subject or valid properties, or have no owner. ` +
       `Actions: ${actions.join(', ')}. ` +
+      `Subjects: ${subjects.length === 0 ? 'none' : subjects.join(', ')}. ` +
       `Roles: ${formatOwners(roles)}. ` +
       `Admin tokens: ${formatOwners(tokens)}. ` +
       `Without role or admin token: ${withoutOwnerCount}.`
