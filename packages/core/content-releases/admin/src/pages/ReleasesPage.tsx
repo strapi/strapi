@@ -345,7 +345,7 @@ const DEFAULT_SORT = 'scheduledAt:asc';
 // The first of the admin's page sizes
 const DEFAULT_PAGE_SIZE = 10;
 
-// The API lists unscheduled releases last in either schedule order
+// The API lists unscheduled releases first in either schedule order
 const SORT_OPTIONS = [
   {
     value: 'scheduledAt:asc',
