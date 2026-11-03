@@ -4,6 +4,8 @@ description: Guide for Audit Logs
 status: needs-review
 review_notes:
   - '`ee/server/services/audit-logs.js` moved under `ee/server/src`.'
+  - 'Events are also saved when a package registers them with `registerEvent` on the `audit-logs-lifecycle` service (upload and content-manager do), not only the `defaultEvents` list.'
+  - '`registerEvent` takes an `action` option to store a row under another action name. Upload uses it to record media folders as `media.*` and `media.update` from an audit-only event, since `media.*` are also webhook events.'
 ---
 
 # Audit Logs
@@ -25,6 +27,16 @@ To save audit log data, we utilize an Audit Logs local provider responsible for 
 #### strapi_audit_logs
 
 This content type stores all the audit logs. For each allowed event, we save an entry in the audit logs content type.
+
+The `admin::audit-log` content type is registered by the CE admin (`packages/core/admin/server/src/content-types/index.ts`) in every edition, with or without a license, like the content types of content releases and review workflows. The CE bootstrap also adds `strapi_audit_logs` to the persisted tables. The schema file stays under `packages/core/admin/ee/server/src/audit-logs/content-types/`.
+
+### Runtime gates
+
+The routes, controller and services use one condition, `isAuditLogsEnabled` in `packages/core/admin/ee/server/src/audit-logs/utils.ts`: the license includes the `audit-logs` feature and `admin.auditLogs.enabled` is not `false`.
+
+The `admin::audit-logs.read` / `admin::audit-logs.export` permission actions follow the license only (`packages/core/admin/ee/server/src/bootstrap.ts`), like the actions of review workflows, content releases and SSO. Turning `admin.auditLogs.enabled` off keeps the actions registered, so it keeps the audit-log grants of every role and admin token. While the config is off the routes are not mounted, and the role and admin token editors may still list the audit-log permissions. Turning the config back on makes the stored grants work again. `tests/api/core/admin/ee/audit-logs/config-disabled-permissions.test.api.ts` covers this behaviour.
+
+When the license loses the `audit-logs` feature, the two actions are not registered on the next boot. The Super Admin reset (`resetSuperAdminPermissions`) drops them from the Super Admin, and the permission cleanup (`cleanPermissionsInDatabase`) deletes them from every other role and from admin tokens. When the feature comes back, the Super Admin reset restores them for the Super Admin only.
 
 ### Subscribing to all events
 

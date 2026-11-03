@@ -97,14 +97,19 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
 };
 
 /**
- * Clicks on a link and waits for the page to load completely.
+ * Clicks a locator.
  *
- * NOTE: this util is used to avoid inconsistent behaviour on webkit
+ * This used to wait for `networkidle` after the click. Playwright fires that event once per
+ * document, so the wait only did something for the first click after a full page load
+ * (`page.goto`, `page.reload`, a login), where it held the test for 0.4 to 1.3 s; every later call
+ * returned at once. When the next step depends on the click, wait for that instead: a web-first
+ * assertion on the new page (`await expect(locator).toBeVisible()`), `page.waitForURL`, or the
+ * response the step needs.
  *
+ * The unused `page` argument keeps the existing call sites compiling.
  */
-export const clickAndWait = async (page: Page, locator: Locator) => {
+export const clickAndWait = async (_page: Page, locator: Locator) => {
   await locator.click();
-  await page.waitForLoadState('networkidle');
 };
 
 // ---------------------------------------------------------------------------

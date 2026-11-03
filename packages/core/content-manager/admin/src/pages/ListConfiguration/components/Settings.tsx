@@ -4,6 +4,8 @@ import { useForm, InputRenderer, type InputProps } from '@strapi/admin/strapi-ad
 import { Flex, Grid, Typography, useCollator } from '@strapi/design-system';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 
+import { COLLECTION_TYPES } from '../../../constants/collections';
+import { isCustomOrderFeatureEnabled } from '../../../constants/customOrder';
 import { useDoc } from '../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../utils/translations';
@@ -48,12 +50,17 @@ const Settings = () => {
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
-  const { schema } = useDoc();
+  const { schema, collectionType } = useDoc();
 
   const layout = useForm<FormData['layout']>(
     'Settings',
     (state) => (state.values as FormData).layout ?? []
   );
+  const hasCustomOrder = useForm<FormData['settings']['customOrder']>(
+    'Settings',
+    (state) => (state.values as FormData).settings.customOrder
+  );
+  const canUseCustomOrder = collectionType === COLLECTION_TYPES && isCustomOrderFeatureEnabled();
   const currentSortBy = useForm<FormData['settings']['defaultSortBy']>(
     'Settings',
     (state) => (state.values as FormData).settings.defaultSortBy
@@ -85,25 +92,29 @@ const Settings = () => {
 
   const formLayout = React.useMemo(
     () =>
-      SETTINGS_FORM_LAYOUT.map((row) =>
-        row.map((field) => {
-          if (field.type === 'enumeration') {
-            return {
-              ...field,
-              hint: field.hint ? formatMessage(field.hint) : undefined,
-              label: formatMessage(field.label),
-              options: field.name === 'settings.defaultSortBy' ? sortOptionsSorted : field.options,
-            };
-          } else {
-            return {
-              ...field,
-              hint: field.hint ? formatMessage(field.hint) : undefined,
-              label: formatMessage(field.label),
-            };
-          }
-        })
-      ) as [top: EditFieldLayout[], bottom: EditFieldLayout[]],
-    [formatMessage, sortOptionsSorted]
+      [...SETTINGS_FORM_LAYOUT, ...(canUseCustomOrder ? [CUSTOM_ORDER_FORM_LAYOUT] : [])].map(
+        (row) =>
+          row.map((field) => {
+            if (field.type === 'enumeration') {
+              return {
+                ...field,
+                // The custom order takes over the default sort of the list
+                disabled: canUseCustomOrder && hasCustomOrder && isDefaultSortField(field.name),
+                hint: field.hint ? formatMessage(field.hint) : undefined,
+                label: formatMessage(field.label),
+                options:
+                  field.name === 'settings.defaultSortBy' ? sortOptionsSorted : field.options,
+              };
+            } else {
+              return {
+                ...field,
+                hint: field.hint ? formatMessage(field.hint) : undefined,
+                label: formatMessage(field.label),
+              };
+            }
+          })
+      ) as EditFieldLayout[][],
+    [canUseCustomOrder, formatMessage, hasCustomOrder, sortOptionsSorted]
   );
 
   return (
@@ -195,5 +206,25 @@ const SETTINGS_FORM_LAYOUT: FormLayoutInputProps[][] = [
     },
   ],
 ];
+
+const CUSTOM_ORDER_FORM_LAYOUT: FormLayoutInputProps[] = [
+  {
+    hint: {
+      id: getTranslation('form.Input.customOrder.hint'),
+      defaultMessage:
+        'Arrange entries by hand in the list view. New entries are added on top. The Content API returns entries in this order when no sort is requested.',
+    },
+    label: {
+      id: getTranslation('form.Input.customOrder'),
+      defaultMessage: 'Enable custom order',
+    },
+    name: 'settings.customOrder',
+    size: 6,
+    type: 'boolean' as const,
+  },
+];
+
+const isDefaultSortField = (name: string) =>
+  name === 'settings.defaultSortBy' || name === 'settings.defaultSortOrder';
 
 export { Settings };
