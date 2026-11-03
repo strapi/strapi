@@ -74,7 +74,7 @@ describe('RepeatableComponent', () => {
     children: () => 'INPUTS',
   } satisfies RepeatableComponentProps;
 
-  const render = (initialFormValues: Record<string, unknown>) =>
+  const render = (initialFormValues: Record<string, unknown>, search = '') =>
     renderRTL(
       <ComponentProvider level={0} type="component">
         <RepeatableComponent {...defaultProps} />
@@ -94,9 +94,16 @@ describe('RepeatableComponent', () => {
             </Routes>
           ),
         },
-        initialEntries: ['/content-manager/collection-types/api::address.address/create'],
+        initialEntries: [`/content-manager/collection-types/api::address.address/create${search}`],
       }
     );
+
+  const entries = {
+    [FIELD_NAME]: [
+      { __temp_key__: '0', name: 'Entry one' },
+      { __temp_key__: '1', name: 'Entry two' },
+    ],
+  };
 
   it('renders the empty initializer when the field value is null', () => {
     render({ [FIELD_NAME]: null });
@@ -122,5 +129,42 @@ describe('RepeatableComponent', () => {
 
     expect(screen.getByRole('button', { name: 'Entry one' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Add an entry/i })).toBeInTheDocument();
+  });
+
+  describe('field query param', () => {
+    it('opens the entry that holds the focused field', () => {
+      render(entries, `?field=${FIELD_NAME}.1.name`);
+
+      expect(screen.getByRole('button', { name: 'Entry two' })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      );
+      expect(screen.getByRole('button', { name: 'Entry one' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+    });
+
+    it('ignores a field that belongs to another attribute', () => {
+      render(entries, '?field=title');
+
+      expect(screen.getByRole('button', { name: 'Entry one' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+      expect(screen.getByRole('button', { name: 'Entry two' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+    });
+
+    it('ignores a field inside another repeatable component', () => {
+      render(entries, '?field=otherRepeatable.0.name');
+
+      expect(screen.getByRole('button', { name: 'Entry one' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+    });
   });
 });

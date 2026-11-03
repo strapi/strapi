@@ -105,11 +105,16 @@ const RepeatableComponent = ({
     if (search.has('field')) {
       const fieldParam = search.get('field');
 
-      if (!fieldParam) {
+      /**
+       * Only a field inside this repeatable concerns it. Without this check, a
+       * `field` that targets another attribute (e.g. `?field=title`) leaves `path`
+       * undefined and `path.split` throws, crashing the whole edit view.
+       */
+      if (!fieldParam || !fieldParam.startsWith(`${name}.`)) {
         return undefined;
       }
 
-      const [, path] = fieldParam.split(`${name}.`);
+      const path = fieldParam.slice(name.length + 1);
 
       if (getIn(value, path, undefined) !== undefined) {
         const [subpath] = path.split('.');
