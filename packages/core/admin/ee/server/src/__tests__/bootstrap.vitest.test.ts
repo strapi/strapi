@@ -61,12 +61,14 @@ describe('EE admin bootstrap', () => {
       expect(registerMany).toHaveBeenCalledWith(actions.auditLogs);
     });
 
-    test('does not register the actions when admin.auditLogs.enabled is false', async () => {
+    // A config disable must not unregister the actions: the boot cleanup would delete every
+    // role and admin token grant for them
+    test('registers the actions when admin.auditLogs.enabled is false', async () => {
       mockStrapi({ features: ['audit-logs'], auditLogsEnabled: false });
 
       await bootstrap({});
 
-      expect(registerMany).not.toHaveBeenCalledWith(actions.auditLogs);
+      expect(registerMany).toHaveBeenCalledWith(actions.auditLogs);
     });
 
     test('does not register the actions when the feature is not licensed', async () => {

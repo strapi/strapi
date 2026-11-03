@@ -1,7 +1,6 @@
 import executeCEBootstrap from '../../../server/src/bootstrap';
 import { getService } from './utils';
 import actions from './config/admin-actions';
-import { isAuditLogsEnabled } from './audit-logs/utils';
 
 export default async (args: any) => {
   const { actionProvider } = getService('permission');
@@ -10,8 +9,9 @@ export default async (args: any) => {
     await actionProvider.registerMany(actions.sso);
   }
 
-  // Same condition as the audit-logs routes, so the role editor lists no permission without a route
-  if (isAuditLogsEnabled(strapi)) {
+  // License only, not `admin.auditLogs.enabled`: unregistered actions get their stored grants
+  // (roles and admin tokens) deleted by the boot permission cleanup
+  if (strapi.ee.features.isEnabled('audit-logs')) {
     await actionProvider.registerMany(actions.auditLogs);
   }
 
