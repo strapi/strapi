@@ -340,6 +340,30 @@ describe('Releases home page', () => {
     expect(screen.getByText(/you have reached the 3 pending releases limit/i)).toBeInTheDocument();
   });
 
+  it("asks for 10 releases per page and offers the admin's page sizes", async () => {
+    const pageSizes: (string | null)[] = [];
+    const { data, meta } = mockReleasesPageData.pendingEntries;
+    server.use(
+      http.get('/content-releases', ({ request }) => {
+        pageSizes.push(new URL(request.url).searchParams.get('pageSize'));
+        return HttpResponse.json({ data: data.slice(0, 10), meta });
+      })
+    );
+    const { user } = render(<ReleasesPage />);
+
+    await screen.findByRole('link', { name: 'entry 1' });
+    expect(pageSizes[0]).toBe('10');
+
+    await user.click(await screen.findByRole('combobox', { name: /entries per page/i }));
+
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      '10',
+      '20',
+      '50',
+      '100',
+    ]);
+  });
+
   describe('filters', () => {
     const getOptionLabels = () => screen.getAllByRole('option').map((option) => option.textContent);
 
