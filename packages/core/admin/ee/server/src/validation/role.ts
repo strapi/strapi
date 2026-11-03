@@ -1,10 +1,13 @@
 import { yup, validateYupSchema } from '@strapi/utils';
+import constants from '../../../../server/src/services/constants';
+
+const { ROLE_TEXT_MAX_LENGTH } = constants;
 
 const roleCreateSchema = yup
   .object()
   .shape({
-    name: yup.string().min(1).required(),
-    description: yup.string().nullable(),
+    name: yup.string().min(1).max(ROLE_TEXT_MAX_LENGTH).required(),
+    description: yup.string().max(ROLE_TEXT_MAX_LENGTH).nullable(),
   })
   .noUnknown();
 

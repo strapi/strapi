@@ -83,12 +83,15 @@ const DrawerContainer = styled(Flex)<DrawerContainerProps>`
   width: 100%;
   padding: ${({ theme }) => theme.spaces[2]};
   max-width: 100%;
-  /* Sit just below the overlay token (300) so that:
-     - popovers (500) and tooltips (1000) rendered from descendant components
-       surface above the drawer panel,
-     - AlertDialog overlays (300) and contents (310) opened from inside the
-       drawer (e.g. the asset details "delete" confirm) cover the drawer. */
-  z-index: 200;
+  /* On the overlay token, so ties resolve by DOM order, as they do between DS
+     modals: a drawer opened from inside a modal (e.g. a media field in the
+     content manager's relation modal) portals in after it and sits above its
+     overlay, while a dialog opened from inside the drawer (e.g. the asset
+     details "delete" confirm) portals in after the drawer and covers it.
+     Not the modal token (310): a DS dialog's content stacks inside its own
+     overlay at 300, so the drawer would cover its own confirmations.
+     Popovers (500) and tooltips (1000) still surface above the panel. */
+  z-index: ${({ theme }) => theme.zIndices.overlay};
   overflow: hidden;
   /* dvh, not vh: anchored to the bottom, a 100vh cap on mobile (visual
      viewport < 100vh under the URL bar) would push the drawer top off-screen. */
@@ -171,6 +174,7 @@ const CloseIconButton = styled(IconButton)`
  * -----------------------------------------------------------------------------------------------*/
 
 type PointerDownOutsideHandler = NonNullable<Dialog.DialogContentProps['onPointerDownOutside']>;
+type AutoFocusHandler = NonNullable<Dialog.DialogContentProps['onOpenAutoFocus']>;
 
 /** Vetoes an outside interaction that would otherwise dismiss the drawer. */
 const keepOpen = (event: { preventDefault: () => void }) => event.preventDefault();
@@ -190,12 +194,28 @@ interface DrawerBodyProps extends Omit<FlexProps, 'width' | 'maxHeight'> {
    * never counts as outside — Radix reads the React tree, not the DOM.
    */
   onPointerDownOutside?: PointerDownOutsideHandler;
+  /** Radix's hook as focus moves into the panel on open. */
+  onOpenAutoFocus?: AutoFocusHandler;
+  /**
+   * Radix's hook as the panel gives focus back on close. Opened from state
+   * rather than a `Dialog.Trigger`, it has nowhere to send it unless this does.
+   */
+  onCloseAutoFocus?: AutoFocusHandler;
   children: React.ReactNode;
 }
 
 const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
   (
-    { animationDirection, width, maxHeight, onPointerDownOutside = keepOpen, children, ...props },
+    {
+      animationDirection,
+      width,
+      maxHeight,
+      onPointerDownOutside = keepOpen,
+      onOpenAutoFocus,
+      onCloseAutoFocus,
+      children,
+      ...props
+    },
     ref
   ) => (
     <Dialog.Content
@@ -203,6 +223,8 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
       forceMount
       asChild
       onPointerDownOutside={onPointerDownOutside}
+      onOpenAutoFocus={onOpenAutoFocus}
+      onCloseAutoFocus={onCloseAutoFocus}
       // Non-modal, so focus legitimately moves outside (tabbing past the last
       // field); only a pointer press should ever dismiss.
       onFocusOutside={keepOpen}

@@ -47,7 +47,7 @@
   "list.assets.loading-asset": "Cargando la vista previa de los recursos: {path}",
   "list.assets.not-supported-content": "No hay vista previa disponible",
   "list.assets.preview-asset": "Vista previa del video en la ruta {path}",
-  "list.assets.selected": "{number, plural, =0 {Ningún recurso seleccionado} one {1 recurso seleccionado} other {# recursos seleccionados}}",
+  "list.assets.selected": "{numberFolders, plural, one {1 carpeta} other {# carpetas}} - {numberAssets, plural, one {1 recurso} other {# recursos}}",
   "list.assets.type-not-allowed": "Este tipo de archivo no está permitido.",
   "mediaLibraryInput.actions.nextSlide": "Siguiente",
   "mediaLibraryInput.actions.previousSlide": "Anterior",

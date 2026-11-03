@@ -65,7 +65,7 @@ const initialState: DataManagerStateType = {
   isLoading: true,
 };
 
-const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
+const ONE_SIDE_RELATIONS = new Set(['oneWay', 'manyWay']);
 
 type AttributeMutation = AnyAttribute & {
   createComponent?: unknown;
@@ -397,7 +397,7 @@ const applyRenameConsent = (
   }
 };
 
-const UID_TARGET_TYPES = ['string', 'text'];
+const UID_TARGET_TYPES = new Set(['string', 'text']);
 
 /**
  * Keeps uid fields attached to a field when it is renamed, whether or not the
@@ -415,7 +415,7 @@ const renameUIDTargetFields = (
     return;
   }
 
-  const isValidTarget = UID_TARGET_TYPES.includes(newAttribute.type);
+  const isValidTarget = UID_TARGET_TYPES.has(newAttribute.type);
 
   type.attributes.forEach((attribute) => {
     if (attribute.type === 'uid' && attribute.targetField === oldName) {
@@ -957,7 +957,7 @@ const slice = createUndoRedoSlice(
           attributeToSet.targetAttribute
         );
         const isBidirectionnal =
-          newRelationType !== undefined && !ONE_SIDE_RELATIONS.includes(newRelationType);
+          newRelationType !== undefined && !ONE_SIDE_RELATIONS.has(newRelationType);
 
         if (isBidirectionnal) {
           const newTargetAttribute = {
@@ -1048,7 +1048,7 @@ const slice = createUndoRedoSlice(
           const { target, relation, targetAttribute: targetAttributeName } = attribute;
           const relationType = getRelationType(relation, targetAttributeName);
 
-          const isBidirectionnal = !ONE_SIDE_RELATIONS.includes(relationType!);
+          const isBidirectionnal = !ONE_SIDE_RELATIONS.has(relationType!);
 
           if (isBidirectionnal && targetAttributeName) {
             const targetContentType = getType(state, { forTarget, targetUid: target });

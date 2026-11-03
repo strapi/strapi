@@ -314,6 +314,7 @@ class Strapi extends Container implements Core.Strapi {
         return new Database(
           _.merge(this.config.get('database'), {
             logger,
+            getPhase: () => (this.isLoaded ? 'runtime' : 'boot'),
             settings: {
               migrations: {
                 dir: path.join(projectDir, 'database/migrations'),
@@ -534,6 +535,9 @@ class Strapi extends Container implements Core.Strapi {
     }
 
     await this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP);
+
+    // Runs once every module, provider and the app have bootstrapped
+    await this.hook('strapi::app.afterBootstrap').call();
 
     return this;
   }

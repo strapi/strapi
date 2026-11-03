@@ -1,12 +1,26 @@
-import { expandLegacyActionFilters, isLegacyAction } from '../legacyActions';
+import {
+  expandLegacyActionFilters,
+  expandLegacyActionQuery,
+  isLegacyAction,
+} from '../legacyActions';
 
 describe('legacyActions', () => {
-  it('marks the three legacy keys and nothing else', () => {
+  it('marks the legacy keys and nothing else', () => {
     expect(isLegacyAction('user.create')).toBe(true);
     expect(isLegacyAction('user.update')).toBe(true);
     expect(isLegacyAction('user.delete')).toBe(true);
+    expect(isLegacyAction('media-folder.create')).toBe(true);
+    expect(isLegacyAction('media-folder.update')).toBe(true);
+    expect(isLegacyAction('media-folder.delete')).toBe(true);
     expect(isLegacyAction('admin-user.create')).toBe(false);
+    expect(isLegacyAction('media.create')).toBe(false);
     expect(isLegacyAction('entry.create')).toBe(false);
+  });
+
+  it('finds old folder rows under the matching media action', () => {
+    expect(expandLegacyActionFilters({ $and: [{ action: { $eq: 'media.delete' } }] })).toEqual({
+      $and: [{ action: { $in: ['media.delete', 'media-folder.delete'] } }],
+    });
   });
 
   it('expands an equality on a new key into $in over both keys', () => {
@@ -47,6 +61,24 @@ describe('legacyActions', () => {
         { $not: { action: { $in: ['admin-user.delete', 'user.delete'] } } },
       ],
     });
+  });
+
+  it('expands the filters of a list query and keeps the rest', () => {
+    expect(
+      expandLegacyActionQuery({
+        page: 1,
+        pageSize: 10,
+        sort: 'date:DESC',
+        filters: { $and: [{ action: { $eq: 'media.create' } }] },
+      })
+    ).toEqual({
+      page: 1,
+      pageSize: 10,
+      sort: 'date:DESC',
+      filters: { $and: [{ action: { $in: ['media.create', 'media-folder.create'] } }] },
+    });
+    const withoutFilters: { page: number; filters?: unknown } = { page: 2 };
+    expect(expandLegacyActionQuery(withoutFilters)).toEqual({ page: 2 });
   });
 
   it('returns undefined and scalars as is', () => {

@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { isAbsolute, join, relative, sep } from 'node:path';
 
 import chalk from 'chalk';
 import execa from 'execa';
@@ -256,45 +256,31 @@ async function createApp(scope: Scope) {
 
   logger.title('Strapi', `Your application was created!`);
 
-  logger.log([
-    'Available commands in your project:',
-    '',
-    'Start Strapi in watch mode. (Changes in Strapi project files will trigger a server restart)',
-    `${cmd} develop`,
-    '',
-    'Start Strapi without watch mode.',
-    `${cmd} start`,
-    '',
-    'Build Strapi admin panel.',
-    `${cmd} build`,
-    '',
-    'Deploy Strapi project.',
-    `${cmd} deploy`,
-    '',
-  ]);
-
   if (useExample) {
     logger.log(['Seed your database with sample data.', `${cmd} seed:example`, '']);
   }
 
-  logger.log(['Display all available commands.', `${cmd} strapi\n`]);
+  // show the folder relative to where the command ran, not the absolute path
+  const projectFolder = getDisplayFolder(relative(process.cwd(), rootPath));
 
   if (installDependencies) {
     logger.log([
       'To get started run',
       '',
-      `${chalk.cyan('cd')} ${rootPath}`,
+      `${chalk.cyan('cd')} ${projectFolder}`,
       !shouldRunSeed && useExample ? `${cmd} seed:example && ${cmd} develop` : `${cmd} develop`,
     ]);
   } else {
     logger.log([
       'To get started run',
       '',
-      `${chalk.cyan('cd')} ${rootPath}`,
+      `${chalk.cyan('cd')} ${projectFolder}`,
       `${chalk.cyan(packageManager)} install`,
       !shouldRunSeed && useExample ? `${cmd} seed:example && ${cmd} develop` : `${cmd} develop`,
     ]);
   }
+
+  logger.log(['', 'Documentation:', 'Quick Start Guide : https://docs.strapi.io/cms/quick-start']);
 
   if (runApp && installDependencies) {
     logger.title('Run', 'Running your Strapi application');
@@ -321,6 +307,23 @@ async function createApp(scope: Scope) {
       logger.fatal('Failed to start your Strapi application');
     }
   }
+}
+
+// prefix child folders with ./ so names like -site or ~site are not read as an option or a home path
+function getDisplayFolder(relativeFolder: string) {
+  if (!relativeFolder) {
+    return '.';
+  }
+
+  if (
+    isAbsolute(relativeFolder) ||
+    relativeFolder === '..' ||
+    relativeFolder.startsWith(`..${sep}`)
+  ) {
+    return relativeFolder;
+  }
+
+  return `.${sep}${relativeFolder}`;
 }
 
 async function runInstall({ rootPath, packageManager }: Scope) {

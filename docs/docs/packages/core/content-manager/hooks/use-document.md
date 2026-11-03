@@ -12,6 +12,8 @@ This hook is considered unstable and may change in a future release.
 
 Returns a document based on the model, collection type & id passed as arguments. Also extracts its schema from the redux cache to be used for creating a validation schema.
 
+The validation schema is built the first time `validate` is called, not when the hook mounts. It is cached per `schema` and `components` objects, which `useContentTypeSchema` shares across hook instances. The edit view calls `useDocument` from every field, so building the schema on mount used to cost seconds and gigabytes of memory on large content types.
+
 ## Usage
 
 ```tsx

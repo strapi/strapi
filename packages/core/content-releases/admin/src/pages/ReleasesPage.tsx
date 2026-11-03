@@ -35,6 +35,7 @@ import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { GetReleases, type Release } from '../../../shared/contracts/releases';
+import { getMaximumReleases } from '../../../shared/license';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
@@ -44,6 +45,8 @@ import {
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
+
+const EMPTY_RELEASES: NonNullable<ReleasesGridProps['releases']> = [];
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesGrid
@@ -92,7 +95,11 @@ const getBadgeProps = (status: Release['status']) => {
   };
 };
 
-const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
+const ReleasesGrid = ({
+  sectionTitle,
+  releases = EMPTY_RELEASES,
+  isError = false,
+}: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
 
   if (isError) {
@@ -191,9 +198,7 @@ const ReleasesPage = () => {
   const { data, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
-  const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
-    maximumReleases: number;
-  };
+  const maximumReleases = getMaximumReleases(getFeature('cms-content-releases')?.maximumReleases);
   const { trackUsage } = useTracking();
   const {
     allowedActions: { canCreate },

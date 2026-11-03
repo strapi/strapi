@@ -1,5 +1,6 @@
-import { curry, isString, isEmpty, isObject, constant, identity, cloneDeep } from 'lodash';
+import { isString, isEmpty, isObject, constant, identity, cloneDeep } from 'lodash';
 
+import { curry } from '../curry';
 import traverseFactory, { type Parent } from './factory';
 import { Attribute } from '../types';
 import { isMorphToRelationalAttribute } from '../content-types';

@@ -19,8 +19,7 @@ export const resolveStorageType = (attribute: AttributeLike): string | undefined
 
   try {
     const customField = strapi.get('custom-fields').get(attribute.customField) as
-      | { type?: string }
-      | undefined;
+      { type?: string } | undefined;
     return customField?.type;
   } catch {
     return undefined;
@@ -33,5 +32,7 @@ export const resolveStorageType = (attribute: AttributeLike): string | undefined
  */
 export const isValidUidTarget = (attribute: AttributeLike): boolean => {
   const type = resolveStorageType(attribute);
-  return VALID_UID_TARGETS.some((validType) => validType === type);
+  const validUidTargets: readonly string[] = VALID_UID_TARGETS;
+
+  return type !== undefined && validUidTargets.includes(type);
 };

@@ -95,7 +95,7 @@ const changes = {
   },
 };
 
-const removed = [
+const removed = new Set([
   'getCommonBeginning',
   'templateConfiguration',
   'removeUndefined',
@@ -103,7 +103,7 @@ const removed = [
   'getAbsoluteAdminUrl',
   'getAbsoluteServerUrl',
   'forEachAsync',
-];
+]);
 
 const transformImports = (root: Collection, j: JSCodeshift) => {
   root
@@ -120,7 +120,7 @@ const transformImports = (root: Collection, j: JSCodeshift) => {
           return false;
         }
 
-        if (removed.includes(specifier.imported.name)) {
+        if (removed.has(specifier.imported.name)) {
           console.warn(
             `Function "${specifier.imported.name}" was removed. You will have to remove it from your code.`
           );
@@ -207,7 +207,7 @@ const transformImports = (root: Collection, j: JSCodeshift) => {
             return false;
           }
 
-          if (removed.includes(property.value.name)) {
+          if (removed.has(property.value.name)) {
             console.warn(
               `Function "${property.value.name}" was removed. You will have to remove it from your code.`
             );
