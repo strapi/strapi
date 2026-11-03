@@ -232,8 +232,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const { runLocked } = createReleaseRun({ strapi, updateReleaseStatus });
 
   /**
-   * Each database sorts nulls its own way: the scheduled releases fill the pages first, so the
-   * unscheduled ones come last whatever the direction
+   * Each database sorts nulls its own way: the unscheduled releases fill the pages first, so they
+   * come first whatever the direction, then the scheduled ones in the requested order
    */
   const findPageByScheduledAt = async (
     { where, orderBy, ...params }: { where?: object; orderBy?: object | object[] },
@@ -251,38 +251,38 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       $and: [...(where ? [where] : []), { scheduledAt: { $notNull: isScheduled } }],
     });
 
-    const [scheduledCount, unscheduledCount] = await Promise.all([
-      query.count({ where: withSchedule(true) }),
+    const [unscheduledCount, scheduledCount] = await Promise.all([
       query.count({ where: withSchedule(false) }),
+      query.count({ where: withSchedule(true) }),
     ]);
     const offset = (page - 1) * pageSize;
-    const scheduledLimit = Math.min(Math.max(scheduledCount - offset, 0), pageSize);
-    const unscheduledLimit = pageSize - scheduledLimit;
+    const unscheduledLimit = Math.min(Math.max(unscheduledCount - offset, 0), pageSize);
+    const scheduledLimit = pageSize - unscheduledLimit;
 
-    const [scheduled, unscheduled] = await Promise.all([
-      scheduledLimit > 0
-        ? query.findMany({
-            ...params,
-            where: withSchedule(true),
-            orderBy: order,
-            offset,
-            limit: scheduledLimit,
-          })
-        : [],
+    const [unscheduled, scheduled] = await Promise.all([
       unscheduledLimit > 0
         ? query.findMany({
             ...params,
             where: withSchedule(false),
             orderBy: order,
-            offset: Math.max(offset - scheduledCount, 0),
+            offset,
             limit: unscheduledLimit,
           })
         : [],
+      scheduledLimit > 0
+        ? query.findMany({
+            ...params,
+            where: withSchedule(true),
+            orderBy: order,
+            offset: Math.max(offset - unscheduledCount, 0),
+            limit: scheduledLimit,
+          })
+        : [],
     ]);
-    const total = scheduledCount + unscheduledCount;
+    const total = unscheduledCount + scheduledCount;
 
     return {
-      results: [...scheduled, ...unscheduled],
+      results: [...unscheduled, ...scheduled],
       pagination: { page, pageSize, pageCount: Math.ceil(total / pageSize), total },
     };
   };

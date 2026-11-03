@@ -3577,7 +3577,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       ).toEqual([later.id]);
     });
 
-    test('sorts by schedule with the unscheduled releases last, most recently updated first', async () => {
+    test('sorts by schedule with the unscheduled releases first, most recently updated first', async () => {
       // Straight to the database: the default license caps pending releases at three
       const insert = async (name: string, scheduledAt: string | null, updatedAt: string) => {
         const release = await strapi.db.query('plugin::content-releases.release').create({
@@ -3600,7 +3600,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         await insert('Sooner', '2024-02-01T00:00:00.000Z', '2024-01-01T00:00:00.000Z'),
         await insert('Latest', '2024-04-01T00:00:00.000Z', '2024-01-01T00:00:00.000Z'),
       ];
-      // Pages of two: the second one holds the last scheduled release and the first unscheduled
+      // Pages of two: the second one holds the last unscheduled release and the first scheduled
       const findNames = async (sort: string, filters: Record<string, unknown> = {}) => {
         const pages = await Promise.all(
           [1, 2, 3].map((page) =>
@@ -3621,17 +3621,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       const unscheduled = ['Unscheduled, updated last', 'Unscheduled, updated first'];
       expect(await findNames('scheduledAt:asc')).toEqual({
-        names: ['Sooner', 'Later', 'Latest', ...unscheduled],
+        names: [...unscheduled, 'Sooner', 'Later', 'Latest'],
         pagination: { page: 1, pageSize: 2, pageCount: 3, total: 5 },
       });
       expect((await findNames('scheduledAt:desc')).names).toEqual([
+        ...unscheduled,
         'Latest',
         'Later',
         'Sooner',
-        ...unscheduled,
       ]);
       expect(await findNames('scheduledAt:asc', { name: { $ne: 'Later' } })).toEqual({
-        names: ['Sooner', 'Latest', ...unscheduled],
+        names: [...unscheduled, 'Sooner', 'Latest'],
         pagination: { page: 1, pageSize: 2, pageCount: 2, total: 4 },
       });
     });
