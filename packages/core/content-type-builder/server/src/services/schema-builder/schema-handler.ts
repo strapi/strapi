@@ -5,17 +5,25 @@ import _ from 'lodash';
 
 import { isConfigurable } from '../../utils/attributes';
 
-export type Infos = {
+/**
+ * The UID a schema handler holds: a content-type UID for a content type, a component UID for a
+ * component.
+ */
+export type SchemaHandlerUID = Internal.UID.ContentType | Internal.UID.Component;
+
+export type Infos<TUID extends SchemaHandlerUID = Internal.UID.ContentType> = {
   category?: string;
   modelName?: string;
   plugin?: string;
-  uid?: Internal.UID.ContentType;
+  uid?: TUID;
   dir: string;
   filename: string;
   schema?: Struct.ContentTypeSchema;
 };
 
-export type SchemaHandler = ReturnType<typeof createSchemaHandler>;
+export type SchemaHandler<TUID extends SchemaHandlerUID = Internal.UID.ContentType> = ReturnType<
+  typeof createSchemaHandler<TUID>
+>;
 
 const removeDirectoryIfEmpty = async (dir: string) => {
   try {
@@ -30,7 +38,13 @@ const removeDirectoryIfEmpty = async (dir: string) => {
   }
 };
 
-export default function createSchemaHandler(infos: Infos) {
+/**
+ * `TUID` is never inferred from `infos`: a content-type handler keeps the whole content-type UID
+ * union, and a component handler is created with an explicit `Internal.UID.Component`.
+ */
+export default function createSchemaHandler<
+  TUID extends SchemaHandlerUID = Internal.UID.ContentType,
+>(infos: Infos<NoInfer<TUID>>) {
   const { category, modelName, plugin, uid, dir, filename, schema } = infos;
 
   const initialState = {
@@ -82,7 +96,7 @@ export default function createSchemaHandler(infos: Infos) {
       return _.get(state, 'plugin') !== 'admin';
     },
 
-    setUID(val: Internal.UID.ContentType) {
+    setUID(val: TUID) {
       modified = true;
 
       state.uid = val;
