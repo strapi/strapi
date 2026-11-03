@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 const { createAuthRequest, createContentAPIRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
 
@@ -349,16 +352,32 @@ describe('Content Type Builder - Components', () => {
     const CARD = {
       displayName: 'Card',
       icon: 'calendar',
-      attributes: { title: { type: 'string' } },
+      attributes: {
+        title: { type: 'string' },
+        image: { type: 'media', multiple: false, allowedTypes: ['images'] },
+      },
     };
 
     let contentApi;
+    let file;
 
     const updateSchema = (data) =>
       rq({ method: 'POST', url: '/content-type-builder/update-schema', body: { data } });
 
     const componentTypes = async (tableName) =>
       strapi.db.getConnection(tableName).pluck('component_type');
+
+    const uploadImage = async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../upload/utils/rec.jpg')),
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      return res.body[0];
+    };
 
     beforeAll(async () => {
       // card nested in a wrapper component, and used both in a dynamic zone and as a single component
@@ -370,7 +389,11 @@ describe('Content Type Builder - Components', () => {
             category: 'default',
             displayName: CARD.displayName,
             icon: CARD.icon,
-            attributes: [{ action: 'create', name: 'title', properties: { type: 'string' } }],
+            attributes: Object.entries(CARD.attributes).map(([name, properties]) => ({
+              action: 'create',
+              name,
+              properties,
+            })),
           },
           {
             action: 'create',
@@ -419,16 +442,18 @@ describe('Content Type Builder - Components', () => {
       await restart();
       contentApi = createContentAPIRequest({ strapi });
 
+      file = await uploadImage();
+
       const created = await contentApi({
         method: 'POST',
         url: '/pages',
         body: {
           data: {
             sections: [
-              { __component: 'default.card', title: 'A' },
-              { __component: 'default.wrapper', inner: { title: 'I' } },
+              { __component: 'default.card', title: 'A', image: file.id },
+              { __component: 'default.wrapper', inner: { title: 'I', image: file.id } },
             ],
-            hero: { title: 'H' },
+            hero: { title: 'H', image: file.id },
           },
         },
       });
@@ -443,6 +468,10 @@ describe('Content Type Builder - Components', () => {
           { action: 'delete', uid: 'default.wrapper' },
         ],
       });
+
+      if (file) {
+        await rq({ method: 'DELETE', url: `/upload/files/${file.id}` });
+      }
     });
 
     test('the dynamic zone and component rows follow the new uid', async () => {
@@ -482,6 +511,43 @@ describe('Content Type Builder - Components', () => {
         expect.objectContaining({ __component: 'default.wrapper' }),
       ]);
       expect(body.data[0].hero).toMatchObject({ title: 'H' });
+    });
+
+    test('the media links of the moved component follow the new uid', async () => {
+      // the previous test moved the card and restarted
+      const morphTable = strapi.db.metadata.get('plugin::upload.file').attributes.related.joinTable;
+      const typeColumn = morphTable.morphColumn.typeColumn.name;
+
+      const relatedTypes = await strapi.db.getConnection(morphTable.name).pluck(typeColumn);
+      expect(relatedTypes).not.toContain('default.card');
+      expect(relatedTypes.filter((type) => type === 'blocks.card')).toHaveLength(3);
+
+      const { statusCode, body } = await contentApi({
+        method: 'GET',
+        url: '/pages',
+        qs: {
+          populate: {
+            sections: {
+              on: {
+                'blocks.card': { populate: '*' },
+                'default.wrapper': { populate: { inner: { populate: '*' } } },
+              },
+            },
+            hero: { populate: '*' },
+          },
+        },
+      });
+
+      expect(statusCode).toBe(200);
+      const [page] = body.data;
+      const image = expect.objectContaining({ id: file.id });
+
+      expect(page.sections[0]).toMatchObject({ __component: 'blocks.card', title: 'A' });
+      expect(page.sections[0].image).toEqual(image);
+      expect(page.sections[1].inner).toMatchObject({ title: 'I' });
+      expect(page.sections[1].inner.image).toEqual(image);
+      expect(page.hero).toMatchObject({ title: 'H' });
+      expect(page.hero.image).toEqual(image);
     });
   });
 });
