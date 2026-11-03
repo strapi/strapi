@@ -35,6 +35,7 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
+import { useOmitLockedSharedFieldsOnLocaleCreate } from '../../../hooks/useI18nFieldLock';
 import { usePreviewContext } from '../../../preview/pages/Preview';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import {
@@ -740,6 +741,7 @@ const PublishAction: DocumentActionComponent = ({
   const {
     currentDocument: { components },
   } = useDocumentContext('PublishAction');
+  const omitLockedSharedFields = useOmitLockedSharedFieldsOnLocaleCreate();
 
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
@@ -924,7 +926,7 @@ const PublishAction: DocumentActionComponent = ({
           documentId,
           params: currentDocumentMeta.params,
         },
-        data
+        omitLockedSharedFields(data)
       );
 
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
@@ -1236,6 +1238,7 @@ const UpdateAction: DocumentActionComponent = ({
   const {
     currentDocument: { components },
   } = useDocumentContext('UpdateAction');
+  const omitLockedSharedFields = useOmitLockedSharedFieldsOnLocaleCreate();
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
 
@@ -1375,7 +1378,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId,
             params: currentDocumentMeta.params,
           },
-          data
+          omitLockedSharedFields(data)
         );
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {

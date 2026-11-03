@@ -715,6 +715,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "description": "A datetime field",
             "type": "string",
           },
+          "variationBlocks": {
+            "description": "A dynamic zone field",
+            "items": {},
+            "type": "array",
+          },
           "variations": {
             "description": "A component field",
             "items": {
@@ -16869,6 +16874,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "images",
                     "seo",
                     "variations",
+                    "variationBlocks",
                     "countries",
                     "localizations",
                   ],
@@ -16882,6 +16888,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "images",
                       "seo",
                       "variations",
+                      "variationBlocks",
                       "countries",
                       "localizations",
                     ],
@@ -17075,6 +17082,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "description": "A datetime field",
                             "type": "string",
                           },
+                          "variationBlocks": {
+                            "description": "A dynamic zone field",
+                            "items": {},
+                            "type": "array",
+                          },
                           "variations": {
                             "description": "A component field",
                             "items": {
@@ -17244,6 +17256,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "images",
                     "seo",
                     "variations",
+                    "variationBlocks",
                     "countries",
                     "localizations",
                   ],
@@ -17257,6 +17270,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "images",
                       "seo",
                       "variations",
+                      "variationBlocks",
                       "countries",
                       "localizations",
                     ],
@@ -17423,6 +17437,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         ],
                         "type": "string",
                       },
+                      "variationBlocks": {
+                        "description": "A dynamic zone field",
+                        "items": {},
+                        "type": "array",
+                      },
                       "variations": {
                         "description": "A component field",
                         "items": {},
@@ -17558,6 +17577,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "description": "A datetime field",
                           "type": "string",
                         },
+                        "variationBlocks": {
+                          "description": "A dynamic zone field",
+                          "items": {},
+                          "type": "array",
+                        },
                         "variations": {
                           "description": "A component field",
                           "items": {
@@ -17676,6 +17700,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "images",
                     "seo",
                     "variations",
+                    "variationBlocks",
                     "countries",
                     "localizations",
                   ],
@@ -17689,6 +17714,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "images",
                       "seo",
                       "variations",
+                      "variationBlocks",
                       "countries",
                       "localizations",
                     ],
@@ -17910,6 +17936,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "description": "A datetime field",
                           "type": "string",
                         },
+                        "variationBlocks": {
+                          "description": "A dynamic zone field",
+                          "items": {},
+                          "type": "array",
+                        },
                         "variations": {
                           "description": "A component field",
                           "items": {
@@ -18026,6 +18057,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "images",
                     "seo",
                     "variations",
+                    "variationBlocks",
                     "countries",
                     "localizations",
                   ],
@@ -18039,6 +18071,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "images",
                       "seo",
                       "variations",
+                      "variationBlocks",
                       "countries",
                       "localizations",
                     ],
@@ -18358,6 +18391,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "description": "A datetime field",
                           "type": "string",
                         },
+                        "variationBlocks": {
+                          "description": "A dynamic zone field",
+                          "items": {},
+                          "type": "array",
+                        },
                         "variations": {
                           "description": "A component field",
                           "items": {
@@ -18474,6 +18512,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "images",
                     "seo",
                     "variations",
+                    "variationBlocks",
                     "countries",
                     "localizations",
                   ],
@@ -18487,6 +18526,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                       "images",
                       "seo",
                       "variations",
+                      "variationBlocks",
                       "countries",
                       "localizations",
                     ],
@@ -18653,6 +18693,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         ],
                         "type": "string",
                       },
+                      "variationBlocks": {
+                        "description": "A dynamic zone field",
+                        "items": {},
+                        "type": "array",
+                      },
                       "variations": {
                         "description": "A component field",
                         "items": {},
@@ -18780,6 +18825,11 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "updatedAt": {
                           "description": "A datetime field",
                           "type": "string",
+                        },
+                        "variationBlocks": {
+                          "description": "A dynamic zone field",
+                          "items": {},
+                          "type": "array",
                         },
                         "variations": {
                           "description": "A component field",
