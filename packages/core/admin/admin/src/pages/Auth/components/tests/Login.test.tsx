@@ -183,14 +183,12 @@ describe('ResetPassword', () => {
       await user.type(getByLabelText('Password*'), 'Testing123!');
       fireEvent.click(getByRole('button', { name: 'Login' }));
 
-      // The design system keeps a permanent, empty `role="alert"` live region mounted for toast
-      // announcements, so `findByRole('alert')` resolves against that instead of waiting for this
-      // banner (see MfaChallenge.test.tsx for the same workaround). Wait on the actual text, then
-      // confirm it is the alert-role element.
-      const errorMessage = await findByText(
-        'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.'
-      );
-      expect(errorMessage).toHaveAttribute('role', 'alert');
+      // In the password field's own error slot, under the input, not above the form.
+      const message =
+        'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.';
+      await findByText(message);
+      expect(getByLabelText('Password*')).toHaveAttribute('aria-invalid', 'true');
+      expect(getByLabelText('Password*')).toHaveAccessibleDescription(message);
       expect(window.localStorage.getItem('jwtToken')).toBeNull();
     });
 

@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { Form } from '../../../components/Form';
+import { Form, type FormHelpers } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
@@ -56,20 +56,25 @@ const Login = ({ children }: LoginProps) => {
 
   const { login } = useAuth('Login', (auth) => auth);
 
-  const handleLogin = async (body: Parameters<typeof login>[0]) => {
+  const handleLogin = async (
+    body: Parameters<typeof login>[0],
+    { setErrors }: Pick<FormHelpers, 'setErrors'>
+  ) => {
     setApiError(undefined);
 
     const res = await login(body);
 
     if ('error' in res) {
       if (isMfaLockedError(res.error)) {
-        setApiError(
-          formatMessage({
+        // Under the password field, in its own error slot: the password was right, and this says
+        // why it still did not let the user in.
+        setErrors({
+          password: formatMessage({
             id: 'Auth.form.mfa.locked.message',
             defaultMessage:
               'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
-          })
-        );
+          }),
+        });
         return;
       }
 
@@ -140,8 +145,8 @@ const Login = ({ children }: LoginProps) => {
               password: '',
               rememberMe: false,
             }}
-            onSubmit={(values) => {
-              handleLogin(values);
+            onSubmit={(values, helpers) => {
+              handleLogin(values, helpers);
             }}
             validationSchema={LOGIN_SCHEMA}
           >

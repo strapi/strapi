@@ -3,6 +3,7 @@ import * as React from 'react';
 import { render, server, screen, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { createIntl } from 'react-intl';
+import { useLocation } from 'react-router-dom';
 
 import { MfaNotices, formatMfaNotice } from '../MfaNotices';
 
@@ -53,7 +54,54 @@ const status = (overrides = {}) =>
     })
   );
 
+const LocationDisplay = () => <span data-testid="location">{useLocation().pathname}</span>;
+
 describe('MfaNotices', () => {
+  it('links "profile page" to the profile, and the toast goes away there without marking seen', async () => {
+    let seenCalls = 0;
+    server.use(
+      status(),
+      http.get('/admin/mfa/notices', () => HttpResponse.json({ data: NOTICES })),
+      http.post('/admin/mfa/notices/seen', () => {
+        seenCalls += 1;
+        return new HttpResponse(null, { status: 204 });
+      })
+    );
+    const { user } = render(
+      <>
+        <MfaNotices />
+        <LocationDisplay />
+      </>
+    );
+
+    await screen.findByText(/2 security events on your account/i);
+    await user.click(screen.getByRole('link', { name: 'profile page' }));
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/me');
+    await waitFor(() =>
+      expect(screen.queryByText(/2 security events on your account/i)).not.toBeInTheDocument()
+    );
+    // The profile lists the same events with its own "Mark all as seen".
+    expect(seenCalls).toBe(0);
+  });
+
+  it('does not show the toast on the profile page, which lists the events itself', async () => {
+    let noticesRead = 0;
+    server.use(
+      status(),
+      http.get('/admin/mfa/notices', () => {
+        noticesRead += 1;
+        return HttpResponse.json({ data: NOTICES });
+      })
+    );
+    render(<MfaNotices />, { initialEntries: ['/me'] });
+
+    await waitFor(() => expect(noticesRead).toBe(1));
+    // One more tick for the effect that would raise the toast.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(screen.queryByText(/security events on your account/i)).not.toBeInTheDocument();
+  });
+
   it('shows one warning toast summarising unseen notices and marks them seen on dismiss', async () => {
     let seenBody: unknown;
     server.use(

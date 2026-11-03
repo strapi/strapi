@@ -13,7 +13,8 @@ interface NotificationLink {
 interface NotificationConfig {
   blockTransition?: boolean;
   link?: NotificationLink;
-  message?: string;
+  /** Usually a string; a node lets a message carry an in-app link, which `link` cannot. */
+  message?: React.ReactNode;
   onClose?: () => void;
   timeout?: number;
   title?: string;

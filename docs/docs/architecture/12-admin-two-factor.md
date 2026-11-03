@@ -231,6 +231,11 @@ them (an absent `ids` marks all of the caller's, and it is always scoped to rows
 Notice `metadata` is limited to neutral context and never carries a code, a secret or an otpauth
 URI.
 
+In the admin panel, `MfaNotices` turns the unseen rows into one warning toast per load, whose
+"profile page" links to the profile. It never shows on the profile page itself, which lists the same
+rows in its two-factor section with its own "Mark all as seen". Arriving there dismisses the toast
+without marking anything seen.
+
 The EE audit log records thirteen of these, plus `admin.auth.mfa_required` and
 `admin.security-settings.update`, on the standard shape. They are registered through
 `registerEvent` in `server/src/audit-logs/mfa.ts`. The actor is the session user when there is one

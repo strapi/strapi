@@ -1,6 +1,8 @@
 import * as React from 'react';
 
+import { Link } from '@strapi/design-system';
 import { type IntlFormatters, useIntl } from 'react-intl';
+import { useHref, useMatch, useNavigate } from 'react-router-dom';
 
 import {
   useGetMfaNoticesQuery,
@@ -120,10 +122,18 @@ export const formatMfaNotice = (
   })})`;
 };
 
+const PROFILE_PATH = '/me';
+
 /**
- * Unseen notice rows become one warning toast on the next authenticated load. No link, because
- * `Notifications` renders `link` as an external `<Link isExternal>`, which is wrong for an in-app
- * destination.
+ * Unseen notice rows become one warning toast on the next authenticated load. "profile page" in
+ * the message links to the profile. Not through `link`, which `Notifications` renders as an
+ * external `<Link isExternal>`, and not through a router `<Link>`, because `Toaster` renders above
+ * the router: the link is a plain anchor whose click navigates with the `navigate` captured here.
+ *
+ * Never on the profile page itself, which lists the same events in its two-factor section with its
+ * own "Mark all as seen": landing there (from the link or otherwise) dismisses the toast without
+ * marking anything seen, and a visit there counts as announced, so leaving the page does not raise
+ * the toast afterwards.
  *
  * The flag-off signal is a 404 from `useGetMfaStatusQuery`, which then `skip`s the notices query.
  * Deliberately not `status.enabled`: `disabled`/`reset` notices are raised exactly when a user
@@ -148,9 +158,25 @@ const MfaNotices = () => {
   const [markSeen] = useMarkMfaNoticesSeenMutation();
   const announced = React.useRef(false);
   const toastId = React.useRef<string | number>();
+  const onProfile = useMatch(PROFILE_PATH) !== null;
+  const navigate = useNavigate();
+  const profileHref = useHref(PROFILE_PATH);
 
   React.useEffect(() => {
-    if (announced.current || !notices || notices.length === 0) {
+    if (!onProfile) {
+      return;
+    }
+    if (notices && notices.length > 0) {
+      announced.current = true;
+    }
+    if (toastId.current !== undefined) {
+      dismissNotification(toastId.current);
+      toastId.current = undefined;
+    }
+  }, [dismissNotification, notices, onProfile]);
+
+  React.useEffect(() => {
+    if (onProfile || announced.current || !notices || notices.length === 0) {
       return;
     }
     announced.current = true;
@@ -167,15 +193,29 @@ const MfaNotices = () => {
         {
           id: 'Settings.profile.form.section.mfa.notice.summary',
           defaultMessage:
-            '{count, plural, one {# security event} other {# security events}} on your account since your last visit. Review them on your profile page.',
+            '{count, plural, one {# security event} other {# security events}} on your account since your last visit. Review them on your <link>profile page</link>.',
         },
-        { count: notices.length }
+        {
+          count: notices.length,
+          link: (chunks: React.ReactNode) => (
+            <Link
+              href={profileHref}
+              isExternal={false}
+              onClick={(event: React.MouseEvent) => {
+                event.preventDefault();
+                navigate(PROFILE_PATH);
+              }}
+            >
+              {chunks}
+            </Link>
+          ),
+        }
       ),
       onClose: () => {
         markSeen({ ids });
       },
     });
-  }, [formatMessage, markSeen, notices, toggleNotification]);
+  }, [formatMessage, markSeen, navigate, notices, onProfile, profileHref, toggleNotification]);
 
   React.useEffect(() => {
     return () => {

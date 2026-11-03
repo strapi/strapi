@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { Form } from '../../../components/Form';
+import { Form, type FormHelpers, useForm } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
@@ -56,9 +56,24 @@ const MFA_SCHEMA = yup.object().shape({
     .max(32, { ...translatedErrors.maxLength, values: { max: 32 } }),
 });
 
+type CodeErrorSetter = FormHelpers<{ code: string }>['setErrors'];
+
+/**
+ * Inside the `<Form>` only to reach its `setErrors`: the passkey path is a click, not a submit, and
+ * its refusal belongs in the same place as a refused code -- under the code field.
+ */
+const PasskeyButton = ({
+  onClick,
+  ...props
+}: Omit<React.ComponentProps<typeof Button>, 'onClick'> & {
+  onClick: (setErrors: CodeErrorSetter) => void;
+}) => {
+  const setErrors = useForm('PasskeyButton', (state) => state.setErrors);
+  return <Button {...props} onClick={() => onClick(setErrors)} />;
+};
+
 const MfaChallenge = () => {
   const toMessage = useToMessage();
-  const [apiError, setApiError] = React.useState<string>();
   const { formatMessage } = useIntl();
   const location = useLocation();
   const navigate = useNavigate();
@@ -136,7 +151,12 @@ const MfaChallenge = () => {
     return <Navigate to={{ pathname: '/auth/login', search: location.search }} replace />;
   }
 
-  const handleSubmit = async ({ code }: { code: string }) => {
+  /** A refusal reads under the code field, in the field's own error slot, like a validation
+   * error -- not above the form, where it read as a page-level fault. */
+  const handleSubmit = async (
+    { code }: { code: string },
+    { setErrors }: Pick<FormHelpers<{ code: string }>, 'setErrors'>
+  ) => {
     // Enter can submit before React re-renders the disabled attribute, and two concurrent calls race
     // the same single-use challenge: the loser shows a refusal over a login that succeeded, and the
     // verify route charges an attempt for a race the user did not cause.
@@ -144,7 +164,7 @@ const MfaChallenge = () => {
       return;
     }
     inFlightRef.current = true;
-    setApiError(undefined);
+    setErrors({});
     setCodeBusy(true);
 
     try {
@@ -156,7 +176,7 @@ const MfaChallenge = () => {
       });
 
       if ('error' in res) {
-        setApiError(toMessage(res.error));
+        setErrors({ code: toMessage(res.error) });
         return;
       }
 
@@ -174,19 +194,19 @@ const MfaChallenge = () => {
 
   /** Three steps that must stay in this order: options (which stores the ceremony's challenge on
    * the challenge row), the browser ceremony, then the assertion. */
-  const handlePasskey = async () => {
+  const handlePasskey = async (setErrors: CodeErrorSetter) => {
     // The same ref `handleSubmit` uses: the two paths spend one challenge between them.
     if (inFlightRef.current) {
       return;
     }
     inFlightRef.current = true;
-    setApiError(undefined);
+    setErrors({});
     setPasskeyBusy(true);
 
     try {
       const optionsRes = await webauthnOptions({ challengeToken: challenge.challengeToken });
       if ('error' in optionsRes) {
-        setApiError(toMessage(optionsRes.error));
+        setErrors({ code: toMessage(optionsRes.error) });
         return;
       }
 
@@ -197,13 +217,13 @@ const MfaChallenge = () => {
         // A dismissed prompt is a no-op: the user closed their own dialog. Everything else gets one
         // neutral line, because the cause is not safe to paraphrase.
         if (ceremonyErrorKind(error) !== 'dismissed') {
-          setApiError(
-            formatMessage({
+          setErrors({
+            code: formatMessage({
               id: 'Auth.form.mfa.passkey.failed',
               defaultMessage:
                 'Your device could not complete the passkey check. Try again, or enter a code instead.',
-            })
-          );
+            }),
+          });
         }
         return;
       }
@@ -216,7 +236,7 @@ const MfaChallenge = () => {
       });
 
       if ('error' in res) {
-        setApiError(toMessage(res.error));
+        setErrors({ code: toMessage(res.error) });
         return;
       }
 
@@ -260,12 +280,8 @@ const MfaChallenge = () => {
                 {formatMessage({
                   id: 'Auth.form.mfa.expired',
                   defaultMessage:
-                    'This sign-in attempt has expired. Go back to login and sign in again.',
+                    'This login attempt has expired. Go back to login and log in again.',
                 })}
-              </Typography>
-            ) : apiError ? (
-              <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
-                {apiError}
               </Typography>
             ) : null}
           </Column>
@@ -307,7 +323,7 @@ const MfaChallenge = () => {
                 {formatMessage({ id: 'Auth.form.mfa.button.verify', defaultMessage: 'Verify' })}
               </Button>
               {showPasskey ? (
-                <Button
+                <PasskeyButton
                   fullWidth
                   type="button"
                   variant="tertiary"
@@ -319,7 +335,7 @@ const MfaChallenge = () => {
                     id: 'Auth.form.mfa.passkey.button',
                     defaultMessage: 'Use a passkey',
                   })}
-                </Button>
+                </PasskeyButton>
               ) : availability === 'insecure-context' ? (
                 // The far likelier cause on a self-hosted panel than an incapable browser. Saying
                 // nothing made the passkey button simply vanish at login with no explanation.

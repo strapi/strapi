@@ -162,11 +162,12 @@ describe('MfaChallenge', () => {
     await user.type(screen.getByLabelText('Authentication code*'), '000000');
     submitVerify();
 
-    // The design system keeps a permanent, empty `role="alert"` live region mounted for toast
-    // announcements, so `findByRole('alert')` resolves against that instead of waiting for this
-    // banner. Wait on the actual text, then confirm it is the alert-role element.
-    const errorMessage = await screen.findByText('Invalid code');
-    expect(errorMessage).toHaveAttribute('role', 'alert');
+    // In the code field's own error slot, under the input: the field is marked invalid and the
+    // message is its description, so a screen reader reads it with the field.
+    await screen.findByText('Invalid code');
+    const field = screen.getByLabelText('Authentication code*');
+    expect(field).toHaveAttribute('aria-invalid', 'true');
+    expect(field).toHaveAccessibleDescription('Invalid code');
     expect(screen.getByRole('button', { name: 'Verify' })).toBeEnabled();
   });
 
@@ -191,8 +192,10 @@ describe('MfaChallenge', () => {
     await user.type(screen.getByLabelText('Authentication code*'), '000000');
     submitVerify();
 
-    const errorMessage = await screen.findByText(/Too many requests/);
-    expect(errorMessage).toHaveAttribute('role', 'alert');
+    await screen.findByText(/Too many requests/);
+    expect(screen.getByLabelText('Authentication code*')).toHaveAccessibleDescription(
+      /Too many requests/
+    );
   });
 
   it('offers "Trust this device" only when the organisation allows it', () => {
@@ -410,8 +413,10 @@ describe('MfaChallenge', () => {
     const { user } = renderChallenge({ ...STATE, passkeyAvailable: true });
     await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
 
-    const message = await screen.findByText('Could not verify that passkey.');
-    expect(message).toHaveAttribute('role', 'alert');
+    await screen.findByText('Could not verify that passkey.');
+    expect(screen.getByLabelText('Authentication code*')).toHaveAccessibleDescription(
+      'Could not verify that passkey.'
+    );
     expect(jest.mocked(startAuthentication)).not.toHaveBeenCalled();
   });
 
@@ -444,8 +449,10 @@ describe('MfaChallenge', () => {
     const { user } = renderChallenge({ ...STATE, passkeyAvailable: true });
     await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
 
-    const message = await screen.findByText('Could not verify that passkey.');
-    expect(message).toHaveAttribute('role', 'alert');
+    await screen.findByText('Could not verify that passkey.');
+    expect(screen.getByLabelText('Authentication code*')).toHaveAccessibleDescription(
+      'Could not verify that passkey.'
+    );
     // The ceremony DID run -- this is the verify half failing, not the options half.
     expect(jest.mocked(startAuthentication)).toHaveBeenCalled();
   });
@@ -582,7 +589,7 @@ describe('MfaChallenge', () => {
 
       expect(
         await screen.findByText(
-          'This sign-in attempt has expired. Go back to login and sign in again.'
+          'This login attempt has expired. Go back to login and log in again.'
         )
       ).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Verify' })).toBeDisabled();
