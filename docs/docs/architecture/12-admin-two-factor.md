@@ -226,8 +226,16 @@ Two functions in `server/src/services/mfa.ts` record what happens:
   `enabled`, `disabled`, `reset` and `authenticator_replaced`. `trusted_device_used` and
   `passkey_used` are emitted with no row.
 
-`GET /admin/mfa/notices` returns the caller's unseen rows; `POST /admin/mfa/notices/seen` marks
-them (an absent `ids` marks all of the caller's, and it is always scoped to rows the caller owns).
+Each row records the `sessionId` of the request that caused it, read from `strapi.requestContext`.
+A login has no session yet while it writes its rows (a recovery code used, a device trusted), so
+`issueSession` calls `claimRequestEvents` to hand those rows to the session it just issued. System
+and administrator events (grace started, locked, unlocked, reset) carry no session.
+
+`GET /admin/mfa/notices` returns the caller's unseen rows, newest first, minus the rows the
+caller's own session caused: that session already knows. `POST /admin/mfa/notices/seen` marks them
+(an absent `ids` marks all of the caller's, and it is always scoped to rows the caller owns). It
+also skips the caller's own session's rows, so clearing notices on one device never hides that
+device's actions from the others.
 Notice `metadata` is limited to neutral context and never carries a code, a secret or an otpauth
 URI.
 
