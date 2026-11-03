@@ -249,6 +249,49 @@ describe('Releases home page', () => {
     expect(overdue).toHaveTextContent(/Was due \d+ days ago/);
   });
 
+  it('dates a release by its schedule, the one the sort and the filters use, even once it ran', async () => {
+    const [base] = mockReleasesPageData.releasesByStatus.data;
+    server.use(
+      http.get('/content-releases', () =>
+        HttpResponse.json({
+          ...mockReleasesPageData.releasesByStatus,
+          data: [
+            // Published by hand two days before its schedule
+            {
+              ...base,
+              id: 1,
+              name: 'Ran early',
+              status: 'done',
+              scheduledAt: '2026-10-15T09:00:00.000Z',
+              timezone: 'UTC',
+              releasedAt: '2026-10-13T08:00:00.000Z',
+            },
+            // Published by hand without a date
+            {
+              ...base,
+              id: 2,
+              name: 'Ran undated',
+              status: 'done',
+              scheduledAt: null,
+              timezone: null,
+              releasedAt: '2026-10-13T08:00:00.000Z',
+            },
+          ],
+        })
+      )
+    );
+
+    render(<ReleasesPage />);
+
+    await screen.findByRole('link', { name: 'Ran early' });
+    const [early, undated] = screen.getAllByRole('row').slice(1);
+
+    expect(early).toHaveTextContent(/Released .+ago/);
+    expect(within(early).getByText(/^Oct 15, 2026 • 09:00/)).toBeInTheDocument();
+    expect(within(undated).getByText('Not scheduled')).toBeInTheDocument();
+    expect(within(undated).queryByText(/Oct 13, 2026/)).not.toBeInTheDocument();
+  });
+
   it("shows the API's error when creating a release fails", async () => {
     server.use(
       http.get('/content-releases', () => HttpResponse.json(mockReleasesPageData.emptyEntries)),

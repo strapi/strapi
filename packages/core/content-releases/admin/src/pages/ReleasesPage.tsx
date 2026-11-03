@@ -105,14 +105,14 @@ const SCHEDULE_MESSAGES = {
  * ago" for a schedule that passed without a run, and "Not scheduled". A clock marks a run to come
  * and a calendar a date that passed. Only an upcoming run keeps the table's text colour: the others
  * are grey, so the runs to come stand out.
+ *
+ * The date is the schedule, the one the sort and the "Scheduled for" filter use: a release
+ * published by hand without one stays "Not scheduled". Only the words of a run tell when it ran.
  */
 const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
-  // A release that froze without running never ran: `releasedAt` is when it froze, not a run
-  const hasRun = Boolean(release.releasedAt) && !release.failureReason;
-  const date = hasRun ? release.releasedAt : release.scheduledAt;
 
-  if (!date) {
+  if (!release.scheduledAt) {
     return (
       <Typography textColor="neutral600">
         {formatMessage({
@@ -123,16 +123,20 @@ const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
     );
   }
 
-  const timestamp = new Date(date);
   const timeZone = release.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const absoluteTime = `${formatDate(timestamp, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(timestamp, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, timestamp)}`;
-  const isUpcoming = !hasRun && timestamp.getTime() > Date.now();
+  const formatAbsolute = (timestamp: Date) =>
+    `${formatDate(timestamp, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(timestamp, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, timestamp)}`;
+  const scheduledAt = new Date(release.scheduledAt);
+  // A release that froze without running never ran: `releasedAt` is when it froze, not a run
+  const ranAt = release.releasedAt && !release.failureReason ? new Date(release.releasedAt) : null;
+  const isUpcoming = !ranAt && scheduledAt.getTime() > Date.now();
   // An overdue release the sweep hasn't frozen yet was due too
-  const message = hasRun
+  const message = ranAt
     ? SCHEDULE_MESSAGES.released
     : isUpcoming
       ? SCHEDULE_MESSAGES.upcoming
       : SCHEDULE_MESSAGES.overdue;
+  const wordedTime = ranAt ?? scheduledAt;
 
   const Icon = isUpcoming ? Clock : Calendar;
 
@@ -145,11 +149,11 @@ const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
         <Typography textColor={isUpcoming ? 'neutral800' : 'neutral600'}>
           {formatMessage(message, {
             // The browser-zone default title would contradict the release-zone line below
-            time: <RelativeTime timestamp={timestamp} title={absoluteTime} />,
+            time: <RelativeTime timestamp={wordedTime} title={formatAbsolute(wordedTime)} />,
           })}
         </Typography>
         <Typography variant="pi" textColor="neutral600">
-          {absoluteTime}
+          {formatAbsolute(scheduledAt)}
         </Typography>
       </Flex>
     </Flex>
