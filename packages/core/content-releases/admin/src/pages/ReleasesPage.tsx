@@ -86,29 +86,14 @@ const RELEASE_CONDITION_BADGES = {
   { icon: React.ComponentType; message: MessageDescriptor }
 >;
 
-const SCHEDULE_MESSAGES = {
-  upcoming: {
-    id: 'content-releases.pages.Releases.schedule.upcoming',
-    defaultMessage: 'Scheduled {time}',
-  },
-  released: {
-    id: 'content-releases.pages.Releases.schedule.released',
-    defaultMessage: 'Released {time}',
-  },
-  overdue: {
-    id: 'content-releases.pages.Releases.schedule.overdue',
-    defaultMessage: 'Was due {time}',
-  },
-} satisfies Record<string, MessageDescriptor>;
-
 /**
- * The words tell the states apart: "Scheduled in 2 days", "Released 3 days ago", "Was due 3 days
- * ago" for a schedule that passed without a run, and "Not scheduled". A clock marks a run to come
- * and a calendar a date that passed. Only an upcoming run keeps the table's text colour: the others
- * are grey, so the runs to come stand out.
+ * The schedule reads as a relative time alone ("In 2 days", "3 days ago") over its date: the status
+ * column already tells a run from a missed schedule. A clock marks a run to come and a calendar a
+ * date that passed. Only an upcoming run keeps the table's text colour: the others are grey, so the
+ * runs to come stand out.
  *
  * The date is the schedule, the one the sort and the "Scheduled for" filter use: a release
- * published by hand without one stays "Not scheduled". Only the words of a run tell when it ran.
+ * published by hand without one stays "Not scheduled".
  */
 const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
@@ -125,19 +110,10 @@ const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
   }
 
   const timeZone = release.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const formatAbsolute = (timestamp: Date) =>
-    `${formatDate(timestamp, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(timestamp, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, timestamp)}`;
   const scheduledAt = new Date(release.scheduledAt);
-  // A release that froze without running never ran: `releasedAt` is when it froze, not a run
-  const ranAt = release.releasedAt && !release.failureReason ? new Date(release.releasedAt) : null;
-  const isUpcoming = !ranAt && scheduledAt.getTime() > Date.now();
-  // An overdue release the sweep hasn't frozen yet was due too
-  const message = ranAt
-    ? SCHEDULE_MESSAGES.released
-    : isUpcoming
-      ? SCHEDULE_MESSAGES.upcoming
-      : SCHEDULE_MESSAGES.overdue;
-  const wordedTime = ranAt ?? scheduledAt;
+  const absoluteTime = `${formatDate(scheduledAt, { day: 'numeric', month: 'short', year: 'numeric', timeZone })} • ${formatTime(scheduledAt, { timeZone, hourCycle: 'h23' })} ${getTimezoneOffset(timeZone, scheduledAt)}`;
+  // A release that ran is past, even when it ran before its schedule
+  const isUpcoming = !release.releasedAt && scheduledAt.getTime() > Date.now();
 
   const Icon = isUpcoming ? Clock : Calendar;
 
@@ -147,19 +123,26 @@ const ScheduleCell = ({ release }: { release: ReleaseRow }) => {
         <Icon width="1.2rem" height="1.2rem" aria-hidden />
       </Flex>
       <Flex direction="column" alignItems="flex-start">
-        <Typography textColor={isUpcoming ? 'neutral800' : 'neutral600'}>
-          {formatMessage(message, {
-            // The browser-zone default title would contradict the release-zone line below
-            time: <RelativeTime timestamp={wordedTime} title={formatAbsolute(wordedTime)} />,
-          })}
-        </Typography>
+        <SentenceCase textColor={isUpcoming ? 'neutral800' : 'neutral600'}>
+          {/* The browser-zone default title would contradict the release-zone line below */}
+          <RelativeTime timestamp={scheduledAt} title={absoluteTime} />
+        </SentenceCase>
         <Typography variant="pi" textColor="neutral600">
-          {formatAbsolute(scheduledAt)}
+          {absoluteTime}
         </Typography>
       </Flex>
     </Flex>
   );
 };
+
+// "in 2 days" reads "In 2 days": `capitalize` would also write "Days"
+const SentenceCase = styled(Typography)`
+  display: inline-block;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+`;
 
 const EntriesCell = ({ release }: { release: ReleaseRow }) => {
   const { formatMessage } = useIntl();
