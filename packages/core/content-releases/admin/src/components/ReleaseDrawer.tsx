@@ -85,8 +85,6 @@ interface ReleaseDrawerProps {
   };
   // A value of the timezone list, from the release settings
   defaultTimezone?: string | null;
-  // Fill today in the date of a scheduled release that has no date yet
-  isDatePrefilled?: boolean;
   isSubmitting?: boolean;
   isSubmitDisabled?: boolean;
   // Shown above the release info
@@ -101,7 +99,6 @@ export const ReleaseDrawer = ({
   submitLabel,
   initialValues,
   defaultTimezone: settingsTimezone,
-  isDatePrefilled = true,
   isSubmitting = false,
   isSubmitDisabled = false,
   children,
@@ -141,16 +138,12 @@ export const ReleaseDrawer = ({
     FALLBACK_TIMEZONE;
   const timezone = findTimezone(initialValues.timezone) ?? defaultTimezone;
   const zonedScheduledAt = scheduledAt && utcToZonedTime(scheduledAt, getTimezoneName(timezone));
-  const defaultDate = isDatePrefilled ? format(new Date(), 'yyyy-MM-dd') : null;
 
   const formInitialValues: FormValues = {
     name: initialValues.name,
     isScheduled: initialValues.isScheduled,
-    date: initialValues.isScheduled
-      ? zonedScheduledAt
-        ? format(zonedScheduledAt, 'yyyy-MM-dd')
-        : defaultDate
-      : null,
+    date:
+      initialValues.isScheduled && zonedScheduledAt ? format(zonedScheduledAt, 'yyyy-MM-dd') : null,
     time: initialValues.isScheduled && zonedScheduledAt ? format(zonedScheduledAt, 'HH:mm') : '',
     timezone: initialValues.isScheduled ? timezone : null,
     releaseCondition: initialValues.releaseCondition,
@@ -232,7 +225,6 @@ export const ReleaseDrawer = ({
                   <ScheduleFields
                     timezoneList={timezoneList}
                     defaultTimezone={defaultTimezone}
-                    defaultDate={defaultDate}
                     initialSchedule={formInitialValues}
                   />
                 </div>
@@ -314,14 +306,12 @@ const NameField = () => {
 interface ScheduleFieldsProps {
   timezoneList: TimezoneOption[];
   defaultTimezone: string;
-  defaultDate: string | null;
   initialSchedule: Pick<FormValues, 'date' | 'time' | 'timezone'>;
 }
 
 const ScheduleFields = ({
   timezoneList,
   defaultTimezone,
-  defaultDate,
   initialSchedule,
 }: ScheduleFieldsProps) => {
   const { formatMessage } = useIntl();
@@ -339,7 +329,7 @@ const ScheduleFields = ({
       ...(hasNoSchedule
         ? { date: null, time: '', timezone: null }
         : {
-            date: initialSchedule.date ?? defaultDate,
+            date: initialSchedule.date,
             time: initialSchedule.time,
             timezone: initialSchedule.timezone ?? defaultTimezone,
           }),

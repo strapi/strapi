@@ -97,6 +97,19 @@ describe('ReleaseDrawer', () => {
     expect(screen.getByRole('combobox', { name: 'Date' })).toBeInTheDocument();
   });
 
+  it('leaves the date of a new release empty, also after ticking and unticking no date', async () => {
+    const { user } = renderDrawer({ initialValues: NEW_RELEASE });
+
+    expect(await screen.findByRole('combobox', { name: 'Date' })).toHaveValue('');
+    expect(screen.getByRole('combobox', { name: 'Time' })).toHaveValue('');
+
+    const noDate = screen.getByRole('checkbox', { name: "I don't have a release date yet" });
+    await user.click(noDate);
+    await user.click(noDate);
+
+    expect(await screen.findByRole('combobox', { name: 'Date' })).toHaveValue('');
+  });
+
   it('submits the schedule in UTC with the timezone name', async () => {
     const onSubmit = jest.fn();
     renderDrawer({ onSubmit });
