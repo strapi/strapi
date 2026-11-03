@@ -73,6 +73,21 @@ describe('getStylesheet', () => {
     expect(sheet).not.toContain('\\');
   });
 
+  test('imports a Windows design system source with forward slashes', () => {
+    jest
+      .mocked(getSubpathEntries)
+      .mockReturnValueOnce([
+        [
+          '@strapi/design-system/next/source.css',
+          'C:\\fixture\\@strapi\\design-system\\src\\next\\source.css',
+        ],
+      ]);
+
+    expect(getStylesheet(ctx([]))).toContain(
+      '@import "C:/fixture/@strapi/design-system/src/next/source.css";'
+    );
+  });
+
   test('stops when the path holds both quote characters', () => {
     expect(() => getStylesheet(ctx([`/pkg/o'br"ien`]))).toThrow('both quote characters');
   });
