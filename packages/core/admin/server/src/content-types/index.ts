@@ -11,6 +11,7 @@ import mfaRecoveryCode from './mfa-recovery-code';
 import mfaEvent from './mfa-event';
 import mfaTrustedDevice from './mfa-trusted-device';
 import mfaPasskey from './mfa-passkey';
+import { auditLog } from '../../../ee/server/src/audit-logs/content-types/audit-log';
 
 export default {
   permission: { schema: Permission },
@@ -26,4 +27,7 @@ export default {
   'mfa-event': { schema: mfaEvent },
   'mfa-trusted-device': { schema: mfaTrustedDevice },
   'mfa-passkey': { schema: mfaPasskey },
+  // Registered in every edition, like content releases and review workflows, so audit log data
+  // survives a license change
+  'audit-log': auditLog,
 };

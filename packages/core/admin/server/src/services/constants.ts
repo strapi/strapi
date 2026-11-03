@@ -1,4 +1,5 @@
 import { ContentApiApiToken } from '../../../shared/contracts/api-token';
+import { SUPER_ADMIN_CODE } from '../../../shared/utils/super-admin';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -24,7 +25,7 @@ const PRIVATE_MFA_FIELDS = [
 const constants = {
   PRIVATE_MFA_FIELDS,
   CONTENT_TYPE_SECTION: 'contentTypes',
-  SUPER_ADMIN_CODE: 'strapi-super-admin',
+  SUPER_ADMIN_CODE,
   // Role `name`, `code` and `description` are `string` attributes, stored as varchar(255)
   ROLE_TEXT_MAX_LENGTH: 255,
   EDITOR_CODE: 'strapi-editor',

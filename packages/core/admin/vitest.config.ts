@@ -1,6 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { defineConfig, mergeConfig } from 'vitest/config';
-// @ts-expect-error - Vitest config uses bundler resolution
 import { unitPreset } from 'vitest-config/presets/unit';
 
 export default mergeConfig(
@@ -8,6 +6,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       root: __dirname,
+      setupFiles: ['./vitest.setup.ts'],
     },
   })
 );

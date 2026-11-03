@@ -22,16 +22,16 @@ import { useConfiguration } from '../features/Configuration';
 import { MfaNotices } from '../features/MfaNotices';
 import { useMenu } from '../hooks/useMenu';
 import { useInformationQuery } from '../services/admin';
-import { hashAdminUserEmail } from '../utils/users';
 
 import { useAuthenticatedAccessTracking } from './useAuthenticatedAccessTracking';
+import { useHashedAdminUserId } from './useHashedAdminUserId';
 
 const { version: strapiVersion } = packageInfo;
 
 const AdminLayout = () => {
   const { formatMessage } = useIntl();
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
-  const [userId, setUserId] = React.useState<string>();
+  const userId = useHashedAdminUserId(userInfo);
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
@@ -60,14 +60,6 @@ const AdminLayout = () => {
         });
     }
   }, [showReleaseNotification]);
-
-  React.useEffect(() => {
-    hashAdminUserEmail(userInfo).then((id) => {
-      if (id) {
-        setUserId(id);
-      }
-    });
-  }, [userInfo]);
 
   const {
     isLoading: isLoadingMenu,

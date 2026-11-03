@@ -10,6 +10,7 @@ const config = {
     'coverage/',
     'lint-staged.config.mjs',
     'vitest.config.ts',
+    'vitest.setup.ts',
     // ee/server has no TS eslint project (#26699); back/CJS config can't parse these.
     'ee/server/**/*',
   ],

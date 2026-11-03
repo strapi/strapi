@@ -10,7 +10,7 @@ import auditLogsRoutes from './audit-logs/routes/audit-logs';
 import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
 import { createAuditLogsLifecycleService } from './audit-logs/services/lifecycles';
-import { auditLog } from './audit-logs/content-types/audit-log';
+import { isAuditLogsEnabled as getIsAuditLogsEnabled } from './audit-logs/utils';
 import { AUDIT_LOG_EXPORT_EVENT } from '../../../shared/utils/audit-log-export';
 import { registerTokenAuditEvents } from '../../../server/src/audit-logs/tokens';
 import { registerAdminUserAuditEvents } from '../../../server/src/audit-logs/admin-users';
@@ -18,25 +18,21 @@ import { registerWebhookAuditEvents } from '../../../server/src/audit-logs/webho
 import { registerAuthAuditEvents } from '../../../server/src/audit-logs/auth';
 import { registerMfaAuditEvents } from '../../../server/src/audit-logs/mfa';
 import { registerSsoSettingsAuditEvents } from '../../../server/src/audit-logs/sso-settings';
+import { registerProjectSettingsAuditEvents } from '../../../server/src/audit-logs/project-settings';
 
 const getAdminEE = () => {
   const eeAdmin = {
     register,
     bootstrap,
     destroy,
-    contentTypes: {
-      // Always register the audit-log content type to prevent data loss
-      'audit-log': auditLog,
-      ...adminContentTypes,
-    },
+    // The audit-log content type is registered by the CE admin, in every edition
+    contentTypes: adminContentTypes,
     services,
     controllers,
     routes,
   };
 
-  const isAuditLogsEnabled =
-    strapi.config.get('admin.auditLogs.enabled', true) &&
-    strapi.ee.features.isEnabled('audit-logs');
+  const isAuditLogsEnabled = getIsAuditLogsEnabled(strapi);
   return {
     ...eeAdmin,
     controllers: {
@@ -72,6 +68,7 @@ const getAdminEE = () => {
         registerAuthAuditEvents(auditLogsLifecycle);
         registerMfaAuditEvents(auditLogsLifecycle, { strapi });
         registerSsoSettingsAuditEvents(auditLogsLifecycle);
+        registerProjectSettingsAuditEvents(auditLogsLifecycle);
 
         await auditLogsLifecycle.register();
       }

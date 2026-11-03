@@ -172,7 +172,6 @@ const authService = adminApi
         transformResponse(res: MfaWebauthnLogin.Response) {
           return res.data;
         },
-        invalidatesTags: ['Me'],
       }),
       logout: builder.mutation<void, { deviceId?: string } | void>({
         query: (body) => ({

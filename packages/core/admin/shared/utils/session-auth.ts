@@ -130,7 +130,7 @@ export const getAccessCookieDomain = (): string | undefined => {
 
 export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;
 export const DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN = 14 * 24 * 60 * 60;
-export const DEFAULT_MAX_SESSION_LIFESPAN = 1 * 24 * 60 * 60;
+export const DEFAULT_MAX_SESSION_LIFESPAN = 30 * 24 * 60 * 60;
 export const DEFAULT_IDLE_SESSION_LIFESPAN = 2 * 60 * 60;
 
 export const getRefreshCookieOptions = (secureRequest?: boolean) => {

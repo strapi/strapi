@@ -44,5 +44,6 @@ exports[`content-types:list should output list of content-types 1`] = `
 │ admin::mfa-recovery-code                             │
 │ admin::mfa-event                                     │
 │ admin::mfa-trusted-device                            │
-│ admin::mfa-passkey                                   │"
+│ admin::mfa-passkey                                   │
+│ admin::audit-log                                     │"
 `;

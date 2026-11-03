@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - The webhook runner paragraph describes `contentTypeEvents`. That claim was checked against `webhook-runner.ts` and `webhook-store.ts`. The rest of this page was not re-verified.
+  - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release.ts`. The rest of this page was not re-verified.
 ---
 
 This page follows one write through the server. It explains the layers and the order in which they run. It is not an API reference for the Document Service.
@@ -122,7 +122,7 @@ When a row goes away, through `delete`, `unpublish`, `discardDraft` or the repla
 
 ## Validation
 
-The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. For drafts, it skips `required`, `min`, `minLength` and `regex` checks. When `api.documents.strictRelations` is `true`, it also enforces required relations and media on non-draft writes.
+The entries service calls the entity validator before each insert or update. The validator builds a Yup schema from the content type. It receives `isDraft`, which is `true` when `data.publishedAt` is empty. For drafts, it skips `required`, `min`, `minLength` and `regex` checks. When `api.documents.strictRelations` is `true`, it also enforces required relations and media on non-draft writes. On a non-draft update, a missing required field is accepted because the stored value is kept, but a required field set to `null` is rejected. A component sent without an `id` in a non-draft update is validated as on create, because the entries service creates it.
 
 Database lifecycles run after the entity validator. Data that a `beforeCreate` or `beforeUpdate` subscriber adds is not validated.
 
@@ -156,6 +156,10 @@ When the callback runs, the event manager:
 | `discardDraft` | `entry.draft-discard` per new draft row                                                           |
 
 The webhook runner adds an event hub listener for an event when the first webhook for that event is registered. Registration includes events selected for every content type and events selected for one content type. The listener only adds a job to an in-memory queue with a concurrency of 5. For each job, the runner sends a `POST` to each enabled webhook that the event triggers. An event listed in `events` triggers the webhook for every content type. An event listed only in `contentTypeEvents` triggers it when `info.uid` is that content type. The body is `{ event, createdAt, model, uid, entry }`. The headers are the `server.webhooks.defaultHeaders`, the webhook headers, `X-Strapi-Event` and `Content-Type: application/json`. Each request has a 10-second timeout. The runner does not retry. In the event path, it also does not report failed deliveries: `run()` turns network errors and non-2xx responses into a returned status object, and `executeListener()` does not read that object.
+
+`server.webhooks.deduplicateReleaseWebhooks` defaults to `false`. Set it to `true` to skip `entry.publish` and `entry.unpublish` for a webhook that also lists `releases.publish`, when that event is the release action in progress. The runner matches the content-type UID, `documentId`, locale, and event name. A webhook that does not list `releases.publish` still receives the entry events. Standalone publish, unpublish, and delete events stay as they are. With the option omitted or set to `false`, a release still sends one entry webhook per action and the `releases.publish` webhook.
+
+When the option is `true`, the event manager keeps the request context from the moment the event was scheduled. The commit callback emits the event inside that context, so the runner can still read the release action after the document operation has returned. Content Releases writes that action onto the context only while the option is on.
 
 When a webhook is created or updated, the webhook store rejects events that are not in its allowed list. It checks both `events` and `contentTypeEvents`. Core allows the six `entry.*` events. Plugins add their own events with `addAllowedEvent`. `contentTypeEvents` maps a content-type UID to event names. The store does not keep a per-type event that is already in `events`. A webhook saved before this field existed is read as an empty map.
 
