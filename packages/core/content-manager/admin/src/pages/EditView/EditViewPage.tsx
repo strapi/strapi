@@ -11,7 +11,7 @@ import {
   useIsDesktop,
   useIsMobile,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Tabs, Box } from '@strapi/design-system';
+import { Grid, Tabs, Box, ScrollArea } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -245,7 +245,11 @@ const EditViewPage = () => {
                 </Grid.Item>
                 {isDesktop && (
                   <Grid.Item col={3} direction="column" alignItems="stretch">
-                    <Panels />
+                    <StickyPanels>
+                      <PanelsScrollArea>
+                        <Panels />
+                      </PanelsScrollArea>
+                    </StickyPanels>
                   </Grid.Item>
                 )}
               </Grid.Root>
@@ -273,6 +277,15 @@ const EditViewPage = () => {
 
 const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
+`;
+
+const StickyPanels = styled.div`
+  position: sticky;
+  top: ${({ theme }) => theme.spaces[4]};
+`;
+
+const PanelsScrollArea = styled(ScrollArea)`
+  max-height: calc(100dvh - ${({ theme }) => theme.spaces[8]});
 `;
 
 /**
