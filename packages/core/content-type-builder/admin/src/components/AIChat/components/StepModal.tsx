@@ -52,6 +52,11 @@ interface StepModalProps {
   children: ReactNode;
   onComplete?: () => void;
   onCancel?: () => void;
+  /**
+   * Unsaved state owned by the component rendering the StepModal. Steps can also
+   * register their own with `useUnsavedChangesModalDirty`.
+   */
+  hasUnsavedChanges?: boolean;
 }
 
 interface StepProps {
@@ -71,6 +76,7 @@ const StepModal = ({
   children,
   onComplete,
   onCancel,
+  hasUnsavedChanges,
 }: StepModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -183,7 +189,7 @@ const StepModal = ({
   return (
     <StepModalContext.Provider value={contextValue}>
       {open && (
-        <UnsavedChangesModal open onOpenChange={handleCancel}>
+        <UnsavedChangesModal open onOpenChange={handleCancel} hasUnsavedChanges={hasUnsavedChanges}>
           <Modal.Content>
             <Modal.Header>
               <Typography variant="omega" fontWeight="bold">
