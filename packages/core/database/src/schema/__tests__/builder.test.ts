@@ -33,6 +33,8 @@ describe('schema builder', () => {
       'articles_author_id_fk',
     ]);
     expect(dropTableIfExists).toHaveBeenCalledWith('articles');
-    expect(raw.mock.calls.flat()).not.toContainEqual(expect.stringMatching(/DROP TABLE .* CASCADE/i));
+    expect(raw.mock.calls.flat()).not.toContainEqual(
+      expect.stringMatching(/DROP TABLE .* CASCADE/i)
+    );
   });
 });

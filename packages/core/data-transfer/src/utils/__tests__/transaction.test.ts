@@ -8,7 +8,9 @@ describe('createTransaction', () => {
     });
     const strapi = {
       db: {
-        transaction: async (callback: (params: { trx: object; rollback: () => Promise<void> }) => void) => {
+        transaction: async (
+          callback: (params: { trx: object; rollback: () => Promise<void> }) => void
+        ) => {
           await callback({ trx: {}, rollback: async () => {} });
           await transactionSettled;
         },
