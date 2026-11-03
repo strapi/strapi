@@ -16,22 +16,24 @@ describe('ConfirmDowngradeDialog', () => {
     renderDialog();
 
     expect(
-      screen.getByRole('dialog', { name: 'Confirm lowering two-factor requirements' })
+      screen.getByRole('dialog', { name: 'Lower two-factor requirements?' })
     ).toBeInTheDocument();
+    expect(screen.getByText('Confirm your password and a code to continue.')).toBeInTheDocument();
     expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
     expect(screen.getByLabelText('Authentication code*')).toHaveAttribute(
       'autocomplete',
       'one-time-code'
     );
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Lower requirements' })).toBeDisabled();
   });
 
   it('asks for the password only when the caller is not enrolled', async () => {
     const { user, onConfirm } = renderDialog({ requiresCode: false });
 
     expect(screen.queryByLabelText('Authentication code*')).not.toBeInTheDocument();
+    expect(screen.getByText('Confirm your password to continue.')).toBeInTheDocument();
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Lower requirements' }));
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalledWith({ password: 'Testing123!' }));
   });
@@ -41,7 +43,7 @@ describe('ConfirmDowngradeDialog', () => {
 
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.type(screen.getByLabelText('Authentication code*'), ' 123456 ');
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Lower requirements' }));
 
     await waitFor(() =>
       expect(onConfirm).toHaveBeenCalledWith({ password: 'Testing123!', code: '123456' })
@@ -54,7 +56,7 @@ describe('ConfirmDowngradeDialog', () => {
 
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.type(screen.getByLabelText('Authentication code*'), '000000');
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Lower requirements' }));
 
     // The design system's permanent `#live-region-alert` node always carries `role="alert"`, even
     // empty, so a bare `findByRole('alert')` query resolves to it immediately instead of waiting
@@ -66,15 +68,15 @@ describe('ConfirmDowngradeDialog', () => {
     expect(screen.getByLabelText('Current password*')).toHaveValue('Testing123!');
   });
 
-  it('keeps the Confirm button disabled until the password and a 6+ character code are present', async () => {
+  it('keeps the confirm button disabled until the password and a 6+ character code are present', async () => {
     const { user } = renderDialog();
 
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Lower requirements' })).toBeDisabled();
     await user.type(screen.getByLabelText('Authentication code*'), '12345');
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Lower requirements' })).toBeDisabled();
     await user.type(screen.getByLabelText('Authentication code*'), '6');
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Lower requirements' })).toBeEnabled();
   });
 
   it('does not submit twice for one click and Enter racing each other', async () => {
@@ -84,8 +86,8 @@ describe('ConfirmDowngradeDialog', () => {
 
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
-    fireEvent.submit(screen.getByRole('button', { name: 'Confirm' }).closest('form')!);
+    fireEvent.click(screen.getByRole('button', { name: 'Lower requirements' }));
+    fireEvent.submit(screen.getByRole('button', { name: 'Lower requirements' }).closest('form')!);
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     resolve(undefined);
@@ -100,32 +102,31 @@ describe('ConfirmDowngradeDialog', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('renders the caller-supplied title and description instead of the defaults', () => {
+  it('renders the caller-supplied title, description and button instead of the defaults', () => {
     renderDialog({
       title: 'Turn passkeys off?',
-      description: 'Turning passkeys off deletes every passkey your users have registered.',
+      description: 'This deletes all 4 passkeys your users registered. This cannot be undone.',
+      confirmLabel: 'Turn off',
     });
 
     expect(screen.getByRole('dialog', { name: 'Turn passkeys off?' })).toBeInTheDocument();
     expect(
-      screen.getByText('Turning passkeys off deletes every passkey your users have registered.')
+      screen.getByText('This deletes all 4 passkeys your users registered. This cannot be undone.')
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText(/This change makes two-factor authentication less strict/)
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Turn off' })).toBeInTheDocument();
     // the credential fields are unaffected by the copy override
     expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
     expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
   });
 
-  it('keeps the default copy when neither prop is given', () => {
-    renderDialog();
+  /** An SSO-only administrator turning passkeys off: the server asks them for nothing. */
+  it('confirms without credential fields when no password is required', async () => {
+    const { onConfirm } = renderDialog({ requiresPassword: false, confirmLabel: 'Turn off' });
 
-    expect(
-      screen.getByRole('dialog', { name: 'Confirm lowering two-factor requirements' })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/^This change makes two-factor authentication less strict/)
-    ).toBeInTheDocument();
+    expect(screen.queryByLabelText('Current password*')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Confirm your password/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Turn off' }));
+
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledWith(undefined));
   });
 });

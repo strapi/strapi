@@ -204,8 +204,10 @@ a dialog they cannot complete.
 ## What the UI shows
 
 - **Settings > Security** (`pages/Settings/pages/Security/SecurityPage.tsx`): one card per policy
-  object, saving through `useSecuritySettingsSave`, which routes any downgrade through
-  `ConfirmDowngradeDialog`
+  object and one Save in the page header. The page owns one draft of all three objects, and
+  `useSecuritySettingsSave` sends only the changed ones in a single `PUT`. A raise shows its impact
+  dialog first; any downgrade in the save (one or several kinds) then opens one
+  `ConfirmDowngradeDialog`. Leaving the page with unsaved changes asks for confirmation
 - **Settings > Users**, list: a two-factor column (enrolled, grace, locked), shown to holders of
   `admin::users.update` while the flag is on
 - **Settings > Users**, per user (`pages/Settings/pages/Users/components/TwoFactorPanel.tsx`):
