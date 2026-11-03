@@ -337,6 +337,8 @@ const useReleasesFilterOptions = (): Filters.Filter[] => {
  * -----------------------------------------------------------------------------------------------*/
 
 const DEFAULT_SORT = 'scheduledAt:asc';
+// The first of the admin's page sizes
+const DEFAULT_PAGE_SIZE = 10;
 
 // The API lists unscheduled releases last in either schedule order
 const SORT_OPTIONS = [
@@ -575,7 +577,7 @@ const ReleasesPage = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams & Filters.Query>();
   // Only the filters the page controls: old links can still carry the filters of the removed tabs
-  const { page, pageSize, sort = DEFAULT_SORT } = query;
+  const { page, pageSize = DEFAULT_PAGE_SIZE, sort = DEFAULT_SORT } = query;
   // A hand-edited URL can make `$and` a string or an object
   const appliedFilters = Array.isArray(query.filters?.$and) ? query.filters.$and : [];
   const hasFilters = appliedFilters.length > 0;
@@ -772,7 +774,7 @@ const ReleasesPage = () => {
                   onClearFilters={clearFilters}
                 />
                 <Pagination.Root {...meta?.pagination} defaultPageSize={meta?.pagination?.pageSize}>
-                  <Pagination.PageSize options={['8', '16', '32', '64']} />
+                  <Pagination.PageSize />
                   <Pagination.Links />
                 </Pagination.Root>
               </Flex>
