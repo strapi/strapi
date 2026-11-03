@@ -8,7 +8,8 @@ export const DEFAULT_RETENTION_DAYS = 90;
  * Events audited before the payload standard; their stored shape is frozen for
  * compatibility. Do not add events here: new events come through registerEvent().
  * The event hub still emits user.create, user.update and user.delete; the audit log
- * records them as admin-user.* (server/src/audit-logs/admin-users.ts).
+ * records them as admin-user.* (server/src/audit-logs/admin-users.ts). The upload
+ * plugin registers media.* and media-folder.* itself (upload/server/src/audit-logs.ts).
  * TODO: migrate the rest to the standard.
  */
 const defaultEvents = [
@@ -17,12 +18,6 @@ const defaultEvents = [
   'entry.delete',
   'entry.publish',
   'entry.unpublish',
-  'media.create',
-  'media.update',
-  'media.delete',
-  'media-folder.create',
-  'media-folder.update',
-  'media-folder.delete',
   'admin.auth.success',
   'admin.logout',
   'content-type.create',
@@ -69,6 +64,11 @@ export interface RegisterEventOptions {
    * event out of the audit log. Listeners on the event hub still receive it.
    */
   shouldRecord?: (...args: any[]) => boolean;
+  /**
+   * The action stored in the row, when it is not the event name. For an event recorded
+   * under a name the event hub already uses for another event, such as a webhook event.
+   */
+  action?: string;
 }
 
 const getEventMap = (events: string[]) => {
@@ -217,6 +217,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     }
 
     const actor = getActor(systemOrigin, user);
+    const action = options.action ?? name;
 
     let shape: Modules.AuditLogs.EventShape | null = null;
 
@@ -236,10 +237,10 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       ...rest
     } = (shape ?? {}) as Record<string, unknown>;
     const payload = shape
-      ? ({ action: name, date, actor, origin, ...rest } as Modules.AuditLogs.StoredPayload)
-      : { action: name, date, actor, origin };
+      ? ({ action, date, actor, origin, ...rest } as Modules.AuditLogs.StoredPayload)
+      : { action, date, actor, origin };
 
-    return { action: name, date, payload, userId };
+    return { action, date, payload, userId };
   };
 
   const handleEvent = async (name: string, ...args: any) => {

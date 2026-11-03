@@ -59,11 +59,18 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
      * so this is executed after that transaction is committed.
      */
     emitEvent(eventName: EventName, entry: Modules.Documents.AnyDocument) {
+      const context =
+        strapi.config.get<boolean>('server.webhooks.deduplicateReleaseWebhooks', false) === true
+          ? strapi.requestContext.get()
+          : undefined;
       strapi.db.transaction(({ onCommit }) => {
         // The transaction runner discards the callback result, so a failure here
         // (e.g. the re-read of the entry) would be an unhandled rejection.
         onCommit(() =>
-          emitEvent(eventName, entry).catch((error) => {
+          (context
+            ? strapi.requestContext.run(context, () => emitEvent(eventName, entry))
+            : emitEvent(eventName, entry)
+          ).catch((error) => {
             strapi.log.error(`Could not emit ${eventName} for ${uid}: ${error?.message ?? error}`);
           })
         );

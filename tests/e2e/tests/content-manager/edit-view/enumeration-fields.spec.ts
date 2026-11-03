@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../../utils/login';
+import { loginWithApi } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
 import { navToHeader, findAndClose, clickAndWait } from '../../../../utils/shared';
 import { waitForRestart } from '../../../../utils/restart';
@@ -7,8 +7,8 @@ import { waitForRestart } from '../../../../utils/restart';
 test.describe('Edit View - Enumeration Fields Testing', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('should test enumeration fields - required vs non-required behavior', async ({ page }) => {

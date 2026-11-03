@@ -73,6 +73,16 @@ export type ScalarValues = GetValue<
 >;
 
 /**
+ * Repeatable components and dynamic zones are validated as required, so they reject null
+ */
+export type NullableInput<TAttribute extends Schema.Attribute.Attribute> =
+  TAttribute extends Schema.Attribute.DynamicZone
+    ? never
+    : TAttribute extends Schema.Attribute.Component<UID.Component, true>
+      ? never
+      : null;
+
+/**
  * Attribute.GetValues override with extended values
  */
 export type GetValues<TSchemaUID extends UID.Schema> = {
@@ -81,9 +91,9 @@ export type GetValues<TSchemaUID extends UID.Schema> = {
 } & OmitRelationsWithoutTarget<
   TSchemaUID,
   {
-    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: GetValue<
-      Schema.AttributeByName<TSchemaUID, TKey>
-    >;
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?:
+      | GetValue<Schema.AttributeByName<TSchemaUID, TKey>>
+      | NullableInput<Schema.AttributeByName<TSchemaUID, TKey>>;
   } & {
     [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: GetValue<
       Schema.AttributeByName<TSchemaUID, TKey>

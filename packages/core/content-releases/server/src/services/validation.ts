@@ -2,6 +2,7 @@ import { errors, contentTypes } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
+import { getMaximumReleases } from '../../../shared/license';
 import { RELEASE_MODEL_UID } from '../constants';
 
 export class AlreadyOnReleaseError extends errors.ApplicationError<'AlreadyOnReleaseError'> {
@@ -67,11 +68,11 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
     }
   },
   async validatePendingReleasesLimit() {
-    // Use the maximum releases option if it exists, otherwise default to 3
     const featureCfg = strapi.ee.features.get('cms-content-releases');
 
-    const maximumPendingReleases =
-      (typeof featureCfg === 'object' && featureCfg?.options?.maximumReleases) || 3;
+    const maximumPendingReleases = getMaximumReleases(
+      typeof featureCfg === 'object' ? featureCfg?.options?.maximumReleases : undefined
+    );
 
     const [, pendingReleasesCount] = await strapi.db.query(RELEASE_MODEL_UID).findWithCount({
       filters: {
