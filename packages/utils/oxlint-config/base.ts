@@ -56,7 +56,8 @@ export const base = {
               'lodash/entries',
               'lodash/entries.js',
             ],
-            message: 'Use native Object.keys / Object.values / Object.entries instead.',
+            message:
+              'Use native Object.keys / Object.values / Object.entries instead. They throw on null/undefined, so guard nullish input (e.g. `?? {}`).',
           },
           {
             group: [
@@ -68,21 +69,25 @@ export const base = {
               'lodash/find.js',
             ],
             message:
-              'Use native Array.prototype.concat (or an array spread), filter or find instead.',
+              'Use native Array.prototype.concat (or an array spread), filter or find instead. They need an array and a callback: guard nullish input and replace object or shorthand forms such as `{ id }`.',
           },
         ],
         paths: [
           {
             name: 'lodash',
-            importNames: ['isArray', 'forEach', 'each'],
+            importNames: [
+              'isArray',
+              'forEach',
+              'each',
+              'keys',
+              'values',
+              'entries',
+              'concat',
+              'filter',
+              'find',
+            ],
             message:
-              'Use native Array.isArray, Array.prototype.forEach or Object.entries / Object.values instead.',
-          },
-          {
-            name: 'lodash',
-            importNames: ['keys', 'values', 'entries', 'concat', 'filter', 'find'],
-            message:
-              'Use native Object.keys / Object.values / Object.entries or Array.prototype.concat / filter / find instead.',
+              'Use native Array.isArray, Array.prototype.forEach / concat / filter / find or Object.keys / Object.values / Object.entries instead. The native methods throw on null/undefined and do not accept object or shorthand forms such as `{ id }`, so guard nullish input.',
           },
         ],
       },
