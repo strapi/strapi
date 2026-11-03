@@ -81,9 +81,9 @@ test.describe('Trusted devices', () => {
     await page.getByRole('button', { name: 'Revoke trust' }).click();
     await page
       .getByRole('alertdialog', { name: 'Revoke this device?' })
-      .getByRole('button', { name: 'Confirm' })
+      .getByRole('button', { name: 'Revoke' })
       .click();
-    await expect(page.getByText('Device no longer trusted')).toBeVisible();
+    await expect(page.getByText('Device revoked.')).toBeVisible();
     await expect(page.getByText(/^No trusted devices\./)).toBeVisible();
     expect(
       (await context.cookies()).find((cookie) => cookie.name === TRUST_COOKIE)
@@ -127,9 +127,9 @@ test.describe('Trusted devices', () => {
     await page.getByRole('button', { name: 'Revoke trusted devices' }).click();
     await page
       .getByRole('alertdialog', { name: "Revoke this user's trusted devices?" })
-      .getByRole('button', { name: 'Confirm' })
+      .getByRole('button', { name: 'Revoke' })
       .click();
-    await expect(page.getByText('Trusted devices revoked')).toBeVisible();
+    await expect(page.getByText('Trusted devices revoked.')).toBeVisible();
     await expect(page.getByText('No trusted devices')).toBeVisible();
 
     // 3. The editor's browser, trust cookie and all, is challenged again.

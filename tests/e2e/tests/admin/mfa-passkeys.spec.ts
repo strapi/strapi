@@ -50,7 +50,7 @@ const addPasskey = async (page: Page, name: string, secret: string) => {
   await dialog.getByLabel('Authentication code*').fill(totpFor(secret));
   await dialog.getByRole('button', { name: 'Add passkey' }).click();
   await dialog.waitFor({ state: 'hidden' });
-  await expect(page.getByText('Passkey added')).toBeVisible();
+  await expect(page.getByText('Passkey added.')).toBeVisible();
 };
 
 test.describe('Passkeys', () => {
@@ -103,7 +103,7 @@ test.describe('Passkeys', () => {
     await removeDialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
     await removeDialog.getByLabel('Authentication code*').fill(admin.recoveryCodes[0]);
     await removeDialog.getByRole('button', { name: 'Remove' }).click();
-    await expect(page.getByText('Passkey removed')).toBeVisible();
+    await expect(page.getByText('Passkey removed.')).toBeVisible();
     await expect(page.getByText(/^No passkeys\./)).toBeVisible();
 
     await context.clearCookies();

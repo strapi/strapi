@@ -38,7 +38,7 @@ export const enrolViaUi = async (page: Page, password: string) => {
   await codesLocator.first().waitFor();
   const recoveryCodes = await codesLocator.allTextContents();
   await codesDialog.getByRole('checkbox', { name: /saved these codes/i }).check();
-  await codesDialog.getByRole('button', { name: 'I have saved my recovery codes' }).click();
+  await codesDialog.getByRole('button', { name: 'Done' }).click();
   await codesDialog.waitFor({ state: 'hidden' });
 
   return { secret, recoveryCodes: recoveryCodes.map((c) => c.trim()) };

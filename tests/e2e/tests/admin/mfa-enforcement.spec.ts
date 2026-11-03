@@ -102,10 +102,12 @@ test.describe('Two-factor enforcement', () => {
     await page.getByRole('button', { name: 'Unlock' }).click();
     await page
       .getByRole('alertdialog', { name: 'Unlock this account?' })
-      .getByRole('button', { name: 'Confirm' })
+      .getByRole('button', { name: 'Unlock' })
       .click();
-    await expect(page.getByText('Account unlocked')).toBeVisible();
-    await expect(page.getByText('Not enrolled', { exact: true })).toBeVisible();
+    await expect(page.getByText('Account unlocked.')).toBeVisible();
+    await expect(
+      page.getByText(/^Not set up\. A new \d+-day grace period starts at their next login\.$/)
+    ).toBeVisible();
 
     // 5. The editor logs in again (fresh grace), enrols, and the banner goes away.
     await context.clearCookies();
@@ -137,7 +139,7 @@ test.describe('Two-factor enforcement', () => {
     await codes.first().waitFor();
     expect(await codes.count()).toBe(10);
     await codesDialog.getByRole('checkbox', { name: /saved these codes/i }).check();
-    await codesDialog.getByRole('button', { name: 'I have saved my recovery codes' }).click();
+    await codesDialog.getByRole('button', { name: 'Done' }).click();
     await codesDialog.waitFor({ state: 'hidden' });
     await expect(page.getByText(/Your authenticator app was replaced/)).toBeVisible();
   });
