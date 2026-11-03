@@ -1069,12 +1069,10 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               >
                 <Flex tag="span" gap={2}>
                   {formatMessage(label)}
-                  {count !== undefined &&
-                    (value === activeTab ? (
-                      <InlineBadge active>{count}</InlineBadge>
-                    ) : (
-                      <Typography textColor="neutral600">{count}</Typography>
-                    ))}
+                  {/* The same badge on every tab: the count keeps its size when its tab is picked */}
+                  {count !== undefined && (
+                    <InlineBadge active={value === activeTab}>{count}</InlineBadge>
+                  )}
                 </Flex>
               </Tabs.Trigger>
             ))}
