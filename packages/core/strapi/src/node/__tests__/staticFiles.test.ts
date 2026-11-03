@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+import { getSubpathEntries } from '../core/admin-vite-aliases';
 import { getEntryModule, getStylesheet, writeStaticClientFiles } from '../staticFiles';
 
 import type { BuildContext } from '../create-build-context';
@@ -13,10 +14,10 @@ jest.mock('prettier', () => ({ format: async (source: string) => source }));
 const sourceTarget = '/fixture/@strapi/design-system/src/next/source.css';
 
 jest.mock('../core/admin-vite-aliases', () => ({
-  getSubpathEntries: () => [
+  getSubpathEntries: jest.fn(() => [
     ['@strapi/design-system', '/fixture/@strapi/design-system/dist/index.mjs'],
     ['@strapi/design-system/next/source.css', sourceTarget],
-  ],
+  ]),
 }));
 
 describe('getStylesheet', () => {
@@ -74,6 +75,19 @@ describe('getStylesheet', () => {
 
   test('stops when the path holds both quote characters', () => {
     expect(() => getStylesheet(ctx([`/pkg/o'br"ien`]))).toThrow('both quote characters');
+  });
+
+  test('tells the user to update Strapi when the design system has no next source', () => {
+    // A design system older than 2.3.0 exports no next entry
+    jest
+      .mocked(getSubpathEntries)
+      .mockReturnValueOnce([
+        ['@strapi/design-system', '/fixture/@strapi/design-system/dist/index.mjs'],
+      ]);
+
+    expect(() => getStylesheet(ctx([]))).toThrow(
+      /@strapi\/design-system\/next\/source\.css.*Update @strapi\/strapi/
+    );
   });
 });
 
