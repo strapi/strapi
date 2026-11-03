@@ -1,4 +1,5 @@
-export const RELEASE_CONDITIONS = ['allow_partial', 'all_or_nothing'] as const;
+// The default first: the forms and filters list the modes in this order
+export const RELEASE_CONDITIONS = ['all_or_nothing', 'allow_partial'] as const;
 export type ReleaseCondition = (typeof RELEASE_CONDITIONS)[number];
 export const DEFAULT_RELEASE_CONDITION = 'all_or_nothing' satisfies ReleaseCondition;
 

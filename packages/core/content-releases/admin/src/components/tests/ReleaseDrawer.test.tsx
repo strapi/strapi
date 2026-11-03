@@ -110,6 +110,18 @@ describe('ReleaseDrawer', () => {
     expect(await screen.findByRole('combobox', { name: 'Date' })).toHaveValue('');
   });
 
+  it('lists the default release mode first', async () => {
+    renderDrawer({ initialValues: NEW_RELEASE });
+
+    const modes = await screen.findAllByRole('radio');
+
+    expect(modes).toEqual([
+      screen.getByRole('radio', { name: 'Require every entry to be ready' }),
+      screen.getByRole('radio', { name: 'Release all ready items' }),
+    ]);
+    expect(modes[0]).toBeChecked();
+  });
+
   it('submits the schedule in UTC with the timezone name', async () => {
     const onSubmit = jest.fn();
     renderDrawer({ onSubmit });
