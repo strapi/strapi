@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { login as loginFunc } from './login';
+import { loginWithApi } from './login';
 import { resetFiles as resetFilesFunc } from './file-reset';
 import {
   resetDatabaseAndImportDataFromPath,
@@ -80,10 +80,11 @@ export const sharedSetup = async (
     }
   }
 
-  // This part always runs, regardless of setup being initialized
+  // This part always runs, regardless of setup being initialized. The login runs after any reset
+  // above: a reset replaces the admin users, which ends earlier sessions.
   if (login) {
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await loginFunc({ page });
   }
 
   if (firstRun) {

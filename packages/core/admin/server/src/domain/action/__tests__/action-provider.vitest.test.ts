@@ -15,6 +15,7 @@ const providerMethods = [
   'has',
   'size',
   'clear',
+  'lock',
   'unstable_aliases',
 ];
 
@@ -83,6 +84,52 @@ describe('Action Provider', () => {
         await expect(register()).rejects.toThrowError(
           `You can't register new actions outside of the bootstrap function.`
         );
+      });
+
+      test(`Can't register an action once the provider is locked`, async () => {
+        const attributes = {
+          section: 'settings',
+          displayName: 'Foo bar',
+          uid: 'foo',
+          pluginName: 'bar',
+          category: 'category',
+          subCategory: 'subcategory',
+        };
+
+        const actionProvider = createActionProvider();
+
+        actionProvider.lock();
+
+        await expect(actionProvider.register(attributes)).rejects.toThrowError(
+          `You can't register new actions once the admin cleaned the stored permissions.`
+        );
+        await expect(actionProvider.registerMany([attributes])).rejects.toThrowError(
+          `You can't register new actions once the admin cleaned the stored permissions.`
+        );
+        expect(actionProvider.size()).toBe(0);
+      });
+
+      test('Can register an action again once the locked provider is cleared', async () => {
+        const attributes = {
+          section: 'settings',
+          displayName: 'Foo bar',
+          uid: 'foo',
+          pluginName: 'bar',
+          category: 'category',
+          subCategory: 'subcategory',
+        };
+
+        const actionProvider = createActionProvider();
+
+        await actionProvider.register(attributes);
+        actionProvider.lock();
+        await actionProvider.clear();
+
+        expect(actionProvider.size()).toBe(0);
+
+        await actionProvider.register(attributes);
+
+        expect(actionProvider.has(domain.computeActionId(attributes))).toBe(true);
       });
 
       test(`Can't register an action with unknown attribute`, async () => {
@@ -175,6 +222,68 @@ describe('Action Provider', () => {
         const registerAll = () => actionProvider.registerMany(attributes);
 
         await expect(registerAll()).rejects.toThrowError();
+        expect(actionProvider.size()).toBe(0);
+      });
+
+      test(`If the same action appears twice in the array, don't register any of them`, async () => {
+        const createAction = (uid: string) => ({
+          section: 'settings',
+          displayName: uid,
+          category: 'category',
+          uid,
+        });
+
+        const actionProvider = createActionProvider();
+        const registerAll = () =>
+          actionProvider.registerMany([
+            createAction('dup.a'),
+            createAction('dup.b'),
+            createAction('dup.a'),
+            createAction('dup.c'),
+          ]);
+
+        await expect(registerAll()).rejects.toThrowError('Duplicated item key: api::dup.a');
+        expect(actionProvider.size()).toBe(0);
+      });
+
+      test(`If one action is already registered, don't register the others`, async () => {
+        const createAction = (uid: string) => ({
+          section: 'settings',
+          displayName: uid,
+          category: 'category',
+          uid,
+        });
+
+        const actionProvider = createActionProvider();
+        await actionProvider.register(createAction('dup.b'));
+
+        const willRegister = vi.fn();
+        actionProvider.hooks.willRegister.register(willRegister);
+
+        const registerAll = () =>
+          actionProvider.registerMany([
+            createAction('dup.a'),
+            createAction('dup.b'),
+            createAction('dup.c'),
+          ]);
+
+        await expect(registerAll()).rejects.toThrowError('Duplicated item key: api::dup.b');
+        expect(actionProvider.keys()).toStrictEqual(['api::dup.b']);
+        expect(willRegister).not.toHaveBeenCalled();
+      });
+
+      test(`Can't register many actions if strapi is loaded`, async () => {
+        global.strapi.isLoaded = true;
+
+        const actionProvider = createActionProvider();
+        const registerAll = () =>
+          actionProvider.registerMany([
+            { section: 'settings', displayName: 'Foo', category: 'category', uid: 'foo' },
+          ]);
+
+        await expect(registerAll()).rejects.toThrowError(
+          `You can't register new actions outside of the bootstrap function.`
+        );
         expect(actionProvider.size()).toBe(0);
       });
 

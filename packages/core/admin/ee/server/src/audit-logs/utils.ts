@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+
 interface AdminUserLike {
   username?: string | null;
   firstname?: string | null;
@@ -18,4 +20,13 @@ const getDisplayName = (user: AdminUserLike): string => {
   return user.email;
 };
 
-export { getDisplayName };
+/**
+ * Audit logs run when the license includes the feature and the admin config does not disable them.
+ * Routes, services and permission actions all follow this condition.
+ */
+const isAuditLogsEnabled = (strapi: Core.Strapi): boolean =>
+  Boolean(
+    strapi.config.get('admin.auditLogs.enabled', true) && strapi.ee.features.isEnabled('audit-logs')
+  );
+
+export { getDisplayName, isAuditLogsEnabled };
