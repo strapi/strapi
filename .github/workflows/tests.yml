@@ -313,8 +313,9 @@ jobs:
       options: --ipc=host --init
       # The image has no zstd, so actions/cache falls back to gzip there. A gzip cache is a
       # different cache version, so these jobs missed every cache the build job saves with
-      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd works in the image
-      # (both are Ubuntu 24.04); actions/cache also calls it as unzstd and zstdmt.
+      # zstd and rebuilt the monorepo (about 5 min each). The runner's zstd runs in the image: it
+      # only links libc, zlib, liblzma, liblz4 and libxxhash, which the image's Ubuntu base has.
+      # actions/cache also calls it as unzstd and zstdmt.
       volumes:
         - /usr/bin/zstd:/usr/local/bin/zstd:ro
         - /usr/bin/zstd:/usr/local/bin/unzstd:ro
