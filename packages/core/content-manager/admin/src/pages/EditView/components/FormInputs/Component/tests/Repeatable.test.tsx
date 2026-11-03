@@ -74,7 +74,10 @@ describe('RepeatableComponent', () => {
     children: () => 'INPUTS',
   } satisfies RepeatableComponentProps;
 
-  const render = (initialFormValues: Record<string, unknown>) =>
+  const render = (
+    initialFormValues: Record<string, unknown>,
+    initialErrors?: Record<string, unknown>
+  ) =>
     renderRTL(
       <ComponentProvider level={0} type="component">
         <RepeatableComponent {...defaultProps} />
@@ -86,7 +89,12 @@ describe('RepeatableComponent', () => {
               <Route
                 path="/content-manager/:collectionType/:slug/:id"
                 element={
-                  <Form initialValues={initialFormValues} method="POST" onSubmit={jest.fn()}>
+                  <Form
+                    initialValues={initialFormValues}
+                    initialErrors={initialErrors}
+                    method="POST"
+                    onSubmit={jest.fn()}
+                  >
                     {children}
                   </Form>
                 }
@@ -122,5 +130,31 @@ describe('RepeatableComponent', () => {
 
     expect(screen.getByRole('button', { name: 'Entry one' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Add an entry/i })).toBeInTheDocument();
+  });
+
+  it('opens an item that has an error, not the first item, when several items have errors', async () => {
+    render(
+      {
+        [FIELD_NAME]: [
+          { __temp_key__: 'a0', name: 'Entry one' },
+          { __temp_key__: 'a1', name: 'Entry two' },
+          { __temp_key__: 'a2', name: 'Entry three' },
+        ],
+      },
+      {
+        // Mirrors what `setIn` produces for errors on items 2 and 3: the
+        // array clone fills the first slot with `undefined`.
+        [FIELD_NAME]: [undefined, { name: 'Invalid' }, { name: 'Invalid' }],
+      }
+    );
+
+    expect(await screen.findByRole('button', { name: 'Entry two' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Entry one' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
   });
 });
