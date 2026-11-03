@@ -33,6 +33,8 @@ packages/core/content-releases/server/src/content-types/release/schema.ts
 
 Th `Release Action` content type is associated with any entry from any content-type that has draft and publish enabled. It is responsible for storing the action to perform for an associated entry. It is saved in the database as `strapi_release_actions`. In v4, we used built-in polymorphic relations, but for v5, we stored `contentType`, `locale`, and `entryDocumentId` in the Release Action schema to create a "manual" relationship between actions and entries. This approach allows us to link a release action to a document ID instead of a specific entry ID, as the entry ID may change over time and is not reliable.
 
+Only an action of a localized content type has a `locale`. The Content Manager sends the locale of its URL whatever the content type, so adding an action drops it for a content type that isn't localized, before the "already in the release" check: such an entry has one version, whatever the locale. Listing a release's actions (`groupActions`) also shows no locale for those content types, for actions stored before.
+
 The schema can be found in:
 
 ```
