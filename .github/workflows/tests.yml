@@ -519,7 +519,10 @@ jobs:
         run: exit 1
 
   e2e_ee:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    # Needs the licence secret. On pull requests only local branches have it (is_local, which is
+    # false on every other event), so pushes always run. A fork PR would otherwise run these
+    # jobs as the Community Edition.
+    if: (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true') && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true')
     timeout-minutes: 60
     needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -772,7 +775,9 @@ jobs:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    # Needs the licence secret. On pull requests only local branches have it (is_local, which is
+    # false on every other event), so pushes always run.
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -816,7 +821,9 @@ jobs:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    # Needs the licence secret. On pull requests only local branches have it (is_local, which is
+    # false on every other event), so pushes always run.
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -859,7 +866,9 @@ jobs:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     needs: [conditions, build]
     name: '[EE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    # Needs the licence secret. On pull requests only local branches have it (is_local, which is
+    # false on every other event), so pushes always run.
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && (github.event_name != 'pull_request' || needs.conditions.outputs.is_local == 'true')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
