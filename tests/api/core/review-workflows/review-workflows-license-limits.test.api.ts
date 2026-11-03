@@ -6,6 +6,7 @@ import { describeOnCondition } from 'api-tests/utils';
 
 import {
   ERRORS,
+  STAGE_MODEL_UID,
   WORKFLOW_MODEL_UID,
 } from '../../../../packages/core/review-workflows/server/src/constants/workflows';
 
@@ -58,6 +59,10 @@ describeOnCondition(edition === 'EE')('Review workflows license limits', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({ register: withReviewWorkflowsLimits });
     rq = await createAuthRequest({ strapi });
+
+    // The test DB is shared across the review workflows API files: start from zero workflows
+    await strapi.db.query(STAGE_MODEL_UID).deleteMany({});
+    await strapi.db.query(WORKFLOW_MODEL_UID).deleteMany({});
   });
 
   afterAll(async () => {
@@ -76,10 +81,7 @@ describeOnCondition(edition === 'EE')('Review workflows license limits', () => {
   });
 
   test('It rejects a workflow above the license workflow limit', async () => {
-    const existingCount = await strapi.db.query(WORKFLOW_MODEL_UID).count();
-    expect(existingCount).toBeLessThan(LICENSE_LIMITS.numberOfWorkflows);
-
-    for (let index = existingCount; index < LICENSE_LIMITS.numberOfWorkflows; index += 1) {
+    for (let index = 0; index < LICENSE_LIMITS.numberOfWorkflows; index += 1) {
       const res = await createWorkflow(`within-limit-${index}`);
       expect(res.status).toBe(201);
     }
