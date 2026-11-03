@@ -511,6 +511,28 @@ describe('Release details tabs, header and rows', () => {
     await waitFor(() => expect(actionsRequest).toHaveBeenLastCalledWith('notReady'));
   });
 
+  it('shows only the empty state for a tab without entries', async () => {
+    server.use(
+      http.get('/content-releases/:releaseId', () => HttpResponse.json({ data: plannedRelease })),
+      // The API counts no page for no entries
+      http.get('/content-releases/:releaseId/actions', () =>
+        HttpResponse.json({
+          data: [],
+          meta: {
+            pagination: { page: 1, pageSize: 10, total: 0, pageCount: 0 },
+            contentTypes: {},
+            components: {},
+          },
+        })
+      )
+    );
+
+    renderPage();
+
+    expect(await screen.findByText('No entries to show here.')).toBeInTheDocument();
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
+  });
+
   it('disables Publish on a blocked release', async () => {
     mockRelease(plannedRelease, [action(1)]);
 

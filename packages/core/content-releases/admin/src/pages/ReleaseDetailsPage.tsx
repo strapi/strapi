@@ -1263,7 +1263,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             </Table.Root>
           </Flex>
         ))}
-        {releaseMeta?.pagination?.pageCount && releaseMeta.pagination.pageCount > 1 && (
+        {(releaseMeta?.pagination?.pageCount ?? 0) > 1 && (
           <Pagination.Root
             {...releaseMeta?.pagination}
             defaultPageSize={releaseMeta?.pagination?.pageSize}
