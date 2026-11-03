@@ -79,9 +79,9 @@ describe('Users | ListPage', () => {
 
     await screen.findByText('Was');
     expect(screen.getByText('Two-factor')).toBeInTheDocument();
-    expect(screen.getByText('Set up')).toBeInTheDocument();
+    expect(screen.getByText('Enabled')).toBeInTheDocument();
     expect(screen.getByText(/^Due /)).toBeInTheDocument();
     expect(screen.getByText('Locked')).toBeInTheDocument();
-    expect(screen.getByText('Not set up')).toBeInTheDocument();
+    expect(screen.getByText('Not enabled')).toBeInTheDocument();
   });
 });

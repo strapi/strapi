@@ -1,3 +1,4 @@
+import { within } from '@testing-library/react';
 import { render, screen, waitFor, server, fireEvent } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -57,16 +58,16 @@ describe('Users | EditPage', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('shows Not enrolled', async () => {
+    it('shows Not enabled', async () => {
       server.use(userWith({ mfaEnabledAt: null, mfaGraceUntil: null, mfaLockedAt: null }));
       renderEdit();
 
       await screen.findByRole('heading', { name: 'Two-factor authentication' });
-      expect(screen.getByText('Not enrolled')).toBeInTheDocument();
+      expect(screen.getByText('Not enabled')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
     });
 
-    it('shows Enrolled since a date', async () => {
+    it('shows Enabled since a date', async () => {
       server.use(
         userWith({
           mfaEnabledAt: '2026-09-01T10:14:00.000Z',
@@ -76,7 +77,7 @@ describe('Users | EditPage', () => {
       );
       renderEdit();
 
-      expect(await screen.findByText(/^Enrolled since .*2026/)).toBeInTheDocument();
+      expect(await screen.findByText(/^Enabled since .*2026/)).toBeInTheDocument();
     });
 
     it('shows the grace deadline with date and time', async () => {
@@ -89,9 +90,7 @@ describe('Users | EditPage', () => {
       );
       renderEdit();
 
-      const line = await screen.findByText(
-        /^Not enrolled\. Must set up two-factor authentication before/
-      );
+      const line = await screen.findByText(/^Not enabled\. Must be set up before/);
       expect(line).toHaveTextContent(/2026/);
       expect(line).toHaveTextContent(/\d{1,2}:\d{2}/);
     });
@@ -125,10 +124,14 @@ describe('Users | EditPage', () => {
 
       await user.click(screen.getByRole('button', { name: 'Unlock' }));
       expect(screen.getByRole('alertdialog', { name: 'Unlock this account?' })).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      fireEvent.click(
+        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
+      );
 
-      expect(await screen.findByText('Account unlocked')).toBeInTheDocument();
-      expect(await screen.findByText('Not enrolled')).toBeInTheDocument();
+      expect(await screen.findByText('Account unlocked.')).toBeInTheDocument();
+      expect(
+        await screen.findByText('Not set up. A new grace period starts at their next login.')
+      ).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Unlock' })).not.toBeInTheDocument();
     });
 
@@ -155,7 +158,9 @@ describe('Users | EditPage', () => {
       const { user } = renderEdit();
 
       await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      fireEvent.click(
+        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
+      );
 
       expect(await screen.findByText('This account is not locked')).toBeInTheDocument();
     });
@@ -209,9 +214,11 @@ describe('Users | EditPage', () => {
       expect(
         screen.getByRole('alertdialog', { name: "Revoke this user's trusted devices?" })
       ).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      fireEvent.click(
+        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Revoke' })
+      );
 
-      expect(await screen.findByText('Trusted devices revoked')).toBeInTheDocument();
+      expect(await screen.findByText('Trusted devices revoked.')).toBeInTheDocument();
       expect(await screen.findByText('No trusted devices')).toBeInTheDocument();
       expect(
         screen.queryByRole('button', { name: 'Revoke trusted devices' })
@@ -239,7 +246,7 @@ describe('Users | EditPage', () => {
       );
       renderEdit();
 
-      await screen.findByText('Not enrolled');
+      await screen.findByText('Not enabled');
       expect(screen.queryByText(/trusted device/)).not.toBeInTheDocument();
       expect(called).toBe(false);
     });
@@ -277,7 +284,9 @@ describe('Users | EditPage', () => {
 
       await screen.findByText('1 trusted device');
       await user.click(screen.getByRole('button', { name: 'Revoke trusted devices' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      fireEvent.click(
+        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Revoke' })
+      );
 
       expect(await screen.findByText('User does not exist')).toBeInTheDocument();
     });
@@ -300,9 +309,11 @@ describe('Users | EditPage', () => {
       expect(
         screen.getByRole('alertdialog', { name: "Remove this user's passkeys?" })
       ).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      fireEvent.click(
+        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove' })
+      );
 
-      expect(await screen.findByText('Passkeys removed')).toBeInTheDocument();
+      expect(await screen.findByText('Passkeys removed.')).toBeInTheDocument();
       expect(await screen.findByText('No passkeys')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Remove passkeys' })).not.toBeInTheDocument();
     });
@@ -346,7 +357,7 @@ describe('Users | EditPage', () => {
       );
       renderEdit();
 
-      await screen.findByText('Not enrolled');
+      await screen.findByText('Not enabled');
       expect(screen.queryByText(/passkey/)).not.toBeInTheDocument();
       expect(called).toBe(false);
     });
@@ -364,7 +375,7 @@ describe('Users | EditPage', () => {
       );
       renderEdit();
 
-      await screen.findByText(/^Enrolled since/);
+      await screen.findByText(/^Enabled since/);
       await waitFor(() => expect(screen.queryByText('No passkeys')).not.toBeInTheDocument());
       expect(screen.queryByText(/passkey/)).not.toBeInTheDocument();
     });
@@ -385,7 +396,9 @@ describe('Users | EditPage', () => {
 
       await screen.findByText('1 passkey');
       await user.click(screen.getByRole('button', { name: 'Remove passkeys' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      fireEvent.click(
+        within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove' })
+      );
 
       expect(await screen.findByText('User does not exist')).toBeInTheDocument();
       // A refused removal must leave the panel truthful: the count is unchanged and the action is

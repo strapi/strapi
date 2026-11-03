@@ -1,3 +1,5 @@
+import { within } from '@testing-library/react';
+import { initialState } from '@tests/store';
 import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -20,6 +22,47 @@ const renderPanel = (
       canUpdate={canUpdate}
     />
   );
+
+/** The shared fixtures grant `admin::security-settings.read`, but their redux permission map has no
+ * `settings.security` entry; this wires it in so the panel may read the enforcement settings. */
+const withSecurityRead = () => {
+  const preloadedState = initialState();
+  preloadedState.admin_app.permissions = {
+    ...preloadedState.admin_app.permissions,
+    settings: {
+      ...preloadedState.admin_app.permissions.settings,
+      security: {
+        main: [{ action: 'admin::security-settings.read', subject: null }],
+        read: [{ action: 'admin::security-settings.read', subject: null }],
+        update: [{ action: 'admin::security-settings.update', subject: null }],
+      },
+    } as typeof preloadedState.admin_app.permissions.settings,
+  };
+  return { storeConfig: { preloadedState } };
+};
+
+const NOT_ENROLLED = {
+  ...ENROLLED,
+  mfaEnabledAt: null,
+  roles: [{ id: 2, name: 'Editor', code: 'strapi-editor' }],
+} as unknown as React.ComponentProps<typeof TwoFactorPanel>['user'];
+
+const settings = (mfa: { mode: 'off' | 'optional' | 'required'; requiredRoles: string[] }) => {
+  const reads = { count: 0 };
+  server.use(
+    http.get('/admin/security-settings', () => {
+      reads.count += 1;
+      return HttpResponse.json({
+        data: {
+          mfa: { graceDays: 5, ...mfa },
+          trustedDevices: { enabled: false, days: 30 },
+          passkeys: { enabled: false },
+        },
+      });
+    })
+  );
+  return reads;
+};
 
 const DEVICE = {
   id: 9,
@@ -87,7 +130,7 @@ describe('TwoFactorPanel', () => {
   it('offers no Reset for an account that was never enrolled', async () => {
     renderPanel({ mfaEnabledAt: null });
 
-    expect(await screen.findByText('Not enrolled')).toBeInTheDocument();
+    expect(await screen.findByText('Not enabled')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeInTheDocument();
   });
 
@@ -114,10 +157,12 @@ describe('TwoFactorPanel', () => {
     ).toBeInTheDocument();
     expect(calls).toHaveLength(0);
 
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+    await user.click(
+      within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Reset' })
+    );
 
     await waitFor(() => expect(calls).toEqual(['3']));
-    expect(await screen.findByText('Two-factor authentication reset')).toBeInTheDocument();
+    expect(await screen.findByText('Two-factor authentication reset.')).toBeInTheDocument();
   });
 
   it('leaves the account alone when the confirmation is cancelled', async () => {
@@ -142,10 +187,12 @@ describe('TwoFactorPanel', () => {
     const { user } = renderPanel();
 
     await user.click(await screen.findByRole('button', { name: 'Reset' }));
-    await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+    await user.click(
+      within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Reset' })
+    );
 
     expect(await screen.findByText('Nope')).toBeInTheDocument();
-    expect(screen.queryByText('Two-factor authentication reset')).not.toBeInTheDocument();
+    expect(screen.queryByText('Two-factor authentication reset.')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reset' })).toBeEnabled();
   });
 
@@ -165,10 +212,12 @@ describe('TwoFactorPanel', () => {
       await user.click(await screen.findByRole('button', { name: 'Unlock' }));
       expect(await screen.findByText('Unlock this account?')).toBeInTheDocument();
       expect(calls).toHaveLength(0);
-      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
+      );
 
       await waitFor(() => expect(calls).toEqual(['3']));
-      expect(await screen.findByText('Account unlocked')).toBeInTheDocument();
+      expect(await screen.findByText('Account unlocked.')).toBeInTheDocument();
     });
 
     it('says why an unlock failed', async () => {
@@ -176,10 +225,12 @@ describe('TwoFactorPanel', () => {
       const { user } = renderPanel(locked);
 
       await user.click(await screen.findByRole('button', { name: 'Unlock' }));
-      await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
+      );
 
       expect(await screen.findByText('Unlock refused')).toBeInTheDocument();
-      expect(screen.queryByText('Account unlocked')).not.toBeInTheDocument();
+      expect(screen.queryByText('Account unlocked.')).not.toBeInTheDocument();
     });
   });
 
@@ -197,10 +248,12 @@ describe('TwoFactorPanel', () => {
 
       await user.click(await screen.findByRole('button', { name: 'Revoke trusted devices' }));
       expect(await screen.findByText("Revoke this user's trusted devices?")).toBeInTheDocument();
-      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Revoke' })
+      );
 
       await waitFor(() => expect(calls).toEqual(['3']));
-      expect(await screen.findByText('Trusted devices revoked')).toBeInTheDocument();
+      expect(await screen.findByText('Trusted devices revoked.')).toBeInTheDocument();
     });
 
     it('says why a revoke failed', async () => {
@@ -211,10 +264,12 @@ describe('TwoFactorPanel', () => {
       const { user } = renderPanel();
 
       await user.click(await screen.findByRole('button', { name: 'Revoke trusted devices' }));
-      await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Revoke' })
+      );
 
       expect(await screen.findByText('Revoke refused')).toBeInTheDocument();
-      expect(screen.queryByText('Trusted devices revoked')).not.toBeInTheDocument();
+      expect(screen.queryByText('Trusted devices revoked.')).not.toBeInTheDocument();
     });
 
     it('offers no revoke when there is nothing to revoke', async () => {
@@ -241,10 +296,12 @@ describe('TwoFactorPanel', () => {
 
       await user.click(await screen.findByRole('button', { name: 'Remove passkeys' }));
       expect(await screen.findByText("Remove this user's passkeys?")).toBeInTheDocument();
-      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' })
+      );
 
       await waitFor(() => expect(calls).toEqual(['3']));
-      expect(await screen.findByText('Passkeys removed')).toBeInTheDocument();
+      expect(await screen.findByText('Passkeys removed.')).toBeInTheDocument();
     });
 
     it('says why a removal failed', async () => {
@@ -253,10 +310,58 @@ describe('TwoFactorPanel', () => {
       const { user } = renderPanel();
 
       await user.click(await screen.findByRole('button', { name: 'Remove passkeys' }));
-      await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' })
+      );
 
       expect(await screen.findByText('Remove refused')).toBeInTheDocument();
-      expect(screen.queryByText('Passkeys removed')).not.toBeInTheDocument();
+      expect(screen.queryByText('Passkeys removed.')).not.toBeInTheDocument();
+    });
+  });
+  describe('required but not set up', () => {
+    // An unlock clears the lock and the grace period; the next login starts a new one. The page
+    // says so, with the configured length, whenever the settings require it of this user.
+    it('says a new grace period of the configured length starts at the next login', async () => {
+      settings({ mode: 'optional', requiredRoles: ['2'] });
+      render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />, {
+        providerOptions: withSecurityRead(),
+      });
+
+      expect(
+        await screen.findByText('Not set up. A new 5-day grace period starts at their next login.')
+      ).toBeInTheDocument();
+    });
+
+    it('reads as not enabled when none of their roles is required', async () => {
+      const reads = settings({ mode: 'optional', requiredRoles: ['1'] });
+      render(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />, {
+        providerOptions: withSecurityRead(),
+      });
+
+      // Wait for the settings to be read, so this is not just the first paint.
+      await waitFor(() => expect(reads.count).toBe(1));
+      expect(await screen.findByText('Not enabled')).toBeInTheDocument();
+      expect(screen.queryByText(/grace period starts/)).not.toBeInTheDocument();
+    });
+
+    it('says a new grace period starts after an unlock made here, without settings to read', async () => {
+      server.use(
+        http.post('/admin/mfa/users/:id/unlock', () => new HttpResponse(null, { status: 204 }))
+      );
+      const locked = { ...NOT_ENROLLED, mfaLockedAt: '2026-02-01T00:00:00.000Z' };
+      const { user, rerender } = render(<TwoFactorPanel user={locked} canUpdate />);
+
+      await user.click(await screen.findByRole('button', { name: 'Unlock' }));
+      await user.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Unlock' })
+      );
+      await screen.findByText('Account unlocked.');
+      // What the refetched user looks like after the unlock.
+      rerender(<TwoFactorPanel user={NOT_ENROLLED} canUpdate />);
+
+      expect(
+        await screen.findByText('Not set up. A new grace period starts at their next login.')
+      ).toBeInTheDocument();
     });
   });
 });

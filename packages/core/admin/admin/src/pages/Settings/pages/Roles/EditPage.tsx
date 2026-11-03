@@ -26,6 +26,7 @@ import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
+import { RoleTwoFactorRequirement } from './components/RoleTwoFactorRequirement';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required.id),
@@ -233,6 +234,7 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
+                <RoleTwoFactorRequirement roleId={id} />
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}

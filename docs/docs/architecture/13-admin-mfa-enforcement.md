@@ -208,10 +208,21 @@ a dialog they cannot complete.
   `useSecuritySettingsSave` sends only the changed ones in a single `PUT`. A raise shows its impact
   dialog first; any downgrade in the save (one or several kinds) then opens one
   `ConfirmDowngradeDialog`. Leaving the page with unsaved changes asks for confirmation
-- **Settings > Users**, list: a two-factor column (enrolled, grace, locked), shown to holders of
-  `admin::users.update` while the flag is on
+- **Settings > Users**, list: a two-factor column ("Enabled", "Due {date}", "Locked", "Not
+  enabled"), shown to holders of `admin::users.update` while the flag is on
 - **Settings > Users**, per user (`pages/Settings/pages/Users/components/TwoFactorPanel.tsx`):
-  enrolment state, lock state, the unlock and reset actions, plus trusted-device and passkey counts
+  enrolment state, lock state, the unlock and reset actions, plus trusted-device and passkey counts.
+  An unlocked account has no lock and no grace, like one that never started. When the viewer may
+  read the security settings and they require two-factor authentication of the user, the panel says
+  "Not set up. A new {n}-day grace period starts at their next login." with the configured grace
+  days. Without the settings, it says so without the number only after an unlock made on that page
+  (it cannot tell an exempt SSO-only account from a required one either way)
+- **Settings > Roles**, per role (`pages/Settings/pages/Roles/components/RoleTwoFactorRequirement.tsx`):
+  a "Require two-factor authentication" toggle on `admin::role.mfaRequired`, shown to holders of
+  `admin::security-settings.read` and `.update` while the feature is on. It saves on its own through
+  `PUT /admin/security-settings` (`mfa.requiredRoles`), with the Security page's impact dialog on a
+  raise and `ConfirmDowngradeDialog` on a drop. It is disabled, with a hint, unless the mode is
+  "Required for selected roles"
 - **A grace banner** (`components/MfaGraceBanner.tsx`) for a user inside their grace period
 
 `GET /admin/users` and `GET /admin/users/:id` append `mfaEnabledAt`, `mfaGraceUntil` and

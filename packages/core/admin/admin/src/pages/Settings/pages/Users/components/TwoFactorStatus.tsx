@@ -33,7 +33,7 @@ const TwoFactorStatus = ({ user }: { user: AdminUserMfaState }) => {
           <Typography tag="span" variant="omega" fontWeight="bold">
             {formatMessage({
               id: 'Settings.permissions.users.mfa.status.enrolled',
-              defaultMessage: 'Set up',
+              defaultMessage: 'Enabled',
             })}
           </Typography>
         </Status>
@@ -63,7 +63,7 @@ const TwoFactorStatus = ({ user }: { user: AdminUserMfaState }) => {
     <Typography textColor="neutral600">
       {formatMessage({
         id: 'Settings.permissions.users.mfa.status.none',
-        defaultMessage: 'Not set up',
+        defaultMessage: 'Not enabled',
       })}
     </Typography>
   );

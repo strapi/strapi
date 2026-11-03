@@ -1,12 +1,16 @@
 import * as React from 'react';
 
 import { Button, Dialog, Flex, Typography } from '@strapi/design-system';
+import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../../components/ConfirmDialog';
 import { Panel } from '../../../../../components/Panel';
+import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useNotification } from '../../../../../features/Notifications';
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import { useToMessage } from '../../../../../hooks/useToMessage';
+import { selectAdminPermissions } from '../../../../../selectors';
 import {
   useDeleteUserPasskeysMutation,
   useGetUserPasskeysQuery,
@@ -15,11 +19,12 @@ import {
   useRevokeUserTrustedDevicesMutation,
   useUnlockUserMfaMutation,
 } from '../../../../../services/mfa';
+import { useGetSecuritySettingsQuery } from '../../../../../services/securitySettings';
 
 import type { AdminUserListItem } from '../../../../../services/users';
 
 interface TwoFactorPanelProps {
-  user: Pick<AdminUserListItem, 'id' | 'mfaEnabledAt' | 'mfaGraceUntil' | 'mfaLockedAt'>;
+  user: Pick<AdminUserListItem, 'id' | 'mfaEnabledAt' | 'mfaGraceUntil' | 'mfaLockedAt' | 'roles'>;
   canUpdate: boolean;
 }
 
@@ -35,11 +40,16 @@ interface TwoFactorPanelProps {
  * unlock while they are away cannot re-lock them unseen), and revoking trust or removing passkeys
  * only forces the second factor back on.
  *
- * Reset is the exception and the only destructive one: it strips the factor entirely and signs
+ * Reset is the exception and the only destructive one: it strips the factor entirely and logs
  * the user out everywhere. Offered for any enrolled account rather than only a locked one,
  * because the user it serves has no lock to clear -- they know their password but have lost their
  * authenticator and spent their recovery codes, and the alternative is a shell the customer may
  * not have.
+ *
+ * An unlocked account reads like one that never started: not enrolled, no grace, no lock. The
+ * enforcement settings tell the two apart from "not required at all" -- when the viewer may read
+ * them -- so the page can say a new grace period starts at the user's next login, and for how
+ * many days. Without them, only an unlock made on this page is known to have that effect.
  */
 const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { formatMessage, formatDate } = useIntl();
@@ -49,6 +59,22 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const [resetMfa, { isLoading: isResetting }] = useResetUserMfaMutation();
   const [resetOpen, setResetOpen] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [justUnlocked, setJustUnlocked] = React.useState(false);
+
+  const permissions = useTypedSelector(selectAdminPermissions);
+  const {
+    allowedActions: { canRead: canReadSecuritySettings },
+  } = useRBAC({ read: permissions.settings?.security?.read ?? [] });
+  // Errors (including the feature-off 404) leave `settings` undefined: the panel then falls back to
+  // what it knows without them.
+  const { data: settings } = useGetSecuritySettingsQuery(undefined, {
+    skip: !canReadSecuritySettings,
+  });
+  const requiredBySettings = settings
+    ? settings.mfa.mode === 'required' ||
+      (settings.mfa.mode === 'optional' &&
+        (user.roles ?? []).some((role) => settings.mfa.requiredRoles.includes(String(role.id))))
+    : undefined;
 
   // Only an enrolled user can hold trusted browsers (disable and reset clear them), so the query
   // is skipped otherwise. Gating on `isSuccess` rather than defaulting `data` to `[]` keeps the
@@ -86,11 +112,12 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       });
       return;
     }
+    setJustUnlocked(true);
     toggleNotification({
       type: 'success',
       message: formatMessage({
         id: 'Settings.permissions.users.mfa.unlock.success',
-        defaultMessage: 'Account unlocked',
+        defaultMessage: 'Account unlocked.',
       }),
     });
   };
@@ -109,7 +136,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       type: 'success',
       message: formatMessage({
         id: 'Settings.permissions.users.mfa.reset.success',
-        defaultMessage: 'Two-factor authentication reset',
+        defaultMessage: 'Two-factor authentication reset.',
       }),
     });
   };
@@ -128,7 +155,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       type: 'success',
       message: formatMessage({
         id: 'Settings.permissions.users.mfa.trustedDevices.revoke.success',
-        defaultMessage: 'Trusted devices revoked',
+        defaultMessage: 'Trusted devices revoked.',
       }),
     });
   };
@@ -147,7 +174,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       type: 'success',
       message: formatMessage({
         id: 'Settings.permissions.users.mfa.passkeys.remove.success',
-        defaultMessage: 'Passkeys removed',
+        defaultMessage: 'Passkeys removed.',
       }),
     });
   };
@@ -169,7 +196,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
           {formatMessage({
             id: 'Settings.permissions.users.mfa.state.locked.hint',
             defaultMessage:
-              'Two-factor authentication was not set up before the deadline. If this account also signs in through single sign-on, that session stays valid until its next refresh.',
+              'Two-factor authentication was not set up before the deadline. If this account also logs in through single sign-on, that session stays valid until its next refresh.',
           })}
         </Typography>
       </Flex>
@@ -180,7 +207,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
         {formatMessage(
           {
             id: 'Settings.permissions.users.mfa.state.enrolled',
-            defaultMessage: 'Enrolled since {date}',
+            defaultMessage: 'Enabled since {date}',
           },
           { date: formatDate(user.mfaEnabledAt, { dateStyle: 'medium' }) }
         )}
@@ -192,10 +219,31 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
         {formatMessage(
           {
             id: 'Settings.permissions.users.mfa.state.grace',
-            defaultMessage: 'Not enrolled. Must set up two-factor authentication before {datetime}',
+            defaultMessage: 'Not enabled. Must be set up before {datetime}',
           },
           { datetime: dateTime(user.mfaGraceUntil) }
         )}
+      </Typography>
+    );
+  } else if (requiredBySettings && settings) {
+    state = (
+      <Typography>
+        {formatMessage(
+          {
+            id: 'Settings.permissions.users.mfa.state.pending',
+            defaultMessage: 'Not set up. A new {days}-day grace period starts at their next login.',
+          },
+          { days: settings.mfa.graceDays }
+        )}
+      </Typography>
+    );
+  } else if (justUnlocked && requiredBySettings === undefined) {
+    state = (
+      <Typography>
+        {formatMessage({
+          id: 'Settings.permissions.users.mfa.state.pending.unknownDays',
+          defaultMessage: 'Not set up. A new grace period starts at their next login.',
+        })}
       </Typography>
     );
   } else {
@@ -203,7 +251,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       <Typography textColor="neutral600">
         {formatMessage({
           id: 'Settings.permissions.users.mfa.state.none',
-          defaultMessage: 'Not enrolled',
+          defaultMessage: 'Not enabled',
         })}
       </Typography>
     );
@@ -241,12 +289,21 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
                 id: 'Settings.permissions.users.mfa.reset.title',
                 defaultMessage: "Reset this user's two-factor authentication?",
               })}
-              onConfirm={handleReset}
+              endAction={
+                <Dialog.Action>
+                  <Button fullWidth variant="danger-light" onClick={handleReset}>
+                    {formatMessage({
+                      id: 'Settings.permissions.users.mfa.reset',
+                      defaultMessage: 'Reset',
+                    })}
+                  </Button>
+                </Dialog.Action>
+              }
             >
               {formatMessage({
                 id: 'Settings.permissions.users.mfa.reset.body',
                 defaultMessage:
-                  'Their authenticator app, recovery codes, passkeys and trusted devices are all removed, and they are signed out everywhere. They sign in with their password alone until they set up two-factor authentication again. Use this when a user has lost their authenticator and their recovery codes.',
+                  'Their authenticator app, recovery codes, passkeys and trusted devices are all removed, and they are logged out everywhere. They log in with their password alone until they set up two-factor authentication again. Use this when a user has lost their authenticator and their recovery codes.',
               })}
             </ConfirmDialog>
           </Dialog.Root>
@@ -261,13 +318,23 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
                 })}
               </Button>
             </Dialog.Trigger>
+            {/* Unlocking restores access rather than removing anything, so no danger styling. */}
             <ConfirmDialog
-              variant="default"
+              icon={<Information fill="neutral500" />}
               title={formatMessage({
                 id: 'Settings.permissions.users.mfa.unlock.title',
                 defaultMessage: 'Unlock this account?',
               })}
-              onConfirm={handleUnlock}
+              endAction={
+                <Dialog.Action>
+                  <Button fullWidth variant="default" onClick={handleUnlock}>
+                    {formatMessage({
+                      id: 'Settings.permissions.users.mfa.unlock',
+                      defaultMessage: 'Unlock',
+                    })}
+                  </Button>
+                </Dialog.Action>
+              }
             >
               {formatMessage({
                 id: 'Settings.permissions.users.mfa.unlock.body',
@@ -305,7 +372,16 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
                   id: 'Settings.permissions.users.mfa.trustedDevices.revoke.title',
                   defaultMessage: "Revoke this user's trusted devices?",
                 })}
-                onConfirm={handleRevokeTrustedDevices}
+                endAction={
+                  <Dialog.Action>
+                    <Button fullWidth variant="danger-light" onClick={handleRevokeTrustedDevices}>
+                      {formatMessage({
+                        id: 'Settings.permissions.users.mfa.trustedDevices.revoke.confirm',
+                        defaultMessage: 'Revoke',
+                      })}
+                    </Button>
+                  </Dialog.Action>
+                }
               >
                 {formatMessage({
                   id: 'Settings.permissions.users.mfa.trustedDevices.revoke.body',
@@ -344,7 +420,16 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
                   id: 'Settings.permissions.users.mfa.passkeys.remove.title',
                   defaultMessage: "Remove this user's passkeys?",
                 })}
-                onConfirm={handleRemovePasskeys}
+                endAction={
+                  <Dialog.Action>
+                    <Button fullWidth variant="danger-light" onClick={handleRemovePasskeys}>
+                      {formatMessage({
+                        id: 'Settings.permissions.users.mfa.passkeys.remove.confirm',
+                        defaultMessage: 'Remove',
+                      })}
+                    </Button>
+                  </Dialog.Action>
+                }
               >
                 {formatMessage({
                   id: 'Settings.permissions.users.mfa.passkeys.remove.body',
