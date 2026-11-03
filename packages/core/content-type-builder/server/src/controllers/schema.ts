@@ -7,6 +7,10 @@ import { validateUpdateSchema } from './validation/schema';
 export default () => {
   const internals = {
     isUpdating: false,
+    // Held from the first line of updateSchema until it returns. isUpdating
+    // means this request turned the watcher off, so it cannot be claimed
+    // before validation.
+    hasRequestInFlight: false,
   };
 
   return {
@@ -17,14 +21,14 @@ export default () => {
     },
 
     async updateSchema(ctx: Context) {
-      if (internals.isUpdating === true) {
+      if (internals.isUpdating === true || internals.hasRequestInFlight === true) {
         return ctx.conflict('Schema update is already in progress.');
       }
 
       // Claim the in-process lock before any await. Validation and the schema
       // write both yield, so a check that happens only after those awaits lets
       // a second request pass the guard and apply a second update.
-      internals.isUpdating = true;
+      internals.hasRequestInFlight = true;
 
       try {
         const { data } = await validateUpdateSchema(ctx.request.body);
@@ -34,11 +38,11 @@ export default () => {
           isEmpty(data.contentTypes) &&
           isEmpty(data.contentStructure)
         ) {
-          internals.isUpdating = false;
           ctx.body = {};
           return;
         }
 
+        internals.isUpdating = true;
         strapi.reload.isWatching = false;
 
         await getService('schema').updateSchema(data);
@@ -54,6 +58,8 @@ export default () => {
         internals.isUpdating = false;
         const errorMessage = error instanceof Error ? error.message : String(error);
         return ctx.send({ error: errorMessage }, 400);
+      } finally {
+        internals.hasRequestInFlight = false;
       }
     },
 

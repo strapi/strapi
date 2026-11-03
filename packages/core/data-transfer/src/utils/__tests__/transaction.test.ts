@@ -8,10 +8,10 @@ describe('createTransaction', () => {
     });
     const strapi = {
       db: {
-        transaction: async (
-          callback: (params: { trx: object; rollback: () => Promise<void> }) => void
-        ) => {
-          await callback({ trx: {}, rollback: async () => {} });
+        async transaction(
+          handler: (params: { trx: object; rollback: () => Promise<void> }) => void
+        ) {
+          await handler({ trx: {}, rollback: jest.fn().mockResolvedValue(undefined) });
           await transactionSettled;
         },
       },

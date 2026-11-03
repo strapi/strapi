@@ -11,7 +11,7 @@ describe('schema builder', () => {
     const db = {
       config: { settings: { forceMigration: true } },
       connection: {
-        transaction: jest.fn(async (callback) => callback({})),
+        transaction: jest.fn(async (handler) => handler({})),
       },
       dialect: { client: 'postgres' },
       getSchemaConnection: jest.fn(() => schemaBuilder),
