@@ -942,6 +942,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const unseenEvents = async (userId: string): Promise<MfaEventNotice[]> => {
     const rows = await eventQuery().findMany({
       where: { userId: String(userId), seenAt: null, type: NOT_ACKNOWLEDGEMENT_MARKER },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
 
     return rows.map((row) => ({

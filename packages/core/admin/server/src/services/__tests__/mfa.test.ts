@@ -2473,6 +2473,21 @@ describe('mfa service: notices and acknowledgement', () => {
     expect(typeof notices[0].createdAt).toBe('string');
   });
 
+  test('unseenEvents lists the newest event first', async () => {
+    const { service, events } = setup();
+    await service.recordEvent('1', 'enabled');
+    await service.recordEvent('1', 'challenge_failed');
+    await service.recordEvent('1', 'disabled');
+    // Insertion order is oldest first; same-millisecond rows fall back to the id tiebreaker.
+    events.find((e) => e.type === 'enabled')!.createdAt = new Date('2026-01-01T00:00:00Z');
+    events.find((e) => e.type === 'challenge_failed')!.createdAt = new Date('2026-01-03T00:00:00Z');
+    events.find((e) => e.type === 'disabled')!.createdAt = new Date('2026-01-02T00:00:00Z');
+
+    const notices = await service.unseenEvents('1');
+
+    expect(notices.map((n) => n.type)).toEqual(['challenge_failed', 'disabled', 'enabled']);
+  });
+
   test('unseenEvents never returns the recovery_codes_issued acknowledgement marker', async () => {
     const { service } = setup();
     // `issueRecoveryCodes` records a `recovery_codes_issued` marker as a side effect.
