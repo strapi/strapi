@@ -4,6 +4,7 @@ import type { Utils } from '@strapi/types';
 
 import { Permission } from '../../../../shared/contracts/shared';
 import { SanitizedPermission } from '../../../../shared/contracts/roles';
+import ceiling from './ceiling';
 
 export type CreatePermissionPayload = Utils.Object.PartialBy<
   Permission,
@@ -153,6 +154,7 @@ export { toPermission };
 
 export default {
   addCondition,
+  ceiling,
   removeCondition,
   create,
   deleteProperty,
