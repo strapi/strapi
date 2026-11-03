@@ -56,7 +56,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version `>= v22 and <= v26` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version `>= v22 and <= v26` and [Yarn](https://yarnpkg.com/getting-started/install) 4 installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -137,9 +137,9 @@ Both commands must be running at same time; now you will be able to see the admi
 ### 6. Available commands
 
 - `yarn watch` starts yarn watch in all packages.
-- `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn build` builds all packages (code and types).
 - `yarn commit` runs an interactive commit CLI to help you write a good commit message inline with our git conventions.
-- `yarn setup` installs dependencies.
+- `yarn setup` installs dependencies, then cleans and builds all packages.
 - `yarn lint` lints the codebase.
 - `yarn test:clean` removes the coverage reports.
 - `yarn test:front` runs front-end related tests.
@@ -147,8 +147,6 @@ Both commands must be running at same time; now you will be able to see the admi
 - `yarn test:unit` runs the back-end unit tests.
 - `yarn test:api` runs the api integration tests.
 - `yarn test:generate-app` generates a test application.
-- `yarn test:run-app` runs a test application.
-- `yarn test:start-app` starts the test application.
 
 ---
 
@@ -157,9 +155,9 @@ Both commands must be running at same time; now you will be able to see the admi
 The API integration tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
 
 ```bash
-$ yarn test:generate-app --db=sqlite
-$ yarn test:generate-app --db=postgres
-$ yarn test:generate-app --db=mysql
+$ yarn test:generate-app sqlite
+$ yarn test:generate-app postgres
+$ yarn test:generate-app mysql
 ```
 
 A new app is required every time you run the API integration tests, otherwise the test suite will fail. A command is available to make this process easier: `yarn test:api`.
@@ -236,7 +234,7 @@ Examples:
 
 ### Repository Organization
 
-We chose to use a monorepo design using [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows us to maintain the whole ecosystem keep it up-to-date and consistent.
+We chose to use a monorepo design using [Yarn Workspaces](https://yarnpkg.com/features/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows us to maintain the whole ecosystem keep it up-to-date and consistent.
 
 We do our best to keep the develop branch as clean as possible, with tests passing at all times. However, the develop branch can move faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/@strapi/strapi) so that you are always up-to-date with the latest stable version.
 
