@@ -30570,6 +30570,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "namePath": {
+                            "description": "The path made of folder names. Computed, so it cannot be filtered or sorted on",
                             "type": "string",
                           },
                           "parent": {
@@ -30596,8 +30597,10 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                                 "type": "null",
                               },
                             ],
+                            "description": "null at the library root. Left out when the token cannot list folders",
                           },
                           "path": {
+                            "description": "Made of pathIds. To filter a subtree, match this path, or paths that start with it followed by \`/\`",
                             "type": "string",
                           },
                           "updatedAt": {
@@ -30610,7 +30613,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "name",
                           "path",
                           "namePath",
-                          "parent",
                           "createdAt",
                           "updatedAt",
                         ],
@@ -30767,6 +30769,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "namePath": {
+                          "description": "The path made of folder names. Computed, so it cannot be filtered or sorted on",
                           "type": "string",
                         },
                         "parent": {
@@ -30793,8 +30796,10 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                               "type": "null",
                             },
                           ],
+                          "description": "null at the library root. Left out when the token cannot list folders",
                         },
                         "path": {
+                          "description": "Made of pathIds. To filter a subtree, match this path, or paths that start with it followed by \`/\`",
                           "type": "string",
                         },
                         "updatedAt": {
@@ -30807,7 +30812,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "name",
                         "path",
                         "namePath",
-                        "parent",
                         "createdAt",
                         "updatedAt",
                       ],
