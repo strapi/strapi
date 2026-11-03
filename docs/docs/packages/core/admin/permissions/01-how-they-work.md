@@ -153,7 +153,7 @@ A permission contains all needed information for the backend and the frontend to
 
 A user can only hand on permissions they hold themselves. The rules live in `server/src/domain/permission/ceiling.ts`.
 
-The engine registers each stored permission as its own rule (`title@en` plus `body@fr` does not give `title@fr`), and the ceiling does the same. A requested permission is split into atoms (one per field, locale and condition combination). It is within the ceiling when **a single held permission** with the same `action` and `subject` covers every atom. A held permission covers a value if it does not restrict that property or lists the value (`seo` covers `seo.title`), and covers a condition if it is unconditional or lists it. Omitting a restricted property, sending `null` or dropping conditions is rejected.
+The engine registers each stored permission as its own rule (`title@en` plus `body@fr` does not give `title@fr`), and the ceiling does the same. A requested permission is split into atoms (one per field, locale and condition combination). It is within the ceiling when each atom is covered by a single held permission with the same `action` and `subject`. Different atoms can be covered by different held permissions. A held permission covers a value if it does not restrict that property or lists the value (`seo` covers `seo.title`), and covers a condition if it is unconditional or lists it. Omitting a restricted property, sending `null` or dropping conditions is rejected.
 
 Held permissions are read as the engine enforces them:
 
