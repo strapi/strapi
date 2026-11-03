@@ -112,6 +112,10 @@ export default {
       ctx.send({ data: { uid: contentType.uid } }, 201);
     } catch (err) {
       strapi.log.error(err);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       strapi.telemetry
         .send('didNotCreateContentType', {
           eventProperties: { error: (err as Error).message || err },
@@ -150,6 +154,10 @@ export default {
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as Error)?.message || 'Unknown error' }, 400);
     }
   },
@@ -173,6 +181,10 @@ export default {
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as Error)?.message || 'Unknown error' }, 400);
     }
   },
