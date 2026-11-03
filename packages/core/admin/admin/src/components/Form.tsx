@@ -858,13 +858,29 @@ interface BlockerProps {
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({
-  onProceed = DEFAULT_ON_PROCEED,
-  onCancel = DEFAULT_ON_CANCEL,
-}: BlockerProps) => {
-  const { formatMessage } = useIntl();
+const Blocker = (props: BlockerProps) => {
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
+
+  return <UnsavedChangesBlocker {...props} modified={modified} isSubmitting={isSubmitting} />;
+};
+
+interface UnsavedChangesBlockerProps extends BlockerProps {
+  modified: boolean;
+  isSubmitting: boolean;
+}
+
+/**
+ * The guard behind `Blocker`, for a page that keeps its own draft instead of using `Form`: it
+ * takes `modified` and `isSubmitting` as props rather than reading them from the form context.
+ */
+const UnsavedChangesBlocker = ({
+  onProceed = DEFAULT_ON_PROCEED,
+  onCancel = DEFAULT_ON_CANCEL,
+  modified,
+  isSubmitting,
+}: UnsavedChangesBlockerProps) => {
+  const { formatMessage } = useIntl();
   const registrationId = React.useId();
   const hasUnsavedEdits = modified && !isSubmitting;
 
@@ -947,7 +963,7 @@ const Blocker = ({
   return null;
 };
 
-export { Form, Blocker, useField, useForm, getYupValidationErrors };
+export { Form, Blocker, UnsavedChangesBlocker, useField, useForm, getYupValidationErrors };
 export type {
   FormErrors,
   FormHelpers,
