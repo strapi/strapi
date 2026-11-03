@@ -306,8 +306,10 @@ jobs:
     # Browsers and their system libraries are preinstalled in the Playwright image, so the
     # job never runs `playwright install --with-deps`, whose apt step can stall for most of
     # the job timeout on a slow Ubuntu mirror.
+    # `-resolute` is Ubuntu 26.04, which `ubuntu-latest` moves to in November 2026
+    # (actions/runner-images#14748).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
     strategy:
       fail-fast: false # remove once tests aren't flaky
@@ -396,7 +398,7 @@ jobs:
     runs-on: ubuntu-latest
     # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -452,7 +454,7 @@ jobs:
     runs-on: ubuntu-latest
     # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -508,7 +510,7 @@ jobs:
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
     # Browsers and system libraries come from the Playwright image (see `e2e_ce`).
     container:
-      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.conditions.outputs.playwright }}-resolute
       options: --ipc=host --init
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
