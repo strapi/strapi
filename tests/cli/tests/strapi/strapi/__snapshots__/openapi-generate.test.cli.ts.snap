@@ -16552,16 +16552,12 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                     "additionalProperties": false,
                     "properties": {
                       "code": {
-                        "maxLength": 2,
-                        "minLength": 2,
                         "type": "string",
                       },
                       "createdAt": {
                         "type": "string",
                       },
                       "documentId": {
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
                         "type": "string",
                       },
                       "id": {

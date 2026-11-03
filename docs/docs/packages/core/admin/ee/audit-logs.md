@@ -4,6 +4,8 @@ description: Guide for Audit Logs
 status: needs-review
 review_notes:
   - '`ee/server/services/audit-logs.js` moved under `ee/server/src`.'
+  - 'Events are also saved when a package registers them with `registerEvent` on the `audit-logs-lifecycle` service (upload and content-manager do), not only the `defaultEvents` list.'
+  - '`registerEvent` takes an `action` option to store a row under another action name. Upload uses it to record media folders as `media.*` and `media.update` from an audit-only event, since `media.*` are also webhook events.'
 ---
 
 # Audit Logs
@@ -25,6 +27,12 @@ To save audit log data, we utilize an Audit Logs local provider responsible for 
 #### strapi_audit_logs
 
 This content type stores all the audit logs. For each allowed event, we save an entry in the audit logs content type.
+
+The `admin::audit-log` content type is registered by the CE admin (`packages/core/admin/server/src/content-types/index.ts`) in every edition, with or without a license, like the content types of content releases and review workflows. The CE bootstrap also adds `strapi_audit_logs` to the persisted tables. The schema file stays under `packages/core/admin/ee/server/src/audit-logs/content-types/`.
+
+### Runtime gates
+
+The routes, controller, services and the `admin::audit-logs.read` / `admin::audit-logs.export` permission actions all use one condition, `isAuditLogsEnabled` in `packages/core/admin/ee/server/src/audit-logs/utils.ts`: the license includes the `audit-logs` feature and `admin.auditLogs.enabled` is not `false`. When the config disables audit logs, the role editor does not list the audit-log permissions.
 
 ### Subscribing to all events
 
