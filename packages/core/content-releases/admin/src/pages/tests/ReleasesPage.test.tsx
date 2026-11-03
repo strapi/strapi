@@ -195,14 +195,14 @@ describe('Releases home page', () => {
     const [missed, preUpgrade, unscheduled] = screen.getAllByRole('row').slice(1);
 
     expect(within(missed).getByText(/Sep 1, 2026 • 09:00 UTC/)).toBeInTheDocument();
-    expect(missed).toHaveTextContent(/Was due \S/);
+    expect(within(missed).getByRole('time')).toHaveTextContent(/ ago$/);
     expect(within(preUpgrade).getByText(/Aug 20, 2026 • 10:00 UTC/)).toBeInTheDocument();
-    expect(preUpgrade).toHaveTextContent(/Was due \S/);
+    expect(within(preUpgrade).getByRole('time')).toHaveTextContent(/ ago$/);
     expect(within(unscheduled).getByText('Not scheduled')).toBeInTheDocument();
     expect(screen.queryByText(/Sep 3, 2026/)).not.toBeInTheDocument();
   });
 
-  it('words the schedule by whether it is to come, ran, or passed without a run', async () => {
+  it('words the schedule with the relative time alone, whether it is to come, ran or passed', async () => {
     const [base] = mockReleasesPageData.releasesByStatus.data;
     const DAY = 24 * 60 * 60 * 1000;
     server.use(
@@ -244,9 +244,13 @@ describe('Releases home page', () => {
     const [upcoming, ran, overdue] = screen.getAllByRole('row').slice(1);
 
     // The calendar-day count depends on the time of day: the words are what this checks
-    expect(upcoming).toHaveTextContent(/Scheduled in \d+ days/);
-    expect(ran).toHaveTextContent(/Released \d+ days ago/);
-    expect(overdue).toHaveTextContent(/Was due \d+ days ago/);
+    expect(within(upcoming).getByRole('time')).toHaveTextContent(/^in \d+ days$/);
+    expect(within(ran).getByRole('time')).toHaveTextContent(/^\d+ days ago$/);
+    expect(within(overdue).getByRole('time')).toHaveTextContent(/^\d+ days ago$/);
+    // No words around it: the status column tells a run from a missed schedule
+    [upcoming, ran, overdue].forEach((row) => {
+      expect(row).not.toHaveTextContent(/Scheduled|Released|Was due/);
+    });
   });
 
   it('dates a release by its schedule, the one the sort and the filters use, even once it ran', async () => {
@@ -286,7 +290,8 @@ describe('Releases home page', () => {
     await screen.findByRole('link', { name: 'Ran early' });
     const [early, undated] = screen.getAllByRole('row').slice(1);
 
-    expect(early).toHaveTextContent(/Released .+ago/);
+    // The relative time counts from the schedule too, like the date under it
+    expect(within(early).getByRole('time')).toHaveAttribute('datetime', '2026-10-15T09:00:00.000Z');
     expect(within(early).getByText(/^Oct 15, 2026 • 09:00/)).toBeInTheDocument();
     expect(within(undated).getByText('Not scheduled')).toBeInTheDocument();
     expect(within(undated).queryByText(/Oct 13, 2026/)).not.toBeInTheDocument();
