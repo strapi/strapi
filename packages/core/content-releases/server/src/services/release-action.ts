@@ -88,14 +88,19 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     const contentTypesData: Record<
       Internal.UID.ContentType,
-      { mainField: string; displayName: string }
+      { mainField: string; displayName: string; isLocalized: boolean }
     > = {};
     for (const contentTypeUid of contentTypesUids) {
       const model = strapi.getModel(contentTypeUid);
 
       // Deleted after its release froze: only the uid is left
       if (!model) {
-        contentTypesData[contentTypeUid] = { mainField: 'id', displayName: contentTypeUid };
+        // Keeps the locale stored on its actions: nothing tells it was not localized
+        contentTypesData[contentTypeUid] = {
+          mainField: 'id',
+          displayName: contentTypeUid,
+          isLocalized: true,
+        };
         continue;
       }
 
@@ -106,6 +111,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       contentTypesData[contentTypeUid] = {
         mainField: contentTypeConfig.settings.mainField,
         displayName: model.info.displayName,
+        isLocalized: strapi.localization.isLocalizedContentType(model),
       };
     }
 
@@ -293,15 +299,22 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     validateEntryData(action.contentType, action.entryDocumentId);
-    await validateUniqueEntry(releaseId, action);
+
+    const model = strapi.contentType(action.contentType);
+    // The Content Manager sends the locale of its URL, whatever the content type
+    const localizedAction = {
+      ...action,
+      locale: strapi.localization.isLocalizedContentType(model) ? action.locale : undefined,
+    };
+
+    await validateUniqueEntry(releaseId, localizedAction);
 
     // If we are adding a singleType, its action points at the singleType's document
-    const model = strapi.contentType(action.contentType);
-    let { entryDocumentId } = action;
+    let { entryDocumentId } = localizedAction;
     if (model.kind === 'singleType') {
       const document = await strapi
         .documents(model.uid)
-        .findFirst({ locale: action.locale, fields: ['documentId'] });
+        .findFirst({ locale: localizedAction.locale, fields: ['documentId'] });
 
       if (!document) {
         throw new errors.NotFoundError(`No entry found for contentType ${action.contentType}`);
@@ -309,7 +322,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       entryDocumentId = document.documentId;
     }
-    const preparedAction = { ...action, entryDocumentId };
+    const preparedAction = { ...localizedAction, entryDocumentId };
 
     return {
       action: preparedAction,
@@ -572,11 +585,12 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       const allLocalesDictionary = await getLocalesDataForActions();
 
       const formattedData = actions.map((action: ReleaseAction) => {
-        const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
+        const { mainField, displayName, isLocalized } =
+          allReleaseContentTypesDictionary[action.contentType];
 
         return {
           ...action,
-          locale: action.locale ? allLocalesDictionary[action.locale] : null,
+          locale: isLocalized && action.locale ? allLocalesDictionary[action.locale] : null,
           contentType: {
             displayName,
             mainFieldValue: action.entry?.[mainField],

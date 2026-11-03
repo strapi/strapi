@@ -116,6 +116,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     return res.body.data;
   };
 
+  // Sent with a locale, like the Content Manager does: Product isn't localized, so none is kept
   const releaseAction = (documentId: string, type = 'publish') => ({
     type,
     contentType: PRODUCT_UID,
@@ -709,7 +710,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         resource: { type: 'release', id: release.id, name: 'Add entry' },
         details: {
           actionType: 'publish',
-          entry: { contentType: PRODUCT_UID, documentId: entry.documentId, locale: 'en' },
+          entry: { contentType: PRODUCT_UID, documentId: entry.documentId, locale: null },
         },
       });
     });
@@ -895,7 +896,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       });
       // The entry alone identifies what was removed
       expect(log.payload.details).toEqual({
-        entry: { contentType: PRODUCT_UID, documentId: entry.documentId, locale: 'en' },
+        entry: { contentType: PRODUCT_UID, documentId: entry.documentId, locale: null },
       });
     });
   });
@@ -952,7 +953,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         resource: { type: 'release', id: newRelease.id, name: 'Second try' },
         details: {
           actionType: 'publish',
-          entry: { contentType: PRODUCT_UID, documentId: skipped.documentId, locale: 'en' },
+          entry: { contentType: PRODUCT_UID, documentId: skipped.documentId, locale: null },
         },
       });
     });
