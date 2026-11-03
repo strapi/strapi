@@ -14,6 +14,7 @@ import { registerAuditEvents } from './audit-logs';
 async function initDefaultWorkflow() {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
+  const { stagesPerWorkflow } = getService('validation', { strapi }).limits;
 
   const wfCount = await workflowsService.count();
   const stagesCount = await stagesService.count();
@@ -24,7 +25,8 @@ async function initDefaultWorkflow() {
     const workflow = {
       ...defaultWorkflow,
       contentTypes: [],
-      stages: defaultStages,
+      // Keep the first stages the license allows, so the first boot never exceeds it
+      stages: defaultStages.slice(0, stagesPerWorkflow),
     };
 
     await workflowsService.create({ data: workflow });

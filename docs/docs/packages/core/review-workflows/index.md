@@ -23,7 +23,7 @@ The package is an Enterprise Edition plugin. It has a server part (`strapi-serve
 
 ### Workflow and stage content types
 
-`plugin::review-workflows.workflow` has a unique `name`, its `stages`, an optional `stageRequiredToPublish` and a JSON list `contentTypes`. `plugin::review-workflows.workflow-stage` has a `name`, a `color`, its `workflow` and a many-to-many relation `permissions` to `admin::permission`. Both are hidden from the content manager. On the first boot, `bootstrap` creates a workflow named "Default" with four stages when the database has none.
+`plugin::review-workflows.workflow` has a unique `name`, its `stages`, an optional `stageRequiredToPublish` and a JSON list `contentTypes`. `plugin::review-workflows.workflow-stage` has a `name`, a `color`, its `workflow` and a many-to-many relation `permissions` to `admin::permission`. Both are hidden from the content manager. On the first boot, `bootstrap` creates a workflow named "Default" with four stages when the database has none. It keeps only the first `stagesPerWorkflow` stages when the license allows fewer than four.
 
 ### Stage and assignee attributes
 
