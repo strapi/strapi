@@ -12,7 +12,7 @@ export default [
   },
   {
     method: 'GET',
-    // Named params so the plugin prefix (`/documentation`) is applied; RegExp paths skip prefix.
+    // The controller checks that each part is a number.
     path: '/v:major.:minor.:patch',
     handler: 'documentation.index',
     config: {
