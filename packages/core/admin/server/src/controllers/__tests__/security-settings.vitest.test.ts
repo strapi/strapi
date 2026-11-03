@@ -1,5 +1,4 @@
-/* eslint-env jest */
-
+import { describe, test, expect, vi } from 'vitest';
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../tests/helpers/create-context';
@@ -10,7 +9,7 @@ const setStrapi = (value: object) => {
 };
 
 const buildCtx = (body: Record<string, unknown> = {}) => {
-  const notFound = jest.fn();
+  const notFound = vi.fn();
   const ctx = createContext(
     { body },
     { state: { user: { id: 7 } }, notFound, request: { query: {}, body } }
@@ -30,7 +29,7 @@ describe('security-settings controller', () => {
       admin: {
         services: {
           mfa: { isEnabled: () => true },
-          'security-settings': { getSettings: jest.fn(() => Promise.resolve(settings)) },
+          'security-settings': { getSettings: vi.fn(() => Promise.resolve(settings)) },
         },
       },
     });
@@ -44,7 +43,7 @@ describe('security-settings controller', () => {
   test('passkeysImpact returns how many passkeys turning passkeys off would delete', async () => {
     setStrapi({
       admin: {
-        services: { mfa: { isEnabled: () => true, countAllPasskeys: jest.fn(async () => 4) } },
+        services: { mfa: { isEnabled: () => true, countAllPasskeys: vi.fn(async () => 4) } },
       },
     });
     const { ctx } = buildCtx();
@@ -55,7 +54,7 @@ describe('security-settings controller', () => {
   });
 
   test('update validates the body and forwards it with the acting user', async () => {
-    const updateSettings = jest.fn(() => Promise.resolve(settings));
+    const updateSettings = vi.fn(() => Promise.resolve(settings));
     setStrapi({
       admin: {
         services: { mfa: { isEnabled: () => true }, 'security-settings': { updateSettings } },
@@ -75,7 +74,7 @@ describe('security-settings controller', () => {
   });
 
   test('update accepts a body with only trustedDevices', async () => {
-    const updateSettings = jest.fn(() => Promise.resolve(settings));
+    const updateSettings = vi.fn(() => Promise.resolve(settings));
     setStrapi({
       admin: {
         services: { mfa: { isEnabled: () => true }, 'security-settings': { updateSettings } },
@@ -90,7 +89,7 @@ describe('security-settings controller', () => {
   });
 
   test('update accepts a body with only mfa', async () => {
-    const updateSettings = jest.fn(() => Promise.resolve(settings));
+    const updateSettings = vi.fn(() => Promise.resolve(settings));
     setStrapi({
       admin: {
         services: { mfa: { isEnabled: () => true }, 'security-settings': { updateSettings } },
@@ -120,7 +119,7 @@ describe('security-settings controller', () => {
     [{ trustedDevices: { enabled: true } }],
     [{ trustedDevices: { enabled: true, days: 30, extra: true } }],
   ])('update rejects an invalid body %j', async (body) => {
-    const updateSettings = jest.fn();
+    const updateSettings = vi.fn();
     setStrapi({
       admin: {
         services: { mfa: { isEnabled: () => true }, 'security-settings': { updateSettings } },

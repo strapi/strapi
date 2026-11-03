@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 import {
   DEFAULT_MFA_ENFORCEMENT,
@@ -13,12 +14,12 @@ import {
 } from '../security-settings';
 
 const buildStrapi = (stored: unknown) => {
-  const get = jest.fn(async ({ key }: { key: string }) =>
+  const get = vi.fn(async ({ key }: { key: string }) =>
     key === SECURITY_SETTINGS_KEY ? stored : null
   );
-  const store = jest.fn(() => ({ get, set: jest.fn() }));
+  const store = vi.fn(() => ({ get, set: vi.fn() }));
   return {
-    strapi: { store, log: { warn: jest.fn(), error: jest.fn() } } as unknown as Core.Strapi,
+    strapi: { store, log: { warn: vi.fn(), error: vi.fn() } } as unknown as Core.Strapi,
     store,
     get,
   };
@@ -231,20 +232,20 @@ describe('security-settings: service', () => {
       },
     ];
     let stored: unknown = options.stored ?? null;
-    const storeGet = jest.fn(async () => stored);
-    const storeSet = jest.fn(async ({ value }: { value: unknown }) => {
+    const storeGet = vi.fn(async () => stored);
+    const storeSet = vi.fn(async ({ value }: { value: unknown }) => {
       stored = value;
     });
-    const emit = jest.fn();
-    const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
-    const clearAllTrustedDevices = jest.fn(() => Promise.resolve(0));
-    const clearAllPasskeys = jest.fn(() => Promise.resolve(0));
-    const validatePassword = jest.fn(() => Promise.resolve(options.passwordOk ?? true));
+    const emit = vi.fn();
+    const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
+    const clearAllTrustedDevices = vi.fn(() => Promise.resolve(0));
+    const clearAllPasskeys = vi.fn(() => Promise.resolve(0));
+    const validatePassword = vi.fn(() => Promise.resolve(options.passwordOk ?? true));
     // `transactionFails` gives this double failure semantics instead of rollback semantics: a
     // callback that never runs cannot call anything ('open'), and a callback whose transaction
     // fails on commit has already called everything inside it ('commit'). That lets a test pin a
     // call to inside the transaction's scope without needing real rollback state to observe.
-    const transaction = jest.fn(async (run: () => Promise<unknown>) => {
+    const transaction = vi.fn(async (run: () => Promise<unknown>) => {
       if (options.transactionFails === 'open') throw new Error('could not open transaction');
       options.onTransaction?.((value: unknown) => {
         stored = value;
@@ -255,7 +256,7 @@ describe('security-settings: service', () => {
     });
 
     const roleQuery = {
-      findMany: jest.fn(async ({ where }: any) => {
+      findMany: vi.fn(async ({ where }: any) => {
         if (where?.mfaRequired === true)
           return roles.filter((r) => r.mfaRequired === true).map((r) => ({ id: r.id }));
         if (where?.id?.$in)
@@ -264,7 +265,7 @@ describe('security-settings: service', () => {
             .map((r) => ({ id: r.id }));
         return roles.map((r) => ({ ...r }));
       }),
-      updateMany: jest.fn(async ({ where, data }: any) => {
+      updateMany: vi.fn(async ({ where, data }: any) => {
         let count = 0;
         for (const role of roles) {
           const inList = (list: unknown[]) => list.map(String).includes(String(role.id));
@@ -278,11 +279,11 @@ describe('security-settings: service', () => {
       }),
     };
     const userQuery = {
-      findOne: jest.fn(async ({ where }: any) => {
+      findOne: vi.fn(async ({ where }: any) => {
         const row = users.find((u) => String(u.id) === String(where.id));
         return row ? { ...row, ...options.actor } : null;
       }),
-      updateMany: jest.fn(async ({ where, data }: any) => {
+      updateMany: vi.fn(async ({ where, data }: any) => {
         let count = 0;
         for (const user of users) {
           if (where.mfaLockedAt === null && user.mfaLockedAt !== null) continue;
@@ -295,22 +296,22 @@ describe('security-settings: service', () => {
     };
 
     const strapi = {
-      store: jest.fn(() => ({ get: storeGet, set: storeSet })),
-      log: { warn: jest.fn(), error: jest.fn() },
+      store: vi.fn(() => ({ get: storeGet, set: storeSet })),
+      log: { warn: vi.fn(), error: vi.fn() },
       eventHub: { emit },
       db: {
         transaction,
-        query: jest.fn((uid: string) => {
+        query: vi.fn((uid: string) => {
           if (uid === 'admin::role') return roleQuery;
           if (uid === 'admin::user') return userQuery;
           throw new Error(`unexpected uid ${uid}`);
         }),
       },
-      service: jest.fn((uid: string) => {
+      service: vi.fn((uid: string) => {
         if (uid === 'admin::mfa') {
           return {
-            isExemptFromMfa: jest.fn(() => Promise.resolve(options.exempt ?? false)),
-            isEnrolled: jest.fn(() => Promise.resolve(options.enrolled ?? false)),
+            isExemptFromMfa: vi.fn(() => Promise.resolve(options.exempt ?? false)),
+            isEnrolled: vi.fn(() => Promise.resolve(options.enrolled ?? false)),
             assertPasswordAndFactor,
             clearAllTrustedDevices,
             clearAllPasskeys,

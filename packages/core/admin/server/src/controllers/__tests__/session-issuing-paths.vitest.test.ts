@@ -1,5 +1,4 @@
-/* eslint-env jest */
-
+import { describe, test, expect, afterEach, vi, type Mock } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -9,7 +8,7 @@ import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
 import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
 import { MfaLockedError } from '../../services/mfa-errors';
-// The real implementation, for the reason `authentication.test.ts` gives: a canned mock would
+// The real implementation, for the reason `authentication.vitest.test.ts` gives: a canned mock would
 // make every "this field never leaks" assertion vacuous.
 import userService from '../../services/user';
 
@@ -50,13 +49,13 @@ const defaultResetBody = { resetPasswordToken: 'reset-token', password: 'NewPass
 
 /** `resetPassword` reads `request.body` twice: once as the validated input, and again through
  * `extractDeviceParams`. */
-const buildResetCtx = (cookiesSet: jest.Mock, body: Record<string, unknown> = defaultResetBody) => {
+const buildResetCtx = (cookiesSet: Mock, body: Record<string, unknown> = defaultResetBody) => {
   const ctx = createContext(
     { body },
     {
       state: {},
       cookies: { set: cookiesSet },
-      internalServerError: jest.fn(),
+      internalServerError: vi.fn(),
       request: { query: {}, body, headers: {}, secure: false },
     }
   ) as any;
@@ -64,32 +63,32 @@ const buildResetCtx = (cookiesSet: jest.Mock, body: Record<string, unknown> = de
   return ctx;
 };
 
-/** `buildIssuingStrapi` from `authentication.test.ts`, scoped to what `resetPassword` reads, with
+/** `buildIssuingStrapi` from `authentication.vitest.test.ts`, scoped to what `resetPassword` reads, with
  * the real `sanitizeUser`. */
 const buildResetStrapi = ({
   enrolled,
   resetPassword,
 }: {
   enrolled: boolean;
-  resetPassword: jest.Mock;
+  resetPassword: Mock;
 }) => {
-  const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-  const isEnrolled = jest.fn(() => Promise.resolve(enrolled));
-  const createChallenge = jest.fn(() =>
+  const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+  const isEnrolled = vi.fn(() => Promise.resolve(enrolled));
+  const createChallenge = vi.fn(() =>
     Promise.resolve({ token: 'reset-challenge-token', expiresIn: 300 })
   );
-  const generateRefreshToken = jest.fn(() =>
+  const generateRefreshToken = vi.fn(() =>
     Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
   );
-  const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
-  const sanitizeUser = jest.fn(realSanitizeUser);
-  const emit = jest.fn();
+  const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'access-token' }));
+  const sanitizeUser = vi.fn(realSanitizeUser);
+  const emit = vi.fn();
 
   setStrapi({
     eventHub: { emit },
-    log: { error: jest.fn(), warn: jest.fn() },
-    config: { get: jest.fn(() => undefined) },
-    sessionManager: jest.fn(() => ({
+    log: { error: vi.fn(), warn: vi.fn() },
+    config: { get: vi.fn(() => undefined) },
+    sessionManager: vi.fn(() => ({
       invalidateRefreshToken,
       generateRefreshToken,
       generateAccessToken,
@@ -98,16 +97,16 @@ const buildResetStrapi = ({
       services: {
         auth: { resetPassword },
         mfa: {
-          claimRequestEvents: jest.fn(() => Promise.resolve()),
-          isEnabled: jest.fn(() => true),
+          claimRequestEvents: vi.fn(() => Promise.resolve()),
+          isEnabled: vi.fn(() => true),
           isEnrolled,
           createChallenge,
-          enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
-          trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
-          countPasskeys: jest.fn(() => Promise.resolve(1)),
-          passkeysConfigured: jest.fn(() => true),
+          enforce: vi.fn(() => Promise.resolve({ outcome: 'none' })),
+          trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+          countPasskeys: vi.fn(() => Promise.resolve(1)),
+          passkeysConfigured: vi.fn(() => true),
           // A reset revokes every trusted browser alongside the sessions.
-          revokeAllTrustedDevices: jest.fn(() => Promise.resolve(0)),
+          revokeAllTrustedDevices: vi.fn(() => Promise.resolve(0)),
         },
         user: { sanitizeUser },
       },
@@ -152,22 +151,22 @@ const validRegisterAdminBody = {
 const buildPath = (
   path: SessionPath,
   mfaOverrides: Record<string, unknown> = {}
-): { ctx: any; generateRefreshToken: jest.Mock } => {
+): { ctx: any; generateRefreshToken: Mock } => {
   const user = { id: 31, email: 'session-path-user@example.com', isActive: true };
 
-  const generateRefreshToken = jest.fn(() =>
+  const generateRefreshToken = vi.fn(() =>
     Promise.resolve({ token: 'refresh-token', absoluteExpiresAt: undefined })
   );
-  const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'access-token' }));
-  const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-  const sanitizeUser = jest.fn(realSanitizeUser);
+  const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'access-token' }));
+  const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+  const sanitizeUser = vi.fn(realSanitizeUser);
 
   setStrapi({
-    eventHub: { emit: jest.fn() },
-    log: { error: jest.fn(), warn: jest.fn() },
-    config: { get: jest.fn(() => undefined) },
-    telemetry: { send: jest.fn() },
-    sessionManager: jest.fn(() => ({
+    eventHub: { emit: vi.fn() },
+    log: { error: vi.fn(), warn: vi.fn() },
+    config: { get: vi.fn(() => undefined) },
+    telemetry: { send: vi.fn() },
+    sessionManager: vi.fn(() => ({
       generateRefreshToken,
       generateAccessToken,
       invalidateRefreshToken,
@@ -176,22 +175,22 @@ const buildPath = (
       services: {
         user: {
           sanitizeUser,
-          register: jest.fn(() => Promise.resolve(user)),
-          createFirstAdmin: jest.fn(() => Promise.resolve(user)),
+          register: vi.fn(() => Promise.resolve(user)),
+          createFirstAdmin: vi.fn(() => Promise.resolve(user)),
         },
         auth: {
-          resetPassword: jest.fn(() => Promise.resolve(user)),
+          resetPassword: vi.fn(() => Promise.resolve(user)),
         },
         mfa: {
-          claimRequestEvents: jest.fn(() => Promise.resolve()),
-          isEnabled: jest.fn(() => true),
-          isEnrolled: jest.fn(() => Promise.resolve(false)),
-          createChallenge: jest.fn(() =>
+          claimRequestEvents: vi.fn(() => Promise.resolve()),
+          isEnabled: vi.fn(() => true),
+          isEnrolled: vi.fn(() => Promise.resolve(false)),
+          createChallenge: vi.fn(() =>
             Promise.resolve({ token: 'path-challenge-token', expiresIn: 300 })
           ),
-          enforce: jest.fn(() => Promise.resolve({ outcome: 'none' })),
-          countPasskeys: jest.fn(() => Promise.resolve(0)),
-          revokeAllTrustedDevices: jest.fn(() => Promise.resolve(0)),
+          enforce: vi.fn(() => Promise.resolve({ outcome: 'none' })),
+          countPasskeys: vi.fn(() => Promise.resolve(0)),
+          revokeAllTrustedDevices: vi.fn(() => Promise.resolve(0)),
           ...mfaOverrides,
         },
       },
@@ -209,8 +208,8 @@ const buildPath = (
     { body },
     {
       state: {},
-      cookies: { set: jest.fn() },
-      internalServerError: jest.fn(),
+      cookies: { set: vi.fn() },
+      internalServerError: vi.fn(),
       request: { query: {}, body, headers: {}, secure: false },
     }
   ) as any;
@@ -222,7 +221,7 @@ const invokePath = (path: SessionPath, ctx: any) => authenticationController[pat
 
 describe('session issuing paths', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('no undecided call site mints an admin session', () => {
@@ -264,7 +263,7 @@ describe('session issuing paths', () => {
       mfaLastUsedStep: 3,
     };
 
-    const resetPassword = jest.fn(() => Promise.resolve(user));
+    const resetPassword = vi.fn(() => Promise.resolve(user));
     const {
       invalidateRefreshToken,
       isEnrolled,
@@ -274,7 +273,7 @@ describe('session issuing paths', () => {
       emit,
     } = buildResetStrapi({ enrolled: true, resetPassword });
 
-    const cookiesSet = jest.fn();
+    const cookiesSet = vi.fn();
     const ctx = buildResetCtx(cookiesSet);
 
     await authenticationController.resetPassword(ctx);
@@ -317,7 +316,7 @@ describe('session issuing paths', () => {
   test('a user with no mfa resetting their password still gets a session', async () => {
     const user = { id: 11, email: 'reset-no-mfa@example.com', isActive: true };
 
-    const resetPassword = jest.fn(() => Promise.resolve(user));
+    const resetPassword = vi.fn(() => Promise.resolve(user));
     const {
       invalidateRefreshToken,
       isEnrolled,
@@ -327,7 +326,7 @@ describe('session issuing paths', () => {
       emit,
     } = buildResetStrapi({ enrolled: false, resetPassword });
 
-    const cookiesSet = jest.fn();
+    const cookiesSet = vi.fn();
     const ctx = buildResetCtx(cookiesSet);
 
     await authenticationController.resetPassword(ctx);
@@ -358,13 +357,13 @@ describe('session issuing paths', () => {
   test('existing sessions are still invalidated before the new one, enrolled or not', async () => {
     const runReset = async (enrolled: boolean) => {
       const user = { id: enrolled ? 21 : 22, email: 'x@example.com', isActive: true };
-      const resetPassword = jest.fn(() => Promise.resolve(user));
+      const resetPassword = vi.fn(() => Promise.resolve(user));
       const { invalidateRefreshToken, createChallenge, generateRefreshToken } = buildResetStrapi({
         enrolled,
         resetPassword,
       });
 
-      const ctx = buildResetCtx(jest.fn());
+      const ctx = buildResetCtx(vi.fn());
       await authenticationController.resetPassword(ctx);
 
       return { invalidateRefreshToken, createChallenge, generateRefreshToken };
@@ -413,15 +412,15 @@ describe('session issuing paths', () => {
     );
 
     // The behavioural half: the real `register` must be the site that nulls the token.
-    const updateById = jest.fn(() => Promise.resolve({}));
-    const findOne = jest.fn(() => Promise.resolve({ id: 42, registrationToken: 'a-real-token' }));
+    const updateById = vi.fn(() => Promise.resolve({}));
+    const findOne = vi.fn(() => Promise.resolve({ id: 42, registrationToken: 'a-real-token' }));
 
     setStrapi({
-      db: { query: jest.fn(() => ({ findOne })) },
+      db: { query: vi.fn(() => ({ findOne })) },
       admin: { services: { user: { updateById } } },
       // `register` records an audit event, which goes through the event hub and logs a failure.
-      eventHub: { emit: jest.fn() },
-      log: { error: jest.fn(), warn: jest.fn() },
+      eventHub: { emit: vi.fn() },
+      log: { error: vi.fn(), warn: vi.fn() },
     });
 
     await userService.register({
@@ -443,14 +442,14 @@ describe('session issuing paths', () => {
       async (path) => {
         // Refused
         {
-          const enforce = jest.fn(() => Promise.resolve({ outcome: 'refused' }));
+          const enforce = vi.fn(() => Promise.resolve({ outcome: 'refused' }));
           const { ctx, generateRefreshToken } = buildPath(path, { enforce });
           await expect(invokePath(path, ctx)).rejects.toBeInstanceOf(MfaLockedError);
           expect(generateRefreshToken).not.toHaveBeenCalled();
         }
         // Graced
         {
-          const enforce = jest.fn(() => Promise.resolve({ outcome: 'grace', graceUntil }));
+          const enforce = vi.fn(() => Promise.resolve({ outcome: 'grace', graceUntil }));
           const { ctx, generateRefreshToken } = buildPath(path, { enforce });
           await invokePath(path, ctx);
           expect(enforce.mock.invocationCallOrder[0]).toBeLessThan(

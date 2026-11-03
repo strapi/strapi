@@ -73,7 +73,7 @@ export type SanitizedAdminUser = Omit<
  * The private two-factor columns, kept in step with the runtime list the two sanitizers strip
  * (`server/src/services/constants.ts`'s `PRIVATE_MFA_FIELDS`). Declared as a type here rather
  * than importing that value, because this file is the shared contract and must not pull in
- * server code -- `server/src/services/__tests__/user.test.ts` asserts the two stay equal, so a
+ * server code -- `server/src/services/__tests__/user.vitest.test.ts` asserts the two stay equal, so a
  * column added to one and not the other fails rather than leaking.
  */
 export type PrivateMfaField =

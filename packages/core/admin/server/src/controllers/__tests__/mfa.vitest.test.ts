@@ -1,5 +1,4 @@
-/* eslint-env jest */
-
+import { describe, test, expect, afterEach, vi } from 'vitest';
 import { errors } from '@strapi/utils';
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
@@ -15,7 +14,7 @@ const setStrapi = (value: object) => {
 const DEFAULT_USER = { id: 7, mfaEnabledAt: null, mfaSecret: null, mfaLastUsedStep: null };
 
 /**
- * Mirrors `buildCtx` in `authentication.test.ts` / `session-issuing-paths.test.ts`: a real
+ * Mirrors `buildCtx` in `authentication.vitest.test.ts` / `session-issuing-paths.vitest.test.ts`: a real
  * `admin::user` row (carrying the private MFA columns, see `strategies/admin.ts`) is placed on
  * `ctx.state.user` the way the admin auth strategy actually does it, so `me`'s read of
  * `ctx.state.user.mfaEnabledAt` is exercised against a non-vacuous fixture.
@@ -26,16 +25,16 @@ const buildCtx = (
   stateOverrides: Record<string, unknown> = {},
   extra: { cookies?: Record<string, string>; params?: Record<string, string> } = {}
 ) => {
-  const notFound = jest.fn();
-  const internalServerError = jest.fn();
-  const cookiesSet = jest.fn();
+  const notFound = vi.fn();
+  const internalServerError = vi.fn();
+  const cookiesSet = vi.fn();
   const ctx = createContext(
     { body, params: extra.params ?? {} },
     {
       state: { user: { ...DEFAULT_USER, ...userOverrides }, ...stateOverrides },
       notFound,
       internalServerError,
-      cookies: { get: jest.fn((name: string) => extra.cookies?.[name]), set: cookiesSet },
+      cookies: { get: vi.fn((name: string) => extra.cookies?.[name]), set: cookiesSet },
       request: { query: {}, body, headers: { 'user-agent': 'jest' }, secure: false },
     }
   ) as any;
@@ -62,19 +61,19 @@ interface FakeSessionEntry {
 }
 
 const buildStrapiWithSessionManager = (mfaOverrides: Record<string, unknown>) => {
-  const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-  const listSessions = jest.fn((): Promise<FakeSessionEntry[]> => Promise.resolve([]));
-  const sessionManagerFn = jest.fn(() => ({
+  const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+  const listSessions = vi.fn((): Promise<FakeSessionEntry[]> => Promise.resolve([]));
+  const sessionManagerFn = vi.fn(() => ({
     invalidateRefreshToken,
     listSessions,
   }));
   // A default so every test reaching a successful `disable` doesn't have to supply its own --
   // only the one test asserting on the call needs to read it back off the return value.
-  const notify = jest.fn();
+  const notify = vi.fn();
 
   setStrapi({
     sessionManager: sessionManagerFn,
-    log: { error: jest.fn(), warn: jest.fn() },
+    log: { error: vi.fn(), warn: vi.fn() },
     admin: { services: { mfa: { notify, ...mfaOverrides } } },
   });
 
@@ -83,32 +82,32 @@ const buildStrapiWithSessionManager = (mfaOverrides: Record<string, unknown>) =>
 
 describe('mfa controller', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // No feature-off cases here: the gate is the `admin::isMfaEnabled` policy, which 404s before
   // any handler runs, so a handler-level test cannot observe it. That every route carries it is
-  // pinned in `routes/__tests__/mfa.test.ts`, the policy's own behaviour in
-  // `policies/__tests__/isMfaEnabled.test.ts`.
+  // pinned in `routes/__tests__/mfa.vitest.test.ts`, the policy's own behaviour in
+  // `policies/__tests__/isMfaEnabled.vitest.test.ts`.
 
   test('GET /mfa/me never returns the secret', async () => {
-    const isEnrolled = jest.fn(() => Promise.resolve(true));
-    const countUnusedRecoveryCodes = jest.fn(() => Promise.resolve(3));
-    const areCodesAcknowledged = jest.fn(() => Promise.resolve(true));
-    const isMfaRequiredFor = jest.fn(() => Promise.resolve(false));
+    const isEnrolled = vi.fn(() => Promise.resolve(true));
+    const countUnusedRecoveryCodes = vi.fn(() => Promise.resolve(3));
+    const areCodesAcknowledged = vi.fn(() => Promise.resolve(true));
+    const isMfaRequiredFor = vi.fn(() => Promise.resolve(false));
 
     setStrapi({
       admin: {
         services: {
           mfa: {
-            isEnabled: jest.fn(() => true),
+            isEnabled: vi.fn(() => true),
             isEnrolled,
             countUnusedRecoveryCodes,
             areCodesAcknowledged,
             isMfaRequiredFor,
-            trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
-            passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
-            passkeysConfigured: jest.fn(() => true),
+            trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+            passkeySettings: vi.fn(() => Promise.resolve({ enabled: true })),
+            passkeysConfigured: vi.fn(() => true),
           },
         },
       },
@@ -143,17 +142,17 @@ describe('mfa controller', () => {
 
   describe('me (enforcement fields)', () => {
     test('reports required and the grace deadline for a required, unenrolled user', async () => {
-      const isMfaRequiredFor = jest.fn(() => Promise.resolve(true));
+      const isMfaRequiredFor = vi.fn(() => Promise.resolve(true));
       setStrapi({
         admin: {
           services: {
             mfa: {
               isEnabled: () => true,
-              isEnrolled: jest.fn(() => Promise.resolve(false)),
+              isEnrolled: vi.fn(() => Promise.resolve(false)),
               isMfaRequiredFor,
-              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
-              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
-              passkeysConfigured: jest.fn(() => true),
+              trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: vi.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured: vi.fn(() => true),
             },
           },
         },
@@ -185,11 +184,11 @@ describe('mfa controller', () => {
           services: {
             mfa: {
               isEnabled: () => true,
-              isEnrolled: jest.fn(() => Promise.resolve(false)),
-              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
-              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
-              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
-              passkeysConfigured: jest.fn(() => true),
+              isEnrolled: vi.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: vi.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured: vi.fn(() => true),
             },
           },
         },
@@ -207,11 +206,11 @@ describe('mfa controller', () => {
           services: {
             mfa: {
               isEnabled: () => true,
-              isEnrolled: jest.fn(() => Promise.resolve(false)),
-              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
-              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: false, days: 30 })),
-              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
-              passkeysConfigured: jest.fn(() => true),
+              isEnrolled: vi.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: false, days: 30 })),
+              passkeySettings: vi.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured: vi.fn(() => true),
             },
           },
         },
@@ -229,10 +228,10 @@ describe('mfa controller', () => {
           services: {
             mfa: {
               isEnabled: () => true,
-              isEnrolled: jest.fn(() => Promise.resolve(false)),
-              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
-              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
-              passkeySettings: jest.fn(() => Promise.resolve({ enabled: false })),
+              isEnrolled: vi.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: vi.fn(() => Promise.resolve({ enabled: false })),
             },
           },
         },
@@ -248,16 +247,16 @@ describe('mfa controller', () => {
     // policy alone, a deployment whose RP cannot resolve (the default production shape -- an
     // IP-literal `admin.absoluteUrl`) would advertise a passkey section that could never work.
     test('reports passkeysEnabled: false when the policy is on but the RP cannot be resolved', async () => {
-      const passkeysConfigured = jest.fn(() => false);
+      const passkeysConfigured = vi.fn(() => false);
       setStrapi({
         admin: {
           services: {
             mfa: {
               isEnabled: () => true,
-              isEnrolled: jest.fn(() => Promise.resolve(false)),
-              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
-              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
-              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
+              isEnrolled: vi.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: vi.fn(() => Promise.resolve({ enabled: true })),
               passkeysConfigured,
             },
           },
@@ -281,11 +280,11 @@ describe('mfa controller', () => {
           services: {
             mfa: {
               isEnabled: () => true,
-              isEnrolled: jest.fn(() => Promise.resolve(false)),
-              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
-              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
-              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
-              passkeysConfigured: jest.fn(() => true),
+              isEnrolled: vi.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: vi.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: vi.fn(() => Promise.resolve({ enabled: true })),
+              passkeysConfigured: vi.fn(() => true),
             },
           },
         },
@@ -302,8 +301,8 @@ describe('mfa controller', () => {
   });
 
   test('enrol requires the current password', async () => {
-    const beginEnrolment = jest.fn();
-    setStrapi({ admin: { services: { mfa: { isEnabled: jest.fn(() => true), beginEnrolment } } } });
+    const beginEnrolment = vi.fn();
+    setStrapi({ admin: { services: { mfa: { isEnabled: vi.fn(() => true), beginEnrolment } } } });
 
     const { ctx } = buildCtx({});
 
@@ -312,16 +311,16 @@ describe('mfa controller', () => {
   });
 
   test('enrol/verify returns recovery codes exactly once, and notifies of the change', async () => {
-    const completeEnrolment = jest.fn(() =>
+    const completeEnrolment = vi.fn(() =>
       Promise.resolve({ recoveryCodes: ['AAAAA-BBBBB', 'CCCCC-DDDDD'], replaced: false })
     );
-    const recordEvent = jest.fn(() => Promise.resolve());
-    const notify = jest.fn();
+    const recordEvent = vi.fn(() => Promise.resolve());
+    const notify = vi.fn();
 
     setStrapi({
       admin: {
         services: {
-          mfa: { isEnabled: jest.fn(() => true), completeEnrolment, recordEvent, notify },
+          mfa: { isEnabled: vi.fn(() => true), completeEnrolment, recordEvent, notify },
         },
       },
     });
@@ -347,17 +346,17 @@ describe('mfa controller', () => {
     // A real second call fails: the account is already enrolled and the TOTP step was already
     // consumed on the first call, so `completeEnrolment` rejects exactly as it does at the
     // service layer. The controller must not paper over that with a second set of codes.
-    const completeEnrolment = jest
+    const completeEnrolment = vi
       .fn()
       .mockResolvedValueOnce({ recoveryCodes: ['AAAAA-BBBBB'], replaced: false })
       .mockRejectedValueOnce(new errors.ValidationError('Invalid code'));
-    const recordEvent = jest.fn(() => Promise.resolve());
-    const notify = jest.fn();
+    const recordEvent = vi.fn(() => Promise.resolve());
+    const notify = vi.fn();
 
     setStrapi({
       admin: {
         services: {
-          mfa: { isEnabled: jest.fn(() => true), completeEnrolment, recordEvent, notify },
+          mfa: { isEnabled: vi.fn(() => true), completeEnrolment, recordEvent, notify },
         },
       },
     });
@@ -376,9 +375,7 @@ describe('mfa controller', () => {
   });
 
   test('enrol forwards a trimmed code so an enrolled user can start a replacement', async () => {
-    const beginEnrolment = jest.fn(() =>
-      Promise.resolve({ secret: 's', otpauthUri: 'otpauth://x' })
-    );
+    const beginEnrolment = vi.fn(() => Promise.resolve({ secret: 's', otpauthUri: 'otpauth://x' }));
     setStrapi({ admin: { services: { mfa: { isEnabled: () => true, beginEnrolment } } } });
     const { ctx } = buildCtx({ password: 'pw', code: ' 123456 ' });
 
@@ -388,9 +385,9 @@ describe('mfa controller', () => {
   });
 
   test('verifyEnrolment records authenticator_replaced when the service reports a replacement', async () => {
-    const recordEvent = jest.fn(() => Promise.resolve());
-    const notify = jest.fn();
-    const completeEnrolment = jest.fn(() =>
+    const recordEvent = vi.fn(() => Promise.resolve());
+    const notify = vi.fn();
+    const completeEnrolment = vi.fn(() =>
       Promise.resolve({ recoveryCodes: ['A'], replaced: true })
     );
     setStrapi({
@@ -408,14 +405,14 @@ describe('mfa controller', () => {
   });
 
   test('disable requires both the password and a valid code', async () => {
-    const assertPasswordAndFactor = jest.fn(() =>
+    const assertPasswordAndFactor = vi.fn(() =>
       Promise.reject(new errors.ValidationError('Invalid credentials'))
     );
-    const disableFn = jest.fn();
-    const recordEvent = jest.fn();
+    const disableFn = vi.fn();
+    const recordEvent = vi.fn();
     const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
-      isEnabled: jest.fn(() => true),
-      isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+      isEnabled: vi.fn(() => true),
+      isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
@@ -451,17 +448,17 @@ describe('mfa controller', () => {
     // Checked before `assertPasswordAndFactor` runs: a broken deployment must not be allowed to
     // spend the caller's password/code attempt, or actually disable two-factor authentication,
     // only to then discover it cannot evict sessions.
-    const assertPasswordAndFactor = jest.fn();
-    const disableFn = jest.fn();
-    const recordEvent = jest.fn();
+    const assertPasswordAndFactor = vi.fn();
+    const disableFn = vi.fn();
+    const recordEvent = vi.fn();
 
     setStrapi({
-      log: { error: jest.fn() },
+      log: { error: vi.fn() },
       admin: {
         services: {
           mfa: {
-            isEnabled: jest.fn(() => true),
-            isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+            isEnabled: vi.fn(() => true),
+            isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
             assertPasswordAndFactor,
             disable: disableFn,
             recordEvent,
@@ -492,13 +489,13 @@ describe('mfa controller', () => {
   });
 
   test("disable invalidates the user's other devices, but not the one making this request", async () => {
-    const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
-    const disableFn = jest.fn(() => Promise.resolve());
-    const recordEvent = jest.fn(() => Promise.resolve());
+    const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
+    const disableFn = vi.fn(() => Promise.resolve());
+    const recordEvent = vi.fn(() => Promise.resolve());
     const { invalidateRefreshToken, listSessions, sessionManagerFn, notify } =
       buildStrapiWithSessionManager({
-        isEnabled: jest.fn(() => true),
-        isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+        isEnabled: vi.fn(() => true),
+        isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
         assertPasswordAndFactor,
         disable: disableFn,
         recordEvent,
@@ -540,12 +537,12 @@ describe('mfa controller', () => {
   });
 
   test('two other sessions sharing one device are invalidated with a single call', async () => {
-    const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
-    const disableFn = jest.fn(() => Promise.resolve());
-    const recordEvent = jest.fn(() => Promise.resolve());
+    const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
+    const disableFn = vi.fn(() => Promise.resolve());
+    const recordEvent = vi.fn(() => Promise.resolve());
     const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
-      isEnabled: jest.fn(() => true),
-      isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+      isEnabled: vi.fn(() => true),
+      isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
@@ -575,12 +572,12 @@ describe('mfa controller', () => {
   });
 
   test('disable falls back to evicting every device when the current session cannot be identified', async () => {
-    const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
-    const disableFn = jest.fn(() => Promise.resolve());
-    const recordEvent = jest.fn(() => Promise.resolve());
+    const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
+    const disableFn = vi.fn(() => Promise.resolve());
+    const recordEvent = vi.fn(() => Promise.resolve());
     const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
-      isEnabled: jest.fn(() => true),
-      isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+      isEnabled: vi.fn(() => true),
+      isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
@@ -597,12 +594,12 @@ describe('mfa controller', () => {
   });
 
   test('disable falls back to evicting every device when the caller session is not in the list', async () => {
-    const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
-    const disableFn = jest.fn(() => Promise.resolve());
-    const recordEvent = jest.fn(() => Promise.resolve());
+    const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
+    const disableFn = vi.fn(() => Promise.resolve());
+    const recordEvent = vi.fn(() => Promise.resolve());
     const { invalidateRefreshToken, listSessions } = buildStrapiWithSessionManager({
-      isEnabled: jest.fn(() => true),
-      isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+      isEnabled: vi.fn(() => true),
+      isMfaRequiredFor: vi.fn(() => Promise.resolve(false)),
       assertPasswordAndFactor,
       disable: disableFn,
       recordEvent,
@@ -627,11 +624,11 @@ describe('mfa controller', () => {
   });
 
   test('disable is refused with MfaRequiredError while the caller is required, before any attempt is spent', async () => {
-    const assertPasswordAndFactor = jest.fn();
+    const assertPasswordAndFactor = vi.fn();
     // `buildStrapiWithSessionManager` calls `setStrapi` itself -- see its definition above.
     buildStrapiWithSessionManager({
       isEnabled: () => true,
-      isMfaRequiredFor: jest.fn(() => Promise.resolve(true)),
+      isMfaRequiredFor: vi.fn(() => Promise.resolve(true)),
       assertPasswordAndFactor,
     });
     const { ctx } = buildCtx({ password: 'pw', code: '123456' });
@@ -641,15 +638,15 @@ describe('mfa controller', () => {
   });
 
   test('regenerating codes requires both the password and a valid code', async () => {
-    const assertPasswordAndFactor = jest.fn(() =>
+    const assertPasswordAndFactor = vi.fn(() =>
       Promise.reject(new errors.ValidationError('Invalid code'))
     );
-    const issueRecoveryCodes = jest.fn();
+    const issueRecoveryCodes = vi.fn();
 
     setStrapi({
       admin: {
         services: {
-          mfa: { isEnabled: jest.fn(() => true), assertPasswordAndFactor, issueRecoveryCodes },
+          mfa: { isEnabled: vi.fn(() => true), assertPasswordAndFactor, issueRecoveryCodes },
         },
       },
     });
@@ -671,9 +668,9 @@ describe('mfa controller', () => {
   });
 
   test("notices leaves out what the caller's own session did", async () => {
-    const unseenEvents = jest.fn(() => Promise.resolve([]));
+    const unseenEvents = vi.fn(() => Promise.resolve([]));
     setStrapi({
-      admin: { services: { mfa: { isEnabled: jest.fn(() => true), unseenEvents } } },
+      admin: { services: { mfa: { isEnabled: vi.fn(() => true), unseenEvents } } },
     });
     const { ctx } = buildCtx({}, { id: 7 }, { session: { id: 'session-a' } });
 
@@ -683,9 +680,9 @@ describe('mfa controller', () => {
   });
 
   test('notices/seen only marks the calling user rows', async () => {
-    const markEventsSeen = jest.fn(() => Promise.resolve());
+    const markEventsSeen = vi.fn(() => Promise.resolve());
     setStrapi({
-      admin: { services: { mfa: { isEnabled: jest.fn(() => true), markEventsSeen } } },
+      admin: { services: { mfa: { isEnabled: vi.fn(() => true), markEventsSeen } } },
     });
 
     const { ctx } = buildCtx({ ids: [101, 202] }, { id: 7 }, { session: { id: 'session-a' } });
@@ -700,7 +697,7 @@ describe('mfa controller', () => {
     // A body that tries to smuggle a different owner in is rejected outright: `.noUnknown()` on
     // the validator has no `userId` field to accept, so this never reaches the service at all --
     // the actual cross-user isolation (a foreign id inside `ids` is left untouched) is proven at
-    // the service layer in `services/__tests__/mfa.test.ts`, against real rows.
+    // the service layer in `services/__tests__/mfa.vitest.test.ts`, against real rows.
     markEventsSeen.mockClear();
     const { ctx: injectionAttemptCtx } = buildCtx({ ids: [101], userId: 'someone-else' });
     await expect(mfaController.markNoticesSeen(injectionAttemptCtx)).rejects.toMatchObject({
@@ -711,13 +708,13 @@ describe('mfa controller', () => {
 
   describe('unlockUser', () => {
     const build = (unlockResult: boolean, userExists = true) => {
-      const unlock = jest.fn(() => Promise.resolve(unlockResult));
-      const findOne = jest.fn(() => Promise.resolve(userExists ? { id: 3 } : null));
+      const unlock = vi.fn(() => Promise.resolve(unlockResult));
+      const findOne = vi.fn(() => Promise.resolve(userExists ? { id: 3 } : null));
       setStrapi({
         admin: { services: { mfa: { isEnabled: () => true, unlock }, user: { findOne } } },
       });
-      const notFound = jest.fn();
-      const badRequest = jest.fn();
+      const notFound = vi.fn();
+      const badRequest = vi.fn();
       const ctx = createContext(
         {},
         {
@@ -756,12 +753,12 @@ describe('mfa controller', () => {
 
   describe('resetUser', () => {
     const build = (userExists = true, targetId = '3') => {
-      const resetUser = jest.fn(() => Promise.resolve());
-      const findOne = jest.fn(() => Promise.resolve(userExists ? { id: Number(targetId) } : null));
+      const resetUser = vi.fn(() => Promise.resolve());
+      const findOne = vi.fn(() => Promise.resolve(userExists ? { id: Number(targetId) } : null));
       setStrapi({
         admin: { services: { mfa: { isEnabled: () => true, resetUser }, user: { findOne } } },
       });
-      const notFound = jest.fn();
+      const notFound = vi.fn();
       const ctx = createContext(
         {},
         {
@@ -815,7 +812,7 @@ describe('mfa controller', () => {
 
   describe('trusted devices', () => {
     const enabledMfa = (overrides: Record<string, unknown> = {}) => ({
-      isEnabled: jest.fn(() => true),
+      isEnabled: vi.fn(() => true),
       ...overrides,
     });
     const device = {
@@ -828,7 +825,7 @@ describe('mfa controller', () => {
     };
 
     test('listTrustedDevices passes the presented cookie so the current row can be marked', async () => {
-      const listTrustedDevices = jest.fn(() => Promise.resolve([device]));
+      const listTrustedDevices = vi.fn(() => Promise.resolve([device]));
       setStrapi({ admin: { services: { mfa: enabledMfa({ listTrustedDevices }) } } });
       const { ctx } = buildCtx({}, {}, {}, { cookies: { [MFA_TRUST_COOKIE_NAME]: 'trust-token' } });
 
@@ -839,7 +836,7 @@ describe('mfa controller', () => {
     });
 
     test('revokeTrustedDevice: a non-numeric id is a 404 without touching the service', async () => {
-      const revokeTrustedDevice = jest.fn();
+      const revokeTrustedDevice = vi.fn();
       setStrapi({ admin: { services: { mfa: enabledMfa({ revokeTrustedDevice }) } } });
       const { ctx, notFound } = buildCtx({}, {}, {}, { params: { id: '3; drop' } });
 
@@ -850,9 +847,7 @@ describe('mfa controller', () => {
     });
 
     test("revokeTrustedDevice: a row that is not the caller's is a 404 and no cookie changes", async () => {
-      const revokeTrustedDevice = jest.fn(() =>
-        Promise.resolve({ revoked: false, current: false })
-      );
+      const revokeTrustedDevice = vi.fn(() => Promise.resolve({ revoked: false, current: false }));
       setStrapi({ admin: { services: { mfa: enabledMfa({ revokeTrustedDevice }) } } });
       const { ctx, notFound, cookiesSet } = buildCtx({}, {}, {}, { params: { id: '3' } });
 
@@ -864,16 +859,16 @@ describe('mfa controller', () => {
     });
 
     test('revokeTrustedDevice: the current row clears the cookie, another row does not', async () => {
-      const revokeTrustedDevice = jest
+      const revokeTrustedDevice = vi
         .fn()
         .mockResolvedValueOnce({ revoked: true, current: true })
         .mockResolvedValueOnce({ revoked: true, current: false });
       // `revokeTrustedDevice` clears the trust cookie via `clearTrustCookie`, which reads cookie
-      // scope options off `strapi.config` (see `session-issuing-paths.test.ts` for the same
+      // scope options off `strapi.config` (see `session-issuing-paths.vitest.test.ts` for the same
       // double) -- unlike the other trusted-device tests, this is the one where the current row
       // actually triggers that path.
       setStrapi({
-        config: { get: jest.fn(() => undefined) },
+        config: { get: vi.fn(() => undefined) },
         admin: { services: { mfa: enabledMfa({ revokeTrustedDevice }) } },
       });
 
@@ -904,10 +899,10 @@ describe('mfa controller', () => {
     });
 
     test('revokeAllTrustedDevices always clears the cookie', async () => {
-      const revokeAllTrustedDevices = jest.fn(() => Promise.resolve(2));
+      const revokeAllTrustedDevices = vi.fn(() => Promise.resolve(2));
       // Same `config` double as above: this handler always calls `clearTrustCookie`.
       setStrapi({
-        config: { get: jest.fn(() => undefined) },
+        config: { get: vi.fn(() => undefined) },
         admin: { services: { mfa: enabledMfa({ revokeAllTrustedDevices }) } },
       });
       const { ctx, cookiesSet } = buildCtx();
@@ -924,8 +919,8 @@ describe('mfa controller', () => {
     });
 
     test('listUserTrustedDevices: 404 for an unknown user; current is stripped for a known one', async () => {
-      const listTrustedDevices = jest.fn(() => Promise.resolve([device]));
-      const findOne = jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 42 });
+      const listTrustedDevices = vi.fn(() => Promise.resolve([device]));
+      const findOne = vi.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 42 });
       setStrapi({
         admin: { services: { mfa: enabledMfa({ listTrustedDevices }), user: { findOne } } },
       });
@@ -957,8 +952,8 @@ describe('mfa controller', () => {
     });
 
     test('revokeUserTrustedDevices: 404 for an unknown user; names the acting administrator otherwise', async () => {
-      const revokeAllTrustedDevices = jest.fn(() => Promise.resolve(1));
-      const findOne = jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 42 });
+      const revokeAllTrustedDevices = vi.fn(() => Promise.resolve(1));
+      const findOne = vi.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 42 });
       setStrapi({
         admin: { services: { mfa: enabledMfa({ revokeAllTrustedDevices }), user: { findOne } } },
       });
@@ -977,25 +972,25 @@ describe('mfa controller', () => {
 
   describe('passkeys', () => {
     const buildStrapiWithPasskeys = (overrides: Record<string, unknown> = {}) => {
-      const passkeySettings = jest.fn(() => Promise.resolve({ enabled: true }));
-      const isEnrolled = jest.fn(() => Promise.resolve(true));
-      const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
-      const passkeyRegistrationOptions = jest.fn(() =>
+      const passkeySettings = vi.fn(() => Promise.resolve({ enabled: true }));
+      const isEnrolled = vi.fn(() => Promise.resolve(true));
+      const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
+      const passkeyRegistrationOptions = vi.fn(() =>
         Promise.resolve({
           challenge: 'opts-challenge',
           rp: { id: 'cms.example.com', name: 'Strapi' },
         })
       );
-      const registerPasskey = jest.fn(() =>
+      const registerPasskey = vi.fn(() =>
         Promise.resolve({ id: '4', name: 'Work laptop', createdAt: 'now', lastUsedAt: null })
       );
-      const listPasskeys = jest.fn(() => Promise.resolve([]));
-      const countPasskeys = jest.fn(() => Promise.resolve(2));
-      const deletePasskey = jest.fn(() => Promise.resolve(true));
-      const clearPasskeys = jest.fn(() => Promise.resolve(2));
-      const recordEvent = jest.fn(() => Promise.resolve());
-      const notify = jest.fn(() => Promise.resolve());
-      const findOne = jest.fn((id: string) =>
+      const listPasskeys = vi.fn(() => Promise.resolve([]));
+      const countPasskeys = vi.fn(() => Promise.resolve(2));
+      const deletePasskey = vi.fn(() => Promise.resolve(true));
+      const clearPasskeys = vi.fn(() => Promise.resolve(2));
+      const recordEvent = vi.fn(() => Promise.resolve());
+      const notify = vi.fn(() => Promise.resolve());
+      const findOne = vi.fn((id: string) =>
         Promise.resolve(id === '404' ? null : { id: Number(id) })
       );
 
@@ -1039,7 +1034,7 @@ describe('mfa controller', () => {
 
     test('options refuses with "Passkeys are disabled" before the body is even validated', async () => {
       const doubles = buildStrapiWithPasskeys({
-        passkeySettings: jest.fn(() => Promise.resolve({ enabled: false })),
+        passkeySettings: vi.fn(() => Promise.resolve({ enabled: false })),
       });
       // An empty body would fail validation too; the policy message is what must come back, and
       // no attempt may be spent on a request that can never succeed.
@@ -1054,7 +1049,7 @@ describe('mfa controller', () => {
 
     test("options refuses an unenrolled caller: a passkey is never a user's only factor", async () => {
       const doubles = buildStrapiWithPasskeys({
-        isEnrolled: jest.fn(() => Promise.resolve(false)),
+        isEnrolled: vi.fn(() => Promise.resolve(false)),
       });
       const { ctx } = buildCtx({ password: 'pw', code: '123456' });
 
@@ -1091,7 +1086,7 @@ describe('mfa controller', () => {
 
     test('a wrong code refuses even with the right password, and issues no ceremony', async () => {
       const doubles = buildStrapiWithPasskeys({
-        assertPasswordAndFactor: jest.fn(() =>
+        assertPasswordAndFactor: vi.fn(() =>
           Promise.reject(new errors.ValidationError('Invalid code'))
         ),
       });
@@ -1158,7 +1153,7 @@ describe('mfa controller', () => {
 
     test("delete: a row that is not the caller's is a 404; their own is a 204 with no body", async () => {
       const missing = buildStrapiWithPasskeys({
-        deletePasskey: jest.fn(() => Promise.resolve(false)),
+        deletePasskey: vi.fn(() => Promise.resolve(false)),
       });
       const first = buildCtx(removalBody('9'));
       await mfaController.deletePasskey(first.ctx);
@@ -1169,7 +1164,7 @@ describe('mfa controller', () => {
       // which allows no unspecified keys -- and the handler would ignore it anyway, since it
       // reads the owner from the session. Either way the row is never touched.
       const spoofed = buildStrapiWithPasskeys({
-        deletePasskey: jest.fn(() => Promise.resolve(false)),
+        deletePasskey: vi.fn(() => Promise.resolve(false)),
       });
       const injected = buildCtx({ ...removalBody('9'), userId: '8' });
       await expect(mfaController.deletePasskey(injected.ctx)).rejects.toThrow(/userId/);
@@ -1190,7 +1185,7 @@ describe('mfa controller', () => {
      */
     test('delete: a wrong credential is refused before the row is touched', async () => {
       const refused = buildStrapiWithPasskeys({
-        assertPasswordAndFactor: jest.fn(() => Promise.reject(new Error('Invalid credentials'))),
+        assertPasswordAndFactor: vi.fn(() => Promise.reject(new Error('Invalid credentials'))),
       });
       const { ctx } = buildCtx(removalBody('9'));
 
@@ -1245,7 +1240,7 @@ describe('mfa controller', () => {
     });
 
     test('the administrator delete on an empty list leaves no notice behind', async () => {
-      const doubles = buildStrapiWithPasskeys({ clearPasskeys: jest.fn(() => Promise.resolve(0)) });
+      const doubles = buildStrapiWithPasskeys({ clearPasskeys: vi.fn(() => Promise.resolve(0)) });
       const { ctx } = buildCtx({}, {}, {}, { params: { id: '12' } });
 
       await mfaController.deleteUserPasskeys(ctx);

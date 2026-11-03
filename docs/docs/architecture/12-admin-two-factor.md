@@ -321,7 +321,7 @@ Admin panel:
 
 | Kind           | Location                                                                                                                                                  |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit (server)  | `packages/core/admin/server/src/services/__tests__/mfa.test.ts`, `controllers/__tests__/mfa.test.ts`                                                      |
+| Unit (server)  | `packages/core/admin/server/src/services/__tests__/mfa.vitest.test.ts`, `controllers/__tests__/mfa.vitest.test.ts`                                        |
 | Unit (admin)   | `packages/core/admin/admin/src/**/tests/` beside each component                                                                                           |
 | API            | `tests/api/core/admin/admin-mfa-*.test.api.ts`: TOTP, enforcement, trusted devices, passkeys (incl. real cryptography), throttling, concurrency, flag off |
 | E2E            | `tests/e2e/tests/admin/mfa{,-enforcement,-trusted-devices,-passkeys}.spec.ts`                                                                             |

@@ -1,5 +1,4 @@
-/* eslint-env jest */
-
+import { describe, test, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import minVersion from 'semver/ranges/min-version';

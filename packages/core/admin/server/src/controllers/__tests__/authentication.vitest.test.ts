@@ -487,8 +487,8 @@ describe('authentication controller', () => {
     });
 
     // The feature-off 404 is the `admin::isMfaEnabled` policy's job, not this handler's --
-    // `routes/__tests__/authentication.test.ts` pins that the three `/login/mfa*` routes carry
-    // it, and `policies/__tests__/isMfaEnabled.test.ts` pins what it does. A policy runs before
+    // `routes/__tests__/authentication.vitest.test.ts` pins that the three `/login/mfa*` routes carry
+    // it, and `policies/__tests__/isMfaEnabled.vitest.test.ts` pins what it does. A policy runs before
     // the handler, so it also still runs before body validation.
 
     describe('login with enforcement', () => {

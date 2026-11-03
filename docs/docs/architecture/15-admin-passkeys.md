@@ -278,12 +278,12 @@ hide itself, so the journeys would fail for a configuration reason rather than a
 Note that the design system renders tables as a **grid**, so Playwright locators for passkey rows
 use `role="gridcell"`, not `cell`.
 
-| Kind          | Location                                                                                                                                                 |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit (server) | `packages/core/admin/server/src/services/__tests__/mfa-passkeys-rp.test.ts` (relying-party resolution) and the passkey blocks of `__tests__/mfa.test.ts` |
-| Unit (admin)  | `pages/Profile/tests/Passkeys.test.tsx`, `utils/tests/webauthn.test.ts`, `pages/Settings/pages/Security/components/tests/PasskeysCard.test.tsx`          |
-| API           | `tests/api/core/admin/admin-mfa-passkeys.test.api.ts`                                                                                                    |
-| E2E           | `tests/e2e/tests/admin/mfa-passkeys.spec.ts`                                                                                                             |
+| Kind          | Location                                                                                                                                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit (server) | `packages/core/admin/server/src/services/__tests__/mfa-passkeys-rp.vitest.test.ts` (relying-party resolution) and the passkey blocks of `__tests__/mfa.vitest.test.ts` |
+| Unit (admin)  | `pages/Profile/tests/Passkeys.test.tsx`, `utils/tests/webauthn.test.ts`, `pages/Settings/pages/Security/components/tests/PasskeysCard.test.tsx`                        |
+| API           | `tests/api/core/admin/admin-mfa-passkeys.test.api.ts`                                                                                                                  |
+| E2E           | `tests/e2e/tests/admin/mfa-passkeys.spec.ts`                                                                                                                           |
 
 ## Key files
 

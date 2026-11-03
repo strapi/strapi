@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import { merge } from 'lodash';
 import { MFA_DEFAULTS, validateMfaConfig } from '../mfa';
 import * as config from '../index';

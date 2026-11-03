@@ -1,5 +1,4 @@
-/* eslint-env jest */
-
+import { describe, test, expect, vi } from 'vitest';
 import isMfaEnabled from '../isMfaEnabled';
 
 type PolicyHandler = (ctx: unknown, config: unknown, deps: { strapi: unknown }) => void;
@@ -7,7 +6,7 @@ type PolicyHandler = (ctx: unknown, config: unknown, deps: { strapi: unknown }) 
 const handler = (isMfaEnabled as unknown as { handler: PolicyHandler }).handler;
 
 const strapiWith = (enabled: boolean) => ({
-  service: jest.fn(() => ({ isEnabled: () => enabled })),
+  service: vi.fn(() => ({ isEnabled: () => enabled })),
 });
 
 describe('admin::isMfaEnabled', () => {
@@ -23,7 +22,7 @@ describe('admin::isMfaEnabled', () => {
   });
 
   test('asks the mfa service on every request rather than deciding once at route build', () => {
-    const strapi = { service: jest.fn(() => ({ isEnabled: () => false })) };
+    const strapi = { service: vi.fn(() => ({ isEnabled: () => false })) };
 
     expect(() => handler({}, {}, { strapi })).toThrow(
       expect.objectContaining({ name: 'NotFoundError' })

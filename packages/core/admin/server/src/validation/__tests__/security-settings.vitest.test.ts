@@ -1,5 +1,4 @@
-/* eslint-env jest */
-
+import { describe, test, expect } from 'vitest';
 /** Exercised through `validateUpdateSecuritySettings`: `passkeysSchema` is not exported, so there
  * is no way to reach it in isolation. */
 import { validateUpdateSecuritySettings } from '../security-settings';

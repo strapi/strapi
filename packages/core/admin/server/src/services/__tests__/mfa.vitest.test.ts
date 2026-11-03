@@ -1,3 +1,4 @@
+import { describe, test, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 import type { Core } from '@strapi/types';
 import {
   generateTotp,
@@ -19,14 +20,14 @@ import { resetSecuritySettingsWarnings } from '../security-settings';
  * Mocks exactly the two passkey verification functions and nothing else. What is under test here
  * is our wiring -- challenge consumption, owner scoping, marshalling, counters, charging,
  * cascades -- not `@simplewebauthn`'s cryptography, which has its own suite upstream and whose
- * call shapes are pinned in `webauthn-library-contract.test.ts`. `generateRegistrationOptions`
+ * call shapes are pinned in `webauthn-library-contract.vitest.test.ts`. `generateRegistrationOptions`
  * and `generateAuthenticationOptions` are deliberately left real: they are pure, they mint the
  * challenge these tests then have to match, and they enforce the `Uint8Array` userID.
  */
-jest.mock('@simplewebauthn/server', () => ({
-  ...jest.requireActual('@simplewebauthn/server'),
-  verifyRegistrationResponse: jest.fn(),
-  verifyAuthenticationResponse: jest.fn(),
+vi.mock('@simplewebauthn/server', async () => ({
+  ...(await vi.importActual<typeof import('@simplewebauthn/server')>('@simplewebauthn/server')),
+  verifyRegistrationResponse: vi.fn(),
+  verifyAuthenticationResponse: vi.fn(),
 }));
 
 const DEFAULT_USER_TABLE = 'admin_users';
@@ -527,9 +528,9 @@ interface FixtureOptions {
   challengeWebauthnColumn?: string;
   /** Merged over `{ enabled: true }` and returned for `strapi.config.get('admin.auth.mfa')`. */
   mfaConfig?: Record<string, unknown>;
-  recoveryOverrides?: Record<string, jest.Mock>;
+  recoveryOverrides?: Record<string, Mock>;
   /** Lets a test swap in a throwing `update` etc. to exercise `disable`'s transaction. */
-  userOverrides?: Record<string, jest.Mock>;
+  userOverrides?: Record<string, Mock>;
   strapiOverrides?: Record<string, unknown>;
 }
 
@@ -584,7 +585,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     mfaPasskeyChallengeExpiresAt: null,
   });
 
-  const metadataGet = jest.fn((uid: string) => {
+  const metadataGet = vi.fn((uid: string) => {
     switch (uid) {
       case USER_UID:
         return {
@@ -623,10 +624,10 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   // for a user row that doesn't carry them) ever sets it, via direct assignment on the returned
   // fixture -- the annotation exists purely so that assignment type-checks.
   const userMocks: {
-    findOne: jest.Mock;
-    update: jest.Mock;
-    updateMany: jest.Mock;
-    load?: jest.Mock;
+    findOne: Mock;
+    update: Mock;
+    updateMany: Mock;
+    load?: Mock;
   } = {
     // A real `findOne` returns a fresh snapshot, not a live reference into storage — a
     // subsequent write elsewhere must not retroactively change what an in-flight read already
@@ -637,7 +638,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     // `populate: ['roles']` is honoured on top of that: `enforce` reloads the row itself and
     // always asks for roles, so a snapshot that silently dropped an unpopulated `roles` field
     // would let the enforcement suite pass without ever exercising the real shape.
-    findOne: jest.fn(async ({ where, populate }: any) => {
+    findOne: vi.fn(async ({ where, populate }: any) => {
       const row = users.get(String(where.id));
       if (!row) return null;
       const snapshot: UserRow = { ...row };
@@ -648,7 +649,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       }
       return snapshot;
     }),
-    update: jest.fn(async ({ where, data }: any) => {
+    update: vi.fn(async ({ where, data }: any) => {
       const user = users.get(String(where.id));
       if (!user) return null;
       Object.assign(user, data);
@@ -665,7 +666,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     // `mfaPendingSecret` value read at the top of the function alongside `id`, so a row that
     // changed underneath (a concurrent `disable`, or any other write) between that read and this
     // call matches nothing and `count` comes back 0.
-    updateMany: jest.fn(async ({ where, data }: any) => {
+    updateMany: vi.fn(async ({ where, data }: any) => {
       const { id, ...rest } = where ?? {};
       let count = 0;
       for (const row of users.values()) {
@@ -686,7 +687,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const recoveryRows: RecoveryRow[] = [];
   let nextRecoveryId = 1;
   const recoveryMocks = {
-    deleteMany: jest.fn(async ({ where }: any) => {
+    deleteMany: vi.fn(async ({ where }: any) => {
       let count = 0;
       for (let i = recoveryRows.length - 1; i >= 0; i -= 1) {
         if (recoveryRows[i].userId === where.userId) {
@@ -696,19 +697,19 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       }
       return { count };
     }),
-    createMany: jest.fn(async ({ data }: any) => {
+    createMany: vi.fn(async ({ data }: any) => {
       for (const row of data) {
         recoveryRows.push({ id: nextRecoveryId, usedAt: null, ...row });
         nextRecoveryId += 1;
       }
       return { count: data.length };
     }),
-    findMany: jest.fn(async ({ where }: any) =>
+    findMany: vi.fn(async ({ where }: any) =>
       recoveryRows
         .filter((r) => r.userId === where.userId && r.usedAt === where.usedAt)
         .map((r) => ({ ...r }))
     ),
-    count: jest.fn(
+    count: vi.fn(
       async ({ where }: any) =>
         recoveryRows.filter((r) => r.userId === where.userId && r.usedAt === where.usedAt).length
     ),
@@ -718,7 +719,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const challenges: ChallengeRow[] = [];
   let nextChallengeId = 1;
   const challengeMocks = {
-    create: jest.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: any) => {
       // `createdAt` is supplied by @strapi/database's timestamps subscriber, which uses
       // `_.defaults` — so it is filled in here unless the caller passed one.
       const row: ChallengeRow = { id: nextChallengeId, createdAt: new Date(), ...data };
@@ -726,11 +727,11 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       challenges.push(row);
       return { ...row };
     }),
-    findOne: jest.fn(async ({ where }: any) => {
+    findOne: vi.fn(async ({ where }: any) => {
       const row = challenges.find((c) => matchesWhere(c, where));
       return row ? { ...row } : null;
     }),
-    deleteMany: jest.fn(async ({ where }: any) => {
+    deleteMany: vi.fn(async ({ where }: any) => {
       let count = 0;
       for (let i = challenges.length - 1; i >= 0; i -= 1) {
         if (matchesWhere(challenges[i], where)) {
@@ -740,7 +741,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       }
       return { count };
     }),
-    count: jest.fn(
+    count: vi.fn(
       async ({ where }: any = {}) => challenges.filter((c) => matchesWhere(c, where)).length
     ),
   };
@@ -748,13 +749,13 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const events: EventRow[] = [];
   let nextEventId = 1;
   const eventMocks = {
-    create: jest.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: any) => {
       const row: EventRow = { id: nextEventId, createdAt: new Date(), ...data };
       nextEventId += 1;
       events.push(row);
       return { ...row };
     }),
-    count: jest.fn(
+    count: vi.fn(
       async ({ where }: any = {}) => events.filter((e) => matchesWhere(e, where)).length
     ),
     // `orderBy` accepts either a single `{ field: direction }` clause or an array of them,
@@ -763,7 +764,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     // (`ORDER BY createdAt DESC, id DESC OFFSET n LIMIT 1`), and a stub that ignored `offset` could
     // never distinguish "cap not reached yet" from "reached", since both would report the newest
     // row as the cutoff.
-    findMany: jest.fn(async ({ where, orderBy, offset, limit }: any = {}) => {
+    findMany: vi.fn(async ({ where, orderBy, offset, limit }: any = {}) => {
       const matches = events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }));
       let clauses: Array<Record<string, string>> = [];
       if (Array.isArray(orderBy)) {
@@ -791,7 +792,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     // `orderBy` shape mirrors `findMany` above -- `areCodesAcknowledged` asks for it (`createdAt`
     // desc, `id` desc as a tiebreaker for rows created in the same millisecond, which a real
     // store's clock resolution cannot rule out).
-    findOne: jest.fn(async ({ where, orderBy }: any = {}) => {
+    findOne: vi.fn(async ({ where, orderBy }: any = {}) => {
       const matches = events.filter((e) => matchesWhere(e, where)).map((e) => ({ ...e }));
       let clauses: Array<Record<string, string>> = [];
       if (Array.isArray(orderBy)) {
@@ -817,7 +818,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     }),
     // Mutates the live rows, not a snapshot, like every other store here: a test has to observe
     // the write through the same `events` array the fixture hands back.
-    deleteMany: jest.fn(async ({ where }: any) => {
+    deleteMany: vi.fn(async ({ where }: any) => {
       let count = 0;
       for (let i = events.length - 1; i >= 0; i -= 1) {
         if (matchesWhere(events[i], where)) {
@@ -827,7 +828,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       }
       return { count };
     }),
-    updateMany: jest.fn(async ({ where, data }: any) => {
+    updateMany: vi.fn(async ({ where, data }: any) => {
       let count = 0;
       for (const event of events) {
         if (matchesWhere(event, where)) {
@@ -845,7 +846,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const trustedRows: TrustedRow[] = [];
   let nextTrustedId = 1;
   const trustedMocks = {
-    create: jest.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: any) => {
       const row: TrustedRow = {
         id: nextTrustedId,
         createdAt: new Date(),
@@ -858,23 +859,23 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       trustedRows.push(row);
       return { ...row };
     }),
-    findOne: jest.fn(async ({ where }: any) => {
+    findOne: vi.fn(async ({ where }: any) => {
       const row = trustedRows.find((r) => matchesWhere(r, where));
       return row ? { ...row } : null;
     }),
-    findMany: jest.fn(async ({ where, orderBy }: any = {}) =>
+    findMany: vi.fn(async ({ where, orderBy }: any = {}) =>
       applyOrderBy(
         trustedRows.filter((r) => matchesWhere(r, where)),
         orderBy
       ).map((r) => ({ ...r }))
     ),
-    update: jest.fn(async ({ where, data }: any) => {
+    update: vi.fn(async ({ where, data }: any) => {
       const row = trustedRows.find((r) => matchesWhere(r, where));
       if (!row) return null;
       Object.assign(row, data);
       return { ...row };
     }),
-    deleteMany: jest.fn(async ({ where }: any) => {
+    deleteMany: vi.fn(async ({ where }: any) => {
       let count = 0;
       for (let i = trustedRows.length - 1; i >= 0; i -= 1) {
         if (matchesWhere(trustedRows[i], where)) {
@@ -884,7 +885,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       }
       return { count };
     }),
-    count: jest.fn(
+    count: vi.fn(
       async ({ where }: any = {}) => trustedRows.filter((r) => matchesWhere(r, where)).length
     ),
   };
@@ -894,7 +895,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const passkeyRows: PasskeyRowFixture[] = [];
   let nextPasskeyId = 1;
   const passkeyMocks = {
-    create: jest.fn(async ({ data }: any) => {
+    create: vi.fn(async ({ data }: any) => {
       const row: PasskeyRowFixture = {
         id: nextPasskeyId,
         createdAt: new Date(),
@@ -906,23 +907,23 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       passkeyRows.push(row);
       return { ...row };
     }),
-    findOne: jest.fn(async ({ where }: any) => {
+    findOne: vi.fn(async ({ where }: any) => {
       const row = passkeyRows.find((r) => matchesWhere(r, where));
       return row ? { ...row } : null;
     }),
-    findMany: jest.fn(async ({ where, orderBy }: any = {}) =>
+    findMany: vi.fn(async ({ where, orderBy }: any = {}) =>
       applyOrderBy(
         passkeyRows.filter((r) => matchesWhere(r, where)),
         orderBy
       ).map((r) => ({ ...r }))
     ),
-    update: jest.fn(async ({ where, data }: any) => {
+    update: vi.fn(async ({ where, data }: any) => {
       const row = passkeyRows.find((r) => matchesWhere(r, where));
       if (!row) return null;
       Object.assign(row, data);
       return { ...row };
     }),
-    deleteMany: jest.fn(async ({ where }: any) => {
+    deleteMany: vi.fn(async ({ where }: any) => {
       let count = 0;
       for (let i = passkeyRows.length - 1; i >= 0; i -= 1) {
         if (matchesWhere(passkeyRows[i], where)) {
@@ -932,7 +933,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       }
       return { count };
     }),
-    count: jest.fn(
+    count: vi.fn(
       async ({ where }: any = {}) => passkeyRows.filter((r) => matchesWhere(r, where)).length
     ),
   };
@@ -955,28 +956,28 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
 
   const strapiBase = {
     config: {
-      get: jest.fn((path: string, defaultValue?: unknown) => {
+      get: vi.fn((path: string, defaultValue?: unknown) => {
         if (path === 'admin.auth.mfa') return { enabled: true, ...options.mfaConfig };
         return defaultValue;
       }),
     },
-    features: { future: { isEnabled: jest.fn(() => true) } },
-    log: { warn: jest.fn(), error: jest.fn(), info: jest.fn() },
+    features: { future: { isEnabled: vi.fn(() => true) } },
+    log: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
     // `notify`'s eventHub emit is unconditional and synchronous -- every test that reaches a
     // `challenge_failed` fallthrough (the whole challenge-lifecycle suite included) now goes
-    // through it, so a real jest mock has to be here unconditionally, not only in the tests that
+    // through it, so a real mock has to be here unconditionally, not only in the tests that
     // are actually about `notify`.
     // `emit` returns a promise in the real hub, and `notify` attaches a `.catch` to it.
-    eventHub: { emit: jest.fn(async () => {}) },
+    eventHub: { emit: vi.fn(async () => {}) },
     // Same reasoning for the fire-and-forget email half of `notify`: a resolving default means
     // every incidental notify (e.g. a challenge_failed-adjacent enrolment test) settles quietly
     // instead of logging a caught error nobody asked about. Tests about `notify` itself override
     // this via `strapiOverrides`.
-    plugin: jest.fn(() => ({
-      service: jest.fn(() => ({ sendTemplatedEmail: jest.fn().mockResolvedValue(undefined) })),
+    plugin: vi.fn(() => ({
+      service: vi.fn(() => ({ sendTemplatedEmail: vi.fn().mockResolvedValue(undefined) })),
     })),
     db: {
-      query: jest.fn((uid: string) => {
+      query: vi.fn((uid: string) => {
         switch (uid) {
           case USER_UID:
             return userMocks;
@@ -994,7 +995,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
             throw new Error(`Unexpected query uid in mock: ${uid}`);
         }
       }),
-      getConnection: jest.fn((table: string) => {
+      getConnection: vi.fn((table: string) => {
         if (table === userTable) return userConnection(table);
         if (table === recoveryTable) return recoveryConnection(table);
         if (table === challengeTable) return challengeConnection(table);
@@ -1014,7 +1015,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       inTransaction() {
         return transactionDepth > 0;
       },
-      transaction: jest.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) => {
+      transaction: vi.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) => {
         transactionDepth += 1;
         const usersSnapshot = new Map(Array.from(users.entries(), ([id, row]) => [id, { ...row }]));
         const recoverySnapshot = recoveryRows.map((row) => ({ ...row }));
@@ -1072,16 +1073,16 @@ const buildStrapi = (
   overrides: Record<string, unknown> = {},
   metadataOverrides: { tableName?: string; columnName?: string } = {},
   recoveryOverrides: {
-    deleteMany?: jest.Mock;
-    createMany?: jest.Mock;
-    findMany?: jest.Mock;
-    count?: jest.Mock;
+    deleteMany?: Mock;
+    createMany?: Mock;
+    findMany?: Mock;
+    count?: Mock;
   } = {}
 ) =>
   buildMfaFixture({
     userTableName: metadataOverrides.tableName,
     userStepColumn: metadataOverrides.columnName,
-    recoveryOverrides: recoveryOverrides as Record<string, jest.Mock>,
+    recoveryOverrides: recoveryOverrides as Record<string, Mock>,
     strapiOverrides: overrides,
   });
 
@@ -1215,7 +1216,7 @@ describe('mfa service: enrolment', () => {
       {},
       {},
       {
-        createMany: jest.fn(async () => {
+        createMany: vi.fn(async () => {
           throw new Error('constraint violation');
         }),
       }
@@ -1402,7 +1403,7 @@ describe('mfa service: enrolment', () => {
       {},
       {},
       {
-        createMany: jest.fn(async () => {
+        createMany: vi.fn(async () => {
           users.get('1')!.mfaPendingSecret = null;
           return { count: 0 };
         }),
@@ -1462,12 +1463,12 @@ describe('mfa service: enrolment', () => {
       expect(originalHashes.length).toBeGreaterThan(0);
 
       const now = Date.now() + 60_000;
-      jest.useFakeTimers({ now });
+      vi.useFakeTimers({ now });
       try {
         const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
         const { secret: pending } = await service.beginEnrolment('1', 'pw', current);
 
-        const updateMany = (strapi.db.query('admin::user') as { updateMany: jest.Mock }).updateMany;
+        const updateMany = (strapi.db.query('admin::user') as { updateMany: Mock }).updateMany;
         const real = updateMany.getMockImplementation()!;
         updateMany.mockImplementation(async (args: { where?: Record<string, unknown> }) => {
           if (args?.where && 'mfaPendingSecret' in args.where) {
@@ -1476,14 +1477,14 @@ describe('mfa service: enrolment', () => {
           return real(args);
         });
 
-        jest.advanceTimersByTime(30_000);
+        vi.advanceTimersByTime(30_000);
         const next = generateTotp({ secret: base32Decode(pending), step: 30, digits: 6 });
 
         await expect(service.completeEnrolment('1', next)).rejects.toThrow(/promotion failed/i);
 
         updateMany.mockImplementation(real);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
 
       // The old authenticator still works, so the codes that pair with it must still be on file.
@@ -1560,7 +1561,7 @@ describe('mfa service: enrolment', () => {
       const { service, users, secret } = await enrol();
       // Step forward so the replacement code is not the one already consumed by enrolment.
       const now = Date.now() + 60_000;
-      jest.useFakeTimers({ now });
+      vi.useFakeTimers({ now });
       try {
         const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
         const next = await service.beginEnrolment('1', 'pw', current);
@@ -1571,7 +1572,7 @@ describe('mfa service: enrolment', () => {
         expect(row.mfaEnabledAt).toBeInstanceOf(Date);
         expect(await service.isEnrolled('1')).toBe(true);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
@@ -1587,7 +1588,7 @@ describe('mfa service: enrolment', () => {
     test('verifying the replacement promotes it, voids the old recovery codes and reports replaced: true', async () => {
       const { service, users, secret, recoveryRows, firstCodes } = await enrol();
       const now = Date.now() + 60_000;
-      jest.useFakeTimers({ now });
+      vi.useFakeTimers({ now });
       try {
         const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
         const next = await service.beginEnrolment('1', 'pw', current);
@@ -1595,7 +1596,7 @@ describe('mfa service: enrolment', () => {
         // A second step forward, even though this code comes from a different secret:
         // `consumeTotpStep`'s replay guard is account-wide, not per-secret, so the step
         // `beginEnrolment` just spent is spent for the new secret too.
-        jest.setSystemTime(now + 60_000);
+        vi.setSystemTime(now + 60_000);
         const newCode = generateTotp({ secret: base32Decode(next.secret), step: 30, digits: 6 });
         const result = await service.completeEnrolment('1', newCode);
 
@@ -1609,32 +1610,32 @@ describe('mfa service: enrolment', () => {
         expect(recoveryRows).toHaveLength(MFA_DEFAULTS.recoveryCodeCount);
         expect(recoveryRows.every((r) => r.usedAt === null)).toBe(true);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     test('a code from the OLD secret does not verify the replacement', async () => {
       const { service, secret } = await enrol();
       const now = Date.now() + 60_000;
-      jest.useFakeTimers({ now });
+      vi.useFakeTimers({ now });
       try {
         const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
         await service.beginEnrolment('1', 'pw', current);
-        jest.setSystemTime(now + 60_000);
+        vi.setSystemTime(now + 60_000);
         const oldSecretCode = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
 
         await expect(service.completeEnrolment('1', oldSecretCode)).rejects.toThrow(
           /invalid code/i
         );
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     test('disable clears the pending secret too', async () => {
       const { service, users, secret } = await enrol();
       const now = Date.now() + 60_000;
-      jest.useFakeTimers({ now });
+      vi.useFakeTimers({ now });
       try {
         await service.beginEnrolment(
           '1',
@@ -1645,13 +1646,13 @@ describe('mfa service: enrolment', () => {
         expect(users.get('1')!.mfaPendingSecret).toBeNull();
         expect(users.get('1')!.mfaSecret).toBeNull();
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     test('a completed replacement revokes every trusted device; a first enrolment touches none', async () => {
       const stored = { trustedDevices: { enabled: true, days: 30 } };
-      const store = jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() }));
+      const store = vi.fn(() => ({ get: vi.fn(async () => stored), set: vi.fn() }));
       const { strapi, trustedRows } = buildStrapi({ store });
       const service = createMfaService(defaultDeps(strapi));
 
@@ -1667,21 +1668,21 @@ describe('mfa service: enrolment', () => {
 
       // Replacement: a current code starts it, a code from the pending secret completes it.
       const now = Date.now() + 60_000;
-      jest.useFakeTimers({ now });
+      vi.useFakeTimers({ now });
       try {
         const replacement = await service.beginEnrolment(
           '1',
           'pw',
           generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
         );
-        jest.setSystemTime(now + 60_000);
+        vi.setSystemTime(now + 60_000);
         const result = await service.completeEnrolment(
           '1',
           generateTotp({ secret: base32Decode(replacement.secret), step: 30, digits: 6 })
         );
         expect(result.replaced).toBe(true);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
 
       expect(trustedRows.map((r) => r.userId)).toEqual(['2']);
@@ -1689,7 +1690,7 @@ describe('mfa service: enrolment', () => {
 
     test('a failing trust clear rolls back the promotion, leaving the old authenticator in place', async () => {
       const stored = { trustedDevices: { enabled: true, days: 30 } };
-      const store = jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() }));
+      const store = vi.fn(() => ({ get: vi.fn(async () => stored), set: vi.fn() }));
       const fixture = buildStrapi({ store });
       const { strapi, users, trustedRows } = fixture;
       const service = createMfaService(defaultDeps(strapi));
@@ -1707,14 +1708,14 @@ describe('mfa service: enrolment', () => {
       // Replacement: a current code starts it, a code from the pending secret completes it -- but
       // the trust clear the completion triggers rejects once.
       const now = Date.now() + 60_000;
-      jest.useFakeTimers({ now });
+      vi.useFakeTimers({ now });
       try {
         const replacement = await service.beginEnrolment(
           '1',
           'pw',
           generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
         );
-        jest.setSystemTime(now + 60_000);
+        vi.setSystemTime(now + 60_000);
 
         fixture.trustedMocks.deleteMany.mockRejectedValueOnce(new Error('boom'));
 
@@ -1725,7 +1726,7 @@ describe('mfa service: enrolment', () => {
           )
         ).rejects.toThrow('boom');
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
 
       // The promotion rolled back with the failed clear: the account is still enrolled on the OLD
@@ -1739,7 +1740,7 @@ describe('mfa service: enrolment', () => {
 describe('mfa service: isEnabled', () => {
   test('is off when the future flag is off, even if config.enabled is true', () => {
     const { strapi } = buildStrapi({
-      features: { future: { isEnabled: jest.fn(() => false) } },
+      features: { future: { isEnabled: vi.fn(() => false) } },
     });
     const service = createMfaService(defaultDeps(strapi));
 
@@ -1749,7 +1750,7 @@ describe('mfa service: isEnabled', () => {
   test('is off when the future flag is on but config.enabled is false', () => {
     const { strapi } = buildStrapi({
       config: {
-        get: jest.fn((path: string, defaultValue?: unknown) =>
+        get: vi.fn((path: string, defaultValue?: unknown) =>
           path === 'admin.auth.mfa' ? { enabled: false } : defaultValue
         ),
       },
@@ -1774,11 +1775,11 @@ describe('mfa service: isEnabled', () => {
   test('re-reads the future flag on every call but reads the config once', () => {
     let flag = true;
     let enabled = true;
-    const get = jest.fn((path: string, defaultValue?: unknown) =>
+    const get = vi.fn((path: string, defaultValue?: unknown) =>
       path === 'admin.auth.mfa' ? { enabled } : defaultValue
     );
     const { strapi } = buildStrapi({
-      features: { future: { isEnabled: jest.fn(() => flag) } },
+      features: { future: { isEnabled: vi.fn(() => flag) } },
       config: { get },
     });
     const service = createMfaService(defaultDeps(strapi));
@@ -1976,8 +1977,8 @@ describe('mfa service: challenge lifecycle', () => {
     // is only ever reached through `readSecret` inside `verifyTotpForUser`, and
     // `validatePassword` only through `consumeRecoveryCode`'s candidate loop, so a zero call
     // count on either is proof that branch never ran.
-    const decrypt = jest.fn((v: string) => (options.unreadableSecret ? null : v.slice(4)));
-    const validatePassword = jest.fn(async (plain: string, hash: string) => hash === `h:${plain}`);
+    const decrypt = vi.fn((v: string) => (options.unreadableSecret ? null : v.slice(4)));
+    const validatePassword = vi.fn(async (plain: string, hash: string) => hash === `h:${plain}`);
 
     const service = createMfaService({
       strapi: fixture.strapi as unknown as Core.Strapi,
@@ -2370,7 +2371,7 @@ describe('mfa service: challenge lifecycle', () => {
 
     // Not swallowed silently: an operator needs to know why TOTP stopped working. And the warning
     // must not carry the thing it is about.
-    const warn = strapi.log.warn as jest.Mock;
+    const warn = strapi.log.warn as Mock;
     expect(warn).toHaveBeenCalled();
     const logged = warn.mock.calls.map((call) => String(call[0])).join(' ');
     expect(logged).toMatch(/recovery code/i);
@@ -2690,11 +2691,11 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
     user.mfaSecret = `enc:${base32Encode(secret)}`;
     user.mfaEnabledAt = new Date();
 
-    const decrypt = jest.fn((v: string) => (options.unreadableSecret ? null : v.slice(4)));
+    const decrypt = vi.fn((v: string) => (options.unreadableSecret ? null : v.slice(4)));
     // Doubles as both the account-password check (`hash === 'hashed-password'`) and
     // `consumeRecoveryCode`'s candidate comparison (`hash === 'h:' + plain`, matching
     // `hashPassword` below) -- `assertPasswordAndFactor` genuinely goes through both paths.
-    const validatePassword = jest.fn(
+    const validatePassword = vi.fn(
       async (plain: string, hash: string) =>
         (hash === 'hashed-password' && plain === CORRECT_PASSWORD) || hash === `h:${plain}`
     );
@@ -2858,7 +2859,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       // `trustDevice`'s settings/store lookup, since the delete this proves has no such dependency.
       const { strapi, recoveryRows, challenges, trustedRows, trustedMocks } = buildMfaFixture({
         userOverrides: {
-          update: jest.fn(async () => {
+          update: vi.fn(async () => {
             throw new Error('connection dropped');
           }),
         },
@@ -2897,7 +2898,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       const stored = { trustedDevices: { enabled: true, days: 30 } };
       const fixture = buildMfaFixture({
         strapiOverrides: {
-          store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
+          store: vi.fn(() => ({ get: vi.fn(async () => stored), set: vi.fn() })),
         },
       });
       const service = createMfaService(defaultDeps(fixture.strapi));
@@ -2950,7 +2951,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       // Same reason `disable` is wrapped: all of it lands or none does.
       const { strapi, passkeyRows } = buildMfaFixture({
         userOverrides: {
-          update: jest.fn(async () => {
+          update: vi.fn(async () => {
             throw new Error('connection dropped');
           }),
         },
@@ -2988,9 +2989,9 @@ describe('mfa notifications', () => {
     });
 
   test('a throwing email provider does not fail the operation', async () => {
-    const sendTemplatedEmail = jest.fn().mockRejectedValue(new Error('smtp down'));
+    const sendTemplatedEmail = vi.fn().mockRejectedValue(new Error('smtp down'));
     const { strapi, service } = setup({
-      plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
+      plugin: vi.fn(() => ({ service: vi.fn(() => ({ sendTemplatedEmail })) })),
     });
 
     // Non-throwing and never rejecting: the caller (e.g. `verifyChallenge`) must never see this
@@ -3012,14 +3013,14 @@ describe('mfa notifications', () => {
   // never sends.
   test("sendNotice's returned promise resolves only after the email settles", async () => {
     let releaseEmail: (() => void) | undefined;
-    const sendTemplatedEmail = jest.fn(
+    const sendTemplatedEmail = vi.fn(
       () =>
         new Promise<void>((resolve) => {
           releaseEmail = resolve;
         })
     );
     const { service } = setup({
-      plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
+      plugin: vi.fn(() => ({ service: vi.fn(() => ({ sendTemplatedEmail })) })),
     });
 
     let settled = false;
@@ -3036,9 +3037,9 @@ describe('mfa notifications', () => {
   });
 
   test("sendNotice's returned promise still resolves (never rejects) when the email provider rejects", async () => {
-    const sendTemplatedEmail = jest.fn().mockRejectedValue(new Error('smtp down'));
+    const sendTemplatedEmail = vi.fn().mockRejectedValue(new Error('smtp down'));
     const { service } = setup({
-      plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
+      plugin: vi.fn(() => ({ service: vi.fn(() => ({ sendTemplatedEmail })) })),
     });
 
     await expect(service.sendNotice('1', 'enabled')).resolves.toBeUndefined();
@@ -3072,7 +3073,7 @@ describe('mfa notifications', () => {
     await flushMicrotasks();
 
     expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.reset', { userId: '1' });
-    const [, payload] = (strapi.eventHub.emit as jest.Mock).mock.calls[0];
+    const [, payload] = (strapi.eventHub.emit as Mock).mock.calls[0];
     // Exactly `{ userId }` -- not a subset match: a mutant that also attached the code, the
     // secret or the otpauth URI onto this payload must fail here, not just onto a `toMatchObject`
     // that would let extra keys through unnoticed.
@@ -3094,9 +3095,9 @@ describe('mfa notifications', () => {
   });
 
   test('challenge_failed emits an eventHub event but sends no email', async () => {
-    const sendTemplatedEmail = jest.fn().mockResolvedValue(undefined);
+    const sendTemplatedEmail = vi.fn().mockResolvedValue(undefined);
     const { strapi, service } = setup({
-      plugin: jest.fn(() => ({ service: jest.fn(() => ({ sendTemplatedEmail })) })),
+      plugin: vi.fn(() => ({ service: vi.fn(() => ({ sendTemplatedEmail })) })),
     });
 
     service.notify('1', 'challenge_failed');
@@ -3222,7 +3223,7 @@ describe('mfa service: event pruning', () => {
     // `eventQuery()` returns this same object reference on every call, so mutating its `count`
     // here reaches every `count` call `pruneEvents` makes -- without needing to actually reach
     // the cap, or to reconstruct the service against a different `strapi.db.query`.
-    eventMocks.count = jest.fn(async () => {
+    eventMocks.count = vi.fn(async () => {
       throw new Error('connection dropped');
     });
 
@@ -3253,20 +3254,20 @@ describe('mfa service: enforcement policy', () => {
       [1, { id: 1, mfaRequired: null }],
       [2, { id: 2, mfaRequired: true }],
     ]);
-    const storeGet = jest.fn(async ({ key }: { key: string }) => {
+    const storeGet = vi.fn(async ({ key }: { key: string }) => {
       if (key === 'security-settings') return options.stored ?? null;
       if (key === 'auth') return { providers: { ssoLockedRoles: options.ssoLockedRoles ?? [] } };
       return null;
     });
     const fixture = buildMfaFixture({
       strapiOverrides: {
-        store: jest.fn(() => ({ get: storeGet, set: jest.fn() })),
-        ee: { features: { isEnabled: jest.fn(() => options.ssoEnabled ?? false) } },
-        features: { future: { isEnabled: jest.fn(() => options.enabled ?? true) } },
+        store: vi.fn(() => ({ get: storeGet, set: vi.fn() })),
+        ee: { features: { isEnabled: vi.fn(() => options.ssoEnabled ?? false) } },
+        features: { future: { isEnabled: vi.fn(() => options.enabled ?? true) } },
       },
     });
     // `load(user, 'roles')` is how the resolver fetches roles when the row has none populated.
-    fixture.userMocks.load = jest.fn(async (user: { id: number }, field: string) => {
+    fixture.userMocks.load = vi.fn(async (user: { id: number }, field: string) => {
       if (field !== 'roles') throw new Error(`unexpected load of ${field}`);
       const row = fixture.users.get(String(user.id)) as { roleIds?: number[] } | undefined;
       return (row?.roleIds ?? []).map((id) => ({ ...roles.get(id)! }));
@@ -3380,7 +3381,7 @@ describe('mfa service: enforcement policy', () => {
 
     const killed = buildMfaFixture({
       mfaConfig: { enabled: false },
-      strapiOverrides: { store: jest.fn() },
+      strapiOverrides: { store: vi.fn() },
     });
     const service = createMfaService(defaultDeps(killed.strapi));
     await expect(service.isMfaRequiredFor(user())).resolves.toBe(false);
@@ -3407,21 +3408,21 @@ describe('mfa service: enforce', () => {
       hasOrigin?: boolean;
     } = {}
   ) => {
-    const storeGet = jest.fn(async ({ key }: { key: string }) =>
+    const storeGet = vi.fn(async ({ key }: { key: string }) =>
       key === 'security-settings' ? (options.stored ?? { mfa: { mode: 'required' } }) : null
     );
-    const invalidateRefreshToken = jest.fn(() => Promise.resolve());
+    const invalidateRefreshToken = vi.fn(() => Promise.resolve());
     const sessionManager = Object.assign(
-      jest.fn(() => ({ invalidateRefreshToken })),
+      vi.fn(() => ({ invalidateRefreshToken })),
       {
-        hasOrigin: jest.fn(() => options.hasOrigin ?? true),
+        hasOrigin: vi.fn(() => options.hasOrigin ?? true),
       }
     );
     const fixture = buildMfaFixture({
       strapiOverrides: {
-        store: jest.fn(() => ({ get: storeGet, set: jest.fn() })),
-        ee: { features: { isEnabled: jest.fn(() => false) } },
-        features: { future: { isEnabled: jest.fn(() => options.enabled ?? true) } },
+        store: vi.fn(() => ({ get: storeGet, set: vi.fn() })),
+        ee: { features: { isEnabled: vi.fn(() => false) } },
+        features: { future: { isEnabled: vi.fn(() => options.enabled ?? true) } },
         sessionManager,
       },
     });
@@ -3575,7 +3576,7 @@ describe('mfa service: enforce', () => {
     // Simulate an administrator unlocking between the read and the conditional lock: the
     // precondition (`mfaGraceUntil <= now`) no longer holds at statement time.
     const realUpdateMany = userMocks.updateMany;
-    userMocks.updateMany = jest.fn(async (args: any) => {
+    userMocks.updateMany = vi.fn(async (args: any) => {
       users.get('1')!.mfaGraceUntil = null;
       return realUpdateMany(args);
     });
@@ -3590,7 +3591,7 @@ describe('mfa service: enforce', () => {
 
   test('two lost races in a row on a required user with no grace fail closed rather than loop', async () => {
     const { service, userMocks, strapi } = setup();
-    userMocks.updateMany = jest.fn(async () => ({ count: 0 }));
+    userMocks.updateMany = vi.fn(async () => ({ count: 0 }));
 
     await expect(service.enforce({ id: 1 })).resolves.toEqual({ outcome: 'refused' });
     expect(userMocks.updateMany).toHaveBeenCalledTimes(2);
@@ -3748,7 +3749,7 @@ describe('mfa service: trusted devices', () => {
     const stored = { trustedDevices: { enabled: true, days: 30, ...trusted } };
     const fixture = buildMfaFixture({
       strapiOverrides: {
-        store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
+        store: vi.fn(() => ({ get: vi.fn(async () => stored), set: vi.fn() })),
       },
     });
     const service = createMfaService(defaultDeps(fixture.strapi));
@@ -3756,7 +3757,7 @@ describe('mfa service: trusted devices', () => {
   };
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('trustDevice stores only a hash, with the label and an absolute expiry, and returns the token once', async () => {
@@ -3814,11 +3815,11 @@ describe('mfa service: trusted devices', () => {
 
   test('a token past its stored expiry is refused and its row deleted by that read', async () => {
     const now = Date.now();
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
     const { service, trustedRows } = setup({ days: 1 });
     const { token } = (await service.trustDevice('1', {}))!;
 
-    jest.setSystemTime(now + 2 * DAY);
+    vi.setSystemTime(now + 2 * DAY);
 
     await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(false);
     expect(trustedRows).toHaveLength(0);
@@ -3826,11 +3827,11 @@ describe('mfa service: trusted devices', () => {
 
   test('lowering days cuts an existing trust at once, deletes it on read, and a later raise cannot revive it', async () => {
     const now = Date.now();
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
     const { service, trustedRows, stored } = setup({ days: 30 });
     const { token } = (await service.trustDevice('1', {}))!;
 
-    jest.setSystemTime(now + 8 * DAY);
+    vi.setSystemTime(now + 8 * DAY);
     await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(true);
 
     stored.trustedDevices.days = 7;
@@ -3843,12 +3844,12 @@ describe('mfa service: trusted devices', () => {
 
   test('raising days never extends a trust granted under a shorter promise', async () => {
     const now = Date.now();
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
     const { service, stored } = setup({ days: 7 });
     const { token } = (await service.trustDevice('1', {}))!;
 
     stored.trustedDevices.days = 30;
-    jest.setSystemTime(now + 8 * DAY);
+    vi.setSystemTime(now + 8 * DAY);
 
     await expect(service.consumeTrustedDevice('1', token)).resolves.toBe(false);
   });
@@ -3866,11 +3867,11 @@ describe('mfa service: trusted devices', () => {
 
   test('the eleventh grant evicts the oldest', async () => {
     const now = Date.now();
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
     const { service, trustedRows } = setup();
     const tokens: string[] = [];
     for (let i = 0; i <= MAX_TRUSTED_DEVICES_PER_USER; i += 1) {
-      jest.setSystemTime(now + i * 1000);
+      vi.setSystemTime(now + i * 1000);
       // eslint-disable-next-line no-await-in-loop
       tokens.push((await service.trustDevice('1', {}))!.token);
     }
@@ -3885,10 +3886,10 @@ describe('mfa service: trusted devices', () => {
 
   test('listTrustedDevices hides the hash, marks the presented token current and sorts it first', async () => {
     const now = Date.now();
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
     const { service } = setup();
     const first = (await service.trustDevice('1', {}))!;
-    jest.setSystemTime(now + 1000);
+    vi.setSystemTime(now + 1000);
     await service.trustDevice('1', {});
     await service.trustDevice('2', {});
 
@@ -3913,10 +3914,10 @@ describe('mfa service: trusted devices', () => {
 
   test('listTrustedDevices reports the effective expiry and prunes dead rows', async () => {
     const now = Date.now();
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
     const { service, trustedRows, stored } = setup({ days: 30 });
     await service.trustDevice('1', {});
-    jest.setSystemTime(now + 10 * DAY);
+    vi.setSystemTime(now + 10 * DAY);
     await service.trustDevice('1', {});
     stored.trustedDevices.days = 12;
 
@@ -3997,13 +3998,13 @@ describe('mfa service: trusted devices', () => {
 
   test('sweepExpiredTrustedDevices deletes rows past their stored expiry only', async () => {
     const now = Date.now();
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
     const { service, trustedRows, stored } = setup({ days: 1 });
     await service.trustDevice('1', {});
     stored.trustedDevices.days = 30;
-    jest.setSystemTime(now + 1000);
+    vi.setSystemTime(now + 1000);
     await service.trustDevice('1', {});
-    jest.setSystemTime(now + 2 * DAY);
+    vi.setSystemTime(now + 2 * DAY);
 
     await expect(service.sweepExpiredTrustedDevices()).resolves.toBe(1);
     expect(trustedRows).toHaveLength(1);
@@ -4053,9 +4054,9 @@ describe('mfa service: passkey registration', () => {
       userPasskeyChallengeColumn,
       omitUserPasskeyChallengeColumn,
       strapiOverrides: {
-        store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
+        store: vi.fn(() => ({ get: vi.fn(async () => stored), set: vi.fn() })),
         config: {
-          get: jest.fn((key: string, defaultValue?: unknown) => {
+          get: vi.fn((key: string, defaultValue?: unknown) => {
             if (key === 'admin.auth.mfa') return { enabled: true };
             if (key === 'admin.absoluteUrl') return adminUrl;
             return defaultValue;
@@ -4129,11 +4130,11 @@ describe('mfa service: passkey registration', () => {
   };
 
   beforeEach(() => {
-    jest.mocked(verifyRegistrationResponse).mockReset();
+    vi.mocked(verifyRegistrationResponse).mockReset();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   // `controllers/mfa.ts`'s `assertPasskeyRegistrationAllowed` enforces both invariants too, so
@@ -4184,7 +4185,7 @@ describe('mfa service: passkey registration', () => {
     // (`security-settings.ts`), and this describe block is the only place in the registration
     // suite that deliberately triggers a refusal outside the dedicated "rp cannot be resolved"
     // test below -- reset before and after each test here so neither steals the other's one log
-    // call, exactly as `mfa-passkeys-rp.test.ts` and the passkey-login describe below do.
+    // call, exactly as `mfa-passkeys-rp.vitest.test.ts` and the passkey-login describe below do.
     beforeEach(() => {
       resetSecuritySettingsWarnings();
     });
@@ -4211,7 +4212,7 @@ describe('mfa service: passkey registration', () => {
 
   test('options mints a ceremony, stores it with a deadline, and derives the rp from the admin url', async () => {
     const now = Date.parse('2026-09-09T12:00:00.000Z');
-    jest.useFakeTimers({ now });
+    vi.useFakeTimers({ now });
     const { service, users } = setup();
 
     const options = await service.passkeyRegistrationOptions('1');
@@ -4294,7 +4295,7 @@ describe('mfa service: passkey registration', () => {
   test('register stores the marshalled credential, records the event and returns four fields', async () => {
     const { service, passkeyRows, events, strapi } = setup();
     const options = await service.passkeyRegistrationOptions('1');
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     const created = await service.registerPasskey(
       '1',
@@ -4313,7 +4314,7 @@ describe('mfa service: passkey registration', () => {
     expect(row.counter).toBe(0);
     expect(row.transports).toBe('internal,hybrid');
 
-    expect(jest.mocked(verifyRegistrationResponse)).toHaveBeenCalledWith(
+    expect(vi.mocked(verifyRegistrationResponse)).toHaveBeenCalledWith(
       expect.objectContaining({
         expectedChallenge: options.challenge,
         expectedOrigin: ['https://cms.example.com'],
@@ -4335,7 +4336,7 @@ describe('mfa service: passkey registration', () => {
   test('register consumes the ceremony, so the same response cannot be replayed', async () => {
     const { service, users } = setup();
     const options = await service.passkeyRegistrationOptions('1');
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
     const response = registrationFor(options.challenge);
 
     await service.registerPasskey('1', 'One', response as never);
@@ -4351,7 +4352,7 @@ describe('mfa service: passkey registration', () => {
   test('a successful registration clears the pending expiry stamp alongside the challenge', async () => {
     const { service, users } = setup();
     const options = await service.passkeyRegistrationOptions('1');
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     expect(users.get('1')!.mfaPasskeyChallengeExpiresAt).not.toBeNull();
 
@@ -4367,7 +4368,7 @@ describe('mfa service: passkey registration', () => {
       userPasskeyChallengeColumn: 'pk_chal',
     });
     const options = await service.passkeyRegistrationOptions('1');
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     const created = await service.registerPasskey(
       '1',
@@ -4382,7 +4383,7 @@ describe('mfa service: passkey registration', () => {
   test('throws an ApplicationError naming the attribute when the passkey-challenge column cannot be resolved from metadata', async () => {
     const { service } = setup({ omitUserPasskeyChallengeColumn: true });
     const options = await service.passkeyRegistrationOptions('1');
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     await expect(
       service.registerPasskey('1', 'Nope', registrationFor(options.challenge) as never)
@@ -4394,7 +4395,7 @@ describe('mfa service: passkey registration', () => {
   test('two concurrent submissions of one ceremony: exactly one lands', async () => {
     const { service, passkeyRows } = setup();
     const options = await service.passkeyRegistrationOptions('1');
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
     const response = registrationFor(options.challenge);
 
     const results = await Promise.allSettled([
@@ -4408,18 +4409,18 @@ describe('mfa service: passkey registration', () => {
 
   test('register with no pending ceremony fails before the library is called', async () => {
     const { service } = setup();
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     await expect(
       service.registerPasskey('1', 'Nope', registrationFor('some-challenge') as never)
     ).rejects.toThrow('That passkey could not be verified.');
-    expect(jest.mocked(verifyRegistrationResponse)).not.toHaveBeenCalled();
+    expect(vi.mocked(verifyRegistrationResponse)).not.toHaveBeenCalled();
   });
 
   test('a response signed over a different challenge is refused and leaves the ceremony pending', async () => {
     const { service, users } = setup();
     const options = await service.passkeyRegistrationOptions('1');
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     await expect(
       service.registerPasskey('1', 'Wrong', registrationFor('not-the-challenge') as never)
@@ -4436,30 +4437,30 @@ describe('mfa service: passkey registration', () => {
     const { service, users } = setup();
     const options = await service.passkeyRegistrationOptions('1');
     users.get('1')!.mfaPasskeyChallengeExpiresAt = stamp();
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     await expect(
       service.registerPasskey('1', 'Late', registrationFor(options.challenge) as never)
     ).rejects.toThrow('That passkey could not be verified.');
-    expect(jest.mocked(verifyRegistrationResponse)).not.toHaveBeenCalled();
+    expect(vi.mocked(verifyRegistrationResponse)).not.toHaveBeenCalled();
   });
 
   test.each([
     [
       'the verifier throws',
       () =>
-        jest
+        vi
           .mocked(verifyRegistrationResponse)
           .mockRejectedValue(new Error('bad attestation') as never),
     ],
     [
       'the verifier reports verified: false',
-      () => jest.mocked(verifyRegistrationResponse).mockResolvedValue({ verified: false } as never),
+      () => vi.mocked(verifyRegistrationResponse).mockResolvedValue({ verified: false } as never),
     ],
     [
       'the credential id is over 255 characters',
       () =>
-        jest
+        vi
           .mocked(verifyRegistrationResponse)
           .mockResolvedValue(verified({ id: 'x'.repeat(256) }) as never),
     ],
@@ -4478,7 +4479,7 @@ describe('mfa service: passkey registration', () => {
     const { service, passkeyRows, users } = setup();
     const options = await service.passkeyRegistrationOptions('1');
     seedPasskeys(passkeyRows, '1', MAX_PASSKEYS_PER_USER);
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     await expect(
       service.registerPasskey('1', 'Eleventh', registrationFor(options.challenge) as never)
@@ -4493,7 +4494,7 @@ describe('mfa service: passkey registration', () => {
   test('a unique-constraint violation on credentialId surfaces as the generic 400, never the dialect error', async () => {
     const { service, passkeyMocks, passkeyRows } = setup();
     const dialectError = new Error(`UNIQUE constraint failed: ${PASSKEY_TABLE}.credential_id`);
-    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     const first = await service.passkeyRegistrationOptions('1');
     passkeyMocks.create.mockRejectedValueOnce(dialectError);
@@ -4628,9 +4629,9 @@ describe('mfa service: passkey login', () => {
     const stored = { passkeys: { enabled } };
     const fixture = buildMfaFixture({
       strapiOverrides: {
-        store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
+        store: vi.fn(() => ({ get: vi.fn(async () => stored), set: vi.fn() })),
         config: {
-          get: jest.fn((key: string, defaultValue?: unknown) => {
+          get: vi.fn((key: string, defaultValue?: unknown) => {
             if (key === 'admin.auth.mfa') return { enabled: true, ...mfaConfig };
             if (key === 'admin.absoluteUrl') return adminUrl;
             return defaultValue;
@@ -4684,12 +4685,12 @@ describe('mfa service: passkey login', () => {
   });
 
   beforeEach(() => {
-    jest.mocked(verifyAuthenticationResponse).mockReset();
+    vi.mocked(verifyAuthenticationResponse).mockReset();
     // `resolveWebauthnRp`'s refusal logs through `warnOnce`, which is deliberately once-per-key-
     // per-process (see `security-settings.ts`) so a misconfigured deployment doesn't spam the
     // log on every request. The registration suite earlier in this file already spends it for
     // `'webauthn.rp'`, so any test here that asserts on a log call needs it reset first --
-    // exactly as `mfa-passkeys-rp.test.ts` does.
+    // exactly as `mfa-passkeys-rp.vitest.test.ts` does.
     resetSecuritySettingsWarnings();
   });
 
@@ -4839,7 +4840,7 @@ describe('mfa service: passkey login', () => {
     // `usableChallenge`'s own read finds the row -- still present, still valid -- but by the time
     // this path's conditional write runs, a concurrent request has consumed it. The write's own
     // affected-row count is what must decide this, not a silent write against a row that is gone.
-    const connectionMock = strapi.db.getConnection as jest.Mock;
+    const connectionMock = strapi.db.getConnection as Mock;
     const originalConnection = connectionMock.getMockImplementation();
     connectionMock.mockImplementationOnce((table: string) => {
       challenges.splice(0, challenges.length);
@@ -4856,14 +4857,14 @@ describe('mfa service: passkey login', () => {
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified(11) as never);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified(11) as never);
 
     await expect(
       service.verifyAssertion(token, assertionFor(row.credentialId) as never)
     ).resolves.toEqual({ userId: '1' });
 
     // `Number(row.counter)` on a `biginteger` read back as a string.
-    expect(jest.mocked(verifyAuthenticationResponse)).toHaveBeenCalledWith(
+    expect(vi.mocked(verifyAuthenticationResponse)).toHaveBeenCalledWith(
       expect.objectContaining({
         expectedRPID: 'cms.example.com',
         expectedOrigin: ['https://cms.example.com'],
@@ -4891,7 +4892,7 @@ describe('mfa service: passkey login', () => {
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
 
     const results = await Promise.allSettled([
       service.verifyAssertion(token, assertionFor(row.credentialId) as never),
@@ -4908,7 +4909,7 @@ describe('mfa service: passkey login', () => {
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
 
     const results = await Promise.allSettled([
       service.verifyAssertion(token, assertionFor(row.credentialId) as never),
@@ -4919,8 +4920,8 @@ describe('mfa service: passkey login', () => {
     // The counter/lastUsedAt write and the notify both run after the consume decides the race, so
     // only the racer that wins ever reaches either -- a lost race must not announce success for an
     // operation it was refused, and must not be charged as a verification failure either.
-    const passkeyUsedCalls = (strapi.eventHub.emit as jest.Mock).mock.calls.filter(
-      ([type]: [string]) => type === 'admin.mfa.passkey.used'
+    const passkeyUsedCalls = (strapi.eventHub.emit as Mock).mock.calls.filter(
+      ([type]) => type === 'admin.mfa.passkey.used'
     );
     expect(passkeyUsedCalls).toHaveLength(1);
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
@@ -4934,7 +4935,7 @@ describe('mfa service: passkey login', () => {
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
 
     await expect(
       service.verifyAssertion(token, assertionFor(row.credentialId) as never)
@@ -4951,7 +4952,7 @@ describe('mfa service: passkey login', () => {
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    jest.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
 
     await expect(
       service.verifyAssertion(token, assertionFor(row.credentialId) as never)
@@ -4970,9 +4971,9 @@ describe('mfa service: passkey login', () => {
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
     // The library raises on a counter regression -- the clone signal -- and this is that path.
-    jest
-      .mocked(verifyAuthenticationResponse)
-      .mockRejectedValue(new Error('Response counter value 3 was lower than 5') as never);
+    vi.mocked(verifyAuthenticationResponse).mockRejectedValue(
+      new Error('Response counter value 3 was lower than 5') as never
+    );
 
     await expect(
       service.verifyAssertion(token, assertionFor(row.credentialId) as never)
@@ -4989,7 +4990,7 @@ describe('mfa service: passkey login', () => {
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    jest.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
 
     await expect(
       service.verifyAssertion(token, assertionFor(row.credentialId) as never)
@@ -5016,7 +5017,7 @@ describe('mfa service: passkey login', () => {
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    jest.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: false } as never);
 
     // Two wrong TOTP codes against this challenge...
     await expect(service.verifyChallenge(token, '000000')).resolves.toEqual({
@@ -5061,7 +5062,7 @@ describe('mfa service: passkey login', () => {
 
     expect(challenges[0].attempts).toBe(1);
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
-    expect(jest.mocked(verifyAuthenticationResponse)).not.toHaveBeenCalled();
+    expect(vi.mocked(verifyAuthenticationResponse)).not.toHaveBeenCalled();
   });
 
   test("another account's passkey finds no row: the lookup is scoped to the challenge's owner", async () => {
@@ -5070,13 +5071,13 @@ describe('mfa service: passkey login', () => {
     const theirs = seedCredential(passkeyRows, '2', { credentialId: 'cred-theirs' });
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    jest.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue(authVerified() as never);
 
     await expect(
       service.verifyAssertion(token, assertionFor(theirs.credentialId) as never)
     ).rejects.toThrow('Could not verify that passkey.');
 
-    expect(jest.mocked(verifyAuthenticationResponse)).not.toHaveBeenCalled();
+    expect(vi.mocked(verifyAuthenticationResponse)).not.toHaveBeenCalled();
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
     // Untouched: a foreign row is refused, never modified.
     expect(passkeyRows.find((r) => r.credentialId === 'cred-theirs')!.lastUsedAt).toBeNull();
@@ -5105,7 +5106,7 @@ describe('mfa service: passkey login', () => {
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');
     await service.authenticationOptions(token);
-    strapi.config.get = jest.fn((key: string, defaultValue?: unknown) => {
+    strapi.config.get = vi.fn((key: string, defaultValue?: unknown) => {
       if (key === 'admin.auth.mfa') return { enabled: true };
       if (key === 'admin.absoluteUrl') return 'http://0.0.0.0:1337/admin';
       return defaultValue;

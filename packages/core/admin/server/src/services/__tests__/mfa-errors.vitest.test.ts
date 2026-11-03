@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import { errors } from '@strapi/utils';
 import { MfaLockedError, MfaRequiredError } from '../mfa-errors';
 

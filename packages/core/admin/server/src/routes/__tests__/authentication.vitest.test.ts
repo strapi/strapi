@@ -1,5 +1,4 @@
-/* eslint-env jest */
-
+import { describe, test, expect } from 'vitest';
 import routes from '../authentication';
 
 type RouteEntry = {

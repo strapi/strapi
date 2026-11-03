@@ -1,5 +1,4 @@
-/* eslint-env jest */
-
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 import { resolveWebauthnRp, createPasskeys, PASSKEY_RP_NOT_CONFIGURED } from '../mfa-passkeys';
 import { resetSecuritySettingsWarnings } from '../security-settings';
@@ -8,10 +7,10 @@ import { resetSecuritySettingsWarnings } from '../security-settings';
  * ever taken from the request's Origin header: the fixed relying-party identity is what WebAuthn's
  * phishing resistance rests on. */
 const buildStrapi = (config: Record<string, unknown>) => {
-  const error = jest.fn();
-  const warn = jest.fn();
+  const error = vi.fn();
+  const warn = vi.fn();
   const strapi = {
-    config: { get: jest.fn((key: string) => config[key]) },
+    config: { get: vi.fn((key: string) => config[key]) },
     log: { error, warn },
   } as unknown as Core.Strapi;
 
@@ -372,9 +371,9 @@ describe('warnIfPasskeysMisconfigured', () => {
       strapi,
       settings: async () => ({ enabled }),
       config: () => ({}) as never,
-      recordEvent: jest.fn(),
-      notify: jest.fn(),
-      isAccountThrottled: jest.fn(),
+      recordEvent: vi.fn(),
+      notify: vi.fn(),
+      isAccountThrottled: vi.fn(),
     } as never);
 
     return { passkeys, error, warn };
