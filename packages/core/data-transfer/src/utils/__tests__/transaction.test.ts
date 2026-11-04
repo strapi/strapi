@@ -46,4 +46,16 @@ describe('createTransaction', () => {
     await expect(transaction.attach(async () => 'again')).rejects.toThrow('pool is closed');
     await expect(transaction.rollback()).resolves.toBe(false);
   });
+
+  test('end rejects when the database transaction rejects', async () => {
+    const strapi = {
+      db: {
+        transaction: () => Promise.reject(new Error('commit failed')),
+      },
+    };
+
+    const transaction = createTransaction(strapi as any);
+
+    await expect(transaction.end()).rejects.toThrow('commit failed');
+  });
 });

@@ -52,8 +52,11 @@ export const lockDocumentBeforeRead = async ({
  *
  * MySQL locks a row in its internal lock table. Nothing references that row,
  * so its exclusive lock does not block foreign-key checks. Postgres locks the
- * row being written with FOR NO KEY UPDATE. SQLite ignores row locks.
- * On MySQL this does nothing when the transaction already holds the lock.
+ * row being written with FOR NO KEY UPDATE. When the requested locale does not
+ * exist yet, it locks the document's lowest-id row so two creates of that
+ * locale still serialize. A document with no rows takes no lock. SQLite
+ * ignores row locks. On MySQL this does nothing when the transaction already
+ * holds the lock.
  */
 export const lockDocumentForUpdate = async ({
   db,

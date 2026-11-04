@@ -386,6 +386,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function deleteDocument(opts = {} as any) {
     const { documentId, ...params } = opts;
 
+    // Same order as update: the MySQL sentinel row first, then content rows.
+    // Deleting content first and the lock row afterwards deadlocks with an update.
+    if (documentId) {
+      await lockDocumentBeforeRead({ db: strapi.db, documentId });
+    }
+
     const lookupQuery = await async.pipe(
       validateParams,
       (value) => omit(value, 'status'),
@@ -408,9 +414,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const entriesToDelete = await strapi.db.query(uid).findMany(lookupQuery);
 
-    const deletedEntries = await async.map(entriesToDelete, (entryToDelete: any) =>
-      entries.delete(entryToDelete.id, selectionQuery)
-    );
+    // Each delete loads and removes components, so they cannot share this
+    // transaction's connection concurrently.
+    const deletedEntries = [];
+    for (const entryToDelete of entriesToDelete) {
+      deletedEntries.push(await entries.delete(entryToDelete.id, selectionQuery));
+    }
 
     entriesToDelete.forEach(emitEvent('entry.delete'));
 
