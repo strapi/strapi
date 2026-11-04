@@ -18,6 +18,7 @@ import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useGetMfaStatusQuery } from '../../../../services/mfa';
 import { useGetSecuritySettingsQuery } from '../../../../services/securitySettings';
+import { useGetRolesQuery } from '../../../../services/users';
 import { isMfaNotFoundError } from '../../../../utils/mfaFeature';
 
 import { ConfirmDowngradeDialog } from './components/ConfirmDowngradeDialog';
@@ -528,11 +529,9 @@ const SecurityPage = () => {
     isLoading: isLoadingSettings,
     isFetching: isFetchingSettings,
   } = useGetSecuritySettingsQuery();
-  const {
-    roles,
-    isLoading: isLoadingRoles,
-    isUninitialized: isUninitializedRoles,
-  } = useAdminRoles(undefined, { skip: !canReadRoles });
+  const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, { skip: !canReadRoles });
+  // Same cache entry as `useAdminRoles`, read for `isUninitialized` only
+  const { isUninitialized: isUninitializedRoles } = useGetRolesQuery({}, { skip: !canReadRoles });
   // The caller's own enrolment decides whether a downgrade needs a code; a 404 here is the same
   // kill-switch signal and simply reads as "not enrolled".
   const { data: mfaStatus } = useGetMfaStatusQuery();
