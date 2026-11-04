@@ -110,6 +110,13 @@ describe('Upload content API - read-only folders routes', () => {
       expect(findOneOne.body.data.id).toBe(folders.acme.id);
       // Listing the parent needs `folder.find`, so it is left out rather than shown as the root.
       expect(findOneOne.body.data).not.toHaveProperty('parent');
+
+      const findOneRoot = await rqFindOne({
+        method: 'GET',
+        url: `/upload/folders/${folders.clients.id}`,
+      });
+      expect(findOneRoot.statusCode).toBe(200);
+      expect(findOneRoot.body.data).not.toHaveProperty('parent');
     });
 
     test('lists folders with a read-only token', async () => {
