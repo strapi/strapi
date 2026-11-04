@@ -130,7 +130,6 @@ describe('<EditAssetDialog />', () => {
 
   beforeAll(() => {
     confirmSpy = jest.spyOn(window, 'confirm');
-    confirmSpy.mockImplementation(jest.fn(() => true));
     global.Date.now = jest.fn(() => new Date('2021-09-20').getTime());
   });
 
@@ -154,7 +153,7 @@ describe('<EditAssetDialog />', () => {
       expect(screen.getByLabelText('Caption')).toHaveValue('');
     });
 
-    it('open confirm box on close if data has changed', () => {
+    it('asks for confirmation on cancel if data has changed', async () => {
       const { getByRole } = renderCompo();
 
       fireEvent.change(getByRole('textbox', { name: /alternative text/i }), {
@@ -162,7 +161,23 @@ describe('<EditAssetDialog />', () => {
       });
       fireEvent.click(getByRole('button', { name: /cancel/i }));
 
-      expect(window.confirm).toBeCalled();
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+        'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.'
+      );
+      expect(window.confirm).not.toHaveBeenCalled();
+    });
+
+    it('asks for confirmation on Escape if data has changed', async () => {
+      const { getByRole } = renderCompo();
+
+      const input = getByRole('textbox', { name: /alternative text/i });
+      fireEvent.change(input, { target: { value: 'Test' } });
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+        'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.'
+      );
+      expect(window.confirm).not.toHaveBeenCalled();
     });
 
     it('disables all the actions and field when the user is not allowed to update', () => {

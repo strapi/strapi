@@ -16,10 +16,12 @@ import {
 import { produce } from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
+import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useUnsavedChangesModalDirty } from '../../../../../components/UnsavedChangesModal';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -51,7 +53,15 @@ interface ConditionsModalProps extends Pick<ActionRowProps, 'isFormDisabled'> {
   onClose?: () => void;
 }
 
-const ConditionsModal = ({
+const ConditionsModal = (props: ConditionsModalProps) => (
+  // The form lives inside `Modal.Content` so that it unmounts on close and every opening starts
+  // from the saved conditions.
+  <Modal.Content>
+    <ConditionsForm {...props} />
+  </Modal.Content>
+);
+
+const ConditionsForm = ({
   actions = EMPTY_ACTIONS,
   headerBreadCrumbs = EMPTY_HEADER_BREAD_CRUMBS,
   isFormDisabled,
@@ -76,17 +86,21 @@ const ConditionsModal = ({
     [actions]
   );
 
-  const [state, setState] = React.useState(() =>
-    createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
+  const defaultForm = React.useMemo(
+    () =>
+      createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory),
+    [actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory]
   );
+
+  const [state, setState] = React.useState(defaultForm);
 
   // Keep the form in sync with conditions set outside the modal, e.g. filled in from the user's
   // own conditions when a permission is ticked. The inputs only change while the modal is closed.
   React.useEffect(() => {
-    setState(
-      createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
-    );
-  }, [actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory]);
+    setState(defaultForm);
+  }, [defaultForm]);
+
+  useUnsavedChangesModalDirty(!isEqual(state, defaultForm));
 
   const handleChange = React.useCallback(
     (name: string, values: ConditionForm) => {
@@ -143,16 +157,8 @@ const ConditionsModal = ({
     onClose?.();
   }, [isReadOnly, state, onChangeConditions, onClose]);
 
-  const onCloseModal = React.useCallback(() => {
-    setState(
-      createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
-    );
-
-    onClose?.();
-  }, [actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory, onClose]);
-
   return (
-    <Modal.Content>
+    <>
       <Modal.Header>
         <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
           {headerBreadCrumbs.map((label, index, arr) => (
@@ -214,14 +220,18 @@ const ConditionsModal = ({
       </Modal.Body>
       <Modal.Footer>
         {isReadOnly ? (
-          <Button variant="tertiary" onClick={() => onCloseModal()}>
-            {formatMessage({ id: 'app.components.Button.close', defaultMessage: 'Close' })}
-          </Button>
+          <Modal.Close>
+            <Button variant="tertiary">
+              {formatMessage({ id: 'app.components.Button.close', defaultMessage: 'Close' })}
+            </Button>
+          </Modal.Close>
         ) : (
           <>
-            <Button variant="tertiary" onClick={() => onCloseModal()}>
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
+            <Modal.Close>
+              <Button variant="tertiary">
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
+            </Modal.Close>
             <Button onClick={handleSubmit}>
               {formatMessage({
                 id: 'Settings.permissions.conditions.apply',
@@ -231,7 +241,7 @@ const ConditionsModal = ({
           </>
         )}
       </Modal.Footer>
-    </Modal.Content>
+    </>
   );
 };
 
