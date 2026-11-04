@@ -74,6 +74,8 @@ const resolveBaseConfig = async (ctx: BuildContext, nodeEnv: 'development' | 'pr
       // micromatch (used by the content-type builder) imports Node builtins.
       fallback: {
         path: require.resolve('path-browserify'),
+        // Trailing slash resolves the npm `util` package rather than the Node builtin.
+        // eslint-disable-next-line node/no-missing-require
         util: require.resolve('util/'),
       },
     },

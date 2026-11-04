@@ -289,8 +289,12 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
     return labelAction;
   }
 
-  // TODO: find a better way to do this rather than access internals
-  const labelActionTitleId = labelAction.props.title.id;
+  // TODO: find a better way to do this rather than access internals.
+  // Shared-field lock actions can be stamped without a title; don't throw.
+  const labelActionTitleId = labelAction.props?.title?.id;
+  if (typeof labelActionTitleId !== 'string') {
+    return labelAction;
+  }
 
   if (labelActionTitleId === 'i18n.Field.localized') {
     return React.cloneElement(labelAction, {
@@ -623,4 +627,9 @@ const attributeHasCustomFieldProperty = (
   'customField' in attribute && typeof attribute.customField === 'string';
 
 export type { VersionInputRendererProps };
-export { VersionInputRenderer, CustomRelationInput, resolveComponentRenderResources };
+export {
+  VersionInputRenderer,
+  CustomRelationInput,
+  getLabelAction,
+  resolveComponentRenderResources,
+};

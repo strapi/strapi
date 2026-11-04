@@ -43,8 +43,10 @@ const StageChanger = () => {
   );
 };
 
-jest.mock('@strapi/admin/strapi-admin', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin'),
+const mockGetFeature = jest.fn();
+
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
   useLicenseLimits: jest.fn().mockReturnValue({
     isLoading: false,
     isError: false,
@@ -54,7 +56,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
       permittedSeats: 3,
       isHostedOnStrapiCloud: false,
     },
-    getFeature: jest.fn().mockReturnValue({ maximumReleases: 3 }),
+    getFeature: (name: string) => mockGetFeature(name),
   }),
 }));
 
@@ -75,6 +77,10 @@ describe('Releases home page', () => {
     );
     return requests;
   };
+
+  beforeEach(() => {
+    mockGetFeature.mockReturnValue({ maximumReleases: 3 });
+  });
 
   it('renders the empty state when there are no releases', async () => {
     server.use(
@@ -752,5 +758,42 @@ describe('Releases home page', () => {
       expect(await screen.findByRole('button', { name: 'Sort' })).toBeInTheDocument();
       await waitFor(() => expect(requests.at(-1)?.get('sort')).toBe('releasedAt:desc'));
     });
+  });
+
+  it.each([
+    ['0', { maximumReleases: '0' }],
+    ['0 (number)', { maximumReleases: 0 }],
+    ['missing', {}],
+    ['non-numeric', { maximumReleases: 'many' }],
+  ])(
+    'limits pending releases to the default of 3 when the license limit is %s',
+    async (_, options) => {
+      mockGetFeature.mockReturnValue(options);
+      server.use(
+        http.get('/content-releases', () => HttpResponse.json(mockReleasesPageData.pendingEntries))
+      );
+
+      render(<ReleasesPage />);
+
+      const newReleaseButton = await screen.findByRole('button', { name: /new release/i });
+      expect(newReleaseButton).toBeDisabled();
+      expect(
+        screen.getByText(/you have reached the 3 pending releases limit/i)
+      ).toBeInTheDocument();
+    }
+  );
+
+  it('reads a numeric license limit', async () => {
+    mockGetFeature.mockReturnValue({ maximumReleases: 20 });
+    server.use(
+      http.get('/content-releases', () => HttpResponse.json(mockReleasesPageData.pendingEntries))
+    );
+
+    render(<ReleasesPage />);
+
+    // The pending tabs are gone: the header count shows the page has loaded
+    await screen.findByText('17 releases');
+    expect(screen.getByRole('button', { name: /new release/i })).toBeEnabled();
+    expect(screen.queryByText(/pending releases limit/i)).not.toBeInTheDocument();
   });
 });

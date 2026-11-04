@@ -1,4 +1,4 @@
-import { login } from '../../../utils/login';
+import { loginWithApi } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import {
   clickAndWait,
@@ -13,8 +13,8 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('a user should see the list of upcoming releases', async ({ page, releases }) => {

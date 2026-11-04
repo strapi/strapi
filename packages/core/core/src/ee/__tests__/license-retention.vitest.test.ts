@@ -364,6 +364,40 @@ describe('ee license retention', () => {
       ]);
     });
 
+    it('listRetained() hands resolvers numeric string options as numbers', async () => {
+      const past = new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString();
+      process.env.STRAPI_LICENSE = 'fake-license-blob';
+      license.verifyLicense.mockReturnValue({
+        ...GOLD_LICENSE_INFO,
+        features: [{ name: 'cms-content-releases', options: { maximumReleases: '0' } }],
+        expireAt: past,
+      });
+
+      eeModule.init('/fake/license/dir');
+      const get = vi.fn((feature) =>
+        typeof feature === 'object' ? feature.options?.maximumReleases : undefined
+      );
+      eeModule.entitlements.register({
+        feature: 'cms-content-releases',
+        limits: [{ key: 'maximumReleases', unit: 'count', get }],
+      });
+
+      process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+      await eeModule.checkLicense({ strapi: mockStrapi });
+
+      expect(eeModule.licenseStatus).toBe('expired');
+      expect(eeModule.entitlements.listRetained()).toEqual([
+        {
+          feature: 'cms-content-releases',
+          limits: [{ key: 'maximumReleases', unit: 'count', value: 0 }],
+        },
+      ]);
+      expect(get).toHaveBeenCalledWith({
+        name: 'cms-content-releases',
+        options: { maximumReleases: 0 },
+      });
+    });
+
     it('listRetained() is empty when no license was ever retained', () => {
       registerAuditLogs();
 

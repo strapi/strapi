@@ -1,22 +1,37 @@
-import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
+import _, {
+  omit,
+  pick,
+  differenceWith,
+  differenceBy,
+  isEmpty,
+  isEqual,
+  isPlainObject,
+  mapValues,
+} from 'lodash';
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
-import permissionDomain from '../domain/permission';
+import permissionDomain, { type CreatePermissionPayload } from '../domain/permission';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
 import type { Action } from '../domain/action';
 
 import { validatePermissionsExist } from '../validation/permission';
 import roleConstants from './constants';
 import { getService } from '../utils';
+import {
+  findRequesterCeilings,
+  findRequesterParameterizedCeilings,
+  type CeilingRequester,
+} from './permission/ceiling-requester';
+import { toEnforcedCeilingPermissions } from './permission/enforced-permissions';
 
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION, ROLE_TEXT_MAX_LENGTH } = roleConstants;
 
 const { createAsyncSeriesWaterfallHook } = hooksUtils;
-const { ApplicationError } = errors;
+const { ApplicationError, ForbiddenError } = errors;
 
 const hooks = {
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
@@ -38,14 +53,32 @@ const pickComparableFields = (permission: Permission) => pick(permission, COMPAR
 const jsonClean = <T extends object>(data: T): T => JSON.parse(JSON.stringify(data));
 
 /**
+ * Arrays of strings in a permission (`conditions`, `properties.fields`, `properties.locales`
+ * and any other property) are sets: the engine applies them regardless of order. Dedupe and
+ * sort them so two permissions that differ only in order compare equal. `null`, `[]` and a
+ * missing key stay distinct, and arrays holding anything but strings are left as they are.
+ */
+const normalizeSets = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.every((item) => typeof item === 'string') ? [...new Set(value)].sort() : value;
+  }
+  if (isPlainObject(value)) {
+    return mapValues(value as Record<string, unknown>, normalizeSets);
+  }
+  return value;
+};
+
+/**
  * Compare two permissions
  */
 const arePermissionsEqual = (p1: Permission, p2: Permission): boolean => {
-  if (p1.action === p2.action) {
-    return isEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
+  if (p1.action !== p2.action) {
+    return false;
   }
-
-  return false;
+  return isEqual(
+    jsonClean(normalizeSets(pickComparableFields(p1)) as object),
+    jsonClean(normalizeSets(pickComparableFields(p2)) as object)
+  );
 };
 
 /**
@@ -393,6 +426,95 @@ const assignPermissions = async (
   return permissionsToReturn;
 };
 
+/**
+ * Make sure a requester cannot grant a role permissions they do not hold themselves. A request
+ * made with an admin token is limited by the token's permissions and, unless the token owner is
+ * a super admin, by the owner's.
+ * Permissions the role already carries, or narrower versions of one of them, are not checked:
+ * they grant nothing new, and removing them is always allowed. A narrower version is covered,
+ * atom by atom (field × locale × condition), by one of the role's own rows read the way the
+ * engine enforces them, so fewer fields, locales or conditions are accepted, but recombining two
+ * rows or dropping the last condition (unconditional) is checked against the requester.
+ * A permission with action parameters is a separate ability for the engine
+ * (`<action>?<parameters>`): it is only covered by held permissions with the same action, subject
+ * and action parameters.
+ * @param requester - the admin user or admin token performing the update
+ * @param roleId - the role being updated
+ * @param permissions - the permissions requested for the role
+ */
+const checkPermissionsCeiling = async (
+  requester: CeilingRequester,
+  roleId: Data.ID,
+  permissions: CreatePermissionPayload[] = []
+): Promise<void> => {
+  const ceilings = await findRequesterCeilings(requester);
+
+  // Super admins hold every permission
+  if (ceilings.length === 0) {
+    return;
+  }
+
+  const permissionService = getService('permission');
+  const sanitizeConditions = permissionDomain.sanitizeConditions(
+    // @ts-expect-error - same Condition type mismatch as in `addPermissions`
+    permissionService.conditionProvider
+  );
+
+  const existingPermissions = await permissionService.findMany({
+    where: { role: { id: roleId } },
+  });
+
+  const isOnRole = (permission: Permission) =>
+    existingPermissions.some((existing) => arePermissionsEqual(permission, existing));
+
+  const existingEnforced = await toEnforcedCeilingPermissions(existingPermissions);
+
+  // Parameterized permissions are registered as `<action>?<parameters>`, which the atom rule
+  // does not describe, so they are never treated as a narrowing
+  const narrowsRolePermission = (stored: Permission) =>
+    isEmpty(stored.actionParameters) &&
+    permissionDomain.ceiling.isPermissionWithinCeiling(stored, existingEnforced);
+
+  // The requested locales need no rewrite: i18n's `willValidateUpdatePermissions` hook has already
+  // turned a missing or empty `locales` on a localized subject into the default locale.
+  // The requested conditions are checked as they will be stored, without the unregistered ones.
+  // A permission equal to a row of the role, as sent or as stored, leaves that row unchanged, and
+  // one covered by the role's own rows only narrows them.
+  const newPermissions = permissions
+    .map((permission) => permissionDomain.create(permission))
+    .map((permission) => ({ permission, stored: sanitizeConditions(permission) as Permission }))
+    .filter(
+      ({ permission, stored }) =>
+        !isOnRole(permission) && !isOnRole(stored) && !narrowsRolePermission(stored)
+    );
+
+  // The held permissions with action parameters, only loaded when a new permission has some
+  const parameterizedCeilings = newPermissions.some(
+    ({ stored }) => !isEmpty(stored.actionParameters)
+  )
+    ? await findRequesterParameterizedCeilings(requester)
+    : [];
+
+  const isWithinCeilings = (stored: Permission) =>
+    isEmpty(stored.actionParameters)
+      ? ceilings.every((held) => permissionDomain.ceiling.isPermissionWithinCeiling(stored, held))
+      : parameterizedCeilings.every((held) =>
+          permissionDomain.ceiling.isParameterizedPermissionWithinCeiling(stored, held)
+        );
+
+  const rejectedPermissions = newPermissions
+    .filter(({ stored }) => !isWithinCeilings(stored))
+    .map(({ permission }) => permission);
+
+  if (rejectedPermissions.length > 0) {
+    throw new ForbiddenError('You cannot grant permissions you do not hold yourself', {
+      permissions: rejectedPermissions.map((permission) =>
+        pick(permission, ['action', 'subject', 'properties', 'conditions'])
+      ),
+    });
+  }
+};
+
 const addPermissions = async (roleId: Data.ID, permissions: any) => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
@@ -487,6 +609,7 @@ export default {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   hasSuperAdminRole,
+  checkPermissionsCeiling,
   assignPermissions,
   resetSuperAdminPermissions,
   checkRolesIdForDeletion,

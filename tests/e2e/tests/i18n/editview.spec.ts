@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
+import { login, loginWithApi } from '../../../utils/login';
 import {
   clickAndWait,
   describeOnCondition,
@@ -29,8 +29,8 @@ test.describe('Edit view', () => {
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('As a user I want to create a brand new document in the non-default locale', async ({
@@ -661,8 +661,8 @@ test.describe('Edit view', () => {
 describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(() => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   test('As a user I want to enable AI translation', async ({ page }) => {
@@ -704,8 +704,8 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 't
   () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin');
+      await loginWithApi({ page });
       await page.goto('/admin');
-      await login({ page });
     });
 
     test('As a user I want to enable AI translation', async ({ page }) => {
