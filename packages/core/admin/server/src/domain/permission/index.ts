@@ -4,6 +4,7 @@ import type { Utils } from '@strapi/types';
 
 import { Permission } from '../../../../shared/contracts/shared';
 import { SanitizedPermission } from '../../../../shared/contracts/roles';
+import ceiling from './ceiling';
 
 export type CreatePermissionPayload = Utils.Object.PartialBy<
   Permission,
@@ -76,9 +77,8 @@ export const removeCondition = curry((condition: string, permission: Permission)
  * @param property - The property to get
  * @param permission - The permission on which we want to access the property
  */
-export const getProperty = curry(
-  (property: string, permission: Permission): Permission =>
-    get(permission, `properties.${property}`)
+export const getProperty = curry((property: string, permission: Permission): Permission =>
+  get(permission, `properties.${property}`)
 );
 
 /**
@@ -154,6 +154,7 @@ export { toPermission };
 
 export default {
   addCondition,
+  ceiling,
   removeCondition,
   create,
   deleteProperty,

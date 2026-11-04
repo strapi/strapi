@@ -20,6 +20,7 @@ import { useWarnIfUnsavedChanges } from '../hooks/useWarnIfUnsavedChanges';
 import { getIn, setIn } from '../utils/objects';
 
 import { createContext } from './Context';
+import { useUnsavedChangesModalDirty } from './UnsavedChangesModal';
 
 import type {
   InputProps as InputPropsImpl,
@@ -27,6 +28,9 @@ import type {
   EnumerationProps,
 } from './FormInputs/types';
 import type * as Yup from 'yup';
+
+const DEFAULT_ON_PROCEED: NonNullable<BlockerProps['onProceed']> = () => {};
+const DEFAULT_ON_CANCEL: NonNullable<BlockerProps['onCancel']> = () => {};
 
 /* -------------------------------------------------------------------------------------------------
  * FormContext
@@ -65,8 +69,9 @@ const isMultipleSelectTarget = (target: FormFieldTarget): target is MultipleSele
   );
 };
 
-interface FormContextValue<TFormValues extends FormValues = FormValues>
-  extends FormState<TFormValues> {
+interface FormContextValue<
+  TFormValues extends FormValues = FormValues,
+> extends FormState<TFormValues> {
   disabled: boolean;
   getValues: () => TFormValues;
   initialValues: TFormValues;
@@ -147,11 +152,14 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
  * Form
  * -----------------------------------------------------------------------------------------------*/
 
-interface FormHelpers<TFormValues extends FormValues = FormValues>
-  extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues' | 'resetForm'> {}
+interface FormHelpers<TFormValues extends FormValues = FormValues> extends Pick<
+  FormContextValue<TFormValues>,
+  'setErrors' | 'setValues' | 'resetForm'
+> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
+  extends
+    Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
     Pick<BoxProps, 'width' | 'height'> {
   children:
     | React.ReactNode
@@ -354,6 +362,9 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [state.values, initialValues.current]
     );
+
+    // Only has an effect when the form is rendered inside an `UnsavedChangesModal`.
+    useUnsavedChangesModalDirty(modified && !state.isSubmitting);
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
       if (typeof eventOrPath === 'string') {
@@ -851,7 +862,10 @@ interface BlockerProps {
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
+const Blocker = ({
+  onProceed = DEFAULT_ON_PROCEED,
+  onCancel = DEFAULT_ON_CANCEL,
+}: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);

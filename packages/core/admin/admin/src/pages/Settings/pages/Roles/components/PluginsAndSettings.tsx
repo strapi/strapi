@@ -18,6 +18,7 @@ import {
   SettingPermission,
   PluginPermission,
 } from '../../../../../../../shared/contracts/permissions';
+import { UnsavedChangesModal } from '../../../../../components/UnsavedChangesModal';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -30,8 +31,11 @@ import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData'
 
 import { ConditionsButton } from './ConditionsButton';
 import { ConditionsModal } from './ConditionsModal';
+import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
 
 import type { GenericLayout } from '../utils/layouts';
+
+const EMPTY_ACTIONS: NonNullable<SubCategoryProps['actions']> = [];
 
 /* -------------------------------------------------------------------------------------------------
  * PluginsAndSettingsPermissions
@@ -72,8 +76,7 @@ const PluginsAndSettingsPermissions = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface RowProps
-  extends Pick<Layout[number], 'childrenForm'>,
-    Pick<Accordion.HeaderProps, 'variant'> {
+  extends Pick<Layout[number], 'childrenForm'>, Pick<Accordion.HeaderProps, 'variant'> {
   kind: Exclude<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
   name: string;
   isFormDisabled?: boolean;
@@ -138,7 +141,7 @@ interface SubCategoryProps {
 }
 
 const SubCategory = ({
-  actions = [],
+  actions = EMPTY_ACTIONS,
   categoryName,
   isFormDisabled,
   subCategoryName,
@@ -149,7 +152,7 @@ const SubCategory = ({
     onChangeParentCheckbox,
     onChangeSimpleCheckbox,
     checkUserHasPermission,
-    userPermissions,
+    inheritConditions,
   } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
@@ -240,33 +243,33 @@ const SubCategory = ({
                     $disabled={isFormDisabled || !userHasPermission}
                     $hasConditions={hasConditions}
                   >
-                    <Checkbox
-                      name={checkboxName}
-                      disabled={isFormDisabled || !userHasPermission}
-                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onCheckedChange={(value) => {
-                        onChangeSimpleCheckbox({
-                          target: {
-                            name: checkboxName,
-                            value: !!value,
-                          },
-                        });
-                      }}
-                      checked={value}
+                    <UnheldPermissionTooltip
+                      isFormDisabled={isFormDisabled}
+                      userHasPermission={userHasPermission}
                     >
-                      {displayName}
-                    </Checkbox>
+                      <Checkbox
+                        name={checkboxName}
+                        disabled={isFormDisabled || !userHasPermission}
+                        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                        onCheckedChange={(value) => {
+                          onChangeSimpleCheckbox({
+                            target: {
+                              name: checkboxName,
+                              value: !!value,
+                            },
+                          });
+                        }}
+                        checked={value}
+                      >
+                        {displayName}
+                      </Checkbox>
+                    </UnheldPermissionTooltip>
                   </CheckboxWrapper>
                 </Grid.Item>
               );
             })}
           </Grid.Root>
-          <Modal.Root
-            open={isConditionModalOpen}
-            onOpenChange={() => {
-              setIsConditionModalOpen((prev) => !prev);
-            }}
-          >
+          <UnsavedChangesModal open={isConditionModalOpen} onOpenChange={setIsConditionModalOpen}>
             <Modal.Trigger>
               <ConditionsButton hasConditions={doesButtonHasCondition} />
             </Modal.Trigger>
@@ -274,12 +277,12 @@ const SubCategory = ({
               headerBreadCrumbs={[categoryName, subCategoryName]}
               actions={formattedActions}
               isFormDisabled={isFormDisabled}
-              isReadOnly={userPermissions !== undefined}
+              isReadOnly={inheritConditions}
               onClose={() => {
                 setIsConditionModalOpen(false);
               }}
             />
-          </Modal.Root>
+          </UnsavedChangesModal>
         </Flex>
       </Box>
     </>

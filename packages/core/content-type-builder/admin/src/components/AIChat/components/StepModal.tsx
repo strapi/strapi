@@ -6,9 +6,12 @@ import {
   Children,
   isValidElement,
   FormEvent,
+  useCallback,
   useEffect,
+  useMemo,
 } from 'react';
 
+import { UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import { Modal, Box, Button, Typography } from '@strapi/design-system';
 
 /* -------------------------------------------------------------------------------------------------
@@ -49,6 +52,11 @@ interface StepModalProps {
   children: ReactNode;
   onComplete?: () => void;
   onCancel?: () => void;
+  /**
+   * Unsaved state owned by the component rendering the StepModal. Steps can also
+   * register their own with `useUnsavedChangesModalDirty`.
+   */
+  hasUnsavedChanges?: boolean;
 }
 
 interface StepProps {
@@ -68,14 +76,19 @@ const StepModal = ({
   children,
   onComplete,
   onCancel,
+  hasUnsavedChanges,
 }: StepModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const childrenArray = Children.toArray(children)
-    .filter((child): child is React.ReactElement => isValidElement(child))
-    .map((child) => child.props);
+  const childrenArray = useMemo(
+    () =>
+      Children.toArray(children)
+        .filter((child): child is React.ReactElement => isValidElement(child))
+        .map((child) => child.props),
+    [children]
+  );
 
   const totalSteps = childrenArray.length;
   const isFirstStep = currentStep === 0;
@@ -91,24 +104,24 @@ const StepModal = ({
     }
   }, [open]);
 
-  const resetStates = () => {
+  const resetStates = useCallback(() => {
     setCurrentStep(0);
     setIsLoading(false);
     setError(null);
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     onCancel?.();
     resetStates();
     onOpenChange(false);
-  };
+  }, [onCancel, onOpenChange, resetStates]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setCurrentStep((prev) => Math.max(0, prev - 1));
     setError(null);
-  };
+  }, []);
 
-  const nextStep = async () => {
+  const nextStep = useCallback(async () => {
     const currentStepProps = childrenArray[currentStep];
 
     if (currentStepProps.onNext) {
@@ -142,35 +155,41 @@ const StepModal = ({
       }
       return true;
     }
-  };
+  }, [childrenArray, currentStep, isLastStep, onComplete, onOpenChange, resetStates]);
 
   // Handle form submission (triggered by Enter key)
-  const handleFormSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!isLoading && !childrenArray[currentStep]?.disableNext) {
-      nextStep();
-    }
-  };
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      if (!isLoading && !childrenArray[currentStep]?.disableNext) {
+        nextStep();
+      }
+    },
+    [childrenArray, currentStep, isLoading, nextStep]
+  );
 
-  const contextValue = {
-    currentStep,
-    goToStep: setCurrentStep,
-    nextStep,
-    prevStep: handleBack,
-    isFirstStep,
-    isLastStep,
-    totalSteps,
-    isLoading,
-    error,
-    setError,
-  };
+  const contextValue = useMemo(
+    () => ({
+      currentStep,
+      goToStep: setCurrentStep,
+      nextStep,
+      prevStep: handleBack,
+      isFirstStep,
+      isLastStep,
+      totalSteps,
+      isLoading,
+      error,
+      setError,
+    }),
+    [currentStep, nextStep, handleBack, isFirstStep, isLastStep, totalSteps, isLoading, error]
+  );
 
   const currentChild = childrenArray[currentStep];
 
   return (
     <StepModalContext.Provider value={contextValue}>
       {open && (
-        <Modal.Root open onOpenChange={handleCancel}>
+        <UnsavedChangesModal open onOpenChange={handleCancel} hasUnsavedChanges={hasUnsavedChanges}>
           <Modal.Content>
             <Modal.Header>
               <Typography variant="omega" fontWeight="bold">
@@ -197,9 +216,11 @@ const StepModal = ({
 
               <Modal.Footer>
                 {isFirstStep ? (
-                  <Button variant="tertiary" onClick={handleCancel} type="button">
-                    {currentChild?.cancelLabel || 'Cancel'}
-                  </Button>
+                  <Modal.Close>
+                    <Button variant="tertiary" type="button">
+                      {currentChild?.cancelLabel || 'Cancel'}
+                    </Button>
+                  </Modal.Close>
                 ) : (
                   <Button variant="tertiary" onClick={handleBack} type="button">
                     {currentChild?.backLabel || 'Back'}
@@ -217,7 +238,7 @@ const StepModal = ({
               </Modal.Footer>
             </form>
           </Modal.Content>
-        </Modal.Root>
+        </UnsavedChangesModal>
       )}
     </StepModalContext.Provider>
   );

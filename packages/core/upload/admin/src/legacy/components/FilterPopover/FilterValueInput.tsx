@@ -1,6 +1,8 @@
 import { DateTimePicker, SingleSelectOption, SingleSelect } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+const EMPTY_OPTIONS: NonNullable<FilterValueInputProps['options']> = [];
+
 interface FilterValueInputProps {
   label?: string;
   onChange: (value: string) => void;
@@ -12,7 +14,7 @@ interface FilterValueInputProps {
 export const FilterValueInput = ({
   label = '',
   onChange,
-  options = [],
+  options = EMPTY_OPTIONS,
   type,
   value = '',
 }: FilterValueInputProps) => {

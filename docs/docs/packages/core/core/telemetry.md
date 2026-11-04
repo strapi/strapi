@@ -53,12 +53,8 @@ On `register()` (when telemetry is enabled):
 ```typescript
 strapi.telemetry.send('didCreateContentType', {
   eventProperties: { kind: 'collectionType' },
-  userProperties: {
-    /* optional, per-user */
-  },
-  groupProperties: {
-    /* optional, project-level */
-  },
+  userProperties: {}, // optional, per-user
+  groupProperties: {}, // optional, project-level
 });
 ```
 
@@ -225,6 +221,8 @@ Metrics wrapper: `packages/core/upload/server/src/services/metrics.ts` → `trac
 | `didOptOutTelemetry`               | `strapi telemetry:disable`                   |
 | `will/did*` project creation       | `packages/cli/create-strapi-app`             |
 | Cloud CLI events                   | Proxied via Cloud API (`packages/cli/cloud`) |
+
+Project-creation events carry `invocation` and `agentName` in `eventProperties`. These show whether an agent, CI, or a person ran the command. `STRAPI_TELEMETRY_DISABLED` also stops these events. See [create-strapi-app](../../cli/create-strapi-app/index.md#telemetry).
 
 ---
 

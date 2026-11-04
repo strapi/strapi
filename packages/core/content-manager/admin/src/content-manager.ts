@@ -86,8 +86,10 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
 
 interface DocumentActionProps extends EditViewContext {}
 
-interface DocumentActionComponent
-  extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
+interface DocumentActionComponent extends DescriptionComponent<
+  DocumentActionProps,
+  DocumentActionDescription
+> {
   type?:
     | 'clone'
     | 'configure-the-view'
@@ -104,13 +106,17 @@ interface DocumentActionComponent
 
 interface HeaderActionProps extends EditViewContext {}
 
-interface HeaderActionComponent
-  extends DescriptionComponent<HeaderActionProps, HeaderActionDescription> {}
+interface HeaderActionComponent extends DescriptionComponent<
+  HeaderActionProps,
+  HeaderActionDescription
+> {}
 
 interface BulkActionComponentProps extends ListViewContext {}
 
-interface BulkActionComponent
-  extends DescriptionComponent<BulkActionComponentProps, BulkActionDescription> {
+interface BulkActionComponent extends DescriptionComponent<
+  BulkActionComponentProps,
+  BulkActionDescription
+> {
   type?: 'delete' | 'publish' | 'unpublish';
 }
 

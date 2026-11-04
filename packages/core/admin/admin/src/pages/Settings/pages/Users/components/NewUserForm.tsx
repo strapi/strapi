@@ -15,6 +15,7 @@ import * as yup from 'yup';
 
 import { Form, type FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { UnsavedChangesModal } from '../../../../../components/UnsavedChangesModal';
 import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
@@ -36,6 +37,7 @@ type FormLayout = FormLayoutInputProps[][];
 
 const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [currentStep, setStep] = React.useState<keyof typeof STEPPER>('create');
+  const [createdUserValues, setCreatedUserValues] = React.useState<InitialData>();
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -47,9 +49,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     ROLE_LAYOUT,
     async () =>
       (
-        await import(
-          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/ModalForm'
-        )
+        await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/ModalForm')
       ).ROLE_LAYOUT,
     {
       combine(ceRoles, eeRoles) {
@@ -64,9 +64,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     FORM_INITIAL_VALUES,
     async () =>
       (
-        await import(
-          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/ModalForm'
-        )
+        await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/ModalForm')
       ).FORM_INITIAL_VALUES,
     {
       combine(ceValues, eeValues) {
@@ -83,9 +81,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     MagicLinkCE,
     async () =>
       (
-        await import(
-          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE'
-        )
+        await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE')
       ).MagicLinkEE
   );
 
@@ -108,6 +104,8 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
         setRegistrationToken(res.data.registrationToken);
       }
 
+      // The user now exists, so what the form shows is saved and closing must not warn.
+      setCreatedUserValues(body);
       goNext();
     } else {
       toggleNotification({
@@ -137,7 +135,15 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   }
 
   return (
-    <Modal.Root defaultOpen onOpenChange={onToggle}>
+    // The list page only mounts this component while the modal is open.
+    <UnsavedChangesModal
+      open
+      onOpenChange={(open) => {
+        if (!open) {
+          onToggle();
+        }
+      }}
+    >
       <Modal.Content>
         <Modal.Header>
           {/**
@@ -149,7 +155,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
         </Modal.Header>
         <Form
           method={currentStep === 'create' ? 'POST' : 'PUT'}
-          initialValues={initialValues ?? {}}
+          initialValues={createdUserValues ?? initialValues ?? {}}
           onSubmit={handleSubmit}
           validationSchema={FORM_SCHEMA}
         >
@@ -237,12 +243,14 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                   </Flex>
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button variant="tertiary" onClick={onToggle} type="button">
-                    {formatMessage({
-                      id: 'app.components.Button.cancel',
-                      defaultMessage: 'Cancel',
-                    })}
-                  </Button>
+                  <Modal.Close>
+                    <Button variant="tertiary" type="button">
+                      {formatMessage({
+                        id: 'app.components.Button.cancel',
+                        defaultMessage: 'Cancel',
+                      })}
+                    </Button>
+                  </Modal.Close>
                   {currentStep === 'create' ? (
                     <Button type="submit" loading={isSubmitting}>
                       {formatMessage(buttonSubmitLabel)}
@@ -258,7 +266,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
           }}
         </Form>
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 

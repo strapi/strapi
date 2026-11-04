@@ -1,16 +1,20 @@
 import type { Core } from '@strapi/types';
 import { isString, map } from 'lodash';
 import { errors, emitAudit } from '@strapi/utils';
-import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
+import { ERRORS, WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 import {
   AUDITED_EVENTS,
   getWorkflowChanges,
   toWorkflowEvent,
   toWorkflowSnapshot,
 } from '../audit-logs';
+import type { Stage } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
 import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
 import workflowsContentTypesFactory, { type ContentTypeTransfer } from './workflow-content-types';
+
+// `replaceStages` returns the input stages with their ids filled in, not full stage entities
+type ReplacedStage = Pick<Stage, 'id' | 'name'>;
 
 const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {
   const processedFilters = { ...filters };
@@ -47,6 +51,33 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (Object.keys(changes).length > 0) {
         await emitAudit({ strapi }, AUDITED_EVENTS.WORKFLOW_UPDATE, { workflowId, name, changes });
       }
+    }
+  };
+
+  /**
+   * The `unique` attribute option is not enforced by `db.query`, so the name is checked here.
+   * @param {string} name - Workflow name to check.
+   * @param {number} [workflowId] - ID of the workflow being updated, excluded from the check.
+   * @throws {ValidationError} - If another workflow already uses the name.
+   */
+  const assertWorkflowNameIsUnique = async (name: string, workflowId?: number) => {
+    const where = workflowId === undefined ? { name } : { name, id: { $ne: workflowId } };
+    const existingWorkflow = await strapi.db
+      .query(WORKFLOW_MODEL_UID)
+      .findOne({ select: ['id'], where });
+
+    if (existingWorkflow !== null) {
+      // Same details shape as a yup error, so the admin form shows the message on the name field
+      throw new errors.ValidationError(ERRORS.DUPLICATED_WORKFLOW_NAME, {
+        errors: [
+          {
+            path: ['name'],
+            message: ERRORS.DUPLICATED_WORKFLOW_NAME,
+            name: 'ValidationError',
+            value: name,
+          },
+        ],
+      });
     }
   };
 
@@ -90,14 +121,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Creates a new workflow.
      * @param {object} opts - Options for creating the new workflow.
-     * @returns {Promise<object>} - Workflow object that was just created.
-     * @throws {ValidationError} - If the workflow has no stages.
+     * @returns {Promise<object>} - Workflow object that was just created, populated with `WORKFLOW_POPULATE`.
+     * @throws {ValidationError} - If the workflow has no stages or its name is already used.
      */
     async create(opts: { data: any }) {
       let createOpts = { ...opts, populate: WORKFLOW_POPULATE };
 
       workflowValidator.validateWorkflowStages(opts.data.stages);
       await workflowValidator.validateWorkflowCount(1);
+
+      if (opts.data.name !== undefined) {
+        await assertWorkflowNameIsUnique(opts.data.name);
+      }
 
       let transfers: ContentTypeTransfer[] = [];
 
@@ -161,16 +196,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Updates an existing workflow.
      * @param {object} workflow - The existing workflow to update.
      * @param {object} opts - Options for updating the workflow.
-     * @returns {Promise<object>} - Workflow object that was just updated.
+     * @returns {Promise<object>} - Workflow object that was just updated, populated with `WORKFLOW_POPULATE`.
      * @throws {ApplicationError} - If the supplied stage ID does not belong to the workflow.
+     * @throws {ValidationError} - If the new name is already used by another workflow.
      */
-    async update(workflow: any, opts: any) {
+    async update(workflow: any, opts: { data: any }) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
-      let updatedStages: any = [];
+      let updatedStages: ReplacedStage[] | undefined;
       let updatedStageIds: any;
 
       await workflowValidator.validateWorkflowCount();
+
+      if (opts.data.name !== undefined && opts.data.name !== workflow.name) {
+        await assertWorkflowNameIsUnique(opts.data.name, workflow.id);
+      }
 
       let transfers: ContentTypeTransfer[] = [];
 
@@ -182,12 +222,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
 
-          updatedStages = await stageService.replaceStages(
+          const replacedStages: ReplacedStage[] = await stageService.replaceStages(
             workflow.stages,
             opts.data.stages,
             workflow.contentTypes
           );
-          updatedStageIds = updatedStages.map((stage: any) => stage.id);
+          updatedStages = replacedStages;
+          updatedStageIds = replacedStages.map((stage) => stage.id);
 
           updateOpts = { ...updateOpts, data: { ...updateOpts.data, stages: updatedStageIds } };
         }

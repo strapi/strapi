@@ -21,9 +21,11 @@ import { getService } from '../utils';
  * `strapi.getModel`, `update` runs a multi-statement transaction, and every admin controller and
  * validator already depends on the ambient form.
  *
- * So the dependency is made explicit and asserted instead. Handlers call this in their factory
- * body — at handler construction, not per call — so a mismatch fails while the tool is being
- * registered rather than surfacing to an agent as tool output mid-conversation.
+ * So the dependency is made explicit and asserted instead. `buildUploadMcpToolDefinitions`
+ * wraps every tool's `createHandler` in this check, so it applies to the whole media surface by
+ * construction rather than by each factory remembering to call it. It runs at handler
+ * construction, not per call, so a mismatch fails while the tool is being registered rather
+ * than surfacing to an agent as tool output mid-conversation.
  *
  * A single-app server is unaffected: `createStrapi` assigns its instance to `global.strapi`, so
  * the two agree. If they ever diverge — a second Strapi instance in one process — this throws
@@ -44,7 +46,7 @@ export const assertAmbientInstance = (strapi: Core.Strapi) => {
  * Resolves the `folder` service for an MCP handler.
  *
  * A bare `getService('folder', strapi)` reads as instance-bound but is not — see
- * `assertAmbientInstance` for why. Handlers assert the instance once at construction; this keeps
- * the resolution behind a named helper so the call sites do not reintroduce the misleading form.
+ * `assertAmbientInstance` for why, and for where that is enforced. This keeps the resolution
+ * behind a named helper so the call sites do not reintroduce the misleading form.
  */
 export const getFolderService = (strapi: Core.Strapi) => getService('folder', strapi);

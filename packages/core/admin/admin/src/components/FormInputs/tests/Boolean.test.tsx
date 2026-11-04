@@ -38,4 +38,40 @@ describe('BooleanInput (via InputRenderer)', () => {
 
     expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
   });
+
+  it.each([
+    ['null', { published: null }],
+    ['undefined', {}],
+  ])('renders neither option as selected when the value is %s', (_, initialValues) => {
+    render(<InputRenderer {...booleanField} />, {
+      renderOptions: {
+        wrapper: ({ children }) => (
+          <Form method="PUT" initialValues={initialValues}>
+            {children}
+          </Form>
+        ),
+      },
+    });
+
+    expect(getComputedStyle(screen.getByText('False')).color).toBe(
+      getComputedStyle(screen.getByText('True')).color
+    );
+    expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
+  });
+
+  it('highlights False when the value is false', () => {
+    render(<InputRenderer {...booleanField} />, {
+      renderOptions: {
+        wrapper: ({ children }) => (
+          <Form method="PUT" initialValues={{ published: false }}>
+            {children}
+          </Form>
+        ),
+      },
+    });
+
+    expect(getComputedStyle(screen.getByText('False')).color).not.toBe(
+      getComputedStyle(screen.getByText('True')).color
+    );
+  });
 });

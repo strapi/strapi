@@ -6,8 +6,8 @@ description: Guide for review workflows in the content-manager.
 ## Summary
 
 Review workflows are disabled for all content-types by default and have to be enabled for each of them individually. More about how to
-enable review-workflows for a content-type. The feature itself is visible in two places
-of the content-manager: list and edit view.
+enable review-workflows for a content-type. The feature itself is visible in three places
+of the content-manager: list view, edit view and preview.
 
 ### Nullish stages
 

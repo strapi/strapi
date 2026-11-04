@@ -613,6 +613,25 @@ describe('AssetsTable', () => {
       expect(await screen.findByRole('checkbox', { name: 'Select Photos' })).not.toBeChecked();
     });
 
+    it('clears selected assets that left the list when the header checkbox is unticked', async () => {
+      const { user, rerender } = setup({ assets: [mockAssets[0], mockAssets[1]] });
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image1.png' }));
+      await user.click(await screen.findByRole('checkbox', { name: 'Select image2.png' }));
+
+      // image1 is moved or deleted from its details drawer, which leaves it selected.
+      rerender(
+        <>
+          <AssetsTable assets={[mockAssets[1]]} onAssetItemClick={mockOnAssetItemClick} />
+          <BulkActionsBar assets={[mockAssets[1]]} />
+        </>
+      );
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Select all' }));
+
+      expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
+    });
+
     it('selects a contiguous range across folders and assets with Shift+click', async () => {
       const { user } = setup({ folders: [createMockFolder(1, 'Photos')], assets: mockAssets });
 

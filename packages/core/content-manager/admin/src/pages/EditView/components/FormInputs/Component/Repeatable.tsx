@@ -33,6 +33,11 @@ import { Initializer } from './Initializer';
 import type { ComponentInputProps } from './Input';
 import type { Schema } from '@strapi/types';
 
+const DEFAULT_MAIN_FIELD: NonNullable<ComponentProps['mainField']> = {
+  name: 'id',
+  type: 'integer',
+};
+
 /* -------------------------------------------------------------------------------------------------
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
@@ -344,21 +349,29 @@ const TextButtonCustom = styled(TextButton)`
   }
 `;
 
-interface RepeatableComponentFieldsProps
-  extends Pick<RepeatableComponentProps, 'children' | 'layout'> {
+interface RepeatableComponentFieldsProps extends Pick<
+  RepeatableComponentProps,
+  'children' | 'layout' | 'disabled'
+> {
   attributeComponent: string;
   nameWithIndex: string;
 }
 
 const RepeatableComponentFields = React.memo(
-  ({ attributeComponent, children, layout, nameWithIndex }: RepeatableComponentFieldsProps) => {
+  ({
+    attributeComponent,
+    children,
+    layout,
+    nameWithIndex,
+    disabled,
+  }: RepeatableComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
       <>
-        {layout.map((row, index) => {
+        {layout.map((row) => {
           return (
-            <ResponsiveGridRoot gap={4} key={index}>
+            <ResponsiveGridRoot gap={4} key={row.map((field) => field.name).join('.')}>
               {row.map(({ size, ...field }) => {
                 /**
                  * Layouts are built from schemas so they don't understand the complete
@@ -384,6 +397,8 @@ const RepeatableComponentFields = React.memo(
                   >
                     {children({
                       ...field,
+                      disabled: field.disabled || disabled,
+                      size,
                       label: translatedLabel,
                       name: completeFieldName,
                     })}
@@ -405,7 +420,8 @@ RepeatableComponentFields.displayName = 'RepeatableComponentFields';
  * -----------------------------------------------------------------------------------------------*/
 
 interface ComponentProps
-  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
+  extends
+    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField' | 'layout'> {
   attributeComponent: string;
   disabled?: boolean;
@@ -423,10 +439,7 @@ const Component = ({
   disabled,
   index,
   name,
-  mainField = {
-    name: 'id',
-    type: 'integer',
-  },
+  mainField = DEFAULT_MAIN_FIELD,
   layout,
   onDeleteComponent,
   renderField,
@@ -577,6 +590,7 @@ const Component = ({
                 attributeComponent={attributeComponent}
                 layout={layout}
                 nameWithIndex={name}
+                disabled={disabled}
               >
                 {renderField}
               </RepeatableComponentFields>

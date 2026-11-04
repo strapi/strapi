@@ -72,11 +72,9 @@ export default () => {
       },
 
       isActionEnabled(action: string) {
-        const matchingActions = [action, ALL_ACTIONS];
+        const matchingActions = new Set([action, ALL_ACTIONS]);
 
-        return configs
-          .get(uid)!
-          .disabledActions.every((action) => !matchingActions.includes(action));
+        return configs.get(uid)!.disabledActions.every((action) => !matchingActions.has(action));
       },
 
       isActionDisabled(action: string) {

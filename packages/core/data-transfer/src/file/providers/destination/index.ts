@@ -36,8 +36,7 @@ export interface ILocalFileDestinationProviderOptions {
   };
 }
 
-export interface ILocalFileDestinationProviderTransferResults
-  extends IDestinationProviderTransferResults {
+export interface ILocalFileDestinationProviderTransferResults extends IDestinationProviderTransferResults {
   file?: {
     path?: string;
   };

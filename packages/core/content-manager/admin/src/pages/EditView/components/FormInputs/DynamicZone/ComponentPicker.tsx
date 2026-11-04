@@ -6,6 +6,10 @@ import { getTranslation } from '../../../../../utils/translations';
 
 import { ComponentCategory, ComponentCategoryProps } from './ComponentCategory';
 
+const EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY: NonNullable<
+  ComponentPickerProps['dynamicComponentsByCategory']
+> = {};
+
 interface ComponentPickerProps {
   dynamicComponentsByCategory?: Record<string, NonNullable<ComponentCategoryProps['components']>>;
   isOpen?: boolean;
@@ -13,7 +17,7 @@ interface ComponentPickerProps {
 }
 
 const ComponentPicker = ({
-  dynamicComponentsByCategory = {},
+  dynamicComponentsByCategory = EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY,
   isOpen,
   onClickAddComponent,
 }: ComponentPickerProps) => {
