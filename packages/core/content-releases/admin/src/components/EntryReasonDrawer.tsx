@@ -41,6 +41,12 @@ export interface EntryReasonDetails {
   location: EntryLocation;
 }
 
+/** The entries that held back the others of a run that released nothing: the first ones, of `total` */
+export interface Blockers {
+  items: EntryReasonDetails[];
+  total: number;
+}
+
 interface EntryReasonDrawerProps {
   items: EntryReasonDetails[];
   total?: number;
@@ -53,6 +59,8 @@ interface EntryReasonDrawerProps {
   onClose: () => void;
   /** The release the entries are in: when its run captured the reasons */
   release?: ReleaseDates | null;
+  /** What held back an entry the run held: each opens its own reason */
+  blockers?: Blockers;
 }
 
 type ReleaseDates = Pick<Release, 'releasedAt' | 'scheduledAt' | 'failureReason' | 'timezone'>;
@@ -170,6 +178,79 @@ const IssueCard = ({ label, fieldKey, problem }: IssueCardProps) => {
   );
 };
 
+/**
+ * The entries that held back a held entry, each opening its own reason
+ */
+const HeldBackBy = ({
+  blockers,
+  onSelect,
+}: {
+  blockers: Blockers;
+  onSelect: (id: ReleaseAction['id']) => void;
+}) => {
+  const { formatMessage } = useIntl();
+  const titleId = React.useId();
+  const moreCount = blockers.total - blockers.items.length;
+
+  return (
+    <section aria-labelledby={titleId} className="flex flex-col gap-2">
+      <h3 id={titleId} className="font-semibold">
+        {formatMessage({
+          id: 'content-releases.reason-drawer.held-back-by',
+          defaultMessage: 'Held back by',
+        })}
+      </h3>
+      <ul className="flex flex-col gap-2">
+        {blockers.items.map((blocker) => {
+          const reasonTitle = getReasonTitle(blocker);
+
+          return (
+            <li key={blocker.id}>
+              <button
+                type="button"
+                aria-label={formatMessage(
+                  {
+                    id: 'content-releases.pages.ReleaseDetails.outcome.details-label',
+                    defaultMessage: 'Why {entry} was skipped',
+                  },
+                  { entry: blocker.entryName }
+                )}
+                onClick={() => onSelect(blocker.id)}
+                className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-border bg-background p-3 text-left hover:bg-muted"
+              >
+                <span
+                  className={cn(
+                    'min-w-0 truncate font-semibold',
+                    (blocker.isUntitled || blocker.isDeleted) && 'italic'
+                  )}
+                >
+                  {blocker.entryName}
+                </span>
+                {reasonTitle && (
+                  <span className="shrink-0 text-xs text-destructive">
+                    {formatMessage(reasonTitle)}
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {moreCount > 0 && (
+        <span className="text-xs text-muted-foreground">
+          {formatMessage(
+            {
+              id: 'content-releases.reason-drawer.held-back-by.more',
+              defaultMessage: 'and {count, plural, one {# other entry} other {# other entries}}',
+            },
+            { count: moreCount }
+          )}
+        </span>
+      )}
+    </section>
+  );
+};
+
 /* -------------------------------------------------------------------------------------------------
  * EntryReasonDrawer
  * -----------------------------------------------------------------------------------------------*/
@@ -219,9 +300,13 @@ const useCapturedNote = (isFrozen: boolean, release?: ReleaseDates | null) => {
 const ReasonBody = ({
   details,
   release,
+  blockers,
+  onSelect,
 }: {
   details: EntryReasonDetails;
   release?: ReleaseDates | null;
+  blockers?: Blockers;
+  onSelect: (id: ReleaseAction['id']) => void;
 }) => {
   const { formatMessage } = useIntl();
   const { reason, outcome, missingReason } = details;
@@ -365,6 +450,10 @@ const ReasonBody = ({
         </IssueBox>
       )}
 
+      {outcome === 'skipped_held' && blockers && blockers.items.length > 0 && (
+        <HeldBackBy blockers={blockers} onSelect={onSelect} />
+      )}
+
       {capturedNote && (
         <p className="rounded-md bg-muted p-3 text-xs text-muted-foreground">{capturedNote}</p>
       )}
@@ -402,6 +491,7 @@ export const EntryReasonDrawer = ({
   onSelect,
   onClose,
   release,
+  blockers,
 }: EntryReasonDrawerProps) => {
   const { formatMessage } = useIntl();
   const index = items.findIndex(({ id }) => id === selectedId);
@@ -412,8 +502,10 @@ export const EntryReasonDrawer = ({
       lastShown.current = current;
     }
   });
+  // A blocker opened from a held entry, until the rows it's among have loaded
   const details =
     current ??
+    blockers?.items.find(({ id }) => id === selectedId) ??
     (selectedId === null || lastShown.current?.id === selectedId ? lastShown.current : null);
   const rowCount = Math.max(total ?? 0, items.length);
   // The row Next was pressed on while the rows after it load
@@ -505,7 +597,13 @@ export const EntryReasonDrawer = ({
               </div>
             </DrawerHeader>
             <div className="min-h-0 flex-1 overflow-y-auto p-5">
-              <ReasonBody key={details.id} details={details} release={release} />
+              <ReasonBody
+                key={details.id}
+                details={details}
+                release={release}
+                blockers={blockers}
+                onSelect={onSelect}
+              />
             </div>
             <DrawerFooter>
               <div className="flex justify-between border-t border-border pt-4">

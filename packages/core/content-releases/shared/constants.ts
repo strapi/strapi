@@ -28,6 +28,13 @@ export const RELEASE_ACTION_OUTCOMES = [
 ] as const;
 export type ReleaseActionOutcome = (typeof RELEASE_ACTION_OUTCOMES)[number];
 
-// What the entries of a release can be narrowed to: their readiness, or what the run did with them
-export const RELEASE_ACTION_FILTERS = ['ready', 'notReady', 'released', 'skipped'] as const;
+// What the entries of a release can be narrowed to: their readiness, or what the run did with them.
+// `blocking`: skipped for a reason of their own, so in an `all_or_nothing` run they held back the rest.
+export const RELEASE_ACTION_FILTERS = [
+  'ready',
+  'notReady',
+  'released',
+  'skipped',
+  'blocking',
+] as const;
 export type ReleaseActionFilter = (typeof RELEASE_ACTION_FILTERS)[number];

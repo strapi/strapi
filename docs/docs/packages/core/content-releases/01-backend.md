@@ -176,7 +176,9 @@ packages/core/content-releases/server/src/routes/release.ts
     // ready / notReady: whether the entry is publishable (every unpublish is). On a release that
     // ran, that's what the run found.
     // released / skipped: what the run did with the entry. Nothing matches on a planned release.
-    filter?: 'ready' | 'notReady' | 'released' | 'skipped';
+    // blocking: skipped for a reason of its own (skipped_invalid, skipped_not_approved,
+    // skipped_error), not held or missed: in an `all_or_nothing` run, what held back the rest.
+    filter?: 'ready' | 'notReady' | 'released' | 'skipped' | 'blocking';
     // Any field of the release action, narrowing the result further, e.g.
     // filters[outcome][$in][0]=skipped_invalid
     filters?: Record<string, unknown>;

@@ -2,7 +2,7 @@ import { useAuth } from '@strapi/admin/strapi-admin';
 import { within } from '@testing-library/react';
 import { render, screen } from '@tests/utils';
 
-import { EntryReasonDrawer, type EntryReasonDetails } from '../EntryReasonDrawer';
+import { EntryReasonDrawer, type Blockers, type EntryReasonDetails } from '../EntryReasonDrawer';
 
 import type { Release } from '../../../../shared/contracts/releases';
 
@@ -68,9 +68,11 @@ const renderDrawer = (
   {
     selectedId = items[0].id,
     release = RAN_RELEASE,
+    blockers,
   }: {
     selectedId?: EntryReasonDetails['id'];
     release?: ReleaseDates;
+    blockers?: Blockers;
   } = {}
 ) => {
   const onSelect = jest.fn();
@@ -82,6 +84,7 @@ const renderDrawer = (
       onSelect={onSelect}
       onClose={onClose}
       release={release}
+      blockers={blockers}
     />
   );
 
@@ -246,6 +249,23 @@ describe('EntryReasonDrawer', () => {
     expect(within(dialog).getByText(`Skipped: ${title}`)).toBeInTheDocument();
     const box = within(dialog).getByRole('region', { name: '1 issue' });
     expect(within(box).getByRole('listitem')).toHaveTextContent(text);
+  });
+
+  it('counts the entries that held back a held entry beyond those it names', async () => {
+    renderDrawer([details(1, { outcome: 'skipped_held', reason: null })], {
+      blockers: { items: [details(2), details(3)], total: 5 },
+    });
+
+    const heldBackBy = await screen.findByRole('region', { name: 'Held back by' });
+    expect(within(heldBackBy).getAllByRole('button')).toHaveLength(2);
+    expect(within(heldBackBy).getByText('and 3 other entries')).toBeInTheDocument();
+  });
+
+  it('names no entry that held back an entry the run released', async () => {
+    renderDrawer([details(1)], { blockers: { items: [details(2)], total: 1 } });
+
+    await screen.findByRole('dialog');
+    expect(screen.queryByRole('region', { name: 'Held back by' })).not.toBeInTheDocument();
   });
 
   it('dates a release that ran by its run, as the page header does', async () => {

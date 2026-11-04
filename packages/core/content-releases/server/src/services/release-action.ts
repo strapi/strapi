@@ -43,7 +43,8 @@ const getGroupName = (queryValue: string) => {
     case 'type':
       return 'type';
     case 'locale':
-      return (action: { locale?: Locale | null }) => _.get(action, 'locale.name', 'No locale');
+      return (action: { locale?: Pick<Locale, 'name'> | null }) =>
+        _.get(action, 'locale.name', 'No locale');
     default:
       return 'contentType.displayName';
   }

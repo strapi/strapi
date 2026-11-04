@@ -677,9 +677,22 @@ describe('Release details tabs, header and rows', () => {
     expect(screen.queryByText('Release was published successfully.')).not.toBeInTheDocument();
   });
 
-  it('says nothing was released when the run failed', async () => {
-    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1)]);
+  // A publish whose run failed, the run's entries that held it back being `blocking`
+  const mockFailedRun = (blocking: unknown[]) => {
+    mockRelease({ ...plannedRelease, status: 'ready' }, [action(1), action(2)]);
     server.use(
+      http.get('/content-releases/:releaseId/actions', ({ request }) =>
+        new URL(request.url).searchParams.get('filter') === 'blocking'
+          ? HttpResponse.json({
+              data: blocking.length > 0 ? { Article: blocking } : [],
+              meta: {
+                pagination: { page: 1, pageSize: 1, total: blocking.length, pageCount: 1 },
+                contentTypes: {},
+                components: {},
+              },
+            })
+          : undefined
+      ),
       http.post('/content-releases/:releaseId/publish', () =>
         HttpResponse.json(
           {
@@ -698,6 +711,24 @@ describe('Release details tabs, header and rows', () => {
         )
       )
     );
+  };
+
+  it('says nothing was released when the run failed, and which entry held it back', async () => {
+    mockFailedRun([action(2, { outcome: 'skipped_error' })]);
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Publish' }));
+
+    expect(
+      await screen.findByText(
+        "Nothing was released, held back by article 2: An entry couldn't be released (PartnerApiError)"
+      )
+    ).toBeVisible();
+  });
+
+  it('says nothing was released when the run failed without an entry to blame', async () => {
+    mockFailedRun([]);
 
     const { user } = renderPage();
 
@@ -896,7 +927,15 @@ describe('Release details tabs, header and rows', () => {
 
   const mockReasonRows = (
     release: Record<string, unknown>,
-    { page, reasons }: { page: Record<string, unknown[]>; reasons: Record<string, unknown[]> }
+    {
+      page,
+      reasons,
+      blocking = {},
+    }: {
+      page: Record<string, unknown[]>;
+      reasons: Record<string, unknown[]>;
+      blocking?: Record<string, unknown[]>;
+    }
   ) => {
     const reasonRequests = jest.fn();
     const respond = (data: Record<string, unknown[]>, total: number) =>
@@ -916,6 +955,9 @@ describe('Release details tabs, header and rows', () => {
         if (filter === 'notReady' || filter === 'skipped') {
           reasonRequests(filter);
           return respond(reasons, Object.values(reasons).flat().length);
+        }
+        if (filter === 'blocking') {
+          return respond(blocking, Object.values(blocking).flat().length);
         }
         return respond(page, Object.values(page).flat().length + 10);
       })
@@ -1083,6 +1125,42 @@ describe('Release details tabs, header and rows', () => {
 
     expect(await within(dialog).findByText('article 3')).toBeInTheDocument();
     expect(within(dialog).getByText('Skipped: Waiting on other entries')).toBeInTheDocument();
+  });
+
+  it('names the entry that held back an entry of a run that released nothing, and opens its reason', async () => {
+    const failing = action(1, {
+      outcome: 'skipped_error',
+      reason: { error: { name: 'PartnerApiError' } },
+    });
+    const held = action(2, { outcome: 'skipped_held' });
+    mockReasonRows(
+      {
+        ...partialRelease,
+        status: 'failed',
+        releaseCondition: 'all_or_nothing',
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 2,
+      },
+      {
+        page: { Article: [failing, held] },
+        reasons: { Article: [failing, held] },
+        blocking: { Article: [failing] },
+      }
+    );
+
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: 'Why article 2 was skipped' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(await within(dialog).findByText('Skipped: Waiting on other entries')).toBeVisible();
+    const heldBackBy = await within(dialog).findByRole('region', { name: 'Held back by' });
+
+    await user.click(within(heldBackBy).getByRole('button', { name: 'Why article 1 was skipped' }));
+
+    expect(await within(dialog).findByText('Couldn’t be published: PartnerApiError')).toBeVisible();
+    expect(within(dialog).getByText('Skipped: Error')).toBeVisible();
   });
 
   it('names an entry with an empty main field "Untitled", not by its id', async () => {
