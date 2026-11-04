@@ -142,7 +142,7 @@ describe('formatFileInfo', () => {
 
     beforeEach(() => {
       findMany = jest.fn();
-      getModel = jest.fn().mockReturnValue({ uid: ref });
+      getModel = jest.fn().mockReturnValue({ uid: ref, modelType: 'contentType' });
 
       service = createUploadService({
         strapi: { getModel, db: { query: jest.fn().mockReturnValue({ findMany }) } },
@@ -205,6 +205,28 @@ describe('formatFileInfo', () => {
       expect(result.related).toEqual([
         { id: documentId, __type: 'api::unknown.unknown', __pivot: { field } },
       ]);
+    });
+
+    test('A documentId refId for a component ref throws a ValidationError', async () => {
+      getModel.mockReturnValue({ uid: 'default.todo', modelType: 'component' });
+
+      await expect(
+        service.formatFileInfo(fileData, {}, { refId: documentId, ref: 'default.todo', field })
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+      expect(findMany).not.toHaveBeenCalled();
+    });
+
+    test('A numeric refId for a component ref links the file without a lookup', async () => {
+      getModel.mockReturnValue({ uid: 'default.todo', modelType: 'component' });
+
+      const result = await service.formatFileInfo(
+        fileData,
+        {},
+        { refId: '3', ref: 'default.todo', field }
+      );
+
+      expect(findMany).not.toHaveBeenCalled();
+      expect(result.related).toEqual([{ id: '3', __type: 'default.todo', __pivot: { field } }]);
     });
 
     test('Without ref and field the file is not linked', async () => {
