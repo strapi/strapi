@@ -31,6 +31,7 @@ import { styled } from 'styled-components';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { I18nSharedFieldsLock } from '../../../../../features/I18nSharedFieldsLock';
 import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
@@ -933,14 +934,17 @@ const RelationModalForm = () => {
 
   return (
     <DocumentRBAC permissions={permissions} model={currentDocumentMeta.model}>
-      <RelationModalFormBody
-        currentDocument={currentDocument}
-        documentTitle={documentTitle}
-        hasDraftAndPublished={hasDraftAndPublished}
-        layout={documentLayoutResponse.edit.layout}
-        plugins={plugins}
-        props={props}
-      />
+      {/* The edit view's unlock applies to its own entry, never to a related one. */}
+      <I18nSharedFieldsLock>
+        <RelationModalFormBody
+          currentDocument={currentDocument}
+          documentTitle={documentTitle}
+          hasDraftAndPublished={hasDraftAndPublished}
+          layout={documentLayoutResponse.edit.layout}
+          plugins={plugins}
+          props={props}
+        />
+      </I18nSharedFieldsLock>
     </DocumentRBAC>
   );
 };

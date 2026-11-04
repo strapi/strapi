@@ -1,5 +1,6 @@
 import type { Context } from 'koa';
 import { getService } from '../utils';
+import { formatValidationError } from '../utils/errors';
 import validateComponentCategory from './validation/component-category';
 
 export default {
@@ -9,7 +10,7 @@ export default {
     try {
       await validateComponentCategory(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     const { name } = ctx.params;

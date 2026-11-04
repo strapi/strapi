@@ -996,6 +996,52 @@ describe('AuthProvider', () => {
     });
   });
 
+  describe('session-dead after a logout', () => {
+    it('ignores a late session-dead signal once the user has logged out', async () => {
+      let logoutRequests = 0;
+      server.use(
+        http.post('*/admin/logout', () => {
+          logoutRequests += 1;
+          return HttpResponse.json({ data: {} });
+        })
+      );
+
+      const LogoutProbe = () => {
+        const logout = useAuth('LogoutProbe', (state) => state.logout);
+        const token = useAuth('LogoutProbeToken', (state) => state.token);
+
+        return (
+          <>
+            <button type="button" onClick={() => void logout()}>
+              Log out
+            </button>
+            <span data-testid="token">{token ?? 'logged-out'}</span>
+          </>
+        );
+      };
+
+      const { user } = render(<LogoutProbe />);
+
+      await user.click(screen.getByRole('button', { name: /log out/i }));
+      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent('logged-out'));
+      await waitFor(() => expect(logoutRequests).toBeGreaterThan(0));
+      const logoutRequestsAfterLogout = logoutRequests;
+
+      // A request from the old session can still fail after the logout. The store middleware
+      // reports it without a token, and a request sent after the token was cleared reports null.
+      // Logging out again would reset the login page while the next admin is signing in.
+      act(() => {
+        triggerSessionExpired();
+      });
+      act(() => {
+        triggerSessionExpired(null);
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(logoutRequests).toBe(logoutRequestsAfterLogout);
+    });
+  });
+
   describe('voluntary logout with unsaved changes', () => {
     it('lets the user cancel and keep their edits', async () => {
       registerUnsavedChangesCheck('form', () => true);
