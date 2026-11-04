@@ -16,11 +16,7 @@ interface Answers {
   confirm: boolean;
 }
 
-/**
- * `admin::mfa` is registered as a factory, so `app.admin!.services.mfa` is the uninstantiated
- * function and calling a method on it throws -- it must be resolved through `app.service`. Typed
- * locally rather than importing `@strapi/admin`'s private service type across packages.
- */
+/** `admin::mfa` is registered as a factory, so it is resolved through `app.service`. */
 interface MfaService {
   // The same method the route calls, so the CLI and the panel cannot drift apart.
   resetUser(userId: string, actor?: { byUserId?: string; via?: 'cli' }): Promise<void>;
@@ -35,16 +31,11 @@ const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
   },
 ];
 
-async function resetMfa({ email: typed }: CmdOptions) {
-  // Admin emails are stored lowercased (`normalizeEmail`), so a lookup with the address as typed
-  // misses on any capital letter.
-  const email = String(typed ?? '')
-    .trim()
-    .toLowerCase();
+async function resetMfa({ email }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  const user = await app.db.query('admin::user').findOne({ where: { email } });
+  const user = await app.admin!.services.user.findOneByEmail(email?.trim());
 
   if (!user) {
     console.error(`No admin user found for ${email}`);
@@ -57,7 +48,7 @@ async function resetMfa({ email: typed }: CmdOptions) {
   // the process down mid-send.
   await mfa.resetUser(String(user.id), { via: 'cli' });
 
-  console.log(`Two-factor authentication reset for ${email}. All sessions were invalidated.`);
+  console.log(`Two-factor authentication reset for ${user.email}. All sessions were invalidated.`);
   process.exit(0);
 }
 

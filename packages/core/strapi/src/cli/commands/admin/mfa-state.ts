@@ -24,23 +24,12 @@ interface MfaService {
   countLiveTrustedDevices(userId: string): Promise<number>;
 }
 
-async function printMfaState({ email: typed }: CmdOptions) {
-  // Admin emails are stored lowercased (`normalizeEmail`), so a lookup with the address as typed
-  // misses on any capital letter.
-  const email = String(typed ?? '')
-    .trim()
-    .toLowerCase();
+async function printMfaState({ email }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  // `password` is selected only so `isMfaRequiredFor`'s no-local-password check can run -- it is
-  // never printed. Never `mfaSecret`/`mfaPendingSecret`, the fields the encrypted TOTP secrets
-  // live in.
-  const user = await app.db.query('admin::user').findOne({
-    where: { email },
-    select: ['id', 'email', 'mfaEnabledAt', 'mfaGraceUntil', 'mfaLockedAt', 'password'],
-    populate: ['roles'],
-  });
+  // Only the fields below are printed; never the password or the encrypted secrets
+  const user = await app.admin!.services.user.findOneByEmail(email?.trim(), ['roles']);
 
   if (!user) {
     console.error(`No admin user found for ${email}`);

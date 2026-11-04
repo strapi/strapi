@@ -2,7 +2,7 @@ import inquirer from 'inquirer';
 import { action as resetUserMfaCommand } from '../reset-user-mfa';
 
 const load = jest.fn(() => mock) as any;
-const findOne = jest.fn();
+const findOneByEmail = jest.fn();
 const resetUser = jest.fn();
 const invalidateRefreshToken = jest.fn();
 const sessionManager = jest.fn(() => ({ invalidateRefreshToken }));
@@ -23,11 +23,8 @@ const mfaFactory = jest.fn(() => mfaServiceInstance);
 const admin = {
   services: {
     mfa: mfaFactory,
+    user: { findOneByEmail },
   },
-};
-
-const db = {
-  query: jest.fn(() => ({ findOne })),
 };
 
 // `Strapi.service(uid)`'s behaviour, the only way a command may reach the service.
@@ -36,7 +33,6 @@ const service = jest.fn((uid: string) => (uid === 'admin::mfa' ? mfaServiceInsta
 const mock = {
   load,
   admin,
-  db,
   sessionManager,
   service,
 };
@@ -53,11 +49,10 @@ describe('admin:reset-user-mfa command', () => {
 
   beforeEach(() => {
     load.mockClear();
-    findOne.mockClear();
+    findOneByEmail.mockClear();
     resetUser.mockClear();
     invalidateRefreshToken.mockClear();
     sessionManager.mockClear();
-    db.query.mockClear();
     mfaFactory.mockClear();
     service.mockClear();
   });
@@ -66,14 +61,14 @@ describe('admin:reset-user-mfa command', () => {
     process.stdin.isTTY = originalIsTTY;
   });
 
-  test('lowercases the typed email, as admin emails are stored', async () => {
-    findOne.mockResolvedValue({ id: 1, email: 'kai@doe.com' });
+  test('looks the email up through the user service, which matches any case', async () => {
+    findOneByEmail.mockResolvedValue({ id: 1, email: 'kai@doe.com' });
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     await resetUserMfaCommand({ email: 'Kai@Doe.com' });
 
-    expect(findOne).toHaveBeenCalledWith({ where: { email: 'kai@doe.com' } });
+    expect(findOneByEmail).toHaveBeenCalledWith('Kai@Doe.com');
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
@@ -81,7 +76,7 @@ describe('admin:reset-user-mfa command', () => {
 
   test('clears enrolment for the given email', async () => {
     const email = 'kai@doe.com';
-    findOne.mockResolvedValue({ id: 1, email });
+    findOneByEmail.mockResolvedValue({ id: 1, email });
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -89,8 +84,7 @@ describe('admin:reset-user-mfa command', () => {
     await resetUserMfaCommand({ email });
 
     expect(load).toHaveBeenCalled();
-    expect(db.query).toHaveBeenCalledWith('admin::user');
-    expect(findOne).toHaveBeenCalledWith({ where: { email } });
+    expect(findOneByEmail).toHaveBeenCalledWith(email);
     expect(service).toHaveBeenCalledWith('admin::mfa');
     expect(mfaFactory).not.toHaveBeenCalled();
     expect(resetUser).toHaveBeenCalledWith('1', { via: 'cli' });
@@ -106,7 +100,7 @@ describe('admin:reset-user-mfa command', () => {
   // silently never sends. Exit must wait for it.
   test('awaits the reset before exiting, so the reset email cannot be dropped by an early exit', async () => {
     const email = 'kai@doe.com';
-    findOne.mockResolvedValue({ id: 1, email });
+    findOneByEmail.mockResolvedValue({ id: 1, email });
 
     let releaseReset: (() => void) | undefined;
     resetUser.mockImplementation(
@@ -150,7 +144,7 @@ describe('admin:reset-user-mfa command', () => {
 
   test('exits non-zero when the email is unknown', async () => {
     const email = 'unknown@doe.com';
-    findOne.mockResolvedValue(null);
+    findOneByEmail.mockResolvedValue(null);
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('exit');

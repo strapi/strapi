@@ -30,18 +30,11 @@ const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
   },
 ];
 
-async function unlockMfa({ email: typed }: CmdOptions) {
-  // Admin emails are stored lowercased (`normalizeEmail`), so a lookup with the address as typed
-  // misses on any capital letter.
-  const email = String(typed ?? '')
-    .trim()
-    .toLowerCase();
+async function unlockMfa({ email }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  const user = await app.db
-    .query('admin::user')
-    .findOne({ where: { email }, select: ['id', 'email'] });
+  const user = await app.admin!.services.user.findOneByEmail(email?.trim());
 
   if (!user) {
     console.error(`No admin user found for ${email}`);
@@ -52,12 +45,12 @@ async function unlockMfa({ email: typed }: CmdOptions) {
   const unlocked = await mfa.unlock(String(user.id), { via: 'cli' });
 
   if (!unlocked) {
-    console.error(`${email} is not locked by two-factor enforcement. Nothing to do.`);
+    console.error(`${user.email} is not locked by two-factor enforcement. Nothing to do.`);
     process.exit(1);
   }
 
   console.log(
-    `${email} unlocked. Their next login starts a fresh two-factor enrolment grace period.`
+    `${user.email} unlocked. Their next login starts a fresh two-factor enrolment grace period.`
   );
   process.exit(0);
 }

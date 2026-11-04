@@ -1,7 +1,7 @@
 import { action as unlockUserMfaCommand } from '../unlock-user-mfa';
 
 const load = jest.fn(() => mock) as any;
-const findOne = jest.fn();
+const findOneByEmail = jest.fn();
 const unlock = jest.fn();
 
 const mfaServiceInstance = {
@@ -15,11 +15,8 @@ const mfaFactory = jest.fn(() => mfaServiceInstance);
 const admin = {
   services: {
     mfa: mfaFactory,
+    user: { findOneByEmail },
   },
-};
-
-const db = {
-  query: jest.fn(() => ({ findOne })),
 };
 
 // `Strapi.service(uid)`'s behaviour, the only way a command may reach the service.
@@ -28,7 +25,6 @@ const service = jest.fn((uid: string) => (uid === 'admin::mfa' ? mfaServiceInsta
 const mock = {
   load,
   admin,
-  db,
   service,
 };
 
@@ -42,16 +38,15 @@ jest.mock('@strapi/core', () => {
 describe('admin:unlock-user-mfa command', () => {
   beforeEach(() => {
     load.mockClear();
-    findOne.mockClear();
+    findOneByEmail.mockClear();
     unlock.mockClear();
-    db.query.mockClear();
     mfaFactory.mockClear();
     service.mockClear();
   });
 
   test('unlocks the account and exits 0', async () => {
     const email = 'kai@doe.com';
-    findOne.mockResolvedValue({ id: 1, email, mfaLockedAt: '2026-09-01T10:14:00.000Z' });
+    findOneByEmail.mockResolvedValue({ id: 1, email, mfaLockedAt: '2026-09-01T10:14:00.000Z' });
     unlock.mockResolvedValue(true);
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -60,7 +55,6 @@ describe('admin:unlock-user-mfa command', () => {
     await unlockUserMfaCommand({ email });
 
     expect(load).toHaveBeenCalled();
-    expect(db.query).toHaveBeenCalledWith('admin::user');
     expect(service).toHaveBeenCalledWith('admin::mfa');
     expect(mfaFactory).not.toHaveBeenCalled();
     expect(unlock).toHaveBeenCalledWith('1', { via: 'cli' });
@@ -71,17 +65,15 @@ describe('admin:unlock-user-mfa command', () => {
     consoleLog.mockRestore();
   });
 
-  test('lowercases the typed email, as admin emails are stored', async () => {
-    findOne.mockResolvedValue({ id: 1, email: 'kai@doe.com' });
+  test('looks the email up through the user service, which matches any case', async () => {
+    findOneByEmail.mockResolvedValue({ id: 1, email: 'kai@doe.com' });
     unlock.mockResolvedValue(true);
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     await unlockUserMfaCommand({ email: 'KAI@doe.com' });
 
-    expect(findOne).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { email: 'kai@doe.com' } })
-    );
+    expect(findOneByEmail).toHaveBeenCalledWith('KAI@doe.com');
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
@@ -89,7 +81,7 @@ describe('admin:unlock-user-mfa command', () => {
 
   test('exits non-zero when the account was not locked', async () => {
     const email = 'kai@doe.com';
-    findOne.mockResolvedValue({ id: 1, email, mfaLockedAt: null });
+    findOneByEmail.mockResolvedValue({ id: 1, email, mfaLockedAt: null });
     unlock.mockResolvedValue(false);
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
@@ -111,7 +103,7 @@ describe('admin:unlock-user-mfa command', () => {
 
   test('exits non-zero when the email is unknown', async () => {
     const email = 'unknown@doe.com';
-    findOne.mockResolvedValue(null);
+    findOneByEmail.mockResolvedValue(null);
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('exit');

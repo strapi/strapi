@@ -3,7 +3,7 @@ import { action as mfaStateCommand } from '../mfa-state';
 const SECRET = 'super-secret-totp-value-do-not-log';
 
 const load = jest.fn(() => mock) as any;
-const findOne = jest.fn();
+const findOneByEmail = jest.fn();
 const isEnrolled = jest.fn();
 const countUnusedRecoveryCodes = jest.fn();
 const config = jest.fn();
@@ -29,11 +29,8 @@ const mfaFactory = jest.fn(() => mfaServiceInstance);
 const admin = {
   services: {
     mfa: mfaFactory,
+    user: { findOneByEmail },
   },
-};
-
-const db = {
-  query: jest.fn(() => ({ findOne })),
 };
 
 // Mirrors `Strapi.service(uid)` (`packages/core/core/src/Strapi.ts`): resolves the already
@@ -44,7 +41,6 @@ const service = jest.fn((uid: string) => (uid === 'admin::mfa' ? mfaServiceInsta
 const mock = {
   load,
   admin,
-  db,
   service,
 };
 
@@ -58,14 +54,13 @@ jest.mock('@strapi/core', () => {
 describe('admin:mfa-state command', () => {
   beforeEach(() => {
     load.mockClear();
-    findOne.mockClear();
+    findOneByEmail.mockClear();
     isEnrolled.mockClear();
     countUnusedRecoveryCodes.mockClear();
     config.mockClear();
     isMfaRequiredFor.mockClear();
     countLiveTrustedDevices.mockClear();
     currentTotpStep.mockClear();
-    db.query.mockClear();
     mfaFactory.mockClear();
     service.mockClear();
 
@@ -75,7 +70,7 @@ describe('admin:mfa-state command', () => {
 
   test('exits non-zero when the email is unknown', async () => {
     const email = 'unknown@doe.com';
-    findOne.mockResolvedValue(null);
+    findOneByEmail.mockResolvedValue(null);
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('exit');
@@ -93,17 +88,15 @@ describe('admin:mfa-state command', () => {
     consoleError.mockRestore();
   });
 
-  test('never selects or prints the secret', async () => {
+  test('never prints the secret', async () => {
     const email = 'kai@doe.com';
-    findOne.mockResolvedValue({
+    findOneByEmail.mockResolvedValue({
       id: 1,
       email,
       mfaEnabledAt: '2026-09-01T10:14:00.000Z',
       mfaGraceUntil: null,
       mfaLockedAt: null,
-      // Seeded even though the command's own `select` should never ask for it -- if the
-      // implementation ever widens that `select` or prints the raw row, this must be what
-      // fails the test.
+      // The full row is read, so printing it raw is what this catches
       mfaSecret: SECRET,
       mfaPendingSecret: SECRET,
     });
@@ -118,10 +111,7 @@ describe('admin:mfa-state command', () => {
     expect(service).toHaveBeenCalledWith('admin::mfa');
     expect(mfaFactory).not.toHaveBeenCalled();
 
-    const findOneArg = findOne.mock.calls[0][0];
-    expect(findOneArg.where).toEqual({ email });
-    expect(findOneArg.select).not.toContain('mfaSecret');
-    expect(findOneArg.select).not.toContain('mfaPendingSecret');
+    expect(findOneByEmail).toHaveBeenCalledWith(email, ['roles']);
 
     for (const call of consoleLog.mock.calls) {
       for (const arg of call) {
@@ -135,9 +125,9 @@ describe('admin:mfa-state command', () => {
     consoleLog.mockRestore();
   });
 
-  test('prints the enforcement state, and selects password only for the resolver', async () => {
+  test('prints the enforcement state, passing the row with its password to the resolver', async () => {
     const email = 'kai@doe.com';
-    findOne.mockResolvedValue({
+    findOneByEmail.mockResolvedValue({
       id: 1,
       email,
       mfaEnabledAt: '2026-09-01T10:14:00.000Z',
@@ -154,11 +144,7 @@ describe('admin:mfa-state command', () => {
 
     await mfaStateCommand({ email });
 
-    const findOneArg = findOne.mock.calls[0][0];
-    expect(findOneArg.select).toEqual(expect.arrayContaining(['mfaGraceUntil', 'mfaLockedAt']));
-    expect(findOneArg.select).not.toContain('mfaSecret');
-    expect(findOneArg.select).not.toContain('mfaPendingSecret');
-    expect(findOneArg.populate).toEqual(['roles']);
+    expect(findOneByEmail).toHaveBeenCalledWith(email, ['roles']);
 
     expect(isMfaRequiredFor).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, password: 'hashed-password' })
@@ -184,7 +170,7 @@ describe('admin:mfa-state command', () => {
   test("prints the mfa service's current totp step", async () => {
     const email = 'kai@doe.com';
 
-    findOne.mockResolvedValue({ id: 1, email, mfaEnabledAt: null });
+    findOneByEmail.mockResolvedValue({ id: 1, email, mfaEnabledAt: null });
     isEnrolled.mockResolvedValue(false);
     countUnusedRecoveryCodes.mockResolvedValue(10);
     currentTotpStep.mockReturnValue(59346643);
@@ -203,7 +189,11 @@ describe('admin:mfa-state command', () => {
   // A diagnostic writes nothing: `listTrustedDevices` would delete the expired rows it met.
   test('prints the number of live trusted devices without pruning any', async () => {
     const email = 'kai@doe.com';
-    findOne.mockResolvedValue({ id: 1, email, mfaEnabledAt: new Date('2026-01-01T00:00:00.000Z') });
+    findOneByEmail.mockResolvedValue({
+      id: 1,
+      email,
+      mfaEnabledAt: new Date('2026-01-01T00:00:00.000Z'),
+    });
     isEnrolled.mockResolvedValue(true);
     countUnusedRecoveryCodes.mockResolvedValue(10);
     countLiveTrustedDevices.mockResolvedValue(2);
@@ -220,8 +210,8 @@ describe('admin:mfa-state command', () => {
     consoleLog.mockRestore();
   });
 
-  test('finds the user whatever the case of the typed email', async () => {
-    findOne.mockResolvedValue(null);
+  test('looks the email up through the user service, which matches any case', async () => {
+    findOneByEmail.mockResolvedValue(null);
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('exit');
     });
@@ -229,9 +219,7 @@ describe('admin:mfa-state command', () => {
 
     await expect(mfaStateCommand({ email: ' Kai@Doe.COM ' })).rejects.toThrow('exit');
 
-    expect(findOne).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { email: 'kai@doe.com' } })
-    );
+    expect(findOneByEmail).toHaveBeenCalledWith('Kai@Doe.COM', ['roles']);
 
     mockExit.mockRestore();
     consoleError.mockRestore();
