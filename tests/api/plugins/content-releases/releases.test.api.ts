@@ -965,6 +965,31 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         ).toEqual([invalidId]);
       });
 
+      test('narrows a run that released nothing to the entries that held it back', async () => {
+        const heldId = await createProduct({ valid: true });
+        const failingId = await createProduct({ valid: true });
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: heldId },
+          { documentId: failingId },
+        ]);
+        documentIdsFailingToPublish.add(failingId);
+        try {
+          expect((await publishManually(release.id)).statusCode).toBe(400);
+        } finally {
+          documentIdsFailingToPublish.delete(failingId);
+        }
+
+        // Both were skipped, only the failing one for a reason of its own
+        expect(await findFiltered(release.id, 'skipped')).toEqual({
+          documentIds: [heldId, failingId].sort(),
+          total: 2,
+        });
+        expect(await findFiltered(release.id, 'blocking')).toEqual({
+          documentIds: [failingId],
+          total: 1,
+        });
+      });
+
       test('rejects an unknown filter', async () => {
         const release = (await createRelease()).body.data;
 

@@ -38,6 +38,11 @@ export const getReleaseActionsWhere = (
     case 'skipped':
       // NOT IN leaves NULL outcomes out: a planned action (no outcome) never counts as skipped
       return { release: releaseId, outcome: { $notIn: [...RELEASED_OUTCOMES] } };
+    case 'blocking':
+      return {
+        release: releaseId,
+        outcome: { $in: ['skipped_invalid', 'skipped_not_approved', 'skipped_error'] },
+      };
     default:
       return { release: releaseId };
   }

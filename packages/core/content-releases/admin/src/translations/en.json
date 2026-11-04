@@ -65,6 +65,7 @@
   "pages.ReleaseDetails.publish-notification-success": "Release was published successfully.",
   "pages.ReleaseDetails.publish-notification-partial": "Released {released} of {total, plural, one {# entry} other {# entries}}, {skipped} skipped",
   "pages.ReleaseDetails.publish-notification-failed": "Nothing was released: {error}",
+  "pages.ReleaseDetails.publish-notification-failed-held": "Nothing was released, held back by {entry}{others, plural, =0 {} one { and # other entry} other { and # other entries}}: {error}",
   "pages.ReleaseDetails.publish-disabled.empty": "This release is empty.",
   "pages.ReleaseDetails.publish-disabled.allow_partial": "Nothing in this release is ready to publish.",
   "pages.ReleaseDetails.publish-disabled.all_or_nothing": "Some entries aren't ready. This release only publishes when every entry is ready.",
@@ -199,6 +200,8 @@
   "reason-drawer.captured": "State captured when the release ran on {date} at {time} ({offset}).",
   "reason-drawer.captured.not-run": "{hasDate, select, true {State captured for the run scheduled on {date} at {time} ({offset}).} other {State captured before the release could run.}}",
   "reason-drawer.go-to-entry": "Go to entry",
+  "reason-drawer.held-back-by": "Held back by",
+  "reason-drawer.held-back-by.more": "and {count, plural, one {# other entry} other {# other entries}}",
   "pages.ReleaseDetails.entry-validation.review-stage": "Review stage",
   "reason-drawer.title.not-checked": "Not checked yet",
   "reason-drawer.fields.unreadable": "{missingReason, select, unchecked {This entry hasn’t been checked yet. Saving it checks it.} unrecorded {Why it isn’t ready wasn’t recorded. Saving the entry checks it again.} other {The entry couldn’t be validated}}"

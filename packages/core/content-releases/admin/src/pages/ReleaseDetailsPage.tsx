@@ -35,7 +35,7 @@ import {
 } from '@strapi/design-system';
 import { More, Pencil, Trash } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { useIntl, type MessageDescriptor } from 'react-intl';
+import { useIntl, type IntlShape, type MessageDescriptor } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
@@ -63,6 +63,7 @@ import { PERMISSIONS } from '../constants';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
+  useLazyGetReleaseActionsQuery,
   useGetReleaseQuery,
   useGetReleaseSettingsQuery,
   useUpdateReleaseMutation,
@@ -76,6 +77,7 @@ import { isBaseQueryError } from '../utils/api';
 import { getReleaseDateParts } from '../utils/time';
 
 import type {
+  FormattedReleaseAction,
   ReleaseAction,
   ReleaseActionFilter,
   ReleaseActionGroupBy,
@@ -86,6 +88,8 @@ import type { ReleaseDataResponse } from '../../../shared/contracts/releases';
 const REASON_PAGE_SIZE = 100;
 // Looking for the opened row stops there: past it, the drawer steps through the table's rows
 const MAX_REASON_SEARCH_SIZE = 500;
+// A held entry's reason names this many of the entries that held it back, then counts the rest
+const BLOCKERS_SHOWN = 5;
 
 const getRunTotals = (release: ReleaseDataResponse) => {
   if (
@@ -111,6 +115,43 @@ const hasRunReleasedNothing = (release: ReleaseDataResponse) => {
   const totals = getRunTotals(release);
 
   return !release.failureReason && totals !== null && totals.total > 0 && totals.released === 0;
+};
+
+/**
+ * How a row names its entry: by its main field, else "Untitled". An entry gone once its release
+ * ran is a "Deleted entry".
+ */
+const getEntryNaming = (
+  { entry, contentType }: Pick<FormattedReleaseAction, 'entry' | 'contentType'>,
+  isFrozen: boolean,
+  formatMessage: IntlShape['formatMessage']
+) => {
+  const isDeleted = isFrozen && !entry;
+  const isUntitled = !isDeleted && !contentType.mainFieldValue;
+
+  if (isDeleted) {
+    return {
+      isDeleted,
+      isUntitled,
+      entryName: formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.table.deleted-entry',
+        defaultMessage: 'Deleted entry',
+      }),
+    };
+  }
+
+  if (isUntitled) {
+    return {
+      isDeleted,
+      isUntitled,
+      entryName: formatMessage({
+        id: 'content-releases.pages.ReleaseDetails.table.untitled',
+        defaultMessage: 'Untitled',
+      }),
+    };
+  }
+
+  return { isDeleted, isUntitled, entryName: `${contentType.mainFieldValue}` };
 };
 
 type ReleaseTabValue = 'all' | ReleaseActionFilter;
@@ -192,6 +233,46 @@ interface ReleaseDetailsLayoutProps {
   children: React.ReactNode;
 }
 
+/**
+ * What the toast says of a run that released nothing: the entry that held back an `all_or_nothing`
+ * run, when the run recorded one. What failed in an `allow_partial` run was only skipped.
+ */
+const useFailedRunMessage = (release?: Pick<ReleaseDataResponse, 'releaseCondition'>) => {
+  const { formatMessage } = useIntl();
+  const [getBlockingActions] = useLazyGetReleaseActionsQuery();
+
+  return async (releaseId: string, error: string) => {
+    const blocking =
+      release?.releaseCondition === 'all_or_nothing'
+        ? (await getBlockingActions({ releaseId, filter: 'blocking', page: 1, pageSize: 1 })).data
+        : undefined;
+    const [blocker] = Object.values(blocking?.data ?? {}).flat();
+
+    if (!blocker) {
+      return formatMessage(
+        {
+          id: 'content-releases.pages.ReleaseDetails.publish-notification-failed',
+          defaultMessage: 'Nothing was released: {error}',
+        },
+        { error }
+      );
+    }
+
+    return formatMessage(
+      {
+        id: 'content-releases.pages.ReleaseDetails.publish-notification-failed-held',
+        defaultMessage:
+          'Nothing was released, held back by {entry}{others, plural, =0 {} one { and # other entry} other { and # other entries}}: {error}',
+      },
+      {
+        entry: getEntryNaming(blocker, true, formatMessage).entryName,
+        others: (blocking?.meta.pagination.total ?? 1) - 1,
+        error,
+      }
+    );
+  };
+};
+
 const ReleaseDetailsLayout = ({
   toggleEditDrawer,
   toggleWarningSubmit,
@@ -218,6 +299,7 @@ const ReleaseDetailsLayout = ({
   const [isSkippedDrawerOpen, setIsSkippedDrawerOpen] = React.useState(false);
 
   const release = data?.data;
+  const getFailedRunMessage = useFailedRunMessage(release);
   // Creating the release adds its actions, so it takes both permissions, as the route does.
   // A run that failed before the upgrade may have released some entries without recording which,
   // so the page doesn't offer to release them again.
@@ -276,15 +358,7 @@ const ReleaseDetailsLayout = ({
 
       toggleNotification({
         type: 'danger',
-        message: hasRunFailed
-          ? formatMessage(
-              {
-                id: 'content-releases.pages.ReleaseDetails.publish-notification-failed',
-                defaultMessage: 'Nothing was released: {error}',
-              },
-              { error: apiError }
-            )
-          : apiError,
+        message: hasRunFailed ? await getFailedRunMessage(id, apiError) : apiError,
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
@@ -797,6 +871,23 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     }
   }, [reasonActionId, currentReasonData]);
 
+  // What held back the others of an `all_or_nothing` run: a held entry's reason names them
+  const { currentData: blockingData } = useGetReleaseActionsQuery(
+    {
+      releaseId,
+      filter: 'blocking',
+      groupBy: selectedGroupBy,
+      page: 1,
+      pageSize: BLOCKERS_SHOWN,
+    },
+    {
+      skip:
+        !release?.releasedAt ||
+        release.releaseCondition !== 'all_or_nothing' ||
+        reasonActionId === null,
+    }
+  );
+
   const [updateReleaseAction] = useUpdateReleaseActionMutation();
 
   const handleChangeType = async (
@@ -951,41 +1042,19 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   type RowAction = (typeof releaseActions)[string][number];
 
-  const getRowNaming = ({ entry, contentType }: Pick<RowAction, 'entry' | 'contentType'>) => {
-    const isDeleted = Boolean(release.releasedAt) && !entry;
-    const isUntitled = !isDeleted && !contentType.mainFieldValue;
-
-    if (isDeleted) {
-      return {
-        isDeleted,
-        isUntitled,
-        entryName: formatMessage({
-          id: 'content-releases.pages.ReleaseDetails.table.deleted-entry',
-          defaultMessage: 'Deleted entry',
-        }),
-      };
-    }
-
-    if (isUntitled) {
-      return {
-        isDeleted,
-        isUntitled,
-        entryName: formatMessage({
-          id: 'content-releases.pages.ReleaseDetails.table.untitled',
-          defaultMessage: 'Untitled',
-        }),
-      };
-    }
-
-    return { isDeleted, isUntitled, entryName: `${contentType.mainFieldValue}` };
-  };
-
   const hasReason = (action: RowAction) =>
     release.releasedAt ? hasSkipReason(action.outcome, isOutcomeUnknown) : isActionNotReady(action);
 
+  // Every content type of the rows the drawer can show, whichever request loaded them
+  const reasonContentTypes = {
+    ...contentTypes,
+    ...reasonData?.meta.contentTypes,
+    ...blockingData?.meta.contentTypes,
+  };
+
   const toReasonDetails = (action: RowAction): EntryReasonDetails => ({
     id: action.id,
-    ...getRowNaming(action),
+    ...getEntryNaming(action, Boolean(release.releasedAt), formatMessage),
     contentTypeName: action.contentType.displayName,
     localeCode: hasI18nEnabled ? action.locale?.code : undefined,
     action: action.type,
@@ -999,7 +1068,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         : undefined,
     location: {
       contentTypeUid: action.contentType.uid,
-      kind: (reasonData?.meta.contentTypes ?? contentTypes)?.[action.contentType.uid]?.kind,
+      kind: reasonContentTypes[action.contentType.uid]?.kind,
       documentId: action.entryDocumentId,
       locale: action.locale?.code,
       showErrors: (action.reason?.validation?.errors.length ?? 0) > 0,
@@ -1031,6 +1100,10 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         (tableOrder.get(b.id) ?? Number.MAX_SAFE_INTEGER)
     )
     .map(toReasonDetails);
+  const blockers = blockingData && {
+    items: Object.values(blockingData.data).flat().map(toReasonDetails),
+    total: blockingData.meta.pagination.total,
+  };
 
   return (
     <Layouts.Content>
@@ -1146,10 +1219,11 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                       },
                       actionIndex
                     ) => {
-                      const { isDeleted, isUntitled, entryName } = getRowNaming({
-                        entry,
-                        contentType,
-                      });
+                      const { isDeleted, isUntitled, entryName } = getEntryNaming(
+                        { entry, contentType },
+                        Boolean(release.releasedAt),
+                        formatMessage
+                      );
                       const textColor = isDeleted ? 'neutral500' : undefined;
                       const openReason = () => setReasonActionId(id);
                       const entryLink = !isDeleted && (
@@ -1285,6 +1359,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         onSelect={setReasonActionId}
         onClose={() => setReasonActionId(null)}
         release={release}
+        blockers={blockers}
       />
     </Layouts.Content>
   );
