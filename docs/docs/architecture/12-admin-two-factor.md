@@ -92,6 +92,11 @@ any reset. Until then the old password, the sessions and the trusts stand, so so
 the mailbox can neither change the password nor sign the holder out. An abandoned staged reset
 expires with its challenge; the link is spent either way.
 
+An account that is not enrolled has no challenge to pass, so its reset commits the password at
+once and then meets `enforce`. When that account is locked, the reset answers `MfaLockedError`
+(403) with the new password already in place. The reset page (`ResetPassword.tsx`) then says the
+password changed and the account is locked, and drops the form, whose link is spent.
+
 ```jsonc
 {
   "data": {

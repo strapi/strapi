@@ -22,6 +22,8 @@ import { establishAdminSession } from '../../../utils/establishAdminSession';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
+import { isMfaLockedError } from './Login';
+
 import type { MfaChallengeLocationState } from './MfaChallenge';
 
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
@@ -106,6 +108,12 @@ const ResetPassword = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const [resetPassword, { error }] = useResetPasswordMutation();
+  /**
+   * A locked account that is not enrolled has its new password committed before the lock is
+   * checked, so the reset worked and the link is spent, yet no session follows. Saying only that
+   * the account is locked would leave the user unsure whether the password changed.
+   */
+  const lockedAfterReset = Boolean(error && isBaseQueryError(error) && isMfaLockedError(error));
 
   const handleSubmit = async (body: ResetPassword.Request['body']) => {
     const res = await resetPassword(body);
@@ -151,7 +159,15 @@ const ResetPassword = () => {
                 })}
               </Typography>
             </Box>
-            {error ? (
+            {lockedAfterReset ? (
+              <Typography id="global-form-error" role="alert" tabIndex={-1}>
+                {formatMessage({
+                  id: 'Auth.form.mfa.locked.afterReset',
+                  defaultMessage:
+                    'Your password was changed, but this account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
+                })}
+              </Typography>
+            ) : error ? (
               <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
                 {isBaseQueryError(error)
                   ? formatAPIError(error)
@@ -162,54 +178,56 @@ const ResetPassword = () => {
               </Typography>
             ) : null}
           </Column>
-          <Form
-            method="POST"
-            initialValues={{
-              password: '',
-              confirmPassword: '',
-            }}
-            onSubmit={(values) => {
-              // We know query.code is defined because we check for it above.
-              handleSubmit({ password: values.password, resetPasswordToken: query.get('code')! });
-            }}
-            validationSchema={RESET_PASSWORD_SCHEMA}
-          >
-            <Flex direction="column" alignItems="stretch" gap={6}>
-              {[
-                {
-                  hint: formatMessage({
-                    id: 'Auth.form.password.hint',
-                    defaultMessage:
-                      'Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number',
-                  }),
-                  label: formatMessage({
-                    id: 'global.password',
-                    defaultMessage: 'Password',
-                  }),
-                  name: 'password',
-                  required: true,
-                  type: 'password' as const,
-                },
-                {
-                  label: formatMessage({
-                    id: 'Auth.form.confirmPassword.label',
-                    defaultMessage: 'Confirm Password',
-                  }),
-                  name: 'confirmPassword',
-                  required: true,
-                  type: 'password' as const,
-                },
-              ].map((field) => (
-                <InputRenderer key={field.name} {...field} />
-              ))}
-              <Button fullWidth type="submit">
-                {formatMessage({
-                  id: 'global.change-password',
-                  defaultMessage: 'Change password',
-                })}
-              </Button>
-            </Flex>
-          </Form>
+          {lockedAfterReset ? null : (
+            <Form
+              method="POST"
+              initialValues={{
+                password: '',
+                confirmPassword: '',
+              }}
+              onSubmit={(values) => {
+                // We know query.code is defined because we check for it above.
+                handleSubmit({ password: values.password, resetPasswordToken: query.get('code')! });
+              }}
+              validationSchema={RESET_PASSWORD_SCHEMA}
+            >
+              <Flex direction="column" alignItems="stretch" gap={6}>
+                {[
+                  {
+                    hint: formatMessage({
+                      id: 'Auth.form.password.hint',
+                      defaultMessage:
+                        'Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number',
+                    }),
+                    label: formatMessage({
+                      id: 'global.password',
+                      defaultMessage: 'Password',
+                    }),
+                    name: 'password',
+                    required: true,
+                    type: 'password' as const,
+                  },
+                  {
+                    label: formatMessage({
+                      id: 'Auth.form.confirmPassword.label',
+                      defaultMessage: 'Confirm Password',
+                    }),
+                    name: 'confirmPassword',
+                    required: true,
+                    type: 'password' as const,
+                  },
+                ].map((field) => (
+                  <InputRenderer key={field.name} {...field} />
+                ))}
+                <Button fullWidth type="submit">
+                  {formatMessage({
+                    id: 'global.change-password',
+                    defaultMessage: 'Change password',
+                  })}
+                </Button>
+              </Flex>
+            </Form>
+          )}
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>

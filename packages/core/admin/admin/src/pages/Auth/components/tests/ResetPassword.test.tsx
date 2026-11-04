@@ -148,5 +148,40 @@ describe('ResetPassword', () => {
       // no session was ever created on the challenge branch
       expect(window.localStorage.getItem('jwtToken')).toBeNull();
     });
+
+    /** The server commits the new password, then refuses a session to the locked account. The
+     * user must learn both, in their own language, and not be offered a form whose link is spent. */
+    it('says the password changed but the account is locked when the reset lands on a locked account', async () => {
+      server.use(
+        http.post('/admin/reset-password', () =>
+          HttpResponse.json(
+            {
+              error: {
+                status: 403,
+                name: 'MfaLockedError',
+                message: 'Account locked: two-factor enrolment deadline passed',
+                details: {},
+              },
+            },
+            { status: 403 }
+          )
+        )
+      );
+
+      const { getByRole, getByLabelText, user, findByText, queryByRole } = render(
+        <ResetPassword />,
+        { initialEntries: [{ search: '?code=test' }] }
+      );
+
+      await user.type(getByLabelText('Password*'), 'Testing123!');
+      await user.type(getByLabelText('Confirm Password*'), 'Testing123!');
+      fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+      expect(
+        await findByText(/Your password was changed, but this account is locked/)
+      ).toBeInTheDocument();
+      expect(queryByRole('button', { name: 'Change password' })).not.toBeInTheDocument();
+      expect(getByRole('link', { name: 'Ready to sign in?' })).toBeInTheDocument();
+    });
   });
 });
