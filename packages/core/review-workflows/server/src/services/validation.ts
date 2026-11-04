@@ -6,6 +6,20 @@ import { clampMaxWorkflows, clampMaxStagesPerWorkflow } from '../utils/review-wo
 
 const { ValidationError } = errors;
 
+/**
+ * Reads a license limit. A missing, zero or non-numeric value keeps the default, so a malformed
+ * license never removes the limit.
+ */
+const toLimit = (value: unknown, fallback: number) => {
+  const parsed = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+
+  if (typeof parsed !== 'number' || Number.isFinite(parsed) === false || parsed === 0) {
+    return fallback;
+  }
+
+  return parsed;
+};
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     limits: {
@@ -15,10 +29,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     register({ numberOfWorkflows, stagesPerWorkflow }: any) {
       if (!Object.isFrozen(this.limits)) {
         this.limits.numberOfWorkflows = clampMaxWorkflows(
-          numberOfWorkflows || this.limits.numberOfWorkflows
+          toLimit(numberOfWorkflows, this.limits.numberOfWorkflows)
         );
         this.limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
-          stagesPerWorkflow || this.limits.stagesPerWorkflow
+          toLimit(stagesPerWorkflow, this.limits.stagesPerWorkflow)
         );
         Object.freeze(this.limits);
       }

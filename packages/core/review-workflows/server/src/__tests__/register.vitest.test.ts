@@ -77,4 +77,13 @@ describe('review-workflows register', () => {
 
     expect(validation.limits).toEqual({ numberOfWorkflows: 200, stagesPerWorkflow: 200 });
   });
+
+  it('keeps the default limits when the license limits are not numbers', async () => {
+    const validation = await registerWith({
+      name: 'review-workflows',
+      options: { numberOfWorkflows: 'not-a-number', stagesPerWorkflow: 'not-a-number' },
+    });
+
+    expect(validation.limits).toEqual({ numberOfWorkflows: 200, stagesPerWorkflow: 200 });
+  });
 });

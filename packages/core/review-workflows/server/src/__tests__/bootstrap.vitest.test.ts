@@ -7,7 +7,7 @@ import defaultStages from '../constants/default-stages.json';
  * Runs the plugin `bootstrap` on an empty database, with the real validation service registered
  * with the license `stagesPerWorkflow`. Returns the data of the default workflow it created.
  */
-const bootWith = async (stagesPerWorkflow: number) => {
+const bootWith = async (stagesPerWorkflow: unknown) => {
   const services: Record<string, any> = {
     stages: { count: vi.fn().mockResolvedValue(0) },
     'workflow-weekly-metrics': { registerCron: vi.fn() },
@@ -61,4 +61,10 @@ describe('review-workflows bootstrap', () => {
       expect(workflow.stages).toEqual(defaultStages);
     }
   );
+
+  it('creates the default workflow with all 4 stages when the license stage limit is not a number', async () => {
+    const workflow = await bootWith('not-a-number');
+
+    expect(workflow.stages).toEqual(defaultStages);
+  });
 });
