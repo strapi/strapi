@@ -219,6 +219,7 @@ Use `yarn commit` for an interactive prompt. Run `yarn version:check` if you've 
 
 - Import types from `@strapi/types` — extend or improve them rather than duplicating locally.
 - Never use `any` when a proper type exists or can be reasonably defined. Prefer `unknown` otherwise.
+- Type entity identifiers with `Data.ID` (numeric/db `id`) and `Data.DocumentID` (`documentId`) from `import type { Data } from '@strapi/types'` — never raw `string`, `number` or `string | number`. A value that can be either is `Data.ID | Data.DocumentID`. They may become branded types later, so raw primitives would break.
 - Run `yarn test:ts` before pushing.
 
 ### Linting & Formatting
