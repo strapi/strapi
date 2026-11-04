@@ -445,6 +445,32 @@ describe('User', () => {
       expect(result).toBe(user);
     });
 
+    test.each([
+      [true, 'revokeAllTrustedDevices'],
+      [false, 'clearTrustedDevices'],
+    ] as const)(
+      'a password change drops the trusted devices (feature on: %s, via %s)',
+      async (enabled, method) => {
+        // A browser trusted under the old password must not skip the second factor under the new.
+        const mfa = passwordChangeMfa(enabled);
+        global.strapi = {
+          ...global.strapi,
+          eventHub: { emit: vi.fn() },
+          db: {
+            query: () => ({
+              findOne: vi.fn(() => Promise.resolve({ id: 1, roles: [] })),
+              update: vi.fn(({ data }) => Promise.resolve({ id: 1, ...data })),
+            }),
+          },
+          admin: { services: { auth: { hashPassword: vi.fn(() => 'hash') }, mfa } },
+        } as any;
+
+        await updateById(1, { password: 'Testing1234' });
+
+        expect(mfa[method]).toHaveBeenCalledWith('1');
+      }
+    );
+
     test('a role change hands the previous row to clearGraceIfStale', async () => {
       const mfa = passwordChangeMfa();
       const previous = { id: 1, roles: [{ id: 2 }], mfaGraceUntil: new Date(0) };

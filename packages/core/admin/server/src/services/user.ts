@@ -211,6 +211,16 @@ const updateById = async (
       populate: ['roles'],
     });
 
+    // Every password change, from the profile, an administrator, the CLI or a reset: a browser
+    // trusted under the old password must not keep skipping the second factor under the new one.
+    // While the feature is off the rows are dropped silently; there is nobody to notify.
+    const mfa = getService('mfa');
+    if (mfa.isEnabled()) {
+      await mfa.revokeAllTrustedDevices(String(id));
+    } else {
+      await mfa.clearTrustedDevices(String(id));
+    }
+
     strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
     await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
 

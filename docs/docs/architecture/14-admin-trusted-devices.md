@@ -122,8 +122,11 @@ Trust is destroyed, not merely expired, when:
 
 - The user disables 2FA, or their factor is reset
 - The user moves to a new authenticator app: the trusts were granted against the old one
-- The user's password is reset (`/reset-password`), since a reset usually means the password was
-  lost or leaked
+- The user's password changes by any route: a reset (`/reset-password`), the profile, an
+  administrator, or the `admin:reset-user-password` CLI. `updateById` in `services/user.ts` does it
+  for every one of them: a browser trusted under the old password must not skip the second factor
+  under the new one. With the feature on the rows are revoked, with a notice; with it off they are
+  deleted silently
 - The account is deleted (`purgeUser`, called from the user service's delete paths)
 - An administrator revokes their devices
 - The organisation turns the setting off (every row is cleared)
