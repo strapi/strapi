@@ -12,6 +12,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
+import { WarningCircle } from '@strapi/icons';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -141,6 +142,40 @@ const TwoFactorEnforcementCard = ({
               <Field.Hint />
             </Field.Root>
           </Box>
+          {/* Right under the choice it blocks, not as grey text under a disabled Save. Not the
+              design system's `Alert`, which always renders a close button: this stays until the
+              choice changes or the caller sets up two-factor authentication. */}
+          {mustEnrolFirst ? (
+            <Flex
+              role="alert"
+              background="warning100"
+              borderColor="warning200"
+              hasRadius
+              padding={4}
+              gap={3}
+              alignItems="flex-start"
+            >
+              <Box shrink={0} paddingTop={1}>
+                <WarningCircle fill="warning600" aria-hidden />
+              </Box>
+              <Typography textColor="warning700">
+                {formatMessage(
+                  {
+                    id: 'Settings.security.mfa.enrolFirst.hint',
+                    defaultMessage:
+                      'Set up two-factor authentication on your own account before requiring it for others. <link>Go to your profile</link>.',
+                  },
+                  {
+                    link: (chunks: React.ReactNode) => (
+                      <Link tag={NavLink} to="/me" isExternal={false}>
+                        {chunks}
+                      </Link>
+                    ),
+                  }
+                )}
+              </Typography>
+            </Flex>
+          ) : null}
           <ErrorMessage error={saveError} />
         </Flex>
 
@@ -241,25 +276,6 @@ const TwoFactorEnforcementCard = ({
               <Field.Error />
             </Field.Root>
           </Box>
-        ) : null}
-
-        {mustEnrolFirst ? (
-          <Typography variant="pi" textColor="neutral600">
-            {formatMessage(
-              {
-                id: 'Settings.security.mfa.enrolFirst.hint',
-                defaultMessage:
-                  'Set up two-factor authentication on your own account before requiring it for others. <link>Go to your profile</link>.',
-              },
-              {
-                link: (chunks: React.ReactNode) => (
-                  <Link tag={NavLink} to="/me" isExternal={false}>
-                    {chunks}
-                  </Link>
-                ),
-              }
-            )}
-          </Typography>
         ) : null}
       </Panel>
     </Box>

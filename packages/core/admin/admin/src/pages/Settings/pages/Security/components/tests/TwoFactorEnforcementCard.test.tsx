@@ -135,9 +135,12 @@ describe('TwoFactorEnforcementCard', () => {
   it('says to set up two-factor authentication first, with a link to the profile', () => {
     render(<Harness mustEnrolFirst />);
 
+    // An alert, so it is announced when the choice that triggers it is made.
     expect(
-      screen.getByText(/Set up two-factor authentication on your own account before requiring it/)
-    ).toBeInTheDocument();
+      screen
+        .getByText(/Set up two-factor authentication on your own account before requiring it/)
+        .closest('[role="alert"]')
+    ).not.toBeNull();
     expect(screen.getByRole('link', { name: 'Go to your profile' })).toHaveAttribute('href', '/me');
   });
 
