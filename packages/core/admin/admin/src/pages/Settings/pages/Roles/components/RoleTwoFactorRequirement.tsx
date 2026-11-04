@@ -28,6 +28,8 @@ import type { MfaEnforcementSettings } from '../../../../../../../shared/contrac
 
 interface RoleTwoFactorRequirementProps {
   roleId: string | number;
+  /** Named in the confirmation when the requirement is dropped. */
+  roleName?: string;
 }
 
 /**
@@ -47,8 +49,10 @@ interface RoleTwoFactorRequirementProps {
  * While everyone is required the checkbox shows the effective state, disabled, and says where it is
  * set.
  */
-const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => {
+const RoleTwoFactorRequirement = ({ roleId, roleName }: RoleTwoFactorRequirementProps) => {
   const { formatMessage } = useIntl();
+  const hintId = React.useId();
+  const explanationId = React.useId();
   const { toggleNotification } = useNotification();
   const toMessage = useToMessage();
   const permissions = useTypedSelector(selectAdminPermissions);
@@ -160,6 +164,8 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
     return message;
   };
 
+  const showHint = checked && !everyone;
+
   const securityLink = (chunks: React.ReactNode) => (
     <Link tag={NavLink} to="/settings/security" isExternal={false}>
       {chunks}
@@ -188,7 +194,7 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
       {
         id: 'Settings.roles.form.mfa.off',
         defaultMessage:
-          'Not required for any role yet. Checking this sets <link>Settings > Security</link> to "Required for selected roles", with this role.',
+          'Not required for any role yet. Checking this sets <link>Settings > Security</link> to "Required for selected roles", with this role. It saves as soon as you change it, without the Save button.',
       },
       { link: securityLink }
     );
@@ -197,7 +203,7 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
       {
         id: 'Settings.roles.form.mfa.selected',
         defaultMessage:
-          'This is the "Required for selected roles" setting in <link>Settings > Security</link>, where all required roles are listed.',
+          'This is the "Required for selected roles" setting in <link>Settings > Security</link>, where all required roles are listed. It saves as soon as you change it, without the Save button.',
       },
       { link: securityLink }
     );
@@ -223,6 +229,7 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Checkbox
             name="mfaRequired"
+            aria-describedby={showHint ? `${hintId} ${explanationId}` : explanationId}
             checked={checked}
             disabled={everyone || mustEnrolFirst || isSaving || isFetching || isFetchingImpact}
             onCheckedChange={(value) => handleChange(value === true)}
@@ -232,8 +239,8 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
               defaultMessage: 'Require two-factor authentication for this role',
             })}
           </Checkbox>
-          {checked && !everyone ? (
-            <Typography variant="pi" textColor="neutral600">
+          {showHint ? (
+            <Typography id={hintId} variant="pi" textColor="neutral600">
               {formatMessage(
                 {
                   id: 'Settings.roles.form.mfa.hint',
@@ -244,7 +251,7 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
               )}
             </Typography>
           ) : null}
-          <Typography variant="pi" textColor="neutral600">
+          <Typography id={explanationId} variant="pi" textColor="neutral600">
             {explanation}
           </Typography>
         </Flex>
@@ -279,6 +286,24 @@ const RoleTwoFactorRequirement = ({ roleId }: RoleTwoFactorRequirementProps) => 
         requiresCode={callerEnrolled}
         onClose={() => setLowering(false)}
         onConfirm={confirmLower}
+        description={
+          <Typography>
+            {roleName
+              ? formatMessage(
+                  {
+                    id: 'Settings.security.downgrade.combined.roles',
+                    defaultMessage:
+                      'Two-factor authentication will no longer be required for {roles}.',
+                  },
+                  { roles: roleName }
+                )
+              : formatMessage({
+                  id: 'Settings.roles.form.mfa.lower.thisRole',
+                  defaultMessage:
+                    'Two-factor authentication will no longer be required for this role.',
+                })}
+          </Typography>
+        }
       />
     </Box>
   );

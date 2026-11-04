@@ -290,7 +290,8 @@ password-less administrator into a dialog they cannot complete.
   a "Require two-factor authentication for this role" checkbox on `admin::role.mfaRequired`, shown
   to holders of `admin::security-settings.read` and `.update` while the feature is on. It saves on
   its own through `PUT /admin/security-settings` (`mfa.requiredRoles`), with the Security page's
-  impact dialog on a raise and `ConfirmDowngradeDialog` on a drop. Under "Not required", checking it
+  impact dialog on a raise and `ConfirmDowngradeDialog`, naming the role, on a drop. The
+  line under the checkbox says it saves at once, without the role form's Save. Under "Not required", checking it
   saves "Required for selected roles" with this role alone; unchecking the last selected role saves
   "Not required". It is disabled only while everyone is required. The grace-period hint shows only
   while the role requires it, and a line under the checkbox says how this relates to the Security

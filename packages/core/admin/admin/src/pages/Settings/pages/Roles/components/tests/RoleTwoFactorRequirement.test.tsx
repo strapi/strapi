@@ -78,7 +78,7 @@ const renderToggle = (onRoleSubmit = jest.fn()) =>
         onRoleSubmit();
       }}
     >
-      <RoleTwoFactorRequirement roleId={3} />
+      <RoleTwoFactorRequirement roleId={3} roleName="Editor" />
     </form>,
     { providerOptions: withSecurityPermissions() }
   );
@@ -135,6 +135,21 @@ describe('RoleTwoFactorRequirement', () => {
     expect(onRoleSubmit).not.toHaveBeenCalled();
   });
 
+  /** The hint and the line under it are what the checkbox does, so a screen reader reads them with
+   * it, including that it saves at once rather than with the role's Save. */
+  it('describes the checkbox with its hint and explanation', async () => {
+    handlers({ mode: 'optional', graceDays: 7, requiredRoles: ['3'] });
+    renderToggle();
+
+    const input = await toggle();
+    expect(input).toHaveAccessibleDescription(
+      expect.stringContaining('within 7 days of their next login')
+    );
+    expect(input).toHaveAccessibleDescription(
+      expect.stringContaining('It saves as soon as you change it, without the Save button.')
+    );
+  });
+
   it('asks for the password and a code before dropping the requirement', async () => {
     const puts = handlers({ mode: 'optional', graceDays: 7, requiredRoles: ['1', '3'] });
     const onRoleSubmit = jest.fn();
@@ -146,6 +161,10 @@ describe('RoleTwoFactorRequirement', () => {
     fireEvent.click(input);
 
     const dialog = await screen.findByRole('dialog', { name: 'Lower two-factor requirements?' });
+    // Names the role, like the Security page's combined dialog names each one.
+    expect(dialog).toHaveTextContent(
+      'Two-factor authentication will no longer be required for Editor.'
+    );
     await user.type(within(dialog).getByLabelText('Current password*'), 'Testing123!');
     await user.type(within(dialog).getByLabelText('Authentication code*'), '123456');
     // A real Enter submits the dialog's own form, and React bubbles that submit through the portal.

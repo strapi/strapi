@@ -255,7 +255,9 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
-                {isMfaFeatureEnabled() ? <RoleTwoFactorRequirement roleId={id} /> : null}
+                {isMfaFeatureEnabled() ? (
+                  <RoleTwoFactorRequirement roleId={id} roleName={role.name} />
+                ) : null}
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}
