@@ -210,6 +210,124 @@ describe('clone relations', () => {
         },
       ]);
     });
+
+    describe('media operation payloads', () => {
+      const MEDIA_ARTICLE = 'api::media-article.media-article';
+      const MEDIA_BLOCK = 'default.media-block';
+
+      const mediaBlockModel = {
+        uid: MEDIA_BLOCK,
+        modelType: 'component',
+        attributes: {
+          image: { type: 'media', multiple: false },
+          images: { type: 'media', multiple: true },
+        },
+      };
+
+      const mediaArticleModel = {
+        uid: MEDIA_ARTICLE,
+        modelType: 'contentType',
+        options: { draftAndPublish: false },
+        attributes: {
+          title: { type: 'string' },
+          cover: { type: 'media', multiple: false },
+          gallery: { type: 'media', multiple: true },
+          block: { type: 'component', component: MEDIA_BLOCK, repeatable: false },
+          blocks: { type: 'component', component: MEDIA_BLOCK, repeatable: true },
+          sections: { type: 'dynamiczone', components: [MEDIA_BLOCK] },
+        },
+      };
+
+      const mediaModels: Record<string, unknown> = {
+        [MEDIA_ARTICLE]: mediaArticleModel,
+        [MEDIA_BLOCK]: mediaBlockModel,
+      };
+      const getMediaModel = (uid: string) => mediaModels[uid];
+
+      const fileA = { id: 1, documentId: 'file-a', name: 'a.png' };
+      const fileC = { id: 3, documentId: 'file-c', name: 'c.png' };
+
+      const original = {
+        title: 'Original',
+        cover: fileA,
+        gallery: [fileA, fileC],
+        block: { id: 10, image: fileA, images: [fileA, fileC] },
+        blocks: [{ id: 20, image: fileA, images: [fileA] }],
+        sections: [{ id: 30, __component: MEDIA_BLOCK, image: fileA, images: [fileA] }],
+      };
+
+      const clone = (submitted: Record<string, unknown>) =>
+        prepareCloneData(original, submitted, mediaArticleModel as never, getMediaModel as never);
+
+      it.each([
+        ['set', { set: [{ documentId: 'file-b' }] }],
+        ['connect', { connect: [{ documentId: 'file-b' }] }],
+        ['disconnect', { disconnect: [{ documentId: 'file-a' }] }],
+        ['an empty set', { set: [] }],
+      ])('replaces a root single media with a submitted %s', async (_, operation) => {
+        const { data } = await clone({ cover: operation });
+
+        expect(data.cover).toEqual(operation);
+      });
+
+      it.each([
+        ['set', { set: [{ documentId: 'file-b' }] }],
+        ['connect', { connect: [{ documentId: 'file-b' }] }],
+        ['disconnect', { disconnect: [{ documentId: 'file-c' }] }],
+      ])('replaces a root multiple media with a submitted %s', async (_, operation) => {
+        const { data } = await clone({ gallery: operation });
+
+        expect(data.gallery).toEqual(operation);
+      });
+
+      it('replaces media inside a single component and keeps its other fields', async () => {
+        const set = { set: [{ documentId: 'file-b' }] };
+        const connect = { connect: [{ documentId: 'file-b' }] };
+
+        const { data } = await clone({ block: { image: set, images: connect } });
+
+        expect(data.block).toEqual({ id: 10, image: set, images: connect });
+      });
+
+      it('replaces media inside repeatable components and dynamic zones', async () => {
+        const set = { set: [{ documentId: 'file-b' }] };
+
+        const { data } = await clone({
+          blocks: [{ image: set }],
+          sections: [{ __component: MEDIA_BLOCK, images: set }],
+        });
+
+        expect(data.blocks).toEqual([{ id: 20, image: set, images: [fileA] }]);
+        expect(data.sections).toEqual([
+          { id: 30, __component: MEDIA_BLOCK, image: fileA, images: set },
+        ]);
+      });
+
+      it('keeps the original media when the clone does not submit it', async () => {
+        const { data } = await clone({ title: 'Clone' });
+
+        expect(data).toMatchObject({
+          title: 'Clone',
+          cover: fileA,
+          gallery: [fileA, fileC],
+          block: { image: fileA, images: [fileA, fileC] },
+        });
+      });
+
+      it('keeps the original media when the submitted operations are empty', async () => {
+        const { data } = await clone({ cover: { connect: [], disconnect: [] } });
+
+        expect(data.cover).toMatchObject({ id: fileA.id, documentId: fileA.documentId });
+      });
+
+      it('does not mutate the original entry', async () => {
+        const snapshot = structuredClone(original);
+
+        await clone({ cover: { set: [{ documentId: 'file-b' }] }, block: { image: { set: [] } } });
+
+        expect(original).toEqual(snapshot);
+      });
+    });
   });
 
   describe('applyDeferredCloneRelationCopies', () => {

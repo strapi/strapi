@@ -194,7 +194,7 @@ const collectRelationOperationOverrides = async (
         overrides.set(path.rawWithIndices!, value);
       }
     },
-    { schema: contentType, getModel },
+    { schema: contentType, getModel, includeMedia: true },
     submittedData as TraversableData
   );
 
