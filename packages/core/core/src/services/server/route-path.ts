@@ -2,6 +2,11 @@ import type Router from '@koa/router';
 import type { Core } from '@strapi/types';
 import compose from 'koa-compose';
 
+/**
+ * Boots routes written for path-to-regexp v6 on v8.
+ * Remove this translator in Strapi 6, when route paths are v8 only.
+ */
+
 export class RoutePathMigrationError extends Error {
   constructor(path: string, reason: string) {
     super(`Cannot migrate route path "${path}" from path-to-regexp v6 to v8: ${reason}`);
