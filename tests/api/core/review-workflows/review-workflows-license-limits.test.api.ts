@@ -145,6 +145,7 @@ describeOnCondition(edition === 'EE')('Review workflows license limits', () => {
   // An instance that created more workflows than its plan allows, while the limit was not enforced
   describe('Above the license workflow limit', () => {
     let workflow;
+    let otherWorkflow;
 
     beforeAll(async () => {
       await deleteAllWorkflows();
@@ -153,10 +154,14 @@ describeOnCondition(edition === 'EE')('Review workflows license limits', () => {
       expect(res.status).toBe(201);
       workflow = res.body.data;
 
+      const otherRes = await createWorkflow('over-limit-other', 2);
+      expect(otherRes.status).toBe(201);
+      otherWorkflow = otherRes.body.data;
+
       const updateRes = await updateWorkflow(workflow.id, { contentTypes: [productUID] });
       expect(updateRes.status).toBe(200);
 
-      for (let index = 1; index <= LICENSE_LIMITS.numberOfWorkflows; index += 1) {
+      for (let index = 2; index <= LICENSE_LIMITS.numberOfWorkflows; index += 1) {
         await strapi.db.query(WORKFLOW_MODEL_UID).create({
           data: { name: `over-limit-${index}`, contentTypes: [] },
         });
@@ -187,6 +192,26 @@ describeOnCondition(edition === 'EE')('Review workflows license limits', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.name).toBe('renamed-over-limit');
+    });
+
+    // Moves the entries of the content type to the first stage of the other workflow
+    test('It reassigns a content type to another workflow', async () => {
+      const res = await updateWorkflow(otherWorkflow.id, { contentTypes: [productUID] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.contentTypes).toEqual([productUID]);
+    });
+
+    // Moves the entries of the deleted stage to the remaining stage
+    test('It deletes a stage of a workflow', async () => {
+      const [firstStage] = otherWorkflow.stages;
+
+      const res = await updateWorkflow(otherWorkflow.id, {
+        stages: [{ id: firstStage.id, name: firstStage.name }],
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.stages.map((stage) => stage.id)).toEqual([firstStage.id]);
     });
 
     test('It rejects a new workflow', async () => {
