@@ -13,8 +13,7 @@ interface NotificationLink {
 interface NotificationConfig {
   blockTransition?: boolean;
   link?: NotificationLink;
-  /** Usually a string; a node lets a message carry an in-app link, which `link` cannot. */
-  message?: React.ReactNode;
+  message?: string;
   onClose?: () => void;
   timeout?: number;
   title?: string;
@@ -27,24 +26,13 @@ interface NotificationConfig {
 
 interface NotificationsContextValue {
   /**
-   * Returns the toast id (sonner's `toast.custom` return value) so a caller that needs to dismiss
-   * it later -- e.g. on its own unmount, before the toast's own timeout -- can do so via
-   * `dismissNotification` without importing `sonner` itself.
+   * Toggles a notification, wrapped in `useCallback` for a stable identity.
    */
-  toggleNotification: (config: NotificationConfig) => string | number | undefined;
-  /**
-   * Dismisses a previously-toggled notification by the id `toggleNotification` returned. This is
-   * the one place `sonner`'s `toast` is used outside `toggleNotification` itself, so callers never
-   * need their own `sonner` import. Note: dismissing this way does NOT run the toast's `onClose`
-   * -- it is meant for "this is going away regardless of whether anyone acted on it", not for
-   * simulating the user closing it.
-   */
-  dismissNotification: (id: string | number) => void;
+  toggleNotification: (config: NotificationConfig) => void;
 }
 
 const NotificationsContext = React.createContext<NotificationsContextValue>({
-  toggleNotification: () => undefined,
-  dismissNotification: () => {},
+  toggleNotification: () => {},
 });
 
 /* -------------------------------------------------------------------------------------------------
@@ -58,7 +46,7 @@ const NotificationsContext = React.createContext<NotificationsContextValue>({
 const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
   const toggleNotification = React.useCallback(
     ({ type, message, link, timeout, blockTransition, onClose, title }: NotificationConfig) => {
-      return toast.custom(
+      toast.custom(
         (id) => {
           return (
             <Box width="50rem" maxWidth="100%">
@@ -81,14 +69,7 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
     []
   );
 
-  const dismissNotification = React.useCallback((id: string | number) => {
-    toast.dismiss(id);
-  }, []);
-
-  const value = React.useMemo(
-    () => ({ toggleNotification, dismissNotification }),
-    [toggleNotification, dismissNotification]
-  );
+  const value = React.useMemo(() => ({ toggleNotification }), [toggleNotification]);
 
   return (
     <>

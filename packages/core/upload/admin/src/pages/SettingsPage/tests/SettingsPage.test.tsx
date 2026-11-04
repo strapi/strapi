@@ -31,10 +31,7 @@ const mockSettings = (aiMetadataAvailable: boolean) => {
 describe('SettingsPage', () => {
   beforeEach(() => {
     mockSettings(false);
-    jest.mocked(useNotification).mockReturnValue({
-      toggleNotification: jest.fn(),
-      dismissNotification: jest.fn(),
-    });
+    jest.mocked(useNotification).mockReturnValue({ toggleNotification: jest.fn() });
     jest.mocked(useStrapiTracking).mockReturnValue({ trackUsage: jest.fn() });
   });
 
@@ -115,7 +112,6 @@ describe('SettingsPage', () => {
     const notifyAfterRefresh = jest.fn();
     jest.mocked(useNotification).mockReturnValue({
       toggleNotification: (notification) => notifyAfterRefresh(notification.type, refreshFinished),
-      dismissNotification: jest.fn(),
     });
     let releaseRefresh = () => {};
     const refreshPending = new Promise<void>((resolve) => {
