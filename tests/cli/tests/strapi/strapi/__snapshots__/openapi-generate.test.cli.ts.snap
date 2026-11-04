@@ -30584,7 +30584,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                             "type": "string",
                           },
                           "namePath": {
-                            "description": "The path made of folder names. Computed, so it cannot be filtered or sorted on",
+                            "description": "The path made of folder names. Computed, so it cannot be filtered or sorted on. Left out when \`name\` is private",
                             "type": "string",
                           },
                           "parent": {
@@ -30626,7 +30626,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "documentId",
                           "name",
                           "path",
-                          "namePath",
                           "createdAt",
                           "updatedAt",
                         ],
@@ -30783,7 +30782,7 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                           "type": "string",
                         },
                         "namePath": {
-                          "description": "The path made of folder names. Computed, so it cannot be filtered or sorted on",
+                          "description": "The path made of folder names. Computed, so it cannot be filtered or sorted on. Left out when \`name\` is private",
                           "type": "string",
                         },
                         "parent": {
@@ -30825,7 +30824,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "documentId",
                         "name",
                         "path",
-                        "namePath",
                         "createdAt",
                         "updatedAt",
                       ],

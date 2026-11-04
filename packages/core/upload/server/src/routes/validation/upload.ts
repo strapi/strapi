@@ -106,7 +106,10 @@ export class UploadRouteValidator extends AbstractRouteValidator {
         ),
       namePath: z
         .string()
-        .describe('The path made of folder names. Computed, so it cannot be filtered or sorted on'),
+        .optional()
+        .describe(
+          'The path made of folder names. Computed, so it cannot be filtered or sorted on. Left out when `name` is private'
+        ),
       parent: parent
         .nullable()
         .optional()
