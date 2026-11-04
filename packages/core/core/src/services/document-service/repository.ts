@@ -676,34 +676,34 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    // Deep populate issues its own queries. Run these lookups one after another
-    // so they stay on this transaction's single connection.
-    const draftsToPublish = await strapi.db.query(uid).findMany({
-      where: {
-        ...queryParams?.lookup,
-        documentId,
-        publishedAt: null, // Ignore lookup
-      },
-      // Populate relations, media, compos and dz
-      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
-    });
-    const oldPublishedVersions = await strapi.db.query(uid).findMany({
-      where: {
-        ...queryParams?.lookup,
-        documentId,
-        publishedAt: { $ne: null },
-      },
-      select: ['id', 'locale'],
-    });
-    // All published locales of this document (not scoped to the publish lookup).
-    // Used so a first publish of FR can inherit EN published shared fields.
-    const publishedVersions = await strapi.db.query(uid).findMany({
-      where: {
-        documentId,
-        publishedAt: { $ne: null },
-      },
-      select: ['locale'],
-    });
+    const [draftsToPublish, oldPublishedVersions, publishedVersions] = await Promise.all([
+      strapi.db.query(uid).findMany({
+        where: {
+          ...queryParams?.lookup,
+          documentId,
+          publishedAt: null, // Ignore lookup
+        },
+        // Populate relations, media, compos and dz
+        populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
+      }),
+      strapi.db.query(uid).findMany({
+        where: {
+          ...queryParams?.lookup,
+          documentId,
+          publishedAt: { $ne: null },
+        },
+        select: ['id', 'locale'],
+      }),
+      // All published locales of this document (not scoped to the publish lookup).
+      // Used so a first publish of FR can inherit EN published shared fields.
+      strapi.db.query(uid).findMany({
+        where: {
+          documentId,
+          publishedAt: { $ne: null },
+        },
+        select: ['locale'],
+      }),
+    ]);
 
     // Load any unidirectional relation targetting the old published entries
     const relationsToSync = await unidirectionalRelations.load(
