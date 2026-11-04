@@ -158,7 +158,29 @@ describe('Image', () => {
     ]);
   });
 
-  it('splits a list in two when converting a list item to an image', async () => {
+  it('keeps a paragraph with text and inserts the image below it', async () => {
+    const baseEditor = withStrapiSchema(createEditor());
+    baseEditor.children = [
+      { type: 'paragraph', children: [{ type: 'text', text: 'Keep me' }] },
+      { type: 'paragraph', children: [{ type: 'text', text: 'After' }] },
+    ];
+
+    await waitFor(() => Transforms.select(baseEditor, { path: [0, 0], offset: 4 }));
+
+    const modalUi = imageBlocks.image.handleConvert!(baseEditor)!();
+    const { user } = render(modalUi, { baseEditor });
+
+    await user.click(screen.getByText(mockMediaLibrarySubmitButton));
+
+    expect(baseEditor.children).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: 'Keep me' }] },
+      { type: 'image', image: mockImage, children: [{ type: 'text', text: '' }] },
+      { type: 'paragraph', children: [{ type: 'text', text: 'After' }] },
+    ]);
+    expect(baseEditor.selection?.anchor.path).toEqual([1, 0]);
+  });
+
+  it('keeps a list item with text and splits the list after it', async () => {
     const baseEditor = createEditor();
     baseEditor.children = [
       {
@@ -172,59 +194,86 @@ describe('Image', () => {
       },
     ];
 
-    await waitFor(() =>
-      Transforms.select(baseEditor, {
-        anchor: { path: [0, 1, 0], offset: 0 },
-        focus: { path: [0, 1, 0], offset: 0 },
-      })
-    );
+    await waitFor(() => Transforms.select(baseEditor, { path: [0, 1, 0], offset: 0 }));
 
-    // Display the media library modal via handleConvert
     const modalComponent = imageBlocks.image.handleConvert!(baseEditor);
-    expect(modalComponent).toBeDefined();
-    const modalUi = modalComponent!();
-    const { user } = render(modalUi, {
-      baseEditor,
-    });
+    const { user } = render(modalComponent!(), { baseEditor });
 
-    // Fake an image upload, then nodes should be created
-    expect(screen.getByText(mockMediaLibraryTitle)).toBeInTheDocument();
     await user.click(screen.getByText(mockMediaLibrarySubmitButton));
+
     expect(baseEditor.children).toEqual([
       {
         type: 'list',
         format: 'ordered',
         children: [
-          {
-            type: 'list-item',
-            children: [
-              {
-                type: 'text',
-                text: 'List item 1',
-              },
-            ],
-          },
+          { type: 'list-item', children: [{ type: 'text', text: 'List item 1' }] },
+          { type: 'list-item', children: [{ type: 'text', text: 'List item 2' }] },
         ],
       },
+      { type: 'image', image: mockImage, children: [{ type: 'text', text: '' }] },
       {
-        type: 'image',
-        image: mockImage,
-        children: [{ type: 'text', text: '' }],
+        type: 'list',
+        format: 'ordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: 'List item 3' }] }],
       },
+    ]);
+  });
+
+  it('inserts the image after the list when the caret is in its last item', async () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: 'Only item' }] }],
+      },
+    ];
+
+    await waitFor(() => Transforms.select(baseEditor, { path: [0, 0, 0], offset: 4 }));
+
+    const { user } = render(imageBlocks.image.handleConvert!(baseEditor)!(), { baseEditor });
+    await user.click(screen.getByText(mockMediaLibrarySubmitButton));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: 'Only item' }] }],
+      },
+      { type: 'image', image: mockImage, children: [{ type: 'text', text: '' }] },
+    ]);
+  });
+
+  it('replaces an empty list item and splits the list around the image', async () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
       {
         type: 'list',
         format: 'ordered',
         children: [
-          {
-            type: 'list-item',
-            children: [
-              {
-                type: 'text',
-                text: 'List item 3',
-              },
-            ],
-          },
+          { type: 'list-item', children: [{ type: 'text', text: 'List item 1' }] },
+          { type: 'list-item', children: [{ type: 'text', text: '' }] },
+          { type: 'list-item', children: [{ type: 'text', text: 'List item 3' }] },
         ],
+      },
+    ];
+
+    await waitFor(() => Transforms.select(baseEditor, { path: [0, 1, 0], offset: 0 }));
+
+    const { user } = render(imageBlocks.image.handleConvert!(baseEditor)!(), { baseEditor });
+    await user.click(screen.getByText(mockMediaLibrarySubmitButton));
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: 'List item 1' }] }],
+      },
+      { type: 'image', image: mockImage, children: [{ type: 'text', text: '' }] },
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [{ type: 'list-item', children: [{ type: 'text', text: 'List item 3' }] }],
       },
     ]);
   });
