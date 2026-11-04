@@ -1,7 +1,8 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { login } from '../../../utils/login';
-import { enrolViaUi, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
+import { enrolViaUi, MFA_FLAG_ENABLED, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
+import { describeOnCondition } from '../../../utils/shared';
 import { ADMIN_PASSWORD, TITLE_HOME } from '../../constants';
 
 // WebAuthn will not run against an IP-literal origin, so this file alone uses `localhost`. The
@@ -53,7 +54,7 @@ const addPasskey = async (page: Page, name: string, secret: string) => {
   await expect(page.getByText('Passkey added.')).toBeVisible();
 };
 
-test.describe('Passkeys', () => {
+describeOnCondition(MFA_FLAG_ENABLED)('Passkeys', () => {
   test.beforeEach(async ({ page, context, browserName }) => {
     test.skip(
       browserName !== 'chromium',

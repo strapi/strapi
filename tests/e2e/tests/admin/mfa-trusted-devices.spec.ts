@@ -1,7 +1,8 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { login } from '../../../utils/login';
-import { enrolViaUi, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
+import { enrolViaUi, MFA_FLAG_ENABLED, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
+import { describeOnCondition } from '../../../utils/shared';
 import { ADMIN_PASSWORD, EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD, TITLE_HOME } from '../../constants';
 
 const TRUST_COOKIE = 'strapi_admin_mfa_trust';
@@ -29,7 +30,7 @@ const passChallenge = async (page: Page, secret: string, trust: boolean) => {
   await expect(page).toHaveTitle(TITLE_HOME);
 };
 
-test.describe('Trusted devices', () => {
+describeOnCondition(MFA_FLAG_ENABLED)('Trusted devices', () => {
   test.beforeEach(async ({ page, context }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await context.clearCookies();

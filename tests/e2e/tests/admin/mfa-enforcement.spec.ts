@@ -1,7 +1,14 @@
 import { test, expect, type Page } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { login } from '../../../utils/login';
-import { enrolViaUi, expireMfaGrace, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
+import {
+  enrolViaUi,
+  expireMfaGrace,
+  MFA_FLAG_ENABLED,
+  totpFor,
+  waitForNextTotpStep,
+} from '../../../utils/mfa';
+import { describeOnCondition } from '../../../utils/shared';
 import { ADMIN_PASSWORD, EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD, TITLE_HOME } from '../../constants';
 
 const LOCKED_MESSAGE =
@@ -31,7 +38,7 @@ const requireTwoFactorForEveryone = async (page: Page) => {
   await expect(page.getByText('Security settings saved.')).toBeVisible();
 };
 
-test.describe('Two-factor enforcement', () => {
+describeOnCondition(MFA_FLAG_ENABLED)('Two-factor enforcement', () => {
   test.beforeEach(async ({ page, context }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await context.clearCookies();

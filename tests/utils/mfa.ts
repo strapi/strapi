@@ -3,6 +3,10 @@ import { spawnSync } from 'node:child_process';
 import type { Page } from '@playwright/test';
 import { base32Decode, generateTotp } from '@strapi/utils';
 
+/** Whether this e2e run has the two-factor feature on. The runner turns it on unless
+ * UNSTABLE_ADMIN_MFA=false (tests/scripts/run-tests.js); the specs skip themselves otherwise. */
+export const MFA_FLAG_ENABLED = process.env.UNSTABLE_ADMIN_MFA === 'true';
+
 export const totpFor = (secret: string): string =>
   generateTotp({
     secret: base32Decode(secret),

@@ -7,14 +7,14 @@ import { createUtils } from 'api-tests/utils';
 jest.setTimeout(120_000);
 
 /**
- * The default product state: `unstableAdminMfa` off. Every other API and e2e suite runs with the
- * flag on, because the test app template defaults it on, so without this nothing proved that the
- * real route table, login path, user endpoints and permission registry behave as they did on
- * develop for an install that never opted in.
+ * The default product state: `unstableAdminMfa` off, as it is for every API suite that does not
+ * switch it on. This proves the real route table, login path, user endpoints and permission
+ * registry behave as they did on develop for an install that never opted in.
  *
- * The flag is read from the environment when the app config loads, so it is set before this
- * suite's instance boots -- bootstrap included -- and restored afterwards, since `test:api` runs
- * every suite in one process.
+ * The flag is pinned off explicitly, so a shell that exports UNSTABLE_ADMIN_MFA cannot turn this
+ * suite into a flag-on one. The flag is read from the environment when the app
+ * config loads, so it is set before this suite's instance boots and restored afterwards, since
+ * `test:api` runs every suite in one process.
  */
 describe('Admin MFA with the feature off', () => {
   let strapi: any;

@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { login } from '../../../utils/login';
-import { enrolViaUi, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
+import { enrolViaUi, MFA_FLAG_ENABLED, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
+import { describeOnCondition } from '../../../utils/shared';
 import { ADMIN_PASSWORD, TITLE_HOME } from '../../constants';
 
-test.describe('Two-factor authentication', () => {
+describeOnCondition(MFA_FLAG_ENABLED)('Two-factor authentication', () => {
   test.beforeEach(async ({ page, context }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await context.clearCookies();
