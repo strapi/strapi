@@ -27,7 +27,8 @@ interface LoginProps {
 }
 
 /** A password login refused because the enrolment grace period expired (403 `MFA_LOCKED`). */
-export const isMfaLockedError = (error: { details?: unknown }): boolean =>
+export const isMfaLockedError = (error: object): boolean =>
+  'details' in error &&
   (error.details as { code?: unknown } | undefined)?.code === MFA_ERROR_CODES.LOCKED;
 
 const LOGIN_SCHEMA = yup.object().shape({

@@ -18,10 +18,7 @@ export const useAdminRoles = (
     sensitivity: 'base',
   });
 
-  const { data, error, isError, isLoading, isUninitialized, refetch } = useGetRolesQuery(
-    params,
-    queryOptions
-  );
+  const { data, error, isError, isLoading, refetch } = useGetRolesQuery(params, queryOptions);
 
   // the return value needs to be memoized, because intantiating
   // an empty array as default value would lead to an unstable return
@@ -40,7 +37,6 @@ export const useAdminRoles = (
     error,
     isError,
     isLoading,
-    isUninitialized,
     refetch,
   };
 };
