@@ -87,7 +87,7 @@ const DEVICE_TRUSTED_NAMED_COPY = {
 
 interface NoticeCopy {
   descriptor: { id: string; defaultMessage: string };
-  values?: Record<string, unknown>;
+  values?: Record<string, string | number>;
 }
 
 const copyFor = (notice: MfaEventNotice): NoticeCopy => {

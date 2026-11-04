@@ -29,7 +29,10 @@ import {
 import type { AdminUserListItem } from '../../../../../services/users';
 
 interface TwoFactorPanelProps {
-  user: Pick<AdminUserListItem, 'id' | 'mfaEnabledAt' | 'mfaGraceUntil' | 'mfaLockedAt' | 'roles'>;
+  user: Pick<
+    AdminUserListItem,
+    'id' | 'mfaEnabledAt' | 'mfaGraceUntil' | 'mfaLockedAt' | 'mfaRequired' | 'roles'
+  >;
   canUpdate: boolean;
 }
 
