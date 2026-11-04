@@ -45,17 +45,17 @@ Optional checkpoints: [`CHECKPOINTS.md`](CHECKPOINTS.md).
 Job **`migration_v5`** in [`.github/workflows/tests.yml`](../../.github/workflows/tests.yml) runs:
 
 ```bash
-yarn test:migrations --initial legacy --initial-node 20 --database <matrix> --skip-build
+MIGRATION_INITIAL_NODE_BIN=<node 20> yarn test:migrations --initial legacy --initial-node 20 --workspace-node 22 --database <matrix> --skip-build
 ```
 
-on **sqlite**, **postgres**, **mysql**, and **mariadb** (Node **20**). **`legacy`** resolves to the latest Strapi v4 from npm (`@strapi/strapi@legacy`). The step uses **`timeout 25m`**.
+on **sqlite**, **postgres**, **mysql**, and **mariadb**. The v4 baseline (scaffold, install, seed) runs on Node **20** via `MIGRATION_INITIAL_NODE_BIN` (same as `--initial-node-bin`), because Strapi v4 needs Node ≤ 20. The host, pinned stages, and workspace validation run on Node **22**, because workspace Strapi and its SQLite driver need Node ≥ 22. **`legacy`** resolves to the latest Strapi v4 from npm (`@strapi/strapi@legacy`). The step uses **`timeout 25m`**.
 
 ### CI parity (local vs GitHub)
 
 - Nested `yarn install` in ephemeral apps (`.migration-v5/`) uses an empty **`yarn.lock`** (standalone project marker) plus **`YARN_ENABLE_IMMUTABLE_INSTALLS=false`** so PR hardened mode does not fail with `YN0028` when the lockfile is populated.
-- CI also sets **`YARN_ENABLE_IMMUTABLE_INSTALLS: false`** on the job and passes **`--initial-node 20`** to match the runner.
+- CI also sets **`YARN_ENABLE_IMMUTABLE_INSTALLS: false`** on the job. It installs Node 20 first to get the baseline binary, then Node 22 for the host, and passes **`--initial-node 20 --workspace-node 22`** so a wrong runtime fails fast.
 - **Postgres / MySQL / MariaDB** matrix legs start DB containers via `examples/complex/docker-compose.dev.yml`. CI sets **`STRAPI_BENCH_RUNTIME=docker`** (and `compose.ts` prefers Docker when **`GITHUB_ACTIONS=true`**) because Podman is often installed on runners but not running.
-- If CI fails on nested install but local passes, compare Node major and re-run with `--initial-node 20`.
+- If CI fails on nested install but local passes, compare Node majors and re-run locally with `--initial-node-bin "$(nvm which 20)" --initial-node 20 --workspace-node 22`.
 
 ### When `migration_v5` runs
 
