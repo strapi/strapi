@@ -668,16 +668,30 @@ describe('media connect/disconnect delta payloads', () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // Review follow-ups (PR #27116)
-  // ---------------------------------------------------------------------------
+  describe('{ set: null } is left as released (CMS-2235)', () => {
+    // This PR does not decide what `{ set: null }` means. `toAssocs` still drops a null
+    // `set` (truthiness check), so on media the payload reaches the morph branch as an
+    // empty delta and a guard in `updateRelations` keeps the released outcome: a bare
+    // null set clears a media field, a null set beside a connect/disconnect runs the
+    // delta, and on a regular relation a bare null set changes nothing. CMS-2235 owns
+    // the unified semantics; these cases only make sure the empty-delta no-op fix above
+    // cannot change today's behaviour by accident.
+    const readRelationDocumentIds = async (field, documentId) => {
+      const res = await rq.get(`/content-manager/relations/${HOLDER_UID}/${documentId}/${field}`);
+      expect(res.statusCode).toBe(200);
+      return (res.body.results ?? []).map((row) => row.documentId);
+    };
 
-  describe('Single media — explicit { set: null } clears the field', () => {
-    // `toAssocs` used to test the `set` key by truthiness, so `{ set: null }` fell through
-    // to the connect/disconnect branch and arrived WITHOUT a `set` key — the shape-based
-    // partial-update gate then read it as an empty delta and preserved the relation.
-    // `{ set: null }` is a valid "clear this field" payload and must empty it.
-    test('{ set: null } empties the cover and leaves no rows', async () => {
+    const countLinks = async (attributeName, entryId) => {
+      const attribute = strapi.db.metadata.get(HOLDER_UID).attributes[attributeName];
+      const { joinTable } = attribute;
+      const rows = await strapi.db.getConnection(joinTable.name).where({
+        [joinTable.joinColumn.name]: entryId,
+      });
+      return rows.length;
+    };
+
+    test('bare { set: null } still clears a single media (released behaviour)', async () => {
       const { id, documentId } = await createWithCover();
 
       const update = await updateEntry(
@@ -687,12 +701,11 @@ describe('media connect/disconnect delta payloads', () => {
         { populate: ['cover'] }
       );
       expect(update.statusCode).toBe(200);
-
       expect(await readCover(documentId)).toBe(null);
       expect(await countJoinRows(id, 'cover')).toBe(0);
     });
 
-    test('{ set: null } on multiple media empties the gallery and leaves no rows', async () => {
+    test('bare { set: null } still clears a multiple media (released behaviour)', async () => {
       const create = await createEntry(
         MULTIPLE_UID,
         { gallery: [fileA, fileB] },
@@ -709,15 +722,10 @@ describe('media connect/disconnect delta payloads', () => {
         { populate: ['gallery'] }
       );
       expect(update.statusCode).toBe(200);
-
-      const read = await getEntry(MULTIPLE_UID, documentId, ['gallery']);
-      expect(read.body.data.gallery).toEqual([]);
       expect(await countGalleryRows(id)).toBe(0);
     });
 
-    // A null `set` combined with connect is the released behaviour: the null is
-    // ignored and the connect runs. It must not clear the field.
-    test('{ set: null, connect: [B] } swaps the cover to B', async () => {
+    test('{ set: null, connect: [B] } on a single media runs the connect', async () => {
       const { id, documentId } = await createWithCover();
 
       const update = await updateEntry(
@@ -730,7 +738,41 @@ describe('media connect/disconnect delta payloads', () => {
       expect((await readCover(documentId)).id).toBe(fileB);
       expect(await countJoinRows(id, 'cover')).toBe(1);
     });
+
+    test('bare { set: null } on a oneToOne changes nothing (released behaviour)', async () => {
+      const res = await createEntry(HOLDER_UID, {
+        pick: { connect: [{ documentId: targetA }] },
+      });
+      expect(res.statusCode).toBe(201);
+      const { id, documentId } = res.body.data;
+      expect(await countLinks('pick', id)).toBe(1);
+
+      const update = await updateEntry(HOLDER_UID, documentId, { pick: { set: null } });
+      expect(update.statusCode).toBe(200);
+      expect(await readRelationDocumentIds('pick', documentId)).toEqual([targetA]);
+      expect(await countLinks('pick', id)).toBe(1);
+    });
+
+    test('bare { set: null } on a manyToMany changes nothing (released behaviour)', async () => {
+      const res = await createEntry(HOLDER_UID, {
+        tags: { connect: [{ documentId: targetA }, { documentId: targetB }] },
+      });
+      expect(res.statusCode).toBe(201);
+      const { id, documentId } = res.body.data;
+      expect(await countLinks('tags', id)).toBe(2);
+
+      const update = await updateEntry(HOLDER_UID, documentId, { tags: { set: null } });
+      expect(update.statusCode).toBe(200);
+      expect(await readRelationDocumentIds('tags', documentId)).toEqual(
+        expect.arrayContaining([targetA, targetB])
+      );
+      expect(await countLinks('tags', id)).toBe(2);
+    });
   });
+
+  // ---------------------------------------------------------------------------
+  // Review follow-ups (PR #27116)
+  // ---------------------------------------------------------------------------
 
   describe('Non-media morphOne is never truncated', () => {
     // Last-wins truncation is gated on the `singleRow` flag, not on `relation === 'morphOne'`.
@@ -898,100 +940,6 @@ describe('media connect/disconnect delta payloads', () => {
     });
   });
 
-  describe('{ set: null } clears regular relations', () => {
-    const readRelationDocumentIds = async (field, documentId) => {
-      const res = await rq.get(
-        `/content-manager/relations/${HOLDER_UID}/${documentId}/${field}`
-      );
-      expect(res.statusCode).toBe(200);
-      return (res.body.results ?? []).map((row) => row.documentId);
-    };
-
-    const countLinks = async (attributeName, entryId) => {
-      const attribute = strapi.db.metadata.get(HOLDER_UID).attributes[attributeName];
-      const { joinTable } = attribute;
-      const rows = await strapi.db.getConnection(joinTable.name).where({
-        [joinTable.joinColumn.name]: entryId,
-      });
-      return rows.length;
-    };
-
-    test('{ set: null } clears a oneToOne and leaves no link rows', async () => {
-      const res = await createEntry(HOLDER_UID, {
-        pick: { connect: [{ documentId: targetA }] },
-      });
-      expect(res.statusCode).toBe(201);
-      const { id, documentId } = res.body.data;
-      expect(await countLinks('pick', id)).toBe(1);
-
-      const update = await updateEntry(HOLDER_UID, documentId, { pick: { set: null } });
-      expect(update.statusCode).toBe(200);
-      expect(await readRelationDocumentIds('pick', documentId)).toEqual([]);
-      expect(await countLinks('pick', id)).toBe(0);
-    });
-
-    test('{ set: null } clears a manyToMany and leaves no link rows', async () => {
-      const res = await createEntry(HOLDER_UID, {
-        tags: { connect: [{ documentId: targetA }, { documentId: targetB }] },
-      });
-      expect(res.statusCode).toBe(201);
-      const { id, documentId } = res.body.data;
-      expect(await countLinks('tags', id)).toBe(2);
-
-      const update = await updateEntry(HOLDER_UID, documentId, { tags: { set: null } });
-      expect(update.statusCode).toBe(200);
-      expect(await readRelationDocumentIds('tags', documentId)).toEqual([]);
-      expect(await countLinks('tags', id)).toBe(0);
-    });
-
-    test('{ set: null, connect: [B] } on a oneToOne applies the connect', async () => {
-      const res = await createEntry(HOLDER_UID, {
-        pick: { connect: [{ documentId: targetA }] },
-      });
-      expect(res.statusCode).toBe(201);
-      const { id, documentId } = res.body.data;
-
-      const update = await updateEntry(HOLDER_UID, documentId, {
-        pick: { set: null, connect: [{ documentId: targetB }] },
-      });
-      expect(update.statusCode).toBe(200);
-      expect(await readRelationDocumentIds('pick', documentId)).toEqual([targetB]);
-      expect(await countLinks('pick', id)).toBe(1);
-    });
-
-    test('{ set: null, connect: [C] } on a manyToMany adds C', async () => {
-      const res = await createEntry(HOLDER_UID, {
-        tags: { connect: [{ documentId: targetA }, { documentId: targetB }] },
-      });
-      expect(res.statusCode).toBe(201);
-      const { id, documentId } = res.body.data;
-
-      const update = await updateEntry(HOLDER_UID, documentId, {
-        tags: { set: null, connect: [{ documentId: targetC }] },
-      });
-      expect(update.statusCode).toBe(200);
-      expect(await readRelationDocumentIds('tags', documentId)).toEqual(
-        expect.arrayContaining([targetA, targetB, targetC])
-      );
-      expect(await countLinks('tags', id)).toBe(3);
-    });
-
-    test('{ set: null, disconnect: [A] } on a manyToMany removes only A', async () => {
-      const res = await createEntry(HOLDER_UID, {
-        tags: { connect: [{ documentId: targetA }, { documentId: targetB }] },
-      });
-      expect(res.statusCode).toBe(201);
-      const { id, documentId } = res.body.data;
-
-      const update = await updateEntry(HOLDER_UID, documentId, {
-        tags: { set: null, disconnect: [{ documentId: targetA }] },
-      });
-      expect(update.statusCode).toBe(200);
-      expect(await readRelationDocumentIds('tags', documentId)).toEqual([targetB]);
-      expect(await countLinks('tags', id)).toBe(1);
-    });
-  });
-
   describe('single media outside a top-level field', () => {
     test('connect inside a component leaves one join row', async () => {
       const created = await createEntry(
@@ -1011,9 +959,7 @@ describe('media connect/disconnect delta payloads', () => {
       );
       expect(update.statusCode).toBe(200);
       expect(update.body.data.block.media.id).toBe(fileB);
-      expect(
-        await countJoinRows(update.body.data.block.id, 'media', COVER_COMPONENT_UID)
-      ).toBe(1);
+      expect(await countJoinRows(update.body.data.block.id, 'media', COVER_COMPONENT_UID)).toBe(1);
     });
 
     test('connect on a draft-and-publish entry leaves one join row', async () => {

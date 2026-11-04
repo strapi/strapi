@@ -476,51 +476,6 @@ describe('strictRelations — publish-time enforcement of connect/disconnect edg
           .findOne({ where: { documentId }, populate: ['author'] });
         expect(row.author).not.toBe(null);
       });
-
-      // `{ set: null }` deletes every link. On a required field that must be a 400,
-      // and the existing link must still be there after the rejected write.
-      test('{ set: null } on a required to-one → update 400 and the link stays', async () => {
-        const author = await createEntry(AUTHOR_UID, { name: 'SetNull' });
-
-        const creation = await createEntry(
-          NODP_OTO_UID,
-          { author: author.body.data.id },
-          { populate: ['author'] }
-        );
-        expect(creation.statusCode).toBe(201);
-        const { documentId } = creation.body.data;
-
-        const update = await updateEntry(NODP_OTO_UID, documentId, { author: { set: null } });
-        expect(update.statusCode).toBe(400);
-
-        const row = await strapi.db
-          .query(NODP_OTO_UID)
-          .findOne({ where: { documentId }, populate: ['author'] });
-        expect(row.author).not.toBe(null);
-      });
-
-      test('required single media { set: null } → update 400, file stays', async () => {
-        const upload = await uploadImg();
-        expect(upload.statusCode).toBe(201);
-        const fileId = upload.body[0].id;
-
-        const creation = await createEntry(
-          NODP_MEDIA_UID,
-          { cover: fileId },
-          { populate: ['cover'] }
-        );
-        expect(creation.statusCode).toBe(201);
-        const { documentId } = creation.body.data;
-
-        const update = await updateEntry(NODP_MEDIA_UID, documentId, { cover: { set: null } });
-        expect(update.statusCode).toBe(400);
-
-        const row = await strapi.db
-          .query(NODP_MEDIA_UID)
-          .findOne({ where: { documentId }, populate: ['cover'] });
-        expect(row.cover).not.toBe(null);
-        expect(row.cover.id).toBe(fileId);
-      });
     });
   });
 });

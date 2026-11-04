@@ -166,22 +166,10 @@ const toAssocs = (data: Assocs) => {
     };
   }
 
-  // `{ set: null }` alone is a clear. Check the key by presence, not truthiness:
-  // a truthiness check let it fall through and look like an empty delta, so the
-  // relation was preserved.
-  //
-  // A null `set` sent together with `connect` or `disconnect` stays on that delta
-  // path. Released Strapi ignored the null because it is falsy and applied the
-  // delta; callers can already be depending on that. A non-null `set` still wins.
-  if (isRecord(data) && has(data, 'set') && data.set !== undefined) {
-    const nullSetWithDelta =
-      data.set === null && (has(data, 'connect') || has(data, 'disconnect'));
-
-    if (!nullSetWithDelta) {
-      return {
-        set: data.set === null ? data.set : toIdArray(data.set),
-      };
-    }
+  if (data?.set) {
+    return {
+      set: data.set === null ? data.set : toIdArray(data.set),
+    };
   }
 
   return {
@@ -912,7 +900,22 @@ export const createEntityManager = (db: Database): EntityManager => {
             const isSingle =
               types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const hasConnect = !isEmpty(cleanRelationData.connect);
+            const hasDisconnect = !isEmpty(cleanRelationData.disconnect);
             const hasSet = !isEmpty(cleanRelationData.set);
+
+            // `toAssocs` checks `set` by truthiness, so `{ set: null }` reaches this branch
+            // as an empty delta. Released Strapi cleared the field on a bare null set (it
+            // fell through to the replace path below) and applied the delta when a connect
+            // or disconnect came with it. Keep both outcomes as they are until CMS-2235
+            // settles what `{ set: null }` means for every relation type: only a real delta
+            // shape may take the empty-delta no-op path.
+            const rawValue = data[attributeName];
+            const isBareNullSet =
+              isRecord(rawValue) &&
+              has(rawValue, 'set') &&
+              rawValue.set === null &&
+              !hasConnect &&
+              !hasDisconnect;
 
             // A partial update is a connect/disconnect delta payload (no `set` key),
             // which must modify only the listed relations — as opposed to a `set`/
@@ -920,7 +923,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             // payload *shape* (like regular joinTable relations at `!has(…, 'set')`),
             // not on content, so that an empty delta (`{ connect: [] }` /
             // `{ disconnect: [] }`) is a no-op instead of wiping the field.
-            const isPartialUpdate = !has(cleanRelationData, 'set');
+            const isPartialUpdate = !has(cleanRelationData, 'set') && !isBareNullSet;
 
             if (isPartialUpdate) {
               // For single media a connect is last-wins and the field holds at most one
