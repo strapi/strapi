@@ -99,7 +99,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Passkeys', () => {
 
     // 5. Removing it puts the account back on codes only.
     //    Removal asks for the password and a code; a recovery code avoids waiting out a TOTP step.
-    await page.getByRole('button', { name: 'Remove passkey' }).click();
+    await page.getByRole('button', { name: /^Remove passkey / }).click();
     const removeDialog = page.getByRole('dialog', { name: 'Remove this passkey?' });
     await removeDialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
     await removeDialog.getByLabel('Authentication code*').fill(admin.recoveryCodes[0]);

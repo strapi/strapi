@@ -94,7 +94,9 @@ describe('Passkeys', () => {
     expect(screen.getByText('YubiKey 5C')).toBeInTheDocument();
     expect(screen.getByText('Not yet')).toBeInTheDocument();
     expect(rows[1]).toHaveTextContent(/2026/);
-    expect(screen.getAllByRole('button', { name: 'Remove passkey' })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /^Remove passkey / })).toHaveLength(2);
+    // Each row's button names its passkey, so a screen reader can tell them apart.
+    expect(screen.getByRole('button', { name: 'Remove passkey YubiKey 5C' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add a passkey' })).toBeInTheDocument();
   });
 
@@ -122,7 +124,7 @@ describe('Passkeys', () => {
     expect(screen.getByText('This browser does not support passkeys.')).toBeInTheDocument();
     // Existing rows are still listed and still removable from here
     expect(screen.getByText('MacBook Touch ID')).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'Remove passkey' })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /^Remove passkey / })).toHaveLength(2);
   });
 
   // The server spends the password AND a live TOTP code
@@ -144,7 +146,7 @@ describe('Passkeys', () => {
       screen.getByText('You have reached the limit of 10 passkeys. Remove one to add another.')
     ).toBeInTheDocument();
     // Existing rows are still listed and still removable from here
-    expect(screen.getAllByRole('button', { name: 'Remove passkey' })).toHaveLength(
+    expect(screen.getAllByRole('button', { name: /^Remove passkey / })).toHaveLength(
       MAX_PASSKEYS_PER_USER
     );
   });
@@ -165,7 +167,7 @@ describe('Passkeys', () => {
 
   /** Fills the removal dialog's two credential fields and submits it. */
   const confirmRemoval = async (user: ReturnType<typeof render>['user']) => {
-    await user.click(screen.getAllByRole('button', { name: 'Remove passkey' })[0]);
+    await user.click(screen.getAllByRole('button', { name: /^Remove passkey / })[0]);
     await screen.findByRole('dialog', { name: 'Remove this passkey?' });
     await user.type(screen.getByLabelText('Current password*'), 'pw');
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
@@ -208,7 +210,7 @@ describe('Passkeys', () => {
     const { user } = render(<Passkeys />);
     await screen.findByText('MacBook Touch ID');
 
-    await user.click(screen.getAllByRole('button', { name: 'Remove passkey' })[0]);
+    await user.click(screen.getAllByRole('button', { name: /^Remove passkey / })[0]);
     await screen.findByRole('dialog', { name: 'Remove this passkey?' });
     await user.type(screen.getByLabelText('Current password*'), 'pw');
 

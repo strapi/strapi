@@ -12,7 +12,7 @@ import {
   Tr,
   Typography,
 } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -232,14 +232,27 @@ const TrustedDevices = () => {
                   <Flex justifyContent="end">
                     <Dialog.Root>
                       <Dialog.Trigger>
+                        {/* Named per row: a screen reader lists every row's button, and "Revoke trust"
+                            five times over says nothing about which. A cross, not a bin: revoking
+                            trust deletes nothing the user made, it only asks for the code again. */}
                         <IconButton
-                          label={formatMessage({
-                            id: 'Settings.profile.form.section.mfa.trustedDevices.revoke',
-                            defaultMessage: 'Revoke trust',
-                          })}
+                          label={formatMessage(
+                            {
+                              id: 'Settings.profile.form.section.mfa.trustedDevices.revoke',
+                              defaultMessage: 'Revoke trust for {name}',
+                            },
+                            {
+                              name:
+                                device.deviceName ??
+                                formatMessage({
+                                  id: 'Settings.sessions.unknownDevice',
+                                  defaultMessage: 'Unknown device',
+                                }),
+                            }
+                          )}
                           variant="ghost"
                         >
-                          <Trash />
+                          <Cross />
                         </IconButton>
                       </Dialog.Trigger>
                       <ConfirmDialog

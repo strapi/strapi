@@ -79,7 +79,7 @@ describeOnCondition(MFA_FLAG_ENABLED)('Trusted devices', () => {
     await page.goto('/admin/me');
     await expect(page.getByRole('heading', { name: 'Trusted devices' })).toBeVisible();
     await expect(page.getByText('This device', { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Revoke trust' }).click();
+    await page.getByRole('button', { name: /^Revoke trust for / }).click();
     await page
       .getByRole('alertdialog', { name: 'Revoke this device?' })
       .getByRole('button', { name: 'Revoke' })

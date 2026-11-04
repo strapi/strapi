@@ -42,7 +42,14 @@ describe('TrustedDevices', () => {
     expect(screen.getByText('Not yet')).toBeInTheDocument();
     expect(rows[1]).toHaveTextContent(/2026/);
     expect(screen.getByRole('button', { name: 'Revoke all' })).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'Revoke trust' })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /^Revoke trust for / })).toHaveLength(2);
+    // Each row's button names its device, so a screen reader can tell them apart.
+    expect(
+      screen.getByRole('button', { name: 'Revoke trust for Chrome on macOS' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Revoke trust for Unknown device' })
+    ).toBeInTheDocument();
   });
 
   it('shows the empty state without a table or a Revoke all button', async () => {
@@ -68,7 +75,7 @@ describe('TrustedDevices', () => {
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getAllByRole('button', { name: 'Revoke trust' })[0]);
+    await user.click(screen.getAllByRole('button', { name: /^Revoke trust for / })[0]);
     expect(screen.getByRole('alertdialog', { name: 'Revoke this device?' })).toHaveTextContent(
       /This browser will ask for a code/
     );
@@ -104,7 +111,7 @@ describe('TrustedDevices', () => {
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getAllByRole('button', { name: 'Revoke trust' })[1]);
+    await user.click(screen.getAllByRole('button', { name: /^Revoke trust for / })[1]);
     expect(screen.getByRole('alertdialog', { name: 'Revoke this device?' })).toHaveTextContent(
       'That browser will ask for a code at its next login.'
     );
@@ -141,7 +148,7 @@ describe('TrustedDevices', () => {
     const { user } = render(<TrustedDevices />);
     await screen.findByText('Chrome on macOS');
 
-    await user.click(screen.getAllByRole('button', { name: 'Revoke trust' })[0]);
+    await user.click(screen.getAllByRole('button', { name: /^Revoke trust for / })[0]);
     fireEvent.click(screen.getByRole('button', { name: 'Revoke' }));
 
     expect(await screen.findByText('Trusted device not found')).toBeInTheDocument();

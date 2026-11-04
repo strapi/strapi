@@ -180,10 +180,13 @@ const Passkeys = () => {
                 <Td>
                   <Flex justifyContent="end">
                     <IconButton
-                      label={formatMessage({
-                        id: 'Settings.profile.form.section.mfa.passkeys.delete',
-                        defaultMessage: 'Remove passkey',
-                      })}
+                      label={formatMessage(
+                        {
+                          id: 'Settings.profile.form.section.mfa.passkeys.delete',
+                          defaultMessage: 'Remove passkey {name}',
+                        },
+                        { name: passkey.name }
+                      )}
                       variant="ghost"
                       onClick={() => setPendingRemoval(passkey)}
                     >
