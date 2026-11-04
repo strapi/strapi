@@ -3692,10 +3692,8 @@ yarn test:unit:update   # update snapshots
 Front-end tests cover the admin panel. Their files also live in `__tests__/` folders inside each package.
 
 ```bash
-yarn test:front              # IS_EE=true: Enterprise Edition features enabled
-yarn test:front:ce           # IS_EE=false: Community Edition only
-yarn test:front:update       # update snapshots (EE)
-yarn test:front:update:ce    # update snapshots (CE)
+yarn test:front              # run all front-end tests
+yarn test:front:update       # update snapshots
 ```
 
 ### Type checking
