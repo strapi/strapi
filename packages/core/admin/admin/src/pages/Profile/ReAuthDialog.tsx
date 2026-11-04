@@ -68,25 +68,12 @@ const COPY = {
 } as const;
 
 /**
- * One form, two intents: re-authenticate with the current password plus a second factor, then
- * either regenerate the recovery-code set or disable MFA. They share this dialog because they
- * share the gate -- both take `{ password, code }` -- and only the copy, the mutation and the
- * submit button's styling vary by `intent`. Reset-on-close and the unmount safety net work
- * exactly as in `EnrolDialog`; see that file for why the `fixedCacheKey` is needed.
+ * Re-authenticates with the current password and a second factor, then regenerates the recovery
+ * codes or disables two-factor authentication, by `intent`.
  *
- * This is the canonical note on the re-entrancy hazard the other MFA dialogs refer to.
- *
- * The form has two blocking fields, and per the HTML spec's implicit-submission algorithm a form
- * with more than one needs a real submit button for Enter to do anything -- so the footer button
- * carries `type="submit"`. That reintroduces a hazard a click-only button does not have: a real
- * click on a submit button fires the React `onClick` *and* the browser's native submit, so
- * `onSubmit` runs too, both synchronously, before either handler's `await` resolves and before
- * React re-renders with `isLoading` set. A guard that reads `isLoading` is therefore stale for
- * the second call. `handleSubmit` uses a synchronous `inFlightRef` flipped in the same tick the
- * first call starts, plus the same length checks the button uses for `disabled`.
- *
- * `onClick` also calls the handler directly because jsdom's `PointerEvent` polyfill means
- * `user.click()` never reaches a submit button's native default action in this suite.
+ * The footer button is `type="submit"` so Enter works with two fields, so a click runs both
+ * `onClick` and the native submit in one tick: `inFlightRef` is the synchronous guard, since
+ * `isLoading` is still stale for the second call.
  */
 const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
   const { formatMessage } = useIntl();
@@ -100,8 +87,7 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
   // dismissal exactly as `EnrolDialog` does: closing before the box is ticked is refused.
   const [dismissBlocked, setDismissBlocked] = React.useState(false);
   const [codesSaved, setCodesSaved] = React.useState(false);
-  // Synchronous re-entrancy guard for `handleSubmit` -- see the class doc comment above for why
-  // this can't be the mutation hook's `isLoading` state.
+  // Synchronous re-entrancy guard for `handleSubmit`
   const inFlightRef = React.useRef(false);
 
   const [regenerateRecoveryCodes, { isLoading: isRegenerating, reset: resetRegenerate }] =

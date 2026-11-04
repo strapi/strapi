@@ -57,30 +57,12 @@ type Step =
   | { name: 'codes'; recoveryCodes: string[] };
 
 /**
- * Three steps: current password (re-authentication), scan the QR and confirm with a code, then
- * save the recovery codes.
+ * Three steps: current password, scan the QR and confirm with a code, then save the recovery codes.
  *
- * The secret, the otpauth URI and the codes also land in the Redux store, because RTK Query keeps
- * a mutation's `data` for as long as the triggering hook stays mounted -- and this dialog is
- * mounted for the whole profile-page session, not just while `open`. Each mutation therefore
- * carries a `fixedCacheKey` (`MFA_ENROL_CACHE_KEYS`) so `reset()` can delete its entry
- * synchronously on close. That cuts both ways: RTK Query deliberately skips its own unmount
- * cleanup for a keyed mutation, so a page unmount that never runs `close()` (browser Back while
- * the dialog sits open) would strand the secret in the store -- which is what the effect below
- * the mutation hooks exists for.
- *
- * `handlePassword` guards re-entrancy with a synchronous `inFlightRef`, for the reason
- * `ReAuthDialog.tsx` sets out in full: a real click on a submit button fires both the React
- * handler and the browser's native submit before either awaits or React re-renders.
- *
- * The footer buttons call their handler from `onClick` rather than relying on `type="submit"`,
- * because the shared Jest setup polyfills `window.PointerEvent` with a class that does not extend
- * `MouseEvent` (jsdom has none natively), so native form submission never fires under
- * `user.click()` in this suite. The exception is `replace` mode's password step, whose two
- * blocking fields need a real submit button for Enter to work at all -- so Continue carries
- * `type="submit"` there, and only there. That is also why only `handlePassword` needs the ref:
- * the scan step's Verify button takes the design system's default `type="button"`, so a click
- * reaches `onClick` alone and Enter reaches `onSubmit` alone -- never both in one tick.
+ * The secret and codes sit in the RTK Query store while the dialog is mounted, so each mutation
+ * has a `fixedCacheKey` (`MFA_ENROL_CACHE_KEYS`) that `reset()` clears on close, and an unmount
+ * effect clears them when the page goes away with the dialog open. `handlePassword` guards
+ * re-entrancy as `ReAuthDialog` does.
  */
 const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   const isReplace = mode === 'replace';
@@ -96,8 +78,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string>();
-  // Synchronous re-entrancy guard for `handlePassword` in replace mode -- see the class doc
-  // comment above for why this can't be the mutation hook's `isLoading` state.
+  // Synchronous re-entrancy guard for `handlePassword` in replace mode
   const inFlightRef = React.useRef(false);
   const scanCodeRef = React.useRef<HTMLInputElement>(null);
   const scanIntroRef = React.useRef<HTMLParagraphElement>(null);
