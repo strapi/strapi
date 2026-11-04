@@ -42,8 +42,8 @@ export default () => {
           return;
         }
 
-        internals.isUpdating = true;
         strapi.reload.isWatching = false;
+        internals.isUpdating = true;
 
         await getService('schema').updateSchema(data);
 
