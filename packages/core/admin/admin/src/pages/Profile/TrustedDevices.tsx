@@ -75,7 +75,7 @@ const TrustedDevices = () => {
       type: 'success',
       message: formatMessage({
         id: 'Settings.profile.form.section.mfa.trustedDevices.revokeAll.success',
-        defaultMessage: 'All devices revoked.',
+        defaultMessage: 'Trusted devices revoked.',
       }),
     });
   };

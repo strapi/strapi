@@ -104,7 +104,9 @@ describe('TwoFactorEnforcementCard', () => {
 
     expect(screen.getByRole('spinbutton', { name: 'Grace period (days)' })).toHaveValue(7);
     expect(
-      screen.getByText('Days a user has to set up 2FA after their first login.')
+      screen.getByText(
+        'Days a user has to set up two-factor authentication after their next login.'
+      )
     ).toBeInTheDocument();
   });
 

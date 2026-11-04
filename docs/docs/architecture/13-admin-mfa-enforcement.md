@@ -220,7 +220,10 @@ a dialog they cannot complete.
   object and one Save in the page header. The page owns one draft of all three objects, and
   `useSecuritySettingsSave` sends only the changed ones in a single `PUT`. A raise shows its impact
   dialog first; any downgrade in the save (one or several kinds) then opens one
-  `ConfirmDowngradeDialog`. Leaving the page with unsaved changes asks for confirmation
+  `ConfirmDowngradeDialog`. When the save combines several kinds, the dialog names each change on
+  its own line: the roles no longer required (by name), "no longer required for everyone", the new
+  grace or trust period against the old one, and the number of passkeys deleted. Leaving the page
+  with unsaved changes asks for confirmation
 - **Settings > Users**, list: a two-factor column ("Enabled", "Due {date}", "Locked", "Not
   enabled"), shown to holders of `admin::users.update` while the flag is on
 - **Settings > Users**, per user (`pages/Settings/pages/Users/components/TwoFactorPanel.tsx`):

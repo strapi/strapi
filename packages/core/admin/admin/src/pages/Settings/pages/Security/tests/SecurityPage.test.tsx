@@ -244,7 +244,9 @@ describe('SecurityPage', () => {
     fireEvent.click(saveButton());
 
     const dialog = await screen.findByRole('dialog', { name: 'Lower security settings?' });
-    expect(dialog).toHaveTextContent('This lowers two-factor requirements.');
+    expect(dialog).toHaveTextContent(
+      'Two-factor authentication will no longer be required for Editor.'
+    );
     expect(
       await within(dialog).findByText(
         'This deletes all 4 passkeys your users registered. This cannot be undone.'
@@ -265,6 +267,68 @@ describe('SecurityPage', () => {
       code: '123456',
     });
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('names each change in the combined dialog: roles, mode, grace and trust periods', async () => {
+    passkeysImpact(3);
+    const { user } = await renderPage(
+      settings({ mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['1', '2'] } }),
+      me(true)
+    );
+
+    // Drop both roles' requirement by choosing "Not required", lengthen trust, and turn passkeys off.
+    await chooseMode(user, 'Not required');
+    const days = screen.getByRole('spinbutton', { name: 'Trust period (days)' });
+    await user.clear(days);
+    await user.type(days, '60');
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Allow users to log in with a passkey' })
+    );
+    fireEvent.click(saveButton());
+
+    const dialog = await screen.findByRole('dialog', { name: 'Lower security settings?' });
+    expect(dialog).toHaveTextContent(
+      'Two-factor authentication will no longer be required for Editor and Author.'
+    );
+    expect(dialog).toHaveTextContent(
+      'Trusted devices will skip the code for 60 days instead of 30.'
+    );
+    expect(
+      await within(dialog).findByText(
+        'This deletes all 3 passkeys your users registered. This cannot be undone.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('says "no longer required for everyone" and names a longer grace period', async () => {
+    passkeysImpact(1);
+    const { user } = await renderPage(
+      // Role flags are kept under "Required for everyone", so the draft already selects Editor.
+      settings({ mfa: { mode: 'required', graceDays: 7, requiredRoles: ['1'] } }),
+      me(true)
+    );
+
+    await chooseMode(user, 'Required for selected roles');
+    const grace = screen.getByRole('spinbutton', { name: 'Grace period (days)' });
+    await user.clear(grace);
+    await user.type(grace, '14');
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Allow users to log in with a passkey' })
+    );
+    fireEvent.click(saveButton());
+
+    const dialog = await screen.findByRole('dialog', { name: 'Lower security settings?' });
+    expect(dialog).toHaveTextContent(
+      'Two-factor authentication will no longer be required for everyone.'
+    );
+    expect(dialog).toHaveTextContent(
+      'Users will have 14 days instead of 7 to set up two-factor authentication.'
+    );
+    expect(
+      await within(dialog).findByText(
+        'This deletes 1 passkey your users registered. This cannot be undone.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('uses the lowering copy, and asks for the password alone, when the caller is not enrolled', async () => {
@@ -298,7 +362,7 @@ describe('SecurityPage', () => {
     fireEvent.click(saveButton());
 
     const dialog = await screen.findByRole('dialog', {
-      name: 'Let browsers skip the code for longer?',
+      name: 'Let trusted devices skip the code for longer?',
     });
     expect(dialog).toHaveTextContent('Confirm your password and a code to continue.');
     expect(within(dialog).getByRole('button', { name: 'Save' })).toBeInTheDocument();
@@ -316,7 +380,7 @@ describe('SecurityPage', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Turn passkeys off?' });
     expect(
       await within(dialog).findByText(
-        'This deletes the 1 passkey your users registered. This cannot be undone.'
+        'This deletes 1 passkey your users registered. This cannot be undone.'
       )
     ).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Turn off' })).toBeInTheDocument();
@@ -407,7 +471,7 @@ describe('SecurityPage', () => {
     );
 
     const dialog = await screen.findByRole('dialog', {
-      name: 'Let browsers skip the code for longer?',
+      name: 'Let trusted devices skip the code for longer?',
     });
     expect(bodies).toHaveLength(0);
     await user.type(within(dialog).getByLabelText('Current password*'), 'Testing123!');

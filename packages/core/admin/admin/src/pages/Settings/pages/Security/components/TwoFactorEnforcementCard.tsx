@@ -207,7 +207,8 @@ const TwoFactorEnforcementCard = ({
               error={errors.graceDays}
               hint={formatMessage({
                 id: 'Settings.security.mfa.graceDays.hint',
-                defaultMessage: 'Days a user has to set up 2FA after their first login.',
+                defaultMessage:
+                  'Days a user has to set up two-factor authentication after their next login.',
               })}
             >
               <Field.Label>

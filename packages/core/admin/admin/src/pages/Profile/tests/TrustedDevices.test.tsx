@@ -95,7 +95,7 @@ describe('TrustedDevices', () => {
     const dialog = screen.getByRole('alertdialog', { name: 'Revoke every trusted device?' });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Revoke all' }));
 
-    expect(await screen.findByText('All devices revoked.')).toBeInTheDocument();
+    expect(await screen.findByText('Trusted devices revoked.')).toBeInTheDocument();
     expect(await screen.findByText(/^No trusted devices\./)).toBeInTheDocument();
   });
 
@@ -168,7 +168,7 @@ describe('TrustedDevices', () => {
     );
 
     expect(await screen.findByText('boom')).toBeInTheDocument();
-    expect(screen.queryByText('All devices revoked.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Trusted devices revoked.')).not.toBeInTheDocument();
     expect(screen.getByText('Chrome on macOS')).toBeInTheDocument();
   });
 

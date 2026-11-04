@@ -4,7 +4,7 @@ import { Box, Button, Dialog, EmptyStateLayout, Flex, Typography } from '@strapi
 import { Check } from '@strapi/icons';
 import { EmptyPermissions } from '@strapi/icons/symbols';
 import isEqual from 'lodash/isEqual';
-import { useIntl } from 'react-intl';
+import { type IntlFormatters, type IntlShape, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { ErrorMessage } from '../../../../components/ErrorMessage';
@@ -38,8 +38,10 @@ import { useSecuritySettingsSave } from './hooks/useSecuritySettingsSave';
 import { enforcedRoleIds } from './utils/isSecurityDowngrade';
 
 import type {
+  MfaEnforcementSettings,
   PasskeySettings,
   SecuritySettings,
+  TrustedDeviceSettings,
 } from '../../../../../../shared/contracts/security-settings';
 
 /**
@@ -305,6 +307,9 @@ const SecuritySettingsForm = ({
 
       <SecurityDowngradeDialog
         downgrade={downgrade}
+        previous={settings}
+        next={next}
+        roles={roles}
         passkeysCount={passkeysCount}
         callerEnrolled={callerEnrolled}
         onClose={closeDowngrade}
@@ -316,8 +321,95 @@ const SecuritySettingsForm = ({
   );
 };
 
+/**
+ * One line per relaxed enforcement term, naming what changes: the roles dropped (by name), the
+ * mode lowered, the grace period lengthened.
+ */
+const enforcementLines = (
+  previous: MfaEnforcementSettings,
+  next: MfaEnforcementSettings,
+  roles: AdminRole[],
+  formatMessage: IntlFormatters['formatMessage'],
+  formatList: IntlShape['formatList']
+): string[] => {
+  const lines: string[] = [];
+  const roleNames = (ids: string[]) =>
+    formatList(
+      ids.map((id) => roles.find((role) => String(role.id) === id)?.name ?? id),
+      { type: 'conjunction' }
+    );
+
+  if (previous.mode === 'required' && next.mode !== 'required') {
+    lines.push(
+      formatMessage({
+        id: 'Settings.security.downgrade.combined.everyone',
+        defaultMessage: 'Two-factor authentication will no longer be required for everyone.',
+      })
+    );
+  } else if (next.mode !== 'required') {
+    const dropped = enforcedRoleIds(previous).filter(
+      (id) => next.mode === 'off' || !next.requiredRoles.includes(id)
+    );
+    if (dropped.length > 0) {
+      lines.push(
+        formatMessage(
+          {
+            id: 'Settings.security.downgrade.combined.roles',
+            defaultMessage: 'Two-factor authentication will no longer be required for {roles}.',
+          },
+          { roles: roleNames(dropped) }
+        )
+      );
+    }
+  }
+
+  if (next.mode !== 'off' && next.graceDays > previous.graceDays) {
+    lines.push(
+      formatMessage(
+        {
+          id: 'Settings.security.downgrade.combined.graceDays',
+          defaultMessage:
+            'Users will have {days, plural, one {# day} other {# days}} instead of {previous} to set up two-factor authentication.',
+        },
+        { days: next.graceDays, previous: previous.graceDays }
+      )
+    );
+  }
+
+  return lines;
+};
+
+/** The trust-period line: trust offered at all, or for longer than before. */
+const trustLine = (
+  previous: TrustedDeviceSettings,
+  next: TrustedDeviceSettings,
+  formatMessage: IntlFormatters['formatMessage']
+): string =>
+  previous.enabled
+    ? formatMessage(
+        {
+          id: 'Settings.security.downgrade.combined.trustedDevices.longer',
+          defaultMessage:
+            'Trusted devices will skip the code for {days, plural, one {# day} other {# days}} instead of {previous}.',
+        },
+        { days: next.days, previous: previous.days }
+      )
+    : formatMessage(
+        {
+          id: 'Settings.security.downgrade.combined.trustedDevices.enabled',
+          defaultMessage:
+            'Users will be able to trust a device to skip the code for {days, plural, one {# day} other {# days}}.',
+        },
+        { days: next.days }
+      );
+
 interface SecurityDowngradeDialogProps {
   downgrade: ReturnType<typeof useSecuritySettingsSave>['downgrade'];
+  /** The stored settings and the ones being saved, to name each change in the combined dialog. */
+  previous: SecuritySettings;
+  next: SecuritySettings;
+  /** Role names for the "no longer required for {roles}" line; an unknown id is shown as is. */
+  roles: AdminRole[];
   passkeysCount?: number;
   callerEnrolled: boolean;
   onClose: () => void;
@@ -326,16 +418,21 @@ interface SecurityDowngradeDialogProps {
 
 /**
  * Picks the copy of the one credential dialog. A save that contains a single kind of downgrade
- * uses that kind's title and button; one that combines several says what each of them does.
+ * uses that kind's title and button; one that combines several names each change, one line each:
+ * the roles no longer required, a lowered mode, a longer grace period or trust period, and the
+ * passkeys deleted.
  */
 const SecurityDowngradeDialog = ({
   downgrade,
+  previous,
+  next,
+  roles,
   passkeysCount,
   callerEnrolled,
   onClose,
   onConfirm,
 }: SecurityDowngradeDialogProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatList } = useIntl();
 
   const passkeysSentence =
     passkeysCount === undefined
@@ -347,7 +444,7 @@ const SecurityDowngradeDialog = ({
           {
             id: 'Settings.security.passkeys.disable.count',
             defaultMessage:
-              '{count, plural, =0 {No user has registered a passkey yet.} one {This deletes the # passkey your users registered. This cannot be undone.} other {This deletes all # passkeys your users registered. This cannot be undone.}}',
+              '{count, plural, =0 {No user has registered a passkey yet.} one {This deletes # passkey your users registered. This cannot be undone.} other {This deletes all # passkeys your users registered. This cannot be undone.}}',
           },
           { count: passkeysCount }
         );
@@ -369,20 +466,14 @@ const SecurityDowngradeDialog = ({
     });
     description = (
       <Flex direction="column" alignItems="stretch" gap={2}>
-        {downgrade.lowersEnforcement ? (
-          <Typography>
-            {formatMessage({
-              id: 'Settings.security.downgrade.combined.mfa',
-              defaultMessage: 'This lowers two-factor requirements.',
-            })}
-          </Typography>
-        ) : null}
+        {downgrade.lowersEnforcement
+          ? enforcementLines(previous.mfa, next.mfa, roles, formatMessage, formatList).map(
+              (line) => <Typography key={line}>{line}</Typography>
+            )
+          : null}
         {downgrade.widensTrust ? (
           <Typography>
-            {formatMessage({
-              id: 'Settings.security.downgrade.combined.trustedDevices',
-              defaultMessage: 'Trusted browsers will skip the code for longer.',
-            })}
+            {trustLine(previous.trustedDevices, next.trustedDevices, formatMessage)}
           </Typography>
         ) : null}
         {downgrade.disablesPasskeys ? <Typography>{passkeysSentence}</Typography> : null}
@@ -392,7 +483,7 @@ const SecurityDowngradeDialog = ({
   } else if (downgrade?.widensTrust) {
     title = formatMessage({
       id: 'Settings.security.trustedDevices.widen.title',
-      defaultMessage: 'Let browsers skip the code for longer?',
+      defaultMessage: 'Let trusted devices skip the code for longer?',
     });
     confirmLabel = formatMessage({ id: 'global.save', defaultMessage: 'Save' });
   } else if (downgrade?.disablesPasskeys) {

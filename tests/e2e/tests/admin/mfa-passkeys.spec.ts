@@ -136,7 +136,7 @@ test.describe('Passkeys', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Turn passkeys off?' });
     await expect(dialog).toContainText(
-      'This deletes the 1 passkey your users registered. This cannot be undone.'
+      'This deletes 1 passkey your users registered. This cannot be undone.'
     );
     await dialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
     await waitForNextTotpStep();
