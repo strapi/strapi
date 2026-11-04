@@ -134,16 +134,24 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           // when the transaction has already been committed
           onCommit(async () => {
             for (const entry of localeEntries) {
-              const status = await serviceUtils.getVersionStatus(uid, entry);
+              try {
+                const status = await serviceUtils.getVersionStatus(uid, entry);
 
-              await getService(strapi, 'history').createVersion({
-                contentType: uid,
-                data: omit(entry, FIELDS_TO_IGNORE) as Modules.Documents.AnyDocument,
-                relatedDocumentId: documentId,
-                locale: entry.locale,
-                status,
-                ...schemas,
-              });
+                await getService(strapi, 'history').createVersion({
+                  contentType: uid,
+                  data: omit(entry, FIELDS_TO_IGNORE) as Modules.Documents.AnyDocument,
+                  relatedDocumentId: documentId,
+                  locale: entry.locale,
+                  status,
+                  ...schemas,
+                });
+              } catch (error) {
+                strapi.log.error(`Failed to create a history version for ${uid}`, {
+                  documentId,
+                  locale: entry.locale,
+                  error,
+                });
+              }
             }
           });
         });
