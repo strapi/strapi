@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import {
   Box,
   BoxComponent,
@@ -109,7 +110,7 @@ const DraggableCard = ({
             <Typography fontWeight="bold">{label}</Typography>
           </Flex>
           <Flex paddingLeft={3} onClick={(e) => e.stopPropagation()}>
-            <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <UnsavedChangesModal open={isModalOpen} onOpenChange={setIsModalOpen}>
               <Modal.Trigger>
                 <ActionButton
                   onClick={(e) => {
@@ -134,7 +135,7 @@ const DraggableCard = ({
                   setIsModalOpen(false);
                 }}
               />
-            </Modal.Root>
+            </UnsavedChangesModal>
             <ActionButton
               onClick={onRemoveField}
               data-testid={`delete-${name}`}

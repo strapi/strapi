@@ -1,7 +1,7 @@
 // TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, UnsavedChangesModal } from '@strapi/admin/strapi-admin';
 import {
   Badge,
   Button,
@@ -355,11 +355,11 @@ interface AssetDialogProps extends AssetContentProps {
 
 export const AssetDialog = ({ open = false, onClose, ...restProps }: AssetDialogProps) => {
   return (
-    <Modal.Root open={open} onOpenChange={onClose}>
+    <UnsavedChangesModal open={open} onOpenChange={onClose}>
       <Modal.Content>
         <AssetContent onClose={onClose} {...restProps} />
       </Modal.Content>
-    </Modal.Root>
+    </UnsavedChangesModal>
   );
 };
 
