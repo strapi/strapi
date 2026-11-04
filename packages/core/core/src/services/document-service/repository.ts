@@ -716,7 +716,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         });
       }
 
-      return entries.publish(entryToPublish, queryParams);
+      return await entries.publish(entryToPublish, queryParams);
     });
 
     // Sync unidirectional relations with the new published entries

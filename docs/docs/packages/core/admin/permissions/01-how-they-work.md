@@ -79,6 +79,10 @@ module.exports = async () => {
 };
 ```
 
+When the cleanup deletes permissions, it logs one warning with the count, the actions, the subjects, and the roles and admin tokens that lost them. Permissions with neither a role nor an admin token are only counted. No warning is logged when nothing is deleted.
+
+Content API token permissions are cleaned separately during the admin `bootstrap`. The ones whose action is no longer registered are deleted, with one warning that lists the count, the actions, the API tokens, and how many had no API token. The full read stays unpopulated; only the rows being deleted are read with their token, in batches.
+
 ### Parametrize actions
 
 Actions can be parametrized with the `actionParameters` property. This property is an object that can contain any key/value pair.
