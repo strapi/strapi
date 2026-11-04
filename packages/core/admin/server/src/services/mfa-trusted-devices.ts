@@ -52,7 +52,11 @@ export const isLive = (
 export interface TrustedDeviceDeps {
   strapi: Core.Strapi;
   settings: () => Promise<TrustedDeviceSettings>;
-  recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
+  recordEvent: (
+    userId: string,
+    type: MfaEventType,
+    metadata?: MfaEventMetadata
+  ) => Promise<unknown>;
   /** Fire-and-forget, and never called inside a transaction: an email send must not sit on the
    * request's critical path. */
   notify: (

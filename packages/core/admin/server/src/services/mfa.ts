@@ -68,6 +68,14 @@ export type VerifyChallengeResult =
   | { ok: true; userId: string }
   | { ok: false; reason: 'unusable' | 'exhausted' | 'invalid' | 'throttled' };
 
+/** See `reserveAttempt`. */
+export interface AttemptReservation {
+  /** Keep the reserved row as this attempt's failure, and send the notice. */
+  spend(): void;
+  /** Delete the reserved row unless it was spent. Idempotent. */
+  settle(): Promise<void>;
+}
+
 export type EnforceOutcome =
   { outcome: 'none' } | { outcome: 'grace'; graceUntil: Date } | { outcome: 'refused' };
 
@@ -568,10 +576,22 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // The one credential-verifying path that used to have no account tier. The route limiter keys
     // on `unknownEmail:<path>:<ip>`, so it is one bucket for everyone behind an address, not a
     // bound on guesses against *this* account's in-progress enrolment.
-    if (await isAccountThrottled(userId)) {
+    const attempt = await reserveAttempt(userId);
+    if (!attempt) {
       throw new RateLimitError();
     }
+    try {
+      return await promotePendingSecret(userId, code, attempt);
+    } finally {
+      await attempt.settle();
+    }
+  };
 
+  const promotePendingSecret = async (
+    userId: string,
+    code: string,
+    attempt: AttemptReservation
+  ) => {
     const user = await loadUser(userId);
     if (!user.mfaPendingSecret) {
       throw new ValidationError('No enrolment in progress', { code: MFA_ERROR_CODES.NO_ENROLMENT });
@@ -587,8 +607,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       window,
     });
     if (!result.valid) {
-      await recordEvent(userId, 'challenge_failed');
-      notify(userId, 'challenge_failed');
+      attempt.spend();
       throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
     }
 
@@ -596,8 +615,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // replacement must not reset `mfaLastUsedStep`, or a code accepted here replays at login.
     const consumed = await consumeTotpStep(userId, result.step);
     if (!consumed) {
-      await recordEvent(userId, 'challenge_failed');
-      notify(userId, 'challenge_failed');
+      attempt.spend();
       throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
     }
 
@@ -787,7 +805,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     userId: string,
     type: MfaEventType,
     metadata: MfaEventMetadata = {}
-  ): Promise<void> => {
+  ): Promise<Data.ID | undefined> => {
     const request = currentRequest();
     const sessionId = request?.state?.session?.id ?? null;
     const row = await eventQuery().create({
@@ -808,7 +826,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // live a little longer; nothing reads them by position. SQLite would survive the catch, but
     // one behaviour on every dialect is worth more than pruning a few events sooner on one.
     if (strapi.db.inTransaction()) {
-      return;
+      return row?.id;
     }
 
     try {
@@ -816,6 +834,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     } catch (error) {
       strapi.log.error('Failed to prune admin::mfa-event rows', error);
     }
+    return row?.id;
   };
 
   /**
@@ -1092,6 +1111,52 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return failures >= maxUserAttempts;
   };
 
+  /**
+   * The exact per-account tier. Checking `isAccountThrottled` and then verifying lets every
+   * concurrent request read the same count, so a burst could spend far more than
+   * `maxUserAttempts` guesses. The attempt is recorded *first*, as the `challenge_failed` row a
+   * wrong code would leave anyway, and the count taken afterwards includes it: the k-th concurrent
+   * request sees at least k rows, so no more than `maxUserAttempts` of them ever verify.
+   *
+   * Every caller must `settle` in a `finally`. A spent attempt keeps its row and sends the notice;
+   * anything else -- a success, a refusal that verified nothing, an error -- deletes the row, so
+   * only wrong codes count against the account.
+   */
+  const reserveAttempt = async (userId: string): Promise<AttemptReservation | null> => {
+    const { maxUserAttempts, userAttemptWindow } = config();
+    const id = await recordEvent(userId, 'challenge_failed');
+    const release = async () => {
+      if (id !== undefined) {
+        await eventQuery().deleteMany({ where: { id } });
+      }
+    };
+
+    const since = new Date(Date.now() - userAttemptWindow * 1000);
+    const failures = await eventQuery().count({
+      where: { userId: String(userId), type: 'challenge_failed', createdAt: { $gt: since } },
+    });
+    if (failures > maxUserAttempts) {
+      await release();
+      return null;
+    }
+
+    let spent = false;
+    let settled = false;
+    return {
+      spend() {
+        spent = true;
+        notify(userId, 'challenge_failed');
+      },
+      async settle() {
+        if (spent || settled) {
+          return;
+        }
+        settled = true;
+        await release();
+      },
+    };
+  };
+
   // --- Passkeys -------------------------------------------------
   // Not beside the trusted-device composition above: this needs `isAccountThrottled`, and a `const`
   // is hoisted uninitialised, so composing earlier throws a TDZ ReferenceError at construction.
@@ -1102,6 +1167,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     recordEvent,
     notify,
     isAccountThrottled,
+    reserveAttempt,
   });
 
   /**
@@ -1190,10 +1256,22 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       return { ok: false as const, reason: 'unusable' as const };
     }
 
-    if (await isAccountThrottled(challenge.userId)) {
+    const attempt = await reserveAttempt(challenge.userId);
+    if (!attempt) {
       return { ok: false as const, reason: 'throttled' as const };
     }
+    try {
+      return await checkChallengeCode(challenge, code, attempt);
+    } finally {
+      await attempt.settle();
+    }
+  };
 
+  const checkChallengeCode = async (
+    challenge: { id: unknown; userId: string },
+    code: string,
+    attempt: AttemptReservation
+  ): Promise<VerifyChallengeResult> => {
     // `returning` would be the obvious way to judge the new value, but it is unsupported on MySQL.
     // Runs *before* any code is checked, so a crash mid-verification still costs an attempt.
     const { tableName, attemptsColumn } = challengeTable();
@@ -1236,33 +1314,36 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     // Also reached when the code matched no factor's shape. A path that charges one tier but not the
     // other is a hole in the other.
-    await recordEvent(challenge.userId, 'challenge_failed');
-    notify(challenge.userId, 'challenge_failed');
+    attempt.spend();
     return { ok: false as const, reason: 'invalid' as const };
   };
 
   const assertFactor = async (userId: string, code: string): Promise<void> => {
-    if (await isAccountThrottled(userId)) {
+    const attempt = await reserveAttempt(userId);
+    if (!attempt) {
       throw new RateLimitError();
     }
 
-    const normalised = normaliseRecoveryCode(code);
+    try {
+      const normalised = normaliseRecoveryCode(code);
 
-    if (normalised.length <= MAX_TOTP_CODE_LENGTH) {
-      const totpResult = await verifyTotpForUser(userId, code.replace(/\s+/g, ''));
-      if (totpResult.valid && (await consumeTotpStep(userId, totpResult.step))) {
+      if (normalised.length <= MAX_TOTP_CODE_LENGTH) {
+        const totpResult = await verifyTotpForUser(userId, code.replace(/\s+/g, ''));
+        if (totpResult.valid && (await consumeTotpStep(userId, totpResult.step))) {
+          return;
+        }
+      }
+
+      if (normalised.length === RECOVERY_CODE_LENGTH && (await consumeRecoveryCode(userId, code))) {
+        await recordEvent(userId, 'recovery_code_used');
         return;
       }
-    }
 
-    if (normalised.length === RECOVERY_CODE_LENGTH && (await consumeRecoveryCode(userId, code))) {
-      await recordEvent(userId, 'recovery_code_used');
-      return;
+      attempt.spend();
+      throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
+    } finally {
+      await attempt.settle();
     }
-
-    await recordEvent(userId, 'challenge_failed');
-    notify(userId, 'challenge_failed');
-    throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
   };
 
   /**
@@ -1380,6 +1461,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     areCodesAcknowledged,
     acknowledgeCodes,
     isAccountThrottled,
+    reserveAttempt,
     enforcementImpact,
     createChallenge,
     verifyChallenge,

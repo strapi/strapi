@@ -2231,6 +2231,42 @@ describe('mfa service: challenge lifecycle', () => {
     }
   };
 
+  test('concurrent wrong codes cannot spend more than the account budget', async () => {
+    // Count-then-verify let every request in a burst read the same count. The attempt is now
+    // recorded before the count, so the burst is bounded by the budget, not by its own size.
+    const { service, events } = setup();
+    const burst = MFA_DEFAULTS.maxUserAttempts * 3;
+    const tokens = await Promise.all(
+      Array.from({ length: Math.ceil(burst / MFA_DEFAULTS.maxChallengeAttempts) }, () =>
+        service.createChallenge('1')
+      )
+    );
+
+    const outcomes = await Promise.all(
+      Array.from({ length: burst }, (_, i) =>
+        service.verifyChallenge(tokens[i % tokens.length].token, '000000')
+      )
+    );
+
+    const verified = outcomes.filter((outcome) => !outcome.ok && outcome.reason === 'invalid');
+    expect(verified.length).toBeLessThanOrEqual(MFA_DEFAULTS.maxUserAttempts);
+    expect(events.filter((e) => e.type === 'challenge_failed').length).toBeLessThanOrEqual(
+      MFA_DEFAULTS.maxUserAttempts
+    );
+  });
+
+  test('a correct code leaves no attempt behind', async () => {
+    const { service, events, validCode } = setup();
+
+    const { token } = await service.createChallenge('1');
+    await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
+      ok: true,
+      userId: '1',
+    });
+
+    expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
+  });
+
   test('a fresh challenge grants nothing until a code is presented', async () => {
     const { service, challenges } = setup();
 
@@ -3432,7 +3468,7 @@ describe('mfa service: event pruning', () => {
       throw new Error('connection dropped');
     });
 
-    await expect(service.recordEvent('1', 'enabled')).resolves.toBeUndefined();
+    await service.recordEvent('1', 'enabled');
 
     // The insert itself is unaffected: `recordEvent` still writes the row before `pruneEvents`
     // ever runs, and the prune failure is caught rather than propagated.

@@ -146,6 +146,14 @@ process restarts. A wrong **password** never records one: `assertPasswordAndFact
 `assertFactor` runs, so a password guess cannot burn a victim's factor attempts. Enrolment
 verification (`/mfa/enrol/verify`) checks and records against the same account tier.
 
+Every path that verifies a factor (`verifyChallenge`, `assertFactor`, `completeEnrolment` and the
+passkey `verifyAssertion`) goes through `reserveAttempt`. It writes the `challenge_failed` row
+first and counts afterwards, including that row, so the k-th concurrent request sees at least k
+rows and a burst cannot verify more than `maxUserAttempts` codes. A wrong code keeps the row and
+sends the notice. Any other outcome (a success, an exhausted challenge, an error) deletes it, so
+only wrong codes count. `isAccountThrottled` is still the check on paths that verify nothing, such
+as creating a challenge.
+
 The routes that verify a password or a code also carry `admin::rateLimit`. With a session, the
 limiter keys on the account and the route pattern (`rateLimitKey` in
 `server/src/middlewares/rateLimit.ts`), so administrators behind one address do not share a bucket

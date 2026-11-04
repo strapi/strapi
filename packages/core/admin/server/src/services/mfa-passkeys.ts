@@ -18,7 +18,7 @@ import type { Core, Data } from '@strapi/types';
 import { MAX_PASSKEYS_PER_USER, type Passkey } from '../../../shared/contracts/mfa';
 import type { PasskeySettings } from '../../../shared/contracts/security-settings';
 import type { MfaConfig } from '../config/mfa';
-import type { MfaEventMetadata, MfaEventType } from './mfa';
+import type { AttemptReservation, MfaEventMetadata, MfaEventType } from './mfa';
 import { warnOnce } from './security-settings';
 
 const { RateLimitError, ValidationError } = errors;
@@ -377,7 +377,11 @@ export interface PasskeyDeps {
   strapi: Core.Strapi;
   settings: () => Promise<PasskeySettings>;
   config: () => MfaConfig;
-  recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
+  recordEvent: (
+    userId: string,
+    type: MfaEventType,
+    metadata?: MfaEventMetadata
+  ) => Promise<unknown>;
   notify: (
     userId: string,
     // `challenge_failed` too: the verify path charges the same per-account tier the TOTP paths do,
@@ -386,6 +390,8 @@ export interface PasskeyDeps {
     extra?: { byUserId?: string; count?: number }
   ) => void;
   isAccountThrottled: (userId: string) => Promise<boolean>;
+  /** See `reserveAttempt` in `mfa.ts`: the exact per-account tier on the verify path. */
+  reserveAttempt: (userId: string) => Promise<AttemptReservation | null>;
 }
 
 // `new Date(undefined).toISOString()` throws, so a hand-edited row must not turn a list read into
@@ -436,6 +442,7 @@ export const createPasskeys = ({
   recordEvent,
   notify,
   isAccountThrottled,
+  reserveAttempt,
 }: PasskeyDeps) => {
   const query = () => strapi.db.query(PASSKEY_UID);
   const userQuery = () => strapi.db.query(USER_UID);
@@ -613,10 +620,23 @@ export const createPasskeys = ({
     }
     const userId = String(challenge.userId);
 
-    if (await isAccountThrottled(userId)) {
+    const attempt = await reserveAttempt(userId);
+    if (!attempt) {
       throw new RateLimitError();
     }
+    try {
+      return await checkAssertion(challenge, userId, assertion, attempt);
+    } finally {
+      await attempt.settle();
+    }
+  };
 
+  const checkAssertion = async (
+    challenge: { id: unknown; webauthnChallenge?: string | null },
+    userId: string,
+    assertion: AuthenticationResponseJSON,
+    attempt: AttemptReservation
+  ): Promise<{ userId: string }> => {
     // Defence in depth: the cascade already runs inside `updateSettings`' transaction, so this covers
     // a hand-edited `core_store` row or a future caller that clears the setting without it.
     if (!(await settings()).enabled) {
@@ -644,8 +664,7 @@ export const createPasskeys = ({
 
     /** One spent attempt at the account tier too, then the one generic message. */
     const fail = async (): Promise<never> => {
-      await recordEvent(userId, 'challenge_failed');
-      notify(userId, 'challenge_failed');
+      attempt.spend();
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     };
 
