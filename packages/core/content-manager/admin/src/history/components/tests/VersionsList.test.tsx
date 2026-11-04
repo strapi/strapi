@@ -58,6 +58,10 @@ describe('VersionsList', () => {
     expect(within(versions[1]).getByText('1/31/2024, 03:58 PM')).toBeInTheDocument();
     expect(within(versions[1]).getByText(/by Kai Doe/i)).toBeInTheDocument();
 
+    // Displays the source of each version
+    expect(within(versions[0]).getByText('Admin panel')).toBeInTheDocument();
+    expect(within(versions[1]).getByText('Admin API')).toBeInTheDocument();
+
     // Redirects to 2nd version on click
     await user.click(versions[1]);
     expect(await screen.findByText('?id=25')).toBeInTheDocument();

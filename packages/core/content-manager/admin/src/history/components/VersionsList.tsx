@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { useQueryParams, useIsMobile } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Status, Typography } from '@strapi/design-system';
 import { stringify } from 'qs';
-import { useIntl } from 'react-intl';
+import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { ActionsDrawer, useActionsDrawer } from '../../components/ActionsDrawer';
@@ -58,6 +58,33 @@ const VersionAuthor = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * VersionSource
+ * -----------------------------------------------------------------------------------------------*/
+
+const SOURCE_LABELS: Record<HistoryVersions.HistoryVersionSource, MessageDescriptor> = {
+  'admin-panel': {
+    id: 'content-manager.history.sidebar.version-card.source.admin-panel',
+    defaultMessage: 'Admin panel',
+  },
+  'admin-api': {
+    id: 'content-manager.history.sidebar.version-card.source.admin-api',
+    defaultMessage: 'Admin API',
+  },
+};
+
+const VersionSource = ({ source }: { source: HistoryVersions.HistoryVersionSource }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Status variant="neutral" size="XS">
+      <Typography tag="span" variant="omega" fontWeight="bold">
+        {formatMessage(SOURCE_LABELS[source])}
+      </Typography>
+    </Status>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * VersionCard
  * -----------------------------------------------------------------------------------------------*/
 
@@ -106,7 +133,10 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
           <VersionAuthor version={version} isCurrent={isCurrent} />
         </Typography>
       </Flex>
-      {version.status && <DocumentStatus status={version.status} size="XS" />}
+      <Flex gap={2} wrap="wrap">
+        {version.status && <DocumentStatus status={version.status} size="XS" />}
+        <VersionSource source={version.source} />
+      </Flex>
     </Flex>
   );
 };

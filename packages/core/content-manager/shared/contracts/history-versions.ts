@@ -6,6 +6,8 @@ import { type errors } from '@strapi/utils';
  * a dedicated API endpoint, but only by the history service listening to other actions.
  * That's why we directly export the create type here.
  */
+export type HistoryVersionSource = 'admin-panel' | 'admin-api';
+
 export interface CreateHistoryVersion {
   contentType: UID.ContentType;
   relatedDocumentId: Data.ID;
@@ -13,6 +15,7 @@ export interface CreateHistoryVersion {
   status: 'draft' | 'published' | 'modified' | null;
   data: Modules.Documents.AnyDocument;
   schema: Struct.SchemaAttributes;
+  source: HistoryVersionSource;
 }
 
 export interface Locale {
