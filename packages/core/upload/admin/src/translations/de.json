@@ -129,8 +129,6 @@
   "list.table.header.sort": "Sortieren nach {label}",
   "list.table.content.empty-label": "Dieses Feld ist leer",
   "tabs.title": "Wie willst du deine Dateien hochladen?",
-  "window.confirm.close-modal.file": "Bist du sicher? Deine Änderungen gehen verloren.",
-  "window.confirm.close-modal.files": "Bist du sicher? Es gibt ein paar Dateien, welche noch nicht hochgeladen wurden.",
   "config.back": "Zurück",
   "config.subtitle": "Definiere die Ansichtseinstellungen der Medienbibliothek.",
   "config.entries.title": "Einträge pro Seite",
