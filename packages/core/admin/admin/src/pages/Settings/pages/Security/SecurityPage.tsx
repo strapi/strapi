@@ -8,7 +8,7 @@ import { type IntlFormatters, type IntlShape, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { ErrorMessage } from '../../../../components/ErrorMessage';
-import { UnsavedChangesBlocker } from '../../../../components/Form';
+import { Blocker, Form, useForm } from '../../../../components/Form';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -47,24 +47,6 @@ import type {
   TrustedDeviceSettings,
 } from '../../../../../../shared/contracts/security-settings';
 
-/**
- * A draft of one stored object. A refetch adopts fresh server data only while the draft still
- * matches the baseline it was taken from: an edit in progress is kept rather than silently thrown
- * away, which is what happened when another administrator saved while this one was typing.
- */
-const useBaselineDraft = <TStored extends TDraft, TDraft>(stored: TStored) => {
-  const [draft, setDraft] = React.useState<TDraft>(stored);
-  const baselineRef = React.useRef(stored);
-
-  React.useEffect(() => {
-    const baseline = baselineRef.current;
-    baselineRef.current = stored;
-    setDraft((current) => (isEqual(current, baseline) ? stored : current));
-  }, [stored]);
-
-  return [draft, setDraft] as const;
-};
-
 interface FieldErrors {
   graceDays?: string;
   requiredRoles?: string;
@@ -92,10 +74,26 @@ interface SecuritySettingsFormProps {
   isRefreshing: boolean;
 }
 
+/** The server's role order must not read as an unsaved change. */
+const toFormValues = (settings: SecuritySettings): SecuritySettings => ({
+  ...settings,
+  mfa: { ...settings.mfa, requiredRoles: [...settings.mfa.requiredRoles].sort() },
+});
+
 /**
- * The loaded page: one draft of all three objects, one Save in the header, one request.
+ * The loaded page: one draft of all three objects in a `Form`, one Save in the header, one request.
  */
-const SecuritySettingsForm = ({
+const SecuritySettingsForm = (props: SecuritySettingsFormProps) => {
+  const initialValues = React.useMemo(() => toFormValues(props.settings), [props.settings]);
+
+  return (
+    <Form method="PUT" initialValues={initialValues}>
+      <SecuritySettingsFields {...props} />
+    </Form>
+  );
+};
+
+const SecuritySettingsFields = ({
   settings,
   roles,
   canUpdate,
@@ -106,17 +104,16 @@ const SecuritySettingsForm = ({
 }: SecuritySettingsFormProps) => {
   const { formatMessage } = useIntl();
 
-  const [mfaDraft, setMfaDraft] = useBaselineDraft<SecuritySettings['mfa'], MfaEnforcementDraft>(
-    settings.mfa
-  );
-  const [trustDraft, setTrustDraft] = useBaselineDraft<
-    SecuritySettings['trustedDevices'],
-    TrustedDevicesDraft
-  >(settings.trustedDevices);
-  const [passkeysDraft, setPasskeysDraft] = useBaselineDraft<
-    SecuritySettings['passkeys'],
-    PasskeySettings
-  >(settings.passkeys);
+  const values = useForm('SecurityPage', (state) => state.values) as {
+    mfa: MfaEnforcementDraft;
+    trustedDevices: TrustedDevicesDraft;
+    passkeys: PasskeySettings;
+  };
+  const onChange = useForm('SecurityPage', (state) => state.onChange);
+  const { mfa: mfaDraft, trustedDevices: trustDraft, passkeys: passkeysDraft } = values;
+  const setMfaDraft = (value: MfaEnforcementDraft) => onChange('mfa', value);
+  const setTrustDraft = (value: TrustedDevicesDraft) => onChange('trustedDevices', value);
+  const setPasskeysDraft = (value: PasskeySettings) => onChange('passkeys', value);
   const [fieldErrors, setFieldErrors] = React.useState<FieldErrors>({});
 
   // An empty number field reads as the stored value, so the downgrade predicates never see the
@@ -305,7 +302,7 @@ const SecuritySettingsForm = ({
         onConfirm={confirmDowngrade}
       />
 
-      <UnsavedChangesBlocker modified={modified} isSubmitting={isSaving || isRefreshing} />
+      <Blocker />
     </>
   );
 };
