@@ -133,10 +133,8 @@ yarn test:unit:update         # update snapshots
 Frontend test files also live in `__tests__/` within their respective packages.
 
 ```bash
-yarn test:front              # runs with IS_EE=true (EE features enabled)
-yarn test:front:ce           # runs with IS_EE=false (Community Edition only)
-yarn test:front:update       # update snapshots (EE)
-yarn test:front:update:ce    # update snapshots (CE)
+yarn test:front              # run all frontend tests
+yarn test:front:update       # update snapshots
 ```
 
 ### Type checking
@@ -179,7 +177,6 @@ yarn test:e2e --concurrency=3                    # run 3 domains in parallel
 
 ### EE toggles
 
-- `IS_EE=true` — enables Enterprise features in frontend tests (`yarn test:front`)
 - `RUN_EE=true` — enables Enterprise features in E2E tests
 
 ### Pre-PR checklist

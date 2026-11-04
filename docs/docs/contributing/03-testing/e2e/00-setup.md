@@ -70,10 +70,11 @@ For **CI, scripts, or automation**, prefer `--reporter=line` after the inner `--
 
 ### Running specific browsers
 
-To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium` or `webkit`
+Locally, `yarn test:e2e` runs Chromium only. To run another browser, pass `--project` to Playwright with the value(s) `chromium` or `webkit`; pass it twice to run both. CI always passes `--project`, so every CI job keeps its browser.
 
 ```shell
-yarn test:e2e --domains=admin -- login.spec.ts --project=chromium
+yarn test:e2e --domains=admin -- login.spec.ts --project=webkit
+yarn test:e2e --domains=admin -- --project=chromium --project=webkit
 ```
 
 To debug your tests with a browser instance and the playwright debugger, you can pass the
@@ -170,7 +171,7 @@ Playwright’s `reuseExistingServer` is **off by default** (see **`PLAYWRIGHT_RE
 
 ## Running tests with future flags
 
-If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation does not take the config folder into consideration. However, the run-e2e-tests script will apply the features config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
+To test an unstable future feature, enable its flag in `tests/app-template/config/features.js`. The test app generator copies the whole template, `config/` included, into each generated app, so run the tests with `--setup` after you change it. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag).
 
 ## What is Playwright?
 
