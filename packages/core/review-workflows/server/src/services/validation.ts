@@ -22,20 +22,20 @@ const toLimit = (value: unknown, fallback: number) => {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
-    limits: {
-      numberOfWorkflows: MAX_WORKFLOWS,
-      stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-    },
-    register({ numberOfWorkflows, stagesPerWorkflow }: any) {
-      if (!Object.isFrozen(this.limits)) {
-        this.limits.numberOfWorkflows = clampMaxWorkflows(
-          toLimit(numberOfWorkflows, this.limits.numberOfWorkflows)
-        );
-        this.limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
-          toLimit(stagesPerWorkflow, this.limits.stagesPerWorkflow)
-        );
-        Object.freeze(this.limits);
-      }
+    /**
+     * Reads the workflow limits from the current license on every call, so a license that the
+     * registry replaces after boot (`ee.update`) applies without a restart.
+     */
+    getLimits() {
+      const feature = strapi.ee.features.get('review-workflows');
+      const options = typeof feature === 'object' ? feature.options : undefined;
+
+      return {
+        numberOfWorkflows: clampMaxWorkflows(toLimit(options?.numberOfWorkflows, MAX_WORKFLOWS)),
+        stagesPerWorkflow: clampMaxStagesPerWorkflow(
+          toLimit(options?.stagesPerWorkflow, MAX_STAGES_PER_WORKFLOW)
+        ),
+      };
     },
     /**
      * Validates the stages of a workflow.
@@ -46,7 +46,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (!stages || stages.length === 0) {
         throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
       }
-      if (stages.length > this.limits.stagesPerWorkflow) {
+      if (stages.length > this.getLimits().stagesPerWorkflow) {
         throw new ValidationError(ERRORS.STAGES_LIMIT);
       }
       // Validate stage names are not duplicated
@@ -60,7 +60,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const stagesService = getService('stages', { strapi });
       const countWorkflowStages = await stagesService.count({ workflowId });
 
-      if (countWorkflowStages + countAddedStages > this.limits.stagesPerWorkflow) {
+      if (countWorkflowStages + countAddedStages > this.getLimits().stagesPerWorkflow) {
         throw new ValidationError(ERRORS.STAGES_LIMIT);
       }
     },
@@ -74,7 +74,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async validateWorkflowCount(countAddedWorkflows = 0) {
       const workflowsService = getService('workflows', { strapi });
       const countWorkflows = await workflowsService.count();
-      if (countWorkflows + countAddedWorkflows > this.limits.numberOfWorkflows) {
+      if (countWorkflows + countAddedWorkflows > this.getLimits().numberOfWorkflows) {
         throw new ValidationError(ERRORS.WORKFLOWS_LIMIT);
       }
     },

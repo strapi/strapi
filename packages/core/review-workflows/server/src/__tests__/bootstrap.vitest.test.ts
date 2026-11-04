@@ -1,11 +1,11 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import bootstrap from '../bootstrap';
 import createValidationService from '../services/validation';
 import defaultStages from '../constants/default-stages.json';
 
 /**
- * Runs the plugin `bootstrap` on an empty database, with the real validation service registered
- * with the license `stagesPerWorkflow`. Returns the data of the default workflow it created.
+ * Runs the plugin `bootstrap` on an empty database, with the real validation service reading the
+ * license `stagesPerWorkflow`. Returns the data of the default workflow it created.
  */
 const bootWith = async (stagesPerWorkflow: unknown) => {
   const services: Record<string, any> = {
@@ -13,9 +13,6 @@ const bootWith = async (stagesPerWorkflow: unknown) => {
     'workflow-weekly-metrics': { registerCron: vi.fn() },
     'document-service-middlewares': {},
   };
-  const validation = createValidationService({ strapi: {} as any });
-  validation.register({ numberOfWorkflows: 200, stagesPerWorkflow });
-  services.validation = validation;
   // The workflows service validates the stages against the limits before creating the workflow
   const create = vi.fn(async ({ data }: { data: { stages: unknown[] } }) => {
     validation.validateWorkflowStages(data.stages);
@@ -29,9 +26,14 @@ const bootWith = async (stagesPerWorkflow: unknown) => {
     get: () => ({ addAllowedEvent: vi.fn() }),
     has: () => false,
     documents: { use: vi.fn() },
+    ee: {
+      features: {
+        get: () => ({ name: 'review-workflows', options: { stagesPerWorkflow } }),
+      },
+    },
   } as any;
-  // `initDefaultWorkflow` resolves the services through `global.strapi`
-  vi.stubGlobal('strapi', strapi);
+  const validation = createValidationService({ strapi });
+  services.validation = validation;
 
   await bootstrap({ strapi });
 
@@ -40,10 +42,6 @@ const bootWith = async (stagesPerWorkflow: unknown) => {
 };
 
 describe('review-workflows bootstrap', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it.each([1, 2, 3])(
     'creates the default workflow with the first %i stages when the license allows fewer than 4',
     async (stagesPerWorkflow) => {
