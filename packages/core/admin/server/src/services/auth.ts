@@ -99,7 +99,7 @@ const completePasswordReset = async (
  * The second half of a reset staged by `completePasswordReset`, once the second factor passed:
  * writes the password and does what a committed reset does, which is end every session (the
  * reason for a reset is usually a password believed lost or leaked). Trusted devices go with the
- * password change itself (`setPasswordHash`).
+ * password change itself (the `admin::user` lifecycle in `bootstrap.ts`).
  */
 const commitStagedPasswordReset = async (
   userId: AdminUser['id'],

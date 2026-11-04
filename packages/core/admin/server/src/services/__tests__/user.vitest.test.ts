@@ -31,25 +31,6 @@ const {
   getLanguagesInUse,
 } = userService;
 
-/**
- * The runtime omit list and the contract's `PrivateMfaField` are two expressions of one rule:
- * these columns never reach a sanitized payload. They cannot be one declaration -- the shared
- * contract must not import server code -- so this pins them equal instead. A column added to one
- * and forgotten in the other fails here rather than leaking TOTP ciphertext into a user payload
- * or the EE audit table.
- */
-
-/** `purgeAndDelete` runs in a transaction; these doubles just run the callback. */
-/** What `updateById` asks of the mfa service on a password change. */
-const passwordChangeMfa = (enabled = true) => ({
-  isEnabled: vi.fn(() => enabled),
-  revokeAllTrustedDevices: vi.fn(() => Promise.resolve(0)),
-  clearTrustedDevices: vi.fn(() => Promise.resolve(0)),
-  clearGraceIfStale: vi.fn(() => Promise.resolve()),
-});
-
-const runInTransaction = async (run: () => unknown) => run();
-
 describe('private MFA fields', () => {
   test('the runtime list and the contract type name exactly the same columns', () => {
     // A compile error here means the runtime list gained a column the contract type has not.
@@ -108,7 +89,7 @@ describe('User', () => {
       });
     });
 
-    test('Removes every MFA column, cycles 1 to 4 alike', () => {
+    test('Removes every MFA column', () => {
       const res = sanitizeUser({
         id: 1,
         firstname: 'Test',
@@ -165,7 +146,6 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
-            mfa: passwordChangeMfa(),
             role: { count },
             metrics: { sendDidInviteUser },
           },
@@ -201,7 +181,6 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
-            mfa: passwordChangeMfa(),
             role: { count },
             metrics: { sendDidInviteUser },
           },
@@ -250,7 +229,6 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
-            mfa: passwordChangeMfa(),
             role: { count },
             metrics: { sendDidInviteUser },
           },
@@ -398,7 +376,6 @@ describe('User', () => {
         admin: {
           services: {
             auth: { hashPassword },
-            mfa: passwordChangeMfa(),
           },
         },
       } as any;
@@ -445,58 +422,6 @@ describe('User', () => {
       expect(result).toBe(user);
     });
 
-    test.each([
-      [true, 'revokeAllTrustedDevices'],
-      [false, 'clearTrustedDevices'],
-    ] as const)(
-      'a password change drops the trusted devices (feature on: %s, via %s)',
-      async (enabled, method) => {
-        // A browser trusted under the old password must not skip the second factor under the new.
-        const mfa = passwordChangeMfa(enabled);
-        global.strapi = {
-          ...global.strapi,
-          eventHub: { emit: vi.fn() },
-          db: {
-            query: () => ({
-              findOne: vi.fn(() => Promise.resolve({ id: 1, roles: [] })),
-              update: vi.fn(({ data }) => Promise.resolve({ id: 1, ...data })),
-            }),
-          },
-          admin: { services: { auth: { hashPassword: vi.fn(() => 'hash') }, mfa } },
-        } as any;
-
-        await updateById(1, { password: 'Testing1234' });
-
-        expect(mfa[method]).toHaveBeenCalledWith('1');
-      }
-    );
-
-    test('a role change hands the previous row to clearGraceIfStale', async () => {
-      const mfa = passwordChangeMfa();
-      const previous = { id: 1, roles: [{ id: 2 }], mfaGraceUntil: new Date(0) };
-      global.strapi = {
-        ...global.strapi,
-        eventHub: { emit: vi.fn() },
-        db: {
-          query: () => ({
-            findOne: vi.fn(() => Promise.resolve(previous)),
-            update: vi.fn(({ data }) => Promise.resolve({ id: 1, ...data })),
-          }),
-        },
-        admin: {
-          services: {
-            mfa,
-            role: { getSuperAdminWithUsersCount: vi.fn(() => Promise.resolve({ id: 9 })) },
-          },
-        },
-      } as any;
-
-      await updateById(1, { roles: [3] } as any);
-
-      expect(mfa.clearGraceIfStale).toHaveBeenCalledWith(previous);
-      expect(mfa.revokeAllTrustedDevices).not.toHaveBeenCalled();
-    });
-
     test('Call the update function with the expected params', async () => {
       const email = 'email@email.fr';
       const password = 'Testing1234';
@@ -534,7 +459,6 @@ describe('User', () => {
             auth: {
               hashPassword,
             },
-            mfa: passwordChangeMfa(),
           },
         },
       } as any;
@@ -571,7 +495,6 @@ describe('User', () => {
         admin: {
           services: {
             auth: { hashPassword },
-            mfa: passwordChangeMfa(),
             role: { getSuperAdminWithUsersCount: vi.fn(() => ({ id: 9, usersCount: 2 })) },
           },
         },
@@ -634,7 +557,6 @@ describe('User', () => {
       const findOne = vi.fn(() => Promise.resolve({ id: 11, roles: [{ code: SUPER_ADMIN_CODE }] }));
 
       const getSuperAdminWithUsersCount = vi.fn(() => Promise.resolve({ id: 1, usersCount: 1 }));
-      const purgeUser = vi.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
@@ -642,10 +564,10 @@ describe('User', () => {
           emit: vi.fn(),
         },
         db: { query: () => ({ findOne }) },
-        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
-      expect.assertions(3);
+      expect.assertions(2);
 
       try {
         await deleteById(2);
@@ -653,9 +575,6 @@ describe('User', () => {
         expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
-
-      // A refused deletion must never strip the still-live user's second factor.
-      expect(purgeUser).not.toHaveBeenCalled();
     });
 
     test('Can delete a super admin if they are not the last one', async () => {
@@ -663,15 +582,14 @@ describe('User', () => {
       const findOne = vi.fn(() => Promise.resolve(user));
       const getSuperAdminWithUsersCount = vi.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
       const deleteFn = vi.fn(() => user);
-      const purgeUser = vi.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: {
           emit: vi.fn(),
         },
-        db: { query: () => ({ findOne, delete: deleteFn }), transaction: runInTransaction },
-        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
+        db: { query: () => ({ findOne, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
       const res = await deleteById(user.id);
@@ -685,17 +603,16 @@ describe('User', () => {
     test('Cannot delete last super admin', async () => {
       const count = vi.fn(() => Promise.resolve(2));
       const getSuperAdminWithUsersCount = vi.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
-      const purgeUser = vi.fn(() => Promise.resolve());
       global.strapi = {
         ...global.strapi,
         eventHub: {
           emit: vi.fn(),
         },
         db: { query: () => ({ count }) },
-        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
-      expect.assertions(3);
+      expect.assertions(2);
 
       try {
         await deleteByIds([2, 3]);
@@ -703,9 +620,6 @@ describe('User', () => {
         expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
-
-      // A refused batch deletion must never strip any of the still-live users' second factor.
-      expect(purgeUser).not.toHaveBeenCalled();
     });
 
     test('Can delete a super admin if they are not the last one', async () => {
@@ -716,15 +630,14 @@ describe('User', () => {
         .fn()
         .mockImplementationOnce(() => users[0])
         .mockImplementationOnce(() => users[1]);
-      const purgeUser = vi.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: {
           emit: vi.fn(),
         },
-        db: { query: () => ({ count, delete: deleteFn }), transaction: runInTransaction },
-        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
+        db: { query: () => ({ count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
       const res = await deleteByIds([2, 3]);
@@ -736,110 +649,6 @@ describe('User', () => {
     });
   });
 
-  describe('MFA cleanup on user deletion', () => {
-    test('deleting a user removes their mfa secret, recovery codes and challenges', async () => {
-      const user = { id: 2, roles: [{ code: SUPER_ADMIN_CODE }] };
-      const findOne = vi.fn(() => Promise.resolve(user));
-      const getSuperAdminWithUsersCount = vi.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
-      const deleteFn = vi.fn(() => user);
-      const purgeUser = vi.fn(() => Promise.resolve());
-
-      global.strapi = {
-        ...global.strapi,
-        eventHub: { emit: vi.fn() },
-        db: { query: () => ({ findOne, delete: deleteFn }), transaction: runInTransaction },
-        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
-      } as any;
-
-      const res = await deleteById(user.id);
-
-      // `purgeUser` clears mfaSecret, recovery codes, challenges, devices, passkeys *and* the
-      // security-notice rows (see admin::mfa#purgeUser). `disable` alone would leave the notices
-      // behind, keyed to a user id that no longer resolves and carrying their device names.
-      expect(purgeUser).toHaveBeenCalledWith(String(user.id));
-      // After the super-admin guard read, before the row is actually removed.
-      expect(getSuperAdminWithUsersCount.mock.invocationCallOrder[0]).toBeLessThan(
-        purgeUser.mock.invocationCallOrder[0]
-      );
-      expect(purgeUser.mock.invocationCallOrder[0]).toBeLessThan(
-        deleteFn.mock.invocationCallOrder[0]
-      );
-      expect(res).toEqual(user);
-    });
-
-    test('the purge and the row delete share one transaction', async () => {
-      // Either both happen or neither: a purge committed before a failed delete would leave a live
-      // account with its second factor silently gone.
-      const user = { id: 2, roles: [] };
-      const findOne = vi.fn(() => Promise.resolve(user));
-      let open = false;
-      const seenInside: string[] = [];
-      const deleteFn = vi.fn(() => {
-        if (open) seenInside.push('delete');
-        return user;
-      });
-      const purgeUser = vi.fn(async () => {
-        if (open) seenInside.push('purge');
-      });
-      const transaction = vi.fn(async (run: () => Promise<unknown>) => {
-        open = true;
-        try {
-          return await run();
-        } finally {
-          open = false;
-        }
-      });
-
-      global.strapi = {
-        ...global.strapi,
-        eventHub: { emit: vi.fn() },
-        db: { query: () => ({ findOne, delete: deleteFn }), transaction },
-        admin: { services: { mfa: { purgeUser } } },
-      } as any;
-
-      await deleteById(user.id);
-
-      expect(transaction).toHaveBeenCalledTimes(1);
-      expect(seenInside).toEqual(['purge', 'delete']);
-    });
-
-    test('deleting several users removes all of their mfa data', async () => {
-      const users = [{ id: 2 }, { id: 3 }];
-      const count = vi.fn(() => Promise.resolve(users.length));
-      const getSuperAdminWithUsersCount = vi.fn(() => Promise.resolve({ id: 1, usersCount: 3 }));
-      const deleteFn = vi
-        .fn()
-        .mockImplementationOnce(() => users[0])
-        .mockImplementationOnce(() => users[1]);
-      const purgeUser = vi.fn(() => Promise.resolve());
-
-      global.strapi = {
-        ...global.strapi,
-        eventHub: { emit: vi.fn() },
-        db: { query: () => ({ count, delete: deleteFn }), transaction: runInTransaction },
-        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
-      } as any;
-
-      const res = await deleteByIds([2, 3]);
-
-      expect(purgeUser).toHaveBeenCalledTimes(2);
-      expect(purgeUser).toHaveBeenNthCalledWith(1, '2');
-      expect(purgeUser).toHaveBeenNthCalledWith(2, '3');
-      // Each id's cleanup happens before that same id's row is deleted.
-      expect(purgeUser.mock.invocationCallOrder[0]).toBeLessThan(
-        deleteFn.mock.invocationCallOrder[0]
-      );
-      expect(purgeUser.mock.invocationCallOrder[1]).toBeLessThan(
-        deleteFn.mock.invocationCallOrder[1]
-      );
-      // The account-wide guard runs once before the loop, ahead of every purge call.
-      expect(getSuperAdminWithUsersCount.mock.invocationCallOrder[0]).toBeLessThan(
-        purgeUser.mock.invocationCallOrder[0]
-      );
-      expect(res).toEqual(users);
-    });
-  });
-
   describe('Session invalidation on user deletion', () => {
     test('deleteById invalidates user sessions when sessionManager exists', async () => {
       const user = { id: 2, roles: [] };
@@ -847,14 +656,12 @@ describe('User', () => {
       const deleteFn = vi.fn(() => user);
       const invalidateRefreshToken = vi.fn(() => Promise.resolve());
       const hasOrigin = vi.fn(() => true);
-      const purgeUser = vi.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: vi.fn() },
         sessionManager: vi.fn(() => ({ invalidateRefreshToken })),
-        db: { query: () => ({ findOne, delete: deleteFn }), transaction: runInTransaction },
-        admin: { services: { mfa: { purgeUser } } },
+        db: { query: () => ({ findOne, delete: deleteFn }) },
       } as any;
 
       // Add hasOrigin method to sessionManager
@@ -874,14 +681,12 @@ describe('User', () => {
       const deleteFn = vi.fn(() => user);
       const invalidateRefreshToken = vi.fn(() => Promise.resolve());
       const hasOrigin = vi.fn(() => false);
-      const purgeUser = vi.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: vi.fn() },
         sessionManager: vi.fn(() => ({ invalidateRefreshToken })),
-        db: { query: () => ({ findOne, delete: deleteFn }), transaction: runInTransaction },
-        admin: { services: { mfa: { purgeUser } } },
+        db: { query: () => ({ findOne, delete: deleteFn }) },
       } as any;
 
       (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
@@ -904,14 +709,13 @@ describe('User', () => {
         .mockImplementationOnce(() => users[1]);
       const invalidateRefreshToken = vi.fn(() => Promise.resolve());
       const hasOrigin = vi.fn(() => true);
-      const purgeUser = vi.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: vi.fn() },
         sessionManager: vi.fn(() => ({ invalidateRefreshToken })),
-        db: { query: () => ({ count, delete: deleteFn }), transaction: runInTransaction },
-        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
+        db: { query: () => ({ count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
       (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
@@ -931,14 +735,13 @@ describe('User', () => {
       const deleteFn = vi.fn(() => users[0]);
       const invalidateRefreshToken = vi.fn(() => Promise.reject(new Error('Session error')));
       const hasOrigin = vi.fn(() => true);
-      const purgeUser = vi.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: vi.fn() },
         sessionManager: vi.fn(() => ({ invalidateRefreshToken })),
-        db: { query: () => ({ count, delete: deleteFn }), transaction: runInTransaction },
-        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
+        db: { query: () => ({ count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
       (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
@@ -965,10 +768,7 @@ describe('User', () => {
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: vi.fn() },
-        db: {
-          query: () => ({ findOne, update, count, delete: deleteFn }),
-          transaction: runInTransaction,
-        },
+        db: { query: () => ({ findOne, update, count, delete: deleteFn }) },
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 

@@ -66,9 +66,6 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
-      // Private two-factor columns, from the one list `services/constants.ts` holds. Keeping them
-      // out of every sanitized payload covers login responses, `/users/me`, user listings and the
-      // `admin.auth.*` event payloads EE audit logs persist.
       ...PRIVATE_MFA_FIELDS,
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
@@ -192,16 +189,23 @@ const updateById = async (
     ? await strapi.db.query('admin::user').findOne({ where: { id }, populate: ['roles'] })
     : null;
 
-  // A role change can put the account newly on the two-factor clock; `clearGraceIfStale` needs
-  // the row as it was. `roles` is a tracked field, so `previous` is already loaded then.
-  if (previous && _.has(attributes, 'roles')) {
-    await getService('mfa').clearGraceIfStale(previous);
-  }
-
   // hash password if a new one is sent
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password!);
-    return writePassword(id, attributes, hashedPassword, previous);
+
+    const updatedUser = await strapi.db.query('admin::user').update({
+      where: { id },
+      data: {
+        ...attributes,
+        password: hashedPassword,
+      },
+      populate: ['roles'],
+    });
+
+    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+
+    return updatedUser;
   }
 
   const updatedUser = await strapi.db.query('admin::user').update({
@@ -218,50 +222,27 @@ const updateById = async (
   return updatedUser;
 };
 
-/** The password half of `updateById`, from an already-hashed password. */
-const writePassword = async (
-  id: Data.ID,
-  attributes: Partial<AdminUserUpdatePayload>,
-  hashedPassword: string,
-  previous: Parameters<typeof emitAdminUserUpdateAudits>[1]['previous']
-): Promise<AdminUser> => {
-  const updatedUser = await strapi.db.query('admin::user').update({
-    where: { id },
-    data: {
-      ...attributes,
-      password: hashedPassword,
-    },
-    populate: ['roles'],
-  });
-
-  // Every password change, from the profile, an administrator, the CLI or a reset: a browser
-  // trusted under the old password must not keep skipping the second factor under the new one.
-  // While the feature is off the rows are dropped silently; there is nobody to notify.
-  const mfa = getService('mfa');
-  if (mfa.isEnabled()) {
-    await mfa.revokeAllTrustedDevices(String(id));
-  } else {
-    await mfa.clearTrustedDevices(String(id));
-  }
-
-  strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
-  await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
-
-  return updatedUser;
-};
-
 /**
- * Sets a password that was hashed earlier, with every side effect `updateById` gives a password
- * change. For a reset of a two-factor account, which hashes the new password when the reset link
- * is used but commits it only once the second factor has passed.
+ * Writes a password hashed earlier, with the events and audits of a password change. For a reset
+ * of a two-factor account, which commits the new password only once the second factor passed.
  */
 const setPasswordHash = async (id: Data.ID, passwordHash: string): Promise<AdminUser> => {
   const previous = await strapi.db
     .query('admin::user')
     .findOne({ where: { id }, populate: ['roles'] });
-  // `password` in the attributes is what marks the audit event as a password change; the value
-  // written is the hash below.
-  return writePassword(id, { password: passwordHash }, passwordHash, previous);
+  const updatedUser = await strapi.db.query('admin::user').update({
+    where: { id },
+    data: { password: passwordHash },
+    populate: ['roles'],
+  });
+
+  strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+  await emitAdminUserUpdateAudits(
+    { strapi },
+    { previous, updated: updatedUser, attributes: { password: passwordHash } }
+  );
+
+  return updatedUser;
 };
 
 /**
@@ -423,26 +404,6 @@ const findPage = async (params = {}): Promise<unknown> => {
   return strapi.db.query('admin::user').findPage(query);
 };
 
-/**
- * The user row and everything the two-factor feature stored about it, in one transaction, so a
- * failure on either leaves neither half behind: a purged account that still exists has silently
- * lost its second factor, and a deleted one whose rows remain leaves recovery-code hashes and
- * device names on file.
- *
- * Unconditional: the mfa tables exist whether or not `unstableAdminMfa` is on, so a user deleted
- * while it's off must not leave those rows behind. Callers run it after their super-admin guard,
- * so a refused deletion never touches a live user's second factor.
- */
-const purgeAndDelete = async (id: Data.ID): Promise<AdminUser> =>
-  strapi.db.transaction(async () => {
-    await getService('mfa').purgeUser(String(id));
-
-    const deleted: AdminUser = await strapi.db
-      .query('admin::user')
-      .delete({ where: { id }, populate: ['roles'] });
-    return deleted;
-  });
-
 /** Delete a user
  * @param id id of the user to delete
  */
@@ -466,7 +427,9 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
     }
   }
 
-  const deletedUser = await purgeAndDelete(id);
+  const deletedUser = await strapi.db
+    .query('admin::user')
+    .delete({ where: { id }, populate: ['roles'] });
 
   // Invalidate all sessions for the deleted user
   const sessionManager = getSessionManager();
@@ -499,7 +462,10 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
 
   const deletedUsers = [] as AdminUser[];
   for (const id of ids) {
-    const deletedUser = await purgeAndDelete(id);
+    const deletedUser = await strapi.db.query('admin::user').delete({
+      where: { id },
+      populate: ['roles'],
+    });
 
     // Invalidate all sessions for the deleted user
     const sessionManager = getSessionManager();

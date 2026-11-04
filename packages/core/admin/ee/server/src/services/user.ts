@@ -176,11 +176,6 @@ const deleteById = async (id: unknown) => {
     }
   }
 
-  // This function shadows the CE one (`server/src/index.ts` merges EE over CE), so the purge has
-  // to be repeated here or it never runs on an EE build. Same contract as CE: unconditional,
-  // after the guard above, right before the row delete. See `server/src/services/user.ts`.
-  await getService('mfa').purgeUser(String(id));
-
   const deletedUser = await strapi.db
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
@@ -219,9 +214,6 @@ const deleteByIds = async (ids: any) => {
 
   const deletedUsers = [];
   for (const id of ids) {
-    // See deleteById: repeated here because EE shadows CE. Before this id's row is deleted.
-    await getService('mfa').purgeUser(String(id));
-
     const deletedUser = await strapi.db.query('admin::user').delete({
       where: { id },
       populate: ['roles'],
@@ -280,9 +272,6 @@ const sanitizeUser = (user: any) => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
-      // The same list the CE sanitizer strips. This sanitizer feeds the `user.update` /
-      // `user.delete` payloads EE audit logs persist, so a column missing here writes TOTP
-      // ciphertext into the audit table -- which is why the list is shared rather than copied.
       ...PRIVATE_MFA_FIELDS,
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
