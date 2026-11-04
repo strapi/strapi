@@ -1,6 +1,10 @@
 import type { Core, Modules, UID } from '@strapi/types';
 
-import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
+import {
+  createDocumentLockMiddleware,
+  createMiddlewareManager,
+  databaseErrorsMiddleware,
+} from './middlewares';
 import { createContentTypeRepository } from './repository';
 import { transformData } from './transform/data';
 
@@ -31,6 +35,8 @@ export const createDocumentService = (
   // Manager to handle document service middlewares
   const middlewares = createMiddlewareManager();
   middlewares.use(databaseErrorsMiddleware);
+  // Registered before any plugin middleware, so the lock precedes their reads.
+  middlewares.use(createDocumentLockMiddleware(() => strapi.db));
 
   const factory = function factory(uid: UID.ContentType) {
     if (repositories.has(uid)) {

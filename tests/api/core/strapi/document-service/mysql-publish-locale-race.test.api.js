@@ -138,4 +138,30 @@ describeMysql('MySQL Content Manager save and publish of a new locale', () => {
     expect(drafts).toHaveLength(1);
     expect(published).toHaveLength(1);
   });
+
+  test('creates one french draft when two updates in caller transactions overlap', async () => {
+    // The MCP update handlers open a transaction and then call update. The
+    // i18n middleware reads inside that transaction before the repository runs.
+    const created = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${RACE_UID}`,
+      body: { name: 'en' },
+    });
+    const { documentId } = created.body.data;
+
+    barrier = createBarrier(2);
+    const update = (name) =>
+      strapi.db.transaction(() =>
+        strapi.documents(RACE_UID).update({ documentId, locale: 'fr', data: { name } })
+      );
+    await Promise.all([update('a'), update('b')]);
+    barrier = undefined;
+
+    const drafts = await strapi.db.query(RACE_UID).findMany({
+      where: { documentId, locale: 'fr', publishedAt: null },
+      select: ['id'],
+    });
+
+    expect(drafts).toHaveLength(1);
+  });
 });
