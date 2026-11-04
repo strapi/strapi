@@ -220,6 +220,54 @@ describe('Release Validation service', () => {
     });
   });
 
+  describe('validatePendingReleasesLimit defaults', () => {
+    const createService = (maximumReleases: unknown, pendingReleasesCount: number) => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        ee: {
+          features: {
+            get: jest
+              .fn()
+              .mockReturnValue(
+                maximumReleases === undefined
+                  ? { name: 'cms-content-releases' }
+                  : { name: 'cms-content-releases', options: { maximumReleases } }
+              ),
+          },
+        },
+        db: {
+          query: jest.fn().mockReturnValue({
+            findWithCount: jest.fn().mockReturnValue([[], pendingReleasesCount]),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      return createReleaseValidationService({ strapi: strapiMock });
+    };
+
+    it.each([
+      ['"0"', '0'],
+      ['0', 0],
+      ['missing', undefined],
+      ['non-numeric', 'many'],
+    ])('enforces the default of 3 when the license limit is %s', async (_, maximumReleases) => {
+      await expect(
+        createService(maximumReleases, 2).validatePendingReleasesLimit()
+      ).resolves.not.toThrow();
+      await expect(
+        createService(maximumReleases, 3).validatePendingReleasesLimit()
+      ).rejects.toThrow('You have reached the maximum number of pending releases');
+    });
+
+    it('reads a numeric string limit as its number', async () => {
+      await expect(createService('90', 89).validatePendingReleasesLimit()).resolves.not.toThrow();
+      await expect(createService('90', 90).validatePendingReleasesLimit()).rejects.toThrow(
+        'You have reached the maximum number of pending releases'
+      );
+    });
+  });
+
   describe('validateUniqueNameForPendingRelease', () => {
     it('should throw an error if a release with the same name already exists', async () => {
       const strapiMock = {
