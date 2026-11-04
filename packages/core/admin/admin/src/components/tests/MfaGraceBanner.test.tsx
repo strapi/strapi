@@ -120,7 +120,7 @@ describe('MfaGraceBanner', () => {
     await within(root).findByRole('status');
 
     enrolled = true;
-    // the window focus listener (setupListeners) triggers a refetch for refetchOnFocus hooks
+    // the banner refetches on window focus
     window.dispatchEvent(new Event('focus'));
 
     await waitFor(() => expect(root).toBeEmptyDOMElement());

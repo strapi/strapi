@@ -21,12 +21,8 @@ export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
  * since the clock starts at the first session issued after it applies -- so the copy then points
  * at the next login rather than inventing a deadline.
  *
- * Mounted only in a build with the feature (`MfaBanners`). Polling stops on a 404 (the server's
- * kill switch) and starts again on a success. The hook's options can only
- * see the *previous* render's result, so that state is mirrored one render behind via an effect.
- * It has to move both ways: `/admin/mfa/me` is a shared cache entry that three other components
- * also read, and a one-way latch would mean one observed 404 permanently blinds this banner for
- * the rest of the tab's life, even after an admin turns the requirement on.
+ * Polling and focus refetch stop on a 404 (the server's kill switch) and resume on a success. The
+ * flag moves both ways because `/admin/mfa/me` is a cache entry other components also refresh.
  */
 const MfaGraceBanner = () => {
   const { formatMessage, formatDate } = useIntl();
@@ -35,10 +31,19 @@ const MfaGraceBanner = () => {
   const { pathname } = useLocation();
   const onProfilePage = pathname === '/me';
   const [isFeatureOff, setIsFeatureOff] = React.useState(false);
-  const { data, error } = useGetMfaStatusQuery(undefined, {
+  const { data, error, refetch } = useGetMfaStatusQuery(undefined, {
     pollingInterval: isFeatureOff ? 0 : MFA_STATUS_POLL_INTERVAL_MS,
-    refetchOnFocus: !isFeatureOff,
   });
+
+  // A local focus listener rather than RTK's `refetchOnFocus`, which needs store-wide listeners.
+  React.useEffect(() => {
+    if (isFeatureOff) {
+      return;
+    }
+    const onFocus = () => refetch();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [isFeatureOff, refetch]);
 
   React.useEffect(() => {
     const notFound = isNotFoundError(error);
