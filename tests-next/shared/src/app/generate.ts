@@ -80,6 +80,21 @@ export const generateApp = async ({ name, overwrite = true }: GenerateAppOptions
     }
   );
 
+  // `strapi develop` opens the admin in a browser tab when the app has no admin user yet, which
+  // is always the case here. BROWSER=none doesn't stop it.
+  const adminFile = path.join(dir, 'config', 'admin.js');
+  const admin = fs.readFileSync(adminFile, 'utf8');
+  if (!admin.includes('module.exports = ({ env }) => ({')) {
+    throw new Error(`Unexpected ${adminFile}: cannot turn off admin.autoOpen.`);
+  }
+  fs.writeFileSync(
+    adminFile,
+    admin.replace(
+      'module.exports = ({ env }) => ({',
+      'module.exports = ({ env }) => ({\n  autoOpen: false,'
+    )
+  );
+
   // create-strapi-app leaves an empty node_modules; without it Node walks up to the repo root.
   fs.rmSync(path.join(dir, 'node_modules'), { recursive: true, force: true });
 
