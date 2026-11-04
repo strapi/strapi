@@ -1,15 +1,6 @@
 import * as React from 'react';
 
-import {
-  Alert,
-  Box,
-  Button,
-  Field,
-  Flex,
-  Modal,
-  TextInput,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Button, Field, Flex, Modal, TextInput, Typography } from '@strapi/design-system';
 import { QRCodeSVG } from 'qrcode.react';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -24,7 +15,7 @@ import {
 } from '../../services/mfa';
 
 import { CredentialFields } from './CredentialFields';
-import { RecoveryCodes } from './RecoveryCodes';
+import { RecoveryCodes, RecoveryCodesDismissAlert } from './RecoveryCodes';
 
 interface EnrolDialogProps {
   open: boolean;
@@ -361,21 +352,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
             <Flex direction="column" alignItems="stretch" gap={4}>
               <ErrorMessage error={error} />
               {dismissBlocked ? (
-                <Alert
-                  variant="warning"
-                  closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
-                  onClose={() => setDismissBlocked(false)}
-                  title={formatMessage({
-                    id: 'Settings.profile.form.section.mfa.codes.dismiss.title',
-                    defaultMessage: 'Save your recovery codes first',
-                  })}
-                >
-                  {formatMessage({
-                    id: 'Settings.profile.form.section.mfa.codes.dismiss.body',
-                    defaultMessage:
-                      'These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then tick the box below. If you close this without saving them, generate a new set from your profile.',
-                  })}
-                </Alert>
+                <RecoveryCodesDismissAlert onClose={() => setDismissBlocked(false)} />
               ) : null}
               <RecoveryCodes
                 codes={step.recoveryCodes}

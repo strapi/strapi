@@ -87,6 +87,26 @@ describe('ReAuthDialog', () => {
     expect(hasLeakedMfaSecrets('Testing123!', ...CODES)).toBe(false);
   });
 
+  /** The old set stops working the moment the new one is issued, so closing before the user says
+   * the new codes are saved would leave them with no recovery codes at all. */
+  it('refuses to close on the regenerated codes until the user says they are saved', async () => {
+    const onClose = jest.fn();
+    const { user } = renderDialog({ open: true, onClose, intent: 'regenerate' });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.type(screen.getByLabelText('Authentication code*'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Generate new recovery codes' }));
+
+    expect(await screen.findByRole('heading', { name: 'Save your recovery codes' })).toBeVisible();
+    await user.keyboard('{Escape}');
+    expect(await screen.findByText('Save your recovery codes first')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
   it('disables, shows the success toast, and closes', async () => {
     const onClose = jest.fn();
     const { user } = renderDialog({ open: true, onClose, intent: 'disable' });

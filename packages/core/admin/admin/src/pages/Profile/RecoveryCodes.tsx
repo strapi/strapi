@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Checkbox, Flex, Grid, Typography } from '@strapi/design-system';
+import { Alert, Box, Button, Checkbox, Flex, Grid, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -153,5 +153,32 @@ const RecoveryCodes = ({ codes, onAcknowledged, onSavedChange }: RecoveryCodesPr
   );
 };
 
-export { RecoveryCodes };
+/**
+ * Shown when a host dialog refuses to close on the codes step because the box is not ticked yet.
+ * The codes are shown once and are the only way back into a locked-out account, so a dismissal
+ * must not silently destroy them.
+ */
+const RecoveryCodesDismissAlert = ({ onClose }: { onClose: () => void }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Alert
+      variant="warning"
+      closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+      onClose={onClose}
+      title={formatMessage({
+        id: 'Settings.profile.form.section.mfa.codes.dismiss.title',
+        defaultMessage: 'Save your recovery codes first',
+      })}
+    >
+      {formatMessage({
+        id: 'Settings.profile.form.section.mfa.codes.dismiss.body',
+        defaultMessage:
+          'These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then tick the box below. If you close this without saving them, generate a new set from your profile.',
+      })}
+    </Alert>
+  );
+};
+
+export { RecoveryCodes, RecoveryCodesDismissAlert };
 export type { RecoveryCodesProps };

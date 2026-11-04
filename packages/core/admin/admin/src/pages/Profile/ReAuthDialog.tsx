@@ -13,7 +13,7 @@ import {
 } from '../../services/mfa';
 
 import { CredentialFields } from './CredentialFields';
-import { RecoveryCodes } from './RecoveryCodes';
+import { RecoveryCodes, RecoveryCodesDismissAlert } from './RecoveryCodes';
 
 interface ReAuthDialogProps {
   open: boolean;
@@ -96,6 +96,10 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string>();
+  // The regenerated codes replace the old set the moment they are issued, so the codes step guards
+  // dismissal exactly as `EnrolDialog` does: closing before the box is ticked is refused.
+  const [dismissBlocked, setDismissBlocked] = React.useState(false);
+  const [codesSaved, setCodesSaved] = React.useState(false);
   // Synchronous re-entrancy guard for `handleSubmit` -- see the class doc comment above for why
   // this can't be the mutation hook's `isLoading` state.
   const inFlightRef = React.useRef(false);
@@ -131,6 +135,8 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
     setPassword('');
     setCode('');
     setError(undefined);
+    setDismissBlocked(false);
+    setCodesSaved(false);
     resetRegenerate();
     resetDisable();
     resetAck();
@@ -202,14 +208,28 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
     <Modal.Root
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          close();
+        if (isOpen) {
+          return;
         }
+        if (step.name === 'codes' && !codesSaved) {
+          setDismissBlocked(true);
+          return;
+        }
+        close();
       }}
     >
       <Modal.Content>
         <Modal.Header>
-          <Modal.Title>{formatMessage(copy.title)}</Modal.Title>
+          <Modal.Title>
+            {formatMessage(
+              step.name === 'codes'
+                ? {
+                    id: 'Settings.profile.form.section.mfa.codes.title',
+                    defaultMessage: 'Save your recovery codes',
+                  }
+                : copy.title
+            )}
+          </Modal.Title>
         </Modal.Header>
 
         {step.name === 'form' ? (
@@ -247,7 +267,14 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
           <Modal.Body>
             <Flex direction="column" alignItems="stretch" gap={4}>
               <ErrorMessage error={error} />
-              <RecoveryCodes codes={step.recoveryCodes} onAcknowledged={handleAcknowledged} />
+              {dismissBlocked ? (
+                <RecoveryCodesDismissAlert onClose={() => setDismissBlocked(false)} />
+              ) : null}
+              <RecoveryCodes
+                codes={step.recoveryCodes}
+                onAcknowledged={handleAcknowledged}
+                onSavedChange={setCodesSaved}
+              />
             </Flex>
           </Modal.Body>
         ) : null}
