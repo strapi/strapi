@@ -39,6 +39,13 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
+
+    // Remote pull runs this on the server during the CLI engine bootstrap, which
+    // is before the CLI destination beforeTransfer moves or deletes local uploads.
+    // Load here so a missing stream-chain fails the pull at that point. Later
+    // reads reuse the cached load. Do this before touching the Strapi instance.
+    await loadStreamDeps();
+
     this.strapi = await this.options.getStrapi();
     this.strapi.db.lifecycles.disable();
   }

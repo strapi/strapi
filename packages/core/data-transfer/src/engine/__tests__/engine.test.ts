@@ -499,15 +499,21 @@ describe('Transfer engine', () => {
       loadStreamDeps.mockRejectedValueOnce(loadError);
 
       const sourceBootstrap = jest.fn();
+      const sourceClose = jest.fn();
       const source = {
         ...minimalSource,
         bootstrap: sourceBootstrap,
+        close: sourceClose,
       };
       const beforeTransfer = jest.fn();
       const destinationBootstrap = jest.fn();
+      const destinationClose = jest.fn();
+      const rollback = jest.fn();
       const destination = createDestination({
         beforeTransfer,
         bootstrap: destinationBootstrap,
+        close: destinationClose,
+        rollback,
       });
       const engine = createTransferEngine(source, destination, defaultOptions);
 
@@ -517,6 +523,15 @@ describe('Transfer engine', () => {
         expect(sourceBootstrap).not.toHaveBeenCalled();
         expect(destinationBootstrap).not.toHaveBeenCalled();
         expect(beforeTransfer).not.toHaveBeenCalled();
+        expect(rollback).not.toHaveBeenCalled();
+        expect(sourceClose).not.toHaveBeenCalled();
+        expect(destinationClose).not.toHaveBeenCalled();
+        expect(engine.diagnostics.stack.items).toContainEqual(
+          expect.objectContaining({
+            kind: 'error',
+            details: expect.objectContaining({ error: loadError }),
+          })
+        );
       } finally {
         loadStreamDeps.mockReset();
         loadStreamDeps.mockImplementation(() =>
