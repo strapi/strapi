@@ -242,7 +242,10 @@ describe('security-settings: service', () => {
       },
     ];
     let stored: unknown = options.stored ?? null;
-    const storeGet = vi.fn(async () => stored);
+    const storeGet = vi.fn(async () => {
+      lockOrder.push('read');
+      return stored;
+    });
     const storeSet = vi.fn(async ({ value }: { value: unknown }) => {
       stored = value;
     });
@@ -255,12 +258,24 @@ describe('security-settings: service', () => {
     // callback that never runs cannot call anything ('open'), and a callback whose transaction
     // fails on commit has already called everything inside it ('commit'). That lets a test pin a
     // call to inside the transaction's scope without needing real rollback state to observe.
-    const transaction = vi.fn(async (run: () => Promise<unknown>) => {
+    // The FOR UPDATE that serialises saves. `locked` lets a test see it happened inside the
+    // transaction, before the re-read.
+    const lockOrder: string[] = [];
+    const lockChain: Record<string, unknown> = {};
+    for (const step of ['select', 'where', 'first', 'transacting', 'forUpdate']) {
+      lockChain[step] = vi.fn(() => lockChain);
+    }
+    lockChain.execute = vi.fn(async () => {
+      lockOrder.push('lock');
+      return { id: 1 };
+    });
+    const queryBuilder = vi.fn(() => lockChain);
+    const transaction = vi.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) => {
       if (options.transactionFails === 'open') throw new Error('could not open transaction');
       options.onTransaction?.((value: unknown) => {
         stored = value;
       });
-      const result = await run();
+      const result = await run({ trx: {} });
       if (options.transactionFails === 'commit') throw new Error('commit failed');
       return result;
     });
@@ -318,6 +333,7 @@ describe('security-settings: service', () => {
       eventHub: { emit },
       db: {
         transaction,
+        queryBuilder,
         query: vi.fn((uid: string) => {
           if (uid === 'admin::role') return roleQuery;
           if (uid === 'admin::user') return userQuery;
@@ -353,6 +369,9 @@ describe('security-settings: service', () => {
       clearAllPasskeys,
       validatePassword,
       transaction,
+      queryBuilder,
+      lockChain,
+      lockOrder,
     };
   };
 
@@ -558,6 +577,23 @@ describe('security-settings: service', () => {
     );
 
     expect(storeSet).toHaveBeenCalled();
+  });
+
+  test('a save locks the Super Admin role row before re-reading, so concurrent saves serialise', async () => {
+    const { service, queryBuilder, lockChain, lockOrder } = setup({ enrolled: true });
+
+    await service.updateSettings(
+      { mfa: { mode: 'required', graceDays: 7, requiredRoles: [] } },
+      actor
+    );
+
+    expect(queryBuilder).toHaveBeenCalledWith('admin::role');
+    expect(lockChain.forUpdate).toHaveBeenCalled();
+    expect(lockChain.where).toHaveBeenCalledWith({ code: 'strapi-super-admin' });
+    // The read at the top happens unlocked; the re-read that decides happens after the lock.
+    const lockAt = lockOrder.indexOf('lock');
+    expect(lockAt).toBeGreaterThan(0);
+    expect(lockOrder.slice(lockAt + 1)).toContain('read');
   });
 
   test('an enrolled caller raises to required and the store and role flags are written together', async () => {

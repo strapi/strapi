@@ -222,7 +222,10 @@ Raising protection needs nothing extra.
 The credentials are checked before the transaction opens, and the relaxing terms are computed
 again inside it against the fresh read. If a concurrent save changed what this one relaxes so
 that it now needs credentials it was not given, it is refused with `SETTINGS_CONFLICT` rather than
-applied.
+applied. The transaction first takes `SELECT ... FOR UPDATE` on the Super Admin role row, so on
+PostgreSQL and MySQL two saves cannot both make that fresh read before either commits. The settings
+document itself may not exist yet, which is why a role row that always exists is locked. SQLite
+ignores the clause and has a single writer.
 
 Two exemption rules apply to a **password-less** (SSO-only) caller:
 

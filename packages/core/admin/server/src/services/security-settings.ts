@@ -9,6 +9,7 @@ import type {
   UpdateSecuritySettings,
 } from '../../../shared/contracts/security-settings';
 import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
+import { SUPER_ADMIN_CODE } from '../../../shared/utils/super-admin';
 
 const { ValidationError } = errors;
 
@@ -453,7 +454,21 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     const credentialsVerified =
       Boolean(actorRow.password) && (lowersEnforcement || widensTrust || disablesPasskeys);
 
-    await strapi.db.transaction(async () => {
+    await strapi.db.transaction(async ({ trx }) => {
+      // Serialises every save on Postgres and MySQL, the way `createFirstAdmin` serialises itself:
+      // without it two saves both re-read the same settings below, both pass the re-check, and the
+      // second commits over the first. The security-settings document may not exist yet, so it is
+      // the Super Admin role row, which always does, that is locked. SQLite ignores FOR UPDATE and
+      // has a single writer anyway.
+      await strapi.db
+        .queryBuilder('admin::role')
+        .select(['id'])
+        .where({ code: SUPER_ADMIN_CODE })
+        .first()
+        .transacting(trx)
+        .forUpdate()
+        .execute();
+
       // A concurrent save since the read at the top can turn what looked like a raise into a
       // relaxation. The credential check is not repeated -- bcrypt would hold the transaction open --
       // so a save whose requirement appeared only now is refused and the caller retries.
