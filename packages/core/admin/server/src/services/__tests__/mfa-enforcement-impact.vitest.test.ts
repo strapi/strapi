@@ -7,16 +7,24 @@ type Row = {
   password: string | null;
   mfaEnabledAt: string | null;
   mfaSecret: string | null;
-  roles: Array<{ id: number }>;
+  roles: Array<{ id: number; mfaRequired?: boolean }>;
 };
 
-const build = (rows: Row[], { ssoLockedRoles = [] as string[] } = {}) => {
+const build = (
+  rows: Row[],
+  { ssoLockedRoles = [] as string[], storedMode = undefined as string | undefined } = {}
+) => {
   const findMany = vi.fn(async () => rows.map((row) => ({ ...row, roles: [...row.roles] })));
 
   const strapi = {
     db: { query: () => ({ findMany }) },
     ee: { features: { isEnabled: (name: string) => name === 'sso' && ssoLockedRoles.length > 0 } },
-    store: () => ({ get: async () => ({ providers: { ssoLockedRoles } }) }),
+    store: () => ({
+      get: async ({ key }: { key: string }) =>
+        key === 'security-settings'
+          ? { mfa: storedMode ? { mode: storedMode } : {} }
+          : { providers: { ssoLockedRoles } },
+    }),
     config: { get: (_key: string, fallback: unknown) => fallback },
     log: { warn: vi.fn(), error: vi.fn() },
     features: { future: { isEnabled: () => true } },
@@ -87,5 +95,40 @@ describe('enforcementImpact', () => {
     await expect(
       service.enforcementImpact({ mode: 'required', requiredRoles: [] })
     ).resolves.toEqual({ affected: 1, enrolled: 1 });
+  });
+
+  /**
+   * Review item 32: with Editor already required, requiring Author (no users) reported Editor's
+   * enrolled user as "1 user will be asked ... and 1 of them already has it". The count is of the
+   * accounts the change adds, not of everyone the proposal covers.
+   */
+  test('counts only the accounts the change adds, not those already required', async () => {
+    const withFlags: Row[] = [
+      { id: 1, password: 'hash', ...enrolled, roles: [{ id: 2, mfaRequired: true }] },
+      { id: 2, password: 'hash', ...notEnrolled, roles: [{ id: 4, mfaRequired: false }] },
+    ];
+    const { service } = build(withFlags, { storedMode: 'optional' });
+
+    // Role 3 has no users: requiring it alongside role 2 adds nobody.
+    await expect(
+      service.enforcementImpact({ mode: 'optional', requiredRoles: ['2', '3'] })
+    ).resolves.toEqual({ affected: 0, enrolled: 0 });
+    // Role 4 adds account 2 only; account 1 was already required through role 2.
+    await expect(
+      service.enforcementImpact({ mode: 'optional', requiredRoles: ['2', '4'] })
+    ).resolves.toEqual({ affected: 1, enrolled: 0 });
+    // Everyone: account 1 is already required, so only account 2 is new.
+    await expect(
+      service.enforcementImpact({ mode: 'required', requiredRoles: [] })
+    ).resolves.toEqual({ affected: 1, enrolled: 0 });
+  });
+
+  test('nobody is added while everyone is already required', async () => {
+    const { service, findMany } = build(rows, { storedMode: 'required' });
+
+    await expect(
+      service.enforcementImpact({ mode: 'required', requiredRoles: [] })
+    ).resolves.toEqual({ affected: 0, enrolled: 0 });
+    expect(findMany).not.toHaveBeenCalled();
   });
 });

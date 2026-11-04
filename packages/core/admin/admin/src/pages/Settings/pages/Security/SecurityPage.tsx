@@ -285,7 +285,7 @@ const SecuritySettingsForm = ({
               ? formatMessage({
                   id: 'Settings.security.mfa.enforce.none',
                   defaultMessage:
-                    'No active user logs in with a password under this setting, so nobody will be asked to set it up yet.',
+                    'Nobody new will be asked to set up two-factor authentication: this change adds no active user who logs in with a password.',
                 })
               : formatMessage(
                   {

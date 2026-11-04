@@ -156,7 +156,9 @@ appear in the RBAC matrix for a page that does not exist.
 `admin.security-settings.update` in the EE audit log with the changed fields.
 
 `mfa-impact?mode=&requiredRoles[]=` answers `{ affected, enrolled }` for a proposed policy:
-how many accounts it would require, and how many of those are already enrolled. The UI calls it
+how many accounts it would newly require, and how many of those are already enrolled. Accounts the
+stored settings already require are not counted, so requiring a role with no users while another
+role is required reports zero rather than that other role's users. The UI calls it
 before any save that raises enforcement and shows the count in a confirmation dialog, so a
 `required` save that starts a grace clock for 300 people is never a single click.
 

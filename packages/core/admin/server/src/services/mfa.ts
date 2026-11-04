@@ -208,6 +208,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * roles rather than the stored flags. Iterated in memory: admin user tables are small, and
    * exact parity with the enforcement path matters more than a clever query that could drift
    * from it. Inactive accounts cannot sign in at all, so they are nobody's problem here.
+   *
+   * Only the accounts this change adds are counted: an account the stored settings already
+   * require was asked before and is not asked again. Counting everyone the proposal covers made
+   * requiring a role with no users report the users of the roles already required.
    */
   const enforcementImpact = async (proposal: {
     mode: MfaEnforcementMode;
@@ -217,10 +221,15 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       return { affected: 0, enrolled: 0 };
     }
 
+    const { mode: currentMode } = await readMfaEnforcement(strapi);
+    if (currentMode === 'required') {
+      return { affected: 0, enrolled: 0 };
+    }
+
     const users = (await userQuery().findMany({
       where: { isActive: true },
       select: ['id', 'password', 'mfaEnabledAt', 'mfaSecret'],
-      populate: { roles: { select: ['id'] } },
+      populate: { roles: { select: ['id', 'mfaRequired'] } },
     })) as AdminUserRow[];
 
     const required = new Set(proposal.requiredRoles.map(String));
@@ -235,7 +244,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       const roles = Array.isArray(user.roles) ? user.roles : [];
       const subject =
         proposal.mode === 'required' || roles.some((role) => required.has(String(role.id)));
-      if (!subject) {
+      const alreadyRequired =
+        currentMode === 'optional' && roles.some((role) => role.mfaRequired === true);
+      if (!subject || alreadyRequired) {
         continue;
       }
       affected += 1;

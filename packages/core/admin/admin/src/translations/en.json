@@ -531,7 +531,7 @@
   "Settings.security.title": "Security",
   "Settings.security.saved": "Security settings saved.",
   "Settings.security.mfa.enforce.body": "{affected, plural, one {# user} other {# users}} will be asked to set up two-factor authentication, and {enrolled, plural, =0 {none of them has} one {# of them already has} other {# of them already have}} it. Each has {graceDays, plural, one {# day} other {# days}} from their next login to set it up. After that, password login is locked until an administrator unlocks the account.",
-  "Settings.security.mfa.enforce.none": "No active user logs in with a password under this setting, so nobody will be asked to set it up yet.",
+  "Settings.security.mfa.enforce.none": "Nobody new will be asked to set up two-factor authentication: this change adds no active user who logs in with a password.",
   "Settings.security.mfa.enforce.title": "Require two-factor authentication?",
   "Settings.security.mfa.enforce.confirm": "Require",
   "Settings.security.mfa.title": "Two-factor authentication",

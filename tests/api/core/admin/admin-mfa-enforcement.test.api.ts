@@ -126,6 +126,28 @@ describe('Admin MFA enforcement', () => {
       expect(verify.body.data.replaced).toBe(false);
     });
 
+    // Round-2 review item 32: requiring a role with no users said "1 user will be asked ... and 1 of
+    // them already has it". The query is sent the way the admin client sends it (qs indices).
+    test('the impact of requiring a role with no users is zero', async () => {
+      const emptyRole = await utils.createRole({ name: 'mfa_enforcement_empty', description: 't' });
+      try {
+        const res = await rq({
+          url: `/admin/security-settings/mfa-impact?mode=optional&requiredRoles[0]=${emptyRole.id}`,
+          method: 'GET',
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toEqual({ affected: 0, enrolled: 0 });
+
+        const editorOnly = await rq({
+          url: `/admin/security-settings/mfa-impact?mode=optional&requiredRoles[0]=${editorRole.id}`,
+          method: 'GET',
+        });
+        expect(editorOnly.body.data).toEqual({ affected: 1, enrolled: 0 });
+      } finally {
+        await utils.deleteRolesById([emptyRole.id]);
+      }
+    });
+
     test("requiring the editor role starts a grace at the editor's next login", async () => {
       const put = await rq({
         url: '/admin/security-settings',
@@ -144,6 +166,22 @@ describe('Admin MFA enforcement', () => {
 
       const row = await strapi.db.query('admin::user').findOne({ where: { id: editor.id } });
       expect(new Date(row.mfaGraceUntil).getTime()).toBe(graceUntil);
+    });
+
+    // Item 32 as reported: with the editor role already required, requiring a role with no users
+    // counted the editor again. Only the accounts the change adds are counted.
+    test('with the editor role required, adding a role with no users adds nobody', async () => {
+      const emptyRole = await utils.createRole({ name: 'mfa_enforcement_empty', description: 't' });
+      try {
+        const res = await rq({
+          url: `/admin/security-settings/mfa-impact?mode=optional&requiredRoles[0]=${editorRole.id}&requiredRoles[1]=${emptyRole.id}`,
+          method: 'GET',
+        });
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toEqual({ affected: 0, enrolled: 0 });
+      } finally {
+        await utils.deleteRolesById([emptyRole.id]);
+      }
     });
 
     test('the editor sees required and the deadline on /mfa/me', async () => {
