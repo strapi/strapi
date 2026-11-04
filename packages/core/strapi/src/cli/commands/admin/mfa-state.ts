@@ -19,11 +19,16 @@ interface MfaService {
     password?: string | null;
     roles?: unknown;
   }): Promise<boolean>;
-  /** The user's live trusted browsers; only the count is printed. */
-  listTrustedDevices(userId: string): Promise<unknown[]>;
+  /** Read-only: unlike `listTrustedDevices` it deletes nothing it finds expired. */
+  countLiveTrustedDevices(userId: string): Promise<number>;
 }
 
-async function printMfaState({ email }: CmdOptions) {
+async function printMfaState({ email: typed }: CmdOptions) {
+  // Admin emails are stored lowercased (`normalizeEmail`), so a lookup with the address as typed
+  // misses on any capital letter.
+  const email = String(typed ?? '')
+    .trim()
+    .toLowerCase();
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
@@ -65,8 +70,9 @@ async function printMfaState({ email }: CmdOptions) {
     `locked at:         ${user.mfaLockedAt ? new Date(user.mfaLockedAt).toISOString() : '-'}`
   );
 
-  const trustedDevices = await mfa.listTrustedDevices(String(user.id));
-  console.log(`trusted devices:   ${trustedDevices.length}`);
+  // A diagnostic command writes nothing: `listTrustedDevices` prunes the dead rows it meets.
+  const trustedDevices = await mfa.countLiveTrustedDevices(String(user.id));
+  console.log(`trusted devices:   ${trustedDevices}`);
 
   process.exit(0);
 }

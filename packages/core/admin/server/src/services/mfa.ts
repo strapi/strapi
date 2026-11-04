@@ -1485,6 +1485,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     trustDevice: trustedDevices.trustDevice,
     consumeTrustedDevice: trustedDevices.consumeTrustedDevice,
     listTrustedDevices: trustedDevices.listTrustedDevices,
+    countLiveTrustedDevices: trustedDevices.countLiveTrustedDevices,
     revokeTrustedDevice: trustedDevices.revokeTrustedDevice,
     revokeAllTrustedDevices: trustedDevices.revokeAllTrustedDevices,
     clearTrustedDevices: trustedDevices.clearTrustedDevices,

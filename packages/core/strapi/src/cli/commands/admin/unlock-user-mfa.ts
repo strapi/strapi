@@ -30,7 +30,12 @@ const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
   },
 ];
 
-async function unlockMfa({ email }: CmdOptions) {
+async function unlockMfa({ email: typed }: CmdOptions) {
+  // Admin emails are stored lowercased (`normalizeEmail`), so a lookup with the address as typed
+  // misses on any capital letter.
+  const email = String(typed ?? '')
+    .trim()
+    .toLowerCase();
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 

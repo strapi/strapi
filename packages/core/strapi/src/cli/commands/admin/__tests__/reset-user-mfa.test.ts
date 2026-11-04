@@ -66,6 +66,19 @@ describe('admin:reset-user-mfa command', () => {
     process.stdin.isTTY = originalIsTTY;
   });
 
+  test('lowercases the typed email, as admin emails are stored', async () => {
+    findOne.mockResolvedValue({ id: 1, email: 'kai@doe.com' });
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    await resetUserMfaCommand({ email: 'Kai@Doe.com' });
+
+    expect(findOne).toHaveBeenCalledWith({ where: { email: 'kai@doe.com' } });
+
+    mockExit.mockRestore();
+    consoleLog.mockRestore();
+  });
+
   test('clears enrolment for the given email', async () => {
     const email = 'kai@doe.com';
     findOne.mockResolvedValue({ id: 1, email });

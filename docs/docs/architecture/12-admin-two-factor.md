@@ -280,7 +280,9 @@ the admin panel maps to a translated message. The English server message is the 
 
 ## CLI
 
-Three commands, for the case where an admin can no longer get in. Each takes `-e, --email`.
+Three commands, for the case where an admin can no longer get in. Each takes `-e, --email`, which
+is trimmed and lowercased before the lookup, as admin emails are stored. `mfa-state` writes nothing:
+it counts live trusted devices without pruning the expired ones.
 
 ```bash
 strapi admin:mfa-state -e user@example.com        # print a user's 2FA state

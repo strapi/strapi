@@ -8,14 +8,14 @@ const isEnrolled = jest.fn();
 const countUnusedRecoveryCodes = jest.fn();
 const config = jest.fn();
 const isMfaRequiredFor = jest.fn(() => Promise.resolve(true));
-const listTrustedDevices = jest.fn(() => Promise.resolve([] as unknown[]));
+const countLiveTrustedDevices = jest.fn(() => Promise.resolve(0));
 
 const mfaServiceInstance = {
   isEnrolled,
   countUnusedRecoveryCodes,
   config,
   isMfaRequiredFor,
-  listTrustedDevices,
+  countLiveTrustedDevices,
 };
 
 // Mirrors the REAL registration shape (`packages/core/admin/server/src/services/index.ts`):
@@ -61,13 +61,13 @@ describe('admin:mfa-state command', () => {
     countUnusedRecoveryCodes.mockClear();
     config.mockClear();
     isMfaRequiredFor.mockClear();
-    listTrustedDevices.mockClear();
+    countLiveTrustedDevices.mockClear();
     db.query.mockClear();
     mfaFactory.mockClear();
     service.mockClear();
 
     config.mockReturnValue({ recoveryCodeCount: 10, step: 30 });
-    listTrustedDevices.mockResolvedValue([]);
+    countLiveTrustedDevices.mockResolvedValue(0);
   });
 
   test('exits non-zero when the email is unknown', async () => {
@@ -203,22 +203,40 @@ describe('admin:mfa-state command', () => {
     consoleLog.mockRestore();
   });
 
-  test('prints the number of live trusted devices', async () => {
+  // A diagnostic writes nothing: `listTrustedDevices` would delete the expired rows it met.
+  test('prints the number of live trusted devices without pruning any', async () => {
     const email = 'kai@doe.com';
     findOne.mockResolvedValue({ id: 1, email, mfaEnabledAt: new Date('2026-01-01T00:00:00.000Z') });
     isEnrolled.mockResolvedValue(true);
     countUnusedRecoveryCodes.mockResolvedValue(10);
-    listTrustedDevices.mockResolvedValue([{ id: '1' }, { id: '2' }]);
+    countLiveTrustedDevices.mockResolvedValue(2);
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     await mfaStateCommand({ email });
 
-    expect(listTrustedDevices).toHaveBeenCalledWith('1');
+    expect(countLiveTrustedDevices).toHaveBeenCalledWith('1');
     expect(consoleLog).toHaveBeenCalledWith('trusted devices:   2');
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
+  });
+
+  test('finds the user whatever the case of the typed email', async () => {
+    findOne.mockResolvedValue(null);
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit');
+    });
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await expect(mfaStateCommand({ email: ' Kai@Doe.COM ' })).rejects.toThrow('exit');
+
+    expect(findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { email: 'kai@doe.com' } })
+    );
+
+    mockExit.mockRestore();
+    consoleError.mockRestore();
   });
 });

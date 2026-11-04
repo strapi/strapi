@@ -4001,6 +4001,17 @@ describe('mfa service: trusted devices', () => {
     vi.useRealTimers();
   });
 
+  test('countLiveTrustedDevices counts only live rows and deletes nothing', async () => {
+    const { service, trustedRows } = setup();
+    await service.trustDevice('1', {});
+    await service.trustDevice('1', {});
+    trustedRows[0].expiresAt = new Date(Date.now() - DAY);
+
+    await expect(service.countLiveTrustedDevices('1')).resolves.toBe(1);
+    // The CLI's `admin:mfa-state` reads through this: a diagnostic must not prune.
+    expect(trustedRows).toHaveLength(2);
+  });
+
   test('trustDevice stores only a hash, with the label and an absolute expiry, and returns the token once', async () => {
     const { service, trustedRows, events, strapi } = setup();
     const before = Date.now();

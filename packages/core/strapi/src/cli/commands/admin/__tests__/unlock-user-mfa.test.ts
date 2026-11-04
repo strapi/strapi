@@ -71,6 +71,22 @@ describe('admin:unlock-user-mfa command', () => {
     consoleLog.mockRestore();
   });
 
+  test('lowercases the typed email, as admin emails are stored', async () => {
+    findOne.mockResolvedValue({ id: 1, email: 'kai@doe.com' });
+    unlock.mockResolvedValue(true);
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    await unlockUserMfaCommand({ email: 'KAI@doe.com' });
+
+    expect(findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { email: 'kai@doe.com' } })
+    );
+
+    mockExit.mockRestore();
+    consoleLog.mockRestore();
+  });
+
   test('exits non-zero when the account was not locked', async () => {
     const email = 'kai@doe.com';
     findOne.mockResolvedValue({ id: 1, email, mfaLockedAt: null });
