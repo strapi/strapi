@@ -114,18 +114,21 @@ const Row = ({
             { category: categoryName }
           )} ${kind === 'plugins' ? 'plugin' : kind}`}
         >
-          {categoryDisplayName}
+          {isDisabledByConfig === true ? (
+            // Next to the title, not after the caret, so the caret stays aligned with other rows
+            <Flex tag="span" gap={2}>
+              {categoryDisplayName}
+              <Badge shrink={0}>
+                {formatMessage({
+                  id: 'Settings.permissions.category.disabled-by-config',
+                  defaultMessage: 'Disabled by configuration',
+                })}
+              </Badge>
+            </Flex>
+          ) : (
+            categoryDisplayName
+          )}
         </Accordion.Trigger>
-        {isDisabledByConfig === true && (
-          <Accordion.Actions>
-            <Badge>
-              {formatMessage({
-                id: 'Settings.permissions.category.disabled-by-config',
-                defaultMessage: 'Disabled by configuration',
-              })}
-            </Badge>
-          </Accordion.Actions>
-        )}
       </Accordion.Header>
       <Accordion.Content>
         <Box padding={6}>

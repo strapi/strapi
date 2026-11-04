@@ -154,7 +154,13 @@ describe('Permissions', () => {
     // Only the audit logs section carries the marker
     expect(screen.getAllByText('Disabled by configuration')).toHaveLength(1);
 
-    await user.click(screen.getByRole('button', { name: 'Audit logs audit logs settings' }));
+    // The marker sits inside the trigger, next to the title
+    const auditLogsTrigger = screen.getByRole('button', {
+      name: 'Audit logs Disabled by configuration audit logs settings',
+    });
+    expect(auditLogsTrigger).toHaveTextContent('Disabled by configuration');
+
+    await user.click(auditLogsTrigger);
 
     const readCheckbox = await screen.findByRole('checkbox', { name: 'Read' });
     expect(readCheckbox).toBeEnabled();
