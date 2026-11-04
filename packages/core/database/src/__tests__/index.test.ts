@@ -268,6 +268,24 @@ describe('Database', () => {
         await db.destroy();
       });
     });
+
+    it('discards a nested commit hook when the outer transaction rolls back', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const committed = jest.fn();
+
+      await expect(
+        db.transaction(async () => {
+          await db.transaction(async ({ onCommit }) => {
+            onCommit(committed);
+          });
+          throw new Error('nope');
+        })
+      ).rejects.toThrow('nope');
+
+      expect(committed).not.toHaveBeenCalled();
+      await db.destroy();
+    });
   });
 });
 

@@ -144,6 +144,7 @@ const createStrapi = () => {
     db: {
       queryBuilder,
       connection: knex,
+      dialect: { client: 'mysql' },
       getConnection: jest.fn(() => table),
       transaction: jest.fn(async (fn: (ctx: { trx: string }) => Promise<unknown>) =>
         fn({ trx: 'trx' })
@@ -455,7 +456,7 @@ describe('Custom order service', () => {
       // Rows of documents that already have a position take it
       expect(knex.raw).toHaveBeenNthCalledWith(1, '(?)', [expect.anything()]);
       // The others go above the current top
-      expect(knex.raw).toHaveBeenNthCalledWith(2, '? - (?)', [4, expect.anything()]);
+      expect(knex.raw).toHaveBeenNthCalledWith(2, '? - CAST(? AS SIGNED)', [4, expect.anything()]);
     });
   });
 

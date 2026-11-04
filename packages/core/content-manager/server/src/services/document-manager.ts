@@ -169,11 +169,16 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: DocServiceParams<'findMany'> & { locale?: string } = {}
     ) {
-      const deletedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(documentIds.map(async (id) => this.delete(id, uid, opts)));
+      const count = await strapi.db.transaction(async () => {
+        // One transaction has one connection. Deleting in parallel overlaps
+        // queries on that connection, and Postgres then warns or, on pg 9, errors.
+        for (const id of documentIds) {
+          await this.delete(id, uid, opts);
+        }
+        return documentIds.length;
       });
 
-      return { count: deletedEntries.length };
+      return { count };
     },
 
     async publish(
@@ -196,9 +201,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       assertDraftAndPublish(uid);
 
       return strapi.db.transaction(async () => {
-        const results = await Promise.all(
-          documentIds.map((documentId) => this.publish(documentId, uid, { locale, populate: {} }))
-        );
+        // One transaction has one connection. Publishing in parallel overlaps
+        // queries on that connection and Postgres/MySQL then reject the action.
+        const results = [];
+        for (const documentId of documentIds) {
+          results.push(await this.publish(documentId, uid, { locale, populate: {} }));
+        }
 
         const publishedEntitiesCount = results.flat().filter(Boolean).length;
         return publishedEntitiesCount;
@@ -213,14 +221,14 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       assertDraftAndPublish(uid);
 
       const unpublishedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(
-          documentIds.map((id) =>
-            strapi
-              .documents(uid)
-              .unpublish({ ...opts, documentId: id, populate: {} })
-              .then((result) => result?.entries)
-          )
-        );
+        const entries = [];
+        for (const id of documentIds) {
+          const result = await strapi
+            .documents(uid)
+            .unpublish({ ...opts, documentId: id, populate: {} });
+          entries.push(result?.entries);
+        }
+        return entries;
       });
 
       const unpublishedEntitiesCount = unpublishedEntries.flat().filter(Boolean).length;
