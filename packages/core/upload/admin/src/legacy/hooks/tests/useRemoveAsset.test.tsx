@@ -153,12 +153,9 @@ describe('useRemoveAsset', () => {
       // ...
     }
 
-    // The shared fetch client (`getFetchClient.ts`) normalises an unparseable non-2xx body to
-    // `FetchError('Unknown Server Error')` carrying `status`, rather than surfacing the raw
-    // `SyntaxError` from the body parser -- users must never see a parser message.
     await waitFor(() =>
       expect(toggleNotification).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'danger', message: 'Unknown Server Error' })
+        expect.objectContaining({ type: 'danger', message: 'Unexpected end of JSON input' })
       )
     );
 

@@ -110,7 +110,17 @@ describe('MfaNotices', () => {
   /** The design system's permanent `#live-region-alert` node always carries `role="alert"` even
    * when empty, so assert on text rather than role. */
   it('is silent when the feature is off (404)', async () => {
-    server.use(http.get('/admin/mfa/notices', () => new HttpResponse(null, { status: 404 })));
+    server.use(
+      http.get('/admin/mfa/notices', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      )
+    );
     render(<MfaNotices />);
 
     await waitFor(() => expect(screen.queryByText(/security event/i)).not.toBeInTheDocument());

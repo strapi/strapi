@@ -32,7 +32,17 @@ const renderBanner = (initialEntries?: string[]) => {
 
 describe('MfaGraceBanner', () => {
   it('renders nothing while the feature is off (404)', async () => {
-    server.use(http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })));
+    server.use(
+      http.get('/admin/mfa/me', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      )
+    );
     const { root } = renderBanner();
 
     await waitFor(() => expect(root).toBeEmptyDOMElement());
@@ -121,7 +131,13 @@ describe('MfaGraceBanner', () => {
     server.use(
       http.get('/admin/mfa/me', () => {
         if (responseMode === 'off') {
-          return new HttpResponse(null, { status: 404 });
+          return HttpResponse.json(
+            {
+              data: null,
+              error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+            },
+            { status: 404 }
+          );
         }
         const enrolled = responseMode === 'enrolled';
         return HttpResponse.json({

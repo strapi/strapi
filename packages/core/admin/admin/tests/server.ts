@@ -145,7 +145,15 @@ export const server: SetupServer = setupServer(
    */
   // Default: the future flag is off, matching the server's behaviour when unstableAdminMfa is
   // disabled. Tests that exercise the enabled/enrolled states override this per-test.
-  http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })),
+  http.get('/admin/mfa/me', () =>
+    HttpResponse.json(
+      {
+        data: null,
+        error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+      },
+      { status: 404 }
+    )
+  ),
   /**
    *
    * ADMIN PROVIDERS
@@ -218,7 +226,13 @@ export const server: SetupServer = setupServer(
       return HttpResponse.json({ data: permissionsData });
     }
 
-    return new HttpResponse(null, { status: 404 });
+    return HttpResponse.json(
+      {
+        data: null,
+        error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+      },
+      { status: 404 }
+    );
   }),
   /**
    *

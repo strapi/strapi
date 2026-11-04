@@ -165,8 +165,24 @@ describe('SecurityPage', () => {
 
   it('shows the disabled-feature state when the API answers 404', async () => {
     server.use(
-      http.get('/admin/security-settings', () => new HttpResponse(null, { status: 404 })),
-      http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 }))
+      http.get('/admin/security-settings', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      ),
+      http.get('/admin/mfa/me', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      )
     );
     render(<SecurityPage />);
 

@@ -73,7 +73,17 @@ describe('TwoFactorSection', () => {
   });
 
   it('renders nothing at all when the feature is off (404)', async () => {
-    server.use(http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })));
+    server.use(
+      http.get('/admin/mfa/me', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      )
+    );
     renderSection();
 
     // Not the error state above: a 404 means the feature does not exist on this instance, so
@@ -87,7 +97,17 @@ describe('TwoFactorSection', () => {
   });
 
   it('renders nothing while the feature is off (404)', async () => {
-    server.use(http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })));
+    server.use(
+      http.get('/admin/mfa/me', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      )
+    );
     const { root } = renderSection();
 
     await waitFor(() => expect(root).toBeEmptyDOMElement());
@@ -98,10 +118,24 @@ describe('TwoFactorSection', () => {
     // on a flag-off instance left a 404 in the network tab for whoever was debugging something else.
     let noticesRequested = false;
     server.use(
-      http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })),
+      http.get('/admin/mfa/me', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      ),
       http.get('/admin/mfa/notices', () => {
         noticesRequested = true;
-        return new HttpResponse(null, { status: 404 });
+        return HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        );
       })
     );
     const { root } = renderSection();

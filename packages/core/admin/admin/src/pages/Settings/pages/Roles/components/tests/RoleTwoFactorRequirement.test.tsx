@@ -101,7 +101,17 @@ describe('RoleTwoFactorRequirement', () => {
   });
 
   it('is not shown while the feature is off', async () => {
-    server.use(http.get('/admin/security-settings', () => new HttpResponse(null, { status: 404 })));
+    server.use(
+      http.get('/admin/security-settings', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      )
+    );
     renderToggle();
 
     await waitFor(() =>

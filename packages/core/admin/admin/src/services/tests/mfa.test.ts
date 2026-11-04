@@ -81,7 +81,17 @@ describe('mfa service', () => {
   });
 
   it('surfaces a 404 (flag off) as an error with status 404 instead of throwing', async () => {
-    server.use(http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })));
+    server.use(
+      http.get('/admin/mfa/me', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} },
+          },
+          { status: 404 }
+        )
+      )
+    );
 
     const { result } = renderHook(() => useGetMfaStatusQuery());
 
