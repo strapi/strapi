@@ -239,10 +239,12 @@ device's actions from the others.
 Notice `metadata` is limited to neutral context and never carries a code, a secret or an otpauth
 URI.
 
-In the admin panel, `MfaNotices` turns the unseen rows into one warning toast per load, whose
-"profile page" links to the profile. It never shows on the profile page itself, which lists the same
-rows in its two-factor section with its own "Mark all as seen". Arriving there dismisses the toast
-without marking anything seen.
+In the admin panel, `MfaNotices` turns the unseen rows into one inline warning per load, whose
+"profile page" links to the profile, and closing it marks those rows seen. `MfaBanners` renders it in
+the content column directly under the two-factor grace banner, so the two stack and never overlap
+(it was a toast that covered the banner until then). It never shows on the profile page itself,
+which lists the same rows in its two-factor section with its own "Mark all as seen". Arriving there
+hides the notice without marking anything seen.
 
 The EE audit log records thirteen of these, plus `admin.auth.mfa_required` and
 `admin.security-settings.update`, on the standard shape. They are registered through

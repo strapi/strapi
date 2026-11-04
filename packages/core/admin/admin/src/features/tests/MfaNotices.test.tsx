@@ -7,20 +7,6 @@ import { useLocation } from 'react-router-dom';
 
 import { MfaNotices, formatMfaNotice } from '../MfaNotices';
 
-/** jsdom has no Pointer Events capture API, and sonner attaches a swipe-to-dismiss
- * `onPointerDown`, so even a plain click bubbles a pointerdown that crashes without this. */
-beforeAll(() => {
-  if (!window.HTMLElement.prototype.hasPointerCapture) {
-    window.HTMLElement.prototype.hasPointerCapture = () => false;
-  }
-  if (!window.HTMLElement.prototype.setPointerCapture) {
-    window.HTMLElement.prototype.setPointerCapture = () => {};
-  }
-  if (!window.HTMLElement.prototype.releasePointerCapture) {
-    window.HTMLElement.prototype.releasePointerCapture = () => {};
-  }
-});
-
 const NOTICES = [
   {
     id: 1,
@@ -57,7 +43,7 @@ const status = (overrides = {}) =>
 const LocationDisplay = () => <span data-testid="location">{useLocation().pathname}</span>;
 
 describe('MfaNotices', () => {
-  it('links "profile page" to the profile, and the toast goes away there without marking seen', async () => {
+  it('links "profile page" to the profile, and the notice goes away there without marking seen', async () => {
     let seenCalls = 0;
     server.use(
       status(),
@@ -85,7 +71,7 @@ describe('MfaNotices', () => {
     expect(seenCalls).toBe(0);
   });
 
-  it('does not show the toast on the profile page, which lists the events itself', async () => {
+  it('does not show the notice on the profile page, which lists the events itself', async () => {
     let noticesRead = 0;
     server.use(
       status(),
@@ -97,12 +83,12 @@ describe('MfaNotices', () => {
     render(<MfaNotices />, { initialEntries: ['/me'] });
 
     await waitFor(() => expect(noticesRead).toBe(1));
-    // One more tick for the effect that would raise the toast.
+    // One more tick for the effect that would raise the notice.
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(screen.queryByText(/security events on your account/i)).not.toBeInTheDocument();
   });
 
-  it('shows one warning toast summarising unseen notices and marks them seen on dismiss', async () => {
+  it('shows one inline warning summarising unseen notices and marks them seen on close', async () => {
     let seenBody: unknown;
     server.use(
       status(),
@@ -114,8 +100,8 @@ describe('MfaNotices', () => {
     );
     const { user } = render(<MfaNotices />);
 
-    const toast = await screen.findByText(/2 security events on your account/i);
-    expect(toast).toBeInTheDocument();
+    expect(await screen.findByText(/2 security events on your account/i)).toBeInTheDocument();
+    expect(screen.getByText('Security notice')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(seenBody).toEqual({ ids: [1, 2] }));
@@ -150,7 +136,7 @@ describe('MfaNotices', () => {
 
   /** Notices must still flow for a user who is not currently enrolled, so the skip may depend only
    * on the status query 404ing, never on `status.enabled`. */
-  it('still shows the toast when the status query resolves with enabled: false', async () => {
+  it('still shows the notice when the status query resolves with enabled: false', async () => {
     server.use(
       status({ enabled: false, enabledAt: null, recoveryCodesRemaining: 0 }),
       http.get('/admin/mfa/notices', () =>
@@ -185,10 +171,10 @@ describe('MfaNotices', () => {
   /**
    * RTK Query structurally shares results, so a refetch returning the *same* notices keeps the same
    * `data` reference and would not exercise the `announced` ref at all. The mock adds a third event
-   * after the dismiss, forcing a genuinely new reference: one toast per app load means even that
-   * must not fire a second.
+   * after the dismiss, forcing a genuinely new reference: one notice per app load means even that
+   * must not raise a second.
    */
-  it('does not fire a second toast for a newly-arrived event once one has already been shown this session', async () => {
+  it('does not raise a second notice for a newly-arrived event once one has already been shown this session', async () => {
     let getCallCount = 0;
     let seenBody: unknown;
     server.use(
@@ -221,8 +207,6 @@ describe('MfaNotices', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(seenBody).toEqual({ ids: [1, 2] }));
 
-    // The dismissed toast unmounts ~200ms later (sonner's exit animation), so wait for it to leave:
-    // the check below must mean "no second toast", not "the first is still animating".
     await waitFor(() =>
       expect(screen.queryByText(/2 security events on your account/i)).not.toBeInTheDocument()
     );
@@ -234,22 +218,7 @@ describe('MfaNotices', () => {
     expect(screen.queryByText(/security events? on your account/i)).not.toBeInTheDocument();
   });
 
-  /**
-   * the toast is `blockTransition: true` (`duration: Infinity`), and the real app's `Toaster`
-   * lives above the router (rendered once by `NotificationsProvider` for the whole app), while
-   * `MfaNotices` is mounted inside `AdminLayout`, below the router. An in-SPA logout unmounts
-   * `AdminLayout` (and with it `MfaNotices`) without ever unmounting `Toaster`, so the toast used
-   * to survive and sit on the login screen, then stack a second one after the next login.
-   * `toast.dismiss(id)` does not fire the `Alert`'s `onClose`, so this must NOT mark the notices
-   * seen -- the user never actually saw them.
-   *
-   * A bare top-level `unmount()` of `render(<MfaNotices />)` would not exercise this: the test
-   * harness's `NotificationsProvider` (and thus `Toaster`) is part of that same render tree, so
-   * unmounting it would trivially remove the toast from the DOM regardless of any cleanup effect.
-   * This harness instead keeps `NotificationsProvider`/`Toaster` mounted for the whole test and
-   * only unmounts `MfaNotices` itself, matching the real logout shape.
-   */
-  it('dismisses the toast when MfaNotices unmounts on its own (e.g. an in-SPA logout), without marking the notices seen', async () => {
+  it('goes away with its layout (e.g. an in-SPA logout) without marking the notices seen', async () => {
     let seenCalled = false;
     server.use(
       status(),
@@ -275,9 +244,7 @@ describe('MfaNotices', () => {
 
     await user.click(screen.getByRole('button', { name: 'logout' }));
 
-    await waitFor(() =>
-      expect(screen.queryByText(/2 security events on your account/i)).not.toBeInTheDocument()
-    );
+    expect(screen.queryByText(/2 security events on your account/i)).not.toBeInTheDocument();
     expect(seenCalled).toBe(false);
   });
 });

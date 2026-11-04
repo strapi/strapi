@@ -88,11 +88,11 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
 };
 
 /**
- * Lists the same unseen `admin::mfa-event` rows the next-login toast (`MfaNotices`) summarised,
- * so nothing is lost if that toast was dismissed, timed out, or was never seen because it fired
- * on a different device. "Mark all as seen" clears every unseen notice at once (an absent `ids`
- * in the request body, per `MarkNoticesSeen.Request`), unlike the toast's dismiss which only
- * marks the ones it announced.
+ * Lists the same unseen `admin::mfa-event` rows the next-login security notice (`MfaNotices`)
+ * summarised, so nothing is lost if that notice was closed or never seen because it showed on a
+ * different device. "Mark all as seen" clears every unseen notice at once (an absent `ids` in the
+ * request body, per `MarkNoticesSeen.Request`), unlike closing the notice, which only marks the
+ * ones it announced.
  */
 const RecentSecurityEvents = ({
   notices,
