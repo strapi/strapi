@@ -63,7 +63,7 @@
     "jsonwebtoken": "9.0.3",
     "jwks-rsa": "3.1.0",
     "lodash": "4.18.1",
-    "minimatch": "10.2.5",
+    "minimatch": "11.0.1",
     "open": "8.4.2",
     "ora": "5.4.1",
     "pkg-up": "3.1.0",
