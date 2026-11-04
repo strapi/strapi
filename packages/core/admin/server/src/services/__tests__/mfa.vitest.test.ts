@@ -690,7 +690,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     deleteMany: vi.fn(async ({ where }: any) => {
       let count = 0;
       for (let i = recoveryRows.length - 1; i >= 0; i -= 1) {
-        if (recoveryRows[i].userId === where.userId) {
+        if (matchesWhere(recoveryRows[i], where)) {
           recoveryRows.splice(i, 1);
           count += 1;
         }
@@ -1734,6 +1734,183 @@ describe('mfa service: enrolment', () => {
       expect(users.get('1')!.mfaSecret).toBe(previousSecret);
       expect(trustedRows).toHaveLength(1);
     });
+
+    test('a first enrolment discards trusts, passkeys and challenges left from an earlier one', async () => {
+      // The state a rollback and roll forward leaves: the `mfa*` columns are gone, so the user is
+      // unenrolled, but the persisted tables still hold the old enrolment's rows.
+      const fixture = buildStrapi();
+      const { strapi, trustedRows, passkeyRows, challenges } = fixture;
+      const leftover = { userId: '1', createdAt: new Date() };
+      trustedRows.push({
+        ...leftover,
+        id: 90,
+        tokenHash: 'old',
+        deviceId: null,
+        deviceName: null,
+        expiresAt: new Date(Date.now() + 86_400_000),
+        lastUsedAt: null,
+      });
+      passkeyRows.push({
+        ...leftover,
+        id: 91,
+        credentialId: 'old',
+        publicKey: 'old',
+        counter: 0,
+        transports: null,
+        name: 'Old key',
+        lastUsedAt: null,
+      });
+      challenges.push({
+        id: 92,
+        token: 'old',
+        userId: '1',
+        attempts: 0,
+        expiresAt: new Date(Date.now() + 60_000),
+        consumedAt: null,
+      } as never);
+      const service = createMfaService(defaultDeps(strapi));
+
+      const { secret } = await service.beginEnrolment('1', 'pw');
+      const result = await service.completeEnrolment(
+        '1',
+        generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+      );
+
+      expect(result.replaced).toBe(false);
+      expect(trustedRows).toHaveLength(0);
+      expect(passkeyRows).toHaveLength(0);
+      expect(challenges).toHaveLength(0);
+    });
+
+    test('a replacement keeps the passkeys, which are credentials the user still holds', async () => {
+      const { strapi, passkeyRows } = buildStrapi();
+      const service = createMfaService(defaultDeps(strapi));
+
+      const { secret } = await service.beginEnrolment('1', 'pw');
+      await service.completeEnrolment(
+        '1',
+        generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+      );
+      passkeyRows.push({
+        id: 91,
+        userId: '1',
+        createdAt: new Date(),
+        credentialId: 'kept',
+        publicKey: 'kept',
+        counter: 0,
+        transports: null,
+        name: 'Key',
+        lastUsedAt: null,
+      });
+
+      const now = Date.now() + 60_000;
+      vi.useFakeTimers({ now });
+      try {
+        const replacement = await service.beginEnrolment(
+          '1',
+          'pw',
+          generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+        );
+        vi.setSystemTime(now + 60_000);
+        await service.completeEnrolment(
+          '1',
+          generateTotp({ secret: base32Decode(replacement.secret), step: 30, digits: 6 })
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+
+      expect(passkeyRows.map((row) => row.credentialId)).toEqual(['kept']);
+    });
+  });
+});
+
+describe('mfa service: reconcileOrphanedRows', () => {
+  /** Users 1 (enrolled) and 2 (not enrolled), plus rows for both and for a deleted user 3. */
+  const setup = () => {
+    const users = new Map<string, Record<string, unknown>>();
+    const fixture = buildMfaFixture({
+      userOverrides: { findMany: vi.fn(async () => [...users.values()].map((u) => ({ ...u }))) },
+    });
+    fixture.users.get('1')!.mfaSecret = 'enc:secret';
+    fixture.users.get('1')!.mfaEnabledAt = new Date();
+    fixture.users.set('2', {
+      ...fixture.users.get('1')!,
+      id: 2,
+      mfaSecret: null,
+      mfaEnabledAt: null,
+    });
+    for (const [key, value] of fixture.users) users.set(key, value);
+
+    for (const userId of ['1', '2', '3']) {
+      const createdAt = new Date();
+      fixture.recoveryRows.push({ id: Number(userId), userId, codeHash: 'h', usedAt: null });
+      fixture.trustedRows.push({
+        id: Number(userId),
+        userId,
+        tokenHash: `t${userId}`,
+        deviceId: null,
+        deviceName: null,
+        expiresAt: new Date(Date.now() + 86_400_000),
+        lastUsedAt: null,
+        createdAt,
+      });
+      fixture.passkeyRows.push({
+        id: Number(userId),
+        userId,
+        credentialId: `c${userId}`,
+        publicKey: 'k',
+        counter: 0,
+        transports: null,
+        name: 'Key',
+        lastUsedAt: null,
+        createdAt,
+      });
+      fixture.challenges.push({
+        id: Number(userId),
+        token: `x${userId}`,
+        userId,
+        attempts: 0,
+        expiresAt: new Date(Date.now() + 60_000),
+        consumedAt: null,
+      } as never);
+      fixture.events.push({
+        id: Number(userId),
+        userId,
+        type: 'disabled',
+        metadata: {},
+        seenAt: null,
+        createdAt,
+      });
+    }
+
+    const service = createMfaService({
+      strapi: fixture.strapi as unknown as Core.Strapi,
+      encryption: { encrypt: (v: string) => `enc:${v}`, decrypt: (v: string) => v.slice(4) },
+      auth: { validatePassword: async () => true, hashPassword: async (v: string) => `h:${v}` },
+    });
+
+    return { ...fixture, service };
+  };
+
+  test('keeps only credentials of enrolled users, and events of existing ones', async () => {
+    const { service, recoveryRows, trustedRows, passkeyRows, challenges, events } = setup();
+
+    await expect(service.reconcileOrphanedRows()).resolves.toBe(9);
+
+    expect(recoveryRows.map((r) => r.userId)).toEqual(['1']);
+    expect(trustedRows.map((r) => r.userId)).toEqual(['1']);
+    expect(passkeyRows.map((r) => r.userId)).toEqual(['1']);
+    expect(challenges.map((r) => r.userId)).toEqual(['1']);
+    // A notice is history, not a credential: an unenrolled user keeps theirs.
+    expect(events.map((r) => r.userId)).toEqual(['1', '2']);
+  });
+
+  test('is a no-op on a consistent table', async () => {
+    const { service } = setup();
+    await service.reconcileOrphanedRows();
+
+    await expect(service.reconcileOrphanedRows()).resolves.toBe(0);
   });
 });
 

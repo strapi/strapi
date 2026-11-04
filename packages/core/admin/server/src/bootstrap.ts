@@ -273,6 +273,24 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     // production deployment -- never sweeping again. `strapi.cron.add` is how metrics, EE audit
     // logs, content-releases and upload all schedule their own housekeeping.
     await sweep();
+
+    // Boot only: rows can only lose their owner's enrolment through a schema change (see the
+    // persisted tables above), and that needs a restart.
+    try {
+      const removed = await mfaService.reconcileOrphanedRows();
+      if (removed > 0) {
+        strapi.log.warn(
+          `Removed ${removed} two-factor rows belonging to deleted or unenrolled admin users.`
+        );
+      }
+    } catch (error) {
+      strapi.log.warn(
+        `Could not reconcile two-factor rows with admin users: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
     strapi.cron.add({
       sweepExpiredMfaRows: {
         task: sweep,

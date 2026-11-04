@@ -39,6 +39,8 @@ const USER_UID = 'admin::user';
 const RECOVERY_CODE_UID = 'admin::mfa-recovery-code';
 const CHALLENGE_UID = 'admin::mfa-challenge';
 const EVENT_UID = 'admin::mfa-event';
+const TRUSTED_DEVICE_UID = 'admin::mfa-trusted-device';
+const PASSKEY_UID = 'admin::mfa-passkey';
 
 const MAX_TOTP_CODE_LENGTH = 8;
 
@@ -626,9 +628,16 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
         });
       }
 
-      // The trusts on file were granted against the authenticator just retired.
-      if (replaced) {
-        await trustedDevices.clearTrustedDevices(userId);
+      // The trusts on file were granted against the authenticator just retired. On a first
+      // enrolment there should be none, nor any passkey or challenge: anything found belongs to an
+      // earlier enrolment whose columns were lost (a rollback drops the `mfa*` columns on
+      // `admin_users` but keeps these tables), and must not be honoured against this one. A
+      // replacement keeps its passkeys: they are separate credentials the user still holds.
+      // Recovery codes need nothing here: `issueRecoveryCodes` above replaced the whole set.
+      await trustedDevices.clearTrustedDevices(userId);
+      if (!replaced) {
+        await passkeys.clearPasskeys(userId);
+        await challengeQuery().deleteMany({ where: { userId: String(userId) } });
       }
 
       return codes;
@@ -1287,6 +1296,36 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
+   * Boot-time repair for rows the user table no longer vouches for. The `strapi_admin_mfa*` tables
+   * are persisted across a rollback while the `mfa*` columns on `admin_users` are not, so a roll
+   * forward can find recovery codes, trusted devices, passkeys and challenges for accounts that are
+   * no longer enrolled, and rows for accounts that no longer exist. None of those may be honoured,
+   * so they are deleted. Events are kept for any existing user: they are the notice history, not a
+   * credential.
+   */
+  const reconcileOrphanedRows = async (): Promise<number> => {
+    const users = (await userQuery().findMany({
+      select: ['id', 'mfaSecret', 'mfaEnabledAt'],
+    })) as AdminUserRow[];
+    const allIds = users.map((user) => String(user.id));
+    const enrolledIds = users.filter(isEnrolledRow).map((user) => String(user.id));
+
+    // `$notIn: []` is not something to trust every dialect with; no ids means every row goes.
+    const notIn = (ids: string[]) => (ids.length > 0 ? { userId: { $notIn: ids } } : {});
+
+    let removed = 0;
+    for (const uid of [RECOVERY_CODE_UID, CHALLENGE_UID, TRUSTED_DEVICE_UID, PASSKEY_UID]) {
+      // eslint-disable-next-line no-await-in-loop -- four statements, run once at boot
+      const result = await strapi.db.query(uid).deleteMany({ where: notIn(enrolledIds) });
+      removed += result?.count ?? 0;
+    }
+    const events = await eventQuery().deleteMany({ where: notIn(allIds) });
+    removed += events?.count ?? 0;
+
+    return removed;
+  };
+
+  /**
    * Housekeeping: expired challenges are already rejected on read, so nothing depends on this
    * running. The DELETE is unbounded by choice -- `createChallenge` is throttled and rate limited,
    * so the expired set stays small.
@@ -1333,6 +1372,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     assertPasswordAndFactor,
     disable,
     sweepExpiredChallenges,
+    reconcileOrphanedRows,
     trustDevice: trustedDevices.trustDevice,
     consumeTrustedDevice: trustedDevices.consumeTrustedDevice,
     listTrustedDevices: trustedDevices.listTrustedDevices,
