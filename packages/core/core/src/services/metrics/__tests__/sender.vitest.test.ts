@@ -67,7 +67,7 @@ describe('metrics sender', () => {
   });
 
   // Real timers: Node's AbortSignal.timeout uses internal timers that vi.useFakeTimers does not drive
-  test('aborts a request still pending after 1000 ms and resolves false', async () => {
+  test('aborts a request still pending after defaultQueryOpts.timeout (1000 ms) and resolves false', async () => {
     const fetch = vi.fn(
       (_url: string, opts: { signal: AbortSignal }) =>
         new Promise((_resolve, reject) => {
