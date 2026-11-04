@@ -9,8 +9,8 @@ import {
   useGetMfaStatusQuery,
   useMarkMfaNoticesSeenMutation,
 } from '../services/mfa';
-import { isNotFoundError } from '../utils/baseQuery';
 import { MFA_DATE_TIME_FORMAT } from '../utils/mfaDates';
+import { isMfaNotFoundError } from '../utils/mfaFeature';
 
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
 
@@ -155,7 +155,7 @@ const MfaNotices = () => {
   const { error: statusError, isLoading: statusLoading } = useGetMfaStatusQuery();
   // Also true while the status query is in flight: dropping that half would fire the notices query
   // once against a feature that may turn out to be off.
-  const skipNotices = isNotFoundError(statusError) || statusLoading;
+  const skipNotices = isMfaNotFoundError(statusError) || statusLoading;
   const { data: notices } = useGetMfaNoticesQuery(undefined, { skip: skipNotices });
   const [markSeen] = useMarkMfaNoticesSeenMutation();
   const announced = React.useRef(false);

@@ -18,7 +18,7 @@ import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useGetMfaStatusQuery } from '../../../../services/mfa';
 import { useGetSecuritySettingsQuery } from '../../../../services/securitySettings';
-import { isNotFoundError } from '../../../../utils/baseQuery';
+import { isMfaNotFoundError } from '../../../../utils/mfaFeature';
 
 import { ConfirmDowngradeDialog } from './components/ConfirmDowngradeDialog';
 import { EnforceImpactMessage } from './components/EnforceImpactMessage';
@@ -543,7 +543,7 @@ const SecurityPage = () => {
     (state.user?.roles ?? []).map((role) => String(role.id))
   );
 
-  const isFeatureOff = isNotFoundError(error);
+  const isFeatureOff = isMfaNotFoundError(error);
   // While `canReadRoles` is true, the roles query starts out uninitialized (its `isLoading` is
   // false) for the render where RBAC first resolves, which would otherwise paint the card with an
   // empty role list for one frame before the roles request even starts.

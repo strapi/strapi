@@ -6,8 +6,8 @@ import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import { useGetMfaStatusQuery } from '../services/mfa';
-import { isNotFoundError } from '../utils/baseQuery';
 import { MFA_DATE_TIME_FORMAT } from '../utils/mfaDates';
+import { isMfaNotFoundError } from '../utils/mfaFeature';
 
 /** Re-read every 15 minutes so a long-lived tab notices a grace period stamped by a background token refresh. */
 export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
@@ -46,7 +46,7 @@ const MfaGraceBanner = () => {
   }, [isFeatureOff, refetch]);
 
   React.useEffect(() => {
-    const notFound = isNotFoundError(error);
+    const notFound = isMfaNotFoundError(error);
     if (notFound !== isFeatureOff) {
       setIsFeatureOff(notFound);
     }

@@ -12,8 +12,8 @@ import {
   useGetMfaStatusQuery,
   useMarkMfaNoticesSeenMutation,
 } from '../../services/mfa';
-import { isNotFoundError } from '../../utils/baseQuery';
 import { MFA_DATE_TIME_FORMAT } from '../../utils/mfaDates';
+import { isMfaNotFoundError } from '../../utils/mfaFeature';
 
 import { EnrolDialog } from './EnrolDialog';
 import { Passkeys } from './Passkeys';
@@ -136,7 +136,7 @@ const TwoFactorSection = () => {
   // Skipped until the status says the feature exists, as `MfaNotices` does: otherwise every profile
   // view with the kill switch on fires one request that can only 404.
   const { data: notices } = useGetMfaNoticesQuery(undefined, {
-    skip: isLoading || isNotFoundError(error),
+    skip: isLoading || isMfaNotFoundError(error),
   });
   const [markNoticesSeen] = useMarkMfaNoticesSeenMutation();
 
@@ -160,7 +160,7 @@ const TwoFactorSection = () => {
 
   // Mounted only in a build with the feature (`ProfilePage`), so a 404 here means the server's
   // kill switch (`admin.auth.mfa.enabled: false`) has it off.
-  const isNotFound = isNotFoundError(error);
+  const isNotFound = isMfaNotFoundError(error);
 
   if (isLoading || isNotFound) {
     return null;
