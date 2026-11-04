@@ -99,6 +99,11 @@ interface DocumentActionDescription {
   variant?: ButtonProps['variant'];
   loading?: ButtonProps['loading'];
   /**
+   * Menus draw a separator wherever two consecutive actions belong to different groups.
+   * Actions without a group stay together, so menus without any group are unchanged.
+   */
+  group?: string;
+  /**
    * When set on a publish action with a dialog, registers an opener for the keyboard shortcut.
    */
   publishConfirmScope?: PublishConfirmDialogScope;
@@ -493,23 +498,27 @@ const DocumentActionsMenu = ({
         variant={variant}
       />
       <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end" maxWidth="25rem">
-        {actions.map((action) => {
+        {actions.map((action, index) => {
+          const hasSeparator = index > 0 && actions[index - 1].group !== action.group;
+
           return (
-            <Menu.Item
-              disabled={action.disabled}
-              /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
-              onSelect={handleClick(action)}
-              display="block"
-              key={action.id}
-              variant={action.variant === 'danger' ? action.variant : 'default'}
-              startIcon={action.icon}
-            >
-              <Flex justifyContent="space-between" gap={4}>
-                <Flex gap={2} tag="span">
-                  {action.label}
+            <React.Fragment key={action.id}>
+              {hasSeparator ? <Menu.Separator /> : null}
+              <Menu.Item
+                disabled={action.disabled}
+                /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
+                onSelect={handleClick(action)}
+                display="block"
+                variant={action.variant === 'danger' ? action.variant : 'default'}
+                startIcon={action.icon}
+              >
+                <Flex justifyContent="space-between" gap={4}>
+                  <Flex gap={2} tag="span">
+                    {action.label}
+                  </Flex>
                 </Flex>
-              </Flex>
-            </Menu.Item>
+              </Menu.Item>
+            </React.Fragment>
           );
         })}
         {children}
