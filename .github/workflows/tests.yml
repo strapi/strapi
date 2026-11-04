@@ -387,15 +387,9 @@ jobs:
   # default decides what runs here: the shared matrix sets neither suite, so it is
   # unaffected by both, and the two suites cannot collide in one app.
   #
-  # Chromium only, for two different reasons — this is the constraint to lift first if
-  # the Media Library suite should join the shared matrix.
-  #
-  # WebKit is a hard limitation: the upload drag-and-drop helper builds a DataTransfer,
-  # which WebKit does not implement.
-  #
-  # The folder drag & drop specs are skipped in the specs themselves rather than filtered
-  # out here — see `RUN_FOLDER_DRAG_SPECS` in `drag-drop-deep.spec.ts`. A grep filter only
-  # protects this job, and those specs must stay parked wherever they are run from.
+  # Chromium only: the upload drag-and-drop helper builds a DataTransfer, which WebKit does
+  # not implement. This is the constraint to lift first if the Media Library suite should
+  # join the shared matrix.
   e2e_media_library:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 45
@@ -677,7 +671,7 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
-        image: postgres
+        image: postgres:18
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -688,12 +682,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The API test apps use the `myschema` schema (tests/scripts/run-api-tests.js).
+      - name: Create the Postgres test schema
+        run: docker exec ${{ job.services.postgres.id }} psql -U strapi -d strapi_test -c "CREATE SCHEMA IF NOT EXISTS myschema"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node }}
@@ -718,7 +714,7 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
-        image: bitnamilegacy/mysql:latest
+        image: bitnamilegacy/mysql:9.3.0
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -787,7 +783,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
-        image: postgres
+        image: postgres:18
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -798,12 +794,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          -v /__w/.github/workflows/db/postgres:/docker-entrypoint-initdb.d
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The API test apps use the `myschema` schema (tests/scripts/run-api-tests.js).
+      - name: Create the Postgres test schema
+        run: docker exec ${{ job.services.postgres.id }} psql -U strapi -d strapi_test -c "CREATE SCHEMA IF NOT EXISTS myschema"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node }}
@@ -833,7 +831,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnamilegacy/mysql:latest
+        image: bitnamilegacy/mysql:9.3.0
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
