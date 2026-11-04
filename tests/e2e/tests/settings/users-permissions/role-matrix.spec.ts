@@ -1,5 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { login } from '../../../../utils/login';
+import { loginWithApi } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
 import { navToHeader } from '../../../../utils/shared';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../../constants';
@@ -17,8 +17,8 @@ import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../../constants';
 test.describe('U&P - role matrix', { tag: ['@critical'] }, () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
+    await loginWithApi({ page });
     await page.goto('/admin');
-    await login({ page });
   });
 
   /**

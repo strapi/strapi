@@ -5,12 +5,13 @@ import { async } from '@strapi/utils';
 import { getService } from './utils';
 import {
   getTokenOptions,
-  expiresInToSeconds,
+  getLegacyExpiresInSeconds,
   hasUserConfiguredAuthOptionsExpiresIn,
 } from './services/token';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';
+import { persistTablesWithPrefix } from '../../ee/server/src/services/persist-tables';
 import {
   DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
   DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
@@ -135,10 +136,9 @@ const createDefaultAPITokensIfNeeded = async () => {
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Get the merged token options (includes defaults merged with user config)
   const { options } = getTokenOptions();
-  const legacyMaxRefreshFallback =
-    expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
-  const legacyMaxSessionFallback =
-    expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_SESSION_LIFESPAN;
+  const legacyExpiresIn = getLegacyExpiresInSeconds();
+  const legacyMaxRefreshFallback = legacyExpiresIn ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
+  const legacyMaxSessionFallback = legacyExpiresIn ?? DEFAULT_MAX_SESSION_LIFESPAN;
 
   // Warn only when the user set legacy admin.auth.options.expiresIn. Merged JWT options always
   // include the default expiresIn ('30d'), so reading merged options alone is a false positive.
@@ -186,6 +186,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     );
   }
 
+  // The audit-log content type is registered in every edition: persist its table with it
+  await persistTablesWithPrefix('strapi_audit_logs');
+
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();
@@ -198,15 +201,22 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const tokenService = getService('token');
 
   await roleService.createRolesIfNoneExist();
-  await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();
 
-  await permissionService.cleanPermissionsInDatabase();
+  // Actions can still be registered in the app bootstrap, which runs after the admin one
+  strapi.hook('strapi::app.afterBootstrap').register(async () => {
+    // An action registered after the cleanup would lose its permissions, so registering throws
+    permissionService.actionProvider.lock();
+
+    await roleService.resetSuperAdminPermissions();
+    await permissionService.cleanPermissionsInDatabase();
+  });
 
   await userService.displayWarningIfUsersDontHaveRole();
 
   await syncAuthSettings();
   await syncAPITokensPermissions();
+  await getService('api-token-admin').syncPermissionsForAllUsers();
 
   await getService('metrics').sendUpdateProjectInformation(strapi);
   getService('metrics').startCron(strapi);
