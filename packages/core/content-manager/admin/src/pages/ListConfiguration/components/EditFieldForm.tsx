@@ -121,9 +121,11 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
           </Grid.Root>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-          </Button>
+          <Modal.Close>
+            <Button variant="tertiary">
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          </Modal.Close>
           <Button type="submit">
             {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
           </Button>

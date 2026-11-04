@@ -111,7 +111,5 @@
   "sort.name_desc": "Ordre alfabètic invers (de la Z a la A)",
   "sort.updated_at_asc": "Actualitzacions més antigues",
   "sort.updated_at_desc": "Actualitzacions més recents",
-  "tabs.title": "Com vols pujar els teus actius?",
-  "window.confirm.close-modal.file": "Estàs segur? Els vostres canvis es perdran.",
-  "window.confirm.close-modal.files": "Estàs segur? Teniu alguns fitxers que encara no s'han penjat."
+  "tabs.title": "Com vols pujar els teus actius?"
 }

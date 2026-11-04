@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   Accordion,
+  Badge,
   Box,
   BoxComponent,
   Checkbox,
@@ -18,6 +19,7 @@ import {
   SettingPermission,
   PluginPermission,
 } from '../../../../../../../shared/contracts/permissions';
+import { UnsavedChangesModal } from '../../../../../components/UnsavedChangesModal';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -95,6 +97,12 @@ const Row = ({
   const categoryName = name.split('::').pop() ?? '';
   const categoryDisplayName =
     categoryName === 'upload' ? 'Media Library' : capitalise(categoryName.replace(/-/g, ' '));
+  // The section stays visible and editable: hiding it would drop its grants on the next save
+  const isDisabledByConfig =
+    childrenForm.length > 0 &&
+    childrenForm.every(({ actions }) =>
+      actions.every((action) => 'disabledByConfig' in action && action.disabledByConfig === true)
+    );
 
   return (
     <Accordion.Item value={name}>
@@ -106,7 +114,20 @@ const Row = ({
             { category: categoryName }
           )} ${kind === 'plugins' ? 'plugin' : kind}`}
         >
-          {categoryDisplayName}
+          {isDisabledByConfig === true ? (
+            // Next to the title, not after the caret, so the caret stays aligned with other rows
+            <Flex tag="span" gap={2}>
+              {categoryDisplayName}
+              <Badge shrink={0}>
+                {formatMessage({
+                  id: 'Settings.permissions.category.disabled-by-config',
+                  defaultMessage: 'Disabled by configuration',
+                })}
+              </Badge>
+            </Flex>
+          ) : (
+            categoryDisplayName
+          )}
         </Accordion.Trigger>
       </Accordion.Header>
       <Accordion.Content>
@@ -268,12 +289,7 @@ const SubCategory = ({
               );
             })}
           </Grid.Root>
-          <Modal.Root
-            open={isConditionModalOpen}
-            onOpenChange={() => {
-              setIsConditionModalOpen((prev) => !prev);
-            }}
-          >
+          <UnsavedChangesModal open={isConditionModalOpen} onOpenChange={setIsConditionModalOpen}>
             <Modal.Trigger>
               <ConditionsButton hasConditions={doesButtonHasCondition} />
             </Modal.Trigger>
@@ -286,7 +302,7 @@ const SubCategory = ({
                 setIsConditionModalOpen(false);
               }}
             />
-          </Modal.Root>
+          </UnsavedChangesModal>
         </Flex>
       </Box>
     </>

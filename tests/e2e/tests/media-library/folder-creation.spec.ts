@@ -67,6 +67,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       await assetsPage.createFolderDialog.getByRole('textbox').fill('Cancelled Folder');
 
       await assetsPage.createFolderDialog.getByRole('button', { name: /cancel/i }).click();
+      await assetsPage.confirmDiscardChanges();
 
       await expect(assetsPage.createFolderDialog).not.toBeVisible();
       await expect(page.getByText('Cancelled Folder')).not.toBeVisible();
@@ -93,10 +94,12 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();
 
-      // Open dialog, type a name, then cancel
+      // Open dialog, type a name, then cancel and discard the typed name
       await assetsPage.openCreateFolderDialog();
       await assetsPage.createFolderDialog.getByRole('textbox').fill('Some Folder');
       await assetsPage.createFolderDialog.getByRole('button', { name: /cancel/i }).click();
+      await assetsPage.confirmDiscardChanges();
+      await expect(assetsPage.createFolderDialog).toBeHidden();
 
       // Reopen — input should be empty, no error visible
       await assetsPage.openCreateFolderDialog();
