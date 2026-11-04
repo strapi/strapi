@@ -14,7 +14,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
 import { MediaField, createFilesDataTransfer, getEditViewField } from './page-objects/MediaField';
 
 /**
- * Journey 6 — Add assets to an entry (CMS-2003).
+ * Journey 6 — Add assets to an entry.
  *
  * An editor fills the single media, multiple media and Blocks fields of one entry
  * through every way of adding an asset, then saves. Critical paths only: the details

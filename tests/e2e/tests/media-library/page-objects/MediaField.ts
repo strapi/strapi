@@ -105,7 +105,8 @@ export class MediaField {
   }
 
   /**
-   * Single media field: the row's edit button. Multiple media field: the card's menu.
+   * Single media field: the edit button of the asset row. A multiple media card has
+   * its actions in a menu instead, see `getCardMenuButton`.
    */
   getEditButton(assetName: string) {
     return this.root.getByRole('button', { name: `Edit ${assetName}` });
