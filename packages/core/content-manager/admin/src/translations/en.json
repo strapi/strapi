@@ -223,6 +223,8 @@
   "form.Input.description.placeholder": "Display name in the profile",
   "form.Input.editable": "Editable field",
   "form.Input.filters": "Enable filters",
+  "form.Input.characterCount": "{count, plural, one {# character} other {# characters}}",
+  "form.Input.characterCount.withMax": "{count} / {max}",
   "form.Input.hint.character.unit": "{maxValue, plural, one { character} other { characters}}",
   "form.Input.hint.minMaxDivider": " / ",
   "form.Input.hint.text": "{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}",
