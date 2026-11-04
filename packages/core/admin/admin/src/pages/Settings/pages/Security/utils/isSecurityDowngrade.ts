@@ -1,35 +1,16 @@
-import type {
-  MfaEnforcementMode,
-  MfaEnforcementSettings,
-  PasskeySettings,
-  TrustedDeviceSettings,
-} from '../../../../../../../shared/contracts/security-settings';
+import {
+  enforcedRoleIds,
+  isModeAbove,
+  isPasskeysDisable,
+  isSecurityDowngrade,
+  isTrustedDevicesDowngrade,
+} from '../../../../../../../shared/utils/security-downgrade';
 
-const MODE_RANK: Record<MfaEnforcementMode, number> = { off: 0, optional: 1, required: 2 };
+import type { MfaEnforcementSettings } from '../../../../../../../shared/contracts/security-settings';
 
-/** The role flags that enforce anything. Under `off` the flags are kept but require nobody. Same
- * rule as the server's `enforcedRoleIds`. */
-export const enforcedRoleIds = (settings: MfaEnforcementSettings): string[] =>
-  settings.mode === 'off' ? [] : settings.requiredRoles;
-
-/** The server is the authority; this only decides whether to ask for credentials first. A dropped
- * role relaxes nothing while the *resulting* mode is `required`, or when the previous mode was
- * `off`. */
-export const isSecurityDowngrade = (
-  previous: MfaEnforcementSettings,
-  next: MfaEnforcementSettings
-): boolean => {
-  if (MODE_RANK[next.mode] < MODE_RANK[previous.mode]) {
-    return true;
-  }
-
-  const removedRole = enforcedRoleIds(previous).some((id) => !next.requiredRoles.includes(id));
-  if (next.mode !== 'required' && removedRole) {
-    return true;
-  }
-
-  return next.graceDays > previous.graceDays;
-};
+/** The downgrade rules are shared with the server, which is the authority; the client only uses
+ * them to decide whether to ask for credentials first. */
+export { enforcedRoleIds, isPasskeysDisable, isSecurityDowngrade, isTrustedDevicesDowngrade };
 
 /**
  * Whether a save could put someone *new* on the enforcement clock: the mode rises out of `off`
@@ -44,7 +25,7 @@ export const isEnforcementRaise = (
   if (next.mode === 'off') {
     return false;
   }
-  if (MODE_RANK[next.mode] > MODE_RANK[previous.mode]) {
+  if (isModeAbove(next.mode, previous.mode)) {
     return true;
   }
   return (
@@ -52,17 +33,6 @@ export const isEnforcementRaise = (
     next.requiredRoles.some((id) => !previous.requiredRoles.includes(id))
   );
 };
-
-/** Offering trust, or lengthening it, lets a browser skip the second factor for longer. */
-export const isTrustedDevicesDowngrade = (
-  previous: TrustedDeviceSettings,
-  next: TrustedDeviceSettings
-): boolean => (!previous.enabled && next.enabled) || (next.enabled && next.days > previous.days);
-
-/** Turning passkeys off deletes every one, irreversibly. Turning them on destroys nothing, which
- * is why only one direction is gated, unlike the trust period. */
-export const isPasskeysDisable = (previous: PasskeySettings, next: PasskeySettings): boolean =>
-  previous.enabled && !next.enabled;
 
 /** An SSO-only actor is let through only when disabling passkeys is the ONLY term that tripped.
  * The other two are parameters, not baked in as `false`, so that narrowness is provable here. */

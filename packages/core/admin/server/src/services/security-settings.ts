@@ -10,6 +10,12 @@ import type {
 } from '../../../shared/contracts/security-settings';
 import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 import { SUPER_ADMIN_CODE } from '../../../shared/utils/super-admin';
+import {
+  enforcedRoleIds,
+  isPasskeysDisable,
+  isSecurityDowngrade,
+  isTrustedDevicesDowngrade,
+} from '../../../shared/utils/security-downgrade';
 
 const { ValidationError } = errors;
 
@@ -178,16 +184,6 @@ export const readPasskeySettings = async (strapi: Core.Strapi): Promise<PasskeyS
 
 export const GUARD_MESSAGE = 'Enrol in two-factor authentication before requiring it for others';
 
-const MODE_RANK: Record<MfaEnforcementMode, number> = { off: 0, optional: 1, required: 2 };
-
-/**
- * The role flags that enforce anything. Under `off` the flags are kept, so a later raise can bring
- * them back, but they require nobody: dropping one relaxes nothing, and flagging one again puts
- * its holders on the clock as if it were new.
- */
-const enforcedRoleIds = (mfa: { mode: MfaEnforcementMode; requiredRoles: string[] }): string[] =>
-  mfa.mode === 'off' ? [] : mfa.requiredRoles;
-
 /**
  * Pure, so it is cheap to evaluate twice: once outside the transaction to decide which credentials
  * to demand, and again inside against a re-read document.
@@ -205,24 +201,13 @@ const relaxingChanges = (
     passkeys: { enabled: boolean };
   }
 ) => {
-  // A dropped role relaxes nothing while the *resulting* mode is `required`, where the mode alone
-  // covers every local-password user, or when the previous mode was `off`, where it required nobody.
-  const removedRoles = enforcedRoleIds(previous.mfa).filter(
-    (id) => !next.requiredRoles.includes(id)
-  );
-  const lowersEnforcement =
-    MODE_RANK[next.mfa.mode] < MODE_RANK[previous.mfa.mode] ||
-    (next.mfa.mode !== 'required' && removedRoles.length > 0) ||
-    next.mfa.graceDays > previous.mfa.graceDays;
-
-  // Offering trust, or lengthening it, lets a browser skip the second factor for longer than before.
-  const widensTrust =
-    (!previous.trustedDevices.enabled && next.trustedDevices.enabled) ||
-    (next.trustedDevices.enabled && next.trustedDevices.days > previous.trustedDevices.days);
-
-  // An irreversible, organisation-wide deletion of every passkey, so a stolen session must not be
-  // able to do it with one PUT and a dialog the attacker is not looking at.
-  const disablesPasskeys = previous.passkeys.enabled && !next.passkeys.enabled;
+  // The rules are shared with the admin client so its credential prompt cannot drift from them.
+  const lowersEnforcement = isSecurityDowngrade(previous.mfa, {
+    ...next.mfa,
+    requiredRoles: next.requiredRoles,
+  });
+  const widensTrust = isTrustedDevicesDowngrade(previous.trustedDevices, next.trustedDevices);
+  const disablesPasskeys = isPasskeysDisable(previous.passkeys, next.passkeys);
 
   return {
     lowersEnforcement,

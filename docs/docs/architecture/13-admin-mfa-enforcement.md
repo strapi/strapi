@@ -260,10 +260,11 @@ Two exemption rules apply to a **password-less** (SSO-only) caller:
   would make the setting permanently unreachable. Combined with either of the other terms it is
   refused as normal
 
-The admin panel mirrors this predicate exactly rather than approximating it
-(`pages/Settings/pages/Security/utils/isSecurityDowngrade.ts`), so the UI never demands a
-credential the server would not have asked for, and never routes a password-less administrator into
-a dialog they cannot complete.
+The server and the admin panel import the same downgrade rules from
+`packages/core/admin/shared/utils/security-downgrade.ts`, so the UI never demands a credential the
+server would not have asked for. The password-less exemption is mirrored client-side in
+`pages/Settings/pages/Security/utils/isSecurityDowngrade.ts`, so the UI never routes a
+password-less administrator into a dialog they cannot complete.
 
 ## What the UI shows
 
