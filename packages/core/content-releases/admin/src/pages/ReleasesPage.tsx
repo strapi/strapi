@@ -39,6 +39,7 @@ import {
   RELEASE_STATUSES,
 } from '../../../shared/constants';
 import { GetReleases } from '../../../shared/contracts/releases';
+import { getMaximumReleases } from '../../../shared/license';
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseDrawer, type ReleaseDrawerValues } from '../components/ReleaseDrawer';
 import { ReleaseStatusBadge, STATUS_MESSAGES } from '../components/ReleaseStatusBadge';
@@ -579,9 +580,7 @@ const ReleasesPage = () => {
   const { data: settings, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
-  const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
-    maximumReleases: number;
-  };
+  const maximumReleases = getMaximumReleases(getFeature('cms-content-releases')?.maximumReleases);
   const {
     allowedActions: { canCreate },
   } = useRBAC(PERMISSIONS);

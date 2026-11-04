@@ -5,12 +5,13 @@ import { async } from '@strapi/utils';
 import { getService } from './utils';
 import {
   getTokenOptions,
-  expiresInToSeconds,
+  getLegacyExpiresInSeconds,
   hasUserConfiguredAuthOptionsExpiresIn,
 } from './services/token';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';
+import { persistTablesWithPrefix } from '../../ee/server/src/services/persist-tables';
 import {
   DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
   DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
@@ -91,7 +92,42 @@ const syncAuthSettings = async () => {
   await adminStore.set({ key: 'auth', value: newAuthSettings });
 };
 
-const syncAPITokensPermissions = async () => {
+type APITokenPermissionRow = {
+  action: string;
+  token?: { id: number | string; name?: string } | null;
+};
+
+// Bounds the `IN (...)` list the token populate binds, below every database's parameter limit
+export const REMOVED_API_TOKEN_PERMISSIONS_BATCH_SIZE = 1000;
+
+/**
+ * Reads the permissions about to be removed with their token, in batches,
+ * so the token populate never binds one parameter per stored permission
+ */
+const findAPITokenPermissionsByActions = async (actions: string[]) => {
+  const permissions: APITokenPermissionRow[] = [];
+
+  for (let offset = 0; ; offset += REMOVED_API_TOKEN_PERMISSIONS_BATCH_SIZE) {
+    const batch: APITokenPermissionRow[] = await strapi.db
+      .query('admin::api-token-permission')
+      .findMany({
+        select: ['id', 'action'],
+        where: { action: { $in: actions } },
+        populate: { token: { select: ['id', 'name'] } },
+        orderBy: { id: 'asc' },
+        limit: REMOVED_API_TOKEN_PERMISSIONS_BATCH_SIZE,
+        offset,
+      });
+
+    permissions.push(...batch);
+
+    if (batch.length < REMOVED_API_TOKEN_PERMISSIONS_BATCH_SIZE) {
+      return permissions;
+    }
+  }
+};
+
+export const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
   const permissionsInDB = await async.pipe(
     strapi.db.query('admin::api-token-permission').findMany,
@@ -101,9 +137,29 @@ const syncAPITokensPermissions = async () => {
   const unknownPermissions = [...new Set(difference(permissionsInDB, validPermissions))];
 
   if (unknownPermissions.length > 0) {
+    // Read before deleting: the rows and their token are gone afterwards
+    const removedPermissions = await findAPITokenPermissionsByActions(unknownPermissions);
+
     await strapi.db
       .query('admin::api-token-permission')
       .deleteMany({ where: { action: { $in: unknownPermissions } } });
+
+    const tokens = new Map(
+      removedPermissions
+        .map((permission) => permission.token)
+        .filter((token): token is NonNullable<APITokenPermissionRow['token']> => token != null)
+        .map((token) => [token.id, `"${token.name}" (id ${token.id})`])
+    );
+    const withoutTokenCount = removedPermissions.filter(
+      (permission) => permission.token == null
+    ).length;
+
+    strapi.log.warn(
+      `Removed ${removedPermissions.length} stored API token permission(s) whose action is no longer registered. ` +
+        `Actions: ${unknownPermissions.join(', ')}. ` +
+        `API tokens: ${tokens.size === 0 ? 'none' : Array.from(tokens.values()).join(', ')}. ` +
+        `Without API token: ${withoutTokenCount}.`
+    );
   }
 };
 
@@ -135,10 +191,9 @@ const createDefaultAPITokensIfNeeded = async () => {
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Get the merged token options (includes defaults merged with user config)
   const { options } = getTokenOptions();
-  const legacyMaxRefreshFallback =
-    expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
-  const legacyMaxSessionFallback =
-    expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_SESSION_LIFESPAN;
+  const legacyExpiresIn = getLegacyExpiresInSeconds();
+  const legacyMaxRefreshFallback = legacyExpiresIn ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
+  const legacyMaxSessionFallback = legacyExpiresIn ?? DEFAULT_MAX_SESSION_LIFESPAN;
 
   // Warn only when the user set legacy admin.auth.options.expiresIn. Merged JWT options always
   // include the default expiresIn ('30d'), so reading merged options alone is a false positive.
@@ -186,6 +241,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     );
   }
 
+  // The audit-log content type is registered in every edition: persist its table with it
+  await persistTablesWithPrefix('strapi_audit_logs');
+
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();
@@ -198,15 +256,22 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const tokenService = getService('token');
 
   await roleService.createRolesIfNoneExist();
-  await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();
 
-  await permissionService.cleanPermissionsInDatabase();
+  // Actions can still be registered in the app bootstrap, which runs after the admin one
+  strapi.hook('strapi::app.afterBootstrap').register(async () => {
+    // An action registered after the cleanup would lose its permissions, so registering throws
+    permissionService.actionProvider.lock();
+
+    await roleService.resetSuperAdminPermissions();
+    await permissionService.cleanPermissionsInDatabase();
+  });
 
   await userService.displayWarningIfUsersDontHaveRole();
 
   await syncAuthSettings();
   await syncAPITokensPermissions();
+  await getService('api-token-admin').syncPermissionsForAllUsers();
 
   await getService('metrics').sendUpdateProjectInformation(strapi);
   getService('metrics').startCron(strapi);

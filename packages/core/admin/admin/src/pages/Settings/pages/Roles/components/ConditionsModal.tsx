@@ -5,8 +5,10 @@ import {
   Button,
   Flex,
   Modal,
-  MultiSelectNested,
-  MultiSelectNestedProps,
+  MultiSelect,
+  MultiSelectGroup,
+  MultiSelectOption,
+  MultiSelectProps,
   Typography,
   Breadcrumbs,
   Crumb,
@@ -14,9 +16,12 @@ import {
 import { produce } from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
+import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
+import { useUnsavedChangesModalDirty } from '../../../../../components/UnsavedChangesModal';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -48,7 +53,15 @@ interface ConditionsModalProps extends Pick<ActionRowProps, 'isFormDisabled'> {
   onClose?: () => void;
 }
 
-const ConditionsModal = ({
+const ConditionsModal = (props: ConditionsModalProps) => (
+  // The form lives inside `Modal.Content` so that it unmounts on close and every opening starts
+  // from the saved conditions.
+  <Modal.Content>
+    <ConditionsForm {...props} />
+  </Modal.Content>
+);
+
+const ConditionsForm = ({
   actions = EMPTY_ACTIONS,
   headerBreadCrumbs = EMPTY_HEADER_BREAD_CRUMBS,
   isFormDisabled,
@@ -56,7 +69,8 @@ const ConditionsModal = ({
   onClose,
 }: ConditionsModalProps) => {
   const { formatMessage } = useIntl();
-  const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
+  const { availableConditions, modifiedData, onChangeConditions, getAllowedConditions } =
+    usePermissionsDataManager();
 
   const arrayOfOptionsGroupedByCategory = React.useMemo(() => {
     return Object.entries(groupBy(availableConditions, 'category'));
@@ -72,19 +86,21 @@ const ConditionsModal = ({
     [actions]
   );
 
-  const [state, setState] = React.useState(() =>
-    createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
+  const defaultForm = React.useMemo(
+    () =>
+      createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory),
+    [actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory]
   );
 
-  React.useEffect(() => {
-    if (isReadOnly === false) {
-      return;
-    }
+  const [state, setState] = React.useState(defaultForm);
 
-    setState(
-      createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
-    );
-  }, [isReadOnly, actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory]);
+  // Keep the form in sync with conditions set outside the modal, e.g. filled in from the user's
+  // own conditions when a permission is ticked. The inputs only change while the modal is closed.
+  React.useEffect(() => {
+    setState(defaultForm);
+  }, [defaultForm]);
+
+  useUnsavedChangesModalDirty(!isEqual(state, defaultForm));
 
   const handleChange = React.useCallback(
     (name: string, values: ConditionForm) => {
@@ -141,16 +157,8 @@ const ConditionsModal = ({
     onClose?.();
   }, [isReadOnly, state, onChangeConditions, onClose]);
 
-  const onCloseModal = React.useCallback(() => {
-    setState(
-      createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
-    );
-
-    onClose?.();
-  }, [actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory, onClose]);
-
   return (
-    <Modal.Content>
+    <>
       <Modal.Header>
         <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
           {headerBreadCrumbs.map((label, index, arr) => (
@@ -189,10 +197,14 @@ const ConditionsModal = ({
         <ul>
           {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
             const name = pathToConditionsObject.join('..');
+            // Content types: [kind, subject, actionId]. Plugins & settings: subject is null.
+            const [root, subject] = pathToConditionsObject;
+            const isContentType = root === 'collectionTypes' || root === 'singleTypes';
 
             return (
               <ActionRow
                 key={actionId}
+                allowedConditions={getAllowedConditions(actionId, isContentType ? subject : null)}
                 arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
                 label={label}
                 isFormDisabled={isFormDisabled || isReadOnly}
@@ -208,14 +220,18 @@ const ConditionsModal = ({
       </Modal.Body>
       <Modal.Footer>
         {isReadOnly ? (
-          <Button variant="tertiary" onClick={() => onCloseModal()}>
-            {formatMessage({ id: 'app.components.Button.close', defaultMessage: 'Close' })}
-          </Button>
+          <Modal.Close>
+            <Button variant="tertiary">
+              {formatMessage({ id: 'app.components.Button.close', defaultMessage: 'Close' })}
+            </Button>
+          </Modal.Close>
         ) : (
           <>
-            <Button variant="tertiary" onClick={() => onCloseModal()}>
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
+            <Modal.Close>
+              <Button variant="tertiary">
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
+            </Modal.Close>
             <Button onClick={handleSubmit}>
               {formatMessage({
                 id: 'Settings.permissions.conditions.apply',
@@ -225,7 +241,7 @@ const ConditionsModal = ({
           </>
         )}
       </Modal.Footer>
-    </Modal.Content>
+    </>
   );
 };
 
@@ -268,6 +284,11 @@ const createDefaultConditionsForm = (
  * -----------------------------------------------------------------------------------------------*/
 
 interface ActionRowProps {
+  /**
+   * The conditions the user may select, `undefined` when unrestricted. Other conditions are
+   * disabled (kept as they are if already set), and the last allowed one cannot be removed.
+   */
+  allowedConditions?: string[];
   arrayOfOptionsGroupedByCategory: Array<
     [string, PermissionsDataManagerContextValue['availableConditions']]
   >;
@@ -281,6 +302,7 @@ interface ActionRowProps {
 }
 
 const ActionRow = ({
+  allowedConditions,
   arrayOfOptionsGroupedByCategory,
   isFormDisabled = false,
   isGrey = false,
@@ -292,13 +314,47 @@ const ActionRow = ({
 }: ActionRowProps) => {
   const { formatMessage } = useIntl();
 
-  const handleChange: MultiSelectNestedProps['onChange'] = (val) => {
+  const selectedValues = getSelectedValues(value);
+  const selectedAllowedValues =
+    allowedConditions === undefined
+      ? []
+      : selectedValues.filter((conditionId) => allowedConditions.includes(conditionId));
+
+  // A permission carrying a condition the user cannot set is outside their ceiling: any change
+  // to it would be rejected (adding a condition broadens it), so the whole row is locked.
+  const isLocked =
+    allowedConditions !== undefined &&
+    selectedValues.some((conditionId) => !allowedConditions.includes(conditionId));
+
+  const isOptionDisabled = (conditionId: string) => {
+    if (allowedConditions === undefined) {
+      return false;
+    }
+
+    // The server rejects a condition-restricted permission without any of the user's conditions
+    const isLastAllowedSelected =
+      selectedAllowedValues.length === 1 && selectedAllowedValues[0] === conditionId;
+
+    return isLocked || !allowedConditions.includes(conditionId) || isLastAllowedSelected;
+  };
+
+  const handleChange: MultiSelectProps['onChange'] = (val = []) => {
+    if (isLocked) {
+      return;
+    }
+
+    if (
+      allowedConditions !== undefined &&
+      selectedAllowedValues.length > 0 &&
+      !val.some((conditionId) => allowedConditions.includes(conditionId))
+    ) {
+      return;
+    }
+
     if (onChange) {
       onChange(name, getNewStateFromChangedValues(arrayOfOptionsGroupedByCategory, val));
     }
   };
-
-  const selectedValues = getSelectedValues(value);
 
   return (
     <Flex
@@ -368,14 +424,37 @@ const ActionRow = ({
             )}
           </Flex>
         ) : (
-          <MultiSelectNested
+          <MultiSelect
             id={name}
             customizeContent={(values = []) => `${values.length} currently selected`}
             onChange={handleChange}
             value={selectedValues}
-            options={getNestedOptions(arrayOfOptionsGroupedByCategory)}
             disabled={isFormDisabled}
-          />
+          >
+            {arrayOfOptionsGroupedByCategory.map(([categoryName, conditions]) => {
+              const enabledValues = conditions
+                .map((condition) => condition.id)
+                .filter((conditionId) => !isOptionDisabled(conditionId));
+
+              return (
+                <MultiSelectGroup
+                  key={categoryName}
+                  label={capitalise(categoryName)}
+                  values={enabledValues}
+                >
+                  {conditions.map((condition) => (
+                    <NestedOption
+                      key={condition.id}
+                      value={condition.id}
+                      disabled={isOptionDisabled(condition.id)}
+                    >
+                      {condition.displayName}
+                    </NestedOption>
+                  ))}
+                </MultiSelectGroup>
+              );
+            })}
+          </MultiSelect>
         )}
       </Box>
     </Flex>
@@ -389,18 +468,10 @@ const getSelectedValues = (rawValue: Record<string, ConditionForm>): string[] =>
       .map(([key]) => key)
   );
 
-const getNestedOptions = (options: ActionRowProps['arrayOfOptionsGroupedByCategory']) =>
-  options.reduce<MultiSelectNestedProps['options']>((acc, [label, children]) => {
-    acc.push({
-      label: capitalise(label),
-      children: children.map((child) => ({
-        label: child.displayName,
-        value: child.id,
-      })),
-    });
-
-    return acc;
-  }, []);
+// Matches the indentation MultiSelectNested gives its options, which doesn't support disabling one
+const NestedOption = styled(MultiSelectOption)`
+  padding-left: ${({ theme }) => theme.spaces[7]};
+`;
 
 const getNewStateFromChangedValues = (
   options: ActionRowProps['arrayOfOptionsGroupedByCategory'],

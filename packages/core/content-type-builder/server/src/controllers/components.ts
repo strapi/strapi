@@ -2,6 +2,7 @@ import _ from 'lodash';
 import type { Context } from 'koa';
 import type { UID } from '@strapi/types';
 import { getService } from '../utils';
+import { formatValidationError } from '../utils/errors';
 import { validateComponentInput, validateUpdateComponentInput } from './validation/component';
 
 /**
@@ -55,7 +56,7 @@ export default {
     try {
       await validateComponentInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     try {
@@ -73,6 +74,10 @@ export default {
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
   },
@@ -93,7 +98,7 @@ export default {
     try {
       await validateUpdateComponentInput(body);
     } catch (error) {
-      return ctx.send({ error }, 400);
+      return ctx.send({ error: formatValidationError(error) }, 400);
     }
 
     try {
@@ -111,6 +116,9 @@ export default {
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
 
       ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
@@ -140,6 +148,10 @@ export default {
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
       strapi.log.error(error);
+
+      // The server will not restart, so hand file changes back to the watcher
+      strapi.reload.resumeWatching();
+
       ctx.send({ error: (error as any)?.message || 'Unknown error' }, 400);
     }
   },
