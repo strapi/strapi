@@ -307,6 +307,56 @@ describe('ComponentCopyModal', () => {
       expect(await screen.findByText('1 entry copied from this entry')).toBeInTheDocument();
     });
 
+    it('does not offer the current entry in a locale that is not saved yet', () => {
+      // what the API sends for a locale that doesn't exist yet
+      mockDocumentContext.currentDocument.document = {} as typeof mockCurrentDocument;
+
+      try {
+        render();
+
+        expect(screen.queryByText('This entry')).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Le Petit Bistro/ })).toBeInTheDocument();
+      } finally {
+        mockDocumentContext.currentDocument.document = mockCurrentDocument;
+      }
+    });
+
+    it('closes on Escape from the empty search, and clears the search first', async () => {
+      const onClose = jest.fn();
+      const { user } = render({ onClose });
+      const search = screen.getByPlaceholderText('Search all entries');
+
+      await user.type(search, 'bistro');
+      await user.keyboard('{Escape}');
+
+      expect(search).toHaveValue('');
+      expect(onClose).not.toHaveBeenCalled();
+
+      await user.keyboard('{Escape}');
+
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('gives the focus back to the button that opened it once closed', async () => {
+      const opener = document.createElement('button');
+      document.body.appendChild(opener);
+      opener.focus();
+
+      try {
+        const { user, unmount } = render();
+
+        expect(opener).not.toHaveFocus();
+
+        await user.click(screen.getByRole('button', { name: 'Cancel' }));
+        // the field unmounts the modal once it's closed
+        unmount();
+
+        await waitFor(() => expect(opener).toHaveFocus());
+      } finally {
+        opener.remove();
+      }
+    });
+
     it('does not offer the current entry while the form has unsaved changes', () => {
       render();
 

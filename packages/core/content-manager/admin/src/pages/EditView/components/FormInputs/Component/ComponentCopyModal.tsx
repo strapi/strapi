@@ -227,6 +227,8 @@ const ComponentCopyModal = ({
   const [sourceDocument, setSourceDocument] = React.useState<Document | null>(null);
   const [selectedPaths, setSelectedPaths] = React.useState<string[]>([]);
   const [isCopying, setIsCopying] = React.useState(false);
+  // Read while rendering: once mounted, the modal holds the focus
+  const [returnFocusTarget] = React.useState(getReturnFocusTarget);
 
   /**
    * Loading an entry and copying components are asynchronous, the modal can be closed in the
@@ -349,8 +351,9 @@ const ComponentCopyModal = ({
 
   const currentEntryTitle = savedDocument ? getTitle(savedDocument) : '';
   const normalizedSearch = debouncedSearch.trim().toLowerCase();
+  // A locale that isn't saved yet has a document id but nothing stored (no `id`)
   const showCurrentEntry =
-    !!savedDocument &&
+    !!savedDocument?.id &&
     !!currentDocumentId &&
     (!normalizedSearch || currentEntryTitle.toLowerCase().includes(normalizedSearch));
 
@@ -814,7 +817,15 @@ const ComponentCopyModal = ({
 
   return (
     <Modal.Root open onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <ModalContent>
+      <ModalContent
+        onCloseAutoFocus={(event) => {
+          // The modal has no trigger of its own to give the focus back to
+          if (returnFocusTarget?.isConnected) {
+            event.preventDefault();
+            returnFocusTarget.focus();
+          }
+        }}
+      >
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
@@ -824,6 +835,7 @@ const ComponentCopyModal = ({
             isLoading={isLoadingEntries}
             // Picking a second entry while one loads would start a race between the two.
             isSelectionLocked={isFetchingDocument || isCopying}
+            onClose={onClose}
             onSearchChange={setSearch}
             onSelect={handleSelectEntry}
             rows={entryRows}
@@ -860,6 +872,32 @@ const ComponentCopyModal = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * getReturnFocusTarget
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @description The element to focus once the modal is closed: the button that opened it, or when
+ * it was opened from a menu item, the button of the menu (the menu is gone by then).
+ */
+const getReturnFocusTarget = (): HTMLElement | null => {
+  const active = document.activeElement;
+
+  if (!(active instanceof HTMLElement) || active === document.body) {
+    return null;
+  }
+
+  const menu = active.closest<HTMLElement>('[role="menu"]');
+
+  if (!menu) {
+    return active;
+  }
+
+  return menu.id
+    ? document.querySelector<HTMLElement>(`[aria-controls="${CSS.escape(menu.id)}"]`)
+    : null;
+};
+
+/* -------------------------------------------------------------------------------------------------
  * EntriesPane
  * -----------------------------------------------------------------------------------------------*/
 
@@ -873,6 +911,7 @@ interface EntriesPaneProps {
    * Whether picking an entry is temporarily refused, e.g. while one loads.
    */
   isSelectionLocked: boolean;
+  onClose: () => void;
   onSearchChange: (search: string) => void;
   onSelect: (row: EntryRow) => void;
   rows: EntryRow[];
@@ -887,6 +926,7 @@ const EntriesPane = ({
   appliedSearch,
   isLoading,
   isSelectionLocked,
+  onClose,
   onSearchChange,
   onSelect,
   rows,
@@ -973,7 +1013,19 @@ const EntriesPane = ({
 
   return (
     <EntriesPaneRoot direction="column" alignItems="stretch">
-      <Box paddingTop={4} paddingBottom={2} paddingLeft={4} paddingRight={4}>
+      <Box
+        paddingTop={4}
+        paddingBottom={2}
+        paddingLeft={4}
+        paddingRight={4}
+        // The searchbar keeps every key to itself: Escape clears the search, and when there's
+        // nothing to clear it closes the modal like anywhere else in it.
+        onKeyDownCapture={(event: React.KeyboardEvent) => {
+          if (event.key === 'Escape' && search === '') {
+            onClose();
+          }
+        }}
+      >
         <Searchbar
           name="component-copy-search"
           value={search}
