@@ -1200,30 +1200,54 @@ describe('authentication controller', () => {
   });
 
   describe('accessToken with enforcement', () => {
-    const buildRefreshStrapi = (enforceResult: unknown) => {
-      const rotateRefreshToken = vi.fn(() =>
-        Promise.resolve({
+    const buildRefreshStrapi = (
+      enforceResult: unknown,
+      options: { sso?: boolean; enforceThrows?: boolean } = {}
+    ) => {
+      const calls: string[] = [];
+      const validateRefreshToken = vi.fn(() =>
+        Promise.resolve({ isValid: true, userId: '7', sessionId: 's1' })
+      );
+      const rotateRefreshToken = vi.fn(() => {
+        calls.push('rotate');
+        return Promise.resolve({
           token: 'rotated',
           sessionId: 's2',
           userId: '7',
           absoluteExpiresAt: undefined,
           type: 'refresh',
-        })
-      );
+        });
+      });
       const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'access-token' }));
       const invalidateRefreshToken = vi.fn(() => Promise.resolve());
-      const enforce = vi.fn(() => Promise.resolve(enforceResult));
+      const enforce = vi.fn(() => {
+        calls.push('enforce');
+        return options.enforceThrows
+          ? Promise.reject(new Error('database went away'))
+          : Promise.resolve(enforceResult);
+      });
+      const sessionFamily = vi.fn(() =>
+        Promise.resolve({ familyId: 'f', startedAt: new Date(), sso: options.sso ?? false })
+      );
       setStrapi({
         log: { error: vi.fn(), warn: vi.fn() },
         config: { get: vi.fn(() => undefined) },
         sessionManager: vi.fn(() => ({
+          validateRefreshToken,
           rotateRefreshToken,
           generateAccessToken,
           invalidateRefreshToken,
         })),
-        admin: { services: { mfa: { enforce } } },
+        admin: { services: { mfa: { enforce, sessionFamily } } },
       });
-      return { rotateRefreshToken, generateAccessToken, invalidateRefreshToken, enforce };
+      return {
+        rotateRefreshToken,
+        generateAccessToken,
+        invalidateRefreshToken,
+        enforce,
+        sessionFamily,
+        calls,
+      };
     };
 
     const buildRefreshCtx = () => {
@@ -1273,6 +1297,40 @@ describe('authentication controller', () => {
         expect.objectContaining({ expires: new Date(0) })
       );
       expect(unauthorized).toHaveBeenCalledWith('Invalid refresh token');
+    });
+
+    test('enforcement runs before the rotation, so a refused user never spends the token', async () => {
+      const { calls, rotateRefreshToken } = buildRefreshStrapi({ outcome: 'refused' });
+      const { ctx } = buildRefreshCtx();
+
+      await authenticationController.accessToken(ctx);
+
+      expect(calls).toEqual(['enforce']);
+      expect(rotateRefreshToken).not.toHaveBeenCalled();
+    });
+
+    test('an enforcement error leaves the presented token unrotated, so a retry still works', async () => {
+      const { rotateRefreshToken } = buildRefreshStrapi(undefined, { enforceThrows: true });
+      const { ctx } = buildRefreshCtx();
+
+      await authenticationController.accessToken(ctx);
+
+      expect(ctx.internalServerError).toHaveBeenCalled();
+      expect(rotateRefreshToken).not.toHaveBeenCalled();
+    });
+
+    test('an SSO login is not enforced on refresh: the identity provider owns its second factor', async () => {
+      const { enforce, sessionFamily, generateAccessToken } = buildRefreshStrapi(
+        { outcome: 'refused' },
+        { sso: true }
+      );
+      const { ctx } = buildRefreshCtx();
+
+      await authenticationController.accessToken(ctx);
+
+      expect(sessionFamily).toHaveBeenCalledWith('s1');
+      expect(enforce).not.toHaveBeenCalled();
+      expect(generateAccessToken).toHaveBeenCalledWith('rotated');
     });
   });
 });

@@ -44,8 +44,11 @@ failing the request, the same rule the config validator uses.
 ## Exemptions
 
 EE SSO logins bypass the second factor entirely, by design: the identity provider owns that
-account's second factor. The rules below decide who enforcement applies to among accounts that
-do sign in with a password.
+account's second factor. The SSO callback (`redirectWithAuth`) calls no `enforce`, and it marks the
+session with `authMethod: 'sso'` in its metadata, which every rotation carries over. The refresh
+path reads that mark and skips `enforce` for the whole login, so an SSO login is never locked or
+put on a grace clock by a later refresh either. The rules below decide who enforcement applies to
+among accounts that do sign in with a password.
 
 `isExemptFromMfa` is the single place this is decided, and enforcement, the guard, and the refresh
 path all go through it. An account is exempt when:
@@ -74,7 +77,9 @@ register, register-admin, reset-password) and again on the refresh path (`enforc
 
 On the refresh path a refusal is not an error page: the refresh answers 401 `Invalid refresh
 token`, the cookie is cleared, and the user lands on the login screen, where the next attempt
-gets the 403.
+gets the 403. The refresh validates the token, enforces, and only then rotates. So a refused user
+never spends the token, and an enforcement error (a 500) leaves the presented token valid for the
+retry instead of signing the browser out.
 
 The first session of a required, unenrolled user stamps `mfaGraceUntil`. Once that deadline passes,
 the next session attempt sets `mfaLockedAt`, **invalidates every session for the account**, records

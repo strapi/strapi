@@ -464,25 +464,41 @@ export default {
         return ctx.internalServerError();
       }
 
+      // Enforcement on the refresh path: a required user whose grace expired mid-session is locked
+      // at their next refresh. It runs *before* the rotation. Rotating first meant an enforcement
+      // error (a database blip) answered 500 after the presented token had already been spent, so
+      // the browser was signed out by a failure that had nothing to do with it; now the token is
+      // untouched and the next refresh simply retries.
+      //
+      // Handled as a value, never thrown -- this try/catch turns a throw into a 500. Refusal is a
+      // bare 401 (this client never renders a message); every refresh token for the user is
+      // invalidated and the cookie is cleared the way `logout` does, or the browser keeps replaying
+      // a dead token.
+      const validation = await sessionManager('admin').validateRefreshToken(refreshToken);
+      if (!validation.isValid || !validation.userId) {
+        return ctx.unauthorized('Invalid refresh token');
+      }
+
+      const mfa = getService('mfa');
+      // A login an identity provider authenticated is exempt, as it was at the SSO callback: the
+      // provider owns the second factor (see `buildAdminSessionMetadata`).
+      const family = await mfa.sessionFamily(validation.sessionId);
+      if (!family?.sso) {
+        const enforcement = await mfa.enforce({ id: validation.userId });
+        if (enforcement.outcome === 'refused') {
+          await sessionManager('admin').invalidateRefreshToken(validation.userId);
+          ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
+            ...getRefreshCookieOptions(ctx.request.secure),
+            expires: new Date(0),
+          });
+          return ctx.unauthorized('Invalid refresh token');
+        }
+      }
+
       // Single-use renewal: rotate on access exchange, then create access token
       // from the new refresh token
       const rotation = await sessionManager('admin').rotateRefreshToken(refreshToken);
       if ('error' in rotation) {
-        return ctx.unauthorized('Invalid refresh token');
-      }
-
-      // Enforcement on the refresh path: a required user whose grace expired mid-session
-      // is locked at their next refresh. Handled as a value, never thrown -- this try/catch turns a
-      // throw into a 500. Refusal is a bare 401 (this client never renders a message); every
-      // refresh token for the user is invalidated (the just-rotated one included) and the cookie
-      // is cleared the way `logout` does, or the browser keeps replaying a dead token.
-      const enforcement = await getService('mfa').enforce({ id: rotation.userId });
-      if (enforcement.outcome === 'refused') {
-        await sessionManager('admin').invalidateRefreshToken(rotation.userId);
-        ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
-          ...getRefreshCookieOptions(ctx.request.secure),
-          expires: new Date(0),
-        });
         return ctx.unauthorized('Invalid refresh token');
       }
 
