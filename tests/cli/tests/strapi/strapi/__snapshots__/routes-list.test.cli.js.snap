@@ -166,9 +166,10 @@ exports[`routes:list should output list of routes 1`] = `
 │ HEAD|GET           │ /admin/mfa/passkeys                                                             │
 │ POST               │ /admin/mfa/passkeys/remove                                                      │
 │ HEAD|GET           │ /admin/mfa/users/:id/passkeys                                                   │
-│ DELETE             │ /admin/mfa/users/:id/passkeys                                                   │
+│ POST               │ /admin/mfa/users/:id/passkeys/remove                                            │
 │ HEAD|GET           │ /admin/security-settings                                                        │
 │ HEAD|GET           │ /admin/security-settings/mfa-impact                                             │
+│ HEAD|GET           │ /admin/security-settings/passkeys-impact                                        │
 │ PUT                │ /admin/security-settings                                                        │
 │ HEAD|GET           │ /admin/permissions                                                              │
 │ POST               │ /admin/permissions/check                                                        │
