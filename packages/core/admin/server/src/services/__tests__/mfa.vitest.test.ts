@@ -31,14 +31,9 @@ vi.mock('@simplewebauthn/server', async () => ({
   verifyAuthenticationResponse: vi.fn(),
 }));
 
-const DEFAULT_USER_TABLE = 'admin_users';
-const DEFAULT_LAST_USED_STEP_COLUMN = 'mfa_last_used_step';
 const USER_UID = 'admin::user';
 const RECOVERY_UID = 'admin::mfa-recovery-code';
-const RECOVERY_TABLE = 'strapi_admin_mfa_recovery_codes';
-const RECOVERY_USED_AT_COLUMN = 'used_at';
 const CHALLENGE_UID = 'admin::mfa-challenge';
-const CHALLENGE_TABLE = 'strapi_admin_mfa_challenges';
 const CHALLENGE_ATTEMPTS_COLUMN = 'attempts';
 const EVENT_UID = 'admin::mfa-event';
 const TRUSTED_UID = 'admin::mfa-trusted-device';
@@ -47,119 +42,8 @@ const TRUSTED_UID = 'admin::mfa-trusted-device';
 // The physical table name asserted against below, in the unique-constraint-translation test: the
 // dialect error names it, and the generic message the caller actually sees must not.
 const PASSKEY_TABLE = 'strapi_admin_mfa_passkeys';
-const DEFAULT_PASSKEY_CHALLENGE_COLUMN = 'mfa_passkey_challenge';
-const DEFAULT_PASSKEY_CHALLENGE_EXPIRES_COLUMN = 'mfa_passkey_challenge_expires_at';
-const DEFAULT_CHALLENGE_WEBAUTHN_COLUMN = 'webauthn_challenge';
 
 type UserRow = Record<string, unknown>;
-type ResolveKey = (column: string) => string;
-
-/**
- * A knex-shaped `whereNull`/`orWhere` builder that actually evaluates against a row, so the
- * replay-guard tests exercise the real conditional-update semantics rather than a stub that
- * always reports success. `resolveKey` translates a physical column name back to the JS
- * attribute name the row is keyed by (see `buildConnection` below for why that matters), and is
- * parameterised per test so a test can prove the service resolves names from metadata rather
- * than hardcoding them.
- */
-const createNestedWhereBuilder = (resolveKey: ResolveKey) => {
-  const predicates: Array<(row: UserRow) => boolean> = [];
-
-  const self = {
-    whereNull(column: string) {
-      const key = resolveKey(column);
-      predicates.push((row) => row[key] === null || row[key] === undefined);
-      return self;
-    },
-    orWhere(column: string, operator: string, value: unknown) {
-      const key = resolveKey(column);
-      predicates.push((row) => {
-        const current = row[key];
-        if (current === null || current === undefined) return false;
-        switch (operator) {
-          case '<':
-            return Number(current) < Number(value);
-          case '<=':
-            return Number(current) <= Number(value);
-          case '>':
-            return Number(current) > Number(value);
-          case '>=':
-            return Number(current) >= Number(value);
-          default:
-            throw new Error(`Unsupported operator in mock: ${operator}`);
-        }
-      });
-      return self;
-    },
-    test(row: UserRow): boolean {
-      // Every condition after the first is joined with OR in this mock, matching the single
-      // `whereNull(...).orWhere(...)` chain the replay guard actually issues.
-      return predicates.some((predicate) => predicate(row));
-    },
-  };
-
-  return self;
-};
-
-/**
- * Builds a knex-shaped `strapi.db.getConnection` backed by the same in-memory `users` map as
- * `strapi.db.query`, so a conditional UPDATE really only mutates rows that satisfy every
- * `.where(...)` clause and reports the true affected-row count.
- *
- * The service reads/writes the user through two different layers: `strapi.db.query`, which
- * speaks JS attribute names (`mfaLastUsedStep`), and this raw connection, which speaks physical
- * column names (whatever `strapi.db.metadata.get(...)` reports). Both must land on the same
- * in-memory row for the replay-guard tests to mean anything, so `resolveKey` translates a
- * physical column name back to the attribute name before touching the row — same as
- * `@strapi/database`'s metadata layer does for real.
- */
-const buildConnection =
-  (users: Map<string, UserRow>, tableName: string, resolveKey: ResolveKey) =>
-  (requestedTable: string) => {
-    if (requestedTable !== tableName) {
-      throw new Error(
-        `Unexpected table in mock connection: got "${requestedTable}", expected "${tableName}"`
-      );
-    }
-
-    const predicates: Array<(row: UserRow) => boolean> = [];
-
-    const builder = {
-      where(
-        condition:
-          Record<string, unknown> | ((nested: ReturnType<typeof createNestedWhereBuilder>) => void)
-      ) {
-        if (typeof condition === 'function') {
-          const nested = createNestedWhereBuilder(resolveKey);
-          condition(nested);
-          predicates.push((row) => nested.test(row));
-        } else {
-          predicates.push((row) =>
-            Object.entries(condition).every(
-              ([key, value]) => String(row[resolveKey(key)]) === String(value)
-            )
-          );
-        }
-        return builder;
-      },
-      async update(data: UserRow) {
-        const translated = Object.fromEntries(
-          Object.entries(data).map(([key, value]) => [resolveKey(key), value])
-        );
-
-        let affected = 0;
-        for (const row of users.values()) {
-          if (predicates.every((predicate) => predicate(row))) {
-            Object.assign(row, translated);
-            affected += 1;
-          }
-        }
-        return affected;
-      },
-    };
-
-    return builder;
-  };
 
 type RecoveryRow = { id: number; userId: string; codeHash: string; usedAt: Date | null };
 
@@ -172,7 +56,6 @@ interface ChallengeRow {
   expiresAt: Date;
   consumedAt: Date | null;
   createdAt: Date;
-  // The mock connection writes by physical column name, which is a parameter per test.
   [key: string]: unknown;
 }
 
@@ -363,150 +246,52 @@ describe('matchesWhere fixture', () => {
 });
 
 /**
- * A knex-shaped builder for the challenge table, backed by the same live `rows` array
- * `strapi.db.query(CHALLENGE_UID)` reads and writes. Two things matter here:
+ * `strapi.db.queryBuilder(CHALLENGE_UID)` for the one statement the service cannot express through
+ * `strapi.db.query`: the conditional attempts increment. Backed by the same live `rows` array
+ * `strapi.db.query(CHALLENGE_UID)` reads and writes, and `where` is evaluated against the **live**
+ * row at the moment `execute` runs, so `UPDATE ... SET attempts = attempts + 1 WHERE id = ? AND
+ * attempts < ?` really is one conditional statement whose affected-row count is the decision. The
+ * body contains no `await` before the write, so each call runs to completion before any racing
+ * call resumes -- the single-threaded stand-in for a database's row-level atomicity.
  *
- *  - every `.where(...)` is stored as a closure and evaluated against the **live** row at the
- *    moment `increment`/`del` runs, so `UPDATE ... SET attempts = attempts + 1 WHERE id = ? AND
- *    attempts < ?` really is one conditional statement whose affected-row count is the decision.
- *    A stub that captured the row up front, or that always reported success, would let a
- *    read-then-write implementation pass the concurrency test.
- *  - the update bodies contain no `await`, so each runs to completion before any other racing
- *    call resumes — the single-threaded stand-in for a database's row-level atomicity.
- *
- * `tableName`/`attemptsColumn` are parameters so a test can prove the service resolves them from
- * `strapi.db.metadata` rather than hardcoding them.
+ * `increment` takes the physical column (the real builder hands it to knex untranslated), so
+ * `attemptsColumn` is a parameter: a test can prove the service resolves it from metadata.
  */
-const buildChallengeConnection =
-  (rows: ChallengeRow[], tableName: string, attemptsColumn: string, webauthnColumn: string) =>
-  (requestedTable: string) => {
-    if (requestedTable !== tableName) {
-      throw new Error(
-        `Unexpected table in mock connection: got "${requestedTable}", expected "${tableName}"`
-      );
+const buildChallengeQueryBuilder =
+  (rows: ChallengeRow[], attemptsColumn: string) => (requestedUid: string) => {
+    if (requestedUid !== CHALLENGE_UID) {
+      throw new Error(`Unexpected uid in mock queryBuilder: ${requestedUid}`);
     }
 
-    // Throws rather than falling through to identity, mirroring `buildRecoveryConnection`'s
-    // `whereNull` guard: with an identity fallback a service that hardcoded `'attempts'` would
-    // still mutate `row.attempts` and the metadata-resolution test below could never fail, so it
-    // would only be enforcing the table half of the claim.
-    const resolveKey = (column: string) => {
-      if (column === attemptsColumn) return 'attempts';
-      if (column === webauthnColumn) return 'webauthnChallenge';
-      if (column === 'id') return 'id';
-      throw new Error(
-        `Unexpected column in mock connection: got "${column}", expected "${attemptsColumn}", "${webauthnColumn}" or "id"`
-      );
-    };
-    const predicates: Array<(row: ChallengeRow) => boolean> = [];
-
-    const builder = {
-      where(condition: Record<string, unknown> | string, operator?: string, value?: unknown) {
-        if (typeof condition === 'string') {
-          const key = resolveKey(condition);
-          predicates.push((row) => {
-            const current = Number(row[key]);
-            switch (operator) {
-              case '<':
-                return current < Number(value);
-              case '<=':
-                return current <= Number(value);
-              case '>':
-                return current > Number(value);
-              case '>=':
-                return current >= Number(value);
-              default:
-                throw new Error(`Unsupported operator in mock: ${operator}`);
-            }
-          });
-        } else {
-          predicates.push((row) =>
-            Object.entries(condition).every(
-              ([key, expected]) => String(row[resolveKey(key)]) === String(expected)
-            )
-          );
-        }
-        return builder;
-      },
-      async increment(column: string, amount: number) {
-        const key = resolveKey(column);
-        let affected = 0;
-        for (const row of rows) {
-          if (predicates.every((predicate) => predicate(row))) {
-            row[key] = Number(row[key]) + amount;
-            affected += 1;
-          }
-        }
-        return affected;
-      },
-      async del() {
-        let affected = 0;
-        for (let i = rows.length - 1; i >= 0; i -= 1) {
-          if (predicates.every((predicate) => predicate(rows[i]))) {
-            rows.splice(i, 1);
-            affected += 1;
-          }
-        }
-        return affected;
-      },
-      async update(data: Record<string, unknown>) {
-        const translated = Object.fromEntries(
-          Object.entries(data).map(([key, value]) => [resolveKey(key), value])
-        );
-
-        let affected = 0;
-        for (const row of rows) {
-          if (predicates.every((predicate) => predicate(row))) {
-            Object.assign(row, translated);
-            affected += 1;
-          }
-        }
-        return affected;
-      },
-    };
-
-    return builder;
-  };
-
-/**
- * A knex-shaped `where().whereNull().update()` builder for the recovery-code table, backed by the
- * same live `rows` array `strapi.db.query(RECOVERY_UID)` reads and writes, mirroring
- * `buildConnection` above for the user table: the conditional UPDATE must see live state at the
- * moment it runs so that, of two concurrent winners racing for the same row, only the first to
- * execute can satisfy `whereNull(usedAtColumn)`.
- */
-const buildRecoveryConnection =
-  (rows: RecoveryRow[], tableName: string, columnName: string) => (requestedTable: string) => {
-    if (requestedTable !== tableName) {
-      throw new Error(
-        `Unexpected table in mock connection: got "${requestedTable}", expected "${tableName}"`
-      );
-    }
-
-    let idFilter: number | undefined;
-    let requireNull = false;
+    let where: Record<string, unknown> = {};
+    let increment: { key: string; amount: number } | undefined;
 
     const builder = {
       where(condition: Record<string, unknown>) {
-        idFilter = Number(condition.id);
+        where = { ...where, ...condition };
         return builder;
       },
-      whereNull(column: string) {
-        if (column !== columnName) {
-          throw new Error(`Unexpected column in mock connection: ${column}`);
+      increment(column: string, amount = 1) {
+        if (column !== attemptsColumn) {
+          throw new Error(
+            `Unexpected column in mock queryBuilder: got "${column}", expected "${attemptsColumn}"`
+          );
         }
-        requireNull = true;
+        increment = { key: 'attempts', amount };
         return builder;
       },
-      async update(data: Record<string, unknown>) {
-        const row = rows.find((r) => r.id === idFilter);
-        if (!row) return 0;
-        if (requireNull && row.usedAt !== null) return 0;
-
-        for (const [column, value] of Object.entries(data)) {
-          if (column === columnName) row.usedAt = value as Date;
+      async execute() {
+        if (!increment) {
+          throw new Error('Mock queryBuilder only supports increment');
         }
-        return 1;
+        let affected = 0;
+        for (const row of rows) {
+          if (matchesWhere(row, where)) {
+            row[increment.key] = Number(row[increment.key]) + increment.amount;
+            affected += 1;
+          }
+        }
+        return affected;
       },
     };
 
@@ -514,19 +299,7 @@ const buildRecoveryConnection =
   };
 
 interface FixtureOptions {
-  userTableName?: string;
-  userStepColumn?: string;
-  recoveryTableName?: string;
-  recoveryUsedAtColumn?: string;
-  challengeTableName?: string;
   challengeAttemptsColumn?: string;
-  userPasskeyChallengeColumn?: string;
-  /** The sibling expiry stamp, nulled alongside `mfaPasskeyChallenge` in the same statement. */
-  userPasskeyChallengeExpiresAtColumn?: string;
-  /** Drops `mfaPasskeyChallenge` (and its sibling expiry column) from the USER_UID metadata
-   * entirely, so a test can prove the `ApplicationError` guard for a missing physical column. */
-  omitUserPasskeyChallengeColumn?: boolean;
-  challengeWebauthnColumn?: string;
   /** Merged over `{ enabled: true }` and returned for `strapi.config.get('admin.auth.mfa')`. */
   mfaConfig?: Record<string, unknown>;
   recoveryOverrides?: Record<string, Mock>;
@@ -546,30 +319,11 @@ interface FixtureOptions {
  *    makes a read-then-write implementation racy under `Promise.all` the way it would be against
  *    a real database; sharing one mutable object lets two racing reads see each other's write and
  *    hides exactly the bug these tests exist to catch.
- *  - every `db.getConnection` write path evaluates its predicates against live rows at the moment
- *    the statement runs, and reports a true affected-row count.
+ *  - every conditional write (`updateMany`, `deleteMany`, the attempts increment) evaluates its
+ *    `where` against live rows at the moment the statement runs, and reports a true count.
  */
 const buildMfaFixture = (options: FixtureOptions = {}) => {
-  const userTable = options.userTableName ?? DEFAULT_USER_TABLE;
-  const userStepColumn = options.userStepColumn ?? DEFAULT_LAST_USED_STEP_COLUMN;
-  const recoveryTable = options.recoveryTableName ?? RECOVERY_TABLE;
-  const recoveryUsedAtColumn = options.recoveryUsedAtColumn ?? RECOVERY_USED_AT_COLUMN;
-  const challengeTable = options.challengeTableName ?? CHALLENGE_TABLE;
   const challengeAttemptsColumn = options.challengeAttemptsColumn ?? CHALLENGE_ATTEMPTS_COLUMN;
-  const userPasskeyChallengeColumn =
-    options.userPasskeyChallengeColumn ?? DEFAULT_PASSKEY_CHALLENGE_COLUMN;
-  const userPasskeyChallengeExpiresAtColumn =
-    options.userPasskeyChallengeExpiresAtColumn ?? DEFAULT_PASSKEY_CHALLENGE_EXPIRES_COLUMN;
-  const omitUserPasskeyChallengeColumn = options.omitUserPasskeyChallengeColumn ?? false;
-  const challengeWebauthnColumn =
-    options.challengeWebauthnColumn ?? DEFAULT_CHALLENGE_WEBAUTHN_COLUMN;
-
-  const resolveUserKey: ResolveKey = (column) => {
-    if (column === userStepColumn) return 'mfaLastUsedStep';
-    if (column === userPasskeyChallengeColumn) return 'mfaPasskeyChallenge';
-    if (column === userPasskeyChallengeExpiresAtColumn) return 'mfaPasskeyChallengeExpiresAt';
-    return column;
-  };
 
   const users = new Map<string, UserRow>();
   users.set('1', {
@@ -586,39 +340,13 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     mfaPasskeyChallengeExpiresAt: null,
   });
 
+  // Only the challenge attempts column is ever resolved: the increment is the one statement the
+  // service runs below `strapi.db.query`, and it needs the physical name.
   const metadataGet = vi.fn((uid: string) => {
-    switch (uid) {
-      case USER_UID:
-        return {
-          tableName: userTable,
-          attributes: {
-            mfaLastUsedStep: { columnName: userStepColumn },
-            ...(omitUserPasskeyChallengeColumn
-              ? {}
-              : {
-                  mfaPasskeyChallenge: { columnName: userPasskeyChallengeColumn },
-                  mfaPasskeyChallengeExpiresAt: {
-                    columnName: userPasskeyChallengeExpiresAtColumn,
-                  },
-                }),
-          },
-        };
-      case RECOVERY_UID:
-        return {
-          tableName: recoveryTable,
-          attributes: { usedAt: { columnName: recoveryUsedAtColumn } },
-        };
-      case CHALLENGE_UID:
-        return {
-          tableName: challengeTable,
-          attributes: {
-            attempts: { columnName: challengeAttemptsColumn },
-            webauthnChallenge: { columnName: challengeWebauthnColumn },
-          },
-        };
-      default:
-        throw new Error(`Unexpected metadata lookup in mock: ${uid}`);
+    if (uid === CHALLENGE_UID) {
+      return { attributes: { attempts: { columnName: challengeAttemptsColumn } } };
     }
+    throw new Error(`Unexpected metadata lookup in mock: ${uid}`);
   });
 
   // `load` has no default implementation: only the enforcement-policy suite (which loads roles
@@ -714,6 +442,17 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       async ({ where }: any) =>
         recoveryRows.filter((r) => r.userId === where.userId && r.usedAt === where.usedAt).length
     ),
+    // `consumeRecoveryCode`'s conditional spend: whoever flips `usedAt` from null wins.
+    updateMany: vi.fn(async ({ where, data }: any) => {
+      let count = 0;
+      for (const row of recoveryRows) {
+        if (matchesWhere(row, where)) {
+          Object.assign(row, data);
+          count += 1;
+        }
+      }
+      return { count };
+    }),
     ...options.recoveryOverrides,
   };
 
@@ -745,6 +484,16 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     count: vi.fn(
       async ({ where }: any = {}) => challenges.filter((c) => matchesWhere(c, where)).length
     ),
+    updateMany: vi.fn(async ({ where, data }: any) => {
+      let count = 0;
+      for (const row of challenges) {
+        if (matchesWhere(row, where)) {
+          Object.assign(row, data);
+          count += 1;
+        }
+      }
+      return { count };
+    }),
   };
 
   const events: EventRow[] = [];
@@ -939,18 +688,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     ),
   };
 
-  const userConnection = buildConnection(users, userTable, resolveUserKey);
-  const recoveryConnection = buildRecoveryConnection(
-    recoveryRows,
-    recoveryTable,
-    recoveryUsedAtColumn
-  );
-  const challengeConnection = buildChallengeConnection(
-    challenges,
-    challengeTable,
-    challengeAttemptsColumn,
-    challengeWebauthnColumn
-  );
+  const challengeQueryBuilder = buildChallengeQueryBuilder(challenges, challengeAttemptsColumn);
 
   // Depth, not a boolean: `issueRecoveryCodes`' transaction nests inside `completeEnrolment`'s.
   let transactionDepth = 0;
@@ -996,12 +734,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
             throw new Error(`Unexpected query uid in mock: ${uid}`);
         }
       }),
-      getConnection: vi.fn((table: string) => {
-        if (table === userTable) return userConnection(table);
-        if (table === recoveryTable) return recoveryConnection(table);
-        if (table === challengeTable) return challengeConnection(table);
-        throw new Error(`Unexpected table in mock connection: ${table}`);
-      }),
+      queryBuilder: vi.fn(challengeQueryBuilder),
       metadata: { get: metadataGet },
       // A real commit/rollback, not a bare pass-through: `disable` wraps its whole teardown in
       // one transaction specifically so a failure on the last statement (the user update) undoes
@@ -1072,7 +805,6 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
 /** Adapter keeping the enrolment suite's call shape onto the merged fixture above. */
 const buildStrapi = (
   overrides: Record<string, unknown> = {},
-  metadataOverrides: { tableName?: string; columnName?: string } = {},
   recoveryOverrides: {
     deleteMany?: Mock;
     createMany?: Mock;
@@ -1081,8 +813,6 @@ const buildStrapi = (
   } = {}
 ) =>
   buildMfaFixture({
-    userTableName: metadataOverrides.tableName,
-    userStepColumn: metadataOverrides.columnName,
     recoveryOverrides: recoveryOverrides as Record<string, Mock>,
     strapiOverrides: overrides,
   });
@@ -1227,7 +957,6 @@ describe('mfa service: enrolment', () => {
   test('a recovery-code write failure during completeEnrolment leaves the user unenrolled and propagates', async () => {
     const { strapi, users } = buildStrapi(
       {},
-      {},
       {
         createMany: vi.fn(async () => {
           throw new Error('constraint violation');
@@ -1323,21 +1052,6 @@ describe('mfa service: enrolment', () => {
     expect(Number(users.get('1')!.mfaLastUsedStep)).toBe(step);
   });
 
-  test('resolves the user table and the last-used-step column from strapi.db.metadata rather than hardcoding them', async () => {
-    const { strapi, users, metadataGet } = buildStrapi(
-      {},
-      { tableName: 'weird_users_table', columnName: 'weird_step_col' }
-    );
-    const service = createMfaService(defaultDeps(strapi));
-
-    const step = 999;
-    const consumed = await service.consumeTotpStep('1', step);
-
-    expect(consumed).toBe(true);
-    expect(metadataGet).toHaveBeenCalledWith(USER_UID);
-    expect(Number(users.get('1')!.mfaLastUsedStep)).toBe(step);
-  });
-
   test('a fresh enrolment writes the secret to mfaPendingSecret and leaves mfaSecret null', async () => {
     const { strapi, users } = buildStrapi();
     const service = createMfaService(defaultDeps(strapi));
@@ -1413,7 +1127,6 @@ describe('mfa service: enrolment', () => {
   // landing in exactly that gap.
   test('a disable landing between the read and the promotion write is not undone, and mfaSecret stays null', async () => {
     const { strapi, users } = buildStrapi(
-      {},
       {},
       {
         createMany: vi.fn(async () => {
@@ -2018,18 +1731,13 @@ describe('mfa service: recovery codes', () => {
   const DEFAULT_RECOVERY_CODE_COUNT = 7;
 
   /**
-   * Adapter onto the merged fixture at the top of this file. `tableName`/`columnName` default to
-   * the real physical names but can be overridden per test, and `recoveryCodeCount` defaults
+   * Adapter onto the merged fixture at the top of this file. `recoveryCodeCount` defaults
    * to a non-default value. Everything else — snapshot hand-outs, a live
    * conditional UPDATE — is the shared fixture's job, so the recovery suite and the challenge
    * suite cannot drift into two different notions of the same store.
    */
-  const setup = (
-    options: { tableName?: string; columnName?: string; recoveryCodeCount?: number } = {}
-  ) => {
+  const setup = (options: { recoveryCodeCount?: number } = {}) => {
     const fixture = buildMfaFixture({
-      recoveryTableName: options.tableName,
-      recoveryUsedAtColumn: options.columnName,
       mfaConfig: {
         recoveryCodeCount: options.recoveryCodeCount ?? DEFAULT_RECOVERY_CODE_COUNT,
       },
@@ -2130,19 +1838,6 @@ describe('mfa service: recovery codes', () => {
     expect(createMany).not.toHaveBeenCalled();
   });
 
-  test('resolves the recovery-code table and the usedAt column from strapi.db.metadata rather than hardcoding them', async () => {
-    const { strapi, rows } = setup({
-      tableName: 'weird_recovery_table',
-      columnName: 'weird_used_at',
-    });
-    const service = createMfaService(deps(strapi));
-
-    const [code] = await service.issueRecoveryCodes('1');
-
-    expect(await service.consumeRecoveryCode('1', code)).toBe(true);
-    expect(rows.find((r) => r.codeHash === `h:${code}`)?.usedAt).toBeInstanceOf(Date);
-  });
-
   test('the replay guard allows only one winner when two requests race for the same code', async () => {
     const { strapi, rows } = setup();
     const service = createMfaService(deps(strapi));
@@ -2167,7 +1862,6 @@ describe('mfa service: challenge lifecycle', () => {
 
   const setup = (
     options: {
-      tableName?: string;
       attemptsColumn?: string;
       mfaConfig?: Record<string, unknown>;
       /** Simulates an ENCRYPTION_KEY rotation: the stored secret can no longer be decrypted. */
@@ -2175,7 +1869,6 @@ describe('mfa service: challenge lifecycle', () => {
     } = {}
   ) => {
     const fixture = buildMfaFixture({
-      challengeTableName: options.tableName,
       challengeAttemptsColumn: options.attemptsColumn,
       mfaConfig: options.mfaConfig,
     });
@@ -2574,9 +2267,8 @@ describe('mfa service: challenge lifecycle', () => {
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
   });
 
-  test('resolves the challenge table and the attempts column from strapi.db.metadata rather than hardcoding them', async () => {
+  test('resolves the attempts column for the increment from strapi.db.metadata rather than hardcoding it', async () => {
     const { service, challenges, metadataGet } = setup({
-      tableName: 'weird_challenge_table',
       attemptsColumn: 'weird_attempts_col',
     });
 
@@ -4526,23 +4218,14 @@ describe('mfa service: passkey registration', () => {
   const setup = ({
     enabled = true,
     adminUrl = ADMIN_URL,
-    userTableName,
-    userPasskeyChallengeColumn,
-    omitUserPasskeyChallengeColumn = false,
     enrolled = true,
   }: {
     enabled?: boolean;
     adminUrl?: string;
-    userTableName?: string;
-    userPasskeyChallengeColumn?: string;
-    omitUserPasskeyChallengeColumn?: boolean;
     enrolled?: boolean;
   } = {}) => {
     const stored = { passkeys: { enabled } };
     const fixture = buildMfaFixture({
-      userTableName,
-      userPasskeyChallengeColumn,
-      omitUserPasskeyChallengeColumn,
       strapiOverrides: {
         store: vi.fn(() => ({ get: vi.fn(async () => stored), set: vi.fn() })),
         config: {
@@ -4850,36 +4533,6 @@ describe('mfa service: passkey registration', () => {
 
     expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
     expect(users.get('1')!.mfaPasskeyChallengeExpiresAt).toBeNull();
-  });
-
-  test('resolves the user table and the passkey-challenge column from strapi.db.metadata rather than hardcoding them', async () => {
-    const { service, users } = setup({
-      userTableName: 'admin_users_x',
-      userPasskeyChallengeColumn: 'pk_chal',
-    });
-    const options = await service.passkeyRegistrationOptions('1');
-    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
-
-    const created = await service.registerPasskey(
-      '1',
-      'Weird columns',
-      registrationFor(options.challenge) as never
-    );
-
-    expect(created.name).toBe('Weird columns');
-    expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
-  });
-
-  test('throws an ApplicationError naming the attribute when the passkey-challenge column cannot be resolved from metadata', async () => {
-    const { service } = setup({ omitUserPasskeyChallengeColumn: true });
-    const options = await service.passkeyRegistrationOptions('1');
-    vi.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
-
-    await expect(
-      service.registerPasskey('1', 'Nope', registrationFor(options.challenge) as never)
-    ).rejects.toThrow(
-      'Could not resolve the physical column name for admin::user.mfaPasskeyChallenge'
-    );
   });
 
   test('two concurrent submissions of one ceremony: exactly one lands', async () => {
@@ -5330,11 +4983,11 @@ describe('mfa service: passkey login', () => {
     // `usableChallenge`'s own read finds the row -- still present, still valid -- but by the time
     // this path's conditional write runs, a concurrent request has consumed it. The write's own
     // affected-row count is what must decide this, not a silent write against a row that is gone.
-    const connectionMock = strapi.db.getConnection as Mock;
-    const originalConnection = connectionMock.getMockImplementation();
-    connectionMock.mockImplementationOnce((table: string) => {
+    const updateMany = (strapi.db.query(CHALLENGE_UID) as { updateMany: Mock }).updateMany;
+    const original = updateMany.getMockImplementation()!;
+    updateMany.mockImplementationOnce((args: unknown) => {
       challenges.splice(0, challenges.length);
-      return originalConnection!(table);
+      return original(args);
     });
 
     await expect(service.authenticationOptions(token)).rejects.toThrow(

@@ -451,63 +451,24 @@ export const createPasskeys = ({
   const countRows = (userId: string): Promise<number> =>
     query().count({ where: { userId: String(userId) } });
 
-  /** A migration problem must surface as an error, not as an UPDATE that affects nothing and so
-   * reads as "already consumed". Both pending-ceremony columns are nulled in the same statement. */
-  const userChallengeTable = (): {
-    tableName: string;
-    challengeColumn: string;
-    challengeExpiresAtColumn: string;
-  } => {
-    const metadata = strapi.db.metadata.get(USER_UID);
-    // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
-    // know that.
-    const challengeColumn: string | undefined = metadata.attributes.mfaPasskeyChallenge?.columnName;
-    const expiresAttr = metadata.attributes.mfaPasskeyChallengeExpiresAt;
-    // @ts-expect-error - same reasoning, for the sibling expiry stamp nulled alongside it.
-    const challengeExpiresAtColumn: string | undefined = expiresAttr?.columnName;
-
-    if (!challengeColumn) {
-      throw new Error(
-        'Could not resolve the physical column name for admin::user.mfaPasskeyChallenge'
-      );
-    }
-    if (!challengeExpiresAtColumn) {
-      throw new Error(
-        'Could not resolve the physical column name for admin::user.mfaPasskeyChallengeExpiresAt'
-      );
-    }
-
-    return { tableName: metadata.tableName, challengeColumn, challengeExpiresAtColumn };
-  };
-
   const challengeQuery = () => strapi.db.query(CHALLENGE_UID);
 
-  /** Resolved here rather than injected, so this module needs nothing from its factory but the
-   * services it cannot resolve itself. */
-  const challengeTable = (): {
-    tableName: string;
-    attemptsColumn: string;
-    webauthnColumn: string;
-  } => {
+  /** The physical attempts column, for the one statement the query engine cannot express as
+   * `updateMany`: an increment. A migration problem surfaces here as an error, not as an UPDATE
+   * that affects nothing and so reads as "exhausted". */
+  const attemptsColumnName = (): string => {
     const metadata = strapi.db.metadata.get(CHALLENGE_UID);
     // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
     // know that.
     const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
-    // @ts-expect-error - same reasoning for the passkeys column.
-    const webauthnColumn: string | undefined = metadata.attributes.webauthnChallenge?.columnName;
 
     if (!attemptsColumn) {
       throw new Error(
         'Could not resolve the physical column name for admin::mfa-challenge.attempts'
       );
     }
-    if (!webauthnColumn) {
-      throw new Error(
-        'Could not resolve the physical column name for admin::mfa-challenge.webauthnChallenge'
-      );
-    }
 
-    return { tableName: metadata.tableName, attemptsColumn, webauthnColumn };
+    return attemptsColumn;
   };
 
   /** Mirrors `verifyChallenge`'s opening checks, including the fail-closed expiry: without the NaN
@@ -602,11 +563,10 @@ export const createPasskeys = ({
 
     // No `consumedAt IS NULL` guard: a spent challenge is a deleted row, so the id match is the whole
     // check. The affected-row count below catches one consumed concurrently since the read.
-    const { tableName, webauthnColumn } = challengeTable();
-    const written = await strapi.db
-      .getConnection(tableName)
-      .where({ id: challenge.id })
-      .update({ [webauthnColumn]: options.challenge });
+    const { count: written } = await challengeQuery().updateMany({
+      where: { id: challenge.id },
+      data: { webauthnChallenge: options.challenge },
+    });
 
     if (written !== 1) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
@@ -652,17 +612,15 @@ export const createPasskeys = ({
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
 
-    const { tableName, attemptsColumn } = challengeTable();
-
     // `verifyChallenge`'s conditional increment, run *before* any verification so a request that
     // crashes mid-verification has still cost an attempt. Both tiers are charged on this path:
     // charging one but not the other is a hole in the other, and a passkey path that charged
     // neither would be the way around the throttle entirely.
     const accepted = await strapi.db
-      .getConnection(tableName)
-      .where({ id: challenge.id })
-      .where(attemptsColumn, '<', config().maxChallengeAttempts)
-      .increment(attemptsColumn, 1);
+      .queryBuilder(CHALLENGE_UID)
+      .where({ id: challenge.id, attempts: { $lt: config().maxChallengeAttempts } })
+      .increment(attemptsColumnName(), 1)
+      .execute<number>();
 
     if (accepted !== 1) {
       // The cap was already reached. Destroy the challenge rather than leave a dead row, exactly
@@ -737,7 +695,9 @@ export const createPasskeys = ({
 
     // `consumeChallenge`'s DELETE again, run *before* the row update and the notice, so only the
     // racer that wins the consume touches the counter or announces success.
-    const consumed = await strapi.db.getConnection(tableName).where({ id: challenge.id }).del();
+    const { count: consumed } = await challengeQuery().deleteMany({
+      where: { id: challenge.id },
+    });
     if (consumed !== 1) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
@@ -861,14 +821,12 @@ export const createPasskeys = ({
 
     // Spent before anything is verified, so two submissions of the same ceremony cannot both land.
     // Bound as a non-null string, so a response signed over a different challenge matches nothing.
-    const { tableName, challengeColumn, challengeExpiresAtColumn } = userChallengeTable();
     // Nulls `mfaPasskeyChallengeExpiresAt` in the same statement as the challenge itself, so a
     // spent ceremony never leaves an expiry stamp behind for the next one to trip over.
-    const affected = await strapi.db
-      .getConnection(tableName)
-      .where({ id: userId })
-      .where({ [challengeColumn]: submitted })
-      .update({ [challengeColumn]: null, [challengeExpiresAtColumn]: null });
+    const { count: affected } = await userQuery().updateMany({
+      where: { id: userId, mfaPasskeyChallenge: submitted },
+      data: { mfaPasskeyChallenge: null, mfaPasskeyChallengeExpiresAt: null },
+    });
 
     if (affected !== 1) {
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);

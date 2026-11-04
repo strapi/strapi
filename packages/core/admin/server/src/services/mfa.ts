@@ -624,27 +624,17 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   /** The replay guard: one conditional UPDATE whose affected-row count is the decision, so two
    * concurrent requests carrying the same code cannot both succeed. */
   const consumeTotpStep = async (userId: string, step: number): Promise<boolean> => {
-    const metadata = strapi.db.metadata.get(USER_UID);
-    const { tableName } = metadata;
-    // @ts-expect-error - columnName exists only on scalar attributes. Optional chaining guards a
-    // missing attribute so the ApplicationError below surfaces instead of a TypeError.
-    const lastUsedStepColumn: string | undefined = metadata.attributes.mfaLastUsedStep?.columnName;
-
-    if (!lastUsedStepColumn) {
-      throw new Error('Could not resolve the physical column name for admin::user.mfaLastUsedStep');
-    }
-
     // A single watermark, not a set of spent steps: with `window.back` set, a legitimate code for
     // an earlier step is refused once a later one has been spent.
-    const affected = await strapi.db
-      .getConnection(tableName)
-      .where({ id: userId })
-      .where((builder) =>
-        builder.whereNull(lastUsedStepColumn).orWhere(lastUsedStepColumn, '<', step)
-      )
-      .update({ [lastUsedStepColumn]: step });
+    const { count } = await userQuery().updateMany({
+      where: {
+        id: userId,
+        $or: [{ mfaLastUsedStep: null }, { mfaLastUsedStep: { $lt: step } }],
+      },
+      data: { mfaLastUsedStep: step },
+    });
 
-    return affected === 1;
+    return count === 1;
   };
 
   const completeEnrolment = async (userId: string, code: string) => {
@@ -799,20 +789,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       return false;
     }
 
-    // Resolved before any candidate is fetched, so a broken column mapping surfaces on every call
-    // rather than only when a submitted code happens to match.
-    const metadata = strapi.db.metadata.get(RECOVERY_CODE_UID);
-    const { tableName } = metadata;
-    // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
-    // know that.
-    const usedAtColumn: string | undefined = metadata.attributes.usedAt?.columnName;
-
-    if (!usedAtColumn) {
-      throw new Error(
-        'Could not resolve the physical column name for admin::mfa-recovery-code.usedAt'
-      );
-    }
-
     const candidates = await recoveryQuery().findMany({
       where: { userId: String(userId), usedAt: null },
     });
@@ -827,13 +803,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
       // Conditional update: whoever flips usedAt from null wins, so a code cannot be spent twice
       // by two concurrent requests.
-      const affected = await strapi.db
-        .getConnection(tableName)
-        .where({ id: candidate.id })
-        .whereNull(usedAtColumn)
-        .update({ [usedAtColumn]: new Date() });
+      const { count } = await recoveryQuery().updateMany({
+        where: { id: candidate.id, usedAt: null },
+        data: { usedAt: new Date() },
+      });
 
-      return affected === 1;
+      return count === 1;
     }
 
     return false;
@@ -850,9 +825,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   /** A migration problem must surface as an error, not as an UPDATE that affects nothing and so
    * reads as "cap already reached". */
-  const challengeTable = () => {
+  /** The physical attempts column, for the one statement the query engine cannot express as
+   * `updateMany`: an increment. */
+  const attemptsColumnName = () => {
     const metadata = strapi.db.metadata.get(CHALLENGE_UID);
-    const { tableName } = metadata;
     // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
     // know that.
     const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
@@ -863,7 +839,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       );
     }
 
-    return { tableName, attemptsColumn };
+    return attemptsColumn;
   };
 
   /** Events a request recorded before it had a session, keyed by that request: a login writes them,
@@ -1354,10 +1330,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     userId: string;
     pendingPasswordHash?: string | null;
   }): Promise<VerifyChallengeResult> => {
-    const { tableName } = challengeTable();
-    const affected = await strapi.db.getConnection(tableName).where({ id: challenge.id }).del();
+    const { count } = await challengeQuery().deleteMany({ where: { id: challenge.id } });
 
-    if (affected !== 1) {
+    if (count !== 1) {
       return { ok: false as const, reason: 'unusable' as const };
     }
     return challenge.pendingPasswordHash
@@ -1423,12 +1398,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   ): Promise<VerifyChallengeResult> => {
     // `returning` would be the obvious way to judge the new value, but it is unsupported on MySQL.
     // Runs *before* any code is checked, so a crash mid-verification still costs an attempt.
-    const { tableName, attemptsColumn } = challengeTable();
     const accepted = await strapi.db
-      .getConnection(tableName)
-      .where({ id: challenge.id })
-      .where(attemptsColumn, '<', config().maxChallengeAttempts)
-      .increment(attemptsColumn, 1);
+      .queryBuilder(CHALLENGE_UID)
+      .where({ id: challenge.id, attempts: { $lt: config().maxChallengeAttempts } })
+      .increment(attemptsColumnName(), 1)
+      .execute<number>();
 
     if (accepted !== 1) {
       // Destroyed rather than left as a dead row a later path could revive by resetting the counter.
