@@ -30,6 +30,7 @@ import type {
 import { createTrustedDevices } from './mfa-trusted-devices';
 import { createPasskeys, PASSKEYS_DISABLED, PASSKEY_NEEDS_TOTP } from './mfa-passkeys';
 import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
+import { sessionFamilyOf, type AdminSessionFamily } from '../../../shared/utils/session-auth';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
@@ -39,6 +40,7 @@ const USER_UID = 'admin::user';
 const RECOVERY_CODE_UID = 'admin::mfa-recovery-code';
 const CHALLENGE_UID = 'admin::mfa-challenge';
 const EVENT_UID = 'admin::mfa-event';
+const SESSION_UID = 'admin::session';
 const TRUSTED_DEVICE_UID = 'admin::mfa-trusted-device';
 const PASSKEY_UID = 'admin::mfa-passkey';
 
@@ -863,22 +865,56 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /** Events a request recorded before it had a session, keyed by that request: a login writes them,
-   * then `claimRequestEvents` hands them to the session the login issues. */
+   * then `claimRequestEvents` hands them to the login family the login issues. */
   const pendingRequestEvents = new WeakMap<object, Data.ID[]>();
 
   const currentRequest = () =>
     strapi.requestContext?.get?.() as { state?: { session?: { id?: string } } } | undefined;
 
-  /** Metadata is neutral context only: these rows are readable wherever admin data is. `sessionId`
-   * is the session whose request caused the event, so that session is not notified of its own
-   * actions. */
+  /**
+   * The login family behind a session id (see `buildAdminSessionMetadata`). Events are owned by a
+   * family, not a session: every refresh mints a new `sessionId`, so an event keyed on the session
+   * that caused it stopped being recognised as its own after the first refresh.
+   */
+  const sessionFamily = async (sessionId?: string): Promise<AdminSessionFamily | null> => {
+    if (!sessionId) {
+      return null;
+    }
+    const row = await strapi.db.query(SESSION_UID).findOne({ where: { sessionId } });
+    return row && row.origin === 'admin' ? sessionFamilyOf(row) : null;
+  };
+
+  /** Read once per request: `recordEvent` can run several times in one. */
+  const requestFamilies = new WeakMap<
+    object,
+    { sessionId: string; family: Promise<AdminSessionFamily | null> }
+  >();
+  const currentFamilyId = async (): Promise<string | null> => {
+    const request = currentRequest();
+    const sessionId = request?.state?.session?.id;
+    if (!request || !sessionId) {
+      return null;
+    }
+    let cached = requestFamilies.get(request);
+    if (cached?.sessionId !== sessionId) {
+      cached = { sessionId, family: sessionFamily(sessionId) };
+      requestFamilies.set(request, cached);
+    }
+    const { family } = cached;
+    // A session row gone mid-request still names *a* session: keep it rather than drop ownership.
+    return (await family)?.familyId ?? sessionId;
+  };
+
+  /** Metadata is neutral context only: these rows are readable wherever admin data is. The
+   * `sessionId` column holds the login family whose request caused the event, so that family is
+   * not notified of its own actions. */
   const recordEvent = async (
     userId: string,
     type: MfaEventType,
     metadata: MfaEventMetadata = {}
   ): Promise<Data.ID | undefined> => {
     const request = currentRequest();
-    const sessionId = request?.state?.session?.id ?? null;
+    const sessionId = await currentFamilyId();
     const row = await eventQuery().create({
       data: { userId: String(userId), type, metadata, seenAt: null, sessionId },
     });
@@ -1080,14 +1116,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   /** Only `acknowledgeCodes` may ever clear the marker, even if a caller passes its id in `ids`. */
   const NOT_ACKNOWLEDGEMENT_MARKER = { $ne: 'recovery_codes_issued' as const };
 
-  /** Matches every event except the ones `sessionId` caused. Spelled with the null branch because
-   * SQL's `<>` never matches a NULL column. */
-  const notFromSession = (sessionId?: string) =>
-    sessionId ? { $or: [{ sessionId: null }, { sessionId: { $ne: sessionId } }] } : {};
+  /** Matches every event except the ones login family `familyId` caused. Spelled with the null
+   * branch because SQL's `<>` never matches a NULL column. */
+  const notFromFamily = (familyId?: string) =>
+    familyId ? { $or: [{ sessionId: null }, { sessionId: { $ne: familyId } }] } : {};
 
   /** Called once a login has issued its session: the events it recorded on the way (a recovery
-   * code, a device trusted) were caused by that session. */
-  const claimRequestEvents = async (sessionId: string): Promise<void> => {
+   * code, a device trusted) were caused by that login's family. */
+  const claimRequestEvents = async (familyId: string): Promise<void> => {
     const request = currentRequest();
     const ids = request ? pendingRequestEvents.get(request) : undefined;
     if (!request || !ids?.length) {
@@ -1096,21 +1132,22 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     pendingRequestEvents.delete(request);
     await eventQuery().updateMany({
       where: { id: { $in: ids }, sessionId: null },
-      data: { sessionId },
+      data: { sessionId: familyId },
     });
   };
 
-  /** `currentSessionId` leaves out what the caller's own session did: it already knows. */
+  /** `currentSessionId` leaves out what the caller's own login did: it already knows. */
   const unseenEvents = async (
     userId: string,
     currentSessionId?: string
   ): Promise<MfaEventNotice[]> => {
+    const family = await sessionFamily(currentSessionId);
     const rows = await eventQuery().findMany({
       where: {
         userId: String(userId),
         seenAt: null,
         type: NOT_ACKNOWLEDGEMENT_MARKER,
-        ...notFromSession(currentSessionId),
+        ...notFromFamily(family?.familyId ?? currentSessionId),
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
@@ -1125,23 +1162,46 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
+   * Whether another live login of this user began before `family`. When one did, `family` is not
+   * the only witness of what happened before it began, so it must not clear those notices: an
+   * attacker who signs in beside the holder would otherwise dismiss the evidence of their own
+   * arrival before the holder's session ever showed it. With no older login, nobody else could
+   * have seen them, and this one must be able to dismiss them or they never go away.
+   */
+  const hasOlderLiveFamily = async (userId: string, family: AdminSessionFamily) => {
+    if (!strapi.sessionManager?.hasOrigin('admin')) {
+      return true;
+    }
+    const sessions = await strapi.sessionManager('admin').listSessions(String(userId));
+    return sessions.some((session) => {
+      const other = sessionFamilyOf(session);
+      return other.familyId !== family.familyId && other.startedAt < family.startedAt;
+    });
+  };
+
+  /**
    * `userId` is always in the `where` and `ids` only narrows further, so a foreign id can never
    * reach another user's row. An *absent* `ids` marks everything; an *empty* array marks nothing.
+   *
+   * A login never clears its own family's events (the other logins still need them) and, while an
+   * older login is live, never clears events from before it began (see `hasOlderLiveFamily`).
    */
   const markEventsSeen = async (
     userId: string,
     ids?: Data.ID[],
     currentSessionId?: string
   ): Promise<void> => {
-    // The caller never saw its own session's events, so "everything" must not clear them for the
-    // other sessions that still should.
+    const family = await sessionFamily(currentSessionId);
     const where: Record<string, unknown> = {
       userId: String(userId),
       type: NOT_ACKNOWLEDGEMENT_MARKER,
-      ...notFromSession(currentSessionId),
+      ...notFromFamily(family?.familyId ?? currentSessionId),
     };
     if (ids) {
       where.id = { $in: ids };
+    }
+    if (family && (await hasOlderLiveFamily(userId, family))) {
+      where.createdAt = { $gte: family.startedAt };
     }
 
     await eventQuery().updateMany({ where, data: { seenAt: new Date() } });
@@ -1530,6 +1590,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     sendNotice,
     pruneEvents,
     unseenEvents,
+    sessionFamily,
     claimRequestEvents,
     markEventsSeen,
     areCodesAcknowledged,

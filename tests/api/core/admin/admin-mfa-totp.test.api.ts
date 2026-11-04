@@ -184,10 +184,12 @@ describe('Admin MFA: the TOTP factor end to end', () => {
   });
 
   test('a failed code reaches the account holder as a notice, and can be marked seen', async () => {
+    // Signed in before the failure, as the holder would be: a login that began after an event may
+    // not dismiss it while an older one is live (the next tests cover that rule).
+    const headers = await bearer();
     const challenge = await login();
     await completeChallenge(challenge.body.data.challengeToken, '000000');
 
-    const headers = await bearer();
     const notices = await createRequest({ strapi }).get('/admin/mfa/notices', { headers });
     expect(notices.statusCode).toBe(200);
     expect(notices.body.data.map((n: any) => n.type)).toContain('challenge_failed');
@@ -231,6 +233,63 @@ describe('Admin MFA: the TOTP factor end to end', () => {
       body: {},
       headers: sessionB,
     });
+  });
+
+  test('a login keeps recognising its own events after POST /admin/access-token rotates it', async () => {
+    // Every refresh mints a new session id. Ownership is keyed on the login family, so the
+    // rotated session must still not be told about its own login, and other logins still must.
+    await strapi.db
+      .query('admin::mfa-event')
+      .updateMany({ where: { userId: String(user.id) }, data: { seenAt: new Date() } });
+    const typesFor = async (headers: Record<string, string>) =>
+      (await createRequest({ strapi }).get('/admin/mfa/notices', { headers })).body.data.map(
+        (n: any) => n.type
+      );
+
+    const challenge = await login();
+    const done = await completeChallenge(challenge.body.data.challengeToken, nextRecoveryCode());
+    const cookie = (done.headers['set-cookie'] as unknown as string[])
+      .find((c) => c.startsWith('strapi_admin_refresh='))!
+      .split(';')[0];
+
+    const refreshed = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: cookie },
+    });
+    expect(refreshed.statusCode).toBe(200);
+    const rotated = { Authorization: `Bearer ${refreshed.body.data.token}` };
+
+    expect(await typesFor(rotated)).toEqual([]);
+
+    // Its "mark all seen" must not clear its own login for the others.
+    await createRequest({ strapi }).post('/admin/mfa/notices/seen', { body: {}, headers: rotated });
+    const other = await bearer();
+    expect(await typesFor(other)).toEqual(['recovery_code_used']);
+    await createRequest({ strapi }).post('/admin/mfa/notices/seen', { body: {}, headers: other });
+  });
+
+  test('a newer login cannot clear a notice from before it began while an older login is live', async () => {
+    await strapi.db
+      .query('admin::mfa-event')
+      .updateMany({ where: { userId: String(user.id) }, data: { seenAt: new Date() } });
+    const failedTypes = async (headers: Record<string, string>) =>
+      (await createRequest({ strapi }).get('/admin/mfa/notices', { headers })).body.data
+        .map((n: any) => n.type)
+        .filter((type: string) => type === 'challenge_failed');
+
+    const holder = await bearer();
+    const challenge = await login();
+    await completeChallenge(challenge.body.data.challengeToken, '000000');
+    const newcomer = await bearer();
+
+    await createRequest({ strapi }).post('/admin/mfa/notices/seen', {
+      body: {},
+      headers: newcomer,
+    });
+
+    // The holder still sees the failed attempt the newcomer tried to dismiss, and can clear it.
+    expect(await failedTypes(holder)).toEqual(['challenge_failed']);
+    await createRequest({ strapi }).post('/admin/mfa/notices/seen', { body: {}, headers: holder });
+    expect(await failedTypes(holder)).toEqual([]);
   });
 
   test('disabling needs the password and a code, then login stops asking', async () => {

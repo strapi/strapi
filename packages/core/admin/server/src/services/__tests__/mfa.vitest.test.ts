@@ -2702,23 +2702,68 @@ describe('mfa service: challenge lifecycle', () => {
   });
 });
 
-describe('mfa service: events from the current session', () => {
-  /** `recordEvent` reads the session from the request context, as `strapi.requestContext` gives it. */
+describe('mfa service: events from the current login', () => {
+  /**
+   * `recordEvent` reads the session from the request context, as `strapi.requestContext` gives it,
+   * and resolves its login family from the `admin::session` row. `login` adds a family; `rotate`
+   * gives it a new session id the way a refresh does, carrying the metadata over.
+   */
   const setup = () => {
     const fixture = buildMfaFixture();
     const request: { state: Record<string, unknown> } = { state: {} };
+    const sessions = new Map<string, Record<string, unknown>>();
+    const baseQuery = fixture.strapi.db.query;
+    (fixture.strapi as any).db.query = (uid: string) =>
+      uid === 'admin::session'
+        ? {
+            findOne: vi.fn(async ({ where }: any) => {
+              const row = sessions.get(where.sessionId);
+              return row ? { ...row } : null;
+            }),
+          }
+        : baseQuery(uid);
+    const live = new Set<string>();
     (fixture.strapi as any).requestContext = { get: () => request };
+    (fixture.strapi as any).sessionManager = Object.assign(
+      () => ({
+        listSessions: vi.fn(async () => [...live].map((id) => ({ ...sessions.get(id) }))),
+      }),
+      { hasOrigin: () => true }
+    );
     const service = createMfaService(defaultDeps(fixture.strapi));
-    return { ...fixture, service, request };
+
+    const login = (sessionId: string, familyId: string, loginAt: Date) => {
+      sessions.set(sessionId, {
+        sessionId,
+        origin: 'admin',
+        userId: '1',
+        createdAt: loginAt,
+        metadata: { familyId, loginAt: loginAt.toISOString() },
+      });
+      live.add(sessionId);
+    };
+    const rotate = (from: string, to: string) => {
+      sessions.set(to, { ...sessions.get(from)!, sessionId: to, createdAt: new Date() });
+      live.delete(from);
+      live.add(to);
+    };
+    const act = async (sessionId: string | undefined, run: () => Promise<unknown>) => {
+      request.state = sessionId ? { session: { id: sessionId } } : {};
+      await run();
+    };
+
+    return { ...fixture, service, request, login, rotate, act, live };
   };
 
-  test('recordEvent tags the event with the session of the request that caused it', async () => {
-    const { service, events, request } = setup();
-    request.state.session = { id: 'session-a' };
+  const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000);
 
-    await service.recordEvent('1', 'disabled');
+  test('recordEvent tags the event with the login family, not the session id', async () => {
+    const { service, events, login, act } = setup();
+    login('session-a', 'family-a', minutesAgo(5));
 
-    expect(events[0].sessionId).toBe('session-a');
+    await act('session-a', () => service.recordEvent('1', 'disabled'));
+
+    expect(events[0].sessionId).toBe('family-a');
   });
 
   test('an event recorded outside any request or session is left untagged', async () => {
@@ -2729,14 +2774,25 @@ describe('mfa service: events from the current session', () => {
     expect(events[0].sessionId ?? null).toBeNull();
   });
 
-  test("unseenEvents leaves out the caller's own session, and keeps every other session and untagged event", async () => {
-    const { service, request } = setup();
-    request.state.session = { id: 'session-a' };
-    await service.recordEvent('1', 'disabled');
-    request.state.session = { id: 'session-b' };
-    await service.recordEvent('1', 'enabled');
-    request.state.session = undefined;
-    await service.recordEvent('1', 'unlocked', { byUserId: '9' });
+  test('a login still recognises its own events after a refresh rotated its session id', async () => {
+    // Keyed on the session id, the first refresh made a login's own actions look foreign to it.
+    const { service, login, rotate, act } = setup();
+    login('session-a', 'family-a', minutesAgo(5));
+    await act('session-a', () => service.recordEvent('1', 'disabled'));
+    rotate('session-a', 'session-a2');
+
+    const notices = await service.unseenEvents('1', 'session-a2');
+
+    expect(notices).toEqual([]);
+  });
+
+  test("unseenEvents leaves out the caller's own login, and keeps every other and untagged event", async () => {
+    const { service, login, act } = setup();
+    login('session-a', 'family-a', minutesAgo(10));
+    login('session-b', 'family-b', minutesAgo(5));
+    await act('session-a', () => service.recordEvent('1', 'disabled'));
+    await act('session-b', () => service.recordEvent('1', 'enabled'));
+    await act(undefined, () => service.recordEvent('1', 'unlocked', { byUserId: '9' }));
 
     const notices = await service.unseenEvents('1', 'session-a');
 
@@ -2744,12 +2800,12 @@ describe('mfa service: events from the current session', () => {
     expect(notices[0]).not.toHaveProperty('sessionId');
   });
 
-  test('markEventsSeen with no ids leaves events this session cannot see for the other sessions', async () => {
-    const { service, events, request } = setup();
-    request.state.session = { id: 'session-a' };
-    await service.recordEvent('1', 'disabled');
-    request.state.session = { id: 'session-b' };
-    await service.recordEvent('1', 'enabled');
+  test('markEventsSeen with no ids leaves its own login’s events for the other logins', async () => {
+    const { service, events, login, act } = setup();
+    login('session-a', 'family-a', minutesAgo(10));
+    login('session-b', 'family-b', minutesAgo(5));
+    await act('session-a', () => service.recordEvent('1', 'disabled'));
+    await act('session-b', () => service.recordEvent('1', 'enabled'));
 
     await service.markEventsSeen('1', undefined, 'session-a');
 
@@ -2757,20 +2813,55 @@ describe('mfa service: events from the current session', () => {
     expect(events.find((e) => e.type === 'enabled')!.seenAt).not.toBeNull();
   });
 
-  test('claimRequestEvents hands the events a login recorded to the session that login issues', async () => {
+  test('a newer login cannot clear notices from before it began while an older login is live', async () => {
+    // The attacker case: they sign in beside the holder and try to dismiss the evidence (failed
+    // codes from their own attempts, recorded before their session existed) before the holder sees it.
+    const { service, events, login, act } = setup();
+    login('victim', 'family-victim', minutesAgo(60));
+    await act(undefined, () => service.recordEvent('1', 'challenge_failed'));
+    events[0].createdAt = minutesAgo(2);
+    login('attacker', 'family-attacker', minutesAgo(1));
+    await act(undefined, () => service.recordEvent('1', 'unlocked', { byUserId: '9' }));
+
+    await service.markEventsSeen('1', undefined, 'attacker');
+
+    expect(events.find((e) => e.type === 'challenge_failed')!.seenAt).toBeNull();
+    // What happened after it began, it may clear.
+    expect(events.find((e) => e.type === 'unlocked')!.seenAt).not.toBeNull();
+    // The older login still sees, and can clear, the earlier notice.
+    expect((await service.unseenEvents('1', 'victim')).map((n) => n.type)).toEqual([
+      'challenge_failed',
+    ]);
+    await service.markEventsSeen('1', undefined, 'victim');
+    expect(events.find((e) => e.type === 'challenge_failed')!.seenAt).not.toBeNull();
+  });
+
+  test('the only live login can clear notices from before it began', async () => {
+    // Otherwise a notice recorded while nobody was signed in (a lock, a reset) could never go.
+    const { service, events, login, act } = setup();
+    await act(undefined, () => service.recordEvent('1', 'reset', { byUserId: '9' }));
+    events[0].createdAt = minutesAgo(30);
+    login('session-a', 'family-a', minutesAgo(1));
+
+    await service.markEventsSeen('1', undefined, 'session-a');
+
+    expect(events[0].seenAt).not.toBeNull();
+  });
+
+  test('claimRequestEvents hands the events a login recorded to the family that login issues', async () => {
     const { service, events, request } = setup();
     // A recovery-code login: no session yet while the events are written.
     await service.recordEvent('1', 'recovery_code_used');
     await service.recordEvent('1', 'device_trusted', { days: 30 });
 
-    await service.claimRequestEvents('session-new');
+    await service.claimRequestEvents('family-new');
 
-    expect(events.map((e) => e.sessionId)).toEqual(['session-new', 'session-new']);
+    expect(events.map((e) => e.sessionId)).toEqual(['family-new', 'family-new']);
     // A later request with its own context starts clean.
     const other: { state: Record<string, unknown> } = { state: {} };
     (request as any).state = other.state;
-    await service.claimRequestEvents('session-other');
-    expect(events.map((e) => e.sessionId)).toEqual(['session-new', 'session-new']);
+    await service.claimRequestEvents('family-other');
+    expect(events.map((e) => e.sessionId)).toEqual(['family-new', 'family-new']);
   });
 });
 

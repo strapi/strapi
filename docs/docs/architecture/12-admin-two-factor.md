@@ -247,16 +247,32 @@ Two functions in `server/src/services/mfa.ts` record what happens:
   `enabled`, `disabled`, `reset` and `authenticator_replaced`. `trusted_device_used` and
   `passkey_used` are emitted with no row.
 
-Each row records the `sessionId` of the request that caused it, read from `strapi.requestContext`.
-A login has no session yet while it writes its rows (a recovery code used, a device trusted), so
-`issueSession` calls `claimRequestEvents` to hand those rows to the session it just issued. System
-and administrator events (grace started, locked, unlocked, reset) carry no session.
+Each row records, in its `sessionId` column, the **login family** of the request that caused it.
+A family is one login and every session a refresh rotates out of it: `issueSession` (and the EE
+SSO callback) store a random `familyId` and the `loginAt` time in the session's `metadata`
+(`buildAdminSessionMetadata` in `shared/utils/session-auth.ts`), and the session manager copies
+`metadata` onto every rotated child. Keying on the session id instead stopped a login recognising
+its own events after its first refresh. The family id is server-generated, unlike the
+client-supplied `deviceId`. Sessions from before this existed are their own family. A login has no
+session yet while it writes its rows (a recovery code used, a device trusted), so `issueSession`
+calls `claimRequestEvents` to hand those rows to the family it just started. System and
+administrator events (grace started, locked, unlocked, reset) carry no family.
 
 `GET /admin/mfa/notices` returns the caller's unseen rows, newest first, minus the rows the
-caller's own session caused: that session already knows. `POST /admin/mfa/notices/seen` marks them
-(an absent `ids` marks all of the caller's, and it is always scoped to rows the caller owns). It
-also skips the caller's own session's rows, so clearing notices on one device never hides that
-device's actions from the others.
+caller's own login family caused: it already knows. `POST /admin/mfa/notices/seen` marks them
+(an absent `ids` marks all of the caller's, and it is always scoped to rows the caller owns), with
+two limits:
+
+- It skips the caller's own family's rows, so clearing notices on one device never hides that
+  device's actions from the others.
+- While another live login of the user began **before** the caller's, it marks only rows created
+  at or after the caller's own `loginAt`. Otherwise an attacker who signs in beside the holder could
+  dismiss the evidence of their arrival (their failed codes, recorded before their session existed)
+  before the holder's session ever showed it. When no older login is live, nobody else could have
+  seen the older rows, so the caller may clear them; without that, a notice recorded while nobody
+  was signed in could never go away. A forgotten old session on another device therefore keeps the
+  older notices up until it is revoked from the sessions list.
+
 Notice `metadata` is limited to neutral context and never carries a code, a secret or an otpauth
 URI.
 

@@ -9,6 +9,7 @@ import {
   resolveLogoutDeviceId,
   issueSession,
   REFRESH_COOKIE_NAME,
+  sessionFamilyOf,
   MFA_TRUST_COOKIE_NAME,
   buildTrustCookieOptions,
   setTrustCookie,
@@ -437,8 +438,15 @@ describe('issueSession', () => {
       data: { token: 'access-token', accessToken: 'access-token', user: sanitizedUser },
     });
     expect(sanitizeUser).toHaveBeenCalledWith(user);
-    // The events this login recorded go to the session it just minted.
-    expect(claimRequestEvents).toHaveBeenCalledWith('session-1');
+    // The events this login recorded go to the login family it just started: a random id in the
+    // session metadata, which every rotation copies, rather than the session id a refresh replaces.
+    const { metadata } = generateRefreshToken.mock.calls[0][2] as {
+      metadata: { familyId: string; loginAt: string; authMethod?: string };
+    };
+    expect(metadata.familyId).toMatch(/^[0-9a-f-]{36}$/);
+    expect(metadata.loginAt).toEqual(expect.any(String));
+    expect(metadata.authMethod).toBeUndefined();
+    expect(claimRequestEvents).toHaveBeenCalledWith(metadata.familyId);
   });
 
   test('honours rememberMe from the request body by minting a refresh-type session', async () => {
@@ -589,5 +597,26 @@ describe('trust cookie helpers', () => {
       '',
       expect.objectContaining({ httpOnly: true, path: '/', expires: new Date(0) })
     );
+  });
+});
+
+describe('sessionFamilyOf', () => {
+  test('reads the family from the metadata a rotation carries over', () => {
+    expect(
+      sessionFamilyOf({
+        sessionId: 'child',
+        createdAt: new Date('2026-11-04T10:00:00.000Z'),
+        metadata: { familyId: 'fam', loginAt: '2026-11-04T09:00:00.000Z', authMethod: 'sso' },
+      })
+    ).toEqual({ familyId: 'fam', startedAt: new Date('2026-11-04T09:00:00.000Z'), sso: true });
+  });
+
+  test('a session from before families existed is its own family', () => {
+    const createdAt = new Date('2026-11-04T10:00:00.000Z');
+    expect(sessionFamilyOf({ sessionId: 'old', createdAt, metadata: null })).toEqual({
+      familyId: 'old',
+      startedAt: createdAt,
+      sso: false,
+    });
   });
 });

@@ -272,6 +272,47 @@ export const buildSessionMetadataFromContext = (ctx: Context) =>
   });
 
 /**
+ * Server-generated facts about a login, stored in the session's `metadata`. The session manager
+ * copies `metadata` onto every rotated child, so these hold for the whole login family:
+ *
+ * - `familyId` names the family. Every refresh mints a new `sessionId`, so anything that must
+ *   recognise "the same login" across rotations (two-factor notices) keys on this instead. It is
+ *   random and never taken from the client, unlike `deviceId`.
+ * - `loginAt` (from `buildSessionMetadata`) is when the family began.
+ * - `authMethod: 'sso'` marks a login an identity provider authenticated. Two-factor enforcement
+ *   does not apply to those: the provider owns the second factor.
+ */
+export const buildAdminSessionMetadata = (ctx: Context, options: { sso?: boolean } = {}) => ({
+  ...buildSessionMetadataFromContext(ctx),
+  familyId: crypto.randomUUID(),
+  ...(options.sso ? { authMethod: 'sso' } : {}),
+});
+
+export interface AdminSessionFamily {
+  familyId: string;
+  /** When the family began. */
+  startedAt: Date;
+  sso: boolean;
+}
+
+/** Sessions issued before `familyId` existed are their own family: the fallback is the row's own
+ * id and creation time, which is conservative (a rotation then starts a new family). */
+export const sessionFamilyOf = (session: {
+  sessionId: string;
+  metadata?: Record<string, unknown> | null;
+  createdAt?: Date | string | null;
+}): AdminSessionFamily => {
+  const metadata = session.metadata ?? {};
+  const loginAt = typeof metadata.loginAt === 'string' ? new Date(metadata.loginAt) : null;
+  const created = session.createdAt ? new Date(session.createdAt) : new Date();
+  return {
+    familyId: typeof metadata.familyId === 'string' ? metadata.familyId : session.sessionId,
+    startedAt: loginAt && !Number.isNaN(loginAt.getTime()) ? loginAt : created,
+    sso: metadata.authMethod === 'sso',
+  };
+};
+
+/**
  * Mints an admin refresh session and access token, then writes them to `ctx`: the refresh
  * cookie and `ctx.body`. This is the single place every CE flow that authenticates a user
  * (password login, the MFA challenge, registration, first-admin registration, password reset)
@@ -305,18 +346,17 @@ export const issueSession = async (
     const deviceId = options.deviceId ?? bodyParams.deviceId;
     const rememberMe = options.rememberMe ?? bodyParams.rememberMe;
 
-    const {
-      token: refreshToken,
-      sessionId,
-      absoluteExpiresAt,
-    } = await sessionManager('admin').generateRefreshToken(userId, deviceId, {
+    const metadata = buildAdminSessionMetadata(ctx);
+    const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
+      'admin'
+    ).generateRefreshToken(userId, deviceId, {
       type: rememberMe ? 'refresh' : 'session',
-      metadata: buildSessionMetadataFromContext(ctx),
+      metadata,
     });
 
-    // Security events this login recorded (a recovery code, a trusted device) belong to the session
+    // Security events this login recorded (a recovery code, a trusted device) belong to the login
     // it just created, which must not then notify about them.
-    await strapi.service('admin::mfa').claimRequestEvents(sessionId);
+    await strapi.service('admin::mfa').claimRequestEvents(metadata.familyId);
 
     const cookieOptions = buildCookieOptionsWithExpiry(
       rememberMe ? 'refresh' : 'session',
