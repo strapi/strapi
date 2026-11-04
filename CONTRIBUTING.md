@@ -137,7 +137,7 @@ Both commands must be running at same time; now you will be able to see the admi
 ### 6. Available commands
 
 - `yarn watch` starts yarn watch in all packages.
-- `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn build` builds every package (code and types).
 - `yarn commit` runs an interactive commit CLI to help you write a good commit message inline with our git conventions.
 - `yarn setup` installs dependencies.
 - `yarn lint` lints the codebase.
