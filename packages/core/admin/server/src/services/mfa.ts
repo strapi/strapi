@@ -603,11 +603,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     const replaced = Boolean(user.mfaEnabledAt && user.mfaSecret);
 
-    // `issueRecoveryCodes` deletes the existing set first, so committing it alone would rotate a
+    // `storeRecoveryCodes` deletes the existing set first, so committing it alone would rotate a
     // replacing user's codes to values the errored response never returned. `mfaPendingSecret` is in
-    // the `where`, so a `disable` racing in between is not silently undone.
+    // the `where`, so a `disable` racing in between is not silently undone. The codes are hashed
+    // before the transaction opens, for the reason `hashRecoveryCodes` gives.
+    const { codes, rows } = await hashRecoveryCodes(userId);
+
     const recoveryCodes = await strapi.db.transaction(async () => {
-      const codes = await issueRecoveryCodes(userId);
+      await storeRecoveryCodes(userId, rows);
 
       const { count } = await userQuery().updateMany({
         where: { id: userId, mfaPendingSecret: user.mfaPendingSecret },
@@ -651,17 +654,25 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const recoveryQuery = () => strapi.db.query(RECOVERY_CODE_UID);
 
   /** bcrypt-hashed rather than encrypted, so a rotated `ENCRYPTION_KEY` cannot take the escape hatch
-   * with it -- rotation is the exact moment a user needs these (ASVS 6.5.2). */
-  const issueRecoveryCodes = async (userId: string): Promise<string[]> => {
+   * with it -- rotation is the exact moment a user needs these (ASVS 6.5.2). Hashed apart from the
+   * write so a caller holding a transaction can do this first: ten bcrypt rounds inside one would
+   * hold it open, and on SQLite that blocks every other write. */
+  const hashRecoveryCodes = async (userId: string) => {
     const codes = generateRecoveryCodes(config().recoveryCodeCount);
-    const data = await Promise.all(
+    const rows = await Promise.all(
       codes.map(async (code) => ({
         userId: String(userId),
         codeHash: await auth.hashPassword(code),
         usedAt: null,
       }))
     );
+    return { codes, rows };
+  };
 
+  const storeRecoveryCodes = async (
+    userId: string,
+    rows: Array<{ userId: string; codeHash: string; usedAt: null }>
+  ): Promise<void> => {
     // One transaction: a `createMany` failure after the delete commits would leave the account
     // with zero recovery codes and no way to get any.
     await strapi.db.transaction(async () => {
@@ -669,15 +680,19 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
       // `recoveryCodeCount: 0` is valid config. Rather than trust every query engine to no-op on
       // an empty `createMany`, skip it.
-      if (data.length > 0) {
-        await recoveryQuery().createMany({ data });
+      if (rows.length > 0) {
+        await recoveryQuery().createMany({ data: rows });
       }
 
       // A fresh, unacknowledged marker every time, so `areCodesAcknowledged` never reports a stale
       // acknowledgement of codes already replaced.
       await recordEvent(userId, 'recovery_codes_issued');
     });
+  };
 
+  const issueRecoveryCodes = async (userId: string): Promise<string[]> => {
+    const { codes, rows } = await hashRecoveryCodes(userId);
+    await storeRecoveryCodes(userId, rows);
     return codes;
   };
 

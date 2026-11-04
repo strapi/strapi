@@ -1735,6 +1735,31 @@ describe('mfa service: enrolment', () => {
       expect(trustedRows).toHaveLength(1);
     });
 
+    test('hashes the recovery codes before the promotion transaction opens', async () => {
+      // bcrypt inside a transaction holds it open for every round; on SQLite that blocks all writes.
+      const { strapi } = buildStrapi();
+      const hashedInTransaction: boolean[] = [];
+      const service = createMfaService({
+        ...defaultDeps(strapi),
+        auth: {
+          validatePassword: async () => true,
+          async hashPassword(v: string) {
+            hashedInTransaction.push(strapi.db.inTransaction());
+            return `h:${v}`;
+          },
+        },
+      });
+
+      const { secret } = await service.beginEnrolment('1', 'pw');
+      await service.completeEnrolment(
+        '1',
+        generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 })
+      );
+
+      expect(hashedInTransaction.length).toBeGreaterThan(0);
+      expect(hashedInTransaction.every((inside) => !inside)).toBe(true);
+    });
+
     test('a first enrolment discards trusts, passkeys and challenges left from an earlier one', async () => {
       // The state a rollback and roll forward leaves: the `mfa*` columns are gone, so the user is
       // unenrolled, but the persisted tables still hold the old enrolment's rows.
