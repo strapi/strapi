@@ -15677,43 +15677,223 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                   "bcc": {
                     "anyOf": [
                       {
-                        "type": "string",
+                        "anyOf": [
+                          {
+                            "type": "string",
+                          },
+                          {
+                            "additionalProperties": {},
+                            "properties": {
+                              "address": {
+                                "type": "string",
+                              },
+                              "name": {
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "address",
+                            ],
+                            "type": "object",
+                          },
+                          {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "additionalProperties": {},
+                                  "properties": {
+                                    "address": {
+                                      "type": "string",
+                                    },
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "address",
+                                  ],
+                                  "type": "object",
+                                },
+                              ],
+                            },
+                            "type": "array",
+                          },
+                        ],
                       },
                       {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
+                        "type": "null",
                       },
                     ],
                   },
                   "cc": {
                     "anyOf": [
                       {
-                        "type": "string",
+                        "anyOf": [
+                          {
+                            "type": "string",
+                          },
+                          {
+                            "additionalProperties": {},
+                            "properties": {
+                              "address": {
+                                "type": "string",
+                              },
+                              "name": {
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "address",
+                            ],
+                            "type": "object",
+                          },
+                          {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "additionalProperties": {},
+                                  "properties": {
+                                    "address": {
+                                      "type": "string",
+                                    },
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "address",
+                                  ],
+                                  "type": "object",
+                                },
+                              ],
+                            },
+                            "type": "array",
+                          },
+                        ],
                       },
                       {
-                        "items": {
-                          "type": "string",
-                        },
-                        "type": "array",
+                        "type": "null",
                       },
                     ],
                   },
                   "from": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                          },
+                          {
+                            "additionalProperties": {},
+                            "properties": {
+                              "address": {
+                                "type": "string",
+                              },
+                              "name": {
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "address",
+                            ],
+                            "type": "object",
+                          },
+                        ],
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                   "html": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                   "replyTo": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                          },
+                          {
+                            "additionalProperties": {},
+                            "properties": {
+                              "address": {
+                                "type": "string",
+                              },
+                              "name": {
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "address",
+                            ],
+                            "type": "object",
+                          },
+                          {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "additionalProperties": {},
+                                  "properties": {
+                                    "address": {
+                                      "type": "string",
+                                    },
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "address",
+                                  ],
+                                  "type": "object",
+                                },
+                              ],
+                            },
+                            "type": "array",
+                          },
+                        ],
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                   "subject": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                   "text": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                   "to": {
                     "anyOf": [
@@ -15721,8 +15901,42 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                         "type": "string",
                       },
                       {
+                        "additionalProperties": {},
+                        "properties": {
+                          "address": {
+                            "type": "string",
+                          },
+                          "name": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "address",
+                        ],
+                        "type": "object",
+                      },
+                      {
                         "items": {
-                          "type": "string",
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "additionalProperties": {},
+                              "properties": {
+                                "address": {
+                                  "type": "string",
+                                },
+                                "name": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "address",
+                              ],
+                              "type": "object",
+                            },
+                          ],
                         },
                         "type": "array",
                       },
@@ -15731,7 +15945,6 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 },
                 "required": [
                   "to",
-                  "subject",
                 ],
                 "type": "object",
               },

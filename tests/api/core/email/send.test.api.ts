@@ -27,13 +27,31 @@ const acceptedBodies = [
       headers: { 'X-Custom': 'value' },
     },
   ],
+  ['neither `text` nor `html`', { to: 'recipient@example.com', subject: 'Hello' }],
+  [
+    'a SendGrid-style template-only body',
+    {
+      to: 'recipient@example.com',
+      templateId: 'd-123',
+      dynamicTemplateData: { name: 'Ada' },
+    },
+  ],
+  [
+    'a nodemailer `raw` body',
+    { to: 'recipient@example.com', raw: 'Subject: Hello\r\n\r\nHello world' },
+  ],
+  [
+    'null optional fields',
+    { ...validBody, from: null, cc: null, bcc: null, replyTo: null, html: null },
+  ],
+  ['an address-object `to`', { ...validBody, to: { name: 'Ada', address: 'ada@example.com' } }],
+  ['a `replyTo` array', { ...validBody, replyTo: ['first@example.com', 'second@example.com'] }],
 ] as const;
 
 const invalidBodies = [
   ['no `to`', { subject: 'Hello', text: 'Hello world' }],
   ['a numeric `subject`', { ...validBody, subject: 42 }],
   ['an object `text`', { ...validBody, text: { value: 'Hello world' } }],
-  ['neither `text` nor `html`', { to: 'recipient@example.com', subject: 'Hello' }],
 ] as const;
 
 describe('Email - POST /email', () => {
