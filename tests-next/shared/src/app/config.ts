@@ -36,6 +36,5 @@ export const baseEnv = (): NodeJS.ProcessEnv => ({
   HOST,
   BROWSER: 'none',
   STRAPI_TELEMETRY_DISABLED: 'true',
-  STRAPI_DISABLE_UPDATE_NOTIFICATION: 'true',
   NODE_ENV: 'development',
 });

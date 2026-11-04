@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import net from 'node:net';
 
+import { TEST_AI_PROVIDER_ENV_VAR, TEST_PLUGIN_ENV_VAR } from '../test-plugin';
 import { HOST, baseEnv, strapiBin } from './config';
 import { adminIndexFile, hasAdminBuild } from './build';
 import type { App } from './generate';
@@ -17,6 +18,10 @@ export interface StartServerOptions {
   /** Fail before starting when the admin build is missing. Set it for UI tests. */
   requireAdmin?: boolean;
   env?: NodeJS.ProcessEnv;
+  /** Load the test plugin (tests-next/shared/test-plugin). Default: true. */
+  testPlugin?: boolean;
+  /** Register the fake AI translations provider. Needs EE with the `cms-byok-ai` feature. */
+  fakeAiProvider?: boolean;
   /** Max time to wait for the server to be ready. Default: 120 s. */
   timeout?: number;
 }
@@ -80,7 +85,15 @@ const signalGroup = (child: ChildProcess, signal: NodeJS.Signals) => {
  * first, or the timeout passes, it rejects with the server output.
  */
 export const startServer = async (app: App, options: StartServerOptions): Promise<Server> => {
-  const { port, mode = 'develop', requireAdmin = false, env, timeout = 120_000 } = options;
+  const {
+    port,
+    mode = 'develop',
+    requireAdmin = false,
+    env,
+    testPlugin = true,
+    fakeAiProvider = false,
+    timeout = 120_000,
+  } = options;
 
   if (requireAdmin && !hasAdminBuild(app)) {
     // Without a build, `--no-build-admin` still passes the readiness check but /admin is a 404.
@@ -95,7 +108,14 @@ export const startServer = async (app: App, options: StartServerOptions): Promis
   const args = mode === 'develop' ? ['develop', '--no-watch-admin', '--no-build-admin'] : [];
   const child = spawn(process.execPath, [strapiBin(), ...args], {
     cwd: app.dir,
-    env: { ...process.env, ...baseEnv(), ...env, PORT: String(port) },
+    env: {
+      ...process.env,
+      ...baseEnv(),
+      [TEST_PLUGIN_ENV_VAR]: String(testPlugin),
+      ...(fakeAiProvider ? { [TEST_AI_PROVIDER_ENV_VAR]: 'fake' } : {}),
+      ...env,
+      PORT: String(port),
+    },
     stdio: ['ignore', 'pipe', 'pipe'],
     // Own process group, so stop() reaches the develop worker too.
     detached: true,
