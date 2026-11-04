@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import type { Modules } from '@strapi/types';
 
 const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'] as const;
 
@@ -6,13 +7,7 @@ const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'] as c
 const sanitizePermissionFields = <T extends Partial<Permission>>(permission: T) =>
   _.pick(permission, PERMISSION_FIELDS);
 
-export interface Permission {
-  action: string;
-  actionParameters?: Record<string, unknown>;
-  subject?: string | object | null;
-  properties?: Record<string, any>;
-  conditions?: string[];
-}
+export type Permission = Modules.Permissions.Permission;
 
 /**
  * Creates a permission with default values for optional properties

@@ -64,8 +64,6 @@
     "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
     "@strapi/database": "5.60.0",
-    "@strapi/logger": "5.60.0",
-    "@strapi/permissions": "5.60.0",
     "@strapi/utils": "5.60.0",
     "commander": "8.3.0",
     "croner": "10.0.1",
@@ -75,6 +73,7 @@
     "typedoc": "0.28.19",
     "typedoc-github-wiki-theme": "2.1.0",
     "typedoc-plugin-markdown": "4.11.0",
+    "winston": "3.10.0",
     "zod": "4.4.3"
   },
   "devDependencies": {

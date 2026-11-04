@@ -1,8 +1,8 @@
-import { engine } from '@strapi/permissions';
 import { providerFactory, sanitize, validate } from '@strapi/utils';
 import type { z } from 'zod/v4';
 
 import type { Route } from '../core';
+import type * as Permissions from './permissions';
 
 /** Base Zod scalar types allowed for query params (no nested objects). */
 type ZodScalarSchema = z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodEnum<Record<string, string>>;
@@ -56,7 +56,7 @@ type ActionProvider = {
 } & ReturnType<typeof providerFactory>;
 
 export interface PermissionUtilities {
-  engine: ReturnType<typeof engine.new>;
+  engine: Permissions.Engine;
   providers: {
     action: ActionProvider;
     condition: ConditionProvider;
