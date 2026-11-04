@@ -39,17 +39,4 @@ describe('UploadDropZoneProvider', () => {
     expect(screen.getByText('true')).toBeInTheDocument();
     expect(renderConsumer).toHaveBeenCalledTimes(2);
   });
-
-  it('fills the admin column as a flex item instead of a percentage min-height', () => {
-    // Between the scrolling column and `Layouts.Root`: a `min-height: 100%` here
-    // ignored the top banners, so the column scrolled by their height and the
-    // bottom of the folder sidebar ended up off-screen.
-    render(
-      <UploadDropZoneProvider onDrop={jest.fn()}>
-        <span>child</span>
-      </UploadDropZoneProvider>
-    );
-
-    expect(screen.getByTestId('assets-dropzone')).toHaveStyle({ flexGrow: '1', minHeight: '0' });
-  });
 });

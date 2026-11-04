@@ -33,11 +33,6 @@ const UploadDropZoneContext = createContext<UploadDropZoneContextValue | null>(n
  * Components
  * -----------------------------------------------------------------------------------------------*/
 
-// Sits between the admin's scrolling column and `Layouts.Root`, so it has to pass
-// the column's height down the same way the layout would as a direct child:
-// grow into the space left by the top banners and never past it. A percentage
-// min-height ignored the banners, which made the whole column scroll by their
-// height and cut the bottom of the folder sidebar off-screen.
 const DropZoneWrapper = styled(Box)`
   position: relative;
   display: flex;
