@@ -38,3 +38,21 @@ describe('security settings validation: passkeysSchema', () => {
     expect(messages).toContain('Provide mfa, trustedDevices or passkeys');
   });
 });
+
+describe('security settings validation: requiredRoles', () => {
+  const mfa = (requiredRoles: unknown[]) => ({
+    mfa: { mode: 'optional', graceDays: 7, requiredRoles },
+  });
+
+  test('accepts role ids as numbers or digit strings', async () => {
+    await expect(validateUpdateSecuritySettings(mfa([1, '2']))).resolves.toEqual(mfa([1, '2']));
+  });
+
+  test.each([['abc'], ['1; drop'], ['-1'], ['1.5']])(
+    'rejects %p rather than letting it reach the role lookup',
+    async (id) => {
+      const messages = await messagesOf(mfa([id]));
+      expect(messages.some((m) => /role ids/.test(m))).toBe(true);
+    }
+  );
+});

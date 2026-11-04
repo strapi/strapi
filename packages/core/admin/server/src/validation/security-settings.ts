@@ -22,7 +22,19 @@ const mfaSchema = yup
       .oneOf([...MFA_ENFORCEMENT_MODES])
       .required(),
     graceDays: yup.number().integer().min(MIN_GRACE_DAYS).max(MAX_GRACE_DAYS).required(),
-    requiredRoles: yup.array().of(yup.strapiID().required()).required(),
+    // Digits only, as a number or a string: a non-numeric id reached the `$in` role lookup and was a
+    // 500 on Postgres rather than a 400.
+    requiredRoles: yup
+      .array()
+      .of(
+        yup
+          .strapiID()
+          .required()
+          .test('role-id', 'requiredRoles must contain role ids', (value) =>
+            /^\d+$/.test(String(value))
+          )
+      )
+      .required(),
   })
   .noUnknown();
 
