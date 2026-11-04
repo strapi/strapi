@@ -122,7 +122,9 @@ describe('RoleTwoFactorRequirement', () => {
     const dialog = await screen.findByRole('alertdialog', {
       name: 'Require two-factor authentication?',
     });
-    expect(dialog).toHaveTextContent(/4 users will be asked to set up two-factor authentication/);
+    expect(dialog).toHaveTextContent(
+      /3 users will be asked to set up two-factor authentication\. 1 more already uses it\./
+    );
     expect(puts).toHaveLength(0);
     await user.click(within(dialog).getByRole('button', { name: 'Require' }));
 

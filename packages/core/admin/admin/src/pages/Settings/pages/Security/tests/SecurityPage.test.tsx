@@ -441,8 +441,9 @@ describe('SecurityPage', () => {
     const dialog = await screen.findByRole('alertdialog', {
       name: 'Require two-factor authentication?',
     });
+    // Counts the users who still have to set it up, then the ones who already have it.
     expect(dialog).toHaveTextContent(
-      '12 users will be asked to set up two-factor authentication, and 5 of them already have it.'
+      '7 users will be asked to set up two-factor authentication. 5 more already use it.'
     );
     expect(dialog).toHaveTextContent('Each has 7 days from their next login');
     expect(bodies).toHaveLength(0);
@@ -451,6 +452,23 @@ describe('SecurityPage', () => {
 
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0]).toEqual({ mfa: { mode: 'required', graceDays: 7, requiredRoles: ['1'] } });
+  });
+
+  /** "3 users will be asked to set up... and 3 of them already have it" read as a contradiction. */
+  it('says nobody will be asked when everyone the raise adds already has two-factor', async () => {
+    mfaImpact(3, 3);
+    const { user } = await renderPage(settings(), me(true));
+
+    await chooseMode(user, 'Required for everyone');
+    fireEvent.click(saveButton());
+
+    const dialog = await screen.findByRole('alertdialog', {
+      name: 'Require two-factor authentication?',
+    });
+    expect(dialog).toHaveTextContent(
+      'All 3 users this adds already use two-factor authentication. Nobody will be asked to set it up.'
+    );
+    expect(dialog).not.toHaveTextContent(/will be asked to set up two-factor/);
   });
 
   it('asks for credentials after the raise when the same save also widens trust', async () => {

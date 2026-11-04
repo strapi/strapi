@@ -21,6 +21,7 @@ import { useGetSecuritySettingsQuery } from '../../../../services/securitySettin
 import { isNotFoundError } from '../../../../utils/baseQuery';
 
 import { ConfirmDowngradeDialog } from './components/ConfirmDowngradeDialog';
+import { EnforceImpactMessage } from './components/EnforceImpactMessage';
 import { PasskeysCard } from './components/PasskeysCard';
 import {
   TrustedDevicesCard,
@@ -283,24 +284,7 @@ const SecuritySettingsForm = ({
               </Dialog.Action>
             }
           >
-            {impact.affected === 0
-              ? formatMessage({
-                  id: 'Settings.security.mfa.enforce.none',
-                  defaultMessage:
-                    'Nobody new will be asked to set up two-factor authentication: this change adds no active user who logs in with a password.',
-                })
-              : formatMessage(
-                  {
-                    id: 'Settings.security.mfa.enforce.body',
-                    defaultMessage:
-                      '{affected, plural, one {# user} other {# users}} will be asked to set up two-factor authentication, and {enrolled, plural, =0 {none of them has} one {# of them already has} other {# of them already have}} it. Each has {graceDays, plural, one {# day} other {# days}} from their next login to set it up. After that, password login is locked until an administrator unlocks the account.',
-                  },
-                  {
-                    affected: impact.affected,
-                    enrolled: impact.enrolled,
-                    graceDays: next.mfa.graceDays,
-                  }
-                )}
+            <EnforceImpactMessage impact={impact} graceDays={next.mfa.graceDays} />
           </ConfirmDialog>
         ) : null}
       </Dialog.Root>
