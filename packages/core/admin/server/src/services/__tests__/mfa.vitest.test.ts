@@ -3650,6 +3650,87 @@ describe('mfa service: enforcement policy', () => {
   });
 });
 
+describe('mfa service: stale grace stamps', () => {
+  const setup = (options: { enabled?: boolean; marker?: unknown; mode?: string } = {}) => {
+    let marker: unknown = options.marker ?? null;
+    const set = vi.fn(async ({ value }: { value: unknown }) => {
+      marker = value;
+    });
+    const get = vi.fn(async ({ key }: { key: string }) => {
+      if (key === 'security-settings') return { mfa: { mode: options.mode ?? 'required' } };
+      if (key === 'mfa-feature-state') return marker;
+      return null;
+    });
+    const fixture = buildMfaFixture({
+      strapiOverrides: {
+        store: vi.fn(() => ({ get, set })),
+        ee: { features: { isEnabled: vi.fn(() => false) } },
+        features: { future: { isEnabled: vi.fn(() => options.enabled ?? true) } },
+      },
+    });
+    const graced = new Date(0);
+    fixture.users.set('1', { ...fixture.users.get('1')!, roles: [], mfaGraceUntil: graced });
+    fixture.users.set('2', {
+      ...fixture.users.get('1')!,
+      id: 2,
+      mfaGraceUntil: graced,
+      mfaLockedAt: new Date(),
+    });
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service, set, graced };
+  };
+
+  test('the first boot after the feature was off restarts every unlocked grace', async () => {
+    // Clocks ran while the flag was off; resuming would otherwise lock everyone at once.
+    const { service, users, set } = setup({ marker: { enabled: false } });
+
+    await service.syncFeatureState();
+
+    expect(users.get('1')!.mfaGraceUntil).toBeNull();
+    expect(users.get('2')!.mfaLockedAt).not.toBeNull();
+    expect(set).toHaveBeenCalledWith({ key: 'mfa-feature-state', value: { enabled: true } });
+  });
+
+  test('a boot while it stays on touches nothing', async () => {
+    const { service, users, set, graced } = setup({ marker: { enabled: true } });
+
+    await service.syncFeatureState();
+
+    expect(users.get('1')!.mfaGraceUntil).toEqual(graced);
+    expect(set).not.toHaveBeenCalled();
+  });
+
+  test('a boot with the feature off records it and leaves stamps alone', async () => {
+    const { service, users, set, graced } = setup({ enabled: false, marker: { enabled: true } });
+
+    await service.syncFeatureState();
+
+    expect(users.get('1')!.mfaGraceUntil).toEqual(graced);
+    expect(set).toHaveBeenCalledWith({ key: 'mfa-feature-state', value: { enabled: false } });
+  });
+
+  test('clearGraceIfStale clears the stamp of an account that was not required', async () => {
+    const { service, users } = setup({ mode: 'optional' });
+
+    await service.clearGraceIfStale({
+      ...users.get('1')!,
+      roles: [{ id: 5, mfaRequired: false }],
+    } as never);
+
+    expect(users.get('1')!.mfaGraceUntil).toBeNull();
+  });
+
+  test('clearGraceIfStale keeps a running window and a lock', async () => {
+    const { service, users, graced } = setup({ mode: 'required' });
+
+    await service.clearGraceIfStale({ ...users.get('1')! } as never);
+    await service.clearGraceIfStale({ ...users.get('2')! } as never);
+
+    expect(users.get('1')!.mfaGraceUntil).toEqual(graced);
+    expect(users.get('2')!.mfaGraceUntil).toEqual(graced);
+  });
+});
+
 describe('mfa service: enforce', () => {
   const DAY = 24 * 60 * 60 * 1000;
 

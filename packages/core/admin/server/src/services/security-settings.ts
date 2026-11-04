@@ -289,6 +289,64 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     };
   };
 
+  /**
+   * A grace stamp on an account this save newly requires is stale: it was set the last time the
+   * account was required, and its clock kept running since. Left in place, the account is locked
+   * at its next session with no warning, so such stamps are cleared and the next session starts a
+   * fresh window. Stamps of accounts already required keep running, and locks are never touched.
+   *
+   * Newly required: everyone, when enforcement was `off` (its clocks were paused); when raising
+   * `optional` to `required`, everyone who held no enforced role; and under `optional`, holders of
+   * an added role who held no enforced role before.
+   */
+  const restartStaleGrace = async (
+    current: { mode: MfaEnforcementMode; requiredRoles: string[] },
+    nextMode: MfaEnforcementMode,
+    nextRoles: string[]
+  ): Promise<void> => {
+    if (nextMode === 'off') {
+      return;
+    }
+    const stale = { mfaLockedAt: null, mfaGraceUntil: { $notNull: true } };
+
+    if (current.mode === 'off') {
+      await userQuery().updateMany({ where: stale, data: { mfaGraceUntil: null } });
+      return;
+    }
+    if (current.mode === 'required') {
+      return;
+    }
+
+    const wasEnforced = new Set(current.requiredRoles.map(String));
+    const added = new Set(nextRoles.map(String).filter((id) => !wasEnforced.has(id)));
+    if (nextMode === 'optional' && added.size === 0) {
+      return;
+    }
+
+    const graced = (await userQuery().findMany({
+      where: stale,
+      select: ['id'],
+      populate: { roles: { select: ['id'] } },
+    })) as Array<{ id: Data.ID; roles?: Array<{ id: Data.ID }> | null }>;
+
+    const ids = graced
+      .filter((user) => {
+        const held = (user.roles ?? []).map((role) => String(role.id));
+        if (held.some((id) => wasEnforced.has(id))) {
+          return false;
+        }
+        return nextMode === 'required' || held.some((id) => added.has(id));
+      })
+      .map((user) => user.id);
+
+    if (ids.length > 0) {
+      await userQuery().updateMany({
+        where: { ...stale, id: { $in: ids } },
+        data: { mfaGraceUntil: null },
+      });
+    }
+  };
+
   const updateSettings = async (
     input: UpdateSecuritySettings.Request['body'],
     actor: { id: Data.ID }
@@ -473,14 +531,7 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
           data: { mfaRequired: false },
         });
 
-        // Grace clocks kept running while enforcement was paused, so without this, resuming after more
-        // than `graceDays` locks every previously graced user at their next session with no banner.
-        if (current.mfa.mode === 'off' && write.mfa.mode !== 'off') {
-          await userQuery().updateMany({
-            where: { mfaLockedAt: null, mfaGraceUntil: { $notNull: true } },
-            data: { mfaGraceUntil: null },
-          });
-        }
+        await restartStaleGrace(current.mfa, write.mfa.mode, write.requiredRoles);
       }
     });
 

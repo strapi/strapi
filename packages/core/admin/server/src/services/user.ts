@@ -192,6 +192,12 @@ const updateById = async (
     ? await strapi.db.query('admin::user').findOne({ where: { id }, populate: ['roles'] })
     : null;
 
+  // A role change can put the account newly on the two-factor clock; `clearGraceIfStale` needs
+  // the row as it was. `roles` is a tracked field, so `previous` is already loaded then.
+  if (previous && _.has(attributes, 'roles')) {
+    await getService('mfa').clearGraceIfStale(previous);
+  }
+
   // hash password if a new one is sent
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password!);

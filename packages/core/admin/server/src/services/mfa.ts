@@ -44,6 +44,9 @@ const PASSKEY_UID = 'admin::mfa-passkey';
 
 const MAX_TOTP_CODE_LENGTH = 8;
 
+/** `core_store` key (admin scope) recording whether the feature was on at the last boot. */
+const FEATURE_STATE_KEY = 'mfa-feature-state';
+
 const RECOVERY_CODE_LENGTH = 10;
 
 /** Well above anything the attempt caps produce: `pruneEvents`' exemptions, not this cap, are what
@@ -307,6 +310,52 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       data: { mfaLockedAt: now },
     });
     return count === 1;
+  };
+
+  /**
+   * A role change can make an account newly required while it still carries a grace stamp from an
+   * earlier requirement, whose clock kept running: it would be locked at its next session with no
+   * warning. A stamp on an account that was *not* required before the change is stale by
+   * definition -- its next session would have cleared it -- so it is cleared here. Locks stay.
+   * `previous` is the row before the change, with its roles.
+   */
+  const clearGraceIfStale = async (previous: AdminUserRow): Promise<void> => {
+    if (!previous.mfaGraceUntil || previous.mfaLockedAt) {
+      return;
+    }
+    if (await isMfaRequiredFor(previous)) {
+      return;
+    }
+    await userQuery().updateMany({
+      where: { id: String(previous.id), mfaLockedAt: null },
+      data: { mfaGraceUntil: null },
+    });
+  };
+
+  /**
+   * Whether enforcement ran at the last boot, so the first boot after the future flag or
+   * `admin.auth.mfa.enabled` was off can tell. Grace clocks kept running while it was off, so
+   * without this a re-enable after more than `graceDays` locks every graced user at their next
+   * session with no warning. The stamps are cleared instead, and each user's next session starts a
+   * fresh window; locks stay. The settings-level `off` has the same treatment in `updateSettings`.
+   *
+   * No stored marker counts as "was off": that is the first boot of a version with the feature.
+   */
+  const syncFeatureState = async (): Promise<void> => {
+    const store = strapi.store({ type: 'core', name: 'admin' });
+    const stored = (await store.get({ key: FEATURE_STATE_KEY })) as
+      { enabled?: unknown } | null | undefined;
+    const enabled = isEnabled();
+
+    if (enabled && stored?.enabled !== true) {
+      await userQuery().updateMany({
+        where: { mfaLockedAt: null, mfaGraceUntil: { $notNull: true } },
+        data: { mfaGraceUntil: null },
+      });
+    }
+    if (stored?.enabled !== enabled) {
+      await store.set({ key: FEATURE_STATE_KEY, value: { enabled } });
+    }
   };
 
   const clearEnforcementStamps = async (userId: string): Promise<void> => {
@@ -1464,6 +1513,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isExemptFromMfa,
     isMfaRequiredFor,
     enforce,
+    clearGraceIfStale,
+    syncFeatureState,
     unlock,
     resetUser,
     purgeUser,

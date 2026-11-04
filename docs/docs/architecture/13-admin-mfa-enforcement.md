@@ -94,6 +94,21 @@ longer than `graceDays` does not lock every previously graced user at their next
 that moves the mode from `off` to anything else clears `mfaGraceUntil` on every unlocked account,
 in the same transaction. Each user gets a fresh window and a banner.
 
+The same applies to any account a change makes **newly required**, because its stamp may be left
+from an earlier requirement whose clock kept running:
+
+- A settings save (`restartStaleGrace` in `services/security-settings.ts`) clears the stamp of every
+  unlocked account it newly requires: everyone when raising `optional` to `required` who held no
+  enforced role, and under `optional` the holders of an added role who held no enforced role
+  before. Accounts already required keep their running deadline.
+- A role change on a user (`updateById` in `services/user.ts`) calls `clearGraceIfStale` with the row
+  as it was. If the account was not required before the change, its stamp is stale and is cleared.
+- The future flag and `admin.auth.mfa.enabled` need a restart to change. `syncFeatureState` runs at
+  every boot and keeps `mfa-feature-state` in the admin `core_store`. The first boot with the
+  feature on after a boot with it off (or with no marker yet) clears every unlocked grace stamp.
+
+Locks are never cleared by any of these. Only an unlock does that.
+
 Sessions are invalidated through `strapi.sessionManager('admin')`. If the admin origin is not
 registered, the lock and its event still land and a warning is logged, rather than the lock
 silently failing.

@@ -40,6 +40,14 @@ const {
  */
 
 /** `purgeAndDelete` runs in a transaction; these doubles just run the callback. */
+/** What `updateById` asks of the mfa service on a password change. */
+const passwordChangeMfa = (enabled = true) => ({
+  isEnabled: vi.fn(() => enabled),
+  revokeAllTrustedDevices: vi.fn(() => Promise.resolve(0)),
+  clearTrustedDevices: vi.fn(() => Promise.resolve(0)),
+  clearGraceIfStale: vi.fn(() => Promise.resolve()),
+});
+
 const runInTransaction = async (run: () => unknown) => run();
 
 describe('private MFA fields', () => {
@@ -157,6 +165,7 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            mfa: passwordChangeMfa(),
             role: { count },
             metrics: { sendDidInviteUser },
           },
@@ -192,6 +201,7 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            mfa: passwordChangeMfa(),
             role: { count },
             metrics: { sendDidInviteUser },
           },
@@ -240,6 +250,7 @@ describe('User', () => {
           services: {
             token: { createToken },
             auth: { hashPassword },
+            mfa: passwordChangeMfa(),
             role: { count },
             metrics: { sendDidInviteUser },
           },
@@ -387,6 +398,7 @@ describe('User', () => {
         admin: {
           services: {
             auth: { hashPassword },
+            mfa: passwordChangeMfa(),
           },
         },
       } as any;
@@ -433,6 +445,32 @@ describe('User', () => {
       expect(result).toBe(user);
     });
 
+    test('a role change hands the previous row to clearGraceIfStale', async () => {
+      const mfa = passwordChangeMfa();
+      const previous = { id: 1, roles: [{ id: 2 }], mfaGraceUntil: new Date(0) };
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: vi.fn() },
+        db: {
+          query: () => ({
+            findOne: vi.fn(() => Promise.resolve(previous)),
+            update: vi.fn(({ data }) => Promise.resolve({ id: 1, ...data })),
+          }),
+        },
+        admin: {
+          services: {
+            mfa,
+            role: { getSuperAdminWithUsersCount: vi.fn(() => Promise.resolve({ id: 9 })) },
+          },
+        },
+      } as any;
+
+      await updateById(1, { roles: [3] } as any);
+
+      expect(mfa.clearGraceIfStale).toHaveBeenCalledWith(previous);
+      expect(mfa.revokeAllTrustedDevices).not.toHaveBeenCalled();
+    });
+
     test('Call the update function with the expected params', async () => {
       const email = 'email@email.fr';
       const password = 'Testing1234';
@@ -470,6 +508,7 @@ describe('User', () => {
             auth: {
               hashPassword,
             },
+            mfa: passwordChangeMfa(),
           },
         },
       } as any;
@@ -506,6 +545,7 @@ describe('User', () => {
         admin: {
           services: {
             auth: { hashPassword },
+            mfa: passwordChangeMfa(),
             role: { getSuperAdminWithUsersCount: vi.fn(() => ({ id: 9, usersCount: 2 })) },
           },
         },

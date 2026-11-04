@@ -247,6 +247,17 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   await createDefaultAPITokensIfNeeded();
 
   const mfaService = getService('mfa');
+
+  // In every state of the flag: the boot that turns it back on needs to know it was off.
+  try {
+    await mfaService.syncFeatureState();
+  } catch (error) {
+    strapi.log.warn(
+      `Could not record the two-factor feature state: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
   if (mfaService.isEnabled() && !mfaService.canEncryptSecrets()) {
     // Enrolment cannot work at all without the key, and enforcement would lock users who could
     // never comply. The settings refuse a raise in this state; this is for the operator.

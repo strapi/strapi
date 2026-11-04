@@ -208,7 +208,14 @@ describe('security-settings: service', () => {
       { id: 2, mfaRequired: true },
       { id: 3, mfaRequired: false },
     ];
-    const users = [
+    const users: Array<{
+      id: number;
+      email: string;
+      password: string | null;
+      roles: Array<{ id: number }>;
+      mfaGraceUntil: Date | null;
+      mfaLockedAt: Date | null;
+    }> = [
       {
         id: 7,
         email: 'admin@example.com',
@@ -286,9 +293,16 @@ describe('security-settings: service', () => {
         const row = users.find((u) => String(u.id) === String(where.id));
         return row ? { ...row, ...options.actor } : null;
       }),
+      findMany: vi.fn(async ({ where }: any) =>
+        users
+          .filter((user) => !(where.mfaLockedAt === null && user.mfaLockedAt !== null))
+          .filter((user) => !(where.mfaGraceUntil?.$notNull && user.mfaGraceUntil === null))
+          .map((user) => ({ id: user.id, roles: user.roles.map((role) => ({ ...role })) }))
+      ),
       updateMany: vi.fn(async ({ where, data }: any) => {
         let count = 0;
         for (const user of users) {
+          if (where.id?.$in && !where.id.$in.map(String).includes(String(user.id))) continue;
           if (where.mfaLockedAt === null && user.mfaLockedAt !== null) continue;
           if (where.mfaGraceUntil?.$notNull && user.mfaGraceUntil === null) continue;
           Object.assign(user, data);
@@ -683,12 +697,63 @@ describe('security-settings: service', () => {
     expect(users.find((u) => u.id === 9)!.mfaGraceUntil).toEqual(new Date(0));
   });
 
-  test('optional → required clears nothing', async () => {
+  test('optional → required restarts only the stale stamps of the newly required', async () => {
+    // User 8 holds no enforced role, so its stamp is left from an earlier requirement and would
+    // lock it at once. A holder of the enforced role 2 is mid-window, and keeps its deadline.
     const { service, users } = setup({ stored: { mfa: { mode: 'optional' } }, enrolled: true });
+    const running = new Date(Date.now() + 86_400_000);
+    users.push({
+      id: 10,
+      email: 'running@example.com',
+      password: 'hashed',
+      roles: [{ id: 2 }],
+      mfaGraceUntil: running,
+      mfaLockedAt: null,
+    });
+
     await service.updateSettings(
       { mfa: { mode: 'required', graceDays: 7, requiredRoles: ['2'] } },
       actor
     );
+
+    expect(users.find((u) => u.id === 8)!.mfaGraceUntil).toBeNull();
+    expect(users.find((u) => u.id === 10)!.mfaGraceUntil).toEqual(running);
+    expect(users.find((u) => u.id === 9)!.mfaLockedAt).not.toBeNull();
+  });
+
+  test('flagging another role under optional restarts its holders stale stamps only', async () => {
+    const { service, users } = setup({ stored: { mfa: { mode: 'optional' } }, enrolled: true });
+    const stale = new Date(0);
+    const running = new Date(Date.now() + 86_400_000);
+    users.push(
+      // Moved out of role 2 and into role 3 long ago: its stamp is from role 2.
+      {
+        id: 10,
+        email: 'moved@example.com',
+        password: 'hashed',
+        roles: [{ id: 3 }],
+        mfaGraceUntil: stale,
+        mfaLockedAt: null,
+      },
+      // Holds both: already required through role 2, so its window keeps running.
+      {
+        id: 11,
+        email: 'both@example.com',
+        password: 'hashed',
+        roles: [{ id: 2 }, { id: 3 }],
+        mfaGraceUntil: running,
+        mfaLockedAt: null,
+      }
+    );
+
+    await service.updateSettings(
+      { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2', '3'] } },
+      actor
+    );
+
+    expect(users.find((u) => u.id === 10)!.mfaGraceUntil).toBeNull();
+    expect(users.find((u) => u.id === 11)!.mfaGraceUntil).toEqual(running);
+    // User 8 holds neither added role, so this save does not concern it.
     expect(users.find((u) => u.id === 8)!.mfaGraceUntil).not.toBeNull();
   });
 
