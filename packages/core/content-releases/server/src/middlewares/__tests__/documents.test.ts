@@ -97,6 +97,56 @@ describe('deleteActionsOnDelete', () => {
   });
 });
 
+describe('updateActionsOnUpdate', () => {
+  const actionUpdateMany = jest.fn();
+
+  const updateDocument = async () => {
+    const result = { id: 1, documentId: 'doc-1', locale: 'en' };
+    const ctx = {
+      action: 'update',
+      contentType: { uid: UID, options: { draftAndPublish: true } },
+      params: { documentId: 'doc-1', locale: 'en', data: {} },
+    } as unknown as Context;
+
+    await expect(updateActionsOnUpdate(ctx, async () => result)).resolves.toBe(result);
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupStrapi({ localized: false });
+    jest
+      .mocked(strapi.db.query)
+      .mockImplementation(((uid: string) =>
+        uid === RELEASE_ACTION_MODEL_UID
+          ? { updateMany: actionUpdateMany }
+          : { findMany: releaseFindMany }) as unknown as typeof strapi.db.query);
+  });
+
+  it('skips validation when the entry is in no pending release', async () => {
+    releaseFindMany.mockResolvedValue([]);
+
+    await updateDocument();
+
+    expect(releaseFindMany).toHaveBeenCalledTimes(1);
+    expect(isEntryValid).not.toHaveBeenCalled();
+    expect(actionUpdateMany).not.toHaveBeenCalled();
+    expect(updateReleaseStatus).not.toHaveBeenCalled();
+  });
+
+  it('revalidates the actions of the pending releases holding the entry', async () => {
+    releaseFindMany.mockResolvedValue([{ id: 1 }]);
+
+    await updateDocument();
+
+    expect(isEntryValid).toHaveBeenCalledTimes(1);
+    expect(actionUpdateMany).toHaveBeenCalledWith({
+      where: { contentType: UID, entryDocumentId: 'doc-1', locale: 'en' },
+      data: { isEntryValid: true },
+    });
+    expect(updateReleaseStatus).toHaveBeenCalledWith(1);
+  });
+});
+
 const contentType: Schema.ContentType = {
   uid: UID,
   modelType: 'contentType',

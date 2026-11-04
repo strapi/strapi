@@ -50,6 +50,11 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
     },
   });
 
+  // Most saves touch entries that are in no pending release: skip the validation queries
+  if (releases.length === 0) {
+    return;
+  }
+
   const entryStatus = await isEntryValid(contentType, entry, { strapi });
 
   await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
