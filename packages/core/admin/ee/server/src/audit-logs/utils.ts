@@ -22,7 +22,8 @@ const getDisplayName = (user: AdminUserLike): string => {
 
 /**
  * Audit logs run when the license includes the feature and the admin config does not disable them.
- * Routes, services and permission actions all follow this condition.
+ * Routes, controller and services follow this condition. Permission actions follow the license only
+ * (see `ee/server/src/bootstrap.ts`), so a config disable keeps stored grants.
  */
 const isAuditLogsEnabled = (strapi: Core.Strapi): boolean =>
   Boolean(

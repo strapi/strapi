@@ -79,14 +79,14 @@ const mockRows = (rows: Row[]) => {
   })) as any;
 };
 
-const switchToSingleType = () =>
+const saveWithKind = (kind: 'collectionType' | 'singleType') =>
   updateSchema({
     contentTypes: [
       {
         action: 'update',
         uid,
         displayName: 'Article',
-        kind: 'singleType',
+        kind,
         draftAndPublish: true,
         pluginOptions: {},
         options: {},
@@ -95,6 +95,8 @@ const switchToSingleType = () =>
     ],
     components: [],
   } as unknown as CTBSchema);
+
+const switchToSingleType = () => saveWithKind('singleType');
 
 describe('updateSchema collectionType to singleType entry guard', () => {
   beforeEach(() => {
@@ -187,6 +189,29 @@ describe('updateSchema collectionType to singleType entry guard', () => {
     mockRows([{ documentId: null, publishedAt: null }]);
 
     await expect(switchToSingleType()).resolves.toBeUndefined();
+    expect(builder.writeFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the guard when a collection type stays a collection type', async () => {
+    mockRows([
+      { documentId: 'doc-1', publishedAt: null },
+      { documentId: 'doc-2', publishedAt: null },
+    ]);
+
+    await expect(saveWithKind('collectionType')).resolves.toBeUndefined();
+    expect(strapi.db.query).not.toHaveBeenCalled();
+    expect(builder.writeFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the guard when a single type stays a single type', async () => {
+    strapi.contentTypes[uid].kind = 'singleType';
+    mockRows([
+      { documentId: 'doc-1', publishedAt: null },
+      { documentId: 'doc-2', publishedAt: null },
+    ]);
+
+    await expect(switchToSingleType()).resolves.toBeUndefined();
+    expect(strapi.db.query).not.toHaveBeenCalled();
     expect(builder.writeFiles).toHaveBeenCalledTimes(1);
   });
 });

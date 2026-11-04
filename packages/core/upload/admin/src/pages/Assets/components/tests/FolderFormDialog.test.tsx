@@ -313,6 +313,47 @@ describe('FolderFormDialog', () => {
     });
   });
 
+  describe('unsaved changes', () => {
+    const UNSAVED_MESSAGE =
+      'You have unsaved changes. Are you sure you want to close? All your modifications will be lost.';
+
+    it('closes without asking while the name is unchanged', async () => {
+      const onClose = jest.fn();
+      const { user } = render(<FolderFormDialog {...renameProps} onClose={onClose} />);
+
+      await user.click(screen.getByRole('button', { name: 'Close modal' }));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+
+    it('asks for confirmation from the close button once the name is changed', async () => {
+      const onClose = jest.fn();
+      const { user } = render(<FolderFormDialog {...renameProps} onClose={onClose} />);
+
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Holidays' } });
+      await user.click(screen.getByRole('button', { name: 'Close modal' }));
+
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(UNSAVED_MESSAGE);
+      expect(onClose).not.toHaveBeenCalled();
+
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
+    it('asks for confirmation from Cancel once a name is typed', async () => {
+      const onClose = jest.fn();
+      const { user } = render(<FolderFormDialog {...createProps} onClose={onClose} />);
+
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Holidays' } });
+      await user.click(screen.getByRole('button', { name: /cancel/i }));
+
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(UNSAVED_MESSAGE);
+      expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
   describe('tracking', () => {
     it('fires didAddMediaLibraryFolders with the upload location after a successful create', async () => {
       render(<FolderFormDialog {...createProps} />);
