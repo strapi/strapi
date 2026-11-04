@@ -80,9 +80,7 @@ interface AuthContextValue {
       rememberMe: boolean;
     }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
-  /** Satisfies the *same* challenge with an assertion instead of a code. `trustDevice` and
-   * `rememberMe` are carried for the reasons `loginMfa` gives: dropping either here would silently
-   * lose the user's choice. */
+  /** Satisfies the same challenge with a passkey assertion instead of a code. */
   loginMfaWebauthn: (
     body: Pick<MfaWebauthnLogin.Request['body'], 'challengeToken' | 'assertion' | 'trustDevice'> & {
       rememberMe: boolean;
@@ -551,9 +549,7 @@ const AuthProvider = ({
        * There will always be a `data` key in the response
        * because if something fails, it will throw an error.
        *
-       * An MFA-enrolled account resolves `res.data` to the challenge shape instead of a
-       * session: no token exists yet, so there is nothing to persist here until the caller
-       * completes `/login/mfa` and receives a real session response.
+       * An enrolled account gets the challenge shape instead: nothing to persist until `/login/mfa`.
        */
       if ('data' in res && !('mfaRequired' in res.data)) {
         const { token } = res.data;

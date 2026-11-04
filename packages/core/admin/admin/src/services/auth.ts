@@ -122,11 +122,7 @@ const authService = adminApi
         },
         invalidatesTags: ['Me'],
       }),
-      /**
-       * Completes a login that `/login` answered with `MfaChallengeResponse`. The response is
-       * the same session shape `/login` returns for an unenrolled account; `features/Auth.tsx`
-       * persists its token exactly as it does for `login`.
-       */
+      /** Completes a login that `/login` answered with `MfaChallengeResponse`. */
       loginMfa: builder.mutation<LoginMfa.Response['data'], LoginMfa.Request['body']>({
         query: (body) => ({
           method: 'POST',
@@ -139,12 +135,8 @@ const authService = adminApi
         invalidatesTags: ['Me'],
       }),
       /**
-       * Passkeys, step one of the passkey login. Lives here beside `loginMfa` rather than in
-       * `services/mfa.ts` because it is an *unauthenticated* login endpoint: the challenge token
-       * is its whole authority, and the challenge-token pair belongs with its sibling.
-       *
-       * A mutation, not a query: it writes the ceremony challenge onto the challenge row
-       * server-side, so it must never be cached, deduplicated or refetched.
+       * Step one of the passkey login, beside `loginMfa` as an unauthenticated login endpoint. A
+       * mutation because it writes the ceremony challenge server-side.
        */
       loginMfaWebauthnOptions: builder.mutation<
         MfaWebauthnOptions.Response['data'],

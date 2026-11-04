@@ -58,8 +58,7 @@ const ListPageCE = () => {
       ).CreateActionEE
   );
 
-  // Present only when the rows carry enforcement state: the server appends it while the feature is
-  // on, to callers who can act on it. Everyone else sees the table exactly as before.
+  // Only when the rows carry two-factor state
   const showTwoFactor = users.some((user) => 'mfaEnabledAt' in user);
   const headers = [...TABLE_HEADERS, ...(showTwoFactor ? [TWO_FACTOR_HEADER] : [])].map(
     (header) => ({
@@ -306,10 +305,7 @@ const TABLE_HEADERS: Array<
   },
 ];
 
-/**
- * Enforcement state at a glance. Watching grace periods run out is the whole job of the
- * administrator who turned enforcement on, and without this it meant opening each user in turn.
- */
+/** Two-factor enforcement state per row. */
 const TWO_FACTOR_HEADER: (typeof TABLE_HEADERS)[number] = {
   // Not a column on the row type; the cell reads the appended state directly.
   name: 'mfaEnabledAt' as keyof SanitizedAdminUser,

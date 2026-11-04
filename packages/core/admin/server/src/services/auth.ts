@@ -56,10 +56,8 @@ const assignResetPasswordToken = async (userId: AdminUser['id']): Promise<string
 export interface PasswordResetResult {
   user: AdminUser;
   /**
-   * Set when the account has a second factor: the new password, hashed, not yet committed. The
-   * caller stages it on the login challenge and `commitStagedPasswordReset` writes it once the
-   * second factor passes. Committing it at once let someone holding only the mailbox change the
-   * password of an account they could never sign in to, locking its holder out of it.
+   * Set when the account has a second factor: the new password, hashed, staged on the login
+   * challenge and written by `commitStagedPasswordReset` once the second factor passes.
    */
   pendingPasswordHash: string | null;
 }

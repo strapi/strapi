@@ -62,8 +62,7 @@ const issueAdminSession = async (...args: Parameters<typeof issueSession>): Prom
   }
 };
 
-/** Throws a 403 `MFA_LOCKED` `PolicyError` on refusal, after emitting `admin.auth.error` like any other failed
- * login; otherwise returns the `issueSession` options carrying the grace deadline. */
+/** Throws 403 `MFA_LOCKED` on refusal, after `admin.auth.error`; else the grace deadline options. */
 const enforceMfaOrThrow = async (
   user: AdminUser
 ): Promise<{ mfaEnrolment?: { graceUntil: Date } }> => {
@@ -75,8 +74,6 @@ const enforceMfaOrThrow = async (
       'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
       { code: MFA_ERROR_CODES.LOCKED }
     );
-    // `email` is optional on the shared `AdminUser` shape, but a row that reached password
-    // verification always has one; the guard only keeps the type honest.
     emitLoginFailure(
       { strapi },
       {
@@ -200,10 +197,8 @@ export default {
       const sessionOptions = await enforceMfaOrThrow(user);
 
       if (mfa.isEnabled() && (await mfa.isEnrolled(userId))) {
-        // Every store read this response needs happens *before* `createChallenge` mints its row, so a
-        // blip cannot 500 a response whose challenge already exists and leave the retry minting a second,
-        // orphaned one. A cookie that matches nothing live, has a foreign owner, or is refused because
-        // the setting is now off is cleared so the browser stops presenting it.
+        // Every store read happens before `createChallenge`, so a failure cannot orphan a challenge.
+        // A trust cookie that is refused is cleared.
         const trustedDeviceDays = await offeredTrustDays();
 
         const trustToken = ctx.cookies.get(MFA_TRUST_COOKIE_NAME);
@@ -214,23 +209,19 @@ export default {
             clearTrustCookie(ctx);
           }
 
-          // Before `createChallenge`, for the reason `trustedDeviceDays` above gives. Scoped inside the
-          // trust-cookie branch, unlike that one: a trusted browser discards this value, so paying a
-          // per-user COUNT and a new 500 surface for it there would be waste.
+          // Before `createChallenge`, as above; a trusted browser never needs it
           const passkeyAvailable = await passkeyAvailableFor(userId);
 
           const { token: challengeToken, expiresIn } = await mfa.createChallenge(userId);
 
-          // A distinct event: the password matched but no session was issued, and audit consumers must be
-          // able to tell that from no attempt at all.
+          // The password matched but no session was issued
           const sanitizedUser = getService('user').sanitizeUser(user);
           strapi.eventHub.emit('admin.auth.mfa_required', {
             user: sanitizedUser,
             provider: 'local',
           });
 
-          // No cookie and no access token: a cookie set alongside this response would make the whole
-          // feature a silent no-op.
+          // No cookie and no access token until the second factor passes
           ctx.body = {
             data: {
               mfaRequired: true,
@@ -273,19 +264,15 @@ export default {
 
       const user = await getService('user').findOne(result.userId);
 
-      // A challenge can outlive an account being disabled inside its `challengeTtl` window, and
-      // `verifyChallenge` has no equivalent of `checkCredentials`' gate. Mirrors it exactly -- it does
-      // not consult `blocked` -- and reuses its generic message rather than open an enumeration channel.
+      // The account may have been deactivated since the challenge; mirrors `checkCredentials`
       if (!user || user.isActive !== true) {
         throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
       }
 
-      // A password reset staged on this challenge commits only now. Before the trust grant: the
-      // commit revokes every trusted device, and must not take this one with them.
+      // A staged password reset commits now, before the trust grant it would otherwise revoke
       const reset = await commitStagedReset(user, result.pendingPasswordHash);
 
-      // The service returns null when the organisation does not offer trust, and a stale checkbox is
-      // not an error. The raw token exists only here and in the Set-Cookie header.
+      // Null when trust is not offered; the raw token exists only here and in Set-Cookie
       if (trustDevice) {
         const granted = await mfa.trustDevice(String(user.id), {
           deviceId,
@@ -304,10 +291,8 @@ export default {
   ]),
 
   /**
-   * Start an authentication ceremony against a challenge `/login` or `/reset-password`
-   * already minted. Unauthenticated and rate-limited; the challenge token is the only credential.
-   * Charges no attempt -- it evaluates no factor -- but the service still checks the throttle and
-   * the challenge's usability, so it cannot be used as an unmetered oracle.
+   * Starts a passkey ceremony against a challenge `/login` or `/reset-password` minted. Charges no
+   * attempt, but the service still checks the throttle and the challenge.
    */
   loginMfaWebauthnOptions: compose([
     async (ctx: Context) => {
@@ -327,19 +312,15 @@ export default {
       await validateMfaWebauthnLoginInput(ctx.request.body ?? {});
 
       const mfa = getService('mfa');
-      // `rememberMe` is read from the body by `issueSession` itself, but must still be in the
-      // validator or `.noUnknown()` rejects the request.
       const { challengeToken, assertion, trustDevice, deviceId } = ctx.request
         .body as MfaWebauthnLogin.Request['body'];
 
-      // One generic error for every outcome but throttling, so no caller can tell an expired challenge
-      // from a wrong credential.
+      // One generic error for every outcome but throttling
       const { userId, pendingPasswordHash } = await mfa.verifyAssertion(challengeToken, assertion);
 
       const user = await getService('user').findOne(userId);
 
-      // What `loginMfa` does, for the same reason. Before the trust grant, or a deactivated account
-      // also collects a trust cookie good for the whole configured window.
+      // As in `loginMfa`, before the trust grant
       if (!user || user.isActive !== true) {
         throw new ValidationError(PASSKEY_VERIFY_FAILED);
       }
@@ -436,14 +417,8 @@ export default {
     const mfa = getService('mfa');
 
     if (pendingPasswordHash) {
-      // An enrolled account: the new password is staged on the challenge, not committed, and the
-      // sessions and trusted devices are left alone until the second factor passes. Someone holding
-      // only the mailbox can then neither change the password nor sign the holder out.
-      //
-      // Forgot-password must not be a way to walk past a second factor, so a reset landing on an
-      // enrolled account gets a challenge, not a session. No trust check here by design: a password
-      // reset is the classic second-factor bypass, and a trust cookie does not change that.
-      // Before `createChallenge` mints its row, for the reason `login` gives.
+      // An enrolled account gets a challenge, not a session: the new password is staged on it and
+      // commits only once the second factor passes. No trust cookie check on a reset, by design.
       const trustedDeviceDays = await offeredTrustDays();
       const passkeyAvailable = await passkeyAvailableFor(String(user.id));
 
@@ -467,8 +442,7 @@ export default {
     }
 
     try {
-      // Invalidate all existing sessions before creating a new one. The trusted devices went with
-      // the password change itself (`updateById`).
+      // Invalidate all existing sessions before creating a new one
       await sessionManager('admin').invalidateRefreshToken(String(user.id));
     } catch (err) {
       strapi.log.error('Failed to create admin refresh session during reset-password', err as any);
@@ -498,16 +472,8 @@ export default {
         return ctx.internalServerError();
       }
 
-      // Enforcement on the refresh path: a required user whose grace expired mid-session is locked
-      // at their next refresh. It runs *before* the rotation. Rotating first meant an enforcement
-      // error (a database blip) answered 500 after the presented token had already been spent, so
-      // the browser was signed out by a failure that had nothing to do with it; now the token is
-      // untouched and the next refresh simply retries.
-      //
-      // Handled as a value, never thrown -- this try/catch turns a throw into a 500. Refusal is a
-      // bare 401 (this client never renders a message); every refresh token for the user is
-      // invalidated and the cookie is cleared the way `logout` does, or the browser keeps replaying
-      // a dead token.
+      // Enforcement before rotation, so a failure here does not spend the presented token. A
+      // refusal is a bare 401 that invalidates every refresh token and clears the cookie.
       const validation = await sessionManager('admin').validateRefreshToken(refreshToken);
       if (!validation.isValid || !validation.userId) {
         return ctx.unauthorized('Invalid refresh token');
