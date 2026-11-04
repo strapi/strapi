@@ -7,6 +7,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 import { useGetMfaStatusQuery } from '../services/mfa';
 import { isNotFoundError } from '../utils/baseQuery';
+import { MFA_DATE_TIME_FORMAT } from '../utils/mfaDates';
 
 /** Re-read every 15 minutes so a long-lived tab notices a grace period stamped by a background token refresh. */
 export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
@@ -80,10 +81,7 @@ const MfaGraceBanner = () => {
                       'Set up two-factor authentication before {datetime}, or your account will be locked.',
                   },
                   {
-                    datetime: formatDate(data.graceUntil, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    }),
+                    datetime: formatDate(data.graceUntil, MFA_DATE_TIME_FORMAT),
                   }
                 )
               : formatMessage({

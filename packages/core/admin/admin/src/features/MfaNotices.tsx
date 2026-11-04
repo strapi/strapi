@@ -10,6 +10,7 @@ import {
   useMarkMfaNoticesSeenMutation,
 } from '../services/mfa';
 import { isNotFoundError } from '../utils/baseQuery';
+import { MFA_DATE_TIME_FORMAT } from '../utils/mfaDates';
 
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
 
@@ -114,10 +115,7 @@ export const formatMfaNotice = (
   formatDate: IntlFormatters['formatDate']
 ): string => {
   const copy = copyFor(notice);
-  return `${formatMessage(copy.descriptor, copy.values)} (${formatDate(notice.createdAt, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })})`;
+  return `${formatMessage(copy.descriptor, copy.values)} (${formatDate(notice.createdAt, MFA_DATE_TIME_FORMAT)})`;
 };
 
 const PROFILE_PATH = '/me';

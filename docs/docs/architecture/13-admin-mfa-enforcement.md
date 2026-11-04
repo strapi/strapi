@@ -276,7 +276,7 @@ password-less administrator into a dialog they cannot complete.
   its own line: the roles no longer required (by name), "no longer required for everyone", the new
   grace or trust period against the old one, and the number of passkeys deleted. Leaving the page
   with unsaved changes asks for confirmation
-- **Settings > Users**, list: a two-factor column ("Enabled", "Due {date}", "Locked", "Not
+- **Settings > Users**, list: a two-factor column ("Enabled", "Set up by {date}", "Locked", "Not
   enabled"), shown to holders of `admin::users.update` while the flag is on
 - **Settings > Users**, per user (`pages/Settings/pages/Users/components/TwoFactorPanel.tsx`):
   enrolment state, lock state, the unlock and reset actions, plus trusted-device and passkey counts.
@@ -294,6 +294,8 @@ password-less administrator into a dialog they cannot complete.
   "Not required". It is disabled only while everyone is required. The grace-period hint shows only
   while the role requires it, and a line under the checkbox says how this relates to the Security
   page and links to it. The Security page's role picker links back to Settings > Roles
+- Every two-factor date with a time (deadlines, locks, device use, events) names its time zone
+  (`admin/src/utils/mfaDates.ts`), since the viewer and the user are often in different ones
 - **A grace banner** (`components/MfaGraceBanner.tsx`) for a user inside their grace period. It links
   to the profile page, except on the profile page itself
 

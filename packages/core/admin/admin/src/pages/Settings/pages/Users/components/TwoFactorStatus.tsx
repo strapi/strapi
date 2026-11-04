@@ -1,6 +1,8 @@
 import { Flex, Status, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { MFA_DATE_TIME_FORMAT } from '../../../../../utils/mfaDates';
+
 import type { AdminUserMfaState } from '../../../../../../../shared/contracts/user';
 
 /**
@@ -49,9 +51,9 @@ const TwoFactorStatus = ({ user }: { user: AdminUserMfaState }) => {
             {formatMessage(
               {
                 id: 'Settings.permissions.users.mfa.status.grace',
-                defaultMessage: 'Due {date}',
+                defaultMessage: 'Set up by {date}',
               },
-              { date: formatDate(user.mfaGraceUntil, { dateStyle: 'medium' }) }
+              { date: formatDate(user.mfaGraceUntil, MFA_DATE_TIME_FORMAT) }
             )}
           </Typography>
         </Status>

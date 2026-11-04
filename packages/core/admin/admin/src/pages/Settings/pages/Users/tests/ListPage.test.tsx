@@ -80,7 +80,7 @@ describe('Users | ListPage', () => {
     await screen.findByText('Was');
     expect(screen.getByText('Two-factor')).toBeInTheDocument();
     expect(screen.getByText('Enabled')).toBeInTheDocument();
-    expect(screen.getByText(/^Due /)).toBeInTheDocument();
+    expect(screen.getByText(/^Set up by .+\d{1,2}:\d{2}/)).toBeInTheDocument();
     expect(screen.getByText('Locked')).toBeInTheDocument();
     expect(screen.getByText('Not enabled')).toBeInTheDocument();
   });

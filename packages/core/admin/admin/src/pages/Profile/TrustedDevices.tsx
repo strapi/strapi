@@ -24,6 +24,7 @@ import {
   useRevokeAllTrustedDevicesMutation,
   useRevokeTrustedDeviceMutation,
 } from '../../services/mfa';
+import { MFA_DATE_TIME_FORMAT } from '../../utils/mfaDates';
 
 import type { TrustedDevice } from '../../../../shared/contracts/mfa';
 
@@ -47,8 +48,7 @@ const TrustedDevices = () => {
   // `devices` array must not render the table (or the Revoke all button) underneath an error.
   const hasDevices = !error && devices.length > 0;
 
-  const dateTime = (value: string) =>
-    formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
+  const dateTime = (value: string) => formatDate(value, MFA_DATE_TIME_FORMAT);
 
   const handleRevoke = async (device: TrustedDevice) => {
     const res = await revokeDevice({ id: device.id });

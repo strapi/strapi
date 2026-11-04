@@ -13,6 +13,7 @@ import {
   useMarkMfaNoticesSeenMutation,
 } from '../../services/mfa';
 import { isNotFoundError } from '../../utils/baseQuery';
+import { MFA_DATE_TIME_FORMAT } from '../../utils/mfaDates';
 
 import { EnrolDialog } from './EnrolDialog';
 import { Passkeys } from './Passkeys';
@@ -47,10 +48,7 @@ const TwoFactorStatus = ({ status }: { status: MfaStatus }) => {
                     defaultMessage: 'Required for your account. Set it up before {datetime}.',
                   },
                   {
-                    datetime: formatDate(status.graceUntil, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    }),
+                    datetime: formatDate(status.graceUntil, MFA_DATE_TIME_FORMAT),
                   }
                 )
               : formatMessage({

@@ -362,7 +362,7 @@
   "Settings.permissions.users.listview.header.subtitle": "All the users who have access to the Strapi admin panel",
   "Settings.permissions.users.mfa.column": "Two-factor",
   "Settings.permissions.users.mfa.status.enrolled": "Enabled",
-  "Settings.permissions.users.mfa.status.grace": "Due {date}",
+  "Settings.permissions.users.mfa.status.grace": "Set up by {date}",
   "Settings.permissions.users.mfa.status.locked": "Locked",
   "Settings.permissions.users.mfa.status.none": "Not enabled",
   "Settings.permissions.users.mfa.reauth.required": "Confirm your own password, and a code if you use two-factor authentication.",

@@ -19,6 +19,7 @@ import { MAX_PASSKEYS_PER_USER, type Passkey } from '../../../../shared/contract
 import { ErrorMessage } from '../../components/ErrorMessage';
 import { useToMessage } from '../../hooks/useToMessage';
 import { useGetPasskeysQuery } from '../../services/mfa';
+import { MFA_DATE_TIME_FORMAT } from '../../utils/mfaDates';
 import { passkeyAvailability } from '../../utils/webauthn';
 
 import { AddPasskeyDialog } from './AddPasskeyDialog';
@@ -60,8 +61,7 @@ const Passkeys = () => {
   const supported = availability === 'available';
   const atCap = passkeys.length >= MAX_PASSKEYS_PER_USER;
 
-  const dateTime = (value: string) =>
-    formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
+  const dateTime = (value: string) => formatDate(value, MFA_DATE_TIME_FORMAT);
 
   if (isLoading) {
     return null;

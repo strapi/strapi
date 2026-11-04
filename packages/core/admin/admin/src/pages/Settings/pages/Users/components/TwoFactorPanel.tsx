@@ -20,6 +20,7 @@ import {
   useUnlockUserMfaMutation,
 } from '../../../../../services/mfa';
 import { useGetSecuritySettingsQuery } from '../../../../../services/securitySettings';
+import { MFA_DATE_TIME_FORMAT } from '../../../../../utils/mfaDates';
 import {
   ConfirmDowngradeDialog,
   type DowngradeCredentials,
@@ -128,8 +129,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const [deletePasskeys, { isLoading: isRemovingPasskeys }] = useDeleteUserPasskeysMutation();
   const [removePasskeysOpen, setRemovePasskeysOpen] = React.useState(false);
 
-  const dateTime = (value: string | Date) =>
-    formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
+  const dateTime = (value: string | Date) => formatDate(value, MFA_DATE_TIME_FORMAT);
 
   const handleUnlock = (credentials?: DowngradeCredentials) =>
     runWithCredentials(
