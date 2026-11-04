@@ -197,7 +197,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
   orderColumn: keyof TRelation,
   strict?: boolean
 ) => {
-  const computedRelations: OrderedLink[] = _.sortBy(
+  const initialRelations: OrderedLink[] = _.sortBy(
     castArray(initArr ?? []).map((r) => ({
       init: true,
       id: r[idColumn] as ID,
@@ -206,72 +206,152 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     'order'
   );
 
-  const maxOrder = maxBy(computedRelations, 'order')?.order || 0;
+  const maxOrder = maxBy(initialRelations, 'order')?.order || 0;
 
-  // How many times each id is in computedRelations, to skip scanning for absent ids
-  const idCounts = new Map<ID, number>();
-  const countId = (id: ID, delta: number) => {
-    const count = (idCounts.get(id) ?? 0) + delta;
-    if (count > 0) {
-      idCounts.set(id, count);
+  // The relations are kept in a doubly linked list indexed by id, so that finding, removing and
+  // inserting a relation next to another one does not scan or shift an array: an array made
+  // connecting n positioned relations O(n^2).
+  interface RelationNode {
+    relation: OrderedLink;
+    prev: RelationNode | null;
+    next: RelationNode | null;
+  }
+
+  let head: RelationNode | null = null;
+  let tail: RelationNode | null = null;
+  let size = 0;
+  const nodesById = new Map<ID, RelationNode[]>();
+
+  const linkNode = (relation: OrderedLink, before: RelationNode | null) => {
+    const node: RelationNode = { relation, prev: null, next: before };
+
+    if (before) {
+      node.prev = before.prev;
+      before.prev = node;
     } else {
-      idCounts.delete(id);
+      node.prev = tail;
+      tail = node;
+    }
+
+    if (node.prev) {
+      node.prev.next = node;
+    } else {
+      head = node;
+    }
+
+    size += 1;
+
+    const nodes = nodesById.get(relation.id);
+    if (nodes) {
+      nodes.push(node);
+    } else {
+      nodesById.set(relation.id, [node]);
     }
   };
-  computedRelations.forEach((r) => countId(r.id, 1));
 
-  const findRelation = (id: ID) => {
-    const idx = computedRelations.findIndex((r) => r.id === id);
-    return { idx, relation: computedRelations[idx] };
+  const unlinkNode = (node: RelationNode) => {
+    if (node.prev) {
+      node.prev.next = node.next;
+    } else {
+      head = node.next;
+    }
+
+    if (node.next) {
+      node.next.prev = node.prev;
+    } else {
+      tail = node.prev;
+    }
+
+    size -= 1;
+
+    const nodes = nodesById.get(node.relation.id)!;
+    nodes.splice(nodes.indexOf(node), 1);
+    if (nodes.length === 0) {
+      nodesById.delete(node.relation.id);
+    }
   };
+
+  // The first node holding this id, in list order
+  const findNode = (id: ID): RelationNode | undefined => {
+    const nodes = nodesById.get(id);
+
+    if (!nodes || nodes.length <= 1) {
+      return nodes?.[0];
+    }
+
+    // Only reached when the same id is in the list more than once
+    for (let node = head; node; node = node.next) {
+      if (node.relation.id === id) {
+        return node;
+      }
+    }
+
+    return undefined;
+  };
+
+  const toArray = () => {
+    const relations: OrderedLink[] = new Array(size);
+    let idx = 0;
+    for (let node = head; node; node = node.next) {
+      relations[idx] = node.relation;
+      idx += 1;
+    }
+    return relations;
+  };
+
+  initialRelations.forEach((relation) => linkNode(relation, null));
 
   const removeRelation = (r: Link) => {
-    if (!idCounts.has(r.id)) {
-      return;
-    }
-
-    const { idx } = findRelation(r.id);
-    if (idx >= 0) {
-      computedRelations.splice(idx, 1);
-      countId(r.id, -1);
+    const node = findNode(r.id);
+    if (node) {
+      unlinkNode(node);
     }
   };
 
   const insertRelation = (r: Link) => {
-    let idx;
+    // The node the relation is inserted before, null to insert it at the end
+    let beforeNode: RelationNode | null;
 
     if (r.position?.before) {
-      const { idx: beforeIdx, relation } = findRelation(r.position.before);
+      const node = findNode(r.position.before);
+      if (!node) {
+        throw new Error(`Relation ${r.position.before} is not connected`);
+      }
+
+      const { relation } = node;
       if (relation.init) {
         r.order = relation.order - 0.5;
       } else {
         r.order = relation.order;
       }
-      idx = beforeIdx;
+      beforeNode = node;
     } else if (r.position?.after) {
-      const { idx: afterIdx, relation } = findRelation(r.position.after);
+      const node = findNode(r.position.after);
+      if (!node) {
+        throw new Error(`Relation ${r.position.after} is not connected`);
+      }
+
+      const { relation } = node;
       if (relation.init) {
         r.order = relation.order + 0.5;
       } else {
         r.order = relation.order;
       }
-      idx = afterIdx + 1;
+      beforeNode = node.next;
     } else if (r.position?.start) {
-      if (computedRelations.length > 0) {
-        const firstRelation = computedRelations[0];
+      if (head) {
+        const firstRelation = head.relation;
         r.order = firstRelation.init ? firstRelation.order - 0.5 : firstRelation.order;
       } else {
         r.order = 0.5;
       }
-      idx = 0;
+      beforeNode = head;
     } else {
       r.order = maxOrder + 0.5;
-      idx = computedRelations.length;
+      beforeNode = null;
     }
 
-    // Insert the relation in the array
-    computedRelations.splice(idx, 0, r as OrderedLink);
-    countId(r.id, 1);
+    linkNode(r as OrderedLink, beforeNode);
   };
 
   return {
@@ -282,7 +362,7 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
       return this;
     },
     connect(relations: Link | Link[]) {
-      sortConnectArray(castArray(relations), computedRelations, strict).forEach((relation) => {
+      sortConnectArray(castArray(relations), toArray(), strict).forEach((relation) => {
         this.disconnect(relation);
 
         try {
@@ -300,14 +380,14 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
       return this;
     },
     get() {
-      return computedRelations;
+      return toArray();
     },
     /**
      * Get a map between the relation id and its order
      */
     getOrderMap() {
       const map: Record<ID, number> = {};
-      const chunks = _(computedRelations).groupBy('order').value();
+      const chunks = _(toArray()).groupBy('order').value();
       const sortedKeys = Object.keys(chunks).sort((a, b) => parseFloat(a) - parseFloat(b));
 
       for (const orderStr of sortedKeys) {
