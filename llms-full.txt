@@ -3185,10 +3185,11 @@ Optional: **`STRAPI_DISABLE_LICENSE_PING=true`** in the same file can match CI E
 3. **`STRAPI_E2E_EDITION`** set to **`ce`** or **`ee`** (after `tests/e2e/.env` is loaded, plus CI `script.sh` or your shell) — use that edition (`ee` without a license falls back to CE with a warning unless you used `test:e2e:ee`, which fails instead).
 4. Else **auto**: EE if `STRAPI_LICENSE` is non-empty, else CE.
 
-**CI:** `.github/workflows/tests.yml` defines two jobs:
+**CI:** `.github/workflows/tests.yml` defines four e2e jobs, 22 with the matrix:
 
-- **`e2e_ce`** — no `STRAPI_LICENSE` secret; composite action runs with `runEE: false` → `script.sh` sets `STRAPI_E2E_EDITION=ce`.
-- **`e2e_ee`** — `env STRAPI_LICENSE: ${{ secrets.strapiLicense }}` and `runEE: true` → `STRAPI_E2E_EDITION=ee` and `STRAPI_DISABLE_LICENSE_PING=true`.
+- **`e2e_ce`**: no `STRAPI_LICENSE` secret. The composite action runs with `runEE: false`, so `script.sh` sets `STRAPI_E2E_EDITION=ce`. Matrix: 4 Chromium shards and 6 WebKit shards.
+- **`e2e_ee`**: `env STRAPI_LICENSE: ${{ secrets.strapiLicense }}` and `runEE: true`, so `script.sh` sets `STRAPI_E2E_EDITION=ee` and `STRAPI_DISABLE_LICENSE_PING=true`. Same matrix as `e2e_ce`.
+- **`e2e_media_library`** and **`e2e_media_library_legacy`**: CE, Chromium only, `media-library` domain only. They run the current and the legacy Media Library (`mediaLibrarySuite: current` / `legacy`, `useLegacyMediaLibrary: false` / `true`).
 
 CI runs **`script.sh`**, which exports **`STRAPI_E2E_EDITION`** (`ce` vs `ee`) before `yarn test:e2e`. **`e2e-edition.ts`** reads that (and **`STRAPI_LICENSE`**, **`STRAPI_DISABLE_LICENSE_PING`**, etc.) so the runner matches the job. Locally, the same applies: if you **`export STRAPI_E2E_EDITION=ce`** (or `ee`), that explicit value is respected when you run `yarn test:e2e`. If you want **pure auto** (license only: EE when `STRAPI_LICENSE` is set, else CE), **`unset STRAPI_E2E_EDITION`** so it is not set in your shell.
 
