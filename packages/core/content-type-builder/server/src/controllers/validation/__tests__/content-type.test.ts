@@ -224,6 +224,49 @@ describe('Content type validator', () => {
       });
     });
 
+    test('Rejects a non-boolean options.draftAndPublish', async () => {
+      const data = {
+        contentType: {
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          options: { draftAndPublish: 'false' },
+          attributes: {
+            title: {
+              type: 'string',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateUpdateContentTypeInput(data)).rejects.toMatchObject({
+        name: 'ValidationError',
+        details: {
+          errors: [
+            expect.objectContaining({ path: ['contentType', 'options', 'draftAndPublish'] }),
+          ],
+        },
+      });
+    });
+
+    test('Accepts a boolean options.draftAndPublish', async () => {
+      const data = {
+        contentType: {
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          options: { draftAndPublish: false },
+          attributes: {
+            title: {
+              type: 'string',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      await expect(validateUpdateContentTypeInput(data)).resolves.toBeDefined();
+    });
+
     test('Deleted UID target fields are removed from input data', async () => {
       const data = {
         contentType: {

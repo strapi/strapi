@@ -25,7 +25,6 @@ interface Asset extends File {
 interface PendingAssetStepProps {
   addUploadedFiles?: (files: File[]) => void;
   folderId?: string | number | null;
-  onClose: () => void;
   onEditAsset: (asset: File) => void;
   onRemoveAsset: (asset: File) => void;
   onAddAsset?: (asset: File) => void;
@@ -40,7 +39,6 @@ interface PendingAssetStepProps {
 export const PendingAssetStep = ({
   addUploadedFiles,
   folderId,
-  onClose,
   onEditAsset,
   onRemoveAsset,
   assets,
@@ -190,9 +188,11 @@ export const PendingAssetStep = ({
         </Flex>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={onClose} variant="tertiary">
-          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
-        </Button>
+        <Modal.Close>
+          <Button variant="tertiary">
+            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
+          </Button>
+        </Modal.Close>
         <Button onClick={handleSubmit} loading={uploadStatus === Status.Uploading}>
           {formatMessage(
             {

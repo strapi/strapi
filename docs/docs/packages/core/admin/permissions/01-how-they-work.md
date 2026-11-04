@@ -56,7 +56,9 @@ Examples: `admin::audit-logs.read`, `plugin::content-manager.explorer.create`
 
 ### Register an action
 
-An action can be registered in the backend during the `bootstrap` phase of the app.
+An action can be registered in the backend during the `register` or `bootstrap` phase of the app or of a plugin. Once the admin cleaned the stored permissions, or once Strapi is loaded, `register` throws.
+
+Once every `bootstrap` has run, the admin resets the super admin permissions and deletes the stored permissions whose action is not registered. It does this in the first `strapi::app.afterBootstrap` handler, so actions registered in the app `bootstrap` keep their permissions across restarts. The handler locks the action provider before the cleanup, so an action registered in a later `strapi::app.afterBootstrap` handler throws instead of losing its permissions.
 
 Example:
 
@@ -76,6 +78,10 @@ module.exports = async () => {
   await strapi.service('admin::permission').actionProvider.registerMany(actions);
 };
 ```
+
+When the cleanup deletes permissions, it logs one warning with the count, the actions, the subjects, and the roles and admin tokens that lost them. Permissions with neither a role nor an admin token are only counted. No warning is logged when nothing is deleted.
+
+Content API token permissions are cleaned separately during the admin `bootstrap`. The ones whose action is no longer registered are deleted, with one warning that lists the count, the actions, the API tokens, and how many had no API token. The full read stays unpopulated; only the rows being deleted are read with their token, in batches.
 
 ### Parametrize actions
 
@@ -148,3 +154,21 @@ The permissions are modified in the admin panel (on the [edit page](http://local
 | **conditions**       | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
 
 A permission contains all needed information for the backend and the frontend to prevent users to perform non-permitted action.
+
+### Permission ceiling
+
+A user can only hand on permissions they hold themselves. The rules live in `server/src/domain/permission/ceiling.ts`.
+
+The engine registers each stored permission as its own rule (`title@en` plus `body@fr` does not give `title@fr`), and the ceiling does the same. A requested permission is split into atoms (one per field, locale and condition combination). It is within the ceiling when each atom is covered by a single held permission with the same `action` and `subject`. Different atoms can be covered by different held permissions. A held permission covers a value if it does not restrict that property or lists the value (`seo` covers `seo.title`), and covers a condition if it is unconditional or lists it. Omitting a restricted property, sending `null` or dropping conditions is rejected.
+
+Held permissions are read as the engine enforces them:
+
+- `fields: []` grants nothing. On a localized subject, a missing `locales` means `locales: []`, even for a super admin's token.
+- A permission with action parameters does not hold the plain action, nor does one whose conditions are all unknown. It is registered as `<action>?<parameters>`, so only held permissions with the same action, subject and parameters cover it (`isParameterizedPermissionWithinCeiling`), using the same atom rule.
+- Unions on one dimension are fine (`title` and `body` held separately allow `[title, body]`); mixing dimensions is not.
+
+Where it applies:
+
+- **Roles**: `PUT /admin/roles/:id/permissions` returns 403 with the offending permissions in `error.details.permissions`. Super admins are exempt. An admin-token request is checked against the token's permissions and, unless the owner is a super admin, the owner's too (`findRequesterCeilings` in `server/src/services/permission/ceiling-requester.ts`). Permissions the role already carries are not checked, whatever their array order, and neither is a narrowing of one of the role's rows (every atom covered by one existing row, so fewer fields, locales or conditions pass). Recombining two rows, or dropping a row's last condition, is checked. Parameterized requests are never a narrowing. Creating or duplicating a role uses the same endpoint, so the duplicate page first drops source permissions outside the user's ceiling.
+- **Admin tokens**: `enforceAdminPermissionsCeiling` in `server/src/services/api-token.ts` rejects (400) permissions the owner does not cover and takes conditions from the owner, not the request. Super-admin owners are unlimited. An admin-token request is limited by the same two ceilings as a role update, and can only read the key of, or regenerate, its own token. Token permissions are re-clamped at startup and whenever the owner's roles change (`reconcileTokenPermissionsToUserCeiling`): uncovered permissions are deleted and conditions follow the owner, with a log warning each time. Parameterized token permissions are reconciled only against the owner's permissions with the same action, subject and parameters (`reconcileParameterizedTokenPermissions`), so they are deleted once the owner loses that exact grant.
+- **Role editor**: `admin/src/pages/Settings/pages/Roles/utils/createPermissionChecker.ts` mirrors the rule and disables values and conditions that cannot be added to what is already ticked. A value is tickable only if the resulting row stays within the editor's permissions, or (edit page only) within what the role already stores. A bulk tick picks one held permission and never mixes fields held under different conditions. A component checkbox is enabled when any field under it can be granted, since roles store a component's fields, not its path.

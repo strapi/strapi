@@ -4,7 +4,7 @@ import { Cog, ShoppingCart, House } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { useTypedSelector } from '../core/store/hooks';
-import { useAuth, AuthContextValue } from '../features/Auth';
+import { getAdminUserId, useAuth, type AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
@@ -35,8 +35,10 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     (state) => state.checkUserHasPermissions,
     true
   );
+  const adminUserId = useAuth('useMenu', (state) => getAdminUserId(state.user));
   const rawMenu = useStrapiApp('useMenu', (state) => state.menu);
   const menu = React.useMemo(() => normalizeMenuLinks(rawMenu), [rawMenu]);
+  const isLoadingAuth = useAuth('useMenu', (state) => state.isLoading);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
@@ -98,8 +100,16 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     isLoading: true,
   });
   const generalSectionLinksRef = React.useRef(menuWithUserPermissions.generalSectionLinks);
+  const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
+  const resolvedPermissionsRef = React.useRef(permissions);
 
   React.useEffect(() => {
+    if (isLoadingAuth) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
     async function applyMenuPermissions() {
       const authorizedPluginSectionLinks = await getPluginSectionLinks(
         menu,
@@ -112,18 +122,26 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
         checkUserHasPermissions
       );
 
-      setMenuWithUserPermissions((state) => ({
-        ...state,
-        generalSectionLinks: authorizedGeneralSectionLinks,
-        pluginsSectionLinks: hideCloudDeployMenuLinkInProduction(
-          authorizedPluginSectionLinks,
-          currentEnvironment
-        ),
-        isLoading: false,
-      }));
+      if (!cancelled) {
+        resolvedAdminUserIdRef.current = adminUserId;
+        resolvedPermissionsRef.current = permissions;
+        setMenuWithUserPermissions((state) => ({
+          ...state,
+          generalSectionLinks: authorizedGeneralSectionLinks,
+          pluginsSectionLinks: hideCloudDeployMenuLinkInProduction(
+            authorizedPluginSectionLinks,
+            currentEnvironment
+          ),
+          isLoading: false,
+        }));
+      }
     }
 
-    applyMenuPermissions();
+    void applyMenuPermissions();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     setMenuWithUserPermissions,
     generalSectionLinksRef,
@@ -132,7 +150,22 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     shouldUpdateStrapi,
     checkUserHasPermissions,
     currentEnvironment,
+    adminUserId,
+    isLoadingAuth,
   ]);
+
+  if (
+    isLoadingAuth ||
+    resolvedAdminUserIdRef.current !== adminUserId ||
+    resolvedPermissionsRef.current !== permissions
+  ) {
+    return {
+      ...menuWithUserPermissions,
+      generalSectionLinks: [],
+      pluginsSectionLinks: [],
+      isLoading: true,
+    };
+  }
 
   return menuWithUserPermissions;
 };

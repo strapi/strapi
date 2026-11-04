@@ -3,6 +3,7 @@ import type { Core } from '@strapi/types';
 import { getService } from './utils';
 import { ALLOWED_SORT_STRINGS, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { notifyMediaLibraryDefault } from './media-library-default-notice';
+import { registerAuditEvents } from './audit-logs';
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const defaultConfig = {
@@ -50,6 +51,10 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
   await registerPermissionActions();
   await registerWebhookEvents();
+
+  if (strapi.has('audit-logs-lifecycle')) {
+    registerAuditEvents(strapi.get('audit-logs-lifecycle'));
+  }
 
   await getService('weeklyMetrics').registerCron();
 
