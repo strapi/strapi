@@ -28,6 +28,9 @@ const SOURCE_COMPLEX = 'Copy source complex';
 const TARGET_COMPLEX = 'Copy target complex';
 const BLOCK_TEXT = 'Copied block';
 
+const REPLACE_SOURCE = 'Replace source complex';
+const REPLACE_TARGET = 'Replace target complex';
+
 const getAdminSession = async (request: APIRequestContext) => {
   const loginResponse = await request.post('/admin/login', {
     data: { email: ADMIN_EMAIL_ADDRESS, password: ADMIN_PASSWORD },
@@ -186,5 +189,51 @@ test.describe('Copy components from existing entries', () => {
     expect((await relationResponse.json()).results).toEqual([
       expect.objectContaining({ id: user.id }),
     ]);
+  });
+
+  test('As a user I want to replace the content of a saved component and lose what it held', async ({
+    page,
+  }) => {
+    const { headers, user } = await getAdminSession(page.request);
+    await seedEntry(page.request, headers, COMPLEX_UID, {
+      required: REPLACE_SOURCE,
+      shorttext: REPLACE_SOURCE,
+      component_single: { shorttext: BLOCK_TEXT },
+    });
+    // The saved component holds a relation, the copied one holds none. The server doesn't count
+    // the relations to admin users, so the field reads as blank and offers "Use existing content…".
+    await seedEntry(page.request, headers, COMPLEX_UID, {
+      required: REPLACE_TARGET,
+      shorttext: REPLACE_TARGET,
+      component_single: { user: { connect: [{ id: user.id }] } },
+    });
+
+    await navToHeader(page, ['Content Manager', 'Complex Content'], 'Complex Content');
+    await clickAndWait(page, page.getByRole('gridcell', { name: REPLACE_TARGET }).first());
+
+    await clickAndWait(page, page.getByRole('button', { name: 'Use existing content…' }));
+    const modal = page.getByRole('dialog');
+    await modal.getByRole('button', { name: new RegExp(REPLACE_SOURCE) }).click();
+    await modal.getByRole('button', { name: 'Use content' }).click();
+    await findAndClose(page, `copied from ${REPLACE_SOURCE}`);
+
+    await save(page);
+
+    /**
+     * The copy is saved as a new component: the relation of the replaced one doesn't come along.
+     */
+    const documentId = new URL(page.url()).pathname.split('/').pop();
+    const targetResponse = await page.request.get(
+      `/content-manager/collection-types/${COMPLEX_UID}/${documentId}?locale=en`,
+      { headers }
+    );
+    const { component_single: component } = (await targetResponse.json()).data;
+    expect(component).toMatchObject({ shorttext: BLOCK_TEXT });
+
+    const relationResponse = await page.request.get(
+      `/content-manager/relations/component-category.component/${component.id}/user?locale=en`,
+      { headers }
+    );
+    expect((await relationResponse.json()).results).toEqual([]);
   });
 });
