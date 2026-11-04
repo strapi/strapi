@@ -264,7 +264,8 @@ SSO callback) store a random `familyId` and the `loginAt` time in the session's 
 its own events after its first refresh. The family id is server-generated, unlike the
 client-supplied `deviceId`. Sessions from before this existed are their own family. A login has no
 session yet while it writes its rows (a recovery code used, a device trusted), so `issueSession`
-calls `claimRequestEvents` to hand those rows to the family it just started. System and
+returns the new `familyId` and the authentication controller's `issueAdminSession` passes it to
+`claimRequestEvents`, which hands those rows to the family it just started. System and
 administrator events (grace started, locked, unlocked, reset) carry no family.
 
 `GET /admin/mfa/notices` returns the caller's unseen rows, newest first, minus the rows the

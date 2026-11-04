@@ -1,5 +1,7 @@
 import { errors } from '@strapi/utils';
 import type { Core, Data } from '@strapi/types';
+import type createMfaService from './mfa';
+import type authService from './auth';
 import type {
   MfaEnforcement,
   MfaEnforcementMode,
@@ -217,23 +219,8 @@ const relaxingChanges = (
   };
 };
 
-interface MfaServiceLike {
-  isExemptFromMfa(user: {
-    id: Data.ID;
-    password?: string | null;
-    roles?: unknown;
-  }): Promise<boolean>;
-  isEnrolled(userId: string): Promise<boolean>;
-  canEncryptSecrets(): boolean;
-  assertPasswordAndFactor(userId: string, password: string, code: string): Promise<void>;
-  clearAllTrustedDevices(): Promise<number>;
-  /** Every passkey row, every user. Called on the transition to `enabled: false`. */
-  clearAllPasskeys(): Promise<number>;
-}
-
-interface AuthServiceLike {
-  validatePassword(password: string, hash: string): Promise<boolean>;
-}
+type MfaService = ReturnType<typeof createMfaService>;
+type AuthService = typeof authService;
 
 export interface SecuritySettingsDeps {
   strapi: Core.Strapi;
@@ -248,8 +235,10 @@ export interface SecuritySettingsDeps {
 export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) => {
   const roleQuery = () => strapi.db.query('admin::role');
   const userQuery = () => strapi.db.query('admin::user');
-  const mfa = () => strapi.service('admin::mfa') as unknown as MfaServiceLike;
-  const auth = () => strapi.service('admin::auth') as unknown as AuthServiceLike;
+  // Resolved lazily through the injected instance: the mfa service reads these settings, so
+  // neither can be handed to the other at construction time.
+  const mfa = () => strapi.service('admin::mfa') as unknown as MfaService;
+  const auth = () => strapi.service('admin::auth') as unknown as AuthService;
 
   const listRequiredRoleIds = async (): Promise<string[]> => {
     const roles = await roleQuery().findMany({ where: { mfaRequired: true }, select: ['id'] });

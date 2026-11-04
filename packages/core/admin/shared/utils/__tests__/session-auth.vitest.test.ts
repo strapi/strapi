@@ -368,13 +368,12 @@ describe('issueSession', () => {
   const user = { id: 11, email: 'admin@example.com' } as any;
   const sanitizedUser = { id: 11, email: 'admin@example.com' };
   const sanitizeUser = vi.fn(() => sanitizedUser);
-  const claimRequestEvents = vi.fn(() => Promise.resolve());
 
   const setStrapi = (sessionManagerFn?: Mock) => {
     global.strapi = {
       config: { get: vi.fn(() => undefined) },
       log: { error: vi.fn(), warn: vi.fn() },
-      admin: { services: { user: { sanitizeUser }, mfa: { claimRequestEvents } } },
+      admin: { services: { user: { sanitizeUser } } },
       ...(sessionManagerFn ? { sessionManager: sessionManagerFn } : {}),
     } as any;
   };
@@ -421,7 +420,7 @@ describe('issueSession', () => {
 
     const { ctx, cookiesSet } = buildCtx();
 
-    await issueSession(ctx, user);
+    const issued = await issueSession(ctx, user);
 
     expect(sessionManagerFn).toHaveBeenCalledWith('admin');
     expect(generateRefreshToken).toHaveBeenCalledWith(
@@ -446,7 +445,8 @@ describe('issueSession', () => {
     expect(metadata.familyId).toMatch(/^[0-9a-f-]{36}$/);
     expect(metadata.loginAt).toEqual(expect.any(String));
     expect(metadata.authMethod).toBeUndefined();
-    expect(claimRequestEvents).toHaveBeenCalledWith(metadata.familyId);
+    // The family id goes back to the caller, which claims the login's events with it.
+    expect(issued).toEqual({ familyId: metadata.familyId });
   });
 
   test('honours rememberMe from the request body by minting a refresh-type session', async () => {

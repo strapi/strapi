@@ -227,8 +227,10 @@ describe('session issuing paths', () => {
   test('no undecided call site mints an admin session', () => {
     const controller = fs.readFileSync(path.join(__dirname, '..', 'authentication.ts'), 'utf8');
 
-    // Imported, not defined here, so every match is a call site.
-    const callSites = [...controller.matchAll(/issueSession\(/g)];
+    // `issueSession` is called once, by the local `issueAdminSession` wrapper that claims the
+    // login's events; every call of the wrapper is a call site.
+    expect([...controller.matchAll(/issueSession\(/g)]).toHaveLength(1);
+    const callSites = [...controller.matchAll(/issueAdminSession\(/g)];
 
     expect(callSites.length).toBe(DECIDED_CALL_SITES.length);
 
@@ -238,7 +240,7 @@ describe('session issuing paths', () => {
       controller.indexOf('login: compose('),
       controller.indexOf('loginMfa: compose(')
     );
-    expect([...loginBlock.matchAll(/issueSession\(/g)]).toHaveLength(1);
+    expect([...loginBlock.matchAll(/issueAdminSession\(/g)]).toHaveLength(1);
 
     expect(controller).not.toMatch(/generateRefreshToken\(/);
 
@@ -250,6 +252,21 @@ describe('session issuing paths', () => {
     expect(rotateSites.length).toBe(1);
     expect(generateAccessTokenSites.length).toBe(1);
   });
+
+  test.each(['register', 'registerAdmin'] as const)(
+    '%s hands the new login family to the mfa service to claim its events',
+    async (sessionPath) => {
+      const { ctx, generateRefreshToken } = buildPath(sessionPath);
+
+      await invokePath(sessionPath, ctx);
+
+      const { metadata } = (generateRefreshToken.mock.calls[0] as unknown[])[2] as {
+        metadata: { familyId: string };
+      };
+      const { claimRequestEvents } = (global.strapi as any).admin.services.mfa;
+      expect(claimRequestEvents).toHaveBeenCalledWith(metadata.familyId);
+    }
+  );
 
   test('an enrolled user resetting their password gets a challenge, not a session', async () => {
     const user = {
@@ -476,7 +493,7 @@ describe('session issuing paths', () => {
  * call site must fail here until it is added with its own decision.
  */
 describe('generateRefreshToken / issueSession call-site inventory', () => {
-  const PATTERNS = ['issueSession(', 'generateRefreshToken('] as const;
+  const PATTERNS = ['issueSession(', 'issueAdminSession(', 'generateRefreshToken('] as const;
 
   test('generateRefreshToken( and issueSession( occur only at the exact, decided sites', () => {
     const roots = [SERVER_SRC, EE_SERVER_SRC, SHARED_DIR];
@@ -503,8 +520,10 @@ describe('generateRefreshToken / issueSession call-site inventory', () => {
       // The six decided CE call sites (`login`, `loginMfa`, `loginMfaWebauthn`, `register`,
       // `registerAdmin`, `resetPassword`) -- already enumerated and reasoned about individually
       // above.
-      [`${path.join('server', 'src', 'controllers', 'authentication.ts')} :: issueSession(`]:
+      [`${path.join('server', 'src', 'controllers', 'authentication.ts')} :: issueAdminSession(`]:
         DECIDED_CALL_SITES.length,
+      // `issueAdminSession` itself: `issueSession`, then the claim of the login's events.
+      [`${path.join('server', 'src', 'controllers', 'authentication.ts')} :: issueSession(`]: 1,
       // `issueSession`'s own implementation: every CE flow above funnels through this one call.
       [`${path.join('shared', 'utils', 'session-auth.ts')} :: generateRefreshToken(`]: 1,
       // The SSO callback: deliberately exempt from `issueSession` (see the block comment above).

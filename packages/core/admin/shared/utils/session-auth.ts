@@ -323,6 +323,10 @@ export const sessionFamilyOf = (session: {
  * `ctx.request.body` via `extractDeviceParams`. Reset-password uses this to force a fresh
  * device id and a non-persistent session cookie regardless of what the caller's body contains;
  * every other caller omits `options` and lets the request body decide.
+ *
+ * Returns the new login family's id on success, `undefined` when it answered with an error. The
+ * caller hands that id to the mfa service to claim the security events the login recorded; this
+ * shared helper does not reach into admin services for it.
  */
 export const issueSession = async (
   ctx: Context,
@@ -333,12 +337,12 @@ export const issueSession = async (
     /** Set by the controllers when enforcement returned a grace outcome. */
     mfaEnrolment?: { graceUntil: Date };
   } = {}
-): Promise<void> => {
+): Promise<{ familyId: string } | undefined> => {
   try {
     const sessionManager = getSessionManager();
     if (!sessionManager) {
       ctx.internalServerError();
-      return;
+      return undefined;
     }
 
     const userId = String(user.id);
@@ -354,10 +358,6 @@ export const issueSession = async (
       metadata,
     });
 
-    // Security events this login recorded (a recovery code, a trusted device) belong to the login
-    // it just created, which must not then notify about them.
-    await strapi.service('admin::mfa').claimRequestEvents(metadata.familyId);
-
     const cookieOptions = buildCookieOptionsWithExpiry(
       rememberMe ? 'refresh' : 'session',
       absoluteExpiresAt,
@@ -368,7 +368,7 @@ export const issueSession = async (
     const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
     if ('error' in accessResult) {
       ctx.internalServerError();
-      return;
+      return undefined;
     }
 
     const { token: accessToken } = accessResult;
@@ -386,9 +386,12 @@ export const issueSession = async (
           : {}),
       },
     };
+
+    return { familyId: metadata.familyId };
   } catch (error) {
     strapi.log.error('Failed to create admin refresh session', error);
     ctx.internalServerError();
+    return undefined;
   }
 };
 

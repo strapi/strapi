@@ -52,6 +52,17 @@ import { MFA_ERROR_CODES } from '../../../shared/utils/mfa-error-codes';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
+/**
+ * `issueSession`, then hands the security events this login recorded (a recovery code, a trusted
+ * device) to the login family it just created, which must not then notify about them.
+ */
+const issueAdminSession = async (...args: Parameters<typeof issueSession>): Promise<void> => {
+  const issued = await issueSession(...args);
+  if (issued) {
+    await getService('mfa').claimRequestEvents(issued.familyId);
+  }
+};
+
 /** Throws `MfaLockedError` on refusal, after emitting `admin.auth.error` like any other failed
  * login; otherwise returns the `issueSession` options carrying the grace deadline. */
 const enforceMfaOrThrow = async (
@@ -233,7 +244,7 @@ export default {
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
-      return issueSession(ctx, user, sessionOptions);
+      return issueAdminSession(ctx, user, sessionOptions);
     },
   ]),
 
@@ -285,7 +296,7 @@ export default {
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
-      return issueSession(ctx, user, reset);
+      return issueAdminSession(ctx, user, reset);
     },
   ]),
 
@@ -347,7 +358,7 @@ export default {
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
-      return issueSession(ctx, user, reset);
+      return issueAdminSession(ctx, user, reset);
     },
   ]),
 
@@ -374,7 +385,7 @@ export default {
 
     const sessionOptions = await enforceMfaOrThrow(user);
 
-    return issueSession(ctx, user, sessionOptions);
+    return issueAdminSession(ctx, user, sessionOptions);
   },
 
   async registerAdmin(ctx: Context) {
@@ -388,7 +399,7 @@ export default {
 
     const sessionOptions = await enforceMfaOrThrow(user);
 
-    return issueSession(ctx, user, sessionOptions);
+    return issueAdminSession(ctx, user, sessionOptions);
   },
 
   async forgotPassword(ctx: Context) {
@@ -464,7 +475,7 @@ export default {
     const sessionOptions = await enforceMfaOrThrow(user);
 
     // A fresh device id and a non-persistent cookie, whatever the body carries.
-    return issueSession(ctx, user, {
+    return issueAdminSession(ctx, user, {
       deviceId: generateDeviceId(),
       rememberMe: false,
       ...sessionOptions,
