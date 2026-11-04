@@ -39,7 +39,7 @@ A role can change the stage of an entry only with the `admin::review-workflows.s
 
 ### Workflow assignment and limits
 
-The `workflows` service creates and updates workflows. The `workflow-content-types` service moves the entries of a content type to a stage when the content type changes workflow, and updates the content manager configuration. The `validation` service applies the limits `numberOfWorkflows` and `stagesPerWorkflow`. The license feature options set them, and the default is 200 each.
+The `workflows` service creates and updates workflows. The `workflow-content-types` service moves the entries of a content type to a stage when the content type changes workflow, and updates the content manager configuration. The `validation` service applies the limits `numberOfWorkflows` and `stagesPerWorkflow`. The license feature options set them, and the default is 200 each, also when a value is not a number. The workflow limit is checked only when a workflow is created, so an instance already above it can still update its workflows and change the stage of its entries. The stage limit is checked whenever the stages of a workflow are set.
 
 ### Admin part
 
