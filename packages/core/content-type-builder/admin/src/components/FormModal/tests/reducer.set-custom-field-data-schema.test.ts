@@ -1,5 +1,11 @@
 import { initialState, reducer, actions } from '../reducer';
 
+// Actions that seed the form also snapshot the seeded data, so it can tell real edits apart.
+const withPristine = <T extends { modifiedData: unknown }>(state: T) => ({
+  ...state,
+  pristineData: state.modifiedData,
+});
+
 const mockCustomField = {
   type: 'string',
 };
@@ -30,7 +36,7 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
       uid: 'apis::test.test',
     });
 
-    expect(reducer(initialState, action)).toEqual(expected);
+    expect(reducer(initialState, action)).toEqual(withPristine(expected));
   });
 
   it('adds a custom field', () => {
@@ -48,7 +54,7 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
       },
     };
 
-    expect(reducer(initialState, action)).toEqual(expected);
+    expect(reducer(initialState, action)).toEqual(withPristine(expected));
   });
 
   it("adds a custom field's default options", () => {
@@ -102,6 +108,6 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
       },
     };
 
-    expect(reducer(initialState, action)).toEqual(expected);
+    expect(reducer(initialState, action)).toEqual(withPristine(expected));
   });
 });

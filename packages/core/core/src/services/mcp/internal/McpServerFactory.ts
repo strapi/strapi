@@ -5,6 +5,7 @@ import { McpResourceRegistry } from '../resource-registry';
 import { McpToolRegistry } from '../tool-registry';
 import type { McpAdminTokenAbility } from '../authentication';
 import { McpCapabilityDefinitionRegistry } from './McpCapabilityDefinitionRegistry';
+import { DEFAULT_MAX_TOOL_INPUT_ELEMENTS } from './McpConfiguration';
 import type { McpCapabilityRegistryReadonly } from './McpCapabilityRegistry';
 import { canUseMcpCapability, syncMcpSessionCapabilities } from './syncMcpSessionCapabilities';
 import type { McpToolSchemaScope } from './resolveToolSchemaScope';
@@ -41,6 +42,8 @@ export type CreateMcpServerWithRegistriesParams = {
   user: Modules.MCP.McpHandlerContext['user'];
   /** Tools whose schemas the request needs. Defaults to `'all'`. */
   toolSchemaScope?: McpToolSchemaScope;
+  /** Passed to the SDK as `maxToolInputElements`. */
+  maxToolInputElements?: number;
 };
 
 export const createMcpServerWithRegistries = ({
@@ -50,6 +53,7 @@ export const createMcpServerWithRegistries = ({
   ability,
   user,
   toolSchemaScope = 'all',
+  maxToolInputElements = DEFAULT_MAX_TOOL_INPUT_ELEMENTS,
 }: CreateMcpServerWithRegistriesParams): McpServerWithRegistries => {
   const capabilities: ServerCapabilities = {
     logging: {},
@@ -73,6 +77,7 @@ export const createMcpServerWithRegistries = ({
     },
     {
       capabilities,
+      maxToolInputElements,
     }
   );
 
