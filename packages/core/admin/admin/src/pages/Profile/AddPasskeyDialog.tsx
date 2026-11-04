@@ -187,7 +187,7 @@ const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
                 required
                 hint={formatMessage({
                   id: 'Settings.profile.form.section.mfa.passkeys.add.name.hint',
-                  defaultMessage: 'Something you will recognise, like "MacBook Touch ID".',
+                  defaultMessage: 'Something you will recognize, like "MacBook Touch ID".',
                 })}
               >
                 <Field.Label>

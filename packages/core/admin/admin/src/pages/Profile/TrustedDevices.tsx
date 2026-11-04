@@ -137,7 +137,7 @@ const TrustedDevices = () => {
         {formatMessage({
           id: 'Settings.profile.form.section.mfa.trustedDevices.description',
           defaultMessage:
-            'Browsers that skip the code at login. A browser is trusted when you tick "Trust this device" after entering a code, until the date shown. Your password is still required every time.',
+            'Browsers that skip the code at login. A browser is trusted when you check "Trust this device" after entering a code, until the date shown. Your password is still required every time.',
         })}
       </Typography>
       {error ? <ErrorMessage error={toMessage(error)} /> : null}

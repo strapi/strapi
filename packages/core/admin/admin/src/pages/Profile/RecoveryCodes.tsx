@@ -174,7 +174,7 @@ const RecoveryCodesDismissAlert = ({ onClose }: { onClose: () => void }) => {
       {formatMessage({
         id: 'Settings.profile.form.section.mfa.codes.dismiss.body',
         defaultMessage:
-          'These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then tick the box below. If you close this without saving them, generate a new set from your profile.',
+          'These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then check the box below to close this.',
       })}
     </Alert>
   );
