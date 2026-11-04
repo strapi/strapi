@@ -384,6 +384,26 @@ const findPage = async (params = {}): Promise<unknown> => {
   return strapi.db.query('admin::user').findPage(query);
 };
 
+/**
+ * The user row and everything the two-factor feature stored about it, in one transaction, so a
+ * failure on either leaves neither half behind: a purged account that still exists has silently
+ * lost its second factor, and a deleted one whose rows remain leaves recovery-code hashes and
+ * device names on file.
+ *
+ * Unconditional: the mfa tables exist whether or not `unstableAdminMfa` is on, so a user deleted
+ * while it's off must not leave those rows behind. Callers run it after their super-admin guard,
+ * so a refused deletion never touches a live user's second factor.
+ */
+const purgeAndDelete = async (id: Data.ID): Promise<AdminUser> =>
+  strapi.db.transaction(async () => {
+    await getService('mfa').purgeUser(String(id));
+
+    const deleted: AdminUser = await strapi.db
+      .query('admin::user')
+      .delete({ where: { id }, populate: ['roles'] });
+    return deleted;
+  });
+
 /** Delete a user
  * @param id id of the user to delete
  */
@@ -407,15 +427,7 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
     }
   }
 
-  // Unconditional: the mfa tables exist whether or not `unstableAdminMfa` is on, so a user deleted
-  // while it's off must not leave recovery-code hashes, an encrypted secret or the device names
-  // on their security notices behind. Runs after the guard above and right before the row
-  // delete, so a refused deletion never touches a live user's second factor.
-  await getService('mfa').purgeUser(String(id));
-
-  const deletedUser = await strapi.db
-    .query('admin::user')
-    .delete({ where: { id }, populate: ['roles'] });
+  const deletedUser = await purgeAndDelete(id);
 
   // Invalidate all sessions for the deleted user
   const sessionManager = getSessionManager();
@@ -448,13 +460,7 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
 
   const deletedUsers = [] as AdminUser[];
   for (const id of ids) {
-    // See deleteById: unconditional, after the guard above, before this id's row is deleted.
-    await getService('mfa').purgeUser(String(id));
-
-    const deletedUser = await strapi.db.query('admin::user').delete({
-      where: { id },
-      populate: ['roles'],
-    });
+    const deletedUser = await purgeAndDelete(id);
 
     // Invalidate all sessions for the deleted user
     const sessionManager = getSessionManager();
