@@ -15,7 +15,12 @@ export type Infos<TUID extends SchemaHandlerUID = Internal.UID.ContentType> = {
   category?: string;
   modelName?: string;
   plugin?: string;
-  uid?: TUID;
+  uid: TUID;
+  /**
+   * `true` when the handler describes a schema the builder is creating, which has no file on disk
+   * yet: rolling it back removes the written file instead of restoring the initial schema.
+   */
+  isNew?: boolean;
   dir: string;
   filename: string;
   schema?: Struct.ContentTypeSchema;
@@ -45,7 +50,7 @@ const removeDirectoryIfEmpty = async (dir: string) => {
 export default function createSchemaHandler<
   TUID extends SchemaHandlerUID = Internal.UID.ContentType,
 >(infos: Infos<NoInfer<TUID>>) {
-  const { category, modelName, plugin, uid, dir, filename, schema } = infos;
+  const { category, modelName, plugin, uid, isNew = false, dir, filename, schema } = infos;
 
   const initialState = {
     modelName,
@@ -315,7 +320,7 @@ export default function createSchemaHandler<
       const filePath = path.join(state.dir, state.filename);
 
       // it was a creation so it needs to be deleted
-      if (!initialState.uid) {
+      if (isNew === true) {
         await fse.remove(filePath);
 
         await removeDirectoryIfEmpty(state.dir);

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import type { Internal } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
-import createSchemaHandler from './schema-handler';
+import createSchemaHandler, { type SchemaHandler } from './schema-handler';
 import createComponentBuilder from './component-builder';
 import createContentTypeBuilder from './content-type-builder';
 
@@ -59,7 +59,7 @@ type SchemaBuilderOptions = {
 };
 
 function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions) {
-  const tmpComponents = new Map();
+  const tmpComponents = new Map<Internal.UID.Component, SchemaHandler<Internal.UID.Component>>();
   const tmpContentTypes = new Map();
 
   // init temporary ContentTypes
