@@ -115,7 +115,18 @@ export const formatMfaNotice = (
   formatDate: IntlFormatters['formatDate']
 ): string => {
   const copy = copyFor(notice);
-  return `${formatMessage(copy.descriptor, copy.values)} (${formatDate(notice.createdAt, MFA_DATE_TIME_FORMAT)})`;
+  // One message rather than a string template, so a translation can place the date and the
+  // punctuation where its language wants them.
+  return formatMessage(
+    {
+      id: 'Settings.profile.form.section.mfa.notice.withDate',
+      defaultMessage: '{notice} ({datetime}).',
+    },
+    {
+      notice: formatMessage(copy.descriptor, copy.values),
+      datetime: formatDate(notice.createdAt, MFA_DATE_TIME_FORMAT),
+    }
+  );
 };
 
 const PROFILE_PATH = '/me';

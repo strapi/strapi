@@ -26,6 +26,8 @@ import { PasskeysCard } from './components/PasskeysCard';
 import {
   TrustedDevicesCard,
   type TrustedDevicesDraft,
+  DAYS_MAX,
+  DAYS_MIN,
   isValidDays,
 } from './components/TrustedDevicesCard';
 import {
@@ -138,16 +140,19 @@ const SecuritySettingsForm = ({
       errors.graceDays = formatMessage(
         {
           id: 'Settings.security.mfa.graceDays.error',
-          defaultMessage: 'Enter a whole number of days between {min} and {max}',
+          defaultMessage: 'Enter a whole number of days between {min} and {max}.',
         },
         { min: GRACE_MIN, max: GRACE_MAX }
       );
     }
     if (trustDraft.enabled && !isValidDays(trustDraft.days)) {
-      errors.trustDays = formatMessage({
-        id: 'Settings.security.trustedDevices.days.error',
-        defaultMessage: 'Enter a whole number of days between 1 and 90',
-      });
+      errors.trustDays = formatMessage(
+        {
+          id: 'Settings.security.trustedDevices.days.error',
+          defaultMessage: 'Enter a whole number of days between {min} and {max}.',
+        },
+        { min: DAYS_MIN, max: DAYS_MAX }
+      );
     }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;

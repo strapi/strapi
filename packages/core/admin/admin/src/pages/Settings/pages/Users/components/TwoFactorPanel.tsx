@@ -281,7 +281,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
             {
               id: 'Settings.permissions.users.mfa.state.pending',
               defaultMessage:
-                'Not set up. A new {days}-day grace period starts at their next login.',
+                'Not set up. A new {days, plural, one {#-day} other {#-day}} grace period starts at their next login.',
             },
             { days }
           )
@@ -289,7 +289,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
             {
               id: 'Settings.permissions.users.mfa.state.required',
               defaultMessage:
-                'Required, not set up. A {days}-day grace period starts at their next login.',
+                'Required, not set up. A {days, plural, one {#-day} other {#-day}} grace period starts at their next login.',
             },
             { days }
           );

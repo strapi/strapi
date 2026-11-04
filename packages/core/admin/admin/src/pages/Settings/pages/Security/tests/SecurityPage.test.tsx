@@ -585,7 +585,7 @@ describe('SecurityPage', () => {
     fireEvent.click(saveButton());
 
     expect(
-      await screen.findByText('Enter a whole number of days between 1 and 30')
+      await screen.findByText('Enter a whole number of days between 1 and 30.')
     ).toBeInTheDocument();
     expect(bodies).toHaveLength(0);
   });
