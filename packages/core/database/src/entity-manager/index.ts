@@ -906,7 +906,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             // `toAssocs` checks `set` by truthiness, so `{ set: null }` reaches this branch
             // as an empty delta. Released Strapi cleared the field on a bare null set (it
             // fell through to the replace path below) and applied the delta when a connect
-            // or disconnect came with it. Keep both outcomes as they are until CMS-2235
+            // or disconnect came with it. Keep both outcomes as they are until #27432
             // settles what `{ set: null }` means for every relation type: only a real delta
             // shape may take the empty-delta no-op path.
             const rawValue = data[attributeName];

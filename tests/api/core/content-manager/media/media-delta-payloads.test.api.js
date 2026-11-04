@@ -668,12 +668,12 @@ describe('media connect/disconnect delta payloads', () => {
     });
   });
 
-  describe('{ set: null } is left as released (CMS-2235)', () => {
+  describe('{ set: null } is left as released', () => {
     // This PR does not decide what `{ set: null }` means. `toAssocs` still drops a null
     // `set` (truthiness check), so on media the payload reaches the morph branch as an
     // empty delta and a guard in `updateRelations` keeps the released outcome: a bare
     // null set clears a media field, a null set beside a connect/disconnect runs the
-    // delta, and on a regular relation a bare null set changes nothing. CMS-2235 owns
+    // delta, and on a regular relation a bare null set changes nothing. Issue #27432 owns
     // the unified semantics; these cases only make sure the empty-delta no-op fix above
     // cannot change today's behaviour by accident.
     const readRelationDocumentIds = async (field, documentId) => {
@@ -801,8 +801,8 @@ describe('media connect/disconnect delta payloads', () => {
       const t1 = await strapi.db.query(MORPH_TARGET_UID).create({ data: { label: 'one' } });
       const t2 = await strapi.db.query(MORPH_TARGET_UID).create({ data: { label: 'two' } });
 
-      // Write both through the morphOne side — the join-table branch that used to slice(-1)
-      // for every morphOne, media or not.
+      // Write both through the morphOne side. This is a guard, not a regression test: the
+      // join-table branch must reduce only `singleRow` morphOnes, never a generic morphOne.
       await strapi.db.query(MORPH_HOLDER_UID).update({
         where: { id: holder.id },
         data: { tagged: [t1.id, t2.id] },
