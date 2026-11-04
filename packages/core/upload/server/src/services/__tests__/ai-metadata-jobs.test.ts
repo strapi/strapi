@@ -14,6 +14,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 describe('AI metadata jobs service', () => {
   let db: Database;
   let tmpDir: string;
+  const originalStrapi = global.strapi;
   let service: ReturnType<typeof createAIMetadataJobsService>;
 
   beforeAll(async () => {
@@ -39,8 +40,8 @@ describe('AI metadata jobs service', () => {
 
   afterAll(async () => {
     await db.destroy();
-    // @ts-expect-error - test cleanup of the global set above
-    delete global.strapi;
+    // The unit setup defines `strapi` with a setter that rejects `undefined` and `delete`
+    global.strapi = originalStrapi ?? ({} as any);
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
