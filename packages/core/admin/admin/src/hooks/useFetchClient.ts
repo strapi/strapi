@@ -44,11 +44,13 @@ const useFetchClient = () => {
     controller.current = new AbortController();
   }
 
-  React.useEffect(() => {
-    /**
-     * React StrictMode runs the cleanup once before mounting again,
-     * so we need a fresh controller if the previous one was aborted.
-     */
+  /**
+   * React StrictMode runs the cleanup once before mounting again,
+   * so we need a fresh controller if the previous one was aborted.
+   * A layout effect re-mounts before any passive effect in the tree,
+   * so children that fetch in their own `useEffect` already see the fresh controller.
+   */
+  React.useLayoutEffect(() => {
     if (controller.current?.signal.aborted) {
       controller.current = new AbortController();
     }

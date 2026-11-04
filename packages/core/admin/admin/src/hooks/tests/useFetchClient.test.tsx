@@ -1,7 +1,10 @@
 // eslint-disable-next-line check-file/filename-naming-convention
 import * as React from 'react';
 
-import { renderHook as renderHookWithoutProviders } from '@testing-library/react';
+import {
+  render as renderWithoutProviders,
+  renderHook as renderHookWithoutProviders,
+} from '@testing-library/react';
 import { render, renderHook, server, waitFor } from '@tests/utils';
 import { delay, http, HttpResponse } from 'msw';
 
@@ -74,6 +77,36 @@ describe('useFetchClient', () => {
     const { data } = await result.current.get('/use-fetch-client-test');
 
     expect(data).toHaveProperty('data.results');
+  });
+
+  it('should complete requests made from a child effect under React.StrictMode', async () => {
+    const results: string[] = [];
+
+    const Child = ({ get }: { get: ReturnType<typeof useFetchClient>['get'] }) => {
+      React.useEffect(() => {
+        get('/use-fetch-client-test').then(
+          () => results.push('ok'),
+          (e) => results.push(e.name)
+        );
+      }, [get]);
+
+      return null;
+    };
+
+    const Parent = () => {
+      const { get } = useFetchClient();
+
+      return <Child get={get} />;
+    };
+
+    renderWithoutProviders(
+      <React.StrictMode>
+        <Parent />
+      </React.StrictMode>
+    );
+
+    // The first request is aborted by StrictMode's simulated unmount, the second must succeed.
+    await waitFor(() => expect(results).toEqual(['AbortError', 'ok']));
   });
 
   it('should abort pending requests when the component unmounts', async () => {
