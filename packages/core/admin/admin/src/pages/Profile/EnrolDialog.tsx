@@ -7,6 +7,7 @@ import { styled } from 'styled-components';
 
 import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
 import { ErrorMessage } from '../../components/ErrorMessage';
+import { useNotification } from '../../features/Notifications';
 import { useToMessage } from '../../hooks/useToMessage';
 import {
   useAcknowledgeRecoveryCodesMutation,
@@ -28,6 +29,9 @@ interface EnrolDialogProps {
 const ManualKey = styled(Typography)`
   font-family: monospace;
 `;
+
+/** `JBSWY3DPEHPK3PXP` as `JBSW Y3DP EHPK 3PXP`. */
+const groupKey = (secret: string) => secret.match(/.{1,4}/g)?.join(' ') ?? secret;
 
 /** These key `state.adminApi.mutations` store-globally, so any other component using the same
  * string shares -- and can clobber -- this dialog's cached result. */
@@ -96,6 +100,36 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   // comment above for why this can't be the mutation hook's `isLoading` state.
   const inFlightRef = React.useRef(false);
   const scanCodeRef = React.useRef<HTMLInputElement>(null);
+  const scanIntroRef = React.useRef<HTMLParagraphElement>(null);
+  const manualKeyLabelId = React.useId();
+  const { toggleNotification } = useNotification();
+
+  // A new step replaces the whole body, so focus would otherwise fall back to the dialog. Moving it
+  // to the scan step's instructions announces them and puts a keyboard user at the top of the
+  // step; the codes step does the same for its heading (`RecoveryCodes`).
+  React.useEffect(() => {
+    if (step.name === 'scan') {
+      scanIntroRef.current?.focus();
+    }
+  }, [step.name]);
+
+  const handleCopyKey = async (secret: string) => {
+    try {
+      await navigator.clipboard.writeText(secret);
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: 'Settings.profile.form.section.mfa.enrol.scan.copied',
+          defaultMessage: 'Key copied.',
+        }),
+      });
+    } catch {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
+  };
 
   const [enrol, { isLoading: isEnrolling, reset: resetEnrol }] = useEnrolMfaMutation({
     fixedCacheKey: MFA_ENROL_CACHE_KEYS.password,
@@ -279,7 +313,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
           <form onSubmit={handleVerify}>
             <Modal.Body>
               <Flex direction="column" alignItems="stretch" gap={4}>
-                <Typography>
+                <Typography ref={scanIntroRef} tabIndex={-1}>
                   {formatMessage({
                     id: 'Settings.profile.form.section.mfa.enrol.scan.intro',
                     defaultMessage:
@@ -309,13 +343,30 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
                   </Box>
                 </Flex>
                 <Flex direction="column" alignItems="stretch" gap={1}>
-                  <Typography variant="pi" textColor="neutral600">
+                  <Typography variant="pi" textColor="neutral600" id={manualKeyLabelId}>
                     {formatMessage({
                       id: 'Settings.profile.form.section.mfa.enrol.scan.manual',
                       defaultMessage: 'Manual key',
                     })}
                   </Typography>
-                  <ManualKey data-testid="mfa-manual-key">{step.secret}</ManualKey>
+                  <Flex gap={2} alignItems="center" wrap="wrap">
+                    {/* Shown in groups of four so it can be read and typed without losing one's
+                        place; authenticator apps ignore the spaces. Copy takes the bare key. */}
+                    <ManualKey data-testid="mfa-manual-key" aria-labelledby={manualKeyLabelId}>
+                      {groupKey(step.secret)}
+                    </ManualKey>
+                    <Button
+                      variant="tertiary"
+                      size="S"
+                      type="button"
+                      onClick={() => handleCopyKey(step.secret)}
+                    >
+                      {formatMessage({
+                        id: 'Settings.profile.form.section.mfa.enrol.scan.copy',
+                        defaultMessage: 'Copy key',
+                      })}
+                    </Button>
+                  </Flex>
                 </Flex>
                 <Field.Root name="code" required error={error}>
                   <Field.Label>

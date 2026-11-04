@@ -440,6 +440,8 @@
   "Settings.profile.form.section.mfa.enrol.password.label": "Current password",
   "Settings.profile.form.section.mfa.enrol.scan.intro": "Scan this QR code with your authenticator app, or enter the key manually, then enter the code the app shows.",
   "Settings.profile.form.section.mfa.enrol.scan.manual": "Manual key",
+  "Settings.profile.form.section.mfa.enrol.scan.copy": "Copy key",
+  "Settings.profile.form.section.mfa.enrol.scan.copied": "Key copied.",
   "Settings.profile.form.section.mfa.enrol.scan.qr": "Scan this QR code with your authenticator app",
   "Settings.profile.form.section.mfa.enrol.title": "Enable two-factor authentication",
   "Settings.profile.form.section.mfa.enrol.error.invalidCode": "That code was not accepted. Codes change every 30 seconds. Wait for the next one and try again.",

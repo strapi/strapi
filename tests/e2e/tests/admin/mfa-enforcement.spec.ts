@@ -138,7 +138,11 @@ describeOnCondition(MFA_FLAG_ENABLED)('Two-factor enforcement', () => {
     await dialog.getByLabel('Current password*').fill(EDITOR_PASSWORD);
     await dialog.getByLabel('Authentication code*').fill(editor.recoveryCodes[0]);
     await dialog.getByRole('button', { name: 'Continue' }).click();
-    const newSecret = (await dialog.getByTestId('mfa-manual-key').textContent())!.trim();
+    // Shown in groups of four for reading; the bare key is what the authenticator needs.
+    const newSecret = (await dialog.getByTestId('mfa-manual-key').textContent())!.replace(
+      /\s+/g,
+      ''
+    );
     expect(newSecret).not.toBe(editor.secret);
     // The enrolment verify a moment ago consumed the current step account-wide
     await waitForNextTotpStep();

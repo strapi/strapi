@@ -10,6 +10,8 @@ import {
 } from './MfaStoreProbe';
 
 const SECRET = 'JBSWY3DPEHPK3PXP';
+/** How the dialog shows it: in groups of four. */
+const SHOWN_SECRET = 'JBSW Y3DP EHPK 3PXP';
 const URI = `otpauth://totp/Strapi:test%40testing.com?secret=${SECRET}&issuer=Strapi`;
 const CODES = ['ABCDE12345', 'FGHJK67890'];
 
@@ -76,7 +78,7 @@ describe('EnrolDialog', () => {
 
     // step 2: the QR code and the manual key, never the raw URI as plain text or in an attribute
     expect(await screen.findByRole('img', { name: /scan this qr code/i })).toBeInTheDocument();
-    expect(screen.getByText(SECRET)).toBeInTheDocument();
+    expect(screen.getByText(SHOWN_SECRET)).toBeInTheDocument();
     expect(screen.queryByText(URI)).not.toBeInTheDocument();
     // `document.body.innerHTML` serialises `&` as `&amp;`, so an attribute leak of the full
     // URI would render as `...secret=...&amp;issuer=Strapi` and asserting on the raw `URI`
@@ -114,8 +116,36 @@ describe('EnrolDialog', () => {
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
 
-    await screen.findByText(SECRET);
+    await screen.findByText(SHOWN_SECRET);
     expect(enrolBody).toEqual({ password: 'Testing123!' });
+  });
+
+  /** A 16-to-32 character key typed by hand needs groups to keep one's place, and a way to copy
+   * the bare key; focus moves to the new step so it is announced. */
+  it('groups the manual key, copies it bare, and moves focus to the scan step', async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+    const original = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+
+    try {
+      await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+      expect(await screen.findByTestId('mfa-manual-key')).toHaveTextContent(SHOWN_SECRET);
+      await waitFor(() =>
+        expect(screen.getByText(/Scan this QR code with your authenticator app, or/)).toHaveFocus()
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copy key' }));
+      await waitFor(() => expect(writeText).toHaveBeenCalledWith(SECRET));
+    } finally {
+      if (original) {
+        Object.defineProperty(navigator, 'clipboard', original);
+      } else {
+        Reflect.deleteProperty(navigator, 'clipboard');
+      }
+    }
   });
 
   it('renders the QR code with a scannable quiet zone and a larger size', async () => {
@@ -166,7 +196,7 @@ describe('EnrolDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Verify' }));
 
     expect(await screen.findByText('Invalid code')).toBeInTheDocument();
-    expect(screen.getByText(SECRET)).toBeInTheDocument();
+    expect(screen.getByText(SHOWN_SECRET)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Verify' })).toBeEnabled();
   });
 
@@ -242,7 +272,7 @@ describe('EnrolDialog', () => {
     fireEvent.submit(form);
     fireEvent.submit(form);
 
-    await screen.findByText(SECRET);
+    await screen.findByText(SHOWN_SECRET);
     expect(enrolRequestCount).toBe(1);
   });
 
@@ -379,7 +409,7 @@ describe('EnrolDialog', () => {
 
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    await screen.findByText(SECRET);
+    await screen.findByText(SHOWN_SECRET);
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onClose).toHaveBeenCalled();
@@ -402,7 +432,7 @@ describe('EnrolDialog', () => {
       </>
     );
     expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
-    expect(screen.queryByText(SECRET)).not.toBeInTheDocument();
+    expect(screen.queryByText(SHOWN_SECRET)).not.toBeInTheDocument();
   });
 
   it('does not leak the secret into the store when the dialog unmounts without closing', async () => {
@@ -413,7 +443,7 @@ describe('EnrolDialog', () => {
 
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    await screen.findByText(SECRET);
+    await screen.findByText(SHOWN_SECRET);
 
     unmount();
 
