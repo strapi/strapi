@@ -6,12 +6,7 @@ const yargs = require('yargs');
 const chalk = require('chalk');
 const dotenv = require('dotenv');
 
-const {
-  publishYalc,
-  setupTestApps,
-  getCurrentTestApps,
-  setupTestEnvironment,
-} = require('../utils/runners/shared-setup');
+const { publishYalc, setupTestApps, getCurrentTestApps } = require('../utils/runners/shared-setup');
 const { buildAdmin, runPlaywright } = require('../utils/runners/browser-runner');
 const { extractShardArgs, planShard } = require('../utils/runners/shard-plan');
 const { selectRunnableDomains } = require('../utils/runners/e2e-domains');
@@ -217,7 +212,6 @@ yargs
           templateDir,
           setup,
           currentTestApps: currentTestApps.map((appPath) => path.basename(appPath)),
-          setupTestEnvironment: type === 'e2e' ? setupTestEnvironment : null,
           commitE2eBaseline: type === 'e2e',
         });
 

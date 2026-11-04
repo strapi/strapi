@@ -170,7 +170,7 @@ Playwright’s `reuseExistingServer` is **off by default** (see **`PLAYWRIGHT_RE
 
 ## Running tests with future flags
 
-If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation does not take the config folder into consideration. However, the run-e2e-tests script will apply the features config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
+To test an unstable future feature, enable its flag in `tests/app-template/config/features.js`. The test app generator copies the whole template, `config/` included, into each generated app, so run the tests with `--setup` after you change it. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag).
 
 ## What is Playwright?
 
