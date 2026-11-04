@@ -7,7 +7,9 @@ const validBody = {
   text: 'Hello world',
 };
 
-const acceptedBodies = [
+// The route is a pass-through: every object body reaches the provider unchanged,
+// including shapes outside the documented `SendOptions` contract
+const passedBodies = [
   ['a text body', validBody],
   ['an html-only body', { to: 'recipient@example.com', subject: 'Hello', html: '<p>Hello</p>' }],
   [
@@ -46,12 +48,17 @@ const acceptedBodies = [
   ],
   ['an address-object `to`', { ...validBody, to: { name: 'Ada', address: 'ada@example.com' } }],
   ['a `replyTo` array', { ...validBody, replyTo: ['first@example.com', 'second@example.com'] }],
-] as const;
-
-const invalidBodies = [
-  ['no `to`', { subject: 'Hello', text: 'Hello world' }],
+  ['a body without `to`', { subject: 'Hello', text: 'Hello world' }],
   ['a numeric `subject`', { ...validBody, subject: 42 }],
   ['an object `text`', { ...validBody, text: { value: 'Hello world' } }],
+] as const;
+
+// Sent as raw JSON text so the request carries exactly this payload. The strict JSON body
+// parser rejects top-level primitives before the controller; the controller rejects arrays.
+const nonObjectBodies = [
+  ['an array', JSON.stringify([validBody]), 'ValidationError'],
+  ['a string', JSON.stringify('hello'), 'SyntaxError'],
+  ['a null', JSON.stringify(null), 'SyntaxError'],
 ] as const;
 
 describe('Email - POST /email', () => {
@@ -89,7 +96,7 @@ describe('Email - POST /email', () => {
       rq = await createRequest();
     });
 
-    test.each(acceptedBodies)('sends %s to the provider', async (__, body) => {
+    test.each(passedBodies)('sends %s to the provider', async (__, body) => {
       const res = await rq({ method: 'POST', url, body });
 
       expect(res.statusCode).toBe(200);
@@ -97,14 +104,11 @@ describe('Email - POST /email', () => {
       expect(send).toHaveBeenCalledWith(body);
     });
 
-    test.each(invalidBodies)('answers 400 ValidationError for a body with %s', async (__, body) => {
-      // A real provider fails on such input, which the controller turns into a 500
-      send.mockRejectedValue(new Error('Invalid email options'));
-
+    test.each(nonObjectBodies)('answers 400 for %s body', async (__, body, errorName) => {
       const res = await rq({ method: 'POST', url, body });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.error).toMatchObject({ name: 'ValidationError', status: 400 });
+      expect(res.body.error).toMatchObject({ name: errorName, status: 400 });
       expect(send).not.toHaveBeenCalled();
     });
   });

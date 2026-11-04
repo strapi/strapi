@@ -15675,276 +15675,34 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
                 "additionalProperties": {},
                 "properties": {
                   "bcc": {
-                    "anyOf": [
-                      {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "additionalProperties": {},
-                            "properties": {
-                              "address": {
-                                "type": "string",
-                              },
-                              "name": {
-                                "type": "string",
-                              },
-                            },
-                            "required": [
-                              "address",
-                            ],
-                            "type": "object",
-                          },
-                          {
-                            "items": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "additionalProperties": {},
-                                  "properties": {
-                                    "address": {
-                                      "type": "string",
-                                    },
-                                    "name": {
-                                      "type": "string",
-                                    },
-                                  },
-                                  "required": [
-                                    "address",
-                                  ],
-                                  "type": "object",
-                                },
-                              ],
-                            },
-                            "type": "array",
-                          },
-                        ],
-                      },
-                      {
-                        "type": "null",
-                      },
-                    ],
+                    "type": "string",
                   },
                   "cc": {
-                    "anyOf": [
-                      {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "additionalProperties": {},
-                            "properties": {
-                              "address": {
-                                "type": "string",
-                              },
-                              "name": {
-                                "type": "string",
-                              },
-                            },
-                            "required": [
-                              "address",
-                            ],
-                            "type": "object",
-                          },
-                          {
-                            "items": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "additionalProperties": {},
-                                  "properties": {
-                                    "address": {
-                                      "type": "string",
-                                    },
-                                    "name": {
-                                      "type": "string",
-                                    },
-                                  },
-                                  "required": [
-                                    "address",
-                                  ],
-                                  "type": "object",
-                                },
-                              ],
-                            },
-                            "type": "array",
-                          },
-                        ],
-                      },
-                      {
-                        "type": "null",
-                      },
-                    ],
+                    "type": "string",
                   },
                   "from": {
-                    "anyOf": [
-                      {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "additionalProperties": {},
-                            "properties": {
-                              "address": {
-                                "type": "string",
-                              },
-                              "name": {
-                                "type": "string",
-                              },
-                            },
-                            "required": [
-                              "address",
-                            ],
-                            "type": "object",
-                          },
-                        ],
-                      },
-                      {
-                        "type": "null",
-                      },
-                    ],
+                    "type": "string",
                   },
                   "html": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                      },
-                      {
-                        "type": "null",
-                      },
-                    ],
+                    "type": "string",
                   },
                   "replyTo": {
-                    "anyOf": [
-                      {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                          },
-                          {
-                            "additionalProperties": {},
-                            "properties": {
-                              "address": {
-                                "type": "string",
-                              },
-                              "name": {
-                                "type": "string",
-                              },
-                            },
-                            "required": [
-                              "address",
-                            ],
-                            "type": "object",
-                          },
-                          {
-                            "items": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                },
-                                {
-                                  "additionalProperties": {},
-                                  "properties": {
-                                    "address": {
-                                      "type": "string",
-                                    },
-                                    "name": {
-                                      "type": "string",
-                                    },
-                                  },
-                                  "required": [
-                                    "address",
-                                  ],
-                                  "type": "object",
-                                },
-                              ],
-                            },
-                            "type": "array",
-                          },
-                        ],
-                      },
-                      {
-                        "type": "null",
-                      },
-                    ],
+                    "type": "string",
                   },
                   "subject": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                      },
-                      {
-                        "type": "null",
-                      },
-                    ],
+                    "type": "string",
                   },
                   "text": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                      },
-                      {
-                        "type": "null",
-                      },
-                    ],
+                    "type": "string",
                   },
                   "to": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                      },
-                      {
-                        "additionalProperties": {},
-                        "properties": {
-                          "address": {
-                            "type": "string",
-                          },
-                          "name": {
-                            "type": "string",
-                          },
-                        },
-                        "required": [
-                          "address",
-                        ],
-                        "type": "object",
-                      },
-                      {
-                        "items": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                            },
-                            {
-                              "additionalProperties": {},
-                              "properties": {
-                                "address": {
-                                  "type": "string",
-                                },
-                                "name": {
-                                  "type": "string",
-                                },
-                              },
-                              "required": [
-                                "address",
-                              ],
-                              "type": "object",
-                            },
-                          ],
-                        },
-                        "type": "array",
-                      },
-                    ],
+                    "type": "string",
                   },
                 },
                 "required": [
                   "to",
+                  "subject",
+                  "text",
                 ],
                 "type": "object",
               },
