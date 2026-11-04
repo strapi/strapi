@@ -136,7 +136,7 @@ const TwoFactorSection = () => {
   const { toggleNotification } = useNotification();
   const toMessage = useToMessage();
   // Skipped until the status says the feature exists, as `MfaNotices` does: otherwise every profile
-  // view on a flag-off instance fires one request that can only 404.
+  // view with the kill switch on fires one request that can only 404.
   const { data: notices } = useGetMfaNoticesQuery(undefined, {
     skip: isLoading || isNotFoundError(error),
   });
@@ -160,8 +160,8 @@ const TwoFactorSection = () => {
   const [regenerateOpen, setRegenerateOpen] = React.useState(false);
   const [disableOpen, setDisableOpen] = React.useState(false);
 
-  // 404 means the future flag is off: the feature does not exist on this instance. The UI never
-  // reads the flag itself -- a 404 from /admin/mfa/me is the only signal it is off.
+  // Mounted only in a build with the feature (`ProfilePage`), so a 404 here means the server's
+  // kill switch (`admin.auth.mfa.enabled: false`) has it off.
   const isNotFound = isNotFoundError(error);
 
   if (isLoading || isNotFound) {

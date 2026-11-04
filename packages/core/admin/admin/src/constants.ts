@@ -1,4 +1,5 @@
 import { PermissionMap } from './types/permissions';
+import { isMfaFeatureEnabled } from './utils/mfaFeature';
 
 import type { StrapiAppSettingLink } from './core/apis/router';
 
@@ -235,9 +236,8 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       to: '/settings/admin-tokens',
       id: 'admin-tokens',
     },
-    // Enforcement of admin two-factor authentication. The one place the admin reads the future flag:
-    // the page itself, and everything behind it, keys off the API (404 = feature off) instead.
-    ...(window.strapi.future.isEnabled('unstableAdminMfa')
+    // Enforcement of admin two-factor authentication, only in a build with the feature.
+    ...(isMfaFeatureEnabled()
       ? [
           {
             intlLabel: { id: 'Settings.security.title', defaultMessage: 'Security' },

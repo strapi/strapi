@@ -1,3 +1,5 @@
+import { isMfaFeatureEnabled } from '../../utils/mfaFeature';
+
 import type { RouteObject } from 'react-router-dom';
 
 const ADMIN_TOKEN_ROUTES: RouteObject[] = [
@@ -94,16 +96,21 @@ export const ROUTES_CE = (): RouteObject[] => [
     },
     path: 'users/:id',
   },
-  {
-    lazy: async () => {
-      const { ProtectedSecurityPage } = await import('./pages/Security/SecurityPage');
+  // Only in a build with the two-factor feature, like its settings link.
+  ...(isMfaFeatureEnabled()
+    ? [
+        {
+          lazy: async () => {
+            const { ProtectedSecurityPage } = await import('./pages/Security/SecurityPage');
 
-      return {
-        Component: ProtectedSecurityPage,
-      };
-    },
-    path: 'security',
-  },
+            return {
+              Component: ProtectedSecurityPage,
+            };
+          },
+          path: 'security',
+        },
+      ]
+    : []),
   {
     lazy: async () => {
       const { ProtectedCreatePage } = await import('./pages/Webhooks/CreatePage');

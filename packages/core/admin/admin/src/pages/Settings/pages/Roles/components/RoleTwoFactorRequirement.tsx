@@ -39,9 +39,9 @@ interface RoleTwoFactorRequirementProps {
  * users it puts on the clock, and dropping it asks for the caller's password (and a code when the
  * caller is enrolled), because the server refuses a lowered requirement without them.
  *
- * Shown only to a caller who may read and update the security settings, and only while the feature
- * is on: a 404 from `GET /admin/security-settings` is the feature-off signal, as on the Security
- * page. While nothing is required, turning it on moves the mode to "Required for selected roles"
+ * Mounted only in a build with the feature, and shown only to a caller who may read and update the
+ * security settings. A 404 from `GET /admin/security-settings` is the kill-switch signal, as on the
+ * Security page. While nothing is required, turning it on moves the mode to "Required for selected roles"
  * with this role alone, and turning off the last required role moves it back to "Not required".
  * While everyone is required the checkbox shows the effective state, disabled, and says where it is
  * set.

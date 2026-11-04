@@ -20,7 +20,8 @@ export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
  * since the clock starts at the first session issued after it applies -- so the copy then points
  * at the next login rather than inventing a deadline.
  *
- * Polling stops on a 404 (feature off) and starts again on a success. The hook's options can only
+ * Mounted only in a build with the feature (`MfaBanners`). Polling stops on a 404 (the server's
+ * kill switch) and starts again on a success. The hook's options can only
  * see the *previous* render's result, so that state is mirrored one render behind via an effect.
  * It has to move both ways: `/admin/mfa/me` is a shared cache entry that three other components
  * also read, and a one-way latch would mean one observed 404 permanently blinds this banner for

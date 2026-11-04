@@ -24,6 +24,7 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { isMfaFeatureEnabled } from '../../../../utils/mfaFeature';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
@@ -254,7 +255,7 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
-                <RoleTwoFactorRequirement roleId={id} />
+                {isMfaFeatureEnabled() ? <RoleTwoFactorRequirement roleId={id} /> : null}
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}

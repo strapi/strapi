@@ -94,7 +94,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const {
     allowedActions: { canRead: canReadSecuritySettings },
   } = useRBAC({ read: permissions.settings?.security?.read ?? [] });
-  // Errors (including the feature-off 404) leave `settings` undefined: the panel then falls back to
+  // Errors (including the kill-switch 404) leave `settings` undefined: the panel then falls back to
   // what it knows without them.
   const { data: settings } = useGetSecuritySettingsQuery(undefined, {
     skip: !canReadSecuritySettings,

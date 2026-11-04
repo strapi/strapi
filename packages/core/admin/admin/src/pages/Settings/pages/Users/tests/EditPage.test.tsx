@@ -33,6 +33,16 @@ describe('Users | EditPage', () => {
   });
 
   describe('two-factor panel', () => {
+    const originalFuture = window.strapi.future;
+
+    beforeEach(() => {
+      window.strapi.future = { isEnabled: (name) => name === 'unstableAdminMfa' };
+    });
+
+    afterEach(() => {
+      window.strapi.future = originalFuture;
+    });
+
     /** Unlock and removing passkeys lower another user's protection, so the dialog asks the viewer
      * for their own password and a code (Decision A). `/mfa/me` is a 404 here, so both are shown. */
     const confirmWithCredentials = async (

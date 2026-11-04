@@ -21,6 +21,7 @@ import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { isMfaFeatureEnabled } from '../../../../utils/mfaFeature';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 import { getDisplayName } from '../../../../utils/users';
 
@@ -286,7 +287,7 @@ const EditPage = () => {
                       </Grid.Root>
                     </Flex>
                   </Box>
-                  {user.mfaEnabledAt !== undefined ? (
+                  {isMfaFeatureEnabled() && user.mfaEnabledAt !== undefined ? (
                     <TwoFactorPanel user={user} canUpdate={canUpdate} />
                   ) : null}
                 </Flex>

@@ -18,10 +18,12 @@ const MFA_STATUS = {
 describe('Profile page', () => {
   const originalIsEnabled = window.strapi.features.isEnabled;
   const originalIsEE = window.strapi.isEE;
+  const originalFuture = window.strapi.future;
 
   beforeAll(() => {
     window.strapi.isEE = true;
     window.strapi.features.isEnabled = () => true;
+    window.strapi.future = { isEnabled: (name) => name === 'unstableAdminMfa' };
 
     window.localStorage.setItem('jwtToken', JSON.stringify('token'));
   });
@@ -29,6 +31,27 @@ describe('Profile page', () => {
   afterAll(() => {
     window.strapi.isEE = originalIsEE;
     window.strapi.features.isEnabled = originalIsEnabled;
+    window.strapi.future = originalFuture;
+  });
+
+  it('has no two-factor section, and asks nothing about it, in a build without the feature', async () => {
+    window.strapi.future = { isEnabled: () => false };
+    const requested: string[] = [];
+    const record = ({ request }: { request: Request }) => {
+      requested.push(new URL(request.url).pathname);
+    };
+    server.events.on('request:start', record);
+
+    try {
+      const { findByText, queryByRole } = render(<ProfilePage />);
+      await findByText('Interface language');
+
+      expect(queryByRole('heading', { name: 'Two-factor authentication' })).not.toBeInTheDocument();
+      expect(requested.filter((path) => path.startsWith('/admin/mfa'))).toEqual([]);
+    } finally {
+      server.events.removeListener('request:start', record);
+      window.strapi.future = { isEnabled: (name) => name === 'unstableAdminMfa' };
+    }
   });
 
   beforeEach(() => {

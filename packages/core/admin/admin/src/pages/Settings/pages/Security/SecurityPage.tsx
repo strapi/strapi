@@ -516,10 +516,10 @@ const SecurityDowngradeDialog = ({
  * Settings > Administration Panel > Security. A generic home for security settings; its cards are
  * two-factor enforcement (`TwoFactorEnforcementCard`), trusted devices (`TrustedDevicesCard`) and
  * passkeys (`PasskeysCard`); each is an accessible region named by its own heading. The page owns
- * one draft of all three and saves it with the one Save in its header. The settings link is the
- * one place that reads the future flag; this page keys off the API instead: a 404 from
- * `/admin/security-settings` means the feature is off (kill switch or flag), and it renders a
- * disabled-feature state rather than an empty form.
+ * one draft of all three and saves it with the one Save in its header. The route and its settings
+ * link exist only in a build with the feature; a 404 from `/admin/security-settings` then means
+ * the server's kill switch has it off, and the page renders a disabled-feature state rather than
+ * an empty form.
  *
  * Role names need `admin::roles.read` on top of `admin::security-settings.read`; without it the
  * card renders with an empty role list (the server still enforces role ids on save).
@@ -548,7 +548,7 @@ const SecurityPage = () => {
     isUninitialized: isUninitializedRoles,
   } = useAdminRoles(undefined, { skip: !canReadRoles });
   // The caller's own enrolment decides whether a downgrade needs a code; a 404 here is the same
-  // feature-off signal and simply reads as "not enrolled".
+  // kill-switch signal and simply reads as "not enrolled".
   const { data: mfaStatus } = useGetMfaStatusQuery();
   const callerRoleIds = useAuth('SecurityPage', (state) =>
     (state.user?.roles ?? []).map((role) => String(role.id))

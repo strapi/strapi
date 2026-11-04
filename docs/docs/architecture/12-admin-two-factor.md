@@ -45,6 +45,11 @@ Turning `admin.auth.mfa.enabled` off does **not** delete enrolment data. Nobody 
 nobody is locked out, and re-enabling restores the previous state. That is what makes it usable as
 a kill switch.
 
+In the admin panel every two-factor query and UI is gated on
+`window.strapi.future.isEnabled('unstableAdminMfa')` (`admin/src/utils/mfaFeature.ts`), so a build
+without the flag makes no two-factor request. With the flag on, a 404 from a two-factor endpoint
+means the server's kill switch (`admin.auth.mfa.enabled: false`) has the feature off.
+
 ## Enrolment
 
 Three calls, in order. `secret`/`otpauthUri` and the recovery codes are each returned **exactly
@@ -378,9 +383,12 @@ Admin panel:
 | E2E            | `tests/e2e/tests/admin/mfa{,-enforcement,-trusted-devices,-passkeys}.spec.ts`                                                                             |
 | Shared helpers | `tests/utils/mfa.ts` (TOTP generation), `tests/api/core/admin/utils/mfa-state.ts` (state reset)                                                           |
 
-The e2e app is generated from `tests/app-template/`, whose config enables the future flag and sets
-a WebAuthn relying party. Running the e2e suites without that config leaves passkeys hidden; see
-[Passkeys](./15-admin-passkeys.md).
+The e2e app is generated from `tests/app-template/`, whose config sets a WebAuthn relying party and
+leaves the future flag off unless `UNSTABLE_ADMIN_MFA` is set. The flag is baked into the admin
+bundle at build time, and the e2e runner builds the bundle once per run, so the opt-in is per run:
+`tests/scripts/run-tests.js` sets `UNSTABLE_ADMIN_MFA=true` unless the environment already sets it.
+The two-factor specs skip themselves when it is not `true`. Running the e2e suites without the
+relying-party config leaves passkeys hidden; see [Passkeys](./15-admin-passkeys.md).
 
 The API test app is not generated from that template, so the flag is off there. Every
 `admin-mfa-*` API suite turns it on for its own instance in a `bootstrap` hook, except

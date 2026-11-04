@@ -21,6 +21,7 @@ import { useIsDesktop } from '../hooks/useMediaQuery';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
+import { isMfaFeatureEnabled } from '../utils/mfaFeature';
 import { translatedErrors } from '../utils/translatedErrors';
 import { getDisplayName } from '../utils/users';
 
@@ -208,7 +209,7 @@ const ProfilePage = () => {
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     <UserInfoSection />
                     {!hasLockedRole && <PasswordSection />}
-                    {!hasLockedRole && <TwoFactorSection />}
+                    {!hasLockedRole && isMfaFeatureEnabled() && <TwoFactorSection />}
                     <PreferencesSection localeNames={localeNames} />
                   </Flex>
                 </Layouts.Content>

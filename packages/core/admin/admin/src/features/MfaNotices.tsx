@@ -132,7 +132,8 @@ const PROFILE_PATH = '/me';
  * marking anything seen, and a visit there counts as announced, so leaving the page does not bring
  * the notice back.
  *
- * The flag-off signal is a 404 from `useGetMfaStatusQuery`, which then `skip`s the notices query.
+ * Mounted only in a build with the feature (`MfaBanners`). The kill-switch signal is a 404 from
+ * `useGetMfaStatusQuery`, which then `skip`s the notices query.
  * Deliberately not `status.enabled`: `disabled`/`reset` notices are raised exactly when a user
  * stops being enrolled, so they must keep flowing for a not-currently-enrolled user.
  *
