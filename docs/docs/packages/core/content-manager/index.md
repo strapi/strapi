@@ -42,7 +42,18 @@ The edit view response holds only a count for each relation field, and the relat
 
 ### History and preview
 
-`server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost. The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). Both folders carry their own `LICENSE` file.
+`server/src/history` and `admin/src/history` hold the content history feature. It is an Enterprise feature, gated by `cms-content-history`. When the gate is off, the plugin still registers the `historyVersion` model so that no data is lost.
+
+History records the writes made through the Content Manager routes. Each version stores the source of the write, and the versions list shows it as a tag:
+
+| Source        | Write made with                              |
+| ------------- | -------------------------------------------- |
+| `admin-panel` | An admin panel session                       |
+| `admin-api`   | An admin token on the Content Manager routes |
+
+Versions saved before the source existed show as `admin-panel`. The rules that decide whether a write gets a version, and with which source, are in `server/src/history/origin`.
+
+The `preview` folders hold the live preview. Read [Live preview](./06-preview.md). The `history` and `preview` folders carry their own `LICENSE` file.
 
 ## Related
 

@@ -1,5 +1,6 @@
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
+import { createAgent } from 'api-tests/agent';
 import { createUtils, describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 import fs from 'fs';
@@ -934,6 +935,66 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
 
       expect(restoredDocument.seo).toMatchObject({ metaTitle: 'Initial title' });
+    });
+  });
+
+  describe('Source of history versions', () => {
+    const findVersions = async (documentId: string) => {
+      const { body } = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${documentId}`,
+      });
+
+      return body.data;
+    };
+
+    const createAdminTokenRequest = async () => {
+      const permission = (action: string) => ({
+        action,
+        subject: collectionTypeUid,
+        conditions: [],
+        properties: { fields: ['name', 'description'], locales: ['en'] },
+      });
+
+      const { body } = await rq({
+        method: 'POST',
+        url: '/admin/admin-tokens',
+        body: {
+          name: 'history-source-admin-token',
+          adminPermissions: [
+            permission('plugin::content-manager.explorer.read'),
+            permission('plugin::content-manager.explorer.update'),
+          ],
+        },
+      });
+
+      return createAgent(strapi, { token: body.data.accessKey });
+    };
+
+    test('Records an admin panel write with the admin panel source', async () => {
+      const versions = await findVersions(collectionTypeDocumentId);
+
+      expect(versions.length).toBeGreaterThan(0);
+      versions.forEach((version) => {
+        expect(version.source).toBe('admin-panel');
+      });
+    });
+
+    test('Records an admin token write with the admin API source', async () => {
+      const tokenRq = await createAdminTokenRequest();
+
+      const res = await tokenRq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${collectionTypeUid}/${collectionTypeDocumentId}`,
+        body: { description: 'Updated with an admin token' },
+        qs: { locale: 'en' },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const [latestVersion] = await findVersions(collectionTypeDocumentId);
+      expect(latestVersion.source).toBe('admin-api');
+      expect(latestVersion.data.description).toBe('Updated with an admin token');
     });
   });
 

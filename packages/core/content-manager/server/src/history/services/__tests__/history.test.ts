@@ -150,6 +150,7 @@ describe('history-version service', () => {
         },
       },
       status: 'draft' as const,
+      source: 'admin-panel' as const,
     };
 
     await historyService.createVersion(historyVersionData);
@@ -180,6 +181,7 @@ describe('history-version service', () => {
         },
       },
       status: null,
+      source: 'admin-panel' as const,
     };
 
     mockGetRequestContext.mockReturnValueOnce(null as any);
