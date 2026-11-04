@@ -20,6 +20,7 @@ export interface TransactionObject {
   rollback: () => Promise<void>;
   get: () => Knex.Transaction;
 }
+
 export interface Store {
   trx: Knex.Transaction | null;
   commitCallbacks: Callback[];
@@ -74,15 +75,49 @@ const waitForDeadlockRetry = (attempt: number) =>
     setTimeout(resolve, DEADLOCK_RETRY_DELAY_MS * attempt);
   });
 
+const runCallbacks = async (
+  callbacks: Callback[] | undefined,
+  report?: (error: unknown) => void
+) => {
+  if (!callbacks) {
+    return;
+  }
+
+  // Hooks can register more hooks while they run.
+  while (callbacks.length > 0) {
+    const batch = callbacks.splice(0, callbacks.length);
+    for (const cb of batch) {
+      try {
+        await cb();
+      } catch (error) {
+        // A commit hook runs after the database has kept the write. Log it
+        // and keep going so one failure does not drop the hooks after it.
+        // A rollback hook still fails the call: the transaction did not commit.
+        if (report) {
+          report(error);
+          continue;
+        }
+
+        callbacks.length = 0;
+        throw error;
+      }
+    }
+  }
+};
+
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const store = storage.getStore();
+    // Share callback arrays only while the parent transaction is still open.
+    // Commit hooks run after that transaction is cleared. A transaction they
+    // open must not keep the parent's arrays, or its own onCommit callbacks
+    // run with the parent's instead of after its own commit.
+    const parent = store?.trx ? store : undefined;
     return storage.run<ReturnType<TCallback>, void[]>(
       {
         trx,
-        // Fill with existing callbacks if nesting transactions
-        commitCallbacks: store?.commitCallbacks || [],
-        rollbackCallbacks: store?.rollbackCallbacks || [],
+        commitCallbacks: parent ? parent.commitCallbacks : [],
+        rollbackCallbacks: parent ? parent.rollbackCallbacks : [],
       },
       cb
     );
@@ -93,7 +128,7 @@ const transactionCtx = {
     return store?.trx;
   },
 
-  async commit(trx: Knex.Transaction) {
+  async commit(trx: Knex.Transaction, reportCommitHookError?: (error: unknown) => void) {
     const store = storage.getStore();
     if (isTransactorComplete(trx)) {
       if (store?.trx) {
@@ -110,13 +145,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    if (!store?.commitCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.commitCallbacks.forEach((cb) => cb());
-    store.commitCallbacks = [];
+    await runCallbacks(store?.commitCallbacks, reportCommitHookError ?? (() => undefined));
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -136,13 +165,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    if (!store?.rollbackCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.rollbackCallbacks.forEach((cb) => cb());
-    store.rollbackCallbacks = [];
+    await runCallbacks(store?.rollbackCallbacks);
   },
 
   onCommit(cb: Callback) {

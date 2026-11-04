@@ -305,28 +305,10 @@ describeOnCondition(edition === 'EE')('History API', () => {
     return rq;
   };
 
-  // History rows are written from onCommit, which the document write does not await.
-  const waitForHistoryVersions = async (url: string, minCount: number) => {
-    const deadline = Date.now() + 10_000;
-    let response;
-
-    while (Date.now() < deadline) {
-      response = await rq({ method: 'GET', url });
-      const listed = response.body?.data?.length ?? 0;
-      const total = response.body?.meta?.pagination?.total ?? listed;
-      const pageSize = response.body?.meta?.pagination?.pageSize ?? minCount;
-
-      if (total >= minCount && listed >= Math.min(minCount, pageSize)) {
-        return response;
-      }
-
-      await new Promise((resolve) => {
-        setTimeout(resolve, 50);
-      });
-    }
-
-    return response;
-  };
+  // History rows are written from onCommit, and the document write awaits those
+  // callbacks before it responds. Read once. A poll would hide a return to
+  // fire-and-forget.
+  const readHistoryVersions = async (url: string) => rq({ method: 'GET', url });
 
   beforeAll(async () => {
     builder.addComponent(componentModel);
@@ -648,9 +630,8 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
 
       // Get the history of the cloned entry
-      const cloneHistoryVersions = await waitForHistoryVersions(
-        `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${cloneRes.body.data.documentId}&page=1`,
-        1
+      const cloneHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${cloneRes.body.data.documentId}&page=1`
       );
 
       expect(cloneHistoryVersions.body.meta.pagination.total).toBe(1);
@@ -879,10 +860,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
 
       // Find and restore the initial version that had the components data.
-      // The three writes each record a version after commit, so wait until all three exist.
-      const versions = await waitForHistoryVersions(
-        `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${currentDocument.data.documentId}&page=1&pageSize=3&locale=en`,
-        3
+      // Each write awaits its history onCommit, so all three versions exist now.
+      const versions = await readHistoryVersions(
+        `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${currentDocument.data.documentId}&page=1&pageSize=3&locale=en`
       );
       expect(versions.body.data).toHaveLength(3);
       const res = await rq({
@@ -969,14 +949,12 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       expect(bulkPublishResult.statusCode).toBe(200);
 
-      const enHistoryVersions = await waitForHistoryVersions(
-        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${enProduct.data.documentId}`,
-        2
+      const enHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${enProduct.data.documentId}`
       );
 
-      const frHistoryVersions = await waitForHistoryVersions(
-        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${frProduct.data.documentId}&locale=fr`,
-        2
+      const frHistoryVersions = await readHistoryVersions(
+        `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${frProduct.data.documentId}&locale=fr`
       );
 
       // Create + Publish = 2 versions
