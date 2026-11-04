@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import semver from 'semver';
 import type { modules } from '../../../dist';
 
@@ -7,7 +7,7 @@ const DEP_PATH = `dependencies.${DEP_NAME}`;
 const DEP_VERSION = '13.0.3';
 
 /**
- *
+ * Upgrade better-sqlite3 to 13.x (Node >= 22, ships prebuilt N-API binaries)
  */
 const transform: modules.runner.json.JSONTransform = (file, params) => {
   return upgradeIfExists(file, params, DEP_PATH, DEP_VERSION);
@@ -15,7 +15,7 @@ const transform: modules.runner.json.JSONTransform = (file, params) => {
 
 export default transform;
 
-// TODO: move this to a utility once we solve the issue where codemods are not transpiled properly
+// Codemods are transpiled one file at a time, so this helper cannot be imported from a shared module
 const upgradeIfExists = (
   file: modules.runner.json.JSONSourceFile,
   params: modules.runner.json.JSONTransformParams,
