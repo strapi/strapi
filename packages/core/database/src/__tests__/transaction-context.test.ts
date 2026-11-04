@@ -43,31 +43,62 @@ describe('transaction hooks', () => {
     expect(order).toEqual(['first', 'nested', 'after commit']);
   });
 
-  test('a rejected commit hook fails commit and is marked as a hook error', async () => {
+  test('a rejected commit hook is reported and the later hooks still run', async () => {
     const error = Object.assign(new Error('hook failed'), { code: '40P01' });
     const later = jest.fn();
+    const reported: unknown[] = [];
 
     await transactionCtx.run(fakeTrx(), async () => {
       transactionCtx.onCommit(() => Promise.reject(error));
       transactionCtx.onCommit(later);
-      await expect(transactionCtx.commit(fakeTrx())).rejects.toBe(error);
+      await transactionCtx.commit(fakeTrx(), (hookError) => {
+        reported.push(hookError);
+      });
+    });
+
+    expect(later).toHaveBeenCalledTimes(1);
+    expect(reported).toEqual([error]);
+  });
+
+  test('a throwing rollback hook fails rollback and skips the hooks after it', async () => {
+    const error = Object.assign(new Error('rollback hook failed'), { code: '40P01' });
+    const later = jest.fn();
+
+    await transactionCtx.run(fakeTrx(), async () => {
+      transactionCtx.onRollback(() => {
+        throw error;
+      });
+      transactionCtx.onRollback(later);
+      await expect(transactionCtx.rollback(fakeTrx())).rejects.toBe(error);
     });
 
     expect(later).not.toHaveBeenCalled();
     expect(isTransactionHookError(error)).toBe(true);
   });
 
-  test('a throwing rollback hook fails rollback', async () => {
-    const error = new Error('rollback hook failed');
+  test('commit still finishes when a hook fails and nobody is listening', async () => {
+    const later = jest.fn();
 
     await transactionCtx.run(fakeTrx(), async () => {
-      transactionCtx.onRollback(() => {
-        throw error;
+      transactionCtx.onCommit(() => {
+        throw new Error('no listener');
       });
-      await expect(transactionCtx.rollback(fakeTrx())).rejects.toBe(error);
+      transactionCtx.onCommit(later);
+      await transactionCtx.commit(fakeTrx());
     });
 
-    expect(isTransactionHookError(error)).toBe(true);
+    expect(later).toHaveBeenCalledTimes(1);
+  });
+
+  test('onCommit outside a transaction is not kept for a later one', async () => {
+    const stray = jest.fn();
+    transactionCtx.onCommit(stray);
+
+    await transactionCtx.run(fakeTrx(), async () => {
+      await transactionCtx.commit(fakeTrx());
+    });
+
+    expect(stray).not.toHaveBeenCalled();
   });
 
   test('a driver error is not a hook error', () => {

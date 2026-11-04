@@ -327,39 +327,50 @@ describe('Database', () => {
         await db.destroy();
       });
 
-      it(`rejects without retrying when a commit hook fails with ${title}`, async () => {
+      it(`resolves when a commit hook fails and still runs the later hooks with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
+        const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
 
         let runs = 0;
+        let later = false;
         const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
-        await expect(
-          db.transaction(async ({ onCommit }) => {
-            runs += 1;
-            onCommit(() => Promise.reject(error));
-          })
-        ).rejects.toBe(error);
+        await db.transaction(async ({ onCommit }) => {
+          runs += 1;
+          onCommit(() => Promise.reject(error));
+          onCommit(() => {
+            later = true;
+          });
+        });
 
         expect(runs).toBe(1);
+        expect(later).toBe(true);
+        expect((db.connection as any).commit).toHaveBeenCalledTimes(1);
+        expect((db.connection as any).rollback).not.toHaveBeenCalled();
+        expect(
+          logged.mock.calls.some(([message]) => String(message).includes('deadlock detected'))
+        ).toBe(true);
         await db.destroy();
       });
 
-      it(`rejects without retrying when a commit hook throws synchronously with ${title}`, async () => {
+      it(`resolves when a commit hook throws synchronously with ${title}`, async () => {
         const db = new Database(config);
         await db.init({ models });
+        const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
 
         let runs = 0;
         const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
-        await expect(
-          db.transaction(async ({ onCommit }) => {
-            runs += 1;
-            onCommit(() => {
-              throw error;
-            });
-          })
-        ).rejects.toBe(error);
+        await db.transaction(async ({ onCommit }) => {
+          runs += 1;
+          onCommit(() => {
+            throw error;
+          });
+        });
 
         expect(runs).toBe(1);
+        expect(
+          logged.mock.calls.some(([message]) => String(message).includes('deadlock detected'))
+        ).toBe(true);
         await db.destroy();
       });
 
@@ -438,6 +449,209 @@ describe('Database', () => {
         expect(statements).toEqual(['lock', 'delete', 'lock']);
         await db.destroy();
       });
+    });
+
+    it('does not query when locking a document outside MySQL', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const getConnection = jest.spyOn(db, 'getConnection');
+
+      await db.transaction(async () => {
+        await db.lockDocumentId('doc');
+        await db.deleteDocumentLock('doc');
+      });
+
+      expect(getConnection).not.toHaveBeenCalled();
+      await db.destroy();
+    });
+
+    it('retries a MySQL deadlock and keeps the attempt that succeeds', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+
+      let runs = 0;
+      const error = Object.assign(new Error('Deadlock found when trying to get lock'), {
+        errno: 1213,
+        code: 'ER_LOCK_DEADLOCK',
+      });
+
+      await expect(
+        db.transaction(async () => {
+          runs += 1;
+          if (runs === 1) {
+            throw error;
+          }
+          return 'kept';
+        })
+      ).resolves.toBe('kept');
+      expect(runs).toBe(2);
+
+      await db.destroy();
+    });
+
+    it('does not retry an error that is not a deadlock', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+
+      let runs = 0;
+      await expect(
+        db.transaction(async () => {
+          runs += 1;
+          throw new Error('validation failed');
+        })
+      ).rejects.toThrow('validation failed');
+      expect(runs).toBe(1);
+
+      await db.destroy();
+    });
+
+    it('retries the outermost transaction when a nested one deadlocks', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+
+      let outer = 0;
+      let inner = 0;
+      const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+
+      await expect(
+        db.transaction(async () => {
+          outer += 1;
+          await db.transaction(async () => {
+            inner += 1;
+            throw error;
+          });
+        })
+      ).rejects.toBe(error);
+
+      // Three outer attempts, one inner attempt each. The nested call does not
+      // retry on its own, which would make `inner` a multiple of 3.
+      expect(outer).toBe(3);
+      expect(inner).toBe(3);
+
+      await db.destroy();
+    });
+
+    it('runs onCommit only for the attempt that commits', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+
+      let runs = 0;
+      const committed: string[] = [];
+      const error = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+
+      await db.transaction(async ({ onCommit }) => {
+        runs += 1;
+        onCommit(() => {
+          committed.push(`attempt-${runs}`);
+        });
+        if (runs === 1) {
+          throw error;
+        }
+      });
+
+      expect(committed).toEqual(['attempt-2']);
+      await db.destroy();
+    });
+
+    it('does not retry when a rollback hook throws a deadlock', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+
+      let runs = 0;
+      const later = jest.fn();
+      const hookError = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+
+      await expect(
+        db.transaction(async ({ onRollback }) => {
+          runs += 1;
+          onRollback(() => {
+            throw hookError;
+          });
+          onRollback(later);
+          throw new Error('write failed');
+        })
+      ).rejects.toBe(hookError);
+
+      expect(runs).toBe(1);
+      expect(later).not.toHaveBeenCalled();
+      await db.destroy();
+    });
+
+    it('logs every failed commit hook and still runs hooks registered by a failure', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+      const order: string[] = [];
+
+      await db.transaction(async ({ onCommit }) => {
+        onCommit(() => {
+          onCommit(() => {
+            order.push('registered-by-failure');
+          });
+          throw new Error('first hook');
+        });
+        onCommit(() => {
+          order.push('second');
+          return Promise.reject(new Error('second hook'));
+        });
+        onCommit(() => {
+          order.push('third');
+        });
+      });
+
+      expect(order).toEqual(['second', 'third', 'registered-by-failure']);
+      expect(logged.mock.calls.map(([message]) => String(message))).toEqual([
+        expect.stringContaining('first hook'),
+        expect.stringContaining('second hook'),
+      ]);
+      expect((db.connection as any).rollback).not.toHaveBeenCalled();
+      await db.destroy();
+    });
+
+    it('runs a nested commit hook when the outer transaction commits', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const logged = jest.spyOn(db.logger, 'error').mockImplementation(() => undefined);
+      const order: string[] = [];
+
+      await expect(
+        db.transaction(async () => {
+          await db.transaction(async ({ onCommit }) => {
+            onCommit(() => {
+              throw new Error('nested hook');
+            });
+            onCommit(() => {
+              order.push('nested-later');
+            });
+          });
+          return 'kept';
+        })
+      ).resolves.toBe('kept');
+
+      expect(order).toEqual(['nested-later']);
+      expect(logged.mock.calls.some(([message]) => String(message).includes('nested hook'))).toBe(
+        true
+      );
+      expect((db.connection as any).rollback).not.toHaveBeenCalled();
+      await db.destroy();
+    });
+
+    it('discards a nested commit hook when the outer transaction rolls back', async () => {
+      const db = new Database(configConnectionObject);
+      await db.init({ models });
+      const committed = jest.fn();
+
+      await expect(
+        db.transaction(async () => {
+          await db.transaction(async ({ onCommit }) => {
+            onCommit(committed);
+          });
+          throw new Error('nope');
+        })
+      ).rejects.toThrow('nope');
+
+      expect(committed).not.toHaveBeenCalled();
+      await db.destroy();
     });
   });
 });

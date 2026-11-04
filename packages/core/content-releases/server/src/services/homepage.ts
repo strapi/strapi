@@ -22,10 +22,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         return unscheduled;
       }
 
+      const seenIds = unscheduled.map((release) => release.id);
       const scheduled = await strapi.db.query('plugin::content-releases.release').findMany({
         filters: {
           releasedAt: { $notNull: false },
           scheduledAt: { $notNull: true },
+          // A release can be scheduled between these two queries. Leave out the
+          // ids already returned so it is not listed twice.
+          ...(seenIds.length > 0 ? { id: { $notIn: seenIds } } : {}),
         },
         orderBy: [{ scheduledAt: 'asc' }, { id: 'asc' }],
         limit: MAX_DOCUMENTS - unscheduled.length,

@@ -101,7 +101,10 @@ const recordErrorIfTransactorFinalised = (trx: Knex.Transaction, error: unknown)
   finalisedTransactionErrors.add(error);
 };
 
-const runCallbacks = async (callbacks: Callback[] | undefined) => {
+const runCallbacks = async (
+  callbacks: Callback[] | undefined,
+  report?: (error: unknown) => void
+) => {
   if (!callbacks) {
     return;
   }
@@ -117,7 +120,14 @@ const runCallbacks = async (callbacks: Callback[] | undefined) => {
           hookErrors.add(error);
         }
 
-        // Drop the remaining hooks so a reused store does not run them later.
+        // A commit hook runs after the database has kept the write. Log it
+        // and keep going so one failure does not drop the hooks after it.
+        // A rollback hook still fails the call: the transaction did not commit.
+        if (report) {
+          report(error);
+          continue;
+        }
+
         callbacks.length = 0;
         throw error;
       }
@@ -148,7 +158,7 @@ const transactionCtx = {
     return store?.trx;
   },
 
-  async commit(trx: Knex.Transaction) {
+  async commit(trx: Knex.Transaction, reportCommitHookError?: (error: unknown) => void) {
     const store = storage.getStore();
     if (isTransactorComplete(trx)) {
       if (store?.trx) {
@@ -165,7 +175,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    await runCallbacks(store?.commitCallbacks);
+    await runCallbacks(store?.commitCallbacks, reportCommitHookError ?? (() => undefined));
   },
 
   async rollback(trx: Knex.Transaction) {

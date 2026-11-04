@@ -104,6 +104,10 @@ export const singleCreateOrUpdate = async (
   >;
 
   const formatted = await strapi.db.transaction(async () => {
+    if (documentId) {
+      await strapi.db.lockDocumentId(documentId);
+    }
+
     let doc: any;
 
     if (documentId === undefined) {
@@ -310,7 +314,16 @@ export const createSinglePublishHandler =
       throw new errors.ForbiddenError();
     }
 
+    const existingDocumentId =
+      strapi.db.dialect.client === 'mysql'
+        ? (await strapi.db.query(typedUid).findOne({ select: ['documentId'] }))?.documentId
+        : undefined;
+
     const publishedDocument = await strapi.db.transaction(async () => {
+      if (existingDocumentId) {
+        await strapi.db.lockDocumentId(existingDocumentId);
+      }
+
       const sanitizedQuery = await permissionChecker.sanitizedQuery.publish({ locale });
       const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
@@ -392,6 +405,8 @@ export const createSingleUnpublishHandler =
     }
 
     const result = await strapi.db.transaction(async () => {
+      await strapi.db.lockDocumentId(document.documentId);
+
       if (discardDraft === true) {
         await documentManager.discardDraft(document.documentId, typedUid, {
           locale: resolvedLocale,

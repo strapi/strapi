@@ -6,7 +6,7 @@ review_notes:
   - Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.
   - On develop, publish, unpublish and discardDraft also reject an empty documentId, and the entries service drops documentId from update data. This page does not describe those checks.
   - The page does not cover relation reordering during publish in detail (unidirectional, bidirectional and self-referential relation sync). It needs its own page.
-  - 'Deadlock retry: the outermost transaction runs the handler at most 3 times in total (up to 2 retries). Commit callbacks are awaited, a failing callback rejects the call, and a hook failure does not retry the write.'
+  - 'Deadlock retry: the outermost transaction runs the handler at most 3 times in total (up to 2 retries). Commit callbacks are awaited. A failing commit callback is logged and the call still resolves. A failing rollback callback rejects the call and does not retry the write.'
   - 'update locks the draft row of the locale being written with FOR NO KEY UPDATE on Postgres. MySQL and MariaDB lock an internal sentinel row for the document, removed on 404 updates and when the last row of the document is deleted. On MySQL the sentinel lock precedes every read of the transaction, including in the Content Manager publish routes. Checked against repository.ts, document-update-lock.ts, index.ts, transaction-context.ts, and the Content Manager collection-types.ts and single-types.ts controllers.'
   - The webhook runner paragraph describes `contentTypeEvents` and `server.webhooks.deduplicateReleaseWebhooks`. Those claims were checked against `webhook-runner.ts`, `webhook-store.ts`, `document-service/events.ts`, and `content-releases` `release.ts`. The rest of this page was not re-verified.
 ---
@@ -138,7 +138,7 @@ Database lifecycles run inside the transaction. If the transaction rolls back la
 
 The repository does not emit events directly. `emitEvent` calls `strapi.db.transaction(({ onCommit }) => ...)` and registers a callback. The callback runs only after the outermost transaction commits. It does not run on rollback.
 
-The transaction context awaits those callbacks before the outermost `strapi.db.transaction` resolves. A callback that throws or rejects makes the call reject, although the data is already committed. `emitEvent` catches and logs its own errors, so an event failure does not fail the write.
+The transaction context awaits those callbacks before the outermost `strapi.db.transaction` resolves. A callback that throws is logged, and the callbacks after it still run. The call resolves, because the data is already committed. A rollback callback that throws still rejects the call. `emitEvent` catches and logs its own errors.
 
 When the callback runs, the event manager:
 

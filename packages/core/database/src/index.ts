@@ -267,9 +267,11 @@ class Database {
     // Postgres and MySQL abort one transaction when two of them deadlock, and
     // the caller has to run it again. Nested work is not retried on its own:
     // the outer transaction is already aborted, so the outermost callback
-    // runs again. A commit or rollback hook that fails is not retried: the
-    // transaction is already finalised when it runs. The same applies when
-    // the handler itself has already called commit or rollback.
+    // runs again. A rollback hook that fails is not retried: the transaction
+    // is already finalised when it runs. A commit hook that fails is logged
+    // and does not reject the call, because the write is already committed.
+    // The same applies when the handler itself has already called commit or
+    // rollback.
     const nested = !!transactionCtx.get();
     const attempts = nested ? 1 : 3;
 
@@ -303,10 +305,14 @@ class Database {
     const trx = notNestedTransaction
       ? await this.startTransaction()
       : (transactionCtx.get() as Knex.Transaction);
+    const logger = this.logger;
 
     async function commit() {
       if (notNestedTransaction) {
-        await transactionCtx.commit(trx);
+        await transactionCtx.commit(trx, (error) => {
+          const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
+          logger.error(`Commit hook failed after the transaction committed: ${detail}`);
+        });
       }
     }
 
