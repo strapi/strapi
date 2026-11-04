@@ -308,9 +308,7 @@ describe('Admin MFA enforcement', () => {
       });
       expect(noAuth.statusCode).toBe(400);
       // Not validation and not the self-lockout guard: specifically the downgrade gate.
-      expect(noAuth.body.error.message).toBe(
-        'Your password is required to change two-factor settings'
-      );
+      expect(noAuth.body.error.details.code).toBe('MFA_REAUTH_REQUIRED');
 
       // A fresh TOTP step: the beforeAll enrolment verify already consumed the current one, and
       // the account-wide replay guard means the same step's code can't be accepted twice.
@@ -340,9 +338,7 @@ describe('Admin MFA enforcement', () => {
       });
       expect(noAuth.statusCode).toBe(400);
       // Not validation and not the self-lockout guard: specifically the downgrade gate.
-      expect(noAuth.body.error.message).toBe(
-        'Your password is required to change two-factor settings'
-      );
+      expect(noAuth.body.error.details.code).toBe('MFA_REAUTH_REQUIRED');
 
       await new Promise((resolve) =>
         setTimeout(resolve, (31 - (Math.floor(Date.now() / 1000) % 30)) * 1000)

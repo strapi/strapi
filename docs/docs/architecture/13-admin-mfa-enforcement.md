@@ -230,7 +230,8 @@ the feature is on and the key is missing.
 
 Session authority alone is not enough when the session may be the thing an attacker holds, so any
 save that **relaxes** protection requires the current password (and a code, when the caller is
-enrolled), exactly like `/mfa/disable`. The relaxing changes are:
+enrolled), through the same `assertActorReauth` the administrator actions use (400
+`MFA_REAUTH_REQUIRED` when missing). The relaxing changes are:
 
 - A lower `mode`
 - A role removed from `requiredRoles`, **while the resulting mode is not `required`** and the

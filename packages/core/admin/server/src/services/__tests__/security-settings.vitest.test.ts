@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import type { Core } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
 import {
   DEFAULT_MFA_ENFORCEMENT,
@@ -250,10 +251,14 @@ describe('security-settings: service', () => {
       stored = value;
     });
     const emit = vi.fn();
-    const assertPasswordAndFactor = vi.fn(() => Promise.resolve());
+    const assertPasswordAndFactor = vi.fn<
+      (id: string, password: string, code: string) => Promise<void>
+    >(() => Promise.resolve());
     const clearAllTrustedDevices = vi.fn(() => Promise.resolve(0));
     const clearAllPasskeys = vi.fn(() => Promise.resolve(0));
-    const validatePassword = vi.fn(() => Promise.resolve(options.passwordOk ?? true));
+    const validatePassword = vi.fn<(password: string, hash: string) => Promise<boolean>>(() =>
+      Promise.resolve(options.passwordOk ?? true)
+    );
     // `transactionFails` gives this double failure semantics instead of rollback semantics: a
     // callback that never runs cannot call anything ('open'), and a callback whose transaction
     // fails on commit has already called everything inside it ('commit'). That lets a test pin a
@@ -327,6 +332,27 @@ describe('security-settings: service', () => {
       }),
     };
 
+    // Stands in for `mfa.assertActorReauth`: password, then a code when enrolled
+    const assertActorReauth = vi.fn(
+      async (actorId: string, credentials: { password?: string; code?: string }) => {
+        const row = await userQuery.findOne({ where: { id: actorId } });
+        if (!row?.password) return;
+        if (!credentials.password) {
+          throw new errors.ValidationError('Your password is required for this action');
+        }
+        if (options.enrolled) {
+          if (!credentials.code) {
+            throw new errors.ValidationError('A two-factor code is required for this action');
+          }
+          await assertPasswordAndFactor(actorId, credentials.password, credentials.code);
+          return;
+        }
+        if (!(await validatePassword(credentials.password, row.password))) {
+          throw new errors.ValidationError('Invalid credentials');
+        }
+      }
+    );
+
     const strapi = {
       store: vi.fn(() => ({ get: storeGet, set: storeSet })),
       log: { warn: vi.fn(), error: vi.fn() },
@@ -346,12 +372,11 @@ describe('security-settings: service', () => {
             isExemptFromMfa: vi.fn(() => Promise.resolve(options.exempt ?? false)),
             isEnrolled: vi.fn(() => Promise.resolve(options.enrolled ?? false)),
             canEncryptSecrets: vi.fn(() => options.canEncrypt ?? true),
-            assertPasswordAndFactor,
+            assertActorReauth,
             clearAllTrustedDevices,
             clearAllPasskeys,
           };
         }
-        if (uid === 'admin::auth') return { validatePassword };
         throw new Error(`unexpected service ${uid}`);
       }),
     } as unknown as Core.Strapi;
@@ -1094,7 +1119,7 @@ describe('security-settings: service', () => {
     const body = { passkeys: { enabled: false } };
 
     await expect(unenrolled.service.updateSettings(body, actor)).rejects.toThrow(
-      /password is required to change two-factor settings/i
+      /password is required/i
     );
     expect(unenrolled.storeSet).not.toHaveBeenCalled();
 
@@ -1106,7 +1131,7 @@ describe('security-settings: service', () => {
     const enrolled = setup({ stored: { passkeys: { enabled: true } }, enrolled: true });
     await expect(
       enrolled.service.updateSettings({ ...body, password: 'pw' }, actor)
-    ).rejects.toThrow(/code is required to change two-factor settings/i);
+    ).rejects.toThrow(/code is required/i);
     await expect(
       enrolled.service.updateSettings({ ...body, password: 'pw', code: '123456' }, actor)
     ).resolves.toMatchObject({ passkeys: { enabled: false } });
@@ -1129,7 +1154,7 @@ describe('security-settings: service', () => {
     const { service } = setup({ stored: { passkeys: { enabled: true } } });
 
     await expect(service.updateSettings({ passkeys: { enabled: false } }, actor)).rejects.toThrow(
-      /change two-factor settings/
+      /password is required for this action/
     );
     await expect(
       service.updateSettings({ passkeys: { enabled: false } }, actor)

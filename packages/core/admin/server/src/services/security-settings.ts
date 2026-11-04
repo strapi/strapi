@@ -1,7 +1,6 @@
 import { errors } from '@strapi/utils';
 import type { Core, Data } from '@strapi/types';
 import type createMfaService from './mfa';
-import type authService from './auth';
 import type {
   MfaEnforcement,
   MfaEnforcementMode,
@@ -220,7 +219,6 @@ const relaxingChanges = (
 };
 
 type MfaService = ReturnType<typeof createMfaService>;
-type AuthService = typeof authService;
 
 export interface SecuritySettingsDeps {
   strapi: Core.Strapi;
@@ -238,7 +236,6 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
   // Resolved lazily through the injected instance: the mfa service reads these settings, so
   // neither can be handed to the other at construction time.
   const mfa = () => strapi.service('admin::mfa') as unknown as MfaService;
-  const auth = () => strapi.service('admin::auth') as unknown as AuthService;
 
   const listRequiredRoleIds = async (): Promise<string[]> => {
     const roles = await roleQuery().findMany({ where: { mfaRequired: true }, select: ['id'] });
@@ -405,21 +402,11 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
           { code: MFA_ERROR_CODES.NO_LOCAL_PASSWORD_DOWNGRADE }
         );
       }
-      if (actorRow.password) {
-        if (!input.password) {
-          throw new ValidationError('Your password is required to change two-factor settings');
-        }
-        if (actorEnrolled) {
-          if (!input.code) {
-            throw new ValidationError(
-              'A two-factor code is required to change two-factor settings'
-            );
-          }
-          await mfa().assertPasswordAndFactor(String(actorRow.id), input.password, input.code);
-        } else if (!(await auth().validatePassword(input.password, actorRow.password))) {
-          throw new ValidationError('Invalid credentials');
-        }
-      }
+      // Password, then a code when enrolled; a password-less actor passes through
+      await mfa().assertActorReauth(String(actorRow.id), {
+        password: input.password,
+        code: input.code,
+      });
     }
 
     // What the caller actually proved. A password-less actor reaching here presented nothing --
