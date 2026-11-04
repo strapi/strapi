@@ -38,6 +38,8 @@ export const ALLOWED_CONTENT_TYPES = [
   'admin::mfa-challenge',
   'admin::mfa-recovery-code',
   'admin::mfa-event',
+  'admin::mfa-trusted-device',
+  'admin::mfa-passkey',
   ...APP_TEMPLATE_CONTENT_TYPES,
   'plugin::content-manager.history-version',
   /**
