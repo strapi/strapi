@@ -87,7 +87,7 @@ describe('Admin MFA: passkeys verified against real cryptography', () => {
       body: { password },
       headers,
     });
-    const { base32Decode, generateTotp } = await import('@strapi/utils');
+    const { base32Decode, generateTotp } = await import('../../../utils/totp');
     const verify = await createRequest({ strapi }).post('/admin/mfa/enrol/verify', {
       body: {
         code: generateTotp({ secret: base32Decode(enrol.body.data.secret), step: 30, digits: 6 }),

@@ -2,6 +2,12 @@
 /* eslint-disable no-bitwise */
 import crypto from 'node:crypto';
 
+/**
+ * TOTP (RFC 6238) and recovery-code primitives for admin two-factor authentication. Internal to the
+ * admin server: not exported from any package entry point, so it can change without a breaking
+ * release. The `admin:mfa-state` CLI reads the current step through the `admin::mfa` service.
+ */
+
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const DEFAULT_STEP = 30;
 const DEFAULT_DIGITS = 6;
@@ -98,8 +104,7 @@ export const generateTotp = ({
   timestamp?: number;
 }): string => totpForStep(secret, Math.floor(timestamp / step), digits);
 
-/** Length-safe constant time string comparison. Module-private: exported from `@strapi/utils` it
- * would become public API by accident, and removing it later would be a breaking change. */
+/** Length-safe constant time string comparison. */
 const constantTimeEquals = (a: string, b: string): boolean => {
   const bufA = Buffer.from(a, 'utf8');
   const bufB = Buffer.from(b, 'utf8');

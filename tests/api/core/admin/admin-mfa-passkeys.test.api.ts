@@ -3,7 +3,7 @@
 import { createStrapiInstance, superAdmin } from 'api-tests/strapi';
 import { createAuthRequest, createRequest } from 'api-tests/request';
 import { createUtils } from 'api-tests/utils';
-import { base32Decode, generateTotp } from '@strapi/utils';
+import { base32Decode, generateTotp } from '../../../utils/totp';
 import { resetSharedMfaState } from './utils/mfa-state';
 
 jest.setTimeout(300_000);

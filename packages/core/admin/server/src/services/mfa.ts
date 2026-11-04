@@ -1,16 +1,17 @@
 import crypto from 'node:crypto';
+import { errors } from '@strapi/utils';
+import type { Core, Data } from '@strapi/types';
+import type { RegistrationResponseJSON } from '@simplewebauthn/server';
 import {
   base32Decode,
   base32Encode,
   buildOtpauthUri,
-  errors,
+  currentTotpStep,
   generateRecoveryCodes,
   generateTotpSecret,
   normaliseRecoveryCode,
   verifyTotp,
-} from '@strapi/utils';
-import type { Core, Data } from '@strapi/types';
-import type { RegistrationResponseJSON } from '@simplewebauthn/server';
+} from '../utils/totp';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
 import mfaChangedTemplate from '../config/email-templates/mfa-changed';
 import type {
@@ -1590,10 +1591,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return result?.count ?? 0;
   };
 
+  /** The TOTP step the server is on now, for diagnosing clock drift (`admin:mfa-state`). */
+  const currentStep = (): number => currentTotpStep({ step: config().step });
+
   return {
     isEnabled,
     canEncryptSecrets,
     config,
+    currentTotpStep: currentStep,
     isEnrolled,
     isExemptFromMfa,
     isMfaRequiredFor,

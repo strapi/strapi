@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 
 import type { Page } from '@playwright/test';
-import { base32Decode, generateTotp } from '@strapi/utils';
+import { base32Decode, generateTotp } from './totp';
 
 /** Whether this e2e run has the two-factor feature on. The runner turns it on unless
  * UNSTABLE_ADMIN_MFA=false (tests/scripts/run-tests.js); the specs skip themselves otherwise. */

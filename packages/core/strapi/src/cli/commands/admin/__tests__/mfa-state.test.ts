@@ -9,6 +9,7 @@ const countUnusedRecoveryCodes = jest.fn();
 const config = jest.fn();
 const isMfaRequiredFor = jest.fn(() => Promise.resolve(true));
 const countLiveTrustedDevices = jest.fn(() => Promise.resolve(0));
+const currentTotpStep = jest.fn(() => 0);
 
 const mfaServiceInstance = {
   isEnrolled,
@@ -16,6 +17,7 @@ const mfaServiceInstance = {
   config,
   isMfaRequiredFor,
   countLiveTrustedDevices,
+  currentTotpStep,
 };
 
 // Mirrors the REAL registration shape (`packages/core/admin/server/src/services/index.ts`):
@@ -62,11 +64,12 @@ describe('admin:mfa-state command', () => {
     config.mockClear();
     isMfaRequiredFor.mockClear();
     countLiveTrustedDevices.mockClear();
+    currentTotpStep.mockClear();
     db.query.mockClear();
     mfaFactory.mockClear();
     service.mockClear();
 
-    config.mockReturnValue({ recoveryCodeCount: 10, step: 30 });
+    config.mockReturnValue({ recoveryCodeCount: 10 });
     countLiveTrustedDevices.mockResolvedValue(0);
   });
 
@@ -176,29 +179,23 @@ describe('admin:mfa-state command', () => {
     consoleLog.mockRestore();
   });
 
-  test('current totp step line matches currentTotpStep for the configured step', async () => {
+  // The step comes from the mfa service, which owns the TOTP implementation and the configured
+  // step length; the command only prints it.
+  test("prints the mfa service's current totp step", async () => {
     const email = 'kai@doe.com';
-    const step = 30;
-    const frozenNow = new Date('2026-09-01T11:02:10.000Z').getTime();
-    const dateSpy = jest.spyOn(Date, 'now').mockReturnValue(frozenNow);
 
     findOne.mockResolvedValue({ id: 1, email, mfaEnabledAt: null });
     isEnrolled.mockResolvedValue(false);
     countUnusedRecoveryCodes.mockResolvedValue(10);
-    config.mockReturnValue({ recoveryCodeCount: 10, step });
+    currentTotpStep.mockReturnValue(59346643);
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     await mfaStateCommand({ email });
 
-    // Same computation the command itself must use, `currentTotpStep`'s own formula, at the
-    // same frozen clock -- not a hardcoded number the implementation could happen to also print.
-    const expectedStep = Math.floor(frozenNow / 1000 / step);
+    expect(consoleLog).toHaveBeenCalledWith('current totp step: 59346643');
 
-    expect(consoleLog).toHaveBeenCalledWith(`current totp step: ${expectedStep}`);
-
-    dateSpy.mockRestore();
     mockExit.mockRestore();
     consoleLog.mockRestore();
   });

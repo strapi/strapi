@@ -358,6 +358,8 @@ Server:
 
 - Service: `packages/core/admin/server/src/services/mfa.ts` (the hub; the other three modules are
   composed into it so policy and enrolment invariants hold for every caller)
+- TOTP and recovery-code primitives: `packages/core/admin/server/src/utils/totp.ts`, internal to
+  the admin server; the CLI reads the current step through the service (`currentTotpStep`)
 - Config validation: `packages/core/admin/server/src/config/mfa.ts`
 - Controllers: `packages/core/admin/server/src/controllers/mfa.ts`,
   `controllers/authentication.ts`
@@ -381,7 +383,7 @@ Admin panel:
 | Unit (admin)   | `packages/core/admin/admin/src/**/tests/` beside each component                                                                                           |
 | API            | `tests/api/core/admin/admin-mfa-*.test.api.ts`: TOTP, enforcement, trusted devices, passkeys (incl. real cryptography), throttling, concurrency, flag off |
 | E2E            | `tests/e2e/tests/admin/mfa{,-enforcement,-trusted-devices,-passkeys}.spec.ts`                                                                             |
-| Shared helpers | `tests/utils/mfa.ts` (TOTP generation), `tests/api/core/admin/utils/mfa-state.ts` (state reset)                                                           |
+| Shared helpers | `tests/utils/totp.ts` (independent TOTP generation), `tests/utils/mfa.ts` (e2e journeys), `tests/api/core/admin/utils/mfa-state.ts` (state reset)         |
 
 The e2e app is generated from `tests/app-template/`, whose config sets a WebAuthn relying party and
 leaves the future flag off unless `UNSTABLE_ADMIN_MFA` is set. The flag is baked into the admin

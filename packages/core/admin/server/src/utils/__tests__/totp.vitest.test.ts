@@ -1,3 +1,5 @@
+import { describe, test, expect } from 'vitest';
+
 import {
   base32Decode,
   base32Encode,
@@ -9,7 +11,7 @@ import {
   generateRecoveryCode,
   generateRecoveryCodes,
   normaliseRecoveryCode,
-} from '../mfa';
+} from '../totp';
 
 // RFC 6238 Appendix B, SHA-1 rows. The seed is the ASCII string below, 20 bytes.
 const RFC_SECRET = Buffer.from('12345678901234567890', 'ascii');

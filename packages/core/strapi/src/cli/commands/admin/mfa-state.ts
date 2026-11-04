@@ -1,6 +1,5 @@
 import { createCommand } from 'commander';
 import { createStrapi, compileStrapi } from '@strapi/core';
-import { currentTotpStep } from '@strapi/utils';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
@@ -13,7 +12,9 @@ interface CmdOptions {
 interface MfaService {
   isEnrolled(userId: string): Promise<boolean>;
   countUnusedRecoveryCodes(userId: string): Promise<number>;
-  config(): { recoveryCodeCount: number; step: number };
+  config(): { recoveryCodeCount: number };
+  /** The server's current TOTP step, from the configured step length. */
+  currentTotpStep(): number;
   isMfaRequiredFor(user: {
     id: unknown;
     password?: string | null;
@@ -50,7 +51,7 @@ async function printMfaState({ email: typed }: CmdOptions) {
 
   const enrolled = await mfa.isEnrolled(String(user.id));
   const unusedRecoveryCodes = await mfa.countUnusedRecoveryCodes(String(user.id));
-  const { recoveryCodeCount, step } = mfa.config();
+  const { recoveryCodeCount } = mfa.config();
 
   console.log(`email:             ${user.email}`);
   console.log(`enrolled:          ${enrolled ? 'yes' : 'no'}`);
@@ -59,7 +60,7 @@ async function printMfaState({ email: typed }: CmdOptions) {
   );
   console.log(`recovery codes:    ${unusedRecoveryCodes} of ${recoveryCodeCount} unused`);
   console.log(`server time:       ${new Date().toISOString()}`);
-  console.log(`current totp step: ${currentTotpStep({ step })}`);
+  console.log(`current totp step: ${mfa.currentTotpStep()}`);
 
   const required = await mfa.isMfaRequiredFor(user);
   console.log(`required:          ${required ? 'yes' : 'no'}`);

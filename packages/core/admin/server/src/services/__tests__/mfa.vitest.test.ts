@@ -1,17 +1,17 @@
 import { describe, test, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 import type { Core } from '@strapi/types';
-import {
-  generateTotp,
-  generateTotpSecret,
-  base32Decode,
-  base32Encode,
-  errors,
-  getDeviceName,
-} from '@strapi/utils';
+import { errors, getDeviceName } from '@strapi/utils';
 import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { verifyRegistrationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import { MFA_ERROR_CODES } from '../../../../shared/utils/mfa-error-codes';
 import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
+import {
+  base32Decode,
+  base32Encode,
+  currentTotpStep,
+  generateTotp,
+  generateTotpSecret,
+} from '../../utils/totp';
 import { hashTrustToken, MAX_TRUSTED_DEVICES_PER_USER } from '../mfa-trusted-devices';
 import { PASSKEY_UID, PASSKEY_CAP_MESSAGE, MAX_PASSKEYS_PER_USER } from '../mfa-passkeys';
 import { MFA_DEFAULTS } from '../../config/mfa';
@@ -826,6 +826,19 @@ const defaultDeps = (strapi: unknown) => ({
 });
 
 describe('mfa service: enrolment', () => {
+  test("currentTotpStep is the server clock's step at the configured step length", () => {
+    const { strapi } = buildMfaFixture({ mfaConfig: { step: 60 } });
+    const service = createMfaService(defaultDeps(strapi));
+
+    vi.useFakeTimers({ now: new Date('2026-09-01T11:02:10.000Z') });
+    try {
+      expect(service.currentTotpStep()).toBe(currentTotpStep({ step: 60 }));
+      expect(service.currentTotpStep()).toBe(Math.floor(Date.now() / 1000 / 60));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   test('canEncryptSecrets reports whether a secret could be stored at all', () => {
     const { strapi } = buildStrapi();
     const withKey = createMfaService(defaultDeps(strapi));
