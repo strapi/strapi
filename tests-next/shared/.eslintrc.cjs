@@ -8,6 +8,13 @@ const config = {
     tsconfigRootDir: __dirname,
   },
   ignorePatterns: ['node_modules/', '.eslintrc.cjs'],
+  overrides: [
+    {
+      // CommonJS entry points run with plain Node (see src/app/generate-app.cjs).
+      files: ['*.cjs'],
+      rules: { '@typescript-eslint/no-var-requires': 'off' },
+    },
+  ],
 };
 
 module.exports = config;
