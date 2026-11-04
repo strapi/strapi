@@ -134,6 +134,10 @@ describe('ReAuthDialog', () => {
     expect(await screen.findByText('Invalid code')).toBeInTheDocument();
     expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Disable two-factor authentication' })).toBeEnabled();
+    // In the code field's own error slot, with focus on the field the user retypes.
+    const codeInput = screen.getByLabelText('Authentication code*');
+    expect(codeInput).toHaveAccessibleDescription(expect.stringContaining('Invalid code'));
+    await waitFor(() => expect(codeInput).toHaveFocus());
   });
 
   it('shows the server error and keeps the form when regenerating recovery codes fails', async () => {

@@ -136,7 +136,8 @@ const ConfirmDowngradeDialog = ({
         <form onSubmit={handleSubmit}>
           <Modal.Body>
             <Flex direction="column" alignItems="stretch" gap={4}>
-              <ErrorMessage error={error} />
+              {/* Without fields there is no slot to hold a refusal, so it reads above the text. */}
+              {requiresPassword ? null : <ErrorMessage error={error} />}
               {description}
               {requiresPassword ? (
                 <>
@@ -157,6 +158,7 @@ const ConfirmDowngradeDialog = ({
                     code={code}
                     onCodeChange={setCode}
                     requiresCode={requiresCode}
+                    error={error}
                     codeHint={formatMessage({
                       id: 'Settings.security.mfa.downgrade.code.hint',
                       defaultMessage:

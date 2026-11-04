@@ -4,7 +4,6 @@ import { Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { type Passkey } from '../../../../shared/contracts/mfa';
-import { ErrorMessage } from '../../components/ErrorMessage';
 import { useNotification } from '../../features/Notifications';
 import { useToMessage } from '../../hooks/useToMessage';
 import { useDeletePasskeyMutation } from '../../services/mfa';
@@ -102,7 +101,6 @@ const RemovePasskeyDialog = ({ passkey, onClose }: RemovePasskeyDialogProps) => 
         <form onSubmit={handleSubmit}>
           <Modal.Body>
             <Flex direction="column" alignItems="stretch" gap={4}>
-              <ErrorMessage error={error} />
               <Typography>
                 {formatMessage(
                   {
@@ -118,6 +116,7 @@ const RemovePasskeyDialog = ({ passkey, onClose }: RemovePasskeyDialogProps) => 
                 onPasswordChange={setPassword}
                 code={code}
                 onCodeChange={setCode}
+                error={error}
               />
             </Flex>
           </Modal.Body>

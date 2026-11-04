@@ -236,13 +236,13 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
           <form onSubmit={handleSubmit}>
             <Modal.Body>
               <Flex direction="column" alignItems="stretch" gap={4}>
-                <ErrorMessage error={error} />
                 <Typography>{formatMessage(copy.intro)}</Typography>
                 <CredentialFields
                   password={password}
                   onPasswordChange={setPassword}
                   code={code}
                   onCodeChange={setCode}
+                  error={error}
                 />
               </Flex>
             </Modal.Body>

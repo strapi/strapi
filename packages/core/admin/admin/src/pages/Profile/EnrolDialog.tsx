@@ -95,6 +95,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   // Synchronous re-entrancy guard for `handlePassword` in replace mode -- see the class doc
   // comment above for why this can't be the mutation hook's `isLoading` state.
   const inFlightRef = React.useRef(false);
+  const scanCodeRef = React.useRef<HTMLInputElement>(null);
 
   const [enrol, { isLoading: isEnrolling, reset: resetEnrol }] = useEnrolMfaMutation({
     fixedCacheKey: MFA_ENROL_CACHE_KEYS.password,
@@ -170,7 +171,9 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
     setError(undefined);
     const res = await verify({ code: code.trim() });
     if ('error' in res) {
+      // In the code field's error slot, with focus back on it: the fix is a fresh code.
       setError(toMessage(res.error, SETUP_CODE_MESSAGES));
+      scanCodeRef.current?.focus();
       return;
     }
     setCode('');
@@ -229,7 +232,6 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
           <form onSubmit={handlePassword}>
             <Modal.Body>
               <Flex direction="column" alignItems="stretch" gap={4}>
-                <ErrorMessage error={error} />
                 <Typography>
                   {formatMessage(
                     isReplace
@@ -250,6 +252,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
                   code={code}
                   onCodeChange={setCode}
                   requiresCode={isReplace}
+                  error={error}
                 />
               </Flex>
             </Modal.Body>
@@ -276,7 +279,6 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
           <form onSubmit={handleVerify}>
             <Modal.Body>
               <Flex direction="column" alignItems="stretch" gap={4}>
-                <ErrorMessage error={error} />
                 <Typography>
                   {formatMessage({
                     id: 'Settings.profile.form.section.mfa.enrol.scan.intro',
@@ -315,7 +317,7 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
                   </Typography>
                   <ManualKey data-testid="mfa-manual-key">{step.secret}</ManualKey>
                 </Flex>
-                <Field.Root name="code" required>
+                <Field.Root name="code" required error={error}>
                   <Field.Label>
                     {formatMessage({
                       id: 'Auth.form.mfa.code.label',
@@ -323,12 +325,14 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
                     })}
                   </Field.Label>
                   <TextInput
+                    ref={scanCodeRef}
                     autoComplete="one-time-code"
                     inputMode="numeric"
                     maxLength={32}
                     value={code}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value)}
                   />
+                  <Field.Error />
                 </Field.Root>
               </Flex>
             </Modal.Body>
