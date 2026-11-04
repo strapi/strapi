@@ -66,6 +66,10 @@ type AdminUserId = string | number | undefined;
 const getAdminUserId = (user?: AdminUserRef): AdminUserId => user?.id ?? user?.email;
 
 interface AuthContextValue {
+  /**
+   * With the `unstableAdminMfa` future flag on, `data` can be an `MfaChallengeResponse` instead of
+   * a session (narrow on `'mfaRequired' in data`); that shape is experimental.
+   */
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;

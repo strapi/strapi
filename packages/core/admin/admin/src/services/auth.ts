@@ -3,8 +3,10 @@ import {
   type AccessTokenExchange,
   type Login,
   type LoginMfa,
+  type LoginOrMfaChallenge,
   type MfaChallengeResponse,
   type ResetPassword,
+  type ResetPasswordOrMfaChallenge,
   type RegisterAdmin,
   type Register,
   type RegistrationInfo,
@@ -107,10 +109,7 @@ const authService = adminApi
       /**
        * Auth methods
        */
-      login: builder.mutation<
-        Login.Response['data'] | MfaChallengeResponse['data'],
-        Login.Request['body']
-      >({
+      login: builder.mutation<LoginOrMfaChallenge, Login.Request['body']>({
         query: (body) => ({
           method: 'POST',
           url: '/admin/login',
@@ -180,10 +179,7 @@ const authService = adminApi
           data: body,
         }),
       }),
-      resetPassword: builder.mutation<
-        ResetPassword.Response['data'] | MfaChallengeResponse['data'],
-        ResetPassword.Request['body']
-      >({
+      resetPassword: builder.mutation<ResetPasswordOrMfaChallenge, ResetPassword.Request['body']>({
         query: (body) => ({
           method: 'POST',
           url: '/admin/reset-password',

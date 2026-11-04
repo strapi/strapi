@@ -31,6 +31,7 @@ export interface AuthProvider {
   [key: string]: unknown;
 }
 
+/** @experimental Behind the `unstableAdminMfa` future flag; may change without a major release. */
 export interface MfaWindow {
   back: number;
   forward: number;
@@ -41,12 +42,19 @@ export interface MfaWindow {
  * `admin.absoluteUrl`. `rpId` is **required** for any deployment whose `admin.absoluteUrl`
  * resolves to an IP literal -- the default production shape -- because an IP literal is not a
  * valid relying-party id. `origins` exists for one deployment served on several hostnames.
+ *
+ * @experimental Behind the `unstableAdminMfa` future flag; may change without a major release.
  */
 export interface MfaWebauthn {
   rpId?: string;
   origins?: string[];
 }
 
+/**
+ * `admin.auth.mfa`: admin two-factor authentication.
+ *
+ * @experimental Behind the `unstableAdminMfa` future flag; may change without a major release.
+ */
 export interface Mfa {
   enabled?: boolean;
   digits?: number;
@@ -86,6 +94,7 @@ export interface Auth {
     expiresIn?: string | number;
     [key: string]: unknown;
   };
+  /** @experimental See {@link Mfa}. */
   mfa?: Mfa;
 }
 

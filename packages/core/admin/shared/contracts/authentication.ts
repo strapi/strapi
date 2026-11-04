@@ -24,7 +24,9 @@ export declare namespace Login {
 }
 
 /** Sent instead of `Login.Response` when the account is enrolled: no session yet, so no cookie and
- * no access token. `challengeToken` authorises exactly one follow-up call. */
+ * no access token. `challengeToken` authorises exactly one follow-up call.
+ *
+ * @experimental Behind the `unstableAdminMfa` future flag. */
 export interface MfaChallengeResponse {
   data: {
     mfaRequired: true;
@@ -36,6 +38,14 @@ export interface MfaChallengeResponse {
     passkeyAvailable: boolean;
   };
 }
+
+/**
+ * What `POST /login` answers with the feature on: a session, or a second-factor challenge. Narrow
+ * on `'mfaRequired' in data` before treating it as a session.
+ *
+ * @experimental Behind the `unstableAdminMfa` future flag.
+ */
+export type LoginOrMfaChallenge = Login.Response['data'] | MfaChallengeResponse['data'];
 
 /** The session is real; `mfaGraceUntil` is when the account locks if it stays unenrolled. */
 export interface MfaEnrolmentRequiredFields {
@@ -167,6 +177,15 @@ export declare namespace ResetPassword {
     } & MfaEnrolmentRequiredFields;
   }
 }
+
+/**
+ * What `POST /reset-password` answers: a session, or a second-factor challenge for an enrolled
+ * account. Narrow on `'mfaRequired' in data`.
+ *
+ * @experimental Behind the `unstableAdminMfa` future flag.
+ */
+export type ResetPasswordOrMfaChallenge =
+  ResetPassword.Response['data'] | MfaChallengeResponse['data'];
 
 /**
  * /logout - Log out an admin user
