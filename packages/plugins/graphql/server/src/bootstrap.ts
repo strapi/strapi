@@ -13,9 +13,11 @@ import type { Core } from '@strapi/types';
 import type { Options } from '@koa/cors';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
+import { abortFieldsOnClientDisconnect } from './abort-disconnected-request';
 import { formatGraphqlError } from './format-graphql-error';
 
 type StrapiGraphQLContext = BaseContext & {
+  koaContext: Parameters<Core.MiddlewareHandler>[0];
   rootQueryArgsByPath?: Map<string | number, Record<string, unknown>>;
 };
 
@@ -142,6 +144,8 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
     return;
   }
+
+  abortFieldsOnClientDisconnect(schema);
 
   const { config } = strapi.plugin('graphql');
 

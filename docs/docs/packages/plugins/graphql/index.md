@@ -25,6 +25,10 @@ The plugin has no `register` function. [`bootstrap.ts`](https://github.com/strap
 3. An auth step. It sets `ctx.state.route.info.type` to `content-api` and calls `strapi.auth.authenticate`. It skips authentication for a `GET` that loads the landing page.
 4. `koaMiddleware` from `@as-integrations/koa`.
 
+For a request whose HTTP peer disconnects before the response ends, the route stops entering
+subsequent GraphQL field resolvers. A resolver already running when the peer disconnects keeps
+running; this does not cancel database queries or other asynchronous work in progress.
+
 The plugin also sets `strapi.plugin('graphql').destroy` to stop Apollo Server on shutdown.
 
 ### Config
