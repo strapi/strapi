@@ -294,7 +294,8 @@ password-less administrator into a dialog they cannot complete.
   "Not required". It is disabled only while everyone is required. The grace-period hint shows only
   while the role requires it, and a line under the checkbox says how this relates to the Security
   page and links to it. The Security page's role picker links back to Settings > Roles
-- **A grace banner** (`components/MfaGraceBanner.tsx`) for a user inside their grace period
+- **A grace banner** (`components/MfaGraceBanner.tsx`) for a user inside their grace period. It links
+  to the profile page, except on the profile page itself
 
 `GET /admin/users` and `GET /admin/users/:id` append `mfaEnabledAt`, `mfaGraceUntil` and
 `mfaLockedAt` for a caller holding `admin::users.update` (`withMfaState` in `controllers/user.ts`),

@@ -20,11 +20,12 @@ const status = (overrides = {}) =>
     })
   );
 
-const renderBanner = () => {
+const renderBanner = (initialEntries?: string[]) => {
   const { getByTestId, ...utils } = render(
     <div data-testid="banner-root">
       <MfaGraceBanner />
-    </div>
+    </div>,
+    initialEntries ? { initialEntries } : undefined
   );
   return { root: getByTestId('banner-root'), ...utils };
 };
@@ -71,12 +72,21 @@ describe('MfaGraceBanner', () => {
     expect(within(root).queryByRole('button', { name: /close/i })).not.toBeInTheDocument();
   });
 
+  /** On /me the link pointed at the page the user was already on, and did nothing. */
+  it('leaves the link out on the profile page itself', async () => {
+    server.use(status({ required: true, graceUntil: '2026-09-11T14:30:00.000Z' }));
+    const { root } = renderBanner(['/me']);
+
+    await within(root).findByRole('status');
+    expect(within(root).queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('uses the no-deadline copy when required with no grace stamped yet', async () => {
     server.use(status({ required: true, graceUntil: null }));
     const { root } = renderBanner();
 
     expect(await within(root).findByRole('status')).toHaveTextContent(
-      /Two-factor authentication is now required for your account\. The deadline to set it up starts at your next login\./
+      /Two-factor authentication is now required for your account\. Your grace period to set it up starts at your next login\./
     );
   });
 

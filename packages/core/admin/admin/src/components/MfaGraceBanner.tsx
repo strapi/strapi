@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Flex, Link, Typography } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 import { useGetMfaStatusQuery } from '../services/mfa';
 import { isNotFoundError } from '../utils/baseQuery';
@@ -29,6 +29,10 @@ export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
  */
 const MfaGraceBanner = () => {
   const { formatMessage, formatDate } = useIntl();
+  // On the profile page the link would point at the page the user is on, and the setup button is
+  // already in front of them, so it is left out there.
+  const { pathname } = useLocation();
+  const onProfilePage = pathname === '/me';
   const [isFeatureOff, setIsFeatureOff] = React.useState(false);
   const { data, error } = useGetMfaStatusQuery(undefined, {
     pollingInterval: isFeatureOff ? 0 : MFA_STATUS_POLL_INTERVAL_MS,
@@ -85,15 +89,17 @@ const MfaGraceBanner = () => {
               : formatMessage({
                   id: 'Settings.profile.form.section.mfa.grace.pending',
                   defaultMessage:
-                    'Two-factor authentication is now required for your account. The deadline to set it up starts at your next login.',
+                    'Two-factor authentication is now required for your account. Your grace period to set it up starts at your next login.',
                 })}
           </Typography>
-          <Link tag={NavLink} to="/me" isExternal={false}>
-            {formatMessage({
-              id: 'Settings.profile.form.section.mfa.grace.action',
-              defaultMessage: 'Set up two-factor authentication',
-            })}
-          </Link>
+          {onProfilePage ? null : (
+            <Link tag={NavLink} to="/me" isExternal={false}>
+              {formatMessage({
+                id: 'Settings.profile.form.section.mfa.grace.action',
+                defaultMessage: 'Set up two-factor authentication',
+              })}
+            </Link>
+          )}
         </Flex>
       </Flex>
     </Box>
