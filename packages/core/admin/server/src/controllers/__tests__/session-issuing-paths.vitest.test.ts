@@ -179,7 +179,7 @@ const buildPath = (
           createFirstAdmin: vi.fn(() => Promise.resolve(user)),
         },
         auth: {
-          resetPassword: vi.fn(() => Promise.resolve(user)),
+          resetPassword: vi.fn(() => Promise.resolve({ user, pendingPasswordHash: null })),
         },
         mfa: {
           claimRequestEvents: vi.fn(() => Promise.resolve()),
@@ -263,10 +263,11 @@ describe('session issuing paths', () => {
       mfaLastUsedStep: 3,
     };
 
-    const resetPassword = vi.fn(() => Promise.resolve(user));
+    // The auth service staged the password: an enrolled account's reset commits only at
+    // /login/mfa, so this answer must change nothing about the account.
+    const resetPassword = vi.fn(() => Promise.resolve({ user, pendingPasswordHash: '$2a$staged' }));
     const {
       invalidateRefreshToken,
-      isEnrolled,
       createChallenge,
       generateRefreshToken,
       generateAccessToken,
@@ -278,9 +279,11 @@ describe('session issuing paths', () => {
 
     await authenticationController.resetPassword(ctx);
 
-    expect(invalidateRefreshToken).toHaveBeenCalledWith(String(user.id));
-    expect(isEnrolled).toHaveBeenCalledWith(String(user.id));
-    expect(createChallenge).toHaveBeenCalledWith(String(user.id));
+    // Someone holding only the mailbox cannot sign the holder out either.
+    expect(invalidateRefreshToken).not.toHaveBeenCalled();
+    expect(createChallenge).toHaveBeenCalledWith(String(user.id), {
+      pendingPasswordHash: '$2a$staged',
+    });
 
     // The property the challenge step rests on: no cookie, no token, alongside mfaRequired.
     expect(cookiesSet).not.toHaveBeenCalled();
@@ -316,10 +319,9 @@ describe('session issuing paths', () => {
   test('a user with no mfa resetting their password still gets a session', async () => {
     const user = { id: 11, email: 'reset-no-mfa@example.com', isActive: true };
 
-    const resetPassword = vi.fn(() => Promise.resolve(user));
+    const resetPassword = vi.fn(() => Promise.resolve({ user, pendingPasswordHash: null }));
     const {
       invalidateRefreshToken,
-      isEnrolled,
       createChallenge,
       generateRefreshToken,
       generateAccessToken,
@@ -332,7 +334,6 @@ describe('session issuing paths', () => {
     await authenticationController.resetPassword(ctx);
 
     expect(invalidateRefreshToken).toHaveBeenCalledWith(String(user.id));
-    expect(isEnrolled).toHaveBeenCalledWith(String(user.id));
     expect(createChallenge).not.toHaveBeenCalled();
     expect(generateRefreshToken).toHaveBeenCalled();
     expect(generateAccessToken).toHaveBeenCalled();
@@ -354,10 +355,12 @@ describe('session issuing paths', () => {
     expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
   });
 
-  test('existing sessions are still invalidated before the new one, enrolled or not', async () => {
+  test('existing sessions are invalidated before the new one, and not at all until a staged reset commits', async () => {
     const runReset = async (enrolled: boolean) => {
       const user = { id: enrolled ? 21 : 22, email: 'x@example.com', isActive: true };
-      const resetPassword = vi.fn(() => Promise.resolve(user));
+      const resetPassword = vi.fn(() =>
+        Promise.resolve({ user, pendingPasswordHash: enrolled ? '$2a$staged' : null })
+      );
       const { invalidateRefreshToken, createChallenge, generateRefreshToken } = buildResetStrapi({
         enrolled,
         resetPassword,
@@ -369,12 +372,10 @@ describe('session issuing paths', () => {
       return { invalidateRefreshToken, createChallenge, generateRefreshToken };
     };
 
+    // Staged: the sessions end when `commitStagedPasswordReset` runs at /login/mfa.
     const enrolledResult = await runReset(true);
-    expect(enrolledResult.invalidateRefreshToken).toHaveBeenCalled();
+    expect(enrolledResult.invalidateRefreshToken).not.toHaveBeenCalled();
     expect(enrolledResult.createChallenge).toHaveBeenCalled();
-    expect(enrolledResult.invalidateRefreshToken.mock.invocationCallOrder[0]).toBeLessThan(
-      enrolledResult.createChallenge.mock.invocationCallOrder[0]
-    );
 
     const unenrolledResult = await runReset(false);
     expect(unenrolledResult.invalidateRefreshToken).toHaveBeenCalled();

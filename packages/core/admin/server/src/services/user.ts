@@ -201,30 +201,7 @@ const updateById = async (
   // hash password if a new one is sent
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password!);
-
-    const updatedUser = await strapi.db.query('admin::user').update({
-      where: { id },
-      data: {
-        ...attributes,
-        password: hashedPassword,
-      },
-      populate: ['roles'],
-    });
-
-    // Every password change, from the profile, an administrator, the CLI or a reset: a browser
-    // trusted under the old password must not keep skipping the second factor under the new one.
-    // While the feature is off the rows are dropped silently; there is nobody to notify.
-    const mfa = getService('mfa');
-    if (mfa.isEnabled()) {
-      await mfa.revokeAllTrustedDevices(String(id));
-    } else {
-      await mfa.clearTrustedDevices(String(id));
-    }
-
-    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
-    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
-
-    return updatedUser;
+    return writePassword(id, attributes, hashedPassword, previous);
   }
 
   const updatedUser = await strapi.db.query('admin::user').update({
@@ -239,6 +216,52 @@ const updateById = async (
   }
 
   return updatedUser;
+};
+
+/** The password half of `updateById`, from an already-hashed password. */
+const writePassword = async (
+  id: Data.ID,
+  attributes: Partial<AdminUserUpdatePayload>,
+  hashedPassword: string,
+  previous: Parameters<typeof emitAdminUserUpdateAudits>[1]['previous']
+): Promise<AdminUser> => {
+  const updatedUser = await strapi.db.query('admin::user').update({
+    where: { id },
+    data: {
+      ...attributes,
+      password: hashedPassword,
+    },
+    populate: ['roles'],
+  });
+
+  // Every password change, from the profile, an administrator, the CLI or a reset: a browser
+  // trusted under the old password must not keep skipping the second factor under the new one.
+  // While the feature is off the rows are dropped silently; there is nobody to notify.
+  const mfa = getService('mfa');
+  if (mfa.isEnabled()) {
+    await mfa.revokeAllTrustedDevices(String(id));
+  } else {
+    await mfa.clearTrustedDevices(String(id));
+  }
+
+  strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+  await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+
+  return updatedUser;
+};
+
+/**
+ * Sets a password that was hashed earlier, with every side effect `updateById` gives a password
+ * change. For a reset of a two-factor account, which hashes the new password when the reset link
+ * is used but commits it only once the second factor has passed.
+ */
+const setPasswordHash = async (id: Data.ID, passwordHash: string): Promise<AdminUser> => {
+  const previous = await strapi.db
+    .query('admin::user')
+    .findOne({ where: { id }, populate: ['roles'] });
+  // `password` in the attributes is what marks the audit event as a password change; the value
+  // written is the hash below.
+  return writePassword(id, { password: passwordHash }, passwordHash, previous);
 };
 
 /**
@@ -557,6 +580,7 @@ const getLanguagesInUse = async (): Promise<string[]> => {
   return users.map((user) => user.preferedLanguage || 'en');
 };
 export default {
+  setPasswordHash,
   create,
   createFirstAdmin,
   updateById,

@@ -292,6 +292,53 @@ describe('Admin MFA: the TOTP factor end to end', () => {
     expect(await failedTypes(holder)).toEqual([]);
   });
 
+  test('a password reset commits only once the second factor passes', async () => {
+    // Someone holding only the mailbox must not be able to change the password, or sign the holder
+    // out, of an account whose second factor they do not have.
+    const stageReset = async (token: string, newPassword: string) => {
+      await strapi.db.query('admin::user').update({
+        where: { id: user.id },
+        data: {
+          resetPasswordToken: token,
+          resetPasswordTokenExpiresAt: new Date(Date.now() + 60_000),
+        },
+      });
+      return createRequest({ strapi }).post('/admin/reset-password', {
+        body: { resetPasswordToken: token, password: newPassword },
+      });
+    };
+    const loginWith = (pw: string) =>
+      createRequest({ strapi }).post('/admin/login', { body: { email: user.email, password: pw } });
+
+    const holder = await bearer();
+    const staged = await stageReset('totp-reset-one', 'Changed456');
+    expect(staged.statusCode).toBe(200);
+    expect(staged.body.data.mfaRequired).toBe(true);
+
+    // Nothing changed yet: the old password still logs in, the new one does not, and the holder's
+    // session still works.
+    expect((await loginWith(password)).body.data.mfaRequired).toBe(true);
+    expect((await loginWith('Changed456')).statusCode).toBe(400);
+    expect(
+      (await createRequest({ strapi }).get('/admin/mfa/me', { headers: holder })).statusCode
+    ).toBe(200);
+
+    // The factor commits it: the new password works, the old one does not, sessions are gone.
+    const done = await completeChallenge(staged.body.data.challengeToken, nextRecoveryCode());
+    expect(done.statusCode).toBe(200);
+    expect((await loginWith('Changed456')).body.data.mfaRequired).toBe(true);
+    expect((await loginWith(password)).statusCode).toBe(400);
+    expect(
+      (await createRequest({ strapi }).get('/admin/mfa/me', { headers: holder })).statusCode
+    ).toBe(401);
+
+    // Put the suite's password back the same way, so the tests after this one are unaffected.
+    const back = await stageReset('totp-reset-two', password);
+    expect(
+      (await completeChallenge(back.body.data.challengeToken, nextRecoveryCode())).statusCode
+    ).toBe(200);
+  });
+
   test('disabling needs the password and a code, then login stops asking', async () => {
     const headers = await bearer();
 

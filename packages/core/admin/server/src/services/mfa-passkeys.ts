@@ -514,7 +514,12 @@ export const createPasskeys = ({
    * guard a malformed `expiresAt` is a challenge that never expires. */
   const usableChallenge = async (
     challengeToken: string
-  ): Promise<{ id: unknown; userId: string; webauthnChallenge?: string | null } | null> => {
+  ): Promise<{
+    id: unknown;
+    userId: string;
+    webauthnChallenge?: string | null;
+    pendingPasswordHash?: string | null;
+  } | null> => {
     const challenge = await challengeQuery().findOne({ where: { token: challengeToken } });
     if (!challenge || challenge.consumedAt) {
       return null;
@@ -613,7 +618,7 @@ export const createPasskeys = ({
   const verifyAssertion = async (
     challengeToken: string,
     assertion: AuthenticationResponseJSON
-  ): Promise<{ userId: string }> => {
+  ): Promise<{ userId: string; pendingPasswordHash?: string }> => {
     const challenge = await usableChallenge(challengeToken);
     if (!challenge) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
@@ -632,11 +637,15 @@ export const createPasskeys = ({
   };
 
   const checkAssertion = async (
-    challenge: { id: unknown; webauthnChallenge?: string | null },
+    challenge: {
+      id: unknown;
+      webauthnChallenge?: string | null;
+      pendingPasswordHash?: string | null;
+    },
     userId: string,
     assertion: AuthenticationResponseJSON,
     attempt: AttemptReservation
-  ): Promise<{ userId: string }> => {
+  ): Promise<{ userId: string; pendingPasswordHash?: string }> => {
     // Defence in depth: the cascade already runs inside `updateSettings`' transaction, so this covers
     // a hand-edited `core_store` row or a future caller that clears the setting without it.
     if (!(await settings()).enabled) {
@@ -747,7 +756,10 @@ export const createPasskeys = ({
     // worth a persisted event per login.
     notify(userId, 'passkey_used');
 
-    return { userId };
+    // A staged password reset rides on the challenge, whichever factor satisfied it.
+    return challenge.pendingPasswordHash
+      ? { userId, pendingPasswordHash: challenge.pendingPasswordHash }
+      : { userId };
   };
 
   const passkeyRegistrationOptions = async (

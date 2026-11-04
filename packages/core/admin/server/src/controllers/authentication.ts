@@ -78,6 +78,22 @@ const enforceMfaOrThrow = async (
   return result.outcome === 'grace' ? { mfaEnrolment: { graceUntil: result.graceUntil } } : {};
 };
 
+/**
+ * Commits a password reset the challenge carried (see `PasswordResetResult`), and returns the
+ * session options a reset gets: a fresh device id and a non-persistent cookie, whatever the body
+ * carries, exactly as an unenrolled reset does. Nothing to do for an ordinary login.
+ */
+const commitStagedReset = async (
+  user: AdminUser,
+  pendingPasswordHash: string | undefined
+): Promise<{ deviceId?: string; rememberMe?: boolean }> => {
+  if (!pendingPasswordHash) {
+    return {};
+  }
+  await getService('auth').commitStagedPasswordReset(user.id, pendingPasswordHash);
+  return { deviceId: generateDeviceId(), rememberMe: false };
+};
+
 /** Read per challenge, never cached, so a settings change shows on the next login screen. */
 const offeredTrustDays = async (): Promise<number | null> => {
   const settings = await getService('mfa').trustedDeviceSettings();
@@ -250,6 +266,10 @@ export default {
         throw new ValidationError('Invalid code', { code: MFA_ERROR_CODES.INVALID_CODE });
       }
 
+      // A password reset staged on this challenge commits only now. Before the trust grant: the
+      // commit revokes every trusted device, and must not take this one with them.
+      const reset = await commitStagedReset(user, result.pendingPasswordHash);
+
       // The service returns null when the organisation does not offer trust, and a stale checkbox is
       // not an error. The raw token exists only here and in the Set-Cookie header.
       if (trustDevice) {
@@ -265,7 +285,7 @@ export default {
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
-      return issueSession(ctx, user);
+      return issueSession(ctx, user, reset);
     },
   ]),
 
@@ -300,7 +320,7 @@ export default {
 
       // One generic error for every outcome but throttling, so no caller can tell an expired challenge
       // from a wrong credential.
-      const { userId } = await mfa.verifyAssertion(challengeToken, assertion);
+      const { userId, pendingPasswordHash } = await mfa.verifyAssertion(challengeToken, assertion);
 
       const user = await getService('user').findOne(userId);
 
@@ -309,6 +329,9 @@ export default {
       if (!user || user.isActive !== true) {
         throw new ValidationError(PASSKEY_VERIFY_FAILED);
       }
+
+      // As in `loginMfa`, and before the trust grant for the same reason.
+      const reset = await commitStagedReset(user, pendingPasswordHash);
 
       // Byte for byte what `/login/mfa` does: the trust grant is factor-agnostic.
       if (trustDevice) {
@@ -324,7 +347,7 @@ export default {
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
-      return issueSession(ctx, user);
+      return issueSession(ctx, user, reset);
     },
   ]),
 
@@ -390,44 +413,30 @@ export default {
 
     await validateResetPasswordInput(input);
 
-    const user = await getService('auth').resetPassword(input);
-
     const sessionManager = getSessionManager();
     if (!sessionManager) {
       return ctx.internalServerError();
     }
 
+    const { user, pendingPasswordHash } = await getService('auth').resetPassword(input);
     const mfa = getService('mfa');
 
-    try {
-      // Invalidate all existing sessions before creating a new one.
-      await sessionManager('admin').invalidateRefreshToken(String(user.id));
-
-      // And every trusted browser. A reset is the event you perform when you believe the password
-      // is compromised, so a browser the attacker already trusted must not keep skipping the
-      // second factor on its next login with the new password. `completeEnrolment` clears trusts
-      // when the authenticator is replaced for the same reason; this is the same category of
-      // event. Revoked rather than cleared, so the account holder gets the notice.
-      await mfa.revokeAllTrustedDevices(String(user.id));
-    } catch (err) {
-      strapi.log.error('Failed to create admin refresh session during reset-password', err as any);
-      return ctx.internalServerError();
-    }
-
-    const sessionOptions = await enforceMfaOrThrow(user);
-
-    if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
+    if (pendingPasswordHash) {
+      // An enrolled account: the new password is staged on the challenge, not committed, and the
+      // sessions and trusted devices are left alone until the second factor passes. Someone holding
+      // only the mailbox can then neither change the password nor sign the holder out.
+      //
+      // Forgot-password must not be a way to walk past a second factor, so a reset landing on an
+      // enrolled account gets a challenge, not a session. No trust check here by design: a password
+      // reset is the classic second-factor bypass, and a trust cookie does not change that.
       // Before `createChallenge` mints its row, for the reason `login` gives.
       const trustedDeviceDays = await offeredTrustDays();
       const passkeyAvailable = await passkeyAvailableFor(String(user.id));
 
-      const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
+      const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id), {
+        pendingPasswordHash,
+      });
 
-      // Forgot-password must not be a way to walk past a second factor, so a reset landing on an
-      // enrolled account gets a challenge, not a session.
-      //
-      // No trust check here by design: a password reset is the classic second-factor bypass, and a
-      // trust cookie does not change that.
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.mfa_required', { user: sanitizedUser, provider: 'local' });
 
@@ -442,6 +451,17 @@ export default {
       } satisfies MfaChallengeResponse;
       return;
     }
+
+    try {
+      // Invalidate all existing sessions before creating a new one. The trusted devices went with
+      // the password change itself (`updateById`).
+      await sessionManager('admin').invalidateRefreshToken(String(user.id));
+    } catch (err) {
+      strapi.log.error('Failed to create admin refresh session during reset-password', err as any);
+      return ctx.internalServerError();
+    }
+
+    const sessionOptions = await enforceMfaOrThrow(user);
 
     // A fresh device id and a non-persistent cookie, whatever the body carries.
     return issueSession(ctx, user, {

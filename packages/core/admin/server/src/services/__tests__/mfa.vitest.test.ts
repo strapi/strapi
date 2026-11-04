@@ -2267,6 +2267,18 @@ describe('mfa service: challenge lifecycle', () => {
     );
   });
 
+  test('a reset staged on a challenge comes back from the factor that consumes it', async () => {
+    const { service, validCode } = setup();
+
+    const { token } = await service.createChallenge('1', { pendingPasswordHash: '$2a$staged' });
+
+    await expect(service.verifyChallenge(token, validCode())).resolves.toEqual({
+      ok: true,
+      userId: '1',
+      pendingPasswordHash: '$2a$staged',
+    });
+  });
+
   test('a correct code leaves no attempt behind', async () => {
     const { service, events, validCode } = setup();
 

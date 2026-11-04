@@ -71,6 +71,15 @@ export default {
       private: true,
       searchable: false,
     },
+    // A password reset of an enrolled account, waiting on the second factor: the bcrypt hash of the
+    // new password, committed by whichever login route consumes this row. Until then the old
+    // password stands, so someone holding only the mailbox cannot change it.
+    pendingPasswordHash: {
+      type: 'string',
+      configurable: false,
+      private: true,
+      searchable: false,
+    },
   },
   // Every query in `services/mfa*.ts` against this table narrows by user first, and
   // several run on the login path. Declared the way `upload`'s file content type

@@ -296,6 +296,12 @@ describe('Admin MFA trusted devices', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.data.mfaRequired).toBe(true);
       expect(res.body.data.trustedDeviceDays).toBe(30);
+
+      // Staged, not committed: until the second factor passes, the old password and the trusts
+      // stand, so someone holding only the mailbox has changed nothing.
+      expect(await trustedRows()).toHaveLength(1);
+      const done = await completeChallenge(res.body.data.challengeToken);
+      expect(done.statusCode).toBe(200);
       editorPassword = 'NewPassword456';
 
       // A reset is what you do when you believe the password is compromised, so it revokes every

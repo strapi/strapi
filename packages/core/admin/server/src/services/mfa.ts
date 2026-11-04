@@ -70,7 +70,9 @@ export type MfaEventMetadata = {
 };
 
 export type VerifyChallengeResult =
-  | { ok: true; userId: string }
+  /** `pendingPasswordHash` is set when the challenge came from a password reset: see
+   * `createChallenge`. */
+  | { ok: true; userId: string; pendingPasswordHash?: string }
   | { ok: false; reason: 'unusable' | 'exhausted' | 'invalid' | 'throttled' };
 
 /** See `reserveAttempt`. */
@@ -1314,7 +1316,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     }
   };
 
-  const createChallenge = async (userId: string): Promise<{ token: string; expiresIn: number }> => {
+  /** `pendingPasswordHash` stages a password reset on the challenge (see the content type). */
+  const createChallenge = async (
+    userId: string,
+    options: { pendingPasswordHash?: string } = {}
+  ): Promise<{ token: string; expiresIn: number }> => {
     // Checked here as well as in `verifyChallenge`: throttling only one of the two leaves the
     // other as the way around it.
     if (await isAccountThrottled(userId)) {
@@ -1334,6 +1340,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
         attempts: 0,
         expiresAt: new Date(Date.now() + challengeTtl * 1000),
         consumedAt: null,
+        pendingPasswordHash: options.pendingPasswordHash ?? null,
       },
     });
 
@@ -1342,13 +1349,24 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   /** The DELETE is the consume: whoever removes the row wins, so a token cannot authorise two
    * operations even if both requests present a valid factor. */
-  const consumeChallenge = async (id: unknown, userId: string): Promise<VerifyChallengeResult> => {
+  const consumeChallenge = async (challenge: {
+    id: unknown;
+    userId: string;
+    pendingPasswordHash?: string | null;
+  }): Promise<VerifyChallengeResult> => {
     const { tableName } = challengeTable();
-    const affected = await strapi.db.getConnection(tableName).where({ id }).del();
+    const affected = await strapi.db.getConnection(tableName).where({ id: challenge.id }).del();
 
-    return affected === 1
-      ? { ok: true as const, userId }
-      : { ok: false as const, reason: 'unusable' as const };
+    if (affected !== 1) {
+      return { ok: false as const, reason: 'unusable' as const };
+    }
+    return challenge.pendingPasswordHash
+      ? {
+          ok: true as const,
+          userId: challenge.userId,
+          pendingPasswordHash: challenge.pendingPasswordHash,
+        }
+      : { ok: true as const, userId: challenge.userId };
   };
 
   /**
@@ -1399,7 +1417,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   const checkChallengeCode = async (
-    challenge: { id: unknown; userId: string },
+    challenge: { id: unknown; userId: string; pendingPasswordHash?: string | null },
     code: string,
     attempt: AttemptReservation
   ): Promise<VerifyChallengeResult> => {
@@ -1431,7 +1449,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       // Single-use across the account, not within one challenge, so a spent code cannot be replayed
       // against a freshly created one (RFC 6238 section 5.2).
       if (totpResult.valid && (await consumeTotpStep(challenge.userId, totpResult.step))) {
-        return consumeChallenge(challenge.id, challenge.userId);
+        return consumeChallenge(challenge);
       }
     }
 
@@ -1440,7 +1458,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       (await consumeRecoveryCode(challenge.userId, code))
     ) {
       await recordEvent(challenge.userId, 'recovery_code_used');
-      return consumeChallenge(challenge.id, challenge.userId);
+      return consumeChallenge(challenge);
     }
 
     // Also reached when the code matched no factor's shape. A path that charges one tier but not the

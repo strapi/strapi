@@ -99,7 +99,14 @@ describe('authentication controller', () => {
       const trustedDeviceSettings = vi.fn(() => Promise.resolve({ enabled: true, days: 30 }));
       const consumeTrustedDevice = vi.fn(() => Promise.resolve(false));
       const trustDevice = vi.fn(() => Promise.resolve(null));
-      const resetPassword = vi.fn(() => Promise.resolve(user));
+      // The real service stages the password of an enrolled account (see `completePasswordReset`).
+      const resetPassword = vi.fn(async () => {
+        const isEnabled = mfaOverrides.isEnabled as (() => boolean) | undefined;
+        const isEnrolled = mfaOverrides.isEnrolled as (() => Promise<boolean>) | undefined;
+        const staged = Boolean(isEnabled?.()) && Boolean(await isEnrolled?.());
+        return { user, pendingPasswordHash: staged ? '$2a$staged' : null };
+      });
+      const commitStagedPasswordReset = vi.fn(() => Promise.resolve(user));
 
       setStrapi({
         eventHub: { emit },
@@ -119,12 +126,13 @@ describe('authentication controller', () => {
               ...mfaOverrides,
             },
             user: { sanitizeUser, findOne, ...userOverrides },
-            auth: { resetPassword },
+            auth: { resetPassword, commitStagedPasswordReset },
           },
         },
       });
 
       return {
+        commitStagedPasswordReset,
         generateRefreshToken,
         generateAccessToken,
         invalidateRefreshToken,
@@ -807,27 +815,66 @@ describe('authentication controller', () => {
         });
       });
 
-      /**
-       * A reset is what you do when you believe the password is compromised. A browser the
-       * attacker had already trusted must not keep skipping the second factor on its next login
-       * with the new password -- `completeEnrolment` clears trusts when the authenticator is
-       * replaced for exactly this reason, and this is the same category of event.
-       */
-      test('/reset-password revokes every trusted browser, not just the sessions', async () => {
-        const revokeAllTrustedDevices = vi.fn(() => Promise.resolve(2));
-        const { invalidateRefreshToken } = buildIssuingStrapi({
+      test('/reset-password of an unenrolled user ends every session before issuing its own', async () => {
+        // Trusted devices go with the password change itself (`updateById`), not here.
+        const { invalidateRefreshToken, generateRefreshToken } = buildIssuingStrapi({
           isEnabled: vi.fn(() => false),
-          revokeAllTrustedDevices,
         });
-        const { ctx } = buildCtx({
-          resetPasswordToken: 'reset-token',
-          password: 'NewPassword123',
-        });
+        const { ctx } = buildCtx({ resetPasswordToken: 'reset-token', password: 'NewPassword123' });
 
         await authenticationController.resetPassword(ctx);
 
         expect(invalidateRefreshToken).toHaveBeenCalledWith(String(user.id));
-        expect(revokeAllTrustedDevices).toHaveBeenCalledWith(String(user.id));
+        expect(invalidateRefreshToken.mock.invocationCallOrder[0]).toBeLessThan(
+          generateRefreshToken.mock.invocationCallOrder[0]
+        );
+      });
+
+      test('/login/mfa commits a reset staged on the challenge, before granting trust', async () => {
+        // The new password exists only on the challenge until the second factor passes. The commit
+        // revokes every trusted browser, so it must run before this browser is trusted.
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const trustDevice = vi.fn(() => Promise.resolve({ token: 'trust-token', expiresAt }));
+        const verifyChallenge = vi.fn(() =>
+          Promise.resolve({ ok: true, userId: '7', pendingPasswordHash: '$2a$staged' })
+        );
+        const { commitStagedPasswordReset, generateRefreshToken } = buildIssuingStrapi({
+          isEnabled: vi.fn(() => true),
+          verifyChallenge,
+          trustDevice,
+        });
+        const { ctx } = buildCtx({
+          challengeToken: 'challenge-token',
+          code: '123456',
+          trustDevice: true,
+          rememberMe: true,
+        });
+
+        await authenticationController.loginMfa(ctx, vi.fn());
+
+        expect(commitStagedPasswordReset).toHaveBeenCalledWith(user.id, '$2a$staged');
+        expect(commitStagedPasswordReset.mock.invocationCallOrder[0]).toBeLessThan(
+          trustDevice.mock.invocationCallOrder[0]
+        );
+        // A reset's session, as for an unenrolled reset: non-persistent, whatever the body asked.
+        expect(generateRefreshToken).toHaveBeenCalledWith(
+          String(user.id),
+          expect.any(String),
+          expect.objectContaining({ type: 'session' })
+        );
+      });
+
+      test('/login/mfa commits nothing for an ordinary login', async () => {
+        const verifyChallenge = vi.fn(() => Promise.resolve({ ok: true, userId: '7' }));
+        const { commitStagedPasswordReset } = buildIssuingStrapi({
+          isEnabled: vi.fn(() => true),
+          verifyChallenge,
+        });
+        const { ctx } = buildCtx({ challengeToken: 'challenge-token', code: '123456' });
+
+        await authenticationController.loginMfa(ctx, vi.fn());
+
+        expect(commitStagedPasswordReset).not.toHaveBeenCalled();
       });
     });
 
@@ -896,6 +943,25 @@ describe('authentication controller', () => {
         expect(ctx.body).toEqual({
           data: { challenge: 'auth-challenge', rpId: 'cms.example.com' },
         });
+      });
+
+      test('a passkey satisfies a staged reset too, and commits it', async () => {
+        const doubles = buildIssuingStrapi(
+          webauthnMfa({
+            verifyAssertion: vi.fn(() =>
+              Promise.resolve({ userId: String(user.id), pendingPasswordHash: '$2a$staged' })
+            ),
+          })
+        );
+        const { ctx } = buildCtx(body());
+
+        await authenticationController.loginMfaWebauthn(ctx, vi.fn());
+
+        expect(doubles.commitStagedPasswordReset).toHaveBeenCalledWith(
+          expect.anything(),
+          '$2a$staged'
+        );
+        expect(doubles.generateRefreshToken).toHaveBeenCalled();
       });
 
       test('a verified assertion issues a session and emits admin.auth.success', async () => {

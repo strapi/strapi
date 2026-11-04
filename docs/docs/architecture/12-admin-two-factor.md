@@ -76,7 +76,16 @@ reflects it.
 - **Enrolled:** `MfaChallengeResponse` instead, with **no cookie and no access token**
 
 `POST /admin/reset-password` answers an enrolled account the same way. It never honours a trust
-cookie: a reset is the classic second-factor bypass.
+cookie: a reset is the classic second-factor bypass. It also does **not** change the password yet.
+`completePasswordReset` (`server/src/services/auth.ts`) consumes the reset token, hashes the new
+password and returns it as `pendingPasswordHash`, which the controller stores on the challenge row.
+Whichever login route consumes that challenge (`/login/mfa` or `/login/mfa/webauthn`) calls
+`commitStagedPasswordReset`: it writes the password through `setPasswordHash` (which revokes the
+trusted devices, as every password change does), ends every session and records the reset in the
+audit log, before any trust is granted and before the new session is issued, non-persistent like
+any reset. Until then the old password, the sessions and the trusts stand, so someone holding only
+the mailbox can neither change the password nor sign the holder out. An abandoned staged reset
+expires with its challenge; the link is spent either way.
 
 ```jsonc
 {
