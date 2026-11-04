@@ -76,7 +76,7 @@ const DynamicComponent = ({
   onForceOpenHandled,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
-  const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const isDesktop = useIsDesktop();
 
   const {
@@ -89,7 +89,12 @@ const DynamicComponent = ({
     getIn(state.values, `${name}.${index}.${mainField}`)
   );
 
-  const displayedValue = mainField === 'id' || !mainFieldValue ? '' : String(mainFieldValue).trim();
+  const isEnumeration =
+    !!componentUid &&
+    currentDocument.components[componentUid]?.attributes[mainField]?.type === 'enumeration';
+  const value = mainField === 'id' || !mainFieldValue ? '' : String(mainFieldValue).trim();
+  const displayedValue =
+    isEnumeration && value ? formatMessage({ id: value, defaultMessage: value }) : value;
   const displayTitle = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
   const { icon, displayName } = React.useMemo(() => {

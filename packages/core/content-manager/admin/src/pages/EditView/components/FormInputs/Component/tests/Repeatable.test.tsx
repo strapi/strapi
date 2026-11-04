@@ -1,5 +1,6 @@
 import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, screen } from '@tests/utils';
+import { IntlProvider } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
 import { ComponentProvider } from '../../ComponentContext';
@@ -74,10 +75,14 @@ describe('RepeatableComponent', () => {
     children: () => 'INPUTS',
   } satisfies RepeatableComponentProps;
 
-  const render = (initialFormValues: Record<string, unknown>) =>
+  const render = (
+    initialFormValues: Record<string, unknown>,
+    props: Partial<RepeatableComponentProps> = {},
+    messages: Record<string, string> = {}
+  ) =>
     renderRTL(
       <ComponentProvider level={0} type="component">
-        <RepeatableComponent {...defaultProps} />
+        <RepeatableComponent {...defaultProps} {...props} />
       </ComponentProvider>,
       {
         renderOptions: {
@@ -87,7 +92,9 @@ describe('RepeatableComponent', () => {
                 path="/content-manager/:collectionType/:slug/:id"
                 element={
                   <Form initialValues={initialFormValues} method="POST" onSubmit={jest.fn()}>
-                    {children}
+                    <IntlProvider locale="en" textComponent="span" messages={messages}>
+                      {children}
+                    </IntlProvider>
                   </Form>
                 }
               />
@@ -122,5 +129,25 @@ describe('RepeatableComponent', () => {
 
     expect(screen.getByRole('button', { name: 'Entry one' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Add an entry/i })).toBeInTheDocument();
+  });
+
+  it('translates an enumeration entry title using the value as the message id', () => {
+    render(
+      { [FIELD_NAME]: [{ __temp_key__: '0', name: 'md' }] },
+      { mainField: { name: 'name', type: 'enumeration' } },
+      { md: 'Medium' }
+    );
+
+    expect(screen.getByRole('button', { name: 'Medium' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'md' })).not.toBeInTheDocument();
+  });
+
+  it('falls back to the raw enumeration value when no translation is registered', () => {
+    render(
+      { [FIELD_NAME]: [{ __temp_key__: '0', name: 'md' }] },
+      { mainField: { name: 'name', type: 'enumeration' } }
+    );
+
+    expect(screen.getByRole('button', { name: 'md' })).toBeInTheDocument();
   });
 });
