@@ -17,9 +17,9 @@ import {
   LayoutContent,
   UnauthenticatedLayout,
 } from '../../../layouts/UnauthenticatedLayout';
-import { login } from '../../../reducer';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { establishAdminSession } from '../../../utils/establishAdminSession';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
 import type { PasswordSchema } from '../../../utils/passwordPolicy';
@@ -65,7 +65,7 @@ const ResetPassword = () => {
     const res = await resetPassword(body);
 
     if ('data' in res) {
-      dispatch(login({ token: res.data.token }));
+      establishAdminSession(dispatch, { token: res.data.token });
       navigate('/');
     }
   };

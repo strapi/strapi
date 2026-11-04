@@ -67,6 +67,7 @@ export const AdminPermissions = React.forwardRef<PermissionsAPI, AdminPermission
         layout={layout}
         permissions={initialAdminPermissions}
         userPermissions={effectivePermissions}
+        inheritConditions
         isFormDisabled={disabled}
       />
     );

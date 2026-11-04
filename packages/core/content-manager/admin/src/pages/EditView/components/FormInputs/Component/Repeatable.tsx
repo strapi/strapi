@@ -351,14 +351,20 @@ const TextButtonCustom = styled(TextButton)`
 
 interface RepeatableComponentFieldsProps extends Pick<
   RepeatableComponentProps,
-  'children' | 'layout'
+  'children' | 'layout' | 'disabled'
 > {
   attributeComponent: string;
   nameWithIndex: string;
 }
 
 const RepeatableComponentFields = React.memo(
-  ({ attributeComponent, children, layout, nameWithIndex }: RepeatableComponentFieldsProps) => {
+  ({
+    attributeComponent,
+    children,
+    layout,
+    nameWithIndex,
+    disabled,
+  }: RepeatableComponentFieldsProps) => {
     const { formatMessage } = useIntl();
 
     return (
@@ -391,6 +397,7 @@ const RepeatableComponentFields = React.memo(
                   >
                     {children({
                       ...field,
+                      disabled: field.disabled || disabled,
                       size,
                       label: translatedLabel,
                       name: completeFieldName,
@@ -583,6 +590,7 @@ const Component = ({
                 attributeComponent={attributeComponent}
                 layout={layout}
                 nameWithIndex={name}
+                disabled={disabled}
               >
                 {renderField}
               </RepeatableComponentFields>
